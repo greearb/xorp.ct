@@ -1,4 +1,4 @@
-// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
 
 // Copyright (c) 2001-2003 International Computer Science Institute
 //
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.13 2003/04/06 04:32:13 jcardona Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.14 2003/06/11 19:15:19 jcardona Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -37,31 +37,33 @@ typedef XorpCallback0<bool>::RefPtr PeriodicTimerCallback;
 
 typedef XorpCallback1<void, XorpTimer&>::RefPtr BasicTimerCallback;
 
-
 /**
  * @short Abstract class used to receive TimerList notifications 
  *
- * TimerObserverBase is a class that can be subtyped to receive notifications on
- * when timers are created or expired.  All the methods in this class are
- * private, since they must only be invoked by the friend class, TimerList 
+ * TimerListObserverBase is a class that can be subtyped to receive
+ * notifications on when timers are created or expired.  All the methods in
+ * this class are private, since they must only be invoked by the friend class,
+ * TimerList 
  * 
  * @see TimerList
  */
-class TimerObserverBase {
+class TimerListObserverBase {
 public:
-    void unused() {};  // public method provided to silence compiler warnings 
+    virtual ~TimerListObserverBase();
 
 private:
     /**
-     * This function will get called when a timer is scheduled.  Periodic timers
-     * will produce periodic notifications.
+     * This function will get called when a timer is scheduled.  Periodic
+     * timers will produce periodic notifications.
      */
-    virtual void notify_scheduled(const TimeVal&) const = 0;
+    virtual void notify_scheduled(const TimeVal&) = 0;
 
    /**
      * This function will get called when a timer is unscheduled.
      */
-    virtual void notify_unscheduled(const TimeVal&) const = 0;
+    virtual void notify_unscheduled(const TimeVal&) = 0;
+
+    TimerList * _observed;
 
     friend class TimerList;
 };
@@ -351,9 +353,9 @@ public:
     /**
      * Register an observer object with this class
      * 
-     * @param obs an observer object derived from @ref TimerObserverBase 
+     * @param obs an observer object derived from @ref TimerListObserverBase 
      */
-    void set_observer(TimerObserverBase& obs);      
+    void set_observer(TimerListObserverBase& obs);      
 
     /**
      * Unregister the current observer
@@ -370,10 +372,10 @@ private:
     void release_lock() const		{ /* nothing, for now */ }
 
     query_current_time _current_time_proc;	// called to get time
-    TimerObserverBase const * _observer;
+    TimerListObserverBase * _observer;
 
     friend class TimerNode;
-    friend class TimerObserverBase;
+    friend class TimerListObserverBase;
 
     static TimerNode _dummy_timer_node;
 };

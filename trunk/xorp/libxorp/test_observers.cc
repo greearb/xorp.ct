@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.5 2003/04/02 02:53:51 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_observers.cc,v 1.1 2003/06/11 19:15:19 jcardona Exp $"
 
 //
 // test program to the Observer classes for TimerList and SelectorList
@@ -68,13 +68,13 @@ static void do_the_twist(int fd, SelectorMask mask) {
 }
 
 // Implement the SelectorList observer and notification functions
-class mySelectorObserver : public SelectorObserverBase {
-    void notify_added(int, const SelectorMask&) const; 
-    void notify_removed(int, const SelectorMask&) const; 
+class mySelectorListObserver : public SelectorListObserverBase {
+    void notify_added(int, const SelectorMask&); 
+    void notify_removed(int, const SelectorMask&); 
 };
 
 void 
-mySelectorObserver::notify_added(int fd, const SelectorMask& mask) const 
+mySelectorListObserver::notify_added(int fd, const SelectorMask& mask)
 {
     fprintf(stderr, "notif added fd:%d mask:%#0x\n", fd, mask);
     add_rem_fd_counter+=fd;
@@ -88,7 +88,7 @@ mySelectorObserver::notify_added(int fd, const SelectorMask& mask) const
 } 
 
 void 
-mySelectorObserver::notify_removed(int fd, const SelectorMask& mask) const 
+mySelectorListObserver::notify_removed(int fd, const SelectorMask& mask)
 {
     fprintf(stderr, "notif removed fd:%d mask:%#0x\n", fd, mask);
     add_rem_fd_counter-=fd;
@@ -101,18 +101,18 @@ mySelectorObserver::notify_removed(int fd, const SelectorMask& mask) const
 }
 
 // Implement TimerList observer and notification functions
-class myTimerObserver : public TimerObserverBase {
-    void notify_scheduled(const TimeVal&) const;
-    void notify_unscheduled(const TimeVal&) const;
+class myTimerListObserver : public TimerListObserverBase {
+    void notify_scheduled(const TimeVal&);
+    void notify_unscheduled(const TimeVal&);
 };
 
-void myTimerObserver::notify_scheduled(const TimeVal& tv) const
+void myTimerListObserver::notify_scheduled(const TimeVal& tv) 
 {
     fprintf(stderr, "notif sched ");print_tv(stderr, tv);fprintf(stderr, "\n");
     schedule_notification_called = true;
 }
 
-void myTimerObserver::notify_unscheduled(const TimeVal& tv) const
+void myTimerListObserver::notify_unscheduled(const TimeVal& tv) 
 {
     fprintf(stderr, "notif unsch "); print_tv(stderr, tv);fprintf(stderr, "\n");
     unschedule_notification_called = true;
@@ -121,8 +121,8 @@ void myTimerObserver::notify_unscheduled(const TimeVal& tv) const
 void run_test()
 {
     EventLoop e;
-    mySelectorObserver sel_obs;
-    myTimerObserver timer_obs;
+    mySelectorListObserver sel_obs;
+    myTimerListObserver timer_obs;
 
     e.selector_list().set_observer(sel_obs);
     e.timer_list().set_observer(timer_obs);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.15 2003/06/03 09:50:53 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.16 2003/06/11 19:15:19 jcardona Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -327,15 +327,23 @@ SelectorList::callback_bad_descriptors()
 
 
 void 
-SelectorList::set_observer(const SelectorObserverBase& obs)
+SelectorList::set_observer(SelectorListObserverBase& obs)
 {
     _observer = &obs;
+    _observer->_observed = this;
     return;
 }
 
 void 
 SelectorList::remove_observer()
 {
+    if (_observer) _observer->_observed = NULL;
     _observer = NULL;
     return;
 }
+
+SelectorListObserverBase::~SelectorListObserverBase()
+{
+    if (_observed) _observed->remove_observer();
+}
+
