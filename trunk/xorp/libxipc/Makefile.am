@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.31 2004/09/22 02:49:59 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.32 2004/09/22 05:35:49 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -89,6 +89,9 @@ test_xrl_receiver_SOURCES	+= test_xrls_base.cc
 test_xrl_sender_SOURCES		 = test_xrl_sender.cc
 test_xrl_sender_SOURCES		+= test_xrls_xif.hh
 test_xrl_sender_SOURCES		+= test_xrls_xif.cc
+# XXX: extra source files if both sender and receiver are within same binary
+test_xrl_sender_SOURCES		+= test_xrls_base.hh
+test_xrl_sender_SOURCES		+= test_xrls_base.cc
 
 # -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h

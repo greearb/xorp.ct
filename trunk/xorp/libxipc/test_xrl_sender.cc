@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.3 2004/09/23 12:50:09 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.4 2004/09/24 01:55:37 pavlin Exp $"
 
 
 //
@@ -32,6 +32,7 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/interfaces/test_xrls_xif.hh"
+#include "xrl/targets/test_xrls_base.hh"
 
 
 //
@@ -45,6 +46,15 @@
 //
 // Use the definitions below to change the sender's behavior.
 //
+// Note that if both sender and receiver are compiled within same binary,
+// (e.g., if SINGLE_BINARY below is defined), then there is no need
+// to start "./test_xrl_receiver".
+//
+
+//
+// Define to compile both sender and receiver within a single binary
+//
+// #define SINGLE_BINARY
 
 //
 // Define the maximum number of XRLs to send into a batch, and the
@@ -350,6 +360,163 @@ private:
     vector<uint8_t>	_my_vector;
 };
 
+class TestReceiver : public XrlTestXrlsTargetBase {
+public:
+    TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router)
+	: XrlTestXrlsTargetBase(xrl_router),
+	  _eventloop(eventloop),
+	  _received_xrls(0),
+	  _done(false)
+    {}
+    ~TestReceiver() {}
+
+    inline bool done() const { return _done; }
+
+    inline void print_xrl_received() const {
+#ifdef PRINT_DEBUG
+    	printf(".");
+	if (! (_received_xrls % 10000))
+	    printf("Received %u\n", (uint32_t)_received_xrls);
+#endif // PRINT_DEBUG
+    }
+
+private:
+    XrlCmdError common_0_1_get_target_name(
+	// Output values,
+	string&	name) {
+
+	name = "TestReceiver";
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError common_0_1_get_version(
+	// Output values,
+	string&	version) {
+
+	version = "0.1";
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError common_0_1_get_status(
+	// Output values,
+	uint32_t&	status,
+	string&	reason) {
+	return XrlCmdError::OKAY();
+
+	reason = "Ready";
+	status = PROC_READY;
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError common_0_1_shutdown() {
+	// TODO: XXX: PAVPAVPAV: implement it!
+	return XrlCmdError::OKAY();
+    }
+
+
+    XrlCmdError test_xrls_0_1_start_transmission() {
+	_received_xrls = 0;
+	TimerList::system_gettimeofday(&_start_time);
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError test_xrls_0_1_end_transmission() {
+	TimerList::system_gettimeofday(&_end_time);
+	print_statistics();
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError test_xrls_0_1_add_xrl0() {
+	print_xrl_received();
+	_received_xrls++;
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError test_xrls_0_1_add_xrl1(
+	// Input values,
+	const string&	data1) {
+	print_xrl_received();
+	_received_xrls++;
+	return XrlCmdError::OKAY();
+	UNUSED(data1);
+    }
+
+    XrlCmdError test_xrls_0_1_add_xrl2(
+	// Input values,
+	const string&	data1,
+	const string&	data2) {
+	print_xrl_received();
+	_received_xrls++;
+	return XrlCmdError::OKAY();
+	UNUSED(data1);
+	UNUSED(data2);
+    }
+
+    XrlCmdError test_xrls_0_1_add_xrl9(
+	// Input values,
+	const bool&	data1,
+	const int32_t&	data2,
+	const IPv4&	data3,
+	const IPv4Net&	data4,
+	const IPv6&	data5,
+	const IPv6Net&	data6,
+	const Mac&	data7,
+	const string&	data8,
+	const vector<uint8_t>& data9) {
+	print_xrl_received();
+	_received_xrls++;
+	return XrlCmdError::OKAY();
+	UNUSED(data1);
+	UNUSED(data2);
+	UNUSED(data3);
+	UNUSED(data4);
+	UNUSED(data5);
+	UNUSED(data6);
+	UNUSED(data7);
+	UNUSED(data8);
+	UNUSED(data9);
+    }
+
+    void print_statistics() {
+	TimeVal delta_time = _end_time - _start_time;
+
+	if (_received_xrls == 0) {
+	    printf("No XRLs received\n");
+	    return;
+	}
+	if (delta_time == TimeVal::ZERO()) {
+	    printf("Received %u XRLs; delta-time = %s secs\n",
+		   (uint32_t)_received_xrls, delta_time.str().c_str());
+	    return;
+	}
+
+	double double_time = delta_time.get_double();
+	double speed = _received_xrls;
+	speed /= double_time;
+
+	printf("Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
+	       (uint32_t)_received_xrls, delta_time.str().c_str(), speed);
+
+#if 0	// XXX: if enabled, then exit after all XRLs have been received.
+	_done_timer = _eventloop.new_oneoff_after(TimeVal(3, 0),
+						  callback(this, &TestReceiver::done_cb));
+#endif
+
+	return;
+    }
+
+    void done_cb() {
+	_done = true;
+    }
+
+    EventLoop&	_eventloop;
+    TimeVal	_start_time;
+    TimeVal	_end_time;
+    size_t	_received_xrls;
+    XorpTimer	_done_timer;
+    bool	_done;
+};
+
 /**
  * usage:
  * @argv0: Argument 0 when the program was called (the program name itself).
@@ -412,6 +579,16 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_test_sender);
 
     //
+    // Receiver
+    //
+#ifdef SINGLE_BINARY
+    XrlStdRouter xrl_std_router_test_receiver(eventloop, "test_xrl_receiver",
+					      finder_hostname, finder_port);
+    TestReceiver test_receiver(eventloop, &xrl_std_router_test_receiver);
+    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_test_receiver);
+#endif
+
+    //
     // Start transmission
     //
     test_sender.start_transmission();
@@ -419,9 +596,15 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
     //
     // Run everything
     //
+#ifdef SINGLE_BINARY
+    while (! (test_sender.done() && test_receiver.done())) {
+	eventloop.run();
+    }
+#else
     while (! test_sender.done()) {
 	eventloop.run();
     }
+#endif
 }
 
 int

@@ -154,7 +154,8 @@ test_finder_to_LDADD = libfinder.a $(LDADD)
 
 test_xrl_receiver_SOURCES = test_xrl_receiver.cc test_xrls_base.hh test_xrls_base.cc
 
-test_xrl_sender_SOURCES = test_xrl_sender.cc test_xrls_xif.hh test_xrls_xif.cc
+# XXX: extra source files if both sender and receiver are within same binary
+test_xrl_sender_SOURCES = test_xrl_sender.cc test_xrls_xif.hh test_xrls_xif.cc test_xrls_base.hh test_xrls_base.cc
 
 # -- Library Sources (libxipc)
 
@@ -358,7 +359,7 @@ test_xrl_router_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_router_LDFLAGS =
 am_test_xrl_sender_OBJECTS = test_xrl_sender.$(OBJEXT) \
-	test_xrls_xif.$(OBJEXT)
+	test_xrls_xif.$(OBJEXT) test_xrls_base.$(OBJEXT)
 test_xrl_sender_OBJECTS = $(am_test_xrl_sender_OBJECTS)
 test_xrl_sender_LDADD = $(LDADD)
 test_xrl_sender_DEPENDENCIES = ./libfinder.a ./libxipc.a \
