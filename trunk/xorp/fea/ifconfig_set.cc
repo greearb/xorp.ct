@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.2 2003/10/11 19:47:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.3 2003/10/11 22:14:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -206,14 +206,21 @@ IfConfigSet::push_vif(const IfTreeInterface&	i,
 {
     uint16_t if_index = ifc().get_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
+    uint32_t curflags = 0;
+    uint32_t newflags;
+    bool up, deleted, enabled;
 
-    bool deleted = (i.is_marked(IfTreeItem::DELETED) |
-		    v.is_marked(IfTreeItem::DELETED));
-    bool enabled = i.enabled() & v.enabled();
+    deleted = (i.is_marked(IfTreeItem::DELETED) |
+	       v.is_marked(IfTreeItem::DELETED));
+    enabled = i.enabled() & v.enabled();
 
-    uint32_t curflags = i.if_flags();
-    uint32_t newflags = curflags;
-    bool up = curflags & IFF_UP;
+    // Get the current flags
+    IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+    if (ii != ifc().pulled_config().ifs().end())
+	curflags = ii->second.if_flags();
+    newflags = curflags;
+
+    up = curflags & IFF_UP;
     if (up && (deleted || !enabled))
 	newflags &= ~IFF_UP;
     if ( (!up) && enabled)
