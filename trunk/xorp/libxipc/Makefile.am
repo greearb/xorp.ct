@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.24 2003/06/02 17:20:38 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.25 2003/06/09 21:55:27 hodson Exp $
 ##
 
 # - The library
@@ -224,46 +224,69 @@ libfinder_a_SOURCES += finder_event_observer_xif.cc
 #
 ###############################################################################
 
+# Basic build rule for Xrl Target interface files
+%_xif.o: %_xif.cc
+	$(CXXCOMPILE) -c $<
+
 common_xif.%: $(top_srcdir)/xrl/interfaces/common_xif.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-$(top_srcdir)/xrl/interfaces/common_xif.hh $(top_srcdir)/xrl/interfaces/common_xif.cc: $(top_srcdir)/xrl/interfaces/common.xif
+$(top_srcdir)/xrl/interfaces/common_xif.hh 				\
+$(top_srcdir)/xrl/interfaces/common_xif.cc: 				\
+    $(top_srcdir)/xrl/interfaces/common.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
 finder_xif.%: $(top_srcdir)/xrl/interfaces/finder_xif.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-$(top_srcdir)/xrl/interfaces/finder_xif.hh $(top_srcdir)/xrl/interfaces/finder_xif.cc: $(top_srcdir)/xrl/interfaces/finder.xif
+$(top_srcdir)/xrl/interfaces/finder_xif.hh				\
+$(top_srcdir)/xrl/interfaces/finder_xif.cc:				\
+    $(top_srcdir)/xrl/interfaces/finder.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
 finder_client_xif.%: $(top_srcdir)/xrl/interfaces/finder_client_xif.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-$(top_srcdir)/xrl/interfaces/finder_client_xif.hh $(top_srcdir)/xrl/interfaces/finder_client_xif.cc: $(top_srcdir)/xrl/interfaces/finder_client.xif
+$(top_srcdir)/xrl/interfaces/finder_client_xif.hh			\
+$(top_srcdir)/xrl/interfaces/finder_client_xif.cc:			\
+    $(top_srcdir)/xrl/interfaces/finder_client.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
-finder_event_notifier_xif.%: $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.%
+finder_event_notifier_xif.%:						\
+    $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-$(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.hh $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.cc: $(top_srcdir)/xrl/interfaces/finder_event_notifier.xif
+$(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.hh		\
+$(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.cc:		\
+    $(top_srcdir)/xrl/interfaces/finder_event_notifier.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
-finder_event_observer_xif.%: $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.%
+finder_event_observer_xif.%:						\
+    $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc: $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
+$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh		\
+$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc:		\
+    $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
 ###############################################################################
 #
 # Build handler bases
 #
+# NB The .xif file dependencies are specified MANUALLY for C++ Xrl Target 
+# Base below.  These MUST be kept up to date to be useful.
+#
 ###############################################################################
+
+# Basic build rule for Xrl Target base files
+%_base.o: %_base.cc
+	$(CXXCOMPILE) -c $<
 
 # Finder base
 
@@ -273,7 +296,10 @@ finder_base.%: $(top_srcdir)/xrl/targets/finder_base.%
 
 $(top_srcdir)/xrl/targets/finder_base.hh				\
 $(top_srcdir)/xrl/targets/finder_base.cc:				\
-    $(top_srcdir)/xrl/targets/finder.tgt
+    $(top_srcdir)/xrl/targets/finder.tgt				\
+    $(top_srcdir)/xrl/interfaces/common.xif				\
+    $(top_srcdir)/xrl/interfaces/finder.xif				\
+    $(top_srcdir)/xrl/interfaces/finder_event_notifier.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
 
 # Finder client base
@@ -284,17 +310,23 @@ finder_client_base.%: $(top_srcdir)/xrl/targets/finder_client_base.%
 
 $(top_srcdir)/xrl/targets/finder_client_base.hh				\
 $(top_srcdir)/xrl/targets/finder_client_base.cc:			\
-    $(top_srcdir)/xrl/targets/finder_client.tgt
+    $(top_srcdir)/xrl/targets/finder_client.tgt				\
+    $(top_srcdir)/xrl/interfaces/common.xif				\
+    $(top_srcdir)/xrl/interfaces/finder_client.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
 
 # Test Finder events base
 
-test_finder_events_base.%: $(top_srcdir)/xrl/targets/test_finder_events_base.%
+test_finder_events_base.%:						\
+    $(top_srcdir)/xrl/targets/test_finder_events_base.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
 
 $(top_srcdir)/xrl/targets/test_finder_events_base.hh 			\
 $(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
-    $(top_srcdir)/xrl/targets/test_finder_events.tgt
+    $(top_srcdir)/xrl/targets/test_finder_events.tgt			\
+    $(top_srcdir)/xrl/interfaces/common.xif				\
+    $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
 

@@ -119,10 +119,20 @@ libdemofeaifmgrclientbase_a_SOURCES = demo_fea_ifmgr_client_base.hh	\
 # FEA
 libfeabase_a_SOURCES = fea_base.hh fea_base.cc
 
+#
 # Finder
+#
+# If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
+# too.
+#
 libfinderbase_a_SOURCES = finder_base.hh finder_base.cc
 
+#
 # Finder client
+#
+# If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
+# too.
+#
 libfinderclientbase_a_SOURCES = finder_client_base.hh finder_client_base.cc
 
 # MFEA
@@ -146,7 +156,12 @@ libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
 # RTRMGR
 librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
 
+#
 # Test finder events
+#
+# If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
+# too.
+#
 libtestfindereventsbase_a_SOURCES = test_finder_events_base.hh test_finder_events_base.cc
 
 # TEST PEER
@@ -578,7 +593,6 @@ uninstall-am: uninstall-info-am
 	uninstall-info-am
 
 $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
-		$(TARGET_DIR)/bgp.tgt					\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/bgp.xif				\
 		$(INTERFACES_DIR)/rib_client.xif

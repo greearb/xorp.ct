@@ -1,12 +1,11 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.11 2003/05/20 01:16:54 jcardona Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.12 2003/05/21 00:13:04 atanu Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
 TARGET_DIR=$(top_srcdir)/xrl/targets
-
 
 ###############################################################################
 # Xrl Target related
@@ -37,7 +36,6 @@ noinst_LIBRARIES += libxorpshbase.a
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
 $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
-		$(TARGET_DIR)/bgp.tgt					\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/bgp.xif				\
 		$(INTERFACES_DIR)/rib_client.xif
@@ -78,14 +76,24 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fti.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt.xif
 
+#
 # Finder
+#
+# If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
+# too.
+#
 libfinderbase_a_SOURCES = finder_base.hh finder_base.cc
 $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder.xif				\
 		$(INTERFACES_DIR)/finder_event_notifier.xif
 
+#
 # Finder client
+#
+# If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
+# too.
+#
 libfinderclientbase_a_SOURCES = finder_client_base.hh finder_client_base.cc
 $(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
 		$(INTERFACES_DIR)/common.xif 				\
@@ -140,7 +148,12 @@ $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
 
+#
 # Test finder events
+#
+# If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
+# too.
+#
 libtestfindereventsbase_a_SOURCES  = test_finder_events_base.hh
 libtestfindereventsbase_a_SOURCES += test_finder_events_base.cc
 $(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
