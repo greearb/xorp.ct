@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.20 2004/07/09 04:18:35 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.21 2004/07/09 04:43:54 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -108,8 +108,8 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 	COMMANDS:
  cd www
- gmake -f GNUmakefile
- gmake -f GNUmakefile check
+ gmake
+ gmake check
 	NOTE: the last command may fail with huge number of errors.
 	This is probably because of some configuration requirement
 	to run the "nsgmls" verification program. In the near future
