@@ -193,7 +193,9 @@ def target_handler_methods(cls, name, methods):
     return s
 
 def protect(file):
-    return "__XRL_INTERFACES_%s__" % file.upper().replace(".", "_")
+ # remove direcory component
+    r = file.rfind("/") + 1
+    return "__XRL_INTERFACES_%s__" % file[r:].upper().replace(".", "_")
 
 def prepare_target_hh(modulename, hh_file):
     s   = Xif.util.standard_preamble(1, hh_file)

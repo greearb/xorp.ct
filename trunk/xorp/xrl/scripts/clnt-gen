@@ -38,7 +38,6 @@ def kdoc_comment(method):
     return kdt.output_kdoc("    ", params, comment)
 
 def declare_send_xrl(method_no, x):
-
     rtypes = []
     for r in x.rargs():
         rtypes.append("const " + r.cpp_type() + "*")
@@ -125,7 +124,9 @@ def implement_unmarshall(cls, method_no, method):
     return s
 
 def protect(file):
-    return "__XRL_INTERFACES_%s__" % file.upper().replace(".", "_")
+    # remove direcory component
+    r = file.rfind("/") + 1
+    return "__XRL_INTERFACES_%s__" % file[r:].upper().replace(".", "_")
 
 def prepare_client_if_hh(modulename, hh_file):
 
@@ -223,7 +224,7 @@ def main():
 
     basename = sourcefile[:-4]
 
-    modulename = "Xif%s" % cpp_classname(basename)
+    modulename = "Xif%s" % cpp_classname(basename[basename.rfind("/") + 1:])
     hh_file = "%s_xif.hh" % basename
     cc_file = "%s_xif.cc" % basename
     
@@ -237,7 +238,7 @@ def main():
     Xif.util.file_write_string(hh_file, hh_txt)
 
     # Generate implementation file
-    cc_txt = prepare_client_if_cc(hh_file, cc_file)
+    cc_txt = prepare_client_if_cc(hh_file[hh_file.rfind("/") + 1 : ], cc_file)
     for xif in xifs:
         cc_txt += client_if_cc(cls, xif.name(), xif.version(), xif.methods())
     Xif.util.file_write_string(cc_file, cc_txt)
