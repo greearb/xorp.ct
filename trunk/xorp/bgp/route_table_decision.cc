@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.6 2003/01/17 05:51:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.7 2003/01/26 17:03:19 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -813,10 +813,11 @@ DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     /*
     ** Choose the route from the neighbour with the lowest BGP ID.
     */
-    int test_id = test_peer->id();
-    int our_id = our_peer->id();
+    IPv4 test_id = test_peer->id();
+    IPv4 our_id = our_peer->id();
 
-    debug_msg("testing BGP ID: %d vs %d\n", test_id, our_id);
+    debug_msg("testing BGP ID: %s vs %s\n",
+	test_id.str().c_str(), our_id.str().c_str());
 
     if(test_id < our_id) {
 	cp(80);

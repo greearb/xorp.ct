@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.5 2003/01/29 22:17:10 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.6 2003/01/29 23:38:13 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -272,38 +272,9 @@ PeerHandler::output_no_longer_busy()
 	_plumbing->output_no_longer_busy(this);
 }
 
-uint32_t
-PeerHandler::id() const
-{
-    return ntohl(_peer->peerdata()->id().addr());
-}
-
-const IPv4&
-PeerHandler::bgp_id() const
-{
-    return _peer->peerdata()->id();
-}
-
-uint32_t
-PeerHandler::neighbour_address() const
-{
-    return ntohl(_peer->peerdata()->iptuple().get_peer_addr().s_addr);
-}
-
-const IPv4&
-PeerHandler::my_v4_nexthop() const
-{
-    return _peer->peerdata()->get_v4_local_addr();
-}
-
-const IPv6&
-PeerHandler::my_v6_nexthop() const
-{
-    return _peer->peerdata()->get_v6_local_addr();
-}
-
 EventLoop *
 PeerHandler::get_eventloop() const
 {
     return _peer->main()->get_eventloop();
 }
+

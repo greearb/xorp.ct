@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_reader.cc,v 1.2 2003/01/24 18:52:25 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_reader.cc,v 1.3 2003/01/25 02:10:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "route_table_reader.hh"
@@ -88,7 +88,7 @@ RouteTableReader<A>::RouteTableReader(const list <RibInTable<A>*>& ribins)
     for(i = ribins.begin(); i != ribins.end(); i++) {
 	trie_iterator ti = (*i)->trie().begin();
 	if (ti != (*i)->trie().end()) {
-	    IPv4 peer_id = (*i)->peer_handler()->bgp_id();
+	    IPv4 peer_id = (*i)->peer_handler()->id();
 	    _peer_readers.insert(new ReaderIxTuple<A>(peer_id, ti, (*i)));
 	}
     }

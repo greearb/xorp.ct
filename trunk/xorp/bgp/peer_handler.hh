@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.2 2003/01/25 02:10:07 mjh Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.3 2003/01/29 23:38:13 rizzo Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -73,17 +73,24 @@ public:
     /**
      * @return the neighbours BGP ID as an integer for use by decision.
      */
-    uint32_t id() const;
-
-    const IPv4& bgp_id() const;
+    const IPv4& id() const		{ return _peer->peerdata()->id(); }
 
     /**
      * @return the neighbours IP address an as integer for use be
      * decision.
      */
-    uint32_t neighbour_address() const;
-    const IPv4& my_v4_nexthop() const;
-    const IPv6& my_v6_nexthop() const;
+    uint32_t neighbour_address() const	{
+	return ntohl(_peer->peerdata()->iptuple().get_peer_addr().s_addr);
+    }
+
+    const IPv4& my_v4_nexthop() const	{
+	return _peer->peerdata()->get_v4_local_addr();
+    }
+
+    const IPv6& my_v6_nexthop() const	{
+	return _peer->peerdata()->get_v6_local_addr();
+    }
+
     EventLoop *get_eventloop() const;
 protected:
     BGPPlumbing *_plumbing;
