@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.10 2003/03/06 01:18:58 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.11 2003/03/09 00:55:38 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -259,35 +259,15 @@ XrlRouter::finalize()
 
 #include "sockutil.hh"
 
-struct DLinkElement {
-    DLinkElement() : _next(this), _prev(this) {}
-
-    DLinkElement(DLinkElement& de) : _next(de._next), _prev(&de)
-    {
-	de._next = _next->_prev = this;
-    }
-    
-    virtual ~DLinkElement()
-    {
-	_next->_prev = _prev;
-	_prev->_next = _next;
-    }
-
-private:
-    struct DLinkElement *_next;
-    struct DLinkElement *_prev;
-};
-
-struct XrlRouterDispatchState : protected DLinkElement {
+struct XrlRouterDispatchState {
 public:
     typedef XrlRouter::XrlCallback XrlCallback;
 
 public:
-    XrlRouterDispatchState(DLinkElement&	de,
-			   const XrlRouter*	r,
+    XrlRouterDispatchState(const XrlRouter*	r,
 			   const Xrl&		x,
 			   const XrlCallback&	xcb)
-	: DLinkElement(de), _rtr(r), _xrl(x), _xcb(xcb), _xrs(0)
+	: _rtr(r), _xrl(x), _xcb(xcb), _xrs(0)
     {
     }
 
@@ -313,25 +293,6 @@ protected:
     XrlRouter::XrlCallback	_xcb;
     XrlPFSender*		_xrs;
 };
-
-static class DispatchStateManager {
-public:
-
-    XrlRouterDispatchState* new_dispatch(const XrlRouter* rtr,
-					 const Xrl& xrl,
-					 const XrlRouter::XrlCallback& xcb)
-    {
-	return new XrlRouterDispatchState(_sentinel, rtr, xrl, xcb);
-    }
-
-    void dispose(XrlRouterDispatchState* ds)
-    {
-	delete ds;
-    }
-
-protected:
-    DLinkElement _sentinel;
-} dispatch_manager;
 
 //
 // This is scatty and temporary
@@ -371,9 +332,24 @@ XrlRouter::XrlRouter(EventLoop&  e,
 XrlRouter::~XrlRouter()
 {
     _fac->set_enabled(false);
+
+    while (_dsl.empty() == false) {
+	delete _dsl.front();
+	_dsl.pop_front();
+    }
+
     delete _fac;
     delete _fxt;
     delete _fc;
+}
+
+void
+XrlRouter::dispose(XrlRouterDispatchState* ds)
+{
+    list<XrlRouterDispatchState*>::iterator i;
+    i = find(_dsl.begin(), _dsl.end(), ds);
+    XLOG_ASSERT(_dsl.end() != i);
+    _dsl.erase(i);
 }
 
 bool
@@ -444,7 +420,7 @@ XrlRouter::send_callback(const XrlError&	 e,
 {
     _spend--;
     ds->dispatch(e, args);
-    dispatch_manager.dispose(ds);
+    dispose(ds);
 }
 
 void
@@ -455,7 +431,7 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     _rpend--;
     if (e != XrlError::OKAY()) {
 	ds->dispatch(e, 0);
-	dispatch_manager.dispose(ds);
+	dispose(ds);
 	return;
     }
 
@@ -480,7 +456,7 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     } catch (const InvalidString&) {
 	ds->dispatch(XrlError::CORRUPT_XRL());
     }
-    dispatch_manager.dispose(ds);
+    dispose(ds);
 
     return;    
 }
@@ -490,7 +466,9 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& xcb)
 {
     trace_xrl("Resolving xrl:", xrl);
     _rpend++;
-    DispatchState *ds = dispatch_manager.new_dispatch(this, xrl, xcb);
+    
+    DispatchState *ds = new XrlRouterDispatchState(this, xrl, xcb);
+    _dsl.push_back(ds);
 
     if (xrl.protocol() == "finder" && xrl.target().substr(0,6) == "finder") {
 	_fc->forward_finder_xrl(ds->xrl(),

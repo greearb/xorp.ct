@@ -227,7 +227,9 @@ protected:
 		       const Xrl&		xrl,
 		       XrlArgs*			reply,
 		       XrlRouterDispatchState*	ds);
-		       
+
+    void dispose(XrlRouterDispatchState*);
+    
 protected:
     EventLoop&			_e;
     FinderNGClient*		_fc;
@@ -238,6 +240,7 @@ protected:
     uint32_t			_rpend, _spend;
 
     list<XrlPFListener*>	_listeners;
+    list<XrlRouterDispatchState*> _dsl;
 };
 
 #endif // ORIGINAL_FINDER
