@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.27 2004/05/19 17:37:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.28 2004/06/10 22:40:34 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -30,6 +30,7 @@
 #define cp(x) {}
 #endif
 
+
 template<class A>
 DumpTable<A>::DumpTable(string table_name,
 			const PeerHandler *peer,
@@ -40,6 +41,7 @@ DumpTable<A>::DumpTable(string table_name,
       _dump_iter(peer, peer_list)
 {
     debug_msg("%s peer: %p\n", this->tablename().c_str(), peer);
+    //printf("New dumbtable %s peer: %p\n", this->tablename().c_str(), peer);
 
     cp(1);
     this->_parent = parent_table;
@@ -48,6 +50,11 @@ DumpTable<A>::DumpTable(string table_name,
     _output_busy = false;
     _waiting_for_deletion_completion = false;
     _completed = false;
+#ifdef AUDIT_ENABLE
+    _audit_entries = 0;
+    _first_audit = 0;
+    _last_audit = 0;
+#endif
 }
 
 template<class A>
@@ -72,10 +79,22 @@ DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
 					 rtmsg.genid(),
 					 RTQUEUE_OP_ADD)) {
 	cp(2);
+#ifdef AUDIT_ENABLE
+	add_audit(c_format("%s::add_route peer:%p/%d net:%s valid",
+			   this->tablename().c_str(),
+			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.net().str().c_str()));
+#endif
 	return this->_next_table->add_route(rtmsg,
 				      static_cast<BGPRouteTable<A>*>(this));
     } else {
 	cp(3);
+#ifdef AUDIT_ENABLE
+	add_audit(c_format("%s::add_route peer:%p/%d net:%s not valid",
+			   this->tablename().c_str(),
+			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.net().str().c_str()));
+#endif
 	return ADD_UNUSED;
     }
 }
@@ -108,6 +127,15 @@ DumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 					 new_rtmsg.net(),
 					 new_rtmsg.genid(),
 					 RTQUEUE_OP_REPLACE_NEW);
+
+#ifdef AUDIT_ENABLE
+    add_audit(c_format("%s::replace_route old_peer:%p/%d new_peer:%p/%d net:%s ov:%d nv:%d",
+		       this->tablename().c_str(),
+		       old_rtmsg.origin_peer(), old_rtmsg.genid(),
+		       new_rtmsg.origin_peer(), new_rtmsg.genid(),
+		       new_rtmsg.net().str().c_str(), old_is_valid, new_is_valid));
+#endif
+		       
 
     /* I'm not sure that all these combinations can happen */
     if (old_is_valid && new_is_valid) {
@@ -142,6 +170,12 @@ DumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
     debug_msg("Route_dump: %s %s\n", this->tablename().c_str(),
 	      rtmsg.net().str().c_str());
+#ifdef AUDIT_ENABLE
+    add_audit(c_format("%s:route_dump peer:%p/%d net:%s valid",
+		       this->tablename().c_str(),
+		       rtmsg.origin_peer(), rtmsg.genid(),
+		       rtmsg.net().str().c_str()));
+#endif
     /* turn the route_dump into a route_add */
     _dump_iter.route_dump(rtmsg);
     _dumped++;
@@ -169,9 +203,21 @@ DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 					 rtmsg.genid(),
 					 RTQUEUE_OP_DELETE)) {
 	cp(10);
+#ifdef AUDIT_ENABLE
+	add_audit(c_format("%s::add_route peer:%p/%d net:%s valid",
+			   this->tablename().c_str(),
+			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.net().str().c_str()));
 	return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
+#endif
     } else {
 	cp(11);
+#ifdef AUDIT_ENABLE
+	add_audit(c_format("%s::add_route peer:%p/%d net:%s not valid",
+			   this->tablename().c_str(),
+			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.net().str().c_str()));
+#endif
 	return 0;
     }
 }
@@ -557,6 +603,39 @@ DumpTable<A>::unplumb_self()
     this->_next_table = reinterpret_cast<BGPRouteTable<A>*>(0xd0d0);
     this->_parent = reinterpret_cast<BGPRouteTable<A>*>(0xd0d0);
 }
+
+#ifdef AUDIT_ENABLE
+template<class A>
+void 
+DumpTable<A>::add_audit(const string& log_entry) {
+    //printf("add_audit: %s\n", log_entry.c_str());
+    if (_audit_entries == 0) {
+	_audit_entries++;
+	_last_audit = _first_audit = 0; 
+    } else {
+	_audit_entries++;
+	_last_audit = (_last_audit + 1) % AUDIT_LEN;
+	//have we caught our tail
+	if (_last_audit == _first_audit) {
+	    _first_audit = (_last_audit + 1) % AUDIT_LEN;
+	    _audit_entries--;
+	}
+    }
+    _audit_entry[_last_audit] = log_entry;
+}
+
+template<class A>
+void 
+DumpTable<A>::print_and_clear_audit() {
+    for (int i = 0; i < _audit_entries; i++) {
+	printf("%d:%s\n", i, _audit_entry[(i + _first_audit)%AUDIT_LEN].c_str());
+    }
+    _audit_entries = 0;
+    _first_audit = 0;
+    _last_audit = 0;
+}
+#endif
+
 
 template class DumpTable<IPv4>;
 template class DumpTable<IPv6>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.11 2004/05/15 23:10:45 mjh Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.12 2004/06/10 22:40:29 hodson Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -38,8 +38,6 @@ typedef enum {
     FIRST_SEEN_DURING_DUMP
 } PeerDumpStatus;
     
-	
-
 template <class A>
 class PeerDumpState {
 public:
@@ -154,7 +152,6 @@ public:
      */
     bool waiting_for_deletion_completion() const;
 private:
-    BGPPlumbing *_plumbing;
     const PeerHandler *_peer;
 
     /**
@@ -162,6 +159,7 @@ private:
      */
     list <PeerTableInfo<A> > _peers_to_dump;
     typename list <PeerTableInfo<A> >::iterator _current_peer;
+    PeerTableInfo<A>* _current_peer_debug; //XXX just to aid debugging in gdb
 
     bool _route_iterator_is_valid;
     typename BgpTrie<A>::iterator _route_iterator;
@@ -170,6 +168,7 @@ private:
     IPNet<A> _last_dumped_net;
 
     map <const PeerHandler*, PeerDumpState<A>* > _peers;
+
 };
 
 #endif // __BGP_DUMP_ITERATORS_HH__

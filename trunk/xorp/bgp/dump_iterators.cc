@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.22 2004/05/21 09:20:31 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.23 2004/06/10 22:40:29 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -127,11 +127,14 @@ DumpIterator<A>::DumpIterator(const PeerHandler* peer,
     debug_msg("Peers to dump has %d members\n", ctr);
     _current_peer = _peers_to_dump.begin();
     if (_current_peer != _peers_to_dump.end()) {
+	_current_peer_debug = &(*_current_peer);
 	typename map <const PeerHandler*, 
 		  PeerDumpState<A>* >::iterator state_i;
 	state_i = _peers.find(_current_peer->peer_handler());
 	XLOG_ASSERT(state_i != _peers.end());
 	state_i->second->start_dump();
+    } else {
+	_current_peer_debug = NULL;
     }
     _route_iterator_is_valid = false;
     _routes_dumped_on_current_peer = false;
@@ -229,8 +232,11 @@ DumpIterator<A>::next_peer()
     //move to next undumped peer, if any remain
     while (state_i->second->status() != STILL_TO_DUMP) {
 	_current_peer++;
-	if (_current_peer == _peers_to_dump.end())
+	if (_current_peer == _peers_to_dump.end()) {
+	    _current_peer_debug = NULL;
 	    break;
+	}
+	_current_peer_debug = &(*_current_peer);
 
 	state_i = _peers.find(_current_peer->peer_handler());
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.13 2004/05/15 16:05:21 mjh Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.14 2004/06/10 22:40:34 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -21,6 +21,9 @@
 #include "peer_handler.hh"
 #include "bgp_trie.hh"
 #include "peer_route_pair.hh"
+
+#define AUDIT_ENABLE
+#define AUDIT_LEN 1000
 
 class EventLoop;
 
@@ -82,6 +85,9 @@ public:
     void peering_came_up(const PeerHandler *peer, uint32_t genid,
 			 BGPRouteTable<A> *caller);
 
+#ifdef AUDIT_ENABLE
+    void print_and_clear_audit();
+#endif
 private:
     /**
      * Called when the dump table has completed its tasks.
@@ -107,6 +113,16 @@ private:
 
     //The dump table has done its job and can be removed.
     bool _completed;
+
+#ifdef AUDIT_ENABLE
+    //audit trail for debugging - keep a log of last few events, use
+    //this as a circular buffer
+    string _audit_entry[AUDIT_LEN];
+    int _first_audit, _last_audit, _audit_entries;
+    void add_audit(const string& log_entry);
+
+#endif
+
 };
 
 #endif // __BGP_ROUTE_TABLE_DUMP_HH__
