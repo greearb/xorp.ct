@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.16 2003/06/09 22:14:18 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.17 2003/06/19 00:44:43 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -76,8 +76,9 @@ public:
 
     virtual void send(const Xrl& x, const SendCallback& cb) = 0;
     virtual bool sends_pending() const = 0;
+    virtual const char* protocol() const = 0;
+    inline const string& address() const { return _address; }
 
-    const string& address() const { return _address; }
     EventLoop& eventloop() const { return _eventloop; }
 
 protected:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.8 2003/05/09 21:00:52 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.9 2003/06/19 00:44:44 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_INPROC_HH__
 #define __LIBXIPC_XRL_PF_INPROC_HH__
@@ -43,12 +43,16 @@ class XrlPFInProcSender : public XrlPFSender {
 public:
     XrlPFInProcSender(EventLoop& e, const char* address = NULL)
 	throw (XrlPFConstructorError);
+
     ~XrlPFInProcSender();
 
     void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
-    bool sends_pending() const { return false; }
-    static const char* protocol() { return _protocol; }
 
+    inline bool sends_pending() const			{ return false; }
+
+    const char* protocol() const;
+
+    inline static const char* protocol_name()		{ return _protocol; }
 private:
     static const char* _protocol;
     uint32_t _listener_no;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.12 2003/06/10 17:46:27 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.13 2003/06/19 00:44:43 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -146,6 +146,12 @@ XrlPFInProcSender::send(const Xrl& x, const SendCallback& cb)
 		  _listener_no);
 	cb->dispatch(XrlError::SEND_FAILED(), 0);
     }
+}
+
+const char*
+XrlPFInProcSender::protocol() const
+{
+    return _protocol;
 }
 
 // ----------------------------------------------------------------------------
