@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.22 2004/02/29 22:57:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.23 2004/03/01 10:01:59 pavlin Exp $"
 
 
 //
@@ -25,6 +25,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
+#include "libxorp/utils.hh"
 
 #include "mrt/max_vifs.h"
 #include "mrt/mifset.hh"
@@ -2040,19 +2041,16 @@ MfeaNode::proto_comm_find_by_ipproto(int ipproto) const
 
 /**
  * MfeaNode::get_mrib_table:
- * @return_mrib_table: A pointer to the routing table array composed
+ * @mrib_table: A reference to the routing table vector composed
  * of #Mrib elements.
  * 
- * Return value: The number of entries in @return_mrib_table, or %XORP_ERROR
+ * Return value: The number of entries in @mrib_table, or %XORP_ERROR
  * if there was an error.
  **/
 int
-MfeaNode::get_mrib_table(Mrib **return_mrib_table)
+MfeaNode::get_mrib_table(vector<Mrib* >& mrib_table)
 {
-    Mrib	*mrib_table;
-    int		mrib_table_n = 0;
-    
-    *return_mrib_table = NULL;
+    int mrib_table_n = 0;
     
     switch (family()) {
     case AF_INET:
@@ -2062,26 +2060,27 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	
 	if (_ftic.get_table4(fte_list4) != true)
 	    return (XORP_ERROR);
-	mrib_table = new Mrib[fte_list4.size()](family());
+	mrib_table.resize(fte_list4.size());
 	for (iter = fte_list4.begin(); iter != fte_list4.end(); ++iter) {
 	    Fte4& fte = *iter;
-	    Mrib& mrib = mrib_table[mrib_table_n++];
+	    Mrib* mrib = new Mrib(family());
+	    mrib_table[mrib_table_n++] = mrib;
 	    MfeaVif *mfea_vif = NULL;
-	    mrib.set_dest_prefix(IPvXNet(fte.net()));
-	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
-	    mrib.set_metric(mrib_table_default_metric().get());
-	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
+	    mrib->set_dest_prefix(IPvXNet(fte.net()));
+	    mrib->set_metric_preference(mrib_table_default_metric_preference().get());
+	    mrib->set_metric(mrib_table_default_metric().get());
+	    mrib->set_next_hop_router_addr(IPvX(fte.gateway()));
 
 	    // Set the vif index
 	    mfea_vif = vif_find_by_name(fte.vifname());
 	    if (mfea_vif != NULL)
-		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-	    if (mrib.next_hop_vif_index() >= maxvifs()) {
+		mrib->set_next_hop_vif_index(mfea_vif->vif_index());
+	    if (mrib->next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
 			     "cannot find interface toward next-hop "
 			     "router %s for destination %s",
-			     cstring(mrib.next_hop_router_addr()),
-			     cstring(mrib.dest_prefix()));
+			     cstring(mrib->next_hop_router_addr()),
+			     cstring(mrib->dest_prefix()));
 	    }
 	}
     }
@@ -2095,26 +2094,26 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	
 	if (_ftic.get_table6(fte_list6) != true)
 	    return (XORP_ERROR);
-	mrib_table = new Mrib[fte_list6.size()](family());
+	mrib_table.resize(fte_list6.size());
 	for (iter = fte_list6.begin(); iter != fte_list6.end(); ++iter) {
 	    Fte6& fte = *iter;
-	    Mrib& mrib = mrib_table[mrib_table_n++];
+	    Mrib* mrib = new Mrib(family());
 	    MfeaVif *mfea_vif = NULL;
-	    mrib.set_dest_prefix(IPvXNet(fte.net()));
-	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
-	    mrib.set_metric(mrib_table_default_metric().get());
-	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
+	    mrib->set_dest_prefix(IPvXNet(fte.net()));
+	    mrib->set_metric_preference(mrib_table_default_metric_preference().get());
+	    mrib->set_metric(mrib_table_default_metric().get());
+	    mrib->set_next_hop_router_addr(IPvX(fte.gateway()));
 
 	    // Set the vif index
 	    mfea_vif = vif_find_by_name(fte.vifname());
 	    if (mfea_vif != NULL)
-		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-	    if (mrib.next_hop_vif_index() >= maxvifs()) {
+		mrib->set_next_hop_vif_index(mfea_vif->vif_index());
+	    if (mrib->next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
 			     "cannot find interface toward next-hop "
 			     "router %s for destination %s",
-			     cstring(mrib.next_hop_router_addr()),
-			     cstring(mrib.dest_prefix()));
+			     cstring(mrib->next_hop_router_addr()),
+			     cstring(mrib->dest_prefix()));
 	    }
 	}
     }
@@ -2125,8 +2124,7 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	XLOG_UNREACHABLE();
 	break;
     }
-    
-    *return_mrib_table = mrib_table;
+
     return (mrib_table_n);
 }
 
@@ -2165,16 +2163,16 @@ MfeaNode::mrib_table_read_timer_timeout()
     // Add all new entries to the temporary table
     //
     do {
-	Mrib *new_mrib_array = NULL;
-	int new_mrib_array_size = get_mrib_table(&new_mrib_array);
+	vector<Mrib* > new_mrib_vector;
+	int new_mrib_array_size = get_mrib_table(new_mrib_vector);
 	
 	if (new_mrib_array_size > 0) {
 	    for (int i = 0; i < new_mrib_array_size; i++) {
-		Mrib& new_mrib = new_mrib_array[i];
-		new_mrib_table.insert(new_mrib);
+		Mrib* new_mrib = new_mrib_vector[i];
+		new_mrib_table.insert(*new_mrib);
 	    }
 	}
-	delete[] new_mrib_array;
+	delete_pointers_vector(new_mrib_vector);
     } while (false);
     
     //

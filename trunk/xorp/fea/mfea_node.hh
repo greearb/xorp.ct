@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.14 2003/10/14 22:39:45 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.15 2003/12/06 00:10:01 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -1213,12 +1213,12 @@ public:
     /**
      * Get a copy of the kernel MRIB (@ref Mrib) information.
      * 
-     * @param mrib_table a pointer to the routing table array composed
+     * @param mrib_table a reference to the routing table vector composed
      * of @ref Mrib elements.
      * @return The number of entries in @ref mrib_table, or XORP_ERROR
      * if there was an error.
      */
-    int		get_mrib_table(Mrib **mrib_table);
+    int		get_mrib_table(vector<Mrib* >& mrib_table);
     
     /**
      * Get a reference to the mrouter (@ref MfeaMrouter).
