@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.6 2004/06/01 04:49:04 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.7 2004/06/04 04:47:04 pavlin Exp $ */
 
 protocols {
     mld {
@@ -35,6 +35,7 @@ protocols {
 	%mandatory:	targetname;
 
 	targetname {
+	    %help:	short "Set the target name";
 	    %set:;
 	}
 

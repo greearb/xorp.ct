@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.29 2004/05/28 23:12:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.30 2004/06/04 04:44:07 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -50,6 +50,7 @@ protocols {
 	%mandatory: targetname;
 
 	targetname {
+	    %help: short "Set the target name";
 	    %set:;
 	}
 

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.13 2004/05/18 07:11:07 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.14 2004/06/04 04:47:05 pavlin Exp $ */
 
 plumbing {
     rib {
@@ -19,6 +19,7 @@ plumbing {
 	%mandatory:	targetname;
 
 	targetname {
+	    %help:	short "Set the target name";
 	    %set:;
 	}
     }

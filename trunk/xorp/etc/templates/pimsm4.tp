@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.8 2004/06/01 04:54:57 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.9 2004/06/04 04:47:05 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -76,6 +76,7 @@ protocols {
 	%mandatory:	targetname;
 
 	targetname {
+	    %help:	short "Set the target name";
 	    %set:;
 	}
 

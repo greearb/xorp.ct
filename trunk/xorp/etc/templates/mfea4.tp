@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea4.tp,v 1.6 2004/06/01 04:49:04 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea4.tp,v 1.7 2004/06/04 04:47:04 pavlin Exp $ */
 
 plumbing {
     mfea4 {
@@ -37,6 +37,7 @@ plumbing {
 	%activate:	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
 
 	targetname {
+	    %help:	short "Set the target name";
 	    %set:;
 	}
 
