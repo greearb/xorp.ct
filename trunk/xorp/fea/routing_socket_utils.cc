@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.12 2004/03/17 07:18:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.13 2004/03/17 07:50:59 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -241,11 +241,8 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 		return (netmask.mask_len());
 	    }
 	default:
-	    XLOG_ERROR("Unknown mask: family = %d, sa_len = %d",
-		       family, sock->sa_len);
+	    // XXX: assume that the whole mask is stored
 	    {
-		// XXX: a poor attempt to return something meaningful
-		
 		// XXX: sock->sa_family is undefined
 		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
 		IPv4 netmask(sin->sin_addr);
@@ -283,6 +280,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     u_short if_index = rtm->rtm_index;
     string if_name;
     int family = fte.gateway().af();
+    bool is_family_match = false;
     bool is_deleted = false;
     
     XLOG_ASSERT((rtm->rtm_type == RTM_ADD)
@@ -299,10 +297,8 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     fte.zero();
 
     // Test if this entry was deleted
-    if ((rtm->rtm_type == RTM_DELETE)
-	|| (! (rtm->rtm_flags & RTF_UP))) {
+    if (rtm->rtm_type == RTM_DELETE)
 	is_deleted = true;
-    }
 
     // Get the pointers to the corresponding data structures    
     sa = reinterpret_cast<const struct sockaddr*>(rtm + 1);
@@ -319,6 +315,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	if (sa->sa_family == family) {
 	    dst_addr.copy_in(*rti_info[RTAX_DST]);
 	    dst_addr = kernel_ipvx_adjust(dst_addr);
+	    is_family_match = true;
 	}
     }
     
@@ -329,6 +326,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	if (sa->sa_family == family) {
 	    gateway_addr.copy_in(*rti_info[RTAX_GATEWAY]);
 	    gateway_addr = kernel_ipvx_adjust(gateway_addr);
+	    is_family_match = true;
 	}
     }
     if ((rtm->rtm_flags & RTF_LLINFO)
@@ -342,6 +340,8 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	if (not_bcast_addr)
 	    gateway_addr = dst_addr;
     }
+    if (! is_family_match)
+	return false;
     
     //
     // Get the destination mask length
