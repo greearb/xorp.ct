@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.9 2003/09/13 02:56:30 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.10 2003/11/12 19:07:40 pavlin Exp $"
 
 
 //
@@ -72,8 +72,10 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     uint32_t lookup_flags;
     PimMre *pim_mre, *pim_mre_sg;
     PimMfc *pim_mfc;
+    bool is_sptbit_set = false;
+    bool sent_register_stop = false;
     bool is_keepalive_timer_restarted = false;
-    Mifset olist;
+    uint32_t keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
     uint16_t register_vif_index = pim_node().pim_register_vif_index();
     
     //
@@ -97,15 +99,27 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     case AF_INET: {
 	struct ip ip4_header;
 	uint8_t *cp = (uint8_t *)&ip4_header;
-	uint16_t data_len;
 	
 	BUFFER_GET_DATA(cp, buffer, sizeof(ip4_header));
 	inner_src.copy_in(ip4_header.ip_src);
 	inner_dst.copy_in(ip4_header.ip_dst);
-	data_len = ntohs(ip4_header.ip_len) - sizeof(ip4_header);
 	if (null_register_bool) {
-	    // XXX: here we should check that data_len is zero,
-	    // but let's be conservative about this.
+	    //
+	    // If the inner header checksum is non-zero, then
+	    // check the checksum.
+	    //
+	    if (ip4_header.ip_sum != 0) {
+		uint16_t cksum = INET_CKSUM(&ip4_header, sizeof(ip4_header));
+		if (cksum != 0) {
+		    XLOG_WARNING("RX %s%s from %s to %s: "
+				 "inner dummy IP header checksum error",
+				 PIMTYPE2ASCII(PIM_REGISTER),
+				 (null_register_bool)? "(Null)" : "",
+				 cstring(src), cstring(dst));
+		    ++_pimstat_bad_checksum_messages;
+		    return (XORP_ERROR);
+		}
+	    }
 	}
 	break;
     }
@@ -114,15 +128,37 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     case AF_INET6: {
 	struct ip6_hdr ip6_header;
 	uint8_t *cp = (uint8_t *)&ip6_header;
-	uint16_t data_len;
+	uint16_t inner_data_len;
 	
 	BUFFER_GET_DATA(cp, buffer, sizeof(ip6_header));
 	inner_src.copy_in(ip6_header.ip6_src);
 	inner_dst.copy_in(ip6_header.ip6_dst);
-	data_len = ip6_header.ip6_plen;
+	inner_data_len = ntohs(ip6_header.ip6_plen);
 	if (null_register_bool) {
-	    // XXX: here we should check that data_len is zero,
-	    // but let's be conservative about this.
+	    //
+	    // If the dummy PIM header is present, then
+	    // check the checksum.
+	    //
+	    if (inner_data_len == sizeof(struct pim)) {
+		struct pim pim_header;
+		cp = (uint8_t *)&pim_header;
+		BUFFER_GET_DATA(cp, buffer, sizeof(pim_header));
+		uint16_t cksum, cksum2;
+		cksum = INET_CKSUM(&pim_header, sizeof(pim_header));
+		cksum2 = calculate_ipv6_pseudo_header_checksum(inner_src,
+							       inner_dst,
+							       sizeof(struct pim));
+		cksum = INET_CKSUM_ADD(cksum, cksum2);
+		if (cksum != 0) {
+		    XLOG_WARNING("RX %s%s from %s to %s: "
+				 "inner dummy IP header checksum error",
+				 PIMTYPE2ASCII(PIM_REGISTER),
+				 (null_register_bool)? "(Null)" : "",
+				 cstring(src), cstring(dst));
+		    ++_pimstat_bad_checksum_messages;
+		    return (XORP_ERROR);
+		}
+	    }
 	}
 	break;
     }
@@ -187,7 +223,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     if (register_vif_index == Vif::VIF_INDEX_INVALID) {
 	// I don't have a PIM Register vif
 	//
-	// send RegisterStop(S,G) to outer.src
+	// send Register-Stop(S,G) to outer.src
 	//
 	pim_register_stop_send(src, inner_src, inner_dst);
 	++_pimstat_rx_register_not_rp;
@@ -197,6 +233,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
     pim_mre = pim_node().pim_mrt().pim_mre_find(inner_src, inner_dst,
 						lookup_flags, 0);
+    
     //
     // Test if I am the RP for the multicast group
     //
@@ -205,7 +242,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	|| (! pim_mre->i_am_rp())
 	|| (dst != *pim_mre->rp_addr_ptr())) {
 	//
-	// send RegisterStop(S,G) to outer.src
+	// send Register-Stop(S,G) to outer.src
 	//
 	pim_register_stop_send(src, inner_src, inner_dst);
 	++_pimstat_rx_register_not_rp;
@@ -232,68 +269,37 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	}
     } while (false);
     
-    olist = pim_mre->inherited_olist_sg();
-    
-    if (olist.any() && pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
+    is_sptbit_set = false;
+    if ((pim_mre_sg != NULL) && pim_mre_sg->is_spt())
+	is_sptbit_set = true;
+
+    //
+    // The code below implements the core logic inside
+    // packet_arrives_on_rp_tunnel()
+    // Note that we call is_switch_to_spt_desired_sg() with a time interval
+    // of zero seconds and a threshold of zero bytes.
+    // I.e., this check will evaluate to true if the SPT switch is enabled
+    // and the threshold for the switch is 0 bytes (i.e., switch immediately).
+    //
+    sent_register_stop = false;
+    if (is_sptbit_set
+	|| (pim_mre->is_switch_to_spt_desired_sg(0, 0)
+	    && pim_mre->inherited_olist_sg().none())) {
 	//
-	// XXX: the is_switch_to_spt_desired_sg() check is not in the spec,
-	// but we use it here to switch conditionally to the SPT.
-	// More specifically, the pseudo-code of
-	// "packet_arrives_on_rp_tunnel( pkt )" the line
-	//	restart KeepaliveTimer(S,G)
-	// has been changed to:
-	//	if(( inherited_olist(S,G) != NULL ) AND
-	//	    SwitchToSptDesired(S,G))
-	//	    restart KeepaliveTimer(S,G)
-	// However, now we need to restart the KeepaliveTimer() in some
-	// of the code below to compensate for its conditional restart
-	// in its original place.
+	// send Register-Stop(S,G) to outer.src
 	//
-	// To be more specific, the original code:
-	//
-	// if( I_am_RP( G ) && outer.dst == RP(G) ) {
-        //	restart KeepaliveTimer(S,G)
-        //	if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
-	//	    send RegisterStop(S,G) to outer.src
-        //	} else {
-	//	    if( ! pkt.NullRegisterBit ) {
-	//		decapsulate and pass the inner packet to the normal
-	//		forwarding path for forwarding on the (*,G) tree.
-	//	    }
-	//	}
-	// } else {
-	//   ...
-	//
-	// would become:
-	//
-	// if( I_am_RP( G ) && outer.dst == RP(G) ) {
-	//	if(( inherited_olist(S,G) != NULL ) AND
-	//	    SwitchToSptDesired(S,G))
-	//	    restart KeepaliveTimer(S,G)
-	//	if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
-	//	    restart KeepaliveTimer(S,G)
-	//	    send RegisterStop(S,G) to outer.src
-	//	} else {
-	//	    if( ! pkt.NullRegisterBit ) {
-	//		decapsulate and pass the inner packet to the normal
-	//		forwarding path for forwarding on the (*,G) tree.
-	//	    } else {
-	//		restart KeepaliveTimer(S,G)
-	//	    }
-	//	}
-	// } else {
-	//   ...
-	//
-	//  Note that with the above modification, an (S,G) state may still be
-	//  created at the RP even if the sender's bandwidth is below a
-	//  threshold. E.g., if the RP has no downstream members for a group,
-	//  the RP will create (S,G) with NULL oifs per each active source for
-	//  that group. Thus, when new members join, the RP can immediately
-	//  send (S,G) Join toward each S and the data will start flowing;
-	//  otherwise, no traffic will be received from a source until the
-	//  Register Stop timer at that source's DR expires.
-	//
-	
+	pim_register_stop_send(src, inner_src, inner_dst);
+	sent_register_stop = true;
+    }
+    if (is_sptbit_set || pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
+	if (sent_register_stop) {
+	    // restart KeepaliveTimer(S,G) to Keepalive_Period
+	    keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
+	} else {
+	    // restart KeepaliveTimer(S,G) to RP_Keepalive_Period
+	    keepalive_timer_sec = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
+	}
+	// Create an (S,G) entry that will keep the Keepalive Timer running
 	if (pim_mre_sg == NULL) {
 	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(inner_src,
 							   inner_dst,
@@ -303,52 +309,12 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	pim_mre_sg->start_keepalive_timer();
 	is_keepalive_timer_restarted = true;
     }
-    
-    if ((! olist.any()) || ((pim_mre_sg != NULL) && pim_mre_sg->is_spt())) {
-	if (! is_keepalive_timer_restarted) {
-	    //
-	    // XXX: we need to restart KeepaliveTimer(S,G) now, because
-	    // the timer was conditionally started above. The reason is
-	    // because the RP needs to create an (S,G) state when
-	    // it has no downstream members. Thus, if a new member joins,
-	    // the RP can immediately send (S,G)Join toward S instead
-	    // of waiting for the Register Stop timer at the DR for that S
-	    // to expire.
-	    // restart KeepaliveTimer(S,G)
-	    //
-	    if (pim_mre_sg == NULL) {
-		pim_mre_sg = pim_node().pim_mrt().pim_mre_find(inner_src,
-							       inner_dst,
-							       PIM_MRE_SG,
-							       PIM_MRE_SG);
-	    }
-	    pim_mre_sg->start_keepalive_timer();
-	    is_keepalive_timer_restarted = true;
-	}
-	// send RegisterStop(S,G) to outer.src
-	pim_register_stop_send(src, inner_src, inner_dst);
-    } else {
-	if (! null_register_bool) {
+    if ((! is_sptbit_set) && (! null_register_bool)) {
 	    //
 	    // decapsulate and pass the inner packet to the normal
 	    // forwarding path for forwarding on the (*,G) tree.
 	    // XXX: will happen at the kernel
 	    //
-	} else {
-	    //
-	    // XXX: restart Keepalive(S,G) now to compensate for the
-	    // conditional restart in the first place.
-	    // restart KeepaliveTimer(S,G)
-	    //
-	    if (pim_mre_sg == NULL) {
-		pim_mre_sg = pim_node().pim_mrt().pim_mre_find(inner_src,
-							       inner_dst,
-							       PIM_MRE_SG,
-							       PIM_MRE_SG);
-	    }
-	    pim_mre_sg->start_keepalive_timer();
-	    is_keepalive_timer_restarted = true;
-	}
     }
     
     pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst, false);
@@ -379,7 +345,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     if (pim_mfc == NULL) {
 	pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst, true);
 	pim_mfc->set_iif_vif_index(register_vif_index);
-	pim_mfc->set_olist(olist);
+	pim_mfc->set_olist(pim_mre->inherited_olist_sg());
 	pim_mfc->add_mfc_to_kernel();
     }
     if (is_keepalive_timer_restarted
@@ -388,13 +354,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	// Add a dataflow monitor to expire idle (S,G) PimMre state
 	// and/or idle PimMfc+MFC state
 	//
-	uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-	if (expected_dataflow_monitor_sec
-	    < PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
-	    expected_dataflow_monitor_sec
-		= PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
-	}
-	pim_mfc->add_dataflow_monitor(expected_dataflow_monitor_sec, 0,
+	pim_mfc->add_dataflow_monitor(keepalive_timer_sec, 0,
 				      0,	// threshold_packets
 				      0,	// threshold_bytes
 				      true,	// is_threshold_in_packets
@@ -672,7 +632,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_REGISTER),
-	       cstring(addr()), cstring(rp_addr));
+	       cstring(domain_wide_addr()), cstring(rp_addr));
     return (XORP_ERROR);
 }
 
@@ -694,12 +654,13 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	struct ip ip4_header;
 	uint8_t *cp = (uint8_t *)&ip4_header;
 	
+	memset(&ip4_header, 0, sizeof(ip4_header));
 	ip4_header.ip_v		= IPVERSION;
 	ip4_header.ip_hl	= (sizeof(ip4_header) >> 2);
 	ip4_header.ip_tos	= 0;
 	ip4_header.ip_id	= 0;
 	ip4_header.ip_off	= 0;
-	ip4_header.ip_p		= IPPROTO_IP;		// XXX: 0, but bogus
+	ip4_header.ip_p		= IPPROTO_PIM;
 	ip4_header.ip_len	= htons(sizeof(ip4_header));
 	ip4_header.ip_ttl	= 0;
 	source_addr.copy_out(ip4_header.ip_src);
@@ -720,9 +681,14 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
     
 #ifdef HAVE_IPV6    
     case AF_INET6: {
+	//
+	// First generate the dummy IPv6 header, and then the dummy PIM header
+	//
+	
+	// Generate the dummy IPv6 header
 	struct ip6_hdr ip6_header;
 	uint8_t *cp = (uint8_t *)&ip6_header;
-
+	
 	// XXX: conditionally define IPv6 header related values
 #ifndef IPV6_VERSION
 #define IPV6_VERSION		0x60
@@ -730,17 +696,32 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 #ifndef IPV6_VERSION_MASK
 #define IPV6_VERSION_MASK	0xf0
 #endif
-
-	ip6_header.ip6_plen	= 0;
+	memset(&ip6_header, 0, sizeof(ip6_header));
+	ip6_header.ip6_plen	= htons(sizeof(struct pim));
 	ip6_header.ip6_flow	= 0;
 	ip6_header.ip6_vfc	&= ~IPV6_VERSION_MASK;
 	ip6_header.ip6_vfc	|= IPV6_VERSION;
 	ip6_header.ip6_hlim	= 0;
-	ip6_header.ip6_nxt	= IPPROTO_NONE;
+	ip6_header.ip6_nxt	= IPPROTO_PIM;
 	source_addr.copy_out(ip6_header.ip6_src);
 	group_addr.copy_out(ip6_header.ip6_dst);
 	
 	BUFFER_PUT_DATA(cp, buffer, sizeof(ip6_header));
+	
+	// Generate the dummy PIM header
+	uint16_t cksum, cksum2;
+	struct pim pim_header;
+	cp = (uint8_t *)&pim_header;
+	
+	memset(&pim_header, 0, sizeof(pim_header));
+	cksum = INET_CKSUM(&pim_header, sizeof(pim_header));	// XXX: no-op
+	cksum2 = calculate_ipv6_pseudo_header_checksum(source_addr,
+						       group_addr,
+						       sizeof(struct pim));
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	pim_header.pim_cksum = cksum;
+	
+	BUFFER_PUT_DATA(cp, buffer, sizeof(pim_header));
 	break;
     }
 #endif // HAVE_IPV6
@@ -758,6 +739,6 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_REGISTER),
 	       "(Null)",
-	       cstring(addr()), cstring(rp_addr));
+	       cstring(domain_wide_addr()), cstring(rp_addr));
     return (XORP_ERROR);
 }
