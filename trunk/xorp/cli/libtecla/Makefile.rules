@@ -27,6 +27,7 @@ static: libtecla$(SUFFIX).a
 
 libtecla$(SUFFIX).a: $(LIB_OBJECTS)
 	ar -ru $@ $(LIB_OBJECTS); \
+	ranlib $@
 	rm -f $(PROGS)
 
 shared: libtecla$(SUFFIX)$(SHARED_EXT)
