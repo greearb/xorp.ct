@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.50 2002/12/09 18:28:44 hodson Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -81,7 +81,7 @@ public:
 
     void dump();
     uint8_t get_flags() const;
-    void set_flags(uint8_t f);
+    void set_flags(const uint8_t f);
     virtual string str() const;
     bool operator<(const PathAttribute& him) const;
     bool operator==(const PathAttribute& him) const;
