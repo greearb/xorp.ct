@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.42 2004/05/28 18:26:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.43 2004/05/28 22:27:58 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -507,6 +507,10 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	    }
 	    // Strip the magic "\n" off
 	    segment = segment.substr(1, segment.size() - 1);
+	    if (segment.empty()) {
+		++iter;
+		continue;
+	    }
 	}
 
 	// Do variable expansion
