@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.17 2005/01/29 07:14:32 bms Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.18 2005/01/29 07:33:30 bms Exp $"
 
 #include "static_routes_module.h"
 
@@ -23,27 +23,39 @@
 #include "libxorp/ipvx.hh"
 #include "libxorp/status_codes.h"
 
-#include "libxipc/xrl_router.hh"
-
 #include "static_routes_node.hh"
 #include "xrl_static_routes_node.hh"
 
-#include "xrl/interfaces/finder_event_notifier_xif.hh"
+const TimeVal XrlStaticRoutesNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
-XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop& eventloop,
-					 XrlRouter* xrl_router,
-					 const string& fea_target,
-					 const string& rib_target)
+XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
+					 const string&	class_name,
+					 const string&	finder_hostname,
+					 uint16_t	finder_port,
+					 const string&	finder_target,
+					 const string&	fea_target,
+					 const string&	rib_target)
     : StaticRoutesNode(eventloop),
-      XrlStaticRoutesTargetBase(xrl_router),
-      _xrl_router(xrl_router),
-      _class_name(xrl_router->class_name()),
-      _instance_name(xrl_router->instance_name()),
-      _xrl_rib_client(xrl_router),
+      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+		   finder_port),
+      XrlStaticRoutesTargetBase(&xrl_router()),
+      _class_name(xrl_router().class_name()),
+      _instance_name(xrl_router().instance_name()),
+      _xrl_rib_client(&xrl_router()),
+      _finder_target(finder_target),
       _fea_target(fea_target),
       _rib_target(rib_target),
-      _ifmgr(eventloop, fea_target.c_str(), xrl_router->finder_address(),
-	     xrl_router->finder_port()),
+      _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
+	     xrl_router().finder_port()),
+      _xrl_finder_client(&xrl_router()),
+      _is_ifmgr_alive(false),
+      _is_ifmgr_registered(false),
+      _is_ifmgr_registering(false),
+      _is_ifmgr_deregistering(false),
+      _is_rib_alive(false),
+      _is_rib_registered(false),
+      _is_rib_registering(false),
+      _is_rib_deregistering(false),
       _is_rib_igp_table4_registered(false),
       _is_rib_igp_table6_registered(false)
 {
@@ -59,26 +71,9 @@ XrlStaticRoutesNode::~XrlStaticRoutesNode()
     _ifmgr.unset_observer(dynamic_cast<StaticRoutesNode*>(this));
 }
 
-void
-XrlStaticRoutesNode::finder_interest_callback(const XrlError& error)
-{
-    if (error != XrlError::OKAY()) {
-	XLOG_ERROR("callback: %s",  error.str().c_str());
-    }
-}
-
 bool
 XrlStaticRoutesNode::startup()
 {
-    XrlFinderEventNotifierV0p1Client finder(_xrl_router);
-    XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
-	::callback(this, &XrlStaticRoutesNode::finder_interest_callback);
-
-    finder.send_register_class_event_interest("finder",
-	_xrl_router->instance_name(), _fea_target, cb);
-    finder.send_register_class_event_interest("finder",
-	_xrl_router->instance_name(), _rib_target, cb);
-
     return StaticRoutesNode::startup();
 }
 
@@ -88,70 +83,303 @@ XrlStaticRoutesNode::shutdown()
     return StaticRoutesNode::shutdown();
 }
 
-bool
-XrlStaticRoutesNode::ifmgr_startup()
+//
+//
+//
+void
+XrlStaticRoutesNode::finder_disconnect_event()
 {
-    bool ret_value;
+    XLOG_ERROR("Finder disconnect event. Exiting immediately...");
 
-    // TODO: XXX: we should startup the ifmgr only if it hasn't started yet
-    StaticRoutesNode::incr_startup_requests_n();
-
-    ret_value = _ifmgr.startup();
-
-    //
-    // XXX: when the startup is completed, IfMgrHintObserver::tree_complete()
-    // will be called.
-    //
-
-    return ret_value;
+    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::update_status();
 }
 
-bool
-XrlStaticRoutesNode::ifmgr_shutdown()
+//
+// Register with the FEA
+//
+void
+XrlStaticRoutesNode::ifmgr_register_startup()
 {
-    bool ret_value;
+    bool success;
 
-    StaticRoutesNode::incr_shutdown_requests_n();
+    _ifmgr_register_startup_timer.unschedule();
+    _ifmgr_register_shutdown_timer.unschedule();
 
-    ret_value = _ifmgr.shutdown();
+    if (_is_ifmgr_registered)
+	return;		// Already registered
+
+    if (! _is_ifmgr_registering) {
+	StaticRoutesNode::incr_startup_requests_n();
+	_is_ifmgr_registering = true;
+    }
+
+    //
+    // Register interest in the FEA with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), _instance_name, _fea_target,
+	callback(this, &XrlStaticRoutesNode::finder_register_interest_ifmgr_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_ifmgr_register_startup_timer =
+	    StaticRoutesNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::ifmgr_register_startup));
+	return;
+    }
+}
+
+void
+XrlStaticRoutesNode::finder_register_interest_ifmgr_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then the FEA birth event will startup the ifmgr
+    if (xrl_error == XrlError::OKAY()) {
+	_is_ifmgr_registering = false;
+	_is_ifmgr_registered = true;
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register interest in finder events: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    //
+    if (! _ifmgr_register_startup_timer.scheduled()) {
+	_ifmgr_register_startup_timer =
+	    StaticRoutesNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::ifmgr_register_startup));
+    }
+}
+
+//
+// De-register with the FEA
+//
+void
+XrlStaticRoutesNode::ifmgr_register_shutdown()
+{
+    bool success;
+
+    _ifmgr_register_startup_timer.unschedule();
+    _ifmgr_register_shutdown_timer.unschedule();
+
+    if (! _is_ifmgr_alive)
+	return;		// The FEA is not there anymore
+
+    if (! _is_ifmgr_registered)
+	return;		// Not registered
+
+    if (! _is_ifmgr_deregistering) {
+	StaticRoutesNode::incr_shutdown_requests_n();
+	_is_ifmgr_deregistering = true;
+    }
+
+    //
+    // De-register interest in the FEA with the Finder
+    //
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), _instance_name, _fea_target,
+	callback(this, &XrlStaticRoutesNode::finder_deregister_interest_ifmgr_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_ifmgr_register_shutdown_timer =
+	    StaticRoutesNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::ifmgr_register_shutdown));
+	return;
+    }
 
     //
     // XXX: when the shutdown is completed, StaticRoutesNode::status_change()
     // will be called.
     //
-
-    return ret_value;
+    _ifmgr.shutdown();
 }
 
 void
-XrlStaticRoutesNode::rib_register_startup()
+XrlStaticRoutesNode::finder_deregister_interest_ifmgr_cb(
+    const XrlError& xrl_error)
 {
-    if (! _is_rib_igp_table4_registered)
-	StaticRoutesNode::incr_startup_requests_n();
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_ifmgr_deregistering = false;
+	_is_ifmgr_registered = false;
+	return;
+    }
 
-    if (! _is_rib_igp_table6_registered)
-	StaticRoutesNode::incr_startup_requests_n();
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
 
-    send_rib_registration();
-}
+    _is_ifmgr_deregistering = false;
+    _is_ifmgr_registered = false;
 
-void
-XrlStaticRoutesNode::rib_register_shutdown()
-{
-    if (_is_rib_igp_table4_registered)
-	StaticRoutesNode::incr_shutdown_requests_n();
-
-    if (_is_rib_igp_table6_registered)
-	StaticRoutesNode::incr_shutdown_requests_n();
-
-    send_rib_deregistration();
+    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::update_status();
 }
 
 //
 // Register with the RIB
 //
 void
-XrlStaticRoutesNode::send_rib_registration()
+XrlStaticRoutesNode::rib_register_startup()
+{
+    bool success;
+
+    _rib_register_startup_timer.unschedule();
+    _rib_register_shutdown_timer.unschedule();
+
+    if (_is_rib_registered)
+	return;		// Already registered
+
+    if (! _is_rib_registering) {
+	if (! _is_rib_igp_table4_registered)
+	    StaticRoutesNode::incr_startup_requests_n();
+	if (! _is_rib_igp_table6_registered)
+	    StaticRoutesNode::incr_startup_requests_n();
+	_is_rib_registering = true;
+    }
+
+    //
+    // Register interest in the RIB with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), _instance_name, _rib_target,
+	callback(this, &XrlStaticRoutesNode::finder_register_interest_rib_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_rib_register_startup_timer =
+	    StaticRoutesNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::rib_register_startup));
+	return;
+    }
+}
+
+void
+XrlStaticRoutesNode::finder_register_interest_rib_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then add the RIB tables
+    if (xrl_error == XrlError::OKAY()) {
+	_is_rib_registering = false;
+	_is_rib_registered = true;
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register interest in finder events: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    //
+    if (! _rib_register_startup_timer.scheduled()) {
+	_rib_register_startup_timer =
+	    StaticRoutesNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::rib_register_startup));
+    }
+}
+
+//
+// De-register with the RIB
+//
+void
+XrlStaticRoutesNode::rib_register_shutdown()
+{
+    bool success;
+
+    _rib_register_startup_timer.unschedule();
+    _rib_register_shutdown_timer.unschedule();
+
+    if (! _is_rib_alive)
+	return;		// The RIB is not there anymore
+
+    if (! _is_rib_registered)
+	return;		// Not registered
+
+    if (! _is_rib_deregistering) {
+	if (_is_rib_igp_table4_registered)
+	    StaticRoutesNode::incr_shutdown_requests_n();
+	if (_is_rib_igp_table6_registered)
+	    StaticRoutesNode::incr_shutdown_requests_n();
+	_is_rib_deregistering = true;
+    }
+
+    //
+    // De-register interest in the RIB with the Finder
+    //
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), _instance_name, _rib_target,
+	callback(this, &XrlStaticRoutesNode::finder_deregister_interest_rib_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_rib_register_shutdown_timer =
+	    StaticRoutesNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
+	return;
+    }
+
+    send_rib_delete_tables();
+}
+
+void
+XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_rib_deregistering = false;
+	_is_rib_registered = false;
+	return;
+    }
+
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
+
+    _is_rib_deregistering = false;
+    _is_rib_registered = false;
+
+    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::update_status();
+}
+
+//
+// Add tables with the RIB
+//
+void
+XrlStaticRoutesNode::send_rib_add_tables()
 {
     bool success = true;
 
@@ -192,12 +420,12 @@ XrlStaticRoutesNode::send_rib_registration()
     if (! success) {
 	//
 	// If an error, then start a timer to try again.
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
     start_timer_label:
-	_rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlStaticRoutesNode::send_rib_registration));
+	_rib_igp_table_registration_timer =
+	    StaticRoutesNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
     }
 }
 
@@ -207,7 +435,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table4_registered = true;
-	send_rib_registration();
+	send_rib_add_tables();
 	StaticRoutesNode::decr_startup_requests_n();
 	return;
     }
@@ -223,13 +451,13 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlStaticRoutesNode::send_rib_registration));
+    _rib_igp_table_registration_timer =
+	StaticRoutesNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
 }
 
 void
@@ -238,7 +466,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table6_registered = true;
-	send_rib_registration();
+	send_rib_add_tables();
 	StaticRoutesNode::decr_startup_requests_n();
 	return;
     }
@@ -254,20 +482,20 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlStaticRoutesNode::send_rib_registration));
+    _rib_igp_table_registration_timer =
+	StaticRoutesNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
 }
 
 //
-// De-register with the RIB
+// Delete tables with the RIB
 //
 void
-XrlStaticRoutesNode::send_rib_deregistration()
+XrlStaticRoutesNode::send_rib_delete_tables()
 {
     bool success = true;
 
@@ -411,8 +639,24 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
     const string&   target_class,
     const string&   target_instance)
 {
+    if (target_class == _fea_target) {
+	//
+	// XXX: when the startup is completed,
+	// IfMgrHintObserver::tree_complete() will be called.
+	//
+	_is_ifmgr_alive = true;
+	if (_ifmgr.startup() != true) {
+	    StaticRoutesNode::ServiceBase::set_status(FAILED);
+	    StaticRoutesNode::update_status();
+	}
+    }
+
+    if (target_class == _rib_target) {
+	_is_rib_alive = true;
+	send_rib_add_tables();
+    }
+
     return XrlCmdError::OKAY();
-    UNUSED(target_class);
     UNUSED(target_instance);
 }
 
@@ -422,14 +666,26 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
     const string&   target_class,
     const string&   target_instance)
 {
+    bool do_shutdown = false;
 
-    if ((_fea_target == target_class) || (_rib_target == target_class)) {
-	XLOG_ERROR("FEA or RIB died, shutting down.");
-	StaticRoutesNode::shutdown();
+    if (_fea_target == target_class) {
+	XLOG_ERROR("FEA (instance %s) has died, shutting down.",
+		   target_instance.c_str());
+	_is_ifmgr_alive = false;
+	do_shutdown = true;
     }
 
+    if (_rib_target == target_class) {
+	XLOG_ERROR("RIB (instance %s) has died, shutting down.",
+		   target_instance.c_str());
+	_is_rib_alive = false;
+	do_shutdown = true;
+    }
+
+    if (do_shutdown)
+	StaticRoutesNode::shutdown();
+
     return XrlCmdError::OKAY();
-    UNUSED(target_instance);
 }
 
 /**
@@ -953,7 +1209,6 @@ XrlStaticRoutesNode::send_rib_route_change()
     if (! success) {
 	//
 	// If an error, then start a timer to try again.
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	XLOG_ERROR("Failed to %s route for %s with the RIB. "
 		   "Will try again.",
@@ -963,7 +1218,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		   static_route.network().str().c_str());
     start_timer_label:
 	_inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::send_rib_route_change));
     }
 }
@@ -991,12 +1246,11 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_inform_rib_queue_timer.scheduled())
 	return;
     _inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlStaticRoutesNode::send_rib_route_change));
 }
 

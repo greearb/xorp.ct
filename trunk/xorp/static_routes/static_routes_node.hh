@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.12 2004/09/17 19:50:37 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.13 2004/09/17 20:02:28 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -576,24 +576,20 @@ private:
     virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
 
     /**
-     * Initiate startup of the interface manager.
+     * Initiate registration and startup of the interface manager.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
-     *
-     * @return true on success, false on failure.
      */
-    virtual bool ifmgr_startup() = 0;
+    virtual void ifmgr_register_startup() = 0;
 
     /**
-     * Initiate shutdown of the interface manager.
+     * Initiate de-registration and shutdown of the interface manager.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
-     *
-     * @return true on success, false on failure.
      */
-    virtual bool ifmgr_shutdown() = 0;
+    virtual void ifmgr_register_shutdown() = 0;
 
     /**
      * Initiate registration with the RIB.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.10 2004/09/18 01:24:43 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.11 2005/01/29 07:14:32 bms Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -23,26 +23,31 @@
 // StaticRoutes XRL-aware node definition.
 //
 
+#include "libxipc/xrl_std_router.hh"
+
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 #include "xrl/interfaces/rib_xif.hh"
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/targets/static_routes_base.hh"
 
 #include "static_routes_node.hh"
 
 
-class XrlRouter;
-
 //
 // The top-level class that wraps-up everything together under one roof
 //
 class XrlStaticRoutesNode : public StaticRoutesNode,
+			    public XrlStdRouter,
 			    public XrlStaticRoutesTargetBase {
 public:
-    XrlStaticRoutesNode(EventLoop& eventloop,
-			XrlRouter* xrl_router,
-			const string& fea_target,
-			const string& rib_target);
+    XrlStaticRoutesNode(EventLoop&	eventloop,
+			const string&	class_name,
+			const string&	finder_hostname,
+			uint16_t	finder_port,
+			const string&	finder_target,
+			const string&	fea_target,
+			const string&	rib_target);
     ~XrlStaticRoutesNode();
 
     /**
@@ -60,9 +65,11 @@ public:
     bool	shutdown();
 
     /**
-     * Callback for process birth/death events.
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
      */
-    void	finder_interest_callback(const XrlError& error);
+    XrlRouter&	xrl_router() { return *this; }
 
 protected:
     //
@@ -278,15 +285,33 @@ protected:
 
 
 private:
-
-    bool ifmgr_startup();
-    bool ifmgr_shutdown();
-
-    const ServiceBase* ifmgr_mirror_service_base() const { return dynamic_cast<const ServiceBase*>(&_ifmgr); }
+    const ServiceBase* ifmgr_mirror_service_base() const {
+	return dynamic_cast<const ServiceBase*>(&_ifmgr);
+    }
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_disconnect_event();
+
+    void ifmgr_register_startup();
+    void finder_register_interest_ifmgr_cb(const XrlError& xrl_error);
+    void ifmgr_register_shutdown();
+    void finder_deregister_interest_ifmgr_cb(const XrlError& xrl_error);
+
     void rib_register_startup();
+    void finder_register_interest_rib_cb(const XrlError& xrl_error);
     void rib_register_shutdown();
+    void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
+    void send_rib_add_tables();
+    void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
+    void send_rib_delete_tables();
+    void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
 
     /**
      * Inform the RIB about a route change.
@@ -305,28 +330,38 @@ private:
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
-    void send_rib_registration();
-    void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
-    void send_rib_deregistration();
-    void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
-
     const string& my_xrl_target_name() {
 	return XrlStaticRoutesTargetBase::name();
     }
 
-    XrlRouter*		_xrl_router;
     const string	_class_name;
     const string	_instance_name;
     XrlRibV0p1Client	_xrl_rib_client;
+    const string	_finder_target;
     const string	_fea_target;
     const string	_rib_target;
+
     IfMgrXrlMirror	_ifmgr;
     list<StaticRoute>	_inform_rib_queue;
     XorpTimer		_inform_rib_queue_timer;
+    XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
+
+    static const TimeVal RETRY_TIMEVAL;
+    bool		_is_ifmgr_alive;
+    bool		_is_ifmgr_registered;
+    bool		_is_ifmgr_registering;
+    bool		_is_ifmgr_deregistering;
+    XorpTimer		_ifmgr_register_startup_timer;
+    XorpTimer		_ifmgr_register_shutdown_timer;
+
+    bool		_is_rib_alive;
+    bool		_is_rib_registered;
+    bool		_is_rib_registering;
+    bool		_is_rib_deregistering;
     bool		_is_rib_igp_table4_registered;
     bool		_is_rib_igp_table6_registered;
+    XorpTimer		_rib_register_startup_timer;
+    XorpTimer		_rib_register_shutdown_timer;
     XorpTimer		_rib_igp_table_registration_timer;
 };
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.16 2004/09/17 20:02:28 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.17 2005/02/01 02:36:48 pavlin Exp $"
 
 
 //
@@ -79,12 +79,9 @@ StaticRoutesNode::startup()
     _node_status = PROC_STARTUP;
 
     //
-    // Startup the interface manager
+    // Register and startup the interface manager
     //
-    if (ifmgr_startup() != true) {
-	ServiceBase::set_status(FAILED);
-	return false;
-    }
+    ifmgr_register_startup();
 
     //
     // Register with the RIB
@@ -101,11 +98,16 @@ StaticRoutesNode::shutdown()
     // We cannot shutdown if our status is SHUTDOWN or FAILED.
     //
     if ((ServiceBase::status() == SHUTDOWN)
+	|| (ServiceBase::status() == SHUTTING_DOWN)
 	|| (ServiceBase::status() == FAILED)) {
 	return true;
     }
 
-    if (ServiceBase::status() != RUNNING)
+    if ((ServiceBase::status() != RUNNING)
+	&& (ServiceBase::status() != STARTING)
+	&& (ServiceBase::status() != PAUSING)
+	&& (ServiceBase::status() != PAUSED)
+	&& (ServiceBase::status() != RESUMING))
 	return false;
 
     //
@@ -121,17 +123,19 @@ StaticRoutesNode::shutdown()
     rib_register_shutdown();
 
     //
-    // Shutdown the interface manager
+    // De-register and shutdown the interface manager
     //
-    if (ifmgr_shutdown() != true) {
-	ServiceBase::set_status(FAILED);
-	return false;
-    }
+    ifmgr_register_shutdown();
 
     //
     // Set the node status
     //
     _node_status = PROC_SHUTDOWN;
+
+    //
+    // Update status
+    //
+    update_status();
 
     return true;
 }

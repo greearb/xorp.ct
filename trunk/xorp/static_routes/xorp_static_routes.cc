@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.7 2004/06/10 22:41:57 hodson Exp $"
+#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.8 2004/12/09 07:54:42 pavlin Exp $"
 
 
 //
@@ -28,8 +28,6 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-
-#include "libxipc/xrl_std_router.hh"
 
 #include "xrl_static_routes_node.hh"
 
@@ -83,7 +81,7 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-static_routes_main(const char* finder_hostname, uint16_t finder_port)
+static_routes_main(const string& finder_hostname, uint16_t finder_port)
 {
     //
     // Init stuff
@@ -93,16 +91,16 @@ static_routes_main(const char* finder_hostname, uint16_t finder_port)
     //
     // StaticRoutes node
     //
-    XrlStdRouter xrl_std_router_static_routes(
-	eventloop,
-	"static_routes",
-	finder_hostname, finder_port);
     XrlStaticRoutesNode xrl_static_routes_node(
 	eventloop,
-	&xrl_std_router_static_routes,
+	"static_routes",
+	finder_hostname,
+	finder_port,
+	"finder",
 	"fea",
 	"rib");
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_static_routes);
+    wait_until_xrl_router_is_ready(eventloop,
+				   xrl_static_routes_node.xrl_router());
 
     // Startup
     xrl_static_routes_node.startup();
@@ -177,7 +175,7 @@ main(int argc, char *argv[])
     // Run everything
     //
     try {
-	static_routes_main(finder_hostname.c_str(), finder_port);
+	static_routes_main(finder_hostname, finder_port);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
