@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.25 2003/07/30 23:43:30 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.26 2003/08/12 15:11:38 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1515,6 +1515,12 @@ protected:
     /**
      *  Statistics-related counters and values
      */
+    XrlCmdError pim_0_1_clear_pim_statistics();
+
+    XrlCmdError pim_0_1_clear_pim_statistics_per_vif(
+	// Input values, 
+	const string&	vif_name);
+
     XrlCmdError pim_0_1_pimstat_hello_messages_received(
 	// Output values, 
 	uint32_t&	value);

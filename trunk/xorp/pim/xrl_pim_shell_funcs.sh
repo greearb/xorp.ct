@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.11 2003/06/26 18:45:27 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.12 2003/08/12 15:11:38 pavlin Exp $
 #
 
 #
@@ -1415,6 +1415,32 @@ pim_send_test_cand_rp_adv()
 #
 # Statistics-related counters and values
 #
+pim_clear_pim_statistics()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pim_clear_pim_statistics"
+	exit 1
+    fi
+    
+    echo "pim_clear_pim_statistics" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/clear_pim_statistics"
+    XRL_ARGS=""
+    call_xrl $XRL$XRL_ARGS
+}
+
+pim_clear_pim_statistics_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_clear_pim_statistics_per_vif <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pim_clear_pim_statistics_per_vif" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/clear_pim_statistics_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl $XRL$XRL_ARGS
+}
 
 pim_pimstat_hello_messages_received()
 {

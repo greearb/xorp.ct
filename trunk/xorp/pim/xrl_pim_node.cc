@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.32 2003/08/08 22:34:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.33 2003/08/12 15:11:38 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -4664,6 +4664,29 @@ XrlPimNode::pim_0_1_send_test_cand_rp_adv()
 //
 // Statistics-related counters and values
 //
+XrlCmdError
+XrlPimNode::pim_0_1_clear_pim_statistics()
+{
+    PimNode::clear_pim_statistics();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_clear_pim_statistics_per_vif(
+    // Input values, 
+    const string&	vif_name)
+{
+    string error_msg;
+    
+    if (PimNode::clear_pim_statistics_per_vif(vif_name, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
 #define XRL_GET_PIMSTAT_PER_NODE(stat_name)			\
 XrlCmdError							\
 XrlPimNode::pim_0_1_##stat_name(				\

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.21 2003/08/07 02:41:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.22 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -1597,4 +1597,71 @@ PimVif::flags_string() const
 	flags += " DISABLED";
     
     return (flags);
+}
+
+void
+PimVif::clear_pim_statistics()
+{
+    _pimstat_hello_messages_received.reset();
+    _pimstat_hello_messages_sent.reset();
+    _pimstat_hello_messages_rx_errors.reset();
+    _pimstat_register_messages_received.reset();
+    _pimstat_register_messages_sent.reset();
+    _pimstat_register_messages_rx_errors.reset();
+    _pimstat_register_stop_messages_received.reset();
+    _pimstat_register_stop_messages_sent.reset();
+    _pimstat_register_stop_messages_rx_errors.reset();
+    _pimstat_join_prune_messages_received.reset();
+    _pimstat_join_prune_messages_sent.reset();
+    _pimstat_join_prune_messages_rx_errors.reset();
+    _pimstat_bootstrap_messages_received.reset();
+    _pimstat_bootstrap_messages_sent.reset();
+    _pimstat_bootstrap_messages_rx_errors.reset();
+    _pimstat_assert_messages_received.reset();
+    _pimstat_assert_messages_sent.reset();
+    _pimstat_assert_messages_rx_errors.reset();
+    _pimstat_graft_messages_received.reset();
+    _pimstat_graft_messages_sent.reset();
+    _pimstat_graft_messages_rx_errors.reset();
+    _pimstat_graft_ack_messages_received.reset();
+    _pimstat_graft_ack_messages_sent.reset();
+    _pimstat_graft_ack_messages_rx_errors.reset();
+    _pimstat_candidate_rp_messages_received.reset();
+    _pimstat_candidate_rp_messages_sent.reset();
+    _pimstat_candidate_rp_messages_rx_errors.reset();
+    //
+    _pimstat_unknown_type_messages.reset();
+    _pimstat_unknown_version_messages.reset();
+    _pimstat_neighbor_unknown_messages.reset();
+    _pimstat_bad_length_messages.reset();
+    _pimstat_bad_checksum_messages.reset();
+    _pimstat_bad_receive_interface_messages.reset();
+    _pimstat_rx_interface_disabled_messages.reset();
+    _pimstat_rx_register_not_rp.reset();
+    _pimstat_rp_filtered_source.reset();
+    _pimstat_unknown_register_stop.reset();
+    _pimstat_rx_join_prune_no_state.reset();
+    _pimstat_rx_graft_graft_ack_no_state.reset();
+    _pimstat_rx_graft_on_upstream_interface.reset();
+    _pimstat_rx_candidate_rp_not_bsr.reset();
+    _pimstat_rx_bsr_when_bsr.reset();
+    _pimstat_rx_bsr_not_rpf_interface.reset();
+    _pimstat_rx_unknown_hello_option.reset();
+    _pimstat_rx_data_no_state.reset();
+    _pimstat_rx_rp_no_state.reset();
+    _pimstat_rx_aggregate.reset();
+    _pimstat_rx_malformed_packet.reset();
+    _pimstat_no_rp.reset();
+    _pimstat_no_route_upstream.reset();
+    _pimstat_rp_mismatch.reset();
+    _pimstat_rpf_neighbor_unknown.reset();
+    //
+    _pimstat_rx_join_rp.reset();
+    _pimstat_rx_prune_rp.reset();
+    _pimstat_rx_join_wc.reset();
+    _pimstat_rx_prune_wc.reset();
+    _pimstat_rx_join_sg.reset();
+    _pimstat_rx_prune_sg.reset();
+    _pimstat_rx_join_sg_rpt.reset();
+    _pimstat_rx_prune_sg_rpt.reset();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.19 2003/08/07 01:09:11 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.20 2003/08/12 15:11:37 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -315,6 +315,8 @@ public:
 
     //
     // Statistics-related counters and values
+    //
+    void	clear_pim_statistics();
     //
     uint32_t	pimstat_hello_messages_received() const { return _pimstat_hello_messages_received.get(); }
     uint32_t	pimstat_hello_messages_sent() const { return _pimstat_hello_messages_sent.get(); }

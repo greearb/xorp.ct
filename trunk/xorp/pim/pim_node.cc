@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.24 2003/08/07 01:09:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.25 2003/08/12 15:11:36 pavlin Exp $"
 
 
 //
@@ -1727,6 +1727,33 @@ PimNode::find_processing_pim_mre_sg_rpt(uint16_t vif_index,
 //
 // Statistics-related counters and values
 //
+void
+PimNode::clear_pim_statistics()
+{
+    for (uint16_t i = 0; i < maxvifs(); i++) {
+	PimVif *pim_vif = vif_find_by_vif_index(i);
+	if (pim_vif == NULL)
+	    continue;
+	pim_vif->clear_pim_statistics();
+    }
+}
+
+int
+PimNode::clear_pim_statistics_per_vif(const string& vif_name,
+				      string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get statistics for vif %s: no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    pim_vif->clear_pim_statistics();
+    
+    return (XORP_OK);
+}
+
 #define GET_PIMSTAT_PER_NODE(stat_name)				\
 uint32_t							\
 PimNode::##stat_name() const					\
