@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.36 2004/10/13 06:03:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.37 2004/11/07 18:23:14 atanu Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -288,7 +288,7 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
     if (ev == AsyncFileWriter::FLUSHING)
 	return;	// code pre-dates FLUSHING event
 
-    debug_msg("Writer offset %u\n", static_cast<uint32_t>(bytes_done));
+    debug_msg("Writer offset %u\n", XORP_UINT_CAST(bytes_done));
 
     if (ev == AsyncFileWriter::ERROR_CHECK_ERRNO && errno != EAGAIN) {
 	die("read failed");
@@ -296,13 +296,13 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
     }
 
     debug_msg("responses size %u ready %u\n",
-	      static_cast<uint32_t>(_responses.size()),
-	      static_cast<uint32_t>(_reader.available_bytes()));
+	      XORP_UINT_CAST(_responses.size()),
+	      XORP_UINT_CAST(_reader.available_bytes()));
 
     if (_responses.front().size() == bytes_done) {
 	xassert(_responses.size() <= MAX_ACTIVE_REQUESTS);
 	debug_msg("Packet completed -> %u bytes written.\n",
-		  (uint32_t)_responses.front().size());
+		  XORP_UINT_CAST(_responses.front().size()));
 	// erase old head
 	_responses.pop_front();
 	_responses_size--;
@@ -324,7 +324,7 @@ STCPRequestHandler::postpone_death()
 void
 STCPRequestHandler::die(const char *reason, bool verbose)
 {
-    debug_msg(reason);
+    debug_msg("%s", reason);
     if (verbose)
 	XLOG_ERROR("STCPRequestHandler died: %s", reason);
     delete this;
@@ -460,7 +460,7 @@ public:
 	// Pack XRL data
 	x.pack(&_b[0] + header_bytes, xrl_bytes);
 
-	debug_msg("RequestState (%p - seqno %u)\n", this, sn);
+	debug_msg("RequestState (%p - seqno %u)\n", this, XORP_UINT_CAST(sn));
 	debug_msg("RequestState Xrl = %s\n", x.str().c_str());
     }
 
@@ -608,7 +608,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
 XrlPFSTCPSender::~XrlPFSTCPSender()
 {
     debug_msg("Direct calls %u Indirect calls %u\n",
-	      direct_calls, indirect_calls);
+	      XORP_UINT_CAST(direct_calls), XORP_UINT_CAST(indirect_calls));
     delete _reader;
     _reader = 0;
     delete _writer;
@@ -686,17 +686,18 @@ XrlPFSTCPSender::send(const Xrl&	x,
 	// We don't want to accept if we are short of resources
 	if (_active_requests >= MAX_ACTIVE_REQUESTS) {
 	    debug_msg("too many requests %u\n",
-		      static_cast<uint32_t>(_active_requests));
+		      XORP_UINT_CAST(_active_requests));
 	    return false;
 	}
 	if (x.packed_bytes() + _active_bytes > MAX_ACTIVE_BYTES) {
 	    debug_msg("too many bytes %u\n",
-		      static_cast<uint32_t>(x.packed_bytes()));
+		      XORP_UINT_CAST(x.packed_bytes()));
 	    return false;
 	}
     }
 
-    debug_msg("Seqno %u send %s\n", _current_seqno, x.str().c_str());
+    debug_msg("Seqno %u send %s\n", XORP_UINT_CAST(_current_seqno),
+	      x.str().c_str());
     send_request(new RequestState(this, _current_seqno++, x, cb));
 
     xassert(_requests_waiting.size() + _requests_sent.size() == _active_requests);
@@ -767,8 +768,8 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
 			    size_t			buffer_bytes)
 {
     debug_msg("read event %u (need at least %u)\n",
-		static_cast<uint32_t>(buffer_bytes),
-		static_cast<uint32_t>(sizeof(STCPPacketHeader)));
+		XORP_UINT_CAST(buffer_bytes),
+		XORP_UINT_CAST(sizeof(STCPPacketHeader)));
     if (ev == BufferedAsyncReader::ERROR_CHECK_ERRNO) {
 	XLOG_ERROR("Read failed (errno = %d): %s\n", errno, strerror(errno));
 	die("read error");
@@ -816,7 +817,8 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     }
 
     debug_msg("Frame Bytes %u Available %u\n",
-	      sph->frame_bytes(), static_cast<uint32_t>(buffer_bytes));
+	      XORP_UINT_CAST(sph->frame_bytes()),
+	      XORP_UINT_CAST(buffer_bytes));
     if (sph->frame_bytes() > buffer_bytes) {
 	if (_reader->reserve_bytes() < sph->frame_bytes())
 	    _reader->set_reserve_bytes(sph->frame_bytes());

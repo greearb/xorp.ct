@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.33 2004/06/10 22:41:12 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.34 2004/10/13 06:03:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -315,7 +315,7 @@ XrlPFSUDPSender::send(const Xrl& 			x,
 	_eventloop.new_oneoff_after_ms(SUDP_REPLY_TIMEOUT_MS,
 	    callback(this, &XrlPFSUDPSender::timeout_hook, request.xuid));
     debug_msg("XrlPFSUDPSender::send (qsize %u)\n",
-	      (uint32_t)requests_pending.size());
+	      XORP_UINT_CAST(requests_pending.size()));
     return true;
 }
 
@@ -388,7 +388,8 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	return;
     } else if (content_bytes + header_bytes != (size_t)read_bytes) {
 	debug_msg("header and data bytes != read_bytes (%u + %u != %d\n",
-		  (uint32_t)header_bytes, (uint32_t)content_bytes, read_bytes);
+		  XORP_UINT_CAST(header_bytes),
+		  XORP_UINT_CAST(content_bytes), read_bytes);
     }
 
     debug_msg("Received %s\n", xuid.str().c_str());
@@ -414,8 +415,8 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
     } catch (const InvalidString&) {
 	debug_msg("Corrupt response: "
 		  "header_bytes %u content_bytes %u\n\t\"%s\"\n",
-		  (uint32_t)header_bytes,
-		  (uint32_t)content_bytes,
+		  XORP_UINT_CAST(header_bytes),
+		  XORP_UINT_CAST(content_bytes),
 		  buf + header_bytes);
 	XrlError xe(INTERNAL_ERROR, "corrupt xrl response");
 	cb->dispatch(xe, 0);

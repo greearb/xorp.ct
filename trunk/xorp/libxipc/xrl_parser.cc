@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.7 2003/12/06 00:19:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.8 2004/06/10 22:41:11 hodson Exp $"
 
 #include <stdio.h>
 
@@ -93,8 +93,8 @@ XrlParseError::pretty_print(const size_t termwidth) const
     get_coordinates(lno, cno);
 
     // Gloop it up to go.
-    return c_format("XrlParseError at line %u char %u: ", (uint32_t)lno,
-		    (uint32_t)cno)
+    return c_format("XrlParseError at line %u char %u: ", XORP_UINT_CAST(lno),
+		    XORP_UINT_CAST(cno))
 	+ _reason + string("\n") + snapshot + string("\n") + indicator;
 }
 

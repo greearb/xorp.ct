@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.20 2004/10/13 06:03:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.21 2004/10/15 02:05:38 pavlin Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -168,7 +168,7 @@ XrlPFInProcSender::send(const Xrl&		x,
 	    return false;
 	} else {
 	    debug_msg("XrlPFInProcSender::send() no listener (id %d)\n",
-		      _listener_no);
+		      XORP_INT_CAST(_listener_no));
 	    cb->dispatch(XrlError::SEND_FAILED(), 0);
 	    *depth = *depth - 1;
 	    return true;
@@ -182,7 +182,7 @@ XrlPFInProcSender::send(const Xrl&		x,
 	    return false;
 	} else {
 	    debug_msg("XrlPFInProcSender::send() no dispatcher (id %d)\n",
-		      _listener_no);
+		      XORP_INT_CAST(_listener_no));
 	    cb->dispatch(XrlError::SEND_FAILED(), 0);
 	}
 	*depth = *depth - 1;
@@ -218,7 +218,7 @@ static XrlPFInProcListener*
 get_inproc_listener(uint32_t instance_no)
 {
     map<uint32_t, XrlPFInProcListener*>::iterator i;
-    debug_msg("getting -> size %u\n", (uint32_t)listeners.size());
+    debug_msg("getting -> size %u\n", XORP_UINT_CAST(listeners.size()));
     i = listeners.find(instance_no);
     return (i == listeners.end()) ? 0 : i->second;
 }
@@ -227,8 +227,8 @@ static void
 add_inproc_listener(uint32_t instance_no, XrlPFInProcListener* l)
 {
     assert(get_inproc_listener(instance_no) == 0);
-    debug_msg("adding no %d size %u\n", instance_no,
-	      (uint32_t)listeners.size());
+    debug_msg("adding no %d size %u\n", XORP_INT_CAST(instance_no),
+	      XORP_UINT_CAST(listeners.size()));
     listeners[instance_no] = l;
 }
 
@@ -237,7 +237,7 @@ remove_inproc_listener(uint32_t instance_no)
 {
     assert(get_inproc_listener(instance_no) != 0);
     listeners.erase(instance_no);
-    debug_msg("Removing listener %d\n", instance_no);
+    debug_msg("Removing listener %d\n", XORP_INT_CAST(instance_no));
 }
 
 // ----------------------------------------------------------------------------
@@ -251,7 +251,7 @@ XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlDispatcher* xr)
 {
     _instance_no = _next_instance_no ++;
 
-    _address = this_host() + c_format(":%d.%d", getpid(), _instance_no);
+    _address = this_host() + c_format(":%d.%d", getpid(),XORP_INT_CAST(_instance_no));
     add_inproc_listener(_instance_no, this);
 }
 
