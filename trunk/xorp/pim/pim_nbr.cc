@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.7 2003/08/07 01:09:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.8 2003/08/14 01:16:35 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -53,7 +53,7 @@
  * @pim_vif: The protocol vif towards the neighbor.
  * @addr: The address of the neighbor.
  * 
- * PIM neighbor constrictor.
+ * PIM neighbor constructor.
  **/
 PimNbr::PimNbr(PimVif& pim_vif, const IPvX& addr, int proto_version)
     : _pim_node(pim_vif.pim_node()),
