@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.127 2004/12/03 04:18:06 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.128 2004/12/11 02:23:50 atanu Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -867,11 +867,11 @@ main()
 AC_LANG_RESTORE
 
 
-dnl -------------------------------------------
-dnl Check for an IPF firewall build environment
-dnl -------------------------------------------
+dnl ------------------------------------------------------
+dnl Check for IPF support in the host's build environment.
+dnl ------------------------------------------------------
 
-AC_MSG_CHECKING(for an IPF firewall build environment)
+AC_MSG_CHECKING(for IPF support in the host's build environment)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_COMPILE([
@@ -890,50 +890,35 @@ AC_TRY_COMPILE([
   char *myipfname = IPL_NAME;
   int myioctl = SIOCGETFF;
 ],
-  [AC_DEFINE(HAVE_FIREWALL_IPF, 1,
-	[Define to 1 if you have an IPF host build environment])
+  [AC_DEFINE(HAVE_PACKETFILTER_IPF, 1,
+	[Define to 1 if the host has IPF support in the build environment])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
 
-dnl --------------------------------------------
-dnl Check for an IPFW firewall build environment
-dnl --------------------------------------------
+dnl -------------------------------------------------------------------------
+dnl Check for IPFW2 support with atomic sets in the host's build environment.
+dnl -------------------------------------------------------------------------
 
-AC_MSG_CHECKING(for an IPFW firewall build environment)
+AC_MSG_CHECKING(for IPFW2 support with atomic sets in the host's build environment)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_COMPILE([
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <netinet/in.h>
-#include <netinet/ip_fw.h>
-],
-[
-  int mysockopt = IP_FW_ADD;
-#ifdef IPFW2
-#error IPFW2 defined (should not be defined for IPFW). Test failed.
+#include <sys/param.h>
+#if __FreeBSD_version < 490000
+ #error FreeBSD 4.9 or greater is required for IPFW2 with atomic set support.
 #endif
-],
-  [AC_DEFINE(HAVE_FIREWALL_IPFW, 1,
-	[Define to 1 if you have an IPFW build environment])
-   AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)])
-AC_LANG_RESTORE
-
-
-dnl ---------------------------------------------
-dnl Check for an IPFW2 firewall build environment
-dnl ---------------------------------------------
-
-AC_MSG_CHECKING(for an IPFW2 firewall build environment)
-AC_LANG_SAVE
-AC_LANG_C
-AC_TRY_COMPILE([
+#if __FreeBSD_version < 500000
+ /*
+  * RELENG_4 branches of FreeBSD after RELENG_4_9_RELEASE require
+  * that IPFW2 support be explicitly requested by defining the
+  * preprocessor symbol IPFW2 to a non-zero value.
+  */
+ #define IPFW2 1
+#elif __FreeBSD_version < 501000
+ #error FreeBSD 5.1 or greater is required for IPFW2 with set support.
+#endif
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -941,25 +926,25 @@ AC_TRY_COMPILE([
 #include <net/if.h>
 #include <netinet/in.h>
 #include <netinet/ip_fw.h>
-],
-[
-  int mysockopt = IP_FW_ADD;
 #ifndef IPFW2
-#error IPFW2 not defined (should be defined for IPFW2). Test failed.
+ #error IPFW2 not defined (should be defined for IPFW2). Test failed.
 #endif
 ],
-  [AC_DEFINE(HAVE_FIREWALL_IPFW2, 1,
-	[Define to 1 if you have an IPFW2 build environment])
+[
+  int mysockopt = IP_FW_ADD;
+],
+  [AC_DEFINE(HAVE_PACKETFILTER_IPFW2, 1,
+	[Define to 1 if the host has IPFW2 support in the build environment])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
 
-dnl ------------------------------------------------
-dnl Check for an IPTABLES firewall build environment
-dnl ------------------------------------------------
+dnl -----------------------------------------------------------
+dnl Check for IPTABLES support in the host's build environment.
+dnl -----------------------------------------------------------
 
-AC_MSG_CHECKING(for an IPTABLES firewall build environment)
+AC_MSG_CHECKING(for IPTABLES support in the host's build environment)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_COMPILE([
@@ -977,16 +962,16 @@ AC_TRY_COMPILE([
 ],
 [
 ],
-  [AC_DEFINE(HAVE_FIREWALL_IPTABLES, 1,
-	[Define to 1 if you have an IPTABLES build environment])
+  [AC_DEFINE(HAVE_PACKETFILTER_IPTABLES, 1,
+	[Define to 1 if the host has IPTABLES support in the build environment])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
 
-dnl -----------------------------------------
-dnl Check for a PF firewall build environment
-dnl -----------------------------------------
+dnl -----------------------------------------------------
+dnl Check for PF support in the host's build environment.
+dnl -----------------------------------------------------
 
 AC_MSG_CHECKING(for a PF firewall build environment)
 AC_LANG_SAVE
@@ -1003,8 +988,8 @@ AC_TRY_COMPILE([
 [
  int myioctl = DIOCGETRULESET;
 ],
-  [AC_DEFINE(HAVE_FIREWALL_PF, 1,
-	[Define to 1 if you have a PF build environment])
+  [AC_DEFINE(HAVE_PACKETFILTER_PF, 1,
+	[Define to 1 if the host has PF support in the build environment])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE

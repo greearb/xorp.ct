@@ -52,21 +52,6 @@
 /* Define to 1 if netinet6/nd6.h is not C++ friendly */
 #undef HAVE_BROKEN_CXX_NETINET6_ND6_H
 
-/* Define to 1 if you have an IPF host build environment */
-#undef HAVE_FIREWALL_IPF
-
-/* Define to 1 if you have an IPFW build environment */
-#undef HAVE_FIREWALL_IPFW
-
-/* Define to 1 if you have an IPFW2 build environment */
-#undef HAVE_FIREWALL_IPFW2
-
-/* Define to 1 if you have an IPTABLES build environment */
-#undef HAVE_FIREWALL_IPTABLES
-
-/* Define to 1 if you have a PF build environment */
-#undef HAVE_FIREWALL_PF
-
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 
@@ -179,6 +164,18 @@
 
 /* Define to 1 if you have the <net/if_var.h> header file. */
 #undef HAVE_NET_IF_VAR_H
+
+/* Define to 1 if the host has IPF support in the build environment */
+#undef HAVE_PACKETFILTER_IPF
+
+/* Define to 1 if the host has IPFW2 support in the build environment */
+#undef HAVE_PACKETFILTER_IPFW2
+
+/* Define to 1 if the host has IPTABLES support in the build environment */
+#undef HAVE_PACKETFILTER_IPTABLES
+
+/* Define to 1 if the host has PF support in the build environment */
+#undef HAVE_PACKETFILTER_PF
 
 /* Define to 1 if Linux /proc filesystem exists */
 #undef HAVE_PROC_LINUX
