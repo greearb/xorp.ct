@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.24 2004/11/27 23:35:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.25 2004/12/18 02:47:25 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -613,6 +613,22 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	return false;
     }
     XLOG_UNREACHABLE();
+}
+
+template <class A>
+bool
+DumpIterator<A>::iterator_got_moved(IPNet<A> new_net) const
+{
+    /* need to be careful where we call this - the iterator MUST be
+       valid, as we don't sanity check here */
+    if (_routes_dumped_on_current_peer == false)
+	return false;
+    if (new_net == _last_dumped_net) {
+	return false;
+    } else {
+	printf("iterator has moved; was %s now %s\n", _last_dumped_net.str().c_str(), _last_dumped_net.str().c_str());
+	return true;
+    }
 }
 
 template class DumpIterator<IPv4>;

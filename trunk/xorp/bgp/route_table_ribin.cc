@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.35 2005/03/07 21:48:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.36 2005/03/18 08:15:04 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -320,7 +320,13 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 	if (route_iterator == _route_table->end()) {
 	    return false;
 	}
-	route_iterator++;
+	
+	//we need to move on to the next node, except if the iterator
+	//was pointing at a deleted node, because then it will have
+	//just been moved to the next node to dump, so we need to dump
+	//the node that the iterator is currently pointing at.
+	if (dump_iter.iterator_got_moved(route_iterator.key()) == false)
+	    route_iterator++;
     } else {
 	debug_msg("route_iterator is not valid\n");
 	route_iterator = _route_table->begin();
