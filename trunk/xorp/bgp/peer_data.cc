@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.16 2004/06/10 22:40:32 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.17 2004/12/17 01:31:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -34,10 +34,7 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
     set_retry_duration(2 * 60 * 1000);	// Connect retry time.
 
     // we support routing of IPv4 unicast by default.
-    // Don't send this parameter in the open
-    add_sent_parameter(new
-		       BGPMultiProtocolCapability(AFI_IPV4, SAFI_UNICAST,
-						  false));
+    add_sent_parameter(new BGPMultiProtocolCapability(AFI_IPV4, SAFI_UNICAST));
 
     // The peer has no way of telling us that it doesn't want IPv4
     // unicast. So we have to configure the received parameter ourselves.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.22 2004/06/10 22:40:31 hodson Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.23 2004/12/17 01:31:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -138,8 +138,8 @@ BGPAuthParameter::str() const
 }
 /* **************** BGPCapParameter *********************** */
 
-BGPCapParameter::BGPCapParameter(bool send)
-    : BGPParameter(send)
+BGPCapParameter::BGPCapParameter()
+    : BGPParameter()
 {
     _type = PARAMTYPECAP;
     _cap_length = 0;
@@ -257,8 +257,8 @@ BGPRefreshCapability::str() const
 /* ************** BGPMultiProtocolCapability - ****************** */
 
 BGPMultiProtocolCapability::
-BGPMultiProtocolCapability(Afi afi, Safi safi, bool send)
-    : BGPCapParameter(send)
+BGPMultiProtocolCapability(Afi afi, Safi safi)
+    : BGPCapParameter()
 {
     _cap_code = CAPABILITYMULTIPROTOCOL;
     _length = 8;
