@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.7 2003/08/25 21:50:43 atanu Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.8 2003/08/27 01:29:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -86,6 +86,8 @@ ProcessWatch::death(const string& target_class, const string& target_instance)
 void
 ProcessWatch::finder_death()
 {
+    XLOG_ERROR("The finder has died BGP process exiting");
+
     start_kill_timer();
     xorp_throw(NoFinder, "");
 }
