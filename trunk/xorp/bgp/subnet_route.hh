@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.7 2003/02/08 07:30:23 rizzo Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.8 2003/03/10 23:20:06 hodson Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -104,7 +104,7 @@ private:
 
     inline void bump_refcount(int delta) const {
 	assert(delta == 1 || delta == -1);
-	uint8_t refs = refcount();
+	uint16_t refs = refcount();
 	if (delta == 1) {
 	    assert(refs < 0xffff);
 	} else {
