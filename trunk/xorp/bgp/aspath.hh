@@ -12,18 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.13 2003/02/06 04:19:22 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.14 2003/03/10 23:19:57 hodson Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
 
-#include "config.h"
 #include <sys/types.h>
 #include <inttypes.h>
 #include <string>
 #include <list>
 #include <vector>
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/asnum.hh"
 #include "libxorp/exceptions.hh"
@@ -249,7 +249,6 @@ public:
 		return true;
 	return false;
     }
-
 
     const AsNum& first_asnum() const			{
 	assert(!_segments.empty());
