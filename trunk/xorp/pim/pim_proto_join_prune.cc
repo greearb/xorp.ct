@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.23 2002/12/09 18:29:29 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -117,7 +117,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	ignore_group_bool = true;
 	rp_entry_bool = false;
 	new_group_bool = true;
-
+	
 	//
 	// Check the group address and masklen
 	//

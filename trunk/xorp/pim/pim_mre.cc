@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.96 2002/12/09 18:29:25 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -365,20 +365,6 @@ PimMre::set_spt(bool v)
     pim_mrt().add_task_sptbit_sg(source_addr(), group_addr());
 }
 
-// Note: applies only for (S,G,rpt)
-void
-PimMre::set_sg_rpt_prune_received(bool v)
-{
-    if (! is_sg_rpt())
-	return;
-    
-    if (v) {
-	_flags |= PIM_MRE_SG_RPT_PRUNE_RECEIVED;
-    } else {
-	_flags &= ~PIM_MRE_SG_RPT_PRUNE_RECEIVED;
-    }
-}
-
 const IPvX *
 PimMre::rp_addr_ptr() const
 {
@@ -477,10 +463,7 @@ PimMre::prunes_sg_rpt() const
     }
     
     mifs = downstream_prune_state();
-    // XXX: PruneTmp(P') state is internal and transient, hence we don't
-    // need to keep explicit track of it.
-    // TODO: make sure that we don't overlook something.
-    // mifs |= prune_tmp();
+    mifs |= downstream_prune_tmp_state();
     return(mifs);    
 }
 
@@ -1719,9 +1702,13 @@ PimMre::entry_can_remove() const
 	return (false);
     if (_downstream_join_state.any())
 	return (false);
+    if (_downstream_prune_state.any())
+	return (false);
     if (_downstream_prune_pending_state.any())
 	return (false);
-    if (_downstream_prune_state.any())
+    // XXX: we don't really need to test _downstream_tmp_state, because
+    // it is used only in combination with other state, but anyway...
+    if (_downstream_tmp_state.any())
 	return (false);
     if (is_rp() || is_wc() || is_sg()) {
 	if (is_joined_state())
@@ -1749,10 +1736,13 @@ PimMre::entry_can_remove() const
 	if (pim_exclude_sg().any())
 	    return (false);
     }
+#if 0		// TODO: XXX: PAVPAVPAV: not needed?
+    // XXX: (S,G,rpt) entry can be removed if all downstream state is NoInfo
     if (is_sg_rpt()) {
 	if (is_pruned_state() || is_not_pruned_state())
 	    return (false);
     }
+#endif // 0
 #if 0		// TODO: XXX: PAVPAVPAV: not needed?
     if (inherited_olist_sg_forward().any())
 	return (false);

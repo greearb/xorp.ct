@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.51 2002/12/09 18:29:27 hodson Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -217,8 +217,8 @@ public:
     void add_task_receive_prune_sg_rpt(uint16_t vif_index,
 				       const IPvX& source_addr,
 				       const IPvX& group_addr);
-    void add_task_receive_no_prune_sg_rpt(uint16_t vif_index,
-					  const IPvX& group_addr);
+    void add_task_receive_end_of_message_sg_rpt(uint16_t vif_index,
+						const IPvX& group_addr);
     void add_task_downstream_jp_state_rp(uint16_t vif_index,
 					 const IPvX& rp_addr);
     void add_task_downstream_jp_state_wc(uint16_t vif_index,

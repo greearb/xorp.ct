@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.43 2002/12/09 18:29:26 hodson Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -81,7 +81,7 @@ public:
 	INPUT_STATE_RECEIVE_PRUNE_WC,			// 17
 	INPUT_STATE_RECEIVE_PRUNE_SG,			// 18
 	INPUT_STATE_RECEIVE_PRUNE_SG_RPT,		// 19
-	INPUT_STATE_RECEIVE_NO_PRUNE_SG_RPT,		// 20
+	INPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT,	// 20
 	INPUT_STATE_SEE_PRUNE_WC,			// 21
 	INPUT_STATE_DOWNSTREAM_JP_STATE_RP,		// 22
 	INPUT_STATE_DOWNSTREAM_JP_STATE_WC,		// 23
@@ -144,48 +144,49 @@ public:
 	OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC,		// 26
 	OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG,		// 27
 	OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC,		// 28
-	OUTPUT_STATE_RECEIVE_NO_PRUNE_SG_RPT,		// 29
-	OUTPUT_STATE_SG_SEE_PRUNE_WC,			// 30
-	OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG,		// 31
-	OUTPUT_STATE_RPFP_NBR_WC,			// 32
-	OUTPUT_STATE_RPFP_NBR_WC_GEN_ID,		// 33
-	OUTPUT_STATE_RPFP_NBR_SG,			// 34
-	OUTPUT_STATE_RPFP_NBR_SG_GEN_ID,		// 35
-	OUTPUT_STATE_RPFP_NBR_SG_RPT,			// 36
-	OUTPUT_STATE_MRIB_NEXT_HOP_RP,			// 37
-	OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID,		// 38
-	OUTPUT_STATE_MRIB_NEXT_HOP_RP_G,		// 39
-	OUTPUT_STATE_MRIB_NEXT_HOP_S,			// 40
-	OUTPUT_STATE_OUT_START_VIF_RP,			// 41
-	OUTPUT_STATE_OUT_START_VIF_WC,			// 42
-	OUTPUT_STATE_OUT_START_VIF_SG,			// 43
-	OUTPUT_STATE_OUT_START_VIF_SG_RPT,		// 44
-	OUTPUT_STATE_OUT_STOP_VIF_RP,			// 45
-	OUTPUT_STATE_OUT_STOP_VIF_WC,			// 46
-	OUTPUT_STATE_OUT_STOP_VIF_SG,			// 47
-	OUTPUT_STATE_OUT_STOP_VIF_SG_RPT,		// 48
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP,	// 49
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC,	// 50
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG,	// 51
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT,	// 52
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC,	// 53
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG,	// 54
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT,	// 55
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG,	// 56
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT,	// 57
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG,	// 58
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT,// 59
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP,	// 60
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC,	// 61
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG,	// 62
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT,// 63
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC,	// 64
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG,	// 65
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT,// 66
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG,	// 67
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT,// 68
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG,// 69
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT,// 70
+	OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT,		// 29
+	OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT,	// 30
+	OUTPUT_STATE_SG_SEE_PRUNE_WC,			// 31
+	OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG,		// 32
+	OUTPUT_STATE_RPFP_NBR_WC,			// 33
+	OUTPUT_STATE_RPFP_NBR_WC_GEN_ID,		// 34
+	OUTPUT_STATE_RPFP_NBR_SG,			// 35
+	OUTPUT_STATE_RPFP_NBR_SG_GEN_ID,		// 36
+	OUTPUT_STATE_RPFP_NBR_SG_RPT,			// 37
+	OUTPUT_STATE_MRIB_NEXT_HOP_RP,			// 38
+	OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID,		// 39
+	OUTPUT_STATE_MRIB_NEXT_HOP_RP_G,		// 40
+	OUTPUT_STATE_MRIB_NEXT_HOP_S,			// 41
+	OUTPUT_STATE_OUT_START_VIF_RP,			// 42
+	OUTPUT_STATE_OUT_START_VIF_WC,			// 43
+	OUTPUT_STATE_OUT_START_VIF_SG,			// 44
+	OUTPUT_STATE_OUT_START_VIF_SG_RPT,		// 45
+	OUTPUT_STATE_OUT_STOP_VIF_RP,			// 46
+	OUTPUT_STATE_OUT_STOP_VIF_WC,			// 47
+	OUTPUT_STATE_OUT_STOP_VIF_SG,			// 48
+	OUTPUT_STATE_OUT_STOP_VIF_SG_RPT,		// 49
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP,	// 50
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC,	// 51
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG,	// 52
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT,	// 53
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC,	// 54
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG,	// 55
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT,	// 56
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG,	// 57
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT,	// 58
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG,	// 59
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT,// 60
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP,	// 61
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC,	// 62
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG,	// 63
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT,// 64
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC,	// 65
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG,	// 66
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT,// 67
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG,	// 68
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT,// 69
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG,// 70
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT,// 71
 	OUTPUT_STATE_MAX
     };
     
@@ -212,7 +213,7 @@ public:
     void	input_state_receive_prune_wc(list<PimMreAction> action_list);
     void	input_state_receive_prune_sg(list<PimMreAction> action_list);
     void	input_state_receive_prune_sg_rpt(list<PimMreAction> action_list);
-    void	input_state_receive_no_prune_sg_rpt(list<PimMreAction> action_list);
+    void	input_state_receive_end_of_message_sg_rpt(list<PimMreAction> action_list);
     void	input_state_see_prune_wc(list<PimMreAction> action_list);
     void	input_state_downstream_jp_state_rp(list<PimMreAction> action_list);
     void	input_state_downstream_jp_state_wc(list<PimMreAction> action_list);
@@ -274,7 +275,8 @@ public:
     list<PimMreAction>	output_state_assert_rpf_interface_wc(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_assert_receive_join_sg(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_assert_receive_join_wc(list<PimMreAction> action_list);
-    list<PimMreAction>	output_state_receive_no_prune_sg_rpt(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_receive_join_wc_by_sg_rpt(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_receive_end_of_message_sg_rpt(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_sg_see_prune_wc(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_check_switch_to_spt_sg(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_rpfp_nbr_wc(list<PimMreAction> action_list);
@@ -421,7 +423,7 @@ private:
     void	track_state_receive_prune_wc(list<PimMreAction> action_list);
     void	track_state_receive_prune_sg(list<PimMreAction> action_list);
     void	track_state_receive_prune_sg_rpt(list<PimMreAction> action_list);
-    void	track_state_receive_no_prune_sg_rpt(list<PimMreAction> action_list);
+    void	track_state_receive_end_of_message_sg_rpt(list<PimMreAction> action_list);
     void	track_state_sg_see_prune_wc(list<PimMreAction> action_list);
     // J/P (downstream) state (per interface)
     void	track_state_downstream_jp_state_rp(list<PimMreAction> action_list);
@@ -486,6 +488,7 @@ private:
     void	track_state_assert_rpf_interface_wc(list<PimMreAction> action_list);
     void	track_state_assert_receive_join_sg(list<PimMreAction> action_list);
     void	track_state_assert_receive_join_wc(list<PimMreAction> action_list);
+    void	track_state_receive_join_wc_by_sg_rpt(list<PimMreAction> action_list);
     void	track_state_i_am_assert_winner_sg(list<PimMreAction> action_list);
     void	track_state_i_am_assert_winner_wc(list<PimMreAction> action_list);
     void	track_state_i_am_assert_loser_sg(list<PimMreAction> action_list);

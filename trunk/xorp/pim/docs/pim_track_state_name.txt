@@ -104,6 +104,7 @@ Input = INPUT_STATE_RECEIVE_JOIN_RP
 
 Input = INPUT_STATE_RECEIVE_JOIN_WC
         OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC                           (*,G)
+        OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT                    (S,G,rpt)
 
 Input = INPUT_STATE_RECEIVE_JOIN_SG
         OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG                           (S,G)
@@ -134,8 +135,11 @@ Input = INPUT_STATE_RECEIVE_PRUNE_SG
 
 Input = INPUT_STATE_RECEIVE_PRUNE_SG_RPT
 
-Input = INPUT_STATE_RECEIVE_NO_PRUNE_SG_RPT
-        OUTPUT_STATE_RECEIVE_NO_PRUNE_SG_RPT                      (S,G,rpt)
+Input = INPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT
+        OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT                (S,G,rpt)
+
+Input = INPUT_STATE_SEE_PRUNE_WC
+        OUTPUT_STATE_SG_SEE_PRUNE_WC                                  (S,G)
 
 Input = INPUT_STATE_DOWNSTREAM_JP_STATE_RP
         OUTPUT_STATE_IS_JOIN_DESIRED_RP                            (*,*,RP)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.64 2002/12/09 18:29:28 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -697,8 +697,6 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	entry_state_flags += "RP ";
     if (pim_mre->is_spt())
 	entry_state_flags += "SPT ";
-    if (pim_mre->is_sg_rpt_prune_received())
-	entry_state_flags += "SG_RPT_PRUNE_RECEIVED ";
     if (pim_mre->is_directly_connected_s())
 	entry_state_flags += "DirectlyConnectedS ";
     
@@ -827,10 +825,14 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	       mifset_str(pim_mre->prunes_sg_rpt()).c_str()));
     cli_print(c_format("    Join state:               %s\n",
 	       mifset_str(pim_mre->downstream_join_state()).c_str()));
-    cli_print(c_format("    Prune pending state:      %s\n",
-	       mifset_str(pim_mre->downstream_prune_pending_state()).c_str()));
     cli_print(c_format("    Prune state:              %s\n",
 	       mifset_str(pim_mre->downstream_prune_state()).c_str()));
+    cli_print(c_format("    Prune pending state:      %s\n",
+	       mifset_str(pim_mre->downstream_prune_pending_state()).c_str()));
+    cli_print(c_format("    Prune tmp state:          %s\n",
+	       mifset_str(pim_mre->downstream_prune_tmp_state()).c_str()));
+    cli_print(c_format("    Prune pending tmp state:  %s\n",
+	       mifset_str(pim_mre->downstream_prune_pending_tmp_state()).c_str()));
     cli_print(c_format("    I am assert winner state: %s\n",
 	       mifset_str(pim_mre->i_am_assert_winner_state()).c_str()));
     cli_print(c_format("    I am assert loser state:  %s\n",

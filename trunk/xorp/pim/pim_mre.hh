@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.99 2002/12/09 18:29:25 hodson Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -78,11 +78,6 @@ enum {
 					     // is true
     // Misc.
     PIM_MRE_GRAFTED		= 1 << 16,   // For PIM-DM
-    PIM_MRE_SG_RPT_PRUNE_RECEIVED = 1 << 17, // There was (S,G,rpt) Prune
-					     // received. Needed to coordinate
-					     // the state transition for
-					     // (S,G,rpt)
-					     // (the P' and PP' state).
     PIM_MRE_DIRECTLY_CONNECTED_S = 1 << 18,  // Directly-connected S
     PIM_MRE_I_AM_RP		 = 1 << 19,  // I am the RP for the group
     PIM_MRE_KEEPALIVE_TIMER_IS_SET = 1 << 20,// The (S,G) KeepaliveTimer is
@@ -121,18 +116,12 @@ public:
     // Entry characteristics
     // Note: applies only for (S,G)
     bool	is_spt()	const { return (_flags & PIM_MRE_SPT);	}
-    // Note: applies only for (S,G,rpt)
-    bool	is_sg_rpt_prune_received() const {
-	return (_flags & PIM_MRE_SG_RPT_PRUNE_RECEIVED);
-    }
     void	set_sg(bool v);
     void	set_sg_rpt(bool v);
     void	set_wc(bool v);
     void	set_rp(bool v);
     // Note: applies only for (S,G)
     void	set_spt(bool v);
-    // Note: applies only for (S,G,rpt)
-    void	set_sg_rpt_prune_received(bool v);
     
     const IPvX*	rp_addr_ptr() const;	 // The RP address
     const string rp_addr_string() const; // C++ string with the RP address
@@ -329,12 +318,14 @@ public:
     // Note: applies only for (S,G)
     void	receive_prune_sg(uint16_t vif_index, uint16_t holdtime);
     // Note: applies only for (S,G,rpt)
+    void	receive_join_wc_by_sg_rpt(uint16_t vif_index);
+    // Note: applies only for (S,G,rpt)
     void	receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime);
     // Note: applies only for (S,G,rpt)
     void	receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 				     bool join_wc_received_bool);
     // Note: applies only for (S,G,rpt)
-    void	receive_no_prune_sg_rpt(uint16_t vif_index);
+    void	receive_end_of_message_sg_rpt(uint16_t vif_index);
     // Note: applies only for (*,*,RP)
     void	rp_see_join_rp(uint16_t vif_index,
 			       const IPvX& target_nbr_addr);
@@ -397,31 +388,38 @@ public:
     const Mifset& joins_sg() const;
     // Note: applies only for (S,G,rpt)
     const Mifset& prunes_sg_rpt() const;
-
+    
     //
     // J/P (downstream) state (per interface)
     //
     // Note: each method below applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+    // (except for the *_tmp_* and *_processed_sg_rpt*
+    // methods which apply only for (S,G,rpt))
     void	set_downstream_noinfo_state(uint16_t vif_index);
     void	set_downstream_join_state(uint16_t vif_index);
-    void	set_downstream_prune_pending_state(uint16_t vif_index);
     void	set_downstream_prune_state(uint16_t vif_index);
+    void	set_downstream_prune_pending_state(uint16_t vif_index);
+    void	set_downstream_prune_tmp_state(uint16_t vif_index);
+    void	set_downstream_prune_pending_tmp_state(uint16_t vif_index);
+    void	set_downstream_processed_wc_by_sg_rpt(uint16_t vif_index,
+						      bool v);
     bool	is_downstream_noinfo_state(uint16_t vif_index) const;
     bool	is_downstream_join_state(uint16_t vif_index) const;
-    bool	is_downstream_prune_pending_state(uint16_t vif_index) const;
     bool	is_downstream_prune_state(uint16_t vif_index) const;
-    const Mifset& downstream_join_state() const {
-	return (_downstream_join_state);
-    }
-    const Mifset& downstream_prune_pending_state() const {
-	return (_downstream_prune_pending_state);
-    }
-    const Mifset& downstream_prune_state() const {
-	return (_downstream_prune_state);
-    }
+    bool	is_downstream_prune_pending_state(uint16_t vif_index) const;
+    bool	is_downstream_prune_tmp_state(uint16_t vif_index) const;
+    bool	is_downstream_prune_pending_tmp_state(uint16_t vif_index) const;
+    bool	is_downstream_processed_wc_by_sg_rpt(uint16_t vif_index) const;
+    const Mifset& downstream_join_state() const;
+    const Mifset& downstream_prune_state() const;
+    const Mifset& downstream_prune_pending_state() const;
+    const Mifset& downstream_prune_tmp_state() const;
+    const Mifset& downstream_prune_pending_tmp_state() const;
     Mifset	_downstream_join_state;			// Join state
     Mifset	_downstream_prune_pending_state;	// PrunePending state
     Mifset	_downstream_prune_state;		// Prune state
+    Mifset	_downstream_tmp_state;			// P' and PP' state
+    Mifset	_downstream_processed_wc_by_sg_rpt; // (S,G,rpt)J/P processed
     
     // Note: applies only for (*,*,RP)
     void	downstream_expiry_timer_timeout_rp(uint16_t vif_index);

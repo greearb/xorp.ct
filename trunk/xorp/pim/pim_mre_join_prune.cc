@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.2 2002/12/16 05:25:53 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -62,8 +62,9 @@ PimMre::set_downstream_noinfo_state(uint16_t vif_index)
 	return;			// Nothing changed
     
     _downstream_join_state.reset(vif_index);
-    _downstream_prune_pending_state.reset(vif_index);
     _downstream_prune_state.reset(vif_index);
+    _downstream_prune_pending_state.reset(vif_index);
+    _downstream_tmp_state.reset(vif_index);
     
     do {
 	if (is_sg()) {
@@ -106,47 +107,9 @@ PimMre::set_downstream_join_state(uint16_t vif_index)
 	return;			// Nothing changed
     
     _downstream_join_state.set(vif_index);
+    _downstream_prune_state.reset(vif_index);
     _downstream_prune_pending_state.reset(vif_index);
-    _downstream_prune_state.reset(vif_index);
-    
-    do {
-	if (is_sg()) {
-	    pim_mrt().add_task_downstream_jp_state_sg(vif_index,
-						      source_addr(),
-						      group_addr());
-	    break;
-	}
-	if (is_sg_rpt()) {
-	    pim_mrt().add_task_downstream_jp_state_sg_rpt(vif_index,
-							  source_addr(),
-							  group_addr());
-	    break;
-	}
-	if (is_wc()) {
-	    pim_mrt().add_task_downstream_jp_state_wc(vif_index, group_addr());
-	    break;
-	}
-	if (is_rp()) {
-	    pim_mrt().add_task_downstream_jp_state_rp(vif_index,
-						      *rp_addr_ptr());
-	    break;
-	}
-    } while (false);
-}
-
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-void
-PimMre::set_downstream_prune_pending_state(uint16_t vif_index)
-{
-    if (vif_index == Vif::VIF_INDEX_INVALID)
-	return;
-    
-    if (is_downstream_prune_pending_state(vif_index))
-	return;			// Nothing changed
-    
-    _downstream_join_state.reset(vif_index);
-    _downstream_prune_pending_state.set(vif_index);
-    _downstream_prune_state.reset(vif_index);
+    _downstream_tmp_state.reset(vif_index);
     
     do {
 	if (is_sg()) {
@@ -184,8 +147,9 @@ PimMre::set_downstream_prune_state(uint16_t vif_index)
 	return;			// Nothing changed
     
     _downstream_join_state.reset(vif_index);
-    _downstream_prune_pending_state.reset(vif_index);
     _downstream_prune_state.set(vif_index);
+    _downstream_prune_pending_state.reset(vif_index);
+    _downstream_tmp_state.reset(vif_index);
     
     do {
 	if (is_sg()) {
@@ -213,15 +177,117 @@ PimMre::set_downstream_prune_state(uint16_t vif_index)
 }
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+void
+PimMre::set_downstream_prune_pending_state(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    if (is_downstream_prune_pending_state(vif_index))
+	return;			// Nothing changed
+    
+    _downstream_join_state.reset(vif_index);
+    _downstream_prune_state.reset(vif_index);
+    _downstream_prune_pending_state.set(vif_index);
+    _downstream_tmp_state.reset(vif_index);
+    
+    do {
+	if (is_sg()) {
+	    pim_mrt().add_task_downstream_jp_state_sg(vif_index,
+						      source_addr(),
+						      group_addr());
+	    break;
+	}
+	if (is_sg_rpt()) {
+	    pim_mrt().add_task_downstream_jp_state_sg_rpt(vif_index,
+							  source_addr(),
+							  group_addr());
+	    break;
+	}
+	if (is_wc()) {
+	    pim_mrt().add_task_downstream_jp_state_wc(vif_index, group_addr());
+	    break;
+	}
+	if (is_rp()) {
+	    pim_mrt().add_task_downstream_jp_state_rp(vif_index,
+						      *rp_addr_ptr());
+	    break;
+	}
+    } while (false);
+}
+
+// Note: applies for (S,G,rpt)
+void
+PimMre::set_downstream_prune_tmp_state(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    if (! is_sg_rpt())
+	return;
+    
+    if (is_downstream_prune_tmp_state(vif_index))
+	return;			// Nothing changed
+    
+    _downstream_join_state.reset(vif_index);
+    _downstream_prune_state.set(vif_index);
+    _downstream_prune_pending_state.reset(vif_index);
+    _downstream_tmp_state.set(vif_index);
+    
+    // XXX: this state is transient, hence we don't call
+    // add_task_downstream_jp_state_sg_rpt();
+}
+
+// Note: applies for (S,G,rpt)
+void
+PimMre::set_downstream_prune_pending_tmp_state(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    if (! is_sg_rpt())
+	return;
+    
+    if (is_downstream_prune_pending_tmp_state(vif_index))
+	return;			// Nothing changed
+    
+    _downstream_join_state.reset(vif_index);
+    _downstream_prune_state.reset(vif_index);
+    _downstream_prune_pending_state.set(vif_index);
+    _downstream_tmp_state.set(vif_index);
+
+    // XXX: this state is transient, hence we don't call
+    // add_task_downstream_jp_state_sg_rpt();
+}
+
+// Note: applies for (S,G,rpt)
+void
+PimMre::set_downstream_processed_wc_by_sg_rpt(uint16_t vif_index, bool v)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    if (! is_sg_rpt())
+	return;
+    
+    if (v)
+	_downstream_processed_wc_by_sg_rpt.set(vif_index);
+    else
+	_downstream_processed_wc_by_sg_rpt.reset(vif_index);
+}
+
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 bool
 PimMre::is_downstream_noinfo_state(uint16_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (true);		// XXX
     
+    // XXX: we don't test for _downstream_tmp_state, because it is used
+    // in combination with other state.
     return (! (_downstream_join_state.test(vif_index)
-	       || _downstream_prune_pending_state.test(vif_index)
-	       || _downstream_prune_state.test(vif_index))
+	       || _downstream_prune_state.test(vif_index)
+	       || _downstream_prune_pending_state.test(vif_index))
 	);
 }
 
@@ -237,22 +303,119 @@ PimMre::is_downstream_join_state(uint16_t vif_index) const
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 bool
-PimMre::is_downstream_prune_pending_state(uint16_t vif_index) const
-{
-    if (vif_index == Vif::VIF_INDEX_INVALID)
-	return (false);
-    
-    return (_downstream_prune_pending_state.test(vif_index));
-}
-
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-bool
 PimMre::is_downstream_prune_state(uint16_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
     
-    return (_downstream_prune_state.test(vif_index));
+    return (_downstream_prune_state.test(vif_index)
+	    & !_downstream_tmp_state.test(vif_index));
+}
+
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+bool
+PimMre::is_downstream_prune_pending_state(uint16_t vif_index) const
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    return (_downstream_prune_pending_state.test(vif_index)
+	    & !_downstream_tmp_state.test(vif_index));
+}
+
+// Note: applies for (S,G,rpt)
+bool
+PimMre::is_downstream_prune_tmp_state(uint16_t vif_index) const
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    return (_downstream_prune_state.test(vif_index)
+	    & _downstream_tmp_state.test(vif_index));
+}
+
+// Note: applies for (S,G,rpt)
+bool
+PimMre::is_downstream_prune_pending_tmp_state(uint16_t vif_index) const
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    return (_downstream_prune_pending_state.test(vif_index)
+	    & _downstream_tmp_state.test(vif_index));
+}
+
+// Note: applies for (S,G,rpt)
+bool
+PimMre::is_downstream_processed_wc_by_sg_rpt(uint16_t vif_index) const
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    return (_downstream_processed_wc_by_sg_rpt.test(vif_index));
+}
+
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+const Mifset&
+PimMre::downstream_join_state() const
+{
+    return (_downstream_join_state);
+}
+
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+const Mifset&
+PimMre::downstream_prune_state() const
+{
+    static Mifset mifs;
+    
+    if (! is_sg_rpt())
+	return (_downstream_prune_state);
+    
+    mifs = _downstream_prune_state & ~_downstream_tmp_state;
+    return (mifs);
+}
+
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+const Mifset&
+PimMre::downstream_prune_pending_state() const
+{
+    static Mifset mifs;
+    
+    if (! is_sg_rpt())
+	return (_downstream_prune_pending_state);
+    
+    mifs = _downstream_prune_pending_state & ~_downstream_tmp_state;
+    return (mifs);
+}
+
+// Note: applies for (S,G,rpt)
+const Mifset&
+PimMre::downstream_prune_tmp_state() const
+{
+    static Mifset mifs;
+    
+    if (! is_sg_rpt()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = _downstream_prune_state & _downstream_tmp_state;
+    return (mifs);
+}
+
+// Note: applies for (S,G,rpt)
+const Mifset&
+PimMre::downstream_prune_pending_tmp_state() const
+{
+    static Mifset mifs;
+    
+    if (! is_sg_rpt()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = _downstream_prune_pending_state & _downstream_tmp_state;
+    return (mifs);
 }
 
 //
@@ -573,6 +736,38 @@ PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
 }
 
 void
+PimMre::receive_join_wc_by_sg_rpt(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    if (! is_sg_rpt())
+	return;
+    
+    if (is_downstream_processed_wc_by_sg_rpt(vif_index))
+	return;
+    set_downstream_processed_wc_by_sg_rpt(vif_index, true);
+    
+    if (is_downstream_prune_state(vif_index))
+	goto prune_state_label;
+    
+    if (is_downstream_prune_pending_state(vif_index))
+	goto prune_pending_state_label;
+    
+    return;		// Ignore
+    
+ prune_state_label:
+    // Prune state -> PruneTmp state
+    set_downstream_prune_tmp_state(vif_index);
+    return;
+    
+ prune_pending_state_label:
+    // PrunePending state -> PrunePendingTmp state
+    set_downstream_prune_pending_tmp_state(vif_index);
+    return;
+}
+
+void
 PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
@@ -622,18 +817,21 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     if (! is_sg_rpt())
 	return;
     
-    if (is_downstream_prune_state(vif_index)) {
-	if (join_wc_received_bool)
-	    goto prune_tmp_state_label;
-	else
-	    goto prune_state_label;
-    }
-    if (is_downstream_prune_pending_state(vif_index)) {
-	if (join_wc_received_bool)
-	    goto prune_pending_tmp_state_label;
-	else
-	    goto prune_pending_state_label;
-    }
+    if (join_wc_received_bool)
+	receive_join_wc_by_sg_rpt(vif_index);
+    
+    if (is_downstream_prune_state(vif_index))
+	goto prune_state_label;
+    
+    if (is_downstream_prune_pending_state(vif_index))
+	goto prune_pending_state_label;
+    
+    if (is_downstream_prune_tmp_state(vif_index))
+	goto prune_tmp_state_label;
+    
+    if (is_downstream_prune_pending_tmp_state(vif_index))
+	goto prune_pending_tmp_state_label;
+    
     goto noinfo_state_label;
     
  noinfo_state_label:
@@ -656,11 +854,10 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     }
     set_downstream_prune_pending_state(vif_index);
     return;
-
+    
  prune_tmp_state_label:
-    // PruneTmp state
-    // XXX: the temp. flag that should be cleared by the (*,G) Join processing
-    set_sg_rpt_prune_received(true);
+    // PruneTmp state -> Prune state
+    set_downstream_prune_state(vif_index);
     // FALLTHROUGH to Prune state (XXX: note that the action is same)
  prune_state_label:
     // Prune state
@@ -670,9 +867,8 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     return;
     
  prune_pending_tmp_state_label:
-    // PrunePendingTmp state
-    // XXX: the temp. flag that should be cleared by the (*,G) Join processing
-    set_sg_rpt_prune_received(true);
+    // PrunePendingTmp state -> PrunePending state
+    set_downstream_prune_pending_state(vif_index);
     if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
 	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
 			   &PimMre::downstream_expiry_timer_timeout_sg_rpt);
@@ -682,10 +878,12 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     return;		// XXX: TODO: really ignore (S,G,rpt)P in PP state??
 }
 
-// (*,G) Join was received, but probably no (S,G,rpt) prune was received.
-// Move the state to NI.
+//
+// Receive "End of Message"
+// Note: applies for (S,G,rpt)
+//
 void
-PimMre::receive_no_prune_sg_rpt(uint16_t vif_index)
+PimMre::receive_end_of_message_sg_rpt(uint16_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -693,20 +891,14 @@ PimMre::receive_no_prune_sg_rpt(uint16_t vif_index)
     if (! is_sg_rpt())
 	return;
     
-    if (is_sg_rpt_prune_received()) {
-	// (S,G,rpt) was indeed received, hence just reset the flag.
-	set_sg_rpt_prune_received(false);
-	return;
-    }
+    set_downstream_processed_wc_by_sg_rpt(vif_index, false);
     
-    if (is_downstream_prune_state(vif_index))
+    if (is_downstream_prune_tmp_state(vif_index))
 	goto prune_tmp_state_label;
-    if (is_downstream_prune_pending_state(vif_index))
+    
+    if (is_downstream_prune_pending_tmp_state(vif_index))
 	goto prune_pending_tmp_state_label;
-    goto noinfo_state_label;
-
- noinfo_state_label:
-    // NoInfo state
+    
     return;		// Ignore
     
  prune_tmp_state_label:
@@ -915,7 +1107,7 @@ PimMre::downstream_expiry_timer_timeout_sg_rpt(uint16_t vif_index)
     
     if (! is_sg_rpt())
 	return;
-
+    
     if (is_downstream_prune_state(vif_index))
 	goto prune_state_label;
     return;

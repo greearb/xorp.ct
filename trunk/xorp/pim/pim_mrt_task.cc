@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.29 2002/12/09 18:29:27 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -499,8 +499,8 @@ PimMrt::add_task_receive_prune_sg_rpt(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_receive_no_prune_sg_rpt(uint16_t vif_index,
-					 const IPvX& group_addr)
+PimMrt::add_task_receive_end_of_message_sg_rpt(uint16_t vif_index,
+					       const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -508,7 +508,7 @@ PimMrt::add_task_receive_no_prune_sg_rpt(uint16_t vif_index,
 	// Schedule the (S,G,rpt)-related changes (for a given group)
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_RECEIVE_NO_PRUNE_SG_RPT);
+			     PimMreTrackState::INPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT);
 	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
 	

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.2 2002/12/14 01:22:55 pavlin Exp $"
 
 
 //
 // PIM PIM_JOIN_PRUNE control messages supporting functions.
 //
 
+#include <map>
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -153,10 +154,10 @@ PimJpGroup::PimJpGroup(PimJpHeader& jp_header, int family)
 // @new_group_bool: if true, create a new PimJpGroup().
 int
 PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-			   uint32_t group_masklen,
-			   mrt_entry_type_t mrt_entry_type,
-			   action_jp_t action_jp, uint16_t holdtime,
-			   bool new_group_bool)
+			  uint32_t group_masklen,
+			  mrt_entry_type_t mrt_entry_type,
+			  action_jp_t action_jp, uint16_t holdtime,
+			  bool new_group_bool)
 {
     bool jp_group_found_bool = false;
     PimJpGroup *jp_group = NULL;
@@ -311,10 +312,11 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     uint32_t	lookup_flags = 0, create_flags = 0;
     uint16_t	vif_index;
     uint16_t	holdtime;
-    int		source_masklen, group_masklen;
+    uint32_t	source_masklen, group_masklen;
     IPvX	source_addr(family()), group_addr(family());
     list<PimJpGroup *>::iterator iter;
     PimMre	*pim_mre;
+    map<IPvX, IPvX> groups_map;
     
     vif_index = pim_vif->vif_index();
     
@@ -329,7 +331,24 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	i_am_target_router_bool = false;
     }
     
+    //
+    // Create the map with all group addresses
+    //
+    if (i_am_target_router_bool) {
+	for (iter = _jp_groups_list.begin(); iter != _jp_groups_list.end();
+	     ++iter) {
+	    PimJpGroup *jp_group = *iter;
+	    group_addr = jp_group->group_addr();
+	    group_masklen = jp_group->group_masklen();
+	    if (group_masklen != group_addr.addr_bitlen())
+		continue;	// XXX: exclude (e.g., probably (*,*,RP) entry)
+	    groups_map.insert(pair<IPvX, IPvX>(group_addr, group_addr));
+	}
+    }
     
+    //
+    // The main loop
+    //
     for (iter = _jp_groups_list.begin(); iter != _jp_groups_list.end();
 	 ++iter) {
 	PimJpGroup *jp_group = *iter;
@@ -392,62 +411,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		    pim_mre->rp_see_prune_rp(vif_index, target_nbr_addr);
 	    }
 	}
-	// (S,G,rpt) Prune
-	// XXX: (S,G,rpt) Prune processing MUST be before (*,G) Join processing
-	for (iter2 = jp_group->sg_rpt()->p_list().begin();
-	     iter2 != jp_group->sg_rpt()->p_list().end();
-	     ++iter2) {
-	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
-	    
-	    if (i_am_target_router_bool) {
-		pim_mrt().add_task_receive_prune_sg_rpt(vif_index, source_addr,
-							group_addr);
-	    }
-	    
-	    lookup_flags	= PIM_MRE_SG_RPT;
-	    // XXX: even if no entry, the (S,G,rpt) Prune should create one
-	    if (i_am_target_router_bool)
-		create_flags = lookup_flags;
-	    else
-		create_flags = 0;
-	    pim_mre = pim_mrt().pim_mre_find(source_addr, group_addr,
-					     lookup_flags, create_flags);
-	    if (pim_mre == NULL) {
-		if (create_flags)
-		    goto pim_mre_find_error;
-	    } else {
-		bool join_wc_received_bool;
-		if (jp_group->wc()->j_list().empty())
-		    join_wc_received_bool = false;
-		else
-		    join_wc_received_bool = true;
-		if (i_am_target_router_bool)
-		    pim_mre->receive_prune_sg_rpt(vif_index, holdtime,
-						  join_wc_received_bool);
-		else
-		    pim_mre->sg_rpt_see_prune_sg_rpt(vif_index,
-						     target_nbr_addr);
-	    }
-	    
-	    //
-	    // Take care of the (S,G) entry that
-	    // "See Prune (S,G,rpt) to RPF'(S,G)"
-	    //
-	    if (! i_am_target_router_bool) {
-		PimMre *pim_mre_sg = NULL;
-		if (pim_mre != NULL) {
-		    pim_mre_sg = pim_mre->sg_entry();
-		} else {
-		    pim_mre_sg = pim_mrt().pim_mre_find(source_addr,
-							group_addr,
-							lookup_flags, 0);
-		}
-		if (pim_mre_sg != NULL)
-		    pim_mre_sg->sg_see_prune_sg_rpt(vif_index,
-						    target_nbr_addr);
-	    }
-	}
 	// (*,G) Join
 	for (iter2 = jp_group->wc()->j_list().begin();
 	     iter2 != jp_group->wc()->j_list().end();
@@ -455,15 +418,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr		= *iter2;
 	    source_masklen	= IPvX::addr_bitlen(family());
 	    
-	    //
-	    // XXX: add_task_receive_no_prune_sg_rpt() should be before
-	    // add_task_receive_join_wc()
-	    //
-	    if (i_am_target_router_bool) {
-		pim_mrt().add_task_receive_no_prune_sg_rpt(vif_index,
-							   group_addr);
+	    if (i_am_target_router_bool)
 		pim_mrt().add_task_receive_join_wc(vif_index, group_addr);
-	    }
 	    
 	    lookup_flags	= PIM_MRE_WC;
 	    if (i_am_target_router_bool)
@@ -536,6 +492,65 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		    pim_mre->receive_join_sg_rpt(vif_index, holdtime);
 		else
 		    pim_mre->sg_rpt_see_join_sg_rpt(vif_index,
+						    target_nbr_addr);
+	    }
+	}
+	// (S,G,rpt) Prune
+	for (iter2 = jp_group->sg_rpt()->p_list().begin();
+	     iter2 != jp_group->sg_rpt()->p_list().end();
+	     ++iter2) {
+	    source_addr		= *iter2;
+	    source_masklen	= IPvX::addr_bitlen(family());
+	    
+	    if (i_am_target_router_bool) {
+		pim_mrt().add_task_receive_prune_sg_rpt(vif_index, source_addr,
+							group_addr);
+	    }
+	    
+	    lookup_flags	= PIM_MRE_SG_RPT;
+	    // XXX: even if no entry, the (S,G,rpt) Prune should create one
+	    if (i_am_target_router_bool)
+		create_flags = lookup_flags;
+	    else
+		create_flags = 0;
+	    pim_mre = pim_mrt().pim_mre_find(source_addr, group_addr,
+					     lookup_flags, create_flags);
+	    if (pim_mre == NULL) {
+		if (create_flags)
+		    goto pim_mre_find_error;
+	    } else {
+		bool join_wc_received_bool;
+		if (jp_group->wc()->j_list().empty())
+		    join_wc_received_bool = false;
+		else
+		    join_wc_received_bool = true;
+		if (! join_wc_received_bool) {
+		    join_wc_received_bool
+			= (groups_map.find(group_addr) != groups_map.end());
+		}
+		if (i_am_target_router_bool)
+		    pim_mre->receive_prune_sg_rpt(vif_index, holdtime,
+						  join_wc_received_bool);
+		else
+		    pim_mre->sg_rpt_see_prune_sg_rpt(vif_index,
+						     target_nbr_addr);
+	    }
+	    
+	    //
+	    // Take care of the (S,G) entry that
+	    // "See Prune (S,G,rpt) to RPF'(S,G)"
+	    //
+	    if (! i_am_target_router_bool) {
+		PimMre *pim_mre_sg = NULL;
+		if (pim_mre != NULL) {
+		    pim_mre_sg = pim_mre->sg_entry();
+		} else {
+		    pim_mre_sg = pim_mrt().pim_mre_find(source_addr,
+							group_addr,
+							lookup_flags, 0);
+		}
+		if (pim_mre_sg != NULL)
+		    pim_mre_sg->sg_see_prune_sg_rpt(vif_index,
 						    target_nbr_addr);
 	    }
 	}
@@ -615,6 +630,20 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	}
     }
     
+    //
+    // Take care of the (S,G,rpt) entries that see
+    // "End of Message"
+    //
+    if (i_am_target_router_bool) {
+	map<IPvX, IPvX>::iterator map_iter;
+	for (map_iter = groups_map.begin(); map_iter != groups_map.end();
+	     ++map_iter) {
+	    group_addr = map_iter->second;
+	    pim_mrt().add_task_receive_end_of_message_sg_rpt(vif_index,
+							     group_addr);
+	}
+    }
+    
     return (XORP_OK);
     
  pim_mre_find_error:
@@ -629,7 +658,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 int
 PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
 {
-    int		source_masklen;
+    uint32_t	source_masklen;
     uint32_t	flags;
     IPvX	source_addr(family());
     list<PimJpGroup *>::iterator iter;
