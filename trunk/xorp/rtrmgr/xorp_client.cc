@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.4 2003/02/22 21:02:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.5 2003/03/10 23:21:03 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -25,6 +25,18 @@
 XorpBatch::XorpBatch(XorpClient *xclient, uint tid) {
     _xclient = xclient;
     _tid = tid;
+}
+
+EventLoop*
+XorpBatch::eventloop() const 
+{
+    return _xclient->eventloop();
+}
+
+XorpClient*
+XorpBatch::client() const
+{
+    return _xclient;
 }
 
 int
@@ -56,11 +68,15 @@ XorpBatch::start(CommitCallback ending_cb) {
 
 
 int
-XorpBatch::add_xrl(const UnexpandedXrl &xrl, XrlRouter::XrlCallback cb,
-			 bool no_execute) {
+XorpBatch::add_xrl(const UnexpandedXrl&   xrl,
+		   XrlRouter::XrlCallback cb,
+		   bool			  no_execute,
+		   uint32_t		  retries,
+		   uint32_t		  retry_ms)
+{
     debug_msg("XorpBatch::add_xrl\n");
     XorpBatchXrlItem *batch_item;
-    batch_item = new XorpBatchXrlItem(xrl, cb, no_execute);
+    batch_item = new XorpBatchXrlItem(xrl, cb, no_execute, retries, retry_ms);
     _batch_items.push_back(batch_item);
     debug_msg("XorpBatch::add_xrl done\n");
     return XORP_OK;
@@ -124,17 +140,21 @@ XorpBatchItem::XorpBatchItem(XrlRouter::XrlCallback cb,
 {
 }
 
-XorpBatchXrlItem::XorpBatchXrlItem(const UnexpandedXrl& uxrl,
-				   XrlRouter::XrlCallback cb,
-				   bool no_execute) 
-    : XorpBatchItem(cb, no_execute), _unexpanded_xrl(uxrl)
+XorpBatchXrlItem::XorpBatchXrlItem(const UnexpandedXrl&		 uxrl,
+				   const XrlRouter::XrlCallback& cb,
+				   bool				 no_execute,
+				   uint32_t			 retries,
+				   uint32_t 			 retry_ms) 
+    : XorpBatchItem(cb, no_execute), _unexpanded_xrl(uxrl),
+      _retries(retries), _retry_ms(retry_ms)
 {
 }
 
 int
 XorpBatchXrlItem::execute(XorpClient *xclient, 
-			    XorpBatch *batch,
-			    string &errmsg) {
+			  XorpBatch *batch,
+			  string &errmsg)
+{
     _batch = batch;
     Xrl *xrl = _unexpanded_xrl.xrl();
     if (xrl == NULL) {
@@ -143,7 +163,6 @@ XorpBatchXrlItem::execute(XorpClient *xclient,
     }
 
     string xrl_return_spec = _unexpanded_xrl.xrl_return_spec();
-    printf("XorpBatchXrlItem::execute %s\n", xrl->str().c_str());
     return xclient->
 	send_now(*xrl, callback(this,
 				&XorpBatchXrlItem::response_callback),
@@ -152,8 +171,28 @@ XorpBatchXrlItem::execute(XorpClient *xclient,
 }
 
 void
+XorpBatchXrlItem::retry_execution()
+{
+    string tmp_error;
+    debug_msg("Retrying xrl send\n");
+    if (execute(_batch->client(), _batch, tmp_error) != XORP_OK) {
+	abort();
+    }
+}
+
+void
 XorpBatchXrlItem::response_callback(const XrlError& err, 
 				    XrlArgs* xrlargs) {
+
+    if (err != XrlError::OKAY() && _retries > 0) {
+	_retry_timer =
+	    _batch->eventloop()->new_oneoff_after_ms(_retry_ms,
+		callback(this, &XorpBatchXrlItem::retry_execution));
+	_retries--;
+	debug_msg("Attempting resend (retries left %d)", _retries);
+	return;
+    }
+
     if (!_callback.is_empty())
 	_callback->dispatch(err, xrlargs);
     bool success = true;
@@ -178,6 +217,7 @@ XorpBatchModuleItem::XorpBatchModuleItem(ModuleManager* mmgr, Module* module,
 int 
 XorpBatchModuleItem::execute(XorpClient */*xclient*/, XorpBatch *batch, 
 			     string& errmsg) {
+    debug_msg("XorpBatchModuleItem::execute (start %d)", _start);
     _batch = batch;
     if (_start) {
 	debug_msg("XorpBatchModuleItem::execute %s\n", _module->str().c_str());
@@ -206,9 +246,11 @@ void
 XorpBatchModuleItem::response_callback(bool success, string errmsg) {
     debug_msg("XorpBatchModuleItem::response_callback %s\n", 
 	      _module->str().c_str());
-    if (_start)
+    if (_start) {
 	_module->module_run_done(success);
-    else {
+	if (!_callback.is_empty())
+	    _callback->dispatch(XrlError::OKAY(), 0);
+    } else {
 	//XXX
 	abort();
     }
@@ -309,16 +351,20 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
 }
 
 int
-XorpClient::send_xrl(uint tid, const UnexpandedXrl &xrl, 
-		     XCCommandCallback cb,
-		     bool no_execute) {
+XorpClient::send_xrl(uint		  tid,
+		     const UnexpandedXrl& xrl, 
+		     XCCommandCallback	  cb,
+		     bool 		  no_execute,
+		     uint32_t		  retries,
+		     uint32_t		  retry_ms)
+{
     XorpBatch* transaction;
     map<uint, XorpBatch*>::iterator i;
     i = _transactions.find(tid);
     assert(i != _transactions.end());
 
     transaction = i->second;
-    return transaction->add_xrl(xrl, cb, no_execute);
+    return transaction->add_xrl(xrl, cb, no_execute, retries, retry_ms);
 }
 
 int XorpClient::start_module(uint tid, 

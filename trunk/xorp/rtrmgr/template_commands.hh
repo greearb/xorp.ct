@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.5 2003/02/22 07:14:33 mjh Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.6 2003/03/10 23:21:02 hodson Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -62,7 +62,8 @@ public:
     string expand_xrl_variables(const ConfigTreeNode& ctn) const;
     string xrl_return_spec() const {return _response;}
     string affected_module() const;
-    
+
+    inline const string& request() const { return _request; }
 private:
     void check_xrl_is_valid(list<string> cmd, 
 			    const XRLdb& xrldb) const throw (ParseError);
@@ -99,17 +100,13 @@ public:
 		    const XRLdb& xrldb) throw (ParseError);
     void set_path(const string &path);
     void set_depends(const string &depends);
-    int execute(XorpClient *xclient, uint tid,
-		ModuleManager *module_manager, 
-		bool no_execute, 
-		bool no_commit) const;
-    void exec_complete(const XrlError& err, 
-		       XrlArgs* xrlargs);
-    void action_complete(const XrlError& err, 
-			 XrlArgs* args,
-			 ConfigTreeNode *ctn,
-			 Action *action,
-			 string cmd);
+    int  execute(XorpClient *xclient, uint tid,
+		 ModuleManager *module_manager, 
+		 bool no_execute, 
+		 bool no_commit) const;
+
+    bool execute_completed() const;
+    
     const string& name() const {return _modname;}
     const string& path() const {return _modpath;}
     const list <string>& depends() const {return _depends;}
@@ -120,13 +117,26 @@ public:
 			XorpClient *xclient,  uint tid, 
 			bool no_execute, bool no_commit) const;
     string str() const;
+
+protected:
+    void exec_complete(const XrlError& err, 
+		       XrlArgs* xrlargs);
+
+    void action_complete(const XrlError& err, 
+			 XrlArgs* args,
+			 ConfigTreeNode *ctn,
+			 Action *action,
+			 string cmd);
+
 private:
     TemplateTree *_tt;
     string _modname;
     string _modpath;
     list <string> _depends;
+    Action *_procready;
     Action *_startcommit;
     Action *_endcommit;
+    bool _execute_done;
 };
 
 class AllowCommand : public Command {

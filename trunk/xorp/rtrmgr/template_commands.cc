@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.10 2003/02/23 22:08:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.11 2003/03/10 23:21:01 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -628,13 +628,12 @@ Command::str() const {
    return tmp;
 }
 
-ModuleCommand::ModuleCommand(const string &cmd_name, TemplateTree *tt) :
-    Command(cmd_name)
+ModuleCommand::ModuleCommand(const string &cmd_name, TemplateTree *tt)
+    : Command(cmd_name),
+      _tt(tt), _procready(NULL), _startcommit(NULL), _endcommit(NULL),
+      _execute_done(false)
 {
-    _tt = tt;
     assert(cmd_name == "%modinfo");
-    _startcommit = NULL;
-    _endcommit = NULL;
 }
 
 void 
@@ -642,7 +641,8 @@ ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb)
     throw (ParseError)
 {
     if ((action.size() == 3) 
-	&& ((action.front() == "startcommit")
+	&& ((action.front() == "ready")
+	    ||(action.front() == "startcommit")
 	    || (action.front() == "endcommit"))) {
 	//it's OK 
     } else if (action.size() != 2) {
@@ -701,6 +701,14 @@ ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb)
 	    _endcommit = new XrlAction(newaction, xrldb);
 	else
 	    _endcommit = new Action(newaction);
+    } else if (cmd == "ready") {
+	list <string> newaction = action;
+	newaction.pop_front();
+	if (newaction.front() == "xrl") {
+	    _procready = new XrlAction(newaction, xrldb);
+	} else {
+	    _procready = new Action(newaction);
+	}
     } else {
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
 	throw ParseError(err);
@@ -712,7 +720,8 @@ ModuleCommand::execute(XorpClient *xclient, uint tid,
 		       ModuleManager *module_manager, 
 		       bool no_execute, 
 		       bool no_commit) const {
-    debug_msg("ModuleCommand::execute %s\n", _modname.c_str());
+    debug_msg("ModuleCommand::execute %s (no_execute %d, no_commit %d)\n",
+	      _modname.c_str(), no_execute, no_commit);
     if (no_commit == false) {
 	debug_msg("no_commit == false\n");
 	//OK, we're actually going to do the commit
@@ -727,10 +736,23 @@ ModuleCommand::execute(XorpClient *xclient, uint tid,
 	    if (m->is_running())
 		return XORP_OK;
 	}
+
+	debug_msg("Starting module\n");
 	XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
-					&ModuleCommand::exec_complete);
-	return xclient->start_module(tid, module_manager, m, cb,
-				     no_execute);
+					    &ModuleCommand::exec_complete);
+	int r = xclient->start_module(tid, module_manager, m, cb,
+				      no_execute);
+
+	XrlAction* xrl_procready = dynamic_cast<XrlAction*>(_procready);
+	if (xrl_procready) {
+	    debug_msg("proc ready xrl \"%s\"\n",
+		      xrl_procready->request().c_str());
+	    int r2 = xclient->send_xrl(tid,
+				       UnexpandedXrl(0, xrl_procready),
+				       0, no_execute, 30, 250);
+	    debug_msg("Send Xrl okay %d\n", r2 == XORP_OK);
+	}
+	return r;
     } else {
 	//this is just the verification pass, if this is successful
 	//then a commit pass will occur.
@@ -789,10 +811,17 @@ ModuleCommand::str() const {
     return tmp;
 }
 
+bool
+ModuleCommand::execute_completed() const
+{
+    return _execute_done;
+}
+
 void 
 ModuleCommand::exec_complete(const XrlError& /*err*/, 
 			     XrlArgs*) {
     debug_msg("ModuleCommand::exec_complete\n");
+    _execute_done = true;
 #ifdef NOTDEF
     if (err == XrlError::OKAY()) {
 	//XXX does this make sense?

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.2 2003/02/22 21:02:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.3 2003/03/10 23:21:02 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/debug.h"
@@ -34,7 +34,11 @@ UnexpandedXrl::UnexpandedXrl(const ConfigTreeNode* node,
 Xrl* UnexpandedXrl::xrl() {
     
     if (_xrl==NULL) {
-	string request = _action->expand_xrl_variables(*_node);
+	string request;
+	if (_node)
+	    request = _action->expand_xrl_variables(*_node);
+	else
+	    request = _action->request();
 	debug_msg("XRL expanded to %s\n", request.c_str());
 	try {
 	    _xrl = new Xrl(request.c_str());

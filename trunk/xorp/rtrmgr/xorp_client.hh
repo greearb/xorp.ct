@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.3 2003/01/10 00:30:25 hodson Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.4 2003/03/10 23:21:03 hodson Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -44,13 +44,18 @@ public:
     typedef XorpCallback2<void, int, const string&>::RefPtr CommitCallback;
     int start(CommitCallback ending_cb);
     int add_xrl(const UnexpandedXrl &xrl, XCCommandCallback cb, 
-		bool no_execute);
+		bool no_execute, uint32_t retries = 0, uint32_t retry_ms = 0);
     int add_module_start(ModuleManager* mmgr, Module* module,
 			 XCCommandCallback cb, bool no_execute);
     
     void batch_item_done(XorpBatchItem* tran_xrl, bool status, 
 			 const string& errmsg);
     void abort_transaction(const string& errmsg);
+
+    EventLoop* eventloop() const;
+
+    XorpClient* client() const;
+    
 private:
     uint _tid;
     XorpClient *_xclient;
@@ -72,14 +77,29 @@ protected:
 
 class XorpBatchXrlItem : public XorpBatchItem {
 public:
-    XorpBatchXrlItem(const UnexpandedXrl &xrl, 
-		     XCCommandCallback cb, bool no_execute);
-    int execute(XorpClient *xclient, XorpBatch *batch, 
-		string& errmsg);
+    XorpBatchXrlItem(const UnexpandedXrl&     xrl,
+		     const XCCommandCallback& cb,
+		     bool		      no_execute,
+		     uint32_t		      retries = 0,
+		     uint32_t 		      retry_ms = 1000);
+
+    int execute(XorpClient* xclient,
+		XorpBatch*  batch, 
+		string&	    errmsg);
+
+protected:
     void response_callback(const XrlError& err, 
-			   XrlArgs* xrlargs);
-public:
+			   XrlArgs*	   xrlargs);
+
+    void retry_execution();
+
+protected:
     UnexpandedXrl _unexpanded_xrl;
+
+    // Retry related
+    XorpTimer _retry_timer;
+    uint32_t  _retries;
+    uint32_t  _retry_ms;
 };
 
 class XorpBatchModuleItem : public XorpBatchItem {
@@ -104,7 +124,9 @@ public:
     int send_xrl(uint tid, 
 		 const UnexpandedXrl &xrl, 
 		 XrlRouter::XrlCallback cb,
-		 bool no_execute);
+		 bool no_execute,
+		 uint32_t retries = 0,
+		 uint32_t retry_ms = 0);
     int start_module(uint tid, ModuleManager* mmgr, Module* module,
 		     XCCommandCallback cb, bool no_execute);
     int stop_module(uint tid, ModuleManager* mmgr, Module* module,
@@ -116,6 +138,9 @@ public:
     uint begin_transaction();
     int end_transaction(uint tid, XorpBatch::CommitCallback ending_cb);
     void remove_transaction(uint tid);
+
+    EventLoop* eventloop() const { return _event_loop; }
+    
 private:
     EventLoop *_event_loop;
     XrlRouter *_xrlrouter;
