@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.7 2004/04/02 00:27:56 mjh Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.8 2004/06/10 22:41:47 hodson Exp $"
 
 #include <set>
 
@@ -186,8 +187,18 @@ public:
 
 	set<IPNet<A> > nets;
 	make_nets(nets, n_routes);
+
+	TimeVal tv_add_start;
+	_e.current_time(tv_add_start);
+
 	for_each(nets.begin(), nets.end(),
 		 RouteInjector<A>(rdb, A::ZERO(), 5, _pm.the_peer()));
+
+	TimeVal tv_add_end;
+	_e.current_time(tv_add_end);
+	tv_add_end -= tv_add_start;
+	verbose_log("Adding routes took %d.%06d secs\n",tv_add_end.sec(),
+							 tv_add_end.usec());
 
 	// Walk routes on 1ms timer
 	// We make 2 passes over routes with 97 routes read per 1ms
