@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.25 2004/06/22 03:13:53 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.26 2004/12/10 01:24:46 pavlin Exp $
 #
 
 Urgent
@@ -31,7 +31,6 @@ Operational Mode
    should not be shown again after it.
  - Change MasterConfigTree::parse() to return error message string
    by reference.
- - Ensure commands only appear when modules are loaded.
  - If signal SIGSTOP is delivered to a child process
    (e.g., by kill -STOP <pid>), the child process will properly deliver
    SIGCHLD to its parent process (i.e., the rtrmgr). Then the parent
@@ -52,16 +51,12 @@ Other
    add_default_children() in a single place to add the defaults
    from the template tree rather than doing so every time we
    create a configuration tree from somewhere (e.g., file, xorpsh, etc).
-
  - Fix test_router_manager, because even if the path to the xorp_finder
    binary is incorrect, it doesn't report an error.
-
  - Assuming the following paragraph refers to the xorpsh this may be fixed.
-
    Restart code is broken, currently exits because of an Xrl failure
    when xorp_rtrmgr goes away.  Want to stick around, announce absence
    of xorp_rtrmgr and gracefully re-connect when it restarts.
-
  - Add support for commenting-out large blocks of user config files even
    if those files may contain /* ... */ comments inside.
 
@@ -125,3 +120,4 @@ RESOLVED: "-d" is removed, because it is redundant (the same info
    verbose output is "-v".
  - Modify the *.cmds templates syntax to allow specification of the CLI
    help per command.
+ - Ensure commands only appear when modules are loaded.
