@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.12 2004/05/14 18:30:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.13 2004/06/10 22:40:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -102,15 +102,15 @@ BgpTrie<A>::erase(const IPNet& net)
 {
     // unlink the node from the _pathmap chain
     iterator iter = this->lookup_node(net);
-    assert(iter != this->end());
+    XLOG_ASSERT(iter != this->end());
     const ChainedSubnetRoute *found = &(iter.payload());
-    assert(iter.key() == net);
-    assert(found->net() == net);
+    XLOG_ASSERT(iter.key() == net);
+    XLOG_ASSERT(found->net() == net);
 
     debug_msg("deleting route for %s with attributes %p", net.str().c_str(),
 	   found->attributes());
     typename PathmapType::iterator pmi = _pathmap.find(found->attributes());
-    assert(pmi != _pathmap.end());
+    XLOG_ASSERT(pmi != _pathmap.end());
     if (pmi->second == found) {		// this was the head node
 	if (found->next() == found) {	 // it's the only node in the chain
 	    _pathmap.erase(pmi);
@@ -139,8 +139,6 @@ BgpTrie<A>::delete_all_nodes()
 	_pathmap.erase(_pathmap.begin());
     ((RouteTrie*)this)->delete_all_nodes();
 }
-
-
 
 template class BgpTrie<IPv4>;
 template class BgpTrie<IPv6>;
