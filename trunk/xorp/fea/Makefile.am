@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.51 2004/11/29 09:36:26 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.52 2004/11/30 13:11:36 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -63,8 +63,8 @@ xorp_fea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
-### Firewall front-end XRL libraries
-xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfirewallbase.la
+### Packet ACL front-end XRL libraries
+#xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libpacketaclbase.la
 ### socket server libraries and related
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
@@ -174,11 +174,7 @@ libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
 libfea_la_SOURCES	+= addr_table.hh
 libfea_la_SOURCES	+= click_socket.hh
-libfea_la_SOURCES	+= firewall.hh
-libfea_la_SOURCES	+= firewall_dummy.hh
-libfea_la_SOURCES	+= firewall_ipf.hh
-libfea_la_SOURCES	+= firewall_ipfw.hh
-libfea_la_SOURCES	+= firewall_iptables.hh
+# Packet ACL/firewall headers go HERE when ready
 libfea_la_SOURCES	+= fte.hh
 libfea_la_SOURCES	+= fti.hh
 libfea_la_SOURCES	+= fti_transaction.hh
@@ -215,7 +211,7 @@ libfea_la_SOURCES	+= rawsock4.hh
 libfea_la_SOURCES	+= rawsock6.hh
 libfea_la_SOURCES	+= routing_socket.hh
 libfea_la_SOURCES	+= routing_socket_utils.hh
-libfea_la_SOURCES	+= xrl_firewall.hh
+#libfea_la_SOURCES	+= xrl_packet_acl.hh
 libfea_la_SOURCES	+= xrl_fti.hh
 libfea_la_SOURCES	+= xrl_ifmanager.hh
 libfea_la_SOURCES	+= xrl_ifupdate.hh
@@ -228,10 +224,15 @@ libfea_la_SOURCES	+= xrl_target.hh
 
 libfea_la_SOURCES	+= addr_table.cc
 libfea_la_SOURCES	+= click_socket.cc
-libfea_la_SOURCES	+= firewall.cc
-libfea_la_SOURCES	+= firewall_ipf.cc
-libfea_la_SOURCES	+= firewall_ipfw.cc
+# Begin old firewall stuff
+#libfea_la_SOURCES	+= firewall.cc
+#libfea_la_SOURCES	+= firewall_ipf.cc
+#libfea_la_SOURCES	+= firewall_ipfw.cc
 #libfea_la_SOURCES	+= firewall_iptables.cc
+# End old firewall stuff
+# Begin NEW firewall stuff
+#libfea_la_SOURCES	+= fw_transaction.cc
+# End NEW firewall stuff
 libfea_la_SOURCES	+= fti_transaction.cc
 libfea_la_SOURCES	+= fticonfig.cc
 libfea_la_SOURCES	+= fticonfig_entry_get.cc
@@ -307,7 +308,7 @@ libfea_la_SOURCES	+= rawsock4.cc
 libfea_la_SOURCES	+= rawsock6.cc
 libfea_la_SOURCES	+= routing_socket.cc
 libfea_la_SOURCES	+= routing_socket_utils.cc
-libfea_la_SOURCES	+= xrl_firewall.cc
+#libfea_la_SOURCES	+= xrl_packet_acl.cc
 libfea_la_SOURCES	+= xrl_fti.cc
 libfea_la_SOURCES	+= xrl_ifmanager.cc
 libfea_la_SOURCES	+= xrl_ifupdate.cc
