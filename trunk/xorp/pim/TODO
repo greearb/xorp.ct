@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.40 2003/06/23 18:59:24 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.41 2003/06/24 19:31:09 pavlin Exp $
 #
+
+* PIM SPEC: Add text to specify the PIM border router behavior regarding
+  periodic (*,*,RP) Join and (S,G,rpt) Prune behavior:
+  When the PIM border router receives data for a new group G because of
+  (*,*,RP) Join entry it had originated earlier, then then it originates
+  (*,G) Join. Then the periodic (S,G,rpt)Prune entries are generated
+  properly as specified in the text.
 
 * PIM SPEC: Add the text for the new Hello option that includes the number
   of addresses per interface.
