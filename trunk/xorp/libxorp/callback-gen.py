@@ -118,7 +118,7 @@ def output_header(args, dbg):
  * See LICENSE file for licensing, conditions, and warranties on use.
  *
  * This file is PROGRAMMATICALLY GENERATED.
- * """
+ *"""
     print " * This instance was generated with:\n *     ",
     for a in args:
         print "%s" % a,
@@ -319,7 +319,9 @@ if (! cb.is_empty()) {
 #ifndef __XORP_CALLBACK_HH__
 #define __XORP_CALLBACK_HH__
 
+#include "minitraits.hh"
 #include "ref_ptr.hh"
+#include "safe_callback_obj.hh"
 """
     if (dbg):
         print \
@@ -334,21 +336,25 @@ if (! cb.is_empty()) {
 def output_trailer():
     print "#endif /* __XORP_CALLBACK_HH__ */"
 
-def output_kdoc_baseclass(nl):
+def output_kdoc_base_class(nl):
     print "/**"
     print " * @short Base class for callbacks with %d dispatch time args." % nl
     print " */"
 
 def output_kdoc_class(target, nl, nb):
+    if (target != ''):
+        target = target.strip() + ' '
     print "/**"
-    print " * @short Callback object for %s with %d dispatch time" % (target, nl)
+    print " * @short Callback object for %swith %d dispatch time" % (target, nl)
     print " * arguments and %d bound (stored) arguments." % nb
     print " */"
 
-def output_kdoc_factory(target, nl, nb):
+def output_kdoc_factory_function(target, nl, nb):
+    if (target != ''):
+        target = target.strip() + ' '
     print "/**"
     print " * Factory function that creates a callback object targetted at a"
-    print " * %s with %d dispatch time arguments and %d bound arguments." % (target, nl, nb)
+    print " * %swith %d dispatch time arguments and %d bound arguments." % (target, nl, nb)
     print " */"
 
 def output_base(l_types, dbg):
@@ -359,7 +365,7 @@ def output_base(l_types, dbg):
     print "// Code relating to callbacks with %d late args" % n
     print "//"
     print
-    output_kdoc_baseclass(n)
+    output_kdoc_base_class(n)
     print "template<class R%s>" % joining_csv(class_args(l_types))
     print "struct XorpCallback%d {" % n
     print "    typedef ref_ptr<XorpCallback%d> RefPtr;\n" % n
@@ -397,21 +403,22 @@ def output_rest(l_types, b_types, dbg):
     o += "    typedef R (*F)(%s);\n" % csv(l_types + b_types)
     o += "    XorpFunctionCallback%dB%d(" % (nl, nb)
     o += starting_csv(flatten_pair_list(debug_args))
-    o += "F f%s)\n\t: %s(%s),\n\t  _f(f)%s \n    {}\n" \
+    o += "F f%s)\n\t: %s(%s),\n\t  _f(f)%s\n    {}\n" \
           % (joining_csv(decl_args(b_types)),
              base_class,
              csv(second_args(debug_args)),
              joining_csv(cons_args(b_types)))
-    o += "    R dispatch(%s) { return (*_f)(%s); } \n" \
+    o += "    R dispatch(%s) { return (*_f)(%s); }\n" \
          % (csv(decl_args(l_types)),
             csv(call_args(l_types) + mem_args(b_types)))
     o += "protected:\n    F   _f;\n"
     for ba in mem_decls(b_types):
         o += "    %s;\n" % ba
-    o += "};\n\n"
+    o += "};\n"
     print o
+    print ''
 
-    output_kdoc_factory("function", nl, nb)
+    output_kdoc_factory_function("function", nl, nb)
     o  = "template <class R%s>\n" % joining_csv(class_args(l_types + b_types))
     o += "typename XorpCallback%d<R%s>::RefPtr\n" % (nl, joining_csv(l_types))
     if (dbg):
@@ -436,22 +443,82 @@ def output_rest(l_types, b_types, dbg):
         o += "    typedef R (O::*M)(%s) %s;\n" % (csv(l_types + b_types), const)
         o += "    Xorp%sMemberCallback%dB%d(" % (CONST, nl, nb)
         o += starting_csv(flatten_pair_list(debug_args))
-        o += "O *o, M m%s)\n\t : " % joining_csv(decl_args(b_types))
-        o += "%s(%s), \n\t  " % (base_class, csv(second_args(debug_args)))
+        o += "O* o, M m%s)\n\t :" % joining_csv(decl_args(b_types))
+        o += " %s(%s),\n\t  " % (base_class, csv(second_args(debug_args)))
         o += "_o(o), _m(m)%s {}\n" % joining_csv(cons_args(b_types))
         o += "    R dispatch(%s) { return ((*_o).*_m)(%s); }\n" \
              % (csv(decl_args(l_types)), csv(call_args(l_types) + mem_args(b_types)))
         o += "protected:\n"
-        o += "    O	*_o;	// Callback's target object\n"
-        o += "    M	 _m;	// Callback's target method\n"
+        o += "    O*	_o;	// Callback's target object\n"
+        o += "    M	_m;	// Callback's target method\n"
         for ba in mem_decls(b_types):
             o += "    %s;	// Bound argument\n" % ba
         o += "};\n"
         print o
 
+        output_kdoc_class("%s safe member methods" % const, nl, nb)
+        o = ""
+        o += "template <class R, class O%s>\n" % (joining_csv(class_args(l_types + b_types)))
+        o += "struct Xorp%sSafeMemberCallback%dB%d\n" % (CONST, nl, nb)
+        o += "    : public Xorp%sMemberCallback%dB%d<R, O%s>,\n" % (CONST, nl, nb, (joining_csv(l_types + b_types)))
+        o += "      public SafeCallbackBase {\n"
+        o += "    typedef typename Xorp%sMemberCallback%dB%d<R, O%s>::M M;\n" % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += "    Xorp%sSafeMemberCallback%dB%d(" % (CONST, nl, nb)
+        o += starting_csv(flatten_pair_list(debug_args))
+        o += "O* o, M m%s)\n\t : " % joining_csv(decl_args(b_types))
+        o += "Xorp%sMemberCallback%dB%d<R, O%s>(" % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += starting_csv(second_args(debug_args))
+        o += "o, m"
+        o += joining_csv(call_args(b_types))
+        o += "),\n\t   SafeCallbackBase(o) {}\n"
+        o += "    CallbackSafeObject* base()		{ return _o; }\n"
+        o += "    void invalidate()			{ _o = 0; }\n"
+        o += "    R dispatch(%s) {\n" % (csv(decl_args(l_types)))
+        o += "\tif (base())\n"
+        o += "\t    return Xorp%sMemberCallback%dB%d<R, O%s>::dispatch(%s);\n" % (CONST, nl, nb, joining_csv(l_types + b_types), csv(call_args(l_types)))
+        o += "    }\n"
+        o += "};\n"
+        print o
+
+        o = ""
+        o += "template <class R, class O%s, bool B=true>\n" \
+             % (joining_csv(class_args(l_types) + class_args(b_types)))
+        o += "struct Xorp%sMemberCallbackFactory%dB%d\n" % (CONST, nl, nb)
+        o += "{\n"
+        o += "    inline static Xorp%sMemberCallback%dB%d<R, O%s>*\n" \
+             % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += "    make(%s" % starting_csv(flatten_pair_list(debug_args))
+        o += "O* o, R (O::*p)(%s)%s%s)\n" \
+             % (csv(l_types + b_types), const, joining_csv(decl_args(b_types)))
+        o += "    {\n"
+        o += "\treturn new Xorp%sSafeMemberCallback%dB%d<R, O%s>(" \
+             % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += starting_csv(second_args(debug_args))
+        o += "o, p%s);\n" % joining_csv(call_args(b_types))
+        o += "    }\n"
+        o += "};\n"
+        o += "\n"
+        o += "template <class R, class O%s>\n" \
+             % (joining_csv(class_args(l_types) + class_args(b_types)))
+        o += "struct Xorp%sMemberCallbackFactory%dB%d<R, O%s, false>\n" \
+             % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += "{\n"
+        o += "    inline static Xorp%sMemberCallback%dB%d<R, O%s>*\n" \
+             % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += "    make(%s" % starting_csv(flatten_pair_list(debug_args))
+        o += "O* o, R (O::*p)(%s)%s%s)\n" \
+             % (csv(l_types + b_types), const, joining_csv(decl_args(b_types)))
+        o += "    {\n"
+        o += "\treturn new Xorp%sMemberCallback%dB%d<R, O%s>(" \
+             % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += starting_csv(second_args(debug_args))
+        o += "o, p%s);\n" % joining_csv(call_args(b_types))
+        o += "    };\n"
+        o += "};\n"
+        print o
+
         for p,q in [('*', ''), ('&', '&')]:
-            print
-            output_kdoc_factory("%s member function" % const, nl, nb)
+            output_kdoc_factory_function("%s member function" % const, nl, nb)
 
             o  = "template <class R, class O%s> typename " \
                       % joining_csv(class_args(l_types) + class_args(b_types))
@@ -460,16 +527,16 @@ def output_rest(l_types, b_types, dbg):
                 o += "dbg_"
             o += "callback("
             o += starting_csv(flatten_pair_list(debug_args))
-            o += "O %so, R (O::*p)(%s)%s%s)\n" \
+            o += "O%s o, R (O::*p)(%s)%s%s)\n" \
                  % (p, csv(l_types + b_types), const, joining_csv(decl_args(b_types)))
             o += "{\n"
-            o += "    return XorpCallback%d<R%s>::RefPtr(new Xorp%sMemberCallback%dB%d<R, O%s>(" \
-                      % (nl, joining_csv(l_types), CONST, nl, nb, joining_csv(l_types + b_types))
+            o += "    return Xorp%sMemberCallbackFactory%dB%d<" % (CONST, nl, nb)
+            o += "R, O%s, BaseAndDerived<CallbackSafeObject, O>::True>::make(" % joining_csv(l_types + b_types)
             o += starting_csv(second_args(debug_args))
-            o += "%so, p%s));\n" % (q, joining_csv(call_args(b_types)))
+            o += "%so, p%s);\n" % (q, joining_csv(call_args(b_types)))
             o += "}\n"
             print o
-        print
+        print ''
 
 def cb_gen(max_bound, max_late, dbg):
     l_types = []

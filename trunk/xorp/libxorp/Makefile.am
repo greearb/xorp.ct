@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.14 2003/10/10 18:50:34 hodson Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.15 2003/11/06 01:21:38 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -113,6 +113,7 @@ libxorp_a_SOURCES += mac.hh
 libxorp_a_SOURCES += nexthop.hh
 libxorp_a_SOURCES += old_trie.hh
 libxorp_a_SOURCES += ref_ptr.hh
+libxorp_a_SOURCES += safe_callback_obj.hh
 libxorp_a_SOURCES += selector.hh
 libxorp_a_SOURCES += service.hh
 libxorp_a_SOURCES += time_slice.hh
@@ -139,6 +140,7 @@ libxorp_a_SOURCES += ipvx.cc
 libxorp_a_SOURCES += mac.cc
 libxorp_a_SOURCES += nexthop.cc
 libxorp_a_SOURCES += ref_ptr.cc
+libxorp_a_SOURCES += safe_callback_obj.cc
 libxorp_a_SOURCES += selector.cc
 libxorp_a_SOURCES += service.cc
 libxorp_a_SOURCES += time_slice.cc
@@ -147,10 +149,10 @@ libxorp_a_SOURCES += token.cc
 libxorp_a_SOURCES += transaction.cc
 libxorp_a_SOURCES += vif.cc
 
-BUILT_SOURCES = callback.hh
+BUILT_SOURCES	   = callback.hh
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST	 = callback-gen.py
+EXTRA_DIST	   = callback-gen.py
 
 
 ################################################################

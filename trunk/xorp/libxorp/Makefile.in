@@ -131,7 +131,7 @@ test_types_SOURCES = test_types.cc
 test_vif_SOURCES = test_vif.cc
 
 # -- Library Sources
-libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh selector.hh service.hh time_slice.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc c_format.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
+libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc c_format.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
 
 BUILT_SOURCES = callback.hh
 
@@ -153,9 +153,10 @@ am_libxorp_a_OBJECTS = debug.$(OBJEXT) utility.$(OBJEXT) xlog.$(OBJEXT) \
 	asyncio.$(OBJEXT) c_format.$(OBJEXT) eventloop.$(OBJEXT) \
 	exceptions.$(OBJEXT) heap.$(OBJEXT) ipv4.$(OBJEXT) \
 	ipv6.$(OBJEXT) ipvx.$(OBJEXT) mac.$(OBJEXT) nexthop.$(OBJEXT) \
-	ref_ptr.$(OBJEXT) selector.$(OBJEXT) service.$(OBJEXT) \
-	time_slice.$(OBJEXT) timer.$(OBJEXT) token.$(OBJEXT) \
-	transaction.$(OBJEXT) vif.$(OBJEXT)
+	ref_ptr.$(OBJEXT) safe_callback_obj.$(OBJEXT) \
+	selector.$(OBJEXT) service.$(OBJEXT) time_slice.$(OBJEXT) \
+	timer.$(OBJEXT) token.$(OBJEXT) transaction.$(OBJEXT) \
+	vif.$(OBJEXT)
 libxorp_a_OBJECTS = $(am_libxorp_a_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
@@ -292,6 +293,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/ipv4.Po $(DEPDIR)/ipv6.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ipvx.Po $(DEPDIR)/mac.Po \
 @AMDEP_TRUE@	$(DEPDIR)/nexthop.Po $(DEPDIR)/ref_ptr.Po \
+@AMDEP_TRUE@	$(DEPDIR)/safe_callback_obj.Po \
 @AMDEP_TRUE@	$(DEPDIR)/selector.Po $(DEPDIR)/service.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_asyncio.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_callback.Po \
@@ -469,6 +471,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mac.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nexthop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ref_ptr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/safe_callback_obj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/selector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_asyncio.Po@am__quote@
