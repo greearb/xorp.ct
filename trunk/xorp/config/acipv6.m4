@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.12 2003/11/06 03:59:48 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.13 2004/03/20 22:33:56 pavlin Exp $
 dnl
 
 dnl
@@ -26,8 +26,10 @@ else
 main()
 {
  /* XXX: check if the IPv6 implementation is not missing various pieces. */
+#if 0
  int dummy = IP6OPT_MINLEN;
  dummy = dummy;
+#endif
  
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
    return (1);

@@ -7769,8 +7769,10 @@ else
 main()
 {
  /* XXX: check if the IPv6 implementation is not missing various pieces. */
+#if 0
  int dummy = IP6OPT_MINLEN;
  dummy = dummy;
+#endif
 
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
    return (1);
