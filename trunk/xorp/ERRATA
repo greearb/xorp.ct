@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.1 2004/06/11 06:35:12 atanu Exp $
+# $XORP: xorp/ERRATA,v 1.2 2004/06/14 21:44:51 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -68,8 +68,9 @@
       We are aware of the issue and will attempt to fix it in the near future.
 
   BGP:
-    - No known issues.
-
+    - Once BGP selects a route it is taking too long to install it in
+      the kernel.
+      
   MLD/IGMP:
     - If MLD/IGMP is started with a relatively large number of interfaces
       (e.g., on the order of 20), then it may fail with the following error:
