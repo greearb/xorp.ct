@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.14 2004/08/03 18:16:01 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.15 2004/08/03 18:18:56 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -24,6 +24,17 @@
     - There are several known issues, but none of them is considered critical.
       The list of known issues is available from
       http://www.xorp.org/bugzilla/query.cgi
+
+    - Using the rtrmgr "-r" command-line option to restart processes that
+      have failed does not work if a process fails while being reconfigured
+      via xorpsh. If that happens, the rtrmgr itself may coredump.
+      Therefore, using the "-r" command-line option is not recommended!
+      Also, note that a process that has been killed by SIGTERM or SIGKILL
+      will not be restarted (this is a feature rather than a bug).
+      Ideally, we want to monitor the processes status using the finder
+      rather than the forked children process status, therefore in
+      the future when we have a more robust implementation the "-r"
+      switch will be removed and will be enabled by default.
 
   XORPSH:
     - A problem was noticed very late in the release process; rather
