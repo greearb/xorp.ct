@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.4 2003/02/25 01:38:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.5 2003/02/27 03:11:05 pavlin Exp $"
 
 
 //
@@ -526,8 +526,13 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 							       is_scope_zone);
     
     if (config_bsr_zone == NULL) {
-	BsrZone new_bsr_zone(pim_bsr(), PimScopeZoneId(group_prefix,
-						       is_scope_zone));
+	PimScopeZoneId zone_id(group_prefix, is_scope_zone);
+	
+	if (! is_scope_zone) {
+	    zone_id = PimScopeZoneId(IPvXNet::ip_multicast_base_prefix(family()),
+				     is_scope_zone);
+	}
+	BsrZone new_bsr_zone(pim_bsr(), zone_id);
 	config_bsr_zone = pim_bsr().add_config_bsr_zone(new_bsr_zone,
 							error_msg);
 	if (config_bsr_zone == NULL) {
