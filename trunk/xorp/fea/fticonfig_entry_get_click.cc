@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_click.cc,v 1.5 2004/12/01 03:28:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_click.cc,v 1.6 2004/12/03 03:52:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -71,6 +71,10 @@ FtiConfigEntryGetClick::start(string& error_msg)
     // XXX: we should register ourselves after we are running so the
     // registration process itself can trigger some startup operations
     // (if any).
+    //
+    // XXX: we register ourselves as the primary "get" method, because
+    // Click should be the ultimate place to read the route info from.
+    // The kernel itself may contain some left-over stuff.
     //
     register_ftic_primary();
 
