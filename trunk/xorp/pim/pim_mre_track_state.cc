@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.19 2003/07/07 23:13:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.20 2003/07/12 01:14:38 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -201,8 +201,10 @@ PimMreTrackState::ActionLists::compute_action_list()
     list<PimMreAction> action_list;
     
     //
-    // Remove the duplicates (that follow one-after another), and reverse
-    // the action ordering
+    // Remove the duplicates (that follow one-after another), if any,
+    // and reverse the action ordering.
+    // XXX: by definition, there snoudn't be any duplicates, but just
+    // in case we try to remove them anyway (it doesn't cost us anything).
     //
     for (size_t i = 0; i < _action_list_vector.size(); i++) {
 	list<PimMreAction>& l = _action_list_vector[i];
