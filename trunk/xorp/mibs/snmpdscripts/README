@@ -1,4 +1,6 @@
-
+#
+# $XORP$
+#
 
 How to configure your Net-SNMP agent to run with XORP
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -47,7 +49,7 @@ To run the client-side scripts in this directory
   own snmp.conf so it matches your settings.  
   
 
-- You must make XORP textual mib files (xorp/mibs/textual/*.txt) accessible to
+- You must make XORP textual mib files ($XORP/mibs/textual/*.txt) accessible to
   the Net-SNMP command line tools.  Either set the MIBDIRS (man snmpcmd(1)) 
   environment variable to point to that directory or copy those files to your
   mibs directory (default is /usr/local/share/snmp/mibs).  For instance:
@@ -59,6 +61,3 @@ To run the client-side scripts in this directory
   BGP4-MIB you would do:
 
   export MIBS=+BGP4-MIB
- 
-
-

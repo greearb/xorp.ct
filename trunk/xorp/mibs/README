@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mibs/README,v 1.2 2003/06/06 19:05:01 jcardona Exp $
+# $XORP: xorp/mibs/README,v 1.3 2003/08/27 22:17:30 jcardona Exp $
 #
 
 MIB modules for Net-SNMP
@@ -25,7 +25,7 @@ process, not directly from the command line.
 For testing and debugging purposes, the SNMP agent can be manually started.
 The proper sequence is:
 
-    - Start the finder + other protocol processes (currently only bgp
+    - Start the finder + other protocol processes (currently only bgp is
       supported)
 
     - cd into snmpdscripts and execute ./dbg_startsnmp.sh.  This script starts
@@ -60,7 +60,7 @@ The SNMP framework used in the project is described in:
 Testing
 =======
 
-Run gmake check in this directory.
+Run ``gmake check'' in this directory.
 
 Status
 ======
