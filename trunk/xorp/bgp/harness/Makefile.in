@@ -94,7 +94,7 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = coord test_peer
 
 # -- Test Programs
-TESTS = test_peering1.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_terminate.sh
+TESTS = test_peering1.sh test_peering2.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_terminate.sh
 
 noinst_PROGRAMS = 
 noinst_LIBRARIES = 
@@ -440,7 +440,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	mostlyclean-generic tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am
 
-TESTS		+ = test_peering2.sh
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

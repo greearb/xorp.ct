@@ -113,7 +113,7 @@ INCLUDES = -I$(top_srcdir)
 subdir = utils
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = pathconf.sh
+CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 bin_PROGRAMS = runit$(EXEEXT)
@@ -140,7 +140,7 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 CXXFLAGS = @CXXFLAGS@
 DIST_SOURCES = $(runit_SOURCES)
-DIST_COMMON = Makefile.am Makefile.in pathconf.sh.in
+DIST_COMMON = Makefile.am Makefile.in
 SOURCES = $(runit_SOURCES)
 
 all: all-am
@@ -154,8 +154,6 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
-pathconf.sh: $(top_builddir)/config.status pathconf.sh.in
-	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= CONFIG_LINKS= $(SHELL) ./config.status
 
 AR = ar
 
