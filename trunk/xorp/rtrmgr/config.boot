@@ -1,9 +1,11 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot,v 1.11 2003/11/17 22:11:51 pavlin Exp $ */
 
 /* router config file for tinderbox test on xorp8 */ 
 
-/* please don't modify this file for use on other machines - use the
--b command line flag to rtrmgr instead */
+/*
+ * Please don't modify this file for use on other machines -
+ * use the -b command line flag to rtrmgr instead.
+ */
 
 interfaces {
   interface rl0 {
@@ -30,6 +32,7 @@ protocols {
   }
 }
 */
+
 protocols {
   bgp {
     bgp-id: 192.150.187.108
@@ -45,9 +48,12 @@ protocols {
   }
 }
 
-/*  see xorp/mibs/snmpdscripts/README on how to configure Net-SNMP in your host
- *  before uncommenting this section
- 
+/*
+ * See xorp/mibs/snmpdscripts/README on how to configure Net-SNMP in your host
+ * before uncommenting the snmp section below.
+ */
+
+/* 
 protocols {
   snmp {
     mib-module bgp4_mib_1657 {
