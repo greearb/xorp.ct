@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.35 2004/06/09 11:22:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.36 2004/06/10 22:40:55 hodson Exp $"
 
 
 //
@@ -696,9 +696,6 @@ MfeaNode::add_vif(const Vif& vif, string& error_msg)
     
     XLOG_INFO("New vif: %s", mfea_vif->str().c_str());
     
-    // XXX: add PIM Register vif (if needed)
-    add_pim_register_vif();
-    
     return (XORP_OK);
 }
 
@@ -712,6 +709,8 @@ MfeaNode::add_vif(const Vif& vif, string& error_msg)
 int
 MfeaNode::add_pim_register_vif()
 {
+    string error_msg;
+
     //
     // Test first whether we have already PIM Register vif
     //
@@ -725,6 +724,7 @@ MfeaNode::add_pim_register_vif()
     
     //
     // Create the PIM Register vif if there is a valid IP address
+    // on an interface that is already up and running.
     //
     // TODO: check with Linux, Solaris, etc, if we can
     // use 127.0.0.2 or ::2 as a PIM Register vif address, and use that
@@ -738,6 +738,8 @@ MfeaNode::add_pim_register_vif()
 	if (mfea_vif == NULL)
 	    continue;
 	if (! mfea_vif->is_underlying_vif_up())
+	    continue;
+	if (! mfea_vif->is_up())
 	    continue;
 	if (mfea_vif->addr_ptr() == NULL)
 	    continue;
@@ -767,19 +769,21 @@ MfeaNode::add_pim_register_vif()
 					 pim_register_vif_addr.addr_bitlen()),
 				 pim_register_vif_addr,
 				 IPvX::ZERO(family()));
-	string err;
-	if (add_vif(register_vif, err) < 0) {
-	    XLOG_ERROR("Cannot add Register vif: %s", err.c_str());
+	if (add_vif(register_vif, error_msg) < 0) {
+	    XLOG_ERROR("Cannot add Register vif: %s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	
-	if (add_config_vif(register_vif, err) < 0) {
+	if (add_config_vif(register_vif, error_msg) < 0) {
 	    XLOG_ERROR("Cannot add Register vif to set of configured vifs: %s",
-		       err.c_str());
+		       error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }
-    
+
+    // Done
+    set_config_all_vifs_done(error_msg);
+
     return (XORP_OK);
 }
 
@@ -900,7 +904,10 @@ MfeaNode::start_vif(const string& vif_name, string& error_msg)
     }
     
     XLOG_INFO("Started vif: %s", vif_name.c_str());
-    
+
+    // XXX: add PIM Register vif (if needed)
+    add_pim_register_vif();
+
     return (XORP_OK);
 }
 
