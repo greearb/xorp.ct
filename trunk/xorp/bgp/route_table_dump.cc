@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.15 2004/03/04 03:50:30 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.16 2004/04/01 19:54:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -149,7 +149,7 @@ DumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(dump_peer == _peer);
     XLOG_ASSERT(!_completed);
 
-    printf("Route_dump: %s %s\n", this->tablename().c_str(),
+    debug_msg("Route_dump: %s %s\n", this->tablename().c_str(),
 	      rtmsg.net().str().c_str());
     /* turn the route_dump into a route_add */
     _dump_iter.route_dump(rtmsg);
