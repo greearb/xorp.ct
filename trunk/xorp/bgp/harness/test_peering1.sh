@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.5 2003/02/04 21:55:52 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.6 2003/02/05 23:16:15 atanu Exp $
 #
 
 #
@@ -19,8 +19,10 @@
 
 set -e
 
-. ./xrl_shell_funcs.sh ""
-. ../xrl_shell_funcs.sh ""
+# srcdir is set by make for check target
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+. ${srcdir}/xrl_shell_funcs.sh ""
+. ${srcdir}/../xrl_shell_funcs.sh ""
 
 onexit()
 {
@@ -660,7 +662,7 @@ TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11
 TIME_WAIT=`time_wait_seconds`
 
 # Include command line
-. ./args.sh
+. ${srcdir}/args.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then

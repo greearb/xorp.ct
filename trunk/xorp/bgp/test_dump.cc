@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.15 2003/04/02 20:34:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.16 2003/04/22 19:20:21 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -1272,10 +1272,18 @@ bool test_dump() {
 	return false;
     }
     fclose(file);
-    
-    file = fopen("test_dump.reference", "r");
+
+    string ref_filename;
+    const char* srcdir = getenv("srcdir");
+    if (srcdir) {
+	ref_filename = string(srcdir); 
+    } else {
+	ref_filename = ".";
+    }
+    ref_filename += "/test_dump.reference";
+    file = fopen(ref_filename.c_str(), "r");
     if (file == NULL) {
-	fprintf(stderr, "Failed to read test_dump.reference\n");
+	fprintf(stderr, "Failed to read %s\n", ref_filename.c_str());
 	fprintf(stderr, "TEST DUMP FAILED\n");
 	fclose(file);
 	return false;

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.7 2003/01/31 03:00:26 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.8 2003/05/24 23:35:26 mjh Exp $
 #
 
 #
@@ -40,9 +40,10 @@ onexit()
 
 trap onexit 0 2
 
-. ./xrl_shell_funcs.sh ""
-. ../xrl_shell_funcs.sh ""
-. ../../rib/xrl_shell_funcs.sh ""
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+. ${srcdir}/xrl_shell_funcs.sh ""
+. ${srcdir}/../xrl_shell_funcs.sh ""
+. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
 
 HOST=localhost
 PORT1=10001
@@ -586,7 +587,7 @@ RIB="rib"
 TIME_WAIT=`time_wait_seconds`
 
 # Include command line
-. ./args.sh
+. ${srcdir}/args.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then

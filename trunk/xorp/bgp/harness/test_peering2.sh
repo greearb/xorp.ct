@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.4 2003/01/31 03:00:25 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.5 2003/02/05 00:04:15 atanu Exp $
 #
 
 #
@@ -19,8 +19,10 @@
 #
 set -e
 
-. ./xrl_shell_funcs.sh ""
-. ../xrl_shell_funcs.sh ""
+# srcdir is set by make for check target
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+. ${srcdir}/xrl_shell_funcs.sh ""
+. ${srcdir}/xrl_shell_funcs.sh ""
 
 onexit()
 {
@@ -54,7 +56,7 @@ PEER2_AS=65000
 
 HOLDTIME=5
 
-TRAFFIC_FILES="../../../data/bgp/icsi1.mrtd"
+TRAFFIC_FILES="${srcdir}/../../../data/bgp/icsi1.mrtd"
 
 configure_bgp()
 {
@@ -172,7 +174,7 @@ TESTS='test1 test2'
 TIME_WAIT=`time_wait_seconds`
 
 # Include command line
-. ./args.sh
+. ${srcdir}/args.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then

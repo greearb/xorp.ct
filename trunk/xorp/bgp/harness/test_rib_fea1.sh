@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.3 2003/01/31 03:00:25 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.4 2003/05/24 23:35:26 mjh Exp $
 #
 
 #
@@ -38,9 +38,11 @@ onexit()
 
 trap onexit 0 2
 
-. ./xrl_shell_funcs.sh ""
-. ../xrl_shell_funcs.sh ""
-. ../../rib/xrl_shell_funcs.sh ""
+# srcdir is set by make for check target
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+. ${srcdir}/xrl_shell_funcs.sh ""
+. ${srcdir}/../xrl_shell_funcs.sh ""
+. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
 
 HOST=localhost
 PORT1=10001
@@ -96,7 +98,7 @@ configure_rib()
 {
     echo "Configuring rib"
     export CALLXRL
-    RIB_FUNCS=../../rib/xrl_shell_funcs.sh
+    RIB_FUNCS=${srcdir}/../../rib/xrl_shell_funcs.sh
     $RIB_FUNCS make_rib_errors_fatal
 }
 
@@ -105,7 +107,7 @@ configure_fea()
     echo "Configuring fea"
 
     export CALLXRL
-    FEA_FUNCS=../../fea/xrl_shell_funcs.sh
+    FEA_FUNCS=${srcdir}/../../fea/xrl_shell_funcs.sh
     local tid=$($FEA_FUNCS start_fea_transaction)
 
     $FEA_FUNCS create_interface $tid $VIF0
@@ -313,7 +315,7 @@ TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4'
 
 # Include command line
-. ./args.sh
+. ${srcdir}/args.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then

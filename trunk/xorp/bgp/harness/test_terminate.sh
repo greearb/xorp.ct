@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.2 2003/01/31 03:00:26 atanu Exp $
 #
 
 #
@@ -17,8 +17,10 @@
 
 set -e
 
-. ./xrl_shell_funcs.sh ""
-. ../xrl_shell_funcs.sh ""
+# srcdir is set by make for check target
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+. ${srcdir}/xrl_shell_funcs.sh ""
+. ${srcdir}/../xrl_shell_funcs.sh ""
 
 onexit()
 {
@@ -49,7 +51,7 @@ configure_bgp()
 
 test1()
 {
-    CALLXRL=$CALLXRL ../xrl_shell_funcs.sh terminate
+    CALLXRL=$CALLXRL ${srcdir}/../xrl_shell_funcs.sh terminate
 
     sleep 5
 }
@@ -58,7 +60,7 @@ TESTS_NOT_FIXED=''
 TESTS='test1'
 
 # Include command line
-. ./args.sh
+. ${srcdir}/args.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then

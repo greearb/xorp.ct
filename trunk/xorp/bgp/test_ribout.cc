@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.13 2003/03/10 23:20:07 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.14 2003/04/22 19:20:22 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -229,14 +229,23 @@ bool test_ribout() {
 	return false;
     }
     fclose(file);
-    
-    file = fopen("test_ribout.reference", "r");
+
+    string ref_filename;
+    const char* srcdir = getenv("srcdir");
+    if (srcdir) {
+	ref_filename = string(srcdir); 
+    } else {
+	ref_filename = ".";
+    }
+    ref_filename += "/test_ribout.reference";
+    file = fopen(ref_filename.c_str(), "r");
     if (file == NULL) {
-	fprintf(stderr, "Failed to read test_ribout.reference\n");
+	fprintf(stderr, "Failed to read %s\n", ref_filename.c_str());
 	fprintf(stderr, "TEST RIBOUT FAILED\n");
 	fclose(file);
 	return false;
     }
+
     char refout[BUFSIZE];
     memset(refout, 0, BUFSIZE);
     int bytes2 = fread(refout, 1, BUFSIZE, file);

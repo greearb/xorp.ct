@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.13 2003/03/10 23:20:06 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.14 2003/04/22 19:20:20 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -728,10 +728,18 @@ int test_deletion() {
 	return false;
     }
     fclose(file);
-    
-    file = fopen("test_deletion.reference", "r");
+
+    string ref_filename;
+    const char* srcdir = getenv("srcdir");
+    if (srcdir) {
+	ref_filename = string(srcdir); 
+    } else {
+	ref_filename = ".";
+    }
+    ref_filename += "/test_deletion.reference";
+    file = fopen(ref_filename.c_str(), "r");
     if (file == NULL) {
-	fprintf(stderr, "Failed to read test_deletion.reference\n");
+	fprintf(stderr, "Failed to read %s\n", ref_filename.c_str());
 	fprintf(stderr, "TEST DELETION FAILED\n");
 	fclose(file);
 	return false;

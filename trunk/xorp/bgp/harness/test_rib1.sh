@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.6 2003/03/10 20:26:47 mjh Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.7 2003/05/24 23:35:25 mjh Exp $
 #
 
 #
@@ -36,9 +36,11 @@ onexit()
 
 trap onexit 0 2
 
-. ./xrl_shell_funcs.sh ""
-. ../xrl_shell_funcs.sh ""
-. ../../rib/xrl_shell_funcs.sh ""
+# srcdir is set by make for check target
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+. ${srcdir}/xrl_shell_funcs.sh ""
+. ${srcdir}/../xrl_shell_funcs.sh ""
+. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
 
 HOST=localhost
 AS=65008
@@ -415,7 +417,7 @@ TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8'
 
 # Include command line
-. ./args.sh
+. ${srcdir}/args.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then
