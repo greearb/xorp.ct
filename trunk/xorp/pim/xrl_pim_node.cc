@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.39 2003/09/12 23:45:43 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.40 2003/09/30 18:27:06 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -1339,20 +1339,12 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1402,24 +1394,12 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1467,20 +1447,12 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1526,24 +1498,12 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1587,20 +1547,12 @@ XrlPimNode::mfea_client_0_1_add_mrib4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Create the Mrib entry
     //
@@ -1635,24 +1587,12 @@ XrlPimNode::mfea_client_0_1_add_mrib6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Create the Mrib entry
     //
@@ -1682,20 +1622,12 @@ XrlPimNode::mfea_client_0_1_delete_mrib4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Create the Mrib entry
     //
@@ -1721,24 +1653,12 @@ XrlPimNode::mfea_client_0_1_delete_mrib6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Create the Mrib entry
     //
@@ -1913,7 +1833,16 @@ XrlPimNode::fti_0_2_add_entry4(
     const string&	protocol_origin)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
-    
+
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     // TODO: use "protocol_origin"
     UNUSED(protocol_origin);
     
@@ -1923,24 +1852,7 @@ XrlPimNode::fti_0_2_add_entry4(
 				    vifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
-    //
-    // Verify the address family
-    //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+
     //
     // Create the Mrib entry
     //
@@ -1974,7 +1886,16 @@ XrlPimNode::fti_0_2_add_entry6(
     const string&	protocol_origin)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
-    
+
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     // TODO: use "protocol_origin"
     UNUSED(protocol_origin);
     
@@ -1984,28 +1905,7 @@ XrlPimNode::fti_0_2_add_entry6(
 				    vifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
-    //
-    // Verify the address family
-    //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+
     //
     // Create the Mrib entry
     //
@@ -2035,20 +1935,12 @@ XrlPimNode::fti_0_2_delete_entry4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Create the Mrib entry
     //
@@ -2074,24 +1966,12 @@ XrlPimNode::fti_0_2_delete_entry6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Create the Mrib entry
     //
@@ -2126,20 +2006,12 @@ XrlPimNode::fti_0_2_delete_all_entries4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     PimNode::pim_mrib_table().clear();
 
     return XrlCmdError::OKAY();
@@ -2153,24 +2025,12 @@ XrlPimNode::fti_0_2_delete_all_entries6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     PimNode::pim_mrib_table().clear();
     
     return XrlCmdError::OKAY();
@@ -2192,19 +2052,11 @@ XrlPimNode::fti_0_2_lookup_route4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     //
     // Lookup
@@ -2263,24 +2115,12 @@ XrlPimNode::fti_0_2_lookup_route6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Lookup
     //
@@ -2337,20 +2177,12 @@ XrlPimNode::fti_0_2_lookup_entry4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Lookup
     //
@@ -2406,24 +2238,12 @@ XrlPimNode::fti_0_2_lookup_entry6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Lookup
     //
@@ -2536,20 +2356,12 @@ XrlPimNode::mld6igmp_client_0_1_add_membership4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (PimNode::add_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
 	string error_msg = c_format("Failed to add membership for (%s, %s)",
@@ -2572,24 +2384,12 @@ XrlPimNode::mld6igmp_client_0_1_add_membership6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (PimNode::add_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
 	string error_msg = c_format("Failed to add membership for (%s, %s)",
@@ -2612,20 +2412,12 @@ XrlPimNode::mld6igmp_client_0_1_delete_membership4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (PimNode::delete_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
 	string error_msg = c_format("Failed to delete membership for (%s, %s)",
@@ -2649,24 +2441,12 @@ XrlPimNode::mld6igmp_client_0_1_delete_membership6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (PimNode::delete_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
 	string error_msg = c_format("Failed to delete membership for (%s, %s)",
@@ -4736,20 +4516,12 @@ XrlPimNode::pim_0_1_pimstat_neighbors4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     TimeVal now;
     TimerList::system_gettimeofday(&now);
     
@@ -4811,24 +4583,12 @@ XrlPimNode::pim_0_1_pimstat_neighbors6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     TimeVal now;
     TimerList::system_gettimeofday(&now);
     
@@ -4889,20 +4649,12 @@ XrlPimNode::pim_0_1_pimstat_interface4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     string error_msg;
     
     PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
@@ -4936,23 +4688,11 @@ XrlPimNode::pim_0_1_pimstat_interface6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     string error_msg;
     
@@ -4987,20 +4727,12 @@ XrlPimNode::pim_0_1_pimstat_rps4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     rps_number = 0;
     
     list<PimRp *>::const_iterator iter;
@@ -5070,23 +4802,11 @@ XrlPimNode::pim_0_1_pimstat_rps6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     rps_number = 0;
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.19 2003/08/06 18:51:17 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.20 2003/08/07 00:30:12 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -956,20 +956,12 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! Mld6igmpNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1019,24 +1011,12 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! Mld6igmpNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1325,20 +1305,12 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! Mld6igmpNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1407,24 +1379,12 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! Mld6igmpNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1493,20 +1453,12 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! Mld6igmpNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1545,24 +1497,12 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! Mld6igmpNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //

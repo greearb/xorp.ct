@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.14 2003/08/07 03:12:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.15 2003/09/23 03:35:38 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -955,20 +955,12 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1048,24 +1040,12 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1145,19 +1125,11 @@ XrlMfeaNode::mfea_0_1_delete_protocol4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     //
     // Verify the module ID
@@ -1195,23 +1167,11 @@ XrlMfeaNode::mfea_0_1_delete_protocol6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     //
     // Verify the module ID
@@ -1251,19 +1211,11 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     //
     // Verify the module ID
@@ -1304,24 +1256,12 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1361,20 +1301,12 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1414,24 +1346,12 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1649,20 +1569,12 @@ XrlMfeaNode::mfea_0_1_join_multicast_group4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1700,24 +1612,12 @@ XrlMfeaNode::mfea_0_1_join_multicast_group6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1755,20 +1655,12 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1806,24 +1698,12 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -1862,24 +1742,16 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 {
     Mifset mifset;
     Mifset mifset_disable_wrongvif;
-    
+
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     // Check the number of covered interfaces
     if (max_vifs_oiflist > mifset.size()) {
 	// Invalid number of covered interfaces
@@ -1931,28 +1803,16 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
 {
     Mifset mifset;
     Mifset mifset_disable_wrongvif;
-    
+
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     // Check the number of covered interfaces
     if (max_vifs_oiflist > mifset.size()) {
 	// Invalid number of covered interfaces
@@ -2000,20 +1860,12 @@ XrlMfeaNode::mfea_0_1_delete_mfc4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::delete_mfc(xrl_sender_name,
 			     IPvX(source_address), IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
@@ -2040,24 +1892,12 @@ XrlMfeaNode::mfea_0_1_delete_mfc6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::delete_mfc(xrl_sender_name,
 			     IPvX(source_address), IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
@@ -2092,20 +1932,12 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -2162,24 +1994,12 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     //
     // Verify the module ID
     //
@@ -2236,20 +2056,12 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::add_dataflow_monitor(xrl_sender_name,
 				       IPvX(source_address),
 				       IPvX(group_address),
@@ -2293,24 +2105,12 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::add_dataflow_monitor(xrl_sender_name,
 				       IPvX(source_address),
 				       IPvX(group_address),
@@ -2354,20 +2154,12 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::delete_dataflow_monitor(xrl_sender_name,
 					  IPvX(source_address),
 					  IPvX(group_address),
@@ -2411,24 +2203,12 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::delete_dataflow_monitor(xrl_sender_name,
 					  IPvX(source_address),
 					  IPvX(group_address),
@@ -2464,20 +2244,12 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor4(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-	if (family() != AF_INET)
-	    is_invalid_family = true;
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv4");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
 					      IPvX(source_address),
 					      IPvX(group_address)) < 0) {
@@ -2505,24 +2277,12 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor6(
     //
     // Verify the address family
     //
-    do {
-	bool is_invalid_family = false;
-	
-#ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
-#else
-	is_invalid_family = true;
-#endif
-	
-	if (is_invalid_family) {
-	    // Invalid address family
-	    string error_msg = c_format("Received protocol message with "
-					"invalid address family: IPv6");
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-    } while (false);
-    
+    if (! MfeaNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
 					      IPvX(source_address),
 					      IPvX(group_address)) < 0) {
