@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.8 2003/06/02 21:57:48 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.9 2003/06/03 01:04:19 atanu Exp $
 #
 
 #
@@ -214,8 +214,43 @@ test2()
     coord peer2 assert established
 }
 
+test3()
+{
+    TFILE=$1
+
+    echo "TEST3:"
+    echo "\t 1) Start injecting a saved feed (peer2) - $TFILE" 
+    echo "\t 2) Bring in a second peering (peer1) "
+    echo "\t 3) Drop the injecting feed (peer2) "
+
+    # Reset the peers
+    reset
+    
+    # Establish the EBGP peering.
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 assert established
+
+    # send in the saved file
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE
+
+    NOBLOCK=true coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    NOBLOCK=true coord peer1 assert established
+
+    # Allow some routes to be loaded
+    sleep 5
+
+    # Drop the injecting feed
+    NOBLOCK=true coord peer2 disconnect
+
+    # Wait for the BGP to stabilise
+    bgp_all_updates_sent 1
+
+    # Make sure that the peer1 connection is still established
+    coord peer1 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2'
+TESTS='test1 test2 test3'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
