@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.16 2003/03/04 05:32:05 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.17 2003/03/05 07:54:42 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -12037,7 +12037,7 @@ Figure~\ref{fig:pim_test_6_3_sending_candidate_rp_advertisements}.
 Enable PIM-SM on the RUT, TR1, TR2, TR3, and TR4. Configure TR1
 as a Cand-BSR for non-scoped zone 224.0.0.0/4 with default BSR
 priority of 1, unless stated otherwise.
-Configure the RUT as a Candidate-RP for 226.0.0.0/8, Candidate-RP priority
+Configure the RUT as a Candidate-RP for 226.0.0.0/8, Candidate-RP Priority
 of 192, and Holdtime of \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), unless stated
 otherwise.
 
@@ -12228,7 +12228,7 @@ Figure~\ref{fig:pim_test_6_4_creating_the_rp_set_at_the_bsr}.
 Enable PIM-SM on the RUT, TR1, TR2, TR3, and TR4. Configure the RUT
 as a Cand-BSR for non-scoped zone 224.0.0.0/4 with default BSR
 priority of 1, unless stated otherwise.
-Configure TR1 as a Candidate-RP for 226.0.0.0/8, Candidate-RP priority
+Configure TR1 as a Candidate-RP for 226.0.0.0/8, Candidate-RP Priority
 of 192, and Holdtime of \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), unless stated
 otherwise.
 
@@ -12257,7 +12257,7 @@ cand-BSR.}
   messages transmitted on LAN1.
 
   \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 192, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
@@ -12293,7 +12293,7 @@ RUT is not disabled.
   messages transmitted on LAN1.
 
   \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 192, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
@@ -12307,35 +12307,35 @@ RUT is not disabled.
   messages transmitted on LAN1.
 
   \item Compose a second Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 192, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
   messages transmitted on LAN1.
 
   \item Compose a third Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 100, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 100, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
   messages transmitted on LAN1.
 
   \item Compose a fourth Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 100, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 100, and Holdtime of
    0, and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
   messages transmitted on LAN1.
 
   \item Compose a fifth Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 192, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
   messages transmitted on LAN1.
 
   \item Compose a sixth Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 227.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   Candidate-RP for 227.0.0.0/8, Candidate-RP Priority of 192, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
@@ -12357,7 +12357,7 @@ RUT is not disabled.
   messages transmitted on LAN1.
 
   \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 192, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
@@ -12389,7 +12389,7 @@ down.}
   messages transmitted on LAN1.
 
   \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
-   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   Candidate-RP for 226.0.0.0/8, Candidate-RP Priority of 192, and Holdtime of
    \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
 
   \item Check the Cand-RP state in the RUT, and the Bootstrap
@@ -12967,7 +12967,7 @@ TR2's address of the interface that connects TR2 to LAN4.
   \begin{itemize}
 
     \item The address of the interface that connects TR2 to LAN4,
-    Candidate-RP priority of 192, and Holdtime of \verb=C-RP_Timeout=
+    Candidate-RP Priority of 192, and Holdtime of \verb=C-RP_Timeout=
     ({\PimsmCRPTimeout})
 
   \end{itemize}
@@ -12997,11 +12997,11 @@ TR2's address of the interface that connects TR2 to LAN4.
   \begin{itemize}
 
     \item The address of the interface that connects TR2 to LAN4,
-    Candidate-RP priority of 192, and Holdtime of \verb=C-RP_Timeout=
+    Candidate-RP Priority of 192, and Holdtime of \verb=C-RP_Timeout=
     ({\PimsmCRPTimeout})
 
     \item The address of the interface that connects TR3 to LAN3,
-    Candidate-RP priority of 100, and Holdtime of \verb=C-RP_Timeout=
+    Candidate-RP Priority of 100, and Holdtime of \verb=C-RP_Timeout=
     ({\PimsmCRPTimeout})
 
   \end{itemize}
@@ -13018,7 +13018,7 @@ TR2's address of the interface that connects TR2 to LAN4.
   \begin{itemize}
 
     \item The address of the interface that connects TR2 to LAN4,
-    Candidate-RP priority of 192, and Holdtime of \verb=C-RP_Timeout=
+    Candidate-RP Priority of 192, and Holdtime of \verb=C-RP_Timeout=
     ({\PimsmCRPTimeout})
 
   \end{itemize}
@@ -13045,6 +13045,13 @@ TR2's address of the interface that connects TR2 to LAN4.
 \subpara{Part A:}
 
 \begin{itemize}
+
+  \item After the RUT is started, the RP-Set in the RUT should be empty:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+\end{verbatim}
 
   \item After the RUT receives the first Bootstrap message, the RP-Set in the
   RUT should contain TR2 only:
@@ -13437,6 +13444,961 @@ Group           Source          RP              Flags
     PIM include WC:           ..............
     PIM include SG:           ..............
     PIM exclude SG:           ..............
+\end{verbatim}
+
+\end{itemize}
+
+\para{Possible Problems:}
+None.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Semantic Fragmentation of BSMs}
+
+\para{Purpose:}
+Test that a router properly receives and assembles Bootstrap messages that use
+semantic fragmentation.
+
+
+\para{References:}
+\begin{itemize}
+  \item draft-ietf-pim-sm-bsr-03 -- Section 4.1.1
+\end{itemize}
+
+\para{Discussion:}
+Bootstrap messages may be split over several PIM Bootstrap Message Fragment
+(BSMF) packets by using semantic fragmentation.. There are two reasons for
+that: (a) the BSM would exceed the link MTU the packet will be forwarded over;
+and (b) the BSM includes information about more than one admin scope zone.
+A router that receives BSMFs should store them and should assemble them as
+more fragments are received.
+
+\para{Test Setup:}
+Connect the RUT, TR1, TR2, TR3, and TR4 according to
+Figure~\ref{fig:pim_test_6_7_semantic_fragmentation_of_bsms}.
+Enable PIM-SM on the RUT, TR1, TR2, TR3, and TR4.
+Do NOT configure any of the routers as a Cand-BSR or a Candidate-RP,
+unless stated otherwise.
+Configure the MRIB in the RUT such that TR2 is the next-hop router toward
+TR2's address of the interface that connects TR2 to LAN4.
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[scale=0.8]{figs/pim_test_6_7_semantic_fragmentation_of_bsms}
+    \caption{Semantic fragmentation of BSMs test setup}
+    \label{fig:pim_test_6_7_semantic_fragmentation_of_bsms}
+  \end{center}
+\end{figure}
+
+\para{Procedure:}
+
+In all scenarios, the Bootstrap message uses the following values, unless
+stated otherwise:
+
+\begin{itemize}
+  \item BSR address set to TR2
+  \item BSR priority set to 1
+  \item Candidate-RP Priority set to 192
+  \item Candidate-RP Holdtime set to \verb=C-RP_Timeout= ({\PimsmCRPTimeout})
+\end{itemize}
+
+\subpara{Part A: Split up different group prefixes in different fragments.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, and TR2.
+
+  \item Start observing the BSR and the Cand-RP state, and the RP-Set in the
+  RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 1000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 1, Frag RP Count = 1, RP Address 1 = TR1.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 1000.
+
+    \item Group address 1 = 224.2.0.0/16 (non-scoped),
+    RP Count = 1, Frag RP Count = 1, RP Address 1 = TR2.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR3.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR2.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part B: Receiving fragments for the global, non-scoped zone.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, and TR2.
+
+  \item Start observing the BSR and the Cand-RP state, and the RP-Set in the
+  RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 1000.
+
+    \item Group address 1 = 224.0.0.0/4 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR1.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 1000.
+
+    \item Group address 1 = 224.0.0.0/4 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR2.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part C: Receiving fragments for a scoped zone.}
+
+The setup is same as in Part B, except that the RP-Set is for Group address 1
+= 226.0.0.0/8 (scoped).
+
+\subpara{Part D: Replacing the RP-Set for a group prefix.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, and TR2.
+
+  \item Start observing the BSR and the Cand-RP state, and the RP-Set in the
+  RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 1000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 1, Frag RP Count = 1, RP Address 1 = TR1.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR2.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR3.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part E: Expiring a group prefix from the RP-Set.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, and TR2.
+
+  \item Start observing the BSR and the Cand-RP state, and the RP-Set in the
+  RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 1000.
+
+    \item Group address 1 = 224.1.1.0/24 (non-scoped),
+    RP Count = 1, Frag RP Count = 1, RP Address 1 = TR1.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR2.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR3.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Continue observing the BSR and the Cand-RP state, and the RP-Set in
+  the RUT for up to \verb=BS_Timeout= ({\PimsmBSTimeout}).
+
+\end{enumerate}
+
+\subpara{Part F: Removing a group prefix from the RP-Set.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, and TR2.
+
+  \item Start observing the BSR and the Cand-RP state, and the RP-Set in the
+  RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 1000.
+
+    \item Group address 1 = 224.1.1.0/24 (non-scoped),
+    RP Count = 1, Frag RP Count = 1, RP Address 1 = TR1.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR2.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.0.0/16 (non-scoped),
+    RP Count = 2, Frag RP Count = 1, RP Address 1 = TR3.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Check BSR and the Cand-RP state, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with Cand-RP set composed of:
+
+  \begin{itemize}
+
+    \item Fragment Tag = 2000.
+
+    \item Group address 1 = 224.1.1.0/24 (non-scoped),
+    RP Count = 0, Frag RP Count = 0.
+
+  \end{itemize}
+
+  Send the Bootstrap message on LAN2.
+
+  \item Continue observing the BSR and the Cand-RP state, and the RP-Set in
+  the RUT for up to \verb=BS_Timeout= ({\PimsmBSTimeout}).
+
+\end{enumerate}
+
+\para{Observable Results:}
+
+\subpara{Part A:}
+
+\begin{itemize}
+
+  \item After the RUT is started, the BSR state and the Cand-RP state for the
+ (non-scoped) 224.0.0.0/4 zone, and the RP-Set in the RUT should be empty:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+\end{verbatim}
+
+  \item After the RUT receives the first Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      123      1293
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should contain TR1
+  for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     139 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     136            0 224.1.0.0/16      
+\end{verbatim}
+
+  \item After the RUT receives the second Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      127      1297
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should contain TR1
+  for group prefix 224.1.0.0/16, and TR2 for group prefix  224.2.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     121 224.1.0.0/16       10.3.0.1                  -1
+10.3.0.1         192     146 224.2.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1 and TR2:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     119            0 224.1.0.0/16      
+10.3.0.1        bootstrap 192      150     145            0 224.2.0.0/16      
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part B:}
+
+\begin{itemize}
+
+  \item After the RUT is started, the BSR state and the Cand-RP state for the
+ (non-scoped) 224.0.0.0/4 zone, and the RP-Set in the RUT should be empty:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+\end{verbatim}
+
+  \item After the RUT receives the first Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should contain TR1:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     147 224.0.0.0/4        10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should be empty:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+\end{verbatim}
+
+  \item After the RUT receives the second Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should contain TR1
+  and TR2:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     132 224.0.0.0/4        10.3.0.1                  -1
+10.3.0.1         192     147 224.0.0.0/4        10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1 and TR2:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     131            0 224.0.0.0/4       
+10.3.0.1        bootstrap 192      150     146            0 224.0.0.0/4       
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part C:}
+
+The results should be same as in Part B, except that 224.0.0.0/4 is
+substitured everywhere with 226.0.0.0/8, and except that
+the CLI commands to show the scoped-zone results are:
+\begin{verbatim}
+Xorp> show pim bootstrap 226.0.0.0/8 scoped
+...
+Xorp> show pim bootstrap rps 226.0.0.0/8 scoped
+...
+Xorp> show pim rps 
+...
+\end{verbatim}
+
+\subpara{Part D:}
+
+\begin{itemize}
+
+  \item After the RUT is started, the BSR state and the Cand-RP state for the
+ (non-scoped) 224.0.0.0/4 zone, and the RP-Set in the RUT should be empty:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+\end{verbatim}
+
+  \item After the RUT receives the first Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should contain TR1
+  for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     146 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1 as an RP for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     145            0 224.1.0.0/16      
+\end{verbatim}
+
+  \item After the RUT receives the second Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR, as well as an expiring zone:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred        0        -1
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should
+  contain TR2 as an active RP for group prefix 224.1.0.0/16, and TR1 as an
+  expiring RP for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192     147 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     129 224.1.0.0/16       10.3.0.1                  -1
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1 as an RP for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     127            0 224.1.0.0/16      
+\end{verbatim}
+
+  \item After the RUT receives the third Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should
+  contain TR2 and TR3 as active RPs for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192     131 224.1.0.0/16       10.3.0.1                  -1
+10.2.0.4         192     147 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR2 and TR3 as RPs for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.3.0.1        bootstrap 192      150     130            0 224.1.0.0/16      
+10.2.0.4        bootstrap 192      150     146            0 224.1.0.0/16      
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part E:}
+
+\begin{itemize}
+
+  \item After the RUT is started, the BSR state and the Cand-RP state for the
+ (non-scoped) 224.0.0.0/4 zone, and the RP-Set in the RUT should be empty:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+\end{verbatim}
+
+  \item After the RUT receives the first Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      127      1297
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should contain TR1
+  for group prefix 224.1.1.0/24:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     146 224.1.1.0/24       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1 as an RP for group prefix 224.1.1.0/24:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     143            0 224.1.1.0/24      
+\end{verbatim}
+
+  \item After the RUT receives the second Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR, as well as an expiring zone:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred        0        -1
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should
+  contain TR2 as an active RP for group prefix 224.1.0.0/16, and TR1 as an
+  expiring RP for group prefix 224.1.1.0/24:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192     147 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     124 224.1.1.0/24       10.3.0.1                  -1
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1 as an RP for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     122            0 224.1.1.0/24      
+\end{verbatim}
+
+  \item After the RUT receives the third Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR, as well as an expiring zone:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred        0        -1
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should
+  contain TR2 and TR3 as active RPs for group prefix 224.1.0.0/16, and TR1 as
+  an expiring RP for group prefix 224.1.1.0/24:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192     128 224.1.0.0/16       10.3.0.1                  -1
+10.2.0.4         192     146 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     106 224.1.1.0/24       10.3.0.1                  -1
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR1 as an RP for group prefix 224.1.1.0/24, and TR2
+  and TR3 as RPs for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.6.0.1        bootstrap 192      150     104            0 224.1.1.0/24      
+10.3.0.1        bootstrap 192      150     126            0 224.1.0.0/16      
+10.2.0.4        bootstrap 192      150     144            0 224.1.0.0/16      
+\end{verbatim}
+
+  \item After up to \verb=C-RP_Timeout= ({\PimsmCRPTimeout}) or
+  \verb=BS_Timeout= ({\PimsmBSTimeout}) (whichever comes first), the
+  state for group prefix 224.1.1.0/24 and Cand-RP TR1 should expire:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred       16      1186
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192      17 224.1.0.0/16       10.3.0.1                  -1
+10.2.0.4         192      34 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  In addition, TR1 should be removed from the RP-Set as well:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.3.0.1        bootstrap 192      150      15            0 224.1.0.0/16      
+10.2.0.4        bootstrap 192      150      33            0 224.1.0.0/16      
+\end{verbatim}
+
+\end{itemize}
+
+\para{Possible Problems:}
+None.
+
+\subpara{Part F:}
+
+\begin{itemize}
+
+  \item Until after the third Bootstrap message is transmitted, the result
+  should be same as in Section E.
+
+  \item After the RUT receives the fourth Bootstrap message, the BSR state for
+  the (non-scoped) 224.0.0.0/4 zone should contain an active zone entry with
+  TR2 as the BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 224.0.0.0/4
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1           1 0.0.0.0            0 AcceptPreferred      128      1298
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  The Cand-RP state for the (non-scoped) 224.0.0.0/4 zone should
+  contain TR2 and TR3 as active RPs for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 224.0.0.0/4
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192     103 224.1.0.0/16       10.3.0.1                  -1
+10.2.0.4         192     123 224.1.0.0/16       10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  The RP-Set should contain TR2 and TR3 as RPs for group prefix 224.1.0.0/16:
+
+\begin{verbatim}
+Xorp> show pim rps 
+RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix       
+10.3.0.1        bootstrap 192      150     101            0 224.1.0.0/16      
+10.2.0.4        bootstrap 192      150     122            0 224.1.0.0/16      
 \end{verbatim}
 
 \end{itemize}

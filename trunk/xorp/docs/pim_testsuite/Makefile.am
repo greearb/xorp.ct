@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/pim_testsuite/Makefile.am,v 1.13 2003/03/04 05:32:04 pavlin Exp $
+## $XORP: xorp/docs/pim_testsuite/Makefile.am,v 1.14 2003/03/05 07:54:42 pavlin Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -39,6 +39,7 @@ pim_testsuite_FIGURES	=						\
 		figs/pim_test_6_4_creating_the_rp_set_at_the_bsr.eps	\
 		figs/pim_test_6_5_forwarding_bootstrap_messages.eps	\
 		figs/pim_test_6_6_receiving_and_using_the_rp_set.eps	\
+		figs/pim_test_6_7_semantic_fragmentation_of_bsms.eps	\
 		figs/pim_test_7_1_single_router_samelan_membership.eps	\
 		figs/template_lan.eps					\
 		figs/template_receiver.eps				\
