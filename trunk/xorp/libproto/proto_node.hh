@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.18 2004/04/02 10:33:13 mjh Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.19 2004/04/29 23:22:12 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -60,7 +60,9 @@ public:
 	: ProtoUnit(init_family, init_module_id),
 	  _eventloop(init_eventloop),
 	  _is_vif_setup_completed(false),
-	  _node_status(PROC_NULL) {}
+	  _node_status(PROC_NULL),
+	  _startup_requests_n(0),
+	  _shutdown_requests_n(0) {}
     
     /**
      * Destructor
