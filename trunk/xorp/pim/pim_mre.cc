@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.11 2003/01/29 06:13:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.12 2003/01/30 00:39:32 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1252,26 +1252,32 @@ PimMre::is_assert_tracking_desired_state(uint16_t vif_index) const
 bool
 PimMre::recompute_assert_tracking_desired_sg(uint16_t vif_index)
 {
+    bool old_value, new_value;
+    
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
     
     if (! is_sg())
 	return (false);
     
+    old_value = is_assert_tracking_desired_state(vif_index);
+    new_value = assert_tracking_desired_sg().test(vif_index);
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    // Set the new value
+    set_assert_tracking_desired_state(vif_index, new_value);
+    
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
-    return (false);
+    // All other states: ignore the change.
+    return (true);
     
  assert_loser_state_label:
     // IamAssertLoser state
-    if (! is_assert_tracking_desired_state(vif_index))
-	return (false);		// The old AssertTrackingDesired(S,G,I)
-				// was already false
-    // The old AssertTrackingDesired(S,G,I) is true
-    if (assert_tracking_desired_sg().test(vif_index))
-	return (false);		// No change in CouldAssert(S,G,I)
+    if (new_value)
+	return (true);		// AssertTrackingDesired(S,G,I) -> TRUE: ignore
     // AssertTrackingDesired(S,G,I) -> FALSE
-    set_assert_tracking_desired_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a5;
     
@@ -1288,26 +1294,32 @@ PimMre::recompute_assert_tracking_desired_sg(uint16_t vif_index)
 bool
 PimMre::recompute_assert_tracking_desired_wc(uint16_t vif_index)
 {
+    bool old_value, new_value;
+    
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
     
     if (! is_wc())
 	return (false);
 
+    old_value = is_assert_tracking_desired_state(vif_index);
+    new_value = assert_tracking_desired_sg().test(vif_index);
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    // Set the new value
+    set_assert_tracking_desired_state(vif_index, new_value);
+    
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
-    return (false);
+    // All other states: ignore the change.
+    return (true);
     
  assert_loser_state_label:
     // IamAssertLoser state
-    if (! is_assert_tracking_desired_state(vif_index))
-	return (false);		// The old AssertTrackingDesired(*,G,I)
-				// was already false
-    // The old AssertTrackingDesired(*,G,I) is true
-    if (assert_tracking_desired_wc().test(vif_index))
-	return (false);		// No change in CouldAssert(*,G,I)
+    if (new_value)
+	return (true);		// AssertTrackinDesired(*,G,I) -> TRUE: ignore
     // AssertTrackingDesired(*,G,I) -> FALSE
-    set_assert_tracking_desired_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a5;
     
@@ -1334,6 +1346,7 @@ PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
     
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
+    // All other states: ignore the change.
     return (false);
     
  assert_loser_state_label:
@@ -1370,13 +1383,14 @@ PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
     
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
+    // All other states: ignore the change.
     return (false);
     
  assert_loser_state_label:
     // IamAssertLoser state
     my_assert_metric = rpt_assert_metric(vif_index);
     winner_metric = assert_winner_metric_wc(vif_index);
-    XLOG_ASSERT(winner_metric != NULL);	// TODO: is this assert OK? E.g, what about if loser to (S,G) Winner?
+    XLOG_ASSERT(winner_metric != NULL);	// TODO: XXX: PAVPAVPAV: is this assert OK? E.g, what about if loser to (S,G) Winner?
     XLOG_ASSERT(my_assert_metric->addr() != winner_metric->addr());
     // Test if my metric has become better
     if (! my_assert_metric->is_better(winner_metric))
@@ -1406,12 +1420,13 @@ PimMre::recompute_assert_rpf_interface_sg(uint16_t vif_index)
     
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
+    // All other states: ignore the change.
     return (false);
     
  assert_loser_state_label:
     // IamAssertLoser state
     if (rpf_interface_s() == vif_index)
-	return (false);			// Nothing has changed
+	return (false);			// Nothing changed
     goto a5;
     
  a5:
@@ -1437,12 +1452,13 @@ PimMre::recompute_assert_rpf_interface_wc(uint16_t vif_index)
     
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
+    // All other states: ignore the change.
     return (false);
     
  assert_loser_state_label:
     // IamAssertLoser state
     if (rpf_interface_rp() == vif_index)
-	return (false);			// Nothing has changed
+	return (false);			// Nothing changed
     goto a5;
     
  a5:
@@ -1466,6 +1482,7 @@ PimMre::recompute_assert_receive_join_sg(uint16_t vif_index)
     
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
+    // All other states: ignore the change.
     return (false);
     
  assert_loser_state_label:
@@ -1493,6 +1510,7 @@ PimMre::recompute_assert_receive_join_wc(uint16_t vif_index)
     
     if (is_i_am_assert_loser_state(vif_index))
 	goto assert_loser_state_label;
+    // All other states: ignore the change.
     return (false);
     
  assert_loser_state_label:

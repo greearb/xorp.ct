@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.5 2003/01/29 05:43:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.6 2003/01/30 00:39:32 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -616,28 +616,33 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
 bool
 PimMre::recompute_could_assert_wc(uint16_t vif_index)
 {
+    bool old_value, new_value;
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL)
 	return (false);
     
-    if (! is_wc()) {	// TODO: OK to enable is_wc() only?
+    if (! is_wc())		// TODO: OK to enable is_wc() only?
 	return (false);
-    }
+    
+    old_value = is_could_assert_state(vif_index);
+    new_value = could_assert_wc().test(vif_index);
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    // Set the new value
+    set_could_assert_state(vif_index, new_value);
     
     if (is_i_am_assert_winner_state(vif_index))
 	goto assert_winner_state_label;
-    return (false);
+    // All other states: ignore the change.
+    return (true);
     
  assert_winner_state_label:
     // IamAssertWinner state
-    if (! is_could_assert_state(vif_index))
-	return (false);		// The old CouldAssert(*,G,I) was already false
-    // The old CouldAssert(*,G,I) is true
-    if (could_assert_wc().test(vif_index))
-	return (false);		// No change in CouldAssert(*,G,I)
+    if (new_value)
+	return (true);		// CouldAssert(*,G,I) -> TRUE: ignore
     // CouldAssert(*,G,I) -> FALSE
-    set_could_assert_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a4;
     
@@ -657,6 +662,7 @@ PimMre::recompute_could_assert_wc(uint16_t vif_index)
 bool
 PimMre::recompute_could_assert_sg(uint16_t vif_index)
 {
+    bool old_value, new_value;
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL)
@@ -665,19 +671,24 @@ PimMre::recompute_could_assert_sg(uint16_t vif_index)
     if (! is_sg())
 	return (false);
     
+    old_value = is_could_assert_state(vif_index);
+    new_value = could_assert_sg().test(vif_index);
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    // Set the new value
+    set_could_assert_state(vif_index, new_value);
+    
     if (is_i_am_assert_winner_state(vif_index))
 	goto assert_winner_state_label;
-    return (false);
+    // All other states: ignore the change.
+    return (true);
     
  assert_winner_state_label:
     // IamAssertWinner state
-    if (! is_could_assert_state(vif_index))
-	return (false);		// The old CouldAssert(S,G,I) was already false
-    // The old CouldAssert(S,G,I) is true
-    if (could_assert_sg().test(vif_index))
-	return (false);		// No change in CouldAssert(S,G,I)
+    if (new_value)
+	return (true);		// CouldAssert(S,G,I) -> TRUE: ignore
     // CouldAssert(S,G,I) -> FALSE
-    set_could_assert_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a4;
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.7 2003/01/27 08:05:14 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.8 2003/01/30 01:43:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -824,7 +824,7 @@ PimMre::recompute_mrib_next_hop_rp_changed()
     // Joined state
     old_pim_nbr = mrib_next_hop_rp();
     if (new_pim_nbr == old_pim_nbr)
-	return;				// Nothing has changed
+	return;				// Nothing changed
     
     // Send Prune(*,*,RP) to the old value of MRIB.next_hop(RP)
     if (old_pim_nbr != NULL) {
@@ -919,7 +919,7 @@ PimMre::recompute_mrib_next_hop_rp_g_changed()
  joined_state_label:
     // Joined state
     if (new_pim_nbr == mrib_next_hop_rp())
-	return;				// Nothing has changed
+	return;				// Nothing changed
     
     // Send Prune(*,G) to the old value of RPF'(*,G)
     old_pim_nbr = rpfp_nbr_wc();
@@ -992,7 +992,7 @@ PimMre::recompute_rpfp_nbr_wc_changed()
     // Joined state
     old_pim_nbr = rpfp_nbr_wc();
     if (new_pim_nbr == old_pim_nbr)
-	return;				// Nothing has changed
+	return;				// Nothing changed
     
     // Set the new upstream
     set_rpfp_nbr_wc(new_pim_nbr);
@@ -1077,7 +1077,7 @@ PimMre::recompute_mrib_next_hop_s_changed()
  joined_state_label:
     // Joined state
     if (new_pim_nbr == mrib_next_hop_s())
-	return;				// Nothing has changed
+	return;				// Nothing changed
     
     // Send Prune(S,G) to the old value of RPF'(S,G)
     old_pim_nbr = rpfp_nbr_sg();
@@ -1136,7 +1136,7 @@ PimMre::recompute_rpfp_nbr_sg_changed()
     // Joined state
     old_pim_nbr = rpfp_nbr_sg();
     if (new_pim_nbr == old_pim_nbr)
-	return;				// Nothing has changed
+	return;				// Nothing changed
     
     // Set the new upstream
     set_rpfp_nbr_sg(new_pim_nbr);
@@ -1223,7 +1223,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     // NotPruned state
     old_pim_nbr = rpfp_nbr_sg_rpt();
     if (new_pim_nbr == old_pim_nbr)
-	return;				// Nothing has changed
+	return;				// Nothing changed
     
     // Set the new upstream
     set_rpfp_nbr_sg_rpt(new_pim_nbr);
