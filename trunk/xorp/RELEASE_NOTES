@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.9 2003/06/05 22:31:41 hodson Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.10 2003/06/05 23:32:01 hodson Exp $
 #
 
 		XORP RELEASE NOTES
@@ -85,7 +85,18 @@ Release 0.3 (2003/??/??)
     - 
 
   BGP:
-    - 
+    - More robust to XRL communication failures. In particular support
+      for retransmission.
+
+    - Replace calls to abort() with more self-explanatory self-destruction.
+
+    - Terminate interface removed and replaced with common shutdown interface.
+
+    - Use system md5 header files.
+
+    - Peer list sorted by remote IP for snmp.
+
+    - Uninitialised variable bug fix in NextHopRibRequest.
 
   MFEA:
     - IPv6-related bug fixes.
