@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.11 2004/05/06 17:42:57 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.12 2004/05/31 04:06:40 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -942,8 +942,16 @@ XrlRipCommonTarget<A>::ripx_0_1_rip_address_status(const string&	ifn,
 	return pp.second;
 
     Port<A>* p = pp.first;
+    status = p->enabled() ? "enabled" : "disabled";
 
-    status = (p->enabled()) ? "running" : "not running";
+    if (p->enabled()
+	&& _xpm.underlying_rip_address_up(ifn, vifn, addr) == false) {
+	if (_xpm.underlying_rip_address_exists(ifn, vifn, addr)) {
+	    status += " [gated by disabled FEA interface/vif/address]";
+	} else {
+	    status += " [gated by non-existant FEA interface/vif/address]";
+	}
+    }
 
     debug_msg("ripx_0_1_rip_address_status %s/%s/%s -> %s\n",
 	      ifn.c_str(), vifn.c_str(), addr.str().c_str(),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.6 2004/03/20 18:03:59 hodson Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.7 2004/04/22 01:11:51 pavlin Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -133,6 +133,28 @@ public:
     const Port<A>* find_port(const string&	ifname,
 			     const string&	vifname,
 			     const A&		addr) const;
+
+    /**
+     * Determine if rip address is up.  The result is based on the current
+     * state of information from the FEA.
+     *
+     * @return true if the address is up, false if the address is not up
+     * or does not exist.
+     */
+    bool underlying_rip_address_up(const string&	ifname,
+				   const string&	vifname,
+				   const A&		addr) const;
+
+    /**
+     * Determine if rip address exists.  The result is based on the
+     * current state of information from the FEA.
+     *
+     * @return true if the address is up, false if the address is not up
+     * or does not exist.
+     */
+    bool underlying_rip_address_exists(const string&	ifname,
+				       const string&	vifname,
+				       const A&		addr) const;
 
 protected:
     //

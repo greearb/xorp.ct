@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.12 2004/04/22 01:11:51 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.13 2004/05/03 23:08:09 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -392,6 +392,24 @@ XrlPortManager<A>::find_port(const string& 	ifname,
 	return 0;
     }
     return port;
+}
+
+template <typename A>
+bool
+XrlPortManager<A>::underlying_rip_address_up(const string&	ifname,
+					     const string&	vifname,
+					     const A&		addr) const
+{
+    return address_enabled(_ifm.iftree(), ifname, vifname, addr);
+}
+
+template <typename A>
+bool
+XrlPortManager<A>::underlying_rip_address_exists(const string&	ifname,
+						 const string&	vifname,
+						 const A&	addr) const
+{
+    return _ifm.iftree().find_addr(ifname, vifname, addr) != 0;
 }
 
 template <typename A>
