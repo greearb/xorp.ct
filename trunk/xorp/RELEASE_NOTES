@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.28 2003/08/28 02:30:36 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.29 2003/08/28 13:18:24 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -63,11 +63,14 @@ Release 0.4 (2003/08/28)
     - Bug fix (Linux-specific): if IGMP/MLD is enabled, then the multicast
       router will properly receive all IGMP/MLD messages.
 
-    - Added support to enable/disable unicast forwarding in the kernel.
-      Currently, the support is only for FreeBSD. E.g., in case of
-      Linux the user must explicitly enable it by running
-      as root `echo 1 > /proc/sys/net/ipv4/ip_forward`
-      before starting XORP).
+    - Added support to enable/disable unicast forwarding in the kernel
+      via the FEA.
+      Currently, the support is only for FreeBSD, but is not used yet.
+      Hence, the user must explicitly enable unicast forwarding
+      before starting XORP.
+      E.g., in case of FreeBSD run `sysctl net.inet.ip.forwarding=1`
+      as root. In case of Linux run
+      `echo 1 > /proc/sys/net/ipv4/ip_forward` as root.
 
     - Fix a compilation problem for NetBSD
       (courtesy Hitoshi Asaeda <Hitoshi.Asaeda@sophia.inria.fr>
