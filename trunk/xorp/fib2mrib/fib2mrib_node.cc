@@ -12,16 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.18 2005/02/14 23:17:36 pavlin Exp $"
-
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.19 2005/02/15 01:50:19 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
 //
-
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
-
 
 #include "fib2mrib_module.h"
 
@@ -302,14 +297,19 @@ Fib2mribNode::tree_complete()
 void
 Fib2mribNode::updates_made()
 {
-    multimap<IPvXNet, Fib2mribRoute>::const_iterator route_iter;
+    multimap<IPvXNet, Fib2mribRoute>::iterator route_iter;
 
     for (route_iter = _fib2mrib_routes.begin();
 	 route_iter != _fib2mrib_routes.end();
 	 ++route_iter) {
-	const Fib2mribRoute& fib2mrib_route = route_iter->second;
+	Fib2mribRoute& fib2mrib_route = route_iter->second;
 	bool is_old_interface_up = false;
 	bool is_new_interface_up = false;
+	bool is_old_directly_connected = false;
+	bool is_new_directly_connected = false;
+	bool is_new_up = false;
+
+	update_route(ifmgr_iftree(), fib2mrib_route);
 
 	if (fib2mrib_route.is_interface_route()) {
 	    //
@@ -324,27 +324,32 @@ Fib2mribNode::updates_made()
 					       fib2mrib_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
 		is_new_interface_up = true;
-	} else {
-	    //
-	    // Calculate whether the next-hop router was directly connected
-	    // before and now.
-	    //
-	    if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
-		is_old_interface_up = true;
-	    if (is_directly_connected(ifmgr_iftree(), fib2mrib_route.nexthop()))
-		is_new_interface_up = true;
+	}
+	//
+	// Calculate whether the next-hop router was directly connected
+	// before and now.
+	//
+	if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
+	    is_old_directly_connected = true;
+	if (is_directly_connected(ifmgr_iftree(), fib2mrib_route.nexthop()))
+	    is_new_directly_connected = true;
+
+	if ((is_old_interface_up == is_new_interface_up)
+	    && (is_old_directly_connected == is_new_directly_connected)) {
+	    continue;			// Nothing changed
 	}
 
 	if (is_old_interface_up == is_new_interface_up)
-	    continue;			// Nothing changed
+	    is_new_up = is_new_directly_connected;
+	else
+	    is_new_up = is_new_interface_up;
 
-	if (is_new_interface_up) {
+	if (is_new_up) {
 	    //
 	    // The interface is now up, hence add the route
 	    //
 	    inform_rib_route_change(fib2mrib_route);
-	}
-	if (! is_new_interface_up) {
+	} else {
 	    //
 	    // The interface went down, hence cancel all pending requests,
 	    // and withdraw the route.
@@ -364,13 +369,13 @@ Fib2mribNode::updates_made()
 }
 
 bool
-Fib2mribNode::is_directly_connected(const IfMgrIfTree& if_tree,
+Fib2mribNode::is_directly_connected(const IfMgrIfTree& iftree,
 				    const IPvX& addr) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = if_tree.ifs().begin();
-	 if_iter != if_tree.ifs().end();
+    for (if_iter = iftree.ifs().begin();
+	 if_iter != iftree.ifs().end();
 	 ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
@@ -649,12 +654,19 @@ int
 Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
 			string& error_msg)
 {
+    Fib2mribRoute updated_route = fib2mrib_route;
+
+    //
+    // Update the route
+    //
+    update_route(_iftree, updated_route);
+
     //
     // Check the entry
     //
-    if (fib2mrib_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) {
 	error_msg = c_format("Cannot add route for %s: %s",
-			     fib2mrib_route.network().str().c_str(),
+			     updated_route.network().str().c_str(),
 			     error_msg.c_str());
 	return XORP_ERROR;
     }
@@ -663,26 +675,36 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
     // Check if the route was added already
     //
     multimap<IPvXNet, Fib2mribRoute>::iterator iter;
-    iter = _fib2mrib_routes.find(fib2mrib_route.network());
+    iter = _fib2mrib_routes.find(updated_route.network());
     for ( ; iter != _fib2mrib_routes.end(); ++iter) {
 	Fib2mribRoute& tmp_route = iter->second;
-	if (tmp_route.network() != fib2mrib_route.network())
+	if (tmp_route.network() != updated_route.network())
 	    break;
-	if ((tmp_route.ifname() != fib2mrib_route.ifname())
-	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
+	if ((tmp_route.ifname() != updated_route.ifname())
+	    || (tmp_route.vifname() != updated_route.vifname())) {
 	    continue;
 	}
-	error_msg = c_format("Cannot add route for %s: "
-			     "the route already exists",
-			     fib2mrib_route.network().str().c_str());
-	return XORP_ERROR;
+
+	//
+	// XXX: Route found. Ideally, if we receive add_route() from
+	// the FEA, we should have received delete_route() before.
+	// However, on FreeBSD-4.10 (at least), if a route points
+	// to the local address of an interface, and if we delete
+	// that address, the kernel automatically removes all affected
+	// routes without reporting the routing information change
+	// to the process(es) listening on routing sockets.
+	// Therefore, to deal with such (mis)behavior of the FEA,
+	// we just replace the previously received route with the
+	// new one.
+	//
+	return (replace_route(fib2mrib_route, error_msg));
     }
 
     //
     // Add the route
     //
-    iter = _fib2mrib_routes.insert(make_pair(fib2mrib_route.network(),
-					     fib2mrib_route));
+    iter = _fib2mrib_routes.insert(make_pair(updated_route.network(),
+					     updated_route));
 
     //
     // Do policy filtering
@@ -693,16 +715,16 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
     // We do not want to modify original route, so we may re-filter routes on
     // filter configuration changes. Hence, copy route.
     //
-    Fib2mribRoute route_copy = added_route;
+    Fib2mribRoute copy_route = added_route;
 
-    bool accepted = do_filtering(route_copy);
+    bool accepted = do_filtering(copy_route);
 
     // Tag the original route as filtered or not
     added_route.set_filtered(!accepted);
 
     // Inform RIB about the possibly modified route if it was accepted 
     if (accepted)
-	inform_rib(route_copy);
+	inform_rib(copy_route);
 
     return XORP_OK;
 }
@@ -719,14 +741,20 @@ int
 Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 			    string& error_msg)
 {
+    Fib2mribRoute updated_route = fib2mrib_route;
     Fib2mribRoute* route_to_replace_ptr = NULL;
+
+    //
+    // Update the route
+    //
+    update_route(_iftree, updated_route);
 
     //
     // Check the entry
     //
-    if (fib2mrib_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) {
 	error_msg = c_format("Cannot replace route for %s: %s",
-			     fib2mrib_route.network().str().c_str(),
+			     updated_route.network().str().c_str(),
 			     error_msg.c_str());
 	return XORP_ERROR;
     }
@@ -735,15 +763,15 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     // Find the route and replace it
     //
     multimap<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
-    iter = _fib2mrib_routes.find(fib2mrib_route.network());
+    iter = _fib2mrib_routes.find(updated_route.network());
     if ((iter == _fib2mrib_routes.end())
-	|| (iter->second.network() != fib2mrib_route.network())) {
+	|| (iter->second.network() != updated_route.network())) {
 	//
 	// Couldn't find the route to replace
 	//
 	error_msg = c_format("Cannot replace route for %s: "
 			     "no such route",
-			     fib2mrib_route.network().str().c_str());
+			     updated_route.network().str().c_str());
 	return XORP_ERROR;
     }
 
@@ -754,10 +782,10 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     //
     for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
 	Fib2mribRoute& tmp_route = iter2->second;
-	if (tmp_route.network() != fib2mrib_route.network())
+	if (tmp_route.network() != updated_route.network())
 	    break;
-	if ((tmp_route.ifname() != fib2mrib_route.ifname())
-	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
+	if ((tmp_route.ifname() != updated_route.ifname())
+	    || (tmp_route.vifname() != updated_route.vifname())) {
 	    continue;
 	}
 
@@ -786,31 +814,31 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 	Fib2mribRoute& tmp_route = *route_to_replace_ptr;
 
 	bool was_filtered = tmp_route.is_filtered();
-	tmp_route = fib2mrib_route;
+	tmp_route = updated_route;
 
 	// Do policy filtering
-	Fib2mribRoute route_copy = fib2mrib_route;
-	bool accepted = do_filtering(route_copy);
+	Fib2mribRoute copy_route = updated_route;
+	bool accepted = do_filtering(copy_route);
 	tmp_route.set_filtered(!accepted);
 
 	// Decide what to do
 	if (accepted) {
 	    if (was_filtered) {
-		route_copy.set_add_route();
+		copy_route.set_add_route();
 	    } else {
 	    }
 	} else {
 	    if (was_filtered) {
 		return XORP_OK;
 	    } else {
-		route_copy.set_delete_route();
+		copy_route.set_delete_route();
 	    }
 	}
 	
 	//
 	// Inform the RIB about the change
 	//
-	inform_rib(route_copy);
+	inform_rib(copy_route);
 
     } while (false);
 
@@ -829,12 +857,19 @@ int
 Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 			   string& error_msg)
 {
+    Fib2mribRoute updated_route = fib2mrib_route;
+
+    //
+    // Update the route
+    //
+    update_route(_iftree, updated_route);
+
     //
     // Check the entry
     //
-    if (fib2mrib_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) {
 	error_msg = c_format("Cannot delete route for %s: %s",
-			     fib2mrib_route.network().str().c_str(),
+			     updated_route.network().str().c_str(),
 			     error_msg.c_str());
 	return XORP_ERROR;
     }
@@ -843,16 +878,15 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     // Find the route and delete it
     //
     multimap<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
-    iter = _fib2mrib_routes.find(fib2mrib_route.network());
+    iter = _fib2mrib_routes.find(updated_route.network());
     if ((iter == _fib2mrib_routes.end())
-	|| (iter->second.network() != fib2mrib_route.network())) {
+	|| (iter->second.network() != updated_route.network())) {
 	//
 	// Couldn't find the route to delete
 	//
-    error_label:
 	error_msg = c_format("Cannot delete route for %s: "
 			     "no such route",
-			     fib2mrib_route.network().str().c_str());
+			     updated_route.network().str().c_str());
 	return XORP_ERROR;
     }
 
@@ -863,10 +897,10 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     //
     for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
 	Fib2mribRoute& tmp_route = iter2->second;
-	if (tmp_route.network() != fib2mrib_route.network())
+	if (tmp_route.network() != updated_route.network())
 	    break;
-	if ((tmp_route.ifname() != fib2mrib_route.ifname())
-	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
+	if ((tmp_route.ifname() != updated_route.ifname())
+	    || (tmp_route.vifname() != updated_route.vifname())) {
 	    continue;
 	}
 
@@ -877,14 +911,18 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     }
 
     if (iter2 == _fib2mrib_routes.end()
-	|| (iter2->second.network() != fib2mrib_route.network())) {
+	|| (iter2->second.network() != updated_route.network())) {
 	//
 	// No route found with the same ifname and vifname.
 	// If this is an interface-specific route, then this is an error.
 	// Otherwise, delete the first route for the same subnet.
 	//
-	if (fib2mrib_route.is_interface_route())
-	    goto error_label;
+	if (updated_route.is_interface_route()) {
+	    error_msg = c_format("Cannot delete route for %s: "
+				 "no such route",
+				 updated_route.network().str().c_str());
+	    return XORP_ERROR;
+	}
 	iter2 = iter;
     }
 
@@ -986,6 +1024,122 @@ Fib2mribNode::inform_rib(const Fib2mribRoute& route)
 	if (is_directly_connected(_iftree, route.nexthop()))
 	    inform_rib_route_change(route);
     }
+}
+
+/**
+ * Update a route received from the FEA.
+ * 
+ * This method is needed as a work-around of FEA-related problems
+ * with the routes the FEA sends to interested parties such as FIB2MRIB.
+ * A route is updated with interface-related information or next-hop
+ * address.
+ * 
+ * This method is needed as a work-around of FEA-related problems
+ * with the routes the FEA sends to interested parties such as FIB2MRIB.
+ * 
+ * The routes received from the FEA for the directly-connected subnets
+ * may not contain next-hop information and network interface information.
+ * If the route is for a directly-connected subnet, and if it is missing
+ * that information, then add the interface and next-hop router
+ * information.
+ * Furthermore, on startup, the routes received from the FEA may
+ * contain interface-related information, but later updates of those
+ * routes may be missing this information. This may create a mismatch,
+ * therefore all routes are updated (if possible) to contain
+ * interface-related information.
+ * 
+ * @param iftree the tree with the interface state to update the route.
+ * @param route the route to update.
+ * @return true if the route was updated, otherwise false.
+ */
+bool
+Fib2mribNode::update_route(const IfMgrIfTree& iftree, Fib2mribRoute& route)
+{
+    //
+    // Test if the route needs to be updated
+    //
+    if (route.is_interface_route())
+	return (false);
+
+    //
+    // Find if there is a directly-connected subnet that matches the route
+    // or the address of the next-hop router.
+    //
+    IfMgrIfTree::IfMap::const_iterator if_iter;
+    for (if_iter = iftree.ifs().begin();
+	 if_iter != iftree.ifs().end();
+	 ++if_iter) {
+	const IfMgrIfAtom& iface = if_iter->second;
+
+	IfMgrIfAtom::VifMap::const_iterator vif_iter;
+	for (vif_iter = iface.vifs().begin();
+	     vif_iter != iface.vifs().end();
+	     ++vif_iter) {
+	    const IfMgrVifAtom& vif = vif_iter->second;
+
+	    //
+	    // Check the IPv4 subnets
+	    //
+	    if (route.is_ipv4()) {
+		IfMgrVifAtom::V4Map::const_iterator a4_iter;
+		for (a4_iter = vif.ipv4addrs().begin();
+		     a4_iter != vif.ipv4addrs().end();
+		     ++a4_iter) {
+		    const IfMgrIPv4Atom& a4 = a4_iter->second;
+		    IPvXNet ipvxnet(a4.addr(), a4.prefix_len());
+
+		    // Update a directly-connected route
+		    if (ipvxnet == route.network()) {
+			route.set_ifname(iface.name());
+			route.set_vifname(vif.name());
+			if (route.nexthop().is_zero())
+			    route.set_nexthop(a4.addr());
+			return (true);
+		    }
+
+		    // Update the route if a directly-connected next-hop
+		    if (ipvxnet.contains(route.nexthop())
+			&& (! route.nexthop().is_zero())) {
+			route.set_ifname(iface.name());
+			route.set_vifname(vif.name());
+			return (true);
+		    }
+		}
+	    }
+
+	    //
+	    // Check the IPv6 subnets
+	    //
+	    if (route.is_ipv6()) {
+		IfMgrVifAtom::V6Map::const_iterator a6_iter;
+		for (a6_iter = vif.ipv6addrs().begin();
+		     a6_iter != vif.ipv6addrs().end();
+		     ++a6_iter) {
+		    const IfMgrIPv6Atom& a6 = a6_iter->second;
+		    IPvXNet ipvxnet(a6.addr(), a6.prefix_len());
+
+		    // Update a directly-connected route
+		    if (ipvxnet == route.network()) {
+			route.set_ifname(iface.name());
+			route.set_vifname(vif.name());
+			if (route.nexthop().is_zero())
+			    route.set_nexthop(a6.addr());
+			return (true);
+		    }
+
+		    // Update the route if a directly-connected next-hop
+		    if (ipvxnet.contains(route.nexthop())
+			&& (! route.nexthop().is_zero())) {
+			route.set_ifname(iface.name());
+			route.set_vifname(vif.name());
+			return (true);
+		    }
+		}
+	    }
+	}
+    }
+
+    return (false);
 }
 
 bool

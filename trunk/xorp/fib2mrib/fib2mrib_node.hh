@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.12 2005/02/11 04:21:39 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.13 2005/02/14 23:17:36 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -141,6 +141,13 @@ public:
     const IPvX& nexthop() const { return _nexthop; }
 
     /**
+     * Set the address of the next-hop router for this route.
+     *
+     * @param v the address of the next-hop router for this route.
+     */
+    void set_nexthop(const IPvX& v) { _nexthop = v; }
+
+    /**
      * Get the name of the physical interface toward the destination.
      * 
      * @return the name of the physical interface toward the destination.
@@ -148,11 +155,25 @@ public:
     const string& ifname() const { return _ifname; }
 
     /**
+     * Set the name of the physical interface toward the destination.
+     *
+     * @param v the name of the physical interface toward the destination.
+     */
+    void set_ifname(const string& v) { _ifname = v; }
+
+    /**
      * Get the name of the virtual interface toward the destination.
      * 
      * @return the name of the virtual interface toward the destination.
      */
     const string& vifname() const { return _vifname; }
+
+    /**
+     * Set the name of the virtual interface toward the destination.
+     *
+     * @param v the name of the virtual interface toward the destination.
+     */
+    void set_vifname(const string& v) { _vifname = v; }
 
     /**
      * Get the the administratively defined distance for this route.
@@ -667,13 +688,38 @@ private:
      * If an interface toward an address is down, then the address is not
      * considered as directly connected.
      * 
-     * @param if_tree the tree with the interface state.
+     * @param iftree the tree with the interface state.
      * @param addr the address to test.
      * @return true if @ref addr is directly connected to an interface
-     * contained inside @ref if_tree, otherwise false.
+     * contained inside @ref iftree, otherwise false.
      */
-    bool is_directly_connected(const IfMgrIfTree& if_tree,
+    bool is_directly_connected(const IfMgrIfTree& iftree,
 			       const IPvX& addr) const;
+
+    /**
+     * Update a route received from the FEA.
+     * 
+     * This method is needed as a work-around of FEA-related problems
+     * with the routes the FEA sends to interested parties such as FIB2MRIB.
+     * A route is updated with interface-related information or next-hop
+     * address.
+     * 
+     * The routes received from the FEA for the directly-connected subnets
+     * may not contain next-hop information and network interface information.
+     * If the route is for a directly-connected subnet, and if it is missing
+     * that information, then add the interface and next-hop router
+     * information.
+     * Furthermore, on startup, the routes received from the FEA may
+     * contain interface-related information, but later updates of those
+     * routes may be missing this information. This may create a mismatch,
+     * therefore all routes are updated (if possible) to contain
+     * interface-related information.
+     * 
+     * @param iftree the tree with the interface state to update the route.
+     * @param route the route to update.
+     * @return true if the route was updated, otherwise false.
+     */
+    bool update_route(const IfMgrIfTree& iftree, Fib2mribRoute& route);
 
     /**
      * Do policy filtering on a route.
