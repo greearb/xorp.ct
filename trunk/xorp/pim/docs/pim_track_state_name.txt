@@ -1,9 +1,10 @@
 Input = INPUT_STATE_RP_CHANGED
         OUTPUT_STATE_MRIB_RP_RP                                    (*,*,RP)
-        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP                          (*,*,RP)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_RP                       (*,*,RP)
         OUTPUT_STATE_RP_WC                                            (*,G)
         OUTPUT_STATE_MRIB_RP_WC                                       (*,G)
         OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_WC                          (*,G)
         OUTPUT_STATE_RPFP_NBR_WC_NOT_ASSERT                           (*,G)
         OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
@@ -30,9 +31,10 @@ Input = INPUT_STATE_RP_CHANGED
 
 Input = INPUT_STATE_MRIB_RP_CHANGED
         OUTPUT_STATE_MRIB_RP_RP                                    (*,*,RP)
-        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP                          (*,*,RP)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_RP                       (*,*,RP)
         OUTPUT_STATE_MRIB_RP_WC                                       (*,G)
         OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_WC                          (*,G)
         OUTPUT_STATE_RPFP_NBR_WC_NOT_ASSERT                           (*,G)
         OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
@@ -71,7 +73,8 @@ Input = INPUT_STATE_MRIB_S_CHANGED
         OUTPUT_STATE_UPDATE_SPTBIT_MFC                                (MFC)
 
 Input = INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED
-        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP                          (*,*,RP)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_RP                       (*,*,RP)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_WC                          (*,G)
         OUTPUT_STATE_RPFP_NBR_WC_NOT_ASSERT                           (*,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)

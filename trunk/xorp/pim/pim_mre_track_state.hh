@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.15 2004/05/30 09:57:15 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.16 2004/06/10 22:41:31 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -169,40 +169,41 @@ public:
 	OUTPUT_STATE_RPFP_NBR_SG_GEN_ID,			// 44
 	OUTPUT_STATE_RPFP_NBR_SG_RPT,				// 45
 	OUTPUT_STATE_RPFP_NBR_SG_RPT_SG,			// 46
-	OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP,			// 47
-	OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID,		// 48
-	OUTPUT_STATE_OUT_START_VIF_RP,				// 49
-	OUTPUT_STATE_OUT_START_VIF_WC,				// 50
-	OUTPUT_STATE_OUT_START_VIF_SG,				// 51
-	OUTPUT_STATE_OUT_START_VIF_SG_RPT,			// 52
-	OUTPUT_STATE_OUT_STOP_VIF_RP,				// 53
-	OUTPUT_STATE_OUT_STOP_VIF_WC,				// 54
-	OUTPUT_STATE_OUT_STOP_VIF_SG,				// 55
-	OUTPUT_STATE_OUT_STOP_VIF_SG_RPT,			// 56
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP,		// 57
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC,		// 58
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG,		// 59
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT,		// 60
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC,		// 61
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG,		// 62
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT,		// 63
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG,		// 64
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT,		// 65
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG,		// 66
-	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT,	// 67
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP,		// 68
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC,		// 69
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG,		// 70
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT,	// 71
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC,		// 72
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG,		// 73
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT,	// 74
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG,		// 75
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT,	// 76
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG,	// 77
-	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT,	// 78
-	OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC,		// 79
-	OUTPUT_STATE_UPDATE_SPTBIT_MFC,				// 80
+	OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_RP,			// 47
+	OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_WC,			// 48
+	OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID,		// 49
+	OUTPUT_STATE_OUT_START_VIF_RP,				// 50
+	OUTPUT_STATE_OUT_START_VIF_WC,				// 51
+	OUTPUT_STATE_OUT_START_VIF_SG,				// 52
+	OUTPUT_STATE_OUT_START_VIF_SG_RPT,			// 53
+	OUTPUT_STATE_OUT_STOP_VIF_RP,				// 54
+	OUTPUT_STATE_OUT_STOP_VIF_WC,				// 55
+	OUTPUT_STATE_OUT_STOP_VIF_SG,				// 56
+	OUTPUT_STATE_OUT_STOP_VIF_SG_RPT,			// 57
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP,		// 58
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC,		// 59
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG,		// 60
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT,		// 61
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC,		// 62
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG,		// 63
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT,		// 64
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG,		// 65
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT,		// 66
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG,		// 67
+	OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT,	// 68
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP,		// 69
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC,		// 70
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG,		// 71
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT,	// 72
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC,		// 73
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG,		// 74
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT,	// 75
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG,		// 76
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT,	// 77
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG,	// 78
+	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT,	// 79
+	OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC,		// 80
+	OUTPUT_STATE_UPDATE_SPTBIT_MFC,				// 81
 	OUTPUT_STATE_MAX
     };
     
@@ -316,7 +317,8 @@ public:
     list<PimMreAction>	output_state_rpfp_nbr_sg_gen_id(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_rpfp_nbr_sg_rpt(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_rpfp_nbr_sg_rpt_sg(list<PimMreAction> action_list);
-    list<PimMreAction>	output_state_nbr_mrib_next_hop_rp(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_nbr_mrib_next_hop_rp_rp(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_nbr_mrib_next_hop_rp_wc(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_nbr_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_start_vif_rp(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_start_vif_wc(list<PimMreAction> action_list);
@@ -440,7 +442,8 @@ private:
     void	track_state_rpf_interface_rp(list<PimMreAction> action_list);
     void	track_state_rpf_interface_s(list<PimMreAction> action_list);
     // RPF neighbor info
-    void	track_state_nbr_mrib_next_hop_rp(list<PimMreAction> action_list);
+    void	track_state_nbr_mrib_next_hop_rp_rp(list<PimMreAction> action_list);
+    void	track_state_nbr_mrib_next_hop_rp_wc(list<PimMreAction> action_list);
     void	track_state_nbr_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list);
     void	track_state_nbr_mrib_next_hop_rp_g(list<PimMreAction> action_list);
     void	track_state_nbr_mrib_next_hop_s(list<PimMreAction> action_list);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.26 2004/03/04 01:39:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.27 2004/06/10 22:41:31 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -843,7 +843,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
 // Note: applies only for (*,*,RP) entries
 //
 void
-PimMre::recompute_nbr_mrib_next_hop_rp_changed()
+PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
 {
     PimNbr *old_pim_nbr, *new_pim_nbr;
     uint16_t join_prune_period = PIM_JOIN_PRUNE_PERIOD_DEFAULT;
@@ -941,6 +941,28 @@ PimMre::recompute_nbr_mrib_next_hop_rp_gen_id_changed()
     }
 }
 
+
+//
+// The NBR(RPF_interface(RP(G)), MRIB.next_hop(RP(G))) has changed.
+// Take the appropriate action.
+// Note: applies only for (*,G) entries
+//
+void
+PimMre::recompute_nbr_mrib_next_hop_rp_wc_changed()
+{
+    PimNbr *old_pim_nbr, *new_pim_nbr;
+    
+    if (! is_wc())
+	return;
+
+    old_pim_nbr = nbr_mrib_next_hop_rp();
+    new_pim_nbr = compute_nbr_mrib_next_hop_rp();
+    if (old_pim_nbr == new_pim_nbr)
+	return;				// Nothing changed
+
+    set_nbr_mrib_next_hop_rp(new_pim_nbr);    
+}
+
 //
 // The current next hop towards the RP has changed due to an Assert.
 // Take the appropriate action.
@@ -1004,7 +1026,7 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
     if (! is_wc())
 	return;
     
-    new_pim_nbr = compute_rpfp_nbr_wc();    
+    new_pim_nbr = compute_rpfp_nbr_wc();
     
     if (is_joined_state())
 	goto joined_state_label;
