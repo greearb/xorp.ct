@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.19 2003/05/27 17:47:15 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.20 2003/06/01 01:55:57 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -252,7 +252,9 @@ VifManager::set_vif_state()
 		// Update the address
 		// TODO: if necessary, we should update the address inside
 		// the RIB
-		*node_vif_addr = vif_addr;
+		if (*node_vif_addr != vif_addr) {
+		    *node_vif_addr = vif_addr;
+		}
 	    }
 	}
     }

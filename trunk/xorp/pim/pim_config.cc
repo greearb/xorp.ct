@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.12 2003/05/31 17:53:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.13 2003/06/01 02:14:50 pavlin Exp $"
 
 
 //
@@ -116,7 +116,9 @@ PimNode::set_config_all_vifs_done(string& reason)
 		    continue;
 		}
 		// Update the address
-		*node_vif_addr = vif_addr;
+		if (*node_vif_addr != vif_addr) {
+		    *node_vif_addr = vif_addr;
+		}
 	    }
 	}
     }
