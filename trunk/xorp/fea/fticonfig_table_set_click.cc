@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_click.cc,v 1.3 2004/11/12 00:31:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_click.cc,v 1.4 2004/12/01 03:28:09 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -75,7 +75,7 @@ FtiConfigTableSetClick::start(string& error_msg)
     // registration process itself can trigger some startup operations
     // (if any).
     //
-    register_ftic_secondary();
+    register_ftic_primary();
 
     return (XORP_OK);
 }
