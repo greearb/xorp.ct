@@ -1,6 +1,11 @@
 #
-# $XORP: xorp/pim/TODO,v 1.57 2003/08/14 15:20:36 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.58 2003/08/14 23:53:07 pavlin Exp $
 #
+
+* IMPL+PIM_ARCH_DOCUMENT:
+  - Add new class PimStat or so to keep statstics per vif, per node, etc.
+  - Add this new PimStat class to the design figure,
+    and to the test description.
 
 * BOOTSTRAP SPEC + IMPL: If the BSR goes down, and its state expires
   in the rest of the routers, clarify whether they remove the RP-Set
