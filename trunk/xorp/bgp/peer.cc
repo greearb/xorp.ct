@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.49 2003/10/11 03:17:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.50 2003/10/26 04:27:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -979,12 +979,14 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
     debug_msg("check_open_packet says it's OK with us\n");
 }
 
+#define	REMOVE_UNNEGOTIATED_NLRI
+
 inline
 bool
 check_multiprotocol_nlri(const UpdatePacket *p, PathAttribute *pa, bool neg)
 {
     if(pa && !neg) {
-#if	1
+#ifdef	REMOVE_UNNEGOTIATED_NLRI
 	// We didn't advertise this capability, so strip this sucker out.
 	PathAttributeList<IPv4>& tmp = 
 	    const_cast<PathAttributeList<IPv4>&>(p->pa_list());
@@ -1014,27 +1016,56 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
     // 11 - Malformed AS_PATH
 
     /*
-    ** Check for multiprotocol parameters that haven't been sent.
+    ** The maximum message size is 4096 bytes. We don't need an
+    ** explicit check here as the packet construction routines will
+    ** already have generated an error if the maximum size had been
+    ** exceeded.
     */
-    if(p->mpreach_ipv6(SAFI_UNICAST) &&
-       !peerdata()->unicast_ipv6(BGPPeerData::SENT)) {
-#if	1
-	// We didn't advertise this capability, so strip this sucker out.
-	PathAttributeList<IPv4>& tmp = 
-	    const_cast<PathAttributeList<IPv4>&>(p->pa_list());
-	tmp.remove_attribute_by_pointer(p->mpreach_ipv6(SAFI_UNICAST));
-#else
-	// We didn't advertise this capability, drop peering.
- 	return new NotificationPacket(UPDATEMSGERR, OPTATTR);
-#endif
-    }
 
-    BGPPeerData::Direction dir = BGPPeerData::SENT;
+    /*
+    ** Check for multiprotocol parameters that haven't been "negotiated".
+    **
+    ** There are two questions that seem to ambiguous in the BGP specs.
+    **
+    ** 1) How do we deal with a multiprotol attribute that hasn't
+    **    been "negotiated".
+    **	  a) Strip out the offending attribute.
+    **	  b) Send a notify and drop the peering.
+    ** 2) In order to accept a multiprotol attribute. I.E to consider
+    **    it to have been "negotiated", what is the criteria.
+    **	  a) Is it sufficient for this speaker to have announced the
+    **    capability.
+    **	  b) Do both speakers in a session need to announce a capability.
+    **
+    ** For the time being we are going with 1) (a) and 2 (a).
+    */
+
 //     BGPPeerData::Direction dir = BGPPeerData::NEGOTIATED;
+    BGPPeerData::Direction dir = BGPPeerData::SENT;
+    bool bad_nlri = false;
+    if(!check_multiprotocol_nlri(p, p->mpreach_ipv4(SAFI_MULTICAST),
+				 peerdata()->multicast_ipv4(dir)))
+	bad_nlri = true;
+    if(!check_multiprotocol_nlri(p, p->mpunreach_ipv4(SAFI_MULTICAST),
+				 peerdata()->multicast_ipv4(dir)))
+	bad_nlri = true;
+
     if(!check_multiprotocol_nlri(p, p->mpreach_ipv6(SAFI_UNICAST),
 				 peerdata()->unicast_ipv6(dir)))
+	bad_nlri = true;
+    if(!check_multiprotocol_nlri(p, p->mpunreach_ipv6(SAFI_UNICAST),
+				 peerdata()->unicast_ipv6(dir)))
+	bad_nlri = true;
+    if(!check_multiprotocol_nlri(p, p->mpreach_ipv6(SAFI_MULTICAST),
+				 peerdata()->multicast_ipv6(dir)))
+	bad_nlri = true;
+    if(!check_multiprotocol_nlri(p, p->mpunreach_ipv6(SAFI_MULTICAST),
+				 peerdata()->multicast_ipv6(dir)))
+	bad_nlri = true;
+#ifndef	REMOVE_UNNEGOTIATED_NLRI
+    if(bad_nlri)
 	return new NotificationPacket(UPDATEMSGERR, OPTATTR);
-       
+#endif
 
     // if the path attributes list is empty then no network
     // layer reachability information should be present.
@@ -1047,8 +1078,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	}
     } else {
 	// if we have path attributes, check that they are valid.
-	bool local_pref;
-	local_pref = false;
+	bool local_pref = false;
 
 	list<PathAttribute*> l = p->pa_list();
 	list<PathAttribute*>::const_iterator i;
@@ -1093,12 +1123,16 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	}
 
 	/*
-	** If NLRI is present check for the following mandatory fields:
+	** If a NLRI attribute is present check for the following
+	** mandatory fields: 
 	** ORIGIN
 	** AS_PATH
 	** NEXT_HOP
 	*/
-	if ( p->nlri_list().empty() == false )	{
+	if ( p->nlri_list().empty() == false ||
+	     p->mpreach_ipv4(SAFI_MULTICAST) ||
+	     p->mpreach_ipv6(SAFI_UNICAST)   ||
+	     p->mpreach_ipv6(SAFI_MULTICAST)) {
 	    // The ORIGIN Path attribute is mandatory 
 	    if (origin_attr == NULL) {
 		debug_msg("Missing ORIGIN\n");
@@ -1115,9 +1149,33 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
 	    }
 
-	    // The NEXT_HOP attribute is mandatory
-	    if (next_hop_attr == NULL) {
+	    // The NEXT_HOP attribute is mandatory for IPv4 unicast.
+	    // For multiprotocol NLRI its in the path attribute.
+	    if (p->nlri_list().empty() == false && next_hop_attr == NULL) {
 		debug_msg("Missing NEXT_HOP\n");
+		uint8_t data = NEXT_HOP;
+		return new 
+		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
+	    }
+
+	    // In a multiprotocol NLRI message there is always a nexthop,
+	    // just check that its not zero.
+	    if( p->mpreach_ipv4(SAFI_MULTICAST) && 
+		p->mpreach_ipv4(SAFI_MULTICAST)->nexthop() == IPv4::ZERO()) {
+		uint8_t data = NEXT_HOP;
+		return new 
+		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
+	    }
+
+	    if( p->mpreach_ipv6(SAFI_UNICAST) && 
+		p->mpreach_ipv6(SAFI_UNICAST)->nexthop() == IPv6::ZERO()) {
+		uint8_t data = NEXT_HOP;
+		return new 
+		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
+	    }
+
+	    if( p->mpreach_ipv6(SAFI_MULTICAST) && 
+		p->mpreach_ipv6(SAFI_MULTICAST)->nexthop() == IPv6::ZERO()) {
 		uint8_t data = NEXT_HOP;
 		return new 
 		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
