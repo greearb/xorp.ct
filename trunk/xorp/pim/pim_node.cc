@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.13 2003/06/02 04:11:08 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.14 2003/07/01 01:00:42 pavlin Exp $"
 
 
 //
@@ -1126,6 +1126,56 @@ PimNode::delete_membership(uint16_t vif_index, const IPvX& source,
     // delete pim_mre;
     
     return (XORP_OK);
+}
+
+/**
+ * PimNode::is_directly_connected:
+ * @ipaddr_test: The address to test.
+ * 
+ * Note that the underlying interface must be UP to be considered
+ * as directly connected.
+ * 
+ * Return value: True if @ipaddr_test is directly connected to one of
+ * my virtual interfaces, otherwise false.
+ **/
+bool
+PimNode::is_directly_connected(const IPvX& ipaddr_test) const
+{
+    vector<PimVif *>::const_iterator iter;
+    
+    for (iter = const_proto_vifs().begin();
+	 iter != const_proto_vifs().end(); ++iter) {
+	const PimVif *pim_vif = *iter;
+	if (pim_vif == NULL)
+	    continue;
+	if (is_directly_connected(*pim_vif, ipaddr_test))
+	    return (true);
+    }
+    
+    return (false);
+}
+
+/**
+ * PimNode::is_directly_connected:
+ * @pim_vif: The virtual interface to test against.
+ * @ipaddr_test: The address to test.
+ * 
+ * Note that the underlying interface must be UP to be considered
+ * as directly connected.
+ * 
+ * Return value: True if @ipaddr_test is directly connected to @pim_vif,
+ * otherwise false.
+ **/
+bool
+PimNode::is_directly_connected(const PimVif& pim_vif,
+			       const IPvX& ipaddr_test) const
+{
+    // XXX: the underlying interface must be UP
+    if (! pim_vif.is_underlying_vif_up())
+	return (false);
+    
+    return (pim_vif.is_same_subnet(ipaddr_test)
+	    || pim_vif.is_same_p2p(ipaddr_test));
 }
 
 /**
