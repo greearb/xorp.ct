@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.25 2004/11/11 10:37:52 bms Exp $
+# $XORP: xorp/fea/TODO,v 1.26 2004/12/15 18:46:16 bms Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -183,6 +183,13 @@
 
 ==============================================================================
 ==== Packet ACL-specific TODO                                            =====
+
+* Regression test for top half.
+
+* Roll shell scripts for management (add, delete, dump contents).
+
+* Add a new packet ACL template for the router manager, based on the
+  now defunct etc/templates/firewall* files.
 
 * Optional items:
 
