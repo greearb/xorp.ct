@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.2 2004/06/14 21:44:51 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.3 2004/06/14 22:04:09 atanu Exp $
 #
 
 		XORP ERRATA
@@ -70,6 +70,10 @@
   BGP:
     - Once BGP selects a route it is taking too long to install it in
       the kernel.
+
+  STATIC_ROUTES:
+    - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
+      printing lots of error messages.
       
   MLD/IGMP:
     - If MLD/IGMP is started with a relatively large number of interfaces
@@ -90,6 +94,10 @@
       error message:
         [ 2004/06/12 10:26:41  ERROR xorp_fea:444 MFEA +529 mfea_mrouter.cc
         start_mrt ] setsockopt(MRT_INIT, 1) failed: Operation not supported
+
+  FIB2MRIB:
+    - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
+      printing lots of error messages.
 
   CLI:
     - No known issues.
