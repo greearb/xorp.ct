@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.50 2004/07/26 07:07:57 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.51 2004/08/02 20:46:20 pavlin Exp $"
 
 
 //
@@ -387,6 +387,20 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
     _pim_mrib_table.resolve_prefixes_by_vif_name(pim_vif->name(),
 						 pim_vif->vif_index());
 
+    //
+    // Update the primary and domain-wide addresses
+    //
+    if (pim_vif->addr_ptr() != NULL) {
+	if (pim_vif->update_primary_and_domain_wide_address(error_msg)
+	    != XORP_OK) {
+	    XLOG_ERROR("Error updating primary and domain-wide addresses "
+		       "for vif %s: %s",
+		       pim_vif->name().c_str(),
+		       error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
     XLOG_INFO("New vif: %s", pim_vif->str().c_str());
     
     return (XORP_OK);
@@ -581,7 +595,19 @@ PimNode::add_vif_addr(const string& vif_name,
 	XLOG_INFO("Added new address to vif %s: %s",
 		  pim_vif->name().c_str(), vif_addr.str().c_str());
     }
-    
+
+    //
+    // Update the primary and domain-wide addresses
+    //
+    if (pim_vif->update_primary_and_domain_wide_address(error_msg)
+	!= XORP_OK) {
+	XLOG_ERROR("Error updating primary and domain-wide addresses "
+		   "for vif %s: %s",
+		   pim_vif->name().c_str(),
+		   error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
     //
     // Spec:
     // "If an interface changes one of its secondary IP addresses,
