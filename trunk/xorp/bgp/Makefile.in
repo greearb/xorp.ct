@@ -107,7 +107,7 @@ bin_PROGRAMS = xorp_bgp
 TESTS = test_packet aspath_test test_packet_coding isolation_tests test_peer_data test_leaks.sh
 
 # -- No-install Programs
-noinst_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests test_peer_data
+check_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests test_peer_data
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES = libbgp.la
@@ -164,11 +164,11 @@ am_libbgp_la_OBJECTS = aspath.lo attribute_manager.lo bgp_trie.lo \
 	update_attrib.lo update_packet.lo xrl_target.lo
 libbgp_la_OBJECTS = $(am_libbgp_la_OBJECTS)
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
-noinst_PROGRAMS = test_packet$(EXEEXT) test_plumbing$(EXEEXT) \
+check_PROGRAMS = test_packet$(EXEEXT) test_plumbing$(EXEEXT) \
 	update_test$(EXEEXT) aspath_test$(EXEEXT) \
 	test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT) \
 	test_peer_data$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_aspath_test_OBJECTS = aspath_test.$(OBJEXT)
 aspath_test_OBJECTS = $(am_aspath_test_OBJECTS)
@@ -417,8 +417,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 aspath_test$(EXEEXT): $(aspath_test_OBJECTS) $(aspath_test_DEPENDENCIES) 
 	@rm -f aspath_test$(EXEEXT)
 	$(CXXLINK) $(aspath_test_LDFLAGS) $(aspath_test_OBJECTS) $(aspath_test_LDADD) $(LIBS)
@@ -722,6 +722,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -754,8 +755,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -794,9 +795,9 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-recursive \
-	distclean distclean-compile distclean-depend distclean-generic \
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-recursive distclean-tags distdir \
 	dvi dvi-am dvi-recursive info info-am info-recursive install \
 	install-am install-binPROGRAMS install-data install-data-am \

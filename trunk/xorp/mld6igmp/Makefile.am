@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.23 2004/10/02 03:42:10 atanu Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.24 2004/11/12 02:44:45 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -13,7 +13,7 @@ bin_PROGRAMS	 = xorp_igmp xorp_mld
 TESTS		 =
 
 # -- No-install Programs
-noinst_PROGRAMS  = test_mld6igmp
+check_PROGRAMS  = test_mld6igmp
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libmld6igmp.la

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.33 2004/11/12 02:44:49 bms Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.34 2004/11/16 05:41:04 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -12,9 +12,9 @@ TESTS		+= test_sample_config
 TESTS		+= test_module_manager
 
 # -- No-install Programs
-noinst_PROGRAMS	 = test_templates
-noinst_PROGRAMS	+= test_sample_config
-noinst_PROGRAMS	+= test_module_manager
+check_PROGRAMS	 = test_templates
+check_PROGRAMS	+= test_sample_config
+check_PROGRAMS	+= test_module_manager
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(top_builddir)/libxipc/libfinder.la

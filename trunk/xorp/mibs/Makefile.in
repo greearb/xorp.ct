@@ -124,7 +124,7 @@ lib_LTLIBRARIES = bgp4_mib_1657.la ospf_mib_1850.la xorp_if_mib_module.la
 # -- Test Programs
 TESTS = test_xorpevents
 
-noinst_PROGRAMS = $(TESTS)
+check_PROGRAMS = $(TESTS)
 
 
 # -- Compiler and pre compiler flags
@@ -193,9 +193,7 @@ xorp_if_mib_module_la_DEPENDENCIES = ./libnetsnmpxorp.la \
 am_xorp_if_mib_module_la_OBJECTS = xorp_if_mib_module.lo \
 	xorp_if_mib_xrl_target.lo
 xorp_if_mib_module_la_OBJECTS = $(am_xorp_if_mib_module_la_OBJECTS)
-noinst_PROGRAMS = test_xorpevents$(EXEEXT)
-PROGRAMS = $(noinst_PROGRAMS)
-
+check_PROGRAMS = test_xorpevents$(EXEEXT)
 am_test_xorpevents_OBJECTS = test_xorpevents.$(OBJEXT)
 test_xorpevents_OBJECTS = $(am_test_xorpevents_OBJECTS)
 test_xorpevents_DEPENDENCIES = ../libxipc/libfinder.la \
@@ -328,8 +326,8 @@ ospf_mib_1850.la: $(ospf_mib_1850_la_OBJECTS) $(ospf_mib_1850_la_DEPENDENCIES)
 xorp_if_mib_module.la: $(xorp_if_mib_module_la_OBJECTS) $(xorp_if_mib_module_la_DEPENDENCIES) 
 	$(CXXLINK) -rpath $(libdir) $(xorp_if_mib_module_la_LDFLAGS) $(xorp_if_mib_module_la_OBJECTS) $(xorp_if_mib_module_la_LIBADD) $(LIBS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_xorpevents$(EXEEXT): $(test_xorpevents_OBJECTS) $(test_xorpevents_DEPENDENCIES) 
 	@rm -f test_xorpevents$(EXEEXT)
 	$(CXXLINK) $(test_xorpevents_LDFLAGS) $(test_xorpevents_OBJECTS) $(test_xorpevents_LDADD) $(LIBS)
@@ -604,9 +602,10 @@ distcheck: dist
 	@echo "$(distdir).tar.gz is ready for distribution" | \
 	  sed 'h;s/./=/g;p;x;p;x'
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
 	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(pkglibdir)
@@ -636,8 +635,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	clean-noinstPROGRAMS clean-pkglibLTLIBRARIES mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-pkglibLTLIBRARIES mostlyclean-am
 
 dist-all: distdir
 	$(AMTAR) chof - $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
@@ -680,19 +679,18 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-generic clean-libLTLIBRARIES clean-libtool \
-	clean-noinstPROGRAMS clean-pkglibLTLIBRARIES clean-recursive \
-	dist dist-all distcheck distclean distclean-compile \
-	distclean-depend distclean-generic distclean-libtool \
-	distclean-recursive distclean-tags distdir dvi dvi-am \
-	dvi-recursive info info-am info-recursive install install-am \
-	install-data install-data-am install-data-recursive \
-	install-exec install-exec-am install-exec-recursive \
-	install-info install-info-am install-info-recursive \
-	install-libLTLIBRARIES install-man install-pkglibLTLIBRARIES \
-	install-recursive install-strip installcheck installcheck-am \
-	installdirs installdirs-am installdirs-recursive \
-	maintainer-clean maintainer-clean-generic \
+	clean clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-pkglibLTLIBRARIES clean-recursive dist \
+	dist-all distcheck distclean distclean-compile distclean-depend \
+	distclean-generic distclean-libtool distclean-recursive \
+	distclean-tags distdir dvi dvi-am dvi-recursive info info-am \
+	info-recursive install install-am install-data install-data-am \
+	install-data-recursive install-exec install-exec-am \
+	install-exec-recursive install-info install-info-am \
+	install-info-recursive install-libLTLIBRARIES install-man \
+	install-pkglibLTLIBRARIES install-recursive install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	installdirs-recursive maintainer-clean maintainer-clean-generic \
 	maintainer-clean-recursive mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
 	tags tags-recursive uninstall uninstall-am uninstall-info-am \

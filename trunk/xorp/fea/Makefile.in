@@ -106,9 +106,11 @@ TESTS = test_rawsock4 test_ifmanager_transaction test_xrl_sockets4_udp.sh
 test_scripts = test_add_route.sh test_config_interface.sh test_xrl_sockets4_udp.sh
 
 # -- No-install Programs and Scripts
-noinst_PROGRAMS = demo_fea_ifmgr_client test_ifmanager_transaction test_mfea test_rawsock4 test_xrl_sockets4_udp
+noinst_PROGRAMS = demo_fea_ifmgr_client
 
-noinst_SCRIPTS = $(test_scripts)
+check_PROGRAMS = test_ifmanager_transaction test_mfea test_rawsock4 test_xrl_sockets4_udp
+
+check_SCRIPTS = $(test_scripts)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libfea.la
@@ -222,9 +224,9 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo firewall.lo \
 	xrl_target.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
-noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT) \
-	test_ifmanager_transaction$(EXEEXT) test_mfea$(EXEEXT) \
+check_PROGRAMS = test_ifmanager_transaction$(EXEEXT) test_mfea$(EXEEXT) \
 	test_rawsock4$(EXEEXT) test_xrl_sockets4_udp$(EXEEXT)
+noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_demo_fea_ifmgr_client_OBJECTS = demo_fea_ifmgr_client.$(OBJEXT)
@@ -359,8 +361,6 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 xorp_fea_dummy_LDFLAGS =
-SCRIPTS = $(noinst_SCRIPTS)
-
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -538,6 +538,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
@@ -895,9 +898,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -927,8 +931,9 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -967,21 +972,22 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-recursive \
-	distclean distclean-compile distclean-depend distclean-generic \
-	distclean-libtool distclean-recursive distclean-tags distdir \
-	dvi dvi-am dvi-recursive info info-am info-recursive install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-data-recursive install-exec install-exec-am \
-	install-exec-recursive install-info install-info-am \
-	install-info-recursive install-man install-recursive \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am installdirs-recursive maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-recursive tags tags-recursive uninstall \
-	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
+	clean-recursive distclean distclean-compile distclean-depend \
+	distclean-generic distclean-libtool distclean-recursive \
+	distclean-tags distdir dvi dvi-am dvi-recursive info info-am \
+	info-recursive install install-am install-binPROGRAMS \
+	install-data install-data-am install-data-recursive \
+	install-exec install-exec-am install-exec-recursive \
+	install-info install-info-am install-info-recursive install-man \
+	install-recursive install-strip installcheck installcheck-am \
+	installdirs installdirs-am installdirs-recursive \
+	maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-info-recursive uninstall-recursive
 
 

@@ -100,7 +100,7 @@ bin_PROGRAMS = xorp_rtrmgr xorpsh xorp_profiler
 TESTS = test_templates test_sample_config test_module_manager
 
 # -- No-install Programs
-noinst_PROGRAMS = test_templates test_sample_config test_module_manager
+check_PROGRAMS = test_templates test_sample_config test_module_manager
 
 # -- Libraries and library flags to link the binary programs
 LDADD = $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
@@ -166,9 +166,9 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT) \
 	xorp_profiler$(EXEEXT)
-noinst_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
+check_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
 	test_module_manager$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_test_module_manager_OBJECTS = conf_tree.$(OBJEXT) \
 	conf_tree_node.$(OBJEXT) lex.boot.$(OBJEXT) lex.tplt.$(OBJEXT) \
@@ -363,8 +363,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_module_manager$(EXEEXT): $(test_module_manager_OBJECTS) $(test_module_manager_DEPENDENCIES) 
 	@rm -f test_module_manager$(EXEEXT)
 	$(CXXLINK) $(test_module_manager_LDFLAGS) $(test_module_manager_OBJECTS) $(test_module_manager_LDADD) $(LIBS)
@@ -558,6 +558,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(PROGRAMS)
@@ -590,8 +591,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 
@@ -628,17 +629,16 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS distclean distclean-compile \
-	distclean-depend distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool distclean distclean-compile distclean-depend \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 
 ################################################################

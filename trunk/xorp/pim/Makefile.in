@@ -101,7 +101,7 @@ bin_PROGRAMS = xorp_pimsm4 xorp_pimsm6
 TESTS = 
 
 # -- No-install Programs
-noinst_PROGRAMS = test_pim
+check_PROGRAMS = test_pim
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libpim.la
@@ -162,8 +162,8 @@ am_libpim_la_OBJECTS = pim_bsr.lo pim_config.lo pim_mfc.lo pim_mre.lo \
 	pim_scope_zone_table.lo pim_vif.lo xrl_pim_node.lo
 libpim_la_OBJECTS = $(am_libpim_la_OBJECTS)
 bin_PROGRAMS = xorp_pimsm4$(EXEEXT) xorp_pimsm6$(EXEEXT)
-noinst_PROGRAMS = test_pim$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+check_PROGRAMS = test_pim$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_test_pim_OBJECTS = test_pim.$(OBJEXT) rib_manager.$(OBJEXT) \
 	xrl_target.$(OBJEXT) redist_xrl.$(OBJEXT)
@@ -408,8 +408,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 rib_manager.$(OBJEXT): $(top_builddir)/rib/rib_manager.cc
 xrl_target.$(OBJEXT): $(top_builddir)/rib/xrl_target.cc
 redist_xrl.$(OBJEXT): $(top_builddir)/rib/redist_xrl.cc
@@ -654,6 +654,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -686,8 +687,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
@@ -724,8 +725,8 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES distclean \
 	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am info \
 	info-am install install-am install-binPROGRAMS install-data \

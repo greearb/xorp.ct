@@ -115,8 +115,8 @@ test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 TESTS = $(test_programs) $(test_scripts)
 
 # -- No-install Programs
-noinst_PROGRAMS = $(test_programs) $(test_extra_programs)
-noinst_SCRIPTS = $(test_scripts)
+check_PROGRAMS = $(test_programs) $(test_extra_programs)
+check_SCRIPTS = $(test_scripts)
 
 # -- Libraries and library flags to link the binary programs
 LDADD = ./libfinder.la ./libxipc.la $(top_builddir)/libxorp/libxorp.la $(top_builddir)/libcomm/libcomm.la
@@ -208,7 +208,7 @@ am_libxipc_la_OBJECTS = hmac_md5.lo finder_client.lo \
 	finder_client_base.lo finder_xif.lo
 libxipc_la_OBJECTS = $(am_libxipc_la_OBJECTS)
 bin_PROGRAMS = xorp_finder$(EXEEXT)
-noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
+check_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_xrl_atom$(EXEEXT) test_xrl_args$(EXEEXT) \
 	test_header$(EXEEXT) test_inproc$(EXEEXT) test_sudp$(EXEEXT) \
 	test_stcp$(EXEEXT) test_lemming$(EXEEXT) \
@@ -218,7 +218,7 @@ noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_xrl_parser$(EXEEXT) test_finder_to$(EXEEXT) \
 	test_xrl_receiver$(EXEEXT) test_xrl_sender$(EXEEXT)
 sbin_PROGRAMS = call_xrl$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS) $(sbin_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS) $(sbin_PROGRAMS)
 
 am_call_xrl_OBJECTS = call_xrl.$(OBJEXT)
 call_xrl_OBJECTS = $(am_call_xrl_OBJECTS)
@@ -366,8 +366,6 @@ xorp_finder_DEPENDENCIES = libfinder.la ./libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/libcomm/libcomm.la
 xorp_finder_LDFLAGS =
-SCRIPTS = $(noinst_SCRIPTS)
-
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -512,8 +510,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 install-sbinPROGRAMS: $(sbin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(sbindir)
@@ -828,9 +826,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 
 installdirs:
 	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(sbindir)
@@ -862,8 +861,8 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-sbinPROGRAMS \
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-sbinPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -902,8 +901,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-sbinPROGRAMS
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-sbinPROGRAMS \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-sbinPROGRAMS \
 	distclean distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am info \
 	info-am install install-am install-binPROGRAMS install-data \

@@ -103,7 +103,9 @@ bin_PROGRAMS = xorp_rib
 TESTS = test_rib_direct.sh test_rib_xrls.sh test_redist test_register test_deletion
 
 # -- No-install Programs
-noinst_PROGRAMS = add_route main_routemap test_deletion test_redist test_register test_register_xrls test_rib_direct test_rib_xrls
+noinst_PROGRAMS = add_route main_routemap
+
+check_PROGRAMS = test_deletion test_redist test_register test_register_xrls test_rib_direct test_rib_xrls
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = librib.la libribxrl.la
@@ -170,10 +172,10 @@ libribxrl_la_LIBADD =
 am_libribxrl_la_OBJECTS = redist_xrl.lo
 libribxrl_la_OBJECTS = $(am_libribxrl_la_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
-noinst_PROGRAMS = add_route$(EXEEXT) main_routemap$(EXEEXT) \
-	test_deletion$(EXEEXT) test_redist$(EXEEXT) \
+check_PROGRAMS = test_deletion$(EXEEXT) test_redist$(EXEEXT) \
 	test_register$(EXEEXT) test_register_xrls$(EXEEXT) \
 	test_rib_direct$(EXEEXT) test_rib_xrls$(EXEEXT)
+noinst_PROGRAMS = add_route$(EXEEXT) main_routemap$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_add_route_OBJECTS = add_route.$(OBJEXT)
@@ -506,6 +508,9 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 add_route$(EXEEXT): $(add_route_OBJECTS) $(add_route_DEPENDENCIES) 
@@ -780,6 +785,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -812,8 +818,9 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -852,21 +859,22 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-recursive \
-	distclean distclean-compile distclean-depend distclean-generic \
-	distclean-libtool distclean-recursive distclean-tags distdir \
-	dvi dvi-am dvi-recursive info info-am info-recursive install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-data-recursive install-exec install-exec-am \
-	install-exec-recursive install-info install-info-am \
-	install-info-recursive install-man install-recursive \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am installdirs-recursive maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-recursive tags tags-recursive uninstall \
-	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
+	clean-recursive distclean distclean-compile distclean-depend \
+	distclean-generic distclean-libtool distclean-recursive \
+	distclean-tags distdir dvi dvi-am dvi-recursive info info-am \
+	info-recursive install install-am install-binPROGRAMS \
+	install-data install-data-am install-data-recursive \
+	install-exec install-exec-am install-exec-recursive \
+	install-info install-info-am install-info-recursive install-man \
+	install-recursive install-strip installcheck installcheck-am \
+	installdirs installdirs-am installdirs-recursive \
+	maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-info-recursive uninstall-recursive
 
 

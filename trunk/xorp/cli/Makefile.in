@@ -100,7 +100,7 @@ SUBDIRS = libtecla . tools
 TESTS = 
 
 # -- No-install Programs
-noinst_PROGRAMS = test_cli
+check_PROGRAMS = test_cli
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libcli.la
@@ -134,9 +134,7 @@ am_libcli_la_OBJECTS = cli_client.lo cli_command.lo cli_command_pipe.lo \
 	cli_node.lo cli_node_internal_commands.lo cli_node_net.lo \
 	xrl_cli_node.lo
 libcli_la_OBJECTS = $(am_libcli_la_OBJECTS)
-noinst_PROGRAMS = test_cli$(EXEEXT)
-PROGRAMS = $(noinst_PROGRAMS)
-
+check_PROGRAMS = test_cli$(EXEEXT)
 am_test_cli_OBJECTS = test_cli.$(OBJEXT)
 test_cli_OBJECTS = $(am_test_cli_OBJECTS)
 test_cli_LDADD = $(LDADD)
@@ -217,8 +215,8 @@ clean-noinstLTLIBRARIES:
 libcli.la: $(libcli_la_OBJECTS) $(libcli_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libcli_la_LDFLAGS) $(libcli_la_OBJECTS) $(libcli_la_LIBADD) $(LIBS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_cli$(EXEEXT): $(test_cli_OBJECTS) $(test_cli_DEPENDENCIES) 
 	@rm -f test_cli$(EXEEXT)
 	$(CXXLINK) $(test_cli_LDFLAGS) $(test_cli_OBJECTS) $(test_cli_LDADD) $(LIBS)
@@ -443,9 +441,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
 
@@ -474,8 +473,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -514,8 +513,8 @@ uninstall-am: uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-generic clean-libtool clean-noinstLTLIBRARIES \
-	clean-noinstPROGRAMS clean-recursive distclean \
+	clean clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-recursive distclean \
 	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-recursive distclean-tags distdir \
 	dvi dvi-am dvi-recursive info info-am info-recursive install \

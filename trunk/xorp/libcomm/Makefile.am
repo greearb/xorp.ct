@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libcomm/Makefile.am,v 1.6 2004/01/16 19:57:25 hodson Exp $
+## $XORP: xorp/libcomm/Makefile.am,v 1.7 2004/11/12 02:44:41 bms Exp $
 ##
 
 # -- Real Programs
@@ -10,7 +10,7 @@ bin_PROGRAMS	 =
 TESTS		 =
 
 # -- No-install Programs
-noinst_PROGRAMS  = test_comm
+check_PROGRAMS  = test_comm
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libcomm.la

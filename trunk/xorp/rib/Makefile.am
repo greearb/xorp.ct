@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.36 2004/10/06 21:21:06 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.37 2004/11/12 02:44:47 bms Exp $
 ##
 
 SUBDIRS = . tools
@@ -21,12 +21,13 @@ TESTS		+= test_deletion
 # -- No-install Programs
 noinst_PROGRAMS	 = add_route
 noinst_PROGRAMS	+= main_routemap
-noinst_PROGRAMS	+= test_deletion
-noinst_PROGRAMS	+= test_redist
-noinst_PROGRAMS	+= test_register
-noinst_PROGRAMS	+= test_register_xrls
-noinst_PROGRAMS	+= test_rib_direct
-noinst_PROGRAMS	+= test_rib_xrls
+
+check_PROGRAMS	 = test_deletion
+check_PROGRAMS	+= test_redist
+check_PROGRAMS	+= test_register
+check_PROGRAMS	+= test_register_xrls
+check_PROGRAMS	+= test_rib_direct
+check_PROGRAMS	+= test_rib_xrls
 
 # -- No-install Libraries
 noinst_LTLIBRARIES	 = librib.la libribxrl.la

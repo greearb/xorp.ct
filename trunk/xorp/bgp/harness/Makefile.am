@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.14 2003/10/21 23:18:13 atanu Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.15 2004/11/12 02:44:28 bms Exp $
 ##
 
 # -- Real Programs
@@ -18,9 +18,9 @@ TESTS		+= test_path_attribute1.sh
 TESTS		+= test_terminate.sh
 
 # -- No-install Programs
-noinst_PROGRAMS  = coord
-noinst_PROGRAMS	+= test_peer
-noinst_PROGRAMS	+= test_trie
+check_PROGRAMS  = coord
+check_PROGRAMS	+= test_peer
+check_PROGRAMS	+= test_trie
 
 # -- No-install Libraries
 noinst_LTLIBRARIES =

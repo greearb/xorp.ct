@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.27 2004/10/02 03:42:11 atanu Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.28 2004/11/12 02:44:45 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -13,7 +13,7 @@ bin_PROGRAMS	 = xorp_pimsm4 xorp_pimsm6
 TESTS		 =
 
 # -- No-install Programs
-noinst_PROGRAMS  = test_pim
+check_PROGRAMS  = test_pim
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libpim.la

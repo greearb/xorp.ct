@@ -41,7 +41,7 @@ lib_LTLIBRARIES			+= xorp_if_mib_module.la
 
 TESTS				 = test_xorpevents
 
-noinst_PROGRAMS			 = $(TESTS)
+check_PROGRAMS			 = $(TESTS)
 
 # -- Compiler and pre compiler flags
 

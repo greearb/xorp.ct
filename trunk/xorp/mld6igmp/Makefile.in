@@ -101,7 +101,7 @@ bin_PROGRAMS = xorp_igmp xorp_mld
 TESTS = 
 
 # -- No-install Programs
-noinst_PROGRAMS = test_mld6igmp
+check_PROGRAMS = test_mld6igmp
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libmld6igmp.la
@@ -147,8 +147,8 @@ am_libmld6igmp_la_OBJECTS = igmp_proto.lo mld6_proto.lo \
 	xrl_mld6igmp_node.lo
 libmld6igmp_la_OBJECTS = $(am_libmld6igmp_la_OBJECTS)
 bin_PROGRAMS = xorp_igmp$(EXEEXT) xorp_mld$(EXEEXT)
-noinst_PROGRAMS = test_mld6igmp$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+check_PROGRAMS = test_mld6igmp$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_test_mld6igmp_OBJECTS = test_mld6igmp.$(OBJEXT)
 test_mld6igmp_OBJECTS = $(am_test_mld6igmp_OBJECTS)
@@ -329,8 +329,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_mld6igmp$(EXEEXT): $(test_mld6igmp_OBJECTS) $(test_mld6igmp_DEPENDENCIES) 
 	@rm -f test_mld6igmp$(EXEEXT)
 	$(CXXLINK) $(test_mld6igmp_LDFLAGS) $(test_mld6igmp_OBJECTS) $(test_mld6igmp_LDADD) $(LIBS)
@@ -492,6 +492,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -524,8 +525,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
@@ -562,8 +563,8 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES distclean \
 	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am info \
 	info-am install install-am install-binPROGRAMS install-data \

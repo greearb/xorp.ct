@@ -100,7 +100,7 @@ bin_PROGRAMS =
 TESTS = 
 
 # -- No-install Programs
-noinst_PROGRAMS = test_mrt test_mrib
+check_PROGRAMS = test_mrt test_mrib
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libmrt.la
@@ -133,8 +133,8 @@ am_libmrt_la_OBJECTS = buffer.lo inet_cksum.lo random.lo mifset.lo \
 	mrib_table.lo
 libmrt_la_OBJECTS = $(am_libmrt_la_OBJECTS)
 bin_PROGRAMS =
-noinst_PROGRAMS = test_mrt$(EXEEXT) test_mrib$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+check_PROGRAMS = test_mrt$(EXEEXT) test_mrib$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_test_mrib_OBJECTS = test_mrib.$(OBJEXT)
 test_mrib_OBJECTS = $(am_test_mrib_OBJECTS)
@@ -229,8 +229,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_mrib$(EXEEXT): $(test_mrib_OBJECTS) $(test_mrib_DEPENDENCIES) 
 	@rm -f test_mrib$(EXEEXT)
 	$(CXXLINK) $(test_mrib_LDFLAGS) $(test_mrib_OBJECTS) $(test_mrib_LDADD) $(LIBS)
@@ -403,6 +403,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -435,8 +436,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
@@ -473,8 +474,8 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES distclean \
 	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am info \
 	info-am install install-am install-binPROGRAMS install-data \

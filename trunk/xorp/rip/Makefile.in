@@ -103,7 +103,7 @@ bin_PROGRAMS = xorp_rip xorp_ripng
 TESTS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
 
 # -- No-install Programs
-noinst_PROGRAMS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
+check_PROGRAMS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES = librip.la libripng.la libripxrl.la libripngxrl.la
@@ -207,11 +207,11 @@ am_libripxrl_la_OBJECTS = libripxrl_la-xrl_config.lo \
 	libripxrl_la-xrl_rib_notifier.lo
 libripxrl_la_OBJECTS = $(am_libripxrl_la_OBJECTS)
 bin_PROGRAMS = xorp_rip$(EXEEXT) xorp_ripng$(EXEEXT)
-noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
+check_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
 	test_request$(EXEEXT) test_route_walk$(EXEEXT) \
 	test_timers$(EXEEXT) test_update_queue$(EXEEXT) \
 	test_outputs$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_test_auth_OBJECTS = test_auth.$(OBJEXT)
 test_auth_OBJECTS = $(am_test_auth_OBJECTS)
@@ -467,8 +467,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_auth$(EXEEXT): $(test_auth_OBJECTS) $(test_auth_DEPENDENCIES) 
 	@rm -f test_auth$(EXEEXT)
 	$(CXXLINK) $(test_auth_LDFLAGS) $(test_auth_OBJECTS) $(test_auth_LDADD) $(LIBS)
@@ -1461,6 +1461,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -1493,8 +1494,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -1533,9 +1534,9 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-recursive \
-	distclean distclean-compile distclean-depend distclean-generic \
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-recursive distclean-tags distdir \
 	dvi dvi-am dvi-recursive info info-am info-recursive install \
 	install-am install-binPROGRAMS install-data install-data-am \

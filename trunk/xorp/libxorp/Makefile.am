@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.31 2004/11/16 05:41:05 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.32 2004/11/16 05:45:41 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -33,30 +33,30 @@ TESTS		+= test_types
 TESTS		+= test_vif
 
 # -- No-install Programs
-noinst_PROGRAMS	 = test_asyncio
-noinst_PROGRAMS	+= test_callback
-noinst_PROGRAMS	+= test_config_param
-noinst_PROGRAMS	+= test_heap
-noinst_PROGRAMS	+= test_ipnet
-noinst_PROGRAMS	+= test_ipv4
-noinst_PROGRAMS	+= test_ipv4net
-noinst_PROGRAMS	+= test_ipv6
-noinst_PROGRAMS	+= test_ipv6net
-noinst_PROGRAMS	+= test_ipvx
-noinst_PROGRAMS	+= test_ipvxnet
-noinst_PROGRAMS	+= test_mac
-noinst_PROGRAMS	+= test_observers
-noinst_PROGRAMS	+= test_profile
-noinst_PROGRAMS	+= test_ref_ptr
-noinst_PROGRAMS	+= test_ref_trie
-noinst_PROGRAMS	+= test_service
-noinst_PROGRAMS	+= test_test_main
-noinst_PROGRAMS	+= test_time_slice
-noinst_PROGRAMS	+= test_timer
-noinst_PROGRAMS	+= test_timeval
-noinst_PROGRAMS	+= test_trie
-noinst_PROGRAMS	+= test_types
-noinst_PROGRAMS	+= test_vif
+check_PROGRAMS	 = test_asyncio
+check_PROGRAMS	+= test_callback
+check_PROGRAMS	+= test_config_param
+check_PROGRAMS	+= test_heap
+check_PROGRAMS	+= test_ipnet
+check_PROGRAMS	+= test_ipv4
+check_PROGRAMS	+= test_ipv4net
+check_PROGRAMS	+= test_ipv6
+check_PROGRAMS	+= test_ipv6net
+check_PROGRAMS	+= test_ipvx
+check_PROGRAMS	+= test_ipvxnet
+check_PROGRAMS	+= test_mac
+check_PROGRAMS	+= test_observers
+check_PROGRAMS	+= test_profile
+check_PROGRAMS	+= test_ref_ptr
+check_PROGRAMS	+= test_ref_trie
+check_PROGRAMS	+= test_service
+check_PROGRAMS	+= test_test_main
+check_PROGRAMS	+= test_time_slice
+check_PROGRAMS	+= test_timer
+check_PROGRAMS	+= test_timeval
+check_PROGRAMS	+= test_trie
+check_PROGRAMS	+= test_types
+check_PROGRAMS	+= test_vif
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libxorp.la

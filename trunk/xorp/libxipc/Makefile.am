@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.37 2004/10/15 04:24:13 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.38 2004/11/12 02:44:42 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -33,8 +33,8 @@ test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 TESTS = $(test_programs) $(test_scripts)
 
 # -- No-install Programs
-noinst_PROGRAMS = $(test_programs) $(test_extra_programs)
-noinst_SCRIPTS = $(test_scripts)
+check_PROGRAMS = $(test_programs) $(test_extra_programs)
+check_SCRIPTS = $(test_scripts)
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = ./libfinder.la

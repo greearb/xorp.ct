@@ -100,7 +100,7 @@ bin_PROGRAMS =
 TESTS = 
 
 # -- No-install Programs
-noinst_PROGRAMS = test_comm
+check_PROGRAMS = test_comm
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libcomm.la
@@ -128,8 +128,8 @@ libcomm_la_LIBADD =
 am_libcomm_la_OBJECTS = comm_sock.lo comm_user.lo
 libcomm_la_OBJECTS = $(am_libcomm_la_OBJECTS)
 bin_PROGRAMS =
-noinst_PROGRAMS = test_comm$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+check_PROGRAMS = test_comm$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_test_comm_OBJECTS = test_comm.$(OBJEXT)
 test_comm_OBJECTS = $(am_test_comm_OBJECTS)
@@ -207,8 +207,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_comm$(EXEEXT): $(test_comm_OBJECTS) $(test_comm_DEPENDENCIES) 
 	@rm -f test_comm$(EXEEXT)
 	$(LINK) $(test_comm_LDFLAGS) $(test_comm_OBJECTS) $(test_comm_LDADD) $(LIBS)
@@ -355,6 +355,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -387,8 +388,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
@@ -425,8 +426,8 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES distclean \
 	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am info \
 	info-am install install-am install-binPROGRAMS install-data \

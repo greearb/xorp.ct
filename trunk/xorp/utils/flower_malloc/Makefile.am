@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/flower_malloc/Makefile.am,v 1.1 2003/10/17 01:44:29 hodson Exp $
+## $XORP: xorp/utils/flower_malloc/Makefile.am,v 1.2 2004/11/12 02:44:50 bms Exp $
 ##
 
 # -- Real Programs
@@ -10,7 +10,9 @@ bin_PROGRAMS	 =
 TESTS		 = test_flower_malloc.sh
 
 # -- No-install Programs
-noinst_PROGRAMS	 = flower_malloc.so test_flower_malloc
+noinst_PROGRAMS	 = flower_malloc.so
+
+check_PROGRAMS	= test_flower_malloc
 
 # -- No-install Libraries
 noinst_LTLIBRARIES =

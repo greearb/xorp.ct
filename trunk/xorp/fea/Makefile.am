@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.46 2004/11/12 02:44:40 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.47 2004/11/19 10:54:28 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -23,12 +23,13 @@ test_scripts		+= test_xrl_sockets4_udp.sh
 
 # -- No-install Programs and Scripts
 noinst_PROGRAMS 	 = demo_fea_ifmgr_client
-noinst_PROGRAMS		+= test_ifmanager_transaction
-noinst_PROGRAMS 	+= test_mfea
-noinst_PROGRAMS		+= test_rawsock4
-noinst_PROGRAMS		+= test_xrl_sockets4_udp
 
-noinst_SCRIPTS		 = $(test_scripts)
+check_PROGRAMS		 = test_ifmanager_transaction
+check_PROGRAMS 		+= test_mfea
+check_PROGRAMS		+= test_rawsock4
+check_PROGRAMS		+= test_xrl_sockets4_udp
+
+check_SCRIPTS		 = $(test_scripts)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES	 = libfea.la
