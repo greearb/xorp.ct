@@ -21,48 +21,50 @@
 
 %%
 
-input:		/* empty */
-		| definition input
-		| syntax_error
-		;
+input:			/* empty */
+			| definition input
+			| syntax_error
+			;
 
-definition:	word specification { }
-		| word word word_or_var_list specification { }
-		;
+definition:		word word_or_variable_list specification { }
+			;
 
-word:		LITERAL { append_path($1); }
-		;
+word_or_variable_list:	/* empty */
+			| word_or_variable word_or_variable_list { }
+			;
 
-word_or_var_list:
-		/* empty */
-		| word word_or_var_list
-		| VARIABLE word_or_var_list { append_path($1); }
-		;
+word_or_variable:	word
+			| variable
+			;
 
-specification:	startspec attributes endspec { }
-		;
+word:			LITERAL { append_path($1); }
+			;
 
-startspec:	UPLEVEL { push_path(); }
-		;
+variable:		VARIABLE { append_path($1); }
+			;
 
-endspec:	DOWNLEVEL { pop_path(); }
-		;
+specification:		startspec attributes endspec { }
+			;
 
-attributes:	attribute
-		| attribute attributes
-		;
+startspec:		UPLEVEL { push_path(); }
+			;
 
-attribute:	COMMAND COLON LITERAL END {
-			add_cmd($1);
-			append_cmd($3);
-			end_cmd();
-		}
-		;
+endspec:		DOWNLEVEL { pop_path(); }
+			;
 
-syntax_error:	SYNTAX_ERROR {
-			opcmderror("syntax error");
-		}
-		;
+attributes:		attribute
+			| attribute attributes
+			;
+
+attribute:		COMMAND COLON LITERAL END {
+				add_cmd($1);
+				append_cmd($3);
+				end_cmd();
+			}
+			;
+
+syntax_error:		SYNTAX_ERROR { opcmderror("syntax error"); }
+			;
 
 
 %%

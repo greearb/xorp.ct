@@ -63,44 +63,44 @@ static int yygrowstack();
 #define LITERAL 263
 #define SYNTAX_ERROR 264
 const short opcmdlhs[] = {                                        -1,
-    0,    0,    0,    1,    1,    3,    5,    5,    5,    4,
-    6,    8,    7,    7,    9,    2,
+    0,    0,    0,    1,    4,    4,    6,    6,    3,    7,
+    5,    8,   10,    9,    9,   11,    2,
 };
 const short opcmdlen[] = {                                         2,
-    0,    2,    1,    2,    4,    1,    0,    2,    2,    3,
-    1,    1,    1,    2,    4,    1,
+    0,    2,    1,    3,    0,    2,    1,    1,    1,    1,
+    3,    1,    1,    1,    2,    4,    1,
 };
 const short opcmddefred[] = {                                      0,
-    6,   16,    0,    0,    3,    0,    2,   11,    0,    4,
-    0,    0,    0,    0,    0,    0,    0,    9,    8,    5,
-    0,   12,   10,   14,    0,   15,
+    9,   17,    0,    0,    3,    0,    2,   10,    7,    0,
+    0,    8,   12,    4,    0,    6,    0,    0,    0,    0,
+   13,   11,   15,    0,   16,
 };
 const short opcmddgoto[] = {                                       3,
-    4,    5,   13,   10,   14,   11,   16,   23,   17,
+    4,    5,    6,   10,   14,   11,   12,   15,   18,   22,
+   19,
 };
-const short opcmdsindex[] = {                                   -261,
-    0,    0,    0, -261,    0, -257,    0,    0, -254,    0,
- -249, -254, -254, -253, -247, -244, -249,    0,    0,    0,
- -248,    0,    0,    0, -243,    0,
+const short opcmdsindex[] = {                                   -262,
+    0,    0,    0, -262,    0, -259,    0,    0,    0, -251,
+ -259,    0,    0,    0, -254,    0, -252, -249, -254, -253,
+    0,    0,    0, -248,    0,
 };
-const short opcmdrindex[] = {                                     17,
-    0,    0,    0,   17,    0,    0,    0,    0, -239,    0,
-    0, -239, -239,    0,    0,    0, -238,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,
+const short opcmdrindex[] = {                                     12,
+    0,    0,    0,   12,    0, -244,    0,    0,    0,    0,
+ -244,    0,    0,    0,    0,    0,    0,    0, -243,    0,
+    0,    0,    0,    0,    0,
 };
-const short opcmdgindex[] = {                                     15,
-    0,    0,    1,    7,   -2,    0,    5,    0,    0,
+const short opcmdgindex[] = {                                     10,
+    0,    0,   -6,    5,    0,    0,    0,    0,   -2,    0,
+    0,
 };
-#define YYTABLESIZE 22
-const short opcmdtable[] = {                                       8,
-    6,    1,    2,    8,    6,    1,    9,   12,    1,   18,
-   19,   15,   21,   22,   25,   26,    1,    7,    7,   13,
-   20,   24,
+#define YYTABLESIZE 17
+const short opcmdtable[] = {                                       9,
+    1,    2,    8,    1,    9,   13,   17,   20,   21,   24,
+   25,    1,    5,    7,   14,   16,   23,
 };
-const short opcmdcheck[] = {                                     257,
-    0,  263,  264,  257,    4,  263,    6,  262,  263,   12,
-   13,  261,  260,  258,  263,  259,    0,  257,    4,  258,
-   14,   17,
+const short opcmdcheck[] = {                                       6,
+  263,  264,  262,  263,   11,  257,  261,  260,  258,  263,
+  259,    0,  257,    4,  258,   11,   19,
 };
 #define YYFINAL 3
 #ifndef YYDEBUG
@@ -123,12 +123,13 @@ const char * const opcmdrule[] = {
 "input :",
 "input : definition input",
 "input : syntax_error",
-"definition : word specification",
-"definition : word word word_or_var_list specification",
+"definition : word word_or_variable_list specification",
+"word_or_variable_list :",
+"word_or_variable_list : word_or_variable word_or_variable_list",
+"word_or_variable : word",
+"word_or_variable : variable",
 "word : LITERAL",
-"word_or_var_list :",
-"word_or_var_list : word word_or_var_list",
-"word_or_var_list : VARIABLE word_or_var_list",
+"variable : VARIABLE",
 "specification : startspec attributes endspec",
 "startspec : UPLEVEL",
 "endspec : DOWNLEVEL",
@@ -168,7 +169,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 69 "op_commands.yy"
+#line 71 "op_commands.yy"
 
 extern "C" int opcmdparse();
 extern int opcmdlex();
@@ -265,7 +266,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 269 "y.opcmd_tab.c"
+#line 270 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -464,45 +465,43 @@ case 4:
 #line 29 "op_commands.yy"
 { }
 break;
-case 5:
-#line 30 "op_commands.yy"
-{ }
-break;
 case 6:
 #line 33 "op_commands.yy"
-{ append_path(yyvsp[0]); }
-break;
-case 9:
-#line 39 "op_commands.yy"
-{ append_path(yyvsp[-1]); }
-break;
-case 10:
-#line 42 "op_commands.yy"
 { }
 break;
+case 9:
+#line 40 "op_commands.yy"
+{ append_path(yyvsp[0]); }
+break;
+case 10:
+#line 43 "op_commands.yy"
+{ append_path(yyvsp[0]); }
+break;
 case 11:
-#line 45 "op_commands.yy"
-{ push_path(); }
+#line 46 "op_commands.yy"
+{ }
 break;
 case 12:
-#line 48 "op_commands.yy"
+#line 49 "op_commands.yy"
+{ push_path(); }
+break;
+case 13:
+#line 52 "op_commands.yy"
 { pop_path(); }
 break;
-case 15:
-#line 55 "op_commands.yy"
-{
-			add_cmd(yyvsp[-3]);
-			append_cmd(yyvsp[-1]);
-			end_cmd();
-		}
-break;
 case 16:
-#line 62 "op_commands.yy"
+#line 59 "op_commands.yy"
 {
-			opcmderror("syntax error");
-		}
+				add_cmd(yyvsp[-3]);
+				append_cmd(yyvsp[-1]);
+				end_cmd();
+			}
 break;
-#line 506 "y.opcmd_tab.c"
+case 17:
+#line 66 "op_commands.yy"
+{ opcmderror("syntax error"); }
+break;
+#line 505 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
