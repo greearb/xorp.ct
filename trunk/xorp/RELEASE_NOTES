@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.13 2003/06/06 02:08:54 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.14 2003/06/06 02:24:39 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -13,8 +13,9 @@ Release 0.3 (2003/06/06)
 
     - Cross directory build and gmake check support.
 
-    - Purge of abort() calls.  Replacement by XLOG_UNFINISHED and
-      XLOG_UNREACHABLE.
+    - Purge of abort() calls.  Replacement by XLOG_UNFINISHED,
+      XLOG_UNREACHABLE and XLOG_ASSERT as appropriate, or in some
+      cases better error handling code.
 
     - Change to autoconf-2.53 and automake-1.5 as standard autotool versions.
       The older autoconf-2.13 and automake-1.4 should still work.
@@ -84,10 +85,31 @@ Release 0.3 (2003/06/06)
     - Addition of get_status and shutdown methods to the common interface.
 
   RTRMGR:
-    - 
+    - Workaround for yacc incompatibilities on newer Redhat releases.
+
+    - Implement a new TaskManager, which handles actually doing the
+      work during a commit, starting processes and validating that they
+      start, dependency interlocking between processes, and shutting
+      down processes that are no longer needed.
+
+    - rtrmgr will now shutdown processes after they are not needed.
+
+    - rtrmgr can now use the common XRL call get_status to monitor
+      process state, and the common XRL shutdown to gracefully shutdown a
+      process.  Added new modinfo subcommands to specify when to use
+      XRLs for these tasks.
+
+    - Use system MD5 for authentication.
+
+    - Better config file string parser.
+
+    - Add tinderbox tests to cover some of the basic functionality.
+
+    - Better error handling (more compliant with XORP Error Handling
+      document).
 
   XORPSH:
-    - 
+    - Ctrl-C now terminates the current command,  Ctrl-D exits xorpsh.
 
   FEA:
     - MFEA code merged with the unicast FEA, though logically the MFEA
@@ -125,7 +147,8 @@ Release 0.3 (2003/06/06)
 
     - Refactoring of the Vif manager implementation.
 
-    - Support for setting the process status PROC_FOO code.
+    - Support for returning the process status through thet get_status
+      XRL and shutting down using the shutdown XRL.
 
   BGP:
     - More robust to XRL communication failures. In particular support
@@ -133,13 +156,16 @@ Release 0.3 (2003/06/06)
 
     - Replace calls to abort() with more self-explanatory self-destruction.
 
-    - Terminate interface removed and replaced with common shutdown interface.
+    - Terminate interface removed and replaced with common shutdown XRL 
+      interface.
 
     - Use system md5 header files.
 
     - Peer list sorted by remote IP for snmp.
 
     - Uninitialised variable bug fix in NextHopRibRequest.
+
+    - Initial support for returning the process status via get_status XRL.
 
   MFEA:
     - MFEA code merged with the unicast FEA, though logically the MFEA
@@ -157,8 +183,8 @@ Release 0.3 (2003/06/06)
     - Compilation fixes for NetBSD-current (and probably NetBSD-1.6.1)
       (courtesy Hitoshi Asaeda <Hitoshi.Asaeda@sophia.inria.fr>).
 
-    - Initial support for setting the process status PROC_FOO code.
-
+    - Initial support for returning the process status via get_status XRL.
+ 
     - Addition of a command-line option to ``test_mfea'' to specify the
       finder hostname and port number.
 
@@ -189,7 +215,7 @@ Release 0.3 (2003/06/06)
     - Addition of XRL interface to receive MRIB-related updates
       from the RIB; the interface is not used yet.
 
-    - Initial support for setting the process status PROC_FOO code.
+    - Initial support for returning the process status via get_status XRL.
 
     - Addition of a mechanism that should hold-off PIM-SM status
       to PROC_NOT_READY until it has received all necessary confirmation
