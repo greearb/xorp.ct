@@ -108,7 +108,7 @@ noinst_PROGRAMS = test_packet plumbing_test update_test aspath_test packet_codin
 noinst_LIBRARIES = libbgp.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 xorp_bgp_SOURCES = bgp.cc main.hh main.cc
@@ -172,6 +172,7 @@ aspath_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/targets/libbgpbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -190,6 +191,7 @@ isolation_tests_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/targets/libbgpbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -201,6 +203,7 @@ packet_coding_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/targets/libbgpbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -216,6 +219,7 @@ test_packet_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/targets/libbgpbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -227,6 +231,7 @@ update_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/targets/libbgpbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -238,6 +243,7 @@ xorp_bgp_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/targets/libbgpbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.36 2003/04/28 22:05:07 jcardona Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.37 2003/07/02 01:50:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -22,6 +22,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"
+#include "xrl/interfaces/bgp_mib_traps_xif.hh"
 
 #include "peer.hh"
 #include "main.hh"
@@ -1405,6 +1406,47 @@ BGPPeer::set_state(FSMState s, bool error)
 	if (STATEESTABLISHED != previous_state)
 	    established();
 	break;
+    }
+
+    /*
+    ** If there is a BGP MIB target running send it traps when a state
+    ** transition takes place.
+    */
+    BGPMain *m  = _mainprocess;
+    if (m->do_snmp_trap()) {
+	 XrlBgpMibTrapsV0p1Client snmp(m->get_router());
+
+	 inline void trap_callback(const XrlError& error, const char *comment);
+
+	 /*
+	 ** The simplest way to generate an error string with the last
+	 ** error is to generate a notification packet and use its
+	 ** str() method.
+	 */
+	 NotificationPacket pac(_last_error[0], _last_error[1]);
+	 if (STATEESTABLISHED == _state && STATEESTABLISHED != previous_state){
+	    snmp.send_send_bgp_established_trap(m->bgp_mib_name().c_str(),
+					   pac.str(),
+					   _state,
+					   callback(trap_callback,
+						    "established"));
+	} else if (_state < previous_state) {
+	    snmp.send_send_bgp_backward_transition_trap(
+						  m->bgp_mib_name().c_str(), 
+						   pac.str(), _state,
+						   callback(trap_callback,
+							    "backward"));
+	}
+    }
+}
+
+inline
+void
+trap_callback(const XrlError& error, const char *comment)
+{
+    debug_msg("trap_callback %s %s\n", comment, error.str().c_str());
+    if(XrlError::OKAY() != error) {
+	XLOG_WARNING("trap_callback: %s %s",  comment, error.str().c_str());
     }
 }
 
