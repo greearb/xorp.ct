@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.66 2004/12/10 23:15:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.67 2004/12/17 00:19:36 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -189,6 +189,24 @@ XrlFeaTarget::fea_click_0_1_stop_click()
     if (ifc.stop_click(error_msg1) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg1);
     }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Enable/disable duplicating the Click routes to the system kernel.
+ *
+ *  @param enable if true, then enable duplicating the Click routes to the
+ *  system kernel, otherwise disable it.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_enable_duplicate_routes_to_kernel(
+    // Input values,
+    const bool&	enable)
+{
+    FtiConfig& ftic = _xftm.ftic();
+
+    ftic.enable_duplicate_routes_to_kernel(enable);
 
     return XrlCmdError::OKAY();
 }

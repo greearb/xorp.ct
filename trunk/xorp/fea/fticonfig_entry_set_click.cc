@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.16 2004/12/17 05:48:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.17 2004/12/18 02:01:44 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -82,7 +82,10 @@ FtiConfigEntrySetClick::start(string& error_msg)
     // registration process itself can trigger some startup operations
     // (if any).
     //
-    register_ftic_primary();
+    if (ClickSocket::is_duplicate_routes_to_kernel_enabled())
+	register_ftic_secondary();
+    else
+	register_ftic_primary();
 
     return (XORP_OK);
 }

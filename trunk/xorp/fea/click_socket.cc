@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.16 2004/12/17 05:47:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.17 2004/12/17 06:05:50 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -59,6 +59,7 @@ ClickSocket::ClickSocket(EventLoop& eventloop)
       _seqno(0),
       _instance_no(_instance_cnt++),
       _is_enabled(false),
+      _duplicate_routes_to_kernel(false),
       _is_kernel_click(false),
       _is_user_click(false),
       _kernel_click_install_on_startup(false),

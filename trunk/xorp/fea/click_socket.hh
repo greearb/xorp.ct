@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.14 2004/12/17 00:19:35 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.15 2004/12/17 05:47:07 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -52,6 +52,22 @@ public:
      * @return true if the Click support is enabled, otherwise false.
      */
     bool is_enabled() const { return (_is_enabled); }
+
+    /**
+     * Test if duplicating the Click routes to the system kernel is enabled.
+     *
+     * @return true if duplicating the Click routes to the system kernel is
+     * enabled, otherwise false.
+     */
+    bool is_duplicate_routes_to_kernel_enabled() const { return _duplicate_routes_to_kernel; }
+
+    /**
+     * Enable/disable duplicating the Click routes to the system kernel.
+     *
+     * @param enable if true, then enable duplicating the Click routes to the
+     * system kernel, otherwise disable it.
+     */
+    void enable_duplicate_routes_to_kernel(bool v) { _duplicate_routes_to_kernel = v; }
 
     /**
      * Enable/disable kernel-level Click.
@@ -508,6 +524,8 @@ private:
     static pid_t    _pid;
 
     bool	_is_enabled;		// True if Click is enabled
+    bool	_duplicate_routes_to_kernel; // True if duplicating the Click
+					// routes to the kernel is enabled
     bool	_is_kernel_click;	// True if kernel Click is enabled
     bool	_is_user_click;		// True if user Click is enabled
 

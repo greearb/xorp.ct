@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.30 2004/12/13 23:15:34 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.31 2004/12/17 00:19:35 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -167,6 +167,14 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int stop_click(string& error_msg);
+
+    /**
+     * Enable/disable duplicating the Click routes to the system kernel.
+     *
+     * @param enable if true, then enable duplicating the Click routes to the
+     * system kernel, otherwise disable it.
+     */
+    void enable_duplicate_routes_to_kernel(bool enable);
 
     /**
      * Enable/disable kernel-level Click support.

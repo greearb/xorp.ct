@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.37 2004/12/02 07:02:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.38 2004/12/17 00:19:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -652,6 +652,21 @@ FtiConfig::stop_click(string& error_msg)
     }
 
     return (XORP_OK);
+}
+
+/**
+ * Enable/disable duplicating the Click routes to the system kernel.
+ *
+ * @param enable if true, then enable duplicating the Click routes to the
+ * system kernel, otherwise disable it.
+ */
+void
+FtiConfig::enable_duplicate_routes_to_kernel(bool enable)
+{
+    _ftic_entry_get_click.enable_duplicate_routes_to_kernel(enable);
+    _ftic_entry_set_click.enable_duplicate_routes_to_kernel(enable);
+    _ftic_table_get_click.enable_duplicate_routes_to_kernel(enable);
+    _ftic_table_set_click.enable_duplicate_routes_to_kernel(enable);
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.48 2004/12/02 02:37:48 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.49 2004/12/17 00:19:36 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -85,6 +85,16 @@ public:
      *  Stop Click FEA support.
      */
     XrlCmdError fea_click_0_1_stop_click();
+
+    /**
+     *  Enable/disable duplicating the Click routes to the system kernel.
+     *
+     *  @param enable if true, then enable duplicating the Click routes to the
+     *  system kernel, otherwise disable it.
+     */
+    XrlCmdError fea_click_0_1_enable_duplicate_routes_to_kernel(
+	// Input values,
+	const bool&	enable);
 
     /**
      *  Enable/disable kernel-level Click FEA support.
