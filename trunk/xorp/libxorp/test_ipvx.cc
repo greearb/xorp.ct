@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.12 2004/10/25 23:51:50 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.13 2005/01/30 07:03:15 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -693,7 +693,7 @@ test_ipvx_invalid_copy_in_out()
     // Mismatch copy-out: copy-out IPv6 address to in_addr structure.
     //
     try {
-	IPvX ip(*addr_string6);
+	IPvX ip(addr_string6);
 	struct in_addr in_addr;
 	ip.copy_out(in_addr);
 	verbose_log("Cannot catch mismatch copy-out : FAIL\n");
@@ -707,7 +707,7 @@ test_ipvx_invalid_copy_in_out()
     // Mismatch copy-out: copy-out IPv4 address to in_addr6 structure.
     //
     try {
-	IPvX ip(*addr_string4);
+	IPvX ip(addr_string4);
 	struct in6_addr in6_addr;
 	ip.copy_out(in6_addr);
 	verbose_log("Cannot catch mismatch copy-out : FAIL\n");
