@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.2 2003/01/08 21:59:16 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.3 2003/04/11 22:26:09 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -13,56 +13,93 @@ interface ifmgr/0.1 {
 
 	get_configured_vif_names ? ifname:txt -> vifs:list
 
-	get_address_flags4 ? ifname:txt					      \
-			   & vif:txt					      \
-			   & address:ipv4				      \
-			  -> enabled:bool				      \
-			   & broadcast:bool				      \
-			   & loopback:bool				      \
-			   & point_to_point:bool			      \
-			   & multicast:bool 				      
+	get_all_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
 
-	get_address_flags6 ? ifname:txt					      \
-			   & vif:txt 					      \
-			   & address:ipv6				      \
-			  -> enabled:bool 				      \
-			   & loopback:bool				      \
-			   & point_to_point:bool			      \
-			   & multicast:bool
+	get_configured_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
 
-	get_all_vif_addresses4 ? ifname:txt 				      \
-			       & vif:txt				      \
-			       -> addresses:list
+	get_all_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
 
-	get_configured_vif_addresses4 ? ifname:txt			      \
-				      & vif:txt				      \
-				      -> addresses:list
+	get_configured_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
 
-	get_all_vif_addresses6 ? ifname:txt				      \
-			       & vif:txt				      \
-			       -> addresses:list
+	get_all_address_flags4	? ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				-> enabled:bool				\
+				& broadcast:bool			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool 			      
 
-	get_configured_vif_addresses6 ? ifname:txt 			      \
-				      & vif:txt				      \
-				      -> addresses:list
+	get_configured_address_flags4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool			\
+					& broadcast:bool		\
+					& loopback:bool			\
+					& point_to_point:bool		\
+					& multicast:bool
 
-	get_interface_enabled ? ifname:txt -> enabled:bool
+	get_all_address_flags6	? ifname:txt				\
+				& vif:txt 				\
+				& address:ipv6				\
+				-> enabled:bool 			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
 
-	get_mac ? ifname:txt -> mac:mac
+	get_configured_address_flags6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool			\
+					& loopback:bool			\
+					& point_to_point:bool		\
+					& multicast:bool
 
-	get_mtu ? ifname:txt -> mtu:u32
+	get_all_interface_enabled ? ifname:txt -> enabled:bool
 
-	get_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+	get_configured_interface_enabled ? ifname:txt -> enabled:bool
 
-	get_prefix4 ? ifname:txt & vif:txt & address:ipv4 -> prefix:u32
+	get_all_mac ? ifname:txt -> mac:mac
 
-	get_broadcast4 ? ifname:txt & vif:txt & address:ipv4 -> broadcast:ipv4
+	get_configured_mac ? ifname:txt -> mac:mac
 
-	get_endpoint4 ? ifname:txt & vif:txt & address:ipv4 -> endpoint:ipv4
+	get_all_mtu ? ifname:txt -> mtu:u32
 
-	get_prefix6 ? ifname:txt & vif:txt & address:ipv6 -> prefix:u32
+	get_configured_mtu ? ifname:txt -> mtu:u32
 
-	get_endpoint6 ? ifname:txt & vif:txt & address:ipv6 -> endpoint:ipv6
+	get_all_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+
+	get_configured_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+
+	get_all_prefix4 ? ifname:txt & vif:txt & address:ipv4		\
+			-> prefix:u32
+
+	get_configured_prefix4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> prefix:u32
+
+	get_all_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> broadcast:ipv4
+
+	get_configured_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> broadcast:ipv4
+
+	get_all_endpoint4 ? ifname:txt & vif:txt & address:ipv4		\
+			-> endpoint:ipv4
+
+	get_configured_endpoint4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> endpoint:ipv4
+
+	get_all_prefix6 ? ifname:txt & vif:txt & address:ipv6		\
+			-> prefix:u32
+
+	get_configured_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> prefix:u32
+
+	get_all_endpoint6 ? ifname:txt & vif:txt & address:ipv6		\
+			-> endpoint:ipv6
+
+	get_configured_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> endpoint:ipv6
 
 	start_transaction -> tid:u32
 
@@ -89,6 +126,7 @@ interface ifmgr/0.1 {
 	 *               vifs in the system.
 	 */
 	create_vif ? tid:u32 & ifname:txt & vif:txt
+
 	delete_vif ? tid:u32 & ifname:txt & vif:txt
 
 	set_vif_enabled ? tid:u32 & ifname:txt & vif:txt & enabled:bool
@@ -97,61 +135,69 @@ interface ifmgr/0.1 {
 
 	delete_address4 ? tid:u32 & ifname:txt & vif:txt & address:ipv4
 
-	set_address_enabled4 ? tid:u32					      \
-			     & ifname:txt				      \
-			     & vif:txt					      \
-			     & address:ipv4				      \
-			     & enabled:bool 
+	set_address_enabled4	? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& enabled:bool 
 
-	get_address_enabled4 ? ifname:txt & vif:txt & address:ipv4 -> enabled:bool
+	get_all_address_enabled4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool
 
-	set_prefix4 ? tid:u32 						      \
-		    & ifname:txt					      \
-		    & vif:txt						      \
-		    & address:ipv4					      \
-		    & prefix:u32
+	get_configured_address_enabled4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool
 
-	set_broadcast4 ? tid:u32					      \
-		       & ifname:txt					      \
-		       & vif:txt					      \
-		       & address:ipv4					      \
-		       & broadcast:ipv4
+	set_prefix4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt & address:ipv4		\
+				& prefix:u32
 
-	set_endpoint4 ? tid:u32						      \
-		      & ifname:txt					      \
-		      & vif:txt						      \
-		      & address:ipv4					      \
-		      & endpoint:ipv4
+	set_broadcast4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& broadcast:ipv4
 
-	create_address6 ? tid:u32 					      \
-			& ifname:txt					      \
-			& vif:txt					      \
-			& address:ipv6
+	set_endpoint4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& endpoint:ipv4
 
-	delete_address6 ? tid:u32					      \
-			& ifname:txt					      \
-			& vif:txt					      \
-			& address:ipv6
+	create_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6
 
-	set_address_enabled6 ? tid:u32					      \
-			     & ifname:txt				      \
-			     & vif:txt					      \
-			     & address:ipv6				      \
-			     & enabled:bool 
+	delete_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6
 
-	get_address_enabled6 ? ifname:txt & vif:txt & address:ipv6 -> enabled:bool
+	set_address_enabled6	? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& enabled:bool 
 
-	set_prefix6 ? tid:u32						      \
-		    & ifname:txt					      \
-		    & vif:txt						      \
-		    & address:ipv6					      \
-		    & prefix:u32
+	get_all_address_enabled6	? ifname:txt			\
+					& vif:txt & address:ipv6	\
+					-> enabled:bool
 
-	set_endpoint6 ? tid:u32						      \
-		      & ifname:txt					      \
-		      & vif:txt						      \
-		      & address:ipv6					      \
-		      & endpoint:ipv6
+	get_configured_address_enabled6	? ifname:txt			\
+					& vif:txt & address:ipv6	\
+					-> enabled:bool
+
+	set_prefix6		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& prefix:u32
+
+	set_endpoint6		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& endpoint:ipv6
+
 	/**
 	 * Register network interface observer 
 	 *  @param clientname name of xrl entity supporting 
@@ -166,12 +212,3 @@ interface ifmgr/0.1 {
 	 */
 	unregister_client ? clientname:txt
 }
-
-
-
-
-
-
-
-
-
