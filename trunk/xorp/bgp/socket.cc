@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.18 2004/12/05 16:14:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.19 2004/12/10 14:52:02 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -96,7 +96,8 @@ void
 Socket::init_sockaddr(string addr, uint16_t local_port,
 		      struct sockaddr *sin, size_t& len)
 {
-    debug_msg("addr %s port %d len = %u\n", addr.c_str(), local_port, len);
+    debug_msg("addr %s port %u len = %u\n", addr.c_str(), 
+	XORP_UINT_CAST(local_port), XORP_UINT_CAST(len));
 
     string port = c_format("%d", local_port);
 

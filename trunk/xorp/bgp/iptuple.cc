@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.5 2004/06/10 22:40:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.6 2004/12/05 16:14:35 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -167,7 +167,8 @@ Iptuple::fill_address(const char *interface, uint16_t local_port,
 			    gai_strerror(error)));
     }
 
-    debug_msg("addrlen %d len %d\n", res0->ai_addrlen, len);
+    debug_msg("addrlen %u len %u\n", XORP_UINT_CAST(res0->ai_addrlen),
+	XORP_UINT_CAST(len));
     XLOG_ASSERT(res0->ai_addrlen <= len);
     memcpy(sin, res0->ai_addr, res0->ai_addrlen);
     debug_msg("family %d\n", sin->sa_family);
