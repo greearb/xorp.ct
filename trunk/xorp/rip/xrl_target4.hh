@@ -23,6 +23,7 @@
 class XrlRouter;
 class XrlProcessSpy;
 template<typename A> class XrlPortManager;
+template<typename A> class System;
 
 class XrlRip4Target : public XrlRip4TargetBase {
 public:
@@ -70,6 +71,12 @@ public:
 						const IPv4&	addr,
 						string&		status);
 
+    XrlCmdError rip4_0_1_add_static_route(const IPv4Net& 	network,
+					  const IPv4& 		nexthop,
+					  const uint32_t& 	cost);
+
+    XrlCmdError rip4_0_1_delete_static_route(const IPv4Net& 	network);
+
     XrlCmdError socket4_user_0_1_recv_event(const string&	sockid,
 					    const IPv4&		src_host,
 					    const uint32_t&	src_port,
@@ -91,6 +98,8 @@ public:
 protected:
     XrlProcessSpy&		_xps;
     XrlPortManager<IPv4>&	_xpm;
+    System<IPv4>&		_system;
+
     bool&			_should_exit;
 
     ProcessStatus		_status;

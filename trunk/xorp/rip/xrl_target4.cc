@@ -21,6 +21,7 @@
 #include "libxorp/status_codes.h"
 #include "libxipc/xrl_router.hh"
 
+#include "system.hh"
 #include "xrl_target4.hh"
 #include "xrl_process_spy.hh"
 #include "xrl_port_manager.hh"
@@ -29,7 +30,8 @@ XrlRip4Target::XrlRip4Target(XrlRouter&			xr,
 			     XrlProcessSpy&		xps,
 			     XrlPortManager<IPv4>& 	xpm,
 			     bool&			should_exit)
-    : XrlRip4TargetBase(&xr), _xps(xps), _xpm(xpm), _should_exit(should_exit),
+    : XrlRip4TargetBase(&xr), _xps(xps), _xpm(xpm), _system(xpm.system()),
+      _should_exit(should_exit),
       _status(PROC_NULL), _status_note("")
 {
 }
@@ -161,6 +163,33 @@ XrlRip4Target::rip4_0_1_get_rip_address_status(const string& ifname,
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str(),
 	      status.c_str());
 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_add_static_route(const IPv4Net& 	network,
+					 const IPv4& 		nexthop,
+					 const uint32_t& 	cost)
+{
+    if (cost > RIP_INFINITY) {
+	return XrlCmdError::COMMAND_FAILED(c_format("Bad cost %u", cost));
+    }
+
+    _system.add_route_redistributor("static", 0);
+    if (_system.redistributor_add_route("static", network, nexthop, cost)
+	== false) {
+	return XrlCmdError::COMMAND_FAILED("Route exists already.");
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_delete_static_route(const IPv4Net& 	network)
+{
+    if (_system.redistributor_remove_route("static", network) == false) {
+	return XrlCmdError::COMMAND_FAILED("No route to delete.");
+    }
     return XrlCmdError::OKAY();
 }
 

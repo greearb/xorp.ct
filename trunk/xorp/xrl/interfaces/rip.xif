@@ -45,6 +45,28 @@ interface rip4/0.1 {
 			   & vifname:txt				\
 			   & addr:ipv4					\
 			   -> status:txt
+
+    /**
+     * Add a static route.
+     *
+     * @param network route target.
+     * @param nexthop path to direct packets for @ref network to.
+     * @param cost RIP cost [0--15].
+     */
+    add_static_route ? network:ipv4net					\
+		     & nexthop:ipv4					\
+		     & cost:u32
+
+    /**
+     * Remove static route.
+     *
+     * @param network route target.
+     *
+     * This method will fail if network was not previously added with
+     * add_static_route.
+     */
+     delete_static_route ? network:ipv4net
+
 }
 
 interface rip6/0.1 {
