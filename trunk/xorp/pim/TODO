@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.61 2003/11/06 22:31:23 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.62 2003/12/01 04:45:56 pavlin Exp $
 #
 
 * IMPL: If a PimVif interface fails to start/stop/etc, then
@@ -11,7 +11,7 @@
   - Add this new PimStat class to the design figure,
     and to the test description.
 
-* BOOTSTRAP SPEC + IMPL: If the BSR goes down, and its state expires
+* BSR SPEC + IMPL: If the BSR goes down, and its state expires
   in the rest of the routers, clarify whether they remove the RP-Set
   received from that BSR. Maybe they keep it until all Cand-RP timers
   expire? Or delete all BSR related info on BSR timer expiry?
@@ -29,13 +29,6 @@
 
 * IMPL: Implement the PMBR behavior (Section 4.7)
 
-* PIM SPEC: Fix the description of the PIM Null Register messages
-  (e.g., what the mandatory fields are, checksum, etc).
-
-* PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
-  to PIM mailing list from 15 May 2003
-  (Message-ID: <NDEGKGGNPHBFKDIGGCMFAEDDCHAA.suresh@timetra.com>)
-
 * BSR SPEC+IMPL+TESTSUITE:
   Make sure that Mark's email to PIM Mailing list "Re: [pim] PIM BSR Draft"
   on May 8, 2003 is specified in the spec, implemented and tested.
@@ -45,10 +38,6 @@
 * BSR SPEC:
   Add/describe in each non-BSR a timer per Cand-RP that is based
   on each Cand-RP holdtime (as specified in the Bootstrap message).
-
-* PIM SPEC: Don't use "link-local" terminology, because it has no meaning
-  for IPv4? Or, at least, clarify that it is only for IPv6, and describe
-  what happens in case of IPv4.
 
 * IMPL+BSR SPEC+TESTSUITE(?):
   In the bootstrap spec, if we receive and accept an unicast BSM,
@@ -76,13 +65,14 @@
   the action is A5, and move to NI state (this applies for both
   the (S,G) and (*,G) Assert state machine).
 
-* SPEC+IMPL: Take care of the
+* IMPL: Take care of the
   (*,*,RP) Joins and AssertTrackingDesired(S,G,I) problem.
    In the AssertTrackingDesired(S,G,I) definition,
 the line
   "OR (RPF_interface(RP)==I AND JoinDesired(*,G)==TRUE"
 probably should be replaced with
   "OR (RPF_interface(RP)==I AND RPTJoinDesired(G)"
+   (Note: it is already corrected in the spec).
 
 * IMPL: what to do when (S,G) packet received on wrong iif, and there
   is no routing entry yet? Currently, PimMrt::receive_data() processing
@@ -96,7 +86,7 @@ probably should be replaced with
 
 * SPEC+IMPL: Add text to beginning of Section 4.6 that if an implementation
   incorrectly fails to send Hello messages on p2p interfaces, then the
-  spec should RECOMMEND that a config option is provided o interoperate
+  spec should RECOMMEND that a config option is provided to interoperate
   with such routers (i.e., to accept Assert messages even if no Hello
   was received). In other words, add text similar to the paragraph
   right before Section 4.5.1
@@ -158,7 +148,7 @@ probably should be replaced with
   there is no entry for it in the PimBsr table, and there is no timer
   running to time it out.
 
-* SPEC+IMPL:
+* BSR SPEC+IMPL:
     DR--------R1----RP
          |
          R2
@@ -184,6 +174,8 @@ probably should be replaced with
   we send first the (*,*,RP) Join first, or the (*,*,RP) Prune first?
   The description in the text is different from the figure and the table.
   Same fix is needed for (*,G) and (S,G)
+  Note: the fix was applied to the spec. Take care of the implementation
+  and the testsuite
 
 * IMPL+SPEC: Add this text somewhere else:
   ECN bits setup for PIM Registers.
@@ -229,12 +221,6 @@ probably should be replaced with
   created as well, and they were never deleted.
   Add the appropriate test scenarion in the testsuite to test that.
 
-* SPEC: allow all zeros Upstream Neighbor Address for PIM Join/Prune messages
-  on p-to-p interfaces (pending approval from the PIM mailing list).
-  If not allowed, then fix the implementation to disallow all zeros
-  for "target_nbr_addr" in PimVif::pim_join_prune_recv() and
-  PimJpHeader::mrt_commit().
-
 * IMPL: add PimConfig class to PimNode.
 
 * IMPL: all signals from the kernel should be parsed by the MFEA
@@ -256,7 +242,8 @@ probably should be replaced with
 * IMPL: keep a copy of installed kernel dataflow meters in PIM
   and/or MFEA (OK?)
 
-* SPEC+IMPL: How to set the outer TTL for PIM Register packets:
+* SPEC+IMPL+PIMKERN+TESTSUITE: How to set the outer TTL for PIM Register
+  packets: 
   (a) Fixed value (similar to cisco)
   (b) Set to the inner TTL on encasulation, then copy back to inner TTL
     on decapsulation
@@ -270,20 +257,17 @@ probably should be replaced with
   from protocol modules to the MFEA. If set, the IP_DF bit will
   be set (applies only for IPv4).
 
-* SPEC+IMPL: if RP becomes UNKNOWN, remove the Register vif from
-  the oif list (at the DR's (S,G) entry). (Waiting for the spec change...)
-
 * IMPL: add the equivalent of altnet from pimd.conf : e.g.,
   non-local senders appear as senders connected to the same subnet.
   Needed as a work-around solution when there are uni-directional
   interfaces for sending and receiving traffic (e.g., satellite links).
 
-* SPEC: If the DR reboots (e.g., its GenID changes), then
+* BSR SPEC: If the DR reboots (e.g., its GenID changes), then
   the neighbor that should unicast to it the Bootstrap message should
   be the neighbor that _WOULD_ had become the DR if the real DR
   was not there.
 
-* SPEC:
+* SPEC+IMPL+TESTSUITE:
   Change from:
 
  if( iif == RPF_interface(S) AND UpstreamJPState(S,G) == Joined ) {
@@ -294,7 +278,11 @@ probably should be replaced with
      AND ((UpstreamJPState(S,G) == Joined )
           OR (DirectlyConnected(S) == TRUE )) {
 
-* SPEC: 
+ Note: the implementation has already taken care of it. If the
+ spec change is not approved, then modify the implementation
+ and the testsuite as well.
+
+* SPEC+IMPL:
   Change from:
       # Note: register state transition may happen as a result
       # of restarting KeepaliveTimer, and must be dealt with here.
@@ -305,15 +293,18 @@ probably should be replaced with
       # transition may happen as a result
       # of restarting KeepaliveTimer, and must be dealt with here.
 
-* SPEC: Change the packet_arrives_on_rp_tunnel() processing from:
+   Note: the implementation is probably OK, but check it just in case.
 
+* IMPL: Implement the lastest packet_arrives_on_rp_tunnel() processing.
+
+  Currently, the implementation replace the old spec:
     if( I_am_RP( G ) && outer.dst == RP(G) ) {
         restart KeepaliveTimer(S,G)
         if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
             send RegisterStop(S,G) to outer.src
         } else {
 
-  to
+  with
 
     if( I_am_RP( G ) && outer.dst == RP(G) ) {
         if (SwitchToSptDesired(S,G))
@@ -344,11 +335,6 @@ Register_Suppression_Time + Register_Probe_Time )."
   Hence, probably things should be optimized such that
   add_mfc_to_kernel() would be called only if something about the PimMfc
   has changed.
-
-* SPEC+IMPL: Look into the PimVif::pim_register_recv(), and in particular
-  SPEC::packet_arrives_on_rp_tunnel()
-  It seems that "restart KeepaliveTimer" is probably not needed. If true,
-  then remove all PimMfc handling from pim_register_recv()
 
 * SPEC (Bootstrap): Should the triggered Bootstrap message be sent immediately,
   or waiting for a while after the first random Hello message is OK?
@@ -384,15 +370,12 @@ choose.  But I think a v2-only implementation should drop anything
 other than a Hello with version greater than 2, and log a warning."
 
 * SPEC+IMPL: what to do if message with unrecognized Type or Version is
-received?
+  received?
 
 * IMPL: the following ConfigParam in PimVif don't have XRL config interface:
   - join_prune_holdtime (indirectly set from join_prune_period)
   - assert_time
   - assert_override_interval
-
-* SPEC: When specifying Keepalive timer values in the RP, use
-  the RP_Keepalive_Period
 
 * IMPL: parameterize following (per PimNode):
   PIM_KEEPALIVE_PERIOD_DEFAULT
@@ -409,7 +392,27 @@ received?
 * IMPL: check that the Join/prune period should not be larger than 64k/3.5,
   otherwise the holdtime will overflow.
 
-* SPEC: Add the (! i_am_rp()) check to CouldRegister(S,G)
+* SPEC+IMPL+TESTSUITE:
+  Modify:
+
+  Bool CouldRegister(S,G) {
+     return ( I_am_DR( RPF_interface(S) ) AND
+              KeepaliveTimer(S,G) is running AND
+              DirectlyConnected(S) == TRUE )
+  }
+
+ to
+
+  Bool CouldRegister(S,G) {
+     return ( I_am_DR( RPF_interface(S) ) AND
+              KeepaliveTimer(S,G) is running AND
+              DirectlyConnected(S) == TRUE AND
+              !I_am_RP(G) AND
+              RP(G) != NULL)
+  }
+
+  Note: the implementation already takes care of !I_am_RP(G),
+  but it doesn't implement yet the RP(G) != NULL part.
 
 * IMPL: fix following error due to fact that temp. sometimes we don't install
   any dataflow monitoring in the MFEA:
@@ -427,10 +430,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: When setting a new protocol version on an interface, or on the node,
   do we restart the vif and/or node or do we let it run without
   interruption?
-
-* SPEC: "DR priority" or "DR election priority" name consistency.
-  NOTE: Search for "priority" because there is a variation of the above
-  naming.
 
 * IMPL+SPEC: After the spec fixes the naming "DR priority"
   / "DR election priority",
@@ -452,6 +451,8 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL and SPEC:
   When computing JoinDesired (is_join_desired_), should we return
   false if the iif is DOWN?
+  Maybe the answer is NO, and how we suppress the Join messages
+  if the interface is DOWN is implementation-specific issue only.
 
 * IMPL: if we stop PimRegister, should pim_register_vif_index() then return
   VIF_INDEX_INVALID ??
@@ -461,11 +462,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
         INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED,         // 5
         INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED,            // 6
         (Maybe yes, because it is never used??)
-
-* SPEC: Edit for "Unicast Upstream Neighbor Address"
-  "RPF lookup." -> "MRIB lookup." ??
- 
-* PIM SPEC+BSR SPEC: Update cross-references between Bootstrap and PIM-SM spec.
 
 * SPEC+IMPL: If an interface goes down:
   - if IIF, then thread it as the new IIF = INFINITY, and then the protocol
@@ -482,12 +478,12 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
     to send-out a Bootstrap and/or Cand-RP message with the old address,
     if the OS does not allow us (e.g, if it doesn't allow IP address spoofing).
 
-* SPEC: If the IP address of an interface has been changed, a Hello
+* SPEC+IMPL: If the IP address of an interface has been changed, a Hello
   message with Holdtime=0 and the old IP address will be sent-out.
   However, what about scheduling to send quickly a Hello message with the
   new IP address?
 
-* SPEC: PIM-SM spec Section 4.3.1 says that if no Hello message has been
+* BSR SPEC: PIM-SM spec Section 4.3.1 says that if no Hello message has been
   sent yet on an interface, but we must send Join/Prune or Assert message,
   then a Hello message MUST immediately be sent first without waiting
   for the Hello timer to expire.
@@ -501,11 +497,9 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   All Value names must be a single word. E.g:
   BS Timeout -> BS_Timeout
 
-* SPEC: In the default value section at the end of the spec, sometimes
-  the unit is "sec", other time is "secs" or "seconds".
-
-* SPEC: Add descrpiption of the RP behavior when the Border bit of
-  PIM Registers is set (see the RFC spec for that).
+* SPEC+IMPL: Add descrpiption of the RP behavior when the Border bit of
+  PIM Registers is set (see the RFC spec for that), and then implement
+  it.
 
 * IMPL: Rename '*delete*' and '*remove*' methods:
   Use '*remove*' when an element is removed from a container, but the
@@ -518,9 +512,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   E.g., in PimMre::compute_mrib_next_hop_rp(),
   PimMre::compute_rpfp_nbr_wc()
   Similar for S, if a directly-connected S, or I am the S.
-
-* SPEC: Rename Could-Register to CouldRegister (for consistency with
-  rest of the text).
 
 * IMPL: take care of recomputing PimMfc::olist_disable_wrongvif()
 
@@ -535,6 +526,9 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 
 * SPEC: Do we allow SPT switch if only (*,*,RP) entry, but not (*,G) entry?
   See CheckSwitchToSpt(S,G)
+  Maybe no, because by definition in Section 4.7 the border router must
+  generate (*,G) Join for each active group, hence it will contain
+  (*,G) entries.
 
 * SPEC+IMPL: When a packet is received in Section 4.2 (Data Packet Forwarding
   Rules), why in one case the action is
@@ -567,7 +561,7 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   the CPU won't be "blocked" processing all those tasks without
   giving-up control.
 
-* SPEC: explicity specify not to route on link-local multicast groups
+* SPEC+IMPL: explicity specify not to route on link-local multicast groups
   and/or add a pointer to the document that says that.
 
 * IMPL: figure-out what to do for (S,G) MLD/IGMP Leave:
@@ -591,17 +585,19 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: when removing a PimNbr, make sure it is not in use anymore
   by any PimMre or other entry.
 
-* SPEC: When the RP changes, then it could be that
+* SPEC+IMPL: When the RP changes, then it could be that
   both events occur for the upstream (*,G) state machine:
   "JoinDesired(*,G) -> False"
-  and MRIB.next_hop(RP(G)) changed.
+  and
+  "RPF'(*,G) changes not due to an Assert"
   In that case, does it matter in what order the actions are performed?
   
 * IMPL: Unite in PimMreTrackState MRIB_NEXT_HOP_RP with MRIB_NEXT_HOP_RP_G
   (XXX: not need for this??)
 
-* SPEC: fix the definition for "acceptable metric" for (*,G) to
-  be rpt_assert_metric(*,G,I) instead of my_assert_metric(S,G,I)
+* SPEC+IMPL: fix the definition for "acceptable assert" for (*,G) to
+  be rpt_assert_metric(G,I) instead of my_assert_metric(S,G,I)
+  Same for "inferior assert".
 
 * IMPL: Check email message sent to snap-users@kame.net about IPv6 related
   bug in pim6sd from  Alexandre Fenyo <fenyo@enst.fr> :
@@ -613,41 +609,29 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
         algorithm bugs for P2P connected routes and static interface
         routes (reported from pekkas@netcore.fi)
 
-* SPEC: Why there is no entry for RPF'(S,G,rpt) changed for the
-  Upstream (S,G,rpt) state machine?
+* SPEC+IMPL:
+  Why there are no entries for "RPF'(S,G,rpt) changes due to an
+  Assert", and "RPF'(S,G,rpt) changes due not to an Assert"
+  for the Upstream (S,G,rpt) state machine?
 
-* SPEC: Do we need "RPF_interface(S) becomes I" entry for the
-  (S,G) Assert state machine?
-  Similar fot the (*,G) Assert state machine.
+* SPEC+IMPL:
+  Do we need "RPF_interface(S) becomes I" entry for the
+  (S,G) Assert state machine, and "RPF_interface(RP(G)) becomes I"
+  entry for the (*,G) Assert state machine?
 
 * SPEC+IMPL: if an Assert is received for (S,G) or (*,G) we have
   state for, then just silently ignore it?
   However, make sure that an (S,G) is created if it is
   an (S,G) assert and there is (S,G,rpt) PimMre entry
 
-* SPEC: All security references (e.g., the IPsec reference in Section 4.6.1
-  regarding (S,G) Assert Message State Machine) should be
-  moved to the security section.
-
-* SPEC+IMPL: All AssertWinner related comparison such as
+* SPEC+IMPL:
+  All AssertWinner related comparison such as
   "AssertWinner(*,G,I) == me"
-  should replace "me" with "my_ip_address(I)".
-
-* SPEC+IMPL: All AssertWinner related comparison such as
-  "AssertWinner(*,G,I) == me"
-  should replace "me" with "my_ip_address(I)", and
-  should use as appropriate to "track_dependency"
+  or
+  "AssertWinner(S,G,I) == me"
+  should replace "me" with "my_ip_address(I)",
+  and should use as appropriate to "track_dependency"
   PimMre::with track_dependency_my_ip_address()
-
-* SPEC: change
-    "# note that this should not happen if the lower layer is working"
-  to
-    "# note that this should not happen if the lower layer is working properly"
-
-* SPEC: Change everywhere Could-Register to CouldRegister(S,G)
-
-* SPEC: Update_SPTbit() definition:
-    // TODO: XXX: PAVPAVPAV: SPEC: what about if no (S,G,rpt) entry?? 
 
 * SPEC: what about sending Assert based on an (S,G,rpt) or
   (S,G) that is pending SPT switch?
@@ -659,7 +643,9 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
   Needed if the number of neighbors become quite large, so the
   neighbor lookup will become much faster.
 
-* SPEC+IMPL
+* SPEC+IMPL (OLD?)
+  [this entry may be obsoleted by the implementation of the new "Address List"
+  Hello option].
   SPEC: The unicast routing may show one MRIB address, but the upstream
   router may send the Hello messages using only one of the local IP addresses.
   Hence, which IP address to use in the Hello messages?
@@ -668,6 +654,7 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
   any address.
 
 * SPEC+IMPL:
+  [ Note: the text is already in the spec]
   When an interface goes down or changes IP address, a Hello message with
   a zero Hold Time should be sent immediately (with the old IP address if
   the IP address changed).  This will cause PIM neighbors to remove this
@@ -702,12 +689,9 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
   If the Elected BSR is a neighbor, and that neighbor expired,
   do we want to apply the optimization to expire immediately that BSR?
 
-* SPEC:
+* SPEC+IMPL:
   On startup, am I the DR by default, or wait some period of time
   before self-promote as the DR?
-
-* SPEC: In the PIM-SM spec: Section 4.2.1 "Last hop switchover to the SPT":
-  Change "Last hop" to "Last-hop"?
 
 * IMPL+BSR SPEC: Can an intermediate router that forwards a Bootstrap message
   fragment it to fit the max. size on the outgoing link?
@@ -724,7 +708,7 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
 * IMPL+BSR SPEC: take care of the SZ Timer in the BSR spec: unclear when set,
   what means "always running", etc. See page 8 and 9 of the spec.
 
-* SPEC: RP Set or RP-Set??
+* BSR SPEC: Add index
 
 * IMPL+SPEC:
   PIM MIB:
@@ -758,12 +742,10 @@ for the kernel patches as well.
   (assuming the kernel supports that API).
 
 * SPEC: If OverrideTimer expires, and RPF'(S,G,rpt) != RPF'(*,G)
-  it is unclear what exactly the spec suggests.
-
-* SPEC: upstream/downstream interface state names are inconistent.
-  It should be sth. like:
-		downstream: Join Prune TempPrune (present tense)
-		upstream: Joined NotJoined Pruned NotPruned (past tense)
+  it is unclear what exactly the spec suggests. Actually, it suggests
+  don't do anything explicit, and the rest of the machineries
+  will take care of everything. Hence, make sure that the implementation
+  is not really doing anything.
 
 * IMPL: All constants defined in pim_proto.h should be used as configurable
   variables inside the code.
