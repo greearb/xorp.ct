@@ -1,6 +1,21 @@
 #
-# $XORP: xorp/pim/TODO,v 1.65 2004/02/22 03:18:05 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.66 2004/02/23 23:38:22 pavlin Exp $
 #
+
+* IMPL:
+  Implement mixing of IPv4/IPv6 addresses within PIM Join/Prune messages
+  as specified in the spec:
+
+Within one PIM Join/Prune message, all the Multicast Group Addresses,
+Joined Source addresses and Pruned Source addresses MUST be of the same
+address family.  It is NOT PERMITTED to mix IPv4 and IPv6 addresses
+within the same message.  In addition, the address family of the fields
+in the message SHOULD be the same as the IP source and destination
+addresses of the packet.  This permits maximum implementation
+flexibility for dual-stack IPv4/IPv6 routers.  If a router receives a
+message with mixed family addresses, it SHOULD only process the
+addresses which are of the same family as the unicast upstream neighbor
+address.
 
 * IMPL:
   Apply the following optimization to stop generating PIM Assert packets
