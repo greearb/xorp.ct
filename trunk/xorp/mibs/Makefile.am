@@ -3,24 +3,34 @@
 ## # $Header$
 ##
 
-# This makefile builds all the shared object files in this directory but without
-# using libtool.  This forces us to use some hacks to build the libraries, such
-# as declare them as programs, and override the linker default settings.
+#
+# This Makefile builds all the shared object files in this directory but
+# without using libtool.  This forces us to use some hacks to build the
+# libraries, such as declare them as programs, and override the linker
+# default settings.
+#
 
-# This is the only shared object that needs to be installed (manually, since we
-# are not using libtool)
-bin_PROGRAMS = libnetsnmpxorp.so
+#
+# This is the only shared object that needs to be installed.
+# By default it will be installed in directory @pkglibdir@ which
+# in our case defaults to $(libdir)/xorp
+# If we want to change the installation directory to something else,
+# then we need to redefine pkglibdir. E.g.:
+#pkglibdir=@libdir@
+#
+pkglib_PROGRAMS = libnetsnmpxorp.so
 
+
+#
 # These are the mib modules that will be loaded by the snmp agent.  They need
 # not to be installed. Add the MIB modules that you write to this list.
 # 
-# XXX: using the prefix noinst_ would be preferred, but automake complains...
-sbin_PROGRAMS = bgp4_mib_1657.so ospf_mib_1850.so xorp_if_mib_module.so
+noinst_PROGRAMS = bgp4_mib_1657.so ospf_mib_1850.so xorp_if_mib_module.so
 
 # -- Test Programs 
 TESTS           = test_xorpevents
 
-noinst_PROGRAMS = $(TESTS)
+noinst_PROGRAMS += $(TESTS)
 
 # -- Compiler and pre compiler flags
 AM_CPPFLAGS = `net-snmp-config --cflags` 
@@ -39,13 +49,16 @@ test_xorpevents_LDADD  = $(LDADD) -lnetsnmpxorp -L.
 bgp4_mib_1657_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
 bgp4_mib_1657_so_LDADD += $(top_builddir)/xrl/interfaces/libbgpxif.a
 bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
+bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
  
 
 ospf_mib_1850_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
 ospf_mib_1850_so_LDFLAGS = -shared -fPIC -fpic 
+ospf_mib_1850_so_DEPENDENCIES = libnetsnmpxorp.so
 
 xorp_if_mib_module_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
 xorp_if_mib_module_so_LDFLAGS = -shared -fPIC -fpic 
+xorp_if_mib_module_so_DEPENDENCIES = libnetsnmpxorp.so
 
 
 # -- Test Program Sources
@@ -76,14 +89,3 @@ xorp_if_mib_module_so_SOURCES += xorp_if_mib_module.cc
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
-
-
-
-
-
-
-
-
-
-
-
