@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.3 2003/01/17 04:07:24 mjh Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.4 2003/01/19 00:59:26 mjh Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -205,6 +205,46 @@ public:
     XrlCmdError bgp_0_2_delete_route(
 	// Input values, 
 	const IPv4Net&	nlri);
+
+    XrlCmdError bgp_0_2_get_v4_route_list_start(
+	// Output values, 
+	uint32_t& token);
+
+    XrlCmdError bgp_0_2_get_v6_route_list_start(
+	// Output values, 
+	uint32_t& token);
+
+    XrlCmdError bgp_0_2_get_v4_route_list_next(
+	// Input values, 
+	const uint32_t&	token, 
+	// Output values, 
+	IPv4&	peer_id, 
+	IPv4Net& net, 
+	uint32_t& best_and_origin, 
+	vector<uint8_t>& aspath, 
+	IPv4& nexthop, 
+	int32_t& med, 
+	int32_t& localpref, 
+	int32_t& atomic_agg, 
+	vector<uint8_t>& aggregator, 
+	int32_t& calc_localpref, 
+	vector<uint8_t>& attr_unknown);
+
+    XrlCmdError bgp_0_2_get_v6_route_list_next(
+	// Input values, 
+	const uint32_t&	token, 
+	// Output values, 
+	IPv4& peer_id, 
+	IPv6Net& net, 
+	uint32_t& best_and_origin, 
+	vector<uint8_t>& aspath, 
+	IPv6& nexthop, 
+	int32_t& med, 
+	int32_t& localpref, 
+	int32_t& atomic_agg, 
+	vector<uint8_t>& aggregator, 
+	int32_t& calc_localpref, 
+	vector<uint8_t>& attr_unknown);
 
     XrlCmdError bgp_0_2_terminate();
 

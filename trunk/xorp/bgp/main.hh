@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.5 2003/01/19 00:59:25 mjh Exp $
+// $XORP: xorp/bgp/main.hh,v 1.6 2003/01/24 19:50:10 rizzo Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -26,6 +26,7 @@
 #include "iptuple.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "libxorp/eventloop.hh"
+#include "path_attribute_list.hh"
 
 #include "peer_handler.hh"
 
@@ -172,6 +173,42 @@ public:
      */
     bool delete_route(const IPv4Net& nlri);
 
+    bool get_route_list_start4(uint32_t& token);
+    bool get_route_list_start6(uint32_t& token);
+    
+    bool get_route_list_next4(
+			      // Input values, 
+			      const uint32_t&	token, 
+			      // Output values, 
+			      IPv4&	peer_id, 
+			      IPv4Net& net, 
+			      uint32_t& origin, 
+			      vector<uint8_t>& aspath, 
+			      IPv4& nexthop, 
+			      int32_t& med, 
+			      int32_t& localpref, 
+			      int32_t& atomic_agg, 
+			      vector<uint8_t>& aggregator, 
+			      int32_t& calc_localpref, 
+			      vector<uint8_t>& attr_unknown,
+			      bool& best);
+    bool get_route_list_next6(
+			      // Input values, 
+			      const uint32_t&	token, 
+			      // Output values, 
+			      IPv4&	peer_id, 
+			      IPv6Net& net, 
+			      uint32_t& origin, 
+			      vector<uint8_t>& aspath, 
+			      IPv6& nexthop, 
+			      int32_t& med, 
+			      int32_t& localpref, 
+			      int32_t& atomic_agg, 
+			      vector<uint8_t>& aggregator, 
+			      int32_t& calc_localpref, 
+			      vector<uint8_t>& attr_unknown,
+			      bool& best);
+
     bool rib_client_route_info_changed4(
 					// Input values,
 					const IPv4&	addr,
@@ -251,6 +288,21 @@ private:
      */
     void connect_attempt(int fd, SelectorMask m,
 			 struct in_addr laddr, uint16_t lport);
+
+    template <class A>
+    void extract_attributes(// Input values, 
+			    const PathAttributeList<A>& attributes, 
+			    // Output values, 
+			    uint32_t& origin, 
+			    vector<uint8_t>& aspath, 
+			    A& nexthop,
+			    int32_t& med, 
+			    int32_t& localpref, 
+			    int32_t& atomic_agg, 
+			    vector<uint8_t>& aggregator, 
+			    int32_t& calc_localpref, 
+			    vector<uint8_t>& attr_unknown);
+
 
     bool _exit_loop;
     BGPPeerList *_peerlist;

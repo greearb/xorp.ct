@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute_list.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/path_attribute_list.hh,v 1.2 2003/01/17 05:51:07 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_LIST_HH__
 #define __BGP_PATH_ATTRIBUTE_LIST_HH__
@@ -36,6 +36,11 @@ public:
     const AsPath& aspath() const { return _aspath_att->as_path(); }
     const uint8_t origin() const { return _origin_att->origintype(); }
 
+    const MEDAttribute* med_att() const;
+    const LocalPrefAttribute* local_pref_att() const;
+    const AtomicAggAttribute* atomic_aggregate_att() const;
+    const AggregatorAttribute* aggregator_att() const;
+
     void rehash();
     const uint8_t* hash() const {
 	assert_rehash();
@@ -57,6 +62,7 @@ public:
     void replace_AS_path(const AsPath& as_path);
     void remove_attribute_by_type(PathAttType type);
 
+
     string str() const;
 
     /* operator< is used to store and search for PathAttributeLists in
@@ -73,6 +79,7 @@ protected:
 private:
     void replace_attribute(PathAttribute *att, PathAttType type);
     void assert_rehash() const;
+    const PathAttribute* find_attribute_by_type(PathAttType type) const;
 
     NextHopAttribute<A> *_nexthop_att;
     ASPathAttribute *_aspath_att;

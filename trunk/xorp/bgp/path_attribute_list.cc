@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.2 2002/12/17 04:49:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.3 2003/01/17 05:51:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -268,6 +268,51 @@ PathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 }
 
 template<class A>
+const PathAttribute*
+PathAttributeList<A>::find_attribute_by_type(PathAttType type) const
+{
+    // we only remove the first instance of an attribute with matching type
+    list<PathAttribute*>::const_iterator i;
+    for (i = _att_list.begin(); i != _att_list.end(); i++) {
+	if ((*i)->type() == type) {
+	    return *i;
+	}
+    }
+    return NULL;
+}
+
+template<class A>
+const MEDAttribute* 
+PathAttributeList<A>::med_att() const 
+{
+    return dynamic_cast<const MEDAttribute*>(find_attribute_by_type(MED));
+}
+
+template<class A>
+const LocalPrefAttribute*
+PathAttributeList<A>::local_pref_att() const 
+{
+    return dynamic_cast<const LocalPrefAttribute*>(
+               find_attribute_by_type(LOCAL_PREF));
+}
+
+template<class A>
+const AtomicAggAttribute*
+PathAttributeList<A>::atomic_aggregate_att() const 
+{
+    return dynamic_cast<const AtomicAggAttribute*>(
+               find_attribute_by_type(ATOMIC_AGGREGATE));
+}
+
+template<class A>
+const AggregatorAttribute*
+PathAttributeList<A>::aggregator_att() const 
+{
+    return dynamic_cast<const AggregatorAttribute*>(
+              find_attribute_by_type(AGGREGATOR));
+}
+
+template<class A>
 void
 PathAttributeList<A>::assert_rehash() const
 {
@@ -281,3 +326,11 @@ PathAttributeList<A>::assert_rehash() const
 
 template class PathAttributeList<IPv4>;
 template class PathAttributeList<IPv6>;
+
+
+
+
+
+
+
+

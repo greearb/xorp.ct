@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.3 2002/12/14 00:21:01 mjh Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.4 2003/01/21 01:31:49 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -136,7 +136,10 @@ AsSegment::operator==(const AsSegment& him) const
 {
     if (_entries != him._entries)
 	return false;
-    // XXX why reverse iterators ?
+    //We use reverse iterators because the aspaths we receive have
+    //more in common in the ASs near us than in the ASs further away.
+    //Much of the time we can detect disimilarity in the first AS if
+    //we start at the end.
     list <AsNum>::const_reverse_iterator my_i = _aslist.rbegin();
     list <AsNum>::const_reverse_iterator his_i = him._aslist.rbegin();
     for (;my_i != _aslist.rend(); my_i++, his_i++)
@@ -167,6 +170,24 @@ AsSegment::operator<(const AsSegment& him) const
     }
     return false;
 }
+
+size_t
+AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
+{
+    //See RFC 1657, Page 15 for the encoding
+    assert(buf_size >= (2 * _entries * 2));
+    uint8_t *p = buf;
+    *p = (uint8_t)_type;  p++;
+    *p = (uint8_t)_entries; p++;
+    list <AsNum>::const_iterator i;
+    for (i = _aslist.begin(); i!= _aslist.end(); i++) {
+	*p = i->as()/256; p++;
+	*p = i->as()&255; p++;
+    }
+
+    return (2 + _entries * 2);
+}
+
 
 /* *************** AsPath *********************** */
 
@@ -360,4 +381,31 @@ AsPath::operator<(const AsPath& him) const
 	    return false;
     }
     return false;
+}
+void
+AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
+{
+    //See RFC 1657, Page 15 for the encoding.
+    int buf_size = 0;
+    list <AsSegment>::const_iterator i = _segments.begin();
+    for(i = _segments.begin(); i != _segments.end(); i++) {
+	buf_size += 2 + (i->get_as_size() * 2);
+    }
+    if (buf_size > 2)
+	encode_buf.resize(buf_size);
+    else {
+	//The AS path was empty - this can be the case if the route
+	//originated in our AS.
+	//XXX The MIB doesn't say how to encode this, but it says the
+	//vector must be at least two bytes in size.
+	encode_buf.resize(2);
+	encode_buf[0]=0;
+	encode_buf[1]=0;
+	return;
+    }
+
+    int ctr = 0;
+    for(i = _segments.begin(); i != _segments.end(); i++) {
+	ctr += i->encode_for_mib(&encode_buf[ctr], buf_size - ctr);
+    }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.5 2003/01/19 00:59:25 mjh Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.6 2003/01/24 19:50:10 rizzo Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -637,6 +637,178 @@ BGPMain::delete_route(const IPv4Net& nlri)
 
     return _rib_ipc_handler->delete_static_route(nlri);
 }
+
+bool
+BGPMain::get_route_list_start4(uint32_t& token)
+{
+    token = _plumbing->create_ipv4_route_table_reader();
+    return true;
+}
+
+bool 
+BGPMain::get_route_list_start6(uint32_t& token)
+{
+    token = _plumbing->create_ipv6_route_table_reader();
+    return true;
+}
+    
+template <class A>
+void 
+BGPMain::extract_attributes(// Input values, 
+			    const PathAttributeList<A>& attributes, 
+			    // Output values, 
+			    uint32_t& origin, 
+			    vector<uint8_t>& aspath, 
+			    A& nexthop, 
+			    int32_t& med, 
+			    int32_t& localpref, 
+			    int32_t& atomic_agg, 
+			    vector<uint8_t>& aggregator, 
+			    int32_t& calc_localpref, 
+			    vector<uint8_t>& attr_unknown)
+{
+    origin = attributes.origin();
+    attributes.aspath().encode_for_mib(aspath);
+    nexthop = attributes.nexthop();
+
+    const MEDAttribute* med_att = attributes.med_att();
+    if (med_att) {
+	med = (int32_t)med_att->med();
+	if (med < 0) {
+	    med = 0x7ffffff;
+	    XLOG_WARNING("MED truncated in MIB from %u to %u\n", 
+			 med_att->med(), med);
+	}
+    } else {
+	med = -1;
+    }
+	
+    const LocalPrefAttribute* local_pref_att 
+	= attributes.local_pref_att();
+    if (local_pref_att) {
+	localpref = (int32_t)local_pref_att->localpref();
+	if (localpref < 0) {
+	    localpref = 0x7ffffff;
+	    XLOG_WARNING("LOCAL_PREF truncated in MIB from %u to %u\n", 
+			 local_pref_att->localpref(), localpref);
+	}
+    } else {
+	localpref = -1;
+    }
+	
+    if (attributes.atomic_aggregate_att())
+	atomic_agg = 2;
+    else
+	atomic_agg = 1;
+
+    const AggregatorAttribute* agg_att
+	= attributes.aggregator_att();
+    if (agg_att) {
+	aggregator.resize(6);
+	uint32_t addr = htonl(agg_att->route_aggregator().addr());
+	uint16_t as = htons(agg_att->aggregator_as().as());
+	memcpy(&aggregator[0], &addr, 4);
+	memcpy(&aggregator[4], &as, 2);
+    } else {
+	assert(aggregator.size()==0);
+    }
+
+    calc_localpref = 0;
+    attr_unknown.resize(0);
+}
+
+#if 0
+template
+void 
+BGPMain::extract_attributes(// Input values, 
+			    const PathAttributeList<IPv4>& attributes, 
+			    // Output values, 
+			    uint32_t& origin, 
+			    vector<uint8_t>& aspath, 
+			    IPv4& nexthop, 
+			    int32_t& med, 
+			    int32_t& localpref, 
+			    int32_t& atomic_agg, 
+			    vector<uint8_t>& aggregator, 
+			    int32_t& calc_localpref, 
+			    vector<uint8_t>& attr_unknown);
+template
+void 
+BGPMain::extract_attributes(// Input values, 
+			    const PathAttributeList<IPv6>& attributes, 
+			    // Output values, 
+			    uint32_t& origin, 
+			    vector<uint8_t>& aspath, 
+			    IPv6& nexthop, 
+			    int32_t& med, 
+			    int32_t& localpref, 
+			    int32_t& atomic_agg, 
+			    vector<uint8_t>& aggregator, 
+			    int32_t& calc_localpref, 
+			    vector<uint8_t>& attr_unknown);
+#endif
+
+bool 
+BGPMain::get_route_list_next4(
+			      // Input values, 
+			      const uint32_t& token, 
+			      // Output values, 
+			      IPv4&	peer_id, 
+			      IPv4Net& net, 
+			      uint32_t& origin, 
+			      vector<uint8_t>& aspath, 
+			      IPv4& nexthop, 
+			      int32_t& med, 
+			      int32_t& localpref, 
+			      int32_t& atomic_agg, 
+			      vector<uint8_t>& aggregator, 
+			      int32_t& calc_localpref, 
+			      vector<uint8_t>& attr_unknown,
+			      bool& best)
+{
+    const SubnetRoute<IPv4>* route;
+    if (_plumbing->read_next_route(token, route, peer_id)) {
+	net = route->net();
+	extract_attributes(*route->attributes(),
+			   origin, aspath, nexthop, med, localpref, atomic_agg,
+			   aggregator, calc_localpref, attr_unknown);
+	best = route->is_winner();
+	return true;
+    }
+    return false;
+}
+
+bool 
+BGPMain::get_route_list_next6(
+			      // Input values, 
+			      const uint32_t& token, 
+			      // Output values, 
+			      IPv4&	peer_id, 
+			      IPv6Net& net, 
+			      uint32_t& origin, 
+			      vector<uint8_t>& aspath, 
+			      IPv6& nexthop, 
+			      int32_t& med, 
+			      int32_t& localpref, 
+			      int32_t& atomic_agg, 
+			      vector<uint8_t>& aggregator, 
+			      int32_t& calc_localpref, 
+			      vector<uint8_t>& attr_unknown,
+			      bool& best)
+{
+    const SubnetRoute<IPv6>* route;
+    if (_plumbing->read_next_route(token, route, peer_id)) {
+	net = route->net();
+	nexthop = route->nexthop();
+	extract_attributes(*route->attributes(),
+			   origin, aspath, nexthop, med, localpref, atomic_agg,
+			   aggregator, calc_localpref, attr_unknown);
+	best = route->is_winner();
+	return true;
+    }
+    return false;
+}
+
 
 bool
 BGPMain::rib_client_route_info_changed4(const IPv4& addr,

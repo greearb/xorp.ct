@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.2 2002/12/13 22:38:53 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.3 2003/01/21 01:31:49 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -22,6 +22,7 @@
 #include <inttypes.h>
 #include <string>
 #include <list>
+#include <vector>
 
 #include "libxorp/debug.h"
 #include "libxorp/asnum.hh"
@@ -178,6 +179,8 @@ public:
     ASPathSegType type() const			{ return _type; }
     void set_type(ASPathSegType t)		{ _type = t; }
 
+    size_t encode_for_mib(uint8_t* buf, size_t buf_size) const;
+
 private:
     ASPathSegType	_type;
     size_t		_entries;	// # of AS numbers in the as path
@@ -254,6 +257,8 @@ public:
     bool operator==(const AsPath& him) const;
 
     bool operator<(const AsPath& him) const;
+
+    void encode_for_mib(vector<uint8_t>& aspath) const;
 
 private:
     /**
