@@ -4,9 +4,9 @@
 #
 # usage:
 # 
-#     $ source set_env.sh
+#     $ . snmpenv.sh
 #
-export XORP=`realpath ../..`
+export XORP=`(cd ../..; pwd)`
 export MIBDIRS=+${XORP}/mibs/textual
 export MIBS=+BGP4-MIB
 

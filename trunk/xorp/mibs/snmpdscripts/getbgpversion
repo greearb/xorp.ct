@@ -1,4 +1,6 @@
-source ../snmpconfig/snmpenv.sh
+#! /bin/sh
+
+ . ../snmpconfig/snmpenv.sh
 
 echo "Trying snmpget localhost BGP4-MIB::bgpVersion.0"
 snmpget localhost  BGP4-MIB::bgpVersion.0 

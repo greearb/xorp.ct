@@ -1,4 +1,6 @@
-source ../snmpconfig/snmpenv.sh
+#! /bin/sh
+
+ . ../snmpconfig/snmpenv.sh
 
 echo "Trying snmpwalk localhost BGP4-MIB::bgpPeerTable"
 snmpwalk localhost  BGP4-MIB::bgpPeerTable 

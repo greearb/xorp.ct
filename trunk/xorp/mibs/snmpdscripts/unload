@@ -1,3 +1,17 @@
+#! /bin/sh
+#
+# Unload a mib module from snmpd in the position specified in the first
+# parameter. Example:   
+#     
+#  $ unload 2
+#
+# Requires:
+#
+#  (1) that snmpd is running
+#
+
+ . ../snmpconfig/snmpenv.sh
+
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i unload
 echo "The module in position $1 should appear as unloaded"
 snmptable localhost UCD-DLMOD-MIB::dlmodTable

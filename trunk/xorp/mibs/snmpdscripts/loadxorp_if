@@ -1,4 +1,19 @@
-source ../snmpconfig/snmpenv.sh 
+#! /bin/sh
+#
+# Load xorp_if_mib_module into snmpd in the position specified in the first
+# parameter. Example:   
+#     
+#  $ loadxorp_if 1
+#
+# This module should be loaded before any other XORP modules
+#
+# Requires:
+#
+#  (1) that snmpd is running
+#
+#
+
+ . ../snmpconfig/snmpenv.sh
 
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i create
 snmpset localhost UCD-DLMOD-MIB::dlmodName.$1 s "xorp_if_mib_module" UCD-DLMOD-MIB::dlmodPath.$1 s "${XORP}/mibs/xorp_if_mib_module.so"

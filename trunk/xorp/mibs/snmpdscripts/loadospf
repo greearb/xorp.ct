@@ -1,10 +1,23 @@
-#!/bin/sh
+#! /bin/sh
+#
+# Load ospf_mib_1850 module into snmpd in the position specified in the first
+# parameter. Example:   
+#     
+#  $ loadbgp 3 
+#
+# Requires:
+#
+#  (1) that snmpd is running
+#
+#  (2) that the XORP interface module (xorp_if_mib_module) is loaded
+#
 
-source ../snmpconfig/snmpenv.sh 
+ . ../snmpconfig/snmpenv.sh
+
 
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i create
 snmpset localhost UCD-DLMOD-MIB::dlmodName.$1 s "ospf_mib_1850" UCD-DLMOD-MIB::dlmodPath.$1 s "${XORP}/mibs/ospf_mib_1850.so" 
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i load
-echo "The module OSPF should appear as loaded in position 2"
+echo "The module OSPF should appear as loaded in position $1"
 snmptable localhost UCD-DLMOD-MIB::dlmodTable
 
