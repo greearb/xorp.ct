@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.2 2003/07/15 19:05:47 hodson Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.3 2003/08/01 04:08:13 hodson Exp $"
 
 #include <set>
 
@@ -136,7 +136,8 @@ public:
     }
 };
 
-// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
 // Pseudo random number and network generation
 
 static uint32_t
