@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.40 2002/12/09 18:29:26 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -140,52 +140,26 @@ PimMreTask::PimMreTask(PimMrt& pim_mrt,
 
 PimMreTask::~PimMreTask()
 {
-    cleanup_pim_mre_list(_pim_mre_rp_list);
-    cleanup_pim_mre_list(_pim_mre_rp_processed_list);
-    cleanup_pim_mre_list(_pim_mre_wc_list);
-    cleanup_pim_mre_list(_pim_mre_wc_processed_list);
-    cleanup_pim_mre_list(_pim_mre_sg_list);
-    cleanup_pim_mre_list(_pim_mre_sg_processed_list);
-    cleanup_pim_mre_list(_pim_mre_sg_rpt_list);
-    cleanup_pim_mre_list(_pim_mre_sg_rpt_processed_list);
-    cleanup_pim_mfc_list(_pim_mfc_list);
-    cleanup_pim_mfc_list(_pim_mfc_processed_list);
+    // Delete the PimMre entries pending deletion
+    while (! _pim_mre_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_delete_list.front();
+	_pim_mre_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_pending()
+		    || pim_mre->is_task_delete_done());
+	delete pim_mre;
+    }
+    
+    // Delete the PimMfc entries pending deletion
+    while (! _pim_mfc_delete_list.empty()) {
+	PimMfc *pim_mfc = _pim_mfc_delete_list.front();
+	_pim_mfc_delete_list.pop_front();
+	XLOG_ASSERT(pim_mfc->is_task_delete_pending()
+		    || pim_mfc->is_task_delete_done());
+	delete pim_mfc;
+    }
     
     pim_mrt().delete_task(this);
 }
-
-//
-// Delete all PimMre entries on the list that are pending deletion
-//
-void
-PimMreTask::cleanup_pim_mre_list(list<PimMre *>& pim_mre_list)
-{
-    while (! pim_mre_list.empty()) {
-	PimMre *pim_mre = pim_mre_list.front();
-	pim_mre_list.pop_front();
-	if (pim_mre->is_task_delete_pending()
-	    || pim_mre->is_task_delete_done()) {
-	    delete pim_mre;
-	}
-    }
-}
-
-//
-// Delete all PimMfc entries on the list that are pending deletion
-//
-void
-PimMreTask::cleanup_pim_mfc_list(list<PimMfc *>& pim_mfc_list)
-{
-    while (! pim_mfc_list.empty()) {
-	PimMfc *pim_mfc = pim_mfc_list.front();
-	pim_mfc_list.pop_front();
-	if (pim_mfc->is_task_delete_pending()
-	    || pim_mfc->is_task_delete_done()) {
-	    delete pim_mfc;
-	}
-    }
-}
-
 
 PimNode&
 PimMreTask::pim_node() const
@@ -1649,6 +1623,24 @@ void
 PimMreTask::add_pim_mfc(PimMfc *pim_mfc)
 {
     _pim_mfc_list.push_back(pim_mfc);
+}
+
+//
+// Add a PimMre entry to the list of entries to delete
+//
+void
+PimMreTask::add_pim_mre_delete(PimMre *pim_mre)
+{
+    _pim_mre_delete_list.push_back(pim_mre);
+}
+
+//
+// Add a PimMfc entry to the list of entries to delete
+//
+void
+PimMreTask::add_pim_mfc_delete(PimMfc *pim_mfc)
+{
+    _pim_mfc_delete_list.push_back(pim_mfc);
 }
 
 //

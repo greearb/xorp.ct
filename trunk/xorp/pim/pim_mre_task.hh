@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_task.hh,v 1.26 2002/12/09 18:29:26 hodson Exp $
+// $XORP: xorp/pim/pim_mre_task.hh,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRE_TASK_HH__
@@ -48,9 +48,6 @@ public:
     PimMreTask(PimMrt& pim_mrt, PimMreTrackState::input_state_t input_state);
     ~PimMreTask();
     
-    void cleanup_pim_mre_list(list<PimMre *>& pim_mre_list);
-    void cleanup_pim_mfc_list(list<PimMfc *>& pim_mfc_list);
-    
     // General info: PimNode, PimMrt, family, etc.
     PimNode&	pim_node()	const;
     PimMrt&	pim_mrt()	const	{ return (_pim_mrt);		}
@@ -70,6 +67,8 @@ public:
 					const IPvX& group_addr);
     void	add_pim_mre(PimMre *pim_mre);
     void	add_pim_mfc(PimMfc *pim_mfc);
+    void	add_pim_mre_delete(PimMre *pim_mre);
+    void	add_pim_mfc_delete(PimMfc *pim_mfc);
     
     //
     // (*,*,RP) state setup
@@ -275,6 +274,12 @@ private:
     bool	_is_processing_pim_nbr_addr_wc;
     bool	_is_processing_pim_nbr_addr_sg;
     bool	_is_processing_pim_nbr_addr_sg_rpt;
+    
+    //
+    // Lists of PimMre and PimMfc entries that are pending deletion
+    //
+    list<PimMre *> _pim_mre_delete_list;	// PimMre entries to delete
+    list<PimMfc *> _pim_mfc_delete_list;	// PimMfc entries to delete
     
     // The 'occasionally-used' argument(s).
     uint16_t	_vif_index;
