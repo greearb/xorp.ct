@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.16 2003/05/09 19:36:17 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.17 2003/05/09 21:00:53 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -40,8 +40,14 @@ public:
     
 public:
     XrlRouter(EventLoop&	e,
-	      const char*	classname,
-	      const char*	finder_address = "localhost",
+	      const char*	class_name,
+	      const char*	finder_address,
+	      uint16_t		finder_port = 0)
+	throw (InvalidAddress);
+
+    XrlRouter(EventLoop&	e,
+	      const char*	class_name,
+	      IPv4		finder_address = IPv4("127.0.0.1"),
 	      uint16_t		finder_port = 0)
 	throw (InvalidAddress);
 
@@ -61,8 +67,7 @@ public:
 
     bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 
-    inline EventLoop& eventloop() { return _e; }
-
+    inline EventLoop& eventloop()		{ return _e; }
     inline const string& instance_name() const	{ return _instance_name; }
     inline const string& class_name() const	{ return XrlCmdMap::name(); }
     

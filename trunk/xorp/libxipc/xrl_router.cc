@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.18 2003/05/09 19:36:17 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.19 2003/05/09 21:00:53 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -134,18 +134,40 @@ mk_instance_name(EventLoop& e, const char* classname)
 
 XrlRouter::XrlRouter(EventLoop&  e,
 		     const char* class_name,
-		     const char* host,
-		     uint16_t	 port)
+		     const char* finder_addr,
+		     uint16_t	 finder_port)
     throw (InvalidAddress)
     : XrlDispatcher(class_name), _e(e), _rpend(0), _spend(0)
 {
     _fc = new FinderClient();
     _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
 
-    if (0 == port)
-	port = FINDER_NG_TCP_DEFAULT_PORT;
+    if (0 == finder_port)
+	finder_port = FINDER_NG_TCP_DEFAULT_PORT;
     _fac = new FinderTcpAutoConnector(e, *_fc, _fc->commands(),
-					finder_host(host), port);
+				      finder_host(finder_addr),
+				      finder_port);
+
+    _instance_name = mk_instance_name(e, class_name);
+    if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
+	XLOG_FATAL("Failed to register target %s\n", class_name);
+    }
+}
+
+XrlRouter::XrlRouter(EventLoop&  e,
+		     const char* class_name,
+		     IPv4 	 finder_addr,
+		     uint16_t	 finder_port)
+    throw (InvalidAddress)
+    : XrlDispatcher(class_name), _e(e), _rpend(0), _spend(0)
+{
+    _fc = new FinderClient();
+    _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
+
+    if (0 == finder_port)
+	finder_port = FINDER_NG_TCP_DEFAULT_PORT;
+    _fac = new FinderTcpAutoConnector(e, *_fc, _fc->commands(),
+					finder_addr, finder_port);
 
     _instance_name = mk_instance_name(e, class_name);
     if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
