@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.18 2003/10/26 18:25:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.19 2003/12/06 00:10:01 pavlin Exp $"
 
 
 //
@@ -175,6 +175,11 @@ MfeaNode::start()
 int
 MfeaNode::stop()
 {
+    if (! is_up()) {
+	ProtoNode<MfeaVif>::set_node_status(PROC_DONE);
+	return (XORP_OK);
+    }
+
     if (! is_up())
 	return (XORP_ERROR);
     
@@ -197,7 +202,7 @@ MfeaNode::stop()
     //
     // Set the node status
     //
-    ProtoNode<MfeaVif>::set_node_status(PROC_SHUTDOWN);
+    ProtoNode<MfeaVif>::set_node_status(PROC_DONE);
 
     return (XORP_OK);
 }
@@ -283,6 +288,9 @@ MfeaNode::node_status(string& reason_msg)
     case PROC_FAILED:
 	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
 	XLOG_UNFINISHED();
+	break;
+    case PROC_DONE:
+	// Process has completed operation
 	break;
     default:
 	// Unknown status
