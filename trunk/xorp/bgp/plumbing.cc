@@ -13,10 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.60 2005/01/31 21:07:54 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.61 2005/03/03 07:29:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+#define CHECK_TIME
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,6 +30,7 @@
 #include "plumbing.hh"
 #include "bgp.hh"
 #include "profile_vars.hh"
+#include "libxorp/timespent.hh"
 
 BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,
@@ -80,8 +82,11 @@ BGPPlumbing::peering_went_down(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::peering_went_down\n");
     int result = 0;
+    TIMESPENT();
     result |= plumbing_ipv4().peering_went_down(peer_handler);
+    TIMESPENT_CHECK();
     result |= plumbing_ipv6().peering_went_down(peer_handler);
+    TIMESPENT_CHECK();
     return result;
 }
 
@@ -665,10 +670,14 @@ BGPPlumbingAF<A>::peering_went_down(PeerHandler* peer_handler)
     RibInTable<A> *rib_in;
     rib_in = iter->second;
     //peering went down will be propagated downstream by the RIB-In.
+    TIMESPENT();
     rib_in->ribin_peering_went_down();
+    TIMESPENT_CHECK();
+    
 
     //stop_peering shuts down and disconnects the output branch for this peer
     stop_peering(peer_handler);
+    TIMESPENT_CHECK();
 
     /* we don't flush the input caches - lookup requests should still
        be answered until the DeletionTable gets round to telling the
