@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.2 2004/11/10 00:32:18 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.3 2004/11/12 07:49:47 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -33,7 +33,7 @@ struct ClickSocketPlumber;
  */
 class ClickSocket {
 public:
-    ClickSocket(EventLoop& e);
+    ClickSocket(EventLoop& eventloop);
     ~ClickSocket();
 
     /**
@@ -291,7 +291,7 @@ private:
     static const int CLICK_COMMAND_CODE_ERROR_MAX = 599;
 
 private:
-    EventLoop&	 _e;
+    EventLoop&	 _eventloop;
     int		 _fd;
     ObserverList _ol;
 

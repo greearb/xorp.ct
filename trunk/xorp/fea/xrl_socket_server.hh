@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.6 2004/06/10 22:40:59 hodson Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.7 2004/09/02 03:15:19 pavlin Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -35,7 +35,7 @@ class XrlSocketServer
       public AddressTableEventObserver
 {
 public:
-    XrlSocketServer(EventLoop&		e,
+    XrlSocketServer(EventLoop&		eventloop,
 		    AddressTableBase&	addr_table,
 		    const IPv4&		finder_host,
 		    uint16_t		finder_port);
@@ -275,8 +275,8 @@ public:
     void reject_connection(const string& sockid);
     void accept_connection(const string& sockid);
 
-    inline EventLoop& eventloop()			{ return _e; }
-    inline const EventLoop& eventloop()	const		{ return _e; }
+    inline EventLoop& eventloop()			{ return _eventloop; }
+    inline const EventLoop& eventloop()	const		{ return _eventloop; }
 
     inline const AddressTableBase& address_table() const { return _atable; }
 
@@ -368,7 +368,7 @@ public:
     typedef list<ref_ptr<RemoteSocket<IPv6> > > V6Sockets;
 
 protected:
-    EventLoop&			_e;
+    EventLoop&			_eventloop;
     XrlRouter*			_r;
     AddressTableBase&		_atable;
 

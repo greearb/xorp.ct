@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.1 2004/11/19 10:54:28 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -109,11 +109,11 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* buf,
 /* ------------------------------------------------------------------------- */
 /* IoRawSocket6 methods */
 
-IoRawSocket6::IoRawSocket6(EventLoop&	e,
+IoRawSocket6::IoRawSocket6(EventLoop&	eventloop,
 			   uint32_t	protocol,
 			   bool		autohook)
     throw (RawSocket6Exception)
-    : RawSocket6(protocol), _e(e), _autohook(autohook)
+    : RawSocket6(protocol), _eventloop(eventloop), _autohook(autohook)
 {
     int fl = fcntl(_fd, F_GETFL);
     if (fcntl(_fd, F_SETFL, fl | O_NONBLOCK) < 0)
@@ -186,23 +186,23 @@ bool
 IoRawSocket6::eventloop_hook()
 {
     debug_msg("hooking\n");
-    return _e.add_selector(_fd, SEL_RD,
-			   callback(this, &IoRawSocket6::recv));
+    return _eventloop.add_selector(_fd, SEL_RD,
+				   callback(this, &IoRawSocket6::recv));
 }
 
 void
 IoRawSocket6::eventloop_unhook()
 {
     debug_msg("unhooking\n");
-    _e.remove_selector(_fd);
+    _eventloop.remove_selector(_fd);
 }
 
 /* ------------------------------------------------------------------------- */
 /* FilterRawSocket6 methods */
 
-FilterRawSocket6::FilterRawSocket6(EventLoop& e, int protocol)
+FilterRawSocket6::FilterRawSocket6(EventLoop& eventloop, int protocol)
     throw (RawSocket6Exception)
-    : IoRawSocket6(e, protocol, false)
+    : IoRawSocket6(eventloop, protocol, false)
 {
 }
 

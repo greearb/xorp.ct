@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.14 2004/09/09 18:46:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.15 2004/11/09 20:40:08 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -41,8 +41,8 @@ pid_t RoutingSocket::_pid = getpid();
 // Routing Sockets communication with the kernel
 //
 
-RoutingSocket::RoutingSocket(EventLoop& e)
-    : _e(e),
+RoutingSocket::RoutingSocket(EventLoop& eventloop)
+    : _eventloop(eventloop),
       _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++)
@@ -108,8 +108,8 @@ RoutingSocket::start(int af)
     //
     // Add the socket to the event loop
     //
-    if (_e.add_selector(_fd, SEL_RD,
-			callback(this, &RoutingSocket::select_hook))
+    if (_eventloop.add_selector(_fd, SEL_RD,
+				callback(this, &RoutingSocket::select_hook))
 	== false) {
 	XLOG_ERROR("Failed to add routing socket to EventLoop");
 	close(_fd);
@@ -132,7 +132,7 @@ void
 RoutingSocket::shutdown()
 {
     if (_fd >= 0) {
-	_e.remove_selector(_fd, SEL_ALL);
+	_eventloop.remove_selector(_fd, SEL_ALL);
 	close(_fd);
 	_fd = -1;
     }

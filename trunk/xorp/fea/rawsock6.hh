@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/rawsock6.hh,v 1.1 2004/11/19 10:54:28 bms Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -83,7 +83,7 @@ protected:
 class IoRawSocket6 : public RawSocket6
 {
 public:
-    IoRawSocket6(EventLoop& e, uint32_t protocol, bool autohook = true)
+    IoRawSocket6(EventLoop& eventloop, uint32_t protocol, bool autohook = true)
 	throw (RawSocket6Exception);
 
     ~IoRawSocket6();
@@ -104,7 +104,7 @@ private:
 
 private:
     enum { RECVBUF_BYTES = 131072 };
-    EventLoop&		_e;
+    EventLoop&		_eventloop;
     bool		_autohook;
     vector<uint8_t>	_recvbuf;
 };
@@ -140,7 +140,8 @@ public:
     };
 
 public:
-    FilterRawSocket6(EventLoop& e, int protocol) throw (RawSocket6Exception);
+    FilterRawSocket6(EventLoop& eventloop, int protocol)
+	throw (RawSocket6Exception);
     ~FilterRawSocket6();
 
     /** Add a filter to list of input filters.  The FilterRawSocket6 class

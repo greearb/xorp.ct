@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.22 2004/09/09 18:53:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.23 2004/11/09 20:40:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -49,8 +49,8 @@ pid_t NetlinkSocket::_pid = getpid();
 // Netlink Sockets (see netlink(7)) communication with the kernel
 //
 
-NetlinkSocket::NetlinkSocket(EventLoop& e)
-    : _e(e),
+NetlinkSocket::NetlinkSocket(EventLoop& eventloop)
+    : _eventloop(eventloop),
       _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
@@ -196,8 +196,8 @@ NetlinkSocket::start(int af)
     //
     // Add the socket to the event loop
     //
-    if (_e.add_selector(_fd, SEL_RD,
-			callback(this, &NetlinkSocket::select_hook))
+    if (_eventloop.add_selector(_fd, SEL_RD,
+				callback(this, &NetlinkSocket::select_hook))
 	== false) {
 	XLOG_ERROR("Failed to add netlink socket to EventLoop");
 	close(_fd);
@@ -220,7 +220,7 @@ void
 NetlinkSocket::shutdown()
 {
     if (_fd >= 0) {
-	_e.remove_selector(_fd, SEL_ALL);
+	_eventloop.remove_selector(_fd, SEL_ALL);
 	close(_fd);
 	_fd = -1;
     }

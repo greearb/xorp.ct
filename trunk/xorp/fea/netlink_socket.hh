@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.10 2004/09/03 18:13:12 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.11 2004/09/09 18:53:38 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -32,7 +32,7 @@ struct NetlinkSocketPlumber;
  */
 class NetlinkSocket {
 public:
-    NetlinkSocket(EventLoop& e);
+    NetlinkSocket(EventLoop& eventloop);
     ~NetlinkSocket();
 
     /**
@@ -180,7 +180,7 @@ private:
 
     static const size_t NLSOCK_BYTES = 8*1024; // Initial guess at msg size
 
-    EventLoop&	 _e;
+    EventLoop&	 _eventloop;
     int		 _fd;
     ObserverList _ol;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.6 2004/06/10 22:40:56 hodson Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.7 2004/11/19 11:02:33 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -122,11 +122,11 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
 /* ------------------------------------------------------------------------- */
 /* IoRawSocket4 methods */
 
-IoRawSocket4::IoRawSocket4(EventLoop&	e,
+IoRawSocket4::IoRawSocket4(EventLoop&	eventloop,
 			   uint32_t	protocol,
 			   bool		autohook)
     throw (RawSocket4Exception)
-    : RawSocket4(protocol), _e(e), _autohook(autohook)
+    : RawSocket4(protocol), _eventloop(eventloop), _autohook(autohook)
 {
     int fl = fcntl(_fd, F_GETFL);
     if (fcntl(_fd, F_SETFL, fl | O_NONBLOCK) < 0)
@@ -175,23 +175,23 @@ bool
 IoRawSocket4::eventloop_hook()
 {
     debug_msg("hooking\n");
-    return _e.add_selector(_fd, SEL_RD,
-			   callback(this, &IoRawSocket4::recv));
+    return _eventloop.add_selector(_fd, SEL_RD,
+				   callback(this, &IoRawSocket4::recv));
 }
 
 void
 IoRawSocket4::eventloop_unhook()
 {
     debug_msg("unhooking\n");
-    _e.remove_selector(_fd);
+    _eventloop.remove_selector(_fd);
 }
 
 /* ------------------------------------------------------------------------- */
 /* FilterRawSocket4 methods */
 
-FilterRawSocket4::FilterRawSocket4(EventLoop& e, int protocol)
+FilterRawSocket4::FilterRawSocket4(EventLoop& eventloop, int protocol)
     throw (RawSocket4Exception)
-    : IoRawSocket4(e, protocol, false)
+    : IoRawSocket4(eventloop, protocol, false)
 {
 }
 

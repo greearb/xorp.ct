@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.16 2004/09/02 02:36:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.17 2004/09/02 03:15:19 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -41,12 +41,13 @@ static const char* NO_IPV6_MSG = "IPv6 is not available on host";
  */
 class ChattyXrlStdRouter : public XrlStdRouter {
 public:
-    ChattyXrlStdRouter(EventLoop&	e,
+    ChattyXrlStdRouter(EventLoop&	eventloop,
 		       const char*	class_name,
 		       IPv4	   	finder_host,
 		       uint16_t		finder_port,
 		       XrlSocketServer* parent)
-	: XrlStdRouter(e, class_name, finder_host, finder_port), _p(parent)
+	: XrlStdRouter(eventloop, class_name, finder_host, finder_port),
+	  _p(parent)
     {}
 
     void
@@ -305,8 +306,8 @@ XrlSocketServer::RemoteSocket<A>::RemoteSocket<A>(XrlSocketServer& ss,
 template <typename A>
 XrlSocketServer::RemoteSocket<A>::~RemoteSocket()
 {
-    EventLoop& e = _ss.eventloop();
-    e.remove_selector(_fd);
+    EventLoop& eventloop = _ss.eventloop();
+    eventloop.remove_selector(_fd);
     comm_close(_fd);
     _owner.decr_socket_count();
 }
@@ -315,16 +316,16 @@ template <typename A>
 void
 XrlSocketServer::RemoteSocket<A>::set_data_recv_enable(bool en)
 {
-    EventLoop& e = _ss.eventloop();
+    EventLoop& eventloop = _ss.eventloop();
     if (en) {
 	debug_msg("Adding selector for %d\n", _fd);
-	if (e.add_selector(_fd, SEL_RD,
-		callback(this, &RemoteSocket::data_sel_cb)) == false) {
+	if (eventloop.add_selector(_fd, SEL_RD,
+			callback(this, &RemoteSocket::data_sel_cb)) == false) {
 	    XLOG_ERROR("FAILED TO ADD SELECTOR %d\n", _fd);
 	}
     } else {
 	debug_msg("Removing selector for %d\n", _fd);
-	e.remove_selector(_fd);
+	eventloop.remove_selector(_fd);
     }
 }
 
@@ -372,12 +373,12 @@ template <typename A>
 void
 XrlSocketServer::RemoteSocket<A>::set_connect_recv_enable(bool en)
 {
-    EventLoop& e = _ss.eventloop();
+    EventLoop& eventloop = _ss.eventloop();
     if (en) {
-	e.remove_selector(_fd, SEL_RD,
+	eventloop.remove_selector(_fd, SEL_RD,
 			  callback(this, &RemoteSocket::connect_sel_cb));
     } else {
-	e.remove_selector(_fd);
+	eventloop.remove_selector(_fd);
     }
 }
 
@@ -488,14 +489,15 @@ private:
 // ----------------------------------------------------------------------------
 //
 
-XrlSocketServer::XrlSocketServer(EventLoop&		e,
+XrlSocketServer::XrlSocketServer(EventLoop&		eventloop,
 				 AddressTableBase&	atable,
 				 const IPv4&		finder_host,
 				 uint16_t		finder_port)
-    : ServiceBase("Socket Server"), _e(e), _atable(atable)
+    : ServiceBase("Socket Server"), _eventloop(eventloop), _atable(atable)
 {
     const char* class_name = "socket_server";
-    _r = new ChattyXrlStdRouter(e, class_name, finder_host, finder_port, this);
+    _r = new ChattyXrlStdRouter(eventloop, class_name, finder_host,
+				finder_port, this);
     if (set_command_map(_r) == false) {
 	XLOG_FATAL("Could not set command map.");
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.4 2004/11/10 00:32:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.5 2004/11/12 07:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -41,8 +41,8 @@ const IPv4 ClickSocket::DEFAULT_USER_CLICK_CONTROL_ADDRESS = IPv4::LOOPBACK();
 // Click Sockets communication with Click
 //
 
-ClickSocket::ClickSocket(EventLoop& e)
-    : _e(e),
+ClickSocket::ClickSocket(EventLoop& eventloop)
+    : _eventloop(eventloop),
       _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
@@ -156,8 +156,8 @@ ClickSocket::start()
 	//
 	// Add the socket to the event loop
 	//
-	if (_e.add_selector(_fd, SEL_RD,
-			    callback(this, &ClickSocket::select_hook))
+	if (_eventloop.add_selector(_fd, SEL_RD,
+				    callback(this, &ClickSocket::select_hook))
 	    == false) {
 	    XLOG_ERROR("Failed to add user-level Click socket to EventLoop");
 	    comm_close(_fd);
@@ -191,7 +191,7 @@ ClickSocket::shutdown()
 	    //
 	    // Remove the socket from the event loop and close it
 	    //
-	    _e.remove_selector(_fd, SEL_ALL);
+	    _eventloop.remove_selector(_fd, SEL_ALL);
 	    comm_close(_fd);
 	    _fd = -1;
 	}
