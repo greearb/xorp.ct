@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_service.cc,v 1.3 2004/04/22 01:10:26 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_service.cc,v 1.4 2004/06/10 22:41:21 hodson Exp $"
 
 #include "config.h"
 
@@ -162,20 +162,20 @@ public:
 	    e_new = SHUTDOWN;
 	    break;
 	default:
-	    verbose_log("%d. Too many changes.\n", _cc);
+	    verbose_log("%u. Too many changes.\n", XORP_UINT_CAST(_cc));
 	}
 
 	if (e_old == old_status && e_new == new_status) {
-	    verbose_log("%d. Good transition: %s -> %s (%s)\n",
-			_cc,
+	    verbose_log("%u. Good transition: %s -> %s (%s)\n",
+			XORP_UINT_CAST(_cc),
 			service_status_name(e_old),
 			service_status_name(e_new),
 			service->status_note().c_str());
 	    return;
 	}
-	verbose_log("%d. Bad transition: Got %s -> %s (%s) "
+	verbose_log("%u. Bad transition: Got %s -> %s (%s) "
 		    "Expected %s -> %s\n",
-		    _cc,
+		    XORP_UINT_CAST(_cc),
 		    service_status_name(old_status),
 		    service_status_name(new_status),
 		    service_status_name(e_old),
