@@ -7,7 +7,7 @@ fi
 # this looks in the same directory, this
 # FlowerCheck script resides; modify to your
 # needs:
-SHLIB=`dirname $0`/flower_malloc.so
+SHLIB=./flower_malloc.so
 if [ ! -x $SHLIB ] ; then
     echo "$SHLIB not found"
     exit 1
