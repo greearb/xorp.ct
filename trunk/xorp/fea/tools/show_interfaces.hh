@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/tools/show_interfaces.hh,v 1.6 2003/12/02 08:38:04 pavlin Exp $
+// $XORP: xorp/fea/tools/show_interfaces.hh,v 1.1 2004/05/21 08:08:03 pavlin Exp $
 
 #ifndef __FEA_TOOLS_SHOW_INTERFACES_HH__
 #define __FEA_TOOLS_SHOW_INTERFACES_HH__
@@ -61,9 +61,14 @@ public:
     bool	shutdown();
 
     /**
-     * Print the information about network interfaces received from the FEA.
+     * Print information about network interfaces that was received
+     * from the FEA.
+     *
+     * @param print_iface_name the name of the interface to print.
+     * If it is the empty string, then print information about all
+     * configured interfaces.
      */
-    void print_interfaces() const;
+    void print_interfaces(const string& print_iface_name) const;
 
 protected:
     //
