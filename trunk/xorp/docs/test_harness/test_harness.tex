@@ -210,6 +210,16 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
 
   Accept commands via XRLs.
 
+\item Status("peername")
+
+  Returns the status of the named test peer. Can be used to detect if a
+  peer is established or not. Plus the number of update messages sent
+  or received by the peer. This XRL will not return an error if the
+  requested peer does not exist. Can be used in test scripts to wait
+  for established, not established transitions. As well as waiting for
+  a peering to become quiet because all the state is
+  synchronised.
+
 \item Pending()
 
   Returns true while there are any uncompleted commands. Can be used
