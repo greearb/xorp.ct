@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.18 2004/06/10 14:17:07 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.19 2004/06/22 01:38:06 pavlin Exp $
 #
 
 * Refactor IfTree::align_with() when updating the FEA local config
@@ -60,6 +60,9 @@
 
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
+
+* Remove the MRIB-support from the MFEA, because all interested parties
+  should use the RIB itself.
 
 * Try to replicate the following error message during shutdown:
 [ 2004/06/07 09:38:21  ERROR xorp_fea:20735 MFEA +1601 mfea_mrouter.cc get_sg_count ] ioctl(SIOCGETSGCNT, (18.18.0.1 224.0.1.1)) failed: Bad file descriptor
