@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.19 2004/10/02 19:49:50 atanu Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.20 2004/10/25 23:27:56 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -68,8 +68,20 @@ public:
      */
     virtual ~FtiConfig();
 
+    /**
+     * Get a reference to the @see EventLoop instance.
+     *
+     * @return a reference to the @see EventLoop instance.
+     */
     EventLoop& eventloop() { return _eventloop; }
 
+    /**
+     * Get a reference to the @see NexthopPortMapper instance.
+     *
+     * @return a reference to the @see NexthopPortMapper instance.
+     */
+    NexthopPortMapper& nexthop_port_mapper() { return _nexthop_port_mapper; }
+    
     int register_ftic_entry_get_primary(FtiConfigEntryGet *ftic_entry_get);
     int register_ftic_entry_set_primary(FtiConfigEntrySet *ftic_entry_set);
     int register_ftic_entry_observer_primary(FtiConfigEntryObserver *ftic_entry_observer);
@@ -389,7 +401,7 @@ public:
      * @return the IPv6 Trie.
      */
     Trie6& trie6() { return _trie6; }
-    
+
 protected:
     Trie4	_trie4;		// IPv4 trie (used for testing purpose)
     Trie6	_trie6;		// IPv6 trie (used for testing purpose)
