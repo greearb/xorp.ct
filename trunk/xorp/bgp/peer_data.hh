@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.12 2004/06/10 22:40:32 hodson Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.13 2004/08/06 01:41:17 bms Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -153,7 +153,8 @@ public:
 	    }
 	    break;
 	default:
-	    XLOG_FATAL("Unknown IP version %d", A::ip_version());
+	    XLOG_FATAL("Unknown IP version %u",
+		       XORP_UINT_CAST(A::ip_version()));
 	    break;
 	}
 	XLOG_UNREACHABLE();
