@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.13 2003/11/21 19:35:55 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.14 2003/12/15 22:31:24 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -20,7 +20,10 @@
 #include <map>
 #include <list>
 #include <set>
+
 #include "libxorp/xorp.h"
+
+#include "main_rtrmgr.hh"
 #include "task.hh"
 #include "parse_error.hh"
 #include "conf_tree.hh"
@@ -36,7 +39,7 @@ class MasterConfigTree : public ConfigTree {
 public:
     MasterConfigTree(const string& config_file, TemplateTree* tt,
 		     ModuleManager& mmgr, XorpClient& xclient,
-		     bool global_do_exec);
+		     bool global_do_exec) throw (InitError);
 
     bool read_file(string& configuration, const string& config_file,
 		   string& errmsg);

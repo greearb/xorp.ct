@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.25 2003/12/15 22:31:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.26 2003/12/19 20:30:20 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -32,7 +32,7 @@
 #include "util.hh"
 #include "main_rtrmgr.hh"
 
-extern string booterrormsg(const char* s);
+extern string booterrormsg(const char* s) throw (ParseError);
 
 /*************************************************************************
  * Master Config Tree class
@@ -42,7 +42,7 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
 				   TemplateTree* tt,
 				   ModuleManager& mmgr,
 				   XorpClient& xclient,
-				   bool global_do_exec)
+				   bool global_do_exec) throw (InitError)
     : ConfigTree(tt),
       _task_manager(*this, mmgr, xclient, global_do_exec),
       _commit_in_progress(false),
@@ -56,7 +56,6 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
 	xorp_throw0(InitError);
     }
     if (! parse(configuration, config_file)) {
-	debug_msg("throwing InitError\n");
 	xorp_throw0(InitError);
     }
 
