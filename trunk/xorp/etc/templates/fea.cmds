@@ -1,16 +1,26 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.cmds,v 1.3 2003/11/17 22:10:44 pavlin Exp $ */
 
 show interface $(interfaces.interface.*) {
-	%command: rtrmgr/tools/show_interfaces;
+	%command: "rtrmgr/tools/show_interfaces" %help: HELP;
 	%module: fea;
-	%opt_parameter: brief;
-	%opt_parameter: detail;
-	%opt_parameter: extensive;
+	%opt_parameter: "brief" %help: BRIEF;
+	%opt_parameter: "detail" %help: DETAIL;
+	%opt_parameter: "extensive" %help: EXTENSIVE;
+	%tag: HELP "Show network interface information";
+	%tag: BRIEF "Show brief network interface information";
+	%tag: DETAIL "Show detailed network interface information";
+	%tag: EXTENSIVE "Show extensive network interface information";
 }
+
 show vif $(interfaces.interface.*.vif.*) {
-	%command: rtrmgr/tools/show_interfaces;
+	%command: "rtrmgr/tools/show_interfaces" %help: HELP;
 	%module: fea;
-	%opt_parameter: brief;
-	%opt_parameter: detail;
-	%opt_parameter: extensive;
+	%opt_parameter: "brief" %help: BRIEF;
+	%opt_parameter: "detail" %help: DETAIL;
+	%opt_parameter: "extensive" %help: EXTENSIVE;
+	%tag: HELP "Show virtual interface information";
+	%tag: BRIEF "Show brief virtual interface information";
+	%tag: DETAIL "Show detailed virtual interface information";
+	%tag: EXTENSIVE "Show extensive virtual interface information";
 }
+
