@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_transport.cc,v 1.5 2003/03/16 08:20:30 pavlin Exp $"
 
 #include <algorithm>
 #include <functional>
@@ -50,8 +50,8 @@ class FTT {
 public:
     FTT(EventLoop& e)
 	: _sfactory(e, FINDER_TCP_DEFAULT_PORT, callback(this, &FTT::connect)),
-	_cfactory(e), _server_msgs_recv(0), _client_msgs_recv(0),
-	_client_msgs_sent(0), _e(e)
+	  _cfactory(e), _server_msgs_recv(0), _server_msgs_sent(0),
+	  _client_msgs_recv(0), _client_msgs_sent(0), _e(e)
     {
 	_cfactory.run(callback(this, &FTT::connected));
 	g_timeout = _e.new_oneoff_after_ms(5000, callback(&time_out));
