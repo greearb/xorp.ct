@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.16 2003/06/09 20:08:49 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.17 2003/06/26 19:00:33 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -45,6 +45,11 @@ Release 0.4 (2003/??/??)
 
     - Fix some of the XRL names related to static RP configuration
       in the configuration shell scripts.
+
+    - Fix the generation of Assert messages when data packets are received
+      on the wrong interface; in addition, the Assert messages triggered
+      by data packets are rate-limited to one Assert message/s (on
+      average, per (S,G) or (*,G) routing entry).
 
   CLI:
     - 
