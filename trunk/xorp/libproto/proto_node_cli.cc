@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_node_cli.cc,v 1.2 2003/03/10 23:20:20 hodson Exp $"
+#ident "$XORP: xorp/libproto/proto_node_cli.cc,v 1.4 2004/06/10 22:41:03 hodson Exp $"
 
 
 //
@@ -160,7 +160,13 @@ ProtoNodeCli::delete_cli_command(const char *command_name)
 	XLOG_ERROR("Cannot delete CLI command: invalid command name: NULL");
 	return (XORP_ERROR);
     }
-    
+
+    //
+    // XXX: Use a local copy of the command name string, because the original
+    // string may be deleted by some of the erase operations below.
+    //
+    string command_name_str(command_name);
+
     //
     // Delete the command from the local vector of commands,
     // and the callback map
@@ -169,16 +175,16 @@ ProtoNodeCli::delete_cli_command(const char *command_name)
     for (iter = _cli_callback_vector.begin();
 	 iter != _cli_callback_vector.end();
 	 ++iter) {
-	if (*iter == string(command_name)) {
+	if (*iter == command_name_str) {
 	    _cli_callback_vector.erase(iter);
 	    break;
 	}
     }
     map<string, CLIProcessCallback>::iterator pos;
-    pos = _cli_callback_map.find(command_name);
+    pos = _cli_callback_map.find(command_name_str);
     if (pos == _cli_callback_map.end()) {
 	XLOG_ERROR("Cannot delete CLI command '%s': not in the local map",
-		   command_name);
+		   command_name_str.c_str());
 	return (XORP_ERROR);
     }
     _cli_callback_map.erase(pos);
@@ -186,7 +192,7 @@ ProtoNodeCli::delete_cli_command(const char *command_name)
     //
     // Call the virtual function to delete the command from the CLI manager.
     //
-    if (delete_cli_command_from_cli_manager(command_name) < 0) {
+    if (delete_cli_command_from_cli_manager(command_name_str.c_str()) < 0) {
 	return (XORP_ERROR);
     }
     
