@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.8 2003/01/30 01:43:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.9 2003/01/30 02:36:16 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -64,6 +64,10 @@ PimMre::mrib_next_hop_rp() const
     return (NULL);
 }
 
+// Note: applies only for (*,G) ans (S,G,rpt) but works also for (S,G)
+// Note that we can compute RPF'(*,G) for (S,G) or (S,G,rpt) entry
+// even if there is no (*,G) entry; in that case we return MRIB.next_hop(RP(G))
+// for the corresponding RP.
 PimNbr *
 PimMre::rpfp_nbr_wc() const
 {
@@ -73,7 +77,8 @@ PimMre::rpfp_nbr_wc() const
     if (wc_entry() != NULL)
 	return (wc_entry()->rpfp_nbr_wc());
     
-    return (NULL);
+    // Return MRIB.next_hop(RP(G))
+    return (mrib_next_hop_rp());
 }
 
 uint16_t
@@ -1206,7 +1211,6 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
 {
     PimNbr *old_pim_nbr, *new_pim_nbr;
     PimVif *pim_vif;
-    PimMre *pim_mre_wc = wc_entry();
     
     if (! is_sg_rpt())
 	return;
@@ -1227,9 +1231,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     
     // Set the new upstream
     set_rpfp_nbr_sg_rpt(new_pim_nbr);
-    if (pim_mre_wc == NULL)
-	return;
-    if (new_pim_nbr != pim_mre_wc->rpfp_nbr_wc())
+    if (new_pim_nbr != rpfp_nbr_wc())
 	return;			// RPF'(S,G,rpt) != RPF'(*,G) : no action
     if (new_pim_nbr == NULL)
 	return;
