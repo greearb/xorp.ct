@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.31 2003/05/13 21:39:44 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.32 2003/05/15 23:40:38 pavlin Exp $
 #
+
+* PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
+  to PIM mailing list from 15 May 2003
+  (Message-ID: <NDEGKGGNPHBFKDIGGCMFAEDDCHAA.suresh@timetra.com>)
 
 * BSR SPEC+IMPL+TESTSUITE:
   Make sure that Mark's email to PIM Mailing list "Re: [pim] PIM BSR Draft"
