@@ -40,7 +40,7 @@ public:
     }
 
     void
-    RIB_lookup_done(const A& /*nexthop*/, 
+    RIB_lookup_done(const A& /*nexthop*/,
 		    const set <IPNet<A> >& /*nets*/,
 		    bool /*lookup_succeeded*/)
     {
@@ -94,15 +94,15 @@ template <class A>
 class DummyNextHopResolver2 : public NextHopResolver<A> {
 public:
     DummyNextHopResolver2(EventLoop& eventloop, BGPMain& bgp) :
-	NextHopResolver<A>(0, eventloop, bgp)	
+	NextHopResolver<A>(0, eventloop, bgp)
     {
 	// Must set a ribname to force RIB interactions.
-	register_ribname("bogus");	
+	register_ribname("bogus");
     }
 };
 
 /**
- * Register interest in a nexthop 
+ * Register interest in a nexthop
  */
 template <class A>
 bool
@@ -110,8 +110,9 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
+
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -200,8 +201,8 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -293,8 +294,8 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -392,8 +393,8 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -478,8 +479,8 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyDecisionTable<A> dt(info, nhr);
@@ -624,8 +625,8 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -701,8 +702,8 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyDecisionTable<A> dt(info, nhr);
@@ -831,8 +832,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop eventloop;
     BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyDecisionTable<A> dt(info, nhr);
@@ -882,7 +883,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 	DOUT(info) << "Callback to next hop table failed\n";
 	return false;
     }
-    
+
     /*
     ** Case 1: A nexthop has been marked invalid we re-register
     ** interest but the metrics have not changed so we don't get a
@@ -1120,7 +1121,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     return true;
 }
 
-/* 
+/*
 ** This function is never called it exists to instantiate the
 ** templatised functions.
 */
