@@ -35,13 +35,10 @@ protocol development without needing a large lab of machines.
 \vspace{-0.07in}
 \item XORP is scriptable.  XORP's internal communication between
 processes uses XRLs.
-These have a canonical form that is ASCII, such as 
-\vspace{-0.1in}
-\begin{verbatim}
-finder://fea/fti/0.1/add_route?net:ipv4net=10.0.0.1/8&\
-                     gateway:ipv4=192.150.187.1
-\end{verbatim}
-\vspace{-0.1in} There's a command line program \textbf{call\_xrl} that
+These have a canonical form that is ASCII, such as:\\
+{\sf finder://fea/fti/0.1/add\_route~?~net:ipv4net=10.0.0.1/8~\&~gateway:ipv4=192.150.187.1}
+
+There's a command line program \textbf{call\_xrl} that
 allows any scripting language to make calls to any XORP process.  We
 believe this scipting ability is unique as an enabler for novel uses of
 existing router code.
