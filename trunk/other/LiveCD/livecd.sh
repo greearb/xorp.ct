@@ -164,9 +164,12 @@ install_binaries() {
     dialog --title "XORP LiveCD" --infobox "Installing /etc/resolv.conf" 5 60
 
     # Copies /etc/resolv.conf to /etc under LiveCD ;-) 
-    if [ -f /etc/resolv.conf ]; then 
-	cp -p /etc/resolv.conf $CHROOTDIR/etc
-    fi
+    #if [ -f /etc/resolv.conf ]; then 
+    #    cp -p /etc/resolv.conf $CHROOTDIR/etc
+    #fi
+    echo "search xorp.org" > $CHROOTDIR/etc/resolv.conf
+    echo "nameserver 192.150.187.11" >> $CHROOTDIR/etc/resolv.conf
+    echo "nameserver 128.16.6.8" >> $CHROOTDIR/etc/resolv.conf
 
     dialog --title "XORP LiveCD" --infobox "cd /usr/src..." 5 60
     cd /usr/src/ || aviso
