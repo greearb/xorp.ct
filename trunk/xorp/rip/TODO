@@ -1,5 +1,12 @@
-o Add code to send and receive UDP packets from the FEA.
+o Play catch up with RIPng.  This is mostly dulicating socket handling
+  code.
 
-o Restructure rip main routine into a class.
+o Arrange to have triggered updates go out of all RIP Port instances
+  at the same time.  This is a little tricky as each RIP Port instance
+  is autonomous.
 
-o Sync RIPng Xrl plumbing with RIPv2.
+o Clean up RIB interaction.  Add flag signifying RIB aware of route
+  state to RouteEntry structure.  Twiddle flag when route is updated.
+
+o Consider keeping losing routes, age them in the normal way, etc, and
+  be prepared to fall back to them if/when winning routes expire.
