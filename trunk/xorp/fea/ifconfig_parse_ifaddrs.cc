@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.6 2003/08/06 02:10:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.7 2003/09/11 12:57:00 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -202,7 +202,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	// Get the MTU
 	//
 	do {
-	    int mtu = 0;
+	    int mtu ;
+	    mtu = 0;
 	    
 #ifdef AF_LINK
 	    if ((ifa->ifa_addr != NULL)
