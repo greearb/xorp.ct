@@ -101,8 +101,10 @@ on all recent versions of FreeBSD (as of March 2005, we recommend
 FreeBSD 4.10) and on most versions of Linux with a 2.4.x kernel.
 
 <P>
-XORP compiles on MacOS 10.2 or later, but there is not currently any
-forwarding support.  If you try XORP on another platform, let us know
+XORP also appears to work on NetBSD, OpenBSD and MacOS X (10.2 or later),
+but if you want to use it for multicast routing make sure that the kernel
+has the appropriate support (not available for MacOS X at this time).
+If you try XORP on another platform, let us know
 how you fare.  See <a href="porting.html">porting</a> if you're
 interested in porting XORP to a new platform.
 
@@ -133,7 +135,8 @@ which are always built by default.
 <P>
 To compile XORP, you will need <a
 href="http://www.gnu.org/software/make/make.html">gmake</a>
-installed. This is the default on Linux but not on FreeBSD.
+installed. This is the default on Linux but not on BSD-derived systems
+(including MacOS X).
 <P>
 To build XORP with SNMP support, you need net-snmp installed (details
 <a href="snmp.html">here</a>).
@@ -846,7 +849,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.10 2005/02/24 00:04:48 atanu Exp $.
-<br>Generated on 24/Mar/2005 at 21:08:08.</em>
+<br>Generated on 31/Mar/2005 at 11:53:54.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->

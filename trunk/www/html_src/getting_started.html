@@ -42,8 +42,10 @@ on all recent versions of FreeBSD (as of March 2005, we recommend
 FreeBSD 4.10) and on most versions of Linux with a 2.4.x kernel.
 
 <P>
-XORP compiles on MacOS 10.2 or later, but there is not currently any
-forwarding support.  If you try XORP on another platform, let us know
+XORP also appears to work on NetBSD, OpenBSD and MacOS X (10.2 or later),
+but if you want to use it for multicast routing make sure that the kernel
+has the appropriate support (not available for MacOS X at this time).
+If you try XORP on another platform, let us know
 how you fare.  See <a href="porting.html">porting</a> if you're
 interested in porting XORP to a new platform.
 
@@ -74,7 +76,8 @@ which are always built by default.
 <P>
 To compile XORP, you will need <a
 href="http://www.gnu.org/software/make/make.html">gmake</a>
-installed. This is the default on Linux but not on FreeBSD.
+installed. This is the default on Linux but not on BSD-derived systems
+(including MacOS X).
 <P>
 To build XORP with SNMP support, you need net-snmp installed (details
 <a href="snmp.html">here</a>).
