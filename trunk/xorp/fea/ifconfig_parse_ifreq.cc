@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.7 2003/09/11 12:56:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.8 2003/09/11 13:01:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -298,8 +298,8 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 			sizeof(ifrcopy.ifr_name));
 		ifrcopy.ifr_addr.sa_family = family;
 		if (ioctl(sock(family), SIOCGIFADDR, &ifrcopy) < 0) {
-		    XLOG_ERROR("ioctl(SIOCGIFADDR) failed: %s",
-			       strerror(errno));
+		    // XXX: the interface probably has no address. Ignore.
+		    continue;
 		} else {
 		    lcl_addr.copy_in(ifrcopy.ifr_addr);
 		    memcpy(&ip_ifrcopy, &ifrcopy, sizeof(ip_ifrcopy));
