@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.3 2002/12/19 01:29:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.4 2003/01/17 00:49:12 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -153,7 +153,7 @@ static XrlPFInProcListener*
 get_inproc_listener(uint32_t instance_no)
 {
     map<uint32_t, XrlPFInProcListener*>::iterator i;
-    debug_msg("getting -> size %d\n", listeners.size());
+    debug_msg("getting -> size %u\n", (uint32_t)listeners.size());
     i = listeners.find(instance_no);
     return (i == listeners.end()) ? 0 : i->second;
 }
@@ -162,7 +162,8 @@ static void
 add_inproc_listener(uint32_t instance_no, XrlPFInProcListener* l)
 {
     assert(get_inproc_listener(instance_no) == 0);
-    debug_msg("adding no %d size %d\n", instance_no, listeners.size());
+    debug_msg("adding no %d size %u\n", instance_no,
+	      (uint32_t)listeners.size());
     listeners[instance_no] = l;
 }
 

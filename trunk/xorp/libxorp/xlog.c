@@ -13,7 +13,7 @@
  * legally binding. 
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.33 2002/12/09 18:29:16 hodson Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 
 /*
@@ -1050,7 +1050,7 @@ xlog_localtime2string(void)
 	return (ret_buf);
     }
     
-    sprintf(ret_buf, "%s.%ld", buf, tv.tv_usec);
+    sprintf(ret_buf, "%s.%lu", buf, (unsigned long)tv.tv_usec);
     
     return (ret_buf);
 }

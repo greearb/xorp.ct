@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.2 2003/01/17 01:29:57 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -183,8 +183,9 @@ XrlRawSocket4Manager::send(const string& vifname, const vector<uint8_t>& pkt)
     // Minimal size check
     if (pkt.size() < MIN_IP_PKT_BYTES || pkt.size() > MAX_IP_PKT_BYTES) {
 	return XrlCmdError::COMMAND_FAILED(
-	    c_format("Packet size, %d bytes, out of bounds %d-%d bytes)",
-		     pkt.size(), MIN_IP_PKT_BYTES, MAX_IP_PKT_BYTES)
+	    c_format("Packet size, %u bytes, out of bounds %u-%u bytes)",
+		     (uint32_t)pkt.size(), (uint32_t)MIN_IP_PKT_BYTES,
+		     (uint32_t)MAX_IP_PKT_BYTES)
 	    );
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/local_data.cc,v 1.2 2002/12/13 22:38:53 rizzo Exp $"
+#ident "$XORP: xorp/bgp/local_data.cc,v 1.3 2003/01/24 22:14:44 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,7 +45,7 @@ LocalData::get_optparams() const
 
 	memcpy(dst, (*i)->data(), l);
 	dst += l;
-	debug_msg("Parameter total size %d", l);
+	debug_msg("Parameter total size %u", (uint32_t)l);
     }
     return data;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.8 2003/01/22 02:46:34 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.9 2003/01/24 19:50:10 rizzo Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -316,7 +316,7 @@ int test_announce_packet(bool verbose)
     //+ 9 bytes Aggregator
     //+ 15 bytes Community
     if (verbose)
-	printf("len == %d\n", len);
+	printf("len == %u\n", (uint32_t)len);
     assert(len == 110);
 
     //check the common header

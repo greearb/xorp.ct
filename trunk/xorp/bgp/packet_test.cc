@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.4 2003/01/22 02:46:34 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_test.cc,v 1.5 2003/01/24 19:50:11 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -241,15 +241,15 @@ UpdatePacket* BGPTestPacket::create_update()
 	
     AsSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
-    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.get_as_size());
     as_seq.add_as((uint16_t)12);
-    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.get_as_size());
     as_seq.add_as((uint16_t)13);
-    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.get_as_size());
     as_seq.add_as((uint16_t)14);
     AsPath p;
     p.add_segment(as_seq);
-    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.get_as_size());
     NetLayerReachability nlr_0(net[0]);
     NetLayerReachability nlr_1(net[1]);	
     nlr_0.dump();

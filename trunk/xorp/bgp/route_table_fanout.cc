@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.5 2002/12/17 22:06:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.6 2003/01/16 23:18:58 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -110,8 +110,8 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
 
 	    if (i->second.busy()) {
-		debug_msg("Fanout: queuing route, queue len is %d\n",
-			  queued_peers.size());
+		debug_msg("Fanout: queuing route, queue len is %u\n",
+			  (uint32_t)queued_peers.size());
 		queued_peers.push_back(&(i->second));
 		r = ADD_USED;
 	    } else {

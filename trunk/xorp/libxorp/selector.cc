@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.2 2003/01/16 15:35:06 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -165,7 +165,7 @@ void
 SelectorList::remove_selector(int fd, SelectorMask mask) 
 {
     if (fd < 0 || fd >= (int)_selector_entries.size()) {
-	XLOG_ERROR("Attempting to remove fd = %d that is outside range of file descriptors 0..%d", fd,  _selector_entries.size());
+	XLOG_ERROR("Attempting to remove fd = %d that is outside range of file descriptors 0..%u", fd,  (uint32_t)_selector_entries.size());
 	return;
     }
 

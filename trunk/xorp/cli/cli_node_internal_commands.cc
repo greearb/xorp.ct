@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.11 2002/12/09 18:28:54 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $"
 
 
 //
@@ -238,7 +238,7 @@ CliNode::cli_set_log_output_cli(const char *	, // server_name
     
     CliClient *tmp_cli_client;
     string term_name;
-    size_t cli_n = 0;
+    uint32_t cli_n = 0;
     
     if (argv.empty()) {
 	cli_client->cli_print("ERROR: missing CLI terminal name\n");
@@ -286,7 +286,7 @@ CliNode::cli_set_log_output_cli(const char *	, // server_name
 	}
     }
     
-    cli_client->cli_print(c_format("Added %d CLI terminal(s)\n", cli_n));
+    cli_client->cli_print(c_format("Added %u CLI terminal(s)\n", cli_n));
     
     return (XORP_OK);
 }
@@ -310,7 +310,7 @@ CliNode::cli_set_log_output_remove_cli(const char *	, // server_name
     
     CliClient *tmp_cli_client;
     string term_name;
-    size_t cli_n = 0;
+    uint32_t cli_n = 0;
     
     if (argv.empty()) {
 	cli_client->cli_print("ERROR: missing CLI terminal name\n");
@@ -357,7 +357,7 @@ CliNode::cli_set_log_output_remove_cli(const char *	, // server_name
 	}
     }
     
-    cli_client->cli_print(c_format("Removed %d CLI terminal(s)\n", cli_n));
+    cli_client->cli_print(c_format("Removed %u CLI terminal(s)\n", cli_n));
     
     return (XORP_OK);
 }

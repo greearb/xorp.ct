@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.11 2003/01/24 20:08:25 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.12 2003/01/24 23:52:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -111,7 +111,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    break;
 	}
 	case MESSAGETYPEKEEPALIVE: {
-	    debug_msg("KEEPALIVE Packet RECEIVED %d\n", length);
+	    debug_msg("KEEPALIVE Packet RECEIVED %u\n", (uint32_t)length);
 	    // Check that the length is correct or throw an exception
 	    KeepAlivePacket pac(buf, length);
 	    // debug_msg(pac.str().c_str());

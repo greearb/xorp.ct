@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.31 2002/12/09 18:29:19 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -75,10 +75,10 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     //
     if (BUFFER_DATA_SIZE(buffer) < sizeof(struct mld6_hdr)) {
 	XLOG_WARNING("RX %s from %s to %s: "
-		     "too short data field (%d bytes)",
+		     "too short data field (%u bytes)",
 		     module_name(),
 		     cstring(src), cstring(dst),
-		     BUFFER_DATA_SIZE(buffer));
+		     (uint32_t)BUFFER_DATA_SIZE(buffer));
 	return (XORP_ERROR);
     }
     

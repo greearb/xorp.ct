@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.4 2003/01/21 01:31:49 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.5 2003/01/26 01:22:35 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -68,7 +68,7 @@ AsSegment::_encode(size_t &len) const
 	len += (iter->is_extended()) ? 4 : 2;
     assert(_aslist.size() == _entries);		// XXX this is expensive
 
-    debug_msg("data size = %d\n", len);
+    debug_msg("data size = %u\n", (uint32_t)len);
     uint8_t *data = new uint8_t[len];
 
     size_t pos = 0;
@@ -214,7 +214,7 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
     for (size_t i = 0; i < path.length(); i++) {
 	char c = path[i];
 
-        debug_msg("check <%c> at pos %d\n", c, i);
+        debug_msg("check <%c> at pos %u\n", c, (uint32_t)i);
 	if (isdigit(c)) {
 	    size_t start = i;
 
@@ -287,8 +287,8 @@ AsPath::add_segment(const AsSegment& s)
 
     size_t n = s.get_as_path_length();
     _path_len += n;
-    debug_msg("End of add_segment, As Path length by %d to be %d\n",
-                n, _path_len);
+    debug_msg("End of add_segment, As Path length by %u to be %u\n",
+                (uint32_t)n, (uint32_t)_path_len);
 }
 
 string

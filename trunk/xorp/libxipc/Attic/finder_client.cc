@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.2 2002/12/18 22:54:29 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.3 2002/12/19 01:29:08 hodson Exp $"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -147,8 +147,8 @@ FinderClient::hello_handler(const FinderMessage& m)
 {
     struct timeval now;
     gettimeofday(&now, NULL);
-    debug_msg("got hello (seqno %d) %ld.%06ld\n", m.seqno(),
-	      now.tv_sec, now.tv_usec);
+    debug_msg("got hello (seqno %d) %lu.%06lu\n", m.seqno(),
+	      (unsigned long)now.tv_sec, (unsigned long)now.tv_usec);
     UNUSED(m);
 }
 
@@ -394,8 +394,8 @@ FinderClient::initiate_hook(void *thunked_client)
     if (c->_connection) {
 	struct timeval now;
 	gettimeofday(&now, NULL);
-	debug_msg("Connected to Finder. Re-registering...%ld.%06ld\n",
-		  now.tv_sec, now.tv_usec);
+	debug_msg("Connected to Finder. Re-registering...%lu.%06lu\n",
+		  (unsigned long)now.tv_sec, (unsigned long)now.tv_usec);
 
 	// Connect succeed
 	c->_event_loop.add_selector(c->_connection->descriptor(),

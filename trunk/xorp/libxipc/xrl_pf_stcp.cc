@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.5 2003/01/17 00:49:12 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.6 2003/01/24 05:53:51 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -134,8 +134,8 @@ void
 STCPRequestHandler::parse_header(const uint8_t* buffer, size_t bytes_done)
 {
     if (bytes_done < sizeof(STCPPacketHeader)) {
-	debug_msg("Incoming with small header %d < %d\n",
-		  bytes_done, sizeof(STCPPacketHeader));
+	debug_msg("Incoming with small header %u < %u\n",
+		  (uint32_t)bytes_done, (uint32_t)sizeof(STCPPacketHeader));
 	return;
     }
     assert(bytes_done == sizeof(STCPPacketHeader));
@@ -209,10 +209,11 @@ STCPRequestHandler::update_reader(AsyncFileReader::Event ev,
     }
 
     assert(ev == AsyncFileReader::DATA);
-    debug_msg("update_reader: %d done, expecting %d\n",
-	      bytes_done,
+    debug_msg("update_reader: %u done, expecting %u\n",
+	      (uint32_t)bytes_done,
 	      (_request_payload_bytes) ?
-	      _request_payload_bytes : sizeof(STCPPacketHeader));
+	      (uint32_t)_request_payload_bytes
+	      : (uint32_t)sizeof(STCPPacketHeader));
 
     if (_request_payload_bytes == 0) {
 	parse_header(buffer, bytes_done);
@@ -240,7 +241,7 @@ STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
     } catch (const InvalidString&) {
 	e = XrlError::CORRUPT_XRL();
     }
-    debug_msg("Response count %d\n", _responses.size());
+    debug_msg("Response count %u\n", (uint32_t)_responses.size());
 
     _responses.push_back(ReplyPacket());
     ReplyPacket& r = _responses.back();
@@ -292,7 +293,7 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
     if (ev == AsyncFileWriter::FLUSHING)
 	return;	// code pre-dates FLUSHING event
 
-    debug_msg("Writer offset %d\n", bytes_done);
+    debug_msg("Writer offset %u\n", (uint32_t)bytes_done);
 
     if (ev == AsyncFileWriter::ERROR_CHECK_ERRNO && errno != EAGAIN) {
 	debug_msg("Read failed: %s\n", strerror(errno));
@@ -302,8 +303,8 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
 
     list<ReplyPacket>::iterator ri = _responses.begin();
     if (ri->size() == bytes_done) {
-	debug_msg("Packet completed -> %d bytes written.\n",
-		  ri->size());
+	debug_msg("Packet completed -> %u bytes written.\n",
+		  (uint32_t)ri->size());
 	// erase old head
 	_responses.erase(ri);
 	_response_offset = 0;
@@ -571,7 +572,8 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 			       size_t			buffer_bytes,
 			       size_t			bytes_done)
 {
-    debug_msg("bytes done %d / %d\n", bytes_done, buffer_bytes);
+    debug_msg("bytes done %u / %u\n", (uint32_t)bytes_done,
+	      (uint32_t)buffer_bytes);
     assert(_keepalive_in_progress == false);
     if (e == AsyncFileWriter::FLUSHING)
 	return; // Code predates FLUSHING
@@ -665,7 +667,7 @@ XrlPFSTCPSender::recv_data(AsyncFileReader::Event e,
     if (offset < sizeof(STCPPacketHeader)) {
 	// XXX Hopefully never reached.  Just wait until next
 	// chunk arrives before doing any more processing...
-	debug_msg("got small header...%d bytes\n", offset);
+	debug_msg("got small header...%u bytes\n", (uint32_t)offset);
 	assert(_reader->running());
 	return;
     }

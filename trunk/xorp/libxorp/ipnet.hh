@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.34 2002/12/09 18:29:12 hodson Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -26,7 +26,7 @@
  * 
  * A "subnet" is specified by a base "address" and a "prefix length".
  */
-template <class _A> 
+template <class A> 
 class IPNet { 
 public:
     /**
@@ -43,10 +43,10 @@ public:
      * @param preflen length of subnet mask (e.g., class C nets would have 
      * preflen=24).
      */
-    IPNet(const _A& a, size_t preflen) throw (InvalidNetmaskLength)
+    IPNet(const A& a, size_t preflen) throw (InvalidNetmaskLength)
 	: _masked_addr(a), _prefix_len(preflen)
     {
-	if (preflen > _A::addr_bitlen())
+	if (preflen > A::addr_bitlen())
 	    xorp_throw(InvalidNetmaskLength, preflen);
 	_masked_addr = a.mask_by_prefix(preflen);
     }
@@ -140,7 +140,7 @@ public:
      * of the address.
      */
     inline string str() const {
-	return _masked_addr.str() + c_format("/%d", _prefix_len);
+	return _masked_addr.str() + c_format("/%u", (uint32_t)_prefix_len);
     }
 
     /**
@@ -167,7 +167,7 @@ public:
      * @param addr the address to test against.
      * @return true if @ref addr is within this subnet.
      */
-    inline bool contains(const _A& addr) const {
+    inline bool contains(const A& addr) const {
 	return addr.mask_by_prefix(_prefix_len) == _masked_addr;
     }
 
@@ -186,7 +186,7 @@ public:
      * 
      * @return the base address for this subnet.
      */
-    inline const _A& masked_addr() const { return _masked_addr; }
+    inline const A& masked_addr() const { return _masked_addr; }
 
     /**
      * Get the prefix length.
@@ -200,7 +200,7 @@ public:
      * 
      * @return the netmask associated with this subnet.
      */
-    inline _A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
+    inline A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
 
     /**
      * Return the subnet containing all multicast addresses.
@@ -212,9 +212,9 @@ public:
      * 
      * @return the subnet containing multicast addresses.
      */
-    static const IPNet<_A> ip_multicast_base_prefix() {
-	return IPNet(_A::MULTICAST_BASE(),
-		     _A::ip_multicast_base_address_masklen());
+    static const IPNet<A> ip_multicast_base_prefix() {
+	return IPNet(A::MULTICAST_BASE(),
+		     A::ip_multicast_base_address_masklen());
     }
     
     /**
@@ -231,7 +231,7 @@ public:
      * 
      * @return the highest address within this subnet.
      */
-    inline _A top_addr() const { return _masked_addr | ~netmask(); }
+    inline A top_addr() const { return _masked_addr | ~netmask(); }
 
     /**
      * Get the smallest subnet containing both subnets.
@@ -239,22 +239,22 @@ public:
      * @return the smallest subnet containing both subnets passed
      * as arguments.
      */
-    static IPNet<_A> common_subnet(const IPNet<_A> x, const IPNet<_A> y) {
-	return IPNet<_A>(x.masked_addr(), x.overlap(y));
+    static IPNet<A> common_subnet(const IPNet<A> x, const IPNet<A> y) {
+	return IPNet<A>(x.masked_addr(), x.overlap(y));
     }
 
 protected:
     inline void initialize_from_string(const char *s) throw (InvalidString);
 
-    _A		_masked_addr;
+    A		_masked_addr;
     size_t	_prefix_len;
 };
 
 /* ------------------------------------------------------------------------- */
 /* Deferred method definitions */
 
-template <class _A> bool
-IPNet<_A>::operator<(const IPNet& other) const
+template <class A> bool
+IPNet<A>::operator<(const IPNet& other) const
 {
 #if 1
     /*
@@ -284,7 +284,7 @@ IPNet<_A>::operator<(const IPNet& other) const
 	return this->masked_addr() < other.masked_addr();
 
 #else	// old code
-    const _A& maddr_him = other.masked_addr();
+    const A& maddr_him = other.masked_addr();
     size_t his_prefix = other.prefix_len();
 
     //the ordering is important because we want the longest match to
@@ -296,13 +296,13 @@ IPNet<_A>::operator<(const IPNet& other) const
     // we need to check the case when one subnet is a subset of
     // the other
     if (_prefix_len < his_prefix) {
-	_A test_addr(maddr_him.mask_by_prefix(_prefix_len));
+	A test_addr(maddr_him.mask_by_prefix(_prefix_len));
 	if (_masked_addr == test_addr) {
 	    //his subnet is a subset of mine, so he goes first.
 	    return (false);
 	}
     } else if (_prefix_len > his_prefix) {
-	_A test_addr(_masked_addr.mask_by_prefix(his_prefix));
+	A test_addr(_masked_addr.mask_by_prefix(his_prefix));
 	if (maddr_him == test_addr) {
 	    //my subnet is a subset of his, so I go first.
 	    return (true);
@@ -316,8 +316,8 @@ IPNet<_A>::operator<(const IPNet& other) const
 #endif
 }
 
-template <class _A> bool
-IPNet<_A>::is_overlap(const IPNet<_A>& other) const
+template <class A> bool
+IPNet<A>::is_overlap(const IPNet<A>& other) const
 {
     if (prefix_len() > other.prefix_len()) {
 	// I have smaller prefix size
@@ -333,8 +333,8 @@ IPNet<_A>::is_overlap(const IPNet<_A>& other) const
     return (other.masked_addr() == masked_addr());
 }
 
-template <class _A> bool
-IPNet<_A>::contains(const IPNet<_A>& other) const
+template <class A> bool
+IPNet<A>::contains(const IPNet<A>& other) const
 {
     if (prefix_len() > other.prefix_len()) {
 	// I have smaller prefix size, hence I don't contain other.
@@ -349,8 +349,8 @@ IPNet<_A>::contains(const IPNet<_A>& other) const
     return (other.masked_addr() == masked_addr());
 }
 
-template <class _A> void
-IPNet<_A>::initialize_from_string(const char *cp) throw (InvalidString) {
+template <class A> void
+IPNet<A>::initialize_from_string(const char *cp) throw (InvalidString) {
     char *slash = strrchr(cp, '/');
     if (slash == 0) xorp_throw(InvalidString, "Missing slash");
     
@@ -359,11 +359,11 @@ IPNet<_A>::initialize_from_string(const char *cp) throw (InvalidString) {
     
     string addr = string(cp, slash - cp);
     
-    _masked_addr = _A(addr.c_str()).mask_by_prefix(_prefix_len);
+    _masked_addr = A(addr.c_str()).mask_by_prefix(_prefix_len);
 }
 
-template <class _A> IPNet<_A>&
-IPNet<_A>::operator--()
+template <class A> IPNet<A>&
+IPNet<A>::operator--()
 {
     _masked_addr = _masked_addr >> (_masked_addr.addr_bitlen() - _prefix_len);
     --_masked_addr;
@@ -371,8 +371,8 @@ IPNet<_A>::operator--()
     return (*this);
 }
 
-template <class _A> IPNet<_A>&
-IPNet<_A>::operator++()
+template <class A> IPNet<A>&
+IPNet<A>::operator++()
 {
     _masked_addr = _masked_addr >> (_masked_addr.addr_bitlen() - _prefix_len);
     ++_masked_addr;
@@ -380,18 +380,18 @@ IPNet<_A>::operator++()
     return (*this);
 }
 
-template <class _A>
+template <class A>
 inline size_t
-IPNet<_A>::overlap(const IPNet<_A>& other) const
+IPNet<A>::overlap(const IPNet<A>& other) const
 {
-    _A addr = masked_addr() ^ other.masked_addr();
+    A addr = masked_addr() ^ other.masked_addr();
 
     size_t p = (prefix_len() < other.prefix_len()) ? 
 	prefix_len() : other.prefix_len();
 
     size_t i = 0;
 
-    for (_A o(_A::ALL_ONES(_masked_addr.af())); i <= p; o = o >> 1, i++) {
+    for (A o(A::ALL_ONES(_masked_addr.af())); i <= p; o = o >> 1, i++) {
 	if (o < addr) 
 	    return i - 1;
     }

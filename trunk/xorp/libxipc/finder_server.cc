@@ -299,8 +299,8 @@ FinderConnectionInfo::periodic_helo_hook(void *thunk_fci)
 void
 FinderConnectionInfo::write_failure(FinderConnectionInfo *fci)
 {
-    debug_msg("write failure on connection %p with %d services\n",
-	      fci, fci->service_count());
+    debug_msg("write failure on connection %p with %u services\n",
+	      fci, (uint32_t)fci->service_count());
     delete fci;
 }
 

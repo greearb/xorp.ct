@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.85 2002/12/09 18:29:17 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -948,10 +948,10 @@ MfeaNode::unix_comm_recv(x_module_id dst_module_id,
     XLOG_TRACE(false & is_log_trace(),	// XXX: unconditionally disabled
 	       "RX packet for dst_module_name %s: "
 	       "vif_index = %d src = %s dst = %s ttl = %d tos = %#x "
-	       "router_alert = %d rcvbuf = %p rcvlen = %d",
+	       "router_alert = %d rcvbuf = %p rcvlen = %u",
 	       x_module_name(family(), dst_module_id), vif_index,
 	       cstring(src), cstring(dst), ip_ttl, ip_tos, router_alert_bool,
-	       rcvbuf, rcvlen);
+	       rcvbuf, (uint32_t)rcvlen);
     
     //
     // Test if we should accept or drop the message

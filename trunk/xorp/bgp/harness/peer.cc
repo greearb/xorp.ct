@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.10 2003/01/24 19:50:11 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.11 2003/01/24 20:08:25 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -596,8 +596,9 @@ Peer::assertX(const string& line, const vector<string>& words)
 	    if(static_cast<unsigned int>(atoi(words[3].c_str())) !=
 	       _expect._list.size())
 		xorp_throw(InvalidString, 
-			   c_format("Expected list size to be %d actual %d",
-			      atoi(words[3].c_str()), _expect._list.size()));
+			   c_format("Expected list size to be %d actual %u",
+				    atoi(words[3].c_str()),
+				    (uint32_t)_expect._list.size()));
 	    break;
 	default:
 	    xorp_throw(InvalidString, 
@@ -913,8 +914,9 @@ void
 Peer::datain(const bool& status, const timeval& tv,
 	     const vector<uint8_t>& data)
 {
-    debug_msg("status: %d secs: %ld micro: %ld data length: %d\n",
-	      status, tv.tv_sec, tv.tv_usec, data.size());
+    debug_msg("status: %d secs: %lu micro: %lu data length: %u\n",
+	      status, (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec,
+	      (uint32_t)data.size());
 
     /*
     ** A bgp error has occured.
@@ -956,7 +958,7 @@ Peer::datain(const bool& status, const timeval& tv,
 	}
 	    break;
 	case MESSAGETYPEKEEPALIVE: {
-	    debug_msg("KEEPALIVE Packet RECEIVED %d\n", length);
+	    debug_msg("KEEPALIVE Packet RECEIVED %u\n", (uint32_t)length);
 	    KeepAlivePacket pac(buf, length);
 	    debug_msg(pac.str().c_str());
 
@@ -1035,7 +1037,7 @@ Peer::datain_closed()
 void
 Peer::send_message(const uint8_t *buf, const size_t len, SMCB cb)
 {
-    debug_msg("len: %d\n", len);
+    debug_msg("len: %u\n", (uint32_t)len);
 
     if(!_traffic_sent.is_empty()) {
 	struct timeval tp;

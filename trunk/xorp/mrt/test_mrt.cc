@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/test_mrt.cc,v 1.19 2002/12/09 18:29:23 hodson Exp $"
+#ident "$XORP: xorp/mrt/test_mrt.cc,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $"
 
 
 //
@@ -123,7 +123,7 @@ main(int /* argc */, char *argv[])
 	
 	// Mrt size
 	printf("\n");
-	printf("Mrt size = %d\n", mrt.size());
+	printf("Mrt size = %u\n", (uint32_t)mrt.size());
 	printf("PASS\n");
 	
 	// All entries printout

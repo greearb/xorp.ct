@@ -360,7 +360,7 @@ FinderIPCService::fetch_and_verify_message(char *buf,
             size_t vlen = strlen(verify[i]);
             if (got < vlen) {
                 debug_msg("Read too short - got %u, expected %u\n",
-                          got, vlen);
+                          got, (uint32_t)vlen);
                 return false;
             }
             if (strncasecmp(verify[i], buf + start[i], vlen)) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_mrib_rawsock.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_mrib_rawsock.cc,v 1.2 2003/01/13 20:40:21 pavlin Exp $"
 
 
 //
@@ -189,8 +189,8 @@ UnixComm::get_mrib_osdep(const IPvX& dest_addr, Mrib& mrib)
 	if (msglen < (int)sizeof(*rtm)) {
 	    XLOG_ERROR("get_mrib(AF_ROUTE) failed: "
 		       "error reading from socket: "
-		       "message truncated: %d instead of (at least) %d",
-		       msglen, sizeof(*rtm));
+		       "message truncated: %d instead of (at least) %u",
+		       msglen, (uint32_t)sizeof(*rtm));
 	    return (XORP_ERROR);
 	}
     } while ( (rtm->rtm_type != RTM_GET)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.2 2002/12/19 01:29:09 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.3 2003/01/17 00:49:11 hodson Exp $"
 
 #include <vector>
 
@@ -144,7 +144,7 @@ FinderTcpTransport::async_write(AsyncFileWriter::Event	e,
 {
     assert(buffer == &_write_data[0]);
 
-    debug_msg("async_write Error %d offset %d\n", e, offset);
+    debug_msg("async_write Error %d offset %u\n", e, (uint32_t)offset);
     switch (e) {
     case AsyncFileWriter::FLUSHING:
 	return;
@@ -162,7 +162,8 @@ FinderTcpTransport::async_write(AsyncFileWriter::Event	e,
 	;/* FALL_THROUGH */
     }
 
-    debug_msg("Written %d / %d bytes\n", offset, _write_data.size());
+    debug_msg("Written %u / %u bytes\n", (uint32_t)offset,
+	      (uint32_t)_write_data.size());
     // If we get this far this is a completion or we're still running.
     assert(offset == _write_data.size() || _writer.running() == true);
     if (offset == _write_data.size()) {
@@ -191,8 +192,9 @@ FinderTcpTransport::reader_reprovision(size_t extra_bytes)
     }
     _reader.flush_buffers();
 
-    debug_msg("Reprovision %d (%d -> %d)\n", _read_pos,
-	      _read_data.size(), _read_data.size() + extra_bytes);
+    debug_msg("Reprovision %u (%u -> %u)\n", (uint32_t)_read_pos,
+	      (uint32_t)_read_data.size(),
+	      (uint32_t)(_read_data.size() + extra_bytes));
     _reader.add_buffer_with_offset((uint8_t*)&_read_data[0],
 				   _read_data.size(),
 				   resume_pos,
@@ -211,8 +213,9 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 	return; // this code pre-dates flushing callbacks.
 
     assert(buffer == reinterpret_cast<const uint8_t*>(&_read_data[0]));
-    debug_msg("async_read Event %d pos %d offset %d space %d\n",
-	      ev, _read_pos, offset, _read_data.size());
+    debug_msg("async_read Event %d pos %u offset %u space %u\n",
+	      ev, (uint32_t)_read_pos, (uint32_t)offset,
+	      (uint32_t)_read_data.size());
     if (ev != AsyncFileReader::DATA) {
 	if (errno == EAGAIN) {
 	    // Continue writing, socket just not ready.
@@ -253,19 +256,20 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 	    size_t payload_bytes = FinderParser::peek_payload_bytes(r);
 	    size_t msg_bytes = header_bytes + payload_bytes;
 
-	    debug_msg("Space %d Need %d\n",
-		      _read_data.size() - _read_pos, msg_bytes);
+	    debug_msg("Space %u Need %u\n",
+		      (uint32_t)(_read_data.size() - _read_pos),
+		      (uint32_t)msg_bytes);
 	    if (_read_data.size() < _read_pos + msg_bytes) {
 		// short of space...resize buffer and push back
 		size_t req = msg_bytes - (_read_pos - _read_data.size());
-		debug_msg("short of space adding more buffering %d -> %d\n",
-			  _read_data.size(), req);
+		debug_msg("short of space adding more buffering %u -> %u\n",
+			  (uint32_t)_read_data.size(), (uint32_t)req);
 		reader_reprovision(req);
 		break;
 	    }
 
 	    assert(_read_pos + msg_bytes <= _read_data.size());
-	    debug_msg("message bytes %d\n", msg_bytes);
+	    debug_msg("message bytes %u\n", (uint32_t)msg_bytes);
 	    string msg(&_read_data[_read_pos], msg_bytes);
 	    announce_arrival(msg);
 	    _read_pos += msg_bytes;

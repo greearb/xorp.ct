@@ -950,8 +950,8 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
 {
     size_t pb = packed_bytes();
     if (buffer_bytes < pb) {
-	debug_msg("Buffer too small (%d < %d)\n",
-		  buffer_bytes, pb);
+	debug_msg("Buffer too small (%u < %u)\n",
+		  (uint32_t)buffer_bytes, (uint32_t)pb);
 	return 0;
     }
 
@@ -1040,8 +1040,9 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 
 	// Check size for fixed width packed types.
 	if (packed_bytes_fixed() && buffer_bytes < packed_bytes()) {
-	    debug_msg("Insufficient space (%d < %d) for type %d\n",
-		      buffer_bytes - unpacked, packed_bytes(), _type);
+	    debug_msg("Insufficient space (%u < %u) for type %d\n",
+		      (uint32_t)(buffer_bytes - unpacked),
+		      (uint32_t)packed_bytes(), _type);
 	    return 0;
 	}
 

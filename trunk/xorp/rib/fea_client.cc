@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.2 2003/01/16 00:29:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -371,7 +371,8 @@ FeaClient::tasks_pending() const
 SyncFtiCommand *
 FeaClient::get_next()
 {
-    debug_msg("Get next task count %d op count %d\n", tasks_count(),_op_count);
+    debug_msg("Get next task count %u op count %d\n", (uint32_t)tasks_count(),
+	      _op_count);
 
     XLOG_ASSERT(!_tasks.empty());
 

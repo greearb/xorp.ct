@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.2 2003/01/06 20:28:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.3 2003/01/07 01:43:03 pavlin Exp $"
 
 
 //
@@ -633,9 +633,9 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     //
     if (BUFFER_DATA_SIZE(buffer) < PIM_MINLEN) {
 	XLOG_WARNING("RX packet from %s to %s: "
-		     "too short data field (%d bytes)",
+		     "too short data field (%u bytes)",
 		     cstring(src), cstring(dst),
-		     BUFFER_DATA_SIZE(buffer));
+		     (uint32_t)BUFFER_DATA_SIZE(buffer));
 	return (XORP_ERROR);
     }
     

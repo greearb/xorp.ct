@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.8 2003/01/22 03:02:09 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.9 2003/01/24 19:50:11 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -146,8 +146,8 @@ UpdatePacket::big_enough() const
 
     //quick and dirty check
     if (((_withdrawn_list.size() + _nlri_list.size())* 4) > 2048) {
-	debug_msg("withdrawn size = %d\n", _withdrawn_list.size());
-	debug_msg("nlri size = %d\n", _withdrawn_list.size());
+	debug_msg("withdrawn size = %u\n", (uint32_t)_withdrawn_list.size());
+	debug_msg("nlri size = %u\n", (uint32_t)_withdrawn_list.size());
 	return true;
     }
     return false;
@@ -159,8 +159,9 @@ UpdatePacket::encode(size_t &len) const
     int size = 5 + _att_list.size() + 
 	(2*_withdrawn_list.size()) +(2*_nlri_list.size()); 
     int position = 2; // counter only starts after marker and length have been set.
-    debug_msg("Path Att: %d Withdrawn Routes: %d Net Reach: %d size: %d\n",
-	      _att_list.size(),_withdrawn_list.size(),_nlri_list.size(), size);
+    debug_msg("Path Att: %u Withdrawn Routes: %u Net Reach: %u size: %d\n",
+	      (uint32_t)_att_list.size(), (uint32_t)_withdrawn_list.size(),
+	      (uint32_t)_nlri_list.size(), size);
 	
     XLOG_ASSERT(0 == _nlri_list.size() || 0 != _att_list.size());
 
@@ -254,15 +255,15 @@ UpdatePacket::encode(size_t &len) const
     total_size = total_size + 2;
 	
     if (total_size < MINPACKETSIZE || total_size > MAXPACKETSIZE) {
-	debug_msg("Throw exception packet length invalid (%d)\n",
-		  total_size);
+	debug_msg("Throw exception packet length invalid (%u)\n",
+		  (uint32_t)total_size);
 	XLOG_FATAL("Attempt to encode a packet that is too big");
     }
     uint16_t net_total_size = total_size;
     net_total_size = htons(net_total_size);
     io[1].iov_base = (char *)&net_total_size;
     io[1].iov_len = 2;
-    debug_msg("size %d total_size %d\n",size,total_size);
+    debug_msg("size %d total_size %u\n", size, (uint32_t)total_size);
 
     return flatten(&io[0], size, len);
 }
@@ -306,7 +307,7 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 	//done elsewhere
 	if ((bytes > (uint)urlength) || (bytes > 4))
 	    xorp_throw(CorruptMessage,
-		   c_format("inconsistent length %d %d", bytes, urlength),
+		   c_format("inconsistent length %u %d", (uint32_t)bytes, urlength),
 		   UPDATEMSGERR, ATTRLEN);
 	data++;
 
@@ -360,12 +361,12 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 	}
 	if (palength + shift > (uint)plength)
 	    xorp_throw(CorruptMessage,
-		       c_format("inconsistent length %d %d",
-				palength + shift,
+		       c_format("inconsistent length %u %d",
+				(uint32_t)(palength + shift),
 				plength),
 		       UPDATEMSGERR, ATTRLEN);
 
-	debug_msg("palength=%d\n", palength);
+	debug_msg("palength=%u\n", (uint32_t)palength);
 
 	// get the path parameter type.
 	pa_type = (uint8_t &)*(data + sizeof(uint8_t));
@@ -410,12 +411,14 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 	}
 
 	_att_list.push_back(pa_temp);
-	debug_msg("plength %d, palength %d, shift %d, pathatt size %d\n",
-		plength,palength,shift,_att_list.size());
+	debug_msg("plength %d, palength %u, shift %u, pathatt size %u\n",
+		  plength, (uint32_t)palength, (uint32_t)shift,
+		  (uint32_t)_att_list.size());
 	data = data + palength + shift;
 	plength = plength - (palength + shift);
-	debug_msg("plength %d, palength %d, shift %d, pathatt size %d\n",
-		plength,palength,shift,_att_list.size());
+	debug_msg("plength %d, palength %u, shift %u, pathatt size %u\n",
+		  plength, (uint32_t)palength, (uint32_t)shift,
+		  (uint32_t)_att_list.size());
 	dump_bytes(data,10);
     }
     if (plength < 0)
@@ -432,10 +435,11 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
     while (nlength > 0) {
 	nnlength = (uint8_t &)(*data);
 	bytes = (nnlength+7)/8;
-	debug_msg("bits: %d bytes: %d\n", nnlength, bytes);
+	debug_msg("bits: %u bytes: %u\n", (uint32_t)nnlength, (uint32_t)bytes);
 	if ((bytes > (uint)nlength) || (bytes > 4))
 	    xorp_throw(CorruptMessage,
-		       c_format("inconsistent length %d %d", bytes, nlength),
+		       c_format("inconsistent length %u %d", (uint32_t)bytes,
+				nlength),
 		       UPDATEMSGERR, ATTRLEN);
 	data++;
 	nlength--;
@@ -458,20 +462,20 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 		   UPDATEMSGERR, ATTRLEN);
 	
     /* End of decoding of Network Reachability */
-    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
-		"No of networks %d.\n",
-		  _withdrawn_list.size(), _att_list.size(),
-		  _nlri_list.size());
+    debug_msg("No of withdrawn routes %u. No of path attributes %u. "
+	      "No of networks %u.\n",
+	      (uint32_t)_withdrawn_list.size(), (uint32_t)_att_list.size(),
+	      (uint32_t)_nlri_list.size());
 }
 
 string
 UpdatePacket::str() const
 {
     string s = "Update Packet\n";
-    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
-		"No of networks %d.\n",
-	      _withdrawn_list.size(), _att_list.size(),
-	      _nlri_list.size());
+    debug_msg("No of withdrawn routes %u. No of path attributes %u. "
+	      "No of networks %u.\n",
+	      (uint32_t)_withdrawn_list.size(), (uint32_t)_att_list.size(),
+	      (uint32_t)_nlri_list.size());
 
     list <BGPWithdrawnRoute>::const_iterator wi = _withdrawn_list.begin();
     while (wi != _withdrawn_list.end()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.4 2003/01/17 00:49:12 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.5 2003/01/24 06:10:21 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -253,7 +253,8 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     requests_pending[request.xuid].timeout =
 	_event_loop.new_oneoff_after_ms(SUDP_REPLY_TIMEOUT_MS,
 	    callback(this, &XrlPFSUDPSender::timeout_hook, request.xuid));
-    debug_msg("XrlPFSUDPSender::send (qsize %d)\n", requests_pending.size());
+    debug_msg("XrlPFSUDPSender::send (qsize %u)\n",
+	      (uint32_t)requests_pending.size());
 }
 
 void
@@ -297,8 +298,8 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	debug_msg("response header parsing failed\n");
 	return;
     } else if (content_bytes + header_bytes != (size_t)read_bytes) {
-	debug_msg("header and data bytes != read_bytes (%d + %d != %d\n",
-		  header_bytes, content_bytes, read_bytes);
+	debug_msg("header and data bytes != read_bytes (%u + %u != %d\n",
+		  (uint32_t)header_bytes, (uint32_t)content_bytes, read_bytes);
     }
 
     debug_msg("Received %s\n", xuid.str().c_str());
@@ -314,7 +315,7 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	XrlArgs response(buf + header_bytes);
 	r.callback->dispatch(err, r.xrl, &response);
     } catch (const InvalidString&) {
-	debug_msg("Corrupt response: header_bytes %d content_bytes %d\n\t\"%s\"\n", header_bytes, content_bytes, buf + header_bytes);
+	debug_msg("Corrupt response: header_bytes %u content_bytes %u\n\t\"%s\"\n", (uint32_t)header_bytes, (uint32_t)content_bytes, buf + header_bytes);
 	r.callback->dispatch(XrlError::CORRUPT_RESPONSE(), r.xrl, 0);
     }
     debug_msg("Erasing state for %s (answered)\n", r.xuid.str().c_str());
@@ -441,7 +442,7 @@ XrlPFSUDPListener::send_reply(sockaddr*			sa,
 
     msghdr m;
     memset(&m, 0, sizeof(m));
-    m.msg_name = sa;
+    m.msg_name = (caddr_t)sa;
     m.msg_namelen = sizeof(*sa);
     m.msg_iov = v;
     m.msg_iovlen = sizeof(v) / sizeof(v[0]);

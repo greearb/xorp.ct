@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.2 2003/01/17 01:29:57 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -61,8 +61,8 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
     static_assert(sizeof(struct ip) == 20);
 
     if (nbytes < sizeof(struct ip)) {
-	XLOG_ERROR("attempting to write a raw ip packet of %d (<20) bytes.",
-		   nbytes);
+	XLOG_ERROR("attempting to write a raw ip packet of %u (<20) bytes.",
+		   (uint32_t)nbytes);
 	return -1;
     }
 
@@ -109,7 +109,7 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
 #endif /* HAVE_SIN_LEN */
 
     struct msghdr mh;
-    mh.msg_name = &who;
+    mh.msg_name = (caddr_t)&who;
     mh.msg_namelen = sizeof(who);
     mh.msg_iov = iov;
     mh.msg_iovlen = iovcnt;

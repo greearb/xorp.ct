@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.22 2002/12/09 18:29:10 hodson Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
 
 #include <signal.h>
 
@@ -67,7 +67,7 @@ AsyncFileReader::read(int fd, SelectorMask m) {
     assert(fd == _fd);
     assert(_buffers.empty() == false);
 
-    debug_msg("Buffer count %d\n", _buffers.size());
+    debug_msg("Buffer count %u\n", (uint32_t)_buffers.size());
 
     BufferInfo& head = _buffers.front();
 

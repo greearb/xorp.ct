@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_if_getifaddrs.cc,v 1.25 2002/12/09 18:29:18 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_if_getifaddrs.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -215,6 +215,17 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 	    //
 	    // Get IPv6 specific flags
 	    //
+
+#ifdef HOST_OS_MACOSX
+	    //
+	    // XXX: Some OS such as MacOS X 10.2.3 don't have struct in6_ifreq
+	    // TODO: for now, allow the code to compile, but abort at run time
+	    //
+	    XLOG_FATAL("MacOS X doesn't have struct in6_ifreq. Aborting...");
+	    return (XORP_ERROR);
+	    
+#else // ! HOST_OS_MACOSX
+	    
 	    struct in6_ifreq ifrcopy6;
 	    memset(&ifrcopy6, 0, sizeof(ifrcopy6));
 	    // TODO: see the Solaris-related ':' comment above
@@ -232,6 +243,9 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 	    //
 	    if (ifrcopy6.ifr_ifru.ifru_flags6 & IN6_IFF_ANYCAST)
 		continue;
+	    
+#endif // ! HOST_OS_MACOSX
+	    
 	}
 #endif // HAVE_IPV6
 	

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.6 2003/01/17 05:51:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.7 2003/01/24 22:14:44 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -393,13 +393,13 @@ ASPathAttribute::encode()
     // get our copy of the data. Remember to free them when done.
     // l does not include this header yet.
     temp_data = _as_path.encode(l);
-    debug_msg("ASPath length is %d\n", l);
+    debug_msg("ASPath length is %u\n", (uint32_t)l);
     uint8_t *data = new uint8_t[l + 4];
 
     if (l > 255)
 	_flags |= Extended;
 
-    debug_msg("Length %d\n", l);
+    debug_msg("Length %u\n", (uint32_t)l);
 
     data[0] = flags();
     data[1] = AS_PATH;

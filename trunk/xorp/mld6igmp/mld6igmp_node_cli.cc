@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.23 2002/12/09 18:29:20 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -151,13 +151,13 @@ Mld6igmpNodeCli::cli_show_igmp_interface(const vector<string>& argv)
 	    querier_timeout_sec_string = "None";
 	}
 	
-	cli_print(c_format("%-16s%-9s%-16s%8s%8d%8d\n",
+	cli_print(c_format("%-16s%-9s%-16s%8s%8d%8u\n",
 			   mld6igmp_vif->name().c_str(),
 			   mld6igmp_vif->state_string(),
 			   cstring(mld6igmp_vif->querier_addr()),
 			   querier_timeout_sec_string.c_str(),
 			   mld6igmp_vif->proto_version(),
-			   mld6igmp_vif->members().size()));
+			   (uint32_t)mld6igmp_vif->members().size()));
     }
     
     return (XORP_OK);

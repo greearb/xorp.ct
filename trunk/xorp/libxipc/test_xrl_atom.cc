@@ -214,7 +214,7 @@ test()
 	case xrlatom_binary:
 	    {
 		for (size_t sz = 1; sz < 10000; sz += 7) {
-		    tracef("Binary data size = %d\n", sz);
+		    tracef("Binary data size = %u\n", (uint32_t)sz);
 		    vector<uint8_t> t(sz);
 		    for (size_t i = 0; i < sz; i++) {
 			t[i] = random();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.4 2002/12/09 18:29:38 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #include <fcntl.h>
 #include <string>
@@ -221,7 +221,7 @@ bool RandomGen::read_fd(FILE *file) {
     gettimeofday(&tv, NULL);
     if (file != NULL) {
 	bytes = fread(tbuf, 1, RAND_POOL_SIZE, file);
-	printf("RNG: read %d bytes\n", bytes);
+	printf("RNG: read %u bytes\n", (uint32_t)bytes);
 	char ixb[4];
 	uint32_t ix;
 	if (bytes > 0) {
@@ -304,8 +304,8 @@ void RandomGen::get_random_bytes(size_t len, uint8_t *buf) {
 	    size_t bytes_read = fread(buf, 1, len, file);
 	    if (bytes_read < len) {
 		fprintf(stderr, 
-			"Failed read on randomness source; read %d words\n",
-			bytes_read);
+			"Failed read on randomness source; read %u words\n",
+			(uint32_t)bytes_read);
 	    }
 	}
 	fclose(file);

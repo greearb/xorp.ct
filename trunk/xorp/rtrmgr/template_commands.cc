@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.2 2002/12/14 23:43:10 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.3 2003/01/10 00:30:25 hodson Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -143,7 +143,7 @@ XrlAction::XrlAction(const list<string> &action, const XRLdb& xrldb)
 		segment = " " + segment.substr(1,segment.size()-1);
 	}
 	string::size_type start = segment.find("->");
-	printf("start=%d\n", start);
+	printf("start=%u\n", (uint32_t)start);
 	if (start != string::npos) {
 	    printf("found return spec\n");
 	    string::size_type origstart = origsegment.find("->");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.48 2002/12/09 18:28:54 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $"
 
 
 //
@@ -182,10 +182,10 @@ CliNode::add_connection(int client_socket)
     //
     {
 	string term_name = "cli_unknown";
-	size_t i = 0;
+	uint32_t i = 0;
 	
 	for (i = 0; i < CLI_MAX_CONNECTIONS; i++) {
-	    term_name = c_format("cli%d", i);
+	    term_name = c_format("cli%u", i);
 	    if (find_cli_by_term_name(term_name.c_str()) == NULL)
 		break;
 	}
@@ -202,7 +202,7 @@ CliNode::add_connection(int client_socket)
     //
     {
 	uint32_t session_id = ~0;	// XXX: ~0 has no particular meaning
-	size_t i = 0;
+	uint32_t i = 0;
 	
 	for (i = 0; i < CLI_MAX_CONNECTIONS; i++) {
 	    session_id = _next_session_id++;
@@ -549,9 +549,10 @@ CliClient::process_telnet_option(int val)
 		    new_window_height += telnet_sb_buffer().data(4);
 		    set_window_width(new_window_width);
 		    set_window_height(new_window_height);
-		    debug_msg("Client window size changed to width = %d "
-			      "height = %d\n",
-			      window_width(), window_height());
+		    debug_msg("Client window size changed to width = %u "
+			      "height = %u\n",
+			      (uint32_t)window_width(),
+			      (uint32_t)window_height());
 		}
 		break;
 	    default:

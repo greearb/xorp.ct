@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.2 2003/01/21 03:34:56 rizzo Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.3 2003/01/21 18:54:27 rizzo Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -96,8 +96,8 @@ void Socket::init_sockaddr(struct sockaddr_in *name,
 			       struct in_addr addr,
 			       uint16_t port)
 {
-    debug_msg("addr %s port %d len = %d\n", inet_ntoa(addr), ntohs(port),
-	      sizeof(*name));
+    debug_msg("addr %s port %d len = %u\n", inet_ntoa(addr), ntohs(port),
+	      (uint32_t)sizeof(*name));
 
     memset(name, 0, sizeof(*name));
 #ifdef	HAVE_SIN_LEN
@@ -231,8 +231,8 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 		const size_t buf_bytes,	// desired message size
 		const size_t offset)	// where we got so far (next free byte)
 {
-    debug_msg("async_read_message %d %d %d %s\n", ev, buf_bytes, offset,
-	      get_remote_host());
+    debug_msg("async_read_message %d %u %u %s\n", ev, (uint32_t)buf_bytes,
+	      (uint32_t)offset, get_remote_host());
 
     XLOG_ASSERT(_async_reader);
 
@@ -245,7 +245,7 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 	    size_t fh_length = ntohs(header->length);
 
 	    if (fh_length < MINPACKETSIZE || fh_length > sizeof(_read_buf)) {
-		XLOG_ERROR("Illegal length value %d", fh_length);
+		XLOG_ERROR("Illegal length value %u", (uint32_t)fh_length);
 		if (!_callback->dispatch(BGPPacket::ILLEGAL_MESSAGE_LENGTH,
 					buf, buf_bytes))
 		    return;
@@ -327,7 +327,7 @@ SocketClient::send_message(const uint8_t*	    buf,
 			       const size_t	    cnt,
 			       SendCompleteCallback cb)
 {
-    debug_msg("peer %s bytes = %d\n", get_remote_host(), cnt);
+    debug_msg("peer %s bytes = %u\n", get_remote_host(), (uint32_t)cnt);
 
     if(!is_connected()) {
 #ifdef	DEBUG_LOGGING

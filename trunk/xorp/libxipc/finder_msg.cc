@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_msg.cc,v 1.2 2002/12/19 01:29:08 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_msg.cc,v 1.3 2003/01/17 00:49:11 hodson Exp $"
 
 #include "config.h"
 
@@ -240,8 +240,9 @@ FinderParser::peek_header_bytes(const string& header)
     if (pos == string::npos)
 	return -1;
     if (pos < smallest_msg.size())
-	xorp_throw(BadFinderMessage, c_format("Header is too small (%d < %d)",
-					      pos, smallest_msg.size()));
+	xorp_throw(BadFinderMessage, c_format("Header is too small (%u < %u)",
+					      (uint32_t)pos,
+					      (uint32_t)smallest_msg.size()));
     return (ssize_t)pos + 1;
 }
 

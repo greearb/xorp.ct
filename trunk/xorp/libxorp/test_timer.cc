@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.5 2002/12/09 18:29:14 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -75,7 +75,7 @@ test_many()
 void
 print_tv(FILE * s, timeval a)
 {
-    fprintf(s, "%ld.%06ld", a.tv_sec, a.tv_usec);
+    fprintf(s, "%lu.%06lu", (unsigned long)a.tv_sec, (unsigned long)a.tv_usec);
     fflush(s);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.2 2003/01/10 00:30:25 hodson Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -29,8 +29,8 @@ XorpBatch::XorpBatch(XorpClient *xclient, uint tid) {
 
 int
 XorpBatch::start(CommitCallback ending_cb) {
-    debug_msg("Transaction Start: %d Xrls in this transaction\n",
-	   _batch_items.size());
+    debug_msg("Transaction Start: %u Xrls in this transaction\n",
+	   (uint32_t)_batch_items.size());
     _list_complete_callback = ending_cb;
     if (_batch_items.empty()) {
 	_xclient->remove_transaction(_tid);

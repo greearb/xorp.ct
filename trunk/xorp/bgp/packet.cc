@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet.cc,v 1.5 2003/01/22 02:46:34 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet.cc,v 1.6 2003/01/24 19:50:10 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -32,7 +32,7 @@ BGPPacket::flatten(struct iovec *iov, const int cnt, size_t& len) const
 {
     len = 0;
     for (int i = 0; i < cnt; i++) {
-	debug_msg("length = %d\n",  (iov + i)->iov_len);
+	debug_msg("length = %u\n",  (uint32_t)(iov + i)->iov_len);
 	len += (iov + i)->iov_len;
     }
 

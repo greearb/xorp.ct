@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.3 2003/01/21 18:54:28 rizzo Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -346,7 +346,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 bool
 TestPeer::send(const vector<uint8_t>& data, string& error_string)
 {
-    debug_msg("len: %d\n", data.size());
+    debug_msg("len: %u\n", (uint32_t)data.size());
     if(UNCONNECTED == _s) {
 	XLOG_WARNING("Not connected");
 	error_string = "Not connected";
@@ -605,7 +605,8 @@ TestPeer::receive(int fd, SelectorMask m)
 void
 TestPeer::datain(status st, uint8_t *ptr, size_t len, string error)
 {
-    debug_msg("status = %d len = %d error = %s\n", st, len, error.c_str());
+    debug_msg("status = %d len = %u error = %s\n", st, (uint32_t)len,
+	      error.c_str());
 
     if(_verbose) {
 	switch(st) {
@@ -669,7 +670,7 @@ TestPeer::sendit()
 
     XrlDatainV0p1Client datain(&_xrlrouter);
     
-    debug_msg("%d\n", q.v.size());
+    debug_msg("%u\n", (uint32_t)q.v.size());
     XLOG_ASSERT(q.len == q.v.size());
 
     switch(q.len) {

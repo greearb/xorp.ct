@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.82 2002/12/09 18:29:17 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -2167,8 +2167,19 @@ UnixComm::get_sg_count(const IPvX& source, const IPvX& group,
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	struct sioc_sg_req6 sgreq;
+
+#ifndef SIOCGETSGCNT_IN6
+	//
+	// XXX: Some OS such as MacOS X 10.2.3 don't have SIOCGETSGCNT_IN6
+	// TODO: for now, allow the code to compile, but abort at run time
+	//
+	XLOG_FATAL("The OS doesn't have SIOCGETSGCNT_IN6. Aborting...");
+	return (XORP_ERROR);
 	
+#else // SIOCGETSGCNT_IN6
+	
+	struct sioc_sg_req6 sgreq;
+
 	memset(&sgreq, 0, sizeof(sgreq));
 	source.copy_out(sgreq.src);
 	group.copy_out(sgreq.grp);
@@ -2189,6 +2200,9 @@ UnixComm::get_sg_count(const IPvX& source, const IPvX& group,
 	sg_count.set_bytecnt(sgreq.bytecnt);
 	sg_count.set_wrong_if(sgreq.wrong_if);
 	break;
+
+#endif // SIOCGETSGCNT_IN6
+
     }
 #endif // HAVE_IPV6
     default:
@@ -2250,6 +2264,17 @@ UnixComm::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
+	
+#ifndef SIOCGETMIFCNT_IN6
+	//
+	// XXX: Some OS such as MacOS X 10.2.3 don't have SIOCGETMIFCNT_IN6
+	// TODO: for now, allow the code to compile, but abort at run time
+	//
+	XLOG_FATAL("The OS doesn't have SIOCGETMIFCNT_IN6. Aborting...");
+	return (XORP_ERROR);
+	
+#else // SIOCGETMIFCNT_IN6
+
 	struct sioc_mif_req6 mreq;
 	
 	memset(&mreq, 0, sizeof(mreq));
@@ -2273,6 +2298,9 @@ UnixComm::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 	vif_count.set_ibytes(mreq.ibytes);
 	vif_count.set_obytes(mreq.obytes);
 	break;
+	
+#endif // SIOCGETMIFCNT_IN6
+	
     }
 #endif // HAVE_IPV6
     default:
@@ -2318,6 +2346,17 @@ UnixComm::is_multicast_capable(uint16_t vif_index) const
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
+	
+#ifdef HOST_OS_MACOSX
+	//
+	// XXX: Some OS such as MacOS X 10.2.3 don't have struct in6_ifreq
+	// TODO: for now, allow the code to compile, but abort at run time
+	//
+	XLOG_FATAL("MacOS X doesn't have struct in6_ifreq. Aborting...");
+	return (XORP_ERROR);
+	
+#else // ! HOST_OS_MACOSX
+	
 	struct in6_ifreq ifreq6;
 	
 	strncpy(ifreq6.ifr_name, mfea_vif->name().c_str(), IFNAMSIZ);
@@ -2329,6 +2368,9 @@ UnixComm::is_multicast_capable(uint16_t vif_index) const
 	}
 	flags = ifreq6.ifr_ifru.ifru_flags;
 	break;
+	
+#endif // ! HOST_OS_MACOSX
+	
     }	
 #endif // HAVE_IPV6
     default:
@@ -2597,8 +2639,8 @@ UnixComm::proto_socket_read(void)
 	igmpmsg = (struct igmpmsg *)_rcvbuf0;
 	if (nbytes < (int)sizeof(*igmpmsg)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
-			 "kernel signal packet size %d is smaller than minimum size %d",
-			 nbytes, sizeof(*igmpmsg));
+			 "kernel signal packet size %d is smaller than minimum size %u",
+			 nbytes, (uint32_t)sizeof(*igmpmsg));
 	    return (XORP_ERROR);
 	}
 	if (igmpmsg->im_mbz == 0) {
@@ -2619,9 +2661,9 @@ UnixComm::proto_socket_read(void)
 	if ((nbytes < (int)sizeof(*mrt6msg))
 	    && (nbytes < (int)sizeof(struct mld6_hdr))) {
 	    XLOG_WARNING("proto_socket_read() failed: "
-			 "kernel signal packet size %d is smaller than minimum size %d",
+			 "kernel signal packet size %d is smaller than minimum size %u",
 			 nbytes,
-			 min(sizeof(*mrt6msg), sizeof(struct mld6_hdr)));
+			 min((uint32_t)sizeof(*mrt6msg), (uint32_t)sizeof(struct mld6_hdr)));
 	    return (XORP_ERROR);
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
@@ -2666,8 +2708,8 @@ UnixComm::proto_socket_read(void)
 	ip = (struct ip *)_rcvbuf0;
 	if (nbytes < (int)sizeof(*ip)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
-			 "packet size %d is smaller than minimum size %d",
-			 nbytes, sizeof(*ip));
+			 "packet size %d is smaller than minimum size %u",
+			 nbytes, (uint32_t)sizeof(*ip));
 	    return (XORP_ERROR);
 	}
 	// TODO: check for Router Alert option
@@ -2763,9 +2805,10 @@ UnixComm::proto_socket_read(void)
 	if (_rcvmh.msg_controllen < sizeof(struct cmsghdr)) {
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "RX packet from %s has too short msg_controllen "
-		       "(%d instead of %d)",
+		       "(%d instead of %u)",
 		       cstring(src),
-		       _rcvmh.msg_controllen, sizeof(struct cmsghdr));
+		       _rcvmh.msg_controllen,
+		       (uint32_t)sizeof(struct cmsghdr));
 	    return (XORP_ERROR);
 	}
 	
@@ -3032,12 +3075,12 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	if (datalen > sizeof(_sndbuf1)) {
 	    XLOG_ERROR("proto_socket_write() failed: "
 		       "cannot send packet on vif %s from %s to %s: "
-		       "too much data: %d octets (max = %d)",
+		       "too much data: %u octets (max = %u)",
 		       mfea_vif->name().c_str(),
 		       src.str().c_str(),
 		       dst.str().c_str(),
-		       datalen,
-		       sizeof(_sndbuf1));
+		       (uint32_t)datalen,
+		       (uint32_t)sizeof(_sndbuf1));
 	    return (XORP_ERROR);
 	}
     	memcpy(_sndbuf1, databuf, datalen); // XXX: goes to _sndiov[1].iov_base
@@ -3184,12 +3227,12 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	if (datalen > sizeof(_sndbuf0)) {
 	    XLOG_ERROR("proto_socket_write() failed: "
 		       "error sending packet on vif %s from %s to %s: "
-		       "too much data: %d octets (max = %d)",
+		       "too much data: %u octets (max = %u)",
 		       mfea_vif->name().c_str(),
 		       src.str().c_str(),
 		       dst.str().c_str(),
-		       datalen,
-		       sizeof(_sndbuf0));
+		       (uint32_t)datalen,
+		       (uint32_t)sizeof(_sndbuf0));
 	    return (XORP_ERROR);
 	}
 	memcpy(_sndbuf0, databuf, datalen); // XXX: goes to _sndiov[0].iov_base

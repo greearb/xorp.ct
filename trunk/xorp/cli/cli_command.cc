@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.47 2002/12/09 18:28:53 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
 
 
 //
@@ -67,7 +67,7 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     
     // Set the command-completion help string
     // TODO: parameterize the hard-coded number
-    _help_completion = c_format(" %*s%s\r\n", 15 - _name.size(), " ",
+    _help_completion = c_format(" %*s%s\r\n", (int)(15 - _name.size()), " ",
 				_help.c_str());
     
     set_cli_completion_func(cli_attempt_command_completion_byname);	// XXX: default

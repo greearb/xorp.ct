@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.2 2002/12/14 23:42:50 hodson Exp $"
 
 
 //
@@ -305,15 +305,15 @@ cli_print(const char * ,		// server_name
     // Test to print a number of lines at once
     //
     string my_string = "";
-    for (size_t i = 1000; i < 1100; i++)
-	my_string += c_format("This is my line number %d\n", i);
+    for (uint32_t i = 1000; i < 1100; i++)
+	my_string += c_format("This is my line number %u\n", i);
     cli_client->cli_print(my_string);
     
     //
     // Test to print a number of lines one-by-one
     //
-    for (int i = 0; i < 100; i++)
-	cli_client->cli_print(c_format("This is my line number %d\n", i));
+    for (uint32_t i = 0; i < 100; i++)
+	cli_client->cli_print(c_format("This is my line number %u\n", i));
 
 
     return (XORP_OK);

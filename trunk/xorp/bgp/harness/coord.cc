@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -95,8 +95,8 @@ XrlCoordTarget::datain_0_1_receive(const string&  peer, const bool& status,
 				   const uint32_t& secs,const uint32_t& micro,
 				   const vector<uint8_t>&  data)
 {
-    debug_msg("peer: %s status: %d secs: %d micro: %d data length: %d\n",
-	      peer.c_str(), status, secs, micro, data.size());
+    debug_msg("peer: %s status: %d secs: %d micro: %d data length: %u\n",
+	      peer.c_str(), status, secs, micro, (uint32_t)data.size());
 
     _coord.datain(peer, status, secs, micro, data);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.2 2003/01/16 19:32:51 pavlin Exp $"
 
 
 //
@@ -592,7 +592,7 @@ PimBsr::can_add_bsr_zone_to_list(const list<BsrZone *>& zone_list,
 	    }
 	    // Check that the new RPs are not repeating, and that the total
 	    // number of RPs is not too large.
-	    size_t rp_count_sum = org_bsr_group_prefix->received_rp_count();
+	    uint32_t rp_count_sum = org_bsr_group_prefix->received_rp_count();
 	    for (iter_rp = bsr_group_prefix->rp_list().begin();
 		 iter_rp != bsr_group_prefix->rp_list().end();
 		 ++iter_rp) {
@@ -609,8 +609,8 @@ PimBsr::can_add_bsr_zone_to_list(const list<BsrZone *>& zone_list,
 	    if (rp_count_sum > org_bsr_group_prefix->expected_rp_count()) {
 		error_msg = c_format("inconsistent 'fragment RP count': "
 				     "sum of old and new fragments count "
-				     "for zone %s is too large: %d while "
-				     "the expected count is %d",
+				     "for zone %s is too large: %u while "
+				     "the expected count is %u",
 				     cstring(org_bsr_zone->admin_scope_zone_id()),
 				     rp_count_sum,
 				     org_bsr_group_prefix->expected_rp_count());

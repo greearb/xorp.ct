@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.69 2002/12/09 18:29:28 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -673,9 +673,9 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
     int ret_value = XORP_ERROR;
     
     debug_msg("Received message from %s to %s: "
-	      "ip_ttl = %d ip_tos = %#x router_alert = %d rcvlen = %d\n",
+	      "ip_ttl = %d ip_tos = %#x router_alert = %d rcvlen = %u\n",
 	      cstring(src), cstring(dst),
-	      ip_ttl, ip_tos, router_alert_bool, rcvlen);
+	      ip_ttl, ip_tos, router_alert_bool, (uint32_t)rcvlen);
     
     //
     // Misc. checks

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -106,8 +106,10 @@ void
 Command::datain(const string&  peer, const bool& status, const timeval& tv,
 		const vector<uint8_t>&  data)
 {
-    debug_msg("peer: %s status: %d secs: %ld micro: %ld data length: %d\n",
-	      peer.c_str(), status, tv.tv_sec, tv.tv_usec, data.size());
+    debug_msg("peer: %s status: %d secs: %lu micro: %lu data length: %u\n",
+	      peer.c_str(), status,
+	      (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec,
+	      (uint32_t)data.size());
 
     /*
     ** Are we in the peer table.

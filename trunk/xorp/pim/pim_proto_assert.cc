@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.3 2003/01/13 19:38:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.4 2003/01/13 20:40:23 pavlin Exp $"
 
 
 //
@@ -153,10 +153,10 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
     if (group_masklen != IPvX::addr_bitlen(family())) {
 	XLOG_WARNING("RX %s from %s to %s: "
 		     "invalid group mask length = %d "
-		     "instead of %d",
+		     "instead of %u",
 		     PIMTYPE2ASCII(PIM_ASSERT),
 		     cstring(src), cstring(dst),
-		     group_masklen, IPvX::addr_bitlen(family()));
+		     group_masklen, (uint32_t)IPvX::addr_bitlen(family()));
 	return (XORP_ERROR);
     }
     

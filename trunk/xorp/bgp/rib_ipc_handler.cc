@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.2 2003/01/10 01:55:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.3 2003/01/15 19:56:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -370,7 +370,7 @@ template<>
 void
 XrlQueue<IPv4>::sendit()
 {
-    debug_msg("queue length %d\n", _xrl_queue.size());
+    debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
 
     if(_flying >= FLYING_LIMIT)
 	return;
