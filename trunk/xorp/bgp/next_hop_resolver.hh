@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.5 2002/12/18 23:22:18 atanu Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.6 2003/01/16 23:18:57 pavlin Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -107,7 +107,7 @@ public:
      * @param nexthop Nexthop.
      * @param net The net that is associated with this
      * nexthop. Treated as an opaque id.
-     * @requester Once the registration with the RIB suceeds the
+     * @param requester Once the registration with the RIB suceeds the
      * requester is called back.
      * @return True if the registration succeed.
      */
@@ -120,7 +120,7 @@ public:
      * @param nexthop Nexthop.
      * @param net The net that is associated with this
      * nexthop. Treated as an opaque id.
-     * @requester Original requester, not used.
+     * @param requester Original requester, not used.
      * @return True if the registration succeed.
      */
     virtual void deregister_nexthop(A nexthop, IPNet<A> net,
