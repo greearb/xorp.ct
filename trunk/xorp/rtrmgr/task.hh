@@ -12,18 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.24 2004/05/18 00:05:13 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.25 2004/05/28 18:26:27 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
 
+
 #include <map>
 #include <vector>
-#include "rtrmgr_module.h"
-#include "libxorp/xorp.h"
+
 #include "libxorp/status_codes.h"
+
 #include "libxipc/xrl_router.hh"
+
 #include "unexpanded_xrl.hh"
+
 
 class ConfigTree;
 class ModuleCommand;

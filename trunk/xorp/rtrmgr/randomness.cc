@@ -12,16 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.10 2004/01/13 00:20:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.11 2004/05/22 06:09:07 atanu Exp $"
+
 
 #include <fcntl.h>
+
 #include <sys/time.h>
+
 #include <openssl/md5.h>
 
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
 #include "randomness.hh"
 
 

@@ -12,16 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.14 2004/03/20 17:59:35 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.15 2004/05/28 18:26:25 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
 
+
 #include <list>
 #include <map>
+
+#include "libxipc/xrl_error.hh"
+
 #include "cli/cli_node.hh"
 #include "cli/cli_client.hh"
-#include "libxipc/xrl_error.hh"
 
 
 class CommandTree;

@@ -12,19 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.25 2004/05/18 07:11:08 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.26 2004/05/28 18:26:26 pavlin Exp $"
+
 
 #include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "libxipc/xrl_router.hh"
 
 #include "module_command.hh"
-#include "xrldb.hh"
+#include "rtrmgr_error.hh"
+#include "task.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
-#include "task.hh"
-#include "rtrmgr_error.hh"
+#include "xrldb.hh"
+
 
 static string
 strip_quotes(const string& command, const string& value) throw (ParseError)

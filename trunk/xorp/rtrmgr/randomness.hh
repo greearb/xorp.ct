@@ -12,12 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/randomness.hh,v 1.3 2003/04/22 19:42:18 mjh Exp $
+// $XORP: xorp/rtrmgr/randomness.hh,v 1.4 2003/12/02 09:38:56 pavlin Exp $
 
 #ifndef __RTRMGR_RANDOMNESS_HH__
 #define __RTRMGR_RANDOMNESS_HH__
-
-#include <stdio.h>
 
 class RandomGen {
 public:

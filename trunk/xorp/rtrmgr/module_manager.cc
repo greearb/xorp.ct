@@ -12,17 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.29 2004/05/22 06:09:07 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.30 2004/05/28 18:26:26 pavlin Exp $"
+
+#include <signal.h>
+#include <glob.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <signal.h>
-#include <glob.h>
 #include <sys/param.h>
 #include <sys/wait.h>
+
 #include <map>
 
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"

@@ -12,25 +12,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.26 2004/05/24 01:22:35 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.27 2004/05/28 18:26:28 pavlin Exp $"
+
 
 #include <sys/types.h>
 #include <pwd.h>
 #include <signal.h>
 
+#include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "rtrmgr_module.h"
-#include "libxorp/xlog.h"
-
-#include "template_tree_node.hh"
-#include "template_commands.hh"
-#include "template_tree.hh"
+#include "cli.hh"
 #include "op_commands.hh"
 #include "slave_conf_tree.hh"
-#include "cli.hh"
-#include "xorpsh_main.hh"
+#include "template_commands.hh"
+#include "template_tree.hh"
+#include "template_tree_node.hh"
 #include "util.hh"
+#include "xorpsh_main.hh"
 
 
 //

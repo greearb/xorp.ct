@@ -12,11 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.47 2004/05/28 05:00:37 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.48 2004/05/28 18:26:26 pavlin Exp $"
 
 #include <signal.h>
 
 #include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
@@ -32,18 +34,19 @@
 #include "libxipc/permits.hh"
 #include "libxipc/xrl_std_router.hh"
 
-#include "template_tree_node.hh"
-#include "template_commands.hh"
-#include "template_tree.hh"
+#include "main_rtrmgr.hh"
 #include "master_conf_tree.hh"
 #include "module_manager.hh"
-#include "task.hh"
-#include "userdb.hh"
-#include "xrl_rtrmgr_interface.hh"
 #include "randomness.hh"
 #include "rtrmgr_error.hh"
+#include "task.hh"
+#include "template_commands.hh"
+#include "template_tree.hh"
+#include "template_tree_node.hh"
+#include "userdb.hh"
 #include "util.hh"
-#include "main_rtrmgr.hh"
+#include "xrl_rtrmgr_interface.hh"
+
 
 //
 // Default values

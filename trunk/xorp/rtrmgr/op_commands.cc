@@ -12,20 +12,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.17 2004/05/26 12:41:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.18 2004/05/26 15:04:09 hodson Exp $"
+
 
 #include <glob.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
-#include "template_tree.hh"
-#include "slave_conf_tree.hh"
-#include "op_commands.hh"
-#include "y.opcmd_tab.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "cli.hh"
-#include "util.hh"
+#include "op_commands.hh"
 #include "popen.hh"
+#include "slave_conf_tree.hh"
+#include "template_tree.hh"
+#include "util.hh"
+#include "y.opcmd_tab.h"
+
 
 extern int init_opcmd_parser(const char *filename, OpCommandList *o);
 extern void parse_opcmd() throw (ParseError);

@@ -12,16 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.35 2004/05/18 00:05:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.36 2004/05/28 18:26:27 pavlin Exp $"
+
 
 #include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-#include "task.hh"
+#include "libxorp/debug.h"
+
 #include "conf_tree.hh"
-#include "module_manager.hh"
 #include "module_command.hh"
-#include "xorp_client.hh"
+#include "module_manager.hh"
+#include "task.hh"
 #include "unexpanded_xrl.hh"
+#include "xorp_client.hh"
+
 
 #define MAX_STATUS_RETRIES 30
 

@@ -12,14 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.10 2004/03/09 05:51:52 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.11 2004/05/28 18:26:29 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 
+
+#include "libxorp/timer.hh"
+
 #include "xrl/targets/rtrmgr_base.hh"
 #include "xrl/interfaces/rtrmgr_client_xif.hh"
-#include "libxorp/timer.hh"
+
 
 #define CNAMELEN 40
 

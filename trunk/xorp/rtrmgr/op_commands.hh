@@ -12,17 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.7 2004/01/14 03:00:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.11 2004/05/26 04:24:32 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
 
+
 #include <list>
 #include <set>
-#include "libxorp/xorp.h"
+
 #include "libxorp/asyncio.hh"
-#include "rtrmgr_error.hh"
+
 #include "cli.hh"
+#include "rtrmgr_error.hh"
 
 
 class ConfigTree;

@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/userdb.hh,v 1.3 2003/12/02 09:38:59 pavlin Exp $
+// $XORP: xorp/rtrmgr/userdb.hh,v 1.4 2004/05/28 18:26:28 pavlin Exp $
 
 #ifndef __RTRMGR_USERDB_HH__
 #define __RTRMGR_USERDB_HH__
 
+
 #include <map>
 #include <set>
-#include <string>
 
 
 class User {

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/command_tree.hh,v 1.6 2004/02/27 12:12:48 mjh Exp $
+// $XORP: xorp/rtrmgr/command_tree.hh,v 1.7 2004/05/28 18:26:25 pavlin Exp $
 
 #ifndef __RTRMGR_COMMAND_TREE_HH__
 #define __RTRMGR_COMMAND_TREE_HH__
 
-#include "libxorp/xorp.h"
+
 #include <list>
+
 
 class ConfigTreeNode;
 class TemplateTreeNode;

@@ -12,24 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.12 2004/03/11 22:31:45 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.13 2004/05/28 18:26:27 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
+
 
 #include <map>
 #include <list>
 #include <set>
 
-#include "libxorp/xorp.h"
-#include "libxorp/ipvxnet.hh"
-#include "libxorp/mac.hh"
-
 #include "module_manager.hh"
-#include "xorp_client.hh"
-#include "xrldb.hh"
 #include "path_segment.hh"
 #include "rtrmgr_error.hh"
+#include "xorp_client.hh"
+#include "xrldb.hh"
+
 
 class ModuleCommand;
 class TemplateTreeNode;

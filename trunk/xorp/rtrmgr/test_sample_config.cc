@@ -12,7 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.13 2004/01/13 01:18:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.14 2004/05/28 18:26:28 pavlin Exp $"
+
 
 #include <signal.h>
 
@@ -26,13 +27,14 @@
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
-#include "template_tree_node.hh"
-#include "template_commands.hh"
-#include "template_tree.hh"
 #include "master_conf_tree.hh"
 #include "module_manager.hh"
-#include "task.hh"
 #include "rtrmgr_error.hh"
+#include "task.hh"
+#include "template_commands.hh"
+#include "template_tree.hh"
+#include "template_tree_node.hh"
+
 
 //
 // Defaults

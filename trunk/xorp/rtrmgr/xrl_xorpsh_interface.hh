@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.6 2003/12/02 09:39:01 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.7 2004/05/28 18:26:29 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
+
 
 #include "xrl/targets/xorpsh_base.hh"
 

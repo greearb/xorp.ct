@@ -12,14 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.6 2004/02/27 12:12:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.7 2004/05/28 18:26:25 pavlin Exp $"
+
 
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-#include "template_tree_node.hh"
+
 #include "command_tree.hh"
+#include "template_tree_node.hh"
+
 
 CommandTreeNode::CommandTreeNode(const string& name,
 				 const ConfigTreeNode* ctn,

@@ -12,16 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.13 2004/01/14 21:36:08 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.14 2004/01/15 08:51:59 pavlin Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
 #define __RTRMGR_XORP_CLIENT_HH__
 
-#include <list>
-#include <string>
-#include "libxorp/xorp.h"
-#include "libxorp/debug.h"
+
 #include "libxipc/xrl_router.hh"
 
 

@@ -12,19 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.19 2004/05/11 16:50:57 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.20 2004/05/28 18:26:26 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
 
+
 #include <vector>
 #include <map>
-#include "libxorp/xorp.h"
-#include "libxorp/eventloop.hh"
+
+#include "libxorp/timer.hh"
 #include "libxorp/callback.hh"
+
 
 #define NO_SETUID_ON_EXEC 0
 
+class EventLoop;
 class ModuleCommand;
 class ModuleManager;
 class XorpClient;
@@ -132,6 +135,7 @@ public:
      */
     int shell_execute(uid_t userid, const vector<string>& argv, 
 		      ModuleManager::CallBack cb, bool do_exec);
+
 private:
     Module* find_module(const string& module_name);
     const Module* const_find_module(const string& module_name) const;

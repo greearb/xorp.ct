@@ -12,19 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.17 2004/03/20 17:59:35 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.18 2004/05/28 18:26:26 pavlin Exp $"
+
 
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include "cli.hh"
+#include "slave_conf_tree.hh"
+#include "slave_conf_tree_node.hh"
 #include "template_tree_node.hh"
 #include "template_commands.hh"
 #include "template_tree.hh"
-#include "slave_conf_tree.hh"
-#include "slave_conf_tree_node.hh"
-#include "cli.hh"
 #include "util.hh"
+
 
 extern int booterror(const char *s) throw (ParseError);
 

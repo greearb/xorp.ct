@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.16 2004/05/18 07:11:09 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.17 2004/05/28 18:26:26 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
+
 
 #include "template_commands.hh"
 

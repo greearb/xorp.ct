@@ -12,7 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.7 2004/01/15 08:51:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.8 2004/05/28 18:26:29 pavlin Exp $"
+
 
 #include <glob.h>
 

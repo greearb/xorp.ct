@@ -23,9 +23,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.3 2003/12/02 09:38:55 pavlin Exp $"
-
-#include "rtrmgr_module.h"
+#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.4 2004/01/13 00:18:02 pavlin Exp $"
 
 #include <sys/param.h>
 #include <sys/wait.h>
@@ -38,10 +36,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <paths.h>
-#include <string>
 
+#include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "popen.hh"
+
 
 extern char **environ;
 

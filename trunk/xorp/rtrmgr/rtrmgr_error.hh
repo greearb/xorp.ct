@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/parse_error.hh,v 1.3 2003/09/30 18:24:03 hodson Exp $
+// $XORP: xorp/rtrmgr/rtrmgr_error.hh,v 1.1 2004/01/13 00:17:09 pavlin Exp $
 
 #ifndef __RTRMGR_RTRMGR_ERROR_HH__
 #define __RTRMGR_RTRMGR_ERROR_HH__
+
 
 #include "libxorp/exceptions.hh"
 

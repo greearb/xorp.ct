@@ -12,17 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.19 2004/05/10 14:41:10 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.20 2004/05/28 18:26:29 pavlin Exp $"
+
 
 #include <sys/stat.h>
+
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
-#include "userdb.hh"
-#include "master_conf_tree.hh"
+
 #include "main_rtrmgr.hh"
-#include "xrl_rtrmgr_interface.hh"
+#include "master_conf_tree.hh"
 #include "randomness.hh"
+#include "userdb.hh"
+#include "xrl_rtrmgr_interface.hh"
+
 
 XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
 				       EventLoop& eventloop,

@@ -12,19 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.41 2004/05/26 19:18:22 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.42 2004/05/28 18:26:27 pavlin Exp $"
+
 
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "libxipc/xrl_router.hh"
+
 #include "conf_tree_node.hh"
+#include "task.hh"
 #include "template_commands.hh"
-#include "xrldb.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
-#include "task.hh"
 #include "util.hh"
+#include "xrldb.hh"
+
 
 Action::Action(TemplateTreeNode& template_tree_node,
 	       const list<string>& action)

@@ -12,17 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.11 2004/01/15 08:51:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.13 2004/05/28 18:26:29 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
 
 #include "libxipc/xrl_router.hh"
 
-#include "xrl_xorpsh_interface.hh"
 #include "xorpsh_main.hh"
+#include "xrl_xorpsh_interface.hh"
+
 
 XrlXorpshInterface::XrlXorpshInterface(XrlRouter* r, XorpShell& xorpsh)
     : XrlXorpshTargetBase(r),

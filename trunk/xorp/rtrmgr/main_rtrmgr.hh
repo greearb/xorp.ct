@@ -12,10 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.6 2004/05/10 14:41:09 mjh Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.7 2004/05/28 18:26:26 pavlin Exp $
 
 #ifndef __RTRMGR_MAIN_RTRMGR_HH__
 #define __RTRMGR_MAIN_RTRMGR_HH__
+
+
+#include <list>
+
+#include "libxorp/ipv4.hh"
+
+
+class MasterConfigTree;
 
 class Rtrmgr {
 public:

@@ -12,18 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.41 2004/05/26 19:18:22 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.42 2004/05/28 18:26:25 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
-#include "libxorp/xlog.h"
 
-#include "conf_tree_node.hh"
-#include "template_tree_node.hh"
-#include "template_commands.hh"
-#include "module_command.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "command_tree.hh"
+#include "conf_tree_node.hh"
+#include "module_command.hh"
+#include "template_commands.hh"
+#include "template_tree_node.hh"
 #include "util.hh"
+
 
 extern int booterror(const char *s) throw (ParseError);
 
