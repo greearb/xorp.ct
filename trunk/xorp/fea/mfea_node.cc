@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.48 2005/03/15 00:33:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.49 2005/03/19 00:31:43 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -139,6 +139,9 @@ MfeaNode::~MfeaNode()
 int
 MfeaNode::start()
 {
+    if (! is_enabled())
+	return (XORP_OK);
+
     //
     // Test the service status
     //
@@ -208,13 +211,8 @@ MfeaNode::final_start()
  * @: 
  * 
  * Gracefully stop the MFEA.
- * XXX: This function, unlike start(), will stop the MFEA
- * operation on all interfaces.
  * XXX: After the cleanup is completed,
  * MfeaNode::final_stop() is called to complete the job.
- * XXX: If this method is called one-after-another, the second one
- * will force calling immediately MfeaNode::final_stop() to quickly
- * finish the job. TODO: is this a desired semantic?
  * XXX: This function, unlike start(), will stop the MFEA
  * operation on all interfaces.
  * 
@@ -239,6 +237,9 @@ MfeaNode::stop()
 	return (XORP_ERROR);
     }
 
+    if (ProtoNode<MfeaVif>::pending_stop() < 0)
+	return (XORP_ERROR);
+
     //
     // Perform misc. MFEA-specific stop operations
     //
@@ -254,9 +255,6 @@ MfeaNode::stop()
 
     // Stop the MfeaMrouter
     _mfea_mrouter.stop();
-
-    if (ProtoNode<MfeaVif>::pending_stop() < 0)
-	return (XORP_ERROR);
 
     //
     // Set the node status
@@ -797,8 +795,6 @@ MfeaNode::enable_vif(const string& vif_name, string& error_msg)
     
     mfea_vif->enable();
     
-    XLOG_INFO("Enabled vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -823,8 +819,6 @@ MfeaNode::disable_vif(const string& vif_name, string& error_msg)
     }
     
     mfea_vif->disable();
-    
-    XLOG_INFO("Disabled vif: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
@@ -856,8 +850,6 @@ MfeaNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Started vif: %s", vif_name.c_str());
-
     // XXX: add PIM Register vif (if needed)
     add_pim_register_vif();
 
@@ -891,8 +883,6 @@ MfeaNode::stop_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Stopped vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -902,31 +892,24 @@ MfeaNode::stop_vif(const string& vif_name, string& error_msg)
  * 
  * Start MFEA on all enabled interfaces.
  * 
- * Return value: The number of virtual interfaces MFEA was started on,
- * or %XORP_ERROR if error occured.
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 MfeaNode::start_all_vifs()
 {
-    int n = 0;
     vector<MfeaVif *>::iterator iter;
     string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	MfeaVif *mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	if (! mfea_vif->is_enabled())
-	    continue;
-	if (mfea_vif->start(error_msg) != XORP_OK) {
-	    XLOG_ERROR("Cannot start vif %s: %s",
-		       mfea_vif->name().c_str(), error_msg.c_str());
-	} else {
-	    n++;
-	}
+	if (start_vif(mfea_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (n);
+    return (ret_value);
 }
 
 /**
@@ -935,29 +918,24 @@ MfeaNode::start_all_vifs()
  * 
  * Stop MFEA on all interfaces it was running on.
  * 
- * Return value: The number of virtual interfaces MFEA was stopped on,
- * or %XORP_ERROR if error occured.
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 MfeaNode::stop_all_vifs()
 {
-    int n = 0;
     vector<MfeaVif *>::iterator iter;
     string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	MfeaVif *mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	if (mfea_vif->stop(error_msg) != XORP_OK) {
-	    XLOG_ERROR("Cannot stop vif %s: %s",
-		       mfea_vif->name().c_str(), error_msg.c_str());
-	} else {
-	    n++;
-	}
+	if (stop_vif(mfea_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (n);
+    return (ret_value);
 }
 
 /**
@@ -972,15 +950,18 @@ int
 MfeaNode::enable_all_vifs()
 {
     vector<MfeaVif *>::iterator iter;
+    string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	MfeaVif *mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	mfea_vif->enable();
+	if (enable_vif(mfea_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return (ret_value);
 }
 
 /**
@@ -995,17 +976,18 @@ int
 MfeaNode::disable_all_vifs()
 {
     vector<MfeaVif *>::iterator iter;
-
-    stop_all_vifs();
+    string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	MfeaVif *mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	mfea_vif->disable();
+	if (disable_vif(mfea_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return (ret_value);
 }
 
 /**
@@ -1173,8 +1155,7 @@ MfeaNode::delete_protocol(const string& module_instance_name,
 	MfeaVif *mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	if (! mfea_vif->is_enabled())
-	    continue;
+	// TODO: XXX: PAVPAVPAV: shall we ignore the disabled vifs??
 	mfea_vif->stop_protocol(module_instance_name, module_id);
     }
     

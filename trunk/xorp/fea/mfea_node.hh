@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.26 2005/02/24 02:47:40 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.27 2005/03/15 00:33:23 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -409,16 +409,14 @@ public:
     /**
      * Start MFEA on all enabled interfaces.
      * 
-     * @return the number of virtual interfaces MFEA was started on,
-     * or XORP_ERROR if error occured.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_all_vifs();
     
     /**
      * Stop MFEA on all interfaces it was running on.
      * 
-     * @return the number of virtual interfaces MFEA was stopped on,
-     * or XORP_ERROR if error occured.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop_all_vifs();
     
