@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.28 2003/12/13 00:16:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.29 2003/12/13 00:43:34 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -486,6 +486,7 @@ TaskXrlItem::execute(string& errmsg)
 	errmsg = "Failed to expand XRL " + _unexpanded_xrl.str();
 	return false;
     }
+    printf("  XRL: >%s<\n", xrl->str().c_str());
 
     string xrl_return_spec = _unexpanded_xrl.return_spec();
 
