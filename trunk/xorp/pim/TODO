@@ -1,11 +1,18 @@
 #
-# $XORP: xorp/pim/TODO,v 1.56 2003/07/16 03:19:41 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.57 2003/08/14 15:20:36 pavlin Exp $
 #
 
 * BOOTSTRAP SPEC + IMPL: If the BSR goes down, and its state expires
   in the rest of the routers, clarify whether they remove the RP-Set
   received from that BSR. Maybe they keep it until all Cand-RP timers
   expire? Or delete all BSR related info on BSR timer expiry?
+  Incorporate the following text from the PIM mailing list:
+    "It was proposed that "When the BSR times out or dies, and
+     no alternative BSR is elected, routers continue to use their
+     cached RP set, even though it has timed out."
+     The next thing that might happen is that a new BSR comes up and
+     participates in the election with an empty BSM. In that case routers
+     continue to use the cached RP set.
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
   CouldAssert(S,G,I) and CouldAssert(*,G,I) are true,
