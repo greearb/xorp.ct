@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.52 2004/08/19 02:00:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.53 2004/09/17 14:09:02 abittau Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -1053,15 +1053,15 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	    	// XXX: re-escape quotes.
 	    	string escaped("");
 
-		for(string::const_iterator i = _value.begin();
+		for (string::const_iterator i = _value.begin();
 		    i != _value.end(); ++i) {
 		    
 		    const char x = *i;
-		    if(x == '"')
+		    if (x == '"')
 			escaped += "\\\"";
 		    else
 			escaped += x;
-		}    
+		}
 		
 		value = "\"" + escaped + "\"";
 	    } else {
