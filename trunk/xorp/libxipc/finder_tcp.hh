@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.2 2003/01/24 01:45:39 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.3 2003/01/24 02:03:14 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -143,15 +143,15 @@ public:
     virtual bool connection_event(int fd) = 0;
 
     /**
-     * Add host to permitted hosts list.
+     * Add addr to list of addresses allowed to connect with finder.
      * @return true if host is not on list already.
      */
-    bool add_permitted_host(const IPv4& host);
+    bool add_permitted_addr(const IPv4& addr);
 
     /**
-     * Add list of permitted hosts.
+     * Add list of permitted addresses.
      */
-    bool add_permitted_hosts(const AddrList& hosts);
+    bool add_permitted_addrs(const AddrList& addrs);
     
     /**
      * Add net to permitted nets list.

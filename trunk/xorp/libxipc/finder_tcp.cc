@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.3 2003/01/24 01:45:39 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.4 2003/01/24 02:03:14 hodson Exp $"
 
 #include <functional>
 
@@ -275,20 +275,20 @@ FinderTcpListenerBase::~FinderTcpListenerBase()
 }
 
 bool
-FinderTcpListenerBase::add_permitted_host(const IPv4& host)
+FinderTcpListenerBase::add_permitted_addr(const IPv4& addr)
 {
-    if (_ok_addrs.end() == find(_ok_addrs.begin(), _ok_addrs.end(), host)) {
-	_ok_addrs.push_back(host);
+    if (_ok_addrs.end() == find(_ok_addrs.begin(), _ok_addrs.end(), addr)) {
+	_ok_addrs.push_back(addr);
 	return true;
     }
     return false;
 }
 
 bool
-FinderTcpListenerBase::add_permitted_hosts(const AddrList& hosts)
+FinderTcpListenerBase::add_permitted_addrs(const AddrList& addrs)
 {
-    for (AddrList::const_iterator i = hosts.begin(); i != hosts.end(); ++i)
-	add_permitted_host(*i);
+    for (AddrList::const_iterator i = addrs.begin(); i != addrs.end(); ++i)
+	add_permitted_addr(*i);
     return true;
 }
 
