@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.8 2003/10/30 04:37:45 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.9 2003/10/30 04:55:40 atanu Exp $
 #
 
 #
@@ -373,6 +373,8 @@ test3()
 	nlri 10.10.10.10/24 \
 	nlri 20.20.20.20/24
 	
+    # Wait for the route changes to propogate.
+    sleep 2
     result=$(lookup_route4 10.10.10.10 true false)
     echo $result
 
@@ -545,6 +547,8 @@ test5()
 	coord $2
 	coord $3
 
+	# Wait for the route changes to propogate.
+        sleep 2
 	result=$(lookup_route4 10.10.10.10 true false)
 	echo $result
 
