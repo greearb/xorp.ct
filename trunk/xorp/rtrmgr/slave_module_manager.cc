@@ -12,79 +12,50 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.17 2004/06/10 22:41:53 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.18 2004/12/06 00:31:05 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
 #include "slave_module_manager.hh"
 
-#if 0
-//
-// XXX: this file merely provides dummy definitions for the module manager
-// for use in xorpsh, as xorpsh never actually starts any modules, but
-// the template commands need to know about a module manager.
-// This is an ugly hack.
-//
-
-
-ModuleManager::ModuleManager(EventLoop& eventloop) 
+SlaveModuleManager::SlaveModuleManager(EventLoop& eventloop) 
+    : GenericModuleManager(eventloop, false)
 {
-    UNUSED(eventloop);
 }
 
-bool ModuleManager::new_module(const string& module_name, const string& path) 
+GenericModule*
+SlaveModuleManager::new_module(const string& module_name)
 {
-    UNUSED(module_name);
-    UNUSED(path);
+    debug_msg("SlaveModuleManager::new_module %s\n", module_name.c_str());
+    GenericModule* module = new GenericModule(module_name);
+    store_new_module(module);
+    return module;
+}
+
+bool
+SlaveModuleManager::module_is_active(const string& module_name) const
+{
+    const GenericModule *module = const_find_module(module_name);
+    if (module == NULL)
+	return false;
+    debug_msg("module_is_active: %s %d\n", 
+	      module_name.c_str(), module->status());
+    switch (module->status()) {
+    case GenericModule::MODULE_STARTUP:
+    case GenericModule::MODULE_INITIALIZING:
+    case GenericModule::MODULE_RUNNING:
+	return true;
+    case GenericModule::MODULE_FAILED:
+    case GenericModule::MODULE_STALLED:
+    case GenericModule::MODULE_SHUTTING_DOWN:
+    case GenericModule::MODULE_NOT_STARTED:
+    case GenericModule::NO_SUCH_MODULE:
+	return false;
+    }
+    //keep stupid compiler happy
     return true;
 }
-
-int 
-ModuleManager::start_module(const string& module_name, bool do_exec, 
-			  XorpCallback1<void, bool>::RefPtr cb)
-{
-    UNUSED(module_name);
-    UNUSED(do_exec);
-    UNUSED(cb);
-    return XORP_OK;
-}
-
-int 
-ModuleManager::kill_module(const string& module_name,
-			   XorpCallback0<void>::RefPtr cb)
-{
-    UNUSED(module_name);
-    UNUSED(cb);
-    return XORP_OK;
-}
-
-bool 
-ModuleManager::module_exists(const string& module_name) const
-{
-    UNUSED(module_name);
-    return false;
-}
-
-bool 
-ModuleManager::module_has_started(const string& module_name) const
-{
-    UNUSED(module_name);
-    return false;
-}
-
-int 
-ModuleManager::shell_execute(uid_t userid, const vector<string>& argv, 
-			     ModuleManager::CallBack cb, bool do_exec)
-{
-    UNUSED(userid);
-    UNUSED(argv);
-    UNUSED(cb);
-    UNUSED(do_exec);
-    return XORP_ERROR;
-}
-#endif

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.2 2004/12/11 13:36:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.3 2004/12/11 21:29:56 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -67,23 +67,6 @@ GenericModuleManager::GenericModuleManager(EventLoop& eventloop, bool verbose)
 {
 }
 
-#if 0
-bool GenericModuleManager::new_module(const string& module_name, const string& path) 
-{
-    UNUSED(module_name);
-    UNUSED(path);
-    return true;
-}
-#endif
-
-void
-GenericModuleManager::new_module(const string& module_name)
-{
-    debug_msg("ModuleManager::new_module %s\n", module_name.c_str());
-    GenericModule* module = new GenericModule(module_name);
-    store_new_module(module);
-}
-
 bool
 GenericModuleManager::store_new_module(GenericModule *module)
 {
@@ -99,44 +82,6 @@ GenericModuleManager::store_new_module(GenericModule *module)
 	return false;
     }
 }
-
-int 
-GenericModuleManager::start_module(const string& module_name, bool do_exec, 
-			  XorpCallback1<void, bool>::RefPtr cb)
-{
-    UNUSED(module_name);
-    UNUSED(do_exec);
-    UNUSED(cb);
-    return XORP_OK;
-}
-
-int 
-GenericModuleManager::kill_module(const string& module_name,
-			   XorpCallback0<void>::RefPtr cb)
-{
-    UNUSED(module_name);
-    UNUSED(cb);
-    return XORP_OK;
-}
-
-bool 
-GenericModuleManager::module_has_started(const string& module_name) const
-{
-    UNUSED(module_name);
-    return false;
-}
-
-int 
-GenericModuleManager::shell_execute(uid_t userid, const vector<string>& argv, 
-			     GenericModuleManager::CallBack cb, bool do_exec)
-{
-    UNUSED(userid);
-    UNUSED(argv);
-    UNUSED(cb);
-    UNUSED(do_exec);
-    return XORP_ERROR;
-}
-
 
 GenericModule*
 GenericModuleManager::find_module(const string& module_name)

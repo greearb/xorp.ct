@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.4 2004/12/11 13:36:01 mjh Exp $
+// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.5 2004/12/11 21:29:56 mjh Exp $
 
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
@@ -76,18 +76,8 @@ public:
     GenericModuleManager(EventLoop& eventloop, bool verbose);
     virtual ~GenericModuleManager() {};
 
-#if 0
-    virtual bool new_module(const string& module_name, const string& path);
-#endif
-    void new_module(const string& module_name);
-    virtual int start_module(const string& module_name, bool do_exec, 
-		   XorpCallback1<void, bool>::RefPtr cb);
-    virtual int kill_module(const string& module_name, XorpCallback0<void>::RefPtr cb);
     bool module_exists(const string& module_name) const;
     GenericModule::ModuleStatus module_status(const string& module_name) const;
-    virtual bool module_has_started(const string& module_name) const;
-    virtual int shell_execute(uid_t userid, const vector<string>& argv, 
-			      GenericModuleManager::CallBack cb, bool do_exec);
     EventLoop& eventloop() { return _eventloop; }
     GenericModule* find_module(const string& module_name);
     const GenericModule* const_find_module(const string& module_name) const;

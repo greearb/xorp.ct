@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.21 2004/11/16 21:43:12 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.22 2004/11/26 23:05:14 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -30,6 +30,7 @@
 class ConfigTree;
 class OpCommand;
 class TemplateTree;
+class SlaveModuleManager;
 
 class OpInstance {
 public:
@@ -144,7 +145,8 @@ private:
 
 class OpCommandList {
 public:
-    OpCommandList(const string& config_template_dir, const TemplateTree* tt)
+    OpCommandList(const string& config_template_dir, const TemplateTree* tt,
+		  SlaveModuleManager& mmgr)
 	throw (InitError);
     ~OpCommandList();
 
@@ -173,6 +175,7 @@ private:
     OpCommand*		_current_command;
     const TemplateTree*	_template_tree;
     SlaveConfigTree*	_slave_config_tree;
+    SlaveModuleManager& _mmgr;
 };
 
 #endif // __RTRMGR_OP_COMMAND_HH__

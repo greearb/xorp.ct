@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.42 2004/12/11 21:29:56 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.43 2004/12/17 08:43:07 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -100,6 +100,7 @@ xorpsh_SOURCES	+= command_tree.hh
 xorpsh_SOURCES	+= conf_tree.hh
 xorpsh_SOURCES	+= conf_tree_node.hh
 xorpsh_SOURCES	+= generic_module_manager.hh
+xorpsh_SOURCES	+= slave_module_manager.hh
 xorpsh_SOURCES	+= op_commands.hh
 xorpsh_SOURCES	+= path_segment.hh
 xorpsh_SOURCES	+= rtrmgr_error.hh
@@ -118,6 +119,7 @@ xorpsh_SOURCES	+= command_tree.cc
 xorpsh_SOURCES	+= conf_tree.cc
 xorpsh_SOURCES	+= conf_tree_node.cc
 xorpsh_SOURCES	+= generic_module_manager.cc
+xorpsh_SOURCES	+= slave_module_manager.cc
 xorpsh_SOURCES	+= lex.boot.cc
 xorpsh_SOURCES	+= lex.opcmd.cc
 xorpsh_SOURCES	+= lex.tplt.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.34 2004/12/11 13:36:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.35 2004/12/11 21:30:00 mjh Exp $"
 
 
 #include <sys/types.h>
@@ -101,7 +101,7 @@ XorpShell::XorpShell(const string& IPCname,
       _xclient(_eventloop, _xrlrouter),
       _rtrmgr_client(&_xrlrouter),
       _xorpsh_interface(&_xrlrouter, *this),
-      _mmgr(_eventloop, verbose),
+      _mmgr(_eventloop),
       _tt(NULL),
       _ct(NULL),
       _ocl(NULL),
@@ -138,7 +138,7 @@ XorpShell::XorpShell(const string& IPCname,
 
     // Read the router operational template files
     try {
-	_ocl = new OpCommandList(config_template_dir.c_str(), _tt);
+	_ocl = new OpCommandList(config_template_dir.c_str(), _tt, _mmgr);
     } catch (const InitError& e) {
 	xorp_throw(InitError, e.why());
     }
@@ -469,10 +469,9 @@ XorpShell::module_status_change(const string& modname,
 	      modname.c_str(), (int)status);
     GenericModule *module = _mmgr.find_module(modname);
     if (module == NULL) {
-	
-    } else {
-	module->new_status(status);
+	module = _mmgr.new_module(modname);
     }
+    module->new_status(status);
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.37 2004/11/16 21:43:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.38 2004/11/26 23:05:14 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -34,8 +34,10 @@
 #include "op_commands.hh"
 #include "slave_conf_tree.hh"
 #include "template_tree.hh"
+#include "slave_module_manager.hh"
 #include "util.hh"
 #include "y.opcmd_tab.h"
+
 
 
 extern int init_opcmd_parser(const char *filename, OpCommandList *o);
@@ -510,7 +512,9 @@ OpCommand::remove_instance(OpInstance* instance)
 }
 
 OpCommandList::OpCommandList(const string& config_template_dir,
-			     const TemplateTree* tt) throw (InitError)
+			     const TemplateTree* tt,
+			     SlaveModuleManager& mmgr) throw (InitError)
+    : _mmgr(mmgr)
 {
     list<string> files;
     string errmsg;
@@ -735,6 +739,11 @@ OpCommandList::childlist(const string& path, bool& is_executable,
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;
 	if (op_command->command_match(path_parts, _slave_config_tree, false)) {
+	    if (!_mmgr.module_is_active(op_command->module())) {
+		// the module has not been started, so don't add it's
+		// commands
+		continue;
+	    }
 	    map<string, string> matches;
 	    bool tmp_is_executable;
 	    bool tmp_can_pipe;

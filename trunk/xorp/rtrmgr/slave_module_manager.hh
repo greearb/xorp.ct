@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.16 2004/06/10 22:41:53 hodson Exp $
+// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.17 2004/12/06 00:31:05 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_MODULE_MANAGER_HH__
 #define __RTRMGR_SLAVE_MODULE_MANAGER_HH__
@@ -21,23 +21,12 @@
 #include "libxorp/eventloop.hh"
 #include "generic_module_manager.hh"
 
-#if 0
-class ModuleManager {
-    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+class SlaveModuleManager : public GenericModuleManager {
 public:
-    ModuleManager(EventLoop& eventloop);
-
-    bool new_module(const string& module_name, const string& path);
-    int start_module(const string& module_name, bool do_exec, 
-		   XorpCallback1<void, bool>::RefPtr cb);
-    int kill_module(const string& module_name, XorpCallback0<void>::RefPtr cb);
-    bool module_exists(const string& module_name) const;
-    bool module_has_started(const string& module_name) const;
-    int shell_execute(uid_t userid, const vector<string>& argv, 
-		      ModuleManager::CallBack cb, bool do_exec);
+    SlaveModuleManager(EventLoop& eventloop);
+    GenericModule* new_module(const string& module_name);
+    bool module_is_active(const string& module_name) const;
 private:
 };
-
-#endif
 
 #endif // __RTRMGR_SLAVE_MODULE_MANAGER_HH__
