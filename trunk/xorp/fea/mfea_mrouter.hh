@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.5 2003/08/05 05:44:59 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.6 2003/08/28 16:16:13 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -79,6 +79,22 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+    
+    /**
+     * Test if the underlying system supports IPv4 multicast routing.
+     * 
+     * @return true if the underlying system supports IPv4 multicast routing,
+     * otherwise false.
+     */
+    bool have_multicast_routing4() const;
+    
+    /**
+     * Test if the underlying system supports IPv6 multicast routing.
+     * 
+     * @return true if the underlying system supports IPv6 multicast routing,
+     * otherwise false.
+     */
+    bool have_multicast_routing6() const;
     
     /**
      * Get the protocol that would be used in case of mrouter socket.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.11 2003/08/06 18:50:22 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.12 2003/08/07 00:27:21 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -93,6 +93,26 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+    
+    /**
+     * Test if the underlying system supports IPv4 multicast routing.
+     * 
+     * @return true if the underlying system supports IPv4 multicast routing,
+     * otherwise false.
+     */
+    bool have_multicast_routing4() const {
+	return (_mfea_mrouter.have_multicast_routing4());
+    }
+    
+    /**
+     * Test if the underlying system supports IPv6 multicast routing.
+     * 
+     * @return true if the underlying system supports IPv6 multicast routing,
+     * otherwise false.
+     */
+    bool have_multicast_routing6() const {
+	return (_mfea_mrouter.have_multicast_routing6());
+    }
     
     /**
      * Install a new MFEA vif.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.10 2003/09/15 23:32:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.11 2003/09/16 01:15:52 pavlin Exp $"
 
 
 //
@@ -221,6 +221,88 @@ MfeaMrouter::stop()
     close_mrouter_socket();
     
     return (XORP_OK);
+}
+
+/**
+ * Test if the underlying system supports IPv4 multicast routing.
+ * 
+ * @return true if the underlying system supports IPv4 multicast routing,
+ * otherwise false.
+ */
+bool
+MfeaMrouter::have_multicast_routing4() const
+{
+    int s;
+    int v = 1;
+    
+    if (! is_ipv4())
+	return (false);		// Wrong family
+    
+    //
+    // Test to open and initialize a mrouter socket. If success,
+    // then we support multicast routing.
+    //
+    if (mrouter_socket() >= 0)
+	return (true);		// XXX: already have an open mrouter socket
+    
+    if (kernel_mrouter_ipproto() < 0)
+	return (false);
+    
+    s = socket(family(), SOCK_RAW, kernel_mrouter_ipproto());
+    if (s < 0)
+	return (false);		// Failure to open the socket
+    
+    if (setsockopt(s, IPPROTO_IP, MRT_INIT, (void *)&v, sizeof(v)) < 0) {
+	close(s);
+	return (false);
+    }
+    
+    // Success
+    close(s);
+    return (true);
+}
+
+/**
+ * Test if the underlying system supports IPv6 multicast routing.
+ * 
+ * @return true if the underlying system supports IPv6 multicast routing,
+ * otherwise false.
+ */
+bool
+MfeaMrouter::have_multicast_routing6() const
+{
+#ifndef HAVE_IPV6_MULTICAST_ROUTING
+    return (false);
+#else
+    int s;
+    int v = 1;
+    
+    if (! is_ipv6())
+	return (false);		// Wrong family
+    
+    //
+    // Test to open and initialize a mrouter socket. If success,
+    // then we support multicast routing.
+    //
+    if (mrouter_socket() >= 0)
+	return (true);		// XXX: already have an open mrouter socket
+    
+    if (kernel_mrouter_ipproto() < 0)
+	return (false);
+    
+    s = socket(family(), SOCK_RAW, kernel_mrouter_ipproto());
+    if (s < 0)
+	return (false);		// Failure to open the socket
+    
+    if (setsockopt(s, IPPROTO_IPV6, MRT6_INIT, (void *)&v, sizeof(v)) < 0) {
+	close(s);
+	return (false);
+    }
+    
+    // Success
+    close(s);
+    return (true);
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.13 2003/08/07 00:27:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.14 2003/08/07 03:12:24 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -921,6 +921,26 @@ XrlMfeaNode::cli_processor_0_1_process_command(
 				     ret_cli_term_name,
 				     ret_cli_session_id,
 				     ret_command_output);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_have_multicast_routing4(
+    // Output values, 
+    bool&	result)
+{
+    result = MfeaNode::have_multicast_routing4();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_have_multicast_routing6(
+    // Output values, 
+    bool&	result)
+{
+    result = MfeaNode::have_multicast_routing6();
     
     return XrlCmdError::OKAY();
 }

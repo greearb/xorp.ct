@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.2 2003/02/08 09:18:27 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.3 2003/03/25 06:55:09 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
@@ -6,6 +6,22 @@
 
 
 interface mfea/0.1 {
+
+	/**
+	 * Test if the underlying system supports IPv4 multicast routing.
+	 * 
+	 * @param result true if the underlying system supports IPv4
+	 * multicast routing, otherwise false.
+	 */
+	have_multicast_routing4 -> result:bool
+
+	/**
+	 * Test if the underlying system supports IPv6 multicast routing.
+	 * 
+	 * @param result true if the underlying system supports IPv6
+	 * multicast routing, otherwise false.
+	 */
+	have_multicast_routing6 -> result:bool
 
 	/**
 	 * Add/delete a protocol in the Multicast FEA.

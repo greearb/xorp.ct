@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.2 2003/08/14 02:10:51 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.3 2003/08/14 02:57:00 pavlin Exp $
 #
 
 #
@@ -27,6 +27,31 @@ case "${IP_VERSION}" in
 		;;
 esac
 
+mfea_have_multicast_routing4()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: mfea_have_multicast_routing4"
+	exit 1
+    fi
+    
+    echo "mfea_have_multicast_routing4" $*
+    XRL="finder://$MFEA_TARGET/mfea/0.1/have_multicast_routing4"
+    XRL_ARGS=""
+    call_xrl -p result:bool $XRL$XRL_ARGS
+}
+
+mfea_have_multicast_routing6()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: mfea_have_multicast_routing6"
+	exit 1
+    fi
+    
+    echo "mfea_have_multicast_routing6" $*
+    XRL="finder://$MFEA_TARGET/mfea/0.1/have_multicast_routing6"
+    XRL_ARGS=""
+    call_xrl -p result:bool $XRL$XRL_ARGS
+}
 
 mfea_enable_vif()
 {

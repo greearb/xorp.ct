@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.6 2003/05/31 06:44:11 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.7 2003/06/01 02:17:01 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -333,6 +333,26 @@ protected:
 	string&	ret_cli_term_name, 
 	uint32_t& ret_cli_session_id,
 	string&	ret_command_output);
+
+    /**
+     *  Test if the underlying system supports IPv4 multicast routing.
+     *  
+     *  @param result true if the underlying system supports IPv4 multicast
+     *  routing, otherwise false.
+     */
+    XrlCmdError mfea_0_1_have_multicast_routing4(
+	// Output values, 
+	bool&	result);
+
+    /**
+     *  Test if the underlying system supports IPv6 multicast routing.
+     *  
+     *  @param result true if the underlying system supports IPv6 multicast
+     *  routing, otherwise false.
+     */
+    XrlCmdError mfea_0_1_have_multicast_routing6(
+	// Output values, 
+	bool&	result);
 
    /**
      *  Add/delete a protocol in the Multicast FEA.
