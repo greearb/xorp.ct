@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.38 2004/06/10 22:41:34 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.39 2004/06/18 21:51:53 pavlin Exp $"
 
 
 //
@@ -376,6 +376,12 @@ PimVif::stop(string& error_msg)
 	return (ret_value);
     }
     
+    //
+    // Add the shutdown operation of this vif as a shutdown task
+    // for the node.
+    //
+    pim_node().incr_shutdown_requests_n();
+
     if (! is_pim_register()) {
 	//
 	// Delete MLD6/IGMP membership tracking
@@ -461,23 +467,20 @@ PimVif::final_stop(string& error_msg)
     // Stop the vif with the kernel
     //
     if (pim_node().stop_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	error_msg = c_format("cannot stop protocol vif %s with the kernel",
-			     name().c_str());
-	return (XORP_ERROR);
+	XLOG_ERROR("Cannot stop protocol vif %s with the kernel",
+		   name().c_str());
+	ret_value = XORP_ERROR;
     }
     
     XLOG_INFO("STOPPED %s%s",
 	      this->str().c_str(), flags_string().c_str());
-    
+
     //
-    // Test if time to completely stop the PimNode itself because of this vif
+    // Remove the shutdown operation of this vif as a shutdown task
+    // for the node.
     //
-    string dummy_string;
-    if (pim_node().is_pending_down()
-	&& (! pim_node().has_pending_down_units(dummy_string))) {
-	pim_node().final_stop();
-    }
-    
+    pim_node().decr_shutdown_requests_n();
+
     return (ret_value);
 }
 
