@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.11 2004/04/01 19:54:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.12 2004/05/15 15:12:17 mjh Exp $"
 
 #include "bgp_module.h"
 #include "route_table_nhlookup.hh"
@@ -103,6 +103,11 @@ NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     if (_next_hop_resolver->register_nexthop(rtmsg.route()->nexthop(),
 					     rtmsg.net(), this)) {
+	bool resolvable;
+	uint32_t metric;
+	_next_hop_resolver->lookup(rtmsg.route()->nexthop(), 
+				   resolvable, metric);
+	rtmsg.route()->set_nexthop_resolved(resolvable);
 	return this->_next_table->add_route(rtmsg, this);
     }
 
@@ -146,10 +151,16 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     bool new_msg_needs_queuing;
     if (_next_hop_resolver->register_nexthop(new_rtmsg.nexthop(),
-					     new_rtmsg.net(), this))
+					     new_rtmsg.net(), this)) {
 	new_msg_needs_queuing = false;
-    else
+	bool resolvable = false;
+	uint32_t metric;
+	_next_hop_resolver->lookup(new_rtmsg.route()->nexthop(), 
+				   resolvable, metric);
+	new_rtmsg.route()->set_nexthop_resolved(resolvable);
+    } else {
 	new_msg_needs_queuing = true;
+    }
 
 
     const InternalMessage<A>* real_old_msg = &old_rtmsg;
@@ -342,7 +353,7 @@ template <class A>
 void
 NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 				  const set <IPNet<A> >& nets,
-				  bool /*lookup_succeeded*/) 
+				  bool lookup_succeeded) 
 {
     typename multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter, nh_iter2;
     nh_iter = _queue_by_nexthop.find(nexthop);
@@ -351,9 +362,11 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 	const MessageQueueEntry<A>* mqe = nh_iter->second;
 	switch (mqe->type()) {
 	case MessageQueueEntry<A>::ADD:
+	    mqe->add_msg()->route()->set_nexthop_resolved(lookup_succeeded);
 	    this->_next_table->add_route(*(mqe->add_msg()), this);
 	    break;
 	case MessageQueueEntry<A>::REPLACE:
+	    mqe->add_msg()->route()->set_nexthop_resolved(lookup_succeeded);
 	    this->_next_table->replace_route(*(mqe->delete_msg()),
 				       *(mqe->add_msg()), this);
 	    break;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.11 2004/05/06 13:45:44 mjh Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.12 2004/05/15 15:12:17 mjh Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -27,6 +27,7 @@
 #define SRF_WINNER 0x0002
 #define SRF_FILTERED 0x0004
 #define SRF_DELETED 0x0008
+#define SRF_NH_RESOLVED 0x0010
 #define SRF_REFCOUNT 0xffff0000
 
 //Defining paranoid emables some additional checks to ensure we don't
@@ -176,6 +177,17 @@ public:
      * to record this fact.
      */
     void set_is_not_winner() const;
+
+    /**
+     * record whether or not a route's nexthop resolved
+     */
+    void set_nexthop_resolved(bool resolved) const;
+
+    /**
+     * did the route's nexthop resolve when it was passed through the
+     * NextHop resolver table.
+     */
+    bool nexthop_resolved() const {return (_flags & SRF_NH_RESOLVED) != 0;}
 
     /**
      * is_filtered returns true if the route was filtered out by the
