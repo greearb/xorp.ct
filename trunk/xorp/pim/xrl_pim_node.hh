@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.15 2003/03/25 01:21:47 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.16 2003/03/25 06:55:09 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1256,6 +1256,15 @@ protected:
 	// Input values, 
 	const string&	vif_name);
 
+    /**
+     *  Configure PIM Join/Prune-related metrics. The 'set_foo' XRLs set the
+     *  particular values. The 'reset_foo' XRLs reset the metrics to their
+     *  default values.
+     *  
+     *  @param vif_name the name of the vif to configure.
+     *  
+     *  @param join_prune_period the period between Join/Prune messages.
+     */
     XrlCmdError pim_0_1_get_vif_join_prune_period(
 	// Input values, 
 	const string&	vif_name, 
@@ -1270,6 +1279,30 @@ protected:
     XrlCmdError pim_0_1_reset_vif_join_prune_period(
 	// Input values, 
 	const string&	vif_name);
+
+    /**
+     *  Configure SPT-switch threshold. The 'set_foo' XRLs set the particular
+     *  values. The 'reset_foo' XRLs reset the metrics to their default values.
+     *  
+     *  @param is_enabled if true, enable SPT-switch, otherwise disable it.
+     *  
+     *  @param interval_sec if the SPT-switch is enabled, the interval (in
+     *  number of seconds) to measure the bandwidth to consider whether to
+     *  switch to the SPT.
+     */
+    XrlCmdError pim_0_1_get_switch_to_spt_threshold(
+	// Output values, 
+	bool&		is_enabled, 
+	uint32_t&	interval_sec, 
+	uint32_t&	bytes);
+
+    XrlCmdError pim_0_1_set_switch_to_spt_threshold(
+	// Input values, 
+	const bool&	is_enabled, 
+	const uint32_t&	interval_sec, 
+	const uint32_t&	bytes);
+
+    XrlCmdError pim_0_1_reset_switch_to_spt_threshold();
 
     /**
      *  Enable/disable the PIM trace log.

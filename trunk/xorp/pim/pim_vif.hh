@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.9 2003/03/10 23:20:53 hodson Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.10 2003/03/13 00:27:33 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -218,7 +218,7 @@ public:
      * @return the address of the Designated Router on this interface.
      */
     const IPvX&	dr_addr() const		{ return (_dr_addr);		}
-
+    
     //
     // Hello-related configuration parameters
     //

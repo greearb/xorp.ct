@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.3 2003/02/07 00:40:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.4 2003/03/10 23:20:48 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -24,6 +24,7 @@
 #include "pim_proto.h"
 #include "pim_mfc.hh"
 #include "pim_mre.hh"
+#include "pim_node.hh"
 #include "pim_vif.hh"
 
 
@@ -85,6 +86,14 @@ PimMre::update_sptbit_sg(uint16_t iif_vif_index)
 bool
 PimMre::is_switch_to_spt_desired_sg() const
 {
+    if (! pim_node().is_switch_to_spt_enabled().get())
+	return (false);		// SPT-switch disabled
+    
+    if (pim_node().is_switch_to_spt_enabled().get()
+	&& (pim_node().switch_to_spt_threshold_bytes().get() == 0)) {
+	return (true);		// SPT-switch enabled on first packet
+    }
+    
     return (false);	// TODO: XXX: PAVPAVPAV: temp. no SPT-switch
 }
 

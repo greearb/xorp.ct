@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.8 2003/03/13 00:27:33 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.9 2003/03/18 02:44:37 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -905,6 +905,19 @@ public:
     PimNbr	*find_processing_pim_mre_sg_rpt(uint16_t vif_index,
 						const IPvX& pim_nbr_addr);
     
+    //
+    // Configuration parameters
+    //
+    ConfigParam<bool>& is_switch_to_spt_enabled() {
+	return (_is_switch_to_spt_enabled);
+    }
+    ConfigParam<uint32_t>& switch_to_spt_threshold_interval_sec() {
+	return (_switch_to_spt_threshold_interval_sec);
+    }
+    ConfigParam<uint32_t>& switch_to_spt_threshold_bytes() {
+	return (_switch_to_spt_threshold_bytes);
+    }
+    
 private:
     
     PimMrt	_pim_mrt;		// PIM Multicast Routing Table
@@ -920,6 +933,13 @@ private:
     
     list<PimNbr *> _processing_pim_nbr_list; // The list of deleted PimNbr with
 					// PimMre entries to process.
+    
+    //
+    // Configuration parameters
+    //
+    ConfigParam<bool>		_is_switch_to_spt_enabled;
+    ConfigParam<uint32_t>	_switch_to_spt_threshold_interval_sec;
+    ConfigParam<uint32_t>	_switch_to_spt_threshold_bytes;
     
     //
     // Debug and test-related state

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.7 2003/03/13 08:54:09 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.8 2003/03/25 06:55:09 pavlin Exp $
 #
 
 #
@@ -1076,6 +1076,48 @@ pim_reset_vif_join_prune_period()
     echo "pim_reset_vif_join_prune_period" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_join_prune_period"
     XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl $XRL$XRL_ARGS
+}
+
+pim_get_switch_to_spt_threshold()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pim_get_switch_to_spt_threshold"
+	exit 1
+    fi
+    
+    echo "pim_get_switch_to_spt_threshold" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/get_switch_to_spt_threshold"
+    XRL_ARGS=""
+    call_xrl -p is_enabled:bool -p interval_sec:u32 -p bytes:u32 $XRL$XRL_ARGS
+}
+
+pim_set_switch_to_spt_threshold()
+{
+    if [ $# -lt 3 ] ; then
+	echo "Usage: pim_set_switch_to_spt_threshold <is_enabled:bool> <interval_sec:u32> <bytes:u32>"
+	exit 1
+    fi
+    is_enabled=$1
+    interval_sec=$2
+    bytes=$3
+    
+    echo "pim_set_switch_to_spt_threshold" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/set_switch_to_spt_threshold"
+    XRL_ARGS="?is_enabled:bool=$is_enabled&interval_sec:u32=$interval_sec&bytes:u32=$bytes"
+    call_xrl $XRL$XRL_ARGS
+}
+
+pim_reset_switch_to_spt_threshold()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pim_reset_switch_to_spt_threshold"
+	exit 1
+    fi
+    
+    echo "pim_reset_switch_to_spt_threshold" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/reset_switch_to_spt_threshold"
+    XRL_ARGS=""
     call_xrl $XRL$XRL_ARGS
 }
 

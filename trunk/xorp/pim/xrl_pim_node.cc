@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.12 2003/03/25 01:21:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.13 2003/03/25 06:55:08 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3807,6 +3807,44 @@ XrlPimNode::pim_0_1_reset_vif_join_prune_period(
 			      vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_get_switch_to_spt_threshold(
+    // Output values, 
+    bool&	is_enabled, 
+    uint32_t&	interval_sec, 
+    uint32_t&	bytes)
+{
+    is_enabled = PimNode::is_switch_to_spt_enabled().get();
+    interval_sec = PimNode::switch_to_spt_threshold_interval_sec().get();
+    bytes = PimNode::switch_to_spt_threshold_bytes().get();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_set_switch_to_spt_threshold(
+    // Input values, 
+    const bool&		is_enabled, 
+    const uint32_t&	interval_sec, 
+    const uint32_t&	bytes)
+{
+    PimNode::is_switch_to_spt_enabled().set(is_enabled);
+    PimNode::switch_to_spt_threshold_interval_sec().set(interval_sec);
+    PimNode::switch_to_spt_threshold_bytes().set(bytes);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_reset_switch_to_spt_threshold()
+{
+    PimNode::is_switch_to_spt_enabled().reset();
+    PimNode::switch_to_spt_threshold_interval_sec().reset();
+    PimNode::switch_to_spt_threshold_bytes().reset();
     
     return XrlCmdError::OKAY();
 }
