@@ -1,11 +1,15 @@
-/* $XORP: xorp/xrl/targets/pim.tgt,v 1.7 2002/11/05 17:26:27 hodson Exp $ */
+/* $XORP: xorp/xrl/targets/pim.tgt,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $ */
 
 #include "common.xif"
 #include "cli_processor.xif"
 #include "mfea_client.xif"
+#include "fea_fti.xif"
 #include "mld6igmp_client.xif"
 #include "pim.xif"
 
-target pim implements		common/0.1, cli_processor/0.1,		\
-				mfea_client/0.1, mld6igmp_client/0.1,	\
+target pim implements		common/0.1,				\
+				cli_processor/0.1,			\
+				mfea_client/0.1,			\
+				fti/0.1,				\
+				mld6igmp_client/0.1,			\
 				pim/0.1

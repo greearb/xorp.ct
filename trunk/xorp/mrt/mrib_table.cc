@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.3 2003/02/08 09:14:35 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.4 2003/03/10 23:20:45 hodson Exp $"
 
 
 //
@@ -93,6 +93,11 @@ MribTable::clear()
     _mrib_lookup_root = NULL;
     _mrib_lookup_size = 0;
     _mrib_size = 0;
+    
+    //
+    // Delete all pending transactions
+    //
+    _mrib_pending_transactions.clear();
 }
 
 //
@@ -399,37 +404,58 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
 }
 
 void
-MribTable::add_pending_insert(const Mrib& mrib)
+MribTable::add_pending_insert(uint32_t tid, const Mrib& mrib)
 {
-    _mrib_pending_transactions.push_back(pair<Mrib, bool>(mrib, true));
+    _mrib_pending_transactions.push_back(PendingTransaction(tid, mrib, true));
 }
 
 void
-MribTable::add_pending_remove(const Mrib& mrib)
+MribTable::add_pending_remove(uint32_t tid, const Mrib& mrib)
 {
-    _mrib_pending_transactions.push_back(pair<Mrib, bool>(mrib, false));
+    _mrib_pending_transactions.push_back(PendingTransaction(tid, mrib, false));
 }
 
 void
-MribTable::commit_pending_transactions()
+MribTable::commit_pending_transactions(uint32_t tid)
 {
     //
-    // Process all pending Mrib transactions
+    // Process the pending Mrib transactions for the given transaction ID
     //
     // TODO: probably should allow commits in time slices of up to X ms?
-    list<pair<Mrib, bool> >::iterator iter;
+    list<PendingTransaction>::iterator iter, old_iter;
     for (iter = _mrib_pending_transactions.begin();
 	 iter != _mrib_pending_transactions.end();
-	 ++iter) {
-	Mrib& mrib = (*iter).first;
-	bool is_insert_mrib = (*iter).second;
-	
-	if (is_insert_mrib)
-	    insert(mrib);
+	) {
+	PendingTransaction& pending_transaction = *iter;
+	old_iter = iter;
+	++iter;
+	if (pending_transaction.tid() != tid)
+	    continue;
+	if (pending_transaction.is_insert())
+	    insert(pending_transaction.mrib());
 	else
-	    remove(mrib);
+	    remove(pending_transaction.mrib());
+	_mrib_pending_transactions.erase(old_iter);
     }
-    _mrib_pending_transactions.clear();	// Remove all pending transactions
+}
+
+void
+MribTable::abort_pending_transactions(uint32_t tid)
+{
+    //
+    // Abort pending Mrib transactions for the given transaction ID
+    //
+    list<PendingTransaction>::iterator iter, old_iter;
+    for (iter = _mrib_pending_transactions.begin();
+	 iter != _mrib_pending_transactions.end();
+	) {
+	PendingTransaction& pending_transaction = *iter;
+	old_iter = iter;
+	++iter;
+	if (pending_transaction.tid() != tid)
+	    continue;
+	_mrib_pending_transactions.erase(old_iter);
+    }
 }
 
 MribTableIterator&

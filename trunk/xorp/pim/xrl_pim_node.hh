@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.12 2003/03/17 23:38:00 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.13 2003/03/18 02:44:37 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -25,6 +25,7 @@
 #include <string>
 
 #include "libxorp/xlog.h"
+#include "libxorp/transaction.hh"
 #include "libxipc/xrl_router.hh"
 #include "xrl/targets/pim_base.hh"
 #include "xrl/interfaces/common_xif.hh"
@@ -54,7 +55,8 @@ public:
 	  XrlMfeaV0p1Client(xrl_router),
 	  XrlMld6igmpV0p1Client(xrl_router),
 	  XrlCliManagerV0p1Client(xrl_router),
-	  PimNodeCli(*static_cast<PimNode *>(this))
+	  PimNodeCli(*static_cast<PimNode *>(this)),
+	  _mrib_transaction_manager(event_loop)
 	{ }
     virtual ~XrlPimNode() { PimNode::stop(); PimNodeCli::stop(); }
     
@@ -735,6 +737,204 @@ protected:
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
+
+    /**
+     *  Start transaction.
+     *  
+     *  @param tid the transaction ID to use for this transaction.
+     */
+    XrlCmdError fti_0_1_start_transaction(
+	// Output values, 
+	uint32_t&	tid);
+
+    /**
+     *  Commit transaction.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     */
+    virtual XrlCmdError fti_0_1_commit_transaction(
+	// Input values, 
+	const uint32_t&	tid);
+
+    /**
+     *  Abort transaction.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError fti_0_1_abort_transaction(
+	// Input values, 
+	const uint32_t&	tid);
+
+    /**
+     *  Add a routing entry.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     *  
+     *  @param dst the destination subnet address of the entry.
+     *  
+     *  @param gateway the address of the next-hop router toward dst.
+     *  
+     *  @param ifname the name of the physical interface toward dst.
+     *  
+     *  @param vifname the name of the virtual interface toward dst.
+     */
+    XrlCmdError fti_0_1_add_entry4(
+	// Input values, 
+	const uint32_t&	tid, 
+	const IPv4Net&	dst, 
+	const IPv4&	gateway, 
+	const string&	ifname, 
+	const string&	vifname);
+
+    /**
+     *  Add a routing entry.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     *  
+     *  @param dst the destination subnet address of the entry.
+     *  
+     *  @param gateway the address of the next-hop router toward dst.
+     *  
+     *  @param ifname the name of the physical interface toward dst.
+     *  
+     *  @param vifname the name of the virtual interface toward dst.
+     */
+    XrlCmdError fti_0_1_add_entry6(
+	// Input values, 
+	const uint32_t&	tid, 
+	const IPv6Net&	dst, 
+	const IPv6&	gateway, 
+	const string&	ifname, 
+	const string&	vifname);
+
+    /**
+     *  Delete a routing entry.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     *  
+     *  @param dst the destination subnet address of the entry.
+     */
+    XrlCmdError fti_0_1_delete_entry4(
+	// Input values, 
+	const uint32_t&	tid, 
+	const IPv4Net&	dst);
+
+    /**
+     *  Delete a routing entry.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     *  
+     *  @param dst the destination subnet address of the entry.
+     */
+    XrlCmdError fti_0_1_delete_entry6(
+	// Input values, 
+	const uint32_t&	tid, 
+	const IPv6Net&	dst);
+
+    /**
+     *  Delete all routing entries for all address families.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError fti_0_1_delete_all_entries(
+	// Input values, 
+	const uint32_t&	tid);
+
+    /**
+     *  Delete all routing entries for the IPv4 address family.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError fti_0_1_delete_all_entries4(
+	// Input values, 
+	const uint32_t&	tid);
+
+    /**
+     *  Delete all routing entries for the IPv6 address family.
+     *  
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError fti_0_1_delete_all_entries6(
+	// Input values, 
+	const uint32_t&	tid);
+
+    /**
+     *  Lookup a route for a destination host address.
+     *  
+     *  @param dst the destination host address to lookup.
+     *  
+     *  @param gateway the address of the next-hop router toward dst.
+     *  
+     *  @param ifname the name of the physical interface toward dst.
+     *  
+     *  @param vifname the name of the virtual interface toward dst.
+     */
+    XrlCmdError fti_0_1_lookup_route4(
+	// Input values, 
+	const IPv4&	dst, 
+	// Output values, 
+	IPv4Net&	netmask, 
+	IPv4&		gateway, 
+	string&		ifname, 
+	string&		vifname);
+
+    /**
+     *  Lookup a route for a destination host address.
+     *  
+     *  @param dst the destination host address to lookup.
+     *  
+     *  @param gateway the address of the next-hop router toward dst.
+     *  
+     *  @param ifname the name of the physical interface toward dst.
+     *  
+     *  @param vifname the name of the virtual interface toward dst.
+     */
+    XrlCmdError fti_0_1_lookup_route6(
+	// Input values, 
+	const IPv6&	dst, 
+	// Output values, 
+	IPv6Net&	netmask, 
+	IPv6&		gateway, 
+	string&		ifname, 
+	string&		vifname);
+
+    /**
+     *  Lookup a route for a destination subnet address.
+     *  
+     *  @param dst the destination subnet address to lookup.
+     *  
+     *  @param gateway the address of the next-hop router toward dst.
+     *  
+     *  @param ifname the name of the physical interface toward dst.
+     *  
+     *  @param vifname the name of the virtual interface toward dst.
+     */
+    XrlCmdError fti_0_1_lookup_entry4(
+	// Input values, 
+	const IPv4Net&	dst, 
+	// Output values, 
+	IPv4&		gateway, 
+	string&		ifname, 
+	string&		vifname);
+
+    /**
+     *  Lookup a route for a destination subnet address.
+     *  
+     *  @param dst the destination subnet address to lookup.
+     *  
+     *  @param gateway the address of the next-hop router toward dst.
+     *  
+     *  @param ifname the name of the physical interface toward dst.
+     *  
+     *  @param vifname the name of the virtual interface toward dst.
+     */
+    XrlCmdError fti_0_1_lookup_entry6(
+	// Input values, 
+	const IPv6Net&	dst, 
+	// Output values, 
+	IPv6&		gateway, 
+	string&		ifname, 
+	string&		vifname);
 
     /**
      *  Add/delete membership information.
@@ -1720,6 +1920,8 @@ private:
     }
     
     int family() const { return (PimNode::family()); }
+    
+    TransactionManager _mrib_transaction_manager;
 };
 
 #endif // __PIM_XRL_PIM_NODE_HH__

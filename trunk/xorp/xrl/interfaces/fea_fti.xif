@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_fti.xif,v 1.1 2002/11/15 00:09:03 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_fti.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * Forwarding Table XRL interface (part of FEA).
@@ -6,63 +6,149 @@
 
 interface fti/0.1 {
 
+	/**
+	 * Start transaction.
+	 * 
+	 * @param tid the transaction ID to use for this transaction.
+	 */
 	start_transaction -> tid:u32
 
+	/**
+	 * Commit transaction.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
 	commit_transaction ? tid:u32
 
+	/**
+	 * Abort transaction.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
 	abort_transaction ? tid:u32
 
-	add_entry4 ? tid:u32 &						      \
-		     dst:ipv4net &					      \
-		     gateway:ipv4 &					      \
-		     ifname:txt &					      \
+	/**
+	 * Add a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 */
+	add_entry4 ? tid:u32 &						\
+		     dst:ipv4net &					\
+		     gateway:ipv4 &					\
+		     ifname:txt &					\
 		     vifname:txt
 
+	/**
+	 * Add a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 */
+	add_entry6 ? tid:u32 &						\
+		     dst:ipv6net &					\
+		     gateway:ipv6 &					\
+		     ifname:txt &					\
+		     vifname:txt
+
+	/**
+	 * Delete a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 */
 	delete_entry4 ? tid:u32 & dst:ipv4net
 
-	add_entry6 ? tid:u32 &						      \
-		     dst:ipv6net &					      \
-		     gateway:ipv6 &					      \
-		     ifname:txt &					      \
-		     vifname:txt
-
+	/**
+	 * Delete a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 */
 	delete_entry6 ? tid:u32 & dst:ipv6net
 
+	/**
+	 * Delete all routing entries for all address families.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
 	delete_all_entries ? tid:u32
+
+	/**
+	 * Delete all routing entries for the IPv4 address family.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
 	delete_all_entries4 ? tid:u32
+
+	/**
+	 * Delete all routing entries for the IPv6 address family.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
 	delete_all_entries6 ? tid:u32
 
-	lookup_route4 ? dst:ipv4 -> netmask:ipv4net &			      \
-				    gateway:ipv4 &			      \
-				    ifname:txt &			      \
+	/**
+	 * Lookup a route for a destination host address.
+	 * 
+	 * @param dst the destination host address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 */
+	lookup_route4 ? dst:ipv4 -> netmask:ipv4net &			\
+				    gateway:ipv4 &			\
+				    ifname:txt &			\
 				    vifname:txt
 
-	lookup_entry4 ?  dst:ipv4net					      \
-		      -> gateway:ipv4 &					      \
-		    	 ifname:txt &					      \
-			 vifname:txt
-
-	lookup_route6 ? dst:ipv6 -> netmask:ipv6net &			      \
-				    gateway:ipv6 &			      \
-				    ifname:txt &			      \
+	/**
+	 * Lookup a route for a destination host address.
+	 * 
+	 * @param dst the destination host address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 */
+	lookup_route6 ? dst:ipv6 -> netmask:ipv6net &			\
+				    gateway:ipv6 &			\
+				    ifname:txt &			\
 				    vifname:txt
 
-	lookup_entry6 ?  dst:ipv6net					      \
-		      -> gateway:ipv6 &					      \
-			 ifname:txt &					      \
+	/**
+	 * Lookup a route for a destination subnet address.
+	 * 
+	 * @param dst the destination subnet address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 */
+	lookup_entry4 ?  dst:ipv4net					\
+		      -> gateway:ipv4 &					\
+		    	 ifname:txt &					\
 			 vifname:txt
 
-	/* TBD: start_reading and read_entry forwarding table dump methods.
+	/**
+	 * Lookup a route for a destination subnet address.
+	 * 
+	 * @param dst the destination subnet address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 */
+	lookup_entry6 ?  dst:ipv6net					\
+		      -> gateway:ipv6 &					\
+			 ifname:txt &					\
+			 vifname:txt
+
+	/*
+	 * TBD: start_reading and read_entry forwarding table dump methods.
 	 * Perhaps we request the forwarding table be dumped to file and then
 	 * transfer the file.
 	 */
 }
-
-
-
-
-
-
-
-
-

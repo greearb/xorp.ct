@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.2 2003/03/10 23:20:49 hodson Exp $"
 
 //
 // PIM Multicast Routing Information Base Table implementation.
@@ -74,6 +74,15 @@ PimMribTable::pim_mrt()
     return (pim_node().pim_mrt());
 }
 
+void
+PimMribTable::clear()
+{
+    MribTable::clear();
+    
+    add_modified_prefix(IPvXNet(IPvX::ZERO(family()), 0));
+    apply_mrib_changes();
+}
+
 Mrib *
 PimMribTable::find(const IPvX& address) const
 {
@@ -94,23 +103,23 @@ PimMribTable::find(const IPvX& address) const
 }
 
 void
-PimMribTable::add_pending_insert(const Mrib& mrib)
+PimMribTable::add_pending_insert(uint32_t tid, const Mrib& mrib)
 {
     add_modified_prefix(mrib.dest_prefix());
-    MribTable::add_pending_insert(mrib);
+    MribTable::add_pending_insert(tid, mrib);
 }
 
 void
-PimMribTable::add_pending_remove(const Mrib& mrib)
+PimMribTable::add_pending_remove(uint32_t tid, const Mrib& mrib)
 {
     add_modified_prefix(mrib.dest_prefix());
-    MribTable::add_pending_remove(mrib);
+    MribTable::add_pending_remove(tid, mrib);
 }
 
 void
-PimMribTable::commit_pending_transactions()
+PimMribTable::commit_pending_transactions(uint32_t tid)
 {
-    MribTable::commit_pending_transactions();
+    MribTable::commit_pending_transactions(tid);
     
     apply_mrib_changes();
 }

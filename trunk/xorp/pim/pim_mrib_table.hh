@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrib_table.hh,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $
+// $XORP: xorp/pim/pim_mrib_table.hh,v 1.2 2003/03/10 23:20:49 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRIB_TABLE_HH__
@@ -53,11 +53,12 @@ public:
     int		family();
     PimMrt&	pim_mrt();
     
+    void	clear();
     Mrib	*find(const IPvX& address) const;
     
-    void	add_pending_insert(const Mrib& mrib);
-    void	add_pending_remove(const Mrib& mrib);
-    void	commit_pending_transactions();
+    void	add_pending_insert(uint32_t tid, const Mrib& mrib);
+    void	add_pending_remove(uint32_t tid, const Mrib& mrib);
+    void	commit_pending_transactions(uint32_t tid);
     
     void	apply_mrib_changes();
     
