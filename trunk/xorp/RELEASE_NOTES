@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.27 2003/08/28 01:36:21 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.28 2003/08/28 02:30:36 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 0.4 (2003/??/??)
+Release 0.4 (2003/08/28)
 ========================
   ALL:
     - Rename all process names from "foo" to "xorp_foo":
@@ -17,6 +17,7 @@ Release 0.4 (2003/??/??)
       ospfd -> xorp_ospf
       rib -> xorp_rib
       rtrmgr -> xorp_rtrmgr
+
     - Added support for "gmake install" that installs the required
       XORP pieces under /usr/local/xorp.
       Currently, the installed subdirectories and files follow
@@ -24,8 +25,13 @@ Release 0.4 (2003/??/??)
       Only the following binaries are installed in subdirectory "bin":
       call_xrl, xorp_rtrmgr, xorpsh.
 
+    - The code does not compile anymore on MacOS X 10.2.x (or earlier),
+      due to compiler issues. After Apple starts distributing a better
+      compiler (probably with MacOS X 10.3.x?), then attempt will be
+      made to keep the code compiling again on MacOS X.
+
   LIBXORP:
-    - 
+    - Added pre-order iterators for Trie and RefTrie.
 
   LIBXIPC:
     - 
@@ -53,22 +59,29 @@ Release 0.4 (2003/??/??)
   FEA/MFEA:
     - Bug fix: if the multicast protocol to start/stop is PIM, then start/stop
       PIM multicast routing in the kernel.
+
     - Bug fix (Linux-specific): if IGMP/MLD is enabled, then the multicast
       router will properly receive all IGMP/MLD messages.
+
     - Added support to enable/disable unicast forwarding in the kernel.
       Currently, the support is only for FreeBSD. E.g., in case of
       Linux the user must explicitly enable it by running
       as root `echo 1 > /proc/sys/net/ipv4/ip_forward`
       before starting XORP).
+
     - Fix a compilation problem for NetBSD
       (courtesy Hitoshi Asaeda <Hitoshi.Asaeda@sophia.inria.fr>
       and Jun-ichiro itojun Hagino <itojun@iijlab.net>).
+
     - Initial support for Linux /proc parsing to return network interface
       information (work in progress).
+
     - Bug fixes in setting the broadcast or p2p flags and addresses
       in the FEA internal interface tree (IfTree).
+
     - Bug fix in computing the minimum size of a message received
       on a routing socket.
+
     - Change the MFEA configuration scripts so now the IPv4/IPv6 setup
       is controlled by a single variable IP_VERSION that should be
       either IPV4 or IPV6. Note that those configuration scripts
@@ -76,7 +89,7 @@ Release 0.4 (2003/??/??)
       the rtrmgr.
 
   RIB: 
-    - 
+    - No significant changes.
 
   BGP:
     - Update packets with unknown path attributes are now correctly handled.
@@ -84,7 +97,9 @@ Release 0.4 (2003/??/??)
   MLD/IGMP:
     - Change the "RX" log messages to include the vif name a message was
       received on.
+
     - Initial support for returning the process status via get_status XRL.
+
     - Change the MLD/IGMP configuration scripts so now the IPv4/IPv6 setup
       is controlled by a single variable IP_VERSION that should be
       either IPV4 or IPV6. Note that those configuration scripts
@@ -94,34 +109,43 @@ Release 0.4 (2003/??/??)
   PIM-SM:
     - Change the "RX" log messages to include the vif name a message was
       received on.
+
     - Change the PIM configuration scripts so now the IPv4/IPv6 setup
       is controlled by a single variable IP_VERSION that should be
       either IPV4 or IPV6. Note that those configuration scripts
       are temporary solution until the PIM is integrated with
       the rtrmgr.
+
     - Implement Join/Prune items fragmentation across Join/Prune messages
       when generating Join/Prune messages.
+
     - Fix some of the XRL names related to static RP configuration
       in the configuration shell scripts.
+
     - Fix the generation of Assert messages when data packets are received
       on the wrong interface; in addition, the Assert messages triggered
       by data packets are rate-limited to one Assert message/s (on
       average, per (S,G) or (*,G) routing entry).
+
     - Implement an optimization when generating Assert messages
       triggered by the data packets received on the wrong interface:
       suppress the second Assert message that is a duplicate.
+
     - Implement bandwidth-prorated SPT switch triggering:
       The SPT switch can be triggered at the last-hop router if the
       bandwidth from a given source is above a configured threshold.
       In addition, the same mechanism is implemented in the RP as well
       (not in the spec, where the SPT switch in the RP is always triggered
       by the first packet).
+
     - Keep various PIM-related statistics (e.g., number of sent
       or received PIM control messages per interface, etc), and add
       the appropriate XRL interface to get or reset those statistics.
+
     - Modify slightly the "show pim join" CLI output. E.g., print
       "Could assert WC:" for all entries, print "Could assert SG:"
       for (S,G,rpt) as well, etc.
+
     - Bug fix: when receiving IPv6 PIM packets, use the IPv6-specific
       pseudo-header to compute the checksum.
 
