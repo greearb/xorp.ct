@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.11 2003/09/19 22:00:50 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.12 2003/09/20 00:16:29 hodson Exp $
 #
 
 #
@@ -36,7 +36,7 @@ HTML_INDEX_DATA="html/index.dat"
 #
 # Misc. pre-defined variables
 #
-HTML_LOGO="http://www.xorp.org/xorp2.png"
+HTML_LOGO="file:///home/puma/u0/hodson/src/xorp/docs/kdoc/xorp-cropped.png"
 
 #
 # Print message to stderr if DEBUG is set to non-zero value
@@ -495,8 +495,22 @@ kdoc_rip()
     kdocify
 }
 
+#
+# rtrmgr
+#
+kdoc_rtrmgr()
+{
+    lib="rtrmgr"
+    desc="Router Manager"
+    html_start_page="index.html"
+    files="rtrmgr/*.hh"
+    excludes="rtrmgr/*test*h"
+    xref="libxorp libxorp-callback libcomm libxipc"
+    kdocify
+}
+
 KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto mrt cli fea\
-               libfeaclient mld6igmp pim bgp mibs rib rip"
+               libfeaclient mld6igmp pim bgp mibs rib rip rtrmgr"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
     kdoc_$i
