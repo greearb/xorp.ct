@@ -34,7 +34,6 @@ enum TestResult {
 typedef std::set<int>  FakeSnmpdFdSet;
 
 // Local variables
-static TestResult test_result = INTERNAL_FAIL;
 static int cb1_counter, cb2_counter, cb3_counter;
 static FakeSnmpdFdSet exported_readfds, exported_writefds, exported_exceptfds;
 
@@ -47,7 +46,7 @@ extern void run_timer_callbacks (u_int, void *);
 //
 
 int
-register_readfd(int fd, void (*func) (int, void *), void *data)
+register_readfd(int fd, void (*) (int, void *), void *)
 {
     XLOG_INFO("Read file descriptor %d exported", fd);
     if (exported_readfds.end() != exported_readfds.find(fd)) 
@@ -60,7 +59,7 @@ register_readfd(int fd, void (*func) (int, void *), void *data)
 }
 
 int
-register_writefd(int fd, void (*func) (int, void *), void *data)
+register_writefd(int fd, void (*) (int, void *), void *)
 {
     XLOG_INFO("Write file descriptor %d exported", fd);
     if (exported_writefds.end() != exported_writefds.find(fd)) 
@@ -73,7 +72,7 @@ register_writefd(int fd, void (*func) (int, void *), void *data)
 }
 
 int
-register_exceptfd(int fd, void (*func) (int, void *), void *data)
+register_exceptfd(int fd, void (*) (int, void *), void *)
 {
     XLOG_INFO("Exception file descriptor %d exported", fd);
     if (exported_exceptfds.end() != exported_exceptfds.find(fd)) 
@@ -111,14 +110,14 @@ unregister_exceptfd(int fd)
 
 unsigned int
 snmp_alarm_register_hr(struct timeval t, unsigned int flags,
-                       SNMPAlarmCallback * cb, void *cd)
+                       SNMPAlarmCallback *, void *)
 {
     static int  alarm_id = 0; 
     long ms = t.tv_sec*1000 + t.tv_usec/1000;
     if (flags)
-	XLOG_INFO("Periodic alarm registered:  %d ms", ms);
+	XLOG_INFO("Periodic alarm registered:  %ld ms", ms);
     else
-	XLOG_INFO("One time alarm registered:  %d ms", ms);
+	XLOG_INFO("One time alarm registered:  %ld ms", ms);
     return ++alarm_id;
 }
 
@@ -127,8 +126,8 @@ snmp_alarm_unregister (unsigned int) {};
 
 void  snmp_set_do_debugging(int) {};
 int   snmp_get_do_debugging(void) {return 1;};
-void  debugmsg(const char *token, const char *format, ...) {}
-void  debugmsgtoken(const char *token, const char *format, ...) 
+void  debugmsg(const char *, const char *, ...) {}
+void  debugmsgtoken(const char *token, const char * format, ...) 
 {
     if (strcmp("SnmpEventLoop", token)) return; 
     printf("snmp debug:");
@@ -139,7 +138,7 @@ void  debugmsgtoken(const char *token, const char *format, ...)
     return;
 }
 
-int snmp_log(int priority, const char *format, ...) 
+int snmp_log(int, const char * format, ...) 
 {
     printf("snmp log:");
     va_list ap;
@@ -274,7 +273,7 @@ fake_snmpd()
 	XLOG_INFO("fake_select detected activity on xorp file descriptors");
 	run_fd_callbacks(0,0);
     } else {
-	XLOG_INFO("fake_select timed out after %d ms", tv.tv_sec*1000 +
+	XLOG_INFO("fake_select timed out after %ld ms", tv.tv_sec*1000 +
 		    tv.tv_usec/1000);
 	run_timer_callbacks(0,0);
     }
