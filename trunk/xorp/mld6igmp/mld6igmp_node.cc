@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.29 2004/06/09 11:22:13 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.30 2004/06/10 22:41:26 hodson Exp $"
 
 
 //
@@ -339,7 +339,20 @@ Mld6igmpNode::add_vif(const Vif& vif, string& error_msg)
 	delete mld6igmp_vif;
 	return (XORP_ERROR);
     }
-    
+
+    //
+    // Update the primary address
+    //
+    if (mld6igmp_vif->addr_ptr() != NULL) {
+	if (mld6igmp_vif->update_primary_address(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Error updating primary address "
+		       "for vif %s: %s",
+		       mld6igmp_vif->name().c_str(),
+		       error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
     XLOG_INFO("New vif: %s", mld6igmp_vif->str().c_str());
     
     return (XORP_OK);
@@ -525,7 +538,18 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
 	XLOG_INFO("Added new address to vif %s: %s",
 		  mld6igmp_vif->name().c_str(), vif_addr.str().c_str());
     }
-    
+
+    //
+    // Update the primary address
+    //
+    if (mld6igmp_vif->update_primary_address(error_msg) != XORP_OK) {
+	XLOG_ERROR("Error updating primary address "
+		   "for vif %s: %s",
+		   mld6igmp_vif->name().c_str(),
+		   error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
