@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/devnotes/template.hh,v 1.3 2004/06/10 22:40:45 hodson Exp $
 
 #ifndef __PATH_TO_TEMPLATE_HH__
 #define __PATH_TO_TEMPLATE_HH__
