@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.7 2003/06/17 06:44:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.8 2003/06/20 21:44:26 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -74,6 +74,17 @@ main(int /*argc*/, char **argv)
 	*/
  	if (!bgp.get_xrl_target()->done())
  	   bgp.main_loop();
+
+	/* XXX
+	** Wait for one second before starting to exit.
+	** This is a hack to allow any callers of our shutdown XRL to
+	** get a response. It would be better if we could poll to
+	** discover when our response had been sent.
+	*/
+	bool wait_one = false;
+	XorpTimer t = bgp.eventloop().set_flag_after_ms(1000, &wait_one);
+	while ( wait_one == false)
+	    bgp.eventloop().run();
 
     } catch(...) {
 	xorp_catch_standard_exceptions();
