@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.7 2003/06/26 02:22:04 atanu Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.8 2004/06/04 23:58:36 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../../libxipc/call_xrl -w 10}
@@ -12,7 +12,7 @@ BASE=${BASE:-test_peer} # Set BASE in callers environment.
 #
 coord()
 {
-    echo -n "Coord $* "
+    echo "Coord $* "
     $CALLXRL "finder://coord/coord/0.1/command?command:txt=$*"
 
     if [ "${NOBLOCK:-false}" = "true" ]
