@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.21 2005/03/12 21:46:35 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.22 2005/03/24 20:16:26 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -19,9 +19,9 @@ gmake
 2. Internal tests
 =================
 
-To run the internal tests, you must have "bash" installed. Then, after
-the code is compiled, you need to run the following command in the
-top-level directory:
+To run the internal tests, you must have "bash" and "python" installed.
+Then, after the code is compiled, you need to run the following command
+in the top-level directory:
 
 gmake check
 
