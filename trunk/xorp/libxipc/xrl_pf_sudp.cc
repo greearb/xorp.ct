@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.23 2003/08/14 05:20:48 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.24 2003/08/20 23:01:38 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -471,7 +471,9 @@ XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& reply)
 
     try {
 	Xrl xrl(rbuf);
-	return d->dispatch_xrl(xrl.command(), xrl.args(), reply);
+	const string& command = xrl.command();
+	const XrlArgs& args = xrl.args();
+	return d->dispatch_xrl(command, args, reply);
     } catch (InvalidString& e) {
 	debug_msg("Invalid string - failed to dispatch %s\n", rbuf);
     }
