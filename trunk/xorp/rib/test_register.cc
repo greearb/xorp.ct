@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.9 2004/02/06 22:44:12 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.10 2004/02/11 08:48:50 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -145,9 +145,9 @@ main (int /* argc */, char* argv[])
     verify_route("10.0.1.4", "vif1", "10.0.1.1", 0);
     verify_route("10.0.2.4", "vif2", "10.0.2.1", 0);
 
-    rib.add_route("static", IPv4Net("1.0.0.0", 16), IPv4("10.0.0.2"), 0);
-    rib.add_route("static", IPv4Net("1.0.3.0", 24), IPv4("10.0.1.2"), 1);
-    rib.add_route("static", IPv4Net("1.0.9.0", 24), IPv4("10.0.2.2"), 2);
+    rib.add_route("static", IPv4Net("1.0.0.0", 16), IPv4("10.0.0.2"), "", "", 0);
+    rib.add_route("static", IPv4Net("1.0.3.0", 24), IPv4("10.0.1.2"), "", "", 1);
+    rib.add_route("static", IPv4Net("1.0.9.0", 24), IPv4("10.0.2.2"), "", "", 2);
     
     verify_route("1.0.5.4", "vif0", "10.0.0.2", 0);
     verify_route("1.0.3.4", "vif1", "10.0.1.2", 1);
@@ -160,21 +160,21 @@ main (int /* argc */, char* argv[])
 		     "9.255.255.255");
 
     // Add a route to another IGP table
-    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), 3);
+    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), "", "", 3);
     test_route_range("1.0.4.1", "vif0", "10.0.0.2", "1.0.4.0", "1.0.5.255");
     test_route_range("1.0.8.1", "vif0", "10.0.0.2", "1.0.7.0", "1.0.8.255");
     test_route_range("1.0.6.1", "vif2", "10.0.2.2", "1.0.6.0", "1.0.6.255");
 
     // Add an EGP route
-    rib.add_route("ebgp", IPv4Net("5.0.5.0", 24), IPv4("1.0.3.1"), 4);
+    rib.add_route("ebgp", IPv4Net("5.0.5.0", 24), IPv4("1.0.3.1"), "", "", 4);
     test_route_range("5.0.5.1", "vif1", "10.0.1.2", "5.0.5.0", "5.0.5.255");
     test_route_range("2.0.0.1", "discard", "0.0.0.0", "1.1.0.0", "5.0.4.255");
 
-    rib.add_route("ebgp", IPv4Net("1.0.0.0", 20), IPv4("1.0.6.1"), 5);
+    rib.add_route("ebgp", IPv4Net("1.0.0.0", 20), IPv4("1.0.6.1"), "", "", 5);
     test_route_range("1.0.5.1", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.255");
     test_route_range("1.0.6.1", "vif2", "10.0.2.2", "1.0.6.0", "1.0.6.255");
 
-    rib.add_route("ospf", IPv4Net("1.0.5.64", 26), IPv4("10.0.1.2"), 6);
+    rib.add_route("ospf", IPv4Net("1.0.5.64", 26), IPv4("10.0.1.2"), "", "", 6);
     test_route_range("1.0.5.1", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.63");
 
 
@@ -199,14 +199,14 @@ main (int /* argc */, char* argv[])
 
 
     // Add a route that should have no effect
-    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 1);
+    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), "", "", 1);
     if (verbose)
 	printf("##########################\n");
     if (!regserv.verify_no_info())
 	abort();
 
     // Add a route that should cause both registrations to be invalidated
-    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 1);
+    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), "", "", 1);
     if (!regserv.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
 	abort();
     if (!regserv.verify_invalidated("foo2 1.0.5.0/26 mcast:false"))
@@ -251,8 +251,8 @@ main (int /* argc */, char* argv[])
 	abort();
 
     // Test registration where the address doesn't resolve
-    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 1);
-    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 1);
+    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), "", "", 1);
+    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), "", "", 1);
     rib.delete_route("ebgp", IPv4Net("1.0.0.0", 20));
     rib.delete_route("static", IPv4Net("1.0.0.0", 16));
     rib.delete_route("ospf", IPv4Net("1.0.6.0", 24));
@@ -273,7 +273,7 @@ main (int /* argc */, char* argv[])
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
 
-    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), 3);
+    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), "", "", 3);
     if (!regserv.verify_invalidated("foo 1.0.6.0/23 mcast:false"))
 	abort();
     if (!regserv.verify_invalidated("foo2 1.0.6.0/23 mcast:false"))

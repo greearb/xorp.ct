@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.15 2004/02/06 22:44:11 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.16 2004/02/11 08:48:47 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -207,12 +207,18 @@ public:
      * @param net the subnet (address and prefix length) of the route.
      * @param nexthop_addr the nexthop that packets destined for net should be
      * forwarded to.
-     * @param the routing protocol metric associated with this route.
+     * @param ifname the name of the physical interface toward the
+     * destination. If an empty string the interface will be chosen by RIB.
+     * @param vifname the name of the virtual interface toward the
+     * destination. If an empty string the interface will be chosen by RIB.
+     * @param metric the routing protocol metric associated with this route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int add_route(const string&		tablename,
 			  const IPNet<A>&	net,
 			  const A&		nexthop_addr,
+			  const string&		ifname,
+			  const string&		vifname,
 			  uint32_t		metric);
 
     /**
@@ -223,12 +229,19 @@ public:
      * @param net the subnet (address and prefix length) of the route.
      * @param nexthop_addr the new nexthop that packets destined for @ref net
      * should be forwarded to.
-     * @param the new routing protocol metric associated with this route.
+     * @param ifname the name of the physical interface toward the
+     * destination. If an empty string the interface will be chosen by RIB.
+     * @param vifname the name of the virtual interface toward the
+     * destination. If an empty string the interface will be chosen by RIB.
+     * @param metric the new routing protocol metric associated with this
+     * route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int replace_route(const string&	tablename,
 			      const IPNet<A>&	net,
 			      const A&		nexthop_addr,
+			      const string&	ifname,
+			      const string&	vifname,
 			      uint32_t		metric);
 
     /**

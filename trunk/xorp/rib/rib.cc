@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.21 2004/02/12 03:22:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.22 2004/03/18 13:10:35 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -410,7 +410,7 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 	     ai++) {
 	    if (ai->addr().is_ipv4()) {
 		add_route("connected", ai->subnet_addr().get_ipv4net(), 
-			  ai->addr().get_ipv4(), 0);
+			  ai->addr().get_ipv4(), "", "", 0);
 	    }
 	}
 
@@ -440,7 +440,7 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 	     ai++) {
 	    if (ai->addr().is_ipv6()) {
 		add_route("connected", ai->subnet_addr().get_ipv6net(), 
-			  ai->addr().get_ipv6(), 0);
+			  ai->addr().get_ipv6(), "", "", 0);
 	    }
 	}
 
@@ -488,7 +488,7 @@ RIB<A>::add_vif_address(const string&	vifname,
     }
     vi->second.add_address(VifAddr(addr, subnet, A::ZERO(), A::ZERO()));
     // Add a route for this subnet
-    add_route("connected", subnet, addr, /* best possible metric */ 0);
+    add_route("connected", subnet, addr, "", "", /* best possible metric */ 0);
     return XORP_OK;
 }
 
@@ -523,10 +523,12 @@ RIB<A>::delete_vif_address(const string& vifname,
 
 template<class A>
 int
-RIB<A>::add_route(const string& tablename, 
-		  const IPNet<A>& net, 
-		  const A& nexthop_addr,
-		  uint32_t metric) 
+RIB<A>::add_route(const string&		tablename,
+		  const IPNet<A>&	net,
+		  const A&		nexthop_addr,
+		  const string&		ifname,
+		  const string&		vifname,
+		  uint32_t		metric)
 {
     RouteTable<A>* rt = find_table(tablename);
     if (rt == NULL) {
@@ -562,6 +564,27 @@ RIB<A>::add_route(const string& tablename,
 		       "an origin table.", tablename.c_str());
 	    return XORP_ERROR;
 	}
+    }
+
+    if (! vifname.empty()) {
+	//
+	// Add a route with explicitly specified network interface
+	//
+	map<const string, Vif>::iterator iter = _vifs.find(vifname);
+	if (iter == _vifs.end()) {
+	    XLOG_ERROR("Attempting to add route to table \"%s\" "
+		       "(prefix %s next-hop %s ifname %s vifname %s): "
+		       "no such network interface",
+		       tablename.c_str(), net.str().c_str(),
+		       nexthop_addr.str().c_str(),
+		       ifname.c_str(), vifname.c_str());
+	    return XORP_ERROR;
+	}
+	Vif* vif = &iter->second;
+	IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
+	ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol, metric));
+	flush();
+	return XORP_OK;
     }
 
     //
@@ -648,10 +671,12 @@ RIB<A>::add_route(const string& tablename,
 
 template<class A>
 int
-RIB<A>::replace_route(const string& tablename, 
-		      const IPNet<A>& net, 
-		      const A& nexthop_addr,
-		      uint32_t metric) 
+RIB<A>::replace_route(const string&	tablename,
+		      const IPNet<A>&	net,
+		      const A&		nexthop_addr,
+		      const string&	ifname,
+		      const string&	vifname,
+		      uint32_t		metric)
 {
     RouteTable<A>* rt = find_table(tablename);
     if (NULL == rt)
@@ -665,7 +690,8 @@ RIB<A>::replace_route(const string& tablename,
     if (response != XORP_OK)
 	return response;
 
-    response = add_route(tablename, net, nexthop_addr, metric);
+    response = add_route(tablename, net, nexthop_addr, ifname, vifname,
+			 metric);
 
     // No need to flush here, as add_route will do it for us.
 
