@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.9 2003/10/27 00:36:34 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.10 2003/10/30 19:44:11 pavlin Exp $
 #
 
 #
@@ -83,22 +83,22 @@ case ${HOSTNAME} in
 
 	FreeBSD)
 	HAVE_IPV6="true"
-	IFNAME="fxp0"
+	IFNAME="xl0"
 	MAC="00:01:02:71:1B:48"
 	TEST_MAC="00:01:02:71:1b:49"
-	PIF_INDEX="2"
+	PIF_INDEX="1"
 	;;
 
 	NetBSD)
 	HAVE_IPV6="true"
-	IFNAME="fxp0"
-	PIF_INDEX="2"
+	IFNAME="xl0"
+	PIF_INDEX="1"
 	;;
 
 	OpenBSD)
 	HAVE_IPV6="true"
-	IFNAME="fxp0"
-	PIF_INDEX="2"
+	IFNAME="xl0"
+	PIF_INDEX="1"
 	;;
 
 	*)
