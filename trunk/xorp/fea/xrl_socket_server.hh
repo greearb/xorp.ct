@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.1 2003/12/17 00:04:49 hodson Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -164,6 +164,8 @@ public:
 
     inline EventLoop& eventloop()			{ return _e; }
     inline const EventLoop& eventloop()	const		{ return _e; }
+
+    inline const AddressTableBase& address_table() const { return _atable; }
 
 protected:
     void invalidate_address(const IPv4& addr, const string& why);

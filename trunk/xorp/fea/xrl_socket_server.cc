@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.3 2004/01/12 22:11:26 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.4 2004/01/16 19:05:43 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -291,6 +291,19 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
     cmd->data().resize(8000);
     ssize_t rsz = recvfrom(fd, &cmd->data()[0], cmd->data().size(), 0,
 			   &sa, &sa_len);
+
+    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
+    IPv4 	src_addr(sin);
+    uint16_t 	src_port(ntohs(sin.sin_port));
+
+    if (_ss.address_table().address_valid(src_addr)) {
+	// Looks like one of ours, drop it silently.
+	// This should only be invoked for multicast packets where
+	// setting loopback failed.
+	delete cmd;
+	return;
+    }
+
     if (rsz < 0) {
 	delete cmd;
 	ref_ptr<XrlSocketCommandBase> ecmd = new
@@ -303,9 +316,9 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
     cmd->data().resize(rsz);
 
     XLOG_ASSERT(sa.sa_family == AF_INET);
-    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
-    cmd->set_source_host(IPv4(sin));
-    cmd->set_source_port(ntohs(sin.sin_port));
+
+    cmd->set_source_host(src_addr);
+    cmd->set_source_port(src_port);
 
     owner().enqueue(cmd);
 }
@@ -643,15 +656,22 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
+    if (comm_set_iface4(fd, &ia) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Setting interface.");
+    }
     if (comm_set_ttl(fd, ttl) != XORP_OK) {
 	comm_close(fd);
 	return XrlCmdError::COMMAND_FAILED("Setting TTL failed.");
+    }
+    if (comm_set_loopback(fd, 0) != XORP_OK) {
+	XLOG_WARNING("Could not turn off loopback.");
     }
 
     RemoteSocketOwner* rso = find_or_create_owner(creator);
     if (rso == 0) {
 	comm_close(fd);
-	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+	return XrlCmdError::COMMAND_FAILED("Could not create owner.");
     }
     _v4sockets.push_back(new RemoteSocket<IPv4>(*this, *rso, fd, local_addr));
     _v4sockets.back()->set_data_recv_enable(true);
@@ -887,6 +907,9 @@ XrlSocketServer::socket4_0_1_send_to(const string&		sockid,
 			     reinterpret_cast<const sockaddr*>(&sai),
 			     sizeof(sai));
 
+	    fprintf(stderr, "send_to %s/%u %u bytes errno = %d\n",
+		    remote_addr.str().c_str(), remote_port,
+		    reinterpret_cast<uint32_t>(data.size()), errno);
 	    if (out == (int)data.size()) {
 		return XrlCmdError::OKAY();
 	    }
