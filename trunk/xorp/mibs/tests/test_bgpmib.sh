@@ -61,7 +61,7 @@ PEER2_AS=65000
 
 HOLDTIME=5
 
-TRAFFIC_FILES="../../../data/bgp/icsi1.mrtd"
+TRAFFIC_FILES=""
 
 configure_bgp()
 {
@@ -97,7 +97,7 @@ test1()
 {
     TFILE=$1
 
-    echo "TEST1 - Try to read the bgpPeerTable - $TFILE"
+    echo "TEST1 - Read the bgpPeerTable" 
 
     # Reset the peers
     reset
@@ -194,7 +194,7 @@ then
     ${PATH_TO_BGP}/bgp         = $CXRL finder://bgp/common/0.1/get_target_name
     ${PTH}/test_peer -s peer1  = $CXRL finder://peer1/common/0.1/get_target_name
     ${PTH}/coord               = $CXRL finder://coord/common/0.1/get_target_name
-    ${SNMPD} -f -l ${XORP}/mibs/test/snmp.log -D${DBGTOK} -c ${SNMPCFG} -r localhost:51515 = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    ${SNMPD} -f -l ${XORP}/mibs/tests/snmp.log -D${DBGTOK} -c ${SNMPCFG} -r localhost:51515 = $CXRL finder://xorp_if_mib/common/0.1/get_status
 EOF
     trap '' 0
     exit $?
