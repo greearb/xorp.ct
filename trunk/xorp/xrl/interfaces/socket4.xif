@@ -66,6 +66,8 @@ interface socket4/0.1 {
      *
      * @param mcast_addr the multicast group address to join.
      *
+     * @param ttl the ttl to use for this multicast socket.
+     *
      * @param reuse allow other sockets to bind to same multicast group.
      *
      * @param sockid return parameter that contains unique socket id when
@@ -75,6 +77,7 @@ interface socket4/0.1 {
 				& local_addr:ipv4			\
 				& local_port:u32			\
 				& mcast_addr:ipv4			\
+				& ttl:u32				\
 				& reuse:bool				\
 				-> sockid:txt
 
