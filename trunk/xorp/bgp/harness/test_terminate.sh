@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.4 2003/05/29 23:34:02 atanu Exp $
+# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.5 2003/07/17 00:28:32 pavlin Exp $
 #
 
 #
@@ -12,8 +12,9 @@
 #
 # Preconditons
 # 1) Run a finder process
-# 2) Run xorp "../xorp_bgp"
-#
+# 2) Run "../fea/xorp_fea_dummy"
+# 3) Run "../rib/xorp_rib"
+# 4) Run "../xorp_bgp"
 
 set -e
 
@@ -51,13 +52,44 @@ configure_bgp()
 
 test1()
 {
+    echo "TEST1 - Verify that BGP shuts down cleanly"
+
+    CALLXRL=$CALLXRL ${srcdir}/../xrl_shell_funcs.sh shutdown
+
+    sleep 5
+}
+
+test2()
+{
+    echo "TEST2 - Verify that BGP shuts down after enabling three peerings"
+
+    LOCALHOST=localhost
+    HOLDTIME=60
+    NEXT_HOP="127.0.0.1"
+    PEER=localhost
+
+    PORT=10001;PEER_PORT=20001;PEER_AS=6401
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    enable_peer $IPTUPLE
+
+    PORT=10002;PEER_PORT=20002;PEER_AS=6402
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    enable_peer $IPTUPLE
+
+    PORT=10003;PEER_PORT=20003;PEER_AS=6403
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    enable_peer $IPTUPLE
+
     CALLXRL=$CALLXRL ${srcdir}/../xrl_shell_funcs.sh shutdown
 
     sleep 5
 }
     
 TESTS_NOT_FIXED=''
-TESTS='test1'
+TESTS='test1 test2'
 
 # Include command line
 . ${srcdir}/args.sh
@@ -67,6 +99,8 @@ then
 CXRL="$CALLXRL -r 10"
     ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/xorp_finder
+    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
+    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
     ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
 EOF
     trap '' 0
