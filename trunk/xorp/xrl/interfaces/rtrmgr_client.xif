@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rtrmgr_client.xif,v 1.2 2002/08/21 12:44:34 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/rtrmgr_client.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
  
 /*
  * Router Manager Client XRL interface.

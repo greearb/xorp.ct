@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/datain.xif,v 1.1 2002/06/13 22:58:51 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/datain.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * Datain Interface. This interface is associated with the the test peer.
