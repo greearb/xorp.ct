@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.10 2003/02/07 00:40:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.11 2003/02/07 05:16:06 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -962,7 +962,7 @@ PimMre::recompute_assert_winner_nbr_sg_gen_id_changed(uint16_t vif_index,
 	return (false);
     
     if (is_i_am_assert_loser_state(vif_index)) {
-	if (assert_winner_metric_wc(vif_index)->addr() == nbr_addr)
+	if (assert_winner_metric_sg(vif_index)->addr() == nbr_addr)
 	    goto a5;
 	// This is not the assert winner. Ignore.
 	return (false);
@@ -994,7 +994,7 @@ PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
 	return (false);
     
     if (is_i_am_assert_loser_state(vif_index)) {
-	if (assert_winner_metric_sg(vif_index)->addr() == nbr_addr)
+	if (assert_winner_metric_wc(vif_index)->addr() == nbr_addr)
 	    goto a5;
 	// This is not the assert winner. Ignore.
 	return (false);

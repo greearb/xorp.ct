@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.4 2003/01/24 19:50:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.5 2003/02/07 05:16:06 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -210,8 +210,8 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_rp(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -222,8 +222,8 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -234,8 +234,8 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_WC_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -246,8 +246,8 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -258,8 +258,8 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_SG_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -270,8 +270,8 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_SG_RPT_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -289,8 +289,8 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_rp(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -301,8 +301,8 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_WC_GEN_ID_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -313,8 +313,9 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED);
+	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
 	pim_mre_task->set_vif_index(vif_index);
-	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
+	pim_mre_task->set_addr_arg(pim_nbr_addr);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -325,8 +326,8 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_SG_GEN_ID_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -337,8 +338,9 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED);
+	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
-	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
+	pim_mre_task->set_addr_arg(pim_nbr_addr);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -356,8 +358,8 @@ PimMrt::add_task_receive_join_rp(uint16_t vif_index, const IPvX& rp_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_RP);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -374,8 +376,8 @@ PimMrt::add_task_receive_join_wc(uint16_t vif_index, const IPvX& group_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_WC);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_wc(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -394,9 +396,9 @@ PimMrt::add_task_receive_join_sg(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_SG);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -415,9 +417,9 @@ PimMrt::add_task_receive_join_sg_rpt(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_SG_RPT);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -434,8 +436,8 @@ PimMrt::add_task_receive_prune_rp(uint16_t vif_index, const IPvX& rp_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_RP);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -452,8 +454,8 @@ PimMrt::add_task_receive_prune_wc(uint16_t vif_index, const IPvX& group_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_WC);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_wc(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -471,8 +473,8 @@ PimMrt::add_task_see_prune_wc(uint16_t vif_index, const IPvX& group_addr,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_SEE_PRUNE_WC);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_wc(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_addr_arg(target_nbr_addr);	// XXX
 	
 	add_task(pim_mre_task);
@@ -492,9 +494,9 @@ PimMrt::add_task_receive_prune_sg(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_SG);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -513,9 +515,9 @@ PimMrt::add_task_receive_prune_sg_rpt(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_SG_RPT);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -533,8 +535,8 @@ PimMrt::add_task_receive_end_of_message_sg_rpt(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -552,8 +554,8 @@ PimMrt::add_task_downstream_jp_state_rp(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_RP);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -571,8 +573,8 @@ PimMrt::add_task_downstream_jp_state_wc(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_WC);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_wc(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -591,9 +593,9 @@ PimMrt::add_task_downstream_jp_state_sg(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_SG);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -612,9 +614,9 @@ PimMrt::add_task_downstream_jp_state_sg_rpt(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_SG_RPT);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -651,8 +653,8 @@ PimMrt::add_task_local_receiver_include_wc(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_LOCAL_RECEIVER_INCLUDE_WC);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_wc(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -671,9 +673,9 @@ PimMrt::add_task_local_receiver_include_sg(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_LOCAL_RECEIVER_INCLUDE_SG);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -692,9 +694,9 @@ PimMrt::add_task_local_receiver_exclude_sg(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_LOCAL_RECEIVER_EXCLUDE_SG);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -711,8 +713,8 @@ PimMrt::add_task_assert_state_wc(uint16_t vif_index, const IPvX& group_addr)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_STATE_WC);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_wc(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -731,9 +733,9 @@ PimMrt::add_task_assert_state_sg(uint16_t vif_index,
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_STATE_SG);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -750,8 +752,8 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_I_AM_DR);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -763,8 +765,8 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_I_AM_DR);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -776,8 +778,8 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_I_AM_DR);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -797,8 +799,8 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_ADDRESS);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -810,8 +812,8 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_ADDRESS);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -823,8 +825,8 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_ADDRESS);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -844,8 +846,8 @@ PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_SUBNET_ADDRESS);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -857,8 +859,8 @@ PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_SUBNET_ADDRESS);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -870,8 +872,8 @@ PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_SUBNET_ADDRESS);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -950,8 +952,8 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_RP_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -962,8 +964,8 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_S_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -977,8 +979,8 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_IN_START_VIF);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -990,8 +992,8 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_IN_START_VIF);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -1003,8 +1005,8 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_IN_START_VIF);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -1024,8 +1026,8 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_RP_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -1036,8 +1038,8 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_MRIB_S_CHANGED);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -1051,8 +1053,8 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_IN_STOP_VIF);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -1064,8 +1066,8 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_IN_STOP_VIF);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
@@ -1077,8 +1079,8 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_IN_STOP_VIF);
-	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
+	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
