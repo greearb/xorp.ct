@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.51 2005/03/03 18:50:31 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.52 2005/03/04 03:18:26 atanu Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -122,10 +122,10 @@ RIB<A>::remove_table(const string& tablename)
 }
 
 template <typename A>
-inline int
+inline uint32_t
 RIB<A>::admin_distance(const string& tablename)
 {
-    map<string, int>::iterator mi;
+    map<string, uint32_t>::iterator mi;
 
     mi = _admin_distances.find(tablename);
     if (mi == _admin_distances.end()) {
@@ -379,7 +379,7 @@ int
 RIB<A>::new_origin_table(const string&	tablename,
 			 const string&	target_class,
 			 const string&	target_instance,
-			 int		admin_distance,
+			 uint32_t	admin_distance,
 			 ProtocolType	protocol_type)
 {
     OriginTable<A>* ot = new OriginTable<A>(tablename, admin_distance,
@@ -724,14 +724,11 @@ RIB<A>::add_route(const string&		tablename,
     //
     // Only accept the least significant 16 bits of metric.
     //
-    if (protocol->protocol_type() == IGP) {
-	// TODO: shouldn't the check apply for all protocols?
-	if (metric > 0xffff) {
-	    XLOG_WARNING("IGP metric value %u is greater than 0xffff from "
-			 "table \"%s\"",  XORP_UINT_CAST(metric),
-			 tablename.c_str());
-	    metric &= 0xffff;
-	}
+    if (metric > 0xffff) {
+	XLOG_WARNING("Protocol metric value %u is greater than 0xffff from "
+		     "table \"%s\"",  XORP_UINT_CAST(metric),
+		     tablename.c_str());
+	metric &= 0xffff;
     }
 
     //
