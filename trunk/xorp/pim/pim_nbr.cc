@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.9 2003/09/05 15:49:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.10 2003/09/30 18:27:05 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -51,14 +51,14 @@
 /**
  * PimNbr::PimNbr:
  * @pim_vif: The protocol vif towards the neighbor.
- * @addr: The address of the neighbor.
+ * @primary_addr: The primary address of the neighbor.
  * 
  * PIM neighbor constructor.
  **/
-PimNbr::PimNbr(PimVif& pim_vif, const IPvX& addr, int proto_version)
+PimNbr::PimNbr(PimVif& pim_vif, const IPvX& primary_addr, int proto_version)
     : _pim_node(pim_vif.pim_node()),
       _pim_vif(pim_vif),
-      _addr(addr),
+      _primary_addr(primary_addr),
       _proto_version(proto_version),
       _jp_header(pim_vif.pim_node()),
       _startup_time(TimeVal::MAXIMUM())
@@ -90,7 +90,7 @@ PimNbr::reset_received_options()
     // TODO: 0xffffffffU for _genid should be #define
     _genid = 0xffffffffU;
     _is_genid_present = false;
-    set_dr_priority(PIM_HELLO_DR_ELECTION_PRIORITY_DEFAULT);
+    set_dr_priority(PIM_HELLO_DR_PRIORITY_DEFAULT);
     set_is_dr_priority_present(false);
     _hello_holdtime = PIM_HELLO_HELLO_HOLDTIME_DEFAULT;
     _neighbor_liveness_timer.unschedule();
@@ -99,6 +99,7 @@ PimNbr::reset_received_options()
     _lan_delay = 0;
     _override_interval = 0;
     _is_nohello_neighbor = false;
+    _secondary_addr_list.clear();
 }
 
 /**
@@ -113,6 +114,44 @@ uint16_t
 PimNbr::vif_index() const
 {
     return (pim_vif().vif_index());
+}
+
+void
+PimNbr::add_secondary_addr(const IPvX& v)
+{
+    if (find(_secondary_addr_list.begin(), _secondary_addr_list.end(), v)
+	!= _secondary_addr_list.end()) {
+	return;		// The address is already added
+    }
+
+    _secondary_addr_list.push_back(v);
+}
+
+void
+PimNbr::delete_secondary_addr(const IPvX& v)
+{
+    list<IPvX>::iterator iter;
+
+    iter = find(_secondary_addr_list.begin(), _secondary_addr_list.end(), v);
+    if (iter != _secondary_addr_list.end())
+	_secondary_addr_list.erase(iter);
+}
+
+bool
+PimNbr::has_secondary_addr(const IPvX& secondary_addr) const
+{
+    return (find(_secondary_addr_list.begin(), _secondary_addr_list.end(),
+		 secondary_addr)
+	    != _secondary_addr_list.end());
+}
+
+bool
+PimNbr::is_my_addr(const IPvX& addr) const
+{
+    if (addr == _primary_addr)
+	return true;
+
+    return (has_secondary_addr(addr));
 }
 
 int
@@ -154,7 +193,7 @@ PimNbr::neighbor_liveness_timer_timeout()
 {
     pim_vif().delete_pim_nbr_from_nbr_list(this);
     
-    if (pim_vif().dr_addr() == addr()) {
+    if (pim_vif().dr_addr() == primary_addr()) {
 	// The neighbor to expire is the DR. Select a new DR.
 	pim_vif().pim_dr_elect();
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.6 2003/08/14 01:16:35 pavlin Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.7 2003/09/30 18:27:05 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -41,15 +41,20 @@ class PimVif;
 
 class PimNbr {
 public:
-    PimNbr(PimVif& pim_vif, const IPvX& addr, int proto_version);
+    PimNbr(PimVif& pim_vif, const IPvX& primary_addr, int proto_version);
     ~PimNbr();
     
     void	reset_received_options();
     PimNode&	pim_node()	const	{ return (_pim_node);	}
     PimVif&	pim_vif()	const	{ return (_pim_vif);	}
     uint16_t	vif_index()	const;
-    const IPvX&	addr()		const	{ return (_addr);	}
-    void	set_addr(const IPvX& v) { _addr = v;	}
+    const IPvX&	primary_addr()	const	{ return (_primary_addr); }
+    void	set_primary_addr(const IPvX& v) { _primary_addr = v; }
+    void	add_secondary_addr(const IPvX& v);
+    void	delete_secondary_addr(const IPvX& v);
+    void	clear_secondary_addr_list() { _secondary_addr_list.clear(); }
+    bool	has_secondary_addr(const IPvX& secondary_addr) const;
+    bool	is_my_addr(const IPvX& addr) const;
     int		proto_version() const { return (_proto_version); }
     void	set_proto_version(int v) { _proto_version = v; }
     
@@ -94,7 +99,7 @@ public:
     void	pim_hello_lan_prune_delay_process(bool lan_prune_delay_tbit,
 						  uint16_t lan_delay,
 						  uint16_t override_interval);
-    void	pim_hello_dr_election_priority_process(uint32_t dr_priority);
+    void	pim_hello_dr_priority_process(uint32_t dr_priority);
     void	pim_hello_genid_process(uint32_t genid);
     
     bool	is_nohello_neighbor() const { return (_is_nohello_neighbor); }
@@ -145,7 +150,8 @@ private:
     // Fields to hold information from the PIM_HELLO messages
     PimNode&	_pim_node;		// The associated PIM node
     PimVif&	_pim_vif;		// The corresponding PIM vif
-    IPvX	_addr;			// The address of the neighbor
+    IPvX	_primary_addr;		// The primary address of the neighbor
+    list<IPvX>	_secondary_addr_list;	// The secondary addresses of the neighbor
     int		_proto_version;		// The protocol version of the neighbor
     uint32_t	_genid;			// The Gen-ID of the neighbor
     bool	_is_genid_present;	// Is the Gen-ID field is present
