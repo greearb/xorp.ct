@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.2 2003/01/30 00:39:32 pavlin Exp $"
 
 
 //
@@ -191,7 +191,7 @@ PimScopeZone::~PimScopeZone()
 void
 PimScopeZone::set_scoped_vif(uint16_t vif_index, bool v)
 {
-    if (vif_index <= _scoped_vifs.size()) {
+    if (vif_index < _scoped_vifs.size()) {
 	if (v)
 	    _scoped_vifs.set(vif_index);
 	else
