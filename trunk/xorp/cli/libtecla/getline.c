@@ -4921,6 +4921,20 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
     if(gl_bind_terminal_keys(gl))
       return 1;
   };
+
+  if (gl->is_net) {
+/*
+ * Lookup the terminal control string and size information.
+ */
+    if(gl_control_strings(gl, term))
+      return 1;
+/*
+ * Bind terminal-specific keys.
+ */
+    if(gl_bind_terminal_keys(gl))
+      return 1;
+  };
+
   return 0;
 }
 
