@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.4 2002/12/09 18:29:00 hodson Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -220,7 +220,7 @@ protected:
 
     void process_recv_data(const vector<uint8_t>& pkt)
     {
-	const uint8_t* buf = pkt.begin();
+	const uint8_t* buf = &pkt[0];
 	size_t bufbytes = pkt.size();
 
 	if (bufbytes < sizeof(struct ip)) {
