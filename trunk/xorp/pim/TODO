@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.41 2003/06/24 19:31:09 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.42 2003/06/24 20:38:22 pavlin Exp $
 #
+
+* IMPL: Implement the upstream (*,G) and (S,G) spec modifications
+  regarding "RPF'(*,G) changes" -> "RPF'(*,G) changes due to an Assert"
+  and "RPF'(S,G) changes" -> "RPF'(S,G) changes due to an Assert"
 
 * PIM SPEC: Add text to specify the PIM border router behavior regarding
   periodic (*,*,RP) Join and (S,G,rpt) Prune behavior:
