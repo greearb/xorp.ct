@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.18 2004/08/22 05:56:53 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.19 2004/09/15 18:43:57 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -78,7 +78,7 @@ gmake check
 	  [ 2004/06/20 22:26:09  ERROR test_pim:31634 LIBCOMM +582 comm_sock.c comm_sock_accept ] Error accepting socket 4: Too many open files
 
       then you should increase the file descriptors limit by
-      "limit descriptors 400" in tcsh or "ulimit -n 400" in sh.
+      "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
 
 3.3. OpenBSD
 ============
@@ -95,7 +95,7 @@ gmake check
       packages). Then, you must set environmental variables CC and CXX
       to point to the new compiler before running "./configure"
       (e.g., "setenv CC egcc; setenv CXX eg++").
-    - The code compiles with the new compiler, but some of the the internal
+    - The code compiles with the new compiler, but some of the internal
       tests fail.
     - The default datasize limit per user may not be sufficient to compile
       some parts of the code, hence you may need to increase the datasize
@@ -103,8 +103,8 @@ gmake check
 	  /usr/bin/ld: final link failed: Memory exhausted
 	  collect2: ld returned 1 exit status
       then you should increase the data size limit by
-      "limit datasize 200000" in tcsh or "ulimit -d 200000" in sh.
-      If necessary, increase further the the datasize limit.
+      "limit datasize 200000" in csh/tcsh or "ulimit -d 200000" in sh.
+      If necessary, increase further the datasize limit.
     - The default limit of maximum opened file descriptors per process
       is 64 which may not be sufficient. If you run a XORP program and
       there are errors like:
@@ -112,7 +112,32 @@ gmake check
 	  [ 2004/06/20 22:26:09  ERROR test_pim:31634 LIBCOMM +582 comm_sock.c comm_sock_accept ] Error accepting socket 4: Too many open files
 
       then you should increase the file descriptors limit by
-      "limit descriptors 400" in tcsh or "ulimit -n 400" in sh.
+      "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
+
+  * OpenBSD-3.6-current (as of February 2005) on i386 and amd64:
+    - The default gcc/g++ compiler (version 3.3.5 (propolice)) has a bug
+      in the propolice implementation, hence you must disable the propolice
+      feature. You need to add the "-fno-stack-protector" flag to your
+      CFLAGS and CXXFLAGS environmental variables. E.g. (in csh/tcsh):
+	  setenv CFLAGS -fno-stack-protector
+	  setenv CXXFLAGS -fno-stack-protector
+	  ./configure
+    - The code compiles, and the internal tests appear to succeed.
+    - The default datasize limit per user may not be sufficient to compile
+      some parts of the code, hence you may need to increase the datasize
+      limit.  If you see a compilation error like:
+	  collect2: ld terminated with signal 11 [Segmentation fault], core dumped
+      then you should increase the data size limit by
+      "limit datasize 200000" in csh/tcsh or "ulimit -d 200000" in sh.
+      If necessary, increase further the datasize limit.
+    - The default limit of maximum opened file descriptors per process
+      is 64 which may not be sufficient. If you run a XORP program and
+      there are errors like:
+
+	  [ 2004/06/20 22:26:09  ERROR test_pim:31634 LIBCOMM +582 comm_sock.c comm_sock_accept ] Error accepting socket 4: Too many open files
+
+      then you should increase the file descriptors limit by
+      "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
 
 3.4. Linux
 ==========
