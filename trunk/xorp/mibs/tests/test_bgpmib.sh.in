@@ -64,7 +64,7 @@ onexit()
 	echo "$0: Tests Succeeded"
 	
         # Cleanup only on success	
-	rm -f bgpPeerTable?.tmp bgp4PathAttrTable?.tmp snmpd*.log
+	rm -f bgpPeerTable?.tmp bgp4PathAttrTable?.tmp snmp*.log
     else
 	echo "$0: Tests Failed"
     fi
@@ -196,6 +196,15 @@ test1()
  
     echo "${bgp_local_as}"
 
+    ${CALLXRL} "finder://bgp/bgp/0.2/set_bgpid?id:ipv4=${ID}"
+
+    echo -n getting the BGP identifier...
+    bgp_id=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpIdentifier.0 | \
+	sed -e 's/BGP4-MIB::bgpIdentifier\.0 = IpAddress: //'`  
+
+    if [ "${bgp_id}" != "${ID}" ]; then exit 1; fi
+ 
+    echo "${bgp_id}"
 
     echo 'walking through the values of the BGP peer table... '
     snmpwalk ${SNMPCONF} ${SNMPHOST} BGP4-MIB::bgpPeerTable > bgpPeerTable1.tmp
@@ -242,13 +251,12 @@ test1()
     reset
 }
 
-
 #
 # This test populates BGP route list with bogus routes, and reads the
 # PathAttrTable 
 #
 
-test2()
+test2_full()
 {
     TFILE=$1
 
@@ -261,7 +269,7 @@ test2()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
     
-    NOBLOCK=true coord peer1 send dump mrtd update $TFILE  
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE $2 ${ROUTE_UPDATES}
 
     peer_stationary_state peer1
 
@@ -308,6 +316,14 @@ test2()
 }
 
 #
+# Limited version of the previous test
+#
+test2()
+{
+    ROUTE_UPDATES=50 test2_full $1 
+}
+
+#
 # This test tests the BGP SNMP traps 
 #
 
@@ -321,7 +337,7 @@ test3()
     # Reset the peers
     reset
 
-    # Have peer1 connect to BGP and feed it routes 
+    # Have peer1 connect to BGP 
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
     
@@ -353,8 +369,51 @@ test3()
     reset
 }
 
+#
+# This is a convenient way to start everything up, and do nothing
+# To invoke this function:
+#      ./test_bgpmib.sh -t just_start
+#
+just_start()
+{
+    TFILE=$1
 
-TESTS_NOT_FIXED=''
+    echo "Start everything up, and wait for user input"
+
+    # Reset the peers
+    reset
+
+    # Have peer1 connect to BGP and feed it routes 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+    
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE  50
+
+    peer_stationary_state peer1
+
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    # wait for user to exit
+    echo 'Press Ctrl-C when done playing with the SNMP agent...'
+    sleep 360000
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+    # Reset the connection
+    reset
+}
+
+TESTS_NOT_FIXED='test2_full'
 TESTS='test1 test2 test3'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
@@ -365,7 +424,7 @@ TIME_WAIT=`time_wait_seconds`
 
 if [ ${START_PROGRAMS} = "yes" ]
 then
-    SNMPD=/usr/local/sbin/snmpd
+    SNMPD=@snmpd@
     if [ "$SNMPD" = "not_found" ]; then exit 1; fi
     SNMPTRAPD=`echo ${SNMPD} | sed -e 's/snmpd/snmptrapd/'`
     configure_snmp

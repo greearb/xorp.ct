@@ -36,7 +36,8 @@ typedef struct bgp4PathAttrTable_context_s {
     unsigned long bgp4PathAttrIpAddrPrefixLen;
     unsigned long bgp4PathAttrIpAddrPrefix;
     long bgp4PathAttrOrigin;
-    vector<uint8_t> bgp4PathAttrASPathSegment;
+    u_char * bgp4PathAttrASPathSegment;
+    unsigned long bgp4PathAttrASPathSegmentLen;
     unsigned long bgp4PathAttrNextHop;
     long bgp4PathAttrMultiExitDisc;
     long bgp4PathAttrLocalPref;
@@ -45,7 +46,8 @@ typedef struct bgp4PathAttrTable_context_s {
     unsigned long bgp4PathAttrAggregatorAddr;
     long bgp4PathAttrCalcLocalPref;
     long bgp4PathAttrBest;
-    vector<uint8_t> bgp4PathAttrUnknown;
+    u_char * bgp4PathAttrUnknown;
+    unsigned long bgp4PathAttrUnknownLen; 
 
     uint32_t update_signature;
 } bgp4PathAttrTable_context;

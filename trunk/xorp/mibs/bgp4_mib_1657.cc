@@ -22,6 +22,7 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgpversion.hh"
 #include "bgp4_mib_1657_bgplocalas.hh"
+#include "bgp4_mib_1657_bgpidentifier.hh"
 #include "bgp4_mib_1657_bgppeertable.hh"
 #include "bgp4_mib_1657_bgp4pathattrtable.hh"
 
@@ -38,6 +39,7 @@ init_bgp4_mib_1657 (void)
     init_bgp4_mib_1657_bgpversion();
     init_bgp4_mib_1657_bgplocalas();
     init_bgp4_mib_1657_bgppeertable();
+    init_bgp4_mib_1657_bgpidentifier();
     init_bgp4_mib_1657_bgp4pathattrtable();
 
     // NOTE:  these xlog calls are required by each mib module, since the
