@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.36 2004/07/26 08:42:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.37 2004/10/02 03:42:11 atanu Exp $"
 
 
 //
@@ -148,9 +148,14 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 	finder_hostname, finder_port);
 
     //
+    // Profile entity.
+    //
+    Profile profile;
+    
+    //
     // FtiConfig
     //
-    FtiConfig fticonfig(eventloop);
+    FtiConfig fticonfig(eventloop, profile);
     if (is_dummy)
 	fticonfig.set_dummy();
     fticonfig.start();
@@ -200,11 +205,6 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 	xrl_std_router_fea.finder_port());
     xss.startup();
 
-    //
-    // Profile entity.
-    //
-    Profile profile;
-    
     //
     // XRL Target
     //

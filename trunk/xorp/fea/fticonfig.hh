@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.17 2004/08/17 02:20:06 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.18 2004/09/01 18:11:00 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -33,6 +33,7 @@
 #include "fticonfig_table_observer.hh"
 
 class EventLoop;
+class Profile;
 class FtiConfigEntryGet;
 class FtiConfigEntrySet;
 class FtiConfigEntryObserver;
@@ -56,7 +57,7 @@ public:
      * 
      * @param eventloop the event loop.
      */
-    FtiConfig(EventLoop& eventloop);
+    FtiConfig(EventLoop& eventloop, Profile& profile);
 
     /**
      * Virtual destructor (in case this class is used as base class).
@@ -391,6 +392,7 @@ protected:
     
 private:
     EventLoop&	_eventloop;
+    Profile&	_profile;
 
     list<FtiConfigEntryGet*>		_ftic_entry_gets;
     list<FtiConfigEntrySet*>		_ftic_entry_sets;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.34 2004/10/02 03:42:09 atanu Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.35 2004/10/02 04:09:16 atanu Exp $"
 
 #include "fea_module.h"
 
@@ -101,11 +101,18 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     //
     // Initialize Components
     //
+    //
+
+    //
+    // Profile entity.
+    //
+    Profile profile;
+    initialize_profiling_variables(profile);
 
     //
     // FtiConfig
     //
-    FtiConfig fticonfig(eventloop);
+    FtiConfig fticonfig(eventloop, profile);
     if (is_dummy)
 	fticonfig.set_dummy();
     fticonfig.start();
@@ -153,12 +160,6 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 			xrl_std_router_fea.finder_address(),
 			xrl_std_router_fea.finder_port());
     xss.startup();
-
-    //
-    // Profile entity.
-    //
-    Profile profile;
-    initialize_profiling_variables(profile);
 
     //
     // XRL Target

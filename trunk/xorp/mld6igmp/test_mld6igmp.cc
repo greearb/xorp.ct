@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.31 2004/06/10 22:41:27 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.32 2004/10/02 03:42:10 atanu Exp $"
 
 
 //
@@ -143,9 +143,14 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
 				    finder_hostname, finder_port);
 
     //
+    // Profile entity.
+    //
+    Profile profile;
+
+    //
     // FtiConfig
     //
-    FtiConfig fticonfig(eventloop);
+    FtiConfig fticonfig(eventloop, profile);
     if (is_dummy)
 	fticonfig.set_dummy();
     fticonfig.start();
@@ -193,11 +198,6 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
 			xrl_std_router_fea.finder_address(),
 			xrl_std_router_fea.finder_port());
     xss.startup();
-
-    //
-    // Profile entity.
-    //
-    Profile profile;
 
     //
     // XRL Target
