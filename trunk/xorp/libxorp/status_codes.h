@@ -15,19 +15,20 @@
  */
 
 /*
- * $XORP: xorp/devnotes/template.h,v 1.2 2003/01/16 19:08:48 mjh Exp $
+ * $XORP: xorp/libxorp/status_codes.h,v 1.1 2003/05/07 23:40:15 mjh Exp $
  */
 
-#ifndef __STATUS_CODES_H__
-#define __STATUS_CODES_H__
+#ifndef __LIBXORP_STATUS_CODES_H__
+#define __LIBXORP_STATUS_CODES_H__
 
 typedef enum {
-  PROC_NULL = 0,
-  PROC_STARTUP = 1,
-  PROC_NOT_READY = 2,
-  PROC_READY = 3,
-  PROC_SHUTDOWN = 4,
-  PROC_FAILED = 5
+    PROC_NULL		= 0,
+    PROC_STARTUP	= 1,
+    PROC_NOT_READY	= 2,
+    PROC_READY		= 3,
+    PROC_SHUTDOWN	= 4,
+    PROC_FAILED		= 5,
+    PROC_MAX
 } ProcessStatus;
 
-#endif /* __STATUS_CODES_H__ */
+#endif /* __LIBXORP_STATUS_CODES_H__ */
