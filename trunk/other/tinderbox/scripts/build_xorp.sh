@@ -3,19 +3,19 @@
 CONFIG="$(dirname $0)/config"
 . $CONFIG
 
-TIMEOUT=3600
-
 timeout()
 {
-    echo "-----------------------------------------------------------"
-    echo "Process appears wedged. Timed out after ${TIMEOUT} seconds."
-    echo "-----------------------------------------------------------"
+    local err bar
+    err="Process appears wedged. Timed out after ${TIMEOUT} seconds."
+    bar=`echo $err | sed 's/./=/g'`
+    printf "\n${bar}\n${err}\n${bar}\n"
     kill 0
 }
 
 # A test "process" that can be used to appear wedged.
 funkster()
 {
+    local iter
     iter=0
     while [ 1 ] ; do
 	printf "."
@@ -40,9 +40,10 @@ rm -f ${WAKEFILE} 2>/dev/null
 # ${WAKEFILE} both to detect the completion of these commands and to
 # propagate the return value.
 #
-( ( ./configure 2>&1 && gmake -k $@ 2>&1 ) ; echo $? > ${WAKEFILE} ) &
 
-#( ( funkster ) ; cat /dev/null > ${WAKEFILE} ) &
+CMD="./configure && gmake -k $@"
+#CMD=funkster
+( ( eval $CMD ) 2>&1 ; echo $? > ${WAKEFILE} ) &
 
 expiry=`date "+%s"`
 expiry=`expr $expiry + ${TIMEOUT}`
@@ -52,7 +53,7 @@ while [ ! -f ${WAKEFILE} ] ; do
 	timeout
 	break
     fi
-    sleep 10
+    sleep ${TIMEOUT_CHECK}
 done
 
 if [ -f ${WAKEFILE} ] ; then

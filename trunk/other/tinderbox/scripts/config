@@ -51,3 +51,6 @@ FROMADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
 # Post command
 POST="/usr/local/libexec/nmh/post"
 
+# make and make check timeout and timeout check interval, both in seconds
+TIMEOUT=3600
+TIMEOUT_CHECK=10
