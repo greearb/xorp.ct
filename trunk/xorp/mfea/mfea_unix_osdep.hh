@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.2 2003/02/08 09:18:26 pavlin Exp $
+// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.3 2003/03/10 23:20:41 hodson Exp $
 
 #ifndef __MFEA_MFEA_UNIX_OSDEP_HH__
 #define __MFEA_MFEA_UNIX_OSDEP_HH__
@@ -52,15 +52,15 @@
 #define KERNEL_RTREAD_NETLINK	2
 
 //#undef HAVE_GETIFADDRS
-//#undef HAVE_NET_RT_IFLIST
+//#undef HAVE_SYSCTL_NET_RT_IFLIST
 
 // The interface list access method
 #undef KERNEL_IF_METHOD
 #if defined(HAVE_GETIFADDRS)
 #  define KERNEL_IF_METHOD KERNEL_IF_GETIFADDRS
-#elif defined(HAVE_NET_RT_IFLIST)
+#elif defined(HAVE_SYSCTL_NET_RT_IFLIST)
 #  define KERNEL_IF_METHOD KERNEL_IF_SYSCTL
-#elif defined(HAVE_SIOCGIFCONF)
+#elif defined(HAVE_IOCTL_SIOCGIFCONF)
 #  define KERNEL_IF_METHOD KERNEL_IF_IOCTL
 #else
 #  error "The system does not appear to have a mechanism to read the"
@@ -75,9 +75,9 @@
 
 // The unicast reverse-path forwarding information (to be used as MRIB)
 #undef  KERNEL_MRIB_METHOD
-#if defined(HAVE_AF_ROUTE)
+#if defined(HAVE_ROUTING_SOCKETS)
 #  define KERNEL_MRIB_METHOD KERNEL_MRIB_RAWSOCK
-#elif defined(HAVE_AF_NETLINK)
+#elif defined(HAVE_NETLINK_SOCKETS)
 #  define KERNEL_MRIB_METHOD KERNEL_MRIB_NETLINK
 #else
 #  error "The system does not appear to have a mechanism to read the"
@@ -91,9 +91,9 @@
 
 // The unicast routing table read mechanism
 #undef KERNEL_RTREAD_METHOD
-#if defined(HAVE_NET_RT_DUMP)
+#if defined(HAVE_SYSCTL_NET_RT_DUMP)
 #  define KERNEL_RTREAD_METHOD KERNEL_RTREAD_SYSCTL
-#elif defined(HAVE_AF_NETLINK)
+#elif defined(HAVE_NETLINK_SOCKETS)
 #  define KERNEL_RTREAD_METHOD KERNEL_RTREAD_NETLINK
 #else
 #  error "The system does not appear to have a mechanism to read the"

@@ -147,31 +147,31 @@
 #undef HAVE_MF6CC_RP
 
 /*
- * Define this if you have the AF_ROUTE socket.
+ * Define this if you have BSD-style routing sockets (AF_ROUTE).
  */
-#undef HAVE_AF_ROUTE
+#undef HAVE_ROUTING_SOCKETS
 
 /*
- * Define this if you have the Linux-style AF_NETLINK socket.
+ * Define this if you have the Linux-style netlink sockets (AF_NETLINK).
  */
-#undef HAVE_AF_NETLINK
+#undef HAVE_NETLINK_SOCKETS
 
 /*
- * Define this if you have ioctl(SIOCGIFCONF)
+ * Define this if you have ioctl(SIOCGIFCONF) interface read method.
  */
-#undef HAVE_SIOCGIFCONF
+#undef HAVE_IOCTL_SIOCGIFCONF
 
 /*
  * Define this if you have sysctl(NET_RT_IFLIST) interface read method
  * (typically in sys/socket.h).
  */
-#undef HAVE_NET_RT_IFLIST
+#undef HAVE_SYSCTL_NET_RT_IFLIST
 
 /*
  * Define this if you have sysctl(NET_RT_DUMP) routing table read method
  * (exists in sys/socket.h).
  */
-#undef HAVE_NET_RT_DUMP
+#undef HAVE_SYSCTL_NET_RT_DUMP
 
 /* Define if you have the getifaddrs function.  */
 #undef HAVE_GETIFADDRS

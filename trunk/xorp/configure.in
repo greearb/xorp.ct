@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.13 2003/04/02 22:58:53 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.14 2003/04/10 00:30:58 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -690,17 +690,17 @@ main()
   return (0);
 }
 ],
-  [AC_DEFINE(HAVE_AF_ROUTE)
+  [AC_DEFINE(HAVE_ROUTING_SOCKETS)
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
 dnl ------------------------------------
-dnl Check for netlink (AF_NETLINK)
+dnl Check for netlink sockets (AF_NETLINK)
 dnl ------------------------------------
 
-AC_MSG_CHECKING(netlink kernel access (AF_NETLINK))
+AC_MSG_CHECKING(netlink sockets (AF_NETLINK))
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_RUN([
@@ -718,17 +718,17 @@ main()
   return (0);
 }
 ],
-  [AC_DEFINE(HAVE_AF_NETLINK)
+  [AC_DEFINE(HAVE_NETLINK_SOCKETS)
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
 dnl ------------------------------------
-dnl Check for ioctl interface read (SIOCGIFCONF)
+dnl Check for ioctl(SIOCGIFCONF) interface read
 dnl ------------------------------------
 
-AC_MSG_CHECKING(ioctl interface read (SIOCGIFCONF))
+AC_MSG_CHECKING(ioctl(SIOCGIFCONF) interface read)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_RUN([
@@ -769,17 +769,17 @@ main()
     return (0);
 }
 ],
-  [AC_DEFINE(HAVE_SIOCGIFCONF)
+  [AC_DEFINE(HAVE_IOCTL_SIOCGIFCONF)
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
 dnl ------------------------------------
-dnl Check for sysctl interface read (NET_RT_IFLIST)
+dnl Check for sysctl(NET_RT_IFLIST) interface read
 dnl ------------------------------------
 
-AC_MSG_CHECKING(sysctl interface read (NET_RT_IFLIST))
+AC_MSG_CHECKING(sysctl(NET_RT_IFLIST) interface read)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_RUN([
@@ -792,7 +792,7 @@ main()
 {
     size_t buflen;
     /* Interface list and routing table dump MIBs */
-    int mib1[] = {CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0};
+    int mib1[] = { CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0 };
     
     if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), NULL, &buflen, NULL, 0) < 0)
 	return (1);
@@ -800,17 +800,17 @@ main()
     return (0);
 }
 ],
-  [AC_DEFINE(HAVE_NET_RT_IFLIST)
+  [AC_DEFINE(HAVE_SYSCTL_NET_RT_IFLIST)
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
 dnl ------------------------------------
-dnl Check for sysctl routing table read (NET_RT_DUMP)
+dnl Check for sysctl(NET_RT_DUMP) routing table read
 dnl ------------------------------------
 
-AC_MSG_CHECKING(sysctl routing table read (NET_RT_DUMP))
+AC_MSG_CHECKING(sysctl(NET_RT_DUMP) routing table read)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_RUN([
@@ -831,7 +831,7 @@ main()
     return (0);
 }
 ],
-  [AC_DEFINE(HAVE_NET_RT_DUMP)
+  [AC_DEFINE(HAVE_SYSCTL_NET_RT_DUMP)
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])

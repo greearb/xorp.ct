@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_rtread_sysctl.cc,v 1.3 2003/02/08 09:18:26 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_rtread_sysctl.cc,v 1.4 2003/03/10 23:20:41 hodson Exp $"
 
 
 //
@@ -94,7 +94,7 @@ UnixComm::get_mrib_table_osdep(Mrib *return_mrib_table[])
     int			mrib_table_n;
     struct rt_msghdr	*rtm;
     struct sockaddr	*sa, *rti_info[RTAX_MAX];
-    int			mib[] = {CTL_NET, AF_ROUTE, 0, -1, NET_RT_DUMP, 0};
+    int			mib[] = { CTL_NET, AF_ROUTE, 0, -1, NET_RT_DUMP, 0 };
     IPvX		dest_addr(family());
     int			dest_masklen;
     MfeaVif		*mfea_vif;

@@ -3977,7 +3977,7 @@ EOF
 if { (eval echo configure:3978: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   cat >> confdefs.h <<\EOF
-#define HAVE_AF_ROUTE 1
+#define HAVE_ROUTING_SOCKETS 1
 EOF
 
    echo "$ac_t""yes" 1>&6
@@ -3999,8 +3999,8 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 
 
-echo $ac_n "checking netlink kernel access (AF_NETLINK)""... $ac_c" 1>&6
-echo "configure:4004: checking netlink kernel access (AF_NETLINK)" >&5
+echo $ac_n "checking netlink sockets (AF_NETLINK)""... $ac_c" 1>&6
+echo "configure:4004: checking netlink sockets (AF_NETLINK)" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -4034,7 +4034,7 @@ EOF
 if { (eval echo configure:4035: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   cat >> confdefs.h <<\EOF
-#define HAVE_AF_NETLINK 1
+#define HAVE_NETLINK_SOCKETS 1
 EOF
 
    echo "$ac_t""yes" 1>&6
@@ -4056,8 +4056,8 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 
 
-echo $ac_n "checking ioctl interface read (SIOCGIFCONF)""... $ac_c" 1>&6
-echo "configure:4061: checking ioctl interface read (SIOCGIFCONF)" >&5
+echo $ac_n "checking ioctl(SIOCGIFCONF) interface read""... $ac_c" 1>&6
+echo "configure:4061: checking ioctl(SIOCGIFCONF) interface read" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -4114,7 +4114,7 @@ EOF
 if { (eval echo configure:4115: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   cat >> confdefs.h <<\EOF
-#define HAVE_SIOCGIFCONF 1
+#define HAVE_IOCTL_SIOCGIFCONF 1
 EOF
 
    echo "$ac_t""yes" 1>&6
@@ -4136,8 +4136,8 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 
 
-echo $ac_n "checking sysctl interface read (NET_RT_IFLIST)""... $ac_c" 1>&6
-echo "configure:4141: checking sysctl interface read (NET_RT_IFLIST)" >&5
+echo $ac_n "checking sysctl(NET_RT_IFLIST) interface read""... $ac_c" 1>&6
+echo "configure:4141: checking sysctl(NET_RT_IFLIST) interface read" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -4162,7 +4162,7 @@ main()
 {
     size_t buflen;
     /* Interface list and routing table dump MIBs */
-    int mib1[] = {CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0};
+    int mib1[] = { CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0 };
     
     if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), NULL, &buflen, NULL, 0) < 0)
 	return (1);
@@ -4174,7 +4174,7 @@ EOF
 if { (eval echo configure:4175: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   cat >> confdefs.h <<\EOF
-#define HAVE_NET_RT_IFLIST 1
+#define HAVE_SYSCTL_NET_RT_IFLIST 1
 EOF
 
    echo "$ac_t""yes" 1>&6
@@ -4196,8 +4196,8 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 
 
-echo $ac_n "checking sysctl routing table read (NET_RT_DUMP)""... $ac_c" 1>&6
-echo "configure:4201: checking sysctl routing table read (NET_RT_DUMP)" >&5
+echo $ac_n "checking sysctl(NET_RT_DUMP) routing table read""... $ac_c" 1>&6
+echo "configure:4201: checking sysctl(NET_RT_DUMP) routing table read" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -4234,7 +4234,7 @@ EOF
 if { (eval echo configure:4235: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   cat >> confdefs.h <<\EOF
-#define HAVE_NET_RT_DUMP 1
+#define HAVE_SYSCTL_NET_RT_DUMP 1
 EOF
 
    echo "$ac_t""yes" 1>&6

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_if_sysctl.cc,v 1.2 2003/03/05 23:13:08 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_if_sysctl.cc,v 1.3 2003/03/10 23:20:40 hodson Exp $"
 
 
 //
@@ -78,7 +78,7 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
     struct if_msghdr	*ifm;
     struct ifa_msghdr	*ifam;
     struct sockaddr	*sa, *rti_info[RTAX_MAX];
-    int			mib[] = {CTL_NET, AF_ROUTE, 0, -1, NET_RT_IFLIST, 0};
+    int			mib[] = { CTL_NET, AF_ROUTE, 0, -1, NET_RT_IFLIST, 0 };
     
     mib[3] = family();		// XXX
     
