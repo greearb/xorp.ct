@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/timespent.hh,v 1.1 2004/05/05 06:38:33 atanu Exp $
 
-#ifndef __BGP_TIMESPENT_HH__
-#define __BGP_TIMESPENT_HH__
+#ifndef __LIBXORP_TIMESPENT_HH__
+#define __LIBXORP_TIMESPENT_HH__
 
 #include "libxorp/timeval.hh"
 
@@ -106,4 +106,4 @@ private:
 #define TIMESPENT_CHECK()
 #define TIMESPENT_OVERLIMIT()
 #endif
-#endif // __BGP_TIMESPENT_HH__
+#endif // __LIBXORP_TIMESPENT_HH__
