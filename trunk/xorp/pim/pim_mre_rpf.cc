@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.3 2003/01/17 22:57:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.4 2003/01/17 23:07:39 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -604,8 +604,11 @@ PimMre::compute_mrib_s() const
 //
 // Return the MRIB-based RPF neighbor toward the RP
 //
-// Used by (*,*,RP), (*,G) entry.
-// However, it works also for (S,G) and (S,G,rpt).
+// Used by (*,*,RP), (*,G), (S,G,rpt) entry.
+// XXX: used by (S,G,rpt) only to bypass computing of RPF'(*,G) when
+// there is no (*,G) entry (note the out-of-band indirection in
+// the computation).
+// However, it works also for (S,G).
 // XXX: the return info does NOT take into account the Asserts
 PimNbr *
 PimMre::compute_mrib_next_hop_rp() const
@@ -770,9 +773,22 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
     
     // return RPF'(*,G)
     pim_mre_wc = wc_entry();
-    if (pim_mre_wc == NULL)
-	return (NULL);
-    return (pim_mre_wc->compute_rpfp_nbr_wc());
+    if (pim_mre_wc != NULL)
+	return (pim_mre_wc->compute_rpfp_nbr_wc());
+    //
+    // Return MRIB.next_hop(RP(G))
+    // XXX: note the indirection in the computation of RPF'(S,G,rpt) which
+    // uses internal knowledge about how RPF'(*,G) is computed. This
+    // indirection is needed to compute RPF'(S,G,rpt) even if there is no
+    // (*,G) routing state.
+    // XXX: the computation of RPF'(S,G,rpt) when there is no (*,G) state
+    // might be needed only if the spec allows to send (S,G,rpt) Prune
+    // on the RPT tree when there is only (*,*,RP) state. This might
+    // not be the true in case that Section 4.5.8 "(S,G,rpt) Periodic Messages"
+    // is fixed such that (S,G,rpt) Prune are sent only when there is (*,G)
+    // state.
+    //
+    return (compute_mrib_next_hop_rp());
 }
 
 //

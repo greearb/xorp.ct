@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.5 2003/01/14 20:36:55 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.6 2003/01/17 22:57:01 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -195,8 +195,8 @@ public:
     void	set_rpfp_nbr_sg(PimNbr *v);
     // Note: applies only for (S,G,rpt)
     void	set_rpfp_nbr_sg_rpt(PimNbr *v);
-    // Note: applies only for (*,*,RP) and (*,G), but works also for (S,G)
-    // and (S,G,rpt)
+    // Note: applies only for (*,*,RP), (*,G), (S,G,rpt), but works also
+    // for (S,G).
     PimNbr	*compute_mrib_next_hop_rp() const;
     // Note: applies only for (S,G), but if needed can work also for (S,G,rpt)
     PimNbr	*compute_mrib_next_hop_s() const;
