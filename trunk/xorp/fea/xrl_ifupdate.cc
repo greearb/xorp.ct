@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.3 2003/05/09 05:32:54 mjh Exp $"
+#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.4 2003/05/23 23:35:01 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -86,6 +86,22 @@ XrlIfConfigUpdateReporter::add_all_interfaces_reportee(const string& tgt)
 	return false;
     _all_interfaces_tgts.push_back(tgt);
     return true;
+}
+
+bool
+XrlIfConfigUpdateReporter::has_reportee(const string& tgt) const
+{
+    return (find(_configured_interfaces_tgts.begin(),
+		 _configured_interfaces_tgts.end(), tgt)
+	    != _configured_interfaces_tgts.end());
+}
+
+bool
+XrlIfConfigUpdateReporter::has_all_interfaces_reportee(const string& tgt) const
+{
+    return (find(_all_interfaces_tgts.begin(),
+		 _all_interfaces_tgts.end(), tgt)
+	    != _all_interfaces_tgts.end());
 }
 
 bool

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.5 2003/05/09 05:32:54 mjh Exp $
+// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.6 2003/05/23 23:35:01 pavlin Exp $
 
 #ifndef __FEA_XRL_IFUPDATE_HH__
 #define __FEA_XRL_IFUPDATE_HH__
@@ -42,6 +42,15 @@ public:
     bool add_reportee(const string& xrl_target);
 
     /**
+     * Test if an xrl target is on the list of those that will receive
+     * interface event notifications about configured interfaces.
+     *
+     * @param xrl_target the xrl target to be tested.
+     * @return true if @param xrl_target is on the list, otherwise false.
+     */
+    bool has_reportee(const string& xrl_target) const;
+
+    /**
      * Remove an xrl target from the list of those that receive interface
      * event notifications about configured interfaces.
      *
@@ -58,6 +67,15 @@ public:
      * @return true on success, false if target already listed.
      */
     bool add_all_interfaces_reportee(const string& xrl_target);
+
+    /**
+     * Test if an xrl target is on the list of those that will receive
+     * interface event notifications about all interfaces.
+     *
+     * @param xrl_target the xrl target to be tested.
+     * @return true if @param xrl_target is on the list, otherwise false.
+     */
+    bool has_all_interfaces_reportee(const string& xrl_target) const;
 
     /**
      * Remove an xrl target from the list of those that receive interface
