@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.3 2003/03/10 23:20:12 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.4 2003/03/12 10:14:59 pavlin Exp $"
 
 
 //
@@ -322,8 +322,16 @@ CliClient::start_connection(void)
     // XXX: always set to network type
     gl_set_is_net(_gl, 1);
     
+    // Set the terminal
+    string term_name = "vt100";		// Default for network connection
+    if (is_stdio()) {
+	term_name = getenv("TERM");
+	if (term_name.empty())
+	    term_name = "vt100";	// Set to default
+    }
     // Change the input and output streams for libtecla
-    if (gl_change_terminal(_gl, _cli_fd_file_read, _cli_fd_file_write, "vt100")
+    if (gl_change_terminal(_gl, _cli_fd_file_read, _cli_fd_file_write,
+			   term_name.c_str())
 	!= 0) {
 	_gl = del_GetLine(_gl);
 	return (XORP_ERROR);
