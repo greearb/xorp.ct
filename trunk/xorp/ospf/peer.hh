@@ -20,7 +20,7 @@
 
 /**
  * In OSPF terms this class represents an interface/link; interface is
- * too overloaded. The Peer class is also associated with an area. In
+ * too overloaded a term. The Peer class is also associated with an area. In
  * OSPF v2 there is a one-to-one correspondence. In OSPF v3 an
  * interface/link can belong to multiple areas.
  *
