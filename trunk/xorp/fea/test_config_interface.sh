@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.3 2003/10/21 02:05:57 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.4 2003/10/22 20:36:34 pavlin Exp $
 #
 
 #
@@ -31,12 +31,16 @@ OS=`uname -s`
 # Hosts configuration
 #
 
-ADDR="10.20.0.1"
-PREFIX_LEN="24"
-BROADCAST="10.20.0.255"
-ENDPOINT="INVALID"	# XXX: may be overwritten by host configuration
+ADDR4="10.20.0.1"
+PREFIX_LEN4="24"
+BROADCAST4="10.20.0.255"
+ENDPOINT4="INVALID"	# XXX: may be overwritten by host configuration
+ADDR6="fe80::202:b3ff:fe10:e3e8"
+PREFIX_LEN6="64"
+ENDPOINT6="INVALID"	# XXX: may be overwritten by host configuration
 MTU="1500"
 TEST_MTU="1400"
+HAVE_IPV6="true"	# XXX: may be overwritten by host configuration
 
 case ${HOSTNAME} in
 	xorp1)
@@ -48,6 +52,7 @@ case ${HOSTNAME} in
 	VIF_FLAG_LOOPBACK="false"
 	VIF_FLAG_POINT_TO_POINT="false"
 	VIF_FLAG_MULTICAST="true"
+	HAVE_IPV6="true"
 	;;
 
 	xorp4)
@@ -59,6 +64,7 @@ case ${HOSTNAME} in
 	VIF_FLAG_LOOPBACK="false"
 	VIF_FLAG_POINT_TO_POINT="false"
 	VIF_FLAG_MULTICAST="true"
+	HAVE_IPV6="false"
 	;;
 
 	*)
@@ -73,7 +79,7 @@ VIFNAME="${IFNAME}"
 #
 # Test functions
 #
-test_cleanup_interface4()
+test_cleanup_interface()
 {
     echo "TEST: Cleanup interface ${IFNAME}"
 
@@ -84,7 +90,7 @@ test_cleanup_interface4()
     #
 
     #
-    # Add the address, and enable the interface
+    # Add the IPv4 address, and enable the interface
     #
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -93,21 +99,67 @@ test_cleanup_interface4()
     fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
-    fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
-    fea_ifmgr_set_prefix4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${PREFIX_LEN}
+    fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4}
+    fea_ifmgr_set_prefix4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${PREFIX_LEN4}
     if [ "${VIF_FLAG_BROADCAST}" = "true" ] ; then
-	fea_ifmgr_set_broadcast4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${BROADCAST}
+	fea_ifmgr_set_broadcast4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${BROADCAST4}
     fi
     if [ "${VIF_FLAG_POINT_TO_POINT}" = "true" ] ; then
-	fea_ifmgr_set_endpoint4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${ENDPOINT}
+	fea_ifmgr_set_endpoint4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${ENDPOINT4}
     fi
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
     fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} true
-    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} true
+    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} true
     fea_ifmgr_commit_transaction ${tid}
 
     #
-    # Delete the address, disable the interface, and reset the MTU
+    # Add the IPv6 address, and enable the interface
+    #
+    if [ "${HAVE_IPV6}" = "true" ] ; then
+	tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+	if [ "${tid}" = "" ] ; then
+	    echo "ERROR: cannot start transaction: cannot get transaction ID"
+	    return 1
+	fi
+	fea_ifmgr_create_interface ${tid} ${IFNAME}
+	fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
+	fea_ifmgr_create_address6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6}
+	fea_ifmgr_set_prefix6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} ${PREFIX_LEN4}
+	if [ "${VIF_FLAG_POINT_TO_POINT}" = "true" ] ; then
+	    fea_ifmgr_set_endpoint6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} ${ENDPOINT6}
+	fi
+	fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
+	fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} true
+	fea_ifmgr_set_address_enabled6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} true
+	fea_ifmgr_commit_transaction ${tid}
+    fi
+
+    #
+    # Delete the IPv4 address
+    #
+    tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_ifmgr_delete_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4}
+    fea_ifmgr_commit_transaction ${tid}
+
+    #
+    # Delete the IPv6 address
+    #
+    if [ "${HAVE_IPV6}" = "true" ] ; then
+	tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+	if [ "${tid}" = "" ] ; then
+	    echo "ERROR: cannot start transaction: cannot get transaction ID"
+	    return 1
+	fi
+	fea_ifmgr_delete_address6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6}
+	fea_ifmgr_commit_transaction ${tid}
+    fi
+
+    #
+    # Disable the interface, and reset the MTU
     #
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -116,7 +168,6 @@ test_cleanup_interface4()
     fi
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} false
     fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} false
-    fea_ifmgr_delete_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
     fea_ifmgr_set_mtu ${tid} ${IFNAME} ${MTU}
     fea_ifmgr_commit_transaction ${tid}
 
@@ -729,7 +780,7 @@ test_get_vif_flags()
 
 test_create_address4()
 {
-    echo "TEST: Create address ${ADDR} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Create address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -738,23 +789,45 @@ test_create_address4()
     fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
-    fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
-    fea_ifmgr_set_prefix4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${PREFIX_LEN}
+    fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4}
+    fea_ifmgr_set_prefix4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${PREFIX_LEN4}
     if [ "${VIF_FLAG_BROADCAST}" = "true" ] ; then
-	fea_ifmgr_set_broadcast4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${BROADCAST}
+	fea_ifmgr_set_broadcast4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${BROADCAST4}
     fi
     if [ "${VIF_FLAG_POINT_TO_POINT}" = "true" ] ; then
-	fea_ifmgr_set_endpoint4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${ENDPOINT}
+	fea_ifmgr_set_endpoint4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${ENDPOINT4}
     fi
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
     fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} true
-    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} true
+    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} true
+    fea_ifmgr_commit_transaction ${tid}
+}
+
+test_create_address6()
+{
+    echo "TEST: Create address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+
+    tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_ifmgr_create_interface ${tid} ${IFNAME}
+    fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
+    fea_ifmgr_create_address6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6}
+    fea_ifmgr_set_prefix6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} ${PREFIX_LEN6}
+    if [ "${VIF_FLAG_POINT_TO_POINT}" = "true" ] ; then
+	fea_ifmgr_set_endpoint6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} ${ENDPOINT6}
+    fi
+    fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
+    fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} true
+    fea_ifmgr_set_address_enabled6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} true
     fea_ifmgr_commit_transaction ${tid}
 }
 
 test_delete_address4()
 {
-    echo "TEST: Delete address ${ADDR} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Delete address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     # Delete the address
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
@@ -762,7 +835,21 @@ test_delete_address4()
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_ifmgr_delete_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
+    fea_ifmgr_delete_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4}
+    fea_ifmgr_commit_transaction ${tid}
+}
+
+test_delete_address6()
+{
+    echo "TEST: Delete address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+
+    # Delete the address
+    tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_ifmgr_delete_address6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6}
     fea_ifmgr_commit_transaction ${tid}
 }
 
@@ -788,14 +875,55 @@ test_get_address4()
     # Get the list of space-separated addresses
     _addresses_list=`split_xrl_list_values "${_addresses}" ipv4`
     for i in ${_addresses_list} ; do
-	if [ "${ADDR}" = "$i" ] ; then
+	if [ "${ADDR4}" = "$i" ] ; then
 	    _found="yes"
 	    break;
 	fi
     done
 
     if [ "${_found}" != "yes" ] ; then
-	echo "ERROR: Expected address ${ADDR} not found:"
+	echo "ERROR: Expected address ${ADDR4} not found:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_get_address6()
+{
+    local _xrl_result _ret_value _addresses _addresses_list _found
+
+    echo "TEST: Get IPv6 address on interface ${IFNAME} vif ${VIFNAME}"
+
+    _xrl_result=`fea_ifmgr_get_configured_vif_addresses6 ${IFNAME} ${VIFNAME} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot get the IPv6 addresses on interface ${IFNAME}} vif ${VIFNAME}:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Check the result
+    #
+    _found=""
+    _addresses=`get_xrl_variable_value "${_xrl_result}" addresses:list`
+    # Get the list of space-separated addresses
+    _addresses_list=`split_xrl_list_values "${_addresses}" ipv6`
+    for i in ${_addresses_list} ; do
+	if [ "${ADDR6}" = "$i" ] ; then
+	    _found="yes"
+	    break;
+	fi
+    done
+
+    if [ "${_found}" != "yes" ] ; then
+	echo "ERROR: Expected address ${ADDR6} not found:"
 	echo "${_xrl_result}"
 	return 1
     fi
@@ -811,9 +939,9 @@ test_get_prefix4()
 {
     local _xrl_result _ret_value _prefix_len
 
-    echo "TEST: Get prefix length on address ${ADDR} on interface ${IFNAME} vif ${VIF}"
+    echo "TEST: Get prefix length on address ${ADDR4} on interface ${IFNAME} vif ${VIF}"
 
-    _xrl_result=`fea_ifmgr_get_configured_prefix4 ${IFNAME} ${VIFNAME} ${ADDR} 2>&1`
+    _xrl_result=`fea_ifmgr_get_configured_prefix4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: cannot get the prefix length:"
@@ -825,8 +953,38 @@ test_get_prefix4()
     # Check the result
     #
     _prefix_len=`get_xrl_variable_value "${_xrl_result}" prefix_len:u32`
-    if [ "${_prefix_len}" != "${PREFIX_LEN}" ] ; then
-	echo "ERROR: prefix length is ${_prefix_len}; expecting ${PREFIX_LEN}"
+    if [ "${_prefix_len}" != "${PREFIX_LEN4}" ] ; then
+	echo "ERROR: prefix length is ${_prefix_len}; expecting ${PREFIX_LEN4}"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_get_prefix6()
+{
+    local _xrl_result _ret_value _prefix_len
+
+    echo "TEST: Get prefix length on address ${ADDR6} on interface ${IFNAME} vif ${VIF}"
+
+    _xrl_result=`fea_ifmgr_get_configured_prefix6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot get the prefix length:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Check the result
+    #
+    _prefix_len=`get_xrl_variable_value "${_xrl_result}" prefix_len:u32`
+    if [ "${_prefix_len}" != "${PREFIX_LEN6}" ] ; then
+	echo "ERROR: prefix length is ${_prefix_len}; expecting ${PREFIX_LEN6}"
 	return 1
     fi
 
@@ -841,14 +999,14 @@ test_get_broadcast4()
 {
     local _xrl_result _ret_value _broadcast
 
-    echo "TEST: Get broadcast address on address ${ADDR} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Get broadcast address on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     if [ "${VIF_FLAG_BROADCAST}" = "false" ] ; then
 	echo "INFO: ignoring: the interface is not broadcast-capable"
 	return 0
     fi
 
-    _xrl_result=`fea_ifmgr_get_configured_broadcast4 ${IFNAME} ${VIFNAME} ${ADDR} 2>&1`
+    _xrl_result=`fea_ifmgr_get_configured_broadcast4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: cannot get the broadcast address:"
@@ -860,8 +1018,8 @@ test_get_broadcast4()
     # Check the result
     #
     _broadcast=`get_xrl_variable_value "${_xrl_result}" broadcast:ipv4`
-    if [ "${_broadcast}" != "${BROADCAST}" ] ; then
-	echo "ERROR: broadcast address is ${_broadcast}; expecting ${BROADCAST}"
+    if [ "${_broadcast}" != "${BROADCAST4}" ] ; then
+	echo "ERROR: broadcast address is ${_broadcast}; expecting ${BROADCAST4}"
 	return 1
     fi
 
@@ -876,14 +1034,14 @@ test_get_endpoint4()
 {
     local _xrl_result _ret_value _endpoint
 
-    echo "TEST: Get endpoint address on address ${ADDR} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Get endpoint address on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     if [ "${VIF_FLAG_POINT_TO_POINT}" = "false" ] ; then
 	echo "INFO: Test ignored: the interface is not point-to-point"
 	return 0
     fi
 
-    _xrl_result=`fea_ifmgr_get_configured_endpoint4 ${IFNAME} ${VIFNAME} ${ADDR} 2>&1`
+    _xrl_result=`fea_ifmgr_get_configured_endpoint4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: cannot get the endpoint address:"
@@ -895,8 +1053,43 @@ test_get_endpoint4()
     # Check the result
     #
     _endpoint=`get_xrl_variable_value "${_xrl_result}" endpoint:ipv4`
-    if [ "${_endpoint}" != "${ENDPOINT}" ] ; then
-	echo "ERROR: endpoint address is ${_endpoint}; expecting ${ENDPOINT}"
+    if [ "${_endpoint}" != "${ENDPOINT4}" ] ; then
+	echo "ERROR: endpoint address is ${_endpoint}; expecting ${ENDPOINT4}"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_get_endpoint6()
+{
+    local _xrl_result _ret_value _endpoint
+
+    echo "TEST: Get endpoint address on address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+
+    if [ "${VIF_FLAG_POINT_TO_POINT}" = "false" ] ; then
+	echo "INFO: Test ignored: the interface is not point-to-point"
+	return 0
+    fi
+
+    _xrl_result=`fea_ifmgr_get_configured_endpoint6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot get the endpoint address:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Check the result
+    #
+    _endpoint=`get_xrl_variable_value "${_xrl_result}" endpoint:ipv6`
+    if [ "${_endpoint}" != "${ENDPOINT6}" ] ; then
+	echo "ERROR: endpoint address is ${_endpoint}; expecting ${ENDPOINT6}"
 	return 1
     fi
 
@@ -912,9 +1105,9 @@ test_get_address_flags4()
     local _xrl_result _ret_value _enabled _broadcast _loopback _point_to_point
     local _multicast
 
-    echo "TEST: Get address flags on address ${ADDR} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Get address flags on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
-    _xrl_result=`fea_ifmgr_get_configured_address_flags4 ${IFNAME} ${VIFNAME} ${ADDR} 2>&1`
+    _xrl_result=`fea_ifmgr_get_configured_address_flags4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: cannot get the address flags:"
@@ -935,6 +1128,53 @@ test_get_address_flags4()
 	echo "ERROR: broadcast flag is ${_broadcast}; expecting ${VIF_FLAG_BROADCAST}"
 	return 1
     fi
+    _loopback=`get_xrl_variable_value "${_xrl_result}" loopback:bool`
+    if [ "${_loopback}" != "${VIF_FLAG_LOOPBACK}" ] ; then
+	echo "ERROR: loopback flag is ${_loopback}; expecting ${VIF_FLAG_LOOPBACK}"
+	return 1
+    fi
+    _point_to_point=`get_xrl_variable_value "${_xrl_result}" point_to_point:bool`
+    if [ "${_point_to_point}" != "${VIF_FLAG_POINT_TO_POINT}" ] ; then
+	echo "ERROR: point_to_point flag is ${_point_to_point}; expecting ${VIF_FLAG_POINT_TO_POINT}"
+	return 1
+    fi
+    _multicast=`get_xrl_variable_value "${_xrl_result}" multicast:bool`
+    if [ "${_multicast}" != "${VIF_FLAG_MULTICAST}" ] ; then
+	echo "ERROR: multicast flag is ${_multicast}; expecting ${VIF_FLAG_MULTICAST}"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_get_address_flags6()
+{
+    local _xrl_result _ret_value _enabled _broadcast _loopback _point_to_point
+    local _multicast
+
+    echo "TEST: Get address flags on address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+
+    _xrl_result=`fea_ifmgr_get_configured_address_flags6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot get the address flags:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Check the result
+    #
+    _enabled=`get_xrl_variable_value "${_xrl_result}" enabled:bool`
+    if [ "${_enabled}" != "true" ] ; then
+	echo "ERROR: enabled flag is ${_enabled}; expecting true"
+	return 1
+    fi
+    # XXX: the IPv6 address has no broadcast flag
     _loopback=`get_xrl_variable_value "${_xrl_result}" loopback:bool`
     if [ "${_loopback}" != "${VIF_FLAG_LOOPBACK}" ] ; then
 	echo "ERROR: loopback flag is ${_loopback}; expecting ${VIF_FLAG_LOOPBACK}"
@@ -980,14 +1220,55 @@ test_get_deleted_address4()
     # Get the list of space-separated addresses
     _addresses_list=`split_xrl_list_values "${_addresses}" ipv4`
     for i in ${_addresses_list} ; do
-	if [ "${ADDR}" = "$i" ] ; then
+	if [ "${ADDR4}" = "$i" ] ; then
 	    _found="yes"
 	    break;
 	fi
     done
 
     if [ "${_found}" = "yes" ] ; then
-	echo "ERROR: Non-expected address ${ADDR} was found:"
+	echo "ERROR: Non-expected address ${ADDR4} was found:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_get_deleted_address6()
+{
+    local _xrl_result _ret_value _addresses _addresses_list _found
+
+    echo "TEST: Get deleted IPv6 address on interface ${IFNAME} vif ${VIFNAME}"
+
+    _xrl_result=`fea_ifmgr_get_configured_vif_addresses6 ${IFNAME} ${VIFNAME} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot get the IPv6 addresses on interface ${IFNAME} vif ${VIFNAME}:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Check the result
+    #
+    _found=""
+    _addresses=`get_xrl_variable_value "${_xrl_result}" addresses:list`
+    # Get the list of space-separated addresses
+    _addresses_list=`split_xrl_list_values "${_addresses}" ipv6`
+    for i in ${_addresses_list} ; do
+	if [ "${ADDR6}" = "$i" ] ; then
+	    _found="yes"
+	    break;
+	fi
+    done
+
+    if [ "${_found}" = "yes" ] ; then
+	echo "ERROR: Non-expected address ${ADDR6} was found:"
 	echo "${_xrl_result}"
 	return 1
     fi
@@ -1001,7 +1282,7 @@ test_get_deleted_address4()
 
 test_enable_address4()
 {
-    echo "TEST: Enable address ${ADDR} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Enable address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -1010,30 +1291,65 @@ test_enable_address4()
     fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
-    fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
-    fea_ifmgr_set_prefix4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${PREFIX_LEN}
+    fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4}
+    fea_ifmgr_set_prefix4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${PREFIX_LEN4}
     if [ "${VIF_FLAG_BROADCAST}" = "true" ] ; then
-	fea_ifmgr_set_broadcast4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${BROADCAST}
+	fea_ifmgr_set_broadcast4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${BROADCAST4}
     fi
     if [ "${VIF_FLAG_POINT_TO_POINT}" = "true" ] ; then
-	fea_ifmgr_set_endpoint4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} ${ENDPOINT}
+	fea_ifmgr_set_endpoint4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} ${ENDPOINT4}
     fi
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
     fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} true
-    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} true
+    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} true
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_disable_address4()
+test_enable_address6()
 {
-    echo "TEST: Disable address ${ADDR} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Enable address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR} false
+    fea_ifmgr_create_interface ${tid} ${IFNAME}
+    fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
+    fea_ifmgr_create_address6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6}
+    fea_ifmgr_set_prefix6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} ${PREFIX_LEN6}
+    if [ "${VIF_FLAG_POINT_TO_POINT}" = "true" ] ; then
+	fea_ifmgr_set_endpoint6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} ${ENDPOINT6}
+    fi
+    fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
+    fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} true
+    fea_ifmgr_set_address_enabled6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} true
+    fea_ifmgr_commit_transaction ${tid}
+}
+
+test_disable_address4()
+{
+    echo "TEST: Disable address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+
+    tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_ifmgr_set_address_enabled4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR4} false
+    fea_ifmgr_commit_transaction ${tid}
+}
+
+test_disable_address6()
+{
+    echo "TEST: Disable address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+
+    tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_ifmgr_set_address_enabled6 ${tid} ${IFNAME} ${VIFNAME} ${ADDR6} false
     fea_ifmgr_commit_transaction ${tid}
 }
 
@@ -1041,12 +1357,42 @@ test_is_address_enabled4()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether address ${ADDR} is enabled on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Whether address ${ADDR4} is enabled on interface ${IFNAME} vif ${VIFNAME}"
 
-    _xrl_result=`fea_ifmgr_get_configured_address_enabled4 ${IFNAME} ${VIFNAME} ${ADDR} 2>&1`
+    _xrl_result=`fea_ifmgr_get_configured_address_enabled4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
-	echo "ERROR: cannot test whether address ${ADDR} is enabled:"
+	echo "ERROR: cannot test whether address ${ADDR4} is enabled:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Check the result
+    #
+    _enabled=`get_xrl_variable_value "${_xrl_result}" enabled:bool`
+    if [ "${_enabled}" != "true" ] ; then
+	echo "ERROR: enabled status is ${_enabled}; expecting true"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_is_address_enabled6()
+{
+    local _xrl_result _ret_value _enabled
+
+    echo "TEST: Whether address ${ADDR6} is enabled on interface ${IFNAME} vif ${VIFNAME}"
+
+    _xrl_result=`fea_ifmgr_get_configured_address_enabled6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot test whether address ${ADDR6} is enabled:"
 	echo "${_xrl_result}"
 	return 1
     fi
@@ -1072,9 +1418,9 @@ test_is_address_disabled4()
     local _xrl_result _ret_value _enabled
     local _xrl_result2 _ret_value2 _addresses _addresses_list _found
 
-    echo "TEST: Whether address ${ADDR} is disabled on interface ${IFNAME} vif ${VIFNAME}"
+    echo "TEST: Whether address ${ADDR4} is disabled on interface ${IFNAME} vif ${VIFNAME}"
 
-    _xrl_result=`fea_ifmgr_get_configured_address_enabled4 ${IFNAME} ${VIFNAME} ${ADDR} 2>&1`
+    _xrl_result=`fea_ifmgr_get_configured_address_enabled4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	# Probably OK: e.g., if the address was deleted.
@@ -1095,18 +1441,78 @@ test_is_address_disabled4()
 	# Get the list of space-separated addresses
 	_addresses_list=`split_xrl_list_values "${_addresses}" ipv4`
 	for i in ${_addresses_list} ; do
-	    if [ "${ADDR}" = "$i" ] ; then
+	    if [ "${ADDR4}" = "$i" ] ; then
 		_found="yes"
 		break;
 	    fi
 	done
 
 	if [ "${_found}" != "yes" ] ; then
-	    echo "RESULT: OK: Address ${ADDR} was not found"
+	    echo "RESULT: OK: Address ${ADDR4} was not found"
 	    return 0
 	fi
 
-	echo "ERROR: cannot test whether address ${ADDR} is disabled:"
+	echo "ERROR: cannot test whether address ${ADDR4} is disabled:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+
+    #
+    # Check the result
+    #
+    _enabled=`get_xrl_variable_value "${_xrl_result}" enabled:bool`
+    if [ "${_enabled}" != "false" ] ; then
+	echo "ERROR: enabled status is ${_enabled}; expecting false"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_is_address_disabled6()
+{
+    local _xrl_result _ret_value _enabled
+    local _xrl_result2 _ret_value2 _addresses _addresses_list _found
+
+    echo "TEST: Whether address ${ADDR6} is disabled on interface ${IFNAME} vif ${VIFNAME}"
+
+    _xrl_result=`fea_ifmgr_get_configured_address_enabled6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	# Probably OK: e.g., if the address was deleted.
+	# Verifying whether this is the case...
+	_xrl_result2=`fea_ifmgr_get_configured_vif_addresses6 ${IFNAME} ${VIFNAME} 2>&1`
+	_ret_value2=$?
+	if [ ${_ret_value2} -ne 0 ] ; then
+	    echo "ERROR: cannot get the IPv6 addresses on interface ${IFNAME} vif ${VIFNAME}:"
+	    echo "${_xrl_result2}"
+	    return 1
+	fi
+
+	#
+	# Check the result
+	#
+	_found=""
+	_addresses=`get_xrl_variable_value "${_xrl_result2}" addresses:list`
+	# Get the list of space-separated addresses
+	_addresses_list=`split_xrl_list_values "${_addresses}" ipv6`
+	for i in ${_addresses_list} ; do
+	    if [ "${ADDR6}" = "$i" ] ; then
+		_found="yes"
+		break;
+	    fi
+	done
+
+	if [ "${_found}" != "yes" ] ; then
+	    echo "RESULT: OK: Address ${ADDR6} was not found"
+	    return 0
+	fi
+
+	echo "ERROR: cannot test whether address ${ADDR6} is disabled:"
 	echo "${_xrl_result}"
 	return 1
     fi
@@ -1131,7 +1537,8 @@ test_is_address_disabled4()
 # The tests
 #
 TESTS=""
-TESTS="$TESTS test_cleanup_interface4"
+TESTS="$TESTS test_cleanup_interface"
+# Interface and vif tests
 TESTS="$TESTS test_create_interface"
 TESTS="$TESTS test_is_interface_configured"
 TESTS="$TESTS test_delete_interface"
@@ -1154,6 +1561,7 @@ TESTS="$TESTS test_disable_vif"
 TESTS="$TESTS test_is_vif_disabled"
 TESTS="$TESTS test_get_vif_pif_index"
 TESTS="$TESTS test_get_vif_flags"
+# IPv4 tests
 TESTS="$TESTS test_create_address4"
 TESTS="$TESTS test_get_address4"
 TESTS="$TESTS test_get_prefix4"
@@ -1166,7 +1574,22 @@ TESTS="$TESTS test_enable_address4"
 TESTS="$TESTS test_is_address_enabled4"
 TESTS="$TESTS test_disable_address4"
 TESTS="$TESTS test_is_address_disabled4"
-TESTS="$TESTS test_cleanup_interface4"
+# IPv6 tests
+if [ "${HAVE_IPV6}" = "true" ] ; then
+    TESTS="$TESTS test_create_address6"
+    TESTS="$TESTS test_get_address6"
+    TESTS="$TESTS test_get_prefix6"
+    TESTS="$TESTS test_get_endpoint6"
+    TESTS="$TESTS test_get_address_flags6"
+    TESTS="$TESTS test_delete_address6"
+    TESTS="$TESTS test_get_deleted_address6"
+    TESTS="$TESTS test_enable_address6"
+    TESTS="$TESTS test_is_address_enabled6"
+    TESTS="$TESTS test_disable_address6"
+    TESTS="$TESTS test_is_address_disabled6"
+fi
+# Clean-up the mess
+TESTS="$TESTS test_cleanup_interface"
 
 for t in ${TESTS} ; do
     $t
