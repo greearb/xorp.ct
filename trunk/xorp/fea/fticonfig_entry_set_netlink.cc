@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.12 2004/09/09 19:00:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.13 2004/10/26 00:20:06 bms Exp $"
 
 
 #include "fea_module.h"
@@ -275,17 +275,16 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
 
-#ifdef notyet
-    // Handle discard routes. These use a separate route type in
-    // netlink land. Unlike BSD, they should not need to point to
-    // a loopback interface.
-    if (fte.is_discard()) {
-	if (!fte.nexthop().is_loopback())
-	    XLOG_WARNING(
-"Nexthop of a blackhole route is not loopback; overwriting it.");
+    // Check for a discard route; the referenced ifname must have the
+    // discard property. These use a separate route type in netlink
+    // land. Unlike BSD, they need not to point to a loopback interface.
+    IfTree& it = ftic().iftree();
+    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+    XLOG_ASSERT(ii != it.ifs().end());
+    if (ii->second.discard()) {
 	rtmsg->rtm_type = RTN_BLACKHOLE;
+	goto skip_ifindex;
     }
-#endif
 
     // Get the interface index
     if_index = 0;
@@ -310,6 +309,8 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
     memcpy(data, &int_if_index, sizeof(int_if_index));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
+
+skip_ifindex:
 
     // Add the route priority as an attribute
     int int_priority = fte.metric();
