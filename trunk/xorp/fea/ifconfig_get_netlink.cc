@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.9 2004/08/17 02:20:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.10 2004/09/01 18:17:01 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -172,8 +172,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 		   reinterpret_cast<struct sockaddr*>(&snl),
 		   sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	XLOG_ERROR("error writing to netlink socket: %s",
-		   strerror(errno));
+	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));
 	return false;
     }
 
@@ -185,8 +184,13 @@ IfConfigGetNetlink::read_config(IfTree& it)
     // Linux kernel bug: when we read the whole table the kernel
     // may not set the NLM_F_MULTI flag for the multipart messages.
     //
+    string errmsg;
     ns4.set_multipart_message_read(true);
-    _ns_reader.receive_data4(nlh->nlmsg_seq);
+    if (_ns_reader.receive_data4(nlh->nlmsg_seq, errmsg) != XORP_OK) {
+	ns4.set_multipart_message_read(false);
+	XLOG_ERROR("Error reading from netlink socket: %s", errmsg.c_str());
+	return (false);
+    }
     // XXX: reset the multipart message read hackish flag
     ns4.set_multipart_message_read(false);
     if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
@@ -245,7 +249,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 			   reinterpret_cast<struct sockaddr*>(&snl),
 			   sizeof(snl))
 		!= (ssize_t)nlh->nlmsg_len) {
-		XLOG_ERROR("error writing to netlink socket: %s",
+		XLOG_ERROR("Error writing to netlink socket: %s",
 			   strerror(errno));
 		return false;
 	    }
@@ -258,8 +262,14 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // Linux kernel bug: when we read the whole table the kernel
 	    // may not set the NLM_F_MULTI flag for the multipart messages.
 	    //
+	    string errmsg;
 	    ns4.set_multipart_message_read(true);
-	    _ns_reader.receive_data4(nlh->nlmsg_seq);
+	    if (_ns_reader.receive_data4(nlh->nlmsg_seq, errmsg) != XORP_OK) {
+		ns4.set_multipart_message_read(false);
+		XLOG_ERROR("Error reading from netlink socket: %s",
+			   errmsg.c_str());
+		return (false);
+	    }
 	    // XXX: reset the multipart message read hackish flag
 	    ns4.set_multipart_message_read(false);
 	    if (parse_buffer_nlm(it, _ns_reader.buffer(),
@@ -293,7 +303,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 			   reinterpret_cast<struct sockaddr*>(&snl),
 			   sizeof(snl))
 		!= (ssize_t)nlh->nlmsg_len) {
-		XLOG_ERROR("error writing to netlink socket: %s",
+		XLOG_ERROR("Error writing to netlink socket: %s",
 			   strerror(errno));
 		return false;
 	    }
@@ -306,8 +316,14 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // Linux kernel bug: when we read the whole table the kernel
 	    // may not set the NLM_F_MULTI flag for the multipart messages.
 	    //
+	    string errmsg;
 	    ns6.set_multipart_message_read(true);
-	    _ns_reader.receive_data6(nlh->nlmsg_seq);
+	    if (_ns_reader.receive_data6(nlh->nlmsg_seq, errmsg) != XORP_OK) {
+		ns6.set_multipart_message_read(false);
+		XLOG_ERROR("Error reading from netlink socket: %s",
+			   errmsg.c_str());
+		return (false);
+	    }
 	    // XXX: reset the multipart message read hackish flag
 	    ns6.set_multipart_message_read(false);
 	    if (parse_buffer_nlm(it, _ns_reader.buffer(),
