@@ -5,7 +5,7 @@
  * This file is PROGRAMMATICALLY GENERATED.
  *
  * This instance was generated with:
- *      /home/puma/u0/hodson/src/xorp/libxorp/callback-gen.py -b 6 -l 13 
+ *      /Users/orion/src/xorp/libxorp/callback-gen.py -b 6 -l 13 
  */
 
 /**
@@ -290,10 +290,8 @@ struct XorpSafeMemberCallback0B0
     XorpSafeMemberCallback0B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback0B0<R, O>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpSafeMemberCallback0B0() {}    R dispatch() {
+	if (valid())
 	    return XorpMemberCallback0B0<R, O>::dispatch();
     }
 };
@@ -367,10 +365,8 @@ struct XorpConstSafeMemberCallback0B0
     XorpConstSafeMemberCallback0B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback0B0<R, O>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpConstSafeMemberCallback0B0() {}    R dispatch() {
+	if (valid())
 	    return XorpConstMemberCallback0B0<R, O>::dispatch();
     }
 };
@@ -473,10 +469,8 @@ struct XorpSafeMemberCallback0B1
     XorpSafeMemberCallback0B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback0B1<R, O, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpSafeMemberCallback0B1() {}    R dispatch() {
+	if (valid())
 	    return XorpMemberCallback0B1<R, O, BA1>::dispatch();
     }
 };
@@ -551,10 +545,8 @@ struct XorpConstSafeMemberCallback0B1
     XorpConstSafeMemberCallback0B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback0B1<R, O, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpConstSafeMemberCallback0B1() {}    R dispatch() {
+	if (valid())
 	    return XorpConstMemberCallback0B1<R, O, BA1>::dispatch();
     }
 };
@@ -659,10 +651,8 @@ struct XorpSafeMemberCallback0B2
     XorpSafeMemberCallback0B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback0B2<R, O, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpSafeMemberCallback0B2() {}    R dispatch() {
+	if (valid())
 	    return XorpMemberCallback0B2<R, O, BA1, BA2>::dispatch();
     }
 };
@@ -738,10 +728,8 @@ struct XorpConstSafeMemberCallback0B2
     XorpConstSafeMemberCallback0B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback0B2<R, O, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpConstSafeMemberCallback0B2() {}    R dispatch() {
+	if (valid())
 	    return XorpConstMemberCallback0B2<R, O, BA1, BA2>::dispatch();
     }
 };
@@ -848,10 +836,8 @@ struct XorpSafeMemberCallback0B3
     XorpSafeMemberCallback0B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback0B3<R, O, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpSafeMemberCallback0B3() {}    R dispatch() {
+	if (valid())
 	    return XorpMemberCallback0B3<R, O, BA1, BA2, BA3>::dispatch();
     }
 };
@@ -928,10 +914,8 @@ struct XorpConstSafeMemberCallback0B3
     XorpConstSafeMemberCallback0B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback0B3<R, O, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpConstSafeMemberCallback0B3() {}    R dispatch() {
+	if (valid())
 	    return XorpConstMemberCallback0B3<R, O, BA1, BA2, BA3>::dispatch();
     }
 };
@@ -1040,10 +1024,8 @@ struct XorpSafeMemberCallback0B4
     XorpSafeMemberCallback0B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpSafeMemberCallback0B4() {}    R dispatch() {
+	if (valid())
 	    return XorpMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>::dispatch();
     }
 };
@@ -1121,10 +1103,8 @@ struct XorpConstSafeMemberCallback0B4
     XorpConstSafeMemberCallback0B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpConstSafeMemberCallback0B4() {}    R dispatch() {
+	if (valid())
 	    return XorpConstMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>::dispatch();
     }
 };
@@ -1235,10 +1215,8 @@ struct XorpSafeMemberCallback0B5
     XorpSafeMemberCallback0B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpSafeMemberCallback0B5() {}    R dispatch() {
+	if (valid())
 	    return XorpMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>::dispatch();
     }
 };
@@ -1317,10 +1295,8 @@ struct XorpConstSafeMemberCallback0B5
     XorpConstSafeMemberCallback0B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpConstSafeMemberCallback0B5() {}    R dispatch() {
+	if (valid())
 	    return XorpConstMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>::dispatch();
     }
 };
@@ -1433,10 +1409,8 @@ struct XorpSafeMemberCallback0B6
     XorpSafeMemberCallback0B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpSafeMemberCallback0B6() {}    R dispatch() {
+	if (valid())
 	    return XorpMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch();
     }
 };
@@ -1516,10 +1490,8 @@ struct XorpConstSafeMemberCallback0B6
     XorpConstSafeMemberCallback0B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch() {
-	if (base())
+    ~XorpConstSafeMemberCallback0B6() {}    R dispatch() {
+	if (valid())
 	    return XorpConstMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch();
     }
 };
@@ -1643,10 +1615,8 @@ struct XorpSafeMemberCallback1B0
     XorpSafeMemberCallback1B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback1B0<R, O, A1>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpSafeMemberCallback1B0() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpMemberCallback1B0<R, O, A1>::dispatch(a1);
     }
 };
@@ -1720,10 +1690,8 @@ struct XorpConstSafeMemberCallback1B0
     XorpConstSafeMemberCallback1B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback1B0<R, O, A1>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpConstSafeMemberCallback1B0() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpConstMemberCallback1B0<R, O, A1>::dispatch(a1);
     }
 };
@@ -1826,10 +1794,8 @@ struct XorpSafeMemberCallback1B1
     XorpSafeMemberCallback1B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback1B1<R, O, A1, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpSafeMemberCallback1B1() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpMemberCallback1B1<R, O, A1, BA1>::dispatch(a1);
     }
 };
@@ -1904,10 +1870,8 @@ struct XorpConstSafeMemberCallback1B1
     XorpConstSafeMemberCallback1B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback1B1<R, O, A1, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpConstSafeMemberCallback1B1() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpConstMemberCallback1B1<R, O, A1, BA1>::dispatch(a1);
     }
 };
@@ -2012,10 +1976,8 @@ struct XorpSafeMemberCallback1B2
     XorpSafeMemberCallback1B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback1B2<R, O, A1, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpSafeMemberCallback1B2() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpMemberCallback1B2<R, O, A1, BA1, BA2>::dispatch(a1);
     }
 };
@@ -2091,10 +2053,8 @@ struct XorpConstSafeMemberCallback1B2
     XorpConstSafeMemberCallback1B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback1B2<R, O, A1, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpConstSafeMemberCallback1B2() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpConstMemberCallback1B2<R, O, A1, BA1, BA2>::dispatch(a1);
     }
 };
@@ -2201,10 +2161,8 @@ struct XorpSafeMemberCallback1B3
     XorpSafeMemberCallback1B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback1B3<R, O, A1, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpSafeMemberCallback1B3() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpMemberCallback1B3<R, O, A1, BA1, BA2, BA3>::dispatch(a1);
     }
 };
@@ -2281,10 +2239,8 @@ struct XorpConstSafeMemberCallback1B3
     XorpConstSafeMemberCallback1B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback1B3<R, O, A1, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpConstSafeMemberCallback1B3() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpConstMemberCallback1B3<R, O, A1, BA1, BA2, BA3>::dispatch(a1);
     }
 };
@@ -2393,10 +2349,8 @@ struct XorpSafeMemberCallback1B4
     XorpSafeMemberCallback1B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpSafeMemberCallback1B4() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>::dispatch(a1);
     }
 };
@@ -2474,10 +2428,8 @@ struct XorpConstSafeMemberCallback1B4
     XorpConstSafeMemberCallback1B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpConstSafeMemberCallback1B4() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpConstMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>::dispatch(a1);
     }
 };
@@ -2588,10 +2540,8 @@ struct XorpSafeMemberCallback1B5
     XorpSafeMemberCallback1B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpSafeMemberCallback1B5() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>::dispatch(a1);
     }
 };
@@ -2670,10 +2620,8 @@ struct XorpConstSafeMemberCallback1B5
     XorpConstSafeMemberCallback1B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpConstSafeMemberCallback1B5() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpConstMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>::dispatch(a1);
     }
 };
@@ -2786,10 +2734,8 @@ struct XorpSafeMemberCallback1B6
     XorpSafeMemberCallback1B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpSafeMemberCallback1B6() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1);
     }
 };
@@ -2869,10 +2815,8 @@ struct XorpConstSafeMemberCallback1B6
     XorpConstSafeMemberCallback1B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1) {
-	if (base())
+    ~XorpConstSafeMemberCallback1B6() {}    R dispatch(A1 a1) {
+	if (valid())
 	    return XorpConstMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1);
     }
 };
@@ -2996,10 +2940,8 @@ struct XorpSafeMemberCallback2B0
     XorpSafeMemberCallback2B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback2B0<R, O, A1, A2>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpSafeMemberCallback2B0() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpMemberCallback2B0<R, O, A1, A2>::dispatch(a1, a2);
     }
 };
@@ -3073,10 +3015,8 @@ struct XorpConstSafeMemberCallback2B0
     XorpConstSafeMemberCallback2B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback2B0<R, O, A1, A2>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpConstSafeMemberCallback2B0() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpConstMemberCallback2B0<R, O, A1, A2>::dispatch(a1, a2);
     }
 };
@@ -3179,10 +3119,8 @@ struct XorpSafeMemberCallback2B1
     XorpSafeMemberCallback2B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback2B1<R, O, A1, A2, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpSafeMemberCallback2B1() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpMemberCallback2B1<R, O, A1, A2, BA1>::dispatch(a1, a2);
     }
 };
@@ -3257,10 +3195,8 @@ struct XorpConstSafeMemberCallback2B1
     XorpConstSafeMemberCallback2B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback2B1<R, O, A1, A2, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpConstSafeMemberCallback2B1() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpConstMemberCallback2B1<R, O, A1, A2, BA1>::dispatch(a1, a2);
     }
 };
@@ -3365,10 +3301,8 @@ struct XorpSafeMemberCallback2B2
     XorpSafeMemberCallback2B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback2B2<R, O, A1, A2, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpSafeMemberCallback2B2() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpMemberCallback2B2<R, O, A1, A2, BA1, BA2>::dispatch(a1, a2);
     }
 };
@@ -3444,10 +3378,8 @@ struct XorpConstSafeMemberCallback2B2
     XorpConstSafeMemberCallback2B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback2B2<R, O, A1, A2, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpConstSafeMemberCallback2B2() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpConstMemberCallback2B2<R, O, A1, A2, BA1, BA2>::dispatch(a1, a2);
     }
 };
@@ -3554,10 +3486,8 @@ struct XorpSafeMemberCallback2B3
     XorpSafeMemberCallback2B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpSafeMemberCallback2B3() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>::dispatch(a1, a2);
     }
 };
@@ -3634,10 +3564,8 @@ struct XorpConstSafeMemberCallback2B3
     XorpConstSafeMemberCallback2B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpConstSafeMemberCallback2B3() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpConstMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>::dispatch(a1, a2);
     }
 };
@@ -3746,10 +3674,8 @@ struct XorpSafeMemberCallback2B4
     XorpSafeMemberCallback2B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpSafeMemberCallback2B4() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>::dispatch(a1, a2);
     }
 };
@@ -3827,10 +3753,8 @@ struct XorpConstSafeMemberCallback2B4
     XorpConstSafeMemberCallback2B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpConstSafeMemberCallback2B4() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpConstMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>::dispatch(a1, a2);
     }
 };
@@ -3941,10 +3865,8 @@ struct XorpSafeMemberCallback2B5
     XorpSafeMemberCallback2B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpSafeMemberCallback2B5() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2);
     }
 };
@@ -4023,10 +3945,8 @@ struct XorpConstSafeMemberCallback2B5
     XorpConstSafeMemberCallback2B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpConstSafeMemberCallback2B5() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpConstMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2);
     }
 };
@@ -4139,10 +4059,8 @@ struct XorpSafeMemberCallback2B6
     XorpSafeMemberCallback2B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpSafeMemberCallback2B6() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2);
     }
 };
@@ -4222,10 +4140,8 @@ struct XorpConstSafeMemberCallback2B6
     XorpConstSafeMemberCallback2B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2) {
-	if (base())
+    ~XorpConstSafeMemberCallback2B6() {}    R dispatch(A1 a1, A2 a2) {
+	if (valid())
 	    return XorpConstMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2);
     }
 };
@@ -4349,10 +4265,8 @@ struct XorpSafeMemberCallback3B0
     XorpSafeMemberCallback3B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback3B0<R, O, A1, A2, A3>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpSafeMemberCallback3B0() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpMemberCallback3B0<R, O, A1, A2, A3>::dispatch(a1, a2, a3);
     }
 };
@@ -4426,10 +4340,8 @@ struct XorpConstSafeMemberCallback3B0
     XorpConstSafeMemberCallback3B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback3B0<R, O, A1, A2, A3>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpConstSafeMemberCallback3B0() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpConstMemberCallback3B0<R, O, A1, A2, A3>::dispatch(a1, a2, a3);
     }
 };
@@ -4532,10 +4444,8 @@ struct XorpSafeMemberCallback3B1
     XorpSafeMemberCallback3B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback3B1<R, O, A1, A2, A3, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpSafeMemberCallback3B1() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpMemberCallback3B1<R, O, A1, A2, A3, BA1>::dispatch(a1, a2, a3);
     }
 };
@@ -4610,10 +4520,8 @@ struct XorpConstSafeMemberCallback3B1
     XorpConstSafeMemberCallback3B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback3B1<R, O, A1, A2, A3, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpConstSafeMemberCallback3B1() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpConstMemberCallback3B1<R, O, A1, A2, A3, BA1>::dispatch(a1, a2, a3);
     }
 };
@@ -4718,10 +4626,8 @@ struct XorpSafeMemberCallback3B2
     XorpSafeMemberCallback3B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpSafeMemberCallback3B2() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>::dispatch(a1, a2, a3);
     }
 };
@@ -4797,10 +4703,8 @@ struct XorpConstSafeMemberCallback3B2
     XorpConstSafeMemberCallback3B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpConstSafeMemberCallback3B2() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpConstMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>::dispatch(a1, a2, a3);
     }
 };
@@ -4907,10 +4811,8 @@ struct XorpSafeMemberCallback3B3
     XorpSafeMemberCallback3B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpSafeMemberCallback3B3() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>::dispatch(a1, a2, a3);
     }
 };
@@ -4987,10 +4889,8 @@ struct XorpConstSafeMemberCallback3B3
     XorpConstSafeMemberCallback3B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpConstSafeMemberCallback3B3() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpConstMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>::dispatch(a1, a2, a3);
     }
 };
@@ -5099,10 +4999,8 @@ struct XorpSafeMemberCallback3B4
     XorpSafeMemberCallback3B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpSafeMemberCallback3B4() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3);
     }
 };
@@ -5180,10 +5078,8 @@ struct XorpConstSafeMemberCallback3B4
     XorpConstSafeMemberCallback3B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpConstSafeMemberCallback3B4() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpConstMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3);
     }
 };
@@ -5294,10 +5190,8 @@ struct XorpSafeMemberCallback3B5
     XorpSafeMemberCallback3B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpSafeMemberCallback3B5() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3);
     }
 };
@@ -5376,10 +5270,8 @@ struct XorpConstSafeMemberCallback3B5
     XorpConstSafeMemberCallback3B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpConstSafeMemberCallback3B5() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpConstMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3);
     }
 };
@@ -5492,10 +5384,8 @@ struct XorpSafeMemberCallback3B6
     XorpSafeMemberCallback3B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpSafeMemberCallback3B6() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3);
     }
 };
@@ -5575,10 +5465,8 @@ struct XorpConstSafeMemberCallback3B6
     XorpConstSafeMemberCallback3B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3) {
-	if (base())
+    ~XorpConstSafeMemberCallback3B6() {}    R dispatch(A1 a1, A2 a2, A3 a3) {
+	if (valid())
 	    return XorpConstMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3);
     }
 };
@@ -5702,10 +5590,8 @@ struct XorpSafeMemberCallback4B0
     XorpSafeMemberCallback4B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback4B0<R, O, A1, A2, A3, A4>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpSafeMemberCallback4B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpMemberCallback4B0<R, O, A1, A2, A3, A4>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -5779,10 +5665,8 @@ struct XorpConstSafeMemberCallback4B0
     XorpConstSafeMemberCallback4B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback4B0<R, O, A1, A2, A3, A4>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpConstSafeMemberCallback4B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpConstMemberCallback4B0<R, O, A1, A2, A3, A4>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -5885,10 +5769,8 @@ struct XorpSafeMemberCallback4B1
     XorpSafeMemberCallback4B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpSafeMemberCallback4B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -5963,10 +5845,8 @@ struct XorpConstSafeMemberCallback4B1
     XorpConstSafeMemberCallback4B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpConstSafeMemberCallback4B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpConstMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6071,10 +5951,8 @@ struct XorpSafeMemberCallback4B2
     XorpSafeMemberCallback4B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpSafeMemberCallback4B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6150,10 +6028,8 @@ struct XorpConstSafeMemberCallback4B2
     XorpConstSafeMemberCallback4B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpConstSafeMemberCallback4B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpConstMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6260,10 +6136,8 @@ struct XorpSafeMemberCallback4B3
     XorpSafeMemberCallback4B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpSafeMemberCallback4B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6340,10 +6214,8 @@ struct XorpConstSafeMemberCallback4B3
     XorpConstSafeMemberCallback4B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpConstSafeMemberCallback4B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpConstMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6452,10 +6324,8 @@ struct XorpSafeMemberCallback4B4
     XorpSafeMemberCallback4B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpSafeMemberCallback4B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6533,10 +6403,8 @@ struct XorpConstSafeMemberCallback4B4
     XorpConstSafeMemberCallback4B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpConstSafeMemberCallback4B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpConstMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6647,10 +6515,8 @@ struct XorpSafeMemberCallback4B5
     XorpSafeMemberCallback4B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpSafeMemberCallback4B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6729,10 +6595,8 @@ struct XorpConstSafeMemberCallback4B5
     XorpConstSafeMemberCallback4B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpConstSafeMemberCallback4B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpConstMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6845,10 +6709,8 @@ struct XorpSafeMemberCallback4B6
     XorpSafeMemberCallback4B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpSafeMemberCallback4B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -6928,10 +6790,8 @@ struct XorpConstSafeMemberCallback4B6
     XorpConstSafeMemberCallback4B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
-	if (base())
+    ~XorpConstSafeMemberCallback4B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4) {
+	if (valid())
 	    return XorpConstMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4);
     }
 };
@@ -7055,10 +6915,8 @@ struct XorpSafeMemberCallback5B0
     XorpSafeMemberCallback5B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback5B0<R, O, A1, A2, A3, A4, A5>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpSafeMemberCallback5B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpMemberCallback5B0<R, O, A1, A2, A3, A4, A5>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7132,10 +6990,8 @@ struct XorpConstSafeMemberCallback5B0
     XorpConstSafeMemberCallback5B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback5B0<R, O, A1, A2, A3, A4, A5>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpConstSafeMemberCallback5B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpConstMemberCallback5B0<R, O, A1, A2, A3, A4, A5>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7238,10 +7094,8 @@ struct XorpSafeMemberCallback5B1
     XorpSafeMemberCallback5B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpSafeMemberCallback5B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7316,10 +7170,8 @@ struct XorpConstSafeMemberCallback5B1
     XorpConstSafeMemberCallback5B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpConstSafeMemberCallback5B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpConstMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7424,10 +7276,8 @@ struct XorpSafeMemberCallback5B2
     XorpSafeMemberCallback5B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpSafeMemberCallback5B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7503,10 +7353,8 @@ struct XorpConstSafeMemberCallback5B2
     XorpConstSafeMemberCallback5B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpConstSafeMemberCallback5B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpConstMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7613,10 +7461,8 @@ struct XorpSafeMemberCallback5B3
     XorpSafeMemberCallback5B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpSafeMemberCallback5B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7693,10 +7539,8 @@ struct XorpConstSafeMemberCallback5B3
     XorpConstSafeMemberCallback5B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpConstSafeMemberCallback5B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpConstMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7805,10 +7649,8 @@ struct XorpSafeMemberCallback5B4
     XorpSafeMemberCallback5B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpSafeMemberCallback5B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -7886,10 +7728,8 @@ struct XorpConstSafeMemberCallback5B4
     XorpConstSafeMemberCallback5B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpConstSafeMemberCallback5B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpConstMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -8000,10 +7840,8 @@ struct XorpSafeMemberCallback5B5
     XorpSafeMemberCallback5B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpSafeMemberCallback5B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -8082,10 +7920,8 @@ struct XorpConstSafeMemberCallback5B5
     XorpConstSafeMemberCallback5B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpConstSafeMemberCallback5B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpConstMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -8198,10 +8034,8 @@ struct XorpSafeMemberCallback5B6
     XorpSafeMemberCallback5B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpSafeMemberCallback5B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -8281,10 +8115,8 @@ struct XorpConstSafeMemberCallback5B6
     XorpConstSafeMemberCallback5B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-	if (base())
+    ~XorpConstSafeMemberCallback5B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+	if (valid())
 	    return XorpConstMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5);
     }
 };
@@ -8408,10 +8240,8 @@ struct XorpSafeMemberCallback6B0
     XorpSafeMemberCallback6B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpSafeMemberCallback6B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -8485,10 +8315,8 @@ struct XorpConstSafeMemberCallback6B0
     XorpConstSafeMemberCallback6B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpConstSafeMemberCallback6B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpConstMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -8591,10 +8419,8 @@ struct XorpSafeMemberCallback6B1
     XorpSafeMemberCallback6B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpSafeMemberCallback6B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -8669,10 +8495,8 @@ struct XorpConstSafeMemberCallback6B1
     XorpConstSafeMemberCallback6B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpConstSafeMemberCallback6B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpConstMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -8777,10 +8601,8 @@ struct XorpSafeMemberCallback6B2
     XorpSafeMemberCallback6B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpSafeMemberCallback6B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -8856,10 +8678,8 @@ struct XorpConstSafeMemberCallback6B2
     XorpConstSafeMemberCallback6B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpConstSafeMemberCallback6B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpConstMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -8966,10 +8786,8 @@ struct XorpSafeMemberCallback6B3
     XorpSafeMemberCallback6B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpSafeMemberCallback6B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9046,10 +8864,8 @@ struct XorpConstSafeMemberCallback6B3
     XorpConstSafeMemberCallback6B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpConstSafeMemberCallback6B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpConstMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9158,10 +8974,8 @@ struct XorpSafeMemberCallback6B4
     XorpSafeMemberCallback6B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpSafeMemberCallback6B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9239,10 +9053,8 @@ struct XorpConstSafeMemberCallback6B4
     XorpConstSafeMemberCallback6B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpConstSafeMemberCallback6B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpConstMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9353,10 +9165,8 @@ struct XorpSafeMemberCallback6B5
     XorpSafeMemberCallback6B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpSafeMemberCallback6B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9435,10 +9245,8 @@ struct XorpConstSafeMemberCallback6B5
     XorpConstSafeMemberCallback6B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpConstSafeMemberCallback6B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpConstMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9551,10 +9359,8 @@ struct XorpSafeMemberCallback6B6
     XorpSafeMemberCallback6B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpSafeMemberCallback6B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9634,10 +9440,8 @@ struct XorpConstSafeMemberCallback6B6
     XorpConstSafeMemberCallback6B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-	if (base())
+    ~XorpConstSafeMemberCallback6B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+	if (valid())
 	    return XorpConstMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6);
     }
 };
@@ -9761,10 +9565,8 @@ struct XorpSafeMemberCallback7B0
     XorpSafeMemberCallback7B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpSafeMemberCallback7B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -9838,10 +9640,8 @@ struct XorpConstSafeMemberCallback7B0
     XorpConstSafeMemberCallback7B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpConstSafeMemberCallback7B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpConstMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -9944,10 +9744,8 @@ struct XorpSafeMemberCallback7B1
     XorpSafeMemberCallback7B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpSafeMemberCallback7B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10022,10 +9820,8 @@ struct XorpConstSafeMemberCallback7B1
     XorpConstSafeMemberCallback7B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpConstSafeMemberCallback7B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpConstMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10130,10 +9926,8 @@ struct XorpSafeMemberCallback7B2
     XorpSafeMemberCallback7B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpSafeMemberCallback7B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10209,10 +10003,8 @@ struct XorpConstSafeMemberCallback7B2
     XorpConstSafeMemberCallback7B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpConstSafeMemberCallback7B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpConstMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10319,10 +10111,8 @@ struct XorpSafeMemberCallback7B3
     XorpSafeMemberCallback7B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpSafeMemberCallback7B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10399,10 +10189,8 @@ struct XorpConstSafeMemberCallback7B3
     XorpConstSafeMemberCallback7B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpConstSafeMemberCallback7B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpConstMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10511,10 +10299,8 @@ struct XorpSafeMemberCallback7B4
     XorpSafeMemberCallback7B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpSafeMemberCallback7B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10592,10 +10378,8 @@ struct XorpConstSafeMemberCallback7B4
     XorpConstSafeMemberCallback7B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpConstSafeMemberCallback7B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpConstMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10706,10 +10490,8 @@ struct XorpSafeMemberCallback7B5
     XorpSafeMemberCallback7B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpSafeMemberCallback7B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10788,10 +10570,8 @@ struct XorpConstSafeMemberCallback7B5
     XorpConstSafeMemberCallback7B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpConstSafeMemberCallback7B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpConstMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10904,10 +10684,8 @@ struct XorpSafeMemberCallback7B6
     XorpSafeMemberCallback7B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpSafeMemberCallback7B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -10987,10 +10765,8 @@ struct XorpConstSafeMemberCallback7B6
     XorpConstSafeMemberCallback7B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-	if (base())
+    ~XorpConstSafeMemberCallback7B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+	if (valid())
 	    return XorpConstMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7);
     }
 };
@@ -11114,10 +10890,8 @@ struct XorpSafeMemberCallback8B0
     XorpSafeMemberCallback8B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpSafeMemberCallback8B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11191,10 +10965,8 @@ struct XorpConstSafeMemberCallback8B0
     XorpConstSafeMemberCallback8B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpConstSafeMemberCallback8B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpConstMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11297,10 +11069,8 @@ struct XorpSafeMemberCallback8B1
     XorpSafeMemberCallback8B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpSafeMemberCallback8B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11375,10 +11145,8 @@ struct XorpConstSafeMemberCallback8B1
     XorpConstSafeMemberCallback8B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpConstSafeMemberCallback8B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpConstMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11483,10 +11251,8 @@ struct XorpSafeMemberCallback8B2
     XorpSafeMemberCallback8B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpSafeMemberCallback8B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11562,10 +11328,8 @@ struct XorpConstSafeMemberCallback8B2
     XorpConstSafeMemberCallback8B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpConstSafeMemberCallback8B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpConstMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11672,10 +11436,8 @@ struct XorpSafeMemberCallback8B3
     XorpSafeMemberCallback8B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpSafeMemberCallback8B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11752,10 +11514,8 @@ struct XorpConstSafeMemberCallback8B3
     XorpConstSafeMemberCallback8B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpConstSafeMemberCallback8B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpConstMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11864,10 +11624,8 @@ struct XorpSafeMemberCallback8B4
     XorpSafeMemberCallback8B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpSafeMemberCallback8B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -11945,10 +11703,8 @@ struct XorpConstSafeMemberCallback8B4
     XorpConstSafeMemberCallback8B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpConstSafeMemberCallback8B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpConstMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -12059,10 +11815,8 @@ struct XorpSafeMemberCallback8B5
     XorpSafeMemberCallback8B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpSafeMemberCallback8B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -12141,10 +11895,8 @@ struct XorpConstSafeMemberCallback8B5
     XorpConstSafeMemberCallback8B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpConstSafeMemberCallback8B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpConstMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -12257,10 +12009,8 @@ struct XorpSafeMemberCallback8B6
     XorpSafeMemberCallback8B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpSafeMemberCallback8B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -12340,10 +12090,8 @@ struct XorpConstSafeMemberCallback8B6
     XorpConstSafeMemberCallback8B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-	if (base())
+    ~XorpConstSafeMemberCallback8B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+	if (valid())
 	    return XorpConstMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8);
     }
 };
@@ -12467,10 +12215,8 @@ struct XorpSafeMemberCallback9B0
     XorpSafeMemberCallback9B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpSafeMemberCallback9B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -12544,10 +12290,8 @@ struct XorpConstSafeMemberCallback9B0
     XorpConstSafeMemberCallback9B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpConstSafeMemberCallback9B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpConstMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -12650,10 +12394,8 @@ struct XorpSafeMemberCallback9B1
     XorpSafeMemberCallback9B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpSafeMemberCallback9B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -12728,10 +12470,8 @@ struct XorpConstSafeMemberCallback9B1
     XorpConstSafeMemberCallback9B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpConstSafeMemberCallback9B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpConstMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -12836,10 +12576,8 @@ struct XorpSafeMemberCallback9B2
     XorpSafeMemberCallback9B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpSafeMemberCallback9B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -12915,10 +12653,8 @@ struct XorpConstSafeMemberCallback9B2
     XorpConstSafeMemberCallback9B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpConstSafeMemberCallback9B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpConstMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13025,10 +12761,8 @@ struct XorpSafeMemberCallback9B3
     XorpSafeMemberCallback9B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpSafeMemberCallback9B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13105,10 +12839,8 @@ struct XorpConstSafeMemberCallback9B3
     XorpConstSafeMemberCallback9B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpConstSafeMemberCallback9B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpConstMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13217,10 +12949,8 @@ struct XorpSafeMemberCallback9B4
     XorpSafeMemberCallback9B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpSafeMemberCallback9B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13298,10 +13028,8 @@ struct XorpConstSafeMemberCallback9B4
     XorpConstSafeMemberCallback9B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpConstSafeMemberCallback9B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpConstMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13412,10 +13140,8 @@ struct XorpSafeMemberCallback9B5
     XorpSafeMemberCallback9B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpSafeMemberCallback9B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13494,10 +13220,8 @@ struct XorpConstSafeMemberCallback9B5
     XorpConstSafeMemberCallback9B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpConstSafeMemberCallback9B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpConstMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13610,10 +13334,8 @@ struct XorpSafeMemberCallback9B6
     XorpSafeMemberCallback9B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpSafeMemberCallback9B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13693,10 +13415,8 @@ struct XorpConstSafeMemberCallback9B6
     XorpConstSafeMemberCallback9B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-	if (base())
+    ~XorpConstSafeMemberCallback9B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+	if (valid())
 	    return XorpConstMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 };
@@ -13820,10 +13540,8 @@ struct XorpSafeMemberCallback10B0
     XorpSafeMemberCallback10B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpSafeMemberCallback10B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -13897,10 +13615,8 @@ struct XorpConstSafeMemberCallback10B0
     XorpConstSafeMemberCallback10B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpConstSafeMemberCallback10B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpConstMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14003,10 +13719,8 @@ struct XorpSafeMemberCallback10B1
     XorpSafeMemberCallback10B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpSafeMemberCallback10B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14081,10 +13795,8 @@ struct XorpConstSafeMemberCallback10B1
     XorpConstSafeMemberCallback10B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpConstSafeMemberCallback10B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpConstMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14189,10 +13901,8 @@ struct XorpSafeMemberCallback10B2
     XorpSafeMemberCallback10B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpSafeMemberCallback10B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14268,10 +13978,8 @@ struct XorpConstSafeMemberCallback10B2
     XorpConstSafeMemberCallback10B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpConstSafeMemberCallback10B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpConstMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14378,10 +14086,8 @@ struct XorpSafeMemberCallback10B3
     XorpSafeMemberCallback10B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpSafeMemberCallback10B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14458,10 +14164,8 @@ struct XorpConstSafeMemberCallback10B3
     XorpConstSafeMemberCallback10B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpConstSafeMemberCallback10B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpConstMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14570,10 +14274,8 @@ struct XorpSafeMemberCallback10B4
     XorpSafeMemberCallback10B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpSafeMemberCallback10B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14651,10 +14353,8 @@ struct XorpConstSafeMemberCallback10B4
     XorpConstSafeMemberCallback10B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpConstSafeMemberCallback10B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpConstMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14765,10 +14465,8 @@ struct XorpSafeMemberCallback10B5
     XorpSafeMemberCallback10B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpSafeMemberCallback10B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14847,10 +14545,8 @@ struct XorpConstSafeMemberCallback10B5
     XorpConstSafeMemberCallback10B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpConstSafeMemberCallback10B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpConstMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -14963,10 +14659,8 @@ struct XorpSafeMemberCallback10B6
     XorpSafeMemberCallback10B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpSafeMemberCallback10B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -15046,10 +14740,8 @@ struct XorpConstSafeMemberCallback10B6
     XorpConstSafeMemberCallback10B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
-	if (base())
+    ~XorpConstSafeMemberCallback10B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+	if (valid())
 	    return XorpConstMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 };
@@ -15173,10 +14865,8 @@ struct XorpSafeMemberCallback11B0
     XorpSafeMemberCallback11B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpSafeMemberCallback11B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15250,10 +14940,8 @@ struct XorpConstSafeMemberCallback11B0
     XorpConstSafeMemberCallback11B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpConstSafeMemberCallback11B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpConstMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15356,10 +15044,8 @@ struct XorpSafeMemberCallback11B1
     XorpSafeMemberCallback11B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpSafeMemberCallback11B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15434,10 +15120,8 @@ struct XorpConstSafeMemberCallback11B1
     XorpConstSafeMemberCallback11B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpConstSafeMemberCallback11B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpConstMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15542,10 +15226,8 @@ struct XorpSafeMemberCallback11B2
     XorpSafeMemberCallback11B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpSafeMemberCallback11B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15621,10 +15303,8 @@ struct XorpConstSafeMemberCallback11B2
     XorpConstSafeMemberCallback11B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpConstSafeMemberCallback11B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpConstMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15731,10 +15411,8 @@ struct XorpSafeMemberCallback11B3
     XorpSafeMemberCallback11B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpSafeMemberCallback11B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15811,10 +15489,8 @@ struct XorpConstSafeMemberCallback11B3
     XorpConstSafeMemberCallback11B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpConstSafeMemberCallback11B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpConstMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -15923,10 +15599,8 @@ struct XorpSafeMemberCallback11B4
     XorpSafeMemberCallback11B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpSafeMemberCallback11B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -16004,10 +15678,8 @@ struct XorpConstSafeMemberCallback11B4
     XorpConstSafeMemberCallback11B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpConstSafeMemberCallback11B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpConstMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -16118,10 +15790,8 @@ struct XorpSafeMemberCallback11B5
     XorpSafeMemberCallback11B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpSafeMemberCallback11B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -16200,10 +15870,8 @@ struct XorpConstSafeMemberCallback11B5
     XorpConstSafeMemberCallback11B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpConstSafeMemberCallback11B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpConstMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -16316,10 +15984,8 @@ struct XorpSafeMemberCallback11B6
     XorpSafeMemberCallback11B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpSafeMemberCallback11B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -16399,10 +16065,8 @@ struct XorpConstSafeMemberCallback11B6
     XorpConstSafeMemberCallback11B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
-	if (base())
+    ~XorpConstSafeMemberCallback11B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) {
+	if (valid())
 	    return XorpConstMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
 };
@@ -16526,10 +16190,8 @@ struct XorpSafeMemberCallback12B0
     XorpSafeMemberCallback12B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpSafeMemberCallback12B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -16603,10 +16265,8 @@ struct XorpConstSafeMemberCallback12B0
     XorpConstSafeMemberCallback12B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpConstSafeMemberCallback12B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpConstMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -16709,10 +16369,8 @@ struct XorpSafeMemberCallback12B1
     XorpSafeMemberCallback12B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpSafeMemberCallback12B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -16787,10 +16445,8 @@ struct XorpConstSafeMemberCallback12B1
     XorpConstSafeMemberCallback12B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpConstSafeMemberCallback12B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpConstMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -16895,10 +16551,8 @@ struct XorpSafeMemberCallback12B2
     XorpSafeMemberCallback12B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpSafeMemberCallback12B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -16974,10 +16628,8 @@ struct XorpConstSafeMemberCallback12B2
     XorpConstSafeMemberCallback12B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpConstSafeMemberCallback12B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpConstMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17084,10 +16736,8 @@ struct XorpSafeMemberCallback12B3
     XorpSafeMemberCallback12B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpSafeMemberCallback12B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17164,10 +16814,8 @@ struct XorpConstSafeMemberCallback12B3
     XorpConstSafeMemberCallback12B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpConstSafeMemberCallback12B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpConstMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17276,10 +16924,8 @@ struct XorpSafeMemberCallback12B4
     XorpSafeMemberCallback12B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpSafeMemberCallback12B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17357,10 +17003,8 @@ struct XorpConstSafeMemberCallback12B4
     XorpConstSafeMemberCallback12B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpConstSafeMemberCallback12B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpConstMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17471,10 +17115,8 @@ struct XorpSafeMemberCallback12B5
     XorpSafeMemberCallback12B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpSafeMemberCallback12B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17553,10 +17195,8 @@ struct XorpConstSafeMemberCallback12B5
     XorpConstSafeMemberCallback12B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpConstSafeMemberCallback12B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpConstMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17669,10 +17309,8 @@ struct XorpSafeMemberCallback12B6
     XorpSafeMemberCallback12B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpSafeMemberCallback12B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17752,10 +17390,8 @@ struct XorpConstSafeMemberCallback12B6
     XorpConstSafeMemberCallback12B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
-	if (base())
+    ~XorpConstSafeMemberCallback12B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) {
+	if (valid())
 	    return XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
 };
@@ -17879,10 +17515,8 @@ struct XorpSafeMemberCallback13B0
     XorpSafeMemberCallback13B0(const char* file, int line, O* o, M m)
 	 : XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpSafeMemberCallback13B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -17956,10 +17590,8 @@ struct XorpConstSafeMemberCallback13B0
     XorpConstSafeMemberCallback13B0(const char* file, int line, O* o, M m)
 	 : XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line, o, m),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpConstSafeMemberCallback13B0() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18062,10 +17694,8 @@ struct XorpSafeMemberCallback13B1
     XorpSafeMemberCallback13B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpSafeMemberCallback13B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18140,10 +17770,8 @@ struct XorpConstSafeMemberCallback13B1
     XorpConstSafeMemberCallback13B1(const char* file, int line, O* o, M m, BA1 ba1)
 	 : XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(file, line, o, m, ba1),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpConstSafeMemberCallback13B1() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18248,10 +17876,8 @@ struct XorpSafeMemberCallback13B2
     XorpSafeMemberCallback13B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpSafeMemberCallback13B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18327,10 +17953,8 @@ struct XorpConstSafeMemberCallback13B2
     XorpConstSafeMemberCallback13B2(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2)
 	 : XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(file, line, o, m, ba1, ba2),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpConstSafeMemberCallback13B2() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18437,10 +18061,8 @@ struct XorpSafeMemberCallback13B3
     XorpSafeMemberCallback13B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpSafeMemberCallback13B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18517,10 +18139,8 @@ struct XorpConstSafeMemberCallback13B3
     XorpConstSafeMemberCallback13B3(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
 	 : XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(file, line, o, m, ba1, ba2, ba3),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpConstSafeMemberCallback13B3() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18629,10 +18249,8 @@ struct XorpSafeMemberCallback13B4
     XorpSafeMemberCallback13B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpSafeMemberCallback13B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18710,10 +18328,8 @@ struct XorpConstSafeMemberCallback13B4
     XorpConstSafeMemberCallback13B4(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 	 : XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(file, line, o, m, ba1, ba2, ba3, ba4),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpConstSafeMemberCallback13B4() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18824,10 +18440,8 @@ struct XorpSafeMemberCallback13B5
     XorpSafeMemberCallback13B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpSafeMemberCallback13B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -18906,10 +18520,8 @@ struct XorpConstSafeMemberCallback13B5
     XorpConstSafeMemberCallback13B5(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 	 : XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(file, line, o, m, ba1, ba2, ba3, ba4, ba5),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpConstSafeMemberCallback13B5() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -19022,10 +18634,8 @@ struct XorpSafeMemberCallback13B6
     XorpSafeMemberCallback13B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpSafeMemberCallback13B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };
@@ -19105,10 +18715,8 @@ struct XorpConstSafeMemberCallback13B6
     XorpConstSafeMemberCallback13B6(const char* file, int line, O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 	 : XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, m, ba1, ba2, ba3, ba4, ba5, ba6),
 	   SafeCallbackBase(o) {}
-    CallbackSafeObject* base()		{ return _o; }
-    void invalidate()			{ _o = 0; }
-    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
-	if (base())
+    ~XorpConstSafeMemberCallback13B6() {}    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) {
+	if (valid())
 	    return XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
 };

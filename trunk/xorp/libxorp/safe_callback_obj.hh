@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxorp/safe_callback_obj.hh,v 1.1 2003/12/20 00:26:01 hodson Exp $
 
 #ifndef __LIBXORP_SAFE_CALLBACK_OBJ_HH__
 #define __LIBXORP_SAFE_CALLBACK_OBJ_HH__
@@ -72,23 +72,18 @@ public:
      * Informs CallbackSafeObject that is tracking callback
      * instances that this callback no longer exists.
      */
-    virtual ~SafeCallbackBase();
+    ~SafeCallbackBase();
 
-    /**
-     * Get pointer to callback object.
-     */
-    virtual CallbackSafeObject* base() { return 0; };
+    void invalidate();
 
-    /**
-     * Set to CallbackSafeObject associated with callback to null.
-     * This prevents the callback from being dispatched.
-     */
-    virtual void invalidate() = 0;
+    bool valid() const;
 
 protected:
     SafeCallbackBase();					  // Not implemented
     SafeCallbackBase(const SafeCallbackBase&);		  // Not implemented
     SafeCallbackBase& operator=(const SafeCallbackBase&); // Not implemented
+
+    CallbackSafeObject* _cso;
 };
 
 

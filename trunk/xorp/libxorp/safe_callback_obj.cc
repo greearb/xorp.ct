@@ -19,16 +19,30 @@
 // ----------------------------------------------------------------------------
 // SafeCallbackBase implementation
 
-SafeCallbackBase::SafeCallbackBase(CallbackSafeObject* o)
+SafeCallbackBase::SafeCallbackBase(CallbackSafeObject* o) : _cso(o)
 {
-    o->ref_cb(this);
+    _cso->ref_cb(this);
 }
 
 SafeCallbackBase::~SafeCallbackBase()
 {
-    CallbackSafeObject* o = base();
-    if (o)
-	o->unref_cb(this);
+    if (valid())
+	invalidate();
+}
+
+void
+SafeCallbackBase::invalidate()
+{
+    if (valid()) {
+	_cso->unref_cb(this);
+	_cso = 0;
+    }
+}
+
+bool
+SafeCallbackBase::valid() const
+{
+    return _cso != 0;
 }
 
 
@@ -38,9 +52,16 @@ SafeCallbackBase::~SafeCallbackBase()
 CallbackSafeObject::~CallbackSafeObject()
 {
     std::vector<SafeCallbackBase*>::iterator i = _cbs.begin();
-    while (i != _cbs.end()) {
-	(*i)->invalidate();
-	i++;
+    while (_cbs.empty() == false) {
+	SafeCallbackBase* scb = *i;
+	if (scb == 0) {
+	    _cbs.erase(_cbs.begin());
+	    continue;
+	}
+	if (scb->valid()) {
+	    scb->invalidate();
+	}
     }
+    assert(_cbs.empty());
 }
 

@@ -471,10 +471,9 @@ def output_rest(l_types, b_types, dbg):
         o += "o, m"
         o += joining_csv(call_args(b_types))
         o += "),\n\t   SafeCallbackBase(o) {}\n"
-        o += "    CallbackSafeObject* base()		{ return _o; }\n"
-        o += "    void invalidate()			{ _o = 0; }\n"
+        o += "    ~Xorp%sSafeMemberCallback%dB%d() {}" % (CONST, nl, nb)
         o += "    R dispatch(%s) {\n" % (csv(decl_args(l_types)))
-        o += "\tif (base())\n"
+        o += "\tif (valid())\n"
         o += "\t    return Xorp%sMemberCallback%dB%d<R, O%s>::dispatch(%s);\n" % (CONST, nl, nb, joining_csv(l_types + b_types), csv(call_args(l_types)))
         o += "    }\n"
         o += "};\n"
