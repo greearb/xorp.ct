@@ -1,6 +1,37 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.40 2002/12/09 10:59:36 pavlin Exp $
+# $XORP: xorp/bgp/TODO,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 #
+
+---------------------------- WORK PLAN --------------------------
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+* Finish Kdoc'ing BGP                                   M	as needed
+* Integration tests 					H	AG
+* Filter to add and remove MEDs on EBGP peerings        H	MH
+* IPv6 support						L	AG
+* Handle unrecognized optional transitive attributes	H	MH
+* Test harness vs Cisco and Zebra to validate tests     L	AG
+* Monitoring/Instrumentation (show ip bgp, MIB)		H	AG + MH
+* Filters						M	??
+   - which user-specified filters?	
+   - how to do user configuration?
+   - how to handle filter changes?
+* Originating routes					M	AG
+* Handling routes redistributed from IGPs.		M	AG + MH
+* Implement MinRouteAdvertisementInterval		M	??
+
+The list above is the intended functionality for a 1.0 release of Xorp BGP
+
+Longer Term tasks
+-----------------
+* Communities
+* Route flap damping
+* Optionally not storing RIB-IN
+* Confederations
+* Route Reflector
+* Route Refresh
+* TCP MD5
 
 ------------------------------ TODO -----------------------------
 
@@ -10,18 +41,12 @@ check the results of the decoding against what was encoded.
 6) Filling missing throw exceptions.
 	- use exception from BGPPacket.hh, filling the notification codes
 
-10) Verify that we correctly propagate optional transitive options in
-update messages that are unknown to us.
-
 11) Rationalise main.cc and bgp.cc, with respect to where main is.
-
-14) Need to consider pacing outgoing
-packets. MinRouteAdvertisementInterval. Plus jitter addition.
 
 16) Fix open packet operator== method to check parameters, current problem due to received open packets and sent open packets storing data in different places.
 18) Check the validity of the withdrawn routes field in check_update_packet (peer.cc) and the validity of network reachability field.
 
----added 9/24/02 by mjh---
+---added 2002-09-24 by mjh---
 
 21) Ensure we keep the right connection during simultaneous open.
 
@@ -29,13 +54,13 @@ packets. MinRouteAdvertisementInterval. Plus jitter addition.
 
 26) Encode method in BGPAuthParameter
 
---added 21/10/02 by APG---
+--added 2002-10-21 by APG---
 
 27) Implement some capability functionality, the hooks to enable per peer
 capability advertisement exist but the functionality doesn't. Personnally
 I don't think this is required for the cvs opening.
 
--- added 6/12/02 by MJH
+-- added 2002-12-06 by MJH
 
 28) In FanoutTable's queue, we skip entries if they have the same
 origin peer as the output branch calling get_next_message.  If the
