@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.2 2003/03/10 23:20:59 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.3 2003/11/20 05:52:01 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -101,9 +101,9 @@ CommandTreeNode::print() const
 }
 
 CommandTree::CommandTree() 
-    : _root("ROOT", NULL, NULL)
+    : _root_node("ROOT", NULL, NULL)
 {
-    _current_node = &_root;
+    _current_node = &_root_node;
 }
 
 CommandTree::~CommandTree()
@@ -155,5 +155,5 @@ CommandTree::activate_current()
 void 
 CommandTree::print() const
 {
-    _root.print();
+    _root_node.print();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.20 2003/11/18 23:03:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.21 2003/11/20 06:05:05 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -506,8 +506,7 @@ MasterConfigTree::discard_changes()
 {
     printf("##############################################################\n");
     printf("MasterConfigTree::discard_changes\n");
-    string result =
-	_root_node.discard_changes(0, 0);
+    string result = _root_node.discard_changes(0, 0);
     printf("##############################################################\n");
     return result;
 }
@@ -789,14 +788,14 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     diff_configs(new_tree, delta_tree, deletion_tree);
 
     string response;
-    if (!root().merge_deltas(user_id, delta_tree.const_root(),
-			     /*provisional change*/true, response)) {
+    if (!_root_node.merge_deltas(user_id, delta_tree.const_root_node(),
+				 /*provisional change*/true, response)) {
 	discard_changes();
 	errmsg = response;
 	return false;
     }
-    if (!root().merge_deletions(user_id, deletion_tree.const_root(),
-				/*provisional change*/true, response)) {
+    if (!_root_node.merge_deletions(user_id, deletion_tree.const_root_node(),
+				    /*provisional change*/true, response)) {
 	discard_changes();
 	errmsg = response;
 	return false;

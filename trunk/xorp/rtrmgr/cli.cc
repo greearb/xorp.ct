@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.16 2003/11/20 00:39:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.17 2003/11/20 05:45:43 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -32,7 +32,7 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node)
       _mode(CLI_MODE_NONE),
       _changes_made(false)
 {
-    _current_config_node = &(config_tree()->root());
+    _current_config_node = &(config_tree()->root_node());
     operational_mode();
 }
 
@@ -409,7 +409,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
     set <string> existing_children;
 
     const list<CommandTreeNode*>& cmdchildren =
-	command_tree.root().children();
+	command_tree.root_node().children();
     list<CommandTreeNode*>::const_iterator cmd_iter;
     for (cmd_iter = cmdchildren.begin();
 	 cmd_iter != cmdchildren.end();
@@ -435,7 +435,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 
     const TemplateTreeNode* ttn;
     if (_current_config_node->is_root_node()) {
-	ttn = template_tree()->root();
+	ttn = template_tree()->root_node();
     } else {
 	ttn = _current_config_node->template_node();
     }
@@ -551,7 +551,7 @@ RouterCLI::add_edit_subtree()
 	else
 	    cmdpath = "edit " + pathstr();
 
-	add_command_subtree(*_edit_node, cmd_tree.root(),
+	add_command_subtree(*_edit_node, cmd_tree.root_node(),
 			    callback(this, &RouterCLI::edit_func),
 			    cmdpath, 0);
     }
@@ -588,7 +588,7 @@ RouterCLI::add_delete_subtree()
     else
 	cmdpath = "delete " + pathstr();
 
-    add_command_subtree(*_delete_node, cmd_tree.root(),
+    add_command_subtree(*_delete_node, cmd_tree.root_node(),
 			callback(this, &RouterCLI::delete_func),
 			cmdpath, 0);
 }
@@ -619,7 +619,7 @@ RouterCLI::add_set_subtree()
 	else
 	    cmdpath = "set " + pathstr();
 
-	add_command_subtree(*_set_node, cmd_tree.root(),
+	add_command_subtree(*_set_node, cmd_tree.root_node(),
 			    callback(this, &RouterCLI::set_func),
 			    cmdpath, 0);
     }
@@ -657,7 +657,7 @@ RouterCLI::add_show_subtree()
     else
 	cmdpath = "show " + pathstr();
 
-    add_command_subtree(*_show_node, cmd_tree.root(),
+    add_command_subtree(*_show_node, cmd_tree.root_node(),
 			callback(this, &RouterCLI::show_func),
 			cmdpath, 0);
 }

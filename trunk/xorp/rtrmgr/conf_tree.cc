@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.8 2003/11/18 23:03:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.9 2003/11/20 06:05:05 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -46,7 +46,7 @@ ConfigTree::~ConfigTree()
 ConfigTree&
 ConfigTree::operator=(const ConfigTree& orig_tree)
 {
-    _root_node.clone_subtree(orig_tree.const_root());
+    _root_node.clone_subtree(orig_tree.const_root_node());
     return *this;
 }
 
@@ -383,8 +383,8 @@ ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
     printf("end delta tree.\n");
 #endif
     response = "";
-    return root().merge_deltas(user_id, delta_tree.const_root(),
-				provisional_change, response);
+    return _root_node.merge_deltas(user_id, delta_tree.const_root_node(),
+				   provisional_change, response);
 }
 
 bool
@@ -407,8 +407,9 @@ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
     printf("end deletion tree.\n");
 #endif
     response = "";
-    return root().merge_deletions(user_id, deletion_tree.const_root(),
-				   provisional_change, response);
+    return _root_node.merge_deletions(user_id,
+				      deletion_tree.const_root_node(),
+				      provisional_change, response);
 }
 
 void
@@ -434,12 +435,12 @@ ConfigTree::expand_varname_to_matchlist(const string& varname,
 void
 ConfigTree::retain_different_nodes(const ConfigTree& them,
 				   bool retain_changed_values) {
-    _root_node.retain_different_nodes(them.const_root(),
+    _root_node.retain_different_nodes(them.const_root_node(),
 				      retain_changed_values);
 }
 
 void
 ConfigTree::retain_common_nodes(const ConfigTree& them) {
-    _root_node.retain_common_nodes(them.const_root());
+    _root_node.retain_common_nodes(them.const_root_node());
 }
 

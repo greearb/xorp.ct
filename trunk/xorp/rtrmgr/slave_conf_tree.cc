@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.9 2003/11/17 19:34:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.10 2003/11/20 06:05:05 pavlin Exp $"
 
 // #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -176,7 +176,7 @@ bool SlaveConfigTree::get_deltas(const SlaveConfigTree& main_tree) {
 #ifdef DEBUG_COMMIT
     printf("SlaveConfigTree::get_deltas\n");
 #endif
-    if (root().get_deltas(main_tree.const_root()) > 0) {
+    if (root_node().get_deltas(main_tree.const_root_node()) > 0) {
 #ifdef DEBUG_COMMIT
 	printf("FOUND DELTAS:\n");
 	print();
@@ -190,7 +190,7 @@ bool SlaveConfigTree::get_deletions(const SlaveConfigTree& main_tree) {
 #ifdef DEBUG_COMMIT
     printf("SlaveConfigTree::get_deltas\n");
 #endif
-    if (root().get_deletions(main_tree.const_root()) > 0) {
+    if (root_node().get_deletions(main_tree.const_root_node()) > 0) {
 #ifdef DEBUG_COMMIT
 	printf("FOUND DELETIONS:>>>>\n");
 	print();

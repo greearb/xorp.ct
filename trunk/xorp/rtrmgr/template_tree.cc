@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.9 2003/11/17 19:34:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.10 2003/11/20 06:05:06 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -36,8 +36,8 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     : _xrldb(xrl_dir),
       _xorp_root_dir(xorp_root_dir)
 {
-    _root = new TemplateTreeNode(*this, NULL, "", "");
-    _current_node = _root;
+    _root_node = new TemplateTreeNode(*this, NULL, "", "");
+    _current_node = _root_node;
 
     list <string> files;
 
@@ -102,12 +102,12 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 }
 
 TemplateTree::~TemplateTree() {
-    delete _root;
+    delete _root_node;
 }
 
 void
 TemplateTree::display_tree() {
-    _root->print();
+    _root_node->print();
 }
 
 void TemplateTree::extend_path(string segment, bool is_tag) {
@@ -311,7 +311,7 @@ TemplateTree::add_node(const string& segment, int type, char* cinit) {
 
 TemplateTreeNode*
 TemplateTree::find_node(const list<string>& path_segments) {
-    TemplateTreeNode* ttn = _root;
+    TemplateTreeNode* ttn = _root_node;
     list <string>::const_iterator i;
     for (i=path_segments.begin(); i!= path_segments.end(); ++i) {
 	list <TemplateTreeNode*> matches;
@@ -406,5 +406,5 @@ TemplateTree::check_variable_name(const string& s) const {
 	sl.pop_front();
     }
 
-    return _root->check_variable_name(v, 0);
+    return _root_node->check_variable_name(v, 0);
 }
