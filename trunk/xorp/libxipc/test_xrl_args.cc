@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.5 2003/10/20 22:38:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.6 2004/06/10 22:41:09 hodson Exp $"
 
 // test_xrl_args: String Serialization Tests
 
@@ -61,7 +61,7 @@ test_serialize_one(const XrlArgs& original)
 	 buf_bytes++) {
 
 	// Pack XrlArgs into a byte vector
-	vector<uint8_t> buf(buf_bytes);
+	vector<uint8_t> buf(buf_bytes + 1);
 	size_t original_bytes = original.pack(&buf[0], buf_bytes);
 
 	// Check reported bytes used against expected
