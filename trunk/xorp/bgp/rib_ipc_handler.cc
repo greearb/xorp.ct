@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.19 2003/06/17 06:44:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.20 2003/06/20 18:55:56 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -450,6 +450,9 @@ XrlQueue<A>::sendit()
 	// still its gone to poo.
 
 	XLOG_ASSERT(0 != _flying);
+
+	// We failed to send the last XRL. Don't attempt to send any more.
+	return;
     }
 }
 
