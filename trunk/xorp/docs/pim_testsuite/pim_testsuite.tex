@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.9 2003/02/09 00:52:19 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.10 2003/02/11 09:16:39 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -9898,7 +9898,8 @@ State.}
 
 \end{enumerate}
 
-\subpara{Part Q: Receive Join(*,G) on interface I in I Am Assert Loser State.}
+\subpara{Part Q: Receive Join(*,G) or Join(*,*,RP(G)) on interface I in I Am
+Assert Loser State.}
 
 \begin{enumerate}
 
@@ -9930,6 +9931,9 @@ State.}
   \item Continue observing the Assert messages transmitted by the RUT on
   LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
   LAN1.
+
+  \item Repeate the test except that TR1 composes and sends (*,*,RP) Join
+  message instead of the second (*,G) Join message.
 
 \end{enumerate}
 
@@ -10652,6 +10656,9 @@ The results should be same as in Part I.
   LAN1.
   In addition, the RUT should start forwarding the data packets from S1 on
   LAN1.
+
+  \item When the test is repeated with (*,*,RP) Join message instead of the
+  second (*,G) Join messages, the result should be same.
 
 \end{itemize}
 
