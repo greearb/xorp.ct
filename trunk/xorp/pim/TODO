@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.37 2003/06/13 02:29:52 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.38 2003/06/13 19:23:40 pavlin Exp $
 #
 
 * PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
@@ -1157,58 +1157,18 @@ for the kernel patches as well.
 
 * Add the processing when we receive (S,G,rpt)Prune and we are in PP state.
 
+* IMPL: limit:
+  - the number of groups created by a given source S
+  - rate-limit incoming joins and leaves
+  - rate-limit RP register messages at the RP
 
-====================OLD TODO BEGIN================
-* If invalid address in J/P message, ignore the whole message
+* If the number of J/P sources in a J/P message is very large, use
+  IP fragmentation to create a larger message.
 
-* Accept 0.0.0.0 destination address packets (see bottom of page 25
-  section 4.4.1 in draft-new-03)
+* SPEC: Asserts rate-limit of (approx) 1 Assert/s
+  on same oif has to be per routing entry, i.e., (S,G) or (*,G).
 
-* All masklen to become uint8_t instead of uint32_t or better masklen_t
-
-* All *address to become *addr
-
-* IMPLEMENT: Assert processing: S,G, from NoInfo state when S,G packet arrives
- (pp 54, bottom)
-
-* Check the S/W/R flags in the Encoded-Source address
-
-* Take care of the using of LAN Prune Delay stuff in Section 4.6.3 (I-D v.03)
-
-* SPEC: Section 4.9: clarify what "data portion" for PIM checksum
-  computation means. 
-
-* When pim_vif_start() is called, send PIM_HELLO to all neighbors,
-  and take care of all other details.
-
-* Add pim_api.h
-
-* Rename all PIM-SM and PIM-DM to PIMSM and PIMDM (for consistency and
-  easy to search).
-
-* A better implementation of the protocol ASCII names.
-
-* Clean-up the very first line of each file:
-/* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
-
-* Use "return foo" instead of "return (foo)" ??
-
-* Inside vifs, use only X_PROTO_PIM instead of PIMSM or PIMDM (??)
-
-* pim_vif.c needs fixing (it contains many PIM-DM definitions)
-
-* Make sure that PIM_JOIN_PRUNE_HOLDTIME_DEFAULT and
-  PIMDM_JOIN_PRUNE_HOLDTIME_DEFAULT (or SM) are OK.
-
-* Rename PIMDM_VIF_DR to PIM_VIF_DR
-PIMDM_VIF_OK to PIM_VIF_OK
-PIMDM_VIF_DISABLED to PIM_VIF_DISABLED
-
-====================OLD TODO END================
-====================OLD pimdmd IMPL_NOTES BEGIN================
-DONE:
-
- * Rate limit the asserts:
+ * IMPL: Rate limit the asserts (was it DONE before?):
    - add 'mif_set oifs_assert_rate_limit'
      and 'mtimer_t *oifs_assert_rate_limit_timer'
      to 'pimdm_mrt_t' that can be used to rate-limit the asserts:
@@ -1224,68 +1184,21 @@ DONE:
       1 second, but this reduces significantly the number of timers we
       need to run (and the consumed memory). But on average, the
       number of asserts sent on an interface would be 1 assert/s.
-====================OLD pimdmd IMPL_NOTES END================
-====================OLD pimdmd NEXT_TIME BEGIN================
-* When assert winner on oif, schedule for prunning if no direct members
-  (XXX: 3 seconds waiting?)
-* If assert is observed on the iif interface, send a join toward the winner(?)
-====================OLD pimdmd NEXT_TIME END================
+
 ====================OLD pimdmd TODO BEGIN================
 
-* Rename messages related functions as:
-  pimsm_recv(), pimsm_hello_recv(), pimsm_hello_process()...
-
-* Rename all messages related functions in a hierarchy manner.
-  E.g.: pimsm_hello_process() instead of pimsm_process_hello()
-
-* Each module should have foo_exit() function for gracefully exiting.
-
-* PIM-SM: limit number of groups created by a given source S
-* rate-limit incoming joins and leaves
-* rate-limit RP register messages at the RP
-* rate-limit incoming Session Announcements
-* rate-limit incoming Register Messages
-
-* Fix mrt_find_prefix_exact() used in pimdm_process_graft_ack()
-
-* Add to pimdm_nbr a field named 'pimdm_version', i.e. the PIM-DM
-  version that should be used toward that neighbor.
-
-* If the number of J/P sources in a J/P message is very large, use
-  IP fragmentation to create a larger message.
-
-* In PIMDM_OIF_SETUP(), the iif should not reset the same oif.
-  The forwarding engine itself should do that!
-
-* Simplify pimdm_vif.c to #define PIMDM_VIFS(family), and then
-  remove many of the 'switch(family)'
-
-* #ifdef the functions arguments bogus assignment
-  when don't use all of their arguments.
-
-* In pim_proto.h header replace RFC 2362 with the new I-D
-
-* Rethink what functions go to pimdm_vif_start(), pimdm_vif_stop(),
-  pimdm_vif_reset().
-  Also, do we need pimdm_vif_reset()??? 
-
-* SPEC: is it safe enough to assume that every Graft-ACK is
+* PIM-DM SPEC: is it safe enough to assume that every Graft-ACK is
   always exactly same as the Graft it acknowledges. I.e., is it allowed
   to Graft-ACK the (S,G) entries one-by-one.
 
-* If an Assert received on a non-oif (i.e. in prune mode), do we really
-  want to just ignore it? After all, this interface may soon become an oif,
+* PIM-DM SPEC: If an Assert is received on a non-oif (i.e. in prune mode),
+  do we really want to just ignore it? After all, this interface may soon
+  become an oif,
   and eventually itself will trigger Assert. If we don't ignore the 
   Assert received on a non-oif, then this interface will not unnecessarily
   become an oif.
 
-* PIMDM_OIF_SETUP() should send the appropriate command to start/stop
-  mcast pkts forwarding.
-
-* Where to ignore my own messages: in pimdm_process() for all packets,
-  or case-by-case for each PIM packet type?
-
-* SPEC: if winning Assert received on oif, the asserted oif is pruned,
+* PIM-DM SPEC: If winning Assert received on oif, the asserted oif is pruned,
   but the spec later says that a pruned oif timer is set to the received
   PIM_PRUNE holdtime. Obviously, there is a PIM_PRUNE message
   when we are prunning oif because of an Assert. The asserted/prune
@@ -1293,44 +1206,15 @@ DONE:
   which is eventually set to PIM_DATA_TIMEOUT_DEFAULT. The spec is not
   clear here.
   
-* SPEC: The PIM-DM [Assert-Timer] is default to 210, but
-  the PIM-SM [Assert-Timeout] is default to 180. Any reason for the
-  difference?
-
-* In pimdm_assert.c, pimdm_mrt_process_assert_data()
-     * XXX: It would be more CPU-efficient to compute this entry
-     * once by the calling function instead for each matching routing
-     * entry, and pass a pointer to this neighbor entry as a field
-     * in the 'assert_data' structure.
-     * However, this will introduce data integrity problem if the
-     * neighbor disappeares and its entry is immediately removed
-     * before this function gets control?
-     * Well, possible in a multi-thread environment, but, still,
-     * allowing such data integrity dependency doesn't seem right to me.
-     */
-
-* Clean-up/improve all FOO(family) macros (e.g. ALLPIMROUTERS_GROUP(family)),
-  that return the appropriate group or array, such that there is stronger
-  check against 'family'.
-
-* When the PIMDM_OIF_SETUP is called and the result is switch from/to
-  NULL/non-NULL oif set, take the appropriate action (schedule J/P message)
-
-* When oifs setup expires (e.g., asserted oifs), take the appropriate action:
-  (schedule J/P message, etc).
-
-* If the upsteam router/metric change, send an Assert message on each
-  asserted oif.
-
-* SPEC: (both PIM-SM and PIM-DM?): Asserts rate-limit of (approx) 1 Assert/s
+* PIM-DM SPEC: Asserts rate-limit of (approx) 1 Assert/s
   on same oif has to be per routing entry, i.e., (S,G) or (*,G).
 
-* SPEC: if a pimdm_mrt entry expires, and it was an assert winner,
+* PIM-DM SPEC: if a pimdm_mrt entry expires, and it was an assert winner,
   send Assert with max. priority, to 'cancel' the previous winner.
 
-* SPEC: The PIM message Prune holdtime should be longer than
+* PIM-DM SPEC: The PIM message Prune holdtime should be longer than
   PIM_JOIN_PRUNE_OIF_PRUNE_SCHEDULE, otherwise ignore the Prune(?).
 
-* SPEC: What to do if a PIM-DM Graft message contains Prune addresses?
+* PIM-DM SPEC: What to do if a PIM-DM Graft message contains Prune addresses?
 
 ====================OLD pimdmd TODO END================
