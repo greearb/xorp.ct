@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.35 2003/09/11 03:15:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.36 2003/09/11 08:10:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -796,11 +796,11 @@ template <class A>
 string
 MPUNReachNLRIAttribute<A>::str() const
 {
-    string s = c_format("Multiprotocol UNReachable NLRI AFI = %d SAFI = %d\n",
+    string s = c_format("Multiprotocol UNReachable NLRI AFI = %d SAFI = %d",
 			_afi, _safi);
     typename list<IPNet<A> >::const_iterator i = wr_list().begin();
     for(; i != wr_list().end(); i++)
-	s += c_format("   - Nlri %s", i->str().c_str());
+	s += c_format("\n   - Withdrawn %s", i->str().c_str());
     return s;
 }
 
