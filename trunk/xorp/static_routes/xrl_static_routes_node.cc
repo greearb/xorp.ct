@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.24 2005/02/18 00:40:00 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.25 2005/02/23 17:37:38 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -1593,13 +1593,15 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
     case COMMAND_FAILED:
 	//
 	// If a command failed because the other side rejected it,
-	// then send the next one.
+	// then print an error and send the next one.
 	//
 	XLOG_ERROR("Cannot %s a routing entry with the RIB: %s",
 		   (_inform_rib_queue.front().is_add_route())? "add"
 		   : (_inform_rib_queue.front().is_replace_route())? "replace"
 		   : "delete",
 		   xrl_error.str().c_str());
+	_inform_rib_queue.pop_front();
+	send_rib_route_change();
 	break;
 
     case NO_FINDER:
