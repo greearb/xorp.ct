@@ -112,8 +112,14 @@
 /* Define to 1 if you have the <netinet6/ip6_mroute.h> header file. */
 #undef HAVE_NETINET6_IP6_MROUTE_H
 
+/* Define to 1 if you have the <netinet6/nd6.h> header file. */
+#undef HAVE_NETINET6_ND6_H
+
 /* Define to 1 if you have the <netinet/icmp6.h> header file. */
 #undef HAVE_NETINET_ICMP6_H
+
+/* Define to 1 if you have the <netinet/in_var.h> header file. */
+#undef HAVE_NETINET_IN_VAR_H
 
 /* Define to 1 if you have the <netinet/ip6.h> header file. */
 #undef HAVE_NETINET_IP6_H

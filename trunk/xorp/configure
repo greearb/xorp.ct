@@ -5228,7 +5228,8 @@ fi
 
 
 
-for ac_header in sys/cdefs.h sys/ioctl.h sys/sockio.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h
+
+for ac_header in sys/cdefs.h sys/ioctl.h sys/sockio.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h netinet/in_var.h ifaddrs.h netinet/pim.h linux/rtnetlink.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -7770,7 +7771,8 @@ echo "${ECHO_T}$ipv6type" >&6
 
 
 
-for ac_header in netinet6/in6_var.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h
+
+for ac_header in netinet6/in6_var.h netinet6/nd6.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
