@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.9 2003/10/13 02:05:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.10 2003/10/13 23:32:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -21,6 +21,10 @@
 #include "libxorp/debug.h"
 
 #include "libxorp/ipvxnet.hh"
+
+#ifdef HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
 
 #include "fticonfig.hh"
 #include "fticonfig_entry_get.hh"
@@ -213,7 +217,6 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
     }
     rtm->rtm_version = RTM_VERSION;
     rtm->rtm_type = RTM_GET;
-    // TODO: XXX: PAVPAVPAV: do we need RTA_IFP ??
     rtm->rtm_addrs = (RTA_DST | RTA_IFP);
     rtm->rtm_flags = RTF_UP;
     rtm->rtm_pid = rs.pid();
@@ -222,7 +225,38 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
     // Copy the destination address
     sin = reinterpret_cast<struct sockaddr_in*>(rtm + 1);
     dst.copy_out(*sin);
-    
+
+    //
+    // Add extra space for sockaddr_dl that corresponds to the RTA_IFP flag.
+    // Required if the OS is very strict in the arguments checking
+    // (e.g., NetBSD).
+    //
+#ifdef AF_LINK
+    do {
+	// Set the data-link socket
+	struct sockaddr_dl* sdl;
+
+	rtm->rtm_msglen += sizeof(struct sockaddr_dl);
+	switch (dst.af()) {
+	case AF_INET:
+	    sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in),
+			      struct sockaddr_dl*);
+	    break;
+#ifdef HAVE_IPV6
+	case AF_INET6:
+	    sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in6),
+			      struct sockaddr_dl*);
+	    break;
+#endif // HAVE_IPV6
+	default:
+	    XLOG_UNREACHABLE();
+	    break;
+	}
+	sdl->sdl_family = AF_LINK;
+	sdl->sdl_len = sizeof(struct sockaddr_dl);
+    } while (false);
+#endif // AF_LINK
+
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
 	return false;
@@ -286,7 +320,6 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     }
     rtm->rtm_version = RTM_VERSION;
     rtm->rtm_type = RTM_GET;
-    // TODO: XXX: PAVPAVPAV: do we need RTA_IFP ??
     rtm->rtm_addrs = (RTA_DST | RTA_NETMASK | RTA_IFP);
     rtm->rtm_flags = RTF_UP;
     rtm->rtm_pid = rs.pid();
@@ -314,7 +347,38 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     }
     IPvX netmask = IPvX::make_prefix(dst.af(), dst.prefix_len());
     netmask.copy_out(*sin);
-    
+
+    //
+    // Add extra space for sockaddr_dl that corresponds to the RTA_IFP flag.
+    // Required if the OS is very strict in the arguments checking
+    // (e.g., NetBSD).
+    //
+#ifdef AF_LINK
+    do {
+	// Set the data-link socket
+	struct sockaddr_dl* sdl;
+
+	rtm->rtm_msglen += sizeof(struct sockaddr_dl);
+	switch (dst.af()) {
+	case AF_INET:
+	    sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in),
+			      struct sockaddr_dl*);
+	    break;
+#ifdef HAVE_IPV6
+	case AF_INET6:
+	    sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in6),
+			      struct sockaddr_dl*);
+	    break;
+#endif // HAVE_IPV6
+	default:
+	    XLOG_UNREACHABLE();
+	    break;
+	}
+	sdl->sdl_family = AF_LINK;
+	sdl->sdl_len = sizeof(struct sockaddr_dl);
+    } while (false);
+#endif // AF_LINK
+
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
 	return false;
