@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.19 2003/06/26 16:53:06 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.20 2003/07/02 02:19:41 atanu Exp $
 #
 
 #
@@ -193,6 +193,7 @@ test2()
     for i in 1 2
     do
 	coord reset
+
 	coord target $HOST $PORT1
 	coord initialise attach peer1
 
@@ -306,8 +307,81 @@ test4()
     coord peer2 assert established
 }
 
-TESTS_NOT_FIXED='test3'
-TESTS='test1 test2 test4'
+test5()
+{
+    TFILE=$1
+
+    echo "TEST5:"
+    echo "      1) Start injecting a saved feed (peer2) - $TFILE" 
+    echo "      2) Immediately bring up a second peering (peer1) "
+    echo "      3) Wait for all the updates to arrive at (peer1) "
+    echo "      4) Drop both peerings "
+    echo "      5) Bring up (peer1) "
+    echo "      6) Peer1 should not receive any update traffic "
+
+    # Reset the peers
+    reset
+
+    result=$(status peer1)
+    echo "$result"
+
+    # Establish the EBGP peering.
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 assert established
+
+    # send in the saved file
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE
+
+    # Bring up a second peering and wait for all the updates to arrive
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+
+    while :
+    do
+	# debug
+	status peer1
+	status peer2
+
+	a=$(status peer1)
+	sleep 2
+	b=$(status peer1)
+	if [ "$a" = "$b" ]
+	then
+	    break
+	fi
+    done
+
+    coord reset
+
+    # Debugging to demonstrate that the BGP process believes that both peerings
+    # have been taken down.
+    ../tools/print_peers -v
+
+    # debug
+    status peer1
+    status peer2
+
+    # Establish peer1
+    coord target $HOST $PORT1
+    coord initialise attach peer1
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+
+    # If peer1 receives any updates this is an error
+    a=$(status peer1)
+    sleep 2
+    b=$(status peer1)
+    if [ "$a" = "$b" ]
+    then
+	    :
+    else
+	echo "Peer1 received updates, but this is the only peering?"
+	echo $a
+	echo $b
+	return -1
+    fi
+}
+
+TESTS_NOT_FIXED='test2 test3 test5'
+TESTS='test1 test4'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
