@@ -11,7 +11,7 @@
 \newcommand{\xorpsh} {{\em Xorpsh}\@\xspace}
 \newcommand{\cm} {{\em CM}\@\xspace}
 \newcommand{\xrl} {{\em XRL}\@\xspace}
-\newcommand{\rtrmgr} {{\em RTRMGR}\@\xspace}
+\newcommand{\rtrmgr} {{\em rtrmgr}\@\xspace}
 
 \textwidth 6.5in
 \topmargin 0.0in
@@ -31,28 +31,39 @@
 \maketitle                            
 \section{Introduction}
 
-A \xorp router is made up of a number processes that communicate via
-XRLs \cite{xorp:xrl} (a messaging system developed for \xorp). In this
-document we will focus on how to deal with errors that are generated
-directly or indirectly by \xrl calls. As well as dealing with process
-failure and restarts. Most \xorp processes share routing state that
-must remain synchronised. For example, the BGP process sends the
-result of its decision process to the RIB. If the RIB fails then BGP
-has lost the ability to manipulate the FIB. BGP should either withdraw
-all routes or more catastrophically drop all peerings until the RIB
-restarts.
+A \xorp router is made up of a number of processes that communicate
+via XRLs \cite{xorp:xrl} (a messaging system developed for \xorp). In
+this document we will focus on how to deal with errors that are
+generated directly or indirectly by \xrl calls, and discuss how to
+handle process failures and the subsequent restart of failed
+processes.  Of course, in an ideal world processes would not fail, but
+when they do fail, we our goals are to keep as much of the router
+functionality working as possible, to avoid permanent inconsistencies
+at all costs, and for the remainder of the functionality to be
+restored as quickly as possible.
 
-A critical component if the system is the \rtrmgr which is responsible
-for starting and stopping routing processes. When a process is started
-by the \rtrmgr or dies the \finder is notified. If a process has an
-interest in the status of another process it can register interest
-with the \finder.
+Many \xorp processes share routing state that must remain
+synchronised. For example, the BGP process sends the result of its
+routing decisions to the RIB process, which passes these routes on to
+the FEA and hence to the forwarding engine's Forwarding Information
+Base (FIB). If the RIB process fails then BGP would lose the ability
+to manipulate the FIB, and forwarding would not match the BGP routing
+table.  Thus BGP should withdraw all routes that it told its peers, or
+more catastrophically it might drop all peerings until the RIB has
+successfully restarted.
 
-In any complex system such as a \xorp router errors can occur. The
-errors can range from a \xorp process failing to an attempt to install
-a route that already exists. Errors will occur and need to be dealt
-with in a consistent manor. The types of error that may occur are
-categorised below.
+A critical component if the system is the router manager process
+(\rtrmgr) which is responsible for starting and stopping routing
+processes. When a process is started by the \rtrmgr or dies, that
+processes XRL client library ensures that the \finder is notified. If
+a process has an interest in the status of another process it can
+register interest with the \finder.
+
+In any complex system such as a \xorp router errors can occur. These
+errors can range from a \xorp process simply failing, to an attempt to
+install a route into the forwarding engine that already exists. Errors
+will occur and need to be dealt with in a consistent manor. The types
+of error that may occur are categorised below.
 
 The first type of error is {\em Proccess failure}.
 
