@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.9 2004/01/09 00:14:37 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.11 2004/02/14 00:28:22 hodson Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -90,6 +90,7 @@ struct RIP_AF_CONSTANTS<IPv4>
     static inline const IPv4	 IP_GROUP() { return IPv4::RIP2_ROUTERS(); }
     static const uint16_t	 IP_PORT = RIP_PORT;
     static inline const IPv4Net& DEFAULT_ROUTE() { return IPv4_DEFAULT_ROUTE; }
+    static const uint8_t PACKET_VERSION = 2;
 };
 
 template <>
@@ -98,6 +99,7 @@ struct RIP_AF_CONSTANTS<IPv6>
     static inline const IPv6&	 IP_GROUP() { return IPv6::RIP2_ROUTERS(); }
     static const uint16_t	 IP_PORT = RIP_NG_PORT;
     static inline const IPv6Net& DEFAULT_ROUTE() { return IPv6_DEFAULT_ROUTE; }
+    static const uint8_t PACKET_VERSION = 1;
 };
 
 /**

@@ -39,8 +39,8 @@ struct RipPacketHeader {
 
     static const uint8_t REQUEST  = 1;
     static const uint8_t RESPONSE = 2;
-    static const uint8_t IPv4_VERSION = 2;
-    static const uint8_t IPv6_VERSION = 1;
+    static const uint8_t IPv4_VERSION = RIP_AF_CONSTANTS<IPv4>::PACKET_VERSION;
+    static const uint8_t IPv6_VERSION = RIP_AF_CONSTANTS<IPv6>::PACKET_VERSION;
 };
 
 inline void
@@ -77,6 +77,7 @@ struct PacketRouteEntry {
  * Smallest RIPv2 packet size.
  */
 static const size_t RIPv2_MIN_PACKET_BYTES = 4;
+static const size_t RIP_MIN_PACKET_BYTES = 4;
 
 /**
  * Smallest authenticated RIPv2 packet size.
@@ -127,6 +128,7 @@ public:
 
     inline uint16_t addr_family() const 	{ return ntohs(_af); }
     inline uint16_t tag() const			{ return ntohs(_tag); }
+    inline uint32_t prefix_len() const;
     inline IPv4Net  net() const;
     inline IPv4     nexthop() const		{ return IPv4(_nh); }
     inline uint32_t metric() const		{ return ntohl(_metric); }
@@ -158,6 +160,12 @@ PacketRouteEntry<IPv4>::initialize(uint16_t	  tag,
     _mask   = net.netmask().addr();
     _nh     = nh.addr();
     _metric = htonl(cost);
+}
+
+inline uint32_t
+PacketRouteEntry<IPv4>::prefix_len() const
+{
+    return IPv4(_mask).mask_len();
 }
 
 inline IPv4Net
@@ -335,7 +343,7 @@ struct PacketRouteEntry<IPv6> {
 protected:
     uint8_t  _prefix[16];
     uint16_t _tag;
-    uint8_t  _prefix_length;
+    uint8_t  _prefix_len;
     uint8_t  _metric;
 
 public:
@@ -362,6 +370,7 @@ public:
     inline IPv6	    nexthop() const;
 
     inline uint16_t tag() const;
+    inline uint32_t prefix_len() const { return _prefix_len; }
     inline IPv6Net  net() const;
     inline uint8_t  metric() const;
 
@@ -374,7 +383,7 @@ PacketRouteEntry<IPv6>::initialize_route(uint16_t	tag,
 					 uint8_t	cost)
 {
     _tag	   = htons(tag);
-    _prefix_length = net.prefix_len();
+    _prefix_len = net.prefix_len();
     _metric	   = cost;
     net.masked_addr().copy_out(_prefix);
 }
@@ -383,7 +392,7 @@ inline void
 PacketRouteEntry<IPv6>::initialize_nexthop(const IPv6& nexthop)
 {
     _tag = 0;
-    _prefix_length = 0;
+    _prefix_len = 0;
     _metric = NEXTHOP_METRIC;
     nexthop.copy_out(_prefix);
 }
@@ -426,7 +435,7 @@ PacketRouteEntry<IPv6>::tag() const
 inline IPv6Net
 PacketRouteEntry<IPv6>::net() const
 {
-    return IPv6Net(IPv6(_prefix), _prefix_length);
+    return IPv6Net(IPv6(_prefix), _prefix_len);
 }
 
 inline uint8_t
