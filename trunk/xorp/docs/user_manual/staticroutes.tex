@@ -1,0 +1,84 @@
+\chapter{Static Routes}
+
+\section{Terminology and Concepts}
+
+what is a static route?
+
+\section{Configuration of Static Routes}
+
+\subsection{Configuration Syntax}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>static \{\\
+\>\>targetname: {\it text}\\
+\>\>enabled: {\it bool}\\
+\>\>route4 {\it IPv4-addr}/{\it int(1..32)} \{\\
+\>\>\>nexthop: {\it IPv4-addr}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\>\>mrib-route4 {\it IPv4-addr}/{\it int(1..32)} \{\\
+\>\>\>nexthop: {\it IPv4-addr}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\\
+\>\>route6 {\it IPv6-addr}/{\it int(1..128)} \{\\
+\>\>\>nexthop: {\it IPv4-addr}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\>\>mrib-route6 {\it IPv6-addr}/{\it int(1..128)} \{\\
+\>\>\>nexthop: {\it IPv6-addr}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+
+\subsection{Example Configurations}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>static \{\\
+\>\>route4 10.20.0.0/16 \{\\
+\>\>\>nexthop: 10.10.10.20\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>mrib-route4 10.20.0.0/16 \{\\
+\>\>\>nexthop: 10.10.10.30\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>\\
+\>\>route6 20:20:20:20::/64 \{\\
+\>\>\>nexthop: 10:10:10:10:10:10:10:20\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>mrib-route6 20:20:20:20::/64 \{\\
+\>\>\>nexthop: 10:10:10:10:10:10:10:30\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+
+\section{Monitoring Static Routes}
+
+do we have any op-mode commands for this?

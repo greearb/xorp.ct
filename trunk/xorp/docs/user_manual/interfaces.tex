@@ -1,0 +1,142 @@
+\chapter{Network Interfaces}
+
+\section{Terminology and Concepts}
+
+vif vs interface, v4, v6
+
+\section{Configuring Network Interfaces}
+
+A XORP router will only use interfaces that it has been explicitly
+configured to use. Even for protocols such as BGP that are agnostic to
+interfaces, if the next-hop router for a routing entry is not through
+a configured interface the route will not be installed. For protocols
+such as RIP that are explicitly aware of interfaces only, configured
+interfaces will be used.
+
+Every physical network device in the system is considered to be an
+``interface''. Thus an ethernet interface or an ATM adaptor might be
+considered to be an interface.  
+
+Every interface can contain a number of virtual interfaces (``VIF''s).
+In many cases there will be a one-to-one correspondence between
+interfaces and VIFs, but this does not have to be the case.  In the
+case of ethernet, the same physical interface might have multiple
+logical devices in the form of VLANs.  Such VLANs would be multiple
+vifs on a single interface.\footnote{As of the 1.0 release, VLANs are
+not yet supported in XORP.}
+
+In cases where the interface only supports one VIF, the VIF name will
+be the same as the interface name, and will map to the name given to
+the interface by the operating system.   A virtual interface is
+configured with the address or addresses that should be used. At each
+level in the configuration hierarchy ({\tt interface}, {\tt vif} and
+{\tt address}) it is necessary to enable this part of the
+configuration.
+
+\subsection{Configuration Syntax}
+
+The available configuration syntax for network interfaces and
+addresses is as follows:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+interfaces \{\\
+\>interface {\it text} \{\\
+\>\>description: {\it text}\\
+\>\>mac: {\it macaddr}\\
+\>\>mtu: {\it uint}\\
+\>\>default-system-config\\
+\>\>enabled: {\it bool}\\
+\>\>vif {\it text} \{\\
+\>\>\>enabled: {\it bool}\\
+\>\>\>address {\it IPv4-addr} \{\\
+\>\>\>\>prefix-length: {\it int(1..32}\\
+\>\>\>\>broadcast: {\it IPv4-addr}\\
+\>\>\>\>destination: {\it IPv4-addr}\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\>address {\it IPv6-addr} \{\\
+\>\>\>\>prefix-length: {\it int(1..128)}\\
+\>\>\>\>destination: {\it IPv6-addr}\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\subsection{Example Configurations}
+
+We recommend that you select the interfaces that you want to use on
+your system and configure them as below. If you are configuring an
+interface that is currently being used by the the system make sure
+that there is no mismatch in the {\tt address}, {\tt prefix-length} and
+{\tt broadcast} arguments.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+interfaces \{\\
+\>interface dc0 \{\\
+\>\>description: "data interface"\\
+\>\>enabled: true\\
+\>\>vif dc0 \{\\
+\>\>\>enabled: true\\
+\>\>\>address 10.10.10.10 \{\\
+\>\>\>\>prefix-length: 24\\
+\>\>\>\>broadcast: 10.10.10.255\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\>\\
+\>\>\>address 10:10:10:10:10:10:10:10 \{\\
+\>\>\>\>prefix-length: 64\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\>\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+If the {\tt default-system-config} statement is used, it instructs the
+FEA that the interface should be configured by using the existing
+interface information from the underlying system.  In that case, the
+{\tt vif} and {\tt address} sections must not be configured.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+interfaces \{\\
+\>interface dc0 \{\\
+\>\>description: "data interface"\\
+\>\>enabled: true\\
+\>\>default-system-config\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+
+
+\section{Monitoring Network Interfaces}
+
+description of op-mode commands

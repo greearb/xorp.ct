@@ -1,0 +1,122 @@
+\chapter{BGP}
+
+\section{Terminology and Concepts}
+
+BGP: Border Gateway Protocol
+
+concept of a path vector protocol.
+
+ref to RFC 1771 and new draft
+
+BGP4 vs earlier BGPs
+BGP4+ (multiprotocol extensions)
+
+\section{Configuring BGP}
+
+\subsection{Configuration Syntax}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>bgp \{\\
+\>\>targetname: {\it text}\\
+\>\>bgp-id: {\it IPv4}\\
+\>\>local-as: {\it int(1..65535)}\\
+\\
+\>\>peer {\it IPv4} \{\\
+\>\>\>local-ip: {\it IPv4}\\
+\>\>\>as: {\it int(1..65535)}\\
+\>\>\>next-hop: {\it IPv4}\\
+\>\>\>local-port: {\it int(1..65535)}\\
+\>\>\>peer-port: {\it int(1..65535)}\\
+\>\>\>holdtime: {\it uint}\\
+\>\>\>enabled: {\it bool}\\
+\>\>\>enable-ipv4-multicast\\
+\>\>\>enable-ipv6-unicast\\
+\>\>\>enable-ipv6-multicast\\
+\>\>\}\\
+\\
+\>\>network4 {\it IPv4}/{\it int(1..32)} \{\\
+\>\>\>next-hop: {\it IPv4}\\
+\>\>\>unicast: {\it bool}\\
+\>\>\>multicast: {\it bool}\\
+\>\>\}\\
+\\
+\>\>network6 {\it IPv6}/{\it int(1..128)} \{\\
+\>\>\>next-hop: {\it IPv6}\\
+\>\>\>unicast: {\it bool}\\
+\>\>\>multicast: {\it bool}\\
+\>\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\subsection{Example Configurations}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>bgp \{\\
+\>\>bgp-id: 10.10.10.10\\
+\>\>local-as: 65002\\
+\\
+\>\>peer 10.30.30.30 \{\\
+\>\>\>local-ip: 10.10.10.10\\
+\>\>\>as: 65000\\
+\>\>\>next-hop: 10.10.10.20\\
+\>\>\>/*\\
+\>\>\>local-port: 179\\
+\>\>\>peer-port: 179\\
+\>\>\>*/\\
+\>\>\>/* holdtime: 120 */\\
+\>\>\>/* enabled: true */\\
+\\
+\>\>\>/* Optionally enable other AFI/SAFI combinations */\\
+\>\>\>/* enable-ipv4-multicast */\\
+\\
+\>\>\>/* enable-ipv6-unicast */\\
+\>\>\>/* enable-ipv6-multicast */\\
+\>\>\}\\
+\\
+\>\>/* Originate IPv4 Routes */\\
+\>\>/*\\
+\>\>network4 10.10.10.0/24 \{\\
+\>\>\>next-hop: 10.10.10.10\\
+\>\>\>unicast: true\\
+\>\>\>multicast: true\\
+\>\>\}\\
+\>\>*/\\
+\\
+\>\>/* Originate IPv6 Routes */\\
+\>\>/*\\
+\>\>network6 10:10:10:10::/64 \{\\
+\>\>\>next-hop: 10:10:10:10:10:10:10:10\\
+\>\>\>unicast: true\\
+\>\>\>multicast: true\\
+\>\>\}\\
+\>\>*/\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\section{Monitoring BGP}
+
+op-mode stuff.
+
+\subsection{BGP MIB}
+
+what we support

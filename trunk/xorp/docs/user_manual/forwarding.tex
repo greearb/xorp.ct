@@ -1,0 +1,127 @@
+\chapter{Forwarding Engine}
+
+\section{Terminology and Concepts}
+
+forwardin engine, fea, unicast, multicast, v4, v6
+
+\section{Configuration of the Forwarding Engine}
+
+\subsection{Configuration Syntax}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+fea \{\\
+\>targetname: {\it txt}
+\>enable-unicast-forwarding4: {\it bool}\\
+\>enable-unicast-forwarding6: {\it bool}\\
+\}
+\\
+plumbing \{\\
+\>mfea4 \{\\
+\>\>enabled: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\\
+\>mfea6 \{\\
+\>\>enabled: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\subsection{Example Configurations}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+fea \{\\
+\>enable-unicast-forwarding4: true\\
+\>enable-unicast-forwarding6: false\\
+\}
+plumbing \{\\
+\>mfea4 \{\\
+\>\>enabled: true\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\\
+\>mfea6 \{\\
+\>\>enabled: true\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\section{Monitoring the Forwarding Engine}
+
+op-mode commands

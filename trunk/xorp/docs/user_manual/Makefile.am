@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/rtrmgr/Makefile.am,v 1.3 2004/06/23 02:32:49 atanu Exp $
+## $XORP: xorp/docs/user_manual/Makefile.am,v 1.1 2004/07/14 17:18:12 mjh Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -9,7 +9,11 @@ include $(top_srcdir)/docs/mk/Makefile.doc.am
 DOCS			= user_manual
 
 user_manual_LATEX	= user_manual.tex cli_intro.tex config_overview.tex \
-			  preface.tex
+			  preface.tex interfaces.tex forwarding.tex \
+			unicastrouting.tex\
+			staticroutes.tex rip.tex bgp.tex \
+			multicastrouting.tex igmp.tex pimsm.tex\
+			mcasttopology.tex snmp.tex users.tex diagnostics.tex
 user_manual_FIGURES	= figs/xorpsh.ps
 
 ################################################################

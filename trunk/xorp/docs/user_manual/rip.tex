@@ -1,0 +1,97 @@
+\chapter{RIP}
+
+\section{Terminology and Concepts}
+
+RIP: Routing Information Protocol.
+
+concept of a distance vector protocol.
+
+ref to RFC 2453.
+
+ripv1 vs ripv2. 
+
+\section{Configuring RIP}
+
+\subsection{Configuration Syntax}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>rip \{\\
+\>\>targetname {\it text}\\
+\>\>export {\it text} \{\\
+\>\>\>metric: {\it int}\\
+\>\>\>tag: {\it int}\\
+\>\>\}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>address {\it IPv4} \{\\
+\>\>\>\>\>metric: {\it uint}\\
+\>\>\>\>\>horizon: {\it text}\\
+\>\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>\>passive: {\it bool}\\
+\>\>\>\>\>accept-non-rip-requests: {\it bool}\\
+\>\>\>\>\>accept-default-route: {\it bool}\\
+\>\>\>\>\>route-expiry-secs: {\it uint}\\
+\>\>\>\>\>route-deletion-secs: {\it uint}\\
+\>\>\>\>\>triggered-update-min-secs: {\it uint}\\
+\>\>\>\>\>triggered-update-max-secs: {\it uint}\\
+\>\>\>\>\>table-announce-min-secs: {\it uint}\\
+\>\>\>\>\>table-announce-max-secs: {\it uint}\\
+\>\>\>\>\>table-request-secs: {\it uint}\\
+\>\>\>\>\>interpacket-delay-msecs: {\it uint}\\
+\>\>\>\>\>authentication \{\\
+\>\>\>\>\>\>type: {\it text}\\
+\>\>\>\>\>\>password: {\it text}\\
+\>\>\>\>\>\}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\subsection{Example Configurations}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>rip \{\\
+\>/* Redistribute routes for connected interfaces */\\
+\>\>export connected \{\\
+\>\>\>metric: 0\\
+\>\>\>tag: 0\\
+\>\>\}\\
+\>/* Redistribute static routes */\\
+\>\>export static \{\\
+\>\>\>metric: 1\\
+\>\>\>tag: 0\\
+\>\>\}\\
+\>/* Run on specified network interface addresses */\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>address 10.10.10.10 \{\\
+\>\>\>\>\>enabled: true\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\section{Monitoring RIP}
+
+op-mode stuff.

@@ -1,0 +1,37 @@
+\chapter{SNMP}
+
+\section{Terminology and Concepts}
+
+SNMP: Simple Network Monitoring Protocol
+
+Concept of MIB
+
+SNMPv1 vs SNMPv2 vs SNMPv3
+
+\section{Configuring SNMP}
+
+\subsection{Configuration Syntax}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>snmp \{\\
+\>\>targetname: {\it text}\\
+\>\>mib-module {\it text} \{\\
+\>\>\>abs-path: {\it text}\\
+\>\>\>mib-index: {\it uint}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\section{Using SNMP to Monitor a Router}
+
+????

@@ -1,0 +1,108 @@
+\chapter{IGMP and MLD}
+
+\section{Terminology and Concepts}
+
+IGMP: Internet Group Maintenance Protocol
+MLD:
+
+concept of IGMP
+
+ref to RFC ???
+
+IGMPv1 vs IGMPv2 vs IGMPv3
+MLDv1 vs MLDv2
+
+\section{Configuring IGMP}
+\subsection{Configuration Syntax}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>igmp \{\\
+\>\>targetname: {\it text}\\
+\>\>enabled: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text}\{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+protocols \{\\
+\>mld \{\\
+\>\>targetname: {\it text}\\
+\>\>enabled: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\subsection{Example Configurations}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>igmp \{\\
+\>\>enabled: true\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+protocols \{\\
+\>mld \{\\
+\>\>enabled: true\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\section{Monitoring IGMP}
+
+op-mode stuff.
