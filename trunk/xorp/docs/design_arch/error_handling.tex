@@ -1,13 +1,32 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.20 2003/04/17 23:39:40 mjh Exp $
+% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.4 2003/03/07 22:03:59 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
-\usepackage{xspace}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
+\usepackage{fullpage}
+\usepackage{setspace}
 \usepackage{times}
+\usepackage{latexsym}
 \usepackage{psfig}
-\usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\comment}[1]{}
+
 \newcommand{\xorp} {{\em XORP}\@\xspace}
 \newcommand{\module} {{\em module}\@\xspace}
 \newcommand{\modules} {{\em modules}\@\xspace}
@@ -17,26 +36,32 @@
 \newcommand{\xrl} {{\em XRL}\@\xspace}
 \newcommand{\rtrmgr} {{\em rtrmgr}\@\xspace}
 
-\newcommand{\etc}{\emph{etc.}\xspace}
-\newcommand{\ie}{\emph{i.e.,}\xspace}
-\newcommand{\eg}{\emph{e.g.,}\xspace}
 
-\textwidth 6.5in
-\topmargin 0.0in
-\textheight 8.5in
-\headheight 0in
-\headsep 0in
-\oddsidemargin 0in
-%\date{}
-\title{Error Handling in XORP}
-%\author{Atanu Ghosh}
-%\twocolumn
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
+
+% \pagestyle{empty}
+
 \begin{document}
-\parsep 0ex
-\parskip 1.0ex
-\parindent 0em
-\noindent
-\maketitle                            
+
+\title{Error Handling in XORP \\
+\vspace{1ex}
+Version 0.2}
+\author{ XORP Project					\\
+	 International Computer Science Institute	\\
+	 Berkeley, CA 94704, USA			\\
+	 {\it feedback@xorp.org}
+}
+\date{March 10, 2003}
+
+\maketitle
+
+\thispagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
 A \xorp router is made up of a number of processes that communicate
@@ -54,15 +79,15 @@ Many \xorp processes share routing state that must remain
 synchronised. For example, the BGP process sends the result of its
 routing decisions to the RIB process, which passes these routes on to
 the FEA and hence to the forwarding engine's Forwarding Information
-Base (FIB). If the RIB process fails then BGP would lose the ability
+Base (FIB). If the RIB process fails, then BGP would lose the ability
 to manipulate the FIB, and forwarding would not match the BGP routing
-table.  Thus BGP should withdraw all routes that it told its peers, or
+table.  Thus, BGP should withdraw all routes that it told its peers, or
 alternatively it might drop all peerings until the RIB has
 successfully restarted.
 
 A critical component of the system is the router manager process
 (\rtrmgr) which is responsible for starting and stopping routing
-processes. When a xorp process starts or terminates, that
+processes. When a \xorp process starts or terminates, that
 process's XRL client library ensures that the \finder is notified. If
 a process has an interest in the status of another process it can
 register interest with the \finder.
@@ -82,7 +107,7 @@ The message that was being sent may have been lost in transit.
 
 The third type of error, {\em Execution Error}, is when an XRL call
 returns an error due to some underlying interaction failure. A simple
-example of this type of error is a route add failing. The attempt to
+example of this type of error is a ``route add'' failing. The attempt to
 add a route may fail for many reasons. The identical route may already
 be present or a different route may be installed. The error may occur
 due to a bug in the router code, because routing state has been
@@ -97,6 +122,7 @@ source tree this error should not occur. As we are building an
 extensible router it may be the case that a process built from a
 different source tree may encounter compatibility problems.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\label{pfailure}Process Failure}
 
 A \xorp router is made up of a number of distinct processes. There are
@@ -105,7 +131,7 @@ dependencies and what action to take on detecting failure.
 
 The most critical component of a \xorp router is the \rtrmgr/\finder
 process. One of the functions of this component is to start/re-start
-processes. If process A is dependent on the status (alive, dead,
+processes. If process A is dependent on the status (\eg alive, dead,
 restarted) of process B, then process A registers this interest with
 the \finder. This dependency on the \rtrmgr/\finder for managing and
 monitoring process liveness state means that a \xorp router cannot
@@ -123,6 +149,7 @@ register interest in the status of other processes through the
 \finder. If process A is dependent on the state of process B then
 process A must register interest in process B.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Implementing process failure detection}
 
 The \finder process will send keepalive messages to all processes at
@@ -142,6 +169,7 @@ will be marked as dead and all interested processes will be notified.
 Most importantly, the \rtrmgr will be notified and it will kill the
 running process and start a new process.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actions to take on detecting process failure}
 
 Table \ref{failure_table} indicates what action a process should take
@@ -193,6 +221,7 @@ OSPF            &  Restart        & -        & -    & -    & -    & -       & - 
 \caption{\label{failure_table}Action to take on detecting process failure}
 \end{table}
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{\rtrmgr/\finder - Router manager}
 
 If the \rtrmgr/\finder dies then all bets are off and all processes
@@ -201,6 +230,7 @@ should exit apart from the \xorpsh.
 If a \xorp process exits unexpectedly the \rtrmgr/\finder should
 attempt to restart the process.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{FEA - Forwarding Engine Abstraction}
 
 The FEA primarily accepts routes from the RIB and places them in the
@@ -213,6 +243,7 @@ in the kernel.
 The FEA process should register interest in the RIB. If the RIB fails
 the FEA should withdraw all routes that the RIB has sent to it.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{MFEA - Multicast Forwarding Engine Abstraction}
 
 The MFEA is multicast analogue to the unicast FEA. If should be noted
@@ -235,6 +266,7 @@ routing protocol instances, analogous to the function of the unicast
 RIB process. If that coordinator exits, the MFEA should remove all
 multicast forwarding entries from the kernel.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{RIB - Routing Information Base}
 
 Routes from the routing processes are sent to the RIB; the winners are
@@ -244,14 +276,17 @@ The RIB should register interest in the FEA. If the FEA fails the RIB
 should exit. All routing processes that interact with the RIB should,
 on detecting the shutdown of the RIB, also terminate gracefully.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{IGMP/MLD}
 
 If the FEA/MFEA process exits then this process should exit.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{PIM}
 
 If the RIB or FEA/MFEA exits then this process should exit.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{BGP}
 
 Currently the only other process in the system that BGP interacts
@@ -263,24 +298,28 @@ through FEA, at which time the BGP process should also register
 interest in the state of the FEA. If the BGP process detects the death
 of the FEA it should exit immediately.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{RIP}
 
 The RIP process should register interest in the FEA and the RIB. If
 the RIB dies then the RIP process should attempt to exit gracefully.
 If the FEA dies the RIP process should exit immediately.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{IS-IS}
 
 The IS-IS process should register interest in the FEA and the RIB. If
 the RIB dies then the IS-IS process should attempt to exit gracefully.
 If the FEA dies the IS-IS process should exit immediately.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{OSPF}
 
 The OSPF process should register interest in the FEA and the RIB. If
 the RIB dies then the OSPF process should attempt to exit gracefully.
 If the FEA dies the OSPF process should exit immediately.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{\label{xorpsh}\xorpsh}
 
 The \xorpsh provides a command line interface to the XORP router.
@@ -289,6 +328,7 @@ exit. The \rtrmgr/\finder process exiting should generate
 warning output to the user and then the \xorpsh should wait for the
 router to restart.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{XRL Communication Error}
 Interprocess communication in \xorp is achieved using XRLs. In this
 section we will consider what should be done when an XRL call fails
@@ -456,6 +496,7 @@ The application SHOULD cause this XRL interface to go dormant, in the
 expectation that it will authoritatively discover from the finder that
 the target has died.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Execution Error}
 
 A XORP router is partitioned into many processes; most of the operating
@@ -476,6 +517,7 @@ to mask over implementation problems by ignoring errors. In the rest
 of this section we will outline how to deal with a number of common
 errors.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Adding/Deleting route failures}
 
 As stated above, a highly likely error is failures when adding or
@@ -500,6 +542,7 @@ route is no longer present. The FEA should log that it has been asked
 to delete a route that doesn't exist. The RIB should decide if this
 problem should be considered fatal.
 
+%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Route Add Failure due to Resource Starvation}
 
 When a routing process sends a route to the RIB, the asynchronous
