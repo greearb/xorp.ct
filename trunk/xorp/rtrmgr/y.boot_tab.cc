@@ -51,7 +51,7 @@ static int yygrowstack();
 #include "template_tree_node.hh"
 #include "template_tree.hh"
 #include "conf_tree.hh"
-  /*sigh - -p flag to yacc should do this for us*/
+/* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim
 #line 58 "y.boot_tab.c"
@@ -204,9 +204,9 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 89 "boot.yy"
+#line 87 "boot.yy"
 
-/*extern FILE *bootin;*/
+/* extern FILE *bootin; */
 extern void boot_scan_string(const char *);
 extern int bootlinenum;
 
@@ -219,50 +219,64 @@ extern "C" int bootparse();
 extern int bootlex();
 
 
-string booterrormsg(const char *s) {
-  string errmsg;
-  if (boot_filename.empty()) {
-    errmsg = c_format("PARSE ERROR [Config File %s, line %d]: %s\n", 
-		      boot_filename.c_str(),
-		      bootlinenum, s);
-  } else {
-    errmsg = c_format("PARSE ERROR [line %d]: %s\n", bootlinenum, s);
-  }
-  return errmsg;
+string
+booterrormsg(const char *s)
+{
+    string errmsg;
+    if (boot_filename.empty()) {
+	errmsg = c_format("PARSE ERROR [Config File %s, line %d]: %s\n", 
+			  boot_filename.c_str(),
+			  bootlinenum, s);
+    } else {
+	errmsg = c_format("PARSE ERROR [line %d]: %s\n", bootlinenum, s);
+    }
+    return errmsg;
 }
 
-void booterror(const char *s) {
-  xorp_throw(ParseError, booterrormsg(s));
+void
+booterror(const char *s)
+{
+    xorp_throw(ParseError, booterrormsg(s));
 }
 
-
-static void extend_path(char *segment) {
-    strncpy(lastsymbol, segment, 255);
+static void
+extend_path(char *segment)
+{
+    strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
+    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
     cf->extend_path(string(segment));
     free(segment);
 }
 
-
-static void push_path() {
+static void
+push_path()
+{
     cf->push_path();
 }
 
-static void pop_path() {
+static void
+pop_path()
+{
     cf->pop_path();
 }
 
-static void terminal(char *segment, char *value, int type) {
+static void
+terminal(char *segment, char *value, int type)
+{
     extend_path(segment);
     push_path();
-    strncpy(lastsymbol, value, 255);
+    strncpy(lastsymbol, value, sizeof(lastsymbol) - 1);
+    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
     cf->terminal_value(value, type);
     free(value);
     pop_path();
 }
 
-int init_bootfile_parser (const char *configuration, 
-			  const char *filename, 
-			  ConfigTree *c) {
+int
+init_bootfile_parser(const char *configuration, 
+		     const char *filename, 
+		     ConfigTree *c)
+{
     cf = c;
     boot_filename = filename;
     bootlinenum = 1;
@@ -270,11 +284,13 @@ int init_bootfile_parser (const char *configuration,
     return 0;
 }
 
-int parse_bootfile() {
+int
+parse_bootfile()
+{
     bootparse();
     return 0;
 }
-#line 278 "y.boot_tab.c"
+#line 294 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -472,12 +488,12 @@ yyreduce:
 case 4:
 #line 37 "boot.yy"
 {
-                   /*printf("DEFINITION\n");*/
+                   /* printf("DEFINITION\n"); */
                 }
 break;
 case 5:
 #line 41 "boot.yy"
-{push_path(); }
+{ push_path(); }
 break;
 case 6:
 #line 43 "boot.yy"
@@ -513,61 +529,61 @@ case 13:
 break;
 case 14:
 #line 52 "boot.yy"
-{pop_path();}
+{ pop_path(); }
 break;
 case 20:
 #line 59 "boot.yy"
-{/*printf("EMPTY STATEMENT\n");*/}
+{ /* printf("EMPTY STATEMENT\n"); */ }
 break;
 case 21:
 #line 61 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-1], strdup(""), NODE_VOID);
 		}
 break;
 case 22:
 #line 64 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-3], yyvsp[-1], NODE_TEXT);
                 }
 break;
 case 23:
 #line 67 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-3], yyvsp[-1], NODE_UINT);
                 }
 break;
 case 24:
 #line 70 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-3], yyvsp[-1], NODE_BOOL);
                 }
 break;
 case 25:
 #line 73 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4);
                 }
 break;
 case 26:
 #line 76 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4PREFIX);
                 }
 break;
 case 27:
 #line 79 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6);
                 }
 break;
 case 28:
 #line 82 "boot.yy"
-{ 
+{
 		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6PREFIX);
                 }
 break;
-#line 571 "y.boot_tab.c"
+#line 587 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
