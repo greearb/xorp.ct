@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.31 2004/03/26 06:17:14 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.32 2004/04/01 19:54:09 mjh Exp $
 #
 
 #
@@ -533,8 +533,6 @@ TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9'
 
 # Include command line
 . ${srcdir}/args.sh
-
-START_PROGRAMS="no"
 
 if [ $START_PROGRAMS = "yes" ]
 then
