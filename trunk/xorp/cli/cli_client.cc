@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.6 2003/04/22 23:27:16 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.7 2003/04/23 00:52:49 pavlin Exp $"
 
 
 //
@@ -970,7 +970,34 @@ CliClient::process_char(const char *line, uint8_t val)
     //
 
     if (val == CHAR_TO_CTRL('c')) {
-	// Interrupt current command if it is pending
+	//
+	// Interrupt current command if it still is pending
+	//
+	if (is_waiting_for_data()) {
+	    // Reset everything about the command
+	    set_is_waiting_for_data(false);
+	    waiting_for_result_timer().unschedule();
+	    delete_pipe_all();
+	    set_pipe_mode(false);
+	    set_hold_mode(false);
+	    set_page_mode(false);
+	    reset_page_buffer();
+	    set_page_buffer_mode(false);
+	    
+	    cli_print(c_format("\n"));	// XXX: new line
+	    cli_print(c_format("Command interrupted!\n"));
+	}
+	
+	//
+	// Ignore current line, reset buffer, line, cursor, prompt
+	//
+	cli_print(c_format("\n"));	// XXX: new line
+	gl_redisplay_line(gl());
+	gl_reset_line(gl());
+	set_buff_curpos(0);
+	command_buffer().reset();
+	cli_flush();
+	
 	return (XORP_OK);
     }
     

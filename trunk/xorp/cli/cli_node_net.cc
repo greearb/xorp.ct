@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.11 2003/04/22 23:27:16 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.12 2003/04/23 00:52:49 pavlin Exp $"
 
 
 //
@@ -336,6 +336,9 @@ CliClient::start_connection(void)
 	return (XORP_ERROR);
     }
     
+    // Bind Ctrl-C to no-op
+    gl_configure_getline(_gl, "bind ^C user-event4", NULL, NULL);
+    
     // Print the welcome message and show the prompt
     cli_print(c_format("%s\n%s", XORP_CLI_WELCOME, current_cli_prompt()));
     
@@ -421,17 +424,12 @@ CliClient::client_read(int fd, SelectorMask mask)
 	}
 	
 	if (is_waiting_for_data()) {
-	    // Waiting for data for previous command.
-	    if (val == CHAR_TO_CTRL('c')) {
-		// Cancel the command
-		set_pipe_mode(false);	// XXX: disable piping
-		delete_pipe_all();
-		cli_flush();
-		cli_print(c_format("Command interrupted!\n"));
-		set_is_waiting_for_data(false);
-		waiting_for_result_timer().unschedule();
-		post_process_command(false);
-	    } else {
+	    //
+	    // XXX: ignore any input except Ctrl-C if waiting for data
+	    // from previous command.
+	    // TODO: is it OK to ignore, or shall we buffer it?
+	    //
+	    if (val != CHAR_TO_CTRL('c')) {
 		continue;
 	    }
 	}
