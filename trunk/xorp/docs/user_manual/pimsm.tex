@@ -595,11 +595,13 @@ protocols \{\\
   seconds for measuring the bitrate of traffic from a  multicast
   sender.  The measurement interval should normally not be set too
   small - values greater than ten seconds are recommended.  The
-  default is zero, indicating that measurement is disabled.
+  default is 100 seconds, but the smallest accepted value is 3 seconds.
 \item{\tt bytes}: this specifies the maximum number of bytes from a
   multicast sender that can be received in {\stt interval-sec}
   seconds.  If this threshold is exceeded, the router will attempt to
   switch to the shortest-path tree from that multicast sender.
+  If the switch should happen after the first packet, then {\stt bytes}
+  should be set to 0.
 \end{description}
 \item{\tt traceoptions}: this directive delimits the configuration of
   debugging and tracing options for PIM-SM.
