@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipf.cc,v 1.5 2004/09/14 17:04:11 bms Exp $
+// $XORP: xorp/fea/firewall_ipf.cc,v 1.6 2004/09/16 07:14:18 bms Exp $
 
 #include "fea/fea_module.h"
 
@@ -187,6 +187,7 @@ IpfFwProvider::delete_rule4(FwRule4& rule)
 
 	return (XORP_OK);
 #else
+	UNUSED(rule);
 	return (XORP_ERROR);
 #endif // HAVE_FIREWALL_IPF
 }
