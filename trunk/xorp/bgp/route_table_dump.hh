@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.7 2004/02/12 07:00:49 atanu Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.8 2004/02/24 03:16:55 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -30,7 +30,7 @@ public:
 	      const PeerHandler *peer,
 	      const list <const PeerHandler*>& peer_list,
 	      BGPRouteTable<A> *parent,
-	      Safi safi);
+	      Safi safi, bool unplumb = true);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,
@@ -74,6 +74,10 @@ public:
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
 private:
+    /**
+     * Called when the dump table has completed its tasks.
+     */
+    void completed();
     void unplumb_self();
     void do_next_route_dump();
     EventLoop& eventloop() const {return _peer->eventloop();}
@@ -91,6 +95,16 @@ private:
     //process, we need to delay unplumbing ourself until they finish
     //to avoid propagating unnecessary deletes downstream.
     bool _waiting_for_deletion_completion;
+
+    //The dump table has done its job and can be removed.
+    bool _completed;
+
+    /**
+     * The dump table is responsible for removing itself once all the
+     * routes have been dumped, the default setting. It is sometimes
+     * useful while debugging to leave the table in place.
+     */
+    bool _unplumb_allowed;
 };
 
 #endif // __BGP_ROUTE_TABLE_DUMP_HH__

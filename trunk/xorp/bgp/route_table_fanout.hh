@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.8 2004/02/24 03:16:56 atanu Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.9 2004/02/25 05:03:05 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -114,7 +114,7 @@ public:
     string str() const;
 
     int dump_entire_table(BGPRouteTable<A> *child_to_dump_to, Safi safi,
-			  string ribname);
+			  string ribname, bool unplumb_allowed = true);
 #ifdef NOTDEF
     void peering_went_down(const PeerHandler* peer_handler);
 #endif

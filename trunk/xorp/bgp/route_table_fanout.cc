@@ -12,10 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.23 2004/02/25 15:20:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.24 2004/02/25 16:44:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
+
+// #define DEBUG_QUEUE
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -165,17 +167,22 @@ template<class A>
 int
 FanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table) 
 {
+    debug_msg("removing: %s\n", ex_next_table->tablename().c_str());
+
     typename NextTableMap<A>::iterator iter;
     iter = _next_tables.find(ex_next_table);
     if (iter == _next_tables.end()) {
 	// the next_table is not already in the set
-	XLOG_FATAL("FanoutTable<A>::remove_next_table\
- attempt to delete a table that doesn't exist\n");
+	XLOG_FATAL("Attempt to remove table that is not in list: %s",
+		   ex_next_table->tablename().c_str());
     }
+
     skip_entire_queue(ex_next_table);
-    if (ex_next_table->type() == DUMP_TABLE) {
-	remove_dump_table((DumpTable<A>*)ex_next_table);
-	((DumpTable<A>*)ex_next_table)->suspend_dump();
+
+    DumpTable<A> *dtp = dynamic_cast<DumpTable<A>*>(ex_next_table);
+    if (dtp) {
+	remove_dump_table(dtp);
+	dtp->suspend_dump();
     }
     _next_tables.erase(iter);
     return 0;
@@ -328,6 +335,7 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    if (i.second().busy()) {
 		queued_peers.push_back(&(i.second()));
 	    } else {
+		XLOG_ASSERT(!i.second().has_queued_data());
 		i.first()->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 	    }
 	}
@@ -414,6 +422,8 @@ template<class A>
 void
 FanoutTable<A>::remove_dump_table(DumpTable<A> *dump_table) 
 {
+    debug_msg("remove: %s\n", dump_table->str().c_str());
+
     typename set <DumpTable<A>*>::iterator i;
     i = _dump_tables.find(dump_table);
     XLOG_ASSERT(i != _dump_tables.end());
@@ -424,7 +434,7 @@ template<class A>
 int
 FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 				  Safi safi,
-				  string ribname)
+				  string ribname, bool unplumb_allowed)
 {
     XLOG_ASSERT(child_to_dump_to->type() != DUMP_TABLE);
 
@@ -444,7 +454,7 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 			      peer_handler->peername());
     DumpTable<A>* dump_table =
 	new DumpTable<A>(tablename, peer_handler, peer_list,
-			 (BGPRouteTable<A>*)this, safi);
+			 (BGPRouteTable<A>*)this, safi, unplumb_allowed);
 
     dump_table->set_next_table(child_to_dump_to);
     child_to_dump_to->set_parent(dump_table);
@@ -841,6 +851,13 @@ FanoutTable<A>::peering_down_complete(const PeerHandler *peer,
 				      BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(_parent == caller);
+
+    debug_msg("peer: %s genid: %d caller: %s\n",
+	      peer->peername().c_str(), genid,
+	      caller->tablename().c_str());
+
+    print_queue();
+
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end(); ) {
 	BGPRouteTable<A>* next_table = i.first();
@@ -856,15 +873,13 @@ template<class A>
 void
 FanoutTable<A>::print_queue() 
 {
-#ifdef DEBUG_LOGGING
-    // leave this as printf please - mjh
-    printf("Fanout Table rate control queue:\n");
+#ifdef DEBUG_QUEUE
+    debug_msg("Rate control queue:\n");
     typename list <const RouteQueueEntry<A>*>::iterator i;
     int ctr = 0;
     for (i = _output_queue.begin(); i != _output_queue.end(); i++) {
 	ctr++;
-	printf("Queue Entry %d\n", ctr);
-	printf("%s\n", (*i)->str().c_str());
+	debug_msg("%-5d %s\n", ctr, (*i)->str().c_str());
     }
 #endif
 }
@@ -873,7 +888,3 @@ template class PeerRoutePair<IPv4>;
 template class PeerRoutePair<IPv6>;
 template class FanoutTable<IPv4>;
 template class FanoutTable<IPv6>;
-
-
-
-
