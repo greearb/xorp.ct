@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.14 2003/06/03 09:58:52 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.15 2003/06/03 10:10:59 pavlin Exp $"
 
 
 //
@@ -287,6 +287,16 @@ CliClient::start_connection(void)
 		return (XORP_ERROR);
 	    }
 	}
+	
+	// Save state regarding the modified terminal flags
+	if (termios.c_lflag & ICANON)
+	    _is_modified_stdio_termios_icanon = true;
+	if (termios.c_lflag & ECHO)
+	    _is_modified_stdio_termios_echo = true;
+	if (termios.c_lflag & ISIG)
+	    _is_modified_stdio_termios_isig = true;
+	
+	// Reset the flags
 	termios.c_lflag &= ~(ICANON | ECHO | ISIG);
 	while (tcsetattr(cli_fd(), TCSADRAIN, &termios) != 0) {
 	    if (errno != EINTR) {
@@ -347,6 +357,46 @@ CliClient::start_connection(void)
     return (XORP_OK);
 }
 
+int
+CliClient::stop_connection()
+{
+    //
+    // Restore the terminal settings
+    //
+    if (is_stdio()) {
+	if (! (_is_modified_stdio_termios_icanon
+	       || _is_modified_stdio_termios_echo
+	       || _is_modified_stdio_termios_isig)) {
+	    return (XORP_OK);		// Nothing to restore
+	}
+	
+	struct termios termios;
+	
+	while (tcgetattr(cli_fd(), &termios) != 0) {
+	    if (errno != EINTR) {
+		XLOG_ERROR("stop_connection(): tcgetattr() error: %s", 
+			   strerror(errno));
+		return (XORP_ERROR);
+	    }
+	}
+	// Restore the modified terminal flags
+	if (_is_modified_stdio_termios_icanon)
+	    termios.c_lflag |= ICANON;
+	if (_is_modified_stdio_termios_echo)
+	    termios.c_lflag |= ECHO;
+	if (_is_modified_stdio_termios_isig)
+	    termios.c_lflag |= ISIG;
+	while (tcsetattr(cli_fd(), TCSADRAIN, &termios) != 0) {
+	    if (errno != EINTR) {
+		XLOG_ERROR("stop_connection(): tcsetattr() error: %s", 
+			   strerror(errno));
+		return (XORP_ERROR);
+	    }
+	}
+    }
+    
+    return (XORP_OK);
+}
 
 //
 // If @v is true, block the client terminal, otherwise unblock it.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.4 2003/03/30 03:50:43 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.5 2003/06/03 09:58:52 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -73,6 +73,13 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_connection();
+
+    /**
+     * Stop the connection.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		stop_connection();
     
     /**
      * Print a message to the CLI user.
@@ -395,6 +402,11 @@ private:
     uint16_t	_window_height;		// The CLI client window height
     Buffer	_command_buffer;
     Buffer	_telnet_sb_buffer;
+    
+    // The modified terminal flags
+    bool	_is_modified_stdio_termios_icanon;
+    bool	_is_modified_stdio_termios_echo;
+    bool	_is_modified_stdio_termios_isig;
     
     CliCommand	*_current_cli_command;
 #ifndef CLI_PROMPT_SIZE_MAX
