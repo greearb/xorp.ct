@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.4 2004/05/18 01:26:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.5 2004/05/18 03:35:17 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -21,7 +21,8 @@
 void usage()
 {
     fprintf(stderr,
-	    "Usage: xorpsh_print_routes show bgp routes [summary|detail]\n"
+	    "Usage: xorpsh_print_routes show bgp routes "
+	    "[ipv4|ipv6] [unicast|multicast] [summary|detail]\n"
 	    "where summary enables brief output.\n");
 }
 
@@ -70,11 +71,7 @@ int main(int argc, char **argv)
 	    break;
     }
 
-    if (argc > 5) {
-	usage();
-	return -1;
-    }
-    if (argc < 4) {
+    if ((argc < 4) || (argc > 7)) {
 	usage();
 	return -1;
     }
@@ -90,11 +87,26 @@ int main(int argc, char **argv)
 	usage();
 	return -1;
     }
-    if (argc == 5) {
-	if (strcmp(argv[4], "summary")==0) {
+    int counter = 5;
+    if (argc > 4) {
+	if (strcmp(argv[4], "ipv4") == 0)
+	    ipv4 = true;
+	if (strcmp(argv[4], "ipv6") == 0)
+	    ipv6 = true;
+	counter++;
+    }
+    if (argc > 5) {
+	if (strcmp(argv[5], "unicast") == 0)
+	    unicast = true;
+	if (strcmp(argv[5], "multicast") == 0)
+	    multicast = true;
+	counter++;
+    }
+    if (argc == counter) {
+	if (strcmp(argv[counter - 1], "summary")==0) {
 	    verbose_ipv4 = PrintRoutes<IPv4>::SUMMARY;
 	    verbose_ipv6 = PrintRoutes<IPv6>::SUMMARY;
-	} else if (strcmp(argv[4], "detail")==0) {
+	} else if (strcmp(argv[counter - 1], "detail")==0) {
 	    verbose_ipv4 = PrintRoutes<IPv4>::DETAIL;
 	    verbose_ipv6 = PrintRoutes<IPv6>::DETAIL;
 	} else {
@@ -103,10 +115,10 @@ int main(int argc, char **argv)
 	}
     }
 
-    if (ipv4 == false && ipv6 == false)
+    if ((ipv4 == false) && (ipv6 == false))
 	ipv4 = true;
 
-    if (unicast == false && multicast == false)
+    if ((unicast == false) && (multicast == false))
 	unicast = true;
 
     try {

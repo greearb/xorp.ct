@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.cmds,v 1.5 2004/05/16 07:15:16 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.cmds,v 1.6 2004/05/18 03:35:17 atanu Exp $ */
 
 show bgp peers {
     %command: "bgp/tools/xorpsh_print_peers" %help: "Show BGP peers info";
@@ -7,49 +7,49 @@ show bgp peers {
 }
 
 show bgp routes {
-    %command: "bgp/tools/xorpsh_print_routes -4 -u" %help: "Print BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP routes";
     %module: bgp;
     %opt_parameter: "summary" %help: "Print summary of BGP routes";
     %opt_parameter: "detail" %help: "Print detailed BGP routes";
 }
 
 show bgp routes ipv4 {
-    %command: "bgp/tools/xorpsh_print_routes -4 -u" %help: "Print BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP ipv4 routes";
     %module: bgp;
     %opt_parameter: "summary" %help: "Print summary of BGP routes";
     %opt_parameter: "detail" %help: "Print detailed BGP routes";
 }
 
 show bgp routes ipv4 unicast {
-    %command: "bgp/tools/xorpsh_print_routes -4 -u " %help: "Print BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP ipv4 unicast routes";
     %module: bgp;
     %opt_parameter: "summary" %help: "Print summary of BGP routes";
     %opt_parameter: "detail" %help: "Print detailed BGP routes";
 }
 
 show bgp routes ipv4 multicast {
-    %command: "bgp/tools/xorpsh_print_routes -4 -m" %help: "Print BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP ipv4 multicast routes";
     %module: bgp;
     %opt_parameter: "summary" %help: "Print summary of BGP routes";
     %opt_parameter: "detail" %help: "Print detailed BGP routes";
 }
 
 show bgp routes ipv6 {
-    %command: "bgp/tools/xorpsh_print_routes -6 -u" %help: "Print BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP ipv6 routes";
     %module: bgp;
     %opt_parameter: "summary" %help: "Print summary of BGP routes";
     %opt_parameter: "detail" %help: "Print detailed BGP routes";
 }
 
 show bgp routes ipv6 unicast {
-    %command: "bgp/tools/xorpsh_print_routes -6 -u" %help: "Print BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP ipv6 unicast routes";
     %module: bgp;
     %opt_parameter: "summary" %help: "Print summary of BGP routes";
     %opt_parameter: "detail" %help: "Print detailed BGP routes";
 }
 
 show bgp routes ipv6 multicast {
-    %command: "bgp/tools/xorpsh_print_routes -6 -m" %help: "Print BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP ipv6 multicast routes";
     %module: bgp;
     %opt_parameter: "summary" %help: "Print summary of BGP routes";
     %opt_parameter: "detail" %help: "Print detailed BGP routes";

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_routes.hh,v 1.7 2004/05/15 18:31:39 atanu Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.8 2004/05/18 01:26:31 atanu Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -131,9 +131,12 @@ PrintRoutes<A>::get_route_list_start_done(const XrlError& e,
     _prev_no_bgp = false;
     printf("\n\nStatus Codes: * valid route, > best route\n");
     printf("Origin Codes: i IGP, e EGP, ? incomplete\n\n");
-    printf("   Prefix            Nexthop          Peer              AS Path\n");
-    printf("   ------            -------          ----              -------\n");
-	   
+    printf(
+"   Prefix                Nexthop                    Peer            AS Path\n"
+);
+    printf(
+"   ------                -------                    ----            -------\n"
+);
     _token = *token;
     for (int i = 0; i < MAX_REQUESTS; i++) {
 	_active_requests++;
@@ -191,7 +194,7 @@ PrintRoutes<A>::get_route_list_next_done(const XrlError& e,
 
     AsPath asp((const uint8_t*)(&((*aspath)[0])), aspath->size());
 
-    printf(" %-16s  %-15s  %-15s  %s ", net->str().c_str(), 
+    printf(" %-20s  %-25s  %-12s  %s ", net->str().c_str(), 
 	   nexthop->str().c_str(),
 	   peer_id->str().c_str(),
 	   asp.short_str().c_str());
