@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.7 2004/09/16 11:43:19 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.8 2004/09/17 07:51:39 pavlin Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
 
+#include <net/if.h>
 #ifdef HAVE_FIREWALL_IPFW
 #include <netinet/ip_fw.h>
 #endif
