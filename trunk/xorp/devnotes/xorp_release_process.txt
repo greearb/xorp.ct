@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.2 2003/06/05 08:53:10 pavlin Exp $
+# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.3 2003/06/05 09:29:24 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -100,21 +100,25 @@ the login shell is csh or tcsh):
    WHO:  Release manager
    WHEN: 1 day before the release date
 
-17.TASK: Update xorp/docs/kdoc/gen-kdoc.sh
+17.TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
+   WHO:  Release manager
+   WHEN: 1 day before the release date
+
+18.TASK: Update xorp/docs/kdoc/gen-kdoc.sh
    WHO:  Release manager
    WHEN: 1 day before the release date
    MISC: If necessary, edit xorp/docs/kdoc/gen-kdoc.sh and add new
           subdirectories.
 
-18.TASK: Stop the XORP tinderbox crontab job (OPTIONAL)
+19.TASK: Stop the XORP tinderbox crontab job (OPTIONAL)
    WHO:  XORP tinderbox manager
    WHEN: 4 hours before intended release time
 
-19.TASK: Send email to xorp-dev@xorp.org that the release process has started.
+20.TASK: Send email to xorp-dev@xorp.org that the release process has started.
    WHO:  Release manager
    WHEN: 2 hours before intended release time
 
-20.TASK: Bump-up the release version number
+21.TASK: Bump-up the release version number
    WHO:  Release manager
    WHEN: Release time
    COMMANDS:
@@ -125,7 +129,7 @@ the login shell is csh or tcsh):
 	./bootstrap
 	cvs commit -m "Prepare XORP for release: bump-up version number"
 
-21.TASK: Verify that the code compiles and passes all tests.
+22.TASK: Verify that the code compiles and passes all tests.
    WHO:  Release manager
    WHEN: Release time
    COMMANDS: On each supported platform:
@@ -138,7 +142,7 @@ the login shell is csh or tcsh):
 	cd docs
 	gmake
 
-22.TASK: Add CVS tag to the source code
+23.TASK: Add CVS tag to the source code
    WHO:  Release manager
    WHEN: Release time
    COMMANDS:
@@ -153,7 +157,7 @@ the login shell is csh or tcsh):
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag www
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag data
 
-23.TASK: Prepare sofware and documentation tarballs for distribution
+24.TASK: Prepare sofware and documentation tarballs for distribution
    WHO:  Release manager
    WHEN: Release time
    COMMANDS:
@@ -182,7 +186,7 @@ the login shell is csh or tcsh):
  mv docs-$ReleaseVersion.tar.gz ..
  cd ..
 
-24.TASK: Copy the tarballs to the web server
+25.TASK: Copy the tarballs to the web server
    WHO:  Release manager
    WHEN: Release time
    COMMANDS:
@@ -202,7 +206,7 @@ the login shell is csh or tcsh):
  tar zxvf docs-$ReleaseVersion.tar.gz
  mv docs-$ReleaseVersion docs
 
-25.TASK: Update the links in the web server
+26.TASK: Update the links in the web server
    WHO:  Release manager
    WHEN: Release time
    COMMANDS:
@@ -214,7 +218,7 @@ the login shell is csh or tcsh):
  unsetenv ReleaseTag
  unsetenv ReleaseVersion
 
-26.TASK: Start cron job on www.xorp.org that automatically updates the XORP
+27.TASK: Start cron job on www.xorp.org that automatically updates the XORP
          web pages from the CVS repository
    WHO:  Release manager
    WHEN: Right after the release
@@ -223,19 +227,19 @@ the login shell is csh or tcsh):
 	sudo crontab -u pavlin -e
 	# Uncomment the line with update-www.xorp.org
 
-27.TASK: Send email to xorp-dev@xorp.org that the release process has
+28.TASK: Send email to xorp-dev@xorp.org that the release process has
          completed.
    WHO:  Release manager
    WHEN: Right after the release
 
-28.TASK: Send an anouncement email to xorp-users@xorp.org about the new release
+29.TASK: Send an anouncement email to xorp-users@xorp.org about the new release
    WHO:  XORP project leader
    WHEN: Right after the release
 
-29.TASK: Start the XORP tinderbox crontab job (only if it was stopped earlier)
+30.TASK: Start the XORP tinderbox crontab job (only if it was stopped earlier)
    WHO:  XORP tinderbox manager
    WHEN: Right after the release
 
-30.TASK: Jupiter
+31.TASK: Jupiter
    WHO:  Everyone
    WHEN: Right after the release
