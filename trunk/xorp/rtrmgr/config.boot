@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot,v 1.12 2003/11/21 02:06:03 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot,v 1.13 2004/02/14 00:18:01 pavlin Exp $ */
 
 /* router config file for tinderbox test on xorp8 */ 
 
@@ -51,13 +51,16 @@ protocols {
   bgp {
     bgp-id: 192.150.187.108
     local-as: 65017
-    peer xorp-c4000 {
+    peer 192.150.187.109 {
       local-ip: 192.150.187.108
-      peer-ip: 192.150.187.109
       as: 65000
       holdtime: 90
       next-hop: 192.150.187.108
-      set-parameter: "MultiProtocol.IPv6.Unicast"
+
+      enable-ipv4-multicast
+
+      enable-ipv6-unicast
+      enable-ipv6-multicast
     }
   }
 }
