@@ -44,11 +44,6 @@
 #undef ENABLE_ADVANCED_MCAST_API
 
 /*
- * Define this if you have <new>
- */
-#undef HAVE_NEW_HEADER
-
-/*
  * Define this if you want IPv6 support.
  */
 #undef HAVE_IPV6
@@ -204,14 +199,6 @@ typedef int socklen_t;
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
-
-#ifdef __cplusplus
-#ifdef HAVE_NEW_HEADER
-#include <new>
-#else
-inline void *operator new(size_t, void *v) { return v; }
-#endif
-#endif /* __cplusplus */
 
 #if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
 using namespace std;

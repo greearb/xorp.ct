@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.21 2003/04/15 17:09:17 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.22 2003/04/15 18:55:36 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -412,28 +412,6 @@ AC_CACHE_CHECK(for uint32_t in <stdint.h>, xorp_cv_uint32_t_in_stdint_h,
 if test $xorp_cv_uint32_t_in_stdint_h = "no"
 then
          AC_CHECK_TYPE(uint32_t,  unsigned int)
-fi
-
-dnl ----------------------------
-dnl Try for new.h
-dnl ----------------------------
-
-AC_LANG_SAVE
-AC_LANG_CPLUSPLUS
-AC_CACHE_CHECK(for working <new>, xorp_cv_good_new_header,
-  AC_TRY_RUN([
-		#include <new>
-		int main(int c, char **v) {
-		int a;
-		int *b = new(&a) int;
-		return 0;
-		}], 
-		xorp_cv_good_new_header=yes, 
-		xorp_cv_good_new_header=no, 
-		xorp_cv_good_new_header=no))
-AC_LANG_RESTORE
-if test "$xorp_cv_good_new_header" = yes; then
-  AC_DEFINE(HAVE_NEW_HEADER)
 fi
 
 dnl ----------------------------

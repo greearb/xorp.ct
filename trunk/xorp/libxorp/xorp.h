@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.3 2003/03/10 23:20:38 hodson Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.4 2003/04/15 17:09:24 hodson Exp $
  */
 
 
@@ -25,6 +25,7 @@
 #include "config.h"
 
 #ifdef __cplusplus
+#include <new>
 #include <iostream>
 #include <string>
 #include <algorithm>
