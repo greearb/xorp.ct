@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.2 2003/01/16 19:09:28 hodson Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.3 2003/03/10 23:20:36 hodson Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -25,6 +25,193 @@
 
 
 #define ONE_MILLION	1000000
+
+/**
+ * @short TimeVal class
+ *
+ * TimeVal class is used for storing time value. Similar to "struct timeval",
+ * the time value is in seconds and microseconds.
+ */
+class TimeVal {
+public:
+    /**
+     * Default constructor
+     */
+    TimeVal() : _sec(0), _usec(0) {}
+    
+    /**
+     * Constructor for given seconds and microseconds.
+     * 
+     * @param sec the number of seconds.
+     * @param usec the number of microseconds.
+     */
+    TimeVal(uint32_t sec, uint32_t usec) : _sec(sec), _usec(usec) {}
+    
+    /**
+     * Constructor for given "struct timeval".
+     * 
+     * @param timeval the "struct timeval" time value to initialize this
+     * object with.
+     */
+    TimeVal(const struct timeval& timeval)
+	: _sec(timeval.tv_sec), _usec(timeval.tv_usec) {}
+    
+    /**
+     * Constructor for given double-float time value.
+     * 
+     * @param d the double-float time value to initialize this object with.
+     */
+    TimeVal(const double& d)
+	: _sec((uint32_t)d),
+	  _usec((uint32_t)((d - ((double)_sec)) * ONE_MILLION + 1.0e-7)) {}
+
+    /**
+     * Copy the time to a timeval structure.
+     * 
+     * @param timeval the storage to copy the time to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(struct timeval& timeval) {
+	timeval.tv_sec = _sec;
+	timeval.tv_usec = _usec;
+	return (sizeof(_sec) + sizeof(_usec));
+    }
+    
+    /**
+     * Get the number of seconds.
+     * 
+     * @return the number of seconds.
+     */
+    uint32_t sec() const	{ return _sec; }
+    
+    /**
+     * Get the number of microseconds.
+     * 
+     * @return the number of microseconds.
+     */
+    uint32_t usec() const	{ return _usec; }
+    
+    /**
+     * Convert a TimeVal value to a double-float value.
+     * 
+     * @return the double-float value of this TimeVal time.
+     */
+    double get_double() const {
+	return _sec * 1.0 + _usec * 1.0e-6;
+    }
+    
+    /**
+     * Equality Operator
+     * 
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is numerically same as the
+     * right-hand operand.
+     */
+    bool operator==(const TimeVal& other) const {
+	return (_sec == other.sec()) && (_usec == other.usec());
+    }
+    
+    /**
+     * Less-Than Operator
+     * 
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is numerically smaller than the
+     * right-hand operand.
+     */
+    bool operator<(const TimeVal& other) const {
+	return (_sec == other.sec()) ?
+	    _usec < other.usec() : _sec < other.sec();
+    }
+    
+    /**
+     * Assign-Sum Operator
+     * 
+     * @param delta the TimeVal value to add to this TimeVal object.
+     * @return the TimeVal value after the addition of @ref delta.
+     */
+    TimeVal& operator+=(const TimeVal& delta) {
+	_sec += delta.sec();
+	_usec += delta.usec();
+	if (_usec >= ONE_MILLION) {
+	    ++_sec;
+	    _usec -= ONE_MILLION;
+	}
+	return (*this);
+    }
+    
+    /**
+     * Addition Operator
+     * 
+     * @param other the TimeVal value to add to the value of this
+     * TimeVal object.
+     * @return the TimeVal value after the addition of @ref other. 
+     */
+    TimeVal operator+(const TimeVal& other) const {
+	TimeVal tmp_timeval(*this);
+	return tmp_timeval += other;
+    }
+    
+    /**
+     * Assign-Difference Operator
+     * 
+     * @param delta the TimeVal value to substract from this TimeVal object.
+     * @return the TimeVal value after the substraction of @ref delta.
+     */
+    TimeVal& operator-=(const TimeVal& delta) {
+	_sec -= delta.sec();
+	_usec -= delta.usec();
+	if ((signed)_usec < 0) {
+	    --_sec;
+	    _usec += ONE_MILLION;
+	}
+	return (*this);
+    }
+    
+    /**
+     * Substraction Operator
+     * 
+     * @param other the TimeVal value to substract from the value of this
+     * TimeVal object.
+     * @return the TimeVal value after the substraction of @ref other.
+     */
+    TimeVal operator-(const TimeVal& other) const {
+	TimeVal tmp_timeval(*this);
+	return tmp_timeval -= other;
+    }
+    
+    /**
+     * Division Operator
+     * 
+     * @param n the integer value used in dividing the value of this object
+     * with. 
+     * @return the TimeVal value of dividing the value of this object
+     * by @ref n.
+     */
+    TimeVal operator/(int n) const {
+	return TimeVal(_sec / n, ((_sec % n) * ONE_MILLION + _usec) / n);
+    }
+    
+    /**
+     * Multiplication Operator
+     * 
+     * @param n the integer value used in multiplying the value of this object
+     * with.
+     * @return the TimeVal value of multiplying the value of this object
+     * by @ref n.
+     */
+    TimeVal operator*(int n) const {
+	uint32_t tmp_sec, tmp_usec;
+	
+	tmp_usec = _usec * n;
+	tmp_sec = _sec * n + tmp_usec / ONE_MILLION;
+	tmp_usec %= ONE_MILLION;
+	return TimeVal(tmp_sec, tmp_usec);
+    }
+    
+private:
+    uint32_t _sec;		// The number of seconds
+    uint32_t _usec;		// The number of microseconds
+};
 
 /**
  * Make a timeval value.
@@ -88,7 +275,7 @@ double_to_timeval(const double& d)
 {
     timeval t;
     t.tv_sec = (int)d;
-    t.tv_usec = (int)(d - ((double)t.tv_sec)) * ONE_MILLION;
+    t.tv_usec = (int)((d - ((double)t.tv_sec)) * ONE_MILLION + 1.0e-7);
     return t;
 }
 
