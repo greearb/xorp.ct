@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.30 2004/12/17 05:49:42 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.31 2004/12/17 10:40:19 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -532,9 +532,10 @@ private:
 
 class IfConfigSetClick : public IfConfigSet,
 			 public ClickSocket {
-public:
+private:
     class ClickConfigGenerator;
 
+public:
     IfConfigSetClick(IfConfig& ifc);
     virtual ~IfConfigSetClick();
 
