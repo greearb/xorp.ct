@@ -12,6 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
+#include "rip_module.h"
+
 #include "config.h"
 #include "libxorp/xorp.h"
 
