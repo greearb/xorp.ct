@@ -4926,7 +4926,10 @@ trap 'rm -fr `echo "Makefile
 	xrl/targets/Makefile
 	xrl/tests/Makefile
 	libxipc/test_xrl_parser.sh
-	mibs/tests/test_bgpmib.sh config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+	mibs/tests/test_bgpmib.sh
+	rib/test_rib_direct.sh
+	rib/test_rib_xrls.sh
+ config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -5090,7 +5093,10 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	xrl/targets/Makefile
 	xrl/tests/Makefile
 	libxipc/test_xrl_parser.sh
-	mibs/tests/test_bgpmib.sh"}
+	mibs/tests/test_bgpmib.sh
+	rib/test_rib_direct.sh
+	rib/test_rib_xrls.sh
+"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -5259,13 +5265,15 @@ fi; done
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
-echo timestamp > stamp-h
-	chmod a+x libxipc/test_xrl_parser.sh
-	chmod a+x mibs/tests/test_bgpmib.sh
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h
+echo timestamp > stamp-h
+	chmod a+x libxipc/test_xrl_parser.sh
+	chmod a+x mibs/tests/test_bgpmib.sh
+	chmod a+x rib/test_rib_direct.sh 
+	chmod a+x rib/test_rib_xrls.sh 
 
 exit 0
 EOF

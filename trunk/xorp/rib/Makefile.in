@@ -113,7 +113,7 @@ EXTRA_DIST = commands test_rib_direct.sh test_rib_xrls.sh xrl_shell_funcs.sh
 INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
-CONFIG_CLEAN_FILES = 
+CONFIG_CLEAN_FILES =  test_rib_direct.sh test_rib_xrls.sh
 LIBRARIES =  $(noinst_LIBRARIES)
 
 
@@ -210,7 +210,8 @@ CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  README Makefile.am Makefile.in TODO
+DIST_COMMON =  README Makefile.am Makefile.in TODO test_rib_direct.sh.in \
+test_rib_xrls.sh.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -239,6 +240,10 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
+test_rib_direct.sh: $(top_builddir)/config.status test_rib_direct.sh.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+test_rib_xrls.sh: $(top_builddir)/config.status test_rib_xrls.sh.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-noinstLIBRARIES:
 
