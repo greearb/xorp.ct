@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.7 2003/09/27 22:32:47 mjh Exp $"
+#ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.9 2004/02/11 08:48:50 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -39,7 +39,7 @@ private:
 };
 
 RibParser::RibParser(RIB<IPv4>& rib)
-    : _rib(rib) 
+    : _rib(rib)
 {
     add_command(new DirectEtherVifCommand(_rib));
     add_command(new DirectRouteAddCommand(_rib));
@@ -47,9 +47,6 @@ RibParser::RibParser(RIB<IPv4>& rib)
 
     add_command(new DirectRouteVerifyCommand(_rib));
     add_command(new DirectTableOriginCommand(_rib));
-
-    add_command(new DirectTableMergedCommand(_rib));
-    add_command(new DirectTableExtIntCommand(_rib));
 
     add_command(new DirectRedistEnableCommand(_rib));
     add_command(new DirectRedistDisableCommand(_rib));
@@ -86,7 +83,7 @@ parser_main()
 }
 
 int
-main (int /* argc */, char* argv[]) 
+main (int /* argc */, char* argv[])
 {
     //
     // Initialize and start xlog
@@ -110,6 +107,6 @@ main (int /* argc */, char* argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     exit(0);
 }

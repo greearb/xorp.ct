@@ -12,20 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.8 2004/02/11 08:48:46 pavlin Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.9 2004/03/23 11:24:25 pavlin Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
 
 #include "parser.hh"
 
-
 // ----------------------------------------------------------------------------
 // Direct RIB Commands (operate on an instance of a RIB<IPv4>).
 
 class DirectTableOriginCommand : public TableOriginCommand {
 public:
-    DirectTableOriginCommand(RIB<IPv4>& rib) 
+    DirectTableOriginCommand(RIB<IPv4>& rib)
 	: TableOriginCommand(), _rib(rib) {}
     int execute() {
 	cout << "TableOriginCommand::execute " << _tablename << "\n";
@@ -38,33 +37,9 @@ private:
     RIB<IPv4>& _rib;
 };
 
-class DirectTableMergedCommand : public TableMergedCommand {
-public:
-    DirectTableMergedCommand(RIB<IPv4>& rib)
-	: TableMergedCommand(), _rib(rib) {}
-    int execute() {
-	cout << "TableMergedCommand::execute " << _tablename << "\n";
-	return _rib.new_merged_table(_tablename, _t1, _t2);
-    }
-private:
-    RIB<IPv4>& _rib;
-};
-
-class DirectTableExtIntCommand : public TableExtIntCommand {
-public:
-    DirectTableExtIntCommand(RIB<IPv4>& rib)
-	: TableExtIntCommand(), _rib(rib) {}
-    int execute() {
-	cout << "TableExtIntCommand::execute " << _tablename << "\n";
-	return _rib.new_extint_table(_tablename, _t1, _t2);
-    }
-private:
-    RIB<IPv4>& _rib;
-};
-
 class DirectRouteAddCommand : public RouteAddCommand {
 public:
-    DirectRouteAddCommand(RIB<IPv4>& rib) 
+    DirectRouteAddCommand(RIB<IPv4>& rib)
 	: RouteAddCommand(), _rib(rib) {}
     int execute() {
 	cout << "RouteAddCommand::execute " << _tablename << " ";
@@ -98,7 +73,7 @@ public:
 	cout << "RouteVerifyCommand::execute " << _lookupaddr.str() << " "
 	     << _ifname << " " << _nexthop.str() << " "
 	     << c_format("%d", _metric) << "\n";
-	int dummy = _rib.verify_route(_lookupaddr, _ifname, _nexthop, 
+	int dummy = _rib.verify_route(_lookupaddr, _ifname, _nexthop,
 				      (uint32_t)_metric);
 	if (dummy != XORP_OK) {
 	    cerr << "RouteVerify Failed!\n";
@@ -117,7 +92,7 @@ public:
     int execute() {
 	cout << "EtherVifCommand::execute " << _ifname << " ";
 	cout << _addr.str() << "\n";
-	
+
 	Vif vif(_ifname);
 	IPv4Net subnet(_addr, _prefix_len);
 	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.26 2004/02/06 22:44:12 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.27 2004/02/11 08:48:50 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -53,8 +53,6 @@ public:
 	// The following do not exist in XRL interface so use direct methods
 	add_command(new DirectRouteVerifyCommand(rib));
 	add_command(new DirectTableOriginCommand(rib));
-	add_command(new DirectTableMergedCommand(rib));
-	add_command(new DirectTableExtIntCommand(rib));
 
 	// XXX The following should probably use XRL's but punting for
 	// time being.
