@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.27 2003/07/16 02:56:57 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.28 2003/07/30 23:43:30 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -308,7 +308,7 @@ XrlPimNode::start_protocol_kernel()
     //
     // Enable receiving of MRIB information
     //
-#if 0
+#if 1
     XrlMfeaV0p1Client::send_allow_mrib_messages(
 	xorp_module_name(family(), XORP_MODULE_MFEA),
 	my_xrl_target_name(),
