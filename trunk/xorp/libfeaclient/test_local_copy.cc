@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.2 2003/08/25 16:58:03 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.3 2003/10/22 21:09:32 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -219,7 +219,7 @@ test_main()
 	verbose_log("Executing %s\n", fifo.front()->str().c_str());
 	fifo.pop_front();
     }
-    if (t != u) {
+    if (v != u) {
 	verbose_log("Convert to commands and apply to empty tree failed.");
 	return 1;
     }
