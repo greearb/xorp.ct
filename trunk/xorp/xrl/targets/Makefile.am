@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.17 2003/08/28 00:08:52 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.18 2003/11/04 23:39:57 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -29,10 +29,12 @@ tgt_files		+= rip4.tgt
 tgt_files		+= rib.tgt
 tgt_files		+= ribclient.tgt
 tgt_files		+= rtrmgr.tgt
+tgt_files		+= socket_server.tgt
 tgt_files		+= test.tgt
 tgt_files		+= test_fea_ifmgr_mirror.tgt
 tgt_files		+= test_finder_events.tgt
 tgt_files		+= test_peer.tgt
+tgt_files		+= test_socket4.tgt
 tgt_files		+= xorp_if_mib.tgt
 tgt_files		+= xorpsh.tgt
 
@@ -64,10 +66,12 @@ noinst_LIBRARIES	+= libribclientbase.a
 noinst_LIBRARIES	+= librip4base.a
 noinst_LIBRARIES	+= librip6base.a
 noinst_LIBRARIES	+= librtrmgrbase.a
+noinst_LIBRARIES	+= libsocketserverbase.a
 noinst_LIBRARIES	+= libtestbase.a
 noinst_LIBRARIES	+= libtestfeaifmgrmirrorbase.a
 noinst_LIBRARIES	+= libtestfindereventsbase.a
 noinst_LIBRARIES	+= libtestpeerbase.a
+noinst_LIBRARIES	+= libtestsocket4.a
 noinst_LIBRARIES	+= libxorpifmibbase.a
 noinst_LIBRARIES	+= libxorpshbase.a
 
@@ -112,7 +116,8 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
-		$(INTERFACES_DIR)/fea_rawpkt.xif
+		$(INTERFACES_DIR)/fea_rawpkt.xif			\
+		$(INTERFACES_DIR)/socket4_locator.xif
 
 # FEA IfMgr Mirror
 libfeaifmgrmirrorbase_a_SOURCES = fea_ifmgr_mirror_base.hh		\
@@ -205,11 +210,19 @@ $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
 
+# SOCKET SERVER
+libsocketserverbase_a_SOURCES  = socket_server_base.hh			\
+libsocketserverbase_a_SOURCES += socket_server_base.cc
+$(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
+		$(INTERFACES_DIR)/socket4.xif
+
 # TEST FEA IFMGR MIRROR
 libtestfeaifmgrmirrorbase_a_SOURCES  = test_fea_ifmgr_mirror_base.hh
 libtestfeaifmgrmirrorbase_a_SOURCES += test_fea_ifmgr_mirror_base.cc
 $(srcdir)/test_fea_ifmgr_mirror_base.hh					\
-$(srcdir)/test_fea_ifmgr_mirror_base.hh:				\
+$(srcdir)/test_fea_ifmgr_mirror_base.cc:				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif
 
 #
@@ -229,6 +242,12 @@ libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
 $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
+
+# TEST SOCKET4
+libtestsocket4_a_SOURCES = test_socket4_base.hh test_socket4_base.cc
+$(srcdir)/test_socket4_base.hh $(srcdir)/test_socket4_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/socket4_user.xif
 
 # XORP IF MIB
 libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc

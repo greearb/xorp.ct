@@ -100,7 +100,7 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rip4.tgt rib.tgt ribclient.tgt rtrmgr.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt xorp_if_mib.tgt xorpsh.tgt
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rip4.tgt rib.tgt ribclient.tgt rtrmgr.tgt socket_server.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -109,7 +109,7 @@ xrls_files = $(tgt_files:%.tgt=%.xrls)
 data_DATA = $(xrls_files)
 
 # Add your target's library here
-noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librip4base.a librip6base.a librtrmgrbase.a libtestbase.a libtestfeaifmgrmirrorbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
+noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librip4base.a librip6base.a librtrmgrbase.a libsocketserverbase.a libtestbase.a libtestfeaifmgrmirrorbase.a libtestfindereventsbase.a libtestpeerbase.a libtestsocket4.a libxorpifmibbase.a libxorpshbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -179,6 +179,11 @@ librip6base_a_SOURCES = rip6_base.hh rip6_base.cc
 # RTRMGR
 librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
 
+# SOCKET SERVER
+libsocketserverbase_a_SOURCES = socket_server_base.hh			\
+libsocketserverbase_a_SOURCES += socket_server_base.cc
+
+
 # TEST FEA IFMGR MIRROR
 libtestfeaifmgrmirrorbase_a_SOURCES = test_fea_ifmgr_mirror_base.hh test_fea_ifmgr_mirror_base.cc
 
@@ -192,6 +197,9 @@ libtestfindereventsbase_a_SOURCES = test_finder_events_base.hh test_finder_event
 
 # TEST PEER
 libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
+
+# TEST SOCKET4
+libtestsocket4_a_SOURCES = test_socket4_base.hh test_socket4_base.cc
 
 # XORP IF MIB
 libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
@@ -296,6 +304,10 @@ librtrmgrbase_a_AR = $(AR) cru
 librtrmgrbase_a_LIBADD =
 am_librtrmgrbase_a_OBJECTS = rtrmgr_base.$(OBJEXT)
 librtrmgrbase_a_OBJECTS = $(am_librtrmgrbase_a_OBJECTS)
+libsocketserverbase_a_AR = $(AR) cru
+libsocketserverbase_a_LIBADD =
+am_libsocketserverbase_a_OBJECTS = socket_server_base.$(OBJEXT)
+libsocketserverbase_a_OBJECTS = $(am_libsocketserverbase_a_OBJECTS)
 libtestbase_a_AR = $(AR) cru
 libtestbase_a_LIBADD =
 am_libtestbase_a_OBJECTS = test_base.$(OBJEXT)
@@ -315,6 +327,10 @@ libtestpeerbase_a_AR = $(AR) cru
 libtestpeerbase_a_LIBADD =
 am_libtestpeerbase_a_OBJECTS = test_peer_base.$(OBJEXT)
 libtestpeerbase_a_OBJECTS = $(am_libtestpeerbase_a_OBJECTS)
+libtestsocket4_a_AR = $(AR) cru
+libtestsocket4_a_LIBADD =
+am_libtestsocket4_a_OBJECTS = test_socket4_base.$(OBJEXT)
+libtestsocket4_a_OBJECTS = $(am_libtestsocket4_a_OBJECTS)
 libxorpifmibbase_a_AR = $(AR) cru
 libxorpifmibbase_a_LIBADD =
 am_libxorpifmibbase_a_OBJECTS = xorp_if_mib_base.$(OBJEXT)
@@ -341,10 +357,13 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/ospf_base.Po $(DEPDIR)/pim_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_base.Po $(DEPDIR)/ribclient_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rip4_base.Po $(DEPDIR)/rip6_base.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_base.Po $(DEPDIR)/test_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket_server_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_fea_ifmgr_mirror_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_finder_events_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peer_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_socket4_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_if_mib_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorpsh_base.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -367,14 +386,15 @@ DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
 	$(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) \
 	$(libribclientbase_a_SOURCES) $(librip4base_a_SOURCES) \
 	$(librip6base_a_SOURCES) $(librtrmgrbase_a_SOURCES) \
-	$(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) \
+	$(libsocketserverbase_a_SOURCES) $(libtestbase_a_SOURCES) \
+	$(libtestfeaifmgrmirrorbase_a_SOURCES) \
 	$(libtestfindereventsbase_a_SOURCES) \
-	$(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) \
-	$(libxorpshbase_a_SOURCES)
+	$(libtestpeerbase_a_SOURCES) $(libtestsocket4_a_SOURCES) \
+	$(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
 DATA = $(data_DATA)
 
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librip4base_a_SOURCES) $(librip6base_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
+SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librip4base_a_SOURCES) $(librip6base_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libsocketserverbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libtestsocket4_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
 
 all: all-am
 
@@ -464,6 +484,10 @@ librtrmgrbase.a: $(librtrmgrbase_a_OBJECTS) $(librtrmgrbase_a_DEPENDENCIES)
 	-rm -f librtrmgrbase.a
 	$(librtrmgrbase_a_AR) librtrmgrbase.a $(librtrmgrbase_a_OBJECTS) $(librtrmgrbase_a_LIBADD)
 	$(RANLIB) librtrmgrbase.a
+libsocketserverbase.a: $(libsocketserverbase_a_OBJECTS) $(libsocketserverbase_a_DEPENDENCIES) 
+	-rm -f libsocketserverbase.a
+	$(libsocketserverbase_a_AR) libsocketserverbase.a $(libsocketserverbase_a_OBJECTS) $(libsocketserverbase_a_LIBADD)
+	$(RANLIB) libsocketserverbase.a
 libtestbase.a: $(libtestbase_a_OBJECTS) $(libtestbase_a_DEPENDENCIES) 
 	-rm -f libtestbase.a
 	$(libtestbase_a_AR) libtestbase.a $(libtestbase_a_OBJECTS) $(libtestbase_a_LIBADD)
@@ -480,6 +504,10 @@ libtestpeerbase.a: $(libtestpeerbase_a_OBJECTS) $(libtestpeerbase_a_DEPENDENCIES
 	-rm -f libtestpeerbase.a
 	$(libtestpeerbase_a_AR) libtestpeerbase.a $(libtestpeerbase_a_OBJECTS) $(libtestpeerbase_a_LIBADD)
 	$(RANLIB) libtestpeerbase.a
+libtestsocket4.a: $(libtestsocket4_a_OBJECTS) $(libtestsocket4_a_DEPENDENCIES) 
+	-rm -f libtestsocket4.a
+	$(libtestsocket4_a_AR) libtestsocket4.a $(libtestsocket4_a_OBJECTS) $(libtestsocket4_a_LIBADD)
+	$(RANLIB) libtestsocket4.a
 libxorpifmibbase.a: $(libxorpifmibbase_a_OBJECTS) $(libxorpifmibbase_a_DEPENDENCIES) 
 	-rm -f libxorpifmibbase.a
 	$(libxorpifmibbase_a_AR) libxorpifmibbase.a $(libxorpifmibbase_a_OBJECTS) $(libxorpifmibbase_a_LIBADD)
@@ -513,10 +541,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rip4_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rip6_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket_server_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_fea_ifmgr_mirror_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_events_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_socket4_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorpsh_base.Po@am__quote@
 
@@ -708,7 +738,8 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
-		$(INTERFACES_DIR)/fea_rawpkt.xif
+		$(INTERFACES_DIR)/fea_rawpkt.xif			\
+		$(INTERFACES_DIR)/socket4_locator.xif
 $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_ifmgr_mirror.xif
@@ -753,8 +784,12 @@ $(srcdir)/rip6_base.hh $(srcdir)/rip6_base.cc:				\
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
+$(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
+		$(INTERFACES_DIR)/socket4.xif
 $(srcdir)/test_fea_ifmgr_mirror_base.hh					\
-$(srcdir)/test_fea_ifmgr_mirror_base.hh:				\
+$(srcdir)/test_fea_ifmgr_mirror_base.cc:				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif
 $(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
 		$(INTERFACES_DIR)/common.xif				\
@@ -762,6 +797,9 @@ $(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
 $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
+$(srcdir)/test_socket4_base.hh $(srcdir)/test_socket4_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/socket4_user.xif
 $(srcdir)/xorp_if_mib_base.hh $(srcdir)/xorp_if_mib_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/xorp_if_mib.xif

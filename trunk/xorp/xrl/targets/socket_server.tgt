@@ -1,0 +1,8 @@
+#include "common.xif"
+#include "finder_event_observer.xif"
+#include "socket4.xif"
+
+target socket_server implements						\
+	common/0.1,							\
+	finder_event_observer/0.1,					\
+	socket4/0.1

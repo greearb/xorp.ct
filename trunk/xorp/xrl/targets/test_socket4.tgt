@@ -1,0 +1,4 @@
+#include "common.xif"
+#include "socket4_user.xif"
+
+target test_socket4 implements common/0.1, socket4_user/0.1
