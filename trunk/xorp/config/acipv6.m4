@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.9 2003/09/26 16:19:58 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.10 2003/09/27 05:55:47 pavlin Exp $
 dnl
 
 dnl
@@ -70,22 +70,34 @@ dummy += IPV6_LEAVE_GROUP;
 dnl ----------------------------
 dnl Check whether the system IPv6 stack supports IPv6 multicast routing.
 dnl ----------------------------
-AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast routing)
-dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on Linux
-AC_TRY_COMPILE([
+dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on some OS,
+dnl hence we need to include them conditionally.
+AC_CHECK_HEADER(net/if_var.h,
+  [test_net_if_var_h="#include <net/if_var.h>"],
+  [test_net_if_var_h=""])
+AC_CHECK_HEADER(netinet/in_var.h,
+  [test_netinet_in_var_h="#include <netinet/in_var.h>"],
+  [test_netinet_in_var_h=""])
+
+test_multicast_routing_header_files=["
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#include <net/if_var.h>
+${test_net_if_var_h}
 #include <netinet/in.h>
-#include <netinet/in_var.h>
+${test_netinet_in_var_h}
 #include <netinet6/ip6_mroute.h>
+"]
+
+AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast routing)
+AC_TRY_COMPILE([
+${test_multicast_routing_header_files}
 ],
 [
 int dummy = 0;
 
-/* Dummy values that must be defined in some of the header files */
+/* Dummy integer values that must be defined in some of the header files */
 dummy += IPPROTO_ICMPV6;
 dummy += MRT6_INIT;
 dummy += MRT6_ADD_MIF;
@@ -95,16 +107,16 @@ dummy += MRT6_DEL_MFC;
 dummy += MRT6MSG_NOCACHE;
 dummy += MRT6MSG_WRONGMIF;
 dummy += MRT6MSG_WHOLEPKT;
-    
+
 #ifndef SIOCGETSGCNT_IN6
-#error "Missing SIOCGETSGCNT_IN6"
+#error Missing SIOCGETSGCNT_IN6
 #endif
 #ifndef SIOCGETMIFCNT_IN6
-#error "Missing SIOCGETMIFCNT_IN6"
+#error Missing SIOCGETMIFCNT_IN6
 #endif
 ],
 [AC_MSG_RESULT(yes)
- AC_DEFINE(HAVE_IPV6_MULTICAST_ROUTING, 1, [Define to 1 if you have IPv6 multicast routing])],
+ AC_DEFINE(HAVE_IPV6_MULTICAST_ROUTING, 1, [Define to 1 if you have IPv6 multicastst routing])],
  AC_MSG_RESULT(no))
 
 dnl ------------------------------------
