@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.9 2003/02/27 19:42:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.10 2003/02/28 03:00:12 pavlin Exp $"
 
 
 //
@@ -193,6 +193,14 @@ PimBsr::stop(void)
 	    
 	    if (config_bsr_zone->bsr_group_prefix_list().empty())
 		break;		// No Cand-RP-Adv to cancel
+	    
+	    // Test if there is a BSR
+	    if (! ((active_bsr_zone->bsr_zone_state()
+		    == BsrZone::STATE_CANDIDATE_BSR)
+		   || (active_bsr_zone->bsr_zone_state()
+		       == BsrZone::STATE_ACCEPT_PREFERRED))) {
+		break;
+	    }
 	    
 	    //
 	    // Send Cand-RP-Adv messages with holdtime of zero
@@ -2233,6 +2241,14 @@ bsr_zone_candidate_rp_advertise_timer_timeout(void *data_pointer)
 	
 	if (active_bsr_zone->i_am_bsr())
 	    break;		// I am the BSR, hence don't send the message
+	
+	// Test if there is a BSR
+	if (! ((active_bsr_zone->bsr_zone_state()
+		== BsrZone::STATE_CANDIDATE_BSR)
+	       || (active_bsr_zone->bsr_zone_state()
+		   == BsrZone::STATE_ACCEPT_PREFERRED))) {
+	    break;
+	}
 	
 	//
 	// Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
