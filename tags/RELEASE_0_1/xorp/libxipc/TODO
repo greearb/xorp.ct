@@ -1,0 +1,12 @@
+Finder -> Xrl protocol selection and negotiation.
+
+Finder -> Add support for re-mapping Xrl's.
+
+Xrl/Finder -> Interface specification and checking.
+
+Xrl Parsing -> Lexification.  Current method add hock.
+
+Xrl Extractor -> Spit out Xrl's from a text file / string.
+
+Xrl Converters -> Presentation <--> Spaceless
+

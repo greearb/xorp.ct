@@ -1,0 +1,14 @@
+/* $XORP: xorp/xrl/interfaces/common.xif,v 1.5 2002/05/10 17:24:08 hodson Exp $ */
+
+/*
+ * XRL interface common to all XRL target entities.
+ */
+
+
+interface common/0.1 {
+	/** Get name of Xrl Target */
+	get_target_name	-> name:txt
+
+	/** Get version string from Xrl Target */
+	get_version	-> version:txt
+}

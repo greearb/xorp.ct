@@ -1,0 +1,14 @@
+#
+# $XORP: xorp/fea/TODO,v 1.12 2002/12/09 12:47:45 pavlin Exp $
+#
+
+o Add UDP interfaces for sending and receiving.
+
+o Resurrect click based FEA.
+
+o Write native Linux (netlink) based FEA.
+
+o The following files inside "fea" are not used?
+  click.hh click_glue.hh fti_click.hh ifconfig_click.hh
+  click.cc fea_click.cc test_fea.cc test_fti.cc test_ifmanager.cc
+  Keep them or remove?

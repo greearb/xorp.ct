@@ -1,0 +1,174 @@
+Document Structure
+------------------
+
+o Introduction
+
+o Quick Start
+
+o Example
+
+o Tool Usage
+
+o References
+
+
+Introduction
+------------
+
+We have settled on KDOC as the documentation system for source code.
+KDOC is written for and used by the KDE project.  It's syntax is
+derived from Javadoc.
+
+
+Quick Start
+-----------
+
+kdoc comments are C comments that start with /** and end with */.
+When a kdoc comment appears in an interface it is assumed to refer to
+the code or declaration immediately following it.  Thus a comment
+appearing before a class describes the class, a comment appearing
+before a method describes the method, and so forth.
+
+Within a kdoc comment, tags can be used to provide hints to the
+documentation system.  Each tag, with the exception of @ref, should
+appear on a line of it's own.
+
+o Class Tags
+
+      @short <descr> 
+	Provide a short description of a class.  <descr> is limited to 1 line.
+
+      @author <descr>
+	Provide author details. <descr> is limited to 1 line.
+      
+      @version <descr>
+	Provide version detail. <descr> is limited to 1 line.
+
+      @see [one or more references to classes or methods ]
+        Provide references to related documentation.  When referring to a
+	class just use the class name, when referring to a method use
+	ClassName#MethodName, eg string#empty for string::empty().
+
+o Method Tags
+
+      @param <param_name> <descr>
+        Provide a description of a method parameter.   The description may span
+	multiple lines.
+
+      @return <descr>
+        Provide a description of the return value.
+
+      @exception <exception1> [<exception2> [ <exception3> ...]]
+        Provide a list of exceptions that may be thrown by method.
+
+      @see <ref1> [<ref2> [<ref3> ...]]
+        See description in Class Tags.
+
+o Constants, Enums
+
+      @see <ref1> [<ref2> [<ref3> ...]]
+        See description in Class Tags.
+
+o Bonus Magic
+
+      @ref <ref1> [<ref2> [<ref3> ...]]
+        Like @see, but can appear anywhere in the documentation.
+
+      <pre>...code fragment... </pre>
+        Provide a piece of pre-formatted text, such as a code fragment,
+	that kdoc should not examine.
+
+o KDOC style
+
+In general, we try to follow the Javadoc style (see the URL in
+section "Web Links").  Some of the exceptions from those guidelines are:
+
+  - If the @param description is longer than a line, you may add an
+    empty "* " line before the next @param or @return if it helps to
+    improve readability.
+
+  - Always add a period (i.e., ".") after a @param or @return statement
+    to indicate end-of-statement, even if the description is not
+    a complete sentence.
+
+  - The short version of a descriptor of a method or a class should
+    always start with a capital letter. Note that this doesn't apply
+    for the first letter in a @param or @return statement.
+
+  - If the short version of a descriptor of a method or a class is a
+    title-like, such as "Default constructor", don't add a period after it.
+    If the short descriptor is like a statement then add a period after it:
+    "Copy the raw address to an in6_addr structure."
+
+
+Example
+-------
+
+/**
+ * @short A class to format text messages.
+ *
+ * This class pulls text from an input stream and pushes it out on an
+ * output stream.  Each line pushed out may have optional decoration 
+ * characters prepended and appended.
+ *
+ * Example usage might be along the lines of:
+ *
+ * <pre>
+ * Formatter f(cin, cout);
+ * f.set_line_introduction("oh dear: ");
+ * ...
+ * </pre>
+ */
+class Formatter 
+{
+public:
+	/**
+	 * Constructor
+	 * 
+	 * @param istr input stream.
+	 * @param ostr output stream.
+	 */
+	Formatter(istream& istr, ostream& ostr);
+
+	~Formatter();
+
+	/**
+	 * Set the introductory text for each output by the formatter.
+	 *
+ 	 * @param msg the text to be prepended to each line.
+	 */
+	void set_line_introduction(const char* msg);
+
+	/**
+	 * @return the text being prepended to each line.
+	 * @see Formatter#set_line_introduction
+	 */
+	const char* line_introduction() const;
+};
+
+
+Tool Usage
+----------
+
+kdoc <filename>
+
+kdoc supports a range of command line arguments for customizing output
+directories, presentation, etc.  The kdoc(1) manual page describes
+these in detail.
+
+
+Web Links
+---------
+
+The links below should be helpful if you are just starting.  If you
+find, or know of any other, links that would be appropriate please add
+them here.
+
+kdoc web page:
+     www.ph.unimelb.edu.au/~ssk/kde/kdoc/
+
+Javadoc HOWTO:
+	http://java.sun.com/j2se/javadoc/writingdoccomments/index.html
+
+Javadoc comment specification:
+     http://java.sun.com/docs/books/jls/first_edition/html/18.doc.html

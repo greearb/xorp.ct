@@ -1,0 +1,68 @@
+/* $XORP: xorp/xrl/interfaces/fea_fti.xif,v 1.1 2002/11/15 00:09:03 hodson Exp $ */
+
+/*
+ * Forwarding Table XRL interface (part of FEA).
+ */
+
+interface fti/0.1 {
+
+	start_transaction -> tid:u32
+
+	commit_transaction ? tid:u32
+
+	abort_transaction ? tid:u32
+
+	add_entry4 ? tid:u32 &						      \
+		     dst:ipv4net &					      \
+		     gateway:ipv4 &					      \
+		     ifname:txt &					      \
+		     vifname:txt
+
+	delete_entry4 ? tid:u32 & dst:ipv4net
+
+	add_entry6 ? tid:u32 &						      \
+		     dst:ipv6net &					      \
+		     gateway:ipv6 &					      \
+		     ifname:txt &					      \
+		     vifname:txt
+
+	delete_entry6 ? tid:u32 & dst:ipv6net
+
+	delete_all_entries ? tid:u32
+	delete_all_entries4 ? tid:u32
+	delete_all_entries6 ? tid:u32
+
+	lookup_route4 ? dst:ipv4 -> netmask:ipv4net &			      \
+				    gateway:ipv4 &			      \
+				    ifname:txt &			      \
+				    vifname:txt
+
+	lookup_entry4 ?  dst:ipv4net					      \
+		      -> gateway:ipv4 &					      \
+		    	 ifname:txt &					      \
+			 vifname:txt
+
+	lookup_route6 ? dst:ipv6 -> netmask:ipv6net &			      \
+				    gateway:ipv6 &			      \
+				    ifname:txt &			      \
+				    vifname:txt
+
+	lookup_entry6 ?  dst:ipv6net					      \
+		      -> gateway:ipv6 &					      \
+			 ifname:txt &					      \
+			 vifname:txt
+
+	/* TBD: start_reading and read_entry forwarding table dump methods.
+	 * Perhaps we request the forwarding table be dumped to file and then
+	 * transfer the file.
+	 */
+}
+
+
+
+
+
+
+
+
+

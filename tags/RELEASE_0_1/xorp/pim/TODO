@@ -1,0 +1,1229 @@
+#
+# $XORP: xorp/pim/TODO,v 1.154 2002/12/09 14:14:16 pavlin Exp $
+#
+
+* IMPL: The subnets that are allowed for access CLI should not be hard-coded,
+  but should be configurable: PIM, CLI, MFEA, MLD6IGMP.
+  
+* Add this text somewhere else:
+  ECN bits setup for PIM Registers.
+  Issue: we don't know whether the encapsulating router (the DR in PIM)
+  supports the full-functionality option as described in RFC 2481.
+  Hence: when encapsulating, copy the ECN bits from the inner header
+  to the outer header.
+  When decapsulating:
+   * If the ECT-bit in the inner header is not set, don't do anything
+   * If the ECT-bit in the inner header is set, then:
+      * If the ECT-bit in the outer header is not set, don't do anything
+      * If the ECT-bit in the outer header is set, then:
+          * The CE bit on the outer header is ORed with the CE
+             bit of the inner header to update the CE bit of the packet
+
+  NO! See Kame's ip_ecn.c and RFC 3168
+
+* Currently, all log traces are controlled by one single variable,
+  but in the future we may want to enable/disable log traces
+  per protocol message type, etc.
+  This is true for MFEA, MLD6IMGP, PIM
+
+* IMPL: "show pim join" CLI command should not print
+  all info for all entries: e.g, only the (*,G) related
+  info should be print for (*,G) entry, and so on.
+* TEST: rerun all tests that use "show pim join" command
+  up to Section 4.3 (included), so the output examples
+  are consistent.
+
+* IMPL: OK NOT to remove (S,G) entry with olist=NULL if the
+  KeepaliveTimer(S,G) is running? E.g., the entry will be removed
+  after the keepalive timer expires?
+  However check the scenario when there will be data traffic for (S,G)
+  on the IIF because of another router: in that case will the
+  Keepalive timer expire, so the (S,G) entry can be deleted?
+
+* SPEC+IMPL: if we ignore (*,G) Join/Prune entry because of RP mismatch,
+  do we ignore all other (S,G) and (S,G,rpt) entries within same group
+  and message?
+
+* IMPL+TESTSUITE: fix the case when a Prune message is received, but
+  the router has no (*,*,RP) or (*,G) or (S,G) or (S,G,rpt) matching
+  entry. Currently, a no-info entry is created, but it is never deleted.
+  Add the appropriate test scenarion in the testsuite to test that.
+
+* SPEC: correct PruneEcho sending condition: currently the spec
+  says that it should not be sent on interface that contains only one
+  PIM neighbor. The correct wording should be if "no more than one".
+  Also, what about the case when there are 2 nbrs, but the one that
+  sends Prune goes away by the time the PP timer expires?
+
+* SPEC: allow all zeros Upstream Neighbor Address for PIM Join/Prune messages
+  on p-to-p interfaces (pending approval from the PIM mailing list).
+  If not allowed, then fix the implementation to disallow all zeros
+  for "target_nbr_addr" in PimVif::pim_join_prune_recv() and
+  PimJpHeader::mrt_commit().
+
+* IMPL: add PimConfig class to PimNode.
+
+* IMPL: all signals from the kernel should be parsed by the MFEA
+  before sent to PIM
+
+* IMPL: In all *.hh files, use same distance from return argument of a method
+  and the method name (this applies everywhere not only PIM).
+
+* IMPL: rename all "ROUTER_ALERT" in comments to "Router Alert"
+  (applies everywhere not only PIM).
+
+* IMPL: rename all "bool foo_bool" variables to
+  "bool is_foo" (applies everywhere not only PIM).
+
+* IMPL BUG: if register_vif at the DR is started in PIM after NOCACHE signal
+  is received for a group, then later when we receive the Bootstrap
+  information, the RP for the group we received the NOCACHE signal
+  is not set properly.
+  Similar problem occurs at the RP as well: if the register_vif is
+  started after IGMP Membership Join is received.
+
+* IMPL BUG: once, there was a MFC entry in the kernel, and no installed
+  bw_meter in the kernel. When join and leave a local member, the
+  mfc is not deleted; instead, a mfc with olist=NULL is installed when
+  leave.
+
+* IMPL: keep a copy of installed dataflow meters in PIM and/or MFEA.
+
+* SPEC+IMPL: How to set the outer TTL for PIM Register packets:
+  (a) Fixed value (similar to cisco)
+  (b) Set to the inner TTL on encasulation, then copy back to inner TTL
+    on decapsulation
+  (c) Set to inner TTL on encapsulation. On decapsulation, if outer TTL
+    is larger than the inner TTL, then don't copy it (Mark's suggestion)
+
+* IMPL: decide what exactly to do when reconfiguring the Cand-BSR, Cand-RP,
+  etc : e.g. stop everything about RPs, merge, etc...
+
+* IMPL: Add dont_fragment:bool to the send_protocol_message[4,6] XRLs
+  from protocol modules to the MFEA. If set, the IP_DF bit will
+  be set (applies only for IPv4).
+
+* SPEC+IMPL: if RP becomes UNKNOWN, remove the Register vif from
+  the oif list (at the DR's (S,G) entry). (Waiting for the spec change...)
+
+* IMPL: add the equivalent of altnet from pimd.conf : e.g.,
+  non-local senders appear as senders connected to the same subnet.
+  Needed as a work-around solution when there are uni-directional
+  interfaces for sending and receiving traffic (e.g., satellite links).
+
+* IMPL: get rid of has_dataflow_monitor() test
+
+* SPEC: If the DR reboots (e.g., its GenID changes), then
+  the neighbor that should unicast to it the Bootstrap message should
+  be the neighbor that _WOULD_ had become the DR if the real DR
+  was not there.
+
+* IMPL: when do we delete (S,G,rpt) entry??
+
+* SPEC:
+  Change from:
+
+ if( iif == RPF_interface(S) AND UpstreamJPState(S,G) == Joined ) {
+
+ to:
+
+ if( iif == RPF_interface(S)
+     AND ((UpstreamJPState(S,G) == Joined )
+          OR (DirectlyConnected(S) == TRUE )) {
+
+* SPEC: 
+  Change from:
+      # Note: register state transition may happen as a result
+      # of restarting KeepaliveTimer, and must be dealt with here.
+
+  to:
+
+      # Note: register state transition or UpstreamJPState(S,G)
+      # transition may happen as a result
+      # of restarting KeepaliveTimer, and must be dealt with here.
+
+* SPEC: Change the packet_arrives_on_rp_tunnel() processing from:
+
+    if( I_am_RP( G ) && outer.dst == RP(G) ) {
+        restart KeepaliveTimer(S,G)
+        if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
+            send RegisterStop(S,G) to outer.src
+        } else {
+
+  to
+
+    if( I_am_RP( G ) && outer.dst == RP(G) ) {
+        if (SwitchToSptDesired(S,G))
+            restart KeepaliveTimer(S,G)
+        if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
+            restart KeepaliveTimer(S,G)
+            send RegisterStop(S,G) to outer.src
+        } else {
+
+  
+* IMPL: make sure that the following is implemented:
+Additionally a router sets SPTbit(S,G) to TRUE when it receives an
+Assert(S,G) on RPF_interface(S).
+
+* SPEC + IMPL:
+"Thus, at the RP, KeepaliveTimer(S,G) should be restarted to ( 3 *
+Register_Suppression_Time + Register_Probe_Time )."
+
+  At the RP, do we always restart with the above value, or only
+  when we restart because of a PIM Register?
+
+* IMPL: Remove unnecessary recomputations like those after
+  set_i_am_assert_loser_state(vif_index); in
+  PimMre::assert_process_sg() :
+  (Note: this was fixed by removing the extra recompute_foo())
+
+    set_i_am_assert_loser_state(vif_index);
+    // XXX: JoinDesired(S,G) and PruneDesired(S,G,rpt) may have changed
+    // TODO: XXX: PAVPAVPAV: make sure that performing sequentially
+    // the actions for each recomputation is OK.
+    recompute_is_join_desired_sg();
+    if (sg_rpt_entry() != NULL)
+        sg_rpt_entry()->recompute_is_prune_desired_sg_rpt();
+    return (XORP_OK);
+
+   Search for recompute_is_join_desired_sg() to find similar cases
+
+* IMPL: If there is a number of WRONGVIF signals back-to-back,
+  and the first one completes the SPT switch, the rest of the signals
+  will be redundant. However, their processing inside PimMrt::receive_data()
+  would still trigger PimMfc::add_mfc_to_kernel() and friends.
+  Hence, probably things should be optimized such that
+  add_mfc_to_kernel() would be called only if something about the PimMfc
+  has changed.
+
+* SPEC & IMPL: Look into the PimVif::pim_register_recv(), and in particular
+  SPEC::packet_arrives_on_rp_tunnel()
+  It seems that "restart KeepaliveTimer" is probably not needed. If true,
+  then remove all PimMfc handling from pim_register_recv()
+
+* IMPL: Coredump bug:
+Program received signal SIGSEGV, Segmentation fault.
+0x80661df in pim_mre_join_timer_timeout (data_pointer=0x84a5000)
+    at pim_mre_join_prune.cc:1835
+1835                                  new_group_bool);
+(gdb) l
+1830            pim_nbr->jp_entry_add(pim_mre->source_addr(), pim_mre->group_add
+r(),
+1831                                  IPvX::addr_bitlen(pim_mre->family()),
+1832                                  MRT_ENTRY_SG,
+1833                                  ACTION_JOIN,
+1834                                  pim_nbr->pim_vif().join_prune_holdtime().g
+et(),
+1835                                  new_group_bool);
+
+* SPEC (Bootstrap): Should the triggered Bootstrap message be sent immediately,
+  or waiting for a while after the first random Hello message is OK?
+  If the latter, then sending immediately Join or Assert messages may not
+  make much sense.
+  Note: currently, in the implementation if a Join/Prune/Assert/Bootstrap
+  needs to be sent to a neighbor, a Hello message is sent first. The
+  sending of the Hello message itself triggers the sending of the unicast
+  Bootstrap messages.
+
+* SPEC (Bootstrap): Never send a Bootstrap message back to its BSR
+
+* TESTSUITE: Add "LAN Prune Delay" test.
+
+* SPEC+IMPL:
+  If our Hello holdtime is 0xffff, then do we still send periodically the
+  Hello messages according to that value, or blocking those messages
+  is outside PIM??
+
+* SPEC: if the Hello holdtime or period is changed:
+    // Send immediately a Hello message, and schedule the next one
+    // at random in the interval [0, hello_period)
+  If any other Hello option is changed, send immediately a Hello message,
+  but don't reschedule when to send the next one.
+ 
+* KERNEL+SPEC: Add Mark's suggestion re. PIM version field check:
+"My guess is that the reason for changing the version field is that the
+protocol is not backward-compatible.  I would expect that any version
+increase would be signalled in Hello packets, and newer versions
+requried to fall back to v2, or refuse to communicate with v2, as they
+choose.  But I think a v2-only implementation should drop anything
+other than a Hello with version greater than 2, and log a warning."
+
+* IMPL: If error processing a protocol packet, print a WARNING instead
+  of ERROR.
+  (applies for mld6igmp and mfea as well)
+
+* SPEC+IMPL: what to do if message with unrecognized Type or Version is
+received?
+
+* IMPL: Don't send Join/Prune (maybe (S,G) J/P?) from the RP toward the DR,
+  when the RP hasn't initiated the SPT switch:
+[ 2002/08/16 16:24:47 TRACE test_pim PIM ] TX PIM_JOIN_PRUNE from 10.3.0.1 to 224.0.0.13
+
+* IMPL: Get rid of this warning at the RP
+[ 2002/08/16 13:03:42 WARNING test_pim PIM ] JoinDesired(S,G) = true: upstream neighbor for source 10.4.0.2 and group 224.0.1.20: not found
+
+* IMP: When processing PimMfc actions, and need to delete the PimMfc,
+  put it in a list of entries to remove, and then the removing task
+  will take care of it.
+
+* IMPL: When deleting a PimMre entry, make sure that the pointers in the
+  more specific entries (e.g., _rp_entry and _wc_entry and _sg_sg_rpt_entry)
+  are reset to NULL.
+
+* IMPL: not all ConfigParam in PimVif and PimNode have XRL configuration
+  interface. Is it OK?
+
+* SPEC: When specifying Keepalive timer values in the RP, use
+  the RP_Keepalive_Period
+
+* IMPL: parameterize following (per PimNode):
+  PIM_KEEPALIVE_PERIOD_DEFAULT
+  PIM_RP_KEEPALIVE_PERIOD_DEFAULT
+  PIM_REGISTER_SUPPRESSION_TIME_DEFAULT
+  PIM_REGISTER_PROBE_TIME_DEFAULT
+  (and all PIM_CAND_RP_ADV and PIM_BOOTSTRAP related stuff)
+
+* IMPL: Do we want the randomization of Register_Suppression_Time
+  to use a #define-d 0.5 or hard-coding here is acceptable?
+
+* IMPL: use PIM_JOIN_PRUNE_OIF_HOLDTIME_FOREVER
+
+* IMPL: rename lan_delay to lan_delay_msec
+        rename override_interval to override_interval_msec
+
+* IMPL: check that the Join/prune period should not be larger than 64k/3.5,
+  otherwise the holdtime will overflow.
+
+* SPEC: Add the (! i_am_rp()) check to CouldRegister(S,G)
+
+* IMPL: make sure that pim_nbr_me.tracking_support is set to true.
+
+* IMPL: fix following error due to fact that temp. sometimes we don't install
+  any dataflow monitoring in the MFEA:
+[ 2002/08/04 16:37:35  ERROR test_pim:15545 PIM +775 xrl_pim_node.cc xrl_result_
+delete_dataflow_monitor ] Failure delete dataflow monitor with the MFEA: Cannot 
+delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
+
+* IMPL: Juniper configuration re. Cand-RP configures the RP holdtime.
+  However, it makes more sense to configure the C-RP-Adv-Period instead,
+  while the holdtime is 2.5*C-RP-Adv-Period.
+
+* IMPL: When setting the hello_period on PimVif, shall we immediately
+  send-out a new Pim Hello message with the new Hello Holdtime?
+
+* IMPL: Add a CLI command to show config information per PimVif (e.g.
+  hello_period, etc.)
+
+* IMPL: When setting a new protocol version on an interface, or on the node,
+  do we restart the vif and/or node or do we let it run without
+  interruption?
+
+* IMPL: Move all reset_foo() re. PimVif comfiguration from xrl_pim_node.hh
+  to pim_vif.hh  (??)
+
+* SPEC: "DR priority" or "DR election priority" name consistency.
+  NOTE: Search for "priority" because there is a variation of the above
+  naming.
+
+* IMPL: After the spec fixes the naming "DR priority" / "DR election priority",
+  then fix the implementation naming "dr_priority", and
+  PIM_HELLO_DR_ELECTION_PRIORITY_DEFAULT
+
+* IMPL: If an interface changes IP address, or subnet address,
+  then do the right thing. Either:
+   * either call add_task_my_ip_address() or
+     add_task_my_ip_subnet_address()
+   * Stop the vif, reconfigure its address, then start it.
+
+* IMPL: Implement gracefully start for PimVif
+
+* IMPL: Implement gracefully start and stop for PimBsr
+
+* IMPL: When deleting some BSR configuration, don't send-out
+  Bootstrap or Cand-RP messages with holdtime=0 for all configurations
+
+* IMPL: When stopping a PimVif, send-out Bootstrap and Cand-RP messages
+  with holdtime=0 for all configurations that use the address of that PimVif.
+
+* IMPL: in all comments should rename "function" to "method".
+  This applies also for CLI, CLI2, MFEA, MLD6IGMP, LIBPROTO
+
+* IMPL and SPEC:
+  When computing JoinDesired (is_join_desired_), should we return
+  false if the iif is DOWN?
+
+* IMPL: if we stop PimRegister, should pim_register_vif_index() then return
+  VIF_INDEX_INVALID ??
+
+* IMPL: remove the following input state ??
+        INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED,           // 3
+        INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED,         // 5
+        INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED,            // 6
+
+
+* SPEC: Edit for "Unicast Upstream Neighbor Address"
+  "RPF lookup." -> "MRIB lookup." ??
+ 
+* SPEC: Update cross-references between Bootstrap and PIM-SM spec.
+
+* SPEC+IMPL: If an interface goes down:
+  - if IIF, then thread it as the new IIF = INFINITY, and then the protocol
+    machinery will take care of sending Prune, Asserts, etc.
+  - if OIF, then send Hello with Holdtime of 0 (as the protocol spec says),
+    and clean-up internal state (e.g, olist joins, etc).
+  - If the interface has the IP address of the Cand-BSR and/or the Cand-RP
+    (e.g., if we are not using a loopback interface with a global IP address
+     as the Cand-BSR or Cand-RP address).
+    - Send Bootstrap message and/or Cand-RP message with the new IP address
+    - Send Bootstrap message and/or Cand-RP message with the old IP address
+      and Holdtime = 0.
+    NOTE: If the interface address has changed, it may not be possible
+    to send-out a Bootstrap and/or Cand-RP message with the old address,
+    if the OS does not allow us (e.g, if it doesn't allow IP address spoofing).
+
+* SPEC: If the IP address of an interface has been changed, a Hello
+  message with Holdtime=0 and the old IP address will be sent-out.
+  However, what about scheduling to send quickly a Hello message with the
+  new IP address?
+
+* SPEC: PIM-SM spec Section 4.3.1 says that if no Hello message has been
+  sent yet on an interface, but we must send Join/Prune or Assert message,
+  then a Hello message MUST immediately be sent first without waiting
+  for the Hello timer to expire.
+  Then, what about other LAN-only PIM messages like Bootstrap messages?
+
+* IMPL: if (*,G) PimMre is deleted, make sure that corresponding
+  (S,G) and (S,G,rpt) PimMre entries are assigned properly to the
+  corresponding lists inside PimRp and PimNbr.
+
+* IMPL: when we start/stop/enable/disable an unit, is it OK or ERROR
+  to perform the same action twice once after another?
+
+* SPEC: Bootstrap mechanism:
+  All Value names must be a single word. E.g:
+  BS Timeout -> BS_Timeout
+
+* SPEC: In the default value section at the end of the spec, sometimes
+  the unit is "sec", other time is "secs" or "seconds".
+
+* SPEC: Add descrpiption of the RP behavior when the Border bit of
+  PIM Registers is set (see the RFC spec for that).
+
+* IMPL: Rename '*delete*' and '*remove*' methods:
+  Use '*remove*' when an element is removed from a container, but the
+  element itself is not deleted/destroyed.
+  Use '*delete*' when an element is both removed from a container and
+  then deleted/destroyed.
+
+* Delete PimMfc and PimMre from the corresponding PimMrt tables as appropriate.
+
+* SPEC: Change  KeepAliveTimer(S,G); to  KeepaliveTimer(S,G);
+
+* IMPL: If I am the RP for PimMre, do we want to explicity test for that and
+  set/return the PimNbr and the Mrib to NULL?
+  E.g., in PimMre::compute_mrib_next_hop_rp(),
+  PimMre::compute_rpfp_nbr_wc()
+  Similar for S, if a directly-connected S, or I am the S.
+
+* SPEC: Rename Could-Register to CouldRegister (for consistency with
+  rest of the text).
+
+* IMPL: take care of recomputing PimMfc::olist_disable_wrongvif()
+
+* PIMKERN: Add to ip_mroute.h (for FreeBSD, NetBSD, OpenBSD)
+  (for consistency with IPv6 Kame implementation, and with Linux):
+#define MRT_PIM      107     /* enable PIM processing */
+  Note that the particular value is same as MRT_ASSERT.
+
+* IMPL: allow PIM configuration such that a vif is created per IP address,
+  even though they may have same vif name (??).
+
+* IMPL: Add XRLs for setting each of the config. parameters such as
+  misc. timer values, priorities, etc, so the default values don't
+  have to be always explicitly set by outside.
+
+* IMPL: Remove OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG ??
+
+* SPEC: Do we allow SPT switch if only (*,*,RP) entry, but not (*,G) entry?
+  See CheckSwitchToSpt(S,G)
+
+* IMPL: When a packet is received in Section 4.2 (Data Packet Forwarding
+  Rules), why in one case the action is
+  "set KeepaliveTimer(S,G) to Keepalive_Period"
+  but in another it is just:
+  "restart KeepaliveTimer(S,G)"
+  Aren't both actions same?
+
+* IMPL: pim_exclude_sg() needs to be created/applied to (S,G) entry.
+
+* IMPL: make sure that the SPTbit is set for (S,G) as needed, and is
+  tested appropriately (always using the (S,G) entry if such exists).
+
+* IMPL: If (S,G) Assert message received, create (S,G) entry appropriately.
+  We need that (S,G) entry to keep track of the SPTbit.
+  Also, make sure that such entry is removed appopriately if the
+  Assert state expires.
+
+* IMPL: find a solution for the MFEA_UNIX_KERNEL_MESSAGE_* values
+  so inside pim_node.cc we don't need to include
+  "mfea/mfea_unix_kernel_messages.hh"
+
+* IMPL: fix the following error:
+[ 2002/06/25 11:51:03 WARNING test_pim PIM ] Cannot timeout BSR zone 224.0.0.0/4 (non-scoped): no such configured zone
+
+* IMPL: make sure that the followign methods are called as appropriate:
+  PimMrt:add_task_pim_nbr_changed()
+
+* IMPL: when calling delete_pim_nbr(), make sure that the PimVif
+  doesn't disappear and become bogus at some time later when the task
+  has been processed.
+
+* IMPL: make sure that the following function is working fine:
+  mifset_timer_timeout(void *data_pointer)
+
+* IMPL: Call PimMrt::add_task_is_switch_to_spt_desired_sg() when needed.
+  Do the same for:
+  add_task_my_ip_address(), add_task_my_ip_subnet_address()
+  
+* IMPL: Add "Mrib *mrib" to PimRp, and use that one inside
+  PimMre::compute_mrib_rp() instead of lookup the MRIB table
+  per PimMre entry.
+
+* IMPL: need to optimize set_pim_rp() for speed such that
+  it will not lookup for the same RP to set_rp_entry().
+
+* IMPL: All error messages when responding to an XRL must be returned
+  back as a reason for failure.
+
+* IMPL: add a flag to BsrZone indicating whether I am a Cand-RP for
+  that zone, so in the beginning of PimVif::pim_cand_rp_adv_send()
+  we can quickly return for zones I am not a Cand-RP.
+
+* IMPL: Add to BsrRp a flag indicating whether the RP address is me or not.
+  This will save the potentially costly pim_node().is_my_addr()
+  per RP address.
+
+* IMPL: Use the following default values as appropriate:
+	    PIM_CAND_RP_ADV_RP_PRIORITY_DEFAULT,
+	    PIM_CAND_RP_ADV_RP_HOLDTIME_DEFAULT,
+
+* IMPL: When a MFEA client receives set_all_vifs_done(), should it
+  start all vifs if the client node was UP already, or the vifs
+  must be started explicitly by an XRL?
+
+* IMPL: Create a list of PimMre entries for each PimNbr that is the RPF/MRIB
+  next-hop neighbor, and take the appropriate actions when that PimNbr
+  goes down.
+
+* IMPL: Rename all vifs_start_all() and friends to start_all_vifs() for PimNode
+  and other nodes.
+
+* IMPL: Instead of having one timer per task, have only one timer for
+  all tasks, and add a new class like TaskHeader to manage all tasks.
+  Thus, even if there is a large number of tasks scheduled one after another,
+  the CPU won't be "blocked" processing all those tasks without
+  giving-up control.
+
+* SPEC: explicity specify not to route on link-local multicast groups
+  and/or add a pointer to the document that says that.
+
+* IMPL: take care of handling local_receiver_exclude() for (S,G):
+  "local_receiver_exclude(S,G,I)" is true if
+   "local_receiver_include(*,G,I)" is true but none of the local members
+   desire to receive traffic from S.
+
+* IMPL: Unite INPUT_STATE_MRIB_RP_CHANGED and INPUT_STATE_MRIB_S_CHANGED ??
+
+* IMPL: make sure that add_pim_mre() and delete_pim_mre() are called
+  as appropriate.
+
+* IMPL: why create_flags to pim_mre_find() is not 0 for (*,*,RP) Prune?
+  (See PimJpHeader::mrt_commit())
+  Similar for other J/P messages that have no impact if no PimMre state
+  existed.
+
+* IMPL: when updating an (S,G,rpt) entry with a new RP or MRIB to the RP,
+  (re)use the (*,G) information instead of computing the new info
+  for each (S,G,rpt) entry for that (*,G) entry.
+
+* IMPL: scheduling a number of tasks at the same time
+  may result in CPU starvation if the number of tasks is too large,
+  because all of the tasks would have to be processed once before
+  giving-up the CPU.
+
+* IMPL: PAVPAVPAV: get rid of the INPUT_STATE_RPFP_*_CHANGED
+  input changes.
+
+* IMPL: PAVPAVPAV: CHeck whether for all PimMreTask operations
+  that require vif_index, we can compute the required
+  argument(s) in advance.
+
+* SPEC: Rename "null Register" to "Null Register" ??
+
+* IMPL: when removing a PimNbr, make sure it is not in use anymore
+  by any PimMre or other entry.
+
+* IMPL: Remove the following input actions in PimMreTrackState, because
+  they are not used?
+  INPUT_STATE_RECEIVE_PRUNE_RP
+  INPUT_STATE_RECEIVE_PRUNE_SG_RPT
+
+* SPEC: When the RP changes, then it could be that
+  both events occur for the upstream (*,G) state machine:
+  "JoinDesired(*,G) -> False"
+  and MRIB.next_hop(RP(G)) changed.
+  In that case, does it matter in what order the actions are performed?
+  
+* IMPL: make sure that PimMre::recompute_mrib_next_hop_s_changed() is used.
+
+* SPEC: remove the extra ">" in front of "From" in the ASCII version
+  of the spec.
+
+* IMPL: Unite in PimMreTrackState MRIB_NEXT_HOP_RP with MRIB_NEXT_HOP_RP_G
+
+* SPEC: fix the definition for "acceptable metric" for (*,G) to
+  be rpt_assert_metric(*,G,I) instead of my_assert_metric(S,G,I)
+
+* Ckech email message sent to snap-users@kame.net about IPv6 related
+  bug in pim6sd from  Alexandre Fenyo <fenyo@enst.fr> :
+   "(KAME-snap 6432) Bug in the bootstrap protocol..."
+  and apply the fix to the IPv6 code.
+  Also, check earlier email from the kame list from pekkas@netcore.fi
+Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
+        * kame/kame/pim6sd/config.c,vif.[ch],routesock.c: fixed RPF
+        algorithm bugs for P2P connected routes and static interface
+        routes (reported from pekkas@netcore.fi)
+
+
+* IMPL: track state dependency for setting MFC in the kernel:
+  "On receipt on a data from S to G on interface iif:"
+bool
+PimMre::recompute_inherited_olist_sg()
+{
+    // TODO: XXX: PAVPAVPAV: incomplete! CHECK THE SPEC for other dependencies:
+    // - "On receipt on a data from S to G on interface iif:"
+    // - packet_arrives_on_rp_tunnel( pkt )
+    // - The Packet forwarding rules simplification for PIM-SSM-only router
+    
+    return (recompute_is_join_desired_sg());
+}
+
+* IMPL: Do we want the following input state for tracking dependency?
+  input_state_rpfp_nbr_wc_changed(actions_t& actions)
+  It seems that this should be "track_state_*" instead.
+  Similar for the other input_state_rpfp_nbr_*
+
+* SPEC: Why there is no entry for RPF'(S,G,rpt) changed for the
+  Upstream (S,G,rpt) state machine?
+
+* SPEC: Do we need "RPF_interface(S) becomes I" entry for the
+  (S,G) Assert state machine?
+  Similar fot the (*,G) Assert state machine.
+
+* IMPL: Check that the following states for (S,G,rpt) are
+  set appropriately: Pruned(S,G,rpt), NotPruned(S,G,rpt), RPTNotJoined(G)
+  In particular, make sure that (*,G) or (*,*,RP(G)) Joined state is
+  the right one before attempting to set the (S,G,rpt) state.
+
+* IMPL: OUTPUT_STATE_ASSERT_RECEIVE_JOIN_RP is not really used, because
+  the (*,*,RP) Join action is exactly same as the (*,G) Join action.
+  Therefore, maybe delete it?
+
+* SPEC+IMPL: if an Assert is received for (S,G) or (*,G) we have
+  state for, then just silently ignore it?
+  However, make sure that an (S,G) is created if it is
+  an (S,G) assert and there is (S,G,rpt) PimMre entry
+
+* SPEC: All security references (e.g., the IPsec reference in Section 4.6.1
+  regarding (S,G) Assert Message State Machine) should be
+  moved to the security section.
+
+* SPEC: All AssertWinner related comparison such as
+  "AssertWinner(*,G,I) == me"
+  should replace "me" with "my_ip_address(I)".
+
+* IMPL: All AssertWinner related comparison such as
+  "AssertWinner(*,G,I) == me"
+  should replace "me" with "my_ip_address(I)", and
+  should use as appropriate to "track_dependency"
+  PimMre::with track_dependency_my_ip_address()
+
+* IMPL: Get rid of the following method:
+PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
+
+* IMPL: Do we want to add to track_dependency the following macro
+  in "4.5.8.  (S,G,rpt) Periodic Messages" :
+
+  "include a Prune(S,G,rpt) in the compound Join/Prune message:"
+  if( SPTbit(S,G) == TRUE ) {
+      # Note: If receiving (S,G) on the SPT, we only prune off the
+      # shared tree if the rpf neighbors differ.
+    ...
+
+
+* IMPL: implement track_dependency for:
+  packet_arrives_on_rp_tunnel( pkt )
+
+* SPEC: change
+    "# note that this should not happen if the lower layer is working"
+  to
+    "# note that this should not happen if the lower layer is working properly"
+
+* SPEC: Change everywhere Could-Register to CouldRegister(S,G)
+
+* IMPL: Implement the following from section 4.2.2 re. Update_SPTbit(S,G,iif)
+   "Additionally a router sets SPTbit(S,G) to TRUE when it receives an
+   Assert(S,G) on RPF_interface(S)."
+
+* Add method PimMre::recompute_update_sptbit_sg() or sth. like that
+  and call it when appropriate. Also, add similar methods for
+  other macros recomputation.
+
+* IMPL: Make sure that when implementing "Data Packet Forwarding Rules",
+  the implementation of the
+  "On receipt on (of?) a data from S to G on interface iif:"
+   considers the track_dependency_*() as well.
+
+* IMPL: rename PimMre::assert_winner_state() and assert_loser_state()
+  to i_am_assert_winner_state() and i_am_assert_loser_state() ??
+
+* SPEC: Update_SPTbit() definition:
+    // TODO: XXX: PAVPAVPAV: SPEC: what about if no (S,G,rpt) entry?? 
+
+* SPEC: what about sending Assert based on an (S,G,rpt) or
+  (S,G) that is pending SPT switch?
+
+* IMPL:  // TODO: XXX: PAVPAVPAV: recompute_assert_receiver_join_wc()
+      // should be called on all (*,G) entries for this (*,*,RP) entry!!
+
+* IMPL: PimMre::recompute_check_switch_to_spt_sg()
+  and is_switch_to_spt_desired_sg()
+  and recompute_is_switch_to_spt_desired_sg() do not need to
+  be PimMre methods, because to check whether we need to switch
+  to the SPT we may not have a (S,G) PimMre.
+
+* IMPL: Do we want to create methods that take care of (S,G,rpt) entries
+  when both the MRIB(S) and MRIB(RP) change at the same time?
+
+* Change the RpTable apply/commit to be similar to the PimMribTable:
+  when add RPs, put them on an separate list, then when call
+  commit(), the newly added RPs are really put to the main RP table.
+  Similarly, the apply_rp_changes() would only take care of
+  applying changes to the PimMre entries because of the RP changes.
+
+* When using an iterator for all (S,G) or (S,G,rpt) entries for a group,
+  make sure that no entry is added/deleted in the middle, and/or that
+  even if added/deleted, the loop would be OK.
+
+* Make the set of neighbors (per PimVif) a <map> instead of <list>.
+  Needed if the number of neighbors become quite large, so the
+  neighbor lookup will become much faster.
+
+* IMPLEMENTATION: make sure that Override_Interval(I) and
+  J/P_Override_Iterval(I) are not mixed up!!
+
+* SPEC: The unicast routing may show one MRIB address, but the upstream
+  router may send the Hello messages using only one of the local IP addresses.
+  Hence, which IP address to use in the Hello messages?
+  IMPLEMENTATION: when receiving a PIM message, accept it not only if it
+  is destined to the primary IP address of that interface, but to
+  any address.
+
+* IMPLEMENT:
+  When an interface goes down or changes IP address, a Hello message with
+  a zero Hold Time should be sent immediately (with the old IP address if
+  the IP address changed).  This will cause PIM neighbors to remove this
+  neighbor (or its old IP address) immediately.
+  ===
+  IMPLEMENTATION SUGGESTION:
+  Whenever the IP address changes, always take the interface DOWN, and then UP
+  Then, just make sure that taking the interface DOWN sends the Hello
+  message with the holdtime of 0. However, taking interface DOWN 
+  may send Prune messages, so need to be careful here...
+
+
+* If a (*,G) or (*,*,RP) PimMre entry is deleted, make sure that
+  all pointers to it from corresponding (S,G), (S,G,rpt), (*,G) entries
+  are deleted (the last one only for (*,*,RP)
+
+* In PimVif::start(), add a timer for add_protocol_mld6igmp(), so if
+  the PIM vif registration with MLD6IGMP fails, try again after some
+  period of time. Similar repeated trying should be done for
+  other registrations as well (e.g. with MFEA). Similar TODO applies
+  for other modules (e.g., MLD6IGMP).
+
+* Make the initiation add/delete_protocol from PIM to MLD6IGMP part of PimNode,
+  and then implement the particular interface inside xrl_pim_node.cc.
+  The add/delete_protocol would be called when pim_vif.start() or stop().
+
+* Check if multicast add_vif on Linux and Solaris allow
+  VIF_REGISTER to have any address (e.g., 127.0.0.2). If allowed,
+  then modify the MFEA to assign that address itself, and remove
+  it from the XRL interface.
+
+* Make sure that all flags setting for PimMre are done through access methods
+  instead of bitwise OR.
+
+* When receiving PIM Bootstrap message and check them whether
+  they can be added, if all the info was received already,
+  then just silently drop that message instead of printing a warning.
+
+* Check whether KAME's pim6sd RP hash computation that uses CRC
+  in a complicated way is same result as the XOR that is specified
+  in the spec.
+
+* Print warning messages when ignoring a control message.
+
+* Test Bootstrap fragmentation sending and receiving
+
+* PIM-SM spec:
+  If the Elected BSR is a neighbor, and that neighbor expired,
+  do we want to apply the optimization to expire immediately that BSR?
+
+* PIM-SM spec:
+  On startup, am I the DR by default, or wait some period of time
+  before self-promote as the DR?
+
+* In the PIM-SM spec: Section 4.2.1 "Last hop switchover to the SPT":
+  Change "Last hop" to "Last-hop"?
+
+* Can an intermediate router that forwards a Bootstrap message fragment it
+  to fit the max. size on the outgoing link?
+
+* If there is a scope boundary for some group range, it must
+  be a scope boundary (in case of IPv4) for 239.255.0.0/16
+  (the IPv4 Local Scope).
+
+* Use everywhere uint16_t for vif index type instead of size_t (??)
+
+* Make sure that the 'updated_entry' BSR-related flag is used,
+  otherwise remove it.
+
+* There is some inconsistency between "show igmp interface"
+  and "show pim interfaces" commands: the command name,
+  as well as the command output.
+
+* Remove maxvifs() (??)
+
+* Add functions to start/stop enable/disable a single interface (?)
+  Same applies for MLD6IGMP, MfeaNode, etc...
+
+* Implement RFC 1256 (Router Solicitation)
+
+* Add the xlog init stuff
+
+* Cleanup PimVif to use the libxorp/vif.hh
+
+* When the BSR collects all cand. RPs for a prefix, if their number is
+  larger than 255, distribute only the best 255 prefixes.
+
+* All debug messages "from %s:" should be "from %s to %s:"
+
+* Simplify the Bootstrap message processing:
+  - first parse to determine the zone ID, and then process the rest
+
+* Bug-fix when deleting lists
+
+* Make PimVif and Mld6igmpVif to use Vif as a base class
+
+* TODO: take care of the SZ Timer in the BSR spec: unclear when set,
+  what means "always running", etc. See page 8 and 9 of the spec.
+
+* SPEC: should PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT be 1500,
+  or 10*BS Timeout??
+
+* SPEC: RP Set or RP-Set??
+
+* PIM MIB:
+  I just checked RFC 2934, and indeed it seems that PimRPSetEntry
+does not include the RP priority, which IMHO should be there.
+I don't know whether the authors have intentionally left it out for
+some reasons, or it was an unintentional miss. If it was the
+latter, probably it should be added when it comes for a revision of
+this experimental RFC.
+
+* What if the "Hash Mask len" is different for different prefixes
+  in the Bootstrap message? Any issues if different??
+
+* Settle the logistics for start()/stop()/enable()/disable() and
+  syncronize the implementation for all modules to use it.
+
+* PimVif::pim_data_recv() : implement it!!
+
+* TODO (kernel and PIM-SM impl):
+> One limitation with using this option is, it won't allow fragmentation
+> of unicast packets also (man page says this). This we found , during RP
+> sending a huge CRP-ADV packets to BSR. i.e CRP configured with huge 
+> RP-SET .
+A question (I am not sure about the answer without checking it).
+If we use IP_HDR_INCLUDE, and the packet size is more than the MTU,
+the kernel won't fragment it using IP-fragmentation?
+If this is true, in that case it would be better if we don't use
+IP_HDR_INCLUDE, but let the kernel prepare the IP header. I will put
+this on my TODO list for both the newer PIM-SM implementation, and
+for the kernel patches as well.
+
+
+* The spec doesn't say what to do when the Keepalive Timer expires.
+  Delete the (S,G) state, it seems.
+
+* Implement the SPT policy switching in PimMre::switch_to_spt_desired_sg().
+
+* Page 44 and 46 inconsistency re. the actions when JoinDesired(S,G)->false
+  starting from state Joined()
+
+* PimVif::pim_mrt() and PimMre::pim_mrt() should be consistent about the
+  return result: either a pointer or a reference.
+
+* Call when appropriate
+  PimMre::rp_register_sg_changed()
+
+* PimMre::rp_addr() should return a reference to an IPvX address, not a
+  pointer to an IPvX address. If the RP address is not known, return
+  a reference to a dummy IPvX zero address.
+
+* Implement adding PIM Register tunnel
+
+* If PIM vif interface added/changed/deleted,
+  recompute is_directly_connected_s();
+
+* "RX %s from %s" should always be "RX %s from %s to %s"
+
+* Standartize the "on vif ..." error messages format.
+
+* The very prefix of each log message should contain the node ID (e.g. its
+  IP address)
+
+* PimVif::pim_process() : check whether the destination unicast address
+  is my own address.
+
+* Go again through "Rational for Assert Rules" page 63
+
+* See assert macros on page 62 and 63 and rething the implementation whether
+  it is correct. Also, I still don't get the lost_assert(S,G,I) extra
+  check.
+
+* See Figure 11's TODO: "Receive assert from current winner"
+
+* Make sure set_assert_noinfo_state() is not called more than once
+  within same function (e.g. before goto a5);
+
+* Make sure that when Assert info is removed/added (e.g. moving to
+  NoInfo state), the J/P machinery state is updated appropriately.
+
+* AssertMetric::is_better(AssertMetric a) : replace with > and/or < operator
+
+* PimMre->rp_entry should return reference instead of pointer?
+  Or change all address return functions to return a pointer instead??
+
+* Some of the return values are useless (e.g. in pim_mrt.cc re. the
+  assert processing).
+
+* When "wrong iif" signal arrives, if it is not on one of
+  our oifs, and if we don't care about it,
+  disable the "wrong iif" signal from the kernel for that (S,G) state
+  (assuming the kernel supports that API).
+
+* When initializing PimMre, set all pointers to NULL!!!
+
+* When sending a J/P message toward a neighbor (e.g, an upstream), make
+  sure that nbr is non-NULL.
+
+* SPEC: If OverrideTimer expires, and RPF'(S,G,rpt) != RPF'(*,G)
+  it is unclear what exactly the spec suggests.
+
+* Clean-up the usage of is_sg(), is_spt() is_sg_rpt() 
+
+* Whenever processing PimMre entries, always make sure to check
+  whether to delete an entry if it is in NoInfo state.
+
+* When lookup (S,G) and (S,G,rpt) check whether we got the right one
+  because we can have only a single entry for S and G.
+
+* The randomized computation of t_suppressed and t_override should
+  be done by a single function
+
+* PimMre:;entry_try_remove() should be called from all set_foo_noinfo_state() 
+  functions
+
+* SPEC: upstream/downstream interface state names are inconistent.
+  It should be sth. like:
+		downstream: Join Prune TempPrune (present tense)
+		upstream: Joined NotJoined Pruned NotPruned (past tense)
+
+* When adding comments such as:
+  // Send Join(S,G,rpt) to RPF'(S,G,rpt)
+  always make sure that we specify "to", i.e., where the message is sent to.
+
+* In the state machines, check explicitly for each state.
+
+* PimMre: separate (name-wise) the per-interface state _joined and
+  per entry state: is_joined_state(). Similar for other states.
+
+* The set_foo(bool v) functions in pim_mrt.hh should not have
+  the "bool v" argument. If set_foo(false) is needed,
+  add functions reset_foo().
+
+* If no creation allowed in pim_mre_find(), the entry that it returns
+  may be the next one in the map.
+
+* When adding J/P commands in the outgoing J/P messages, make sure
+  that eventually we override whatever was commited before (if needed).
+
+* Make sure that when we use rpf_nbr_wc() and rpf_nbr_sg(), etc
+  for computing the upstream nbr for sending J/P messages, we take
+  into account the upstream Asserts.
+
+* If (*,*,RP) state changes, retrack dependent (*,G) and the rest.
+  Same applies for (*,G)
+
+* PimMre state removal: after something goes to NoInfo state, call a
+  generic function and check whether it is time to delete that state.
+
+* All constants defined in pim_proto.h should be used as configurable
+  variables inside the code.
+
+* SPEC: spellfix "goodbuy":
+ (see section 4.6.1). These are effectively goodbuy messages and
+
+* Use constency in naming re. classes inheritance: e.g. for PIM classes
+  that inherit other classes, always stick PIM or PIM_ in front of the
+  name, or something like this.
+
+* When it comes to Prune overriding on shared LANs, no need for
+  explicit checking whether the LAN is shared. If we noticed
+  somebody else's Prune, this implies the LAN is shared and we
+  need to override it. XXX: we need to override even if this was
+  a Prune from a router that has not sent Hello yet.
+
+* Replace FAMILY2PREFIXLEN(family) with something else for C++
+
+* Make sure that we don't overlook the PruneTmp(P') state by 
+  not keeping explicit track of it.
+  Especially check PimMre::prunes_sg_rpt()
+
+* Add the processing when we receive (S,G,rpt)Prune and we are in PP state.
+
+
+====================OLD TODO BEGIN================
+* Initialize/setup pim_vif::vif_index() and vif_name();
+
+* Rename PIMjp_source to PIMjp_source_list
+
+* Make the URT a class
+
+* If invalid address in J/P message, ignore the whole message
+
+* Whenever a Mrt state is processed, first make sure the timer values
+  of ctimers are accurate.
+
+* Accept 0.0.0.0 destination address packets (see bottom of page 25
+  section 4.4.1 in draft-new-03)
+
+* Take care of PimMre->_mre_prime;
+
+* All masklen to become uint8_t instead of uint32_t or better masklen_t
+
+* If I am not the target router for J/P message, take the appropriate
+  suppression actions.
+
+* All *address to become *addr
+
+* IMPLEMENT: Assert processing: S,G, from NoInfo state when S,G packet arrives
+ (pp 54, bottom)
+
+* Check the S/W/R flags in the Encoded-Source address
+
+* Take care of the using of LAN Prune Delay stuff in Section 4.6.3 (I-D v.03)
+
+* pim_mrt()->metric_preference() should have the RPT_BIT reset for (S,G)
+
+* Use _members.~list(); or _members.list().clear(); ??
+
+* sources_size() in pim_proto_join_prune.hh: take out of both classes?
+
+* SPEC: Section 4.9: clarify what "data portion" for PIM checksum
+  computation means. 
+
+* CONTINUE from pim_assert.c
+
+* When pim_vif_start() is called, send PIM_HELLO to all neighbors,
+  and take care of all other details.
+
+* Rename vif.c VIF_OK to VIF_UP (?)
+
+* Use macros IS_IPV4() and IS_IPV6()
+
+* Add pim_api.h
+
+* Rename all PIM-SM and PIM-DM to PIMSM and PIMDM (for consistency and
+  easy to search).
+
+* A better implementation of the protocol ASCII names.
+
+* Clean-up the MTYPE_* stuff used for X_MALLOC()
+
+* Clean-up the very first line of each file:
+/* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
+
+* Clean-up pim/pim_private.h
+
+* Use "return foo" instead of "return (foo)" ??
+
+* Rename pim_vif->version to pim_vif->pim_version and always
+  use the PIM_VERSION(pim_vif) macro.
+
+* Inside vifs, use only X_PROTO_PIM instead of PIMSM or PIMDM (??)
+
+* pim_vif.c needs fixing (it contains many PIM-DM definitions)
+
+* Do we need jp_header->graft_retransmit_timer ??
+
+* Make sure that PIM_JOIN_PRUNE_HOLDTIME_DEFAULT and
+  PIMDM_JOIN_PRUNE_HOLDTIME_DEFAULT (or SM) are OK.
+
+* Rename PIMDM_VIF_DR to PIM_VIF_DR
+PIMDM_VIF_OK to PIM_VIF_OK
+PIMDM_VIF_DISABLED to PIM_VIF_DISABLED
+
+* Fix the following code in pim_mrt.c
+	if (flip_flag) {
+	    TODO, XXX: this doesn't work!!
+	    pim_vif = pim_vifi2pim_vif(i);
+	    PIM_OIF_SETUP(family, pim_vif, pim_mrt);
+	}
+
+====================OLD TODO END================
+====================OLD pimdmd IMPL_NOTES BEGIN================
+DONE:
+
+ * Rate limit the asserts:
+   - add 'mif_set oifs_assert_rate_limit'
+     and 'mtimer_t *oifs_assert_rate_limit_timer'
+     to 'pimdm_mrt_t' that can be used to rate-limit the asserts:
+      if the rate-limit timer is running, and the rate-limit bit for oif
+      is set, then don't send Assert. If the rate-limit timer is
+      running, but the rate-limit bit is not set, send an Assert, and
+      set the rate-limit bit. If the rate-limit timer is not running,
+      send an Assert, set the rate-limit bit, and start the rate-limit
+      timer with default (minimum?) of 1 second.
+      After the rate-limit timer expires, clear all rate-limit bits.
+      XXX: the rate-limit is not exactly accurate (e.g. the min.
+      time interval between two asserts on the same oif may be less than
+      1 second, but this reduces significantly the number of timers we
+      need to run (and the consumed memory). But on average, the
+      number of asserts sent on an interface would be 1 assert/s.
+====================OLD pimdmd IMPL_NOTES END================
+====================OLD pimdmd NEXT_TIME BEGIN================
+* When assert winner on oif, schedule for prunning if no direct members
+  (XXX: 3 seconds waiting?)
+* If assert is observed on the iif interface, send a join toward the winner(?)
+====================OLD pimdmd NEXT_TIME END================
+====================OLD pimdmd TODO BEGIN================
+
+* Rename messages related functions as:
+  pimsm_recv(), pimsm_hello_recv(), pimsm_hello_process()...
+
+* Rename all messages related functions in a hierarchy manner.
+  E.g.: pimsm_hello_process() instead of pimsm_process_hello()
+
+* Each module should have foo_exit() function for gracefully exiting.
+
+* PIM-SM: limit number of groups created by a given source S
+* rate-limit incoming joins and leaves
+* rate-limit RP register messages at the RP
+* rate-limit incoming Session Announcements
+* rate-limit incoming Register Messages
+
+* Fix mrt_find_prefix_exact() used in pimdm_process_graft_ack()
+
+* Add to pimdm_nbr a field named 'pimdm_version', i.e. the PIM-DM
+  version that should be used toward that neighbor.
+
+* Rename URT to MRIB (Multicast Routing Information Base)
+
+* If the number of J/P sources in a J/P message is very large, use
+  IP fragmentation to create a larger message.
+
+* In PIMDM_OIF_SETUP(), the iif should not reset the same oif.
+  The forwarding engine itself should do that!
+
+* Simplify pimdm_vif.c to #define PIMDM_VIFS(family), and then
+  remove many of the 'switch(family)'
+
+* #ifdef the functions arguments bogus assignment
+  when don't use all of their arguments.
+
+* In pim_proto.h header replace RFC 2362 with the new I-D
+
+* Rethink what functions go to pimdm_vif_start(), pimdm_vif_stop(),
+  pimdm_vif_reset().
+  Also, do we need pimdm_vif_reset()??? 
+
+* SPEC: is it safe enough to assume that every Graft-ACK is
+  always exactly same as the Graft it acknowledges. I.e., is it allowed
+  to Graft-ACK the (S,G) entries one-by-one.
+
+* If an Assert received on a non-oif (i.e. in prune mode), do we really
+  want to just ignore it? After all, this interface may soon become an oif,
+  and eventually itself will trigger Assert. If we don't ignore the 
+  Assert received on a non-oif, then this interface will not unnecessarily
+  become an oif.
+
+* PIMDM_OIF_SETUP() should send the appropriate command to start/stop
+  mcast pkts forwarding.
+
+* Where to ignore my own messages: in pimdm_process() for all packets,
+  or case-by-case for each PIM packet type?
+
+* SPEC: if winning Assert received on oif, the asserted oif is pruned,
+  but the spec later says that a pruned oif timer is set to the received
+  PIM_PRUNE holdtime. Obviously, there is a PIM_PRUNE message
+  when we are prunning oif because of an Assert. The asserted/prune
+  oif timer is probably set to PIMDM_JOIN_PRUNE_HOLDTIME_DEFAULT
+  which is eventually set to PIM_DATA_TIMEOUT_DEFAULT. The spec is not
+  clear here.
+  
+* SPEC: Replace Assert_timer with Assert-Timer
+
+* SPEC: The PIM-DM [Assert-Timer] is default to 210, but
+  the PIM-SM [Assert-Timeout] is default to 180. Any reason for the
+  difference?
+
+* In pimdm_assert.c, pimdm_mrt_process_assert_data()
+     * XXX: It would be more CPU-efficient to compute this entry
+     * once by the calling function instead for each matching routing
+     * entry, and pass a pointer to this neighbor entry as a field
+     * in the 'assert_data' structure.
+     * However, this will introduce data integrity problem if the
+     * neighbor disappeares and its entry is immediately removed
+     * before this function gets control?
+     * Well, possible in a multi-thread environment, but, still,
+     * allowing such data integrity dependency doesn't seem right to me.
+     */
+
+* Clean-up/improve all FOO(family) macros (e.g. ALLPIMROUTERS_GROUP(family)),
+  that return the appropriate group or array, such that there is stronger
+  check against 'family'.
+
+* When the PIMDM_OIF_SETUP is called and the result is switch from/to
+  NULL/non-NULL oif set, take the appropriate action (schedule J/P message)
+
+* When oifs setup expires (e.g., asserted oifs), take the appropriate action:
+  (schedule J/P message, etc).
+
+* If the upsteam router/metric change, send an Assert message on each
+  asserted oif.
+
+* SPEC: (both PIM-SM and PIM-DM?): Asserts rate-limit of (approx) 1 Assert/s
+  on same oif has to be per routing entry, i.e., (S,G) or (*,G).
+
+* SPEC: if a pimdm_mrt entry expires, and it was an assert winner,
+  send Assert with max. priority, to 'cancel' the previous winner.
+
+* SPEC: The PIM message Prune holdtime should be longer than
+  PIM_JOIN_PRUNE_OIF_PRUNE_SCHEDULE, otherwise ignore the Prune(?).
+
+* SPEC: What to do if a PIM-DM Graft message contains Prune addresses?
+
+====================OLD pimdmd TODO END================

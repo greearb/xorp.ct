@@ -1,0 +1,294 @@
+Network Working Group                                      Ravi Chandra
+Internet Draft                                            Siara Systems
+Expiration Date: August 2000                            John G. Scudder
+                                                          cisco Systems
+                  Capabilities Negotiation with BGP-4
+
+                   draft-ietf-idr-bgp4-cap-neg-05.txt
+
+
+1. Status of this Memo
+
+   This document is an Internet-Draft and is in full conformance with
+   all provisions of Section 10 of RFC2026 except that the right to
+   produce derivative works is not granted.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as ``work in progress.''
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+
+
+2. Abstract
+
+   Currently BGP-4 [BGP-4] requires that when a BGP speaker receives an
+   OPEN message with one or more unrecognized Optional Parameters, the
+   speaker must terminate BGP peering. This complicates introduction of
+   new capabilities in BGP.
+
+   This document defines new Optional Parameter, called Capabilities,
+   that is expected to facilitate introduction of new capabilities in
+   BGP by providing graceful capability negotiation without requiring
+   that BGP peering be terminated.
+
+
+
+
+
+
+
+Chandra, Scudder                                                [Page 1]
+
+
+
+
+
+Internet Draft     draft-ietf-idr-bgp4-cap-neg-05.txt      February 2000
+
+
+3. Overview of Operations
+
+   When a BGP speaker that supports capabilities negotiation sends an
+   OPEN message to its BGP peer, the message may include an Optional
+   Parameter, called Capabilities. The parameter lists the capabilities
+   supported by the speaker.
+
+   A BGP speaker determines the capabilities supported by its peer by
+   examining the list of capabilities present in the Capabilities
+   Optional Parameter carried by the OPEN message that the speaker
+   receives from the peer.
+
+   A BGP speaker that supports a particular capability may use this
+   capability with its peer after the speaker determines (as described
+   above) that the peer supports this capability.
+
+   A BGP speaker determines that its peer doesn't support capabilities
+   negotiation, if in response to an OPEN message that carries the
+   Capabilities Optional Parameter, the speaker receives a NOTIFICATION
+   message with the Error Subcode set to Unsupported Optional Parameter.
+   In this case the speaker should attempt to re-establish a BGP
+   connection with the peer without sending to the peer the Capabilities
+   Optional Parameter.
+
+   If a BGP speaker that supports a certain capability determines that
+   its peer doesn't support this capability, the speaker may send a
+   NOTIFICATION message to the peer, and terminate peering. The Error
+   Subcode in the message is set to Unsupported Capability. The message
+   should contain the capability (capabilities) that causes the speaker
+   to send the message.  The decision to send the message and terminate
+   peering is local to the speaker.  Such peering should not be re-
+   established automatically.
+
+
+4. Capabilities Optional Parameter (Parameter Type 2):
+
+   This is an Optional Parameter that is used by a BGP speaker to convey
+   to its BGP peer the list of capabilities supported by the speaker.
+
+   The parameter contains one or more triples <Capability Code,
+   Capability Length, Capability Value>, where each triple is encoded as
+   shown below:
+
+
+
+
+      +------------------------------+
+      | Capability Code (1 octet)    |
+
+
+
+Chandra, Scudder                                                [Page 2]
+
+
+
+
+
+Internet Draft     draft-ietf-idr-bgp4-cap-neg-05.txt      February 2000
+
+
+      +------------------------------+
+      | Capability Length (1 octet)  |
+      +------------------------------+
+      | Capability Value (variable)  |
+      +------------------------------+
+
+
+
+   The use and meaning of these fields are as follows:
+
+      Capability Code:
+
+         Capability Code is a one octet field that unambiguously
+         identifies individual capabilities.
+
+      Capability Length:
+
+         Capability Length is a one octet field that contains the length
+         of the Capability Value field in octets.
+
+      Capability Value:
+
+         Capability Value is a variable length field that is interpreted
+         according to the value of the Capability Code field.
+
+
+   A particular capability, as identified by its Capability Code, may
+   occur more than once within the Optional Parameter.
+
+
+5. Extensions to Error Handling
+
+   This document defines new Error Subcode - Unsupported Capability.
+   The value of this Subcode is 7. The Data field in the NOTIFICATION
+   message lists the set of capabilities that cause the speaker to send
+   the message.  Each such capability is encoded the same way as it was
+   encoded in the received OPEN message.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chandra, Scudder                                                [Page 3]
+
+
+
+
+
+Internet Draft     draft-ietf-idr-bgp4-cap-neg-05.txt      February 2000
+
+
+6. IANA Considerations
+
+   As specified in this document, the Capability optional parameter
+   contains the Capability Code field. Capability Code value 0 is
+   reserved. Capability Code values 1 through 63 are to be assigned by
+   IANA using the "IETF Consensus" policy defined in RFC2434. Capability
+   Code values 64 through 127 are to be assigned by IANA, using the
+   "First  Come First Served" policy defined in RFC2434. Capability Code
+   values 128 through 255 are vendor-specific, and values in this range
+   are not to be assigned by IANA.
+
+
+7. Security Considerations
+
+   This extension to BGP does not change the underlying security issues
+   inherent in the existing BGP [Heffernan].
+
+
+8. Acknowledgements
+
+   The authors would like to thank members of the IDR Working Group for
+   their review and comments.
+
+
+9. References
+
+   [BGP-4]   Rekhter, Y., and T. Li, "A Border Gateway Protocol 4 (BGP-
+   4)", RFC 1771, March 1995.
+
+   [Heffernan]  Heffernan, A., "Protection of BGP Sessions via the TCP
+   MD5 Signature Option", RFC2385, August 1998.
+
+
+10. Author Information
+
+
+   Ravi Chandra
+   Siara Systems Incorporated
+   1195 Borregas Avenue
+   Sunnyvale, CA 94089
+   e-mail: rchandra@siara.com
+
+   John G. Scudder
+   Cisco Systems, Inc.
+   170 West Tasman Drive
+   San Jose, CA 95134
+   e-mail: jgs@cisco.com
+
+
+
+
+Chandra, Scudder                                                [Page 4]
+
+
+
+
+
+Internet Draft     draft-ietf-idr-bgp4-cap-neg-05.txt      February 2000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chandra, Scudder                                                [Page 5]
+
+

@@ -1,0 +1,277 @@
+[comment] ******************************************
+[comment] TEST 1
+[comment] ADD AND DELETE
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 2
+[comment] SIMPLE FLOW CONTROL - PEER 2 BUSY
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 2B
+[comment] SIMPLE FLOW CONTROL - PEER 2 BUSY
+[comment] SENDING FROM PEER 1
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 3
+[comment] INTERLEAVED FLOW CONTROL - BOTH PEERS BUSY
+[comment] SENDING FROM PEER 1
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 4
+[comment] INTERLEAVED FLOW CONTROL - BOTH PEERS BUSY
+[comment] SENDING FROM PEER 1
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 5
+[comment] INTERLEAVED FLOW CONTROL - THREE PEERS BUSY
+[comment] SENDING FROM PEER 1
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 1 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[separator]-------------------------------------
+[comment] SHUTDOWN AND CLEAN UP

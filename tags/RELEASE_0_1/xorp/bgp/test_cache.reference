@@ -1,0 +1,173 @@
+[comment] TEST 1
+[comment] ADD AND DELETE, UNCACHED
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] TEST 1a
+[comment] ADD AND DELETE WITH CACHING.
+[comment] ADD, CACHED
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] DELETE, CACHED
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] TEST 2
+[comment] REPLACE ROUTE, NOT CACHED
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+
+
+[separator]-------------------------------------
+[comment] TEST 2a
+[comment] REPLACE ROUTE, OLD ROUTE CACHEED
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] TEST 2b
+[comment] REPLACE ROUTE, NEW ROUTE TO BE CACHED
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] CLEANUP
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] TEST 2c
+[comment] REPLACE ROUTE, BOTH ROUTES CACHED
+[comment] ADD ROUTE TO CACHE
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[comment] REPLACE ROUTE
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] CLEANUP
+[comment] DELETE ROUTE FROM CACHE
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/5 ,AS/4 ]
+
+
+[separator]-------------------------------------
+[comment] TEST 3
+[comment] FLUSH_CACHE
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+
+
+[separator]-------------------------------------
+[comment] SHUTDOWN AND CLEAN UP

@@ -1,0 +1,135 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.11 2002/12/09 10:12:39 pavlin Exp $
+#
+
+#
+# Send configuration commands to a running PIM process.
+#
+
+. ../mfea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+
+MODULE_NAME="IGMP"
+HOSTNAME=`hostname`
+
+echo "Configuring $MODULE_NAME on $HOSTNAME..."
+
+###############################################################
+# USER CONFIGURATION BEGIN
+###############################################################
+
+#
+# Select the vifs to enable
+#
+case $HOSTNAME in
+	xorp1)
+	ENABLE_VIFS="dc1 dc4"
+	;;
+
+	xorp2)
+	ENABLE_VIFS="dc1 dc2"
+	;;
+
+	xorp3)
+	ENABLE_VIFS="dc0 dc2 dc3"
+	ENABLE_VIFS="dc0 dc2"
+	;;
+
+	xorp4)
+	ENABLE_VIFS="eth6 eth7"
+	;;
+
+	possum.icir.org)
+	ENABLE_VIFS="fxp0"
+	;;
+
+	oreo.icir.org)
+	ENABLE_VIFS="wi0"
+	;;
+	
+	*)
+		echo "Unknown host : $HOSTNAME"
+		exit 1
+	;;
+esac
+
+#
+# Comment-out to disable log trace
+#
+MFEA_ENABLE_LOG_TRACE=yes
+MLD6IGMP_ENABLE_LOG_TRACE=yes
+
+###############################################################
+# USER CONFIGURATION END
+###############################################################
+
+
+# Add the PIM 'register_vif' to the list of interfaces to enable
+MFEA_ENABLE_VIFS="$ENABLE_VIFS register_vif"
+MLD6IGMP_ENABLE_VIFS="$ENABLE_VIFS"
+
+#
+# Disable log trace
+#
+if [ "$MFEA_ENABLE_LOG_TRACE" != "yes" ] ; then
+	mfea_disable_log_trace
+fi
+if [ "$MLD6IGMP_ENABLE_LOG_TRACE" != "yes" ] ; then
+	mld6igmp_disable_log_trace
+fi
+
+#
+# Enable and start MFEA CLI
+#
+mfea_enable_cli
+mfea_start_cli
+
+#
+# Enable and start MFEA
+#
+mfea_enable_mfea
+mfea_start_mfea
+
+#
+# Enable and start MFEA vifs
+#
+for vif in $MFEA_ENABLE_VIFS; do
+	mfea_enable_vif $vif
+	mfea_start_vif $vif
+done
+
+
+#
+# Enable and start MLD6IGMP CLI
+#
+mld6igmp_enable_cli
+mld6igmp_start_cli
+
+#
+# Enable and start MLD6IGMP
+#
+mld6igmp_enable_mld6igmp
+mld6igmp_start_mld6igmp
+
+#
+# Wait to get the list of vifs
+#
+mld6igmp_is_vif_setup_completed
+
+#
+# Enable and start MLD6IGMP vifs
+#
+for vif in $MLD6IGMP_ENABLE_VIFS; do
+	mld6igmp_enable_vif $vif
+	mld6igmp_start_vif $vif
+done
+
+
+#
+# Done
+#
+echo "Configuration done."
+
+exit 0

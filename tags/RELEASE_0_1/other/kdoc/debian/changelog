@@ -1,0 +1,204 @@
+kdoc (2.0a53-1) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Fri, 23 Mar 2001 03:24:00 -0700
+
+kdoc (2.0a52-1) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Sat, 10 Mar 2001 01:05:00 -0700
+
+kdoc (2.0a49-1) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Tue, 20 Feb 2001 05:00:00 -0700
+
+kdoc (2.0a48-2) unstable; urgency=low
+ 
+  * More upstream updates to clarifiy perl requirements
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Mon, 19 Feb 2001 02:00:00 -0700
+
+kdoc (2.0a48-1) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Thu, 15 Feb 2001 02:00:00 -0700
+
+kdoc (2.0a47-1) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Fri, 09 Feb 2001 04:10:00 -0700
+
+kdoc (2.0a46-1) unstable; urgency=low
+ 
+  * New upstream version
+  * Upping standards version
+
+ -- Ivan E. Moore II <rkrusty@debian.org>  Thu, 01 Feb 2001 00:54:00 -0700
+
+kdoc (2.0a45-3) unstable; urgency=low
+ 
+  * Minor upstream fix to verify perl version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Wed, 24 Jan 2001 00:04:00 -0700
+
+kdoc (2.0a45-2) unstable; urgency=low
+ 
+  * Fixing dependency for perl
+    
+ -- Ivan E. Moore II <rkrusty@debian.org>  Mon, 01 Jan 2001 04:30:00 -0700
+
+kdoc (2.0a45-1) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Sat, 09 Dec 2000 05:00:00 -0700
+
+kdoc (2.0a44-6) unstable; urgency=low
+ 
+  * yet another fix
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Fri, 08 dec 2000 00:49:00 -0700
+
+kdoc (2.0a44-5) unstable; urgency=low
+ 
+  * Mor upstream fix
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Wed, 06 dec 2000 12:54:00 -0700
+
+kdoc (2.0a44-4) unstable; urgency=low
+ 
+  * Minor upstream fix
+
+ -- Ivan E. Moore II <rkrusty@debian.org>  Mon, 04 dec 2000 17:04:00 -0700
+
+kdoc (2.0a44-3) unstable; urgency=low
+ 
+  * Updating dependencies
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Thu, 30 Nov 2000 17:32:00 -0700
+
+kdoc (2.0a44-2) unstable; urgency=low
+ 
+  * more upstream fixes
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Wed, 29 Nov 2000 08:26:00 -0700
+
+kdoc (2.0a44-1) unstable; urgency=low
+ 
+  * more upstream fixes
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Tue, 28 Nov 2000 12:16:00 -0700
+
+kdoc (2.0a44-0) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Sun, 26 Nov 2000 01:20:00 -0700
+
+kdoc (2.0a43-0) unstable; urgency=low
+
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Wed, 22 Nov 2000 19:05:00 -0700
+
+kdoc (2.0a42-0) unstable; urgency=low
+
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Thu, 02 Nov 2000 18:00:00 -0700
+
+kdoc (2.0a41-0) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Mon, 23 Oct 2000 01:11:00 -0700
+
+kdoc (2.0a40-1) unstable; urgency=low
+ 
+  * More upstream fixes
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Thu, 12 Oct 2000 05:30:00 -0700
+                                                                                
+kdoc (2.0a40-0) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Wed, 11 Oct 2000 03:54:00 -0700
+                                                                                
+kdoc (2.0a39-0) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Sun, 08 Oct 2000 19:40:00 -0700
+                                                                                
+kdoc (2.0a38-0) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Sun, 01 Oct 2000 22:51:00 -0700
+
+kdoc (2.0a37-0) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Sun, 24 Sep 2000 04:30:00 -0700
+
+kdoc (2.0a36-2) unstable; urgency=low
+ 
+  * More upstream fixes
+  * Committing my package work
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Mon, 18 Sep 2000 19:30:00 -0700
+
+kdoc (2.0a36-0) unstable; urgency=low
+ 
+  * New upstream version 
+  * Initial Debian upload
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Tue, 05 Sep 2000 00:30:00 -0700
+                                                                                
+kdoc (2.0a36-1.0) unstable; urgency=low
+ 
+  * New upstream version
+ 
+ -- Ivan E. Moore II <rkrusty@debian.org>  Sun, 20 Aug 2000 16:00:00 -0700
+                                                                                
+kdoc (2.0a35-1.0) unstable; urgency=low
+
+  * New upstream version
+
+ -- Ivan E. Moore II <rkrusty@debian.org>  Mon, 21 Feb 2000 23:30:06 -0700
+
+kdoc (2.0a15-1.0) unstable; urgency=low
+
+  * New upstream version
+
+ -- Ivan E. Moore II <rkrusty@debian.org>  Wed, 13 Oct 1999 23:30:06 -0400
+
+kdoc (2.0a12-1.0) unstable; urgency=low
+
+  * New upstream version
+
+ -- Ivan E. Moore II <rkrusty@debian.org>  Mon, 27 Sep 1999 23:30:06 -0400
+
+kdoc (2.0a9-2) unstable; urgency=low
+
+  * Use DESTDIR for 'make install'
+
+ -- Bernd Gehrmann <bernd@physik.hu-berlin.de>  Sat, 22 May 1999 18:30:06 +0200
+
+kdoc (2.0a9-1) experimental; urgency=low
+
+  * Initial Release.
+
+ -- Bernd Gehrmann <bernd@physik.hu-berlin.de>  Fri, 23 Apr 1999 19:30:14 +0200
+
+Local variables:
+mode: debian-changelog
+End:

@@ -1,0 +1,6 @@
+/* $XORP: xorp/xrl/targets/finder_client.tgt,v 1.2 2002/11/05 17:26:27 hodson Exp $ */
+
+#include "common.xif"
+#include "finder_client.xif"
+
+target FinderClient implements common/0.1, finder_client/0.1

@@ -1,0 +1,31 @@
+#
+# Configuration variables for tinderbox
+#
+
+SCRIPTSDIR=$(dirname $0)
+
+ROOTDIR=${SCRIPTSDIR}/..
+
+LOCALHOST=`hostname`
+
+# Remote hosts is a list with each entry taking for host[:directory]
+# the build happens under the specified directory or default home directory
+# on remote host.
+REMOTEHOSTS="xorpc.icir.org:/home/xorpc/u1/hodson/build/tinderbox koala.icir.org:tinderbox" 
+
+# Successful build mail address
+REPORTOKADDR="Xorp Tinderbox <xorp-tinderbox@xorp.org>"
+#REPORTOKADDR="orion@icir.org"
+
+# Badness Reporting Address
+REPORTBADADDR="${REPORTOKADDR}"
+
+# Feedback address
+REPLYTOADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
+
+# From address
+FROMADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
+
+# Post command
+POST="/usr/local/libexec/nmh/post"
+

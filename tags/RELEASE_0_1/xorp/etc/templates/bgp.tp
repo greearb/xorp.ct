@@ -1,0 +1,46 @@
+protocols {
+  bgp {
+    bgp-id: ipv4;
+    local-as: uint;
+    peer @: text {
+      peer_port: uint = 179;
+      local_port: uint = 179;
+      local_ip: text = "";
+      as: uint;
+      next-hop: ipv4;
+      holdtime: uint=120;
+    }
+  }
+}
+		
+
+protocols {
+  bgp {
+    %modinfo: provides bgp;
+    %modinfo: depends rib;
+    %modinfo: path "../bgp/bgp";
+    bgp-id {
+      %set: xrl "bgp/bgp/0.2/local_config?as:u32=$(bgp.local-as)&id:ipv4=$(@)";
+    }
+    local-as {
+      %set: xrl "bgp/bgp/0.2/local_config?as:u32=$(@)&id:ipv4=$(bgp.local-as)";
+    }
+    peer @ {
+      %create: xrl "bgp/bgp/0.2/add_peer?local_ip:txt=$(@.local_ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
+      %delete: xrl "bgp/bgp/0.2/delete_peer?local_ip:txt=$(@.local_ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&";
+      peer-port {
+      }
+      local-port {
+      }
+      local-ip {
+      }
+      as {
+      }
+      holdtime {
+      }
+      next-hop {
+      }
+    }
+  }
+}
+		

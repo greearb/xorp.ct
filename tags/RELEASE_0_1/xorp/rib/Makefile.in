@@ -1,0 +1,521 @@
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# -- Real Programs
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AR = @AR@
+CC = @CC@
+CPP = @CPP@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+GMAKE = @GMAKE@
+LN_S = @LN_S@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+RIP = @RIP@
+RIP_OS = @RIP_OS@
+bin_PROGRAMS = rib main_routemap test_fea_client test_register test_register_xrls test_rib_direct test_rib_xrls
+
+# -- Test scripts
+TESTS = test_rib_direct.sh test_rib_xrls.sh test_register
+
+noinst_LIBRARIES = librib.a
+
+# -- Libraries and library flags to link the binary programs
+LDFLAGS = -all-static
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaftixif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a
+
+# -- Program Sources
+main_routemap_SOURCES = routemap.hh routemap.cc main_routemap.cc
+
+rib_SOURCES = main_rib.cc
+rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
+test_rib_direct_SOURCES = parser.hh parser_direct_cmds.hh parser.cc test_rib_direct.cc dummy_register_server.hh dummy_register_server.cc
+test_rib_xrls_SOURCES = parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh parser.cc test_rib_xrls.cc dummy_register_server.hh dummy_register_server.cc
+test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a
+test_register_SOURCES = test_register.cc dummy_register_server.hh dummy_register_server.cc
+test_register_xrls_SOURCES = parser_direct_cmds.hh parser_xrl_cmds.hh test_register_xrls.cc
+test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
+
+test_fea_client_SOURCES = test_fea_client.cc
+librib_a_SOURCES = urib_module.h version.h fea_client.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh fea_client.cc protocol.cc register_server.cc rib.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
+EXTRA_DIST = commands test_rib_direct.sh test_rib_xrls.sh xrl_shell_funcs.sh
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = ../config.h
+CONFIG_CLEAN_FILES = 
+LIBRARIES =  $(noinst_LIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I..
+CPPFLAGS = @CPPFLAGS@
+LIBS = @LIBS@
+librib_a_LIBADD = 
+librib_a_OBJECTS =  fea_client.o protocol.o register_server.o rib.o \
+rib_manager.o route.o rt_tab_base.o rt_tab_export.o rt_tab_extint.o \
+rt_tab_merged.o rt_tab_origin.o rt_tab_redist.o rt_tab_register.o \
+vifmanager.o xrl_target.o
+PROGRAMS =  $(bin_PROGRAMS)
+
+rib_OBJECTS =  main_rib.o
+rib_DEPENDENCIES =  librib.a \
+$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+$(top_builddir)/xrl/interfaces/libribclientxif.a \
+$(top_builddir)/xrl/targets/libribbase.a
+rib_LDFLAGS = 
+main_routemap_OBJECTS =  routemap.o main_routemap.o
+main_routemap_LDADD = $(LDADD)
+main_routemap_DEPENDENCIES =  librib.a \
+$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+$(top_builddir)/xrl/interfaces/libribclientxif.a
+main_routemap_LDFLAGS = 
+test_fea_client_OBJECTS =  test_fea_client.o
+test_fea_client_LDADD = $(LDADD)
+test_fea_client_DEPENDENCIES =  librib.a \
+$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+$(top_builddir)/xrl/interfaces/libribclientxif.a
+test_fea_client_LDFLAGS = 
+test_register_OBJECTS =  test_register.o dummy_register_server.o
+test_register_LDADD = $(LDADD)
+test_register_DEPENDENCIES =  librib.a \
+$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+$(top_builddir)/xrl/interfaces/libribclientxif.a
+test_register_LDFLAGS = 
+test_register_xrls_OBJECTS =  test_register_xrls.o
+test_register_xrls_DEPENDENCIES =  librib.a \
+$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+$(top_builddir)/xrl/interfaces/libribclientxif.a \
+$(top_builddir)/xrl/interfaces/libribxif.a \
+$(top_builddir)/xrl/targets/libribbase.a \
+$(top_builddir)/xrl/targets/libribclientbase.a
+test_register_xrls_LDFLAGS = 
+test_rib_direct_OBJECTS =  parser.o test_rib_direct.o \
+dummy_register_server.o
+test_rib_direct_LDADD = $(LDADD)
+test_rib_direct_DEPENDENCIES =  librib.a \
+$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+$(top_builddir)/xrl/interfaces/libribclientxif.a
+test_rib_direct_LDFLAGS = 
+test_rib_xrls_OBJECTS =  parser.o test_rib_xrls.o \
+dummy_register_server.o
+test_rib_xrls_DEPENDENCIES =  librib.a \
+$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+$(top_builddir)/xrl/interfaces/libribclientxif.a \
+$(top_builddir)/xrl/interfaces/libribxif.a \
+$(top_builddir)/xrl/targets/libribbase.a
+test_rib_xrls_LDFLAGS = 
+CXXFLAGS = @CXXFLAGS@
+CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  README Makefile.am Makefile.in TODO
+
+
+PACKAGE = @PACKAGE@
+VERSION = @VERSION@
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP_ENV = --best
+DEP_FILES =  .deps/dummy_register_server.P .deps/fea_client.P \
+.deps/main_rib.P .deps/main_routemap.P .deps/parser.P .deps/protocol.P \
+.deps/register_server.P .deps/rib.P .deps/rib_manager.P .deps/route.P \
+.deps/routemap.P .deps/rt_tab_base.P .deps/rt_tab_export.P \
+.deps/rt_tab_extint.P .deps/rt_tab_merged.P .deps/rt_tab_origin.P \
+.deps/rt_tab_redist.P .deps/rt_tab_register.P .deps/test_fea_client.P \
+.deps/test_register.P .deps/test_register_xrls.P \
+.deps/test_rib_direct.P .deps/test_rib_xrls.P .deps/vifmanager.P \
+.deps/xrl_target.P
+SOURCES = $(librib_a_SOURCES) $(rib_SOURCES) $(main_routemap_SOURCES) $(test_fea_client_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
+OBJECTS = $(librib_a_OBJECTS) $(rib_OBJECTS) $(main_routemap_OBJECTS) $(test_fea_client_OBJECTS) $(test_register_OBJECTS) $(test_register_xrls_OBJECTS) $(test_rib_direct_OBJECTS) $(test_rib_xrls_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .cc .o .s
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu rib/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-noinstLIBRARIES:
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+librib.a: $(librib_a_OBJECTS) $(librib_a_DEPENDENCIES)
+	-rm -f librib.a
+	$(AR) cru librib.a $(librib_a_OBJECTS) $(librib_a_LIBADD)
+	$(RANLIB) librib.a
+
+mostlyclean-binPROGRAMS:
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+distclean-binPROGRAMS:
+
+maintainer-clean-binPROGRAMS:
+
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	done
+
+rib: $(rib_OBJECTS) $(rib_DEPENDENCIES)
+	@rm -f rib
+	$(CXXLINK) $(rib_LDFLAGS) $(rib_OBJECTS) $(rib_LDADD) $(LIBS)
+
+main_routemap: $(main_routemap_OBJECTS) $(main_routemap_DEPENDENCIES)
+	@rm -f main_routemap
+	$(CXXLINK) $(main_routemap_LDFLAGS) $(main_routemap_OBJECTS) $(main_routemap_LDADD) $(LIBS)
+
+test_fea_client: $(test_fea_client_OBJECTS) $(test_fea_client_DEPENDENCIES)
+	@rm -f test_fea_client
+	$(CXXLINK) $(test_fea_client_LDFLAGS) $(test_fea_client_OBJECTS) $(test_fea_client_LDADD) $(LIBS)
+
+test_register: $(test_register_OBJECTS) $(test_register_DEPENDENCIES)
+	@rm -f test_register
+	$(CXXLINK) $(test_register_LDFLAGS) $(test_register_OBJECTS) $(test_register_LDADD) $(LIBS)
+
+test_register_xrls: $(test_register_xrls_OBJECTS) $(test_register_xrls_DEPENDENCIES)
+	@rm -f test_register_xrls
+	$(CXXLINK) $(test_register_xrls_LDFLAGS) $(test_register_xrls_OBJECTS) $(test_register_xrls_LDADD) $(LIBS)
+
+test_rib_direct: $(test_rib_direct_OBJECTS) $(test_rib_direct_DEPENDENCIES)
+	@rm -f test_rib_direct
+	$(CXXLINK) $(test_rib_direct_LDFLAGS) $(test_rib_direct_OBJECTS) $(test_rib_direct_LDADD) $(LIBS)
+
+test_rib_xrls: $(test_rib_xrls_OBJECTS) $(test_rib_xrls_DEPENDENCIES)
+	@rm -f test_rib_xrls
+	$(CXXLINK) $(test_rib_xrls_LDFLAGS) $(test_rib_xrls_OBJECTS) $(test_rib_xrls_LDADD) $(LIBS)
+.cc.o:
+	$(CXXCOMPILE) -c $<
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = rib
+
+distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu rib/Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+
+%.o: %.cc
+	@echo '$(CXXCOMPILE) -c $<'; \
+	$(CXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.cc
+	@echo '$(LTCXXCOMPILE) -c $<'; \
+	$(LTCXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+check-TESTS: $(TESTS)
+	@failed=0; all=0; \
+	srcdir=$(srcdir); export srcdir; \
+	for tst in $(TESTS); do \
+	  if test -f $$tst; then dir=.; \
+	  else dir="$(srcdir)"; fi; \
+	  if $(TESTS_ENVIRONMENT) $$dir/$$tst; then \
+	    all=`expr $$all + 1`; \
+	    echo "PASS: $$tst"; \
+	  elif test $$? -ne 77; then \
+	    all=`expr $$all + 1`; \
+	    failed=`expr $$failed + 1`; \
+	    echo "FAIL: $$tst"; \
+	  fi; \
+	done; \
+	if test "$$failed" -eq 0; then \
+	  banner="All $$all tests passed"; \
+	else \
+	  banner="$$failed of $$all tests failed"; \
+	fi; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"; \
+	test "$$failed" -eq 0
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am: install-binPROGRAMS
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am: uninstall-binPROGRAMS
+uninstall: uninstall-am
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(bindir)
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
+		mostlyclean-binPROGRAMS mostlyclean-tags \
+		mostlyclean-depend mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-noinstLIBRARIES clean-compile clean-binPROGRAMS \
+		clean-tags clean-depend clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-noinstLIBRARIES distclean-compile \
+		distclean-binPROGRAMS distclean-tags distclean-depend \
+		distclean-generic clean-am
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile maintainer-clean-binPROGRAMS \
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile mostlyclean-binPROGRAMS distclean-binPROGRAMS \
+clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS \
+install-binPROGRAMS tags mostlyclean-tags distclean-tags clean-tags \
+maintainer-clean-tags distdir mostlyclean-depend distclean-depend \
+clean-depend maintainer-clean-depend check-TESTS info-am info dvi-am \
+dvi check check-am installcheck-am installcheck install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+################################################################
+test_rib_direct.sh: test_rib_direct
+
+test_rib_xrls.sh: test_rib_xrls
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:
