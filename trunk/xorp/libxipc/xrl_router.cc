@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.42 2004/12/09 07:54:38 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.43 2005/01/21 02:40:01 atanu Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -146,6 +146,22 @@ XrlRouter::initialize(const char* class_name,
 		      IPv4	  finder_addr,
 		      uint16_t	  finder_port)
 {
+    char* value = getenv("XORP_FINDER_CLIENT_ADDRESS");
+    if (value != NULL) {
+	try {
+	    struct in_addr addr;
+	    IPv4 ipv4(value);
+	    ipv4.copy_out(addr);
+	    if (if_set_preferred(addr) != true) {
+		XLOG_ERROR("Failed to change the Finder client address to %s",
+			   ipv4.str().c_str());
+	    }
+	} catch (const InvalidString& e) {
+	    XLOG_ERROR("Invalid \"XORP_FINDER_CLIENT_ADDRESS\": %s",
+		       e.str().c_str());
+	}
+    }
+
     _fc = new FinderClient();
 
     _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
