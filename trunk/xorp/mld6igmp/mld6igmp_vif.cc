@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.5 2003/03/13 22:13:26 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.6 2003/03/18 02:44:36 pavlin Exp $"
 
 
 //
@@ -58,7 +58,8 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     : ProtoUnit(mld6igmp_node.family(), mld6igmp_node.module_id()),
       Vif(vif),
       _mld6igmp_node(mld6igmp_node),
-      _querier_addr(mld6igmp_node.family())		// XXX: ANY
+      _querier_addr(mld6igmp_node.family()),		// XXX: ANY
+      _dummy_flag(false)
 {
     //
     // TODO: when more things become classes, most of this init should go away
@@ -222,8 +223,10 @@ Mld6igmpVif::start(void)
 		      : (IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
 		      IPvX::ZERO(family()));
 	_startup_query_count = MAX(IGMP_ROBUSTNESS_VARIABLE - 1, 0);
-	_query_timer.start(IGMP_STARTUP_QUERY_INTERVAL, 0,
-			   igmp_query_timeout, this);
+	_query_timer =
+	    mld6igmp_node().event_loop().new_oneoff_after(
+		TimeVal(IGMP_STARTUP_QUERY_INTERVAL, 0),
+		callback(this, &Mld6igmpVif::query_timer_timeout));
     } else {
 #ifdef HAVE_IPV6
 	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
@@ -231,8 +234,10 @@ Mld6igmpVif::start(void)
 		      (MLD6_QUERY_RESPONSE_INTERVAL * MLD6_TIMER_SCALE),
 		      IPvX::ZERO(family()));
 	_startup_query_count = MAX(MLD6_ROBUSTNESS_VARIABLE - 1, 0);
-	_query_timer.start(MLD6_STARTUP_QUERY_INTERVAL, 0,
-			   mld6_query_timeout, this);
+	_query_timer =
+	    mld6igmp_node().event_loop().new_oneoff_after(
+		TimeVal(MLD6_STARTUP_QUERY_INTERVAL, 0),
+		callback(this, &Mld6igmpVif::query_timer_timeout));
 #endif // HAVE_IPV6
     }
     
@@ -274,9 +279,9 @@ Mld6igmpVif::stop(void)
     
     _proto_flags &= ~MLD6IGMP_VIF_QUERIER;
     _querier_addr = IPvX(family());			// XXX: ANY
-    _other_querier_timer.cancel();
-    _query_timer.cancel();
-    _igmpv1_router_present_timer.cancel();
+    _other_querier_timer.unschedule();
+    _query_timer.unschedule();
+    _igmpv1_router_present_timer.unschedule();
     _startup_query_count = 0;
     
     // Remove all members entries
@@ -521,9 +526,9 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
 bool
 Mld6igmpVif::is_igmpv1_mode(void) const
 {
-    return (is_ipv4()
+    return (proto_is_igmp()
 	    && ((proto_version() == IGMP_V1)
-		|| _igmpv1_router_present_timer.is_set()));
+		|| _igmpv1_router_present_timer.scheduled()));
 }
 
 /**

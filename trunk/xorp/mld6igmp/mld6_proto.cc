@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.8 2003/03/14 07:52:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.9 2003/03/30 03:50:45 pavlin Exp $"
 
 
 //
@@ -303,11 +303,13 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
     // addresses, but we don't really care.
     if (src < *addr_ptr()) {
 	// New querier
-	_query_timer.cancel();
+	_query_timer.unschedule();
 	_querier_addr = src;
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
-	_other_querier_timer.start(MLD6_OTHER_QUERIER_PRESENT_INTERVAL, 0,
-				   mld6_other_querier_timeout, this);
+	_other_querier_timer =
+	    mld6igmp_node().event_loop().new_oneoff_after(
+		TimeVal(MLD6_OTHER_QUERIER_PRESENT_INTERVAL, 0),
+		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
     
     //
@@ -340,13 +342,14 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 		% MLD6_TIMER_SCALE;
 	    usec *= (1000000 / MLD6_TIMER_SCALE); // microseconds
 	    received_resp_timeval.set(sec, usec);
-	    struct timeval timeval_tmp;
-	    member_query->_member_query_timer.left_timeval(&timeval_tmp);
-	    left_resp_timeval.copy_in(timeval_tmp);
+	    member_query->_member_query_timer.time_remaining(left_resp_timeval);
 	    
 	    if (left_resp_timeval > received_resp_timeval) {
-		member_query->_member_query_timer.start(
-		    sec, usec, mld6_member_query_timeout, member_query);
+		member_query->_member_query_timer =
+		    mld6igmp_node().event_loop().new_oneoff_after(
+			received_resp_timeval,
+			callback(member_query,
+				 &MemberQuery::member_query_timer_timeout));
 	    }
 	    
 	    break;
@@ -404,7 +407,7 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
 	    // Group found
 	    // TODO: XXX: cancel the g-s rxmt timer?? Not in spec!
 	    member_query = member_query_tmp;
-	    member_query->_last_member_query_timer.cancel();
+	    member_query->_last_member_query_timer.unschedule();
 	    break;
 	}
     }
@@ -422,14 +425,15 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
 				  ACTION_JOIN);
     }
     
-    member_query->_member_query_timer.start(MLD6_MULTICAST_LISTENER_INTERVAL,
-					    0, mld6_member_query_timeout,
-					    member_query);
+    member_query->_member_query_timer =
+	mld6igmp_node().event_loop().new_oneoff_after(
+	    TimeVal(MLD6_MULTICAST_LISTENER_INTERVAL, 0),
+	    callback(member_query, &MemberQuery::member_query_timer_timeout));
+
+    return (XORP_OK);
     
     UNUSED(max_resp_time);
     UNUSED(buffer);
-    
-    return (XORP_OK);
 }
 
 /**
@@ -471,11 +475,13 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 	if (group_address == member_query->group()) {
 	    // Group found
 	    if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
-		member_query->_member_query_timer.start(
-		    (MLD6_LAST_LISTENER_QUERY_INTERVAL
-		     * MLD6_LAST_LISTENER_QUERY_COUNT), 0,
-		    mld6_member_query_timeout,
-		    member_query);
+		member_query->_member_query_timer =
+		    mld6igmp_node().event_loop().new_oneoff_after(
+			TimeVal(MLD6_LAST_LISTENER_QUERY_INTERVAL
+				* MLD6_LAST_LISTENER_QUERY_COUNT),
+			0),
+		    callback(member_query,
+			     &MemberQuery::member_query_timer_timeout);
 		
 		// Send group-specific query
 		mld6igmp_send(member_query->group(),
@@ -483,9 +489,11 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 			      (MLD6_LAST_LISTENER_QUERY_INTERVAL
 			       * MLD6_TIMER_SCALE),
 			      member_query->group());
-		member_query->_last_member_query_timer.start(
-		    MLD6_LAST_LISTENER_QUERY_INTERVAL, 0,
-		    mld6_last_member_query_timeout, member_query);
+		member_query->_last_member_query_timer =
+		    mld6igmp_node().event_loop().new_oneoff_after(
+			TimeVal(MLD6_LAST_LISTENER_QUERY_INTERVAL, 0),
+			callback(member_query,
+				 &MemberQuery::last_member_query_timer_timeout));
 	    }
 	    return (XORP_OK);
 	}
@@ -531,139 +539,6 @@ Mld6igmpVif::mld6_mtrace_recv(const IPvX& , // src
     UNUSED(buffer);
     
     return (XORP_OK);
-}
-
-/**
- * mld6_query_timeout:
- * @data_pointer: The #Mld6igmpVif interface to send the query on.
- * 
- * Timeout: time to send a membership query.
- **/
-void
-mld6_query_timeout(void *data_pointer)
-{
-    Mld6igmpVif *mld6igmp_vif;
-    
-    mld6igmp_vif = (Mld6igmpVif *)data_pointer;
-    mld6igmp_vif->mld6_query_timeout_process();
-}
-
-/**
- * Mld6igmpVif::igmp_query_timeout_process:
- * @void:
- *
- * Send a membership query.
- **/
-void
-Mld6igmpVif::mld6_query_timeout_process(void)
-{
-    IPvX ipaddr_zero(family());			// XXX: ANY
-    int query_interval;
-    
-    if (!(_proto_flags & MLD6IGMP_VIF_QUERIER))
-	return;		// I am not the querier anymore. Ignore.
-    
-    // Send a general membership query
-    mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		  MLD6_LISTENER_QUERY,
-		  is_igmpv1_mode() ? 0:
-		  (MLD6_QUERY_RESPONSE_INTERVAL * MLD6_TIMER_SCALE),
-		  ipaddr_zero);
-    if (_startup_query_count > 0)
-	_startup_query_count--;
-    if (_startup_query_count > 0)
-	query_interval = MLD6_STARTUP_QUERY_INTERVAL;
-    else
-	query_interval = MLD6_QUERY_INTERVAL;
-    _query_timer.start(query_interval, 0, mld6_query_timeout, this);
-}
-
-/**
- * mld6_last_member_query_timeout:
- * @data_pointer: The #MemberQuery entry that has expired.
- * 
- * Timeout: the last group member has expired or has left the group. Quickly
- * query if there are other members for that group.
- * XXX: a different timer (member_query_timer) will stop the process
- * and will cancel this timer `last_member_query_timer'.
- **/
-void
-mld6_last_member_query_timeout(void *data_pointer)
-{
-    MemberQuery *member_query = (MemberQuery *)data_pointer;
-    Mld6igmpVif& mld6igmp_vif = member_query->mld6igmp_vif();
-    
-    //
-    // XXX: The spec says that we shouldn't care if we changed
-    // from a Querier to a non-Querier. Hence, send the group-specific
-    // query (see the bottom part of Section 4.)
-    //
-    mld6igmp_vif.mld6igmp_send(member_query->group(),
-			       MLD6_LISTENER_QUERY,
-			       (MLD6_LAST_LISTENER_QUERY_INTERVAL
-				* MLD6_TIMER_SCALE),
-			       member_query->group());
-    member_query->_last_member_query_timer.start(
-	MLD6_LAST_LISTENER_QUERY_INTERVAL, 0,
-	mld6_last_member_query_timeout, member_query);
-}
-
-/**
- * mld6_member_query_timeout:
- * @data_pointer: The #MemberQuery entry that has expired.
- * 
- * Timeout: expire a multicast group entry.
- **/
-void
-mld6_member_query_timeout(void *data_pointer)
-{
-    MemberQuery *member_query = (MemberQuery *)data_pointer;
-    Mld6igmpVif& mld6igmp_vif = member_query->mld6igmp_vif();
-    
-    member_query->_last_member_query_timer.cancel();
-    member_query->_igmpv1_host_present_timer.cancel();
-    
-    // notify routing (-)
-    mld6igmp_vif.join_prune_notify_routing(member_query->group(),
-					   member_query->group(),
-					   ACTION_PRUNE);
-    
-    // Remove the entry
-    list<MemberQuery *>::iterator iter;
-    for (iter = mld6igmp_vif._members.begin();
-	 iter != mld6igmp_vif._members.end(); ++iter) {
-	if (*iter == member_query) {
-	    mld6igmp_vif._members.erase(iter);
-	    delete member_query;
-	    break;
-	}
-    }
-}
-
-/**
- * mld6_other_querier_timeout:
- * @data_pointer: The #Mld6igmpVif interface to become a querier on.
- * 
- * Timeout: the previous querier has expired. I will become the querier.
- **/
-void
-mld6_other_querier_timeout(void *data_pointer)
-{
-    Mld6igmpVif *mld6igmp_vif = (Mld6igmpVif *)data_pointer;
-    IPvX ipaddr_zero(mld6igmp_vif->family());	// XXX: ANY
-    
-    mld6igmp_vif->set_querier_addr(*mld6igmp_vif->addr_ptr());
-    mld6igmp_vif->_proto_flags |= MLD6IGMP_VIF_QUERIER;
-    
-    // Now I am the querier. Send a general membership query.
-    mld6igmp_vif->mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(mld6igmp_vif->family()),
-				MLD6_LISTENER_QUERY,
-				(MLD6_QUERY_RESPONSE_INTERVAL
-				 * MLD6_TIMER_SCALE),
-				ipaddr_zero);
-    mld6igmp_vif->_startup_query_count = 0;	// XXX: not a startup case
-    mld6igmp_vif->_query_timer.start(MLD6_QUERY_INTERVAL, 0,
-				     mld6_query_timeout, mld6igmp_vif);
 }
 
 #endif /* HAVE_IPV6 */

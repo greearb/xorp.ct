@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.10 2003/03/14 07:52:51 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.11 2003/03/30 03:50:45 pavlin Exp $"
 
 
 //
@@ -25,6 +25,7 @@
 #include "mld6igmp_private.hh"
 #include "mrt/inet_cksum.h"
 #include "igmp_proto.h"
+#include "mld6igmp_node.hh"
 #include "mld6igmp_vif.hh"
 
 
@@ -321,8 +322,10 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
 	//
 	igmp_message_version = IGMP_V1;
 	// TODO: set the timer for any router or only if I am a querier?
-	_igmpv1_router_present_timer.start_semaphore(
-	    IGMP_VERSION1_ROUTER_PRESENT_TIMEOUT, 0);
+	_igmpv1_router_present_timer =
+	    mld6igmp_node().event_loop().set_flag_after(
+		TimeVal(IGMP_VERSION1_ROUTER_PRESENT_TIMEOUT, 0),
+		&_dummy_flag);
     }
     igmp_v1_config_consistency_check(src, dst, message_type,
 				     igmp_message_version);
@@ -332,11 +335,13 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
     // addresses, but we don't really care.
     if (src < *addr_ptr()) {
 	// Eventually a new querier
-	_query_timer.cancel();
+	_query_timer.unschedule();
 	_querier_addr = src;
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
-	_other_querier_timer.start(IGMP_OTHER_QUERIER_PRESENT_INTERVAL, 0,
-				   igmp_other_querier_timeout, this);
+	_other_querier_timer =
+	    mld6igmp_node().event_loop().new_oneoff_after(
+		TimeVal(IGMP_OTHER_QUERIER_PRESENT_INTERVAL, 0),
+		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
     
     //
@@ -368,13 +373,14 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
 		% IGMP_TIMER_SCALE;
 	    usec *= (1000000 / IGMP_TIMER_SCALE); // microseconds
 	    received_resp_timeval.set(sec, usec);
-	    struct timeval timeval_tmp;
-	    member_query->_member_query_timer.left_timeval(&timeval_tmp);
-	    left_resp_timeval.copy_in(timeval_tmp);
+	    member_query->_member_query_timer.time_remaining(left_resp_timeval);
 	    
 	    if (left_resp_timeval > received_resp_timeval) {
-		member_query->_member_query_timer.start(
-		    sec, usec, igmp_member_query_timeout, member_query);
+		member_query->_member_query_timer =
+		    mld6igmp_node().event_loop().new_oneoff_after(
+			received_resp_timeval,
+			callback(member_query,
+				 &MemberQuery::member_query_timer_timeout));
 	    }
 	    
 	    break;
@@ -432,7 +438,7 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
 	    // Group found
 	    // TODO: XXX: cancel the g-s rxmt timer?? Not in spec!
 	    member_query = member_query_tmp;
-	    member_query->_last_member_query_timer.cancel();
+	    member_query->_last_member_query_timer.unschedule();
 	    break;
 	}
     }
@@ -450,9 +456,11 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
 				  ACTION_JOIN);
     }
     
-    member_query->_member_query_timer.start(IGMP_GROUP_MEMBERSHIP_INTERVAL, 0,
-					    igmp_member_query_timeout,
-					    member_query);
+    member_query->_member_query_timer =
+	mld6igmp_node().event_loop().new_oneoff_after(
+	    TimeVal(IGMP_GROUP_MEMBERSHIP_INTERVAL, 0),
+	    callback(member_query, &MemberQuery::member_query_timer_timeout));
+    
     igmp_message_version = IGMP_V2;
     if (message_type == IGMP_V1_MEMBERSHIP_REPORT) {
 	igmp_message_version = IGMP_V1;
@@ -463,8 +471,10 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
 	// Indeed, RFC 3376 (IGMPv3) also doesn't specify that the
 	// corresponding timer has to be started only for queriers.
 	//
-	member_query->_igmpv1_host_present_timer.start_semaphore(
-	    IGMP_GROUP_MEMBERSHIP_INTERVAL, 0);
+	member_query->_igmpv1_host_present_timer =
+	    mld6igmp_node().event_loop().set_flag_after(
+		TimeVal(IGMP_GROUP_MEMBERSHIP_INTERVAL, 0),
+		&_dummy_flag);
     }
     
     return (XORP_OK);
@@ -519,7 +529,7 @@ Mld6igmpVif::igmp_leave_group_recv(const IPvX& src,
 	MemberQuery *member_query = *iter;
 	if (group_address == member_query->group()) {
 	    // Group found
-	    if (member_query->_igmpv1_host_present_timer.is_set()) {
+	    if (member_query->_igmpv1_host_present_timer.scheduled()) {
 		//
 		// Ignore this 'Leave Group' message because this
 		// group has IGMPv1 hosts members.
@@ -527,21 +537,24 @@ Mld6igmpVif::igmp_leave_group_recv(const IPvX& src,
 		return (XORP_OK);
 	    }
 	    if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
-		member_query->_member_query_timer.start(
-		    (IGMP_LAST_MEMBER_QUERY_INTERVAL
-		     * IGMP_LAST_MEMBER_QUERY_COUNT),
-		    0,
-		    igmp_member_query_timeout,
-		    member_query);
+		member_query->_member_query_timer =
+		    mld6igmp_node().event_loop().new_oneoff_after(
+			TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL
+				* IGMP_LAST_MEMBER_QUERY_COUNT,
+				0),
+			callback(member_query,
+				 &MemberQuery::member_query_timer_timeout));
 		
 		// Send group-specific query
 		mld6igmp_send(member_query->group(),
 			      IGMP_MEMBERSHIP_QUERY,
 			      (IGMP_LAST_MEMBER_QUERY_INTERVAL * IGMP_TIMER_SCALE),
 			      member_query->group());
-		member_query->_last_member_query_timer.start(
-		    IGMP_LAST_MEMBER_QUERY_INTERVAL, 0,
-		    igmp_last_member_query_timeout, member_query);
+		member_query->_last_member_query_timer =
+		    mld6igmp_node().event_loop().new_oneoff_after(
+			TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL, 0),
+			callback(member_query,
+				 &MemberQuery::last_member_query_timer_timeout));
 	    }
 	    return (XORP_OK);
 	}
@@ -691,140 +704,6 @@ Mld6igmpVif::igmp_mtrace_recv(const IPvX& , // src
     
     return (XORP_OK);
 }
-
-/**
- * igmp_query_timeout:
- * @data_pointer: The #Mld6igmpVif interface to send the query on.
- * 
- * Timeout: time to send a membership query.
- **/
-void
-igmp_query_timeout(void *data_pointer)
-{
-    Mld6igmpVif *mld6igmp_vif;
-    
-    mld6igmp_vif = (Mld6igmpVif *)data_pointer;
-    mld6igmp_vif->igmp_query_timeout_process();
-}
-
-/**
- * Mld6igmpVif::igmp_query_timeout_process:
- * @void: 
- * 
- * Send a membership query.
- **/
-void
-Mld6igmpVif::igmp_query_timeout_process(void)
-{
-    IPvX ipaddr_zero(family());			// XXX: ANY
-    int query_interval;
-    
-    if (!(_proto_flags & MLD6IGMP_VIF_QUERIER))
-	return;		// I am not the querier anymore. Ignore.
-    
-    // Send a general membership query
-    mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		  IGMP_MEMBERSHIP_QUERY,
-		  is_igmpv1_mode() ? 0:
-		  (IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
-		  ipaddr_zero);
-    if (_startup_query_count > 0)
-	_startup_query_count--;
-    if (_startup_query_count > 0)
-	query_interval = IGMP_STARTUP_QUERY_INTERVAL;
-    else
-	query_interval = IGMP_QUERY_INTERVAL;
-    _query_timer.start(query_interval, 0, igmp_query_timeout, this);
-}
-
-/**
- * igmp_last_member_query_timeout:
- * @data_pointer: The #MemberQuery entry that has expired.
- * 
- * Timeout: the last group member has expired or has left the group. Quickly
- * query if there are other members for that group.
- * XXX: a different timer (member_query_timer) will stop the process
- * and will cancel this timer `last_member_query_timer'.
- **/
-void
-igmp_last_member_query_timeout(void *data_pointer)
-{
-    MemberQuery *member_query = (MemberQuery *)data_pointer;
-    Mld6igmpVif& mld6igmp_vif = member_query->mld6igmp_vif();
-    
-    //
-    // XXX: The spec says that we shouldn't care if we changed
-    // from a Querier to a non-Querier. Hence, send the group-specific
-    // query (see the bottom part of Section 4.)
-    //
-    // TODO: XXX: ignore the fact that now there may be IGPMv1 routers?
-    mld6igmp_vif.mld6igmp_send(member_query->group(),
-			       IGMP_MEMBERSHIP_QUERY,
-			       (IGMP_LAST_MEMBER_QUERY_INTERVAL * IGMP_TIMER_SCALE),
-				member_query->group());
-    member_query->_last_member_query_timer.start(
-	IGMP_LAST_MEMBER_QUERY_INTERVAL, 0,
-	igmp_last_member_query_timeout, member_query);
-}
-
-/**
- * igmp_member_query_timeout:
- * @data_pointer: The #MemberQuery entry that has expired.
- * 
- * Timeout: expire a multicast group entry.
- **/
-void
-igmp_member_query_timeout(void *data_pointer)
-{
-    MemberQuery *member_query = (MemberQuery *)data_pointer;
-    Mld6igmpVif& mld6igmp_vif = member_query->mld6igmp_vif();
-    
-    member_query->_last_member_query_timer.cancel();
-    member_query->_igmpv1_host_present_timer.cancel();
-    
-    // notify routing (-)
-    mld6igmp_vif.join_prune_notify_routing(member_query->source(),
-					   member_query->group(),
-					   ACTION_PRUNE);
-    
-    // Remove the entry 
-    list<MemberQuery *>::iterator iter;
-    for (iter = mld6igmp_vif._members.begin();
-	 iter != mld6igmp_vif._members.end(); ++iter) {
-	if (*iter == member_query) {
-	    mld6igmp_vif._members.erase(iter);
-	    delete member_query;
-	    break;
-	}
-    }
-}
-
-/**
- * igmp_other_querier_timeout:
- * @data_pointer: The #Mld6igmpVif interface to become a querier on.
- * 
- * Timeout: the previous querier has expired. I will become the querier.
- **/
-void
-igmp_other_querier_timeout(void *data_pointer)
-{
-    Mld6igmpVif *mld6igmp_vif = (Mld6igmpVif *)data_pointer;
-    IPvX ipaddr_zero(mld6igmp_vif->family());	// XXX: ANY
-    
-    mld6igmp_vif->set_querier_addr(*mld6igmp_vif->addr_ptr());
-    mld6igmp_vif->_proto_flags |= MLD6IGMP_VIF_QUERIER;
-    
-    // Now I am the querier. Send a general membership query.
-    mld6igmp_vif->mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(mld6igmp_vif->family()),
-				IGMP_MEMBERSHIP_QUERY,
-				mld6igmp_vif->is_igmpv1_mode() ? 0:
-				(IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
-				ipaddr_zero);
-    mld6igmp_vif->_startup_query_count = 0;	// XXX: not a startup case
-    mld6igmp_vif->_query_timer.start(IGMP_QUERY_INTERVAL, 0,
-				     igmp_query_timeout, mld6igmp_vif);
-}
-
 
 /**
  * igmp_v1_config_consistency_check:

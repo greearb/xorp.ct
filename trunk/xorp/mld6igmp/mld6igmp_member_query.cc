@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.2 2003/03/10 23:20:42 hodson Exp $"
 
 //
 // Multicast group membership information used by
@@ -23,6 +23,9 @@
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
 #include "mld6igmp_member_query.hh"
+#include "mld6igmp_node.hh"
+#include "mld6igmp_vif.hh"
+
 
 
 //
@@ -80,3 +83,93 @@ MemberQuery::~MemberQuery()
     // join_prune_notify_routing(source(), group(), ACTION_PRUNE);
 }
 
+/**
+ * MemberQuery::timeout_sec:
+ * @: 
+ * 
+ * Get the number of seconds until time to query for host members.
+ * Return value: the number of seconds until time to query for host members.
+ **/
+uint32_t
+MemberQuery::timeout_sec() const
+{
+    TimeVal tv;
+    
+    _member_query_timer.time_remaining(tv);
+    
+    return (tv.sec());
+}
+
+/**
+ * MemberQuery::member_query_timer_timeout:
+ * 
+ * Timeout: expire a multicast group entry.
+ **/
+void
+MemberQuery::member_query_timer_timeout()
+{
+    _last_member_query_timer.unschedule();
+    if (mld6igmp_vif().mld6igmp_node().proto_is_igmp())
+	_igmpv1_host_present_timer.unschedule();
+    
+    // notify routing (-)
+    mld6igmp_vif().join_prune_notify_routing(source(),
+					     group(),
+					     ACTION_PRUNE);
+    
+    // Remove the entry 
+    list<MemberQuery *>::iterator iter;
+    for (iter = mld6igmp_vif()._members.begin();
+	 iter != mld6igmp_vif()._members.end();
+	 ++iter) {
+	if (*iter == this) {
+	    mld6igmp_vif()._members.erase(iter);
+	    delete this;
+	    return;
+	}
+    }
+}
+
+/**
+ * MemberQuery::last_member_query_timer_timeout:
+ * 
+ * Timeout: the last group member has expired or has left the group. Quickly
+ * query if there are other members for that group.
+ * XXX: a different timer (member_query_timer) will stop the process
+ * and will cancel this timer `last_member_query_timer'.
+ **/
+void
+MemberQuery::last_member_query_timer_timeout()
+{
+    //
+    // XXX: The spec says that we shouldn't care if we changed
+    // from a Querier to a non-Querier. Hence, send the group-specific
+    // query (see the bottom part of Section 4.)
+    //
+    if (mld6igmp_vif().proto_is_igmp()) {
+	// TODO: XXX: ignore the fact that now there may be IGPMv1 routers?
+	mld6igmp_vif().mld6igmp_send(group(),
+				     IGMP_MEMBERSHIP_QUERY,
+				     (IGMP_LAST_MEMBER_QUERY_INTERVAL
+				      * IGMP_TIMER_SCALE),
+				     group());
+	_last_member_query_timer =
+	    mld6igmp_vif().mld6igmp_node().event_loop().new_oneoff_after(
+		TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL, 0),
+		callback(this, &MemberQuery::last_member_query_timer_timeout));
+    }
+
+#ifdef HAVE_IPV6
+    if (mld6igmp_vif().proto_is_mld6()) {
+	mld6igmp_vif().mld6igmp_send(group(),
+				     MLD6_LISTENER_QUERY,
+				     (MLD6_LAST_LISTENER_QUERY_INTERVAL
+				      * MLD6_TIMER_SCALE),
+				     group());
+	_last_member_query_timer =
+	    mld6igmp_vif().mld6igmp_node().event_loop().new_oneoff_after(
+		TimeVal(MLD6_LAST_LISTENER_QUERY_INTERVAL, 0),
+		callback(this, &MemberQuery::last_member_query_timer_timeout));
+    }
+#endif // HAVE_IPV6
+}

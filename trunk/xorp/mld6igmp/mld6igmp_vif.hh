@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.3 2003/03/13 00:32:05 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.4 2003/03/18 02:44:36 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -26,6 +26,8 @@
 #include <list>
 #include <utility>
 
+#include "libxorp/eventloop.hh"
+#include "libxorp/timer.hh"
 #include "libxorp/vif.hh"
 #include "libproto/proto_unit.hh"
 #include "mrt/multicast_defs.h"
@@ -61,7 +63,7 @@ public:
      * Destructor
      */
     virtual ~Mld6igmpVif();
-    
+
     /**
      * Set the current protocol version.
      * 
@@ -118,6 +120,13 @@ public:
     string	flags_string() const;
     
     /**
+     * Get the MLD6IGMP node (@ref Mld6igmpNode).
+     * 
+     * @return a reference to the MLD6IGMP node (@ref Mld6igmpNode).
+     */
+    Mld6igmpNode& mld6igmp_node() const { return (_mld6igmp_node); }
+    
+    /**
      * Get the MLD/IGMP querier address.
      * 
      * @return the MLD/IGMP querier address.
@@ -156,7 +165,7 @@ public:
      * MLD/IGMP querier.
      *
      */
-    const Timer& const_other_querier_timer() const { return (_other_querier_timer); }
+    const XorpTimer& const_other_querier_timer() const { return (_other_querier_timer); }
     
     //
     // Add/delete routing protocols that need to be notified for membership
@@ -196,12 +205,13 @@ public:
 			const string& module_instance_name);
     
 private:
+    friend MemberQuery;
+    
     //
     // Private functions
     //
-    Mld6igmpNode& mld6igmp_node() const { return (_mld6igmp_node); }
     bool	is_igmpv1_mode() const;	// XXX: applies only to IGMP
-    const char *proto_message_type2ascii(uint8_t message_type) const;
+    const char	*proto_message_type2ascii(uint8_t message_type) const;
     buffer_t	*buffer_send_prepare();
     int		join_prune_notify_routing(const IPvX& source,
 					  const IPvX& group,
@@ -215,9 +225,9 @@ private:
 #define MLD6IGMP_VIF_QUERIER  0x00000001U // I am the querier
     uint32_t	_proto_flags;		// Various flags (MLD6IGMP_VIF_*)
     IPvX	_querier_addr;		// IP address of the current querier
-    Timer	_other_querier_timer;	// To timeout the (other) 'querier'
-    Timer	_query_timer;		// Timer to send queries
-    Timer	_igmpv1_router_present_timer;	// IPGPv1 router present timer
+    XorpTimer	_other_querier_timer;	// To timeout the (other) 'querier'
+    XorpTimer	_query_timer;		// Timer to send queries
+    XorpTimer	_igmpv1_router_present_timer;	// IPGPv1 router present timer
 						// XXX: does not apply to MLD6
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
@@ -228,6 +238,7 @@ private:
     //
     // Registered protocols to notify for membership change.
     vector<pair<xorp_module_id, string> > _notify_routing_protocols;
+    bool _dummy_flag;			// Dummy flag
     
     //
     // Not-so handy private functions that should go somewhere else
@@ -311,18 +322,9 @@ private:
 				 const IPvX& group_address,
 				 buffer_t *buffer);
     
-    void	igmp_query_timeout_process(void);
-    void	mld6_query_timeout_process(void);
+    void	other_querier_timer_timeout();
     
-friend void	igmp_query_timeout(void *data_pointer);
-friend void	igmp_other_querier_timeout(void *data_pointer);
-friend void	igmp_member_query_timeout(void *data_pointer);
-friend void	igmp_last_member_query_timeout(void *data_pointer);
-
-friend void	mld6_query_timeout(void *data_pointer);
-friend void	mld6_member_query_timeout(void *data_pointer);
-friend void	mld6_other_querier_timeout(void *data_pointer);
-friend void	mld6_last_member_query_timeout(void *data_pointer);
+    void	query_timer_timeout();
 };
 
 //

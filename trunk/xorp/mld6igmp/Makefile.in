@@ -89,7 +89,7 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_bu
 
 # -- Program Sources
 test_mld6igmp_SOURCES = test_mld6igmp.cc
-libmld6igmp_a_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_member_query.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_private.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh igmp_proto.cc mld6_proto.cc mld6igmp_config.cc mld6igmp_member_query.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
+libmld6igmp_a_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_member_query.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_private.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh igmp_proto.cc mld6_proto.cc mld6igmp_config.cc mld6igmp_member_query.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
 EXTRA_DIST = configure_mld6igmp docs xrl_mld6igmp_shell_funcs.sh
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -103,7 +103,7 @@ LIBS = @LIBS@
 libmld6igmp_a_LIBADD = 
 libmld6igmp_a_OBJECTS =  igmp_proto.o mld6_proto.o mld6igmp_config.o \
 mld6igmp_member_query.o mld6igmp_node.o mld6igmp_node_cli.o \
-mld6igmp_vif.o xrl_mld6igmp_node.o
+mld6igmp_proto.o mld6igmp_vif.o xrl_mld6igmp_node.o
 PROGRAMS =  $(bin_PROGRAMS)
 
 test_mld6igmp_OBJECTS =  test_mld6igmp.o
@@ -144,8 +144,8 @@ TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/igmp_proto.P .deps/mld6_proto.P \
 .deps/mld6igmp_config.P .deps/mld6igmp_member_query.P \
-.deps/mld6igmp_node.P .deps/mld6igmp_node_cli.P .deps/mld6igmp_vif.P \
-.deps/test_mld6igmp.P .deps/xrl_mld6igmp_node.P
+.deps/mld6igmp_node.P .deps/mld6igmp_node_cli.P .deps/mld6igmp_proto.P \
+.deps/mld6igmp_vif.P .deps/test_mld6igmp.P .deps/xrl_mld6igmp_node.P
 SOURCES = $(libmld6igmp_a_SOURCES) $(test_mld6igmp_SOURCES)
 OBJECTS = $(libmld6igmp_a_OBJECTS) $(test_mld6igmp_OBJECTS)
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.2 2003/03/10 23:20:42 hodson Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
 #define __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
@@ -24,7 +24,7 @@
 
 
 #include "libxorp/ipvx.hh"
-#include "mrt/timer.hh"
+#include "libxorp/timer.hh"
 
 
 //
@@ -83,7 +83,7 @@ public:
      * 
      * @return the number of seconds until time to query for host members.
      */
-    uint32_t	timeout_sec()	const	{ return (_member_query_timer.left_sec()); }
+    uint32_t	timeout_sec()	const;
     
     /**
      * Get the address of the host who last reported as member.
@@ -92,6 +92,16 @@ public:
      */
     const IPvX& last_reported_host() const { return (_last_reported_host); }
     
+    /**
+     * Timeout: expire a multicast group entry.
+     */
+    void member_query_timer_timeout();
+    
+    /**
+     * Timeout: the last group member has expired or has left the group.
+     */
+    void last_member_query_timer_timeout();
+    
 private:
     friend class Mld6igmpVif;
     
@@ -99,14 +109,9 @@ private:
     IPvX	_source;		// The source address (MLDv2 or IGMPv3)
     IPvX	_group;			// The multicast group address
     IPvX	_last_reported_host;	// The host who last reported as member
-    Timer	_member_query_timer;	// Timer to query for hosts members
-    Timer	_last_member_query_timer;   // Timer to expire this entry
-    Timer	_igmpv1_host_present_timer; // XXX: does not apply to MLD6
-    // TODO: come-up with a better solution for those friend functions
-    friend void	igmp_last_member_query_timeout(void *data_pointer);
-    friend void	igmp_member_query_timeout(void *data_pointer);
-    friend void	mld6_last_member_query_timeout(void *data_pointer);
-    friend void	mld6_member_query_timeout(void *data_pointer);
+    XorpTimer	_member_query_timer;	// Timer to query for hosts members
+    XorpTimer	_last_member_query_timer;   // Timer to expire this entry
+    XorpTimer	_igmpv1_host_present_timer; // XXX: does not apply to MLD6
 };
 
 
