@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.36 2004/06/10 13:49:27 hodson Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.37 2004/06/10 22:41:39 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -680,7 +680,7 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 	    if (p != 0) {
 		redist_policy = new IsOfProtocol<A>(*p);
 	    } else {
-		cerr << "Could not find protocol " << sub << endl;
+		return XORP_ERROR;
 	    }
 	}
     }
