@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.6 2003/06/13 19:20:56 jcardona Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.7 2003/06/14 01:22:28 jcardona Exp $
 
 #ifndef __MIBS_XORPEVENTLOOP_HH__
 #define __MIBS_XORPEVENTLOOP_HH__
@@ -101,7 +101,7 @@ private:
     friend void run_timer_callbacks(u_int, void *);
 
     static const char * _log_name;
-    static SnmpEventLoop * _sel;
+    static SnmpEventLoop _sel;
 };
 
 

@@ -418,8 +418,6 @@ main(int /* argc */, char *argv[])
 	xorp_catch_standard_exceptions();
     }
 
-    SnmpEventLoop::the_instance().destroy();
-
     //
     // Gracefully stop and exit xlog
     //

@@ -10,6 +10,7 @@
 #include "bgp4_mib_1657_bgppeertable.hh"
 
 
+BgpMib BgpMib::_bgp_mib;
 
 void
 init_bgp4_mib_1657 (void)
@@ -37,32 +38,31 @@ deinit_bgp4_mib_1657 (void)
 {
     BgpMib & bgp_mib = BgpMib::the_instance();
     DEBUGMSGTL((bgp_mib.name(), "Unloading...\n"));
-    bgp_mib.destroy();
 }
 
-BgpMib *  BgpMib::_bgp_mib = NULL;
 
 
 BgpMib& 
 BgpMib::the_instance() 
 {
-    if (!_bgp_mib) {
-	_bgp_mib = new BgpMib;
-	DEBUGMSGTL((XORP_MODULE_NAME, "BgpMib created\n"));
-    }
-    return *_bgp_mib;
+    return _bgp_mib;
 }
 
 BgpMib::BgpMib() 
     : XrlBgpV0p2Client(&_xrl_router), 
       _xrl_router(SnmpEventLoop::the_instance(),"bgp4_mib"),
-      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) {}
+      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) 
+{
+    DEBUGMSGTL((XORP_MODULE_NAME, "BgpMib created\n"));
+}
 
-void
-BgpMib::destroy()
+BgpMib::~BgpMib() 
 {
     DEBUGMSGTL((XORP_MODULE_NAME, "BgpMib destroyed\n"));
-    if (_bgp_mib) delete _bgp_mib;
 }
+
+
+
+
 
 

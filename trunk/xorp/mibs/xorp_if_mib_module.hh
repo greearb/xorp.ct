@@ -32,14 +32,15 @@ class XorpIfMib {
 public:    
     static XorpIfMib& the_instance();
     static const char * name() { return  XORP_MODULE_NAME; };
-    void destroy();
+
+    ~XorpIfMib();
 
 private:
     XorpIfMib();
     XrlStdRouter _xrl_router;
     XrlXorpIfMibTarget _xrl_target;
 
-    static XorpIfMib* _xorp_if_mib;
+    static XorpIfMib _xorp_if_mib;
 };
 
 #endif    /* __MIBS_XORP_IF_MIB_HH__ */                      

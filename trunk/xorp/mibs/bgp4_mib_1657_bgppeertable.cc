@@ -438,6 +438,7 @@ void free_context(void * context, struct netsnmp_iterator_info_s * /* iinfo */)
 {
     DEBUGMSGTL((BgpMib::the_instance().name(),"freeing context %x\n", context));
     if (NULL != context) free(context);
+    context = NULL;
 }
 
 /* ==================== XRL callbacks == ===================================*/

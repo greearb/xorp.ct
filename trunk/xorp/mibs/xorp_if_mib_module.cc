@@ -43,43 +43,36 @@ void
 deinit_xorp_if_mib_module(void)
 {
     DEBUGMSGTL((XorpIfMib::the_instance().name(), "Unloaded...\n"));
-    XorpIfMib::the_instance().destroy();
 
     // since this is the last XORP mib module that will be unloaded, it must do
     // the clean up 
-    SnmpEventLoop::the_instance().destroy();
     xlog_stop();
     xlog_exit();
 }
 
 
-XorpIfMib *  XorpIfMib::_xorp_if_mib = NULL;
+XorpIfMib XorpIfMib::_xorp_if_mib;
 
 
 XorpIfMib&
 XorpIfMib::the_instance()
 {
-    if (!_xorp_if_mib) {
-        _xorp_if_mib = new XorpIfMib;
-        DEBUGMSGTL((XORP_MODULE_NAME, "XorpIfMib created\n"));
-    }
-    return *_xorp_if_mib;
+    return _xorp_if_mib;
 }
 
 XorpIfMib::XorpIfMib()
     : _xrl_router(SnmpEventLoop::the_instance(),"xorp_if_mib"),
-      _xrl_target(&_xrl_router, *this) {}
+      _xrl_target(&_xrl_router, *this) 
+{
+    DEBUGMSGTL((XORP_MODULE_NAME, "XorpIfMib created\n"));
+}
 
-void
-XorpIfMib::destroy()
+XorpIfMib::~XorpIfMib()
 {
     DEBUGMSGTL((XORP_MODULE_NAME, "XorpIfMib destroyed\n"));
-    if (_xorp_if_mib) {
-	while(_xrl_router.pending()) {
-	    SnmpEventLoop::the_instance().run();
-	    DEBUGMSGTL((XORP_MODULE_NAME, "flushing _xrl_router "
-		"operations...\n"));
-	}
-	delete _xorp_if_mib;
+    while(_xrl_router.pending()) {
+	SnmpEventLoop::the_instance().run();
+	DEBUGMSGTL((XORP_MODULE_NAME, "flushing _xrl_router "
+	    "operations...\n"));
     }
 }
