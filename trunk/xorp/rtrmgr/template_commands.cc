@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.31 2003/11/20 19:33:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.32 2003/12/02 09:38:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -397,7 +397,7 @@ XrlAction::execute(const ConfigTreeNode& ctn,
     if (words == 0)
 	return (XORP_ERROR);
 
-    //Now we're ready to begin...
+    // Now we're ready to begin...
     int result;
     if (args[0] == "xrl") {
 	if (words < 2) {

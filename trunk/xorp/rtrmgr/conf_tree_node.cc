@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.27 2003/12/04 20:27:11 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.28 2003/12/05 03:17:46 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -507,6 +507,47 @@ ConfigTreeNode::find_config_module(const string& module_name) const
     return (NULL);
 }
 
+bool
+ConfigTreeNode::verify_configuration(string& result) const
+{
+    list<ConfigTreeNode *>::const_iterator iter;
+
+    //
+    // Verify that all mandatory child nodes are configured in place
+    //
+    if (_template != NULL) {
+	list<string>::const_iterator li;
+	for (li = _template->mandatory_children().begin();
+	     li != _template->mandatory_children().end();
+	     ++li) {
+	    const string& mandatory_child = *li;
+	    bool found = false;
+	    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+		if ((*iter)->segname() == mandatory_child) {
+		    found = true;
+		    break;
+		}
+	    }
+	    if (! found) {
+		result = c_format("Node \"%s\" has no configured mandatory child node \"%s\"",
+				  _path.c_str(), mandatory_child.c_str());
+		return false;
+	    }
+	}
+    }
+
+    //
+    // Recursively verify all child nodes
+    //
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	ConfigTreeNode* ctn = *iter;
+	if (ctn->verify_configuration(result) != true)
+	    return false;
+    }
+
+    return true;
+}
+
 void 
 ConfigTreeNode::initialize_commit()
 {
@@ -518,7 +559,7 @@ ConfigTreeNode::initialize_commit()
     XLOG_ASSERT(_actions_succeeded == true);
 
     list<ConfigTreeNode *>::iterator iter;
-    for (iter = _children.begin(); iter != _children.end(); ++iter) 
+    for (iter = _children.begin(); iter != _children.end(); ++iter)
 	(*iter)->initialize_commit();
 }
 
@@ -612,7 +653,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 			// with do_commit not set, so there can be no
 			// Allow command errors.
 			//
-			XLOG_ASSERT(do_commit == false);
+			// XLOG_ASSERT(do_commit == false);
 			result = "Bad value for \"" + path() + "\"\n";
 			result += "No changes have been committed.\n";
 			result += "Correct this error and try again.\n";
@@ -1247,6 +1288,8 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 	for (iter = ttn->children().begin();
 	     iter != ttn->children().end(); ++iter) {
 	    if ((*iter)->segname() == nodename) {
+		if (! (*iter)->has_default())
+		    return false;
 		XLOG_ASSERT((*iter)->has_default());
 		value = (*iter)->default_str();
 		return true;

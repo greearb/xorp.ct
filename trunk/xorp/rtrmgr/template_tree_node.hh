@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.6 2003/11/19 23:02:12 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.7 2003/12/02 09:38:58 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -89,6 +89,8 @@ public:
     bool expand_variable(const string& varname, string& value) const;
     bool expand_expression(const string& expr, string& value) const;
 
+    const list<string>& mandatory_children() const { return _mandatory_children; }
+
 protected:
     void add_child(TemplateTreeNode* child);
 
@@ -123,6 +125,8 @@ private:
     bool _is_tag;
 
     map<string, Command *> _cmd_map;
+
+    list<string>	_mandatory_children;
 };
 
 class UIntTemplate : public TemplateTreeNode {

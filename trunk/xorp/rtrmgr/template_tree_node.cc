@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.10 2003/11/19 23:02:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.11 2003/12/02 09:38:58 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -111,10 +111,12 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
 	    command = new Command(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
+    } else if (cmd == "%mandatory") {
+	// Nothing to do
     } else {
 	string err = "Invalid command \"" + cmd + "\"\n";
 	err += "Valid commands are %create, %delete, %set, %unset, %get, ";
-	err += "%default, %modinfo, %activate, %allow\n";
+	err += "%default, %modinfo, %activate, %allow, %mandatory\n";
 	xorp_throw(ParseError, err);
     }
 }
@@ -153,6 +155,18 @@ TemplateTreeNode::add_action(const string& cmd,
 	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);
 	XLOG_ASSERT(allow_command != NULL);
 	allow_command->add_action(action_list);
+    } else if (cmd == "%mandatory") {
+	// Add all new mandatory variables
+	list<string>::const_iterator li;
+	for (li = action_list.begin(); li != action_list.end(); ++li) {
+	    const string& varname = *li;
+	    if (find(_mandatory_children.begin(),
+		     _mandatory_children.end(),
+		     varname)
+		== _mandatory_children.end()) {
+		_mandatory_children.push_back(varname);
+	    }
+	}
     } else {
 	iter = _cmd_map.find(cmd);
 	XLOG_ASSERT(iter != _cmd_map.end());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.24 2003/12/02 09:38:55 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.25 2003/12/15 22:31:24 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -384,6 +384,8 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 void
 MasterConfigTree::commit_changes_pass1(CallBack cb)
 {
+    string result;
+
     printf("##############################################################\n");
     printf("MasterConfigTree::commit_changes_pass1\n");
 
@@ -412,9 +414,14 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     _task_manager.reset();
     _task_manager.set_do_exec(false);
     _commit_cb = cb;
-    string result;
 
     _root_node.initialize_commit();
+
+    if (_root_node.verify_configuration(result) == false) {
+	// Something went wrong - return the error message.
+	cb->dispatch(false, result);
+	return;
+    }
 
     // sort the changes in order of module dependencies
     for (iter = changed_modules.begin();
@@ -467,10 +474,18 @@ MasterConfigTree::commit_pass1_done(bool success, string result)
 void
 MasterConfigTree::commit_changes_pass2()
 {
+    string result;
+
     printf("##############################################################\n");
     printf("## commit_changes_pass2\n");
 
     _commit_in_progress = true;
+
+    if (_root_node.verify_configuration(result) == false) {
+	XLOG_ERROR("Commit failed in deciding startups\n");
+	_commit_cb->dispatch(false, result);
+	return;
+    }
 
     /*******************************************************************/
     /* Pass 2: implement the changes                                   */
@@ -484,7 +499,6 @@ MasterConfigTree::commit_changes_pass2()
     _task_manager.set_do_exec(true);
 
     _root_node.initialize_commit();
-    string result;
     // Sort the changes in order of module dependencies
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
@@ -495,7 +509,6 @@ MasterConfigTree::commit_changes_pass2()
 	    return;
 	}
     }
-
 
     if (!_root_node.commit_changes(_task_manager,
 				   /* do_commit = */ true,
