@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.12 2004/06/09 10:14:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.13 2004/06/10 22:40:41 hodson Exp $"
 
 #include "print_routes.hh"
 
@@ -87,7 +87,8 @@ PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, bool unicast,
 	while (_done == false || _active_requests > 0) {
 	    _eventloop.run();
 	    if (_lines == static_cast<int>(_count)) {
-		printf("Output truncated at %d lines\n", _count);
+		printf("Output truncated at %u lines\n",
+		       XORP_UINT_CAST(_count));
 		break;
 	    }
 	}
