@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.24 2003/12/05 06:25:04 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.25 2003/12/10 22:31:29 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -470,41 +470,6 @@ Module::killed()
     _pid = 0;
 }
 
-int
-Module::module_shutdown_completed(bool success)
-{
-    if ((_status == MODULE_NOT_STARTED) || (_status == MODULE_FAILED)) {
-	return XORP_OK;		// We have already taken care of this module
-    }
-
-    if (success)
-	new_status(MODULE_NOT_STARTED);
-    else
-	new_status(MODULE_FAILED);
-
-    //
-    // Erase the module from the maps
-    //
-    map<pid_t, string>::iterator pid_iter;
-    multimap<string, Module*>::iterator path_iter;
-
-    XLOG_ASSERT(_pid != 0);
-    pid_iter = module_pids.find(_pid);
-    XLOG_ASSERT(pid_iter != module_pids.end());
-    XLOG_ASSERT(pid_iter->second == _expath);
-    path_iter = module_paths.find(_expath);
-    XLOG_ASSERT(path_iter != module_paths.end());
-
-    module_paths.erase(path_iter);
-    path_iter = module_paths.find(_expath);
-    if (path_iter == module_paths.end())
-	module_pids.erase(pid_iter);	// The last module within this process
-
-    _pid = 0;
-
-    return XORP_OK;
-}
-
 void
 Module::new_status(ModuleStatus new_status)
 {
@@ -582,17 +547,6 @@ ModuleManager::kill_module(const string& module_name,
     XLOG_ASSERT(module != NULL);
     module->terminate(cb);
     return XORP_OK;
-}
-
-int
-ModuleManager::module_shutdown_completed(const string& module_name,
-					 bool success)
-{
-    Module* module = find_module(module_name);
-
-    XLOG_ASSERT(module != NULL);
-
-    return (module->module_shutdown_completed(success));
 }
 
 bool

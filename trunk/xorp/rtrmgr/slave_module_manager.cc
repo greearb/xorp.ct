@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.12 2003/12/02 09:38:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.13 2003/12/10 22:32:19 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -55,15 +55,6 @@ ModuleManager::kill_module(const string& module_name,
 {
     UNUSED(module_name);
     UNUSED(cb);
-    return XORP_OK;
-}
-
-int
-ModuleManager::module_shutdown_completed(const string& module_name,
-					 bool success)
-{
-    UNUSED(module_name);
-    UNUSED(success);
     return XORP_OK;
 }
 

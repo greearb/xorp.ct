@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.26 2003/12/02 09:38:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.27 2003/12/10 22:36:37 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -338,9 +338,8 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	// The process appears to have shutdown correctly.
 	_cb->dispatch(true);
     } else if (e == XrlError::SEND_FAILED())  {
-	// Something bad happened.
-	// Return false, and we can shut it down using kill.
-	_cb->dispatch(false);
+	// The process is probably gone.
+	_cb->dispatch(true);
     } else {
 	XLOG_ERROR("Error while shutdown validation of module %s",
 		   _module_name.c_str());
@@ -818,7 +817,7 @@ Task::step5_stop()
 	    step6_wait();
 	}
     } else {
-	step7_report();
+	step8_report();
     }
 }
 
@@ -844,7 +843,7 @@ Task::step6_wait()
     if (_stop_module && (_shutdown_validation != NULL)) {
 	_shutdown_validation->validate(callback(this, &Task::step6_done));
     } else {
-	step7_report();
+	step8_report();
     }
 }
 
@@ -854,23 +853,34 @@ Task::step6_done(bool success)
     printf("step6_done (%s)\n", _module_name.c_str());
 
     if (success) {
-	_taskmgr.module_manager().module_shutdown_completed(_module_name,
-							    true);
-	step7_report();
+	step7_wait();
     } else {
 	string msg = "Can't validate stop of process " + _module_name;
 	XLOG_WARNING(msg.c_str());
 	// An error here isn't fatal - module manager will simply kill
 	// the process less subtly.
-	_taskmgr.module_manager().kill_module(_module_name,
-					callback(this, &Task::step7_report));
+	step7_kill();
     }
 }
 
 void
-Task::step7_report()
+Task::step7_wait()
 {
-    printf("step7 (%s)\n", _module_name.c_str());
+    _wait_timer = _taskmgr.eventloop().new_oneoff_after_ms(1000,
+					callback(this, &Task::step7_kill));
+}
+
+void
+Task::step7_kill()
+{
+    _taskmgr.module_manager().kill_module(_module_name,
+					  callback(this, &Task::step8_report));
+}
+
+void
+Task::step8_report()
+{
+    printf("step8 (%s)\n", _module_name.c_str());
 
     debug_msg("Task done\n");
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.20 2003/12/02 09:38:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.21 2003/12/10 22:36:37 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -204,7 +204,10 @@ protected:
     void step6_wait();
     void step6_done(bool success);
 
-    void step7_report();
+    void step7_wait();
+    void step7_kill();
+
+    void step8_report();
     void task_fail(string errmsg, bool fatal);
 
 private:
@@ -223,6 +226,7 @@ private:
     list<TaskXrlItem> _xrls;
     bool	_config_done;	// True if we changed the module's config
     CallBack	_task_complete_cb; // The task completion callback
+    XorpTimer	_wait_timer;
 };
 
 class TaskManager {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.16 2003/11/22 00:17:15 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.17 2003/12/10 22:31:29 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -68,7 +68,6 @@ public:
     ModuleStatus status() const { return _status; }
     void terminate(XorpCallback0<void>::RefPtr cb);
     void terminate_with_prejudice(XorpCallback0<void>::RefPtr cb);
-    int module_shutdown_completed(bool success);
 
 private:
     void new_status(ModuleStatus new_status);
@@ -97,7 +96,6 @@ public:
 		   XorpCallback1<void, bool>::RefPtr cb);
     int kill_module(const string& module_name, 
 		   XorpCallback0<void>::RefPtr cb);
-    int module_shutdown_completed(const string& module_name, bool success);
     void module_shutdown_cb();
     bool module_exists(const string& module_name) const;
     bool module_is_running(const string& module_name) const;
