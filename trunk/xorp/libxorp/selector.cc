@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.16 2003/06/11 19:15:19 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.17 2003/06/12 23:58:15 jcardona Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -176,7 +176,7 @@ SelectorList::remove_selector(int fd, SelectorMask mask)
 	return;
     }
 
-for (int i = 0; i < SEL_MAX_IDX; i++) {
+    for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (mask & (1 << i) && FD_ISSET(fd, &_fds[i])) {
 	    FD_CLR(fd, &_fds[i]);
 	    if (_observer) 
@@ -185,6 +185,9 @@ for (int i = 0; i < SEL_MAX_IDX; i++) {
     }
     _selector_entries[fd].clear(mask);
     if (_selector_entries[fd].is_empty()) {
+	assert(FD_ISSET(fd, &_fds[SEL_RD_IDX]) == 0);
+	assert(FD_ISSET(fd, &_fds[SEL_WR_IDX]) == 0);
+	assert(FD_ISSET(fd, &_fds[SEL_EX_IDX]) == 0);
 	_descriptor_count --;
     }
 }
@@ -233,23 +236,7 @@ SelectorList::select(TimeVal* timeout)
 	return 0;
     }
 
-    // Build list of all possible file descriptors
-    static vector<int> fdtable(0);
-
-    while (fdtable.size() < (size_t)_maxfd + 1)
-	fdtable.push_back(fdtable.size());
-
-    size_t sz = fdtable.size();
-    for (int j = 0; sz != 0 && j != n; ) {
-	// Pick a random file descriptor to check.  Store it and swap value
-	// with old position in vector with last element in vector.  The
-	// latter operation keeps the value in the vector but removes it
-	// from consideration for this round.
-	int x = random() % sz;
-	int fd = fdtable[x];
-	fdtable[x] = fdtable[--sz];
-	fdtable[sz] = fd;
-
+    for (int fd = 0; fd <= _maxfd; fd++) {
 	int mask = 0;
 	if (FD_ISSET(fd, &testfds[SEL_RD_IDX])) {
 	    mask |= SEL_RD;
@@ -265,7 +252,6 @@ SelectorList::select(TimeVal* timeout)
 	}
 	if (mask) {
 	    _selector_entries[fd].run_hooks(SelectorMask(mask), fd);
-	    j++;
 	}
     }
 
