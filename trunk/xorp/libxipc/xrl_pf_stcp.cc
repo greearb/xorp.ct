@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.20 2003/06/20 18:55:58 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.21 2003/09/11 19:28:59 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -210,6 +210,11 @@ STCPRequestHandler::update_reader(AsyncFileReader::Event ev,
 	    debug_msg("Death due to read error\n");
 	    die("read error");
 	}
+	return;
+    }
+
+    if (ev == AsyncFileReader::END_OF_FILE) {
+	die("end of file");
 	return;
     }
 
