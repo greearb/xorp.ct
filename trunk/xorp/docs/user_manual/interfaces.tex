@@ -2,11 +2,11 @@
 
 \section{Network Interfaces Terminology and Concepts}
 
-A router receives packets on its network interfaces from its
+A router receives packets via its network interfaces from its
 neighboring routers.  Some of those packets will be destined for the
-router itself, but most of then will normally be forwarded on to other
-routers via another network interface, or on to locally connected
-hosts via a network interface.
+router itself, but most of then will normally be forwarded on via
+another network interface to another router or to locally connected
+hosts.
 
 There are many different types of network interface, such as Ethernet,
 ATM, DS3, or ISDN.  Sometimes the underlying physical interface will
@@ -17,7 +17,7 @@ really multiple interfaces, in that the router may have to forward
 packets between different ``channels'' on the same interface.  
 
 We choose to distinguish in a XORP router between physical interfaces
-(which we call {\it interfaces}, and logical interfaces, which we can
+(which we call {\it interfaces}, and logical interfaces, which we call
 virtual interfaces or {\it vifs}.  An example of a {\it interface}
 might be an Ethernet card.  An example of a {\it vif} might be one of
 many VLANs configured on that ethernet\footnote{As of the 1.0 release,
@@ -43,14 +43,15 @@ underlying forwarding path.  A common example would be Ethernet
 without VLANs, where the interface and vif might both be named {\stt
 fxp0} on Freebsd or both called {\stt eth0} on Linux.
 
+\newpage
 \section{Configuring Network Interfaces}
 
 A XORP router will only use interfaces that it has been explicitly
-configured to use. Even for protocols such as BGP that are agnostic to
+configured to use. For protocols such as RIP that are explicitly aware
+of interfaces, only configured interfaces will be used.  Even for
+protocols such as BGP that don't directly associate peerings with
 interfaces, if the next-hop router for a routing entry is not through
-a configured interface the route will not be installed. For protocols
-such as RIP that are explicitly aware of interfaces only, configured
-interfaces will be used.  
+a configured interface, the route will not be installed.
 
 \subsection{Configuration Syntax}
 
@@ -106,30 +107,32 @@ interfaces \{\\
   set.  MAC addresses on devices such as Ethernets are usually fixed,
   but in some cases it is possible to override the built-in default
   MAC address.  The format should be in a form appropriate for the
-  interface type.  For an ethernet interfacek, this would be six
-  colon-separated 16-bit numbers in hexadecimal, such as
+  interface type.  For an ethernet interface, this would be six
+  colon-separated 8-bit numbers in hexadecimal, such as
   {\stt 00:0a:59:9a:f2:ba}.
 \item{\tt mtu}: This allows the maximum transfer unit (MTU) to be set
   for the interface as a whole (applying to all VIFs).  The value is
-  an integer number of bytes, and should be less that or equal to the
-  largest MTU supported by the physical device. When forwarding,
-  packets larger than the MTU will be fragmented.
-\item{\tt default-system-config}: Normally all the interfaces, vifs
+  an integer number of bytes, and should be less than or equal to the
+  largest MTU supported by the physical device. When forwarding, IPv4
+  packets larger than the MTU will be fragmented unless they the DF
+  bit set, in which case they will be dropped and an ICMP
+  Packet-too-big message will be returned to the sender.
+\item{\tt default-system-config}: Normally all the interfaces, vifs,
   and addresses on a XORP router will be configured through the XORP
   configuration file and command line interface.  However, under
   certain circumstances it is useful to be able to run XORP as a
   routing daemon without changing the current configuration of
-  interfaces and addresses.  This primitive tells XORP to obtain it's
-  interface configuration by reading the existing configuration back
-  from the forwarding engine rather than by configuring the forwarding
-  engine.
+  interfaces and addresses.  This primitive tells XORP to obtain its
+  configuration for this interface by reading the existing
+  configuration back from the forwarding engine rather than by
+  configuring the forwarding engine.
 \item{\tt enabled}: this flag enables or disables the interface for
   routing and forwarding.  It takes the value {\stt true} or {\stt
   false}.  Configuring an interface to be disabled has the same effect
   as removing its configuration, but without losing what the
   configuration used to be.
 \item{\tt vif}: this configures a vif on the corresponding interface.
-  In some cases this may cause the vif to be created; and example
+  In some cases this may cause the vif to be created; an example
   might be an Ethernet VLAN.  In other cases this merely denotes the
   start of the configuration for the vif.  The parameter is the name
   of the vif, as understood by the router forwarding engine.
@@ -142,7 +145,7 @@ interfaces \{\\
   as removing its configuration, but without losing what the
   configuration used to be.
 \item{\tt address}: this specifies a new IP address for this vif.  A
-  vif might have multiple IP addresses, and might have both IPv4
+  single vif might have multiple IP addresses, and might have both IPv4
   address and IPv6 addresses.  The parameter is either an IPv4 or IPv6
   address.
 
@@ -154,15 +157,15 @@ interfaces \{\\
   be between 8 and 128.  This field is mandatory for each address.
 \item{\tt broadcast}: this gives the subnet broadcast address for the
   subnet corresponding to the vif address.  It is only needed for IPv4
-  addresses, and is only needed for historical reasons.  It takes the
-  form of an IPv4 address. 
+  addresses (it is mandatory), and is needed for historical reasons.
+  It takes the form of an IPv4 address.
 
   Normally the broadcast address will have the local hosts part of the
   subnet address set to all ones.  For example, with address 10.0.0.0
   and prefix-length 20, the broadcast address will have the last 12
   bits set to one, and hence will be 10.0.15.255.
-\item{\tt destination}: this specified the destination IP address.  It
-  is only relevant for point-to-point interfaces, where the IP address
+\item{\tt destination}: this specifies the destination IP address.  It
+  is only relevant for point-to-point interfaces, where the IP addresses
   at each end of the link need not share an IP subnet.
 \item{\tt enabled}: this flag enables or disables this IP address on
   this vif.  It takes the value {\stt true} or {\stt false}.
@@ -173,12 +176,15 @@ interfaces \{\\
 \end{description}
 \end{description}
 
+\newpage
 \subsection{Example Configurations}
 
 We recommend that you select the interfaces that you want to use on
 your system and configure them as below.  Interfaces that you do not
 wish XORP to use for forwarding should be omitted from the
 configuration.
+
+\subsubsection{Configuring Interface Addresses}
 
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
@@ -211,6 +217,7 @@ interfaces \{\\
 \end{minipage}
 }
 
+\vspace{0.1in}
 In the example above, the router has only one interface configured.
 This interface is called {\stt dc0}, and the vif is also called {\stt
 dc0}.  In this case, this is because this interface is an ethernet
@@ -229,6 +236,7 @@ In this case, an ethernet is not a point-to-point interface, so no
 destination address is specified.
 
 
+\subsubsection{Using Pre-Configured Interface Addresses}
 
 If the {\tt default-system-config} statement is used, as shown in the
 example belore, it instructs the FEA that the interface should be
@@ -256,7 +264,7 @@ interfaces \{\\
 \vspace{0.1in}
 
 
-
+\newpage
 \section{Monitoring Network Interfaces}
 
 The state of a XORP router's interfaces can be displayed from
@@ -269,29 +277,55 @@ in the router:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xx\=xxxxxxxxxxxxxxxx\=\kill
+xxxxxxxx\=xxxxxxxxxxxxxxxx\=\kill
 Xorp> \textbf{show interfaces}\\
-
-TBD 
-
+dc0/dc0: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500\\
+\>inet 172.16.0.1 subnet 172.16.0.0/24 broadcast 172.16.0.255\\
+\>physical index 1\\
+\>ether 00:80:c8:b9:61:09\\
+dc1/dc1: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500\\
+\>inet 172.16.1.1 subnet 172.16.1.0/24 broadcast 172.16.0.255\\
+\>physical index 2\\
+\>ether 00:80:c8:b9:61:0a\\
+dc2/dc2: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500\\
+\>inet 172.16.2.1 subnet 172.16.2.0/24 broadcast 172.16.0.255\\
+\>physical index 3\\
+\>ether 00:80:c8:b9:61:0b\\
+dc3/dc3: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500\\
+\>inet 172.16.3.1 subnet 172.16.3.0/24 broadcast 172.16.0.255\\
+\>physical index 4\\
+\>ether 00:80:c8:b9:61:0c\\
+fxp0/fxp0: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500\\
+\>inet 192.150.187.112 subnet 192.150.187.0/25 broadcast 192.150.187.255\\
+\>physical index 5\\
+\>ether 00:02:b3:10:b4:6c
 \end{tabbing}
 \end{alltt}
 \end{minipage}
 }
 
+\vspace{0.1in}
+In this case, the router has five ethernet interfaces, each of which
+has a single vif.  The naming format is {\it interface/vif}.  For
+example {\stt dc1/vlan2} would be vif vlan2 on interface dc1.  In the
+above example, all the vif names are the same as the ethernet
+interface names because no VLANs are being used.
+
+\vspace{0.1in}
 To display information about a specific interface, use the {\stt show
-interfaces $<$interface$>$} command:
+interfaces $<${\it interface}$>$} command:
 
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xx\=xxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show interfaces}\\
-
-TBD 
-
+xxxxxxxx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show interfaces dc1}\\
+dc1/dc1: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500\\
+\>inet 172.16.1.1 subnet 172.16.1.0/24 broadcast 172.16.0.255\\
+\>physical index 2\\
+\>ether 00:80:c8:b9:61:0a\\
 \end{tabbing}
 \end{alltt}
 \end{minipage}
