@@ -1,3 +1,6 @@
+
+source xorpenv.sh
+
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i create
 snmpset localhost UCD-DLMOD-MIB::dlmodName.$1 s "bgp4_mib_1657" UCD-DLMOD-MIB::dlmodPath.$1 s "${XORP}/mibs/bgp4_mib_1657.so"
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i load

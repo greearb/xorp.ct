@@ -6,6 +6,7 @@
 #include "xorpevents.hh"
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgpversion.hh"
+#include "bgp4_mib_1657_bgppeertable.hh"
 
 
 // Local variables
@@ -26,6 +27,7 @@ init_bgp4_mib_1657 (void)
 {
     DEBUGMSGTL((mib_mod_name, "Initializing...\n"));
     init_bgp4_mib_1657_bgpversion();
+    init_bgp4_mib_1657_bgppeertable();
     DEBUGMSGTL((mib_mod_name, "Creating periodic event...\n"));
     ptcb = callback(bgp4_mib_callback);
     pXtbgp = new XorpTimer;
@@ -33,6 +35,16 @@ init_bgp4_mib_1657 (void)
     // *pXtbgp = eventloop.new_periodic (750, ptcb);
     DEBUGMSGTL((mib_mod_name, "Exporting events...\n"));
     eventloop.export_events();
+
+    // NOTE:  these xlog calls are required by each mib module, since the
+    // runtime linker seems to reset the values of xlog.c static variables
+    // everytime a new mib module is loaded.  Only the last unloaded mib module
+    // (xorp_if_mib_module) should do xlog cleanup.
+     
+    xlog_init("snmpd", NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW); 
+    xlog_add_default_output();
+    xlog_start();
 }
 
 void  
@@ -45,7 +57,9 @@ deinit_bgp4_mib_1657 (void)
 
 BgpMibXrlClient * BgpMibXrlClient::_bgpMib = NULL;
 
-BgpMibXrlClient& BgpMibXrlClient::the_instance() 
+
+BgpMibXrlClient& 
+BgpMibXrlClient::the_instance() 
 {
     if (!_bgpMib) {
 	_bgpMib = new BgpMibXrlClient;

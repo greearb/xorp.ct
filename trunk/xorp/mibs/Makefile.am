@@ -74,6 +74,8 @@ bgp4_mib_1657_so_SOURCES  = bgp4_mib_1657.hh
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657.cc
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgpversion.hh
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgpversion.cc
+bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgppeertable.hh
+bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgppeertable.cc
 
 # -- Library Sources (ospf_mib_1850)
 ospf_mib_1850_so_SOURCES  = ospf_mib_1850.hh

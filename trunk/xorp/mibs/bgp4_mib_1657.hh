@@ -31,22 +31,15 @@ void          deinit_bgp4_mib_1657 (void);
 
 class BgpMibXrlClient : public XrlBgpV0p2Client {
 public:
-    typedef std::queue<netsnmp_delegated_cache*> DelegatedQueue;
-public:
     static BgpMibXrlClient& the_instance();
     ~BgpMibXrlClient();
-    
-    /*
-     * These queues hold the request information that the callback functions
-     * will need to complete the SNMP request.  It is assumed that for a given
-     * OID, the callbacks will be called in the same order the XRL was sent.  
-     */
-    DelegatedQueue bgp_version_queue;
-    
+
 private:
     BgpMibXrlClient();
-    XrlStdRouter _xrl_rtr;
+
     static BgpMibXrlClient* _bgpMib;
+
+    XrlStdRouter _xrl_rtr;
 };
 
 #endif    /* __MIBS_BGP4_MIB_1657_HH__ */                      

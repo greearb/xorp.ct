@@ -45,6 +45,8 @@ void
 deinit_xorp_if_mib_module(void)
 {
     DEBUGMSGTL((mib_mod_name, "Unloaded...\n"));
+    xlog_stop();
+    xlog_exit();
 }
 
 

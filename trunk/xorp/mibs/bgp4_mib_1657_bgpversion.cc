@@ -26,36 +26,32 @@ init_bgp4_mib_1657_bgpversion (void)
                                          HANDLER_CAN_RONLY));
 }
 
-void send_get_bgp_version_done(const XrlError& e, const uint32_t* ver)
+void get_bgp_version_done(const XrlError& e, const uint32_t* ver, 
+			       netsnmp_delegated_cache* cache)
 {
     static const int bgpVerStrMax = 4;
     char bgpVersion[bgpVerStrMax];
     int  bgpVersionLen = snprintf(bgpVersion, bgpVerStrMax, "%d", *ver);
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "send_get_bgp_version_done called\n"));
+    DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "get_bgp_version_done called\n"));
     DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "ver = %ld\n", *ver));
 
-    if (XrlError::OKAY() != e) {
+    if (e != XrlError::OKAY()) {
 	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "XrlError: "));
 	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", e.error_msg()));
 	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "\n"));
 	return;
     }
 
-    BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
-
     netsnmp_request_info *requests;
     netsnmp_agent_request_info *reqinfo;
-    netsnmp_delegated_cache * cache = bgp_mib.bgp_version_queue.front();
 
-    cache= netsnmp_handler_check_cache(cache);
+    cache = netsnmp_handler_check_cache(cache);
 
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
     }
-
-    bgp_mib.bgp_version_queue.pop();
 
     /*
      * re-establish the previous pointers we are used to having 
@@ -100,13 +96,13 @@ get_bgpVersion(netsnmp_mib_handler * handler,
     
     DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "get_bgpVersion called\n"));
     BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
-    BgpMibXrlClient::CB0 cb0;
-    cb0 = callback(send_get_bgp_version_done);
-    bgp_mib.send_get_bgp_version("bgp", cb0); 
+    BgpMibXrlClient::CB0 cb_version;
+    netsnmp_delegated_cache * req_cache = netsnmp_create_delegated_cache(handler,
+					    reginfo, reqinfo, requests, NULL);
+    cb_version = callback(get_bgp_version_done, req_cache);
+    bgp_mib.send_get_bgp_version("bgp", cb_version); 
 
     requests->delegated = 1;
-    bgp_mib.bgp_version_queue.push(netsnmp_create_delegated_cache(handler,
-				   reginfo, reqinfo, requests, NULL));
     SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
     eventloop.export_events();
     return SNMP_ERR_NOERROR;

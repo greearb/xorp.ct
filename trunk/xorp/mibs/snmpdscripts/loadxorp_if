@@ -1,3 +1,4 @@
+source xorpenv.sh 
 
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i create
 snmpset localhost UCD-DLMOD-MIB::dlmodName.$1 s "xorp_if_mib_module" UCD-DLMOD-MIB::dlmodPath.$1 s "${XORP}/mibs/xorp_if_mib_module.so"

@@ -1,2 +1,5 @@
-sudo snmpd -L -f -Dsnmp_alarm,ospf_mib_1850,xorp_if_mib_module,bgp4_mib_1657,bgp4_mib_1657_bgpversion -I -ipv6
+#! /bin/sh
+
+
+sudo snmpd -L -f -Dsnmp_alarm,SnmpEventLoop,ospf_mib_1850,xorp_if_mib_module,bgp4_mib_1657,bgp4_mib_1657_bgpversion,bgp4_mib_1657_bgppeertable, -I -ipv6
 
