@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.14 2003/11/08 07:20:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.15 2004/03/24 23:26:59 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -388,6 +388,10 @@ FtiConfig::get_table6(list<Fte6>& fte_list)
 bool
 FtiConfig::have_ipv4() const
 {
+    // XXX: always return true if running in dummy mode
+    if (is_dummy())
+	return true;
+
     int s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s < 0)
 	return (false);
@@ -404,6 +408,10 @@ FtiConfig::have_ipv4() const
 bool
 FtiConfig::have_ipv6() const
 {
+    // XXX: always return true if running in dummy mode
+    if (is_dummy())
+	return true;
+
 #ifndef HAVE_IPV6
     return (false);
 #else
@@ -428,6 +436,10 @@ FtiConfig::have_ipv6() const
 int
 FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 {
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return XORP_OK;
+
     int enabled = 0;
     
 #if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_FORWARDING)
@@ -494,6 +506,10 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 int
 FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 {
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return XORP_OK;
+
 #ifndef HAVE_IPV6
     ret_value = false;
     error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
@@ -570,6 +586,10 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 int
 FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 {
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return XORP_OK;
+
 #ifndef HAVE_IPV6
     ret_value = false;
     error_msg = c_format("Cannot test whether the acceptance of IPv6 "
@@ -630,6 +650,10 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 int
 FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 {
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return XORP_OK;
+
     int enable = (v) ? 1 : 0;
     bool old_value;
     
@@ -699,6 +723,10 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 int
 FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 {
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return XORP_OK;
+
 #ifndef HAVE_IPV6
     error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
 			 "IPv6 is not supported", (v) ? "true": "false");
@@ -795,6 +823,10 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 int
 FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 {
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return XORP_OK;
+
 #ifndef HAVE_IPV6
     error_msg = c_format("Cannot set the acceptance of IPv6 "
 			 "Router Advertisement messages to %s: "
