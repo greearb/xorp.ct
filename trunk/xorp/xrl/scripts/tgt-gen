@@ -140,7 +140,7 @@ def target_handler_methods(cls, name, methods):
         s += """
     if (xa_inputs.size() != %d) {
 	XLOG_ERROR(\"Wrong number of arguments (%%u != %%u) handling %%s\",
-            %d, (uint32_t)xa_inputs.size(), \"%s\");
+            %d, XORP_UINT_CAST(xa_inputs.size()), \"%s\");
 	return XrlCmdError::BAD_ARGS();
     }
 """ % (len(m.args()), len(m.args()), m.name())
