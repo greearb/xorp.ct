@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.12 2003/09/30 03:07:55 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.13 2003/10/01 02:48:08 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -78,17 +78,16 @@ BGPMain::~BGPMain()
     _peerlist->all_stop();
 
     /*
-    ** NOTE: We allow four timers to be pending. The timers are in the
-    ** xrl_router.
+    ** NOTE: We allow one timer to be pending. The timer is in the xrl_router.
     */
     debug_msg("-------------------------------------------\n");
     debug_msg("Waiting for all peers to go to idle\n");
     while (_peerlist->not_all_idle()
-	   || eventloop().timer_list_length() > 4) {
-	    eventloop().run();
-	    XLOG_INFO("EVENT: peerlist %d timers %u",
-		      _peerlist->not_all_idle(),
-		      (uint32_t)eventloop().timer_list_length());
+	   || eventloop().timer_list_length() > 1) {
+	eventloop().run();
+	XLOG_INFO("EVENT: peerlist %d timers %u",
+		  _peerlist->not_all_idle(),
+		  (uint32_t)eventloop().timer_list_length());
     }
 
     /*
