@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.19 2004/08/03 05:02:55 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.20 2004/08/03 07:45:48 pavlin Exp $
 #
 
 #
@@ -768,7 +768,7 @@ subtest_delete_route6()
     fea_redist_transaction6_commit_transaction ${tid}
 }
 
-subtest_lookup_deleted_route4()
+subtest_lookup_deleted_route_by_network4()
 {
     local _xrl_result _ret_value
 
@@ -785,7 +785,7 @@ subtest_lookup_deleted_route4()
     return 0
 }
 
-subtest_lookup_deleted_route6()
+subtest_lookup_deleted_route_by_network6()
 {
     local _xrl_result _ret_value
 
@@ -802,7 +802,7 @@ subtest_lookup_deleted_route6()
     return 0
 }
 
-subtest_lookup_deleted_route4()
+subtest_lookup_deleted_route_by_dest4()
 {
     local _xrl_result _ret_value _ipv4net
 
@@ -832,7 +832,7 @@ subtest_lookup_deleted_route4()
     return 1
 }
 
-subtest_lookup_deleted_route6()
+subtest_lookup_deleted_route_by_dest6()
 {
     local _xrl_result _ret_value _ipv6net
 
@@ -874,13 +874,13 @@ test_add_delete_unicast_forwarding_entry4()
     _subtests="${_subtests} subtest_lookup_route_by_network4"
     _subtests="${_subtests} subtest_lookup_route_by_dest4"
     _subtests="${_subtests} subtest_delete_route4"
-    _subtests="${_subtests} subtest_lookup_deleted_route4"
+    _subtests="${_subtests} subtest_lookup_deleted_route_by_network4"
     #
     # Comment-out the test below, because in case of Linux a cloned routing
     # entry from the default route may be kept in the kernel for very long
     # time.
     #
-    # _subtests="${_subtests} subtest_lookup_deleted_route4"
+    # _subtests="${_subtests} subtest_lookup_deleted_route_by_dest4"
 
     for t in ${_subtests} ; do
 	$t
@@ -903,13 +903,13 @@ test_add_delete_unicast_forwarding_entry6()
     _subtests="${_subtests} subtest_lookup_route_by_network6"
     _subtests="${_subtests} subtest_lookup_route_by_dest6"
     _subtests="${_subtests} subtest_delete_route6"
-    _subtests="${_subtests} subtest_lookup_deleted_route6"
+    _subtests="${_subtests} subtest_lookup_deleted_route_by_network6"
     #
     # Comment-out the test below, because in case of Linux a cloned routing
     # entry from the default route may be kept in the kernel for very long
     # time.
     #
-    #_subtests="${_subtests} subtest_lookup_deleted_route6"
+    #_subtests="${_subtests} subtest_lookup_deleted_route_by_dest6"
 
     for t in ${_subtests} ; do
 	$t
