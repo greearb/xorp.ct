@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/XORP-4.7,v 1.5 2003/02/06 22:19:02 atanu Exp $
+# $XORP: other/testbed/config/XORP-4.7,v 1.6 2003/02/06 22:21:43 atanu Exp $
 # GENERIC -- Generic kernel configuration file for FreeBSD/i386
 #
 # For more information on this file, please read the handbook section on
@@ -306,7 +306,7 @@ options		NMBCLUSTERS=8192
 #
 options		INCLUDE_CONFIG_FILE	# Include this file in kernel
 
-# XORP
+# XORP: need to disable SMP in order to enable device polling.
 # DEVICE_POLLING adds support for mixed interrupt-polling handling
 # of network device drivers, which has significant benefits in terms
 # of robustness to overloads and responsivity, as well as permitting
@@ -323,4 +323,4 @@ options		INCLUDE_CONFIG_FILE	# Include this file in kernel
 # Only the "dc" "fxp" and "sis" devices support this mode of operation at
 # the time of this writing.
  
-options         DEVICE_POLLING
+#options         DEVICE_POLLING
