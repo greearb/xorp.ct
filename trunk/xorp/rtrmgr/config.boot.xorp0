@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.xorp0,v 1.4 2004/05/13 00:05:31 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.xorp0,v 1.5 2004/05/16 07:15:16 pavlin Exp $ */
 
 /* this is the test config for xorp0.icir.org */
 
@@ -40,7 +40,6 @@ protocols {
 	local-as: 65002
 	peer xorp-c4000 {
 	    local-ip: 192.150.187.100
-	    peer-ip: 192.150.187.109
 	    as: 65000
 	    holdtime: 90
 	    next-hop: 192.150.187.100
