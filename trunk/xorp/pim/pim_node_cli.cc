@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.24 2004/03/02 04:06:26 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.25 2004/03/27 23:31:11 pavlin Exp $"
 
 
 //
@@ -661,6 +661,8 @@ PimNodeCli::cli_show_pim_interface_address(const vector<string>& argv)
 		       "Interface", "PrimaryAddr", "DomainWideAddr", "SecondaryAddr"));
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+	if (pim_vif == NULL)
+	    continue;
 	// Test if we should print this entry
 	bool do_print = true;
 	if (interface_name.size()) {

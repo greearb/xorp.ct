@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.11 2004/03/02 04:14:09 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.12 2004/03/27 23:31:10 pavlin Exp $"
 
 
 //
@@ -217,6 +217,8 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface_address(const vector<string>& argv)
 		       "Interface", "PrimaryAddr", "SecondaryAddr"));
     for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
+	if (mld6igmp_vif == NULL)
+	    continue;
 	// Test if we should print this entry
 	bool do_print = true;
 	if (interface_name.size()) {
