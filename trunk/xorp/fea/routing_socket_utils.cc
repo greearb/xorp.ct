@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.9 2003/09/30 03:07:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.10 2003/09/30 18:27:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -258,9 +258,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
     case AF_INET6:
     {
 	if (sock->sa_len == 0) {
-	    // TODO: can this happen for IPv6?
-	    XLOG_ERROR("Probably invalid mask: family = %d, sa_len = %d",
-		       family, sock->sa_len);
+	    // XXX: the default /0 route
 	    return (0);
 	}
 	// XXX: sock->sa_family is undefined
