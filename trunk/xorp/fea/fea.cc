@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.40 2004/12/01 03:28:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.41 2004/12/08 04:59:34 bms Exp $"
 
 #include "fea_module.h"
 
@@ -311,10 +311,10 @@ main(int argc, char *argv[])
     int ch;
     const char *argv0 = argv[0];
     char finder_hostname[MAXHOSTNAMELEN + 1];
-    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: default (in host order)
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     // Default finder hostname
-    strncpy(finder_hostname, FINDER_DEFAULT_HOST.str().c_str(),
+    strncpy(finder_hostname, FinderConstants::FINDER_DEFAULT_HOST().str().c_str(),
 	    sizeof(finder_hostname) - 1);
     finder_hostname[sizeof(finder_hostname) - 1] = '\0';
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.30 2004/05/28 05:00:33 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.31 2004/06/10 22:40:43 hodson Exp $"
 
 
 //
@@ -114,8 +114,8 @@ main(int argc, char *argv[])
     int ch;
     const char *argv0 = argv[0];
     char *finder_hostname_port = NULL;
-    IPv4 finder_addr = FINDER_DEFAULT_HOST;
-    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: host order
+    IPv4 finder_addr = FinderConstants::FINDER_DEFAULT_HOST();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     //
     // Initialize and start xlog
@@ -214,7 +214,7 @@ main(int argc, char *argv[])
 	if (finder_hostname_port == NULL) {
 	    // Start our own finder
 	    try {
-		finder = new FinderServer(eventloop, finder_port, finder_addr);
+		finder = new FinderServer(eventloop, finder_addr, finder_port);
 	    } catch (const InvalidPort&) {
 		XLOG_FATAL("Could not start in-process Finder");
 	    }

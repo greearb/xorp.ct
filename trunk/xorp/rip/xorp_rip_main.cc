@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.6 2004/09/17 13:57:16 abittau Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.7 2004/09/18 00:00:32 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -260,7 +260,9 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	XrlStdRouter		xsr(e, XrlTarget<A>::name(),
 				    finder_host.c_str(), finder_port);
 	XrlProcessSpy		xps(xsr);
-	IfMgrXrlMirror 		ixm(e, xrl_fea_name());
+	IfMgrXrlMirror 		ixm(e, xrl_fea_name(),
+				    FinderConstants::FINDER_DEFAULT_HOST(),
+				    FinderConstants::FINDER_DEFAULT_PORT());
 	XrlPortManager<A>	xpm(rip_system, xsr, ixm);
 	XrlRedistManager<A>	xrm(rip_system, xsr);
 
@@ -328,8 +330,8 @@ XorpRip<A>::main(int argc, char * const argv[])
     xlog_add_default_output();
     xlog_start();
 
-    string	finder_host = FINDER_DEFAULT_HOST.str();
-    uint16_t	finder_port = FINDER_DEFAULT_PORT;
+    string	finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
     bool	do_run 	    = true;
 
     int ch;

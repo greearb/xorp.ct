@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.16 2004/06/10 22:41:55 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.17 2004/08/19 02:00:21 pavlin Exp $"
 
 
 #include <signal.h>
@@ -92,7 +92,8 @@ main(int argc, char* const argv[])
     EventLoop eventloop; 
 
     // Initialize the finder server
-    FinderServer fs(eventloop);
+    FinderServer fs(eventloop, FinderConstants::FINDER_DEFAULT_HOST(),
+		    FinderConstants::FINDER_DEFAULT_PORT());
 
     // Start the module manager
     ModuleManager mmgr(eventloop,

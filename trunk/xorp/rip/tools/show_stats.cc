@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.5 2004/06/06 02:06:48 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.6 2004/06/10 22:41:49 hodson Exp $"
 
 #include <iomanip>
 
@@ -388,8 +388,8 @@ main(int argc, char* const argv[])
     try {
 	bool		do_run 	    = true;
 	bool		brief 	    = false;
-	string  	finder_host = FINDER_DEFAULT_HOST.str();
-        uint16_t        finder_port = FINDER_DEFAULT_PORT;
+	string  	finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
+        uint16_t        finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 	string		xrl_target;
 
 	int ch;

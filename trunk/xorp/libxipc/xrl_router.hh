@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.29 2004/06/10 22:41:13 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.30 2004/10/13 06:03:29 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -48,13 +48,13 @@ public:
     XrlRouter(EventLoop&	e,
 	      const char*	class_name,
 	      const char*	finder_address,
-	      uint16_t		finder_port = FINDER_DEFAULT_PORT)
+	      uint16_t		finder_port)
 	throw (InvalidAddress);
 
     XrlRouter(EventLoop&	e,
 	      const char*	class_name,
-	      IPv4		finder_address = FINDER_DEFAULT_HOST,
-	      uint16_t		finder_port = FINDER_DEFAULT_PORT)
+	      IPv4		finder_address,
+	      uint16_t		finder_port)
 	throw (InvalidAddress);
 
     virtual ~XrlRouter();

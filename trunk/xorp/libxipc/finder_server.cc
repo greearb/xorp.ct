@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_server.cc,v 1.8 2003/06/01 21:37:27 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_server.cc,v 1.9 2004/06/10 22:41:06 hodson Exp $"
 
 #include "finder_module.h"
 #include "finder_server.hh"
 
 FinderServer::FinderServer(EventLoop& e,
-			   uint16_t   default_port,
-			   IPv4	      default_interface)
+			   IPv4	      default_interface,
+			   uint16_t   default_port)
     throw (InvalidAddress, InvalidPort)
     : _e(e), _f(e), _fxt(_f)
 {

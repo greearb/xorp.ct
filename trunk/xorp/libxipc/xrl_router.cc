@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.40 2004/09/22 02:16:30 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.41 2004/10/13 06:03:29 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -175,13 +175,13 @@ XrlRouter::XrlRouter(EventLoop&  e,
 {
     IPv4 finder_ip;
     if (0 == finder_addr) {
-	finder_ip = FINDER_DEFAULT_HOST;
+	finder_ip = FinderConstants::FINDER_DEFAULT_HOST();
     } else {
 	finder_ip = finder_host(finder_addr);
     }
 
     if (0 == finder_port)
-	finder_port = FINDER_DEFAULT_PORT;
+	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     initialize(class_name, finder_ip, finder_port);
 }
@@ -194,7 +194,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
     : XrlDispatcher(class_name), _e(e), _finalized(false)
 {
     if (0 == finder_port)
-	finder_port = FINDER_DEFAULT_PORT;
+	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     initialize(class_name, finder_ip, finder_port);
 }

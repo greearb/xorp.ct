@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.52 2004/08/19 02:00:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.53 2004/12/06 01:15:58 mjh Exp $"
 
 #include <signal.h>
 
@@ -67,7 +67,7 @@ static bool	do_exec = default_do_exec;
 static bool	do_restart = default_do_restart;
 static bool	verbose = default_verbose;
 list<IPv4>	bind_addrs;
-uint16_t	bind_port = FINDER_DEFAULT_PORT;
+uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
 int32_t		quit_time = -1;
 
 void cleanup_and_exit(int errcode);
@@ -230,7 +230,9 @@ Rtrmgr::run()
     //
     FinderServer* fs = NULL;
     try {
-	fs = new FinderServer(eventloop, _bind_port);
+	fs = new FinderServer(eventloop,
+			      FinderConstants::FINDER_DEFAULT_HOST(),
+			      _bind_port);
 	while (_bind_addrs.empty() == false) {
 	    if (fs->add_binding(_bind_addrs.front(), _bind_port) == false) {
 		XLOG_WARNING("Finder failed to bind interface %s port %d",

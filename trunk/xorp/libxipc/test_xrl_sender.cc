@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.7 2004/10/13 05:41:48 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.8 2004/10/15 02:31:42 pavlin Exp $"
 
 //
 // Test XRLs sender.
@@ -720,8 +720,8 @@ main(int argc, char *argv[])
     int ch;
     string::size_type idx;
     const char *argv0 = argv[0];
-    string finder_hostname = FINDER_DEFAULT_HOST.str();
-    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: default (in host order)
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     //
     // Initialize and start xlog

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.11 2004/05/24 01:22:36 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.12 2004/06/10 22:42:19 hodson Exp $"
 
 #include <iostream>
 
@@ -36,7 +36,8 @@ static void
 run_test()
 {
     EventLoop e;
-    FinderServer finder(e);
+    FinderServer finder(e, FinderConstants::FINDER_DEFAULT_HOST(),
+			FinderConstants::FINDER_DEFAULT_PORT());
 
     // Configure target for test
     XrlStdRouter tgt_router(e, g_tgt_name, finder.addr(), finder.port());

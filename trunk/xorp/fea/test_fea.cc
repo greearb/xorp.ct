@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea.cc,v 1.9 2004/06/10 22:40:57 hodson Exp $"
+#ident "$XORP: xorp/fea/test_fea.cc,v 1.10 2004/08/03 03:51:48 pavlin Exp $"
 
 /* TODO: XXX: THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
@@ -306,7 +306,7 @@ print_routing_table(const char *host)
     string hostname = host;
 
     if (0 == host)
-	hostname = FINDER_DEFAULT_HOST.str();
+	hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
 
     XrlStdRouter test_fea(eventloop, client, hostname.c_str());
 
@@ -340,7 +340,7 @@ add(const char *host, Fti::TransactionType tt, char *dst, char *nexthop,
     EventLoop eventloop;
 
     if (0 == host)
-	host = FINDER_DEFAULT_HOST.str().c_str();
+	host = FinderConstants::FINDER_DEFAULT_HOST().str().c_str();
 
     XrlStdRouter test_fea(eventloop, client, host);
 
@@ -394,7 +394,7 @@ del(const char *host, Fti::TransactionType tt, char *dst, char *netmask)
     EventLoop eventloop;
 
     if (0 == host)
-	host = FINDER_DEFAULT_HOST.str().c_str();
+	host = FinderConstants::FINDER_DEFAULT_HOST().str().c_str();
 
     XrlStdRouter test_fea(eventloop, client, host);
 
@@ -475,7 +475,7 @@ create_interface(const char *host, char *interface)
     EventLoop eventloop;
 
     if (0 == host)
-	host = FINDER_DEFAULT_HOST.str().c_str();
+	host = FinderConstants::FINDER_DEFAULT_HOST().str().c_str();
 
     XrlStdRouter test_fea(eventloop, client, host);
 

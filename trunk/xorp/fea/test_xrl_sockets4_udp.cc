@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.6 2004/09/02 03:16:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.7 2004/10/27 01:20:36 bms Exp $"
 
 #include <sysexits.h>
 
@@ -747,7 +747,7 @@ parse_finder_arg(const char* host_colon_port,
 	}
     } else {
 	finder_host = string(host_colon_port);
-	finder_port = FINDER_DEFAULT_PORT;
+	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
     }
 
     try {
@@ -780,8 +780,8 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
-    IPv4        finder_addr = FINDER_DEFAULT_HOST;
-    uint16_t    finder_port = FINDER_DEFAULT_PORT;
+    IPv4        finder_addr = FinderConstants::FINDER_DEFAULT_HOST();
+    uint16_t    finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     int r = 0;	// Return code
 

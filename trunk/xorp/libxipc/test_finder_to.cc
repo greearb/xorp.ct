@@ -72,7 +72,8 @@ test_main(uint32_t pre_block_secs,
     FinderClient fc;
     FinderClientXrlTarget fxt(&fc, &fc.commands());
     FinderTcpAutoConnector fac(e, fc, fc.commands(),
-			       FINDER_DEFAULT_HOST, finder_port);
+			       FinderConstants::FINDER_DEFAULT_HOST(),
+			       finder_port);
 
     bool timeout = false;
     XorpTimer t = e.set_flag_after(TimeVal(1, 0), &timeout);
@@ -175,7 +176,7 @@ main(int argc, char * const argv[])
     block_secs 	    = 0;
     post_block_secs = 0;
     exec_secs 	    = 0;
-    port 	    = FINDER_DEFAULT_PORT;
+    port 	    = FinderConstants::FINDER_DEFAULT_PORT();
 
     int ch;
     while ((ch = getopt(argc, argv, "b:hp:vx:")) != -1) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.15 2004/11/30 07:29:40 bms Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.16 2004/12/01 03:28:12 pavlin Exp $"
 
 
 //
@@ -119,7 +119,8 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     FinderServer *finder = NULL;
     if (start_finder) {
 	try {
-	    finder = new FinderServer(eventloop);
+	    finder = new FinderServer(eventloop, IPv4(finder_hostname),
+				      finder_port);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
 	}
@@ -262,8 +263,8 @@ main(int argc, char *argv[])
     int ch;
     string::size_type idx;
     const char *argv0 = argv[0];
-    string finder_hostname = FINDER_DEFAULT_HOST.str();
-    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: default (in host order)
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     //
     // Initialize and start xlog

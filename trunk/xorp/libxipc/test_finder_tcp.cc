@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.11 2004/06/10 22:41:08 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.12 2004/09/02 02:38:01 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -102,7 +102,7 @@ class DummyFinder : public FinderTcpListenerBase {
 public:
     DummyFinder(EventLoop&  e,
 		IPv4	    interface,
-		uint16_t    port = FINDER_DEFAULT_PORT)
+		uint16_t    port = FinderConstants::FINDER_DEFAULT_PORT())
 	throw (InvalidPort)
 	: FinderTcpListenerBase(e, interface, port), _connection(0)
     {
@@ -134,9 +134,10 @@ static void
 connect_client(EventLoop* e, bool* client_connect_failed)
 {
     struct in_addr ia;
-    ia.s_addr = FINDER_DEFAULT_HOST.addr();
+    ia.s_addr = FinderConstants::FINDER_DEFAULT_HOST().addr();
 
-    int fd = comm_connect_tcp4(&ia, htons(FINDER_DEFAULT_PORT),
+    int fd = comm_connect_tcp4(&ia,
+			       htons(FinderConstants::FINDER_DEFAULT_PORT()),
 			       COMM_SOCK_NONBLOCKING);
     if (fd < 0) {
 	fprintf(stderr, "Client failed to connect\n");
@@ -152,7 +153,7 @@ test_main()
 {
     EventLoop   e;
 
-    DummyFinder df(e, FINDER_DEFAULT_HOST);
+    DummyFinder df(e, FinderConstants::FINDER_DEFAULT_HOST());
 
     bool client_connect_failed = false;
     XorpTimer	connect_timer = e.new_oneoff_after_ms(

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxipc/finder_constants.cc,v 1.1 2004/12/08 17:56:23 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
@@ -20,5 +20,5 @@
 
 #include "finder_constants.hh"
 
-const uint16_t FINDER_DEFAULT_PORT = 19999;
-const IPv4 FINDER_DEFAULT_HOST = IPv4::LOOPBACK();
+// const uint16_t FINDER_DEFAULT_PORT = 19999;
+// const IPv4 FinderConstants::FINDER_DEFAULT_HOST = IPv4::LOOPBACK();

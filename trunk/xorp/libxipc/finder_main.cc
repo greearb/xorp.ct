@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.12 2003/09/29 18:07:36 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.13 2004/06/10 22:41:05 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -106,7 +106,7 @@ finder_main(int argc, char* const argv[])
 {
     bool	run_verbose = false;
     list<IPv4>  bind_addrs;
-    uint16_t	bind_port = FINDER_DEFAULT_PORT;
+    uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     signal(SIGHUP, finder_sig_handler);
     signal(SIGINT, finder_sig_handler);
@@ -195,7 +195,7 @@ finder_main(int argc, char* const argv[])
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	EventLoop e;
-	FinderServer fs(e, bind_port);
+	FinderServer fs(e, FinderConstants::FINDER_DEFAULT_HOST(), bind_port);
 
 	list<IPv4>::const_iterator ci = bind_addrs.begin();
 	while (ci != bind_addrs.end()) {

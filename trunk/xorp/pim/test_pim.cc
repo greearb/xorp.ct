@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.41 2004/11/30 07:31:03 bms Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.42 2004/12/01 03:29:09 pavlin Exp $"
 
 
 //
@@ -125,7 +125,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     FinderServer *finder = NULL;
     if (start_finder) {
 	try {
-	    finder = new FinderServer(eventloop);
+	    finder = new FinderServer(eventloop, IPv4(finder_hostname),
+				      finder_port);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
 	}
@@ -378,8 +379,8 @@ main(int argc, char *argv[])
     int ch;
     string::size_type idx;
     const char *argv0 = argv[0];
-    string finder_hostname = FINDER_DEFAULT_HOST.str();
-    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: default (in host order)
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 
     //
     // Initialize and start xlog

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.14 2004/06/10 22:41:07 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.15 2004/09/22 02:16:44 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -194,13 +194,13 @@ test_main(void)
 {
     EventLoop e;
 
-    IPv4 test_host(FINDER_DEFAULT_HOST);
+    IPv4 test_host(FinderConstants::FINDER_DEFAULT_HOST());
     uint16_t test_port = 16666;
 
     //
     // Construct finder and messenger source for finder
     //
-    FinderServer* finder_box = new FinderServer(e, test_port);
+    FinderServer* finder_box = new FinderServer(e, test_host, test_port);
 
     //
     // Construct first finder client and messenger source for it.
@@ -361,7 +361,9 @@ test_main(void)
 
     // Test we can restart finder
     verbose_log("Restarting finder\n");
-    finder_box = new FinderServer(e, test_port);
+    finder_box = new FinderServer(e,
+				  FinderConstants::FINDER_DEFAULT_HOST(),
+				  test_port);
     expired = false;
     t = e.set_flag_after_ms(1000, &expired);
     while (expired == false)

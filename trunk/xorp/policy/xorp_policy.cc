@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/xorp_policy.cc,v 1.1 2004/09/17 13:48:53 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -29,7 +29,7 @@ void go() {
     EventLoop e;
 
     XrlStdRouter rtr(e,PolicyTarget::policy_target_name.c_str(),
-			 FINDER_DEFAULT_HOST.str().c_str());
+		     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
 
     PolicyTarget policy_target(rtr);
     XrlPolicyTarget xrl_policy_target(&rtr,policy_target);

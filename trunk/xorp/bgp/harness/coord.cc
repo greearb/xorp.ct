@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.18 2004/05/28 05:00:33 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.19 2004/06/10 22:40:39 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -247,7 +247,7 @@ main(int argc, char **argv)
     xlog_start();
 
     int c;
-    string finder_host = FINDER_DEFAULT_HOST.str();
+    string finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
     const char *server = SERVER;
 
     while((c = getopt (argc, argv, "h:")) != EOF) {

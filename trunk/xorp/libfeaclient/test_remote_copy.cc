@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.6 2004/05/24 01:22:32 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.7 2004/06/10 22:41:03 hodson Exp $"
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.6 2004/05/24 01:22:32 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.7 2004/06/10 22:41:03 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -257,7 +257,8 @@ test_main()
     ref_ptr<FinderServer> fs = 0;
     for (uint16_t port = 32000; port < 32500; port++) {
 	try {
-	    fs = new FinderServer(e, port);
+	    fs = new FinderServer(e, FinderConstants::FINDER_DEFAULT_HOST(),
+				  port);
 	    goto ___got_finder;
 	} catch (const InvalidPort&) {
 	    continue;

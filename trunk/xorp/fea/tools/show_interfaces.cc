@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.6 2004/06/10 00:15:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.7 2004/06/10 22:41:00 hodson Exp $"
 
 #include "fea/fea_module.h"
 
@@ -506,8 +506,8 @@ main(int argc, char* const argv[])
     int ch;
     string::size_type idx;
     const char *argv0 = argv[0];
-    string finder_hostname = FINDER_DEFAULT_HOST.str();
-    uint16_t finder_port = FINDER_DEFAULT_PORT; // XXX: default (in host order)
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
     string print_iface_name = "";	// XXX; empty string means print all
     string command;
 

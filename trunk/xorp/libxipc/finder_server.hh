@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_server.hh,v 1.11 2003/06/01 21:37:27 hodson Exp $
+// $XORP: xorp/libxipc/finder_server.hh,v 1.12 2004/06/10 22:41:06 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
@@ -43,9 +43,7 @@ public:
     /**
      * Constructor
      */
-    FinderServer(EventLoop& e,
-		 uint16_t   default_port = FINDER_DEFAULT_PORT,
-		 IPv4	    default_interface = FINDER_DEFAULT_HOST)
+    FinderServer(EventLoop& e, IPv4 default_interface, uint16_t default_port)
 	throw (InvalidAddress, InvalidPort);
 
     /**

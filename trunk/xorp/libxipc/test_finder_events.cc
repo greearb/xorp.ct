@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.11 2004/08/14 05:49:45 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.12 2004/08/14 20:58:17 atanu Exp $"
 
 #include <list>
 #include <vector>
@@ -504,7 +504,7 @@ test1(IPv4		finder_addr,
 
     FinderServer* fs = 0;
     if (use_internal_finder) {
-	fs = new FinderServer(e, finder_port, finder_addr);
+	fs = new FinderServer(e, finder_addr, finder_port);
     } else {
 	verbose_log("Using external Finder\n");
     }
@@ -551,7 +551,7 @@ test2(IPv4		finder_addr,
 
     FinderServer* fs = 0;
     if (use_internal_finder) {
-	fs = new FinderServer(e, finder_port, finder_addr);
+	fs = new FinderServer(e, finder_addr, finder_port);
     } else {
 	verbose_log("Using external Finder\n");
     }
@@ -617,7 +617,7 @@ test3(IPv4		finder_addr,
 
     FinderServer* fs = 0;
     if (use_internal_finder) {
-	fs = new FinderServer(e, finder_port, finder_addr);
+	fs = new FinderServer(e, finder_addr, finder_port);
     } else {
 	verbose_log("Using external Finder\n");
     }
@@ -680,7 +680,7 @@ test4(IPv4		finder_addr,
 
     FinderServer* fs = 0;
     if (use_internal_finder) {
-	fs = new FinderServer(e, finder_port, finder_addr);
+	fs = new FinderServer(e, finder_addr, finder_port);
     } else {
 	verbose_log("Using external Finder\n");
     }
@@ -850,7 +850,7 @@ parse_finder_arg(const char* host_colon_port,
 	}
     } else {
 	finder_host = string(host_colon_port);
-	finder_port = FINDER_DEFAULT_PORT;
+	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
     }
 
     try {
@@ -877,7 +877,7 @@ main(int argc, char * const argv[])
     //
     // Defaults
     //
-    IPv4	finder_addr = FINDER_DEFAULT_HOST;
+    IPv4	finder_addr = FinderConstants::FINDER_DEFAULT_HOST();
     uint16_t	finder_port = 16600;	// over-ridden for external finder
     bool	use_internal_finder = true;
     int		reps = 1;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/tools/send_cli_processor_xrl.cc,v 1.3 2004/05/28 05:00:33 hodson Exp $"
+#ident "$XORP: xorp/cli/tools/send_cli_processor_xrl.cc,v 1.4 2004/06/10 22:40:44 hodson Exp $"
 
 #include "pim/pim_module.h"
 #include "libxorp/xorp.h"
@@ -179,8 +179,8 @@ main(int argc, char* const argv[])
     int ch;
     string::size_type idx;
     const char* argv0 = argv[0];
-    string finder_hostname = FINDER_DEFAULT_HOST.str();
-    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: default (in host order)
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
     string arguments, command, target;
 
     //

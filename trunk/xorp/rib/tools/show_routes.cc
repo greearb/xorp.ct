@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.5 2004/08/03 03:01:08 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.6 2004/11/02 14:01:33 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -627,8 +627,8 @@ main(int argc, char* const argv[])
 
 	ShowRoutesOptions sr_opts;
 
-	sr_opts.finder_host = FINDER_DEFAULT_HOST.str();
-        sr_opts.finder_port = FINDER_DEFAULT_PORT;
+	sr_opts.finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
+        sr_opts.finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 	sr_opts.xrl_target  = "rib";
 
 	int ch;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.11 2004/03/27 20:46:22 pavlin Exp $"
+#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.12 2004/06/10 22:41:25 hodson Exp $"
 
 
 #include <set>
@@ -348,7 +348,9 @@ run_test_2()
     // test we create a Finder in process as we can't guarantee Finder
     // is already running.  Most XORP processes do not have to do this.
     
-    FinderServer* finder = new FinderServer(e);
+    FinderServer* finder = new FinderServer(e,
+					    FinderConstants::FINDER_DEFAULT_HOST(),
+					    FinderConstants::FINDER_DEFAULT_PORT());
     
     // Create and configure "party_A"
     XrlRouter		party_a(e, "party_A", finder->addr(), finder->port());

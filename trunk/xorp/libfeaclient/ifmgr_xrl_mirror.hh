@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.5 2004/04/22 01:11:51 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.6 2004/06/10 22:41:02 hodson Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -92,11 +92,6 @@ class IfMgrXrlMirror
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
 
-    /**
-     * Default Xrl Target to register interest with.
-     */
-    static const char* DEFAULT_REGISTRATION_TARGET;
-
 public:
     /**
      * Constructor
@@ -108,9 +103,9 @@ public:
      * @param finder_port port to direct finder messages to.
      */
     IfMgrXrlMirror(EventLoop&	e,
-		   const char*	reg_tgt     = DEFAULT_REGISTRATION_TARGET,
-		   IPv4		finder_host = FINDER_DEFAULT_HOST,
-		   uint16_t	finder_port = FINDER_DEFAULT_PORT);
+		   const char*	reg_tgt,
+		   IPv4		finder_host,
+		   uint16_t	finder_port);
 
     ~IfMgrXrlMirror();
 

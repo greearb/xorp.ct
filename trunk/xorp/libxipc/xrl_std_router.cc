@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.6 2004/06/10 22:41:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.7 2004/10/15 02:08:26 pavlin Exp $"
 
 #include "xrl_std_router.hh"
 #include "xrl_pf_inproc.hh"
@@ -49,7 +49,8 @@ destroy_listener(XrlPFListener*& l)
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   const char*	class_name)
-    : XrlRouter(eventloop, class_name)
+    : XrlRouter(eventloop, class_name,  FinderConstants::FINDER_DEFAULT_HOST(),
+		FinderConstants::FINDER_DEFAULT_PORT())
 {
     _l = create_listener(eventloop, this);
     add_listener(_l);
@@ -58,7 +59,8 @@ XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   const char*	class_name,
 			   IPv4		finder_address)
-    : XrlRouter(eventloop, class_name, finder_address)
+    : XrlRouter(eventloop, class_name, finder_address,
+		FinderConstants::FINDER_DEFAULT_PORT())
 {
     _l = create_listener(eventloop, this);
     add_listener(_l);
@@ -77,7 +79,8 @@ XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   const char*	class_name,
 			   const char*	finder_address)
-    : XrlRouter(eventloop, class_name, finder_address)
+    : XrlRouter(eventloop, class_name, finder_address,
+		FinderConstants::FINDER_DEFAULT_PORT())
 {
     _l = create_listener(eventloop, this);
     add_listener(_l);

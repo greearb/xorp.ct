@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.10 2003/06/19 00:44:42 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.11 2004/06/10 22:41:08 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -176,7 +176,9 @@ toggle_finder(EventLoop* e, FinderServer** ppfs)
 	delete *ppfs;
 	*ppfs = 0;
     } else {
-	*ppfs = new FinderServer(*e);
+	*ppfs = new FinderServer(*e,
+				 FinderConstants::FINDER_DEFAULT_HOST(),
+				 FinderConstants::FINDER_DEFAULT_PORT());
     }
     return true;
 }
