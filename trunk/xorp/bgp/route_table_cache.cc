@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.24 2004/04/22 19:29:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.25 2004/05/05 18:35:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -22,7 +22,8 @@
 #include "route_table_cache.hh"
 #include "bgp.hh"
 
-template<class A> DeleteAllNodes<A>::RouteTables DeleteAllNodes<A>::_route_tables;
+template<class A> typename DeleteAllNodes<A>::RouteTables
+	DeleteAllNodes<A>::_route_tables;
 template<class A> int DeleteAllNodes<A>::_deletions_per_call = 1000;
 
 template<class A>

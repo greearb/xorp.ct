@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.10 2004/04/12 23:25:03 atanu Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.11 2004/05/05 18:35:51 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -21,6 +21,7 @@
 #include "libxorp/timer.hh"
 #include "route_table_base.hh"
 #include "libxorp/ref_trie.hh"
+#include "peer_handler.hh"
 
 /**
  * Specialize Trie so that the SubnetRoute payload is deleted using
@@ -117,8 +118,8 @@ public:
      */
     bool delete_some_nodes() {
 	RouteTable *route_table = _route_tables.front();
-	RouteTable::iterator current = route_table->begin();
-	for(int i = 0; i < _deletions_per_call; i++, current) {
+	typename RouteTable::iterator current = route_table->begin();
+	for(int i = 0; i < _deletions_per_call; i++) {
 	    route_table->erase(current);
 	    if (current == route_table->end()) {
 		_route_tables.pop();
