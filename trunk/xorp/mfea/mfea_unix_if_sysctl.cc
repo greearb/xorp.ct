@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_if_sysctl.cc,v 1.29 2002/12/09 18:29:18 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_if_sysctl.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -191,15 +191,16 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 		mfea_vifs_vector.push_back(mfea_vif);
 		found_vifs++;
 	    }
-
-	    // Get the physical interface index
+	    
+	    //
+	    // Try to get the physical interface index
+	    //
 	    if (mfea_vif->pif_index() == 0) {
 		unsigned int pif_index = 0;
 		pif_index = ifm->ifm_index;
 		if (pif_index > 0)
 		    mfea_vif->set_pif_index(pif_index);
 	    }
-	    // Try to get again the physical interface index
 	    if (mfea_vif->pif_index() == 0) {
 		unsigned int pif_index = 0;
 #ifdef HAVE_IF_NAMETOINDEX

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_if_getifaddrs.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_if_getifaddrs.cc,v 1.2 2003/01/26 04:06:22 pavlin Exp $"
 
 
 //
@@ -133,7 +133,10 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 	    found_vifs++;
 	}
 	
-	// Get the physical interface index
+	//
+	// Try to get the physical interface index
+	//
+#ifdef AF_LINK
 	if ((ifa->ifa_addr != NULL) && (ifa->ifa_addr->sa_family == AF_LINK)) {
 	    // Link-level address
 	    struct sockaddr_dl *sdl = (struct sockaddr_dl *)ifa->ifa_addr;
@@ -143,7 +146,7 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 		// ('struct if_data' as defined in include file <net/if.h>)
 	    }
 	}
-	// Try to get again the physical interface index
+#endif // AF_LINK
 	if (mfea_vif->pif_index() == 0) {
 	    unsigned int pif_index = 0;
 #ifdef HAVE_IF_NAMETOINDEX
