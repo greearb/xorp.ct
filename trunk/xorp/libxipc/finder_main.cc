@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.8 2003/04/23 20:50:46 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.9 2003/04/24 19:32:47 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -171,6 +171,7 @@ finder_main(int argc, char* const argv[])
     // Add preferred ipc address on host
     //
     add_permitted_host(if_get_preferred());
+    add_permitted_host(IPv4("127.0.0.1"));
     
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
