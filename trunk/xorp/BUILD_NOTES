@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.17 2004/07/16 23:27:10 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.18 2004/08/22 05:56:53 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -40,7 +40,7 @@ gmake check
     - No known issues.
     - The code should compile with the following versions of the
       gcc/g++ compiler: 2.95.4 (default), 3.3.4, and
-      3.4.0 20040310 (prerelease)
+      3.4.2 20040827 (prerelease)
 
   * FreeBSD-5.1:
     - The default gcc/g++ compiler (version 3.2.2) has a bug, hence
@@ -55,6 +55,12 @@ gmake check
   * FreeBSD-5.2:
     - The code compiles with the default compiler, and the internal tests
       appear to succeed.
+
+  * The following compiler is known to be buggy, and should not be used
+    to compile XORP:
+    - gcc34 (GCC) 3.4.0 20040310 (prerelease) [FreeBSD]
+    A newer compiler such as the following should be used instead:
+    - gcc34 (GCC) 3.4.2 20040827 (prerelease) [FreeBSD]
 
 3.2. NetBSD
 ===========
