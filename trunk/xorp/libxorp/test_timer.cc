@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.6 2004/02/20 23:50:24 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.7 2004/06/10 22:41:21 hodson Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -94,6 +94,62 @@ test_wrap()
     fprintf(stderr, "b < c is %d\n", (int)(b < c));
 }
 
+class ZeroTimerTest {
+public:
+    ZeroTimerTest(EventLoop& eventloop)
+	: _eventloop(eventloop),
+	  _done(false) {}
+
+    void start() {
+	_zero_timer = _eventloop.new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &ZeroTimerTest::zero_timer_cb));
+    }
+
+    bool done() const { return _done; }
+
+    void zero_timer_cb() {
+	_done = true;
+	_zero_timer = _eventloop.new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &ZeroTimerTest::zero_timer_cb));
+    }
+
+private:
+    EventLoop&	_eventloop;
+    bool	_done;
+    XorpTimer	_zero_timer;
+};
+
+static void
+alarm_signalhandler(int sig)
+{
+    XLOG_ASSERT(sig == SIGALRM);
+
+    fprintf(stderr, "Test failed: alarm timeout\n");
+    exit(1);
+}
+
+//
+// Test that recursively generating callbacks after time zero
+// doesn't block the execution inside the internal timer look forever.
+//
+static void
+test_zero_timer(EventLoop& eventloop)
+{
+    ZeroTimerTest zero_timer_test(eventloop);
+
+    fprintf(stderr, "Start ZeroTimer test\n");
+    signal(SIGALRM, alarm_signalhandler);
+    alarm(20);
+    zero_timer_test.start();
+    while (! zero_timer_test.done()) {
+	eventloop.run();
+    }
+    signal(SIGALRM, SIG_IGN);
+    fprintf(stderr, "End ZeroTimer test\n");
+}
+
 static void
 run_test()
 {
@@ -115,6 +171,7 @@ run_test()
     }
     zzz.unschedule();
     test_many(e);
+    test_zero_timer(e);
 }
 
 int main(int /* argc */, const char* argv[])
