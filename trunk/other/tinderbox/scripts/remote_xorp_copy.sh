@@ -9,7 +9,7 @@ remote_run()
 {
     host=$1
     shift
-    ssh -n $host "$*"
+    ssh ${SSH_FLAGS} -n $host "$*"
 }
 
 if [ $# -eq 0 -o $# -gt 2 ] ; then
@@ -35,7 +35,7 @@ remote_run $HOST rm -rf "${DESTDIR}/data"
 
 remote_run $HOST mkdir -p ${DESTDIR}/tmp
 
-scp -pr xorp $1:${DESTDIR} && scp -pr scripts $1:${DESTDIR}
+scp ${SSH_FLAGS} -pr xorp $1:${DESTDIR} && scp ${SSH_FLAGS} -pr scripts $1:${DESTDIR}
 if [ $? -ne 0 ] ; then
     exit 1
 fi

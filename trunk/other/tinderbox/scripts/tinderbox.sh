@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.4 2003/01/21 16:03:16 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.5 2003/01/22 19:14:58 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -46,7 +46,7 @@ init_log_header()
     env="$4"
     dir="$5"
     now=`date "+%Y-%m-%d %H:%M:%S %Z"`
-    sinfo=`ssh -n ${host} 'uname -s -r'`
+    sinfo=`ssh ${SSH_FLAGS} -n ${host} 'uname -s -r'`
     cat >${outfile} <<EOF
 -------------------------------------------------------------------------------
 Configuration:		${cfg}
@@ -118,7 +118,7 @@ run_tinderbox() {
 
 	build_errfile="${errfile}-build"
 	cp ${header} ${build_errfile}
-	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh " >>${build_errfile} 2>&1
+	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh " >>${build_errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote build" "${build_errfile}"
 	    continue
@@ -126,7 +126,7 @@ run_tinderbox() {
 
 	check_errfile="${errfile}-check"
 	cp ${header} ${check_errfile}
-	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
+	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote check" "${check_errfile}"
 	    continue

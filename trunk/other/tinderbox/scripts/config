@@ -35,6 +35,8 @@ LOGDIR=${ROOTDIR}/log
 
 LOCALHOST=`hostname`
 
+SSH_FLAGS="-i ${HOME}/.ssh/tinderbox"
+
 # Successful build mail address
 REPORTOKADDR="Xorp Tinderbox <xorp-tinderbox@xorp.org>"
 #REPORTOKADDR="orion@icir.org"
