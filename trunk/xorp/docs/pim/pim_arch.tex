@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim/pim_arch.tex,v 1.8 2003/11/06 19:37:06 pavlin Exp $
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.9 2004/02/22 03:03:43 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP PIM-SM Routing Daemon \\
 \vspace{1ex}
-Version 0.5}
+Version 1.0}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{November 6, 2003}
+\date{June 24, 2004}
 
 \maketitle
 
@@ -77,7 +77,7 @@ implementation is well tested, we would
 try to optimize those parts of the implementation that should prove
 to be a bottleneck.
 
-Currently (November 2003), the PIM-SM implementation is based
+Currently (June 2004), the PIM-SM implementation is based
 on the specification in the following documents:
 
 \begin{itemize}
@@ -229,7 +229,7 @@ capable, and the loopback interface are ignored for multicast
 routing.
 
 Typically, from developer's point of view, all interaction with PimVif
-would be through PimNode~\footnote{For simplicity, currently (November 2003)
+would be through PimNode~\footnote{For simplicity, currently (June 2004)
 there are few occasions when XrlPimNode uses direct access to PimVif.}.
 
 The public interface for PimVif contains the methods to manipulate a
@@ -264,7 +264,7 @@ PimScopeZoneTable is a table that contains information about scoped
 zones. There is one such table per PimNode. This table is used to check
 whether various control messages are allowed to be sent or accepted a
 specific network interface~\footnote{Note that in the current implementation
-(November 2003) the PimScopeZoneTable is used only for PIM
+(June 2004) the PimScopeZoneTable is used only for PIM
 Bootstrap messages. In the future, the scope zone information would be
 used for other control messages as well.}.
 
@@ -324,12 +324,12 @@ contains PimMre entries (described in file \verb=pim/pim_mre.hh=):
 
 \end{itemize}
 
-For simplicity of implementation, currently (November 2003) PimMrt
+For simplicity of implementation, currently (June 2004) PimMrt
 contains one more table: PimMrtMfc PIM-specific table with Multicast
 Forwarding Cache (PimMfc) entries (in the future, this table may be
 moved out of PimMrt to PimNode). This table contains all
 entries that have been installed in the multicast forwarding table in
-the multicast forwarding engine. Currently (November 2003), those
+the multicast forwarding engine. Currently (June 2004), those
 entries are source-group-specific, and are installed ``on-demand'' (\ie
 only if there is an active source for some multicast group). In the future,
 group-specific entries may be supported as well (assuming that that
@@ -577,7 +577,7 @@ class Mrib {
 
 
 The MRIB information is obtained from the RIB
-module~\footnote{Currently (November 2003), the information is
+module~\footnote{Note that before June 2004 the information was
 received from the MFEA instead.}; if the RIB changes, the
 PimMribTable is updated as well. Examples when the MRIB information
 may change are: the unicast routing changes the next-hop router address
@@ -659,29 +659,11 @@ would contain all affected entries: \eg a list of \emph{MRIB\_ADD} and
 entries would specify also the order the PIM-SM module should apply
 them.
 
-Note that as we mentioned earlier, currently (November 2003), the MRIB
-information is received from the MFEA, which reads directly the unicast
-forwarding table from the (UNIX) kernel, and PIM-SM keeps a local copy
-of the whole table. The MFEA periodically reads (\eg every 10 seconds)
-the unicast forwarding table, and if there is any change, it sends the
-changes to all interested modules (that includes the PIM-SM module).
-Similarly, the MFEA informs PIM-SM about any virtual interfaces
-information changes (\eg an address has been added or
-deleted)~\footnote{Strictly speaking, the VIF (Virtual InterFace)
-abstraction is based on 
-information that can be obtained directly from the kernel. However, the
-VIF information is also related with the RIB information as well,
-therefore for consistency reason, probably it is better if any VIF
-information changes is propagated via the RIB module to the PIM-SM
-module, especially because any change in the VIF information may affect
-the unicast routing as well. This is an open issue, therefore in the
-future the current behavior may be changed.}.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{PimConfig Description}
 
 PimConfig handles the PIM-specific configuration~\footnote{Currently
-(November 2003), PimConfig is not implemented; rather, all state is
+(June 2004), PimConfig is not implemented; rather, all state is
 kept inside PimNode instead.}. This configuration is used to configure the
 following units:
 
@@ -719,6 +701,9 @@ following units:
 
   \item November 6, 2003: Bump-up the version to 0.5, and the date;
   add brief info about retrieving protocol-related statistics; minor edits.
+
+  \item June 22, 2004: Updated to match release 1.0. Bump-up the version to
+  1.0, and the date.
 
 \end{itemize}
 
