@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.27 2004/02/22 03:43:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.28 2004/02/25 00:35:48 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1234,8 +1234,10 @@ PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
     
  joined_state_label:
     my_nbr_mrib_next_hop_rp = nbr_mrib_next_hop_rp();
-    if (my_nbr_mrib_next_hop_rp == NULL)
-	return;			// XXX: I don't know the MRIB.next_hop(RP).
+    if (my_nbr_mrib_next_hop_rp == NULL) {
+	// XXX: I don't know the NBR(RPF_interface(RP), MRIB.next_hop(RP))
+	return;
+    }
     if (my_nbr_mrib_next_hop_rp->vif_index() != vif_index)
 	return;
     if (! my_nbr_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
@@ -1280,8 +1282,10 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
     
  joined_state_label:
     my_nbr_mrib_next_hop_rp = nbr_mrib_next_hop_rp();
-    if (my_nbr_mrib_next_hop_rp == NULL)
-	return;			// XXX: I don't know the MRIB.next_hop(RP)
+    if (my_nbr_mrib_next_hop_rp == NULL) {
+	// XXX: I don't know the NBR(RPF_interface(RP), MRIB.next_hop(RP))
+	return;
+    }
     if (my_nbr_mrib_next_hop_rp->vif_index() != vif_index)
 	return;
     if (! my_nbr_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
@@ -1748,7 +1752,7 @@ PimMre::recompute_is_join_desired_rp()
     // NotJoined state -> Joined state
     if (! is_join_desired_rp())
 	return (false);		// Nothing changed
-    // Send Join(*,*,RP) to MRIB.next_hop(RP)
+    // Send Join(*,*,RP) to NBR(RPF_interface(RP), MRIB.next_hop(RP))
     pim_nbr = nbr_mrib_next_hop_rp();
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
@@ -1779,7 +1783,7 @@ PimMre::recompute_is_join_desired_rp()
     // Joined state -> NotJoined state
     if (is_join_desired_rp())
 	return (false);		// Nothing changed
-    // Send Prune(*,*,RP) to MRIB.next_hop(RP)
+    // Send Prune(*,*,RP) to NBR(RPF_interface(RP), MRIB.next_hop(RP))
     pim_nbr = nbr_mrib_next_hop_rp();
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
@@ -2356,7 +2360,7 @@ PimMre::join_timer_timeout()
 	return;		// Wrong state	TODO: trigger state deletion?
     
     // Joined state
-    // Send Join(*,*,RP) to MRIB.next_hop(RP)
+    // Send Join(*,*,RP) to NBR(RPF_interface(RP), MRIB.next_hop(RP))
     pim_nbr = nbr_mrib_next_hop_rp();  
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {

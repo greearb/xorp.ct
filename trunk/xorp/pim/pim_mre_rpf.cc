@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.21 2004/02/22 03:49:36 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.22 2004/02/25 00:35:48 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -66,7 +66,8 @@ PimMre::nbr_mrib_next_hop_rp() const
 
 // Note: applies only for (*,G) and (S,G,rpt), but works also for (S,G)
 // Note that we can compute RPF'(*,G) for (S,G) or (S,G,rpt) entry
-// even if there is no (*,G) entry; in that case we return MRIB.next_hop(RP(G))
+// even if there is no (*,G) entry; in that case we return
+// NBR(RPF_interface(RP), MRIB.next_hop(RP))
 // for the corresponding RP.
 PimNbr *
 PimMre::rpfp_nbr_wc() const
@@ -77,7 +78,7 @@ PimMre::rpfp_nbr_wc() const
     if (wc_entry() != NULL)
 	return (wc_entry()->rpfp_nbr_wc());
     
-    // Return MRIB.next_hop(RP(G))
+    // Return NBR(RPF_interface(RP), MRIB.next_hop(RP))
     return (nbr_mrib_next_hop_rp());
 }
 
@@ -821,7 +822,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
     if (pim_mre_wc != NULL)
 	return (pim_mre_wc->compute_rpfp_nbr_wc());
     //
-    // Return MRIB.next_hop(RP(G))
+    // Return NBR(RPF_interface(RP), MRIB.next_hop(RP))
     // XXX: note the indirection in the computation of RPF'(S,G,rpt) which
     // uses internal knowledge about how RPF'(*,G) is computed. This
     // indirection is needed to compute RPF'(S,G,rpt) even if there is no
@@ -837,7 +838,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
 }
 
 //
-// The MRIB.next_hop(RP) has changed.
+// The NBR(RPF_interface(RP), MRIB.next_hop(RP)) has changed.
 // Take the appropriate action.
 // Note: applies only for (*,*,RP) entries
 //
@@ -864,7 +865,10 @@ PimMre::recompute_nbr_mrib_next_hop_rp_changed()
     if (new_pim_nbr == old_pim_nbr)
 	return;				// Nothing changed
     
-    // Send Join(*,*,RP) to the new value of MRIB.next_hop(RP)
+    //
+    // Send Join(*,*,RP) to the new value of
+    // NBR(RPF_interface(RP), MRIB.next_hop(RP))
+    //
     if (new_pim_nbr != NULL) {
 	bool new_group_bool = false; // Group together all (*,*,RP) entries
 	new_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
@@ -875,7 +879,10 @@ PimMre::recompute_nbr_mrib_next_hop_rp_changed()
 				  new_group_bool);
 	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
     }
-    // Send Prune(*,*,RP) to the old value of MRIB.next_hop(RP)
+    //
+    // Send Prune(*,*,RP) to the old value of
+    // NBR(RPF_interface(RP), MRIB.next_hop(RP))
+    //
     if (old_pim_nbr != NULL) {
 	bool new_group_bool = false; // Group together all (*,*,RP) entries
 	old_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
@@ -895,7 +902,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_changed()
 }
 
 //
-// The GenID of MRIB.next_hop(RP) has changed.
+// The GenID of NBR(RPF_interface(RP), MRIB.next_hop(RP)) has changed.
 // Take the appropriate action
 // Note: applies only for (*,*,RP) entries
 //
