@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.14 2003/05/07 23:42:41 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.15 2003/05/14 22:56:04 pavlin Exp $
 #
 
 Priority:
@@ -37,8 +37,8 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
-* Handle errors as specified in the error doc		Done(?)	MH
-* Support for pipelining of requests to FEA		H(BUG!)	AG
+* Handle errors as specified in the error doc		Done	MH
+* Support for pipelining of requests to FEA		Done	AG
 
 For 0.x:
 * Add route tag support to routing->RIB interface 	M	MH
@@ -151,25 +151,40 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
 * Document mib development framework			M	JC  < 1 week
-* Sample MIB handling (BGP peers, etc)			AlmostDone JC
+* Sample MIB handling (BGP peers, etc)			Done	JC
 
 * Writing autoconf tests for Net-SNMP			Done	JC    2 weeks
 * Write module to make snmpd responsive to XORP events  Done	JC    2 weeks
 * Write bgp4_mib_1657 module				H	JC    3 weeks
-* Write bgp4_mib_1657 tests using Net-SNMP tools	H	JC    1 week
-* Generate Net-SNMP configuration file for XORP		Wish	JC    1 week
+* Write bgp4_mib_1657 tests using Net-SNMP tools	Done	JC    1 week
+* Generate Net-SNMP configuration file for XORP		Done	JC    1 week
 
 ================================ Next Release ================================
 * Next release (xorp-0.3): May 29, 2003
   - Add second CVSWEB for public (DONE)
   - Write a Web page wishlist of tasks/projects that other people may choose
-    to do (Everyone):
+    to do (Started, Everyone):
     - MIBS implementation (each protocol, etc)
   - Add a pointer from the web page to xorp/RELEASE_NOTES (PR)
   - Finder supports target failure registration/notification requests
   - Defer Finder notifications handling for release-0.4
   - Code semi-freeze: May 23, 2003
   - RUN ALL SOFTWARE!!!
+    - Stress testing programs
+  - Add XLOG_UNREACHABLE()
+        equivalent of XLOG_ASSERT(false)
+  - Add XLOG_UNFINISHED("Message")
+        similar to XLOG_FATAL, but used in code that needs fixing.
+  - Command-line option for the finder: port number, and host name
+
+================================ Next-Next Release ===========================
+* Next-next release (xorp-0.4): ?? ??, 2003
+  - Process name convention: xorp_foo, or just foo or something else?
+  - Do we want to allow command-line options? If yes, work-out the
+    conventions.
+  - Add bugzilla
+  - Add automated process running (expect scripts, etc)
+  - Test programs infrastructure
 
 ================================ Next Stable Release =========================
 * Next stable release (xorp-1.0): ?? ??, 200?
