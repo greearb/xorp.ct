@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.15 2004/09/18 02:05:52 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.16 2004/10/05 20:25:28 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -129,7 +129,7 @@ public:
      *
      * @return the routing protocol metric for this route.
      */
-    inline uint32_t metric() const { return _metric; }
+    inline uint16_t metric() const { return _metric; }
 
 protected:
     Vif*		_vif;
