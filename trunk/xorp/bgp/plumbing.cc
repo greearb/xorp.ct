@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.42 2004/03/26 19:44:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.43 2004/04/01 19:54:05 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -288,8 +288,15 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			  filter_in);
     filter_in->set_next_table(cache_in);
 
-    cache_in->set_next_table(_decision_table);
-    _decision_table->add_parent(cache_in, _master.rib_handler());
+    NhLookupTable<A> *nexthop_in =
+	new NhLookupTable<A>(_ribname + "IpcChannelNhLookup",
+			     _master.safi(),
+			     &_next_hop_resolver,
+			     cache_in);
+    cache_in->set_next_table(nexthop_in);
+
+    nexthop_in->set_next_table(_decision_table);
+    _decision_table->add_parent(nexthop_in, _master.rib_handler());
 
     _tables.insert(filter_in);
     _tables.insert(cache_in);
@@ -447,6 +454,10 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     if (ibgp == false) {
 	filter_out->add_AS_prepend_filter(my_AS_number);
     }
+
+    /* 2.1 For routes that we originate add our AS if its not already
+       (EBGP peers) present. */
+    filter_out->add_originate_route_filter(my_AS_number, ibgp);
 
     /* 3. Configure MED filter.
 	  Remove old MED and add new one on transmission to EBGP peers. */
