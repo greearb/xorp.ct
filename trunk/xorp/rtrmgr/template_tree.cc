@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.3 2003/04/22 23:43:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.4 2003/05/23 00:02:08 mjh Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -30,9 +30,11 @@ extern int init_template_parser(const char* , TemplateTree* c);
 extern int parse_template();
 extern void tplterror(const char* s);
 
-TemplateTree::TemplateTree(const string& templatedirname, 
-			   const string& xrldirname) 
-    : _xrldb(xrldirname)
+TemplateTree::TemplateTree(const string& xorp_root_dir,
+			   const string& config_template_dir, 
+			   const string& xrl_dir) 
+    : _xrldb(xrl_dir),
+      _xorp_root_dir(xorp_root_dir)
 {
     _root = new TemplateTreeNode(NULL, "", "");
     _current_node = _root;
@@ -40,9 +42,9 @@ TemplateTree::TemplateTree(const string& templatedirname,
     list <string> files;
 
     struct stat dirdata;
-    if (stat(templatedirname.c_str(), &dirdata) < 0) {
+    if (stat(config_template_dir.c_str(), &dirdata) < 0) {
 	string errstr = "rtrmgr: error reading config directory "
-	    + templatedirname + "\n";
+	    + config_template_dir + "\n";
 	errstr += strerror(errno); 
 	errstr += "\n";
 	fprintf(stderr, "%s", errstr.c_str());
@@ -51,32 +53,33 @@ TemplateTree::TemplateTree(const string& templatedirname,
 
     if ((dirdata.st_mode & S_IFDIR) == 0) {
 	string errstr = "rtrmgr: error reading config directory "
-	    + templatedirname + "\n" + templatedirname + " is not a directory\n";
+	    + config_template_dir + "\n" + config_template_dir
+	    + " is not a directory\n";
 	fprintf(stderr, "%s", errstr.c_str());
 	exit(1);
     }
     
-    string globname = templatedirname + "/*.tp";
+    string globname = config_template_dir + "/*.tp";
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {
 	fprintf(stderr, "rtrmgr failed to find config files in %s\n",
-		templatedirname.c_str());
+		config_template_dir.c_str());
 	globfree(&pglob);
 	exit(1);
     }
 
     if (pglob.gl_pathc == 0) {
 	fprintf(stderr, "rtrmgr failed to find any template files in %s\n", 
-		templatedirname.c_str());
+		config_template_dir.c_str());
 	globfree(&pglob);
 	exit(1);
     }
     
-    for (size_t i=0; i< (size_t)pglob.gl_pathc; i++) {
+    for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	printf("Loading template file %s\n", pglob.gl_pathv[i]);
 	if (init_template_parser(pglob.gl_pathv[i], this) < 0) {
 	    fprintf(stderr, "Failed to open template file: %s\n", 
-		    templatedirname.c_str());
+		    config_template_dir.c_str());
 	    globfree(&pglob);
 	    exit(-1);
 	}

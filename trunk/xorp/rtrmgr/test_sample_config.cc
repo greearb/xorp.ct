@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.5 2003/05/29 21:40:33 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.6 2003/06/09 23:38:40 mjh Exp $"
 
 #include <signal.h>
 
@@ -70,7 +70,7 @@ main(int argc, char* const argv[])
     //read the router config template files
     TemplateTree *tt;
     try {
-	tt = new TemplateTree(config_template_dir, xrl_dir);
+	tt = new TemplateTree(srcdir, config_template_dir, xrl_dir);
     } catch (const XorpException&) {
 	xorp_unexpected_handler();
 	fprintf(stderr, "test_sample_config: failed to load template file\n");
@@ -85,7 +85,7 @@ main(int argc, char* const argv[])
     FinderServer fs(eventloop);
 
     //start the module manager
-    ModuleManager mmgr(eventloop, /*verbose = */false);
+    ModuleManager mmgr(eventloop, /*verbose = */false, srcdir);
     try {
 	//initialize the IPC mechanism
 	XrlStdRouter xrlrouter(eventloop, "rtrmgr-test", fs.addr(), fs.port());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.6 2003/05/10 23:23:04 mjh Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.7 2003/07/05 15:06:42 mjh Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -34,6 +34,7 @@ class XorpShell {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
     XorpShell(const string& IPCname, 
+	      const string& xorp_root_dir,
 	      const string& config_template_dir, 
 	      const string& xrl_dir);
     ~XorpShell();
@@ -89,40 +90,43 @@ public:
 	const uint32_t*>::RefPtr PID_CALLBACK;
     void get_rtrmgr_pid(PID_CALLBACK cb);
 
-    EventLoop& eventloop() {return _eventloop;}
-    SlaveConfigTree* config_tree() {return _ct;}
-    TemplateTree* template_tree() {return _tt;}
-    OpCommandList *op_cmd_list() {return _ocl;}
-    XorpClient& xorp_client() {return _xclient;}
-    uint32_t rtrmgr_pid() const {return _rtrmgr_pid;}
+    EventLoop& eventloop()		{ return _eventloop; }
+    SlaveConfigTree* config_tree()	{ return _ct; }
+    TemplateTree* template_tree()	{ return _tt; }
+    OpCommandList *op_cmd_list()	{ return _ocl; }
+    XorpClient& xorp_client()		{ return _xclient; }
+    const string& xorp_root_dir() const	{ return _xorp_root_dir; }
+    uint32_t rtrmgr_pid() const		{ return _rtrmgr_pid; }
+
 private:
-    EventLoop _eventloop; 
-    XrlStdRouter _xrlrouter;
-    XorpClient _xclient;
-    XrlRtrmgrV0p1Client _rtrmgr_client;
-    XrlXorpshInterface _xorpsh_interface;
+    EventLoop		_eventloop; 
+    XrlStdRouter	_xrlrouter;
+    XorpClient		_xclient;
+    XrlRtrmgrV0p1Client	_rtrmgr_client;
+    XrlXorpshInterface	_xorpsh_interface;
 
-    TemplateTree *_tt;
-    SlaveConfigTree *_ct;
-    OpCommandList *_ocl;
-    CliNode _cli_node;
-    RouterCLI *_router_cli;
-    string _ipc_name;
-    string _authfile;
-    string _authtoken;
-    bool _got_config;
-    string _configuration;
+    TemplateTree	*_tt;
+    SlaveConfigTree	*_ct;
+    OpCommandList	*_ocl;
+    CliNode		_cli_node;
+    RouterCLI		*_router_cli;
+    string		_xorp_root_dir;	// The root of the XORP tree
+    string		_ipc_name;
+    string		_authfile;
+    string		_authtoken;
+    bool		_got_config;
+    string		_configuration;
 
-    bool _done;  //used to move through the startup process
-    Mode _mode;
+    bool		_done;  // used to move through the startup process
+    Mode		_mode;
 
-    //used to store the callback during a commit until we get called
-    //with the response
-    CallBack _commit_callback;
-    string _commit_status; /*used for transient storage of error
-			     messages from commit */
+    // used to store the callback during a commit until we get called
+    // with the response
+    CallBack		_commit_callback;
+    string		_commit_status;	// used for transient storage of error
+					// messages from commit
 
-    uint32_t _rtrmgr_pid;
+    uint32_t		_rtrmgr_pid;
 };
 
 #endif // __RTRMGR_XORPSH_MAIN_HH__

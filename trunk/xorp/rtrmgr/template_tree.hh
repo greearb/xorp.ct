@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.3 2003/04/24 23:43:48 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.4 2003/05/10 23:23:03 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -34,7 +34,9 @@ class ModuleCommand;
 
 class TemplateTree {
 public:
-    TemplateTree(const string& tpdir, const string& xrldir);
+    TemplateTree(const string& xorp_root_dir,
+		 const string& config_template_dir,
+		 const string& xrl_dir);
     ~TemplateTree();
     void extend_path(string segment, bool is_tag);
     void pop_path();
@@ -52,18 +54,22 @@ public:
     bool check_variable_name(const string& s) const;
     const XRLdb& xrldb() const {return _xrldb;}
     TemplateTreeNode *root() const {return _root;}
+    const string& xorp_root_dir() const { return _xorp_root_dir; }
+
 private:
     TemplateTreeNode *new_node(TemplateTreeNode *parent,
 			       const string &path, 
 			       const string &varname,
 			       int type, 
 			       const string &initializer);
-    TemplateTreeNode *_root, *_current_node;
+    TemplateTreeNode	*_root;
+    TemplateTreeNode	*_current_node;
     map <string, ModuleCommand *> _registered_modules;
-    list <PathSegment> _path_segs;
-    list <int> _seg_lengths;
-    XRLdb _xrldb;
-    ModuleManager *mmgr;
+    list <PathSegment>	_path_segs;
+    list <int>		_seg_lengths;
+    XRLdb		_xrldb;
+    ModuleManager	*mmgr;
+    string		_xorp_root_dir;	// The root of the XORP tree
 };
 
 #endif // __RTRMGR_TEMPLATE_TREE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.23 2003/06/09 23:38:40 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.24 2003/07/14 21:55:18 atanu Exp $"
 
 #include <signal.h>
 
@@ -45,14 +45,21 @@
 //
 // Defaults
 //
-static bool 	   default_do_exec 	       = true;
-static const char* default_config_boot	       = "config.boot";
-static const char* default_config_template_dir = "../etc/templates";
-static const char* default_xrl_dir 	       = "../xrl/targets";
+#define DEFAULT_XORP_ROOT_DIR		XORP_ROOT
+#define DEFAULT_CONFIG_BOOT		"config.boot"
+#define DEFAULT_CONFIG_TEMPLATE_DIR	"etc/templates"
+#define DEFAULT_XRL_DIR			"xrl/targets"
+#define DEFAULT_DO_EXEC			true
+string	default_xorp_root_dir		= DEFAULT_XORP_ROOT_DIR;
+string	default_config_boot		= DEFAULT_CONFIG_BOOT;
+string	default_config_template_dir	= DEFAULT_CONFIG_TEMPLATE_DIR;
+string	default_xrl_dir			= DEFAULT_XRL_DIR;
+bool	default_do_exec			= DEFAULT_DO_EXEC;
 
 static bool running;
 
-static void signalhandler(int) {
+static void signalhandler(int)
+{
     running = false;
 }
 
@@ -69,15 +76,15 @@ usage()
 
     fprintf(stderr,
 	    "\t-b config.boot	specify boot file 		[ %s ]\n",
-	    default_config_boot);
+	    default_config_boot.c_str());
 
     fprintf(stderr,
 	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
-	    default_config_template_dir);
+	    default_config_template_dir.c_str());
 
     fprintf(stderr,
 	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
-	    default_xrl_dir);
+	    default_xrl_dir.c_str());
 
     exit(-1);
 }
@@ -110,6 +117,69 @@ valid_interface(const IPv4& addr)
     return false;
 }
 
+//
+// Return the directory path name (without the trailing '/') to the
+// executable program "progname".
+// If the path wasn't found, the return string is empty.
+//
+string
+find_exec_path_name(const char *progname)
+{
+    char *b, *p;
+    
+    // Check if we have already specified a path to the program
+    do {
+	char max_path[MAXPATHLEN + 1];
+	
+	strncpy(max_path, progname,  sizeof(max_path) - 1);
+	max_path[sizeof(max_path) - 1] = '\0';
+	
+	p = strrchr(max_path, '/');
+	if ( p != NULL) {
+	    // We have specified a path to the program; return that path
+	    *p = '\0';
+	    while (max_path[strlen(max_path) - 1] == '/')
+		max_path[strlen(max_path) - 1] = '\0';
+	    return (string(max_path));
+	}
+    } while (false);
+    
+    //
+    // Go through the PATH environment variable and find the program location
+    //
+    char* exec_path = getenv("PATH");
+    if (exec_path == NULL)
+	return (string(""));
+    
+    char buff[strlen(exec_path)];
+    strncpy(buff, exec_path, sizeof(buff) - 1);
+    buff[sizeof(buff) - 1] = '\0';
+    
+    b = buff;
+    do {
+	if ((b == NULL) || (*b == '\0'))
+	    break;
+	
+	// Cut-off the next directory name
+	p = strchr(b, ':');
+	if (p != NULL) {
+	    *p = '\0';
+	    p++;
+	}
+	while (b[strlen(b) - 1] == '/')
+	    b[strlen(b) - 1] = '\0';
+	string prefix_name = string(b);
+	string abs_progname = prefix_name + string("/") + string(progname);
+	
+	if (access(abs_progname.c_str(), X_OK) == 0) {
+	    return (prefix_name);	// Found
+	}
+	b = p;
+    } while (true);
+    
+    return (string(""));
+}
+
 int
 main(int argc, char* const argv[])
 {
@@ -124,14 +194,62 @@ main(int argc, char* const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    running = true;
 
+    running = true;
+    
     RandomGen randgen;
 
+    //
+    // Get the root of the tree
+    // The ordering is:
+    // 1. The shell environment XORP_ROOT
+    // 2. The parent directory (only if it contains the template and the
+    //    xrl directories)
+    // 3. The XORP_ROOT value as defined in config.h
+    //
+    do {
+	// Try the shell environment XORP_ROOT
+	char *p = getenv("XORP_ROOT");
+	if (p != NULL) {
+	    default_xorp_root_dir = p;
+	    break;
+	}
+	
+	// Try the parent directory
+	string s = find_exec_path_name(argv[0]);
+	if (strlen(s.c_str()) > 0) {
+	    s += "/..";		// XXX: add the parent directory
+	    string t_dir = s + "/" + DEFAULT_CONFIG_TEMPLATE_DIR;
+	    string x_dir = s + "/" + DEFAULT_XRL_DIR;
+	    struct stat t_stat, x_stat;
+	    if ((stat(t_dir.c_str(), &t_stat) == 0)
+		&& (stat(x_dir.c_str(), &x_stat) == 0)
+		&& (S_ISDIR(t_stat.st_mode))
+		&& (S_ISDIR(x_stat.st_mode))) {
+		default_xorp_root_dir = s;
+		break;
+	    }
+	}
+	
+	// The XORP_ROOT value
+	default_xorp_root_dir = DEFAULT_XORP_ROOT_DIR;
+	break;
+    } while (false);
+
+    //
+    // Expand the default variables to include the XORP root path    
+    //
+    default_config_boot = default_xorp_root_dir + "/" + default_config_boot;
+    default_config_template_dir = default_xorp_root_dir + "/"
+	+ default_config_template_dir;
+    default_xrl_dir = default_xorp_root_dir + "/" + default_xrl_dir;
+
+    string	config_template_dir = default_config_template_dir;
+    string	xrl_dir 	    = default_xrl_dir;
+    string	config_boot         = default_config_boot;
+
     bool do_exec = default_do_exec;
-    const char*	config_template_dir = default_config_template_dir;
-    const char*	xrl_dir 	    = default_xrl_dir;
-    const char*	config_boot         = default_config_boot;
+
 
     list<IPv4>	bind_addrs;
     uint16_t	bind_port = FINDER_DEFAULT_PORT;
@@ -189,10 +307,11 @@ main(int argc, char* const argv[])
 	}
     }
 
-    //read the router config template files
+    // read the router config template files
     TemplateTree *tt;
     try {
-	tt = new TemplateTree(config_template_dir, xrl_dir);
+	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
+			      xrl_dir);
     } catch (const XorpException&) {
 	printf("caught exception\n");
 	xorp_unexpected_handler();
@@ -237,7 +356,7 @@ main(int argc, char* const argv[])
     }
 
     //start the module manager
-    ModuleManager mmgr(eventloop, /*verbose = */true);
+    ModuleManager mmgr(eventloop, /*verbose = */true, default_xorp_root_dir);
 
     UserDB userdb;
     userdb.load_password_file();

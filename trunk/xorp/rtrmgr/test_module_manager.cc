@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.5 2003/05/01 07:55:28 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.6 2003/05/03 21:26:47 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -23,7 +23,9 @@
 static bool waiting = false;
 static bool run_success = false;
 
-void module_run_done(bool success) {
+void
+module_run_done(bool success)
+{
     run_success = success;
     waiting = false;
 }
@@ -39,12 +41,12 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
-    //initialize the event loop
+    // initialize the event loop
     EventLoop eventloop; 
 
-    //start the module manager
-    ModuleManager mmgr(eventloop, /*verbose = */true);
-    mmgr.new_module("finder", "../libxipc/finder");
+    // start the module manager
+    ModuleManager mmgr(eventloop, /*verbose = */true, ".");
+    mmgr.new_module("finder", "../libxipc/xorp_finder");
 
     if (mmgr.module_has_started("finder") == true) {
 	fprintf(stderr, "Incorrect initialization state for new module\n");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.3 2003/05/29 21:40:33 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.4 2003/06/09 23:59:05 mjh Exp $"
 
 #include <signal.h>
 
@@ -94,7 +94,7 @@ main(int argc, char* const argv[])
     //read the router config template files
     TemplateTree *tt;
     try {
-	tt = new TemplateTree(config_template_dir, xrl_dir);
+	tt = new TemplateTree(srcdir, config_template_dir, xrl_dir);
 	tt->display_tree();
 	delete tt;
     } catch (const XorpException&) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.17 2003/05/23 00:02:08 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.18 2003/05/31 22:33:27 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,7 +33,8 @@ extern "C" int errno;
 
 static map<pid_t, Module*> module_pids;
 
-static void childhandler(int x) 
+static void
+childhandler(int x) 
 {
     printf("childhandler: %d\n", x);
     pid_t pid;
@@ -93,7 +94,7 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
     }
 
     printf("sending kill\n");
-    //We need to kill the process
+    // We need to kill the process
     new_status(MODULE_SHUTTING_DOWN);
     kill(_pid, SIGTERM);
 
@@ -117,7 +118,7 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
     }
 
     printf("sending kill -9\n");
-    //if it still hasn't exited, kill it properly.
+    // if it still hasn't exited, kill it properly.
     kill(_pid, SIGKILL);
     _status = MODULE_NOT_STARTED;
 
@@ -127,9 +128,16 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
 }
 
 
-int Module::set_execution_path(const string &path) 
+int
+Module::set_execution_path(const string &path) 
 {
-    _path = path;
+    if ((path.size() >= 1) && (path[0] == '~')) {
+	// The path to the module starts from the user home directory
+	_path = path;
+    } else {
+	// Add the XORP root path to the front
+	_path = _mmgr.xorp_root_dir() + "/" + path;
+    }
     struct stat sb;
     if (_verbose) {
 	printf("**********************************************************\n");
@@ -137,30 +145,30 @@ int Module::set_execution_path(const string &path)
 	printf("**********************************************************\n");
     }
 
-    if (path[0] != '/') {
-	//we're going to call glob, but don't want to allow wildcard expansion
-	for(u_int i = 0; i<path.length(); i++) {
-	    char c = path[i];
-	    if (c=='*' || c=='?' || c=='[') {
-		string err = path + ": bad filename";
+    if (_path[0] != '/') {
+	// we're going to call glob, but don't want to allow wildcard expansion
+	for (u_int i = 0; i < _path.length(); i++) {
+	    char c = _path[i];
+	    if ((c == '*') || (c == '?') || (c == '[')) {
+		string err = _path + ": bad filename";
 		throw ExecutionError(err);
 	    }
 	}
 	glob_t pglob;
-	glob(path.c_str(), GLOB_TILDE, NULL, &pglob);
+	glob(_path.c_str(), GLOB_TILDE, NULL, &pglob);
 	if (pglob.gl_pathc != 1) {
-	    string err(path + ": File does not exist.");
+	    string err(_path + ": File does not exist.");
 	    XLOG_ERROR(err.c_str());
 	    return XORP_ERROR;
 	}
 	_expath = pglob.gl_pathv[0];
 	globfree(&pglob);
     } else {
-	_expath = path;
+	_expath = _path;
     }
 	
 	
-    if (stat(_expath.c_str(), &sb)<0) {
+    if (stat(_expath.c_str(), &sb) < 0) {
 	string err = _expath + ": ";
 	switch errno {
 	case ENOTDIR:
@@ -184,7 +192,8 @@ int Module::set_execution_path(const string &path)
     return XORP_OK;
 }
 
-int Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
+int
+Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 {
     if (_verbose) {
 	printf("**********************************************************\n");
@@ -216,16 +225,17 @@ int Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
     return XORP_OK;
 }
 
-void Module::module_run_done(bool success) 
+void
+Module::module_run_done(bool success) 
 {
     printf("module_run_done\n");
-    //do we think we managed to start it?
+    // do we think we managed to start it?
     if (success == false) {
 	new_status(MODULE_FAILED);
 	return;
     }
 
-    //is it still running?
+    // is it still running?
     if (_status == MODULE_FAILED) {
 	string err = _expath + ": module startup failed";
 	XLOG_ERROR(err.c_str());
@@ -264,19 +274,20 @@ void
 Module::killed() 
 {
     if (_status == MODULE_SHUTTING_DOWN) {
-	//it may have been shutting down already, in which case this is OK.
+	// it may have been shutting down already, in which case this is OK.
 	if (_verbose)
 	    printf("Module killed during shutdown: %s\n", _name.c_str());
 	new_status(MODULE_NOT_STARTED);
     } else {
-	//we don't know why it was killed.
+	// we don't know why it was killed.
 	if (_verbose)
 	    printf("Module abnormally killed: %s\n", _name.c_str());
 	new_status(MODULE_FAILED);
     }
 }
 
-void Module::new_status(int new_status) 
+void
+Module::new_status(int new_status) 
 {
     if (new_status == _status)
 	return;
@@ -297,12 +308,14 @@ Module::str() const
     return s;
 }
 
-ModuleManager::ModuleManager(EventLoop& eventloop, bool verbose) 
-    : _eventloop(eventloop), _verbose(verbose)
+ModuleManager::ModuleManager(EventLoop& eventloop, bool verbose,
+			     const string& xorp_root_dir) 
+    : _eventloop(eventloop), _verbose(verbose), _xorp_root_dir(xorp_root_dir)
 {
 }
 
-ModuleManager::~ModuleManager() {
+ModuleManager::~ModuleManager()
+{
     shutdown();
 }
 
@@ -332,7 +345,7 @@ ModuleManager::start_module(const string&name, bool do_exec,
 			    XorpCallback1<void, bool>::RefPtr cb) 
 {
     Module *m =  find_module(name);
-    assert (m != NULL);
+    assert(m != NULL);
     return m->run(do_exec, cb);
 }
 
@@ -341,7 +354,7 @@ ModuleManager::kill_module(const string&name,
 			   XorpCallback0<void>::RefPtr cb) 
 {
     Module *m =  find_module(name);
-    assert (m != NULL);
+    assert(m != NULL);
     m->terminate(cb);
     return XORP_OK;
 }
@@ -400,7 +413,7 @@ void
 ModuleManager::module_status_changed(const string& name,
 				     int old_status, int new_status) 
 {
-    //XXX eventually we'll tell someone that things changed
+    // XXX eventually we'll tell someone that things changed
     UNUSED(name);
     UNUSED(old_status);
     UNUSED(new_status);
@@ -419,7 +432,7 @@ ModuleManager::shutdown()
 
 void ModuleManager::module_shutdown_done()
 {
-    //XXX
+    // XXX
 }
 
 bool
@@ -440,7 +453,3 @@ ModuleManager::shutdown_complete()
     }
     return complete;
 }
-
-
-
-
