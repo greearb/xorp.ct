@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.18 2005/03/23 09:45:17 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.19 2005/03/23 10:53:12 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -179,6 +179,7 @@ protocols {
 	    %help:	short "Configure the IPv4 Bootstrap mechanism";
 	    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/start_bsr";
 	    %update:	xrl "$(pimsm4.targetname)/pim/0.1/start_bsr";
+	    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/stop_bsr";
 
 	    disable {
 		%help:	short "Disable the IPv4 Bootstrap mechanism";
@@ -304,7 +305,7 @@ protocols {
 		    disable {
 			%help:	short	"Disable all tracing operations";
 			%set:	xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=`~$(@)`";
-			%delete: xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=`~$(@)`";
+			%delete: xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=`~$(DEFAULT)`";
 		    }
 
 		    enabled {
