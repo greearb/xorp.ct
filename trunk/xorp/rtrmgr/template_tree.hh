@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.2 2003/03/10 23:21:02 hodson Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.3 2003/04/24 23:43:48 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -51,6 +51,7 @@ public:
     ModuleCommand *find_module(const string &name);
     bool check_variable_name(const string& s) const;
     const XRLdb& xrldb() const {return _xrldb;}
+    TemplateTreeNode *root() const {return _root;}
 private:
     TemplateTreeNode *new_node(TemplateTreeNode *parent,
 			       const string &path, 

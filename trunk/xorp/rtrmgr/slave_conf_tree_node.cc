@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.2 2003/03/10 23:21:01 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
@@ -40,33 +40,34 @@ SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 {
 }
 
-CommandTree *
-SlaveConfigTreeNode::get_command_tree(const list <string>& cmd_names,
-				      bool include_intermediates,
-				      bool include_templates) const {
+void
+SlaveConfigTreeNode::create_command_tree(CommandTree& cmd_tree,
+					 const list <string>& cmd_names,
+					 bool include_intermediates,
+					 bool include_templates) const {
 #ifdef NOTDEF
     printf("#############  ConfigTreeNode::get_command_tree called on node %s\n", _segname.c_str());
 #endif
-    CommandTree *cmd_tree = new CommandTree();
-    build_command_tree(cmd_names, *cmd_tree, 0, 
+    build_command_tree(cmd_tree, cmd_names, 0, 
 		       include_intermediates, include_templates);
 #ifdef NOTDEF
     printf("#############  leaving ConfigTreeNode::get_command_tree\n");
 #endif
-    return cmd_tree;
 }
 
 bool
-SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names, 
-					CommandTree& cmd_tree, int depth,
+SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree, 
+					const list<string>& cmd_names, 
+					int depth,
 					bool include_intermediates,
 					bool include_templates) const {
     bool instantiated = false;
-#ifdef NOTDEF
+    printf("BCT\n");
+#ifdef DEBUG
     printf("build_command_tree depth=%d\n", depth);
 #endif
     if (_deleted) {
-#ifdef NOTDEF
+#ifdef DEBUG
 	printf("Node %s is deleted\n", _path.c_str());
 #endif
 	return false;
@@ -82,7 +83,7 @@ SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names,
 	    //true subtree interior nodes.  This is needed for show and
 	    //edit commands, which can show or edit any point in the
 	    //hierarchy
-#ifdef NOTDEF
+#ifdef DEBUG
 	    printf("ACTIVATE NODE: %s\n", _path.c_str());
 #endif
 	    cmd_tree.instantiate(this, _template);
@@ -93,7 +94,7 @@ SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names,
 	    list <string>::const_iterator ci;
 	    for (ci = cmd_names.begin(); ci != cmd_names.end(); ci++) {
 		if(_template->const_command(*ci)!=NULL) {
-#ifdef NOTDEF
+#ifdef DEBUG
 		    printf("CMDTREE: %s NODE: %s\n", ci->c_str(), 
 			   _path.c_str());
 #endif
@@ -110,15 +111,15 @@ SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names,
     bool done = false;
     for (cti=_children.begin(); cti!= _children.end(); ++cti) {
 	SlaveConfigTreeNode *sctn = (SlaveConfigTreeNode*)*cti;
-	done = sctn->build_command_tree(cmd_names, cmd_tree, depth+1,
-					 include_intermediates,
-					 include_templates);
+	done = sctn->build_command_tree(cmd_tree, cmd_names, depth+1,
+					include_intermediates,
+					include_templates);
 	if (done) {
 	    templates_done.insert(sctn->template_node());
 	    instantiated = true;
 	}
     }
-#ifdef NOTDEF
+#ifdef DEBUG
     printf("-------\n***back at %s\n", _path.c_str());
     printf("***templates_done.size()==%d\n", templates_done.size());
     printf("***templates_done = ");
@@ -137,7 +138,7 @@ SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names,
 	    tti != _template->children().end();
 	    tti++) {
 	    if (templates_done.find(*tti) == templates_done.end()) {
-#ifdef NOTDEF
+#ifdef DEBUG
 		printf("***We might add TTN %s [%p] for ", (*tti)->segname().c_str(), *tti);
 		list <string>::const_iterator ci;
 		for (ci = cmd_names.begin(); ci != cmd_names.end(); ci++) {
@@ -145,9 +146,10 @@ SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names,
 		}
 		printf("\n*** at path %s\n", _path.c_str());
 #endif
-		done = (*tti)->build_command_tree(cmd_names, /*depth*/0);
-		if (done) {
-#ifdef NOTDEF
+		if ((*tti)->check_command_tree(cmd_names, 
+					       include_intermediates, 
+					       /*depth*/0)) {
+#ifdef DEBUG
 		    printf("***done == true\n");
 #endif
 		    cmd_tree.push((*tti)->segname());
@@ -155,7 +157,7 @@ SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names,
 		    cmd_tree.pop();
 		    instantiated = true;
 		} else {
-#ifdef NOTDEF
+#ifdef DEBUG
 		    printf("***done == false\n");
 #endif
 		}
@@ -165,7 +167,7 @@ SlaveConfigTreeNode::build_command_tree(const list<string>& cmd_names,
     
     if (depth > 0)
 	cmd_tree.pop();
-#ifdef NOTDEF
+#ifdef DEBUG
     printf("leaving build_command_tree\n");
 #endif
     return instantiated;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.3 2003/04/22 23:43:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.4 2003/05/02 09:00:02 mjh Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -24,6 +24,7 @@
 #include "command_tree.hh"
 
 #define DEBUG_TEMPLATE_PARSER
+#define DEBUG
 
 extern int init_template_parser(const char *, TemplateTree* c);
 extern int parse_template();
@@ -214,18 +215,19 @@ bool TemplateTreeNode::name_is_variable() const {
 
 
 bool 
-TemplateTreeNode::build_command_tree(const list<string>& cmd_names, 
+TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
+				     bool include_intermediates,
 				     int depth) const {
     bool instantiated = false;
-#ifdef NOTDEF
-    printf("TTN:build_command_tree %s depth %d\n", _segname.c_str(), depth);
+#ifdef DEBUG
+    printf("TTN:check_command_tree %s type %s depth %d\n", _segname.c_str(), typestr().c_str(), depth);
 #endif
 
     if (_parent != NULL && _parent->is_tag() && (depth == 0)) {
 	/*if the parent is a tag, then this node must be a pure
           variable. we don't want to instantiate any pure variable
           nodes in the command tree */
-#ifdef NOTDEF
+#ifdef DEBUG
 	printf("pure variable\n");
 #endif
 	return false;
@@ -234,13 +236,13 @@ TemplateTreeNode::build_command_tree(const list<string>& cmd_names,
     list <string>::const_iterator ci;
     for (ci = cmd_names.begin(); ci != cmd_names.end(); ci++) {
 	if(const_command(*ci)!=NULL) {
-#ifdef NOTDEF
+#ifdef DEBUG
 	    printf("node has command %s\n", (*ci).c_str());
 #endif
 	    instantiated = true;
 	    break;
 	} else {
-#ifdef NOTDEF
+#ifdef DEBUG
 	    printf("node doesn't have command %s\n", (*ci).c_str());
 #endif
 	}
@@ -249,15 +251,20 @@ TemplateTreeNode::build_command_tree(const list<string>& cmd_names,
     //when we're building a command tree we only want to go one level
     //into the template tree beyond the part of the tree that is
     //instantiated by the config tree.  The exception is if the first
-    //level node is a tag, then we need to check one level further.
-    if (depth==0 && _is_tag) {
+    //level node is a tag or a VOID node, then we need to check
+    //further to find a real node.
+    if (_is_tag 
+	|| ((type() == NODE_VOID) && include_intermediates)) {
 	list <TemplateTreeNode*>::const_iterator tti;
 	for (tti=_children.begin(); tti!= _children.end(); ++tti) {
-	    if ((*tti)->build_command_tree(cmd_names, depth+1)) {
+	    if ((*tti)->check_command_tree(cmd_names, include_intermediates,
+					   depth+1)) {
 		instantiated = true;
 		break;
 	    }
 	}
+    } else {
+	printf("%s is not a tag\n", _segname.c_str());
     }
     return instantiated;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.5 2003/05/03 21:26:46 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.6 2003/05/04 06:25:20 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -21,6 +21,7 @@
 #include "command_tree.hh"
 #include "slave_conf_tree.hh"
 #include "slave_conf_tree_node.hh"
+#include "template_tree.hh"
 #include "template_tree_node.hh"
 #include "op_commands.hh"
 #include "split.hh"
@@ -331,51 +332,18 @@ void RouterCLI::set_prompt(const string& line1,
     _cli_client.set_current_cli_prompt(line2.c_str());
 }
 
-#ifdef NOTDEF
-void 
-RouterCLI::add_command(const string& cmd) {
-    CliCommand *com0, *com1;
-    
-    com0 = _cli_node.cli_command_root();
-    com1 = com0->add_command(cmd.c_str(), "");
-}
-#endif
-
-void 
-RouterCLI::add_command_tree(const string& cmd, const CommandTree& tree) {
-    CliCommand *com0, *com1;
-    com0 = _cli_node.cli_command_root();
-    if (com0 == NULL) {
-	fprintf(stderr, "Null CLI root node\n");
-	abort();
-    }
-    com1 = com0->add_command(cmd.c_str(), "");
-    if (com1 == NULL) {
-	fprintf(stderr, "add_command %s failed\n", cmd.c_str());
-	abort();
-    } else {
-	debug_msg("add_command %s succeeded\n", cmd.c_str());
-    }
-    debug_msg("Add Command Tree: %s\n", cmd.c_str());
-#ifdef DEBUG_LOGGING
-    tree.print();
-#endif
-    add_command_subtree(com1, tree.root(), 
-			( const CLI_PROCESS_CALLBACK *)NULL, cmd, 0);
-}
-
 void
-RouterCLI::add_command_subtree(CliCommand *current_cli_node,
-			       const CommandTreeNode *current_command_node,
-			       const CLI_PROCESS_CALLBACK *cb,
+RouterCLI::add_command_subtree(CliCommand& current_cli_node,
+			       const CommandTreeNode& current_command_node,
+			       const CLI_PROCESS_CALLBACK& cb,
 			       string path, int depth) {
     const list<CommandTreeNode*> &cmdchildren = 
-	current_command_node->children();
+	current_command_node.children();
     if (depth > 0) {
 	if (path.empty())
-	    path = current_command_node->name();
+	    path = current_command_node.name();
 	else
-	    path += " " + current_command_node->name();
+	    path += " " + current_command_node.name();
     }
 	    
     
@@ -386,12 +354,11 @@ RouterCLI::add_command_subtree(CliCommand *current_cli_node,
 
 	CliCommand *com;
 	string subpath = path + " " + (*cmd_iter)->name();
-	if ((cb != NULL) && ((*cmd_iter)->has_command())) {
-	    com = current_cli_node->
-		add_command((*cmd_iter)->name().c_str(), "help",
-			    *cb);
+	if ((*cmd_iter)->has_command()) {
+	    com = current_cli_node.
+		add_command((*cmd_iter)->name().c_str(), "help", cb);
 	} else {
-	    com = current_cli_node->
+	    com = current_cli_node.
 		add_command((*cmd_iter)->name().c_str(), "help");
 	}
 	if (com == NULL) {
@@ -401,43 +368,40 @@ RouterCLI::add_command_subtree(CliCommand *current_cli_node,
 	} else {
 	    com->set_global_name(subpath.c_str());
 	}
-	add_command_subtree(com, *cmd_iter, cb, path, depth+1);
+	add_command_subtree(*com, *(*cmd_iter), cb, path, depth+1);
     }
 }
 
 
 
 void
-RouterCLI::add_immediate_commands(CliCommand *current_cli_node,
-				  const CommandTreeNode *current_command_node,
+RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
+				  const CommandTree& command_tree,
 				  const list <string>& cmd_names,
 				  bool include_intermediates,
-				  const CLI_PROCESS_CALLBACK *cb,
+				  const CLI_PROCESS_CALLBACK& cb,
 				  string path) {
-    const TemplateTreeNode *ttn = _current_config_node->template_node();
-    if (ttn == NULL)
-	return;
-
     string subpath;
     set <string> existing_children;
 
     const list<CommandTreeNode*> &cmdchildren = 
-	current_command_node->children();
+	command_tree.root().children();
     list <CommandTreeNode*>::const_iterator cmd_iter;
     for (cmd_iter = cmdchildren.begin(); 
 	 cmd_iter != cmdchildren.end(); 
 	 ++cmd_iter) {
+	printf("cmdchild: %s\n", (*cmd_iter)->name().c_str());
 	if (include_intermediates || (*cmd_iter)->has_command()) {
-
+	    if (include_intermediates) printf("include_intermediates\n");
+	    if ((*cmd_iter)->has_command()) printf("has_command\n");
 	    if (path.empty())
 		subpath = (*cmd_iter)->name();
 	    else
 		subpath = path + " " + (*cmd_iter)->name();
 
 	    CliCommand *com;
-	    com = current_cli_node->
-		add_command((*cmd_iter)->name().c_str(), "help",
-			    *cb);
+	    com = current_cli_node.
+		add_command((*cmd_iter)->name().c_str(), "help", cb);
 	    if (com == NULL) {
 		fprintf(stderr, "AI: add_command %s failed\n", 
 			(*cmd_iter)->name().c_str());
@@ -449,23 +413,37 @@ RouterCLI::add_immediate_commands(CliCommand *current_cli_node,
 	}
     }
 
+    const TemplateTreeNode *ttn;
+    if (_current_config_node->is_root_node()) {
+	printf("we're at the root\n");
+	ttn = template_tree()->root();
+    } else {
+	ttn = _current_config_node->template_node();
+    }
+    assert(ttn != NULL);
+
+    printf("TTN Node: %s\n", ttn->s().c_str());
     list <TemplateTreeNode*>::const_iterator tti;
     for(tti = ttn->children().begin();
-	tti == ttn->children().end();
+	tti != ttn->children().end();
 	tti++) {
+	printf("TTN: %s\n", (*tti)->segname().c_str());
 	//we don't need to consider this child if it's already added
 	if (existing_children.find((*tti)->segname()) 
-	    != existing_children.end()) {
-	    if ((*tti)->build_command_tree(cmd_names, /*depth*/0)) {
+	    == existing_children.end()) {
+	    printf("Not yet added\n");
+	    printf("----------------------------------------------------------------------------\n");
+	    if ((*tti)->check_command_tree(cmd_names, include_intermediates,
+					   /*depth*/0)) {
+		printf("build_command_tree returned true\n");
 		if (path.empty())
 		    subpath = (*tti)->segname();
 		else
 		    subpath = path + " " + (*tti)->segname();
 
 		CliCommand *com;
-		com = current_cli_node->
-		    add_command((*tti)->segname().c_str(), "help",
-				*cb);
+		com = current_cli_node.
+		    add_command((*tti)->segname().c_str(), "help", cb);
 		if (com == NULL) {
 		    fprintf(stderr, "AI: add_command %s for template failed\n", 
 			    (*tti)->segname().c_str());
@@ -473,7 +451,12 @@ RouterCLI::add_immediate_commands(CliCommand *current_cli_node,
 		} else {
 		    com->set_global_name(subpath.c_str());
 		}
+	    } else {
+		printf("build_command_tree returned false\n");
 	    }
+	    printf("----------------------------------------------------------------------------\n");
+	} else {
+	    printf("Already added\n");
 	}
     }
 }
@@ -513,7 +496,8 @@ RouterCLI::pathstr2() const {
 
 void 
 RouterCLI::add_edit_subtree() {
-    const CommandTree *cmd_tree;
+    printf("add_edit_subtree\n");
+    CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%create");
     cmds.push_back("%activate");
@@ -531,10 +515,10 @@ RouterCLI::add_edit_subtree() {
 	}
     }
 
-    cmd_tree = 
-	_current_config_node->get_command_tree(cmds, 
-					       /*include_intermediates*/true, 
-					       /*include templates*/true);
+    _current_config_node->create_command_tree(cmd_tree,
+					      cmds, 
+					      /*include_intermediates*/true, 
+					      /*include templates*/true);
 #ifdef DEBUG_CMD_TREES
     printf("==============================================================\n");
     printf("edit subtree is:\n\n");
@@ -543,37 +527,35 @@ RouterCLI::add_edit_subtree() {
 #endif
 
     if (_nesting_depth == 0) {
-	const CLI_PROCESS_CALLBACK cb = callback(this, &RouterCLI::edit_func);
-
 	string cmdpath;
 	if (_path.empty())
 	    cmdpath = "edit";
 	else
 	    cmdpath = "edit " + pathstr();
 
-	add_command_subtree(_edit_node, cmd_tree->root(), &cb, cmdpath, 0);
+	add_command_subtree(*_edit_node, cmd_tree.root(), 
+			    callback(this, &RouterCLI::edit_func), 
+			    cmdpath, 0);
     }
-
-    const CLI_PROCESS_CALLBACK cb2 
-	= callback(this, &RouterCLI::text_entry_func);
-    add_immediate_commands(_cli_node.cli_command_root(), cmd_tree->root(), 
-			   cmds, /*include_intermediates*/true, &cb2, 
+    printf("here1\n");
+    add_immediate_commands(*(_cli_node.cli_command_root()), cmd_tree, 
+			   cmds, /*include_intermediates*/true, 
+			   callback(this, &RouterCLI::text_entry_func), 
 			   pathstr());
-    delete cmd_tree;
 }
 
 void 
 RouterCLI::add_delete_subtree() {
-    const CommandTree *cmd_tree;
+    CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%create");
     cmds.push_back("%activate");
     cmds.push_back("%set");
     cmds.push_back("%delete");
-    cmd_tree = 
-	_current_config_node->get_command_tree(cmds, 
-					       /*include_intermediates*/true, 
-					       /*include templates*/false);
+    _current_config_node->create_command_tree(cmd_tree,
+					      cmds, 
+					      /*include_intermediates*/true, 
+					      /*include templates*/false);
 #ifdef DEBUG_CMD_TREES
     printf("==============================================================\n");
     printf("delete subtree is:\n\n");
@@ -581,27 +563,26 @@ RouterCLI::add_delete_subtree() {
     printf("==============================================================\n");
 #endif
 
-    const CLI_PROCESS_CALLBACK del_cb = 
-	callback(this, &RouterCLI::delete_func);
     string cmdpath;
     if (_path.empty())
 	cmdpath = "delete";
     else
 	cmdpath = "delete " + pathstr();
 
-    add_command_subtree(_delete_node, cmd_tree->root(), &del_cb, cmdpath, 0);
-    delete cmd_tree;
+    add_command_subtree(*_delete_node, cmd_tree.root(), 
+			callback(this, &RouterCLI::delete_func), 
+			cmdpath, 0);
 }
 
 void 
 RouterCLI::add_set_subtree() {
-    const CommandTree *cmd_tree;
+    CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%set");
-    cmd_tree = 
-	_current_config_node->get_command_tree(cmds, 
-					       /*include_intermediates*/false, 
-					       /*include templates*/true);
+    _current_config_node->create_command_tree(cmd_tree,
+					      cmds, 
+					      /*include_intermediates*/false, 
+					      /*include templates*/true);
 
 #ifdef DEBUG_CMD_TREES
     printf("==============================================================\n");
@@ -611,35 +592,33 @@ RouterCLI::add_set_subtree() {
 #endif
 
     if (_nesting_depth == 0) {
-	const CLI_PROCESS_CALLBACK cb = callback(this, &RouterCLI::set_func);
-
 	string cmdpath;
 	if (_path.empty())
 	    cmdpath = "set";
 	else
 	    cmdpath = "set " + pathstr();
 
-	add_command_subtree(_set_node, cmd_tree->root(), &cb, cmdpath, 0);
+	add_command_subtree(*_set_node, cmd_tree.root(), 
+			    callback(this, &RouterCLI::set_func), 
+			    cmdpath, 0);
     }
 
-    const CLI_PROCESS_CALLBACK cb2 
-	= callback(this, &RouterCLI::immediate_set_func);
-    add_immediate_commands(_cli_node.cli_command_root(), cmd_tree->root(), 
-			   cmds, /*include_intermediates*/false, &cb2, 
+    add_immediate_commands(*(_cli_node.cli_command_root()), cmd_tree, 
+			   cmds, /*include_intermediates*/false, 
+			   callback(this, &RouterCLI::immediate_set_func), 
 			   pathstr());
 
-    delete cmd_tree;
 }
 
 void 
 RouterCLI::add_show_subtree() {
-    const CommandTree *cmd_tree;
+    CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%get");
-    cmd_tree = 
-	_current_config_node->get_command_tree(cmds, 
-					       /*include_intermediates*/true, 
-					       /*include templates*/false);
+    _current_config_node->create_command_tree(cmd_tree,
+					      cmds, 
+					      /*include_intermediates*/true, 
+					      /*include templates*/false);
 
 #ifdef DEBUG_CMD_TREES
     printf("==============================================================\n");
@@ -648,16 +627,15 @@ RouterCLI::add_show_subtree() {
     printf("==============================================================\n");
 #endif
 
-    const CLI_PROCESS_CALLBACK cb = callback(this, &RouterCLI::show_func);
-
     string cmdpath;
     if (_path.empty())
 	cmdpath = "show";
     else
 	cmdpath = "show " + pathstr();
 
-    add_command_subtree(_show_node, cmd_tree->root(), &cb, cmdpath, 0);
-    delete cmd_tree;
+    add_command_subtree(*_show_node, cmd_tree.root(), 
+			callback(this, &RouterCLI::show_func), 
+			cmdpath, 0);
 }
 
 int
@@ -896,7 +874,7 @@ RouterCLI::text_entry_func(const char * ,
     string nodename;
     
 
-    if (argv.size() != 0) {
+    if (argv.size() != 0 || (pathsegs.back() != "}")) {
 	if (ctn == NULL) {
 	    create_needed = true;
 	    tag_ttn = config_tree()->find_template(pathsegs);
@@ -907,53 +885,82 @@ RouterCLI::text_entry_func(const char * ,
 	} else {
 	    tag_ttn = ctn->template_node();
 	}
-	assert(tag_ttn->is_tag());
 
-	/* check type of argv[0] is OK*/
-	list <TemplateTreeNode*>::const_iterator tagi;
-	data_ttn = NULL;
-	/* the tag can have multiple children of different types -
-           take the first that has valid syntax */
-	/* XXX we really ought to check the allow commands here */
-	for (tagi=tag_ttn->children().begin();
-	     tagi!=tag_ttn->children().end();
-	     tagi++) {
-	    if ((*tagi)->type_match(argv[0])) {
-		data_ttn = (*tagi);
-		break;
-	    }
-	}
-	if (data_ttn == NULL) {
-	    string result = "ERROR: argument \"" + argv[0] + 
-		"\" is not a valid " + tag_ttn->segname();
-	    _cli_client.cli_print(c_format("%s\n", result.c_str()));
+	//if there are no arguments, it must be a void structuring node
+	if ((argv.size() == 0) && (tag_ttn->type() != NODE_VOID)) {
+	    _cli_client.cli_print("ERROR: Insufficient arguments\n");
 	    return (XORP_ERROR);
 	}
 
-	/* check we're not being asked to create a node that already exists*/
-	if (create_needed == false) {
-	    list <ConfigTreeNode*>::const_iterator cti;
-	    for (cti = ctn->children().begin();
-		 cti != ctn->children().end();
-		 cti++) {
-		if ((*cti)->segname() == argv[0]) {
-		    string result = "ERROR: can't create \"" + argv[0] + 
-			"\", as it already exists.";
-		    _cli_client.cli_print(c_format("%s\n", result.c_str()));
-		    return (XORP_ERROR);
+	assert(tag_ttn->is_tag() || (tag_ttn->type() == NODE_VOID));
+
+	if (tag_ttn->is_tag()) {
+	    //We're dealing with a tag node, plus value.
+
+	    /* check type of argv[0] is OK*/
+	    list <TemplateTreeNode*>::const_iterator tagi;
+	    data_ttn = NULL;
+	    /* the tag can have multiple children of different types -
+	       take the first that has valid syntax */
+	    /* XXX we really ought to check the allow commands here */
+	    for (tagi=tag_ttn->children().begin();
+		 tagi!=tag_ttn->children().end();
+		 tagi++) {
+		if ((*tagi)->type_match(argv[0])) {
+		    data_ttn = (*tagi);
+		    break;
 		}
 	    }
-	}
+	    if (data_ttn == NULL) {
+		string result = "ERROR: argument \"" + argv[0] + 
+		    "\" is not a valid " + tag_ttn->segname();
+		_cli_client.cli_print(c_format("%s\n", result.c_str()));
+		return (XORP_ERROR);
+	    }
 
-	/* check remaining args are OK*/
-	if (argv.size() == 2 && argv[1] != "{") {
-	    string result = "ERROR: \"{\" expected instead of  \"" + argv[1];
-	    _cli_client.cli_print(c_format("%s\n", result.c_str()));
-	    return (XORP_ERROR);
-	} else if (argv.size() > 2) {
-	    string result = "ERROR: too many arguments\n";
-	    _cli_client.cli_print(c_format("%s\n", result.c_str()));
-	    return (XORP_ERROR);
+	    /* check we're not being asked to create a node that
+               already exists*/
+	    if (create_needed == false) {
+		list <ConfigTreeNode*>::const_iterator cti;
+		for (cti = ctn->children().begin();
+		     cti != ctn->children().end();
+		     cti++) {
+		    if ((*cti)->segname() == argv[0]) {
+			string result = "ERROR: can't create \"" + argv[0] + 
+			    "\", as it already exists.";
+			_cli_client.cli_print(c_format("%s\n", 
+						       result.c_str()));
+			return (XORP_ERROR);
+		    }
+		}
+	    }
+
+	    /* check remaining args are OK*/
+	    if (argv.size() == 2 && argv[1] != "{") {
+		string result = "ERROR: \"{\" expected instead of  \"" 
+		    + argv[1];
+		_cli_client.cli_print(c_format("%s\n", result.c_str()));
+		return (XORP_ERROR);
+	    } else if (argv.size() > 2) {
+		string result = "ERROR: too many arguments\n";
+		_cli_client.cli_print(c_format("%s\n", result.c_str()));
+		return (XORP_ERROR);
+	    }
+	} else {
+
+	    //We're dealing with a NODE_VOID structuring node.
+
+	    assert(tag_ttn->type() == NODE_VOID);
+	    if (argv.size() == 1 && argv[0] != "{") {
+		string result = "ERROR: \"{\" expected instead of  \"" 
+		    + argv[1];
+		_cli_client.cli_print(c_format("%s\n", result.c_str()));
+		return (XORP_ERROR);
+	    } else if (argv.size() > 1) {
+		string result = "ERROR: too many arguments\n";
+		_cli_client.cli_print(c_format("%s\n", result.c_str()));
+		return (XORP_ERROR);
+	    }
 	}
 
 	/* create the parent node, if needed */
@@ -973,86 +980,104 @@ RouterCLI::text_entry_func(const char * ,
 					  getuid());
 	}
 
-	newpath += " " + argv[0];
-	newnode = new SlaveConfigTreeNode(argv[0], newpath, data_ttn,
-					  ctn, getuid());
+	if (tag_ttn->is_tag()) {
+	    //We're dealing with a tag node, plus value.
 
-	//check that the value was OK
-	string errmsg;
-	if (newnode->check_allowed_value(errmsg) == false) {
-	    _cli_client.cli_print(errmsg);
-	    //if the value was bad, remove the nodes we just added
-	    ctn->remove_child(newnode);
-	    delete newnode;
-	    if (create_needed) {
-		_current_config_node->remove_child(ctn);
-		delete ctn;
+	    newpath += " " + argv[0];
+	    newnode = new SlaveConfigTreeNode(argv[0], newpath, data_ttn,
+					      ctn, getuid());
+
+	    //check that the value was OK
+	    string errmsg;
+	    if (newnode->check_allowed_value(errmsg) == false) {
+		_cli_client.cli_print(errmsg);
+		//if the value was bad, remove the nodes we just added
+		ctn->remove_child(newnode);
+		delete newnode;
+		if (create_needed) {
+		    _current_config_node->remove_child(ctn);
+		    delete ctn;
+		}
+		return (XORP_ERROR);
 	    }
-	    return (XORP_ERROR);
-	}
 
-	if (argv.size()==1 && _nesting_depth==0) {
-	    //nothing more to enter
-	    _cli_client.cli_print("OK\n");
-	    _changes_made = true;
-	    //apply path change to add the commit command
-	    apply_path_change();
-	    //add any default children for the new node
-	    newnode->add_default_children();
-	    return (XORP_OK);
-	}
+	    if (argv.size()==1 && _nesting_depth==0) {
+		//nothing more to enter
+		_cli_client.cli_print("OK\n");
+		_changes_made = true;
+		//apply path change to add the commit command
+		apply_path_change();
+		//add any default children for the new node
+		newnode->add_default_children();
+		return (XORP_OK);
+	    }
 
-	if (argv.size() > 1) {
-	    _current_config_node = newnode;
+	    if (argv.size() > 1) {
+		_current_config_node = newnode;
+		_path.push_back(pathsegs.back());
+		_path.push_back(argv[0]);
+		_nesting_lengths.push_back(2);
+		_nesting_depth++;
+	    }
+	} else {
+	    //We're dealing with a NODE_VOID structuring node.
+
+	    if (argv.size()==0 && _nesting_depth==0) {
+		//nothing more to enter
+		_cli_client.cli_print("OK\n");
+		_changes_made = true;
+		//apply path change to add the commit command
+		apply_path_change();
+		//add any default children for the new node
+		ctn->add_default_children();
+		return (XORP_OK);
+	    }
+
+	    assert(tag_ttn->type() == NODE_VOID);
+	    _current_config_node = ctn;
 	    _path.push_back(pathsegs.back());
-	    _path.push_back(argv[0]);
+	    _nesting_lengths.push_back(1);
 	    _nesting_depth++;
 	}
 	text_entry_mode();
 	add_edit_subtree();
 	add_set_subtree();
-	const CLI_PROCESS_CALLBACK cb 
-	    = callback(this, &RouterCLI::text_entry_func);
 	CliCommand *com;
 	com = _cli_node.cli_command_root()->
-	    add_command("}", "complete this configuration level", cb);
+	    add_command("}", "complete this configuration level", 
+			callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
 	_changes_made = true;
 	return (XORP_OK);
     } else {
-	if (pathsegs.back() == "}") {
-	    assert(_nesting_depth > 0);
-	    _current_config_node = _current_config_node->parent();
-	    assert(_current_config_node != NULL);
+	assert(pathsegs.back() == "}");
+	assert(_nesting_depth > 0);
+	for (int i=0; i< _nesting_lengths.back(); i++) {
 	    _current_config_node = _current_config_node->parent();
 	    assert(_current_config_node != NULL);
 	    _path.pop_back();
-	    assert(!_path.empty());
-	    _path.pop_back();
-	    _nesting_depth--;
-	    if (_nesting_depth > 0) {
-		assert(!_path.empty());
-		text_entry_mode();
-		add_edit_subtree();
-		add_set_subtree();
-		const CLI_PROCESS_CALLBACK cb 
-		    = callback(this, &RouterCLI::text_entry_func);
-		CliCommand *com;
-		com = _cli_node.cli_command_root()->
-		    add_command("}", "complete this configuration level", cb);
-		com->set_global_name("}");
-		_changes_made = true;
-		return (XORP_OK);
-	    } else {
-		_cli_client.cli_print("OK.  Use \"commit\" to apply these changes.\n");
-		_changes_made = true;
-		config_tree()->add_default_children();
-		configure_mode();
-		return (XORP_OK);
-	    }
 	}
-	_cli_client.cli_print("ERROR: Insufficient arguments\n");
-	return (XORP_ERROR);
+	_nesting_lengths.pop_back();
+	_nesting_depth--;
+	if (_nesting_depth > 0) {
+	    assert(!_path.empty());
+	    text_entry_mode();
+	    add_edit_subtree();
+	    add_set_subtree();
+	    CliCommand *com;
+	    com = _cli_node.cli_command_root()->
+		add_command("}", "complete this configuration level", 
+			    callback(this, &RouterCLI::text_entry_func));
+	    com->set_global_name("}");
+	    _changes_made = true;
+	    return (XORP_OK);
+	} else {
+	    _cli_client.cli_print("OK.  Use \"commit\" to apply these changes.\n");
+	    _changes_made = true;
+	    config_tree()->add_default_children();
+	    configure_mode();
+	    return (XORP_OK);
+	}
     }
 }
 
@@ -1129,11 +1154,10 @@ RouterCLI::immediate_set_func(const char * ,
 	text_entry_mode();
 	add_edit_subtree();
 	add_set_subtree();
-	const CLI_PROCESS_CALLBACK cb 
-	    = callback(this, &RouterCLI::text_entry_func);
 	CliCommand *com;
 	com = _cli_node.cli_command_root()->
-	    add_command("}", "complete this configuration level", cb);
+	    add_command("}", "complete this configuration level", 
+			callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
     }
     return (XORP_OK);
@@ -1470,6 +1494,12 @@ RouterCLI::load_done(bool success, string errmsg) {
 SlaveConfigTree* 
 RouterCLI::config_tree() {
     return _xorpsh.config_tree();
+}
+
+//just to make the code more readable:
+TemplateTree* 
+RouterCLI::template_tree() {
+    return _xorpsh.template_tree();
 }
 
 //just to make the code more readable:

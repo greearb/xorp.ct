@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.4 2003/04/23 21:09:32 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.5 2003/05/03 21:26:46 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -23,6 +23,7 @@
 #include "cli/cli_client.hh"
 #include "libxipc/xrl_error.hh"
 
+class TemplateTree;
 class ConfigTree;
 class SlaveConfigTree;
 class ConfigTreeNode;
@@ -46,10 +47,8 @@ class RouterCLI {
 public:
     RouterCLI::RouterCLI(XorpShell& xorpsh,
 			 CliNode& cli_node);
-    //    void add_command(const string& cmd);
     bool is_config_mode() const;
     void commit_done_by_user(int uid);
-    void add_command_tree(const string& cmd, const CommandTree& tree);
     void clear_command_set();
     int configure_func(const char *,
 		       const char *,
@@ -142,15 +141,43 @@ private:
     void add_op_mode_commands(CliCommand *root);
     void configure_mode();
     void text_entry_mode();
-    void add_command_subtree(CliCommand *current_cli_node,
-			     const CommandTreeNode *current_command_node,
-			     const CLI_PROCESS_CALLBACK *cli_process_callback,
+    void add_command_subtree(CliCommand& current_cli_node,
+			     const CommandTreeNode& current_command_node,
+			     const CLI_PROCESS_CALLBACK& cli_process_callback,
 			     string path, int depth);
-    void add_immediate_commands(CliCommand *current_cli_node,
-				const CommandTreeNode *current_command_node,
+    
+    /**
+     * @short add commands for direct configuration of new nodes
+     *
+     * To add a new node in the command tree, you just start typing
+     * the name of the node, and continue adding new config until the
+     * new config subtree is complete.  add_immediate_commands adds
+     * the names of possible new configution nodes to the command menu
+     * to permit this. 
+     *
+     * @param current_cli_node the current position in the config tree.
+     *
+     * @param the command tree whose nodes need to be added to the CLI.
+     *
+     * @param cmd_names the list of template tree command names that
+     * we will use to find the template_tree nodes that form the
+     * command tree rooted at this config tree node.
+     *
+     * @param include_intermediates true if we want to add commands
+     * for nodes indirectly rooted at the current node, false if we
+     * only want to include commands that are direct children of the
+     * current node.
+     *
+     * @param cb the callback to call if any of these commands is
+     * typed by the user.
+     *
+     * @param path the configuration path to current position in the config 
+     *        tree */
+    void add_immediate_commands(CliCommand& current_cli_node,
+				const CommandTree& command_tree,
 				const list <string>& cmd_names,
 				bool include_intermediates,
-				const CLI_PROCESS_CALLBACK *cb,
+				const CLI_PROCESS_CALLBACK& cb,
 				string path);
     void add_edit_subtree();
     void add_delete_subtree();
@@ -165,6 +192,7 @@ private:
     void check_for_rtrmgr_restart();
     void verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid);
 
+    TemplateTree* template_tree();
     SlaveConfigTree* config_tree();
     OpCommandList* op_cmd_list();
 
@@ -184,6 +212,8 @@ private:
     list <uint32_t> _config_mode_users;
     list <string> _alerts;
     int _nesting_depth; /* for text_entry mode: number of brackets deep */
+    list <int> _nesting_lengths; /* for text_entry mode: number of
+                                   nodes for each backet nested */
     bool _changes_made; /* indicates there are uncommitted changes */
 };
 

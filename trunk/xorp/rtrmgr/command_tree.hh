@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/command_tree.hh,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
+// $XORP: xorp/rtrmgr/command_tree.hh,v 1.2 2003/03/10 23:20:59 hodson Exp $
 
 #ifndef __RTRMGR_COMMAND_TREE_HH__
 #define __RTRMGR_COMMAND_TREE_HH__
@@ -60,10 +60,7 @@ public:
 		     const TemplateTreeNode *ttn);
     void activate_current();
     void print() const;
-    const CommandTreeNode* root() const {return &_root;}
-#ifdef NOTDEF
-    const CommandTreeNode* subroot(const list <string>& path) const;
-#endif
+    const CommandTreeNode& root() const {return _root;}
 private:
     list <string> _temp_path;
     CommandTreeNode _root;

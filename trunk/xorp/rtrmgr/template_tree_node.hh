@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.2 2003/03/10 23:21:02 hodson Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.3 2003/04/22 23:43:02 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -88,7 +88,8 @@ public:
     const string& segname() const {return _segname;}
     string path() const;
 
-    bool build_command_tree(const list<string>& commands, 
+    bool check_command_tree(const list<string>& commands, 
+			    bool include_intermediates, 
 			    int depth) const;
     bool has_default() const {return _has_default;}
     bool check_variable_name(const vector<string>& parts, uint part) const;
