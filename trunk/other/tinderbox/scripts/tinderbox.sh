@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.3 2003/01/20 20:36:23 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.4 2003/01/21 16:03:16 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -9,9 +9,9 @@ filter_and_post_log()
 {
     local subject toaddr errfile filtfile msgfile
 
-    subject="$1: $2"
-    toaddr="$3"
-    errfile="$4"
+    subject="$1"
+    toaddr="$2"
+    errfile="$3"
 
     # File containing filtered error log
     filtfile=${errfile}.filt
@@ -63,25 +63,23 @@ EOF
 #
 # extoll - send success message 
 #
-# $1 = Host message relevant to
-# $2 = Subject
-# $3 = log file
+# $1 = Config message relevant to + message
+# $2 = log file
 #
 extoll()
 {
-    filter_and_post_log "$1" "$2" "${REPORTOKADDR}" "${3}"
+    filter_and_post_log "PASS: $1" "${REPORTOKADDR}" "${2}"
 }
 
 #
 # harp - send fail message 
 #
-# $1 = Host message relevant to
-# $2 = Subject
-# $3 = log file
+# $1 = Message relevant to
+# $2 = log file
 #
 harp()
 {
-    filter_and_post_log "$1" "$2" "${REPORTBADADDR}" "${3}"
+    filter_and_post_log "FAIL: $1" "${REPORTBADADDR}" "${2}"
 }
 
 run_tinderbox() {
@@ -99,42 +97,44 @@ run_tinderbox() {
 	cat /dev/null > ${errfile}
 	if [ -z "${cfg_host}" ] ; then
 	    echo "Configuration \"$cfg\" has no host." > ${errfile}
-	    harp "${cfg}" "Misconfiguration" "${errfile}"
+	    harp "${cfg} configuration" "${errfile}"
 	    continue
 	fi
 
 	if [ -z "${cfg_home}" ] ; then
 	    echo "Configuration \"$cfg\" has no directory." > ${errfile}
-	    harp "${cfg}" "Misconfiguration" "${err_file}"
+	    harp "${cfg} configuration" "${err_file}"
 	    continue
 	fi
 
 	echo "Remote copy ${cfg_host} ${cfg_home}" > ${errfile}
 	${SCRIPTSDIR}/remote_xorp_copy.sh ${cfg_host} ${cfg_home} >>${errfile} 2>&1
 	if [ $? -ne 0 ] ; then
-	    harp "${HOSTNAME}" "remote copy failed to ${cfg_host}" "${errfile}"
+	    harp "${cfg} remote copy" "${errfile}"
 	    continue
 	fi
 
 	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}" 
 
-	cp ${header} ${errfile}
-	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh " >>${errfile} 2>&1
+	build_errfile="${errfile}-build"
+	cp ${header} ${build_errfile}
+	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh " >>${build_errfile} 2>&1
 	if [ $? -ne 0 ] ; then
-	    harp ${cfg} "remote build failed" "${errfile}"
+	    harp "${cfg} remote build" "${build_errfile}"
 	    continue
 	fi
 
-	cp ${header} ${errfile}
-	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${errfile} 2>&1
+	check_errfile="${errfile}-check"
+	cp ${header} ${check_errfile}
+	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
 	if [ $? -ne 0 ] ; then
-	    harp ${cfg} "remote check failed" "${errfile}"
+	    harp "${cfg} remote check" "${check_errfile}"
 	    continue
 	fi
 
 	cp ${header} ${errfile}
 	echo "No problems to report." >> ${errfile}
-	extoll "${cfg}" "build and test good" "${errfile}"
+	extoll "${cfg}" "${errfile}"
     done
 }
 
@@ -149,7 +149,7 @@ checkout() {
     #
     ${SCRIPTSDIR}/co_xorp.sh >${errfile} 2>&1
     if [ $? -ne 0 ] ; then
-	harp "$LOCALHOST: checkout failed" "${errfile}"
+	harp "$LOCALHOST checkout" "${errfile}"
 	exit
     fi
 }
@@ -157,7 +157,7 @@ checkout() {
 roll_over_logs()
 {
     log_history=10
-    rm -f ${LOGDIR}/${log_history}
+    rm -rf ${LOGDIR}/${log_history}
     log=${log_history}
     while [ ${log} -ne 0 ] ; do
 	next_log=`expr ${log} - 1`
@@ -171,6 +171,6 @@ roll_over_logs()
 roll_over_logs   
 mkdir -p ${LOGDIR}/0
 
-checkout "${LOGDIR}/0/checkout.log"
+checkout "${LOGDIR}/0/checkout"
 run_tinderbox
 
