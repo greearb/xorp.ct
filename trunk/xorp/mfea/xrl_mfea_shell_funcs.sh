@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/xrl_mfea_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+# $XORP: xorp/mfea/xrl_mfea_shell_funcs.sh,v 1.2 2003/02/08 09:18:27 pavlin Exp $
 #
 
 #
@@ -15,7 +15,7 @@ MFEA_TARGET="MFEA_4"
 mfea_enable_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_enable_vif <vif_name>"
+	echo "Usage: mfea_enable_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -29,7 +29,7 @@ mfea_enable_vif()
 mfea_disable_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_disable_vif <vif_name>"
+	echo "Usage: mfea_disable_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -43,7 +43,7 @@ mfea_disable_vif()
 mfea_start_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_start_vif <vif_name>"
+	echo "Usage: mfea_start_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -57,7 +57,7 @@ mfea_start_vif()
 mfea_stop_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_stop_vif <vif_name>"
+	echo "Usage: mfea_stop_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -196,7 +196,7 @@ mfea_get_mrib_table_default_metric_preference()
 mfea_set_mrib_table_default_metric_preference()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_set_mrib_table_default_metric_preference <metric_preference>"
+	echo "Usage: mfea_set_mrib_table_default_metric_preference <metric_preference:u32>"
 	exit 1
     fi
     metric_preference=$1
@@ -236,7 +236,7 @@ mfea_get_mrib_table_default_metric()
 mfea_set_mrib_table_default_metric()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_set_mrib_table_default_metric <metric>"
+	echo "Usage: mfea_set_mrib_table_default_metric <metric:u32>"
 	exit 1
     fi
     metric=$1

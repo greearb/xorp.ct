@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.8 2002/12/08 11:02:36 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 #
 
 #
@@ -15,7 +15,7 @@ MLD6IGMP_TARGET="IGMP"
 mld6igmp_enable_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mld6igmp_enable_vif <vif_name>"
+	echo "Usage: mld6igmp_enable_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -29,7 +29,7 @@ mld6igmp_enable_vif()
 mld6igmp_disable_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mld6igmp_disable_vif <vif_name>"
+	echo "Usage: mld6igmp_disable_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -43,7 +43,7 @@ mld6igmp_disable_vif()
 mld6igmp_start_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mld6igmp_start_vif <vif_name>"
+	echo "Usage: mld6igmp_start_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -57,7 +57,7 @@ mld6igmp_start_vif()
 mld6igmp_stop_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: mld6igmp_stop_vif <vif_name>"
+	echo "Usage: mld6igmp_stop_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
