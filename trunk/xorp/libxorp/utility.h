@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.2 2003/03/10 23:20:37 hodson Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -42,5 +42,7 @@
 #define cstring(s) (s).str().c_str()
 #endif
 
+#define ADD_POINTER(pointer, size, type)				\
+	((type)(((uint8_t *)(pointer)) + (size)))
 
 #endif /* __LIBXORP_UTILITY_H__ */
