@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.16 2004/02/06 02:11:18 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.17 2004/03/09 05:51:52 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -464,8 +464,9 @@ XrlRtrmgrInterface::client_updated(const XrlError& e, uid_t user_id,
 	    // they are probably dead.  We can't guarantee that the
 	    // "user" pointer is still valid, so check before using it.
 	    multimap<uint32_t, UserInstance*>::iterator iter;
-	    iter = _users.lower_bound(user_id);
-	    while (iter != _users.end()) {
+	    for (iter = _users.lower_bound(user_id);
+		 iter != _users.end();
+		 iter++) {
 		if (iter->second == user) {
 		    user->set_zombie(true);
 		    return;
