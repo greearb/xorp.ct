@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.120 2004/10/16 10:58:43 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.121 2004/11/03 22:23:54 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1506,6 +1506,20 @@ dnl ----------------------------
 
 if test "${GCC}" = "yes" ; then
 	dnl
+	dnl Filter-out the "-g" flag
+	dnl
+	CFLAGS=`echo $CFLAGS |  sed 's/-g//g'`
+	CXXFLAGS=`echo $CXXFLAGS |  sed 's/-g//g'`
+
+	dnl
+	dnl If debugging is enabled, try to add the "-g" flag
+	dnl
+	if test "${enable_debug}" = "yes" ; then
+		XR_TRY_ADD_CFLAGS("-g")
+		XR_TRY_ADD_CXXFLAGS("-g")
+	fi
+
+	dnl
 	dnl TODO: add -ansi -pedantic
 	dnl XXX: Flag -Wtraditional is not recommended for C, because:
 	dnl	- On FreeBSD-4.5 macros like IN_CLASSA(i) from netinet/in.h
@@ -1533,15 +1547,9 @@ if test "${GCC}" = "yes" ; then
 	XR_TRY_ADD_CXXFLAGS("-pipe")
 
 	dnl
-	dnl If debugging is disabled, filter-out the "-g" flag
-	dnl
-	if test "${enable_debug}" = "no" ; then
-		CFLAGS=`echo $CFLAGS |  sed 's/-g//g'`
-		CXXFLAGS=`echo $CXXFLAGS |  sed 's/-g//g'`
-	fi
-
-	dnl default compiler flags have optimization turned on which
+	dnl Default compiler flags have optimization turned on which
 	dnl can cause helpful debugging info to be optimized out.
+	dnl
 	if test "${enable_optimize}" != "yes" ; then
 		dnl Could just append -O0, but two -O args are icky
 		dnl We make assumption change is O2 because extended regexps
