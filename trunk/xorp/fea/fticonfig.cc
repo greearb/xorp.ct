@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.6 2003/08/16 00:12:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.7 2003/09/11 23:36:59 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -371,6 +371,42 @@ FtiConfig::get_table6(list<Fte6>& fte_list)
     if (_ftic_table_get == NULL)
 	return false;
     return (_ftic_table_get->get_table6(fte_list));
+}
+
+/**
+ * Test if the underlying system supports IPv4.
+ * 
+ * @return true if the underlying system supports IPv4, otherwise false.
+ */
+bool
+FtiConfig::have_ipv4() const
+{
+    int s = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s < 0)
+	return (false);
+    
+    close(s);
+    return (true);
+}
+
+/**
+ * Test if the underlying system supports IPv6.
+ * 
+ * @return true if the underlying system supports IPv6, otherwise false.
+ */
+bool
+FtiConfig::have_ipv6() const
+{
+#ifndef HAVE_IPV6
+    return (false);
+#else
+    int s = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (s < 0)
+	return (false);
+    
+    close(s);
+    return (true);
+#endif // HAVE_IPV6
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.17 2003/08/16 00:00:34 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.18 2003/08/28 00:08:54 hodson Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -627,6 +627,14 @@ public:
 	uint32_t&	metric,
 	uint32_t&	admin_distance,
 	string&		protocol_origin);
+
+    XrlCmdError fti_0_2_have_ipv4(
+	// Output values, 
+	bool&	result);
+
+    XrlCmdError fti_0_2_have_ipv6(
+	// Output values, 
+	bool&	result);
 
     XrlCmdError fti_0_2_get_unicast_forwarding_enabled4(
 	// Output values,

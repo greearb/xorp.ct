@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.6 2003/05/29 17:59:09 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.7 2003/08/15 23:58:36 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -246,6 +246,20 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool get_table6(list<Fte6>& fte_list);
+
+    /**
+     * Test if the underlying system supports IPv4.
+     * 
+     * @return true if the underlying system supports IPv4, otherwise false.
+     */
+    bool have_ipv4() const;
+
+    /**
+     * Test if the underlying system supports IPv6.
+     * 
+     * @return true if the underlying system supports IPv6, otherwise false.
+     */
+    bool have_ipv6() const;
 
     /**
      * Test whether the IPv4 unicast forwarding engine is enabled or disabled

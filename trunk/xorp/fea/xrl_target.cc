@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.23 2003/08/16 00:00:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.24 2003/08/28 00:08:54 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1394,6 +1394,26 @@ XrlFeaTarget::fti_0_2_lookup_entry6(
 	return XrlCmdError::OKAY();
     }
     return XrlCmdError::COMMAND_FAILED("No entry for " + dst.str());
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_have_ipv4(
+	// Output values, 
+	bool&	result)
+{
+    result = _xftm.ftic().have_ipv4();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_have_ipv6(
+	// Output values, 
+	bool&	result)
+{
+    result = _xftm.ftic().have_ipv6();
+    
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError

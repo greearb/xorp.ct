@@ -363,6 +363,18 @@ lookup_entry4()
     $CALLXRL "finder://fea/fti/0.2/lookup_entry4?dst:ipv4net=$1"
 }
 
+have_ipv4()
+{
+    echo -n "have_ipv4"
+    $CALLXRL "finder://fea/fti/0.2/have_ipv4"
+}
+
+have_ipv6()
+{
+    echo -n "have_ipv6"
+    $CALLXRL "finder://fea/fti/0.2/have_ipv6"
+}
+
 get_unicast_forwarding_enabled4()
 {
     echo -n "get_unicast_forwarding_enabled4"
