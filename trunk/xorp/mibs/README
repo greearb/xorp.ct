@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mibs/README,v 1.4 2003/11/06 23:23:20 pavlin Exp $
+# $XORP: xorp/mibs/README,v 1.5 2003/11/07 00:00:11 pavlin Exp $
 #
 
 MIB modules for Net-SNMP
@@ -72,7 +72,8 @@ Currenly we have fully implemented BGP4-MIB (RFC 1657).
 Known problems
 ==============
 
-Terminating snmpd (v 5.0.8) with XORP modules still loaded causes a core dump in FreeBSD.  
+Terminating snmpd (v 5.0.8) with XORP modules still loaded causes a core dump
+in FreeBSD.  
 
 If you are using FreeBSD/gcc2.95.4, you may see a memory leak in snmpd after
 the BGP4-MIB module is loaded.  This seems to be related to the STL default
