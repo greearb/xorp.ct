@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packet_assembly.hh,v 1.3 2004/02/21 00:34:05 hodson Exp $
+// $XORP: xorp/rip/packet_assembly.hh,v 1.4 2004/02/26 01:01:43 hodson Exp $
 
 #ifndef __RIP_PACKET_ASSEMBLY_HH__
 #define __RIP_PACKET_ASSEMBLY_HH__
@@ -54,6 +54,13 @@ public:
     {}
 
     /**
+     * IPv4 Specific Constructor.
+     */
+    PacketAssemblerSpecState(AuthHandlerBase& auth_handler)
+	: _ah(auth_handler)
+    {}
+
+    /**
      * IPv4 Specific authentication handler accessor.
      */
     inline AuthHandlerBase&	  ah()			{ return _ah; }
@@ -84,6 +91,9 @@ private:
 
 public:
     inline PacketAssemblerSpecState(Port<IPv6>& )
+	: _max_entries(25), _lnh(IPv6::ALL_ONES())
+    {}
+    inline PacketAssemblerSpecState()
 	: _max_entries(25), _lnh(IPv6::ALL_ONES())
     {}
 
@@ -140,6 +150,13 @@ public:
      * @param p Port to take configuration information from.
      */
     inline ResponsePacketAssembler(Port<A>& p);
+
+    /**
+     * Constructor.
+     *
+     * @param sp Specialized state.
+     */
+    inline ResponsePacketAssembler(SpState& sp);
 
     /**
      * Destructor.
@@ -237,6 +254,13 @@ ResponsePacketAssembler<IPv4>::ResponsePacketAssembler(Port<IPv4>& p)
 
 template <>
 inline
+ResponsePacketAssembler<IPv4>::ResponsePacketAssembler(SpState& sp)
+    : _p(0), _pos(0), _sp_state(sp)
+{
+}
+
+template <>
+inline
 ResponsePacketAssembler<IPv4>::~ResponsePacketAssembler()
 {
 }
@@ -304,6 +328,13 @@ template <>
 inline
 ResponsePacketAssembler<IPv6>::ResponsePacketAssembler(Port<IPv6>& p)
     : _p(0), _pos(0), _sp_state(p)
+{
+}
+
+template <>
+inline
+ResponsePacketAssembler<IPv6>::ResponsePacketAssembler(SpState& sp)
+    : _p(0), _pos(0), _sp_state(sp)
 {
 }
 
