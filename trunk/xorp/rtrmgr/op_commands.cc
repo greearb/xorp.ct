@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.43 2005/01/31 07:03:18 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.44 2005/02/01 07:44:03 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -741,11 +741,16 @@ OpCommandList::childlist(const string& path, bool& is_executable,
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;
 	if (op_command->command_match(path_parts, _slave_config_tree, false)) {
-	    if (!_mmgr.module_is_active(op_command->module())) {
-		// the module has not been started, so don't add it's
-		// commands
+	    //
+	    // XXX: If the module has not been started, then don't add its
+	    // commands. However, add all commands that are not associated
+	    // with any module.
+	    //
+	    if ((_mmgr.module_is_active(op_command->module()) == false)
+		&& (! op_command->module().empty())) {
 		continue;
 	    }
+
 	    map<string, string> matches;
 	    bool tmp_is_executable;
 	    bool tmp_can_pipe;
