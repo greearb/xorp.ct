@@ -76,7 +76,7 @@ the configuration hierarchy ("interface", "vif" and "address") it is
 necessary to enable this part of the configuration.
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -101,7 +101,7 @@ interfaces \{\\
 \>\>\>*/\\
 \>\>\}\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -124,7 +124,7 @@ It is a requirement to explicitly enable forwarding for each
 protocol family.
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -132,7 +132,7 @@ xx\=xx\=xx\=xx\=xx\=\kill
 fea \{\\
 \>enable-unicast-forwarding4: true\\
 \>/* enable-unicast-forwarding6: true */\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -157,7 +157,7 @@ multicast-specific reverse-path information by multicast routing
 protocols such as PIM-SM.
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -183,7 +183,7 @@ protocols \{\\
 \>\>\}\\
 \>\>*/\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -208,7 +208,7 @@ place of "export".
 
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -240,7 +240,7 @@ protocols \{\\
 \>\>\}\\
 \>*/\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -257,7 +257,7 @@ address that TCP should use. The "as" is the Autonomous System Number
 of the peer.
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -303,7 +303,7 @@ protocols \{\\
 \>\>\}\\
 \>\>*/\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -324,7 +324,7 @@ each "vif". The "traceoptions" section is used to explicitly enable
 log information that can be used for debugging purpose.
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -371,7 +371,7 @@ plumbing \{\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -396,7 +396,7 @@ each "vif". The "traceoptions" section is used to explicitly enable
 log information that can be used for debugging purpose.
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -431,7 +431,7 @@ protocols \{\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -447,7 +447,7 @@ virtual interfaces should be enabled, and the mechanism for obtaining
 the Candidate-RP set (either the Bootstrap mechanism, or a static-RP set).
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{\tiny
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -512,15 +512,15 @@ protocols \{\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
 }
-\vspace{0.1in}
+%\vspace{0.1in}
 
-\vspace{0.1in}
-\noindent\framebox[\textwidth][l]{\tiny
+%\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -585,13 +585,12 @@ protocols \{\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
 }
 \vspace{0.1in}
-
 
 A number of parameters have default values, therefore
 they don't have to be configured (those parameters are commented-out
@@ -674,7 +673,7 @@ it must be explicitly enabled.
 
 
 \vspace{0.1in}
-\noindent\framebox[\textwidth][l]{
+\noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -683,7 +682,7 @@ protocols \{\\
 \>fib2mrib \{\\
 \>\>enabled: true\\
 \>\}\\
-\}\\
+\}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
