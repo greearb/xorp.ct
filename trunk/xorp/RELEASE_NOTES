@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.61 2005/03/10 01:08:15 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.62 2005/03/25 02:12:55 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.1-RC (2005/03/24)
+Release 1.1 (2005/04/??)
 =========================
   ALL:
     - Numerous improvements, bug fixes and cleanup.
@@ -127,6 +127,8 @@ Release 1.1-RC (2005/03/24)
     - Implementation of Click FEA support.
 
     - Addition of support for discard interfaces and discard routes.
+
+    - Addition of support for adding interface-specific routes.
 
     - Addition of support for ACLs, though currently there is no mechanism
       to configure them through the XORP configuration file.
