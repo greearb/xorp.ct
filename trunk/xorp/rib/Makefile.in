@@ -133,7 +133,7 @@ INCLUDES = -I$(top_srcdir)
 subdir = rib
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = test_rib_direct.sh test_rib_xrls.sh
+CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 librib_a_AR = $(AR) cru
@@ -288,8 +288,7 @@ DIST_SOURCES = $(librib_a_SOURCES) $(main_routemap_SOURCES) \
 	$(rib_SOURCES) $(test_register_SOURCES) \
 	$(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) \
 	$(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
-DIST_COMMON = README Makefile.am Makefile.in TODO test_rib_direct.sh.in \
-	test_rib_xrls.sh.in
+DIST_COMMON = README Makefile.am Makefile.in TODO
 SOURCES = $(librib_a_SOURCES) $(main_routemap_SOURCES) $(rib_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
 
 all: all-am
@@ -303,10 +302,6 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
-test_rib_direct.sh: $(top_builddir)/config.status test_rib_direct.sh.in
-	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= CONFIG_LINKS= $(SHELL) ./config.status
-test_rib_xrls.sh: $(top_builddir)/config.status test_rib_xrls.sh.in
-	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= CONFIG_LINKS= $(SHELL) ./config.status
 
 AR = ar
 

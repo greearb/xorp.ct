@@ -167,7 +167,7 @@ CLEANFILES = $(BUILT_SOURCES)
 subdir = libxipc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = test_xrl_parser.sh
+CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 libfinder_a_AR = $(AR) cru
@@ -410,7 +410,7 @@ DIST_SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) \
 	$(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) \
 	$(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) \
 	$(test_xrl_router_SOURCES)
-DIST_COMMON = README Makefile.am Makefile.in TODO test_xrl_parser.sh.in
+DIST_COMMON = README Makefile.am Makefile.in TODO
 SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_router_SOURCES)
 
 all: $(BUILT_SOURCES)
@@ -425,8 +425,6 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
-test_xrl_parser.sh: $(top_builddir)/config.status test_xrl_parser.sh.in
-	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= CONFIG_LINKS= $(SHELL) ./config.status
 
 AR = ar
 

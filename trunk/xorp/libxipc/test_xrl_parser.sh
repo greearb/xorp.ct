@@ -1,6 +1,7 @@
 #!/bin/sh
 
-test_data=@srcdir@/test_xrl_parser.data
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+test_data=${srcdir}/test_xrl_parser.data
 test_program=./test_xrl_parser
 
 if [ ! -f ${test_data} ] ; then
