@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.17 2004/04/15 16:13:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.18 2004/06/10 22:40:39 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -128,9 +128,9 @@ Command::datain(const string&  peer,  const uint32_t& genid,
 		const vector<uint8_t>&  data)
 {
     debug_msg("peer: %s genid: %u status: %d secs: %lu micro: %lu data length: %u\n",
-	      peer.c_str(), genid, status,
+	      peer.c_str(), XORP_UINT_CAST(genid), status,
 	      (unsigned long)tv.sec(), (unsigned long)tv.usec(),
-	      (uint32_t)data.size());
+	      XORP_UINT_CAST(data.size()));
 
     /*
     ** Are we in the peer table.
@@ -153,15 +153,15 @@ Command::datain(const string&  peer,  const uint32_t& genid,
     }
 
     XLOG_WARNING("Data for a peer <%s,%u> that is not in our table",
-		 peer.c_str(), genid);
+		 peer.c_str(), XORP_UINT_CAST(genid));
 }
 
 void 
 Command::datain_error(const string&  peer, const uint32_t& genid,
 		      const string& reason)
 {
-    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(), genid,
-	      reason.c_str());
+    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(),
+	      XORP_UINT_CAST(genid), reason.c_str());
     /*
     ** Are we in the peer table.
     */
@@ -183,13 +183,13 @@ Command::datain_error(const string&  peer, const uint32_t& genid,
     }
 
     XLOG_WARNING("Data for a peer <%s,%u> that is not in our table",
-		 peer.c_str(), genid);
+		 peer.c_str(), XORP_UINT_CAST(genid));
 }
 
 void
 Command::datain_closed(const string&  peer, const uint32_t& genid)
 {
-    debug_msg("peer: %s genid: %u \n", peer.c_str(), genid);
+    debug_msg("peer: %s genid: %u \n", peer.c_str(), XORP_UINT_CAST(genid));
     /*
     ** Are we in the peer table.
     */
@@ -211,7 +211,7 @@ Command::datain_closed(const string&  peer, const uint32_t& genid)
     }
 
     XLOG_WARNING("Data for a peer <%s,%u> that is not in our table",
-		 peer.c_str(), genid);
+		 peer.c_str(), XORP_UINT_CAST(genid));
 }
 
 /*

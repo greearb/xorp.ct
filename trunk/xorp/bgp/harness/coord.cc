@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.19 2004/06/10 22:40:39 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.20 2004/12/09 07:54:33 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -134,8 +134,10 @@ XrlCoordTarget::datain_0_1_receive(const string&  peer, const uint32_t& genid,
 				   const uint32_t& micro,
 				   const vector<uint8_t>&  data)
 {
-    debug_msg("peer: %s genid: %u status: %d secs: %d micro: %d data length: %u\n",
-	      peer.c_str(), genid, status, secs, micro, (uint32_t)data.size());
+    debug_msg("peer: %s genid: %u status: %d secs: %u micro: %u data length: %u\n",
+	      peer.c_str(), XORP_UINT_CAST(genid), status,
+	      XORP_UINT_CAST(secs), XORP_UINT_CAST(micro),
+	      XORP_UINT_CAST(data.size()));
 
     _coord.datain(peer, genid, status, secs, micro, data);
 
@@ -146,8 +148,8 @@ XrlCmdError
 XrlCoordTarget::datain_0_1_error(const string&  peer, const uint32_t& genid,
 				 const string& reason)
 {
-    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(), genid,
-	      reason.c_str());
+    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(),
+	      XORP_UINT_CAST(genid), reason.c_str());
 
     _coord.datain_error(peer, genid, reason);
 
