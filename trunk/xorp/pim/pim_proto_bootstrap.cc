@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.14 2004/03/05 09:00:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.15 2004/06/10 22:41:33 hodson Exp $"
 
 
 //
@@ -346,7 +346,10 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 {
     size_t avail_buffer_size = 0;
     IPvX src_addr = primary_addr();
-    
+
+    if (is_pim_register())
+	return (XORP_ERROR);	// Never send on the PIM Register vif
+
     if (bsr_zone.bsr_addr() == dst_addr)
 	return (XORP_ERROR);	// Never send-back to the BSR
     
