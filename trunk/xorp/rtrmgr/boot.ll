@@ -82,7 +82,6 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 \"			{
 			BEGIN(string);
 			memset(stringbuf, 0, SBUFSIZE);
-			bootlval = stringbuf;
 			}
 <string>[^\\\n\"]*	/*normal text*/ {
 			strncat(stringbuf, boottext, SBUFSIZE);
@@ -104,6 +103,7 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 <string>\"		{
 			BEGIN(INITIAL);
 			printf("STRING:>%s<\n", stringbuf);
+			bootlval = strdup(stringbuf);
 			return STRING;
 			}
 
