@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.6 2003/10/21 18:59:31 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.7 2003/10/21 23:18:48 pavlin Exp $
 #
 
 #
@@ -232,7 +232,7 @@ test_lookup_entry4()
     local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Look-up gateway for destination ${DEST}"
+    echo "TEST: Lookup gateway for destination ${DEST}"
 
     _xrl_result=`fea_fti_lookup_entry4 ${DEST} 2>&1`
     _ret_value=$?
@@ -292,7 +292,7 @@ test_lookup_route4()
     local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Look-up route for destination ${DEST_HOST}"
+    echo "TEST: Lookup route for destination ${DEST_HOST}"
 
     _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST} 2>&1`
     _ret_value=$?
@@ -364,7 +364,7 @@ test_lookup_deleted_entry4()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Look-up deleted entry for destination ${DEST}"
+    echo "TEST: Lookup deleted entry for destination ${DEST}"
 
     _xrl_result=`fea_fti_lookup_entry4 ${DEST} 2>&1`
     _ret_value=$?
@@ -379,22 +379,30 @@ test_lookup_deleted_entry4()
 
 test_lookup_deleted_route4()
 {
-    local _xrl_result _ret_value
+    local _xrl_result _ret_value _ipv4net
 
-    echo "TEST: Look-up deleted route for destination ${DEST_HOST}"
+    echo "TEST: Lookup deleted route for destination ${DEST_HOST}"
 
     echo "INFO: Sleeping for 3 seconds (to timeout any obsoleted cloned entries)..."
     sleep 3
 
     _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST} 2>&1`
     _ret_value=$?
-    if [ ${_ret_value} -eq 0 ] ; then
-	echo "ERROR: routing entry was not deleted:"
-	echo "${_xrl_result}"
-	return 1
+    if [ ${_ret_value} -ne 0 ] ; then
+	# OK: the entry was deleted
+	return 0
     fi
 
-    return 0
+    # There is a matching routing entry: check that this is not the default one
+    _ipv4net=`get_xrl_variable_value "${_xrl_result}" netmask:ipv4net`
+    if [ "${_ipv4net}" = "0.0.0.0/0" ] ; then
+	# OK: this is the default routing entry
+	return 0
+    fi
+
+    echo "ERROR: routing entry was not deleted:"
+    echo "${_xrl_result}"
+    return 1
 }
 
 test_delete_all_entries4()
