@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.25 2003/09/16 18:13:47 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.1 2004/02/12 20:11:26 pavlin Exp $"
 
 
 //
@@ -121,16 +121,15 @@ static_routes_main(const char* finder_hostname, uint16_t finder_port)
 	}
     }
 
+    // Startup
     xrl_static_routes_node.startup();
 
     //
     // Main loop
     //
-    while (true) {
+    while (! xrl_static_routes_node.is_done()) {
 	eventloop.run();
     }
-
-    xrl_static_routes_node.shutdown();
 }
 
 int
