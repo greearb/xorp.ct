@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.7 2003/09/18 19:06:45 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.8 2004/06/10 22:41:09 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -21,12 +21,10 @@
 
 const string Xrl::_finder_protocol = "finder";
 
-Xrl::Xrl(const char* c_str) throw (InvalidString)
+const char*
+Xrl::parse_xrl_path(const char* c_str)
 {
     const char *sep, *start;
-
-    if (0 == c_str)
-	xorp_throw0(InvalidString);
 
     // Extract protocol
     start = c_str;
@@ -53,13 +51,23 @@ Xrl::Xrl(const char* c_str) throw (InvalidString)
 	if (_command.size() == 0) {
 	    xorp_throw0(InvalidString);
 	}
-	return;
+	return 0;
     }
     _command = string(start, sep - start);
     start = sep + TOKEN_BYTES(XrlToken::CMD_ARGS_SEP) - 1;
 
+    return start;
+}
+
+Xrl::Xrl(const char* c_str) throw (InvalidString)
+{
+    if (0 == c_str)
+	xorp_throw0(InvalidString);
+
+    const char* start = parse_xrl_path(c_str);
+
     // Extract Arguments and pass to XrlArgs string constructor
-    if (*start != '\0') {
+    if (0 != start && *start != '\0') {
 	try {
 	    _args = XrlArgs(start);
 	} catch (const InvalidString& is) {
@@ -102,4 +110,49 @@ Xrl::is_resolved() const
 {
     // This value is ripe for caching.
     return strcasecmp(_protocol.c_str(), _finder_protocol.c_str());
+}
+
+size_t
+Xrl::packed_bytes() const
+{
+    // Use XrlAtom packing as it's well tested.  Push Xrl path
+    // components to front of args list, compute packed size, then pop
+    // it off again.
+    XrlAtom xa(this->string_no_args());
+    _args.push_front(xa);
+    size_t packed_bytes = _args.packed_bytes();
+    _args.pop_front();
+    return packed_bytes;
+}
+
+size_t
+Xrl::pack(uint8_t* buffer, size_t buffer_bytes) const
+{
+    // See comment in packed_bytes() for an explanation.
+    XrlAtom xa(this->string_no_args());
+    _args.push_front(xa);
+    size_t packed_bytes = _args.pack(buffer, buffer_bytes);
+    _args.pop_front();
+    return packed_bytes;
+}
+
+size_t
+Xrl::unpack(const uint8_t* buffer, size_t buffer_bytes)
+{
+    _args.clear();
+
+    size_t unpacked_bytes = _args.unpack(buffer, buffer_bytes);
+    if (unpacked_bytes == 0)
+	return 0;
+
+    const XrlAtom& xa = _args.front();
+    if (xa.type() != xrlatom_text || xa.has_data() == false) {
+	_args.pop_front();
+	return 0;
+    }
+
+    parse_xrl_path(xa.text().c_str());
+    _args.pop_front();
+
+    return unpacked_bytes;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.8 2003/09/18 19:06:45 hodson Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.9 2004/06/10 22:41:09 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -121,11 +121,41 @@ public:
      */
     bool is_resolved() const;
 
+    /**
+     * Get number of bytes needed to pack XRL into a serialized byte form.
+     */
+    size_t packed_bytes() const;
+
+    /**
+     * Pack XRL into a byte array.  The size of the byte
+     * array should be larger or equal to the value returned by
+     * packed_bytes().
+     *
+     * @param buffer buffer to receive data.
+     * @param buffer_bytes size of buffer.
+     * @return size of packed data on success, 0 on failure.
+     */
+    size_t pack(uint8_t* buffer, size_t buffer_bytes) const;
+
+    /**
+     * Unpack XRL from serialized byte array.
+     *
+     * @param buffer to read data from.
+     * @param buffer_bytes size of buffer.  The size should exactly match
+     *        number of bytes of packed data, ie packed_bytes() value
+     *        used when packing.
+     * @return number of bytes turned into atoms on success, 0 on failure.
+     */
+    size_t unpack(const uint8_t* buffer, size_t buffer_bytes);
+
+private:
+    const char* parse_xrl_path(const char* xrl_path);
+
 private:
     string	_protocol;
     string	_target;   // if protocol != finder, target = protocol params
     string	_command;
-    XrlArgs	_args;
+    mutable XrlArgs	_args; // XXX only for packed_bytes() and pack()
 
     static const string _finder_protocol;
 };
