@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.2 2002/12/18 22:54:29 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.3 2002/12/19 01:29:08 hodson Exp $
 
 #ifndef __FINDER_CLIENT_HH__
 #define __FINDER_CLIENT_HH__
@@ -64,7 +64,7 @@ public:
     struct ClientConnectionError : public exception {
 	ClientConnectionError(const char* reason = "Not specified")
 	    : _reason(reason) {}
-        const char* what() { return _reason; }
+        const char* xrl_what() { return _reason; }
     protected:
         const char* _reason;
     };

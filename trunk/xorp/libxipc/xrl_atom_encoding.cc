@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.1 2002/12/14 23:43:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.2 2002/12/19 01:29:12 hodson Exp $"
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -74,19 +74,19 @@ fast_needs_escape(char c)
 // ----------------------------------------------------------------------------
 
 inline static bool
-is_a_quote(string::const_iterator c)
+is_a_quote(char c)
 {
-    return (*c == '%' || *c == '+');
+    return (c == '%' || c == '+');
 }
 
 inline static const char*
-escape_encode(string::const_iterator c)
+escape_encode(char c)
 {
-    if (*c == ' ') {
+    if (c == ' ') {
 	return "+";
     } else {
 	static char e[4];
-	snprintf(e, sizeof(e) / sizeof(e[0]), "%%%02X", (unsigned char)*c);
+	snprintf(e, sizeof(e) / sizeof(e[0]), "%%%02X", (unsigned char)c);
 	return e;
     }
 }
@@ -104,7 +104,7 @@ hex_digit(char c)
 }
 
 inline static ssize_t
-escape_decode(string::const_iterator c, char& out)
+escape_decode(const char* c, char& out)
 {
     if (*c == '+') {
 	out = ' ';
@@ -144,7 +144,7 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
 	// Do escapes one at a time.
 	reg_start = reg_end;
 	while (reg_start != val_end && fast_needs_escape(*reg_start) == true) {
-	    out.append(escape_encode(reg_start));
+	    out.append(escape_encode(*reg_start));
 	    reg_start++;
 	}
     }
@@ -164,14 +164,14 @@ xrlatom_decode_value(const char* input, size_t input_bytes, string& out)
     while (reg_start < input_end) {
 	// Copy non-escaped sequences as a block
 	reg_end = reg_start;
-	while (reg_end < input_end && is_a_quote(reg_end) == false) {
+	while (reg_end < input_end && is_a_quote(*reg_end) == false) {
 	    reg_end++;
 	}
 	out.insert(out.end(), reg_start, reg_end);
 
 	// Deal with escaped sequences one at a time
 	reg_start = reg_end;
-	while (reg_start < input_end && is_a_quote(reg_start) == true) {
+	while (reg_start < input_end && is_a_quote(*reg_start) == true) {
 	    if (*reg_start == '%' && reg_start + 3 > input_end) {
 		// Malformed escape at end of string eg, not %[0-f][0-f]
 		return (reg_start - input);
@@ -205,7 +205,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
     while (reg_start < input_end) {
 	// Copy non-escaped sequences as a block
 	reg_end = reg_start;
-	while (reg_end < input_end && is_a_quote(reg_end) == false) {
+	while (reg_end < input_end && is_a_quote(*reg_end) == false) {
 	    reg_end++;
 	}
 	out.insert(out.end(),
@@ -214,7 +214,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
 
 	// Deal with escaped sequences one at a time
 	reg_start = reg_end;
-	while (reg_start < input_end && is_a_quote(reg_start) == true) {
+	while (reg_start < input_end && is_a_quote(*reg_start) == true) {
 	    if (*reg_start == '%' && reg_start + 3 > input_end) {
 		// Malformed escape at end of string eg, not %[0-f][0-f]
 		return (reg_start - input);

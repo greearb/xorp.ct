@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.1 2002/12/14 23:42:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.2 2002/12/19 01:29:09 hodson Exp $"
 
 #include <vector>
 
@@ -86,7 +86,7 @@ protected:
     AsyncFileWriter		_writer;
 
     // Outgoing state
-    string			_write_data;
+    vector<uint8_t>		_write_data;
 
     // Methods
     void push_departures();
@@ -111,16 +111,25 @@ FinderTcpTransport::push_departures()
     if (_writer.running() == false && departures_waiting() == 1) {
 	assert(_write_data.size() == 0);
 
+	if (_writer.buffers_remaining())
+	    _writer.flush_buffers();
+
+	string srep;
 	const FinderMessage::RefPtr& msg = departure_head();
 	debug_msg("Pushing FinderMessage (seqno %d)\n", msg->seqno());
 	if (hmac()) {
-	    _write_data = msg->render_signed(*hmac());
+	    srep = msg->render_signed(*hmac());
 	} else {
-	    _write_data = msg->render();
+	    srep = msg->render();
 	}
-	if (_writer.buffers_remaining())
-	    _writer.flush_buffers();
-	_writer.add_buffer((const uint8_t*)_write_data.begin(),
+
+	// XXX This is blatantly bad, fortunately this code is going away RSN.
+	_write_data.clear();
+	for (uint32_t i = 0; i < srep.size(); i++) {
+	    _write_data.push_back(srep[i]);
+	}
+	
+	_writer.add_buffer(&_write_data[0],
 			   _write_data.size(),
 			   callback(this, &FinderTcpTransport::async_write));
 	_writer.start();
@@ -133,7 +142,7 @@ FinderTcpTransport::async_write(AsyncFileWriter::Event	e,
 				size_t			/* buffer_bytes */,
 				size_t			offset)
 {
-    assert(buffer == (const uint8_t*)_write_data.c_str());
+    assert(buffer == &_write_data[0]);
 
     debug_msg("async_write Error %d offset %d\n", e, offset);
     switch (e) {
@@ -184,7 +193,7 @@ FinderTcpTransport::reader_reprovision(size_t extra_bytes)
 
     debug_msg("Reprovision %d (%d -> %d)\n", _read_pos,
 	      _read_data.size(), _read_data.size() + extra_bytes);
-    _reader.add_buffer_with_offset((uint8_t*)_read_data.begin(),
+    _reader.add_buffer_with_offset((uint8_t*)&_read_data[0],
 				   _read_data.size(),
 				   resume_pos,
 				   callback(this,
@@ -201,7 +210,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
     if (ev == AsyncFileReader::FLUSHING)
 	return; // this code pre-dates flushing callbacks.
 
-    assert(buffer == (const uint8_t*)_read_data.begin());
+    assert(buffer == reinterpret_cast<const uint8_t*>(&_read_data[0]));
     debug_msg("async_read Event %d pos %d offset %d space %d\n",
 	      ev, _read_pos, offset, _read_data.size());
     if (ev != AsyncFileReader::DATA) {
@@ -225,7 +234,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 	    }
 	    assert(available > 0);
 	    debug_msg("available %d\n", available);
-	    r = string(_read_data.begin() + _read_pos, available);
+	    r = string(&_read_data[_read_pos], available);
 
 	    ssize_t header_bytes = FinderParser::peek_header_bytes(r);
 	    if (header_bytes < 0) {
@@ -257,7 +266,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 
 	    assert(_read_pos + msg_bytes <= _read_data.size());
 	    debug_msg("message bytes %d\n", msg_bytes);
-	    string msg(_read_data.begin() + _read_pos, msg_bytes);
+	    string msg(&_read_data[_read_pos], msg_bytes);
 	    announce_arrival(msg);
 	    _read_pos += msg_bytes;
 	    if (_read_pos == _read_data.size()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.4 2002/12/19 01:29:13 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.5 2003/01/08 18:35:38 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -34,7 +34,7 @@
 struct XrlPFConstructorError : public exception {
     XrlPFConstructorError(const char* reason = "Not specified")
 	: _reason(reason) {}
-    const char* what() { return _reason; }
+    const char* xrl_what() { return _reason; }
 protected:
     const char* _reason;
 };

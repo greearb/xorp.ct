@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_msg.cc,v 1.1 2002/12/14 23:42:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_msg.cc,v 1.2 2002/12/19 01:29:08 hodson Exp $"
+
+#include "config.h"
 
 #include <algorithm>
 #include <functional>
@@ -117,10 +119,31 @@ skip_chars(string::const_iterator& spos, _Predicate chrcls)
 	spos++;
 }
 
+//
+// Wrapper functions because the system implementation may not use functions.
+//
+static int
+my_isdigit(int c)
+{
+    return isdigit(c);
+}
+
+static int
+my_isalpha(int c)
+{
+    return isalpha(c);
+}
+
+static int
+my_iscntrl(int c)
+{
+    return iscntrl(c);
+}
+
 inline bool
 get_uint32(string::const_iterator& spos, uint32_t& r)
 {
-    string u32 = get_chars(spos, ptr_fun(isdigit));
+    string u32 = get_chars(spos, ptr_fun(my_isdigit));
 
     r = 0;
     for (string::const_iterator i = u32.begin(); i != u32.end(); i++) {
@@ -133,14 +156,14 @@ get_uint32(string::const_iterator& spos, uint32_t& r)
 inline bool
 get_alphaword(string::const_iterator& spos, string& r)
 {
-    r = get_chars(spos, ptr_fun(isalpha));
+    r = get_chars(spos, ptr_fun(my_isalpha));
     return r.empty() == false;
 }
 
 inline bool
 get_line(string::const_iterator& spos, string& r)
 {
-    r = get_chars(spos, not1(ptr_fun(iscntrl)));
+    r = get_chars(spos, not1(ptr_fun(my_iscntrl)));
     return r.empty() == false;
 }
 
@@ -260,20 +283,18 @@ FinderParser::parse_payload(uint32_t			src,
 			    const string&		buf,
 			    string::const_iterator& 	buf_pos) const
 {
-
-    // Find any matching parser, syntax is dead ugly here because of
-    // ref_ptr use in ParsingElement type.
-    PEList::const_iterator i = find_if(_parsers.begin(),
-				       _parsers.end(),
-				       compose1(bind2nd(equal_to<const string>(), msgname),
-						compose1(mem_fun(&FinderParselet::name),
-							 mem_fun_ref(&ParsingElement::get))));
-    if (i == _parsers.end())
-	return false;
-
-    const FinderParselet* p = i->get();
-    p->parse(src, seqno, buf, buf_pos);
-    return true;
+    PEList::const_iterator pi;
+    const FinderParselet* p;
+    for (pi = _parsers.begin(); pi != _parsers.end(); ++pi) {
+	// pi is an iterator to a ref_ptr wrappered object, get object
+	// since both iterator and ref_ptr classes overload operator->
+	p = pi->get();
+	if (p->name() == msgname) {
+	    p->parse(src, seqno, buf, buf_pos);
+	    return true;
+	}
+    }
+    return false;
 }
 
 size_t
@@ -289,7 +310,7 @@ FinderParser::parse(const HMAC*			hmac,
 
     if (parse_header(bpos, major, minor, src, seqno, pbytes, msgname) == false)
 	xorp_throw(BadFinderMessage,
-		   c_format("Junk Header >>%s\n", start));
+		   c_format("Junk Header >>%s\n", string(start, bpos).c_str()));
 
     if (hmac) {
 	const string::const_iterator hmac_start = bpos;

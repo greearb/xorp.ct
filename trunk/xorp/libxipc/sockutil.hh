@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/sockutil.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+// $XORP: xorp/libxipc/sockutil.hh,v 1.2 2002/12/19 01:29:09 hodson Exp $
 
 /* Some helper functions for sockets */
 
@@ -26,6 +26,8 @@
 #include <netinet/in.h>
 #include <sys/param.h>
 #include <sys/socket.h>
+
+#include "libxorp/xorp.h"
 
 enum IPSocketType { UDP = IPPROTO_UDP, TCP = IPPROTO_TCP };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.2 2002/12/19 01:29:12 hodson Exp $
+// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.3 2003/01/08 18:34:52 hodson Exp $
 
 #ifndef __XRLATOM_ENCODING_HH__
 #define __XRLATOM_ENCODING_HH__
@@ -50,7 +50,8 @@ xrlatom_encode_value(const string& val)
 inline string
 xrlatom_encode_value(const vector<uint8_t>& v)
 {
-    return xrlatom_encode_value(reinterpret_cast<const char*>(v.begin()),
+    const uint8_t* start = &v[0];
+    return xrlatom_encode_value(reinterpret_cast<const char*>(start),
 				v.size());
 }
 

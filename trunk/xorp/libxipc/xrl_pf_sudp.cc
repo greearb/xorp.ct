@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.2 2002/12/18 22:54:30 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.3 2002/12/19 01:29:14 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,9 +29,9 @@
 #include <string>
 
 #include "config.h"
-
 #include "xrl_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
@@ -105,17 +105,25 @@ static string xrlerror_to_status(const XrlError& e)
 
 static XrlError status_to_xrlerror(const string& status)
 {
-    char* ep;
-    uint32_t error_code = strtol(status.c_str(), &ep, 10);
-    if (ep == status.c_str()) {
+    uint32_t error_code = 0;
+
+    string::const_iterator si = status.begin();
+    while (isdigit(*si)) {
+	error_code *= 10;
+	error_code += *si - '0';
+	si++;
+    }
+    
+    if (si == status.begin()) {
 	XLOG_ERROR("Missing XrlError::errorcode value");
 	return XrlError::CORRUPT_RESPONSE();
     }
-    string::const_iterator si = ep;
+
     if (si == status.end())
 	return XrlError(error_code);
+    
     si++;
-    return XrlError(error_code, si);
+    return XrlError(error_code, string(si, status.end()));
 }
 
 static string

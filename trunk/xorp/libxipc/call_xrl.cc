@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.3 2002/12/19 01:29:08 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.4 2003/01/10 00:30:24 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -137,8 +137,7 @@ input_files(int argc,  char* const argv[], bool pponly)
     do {
 	if (argc == 0 || argv[0][0] == '-') {
 	    do {
-		fstream f(fileno(stdin));
-		XrlParserFileInput xfp(&f);
+		XrlParserFileInput xfp(&cin);
 		if (pponly) {
 		    preprocess_file(xfp);
 		} else {

@@ -915,14 +915,14 @@ XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes)
     return used;
 }
 
-size_t
+inline size_t
 XrlAtom::pack_binary(uint8_t* buffer) const
 {
     uint32_t sz = _binary->size();
     uint32_t ul = htonl(sz);
     memcpy(buffer, &ul, sizeof(ul));
     if (sz > 0) {
-	memcpy(buffer + sizeof(ul), _binary->begin(), sz);
+	memcpy(buffer + sizeof(ul), &(_binary->operator[](0)), sz);
     }
     return sizeof(ul) + sz;
 }
@@ -948,9 +948,10 @@ XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes)
 size_t
 XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
 {
-    if (buffer_bytes < packed_bytes()) {
+    size_t pb = packed_bytes();
+    if (buffer_bytes < pb) {
 	debug_msg("Buffer too small (%d < %d)\n",
-		  buffer_bytes, packed_bytes());
+		  buffer_bytes, pb);
 	return 0;
     }
 

@@ -146,15 +146,16 @@ public:
     void departure_event(list<FinderMessage::RefPtr>& msgs,
 			 const FinderMessage::RefPtr& m) {
 	list<FinderMessage::RefPtr>::iterator i;
-	i = find_if(msgs.begin(), msgs.end(),
-		    compose1(bind2nd(equal_to<const FinderMessage*>(), m.get()),
-			     mem_fun_ref(&FinderMessage::RefPtr::get)));
-	if (i == msgs.end()) {
-	    cerr << endl << msgs.size() << endl;
-	    cerr << msgs.front()->render() << endl << m->render() << endl;
+
+	for (i = msgs.begin(); i != msgs.end(); ++i) {
+	    if (m.get() == i->get()) {
+		msgs.erase(i);
+		return;
+	    }
 	}
+	cerr << endl << msgs.size() << endl;
+	cerr << msgs.front()->render() << endl << m->render() << endl;
 	assert (i != msgs.end());
-	msgs.erase(i);
     }
 
 private:

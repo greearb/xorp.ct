@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.3 2002/12/18 22:54:30 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.4 2002/12/19 01:29:13 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -22,9 +22,9 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <stl_relops.h>
 
 #include "config.h"
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxipc/xrl_module.h"
 #include "libxorp/xlog.h"
@@ -255,12 +255,12 @@ STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
     sph->initialize(seqno, STCP_PT_RESPONSE, e, xrl_data.size());
 
     if (e.note().size()) {
-	memcpy(r.begin() + sizeof(STCPPacketHeader),
+	memcpy(&r[0] + sizeof(STCPPacketHeader),
 	       e.note().c_str(), e.note().size());
     }
 
     if (xrl_data.size()) {
-	memcpy(r.begin() + sizeof(STCPPacketHeader) + e.note().size(),
+	memcpy(&r[0] + sizeof(STCPPacketHeader) + e.note().size(),
 	       xrl_data.c_str(), xrl_data.size());
     }
 
@@ -276,7 +276,7 @@ STCPRequestHandler::start_writer()
 	assert(_writer.running() == false);
 	ReplyPacket& r = _responses.front();
 	_response_offset = 0;
-	_writer.add_buffer(r.begin(), r.size(),
+	_writer.add_buffer(&r[0], r.size(),
 			   callback(this, &STCPRequestHandler::update_writer));
 	_writer.start();
     }
@@ -331,7 +331,7 @@ STCPRequestHandler::die(const char *reason)
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
 // connection.
 
-XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m, int port)
+XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m, uint16_t port)
     throw (XrlPFConstructorError)
     : XrlPFListener(e, m), _fd(-1), _address_slash_port() {
 
@@ -340,7 +340,6 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m, int port)
     }
 
     string addr;
-    uint16_t port;
     if (get_local_socket_details(_fd, addr, port) == false) {
         close(_fd);
         throw XrlPFConstructorError(strerror(errno));
@@ -604,7 +603,7 @@ XrlPFSTCPSender::dispatch_reply()
 
     // Packet format is Header + optional Error note + xrl_data as textual info
 
-    char* data = reinterpret_cast<char*>(_reply.begin()) + sizeof(STCPPacketHeader);
+    char* data = reinterpret_cast<char*>(&_reply[0] + sizeof(STCPPacketHeader));
 
     // We reserved an additional one byte for null termination
     data[_sph->payload_bytes()] = 0;
@@ -644,7 +643,7 @@ XrlPFSTCPSender::recv_data(AsyncFileReader::Event e,
 			   size_t		    /* buffer_bytes */,
 			   size_t		    offset)
 {
-    assert(buffer == _reply.begin());
+    assert(buffer == &_reply[0]);
     assert(_reply.size() >= sizeof(STCPPacketHeader));
 
     switch (e) {
@@ -688,7 +687,7 @@ XrlPFSTCPSender::recv_data(AsyncFileReader::Event e,
 	// later and cast it to a C-string.
 	_reply.resize(sizeof(STCPPacketHeader) + _sph->payload_bytes() + 1);
 	if (_sph->payload_bytes()) {
-	    _reader->add_buffer_with_offset(_reply.begin(),
+	    _reader->add_buffer_with_offset(&_reply[0],
 					    _reply.size() - 1,
 					    sizeof(STCPPacketHeader),
 					    callback(this, &XrlPFSTCPSender::recv_data));
@@ -711,7 +710,7 @@ XrlPFSTCPSender::prepare_for_reply_header()
     _sph = 0;
     if (_reply.size() < sizeof(STCPPacketHeader))
 	_reply.resize(sizeof(STCPPacketHeader));
-    _reader->add_buffer(_reply.begin(), sizeof(STCPPacketHeader),
+    _reader->add_buffer(&_reply[0], sizeof(STCPPacketHeader),
 			callback(this, &XrlPFSTCPSender::recv_data));
     _reader->start();
 }

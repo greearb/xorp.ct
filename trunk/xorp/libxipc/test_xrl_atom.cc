@@ -63,9 +63,9 @@ binary_test(const XrlAtom& a)
 {
     XrlAtom b;
     vector<uint8_t> buffer(a.packed_bytes());
-    if (a.pack(buffer.begin(), buffer.size()) == a.packed_bytes()) {
-	dump(buffer.begin(), buffer.size());
-	b.unpack(buffer.begin(), buffer.size());
+    if (a.pack(&buffer[0], buffer.size()) == a.packed_bytes()) {
+	dump(&buffer[0], buffer.size());
+	b.unpack(&buffer[0], buffer.size());
     }
     tracef("\tBinary Serialization I...");
     tracef("%s\n", (a == b) ? "yes" : "NO");
@@ -80,7 +80,7 @@ binary_test2(const XrlAtom& a)
     // buffer is too small shouldn't be able to pack
     XrlAtom b;
     vector<uint8_t> buffer(a.packed_bytes() - 1);
-    if (a.pack(buffer.begin(), buffer.size()) != 0) {
+    if (a.pack(&buffer[0], buffer.size()) != 0) {
 	tracef("NO\n");
 	return false;
     } else {
@@ -97,8 +97,8 @@ binary_test3(const XrlAtom& a)
     XrlAtom b;
     // Buffer is too big, shouldn't make any difference.
     vector<uint8_t> buffer(a.packed_bytes() + 1);
-    if (a.pack(buffer.begin(), buffer.size()) == a.packed_bytes()) {
-	b.unpack(buffer.begin(), buffer.size());
+    if (a.pack(&buffer[0], buffer.size()) == a.packed_bytes()) {
+	b.unpack(&buffer[0], buffer.size());
     }
     tracef("%s\n", (a == b) ? "yes" : "NO");
     return a == b;
@@ -213,12 +213,16 @@ test()
 	    break;
 	case xrlatom_binary:
 	    {
-		for (int sz = 1; sz < 1000; sz++) {
+		for (size_t sz = 1; sz < 10000; sz += 7) {
+		    tracef("Binary data size = %d\n", sz);
 		    vector<uint8_t> t(sz);
-		    for (int i = 1; i < sz; i++) {
-			t.push_back(random());
+		    for (size_t i = 0; i < sz; i++) {
+			t[i] = random();
 		    }
-		    test_atom(XrlAtom("binary_data", t));
+		    assert(t.size() == sz);
+		    XrlAtom a("binary_data", t);
+		    assert(a.binary().size() == t.size());
+		    test_atom(a);
 		}
 	    }
 	    break;

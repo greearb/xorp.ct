@@ -33,11 +33,11 @@
 XrlArgs&
 XrlArgs::add(const XrlAtom& xa) throw (XrlAtomFound)
 {
-    const_iterator p = find_if(_args.begin(), _args.end(),
-			       compose1(bind2nd(equal_to<string>(), xa.name()),
-					mem_fun_ref(&XrlAtom::name)));
-    if (p != _args.end()) {
-	throw XrlAtomFound();
+    const_iterator p;
+    for (p = _args.begin(); p != _args.end(); ++p) {
+	if (p->name() == xa.name()) {
+	    throw XrlAtomFound();
+	}
     }
     _args.push_back(xa);
     return *this;
@@ -46,35 +46,29 @@ XrlArgs::add(const XrlAtom& xa) throw (XrlAtomFound)
 const XrlAtom&
 XrlArgs::get(const XrlAtom& dataless) const throw (XrlAtomNotFound)
 {
-    const_iterator p = find_if(_args.begin(), _args.end(),
-			       compose2(logical_and<bool>(),
-					compose1(bind2nd(equal_to<string>(),
-							 dataless.name()),
-						 mem_fun_ref(&XrlAtom::name)),
-					compose1(bind2nd(equal_to<XrlAtomType>(),
-							 dataless.type()),
-						 mem_fun_ref(&XrlAtom::type))));
-
-    if (p == _args.end()) {
-	throw XrlAtomNotFound();
+    const_iterator p;
+    for (p = _args.begin(); p != _args.end(); ++p) {
+	if (p->name() == dataless.name() &&
+	    p->type() == dataless.type()) {
+	    return *p;
+	}
     }
+    throw XrlAtomNotFound();
     return *p;
 }
 
 void
 XrlArgs::remove(const XrlAtom& dataless) throw (XrlAtomNotFound)
 {
-    iterator p = find_if(_args.begin(), _args.end(),
-			 compose2(logical_and<bool>(),
-				  compose1(bind2nd(equal_to<string>(), dataless.name()),
-					   mem_fun_ref(&XrlAtom::name)),
-				  compose1(bind2nd(equal_to<XrlAtomType>(), dataless.type()),
-					   mem_fun_ref(&XrlAtom::type))));
-
-    if (p == _args.end()) {
-	throw XrlAtomNotFound();
+    iterator p;
+    for (p = _args.begin(); p != _args.end(); ++p) {
+	if (p->name() == dataless.name() &&
+	    p->type() == dataless.type()) {
+	    _args.erase(p);
+	    return;
+	    }
     }
-    _args.erase(p);
+    throw XrlAtomNotFound();
 }
 
 // ----------------------------------------------------------------------------

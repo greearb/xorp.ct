@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_parser_input.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
+// $XORP: xorp/libxipc/xrl_parser_input.hh,v 1.2 2002/12/19 01:29:13 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PARSER_INPUT_HH__
 #define __LIBXIPC_XRL_PARSER_INPUT_HH__
 
 #include <iostream>
-#include <fstream.h>
+#include <fstream>
 #include <list>
 #include <vector>
 #include <string>
