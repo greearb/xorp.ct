@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.16 2003/05/31 16:41:21 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.17 2003/06/01 21:38:13 hodson Exp $"
 
 
 //
@@ -262,10 +262,40 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
 					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
+	{
+	    // Wait until the XrlRouter becomes ready
+	    bool timed_out = false;
+	    
+	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	    while (xrl_std_router_cli4.ready() == false
+		   && timed_out == false) {
+		eventloop.run();
+	    }
+	    
+	    if (xrl_std_router_cli4.ready() == false && timed_out) {
+		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+		exit (1);
+	    }
+	}
 #else
 	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
 					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
+	{
+	    // Wait until the XrlRouter becomes ready
+	    bool timed_out = false;
+	    
+	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	    while (xrl_std_router_cli6.ready() == false
+		   && timed_out == false) {
+		eventloop.run();
+	    }
+	    
+	    if (xrl_std_router_cli6.ready() == false && timed_out) {
+		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+		exit (1);
+	    }
+	}
 #endif // ! DO_IPV4
 
 	//
