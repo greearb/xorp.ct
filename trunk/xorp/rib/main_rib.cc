@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.16 2003/09/16 18:13:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.17 2004/02/11 08:48:45 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -64,8 +64,26 @@ main (int /* argc */, char* argv[])
 	}
 
 	// Add the FEA as a RIB client
+#if 0	// TODO: change to "#if 1" to switch-back to the old interface
 	rib_manager.add_rib_client("fea", AF_INET, true, false);
 	rib_manager.add_rib_client("fea", AF_INET6, true, false);
+#else
+	rib_manager.add_redist_xrl_output4("fea",	/* target_name */
+					   "all",	/* from_protocol */
+					   true,	/* unicast */
+					   false,	/* multicast */
+					   "all",	/* cookie */
+					   true /* is_xrl_transaction_output */
+	    );
+	rib_manager.add_redist_xrl_output6("fea",	/* target_name */
+					   "all",	/* from_protocol */
+					   true,	/* unicast */
+					   false,	/* multicast */
+					   "all",	/* cookie */
+					   true /* is_xrl_transaction_output */
+	    );
+#endif // 0/1
+
 	rib_manager.start();
 	
 	//
