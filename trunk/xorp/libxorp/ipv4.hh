@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.10 2003/09/30 03:07:59 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.11 2003/09/30 18:27:03 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -367,9 +367,9 @@ public:
      * @return the multicast base address mask length for family AF_INET.
      */
     static size_t ip_multicast_base_address_mask_len() {
-#define IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV4	4
-	return (IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV4);
-#undef IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV4
+#define IP_MULTICAST_BASE_ADDRESS_MASK_LEN_IPV4	4
+	return (IP_MULTICAST_BASE_ADDRESS_MASK_LEN_IPV4);
+#undef IP_MULTICAST_BASE_ADDRESS_MASK_LEN_IPV4
     }
     
     /**

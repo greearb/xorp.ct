@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.20 2003/08/07 00:31:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.21 2003/09/30 18:27:04 pavlin Exp $"
 
 
 //
@@ -1138,7 +1138,7 @@ PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
     
     // XXX: if hash_mask_len is 0, then set its value to default
     if (hash_mask_len == 0)
-	hash_mask_len = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
+	hash_mask_len = PIM_BOOTSTRAP_HASH_MASK_LEN_DEFAULT(family());
     
     BsrZone new_bsr_zone(pim_bsr(), my_cand_bsr_addr, bsr_priority,
 			 hash_mask_len, fragment_tag);
@@ -1506,7 +1506,7 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
     
     // XXX: if hash_mask_len is 0, then set its value to default
     if (hash_mask_len == 0)
-	hash_mask_len = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
+	hash_mask_len = PIM_BOOTSTRAP_HASH_MASK_LEN_DEFAULT(family());
     
     if (rp_table().add_rp(rp_addr, rp_priority, group_prefix, hash_mask_len,
 			  PimRp::RP_LEARNED_METHOD_STATIC)

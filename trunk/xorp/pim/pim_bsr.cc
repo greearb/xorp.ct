@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.22 2003/08/07 01:09:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.23 2003/09/30 18:27:04 pavlin Exp $"
 
 
 //
@@ -1167,7 +1167,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
       _is_test_bsr_zone(false),
       _bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _bsr_priority(0),
-      _hash_mask_len(PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(_pim_bsr.family())),
+      _hash_mask_len(PIM_BOOTSTRAP_HASH_MASK_LEN_DEFAULT(_pim_bsr.family())),
       _fragment_tag(RANDOM(0xffff)),
       _is_accepted_message(false),
       _is_unicast_message(false),
