@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.13 2003/01/29 00:38:56 rizzo Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.14 2003/01/29 23:38:12 rizzo Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -499,9 +499,9 @@ BGPMain::get_peer_timer_config(const Iptuple& iptuple,
     if (peer == NULL)
 	return false;
     const BGPPeerData* pd = peer->peerdata();
-    retry_interval = pd->get_retry_duration();
-    hold_time = pd->get_hold_duration();
-    keep_alive = pd->get_keepalive_duration();
+    retry_interval = (pd->get_retry_duration() / 1000);
+    hold_time = (pd->get_hold_duration() / 1000);
+    keep_alive = (pd->get_keepalive_duration() / 1000);
     hold_time_configured = pd->get_configured_hold_time();
     keep_alive_configured = hold_time_configured/3; //XXX
     min_as_origination_interval = 0; //XXX
