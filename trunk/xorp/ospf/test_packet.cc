@@ -37,6 +37,36 @@
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.
 
+/*
+ * Compare two packets
+ *
+ * @return true when they are equal
+ */
+inline
+bool
+compare_packets(TestInfo& info, vector<uint8_t>& pkt1, vector<uint8_t>& pkt2)
+{
+    if (pkt1.size() != pkt2.size()) {
+	DOUT(info) << "Packet lengths don't match " <<
+	    pkt1.size() << " " << pkt2.size() << endl;
+	return false;
+    }
+    
+    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
+	for(size_t i = 0; i < pkt1.size(); i++) {
+	    if (pkt1[i] != pkt2[i]) {
+		DOUT(info) << "mismatch at byte position " << i << endl;
+		DOUT(info) << "bytes " <<
+		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
+		break;
+	    }
+	}
+	return false;
+    }
+
+    return true;
+}
+
 /**
  * Fill all the fields except for the 8 byte auth in a V2 hello packet.
  */
@@ -232,23 +262,8 @@ hello_packet_compare(TestInfo& info, OspfTypes::Version version)
     vector<uint8_t> pkt2;
     hello3->encode(pkt2);
     
-    if (pkt1.size() != pkt2.size()) {
-	DOUT(info) << "Packet lengths don't match " <<
-	    pkt1.size() << " " << pkt2.size() << endl;
+    if (!compare_packets(info, pkt1, pkt2))
 	return false;
-    }
-    
-    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
-	for(size_t i = 0; i < pkt1.size(); i++) {
-	    if (pkt1[i] != pkt2[i]) {
-		DOUT(info) << "mismatch at byte position " << i << endl;
-		DOUT(info) << "bytes " <<
-		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
-		break;
-	    }
-	}
-	return false;
-    }
 
     delete hello1;
     delete hello2;
@@ -303,23 +318,8 @@ data_description_packet_compare(TestInfo& info, OspfTypes::Version version)
     vector<uint8_t> pkt2;
     ddp3->encode(pkt2);
     
-    if (pkt1.size() != pkt2.size()) {
-	DOUT(info) << "Packet lengths don't match " <<
-	    pkt1.size() << " " << pkt2.size() << endl;
+    if (!compare_packets(info, pkt1, pkt2))
 	return false;
-    }
-    
-    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
-	for(size_t i = 0; i < pkt1.size(); i++) {
-	    if (pkt1[i] != pkt2[i]) {
-		DOUT(info) << "mismatch at byte position " << i << endl;
-		DOUT(info) << "bytes " <<
-		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
-		break;
-	    }
-	}
-	return false;
-    }
 
     delete ddp1;
     delete ddp2;
@@ -374,23 +374,8 @@ link_state_request_packet_compare(TestInfo& info, OspfTypes::Version version)
     vector<uint8_t> pkt2;
     lsrp3->encode(pkt2);
     
-    if (pkt1.size() != pkt2.size()) {
-	DOUT(info) << "Packet lengths don't match " <<
-	    pkt1.size() << " " << pkt2.size() << endl;
+    if (!compare_packets(info, pkt1, pkt2))
 	return false;
-    }
-    
-    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
-	for(size_t i = 0; i < pkt1.size(); i++) {
-	    if (pkt1[i] != pkt2[i]) {
-		DOUT(info) << "mismatch at byte position " << i << endl;
-		DOUT(info) << "bytes " <<
-		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
-		break;
-	    }
-	}
-	return false;
-    }
 
     delete lsrp1;
     delete lsrp2;
