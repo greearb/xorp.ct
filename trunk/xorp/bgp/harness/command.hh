@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.7 2002/12/09 18:28:52 hodson Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
@@ -62,16 +62,29 @@ public:
 	throw(InvalidString);
     void initialise(const string& line, const vector<string>& v) 
 	throw(InvalidString);
-    void initialise_callback(const XrlError& error, const string peername);
+    void initialise_callback(const XrlError& error, string peername);
 private:
     XrlRouter& _xrlrouter;
 
     /*
     ** Supported commands.
     */
-    typedef void (Command::* PMEM)(const string& line,
-				   const vector<string>& v);
-    map<const string, PMEM> _commands;
+    typedef void (Command::* MEMFUN)(const string& line,
+				     const vector<string>& v);
+
+    struct PCmd {
+	PCmd(const Command::MEMFUN& mem_fun) : _mem_fun(mem_fun)
+	{}
+
+	void dispatch(Command* c, const string& line, const vector<string>&v)
+	{
+	    (c->*_mem_fun)(line, v);
+	}
+	Command::MEMFUN _mem_fun;
+    };
+
+    typedef map<const string, PCmd> StringCommandMap;
+    StringCommandMap _commands;
     map<const string, Peer> _peers;
 
     string _target_hostname;

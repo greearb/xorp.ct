@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.3 2003/01/26 04:06:18 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -53,9 +53,10 @@ Command::load_command_map()
 {
     _commands.clear();
 
-    _commands["reset"] = &Command::reset;
-    _commands["target"] = &Command::target;
-    _commands["initialise"] = &Command::initialise;
+    _commands.insert(StringCommandMap::value_type("reset", &Command::reset));
+    _commands.insert(StringCommandMap::value_type("target", &Command::target));
+    _commands.insert(StringCommandMap::value_type("initialise",
+						  &Command::initialise));
 }
 
 void
@@ -72,15 +73,13 @@ Command::command(const string& line) throw(InvalidString)
     if(v.empty())
 	xorp_throw(InvalidString, "Empty command");
 
-    map<const string, PMEM>::iterator cur  = _commands.find(v[0].c_str());
+    StringCommandMap::iterator cur  = _commands.find(v[0].c_str());
    
     if(_commands.end() == cur)
 	xorp_throw(InvalidString, c_format("Unknown command: %s",
 					   v[0].c_str()));
-	
-    PMEM mem = cur->second;
 
-    (this->*mem)(line, v);
+    cur->second.dispatch(this, line, v);
 }
 
 bool
@@ -274,7 +273,7 @@ Command::initialise(const string& line, const vector<string>& v)
     ** This peer name will be added to the command name map, verify
     ** that we don't already have a command with this name.
     */
-    map<const string, PMEM>::iterator com  = _commands.find(peername);
+    StringCommandMap::iterator com  = _commands.find(peername);
     if(_commands.end() != com)
 	xorp_throw(InvalidString, c_format("Peername command clash: %s",
 					   peername));
@@ -297,11 +296,11 @@ Command::initialise(const string& line, const vector<string>& v)
     XrlTestPeerV0p1Client test_peer(&_xrlrouter);
     test_peer.send_reset(peername,
 			 callback(this, &Command::initialise_callback, 
-				  static_cast<string>(peername)));
+				  string(peername)));
 }
 
 void
-Command::initialise_callback(const XrlError& /*error*/, const string peername)
+Command::initialise_callback(const XrlError& /*error*/, string peername)
 {
     debug_msg("callback: %s\n", peername.c_str());
     
@@ -310,5 +309,5 @@ Command::initialise_callback(const XrlError& /*error*/, const string peername)
 			    _target_port);
 
     /* Add to the command structure */
-    _commands[peername] = &Command::peer;
+    _commands.insert(StringCommandMap::value_type(peername, &Command::peer));
 }
