@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.13 2004/08/17 02:20:10 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.14 2004/09/09 04:58:45 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -65,13 +65,13 @@ protected:
      * @param ifname the interface name.
      * @param if_index the interface index.
      * @param ether_addr the Ethernet MAC address to set.
-     * @param reason the human-readable reason for any failure.
+     * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
-					  string& reason) = 0;
+					  string& errmsg) = 0;
 
     /**
      * Set the interface MTU address.
@@ -79,13 +79,13 @@ protected:
      * @param ifname the interface name.
      * @param if_index the interface index.
      * @param mtu the MTU to set.
-     * @param reason the human-readable reason for any failure.
+     * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
-				  string& reason) = 0;
+				  string& errmsg) = 0;
 
     /**
      * Set the interface flags.
@@ -93,13 +93,13 @@ protected:
      * @param ifname the interface name.
      * @param if_index the interface index.
      * @param flags the flags to set.
-     * @param reason the human-readable reason for any failure.
+     * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
-				    string& reason) = 0;
+				    string& errmsg) = 0;
 
     /**
      * Set an address on an interface.
@@ -111,7 +111,7 @@ protected:
      * @param addr the address to set.
      * @param dst_or_bcast the broadcast or the destination/peer address.
      * @param prefix_len the prefix length of the subnet mask.
-     * @param reason the human-readable reason for any failure.
+     * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_vif_address(const string& ifname,
@@ -121,7 +121,7 @@ protected:
 				const IPvX& addr,
 				const IPvX& dst_or_bcast,
 				uint32_t prefix_len,
-				string& reason) = 0;
+				string& errmsg) = 0;
 
     /**
      * Delete an address from an interface. 
@@ -130,14 +130,14 @@ protected:
      * @param if_index the interface index.
      * @param addr the address to delete.
      * @param prefix_len the prefix length of the subnet mask.
-     * @param reason the human-readable reason for any failure.
+     * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_vif_address(const string& ifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,
-				   string& reason) = 0;
+				   string& errmsg) = 0;
 
 protected:
     // Misc other state
@@ -185,17 +185,17 @@ private:
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
-					  string& reason);
+					  string& errmsg);
 
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
-				  string& reason);
+				  string& errmsg);
 
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
-				    string& reason);
+				    string& errmsg);
 
     virtual int set_vif_address(const string& ifname,
 				uint16_t if_index,
@@ -204,13 +204,13 @@ private:
 				const IPvX& addr,
 				const IPvX& dst_or_bcast,
 				uint32_t prefix_len,
-				string& reason);
+				string& errmsg);
 
     virtual int delete_vif_address(const string& ifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,
-				   string& reason);
+				   string& errmsg);
 };
 
 class IfConfigSetIoctl : public IfConfigSet {
@@ -236,17 +236,17 @@ private:
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
-					  string& reason);
+					  string& errmsg);
 
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
-				  string& reason);
+				  string& errmsg);
 
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
-				    string& reason);
+				    string& errmsg);
 
     virtual int set_vif_address(const string& ifname,
 				uint16_t if_index,
@@ -255,13 +255,13 @@ private:
 				const IPvX& addr,
 				const IPvX& dst_or_bcast,
 				uint32_t prefix_len,
-				string& reason);
+				string& errmsg);
 
     virtual int delete_vif_address(const string& ifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,
-				   string& reason);
+				   string& errmsg);
 
     virtual int set_vif_address4(const string& ifname,
 				 uint16_t if_index,
@@ -270,7 +270,7 @@ private:
 				 const IPvX& addr,
 				 const IPvX& dst_or_bcast,
 				 uint32_t prefix_len,
-				 string& reason);
+				 string& errmsg);
 
     virtual int set_vif_address6(const string& ifname,
 				 uint16_t if_index,
@@ -278,7 +278,7 @@ private:
 				 const IPvX& addr,
 				 const IPvX& dst,
 				 uint32_t prefix_len,
-				 string& reason);
+				 string& errmsg);
 
     int _s4;
     int _s6;
@@ -309,17 +309,17 @@ private:
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
-					  string& reason);
+					  string& errmsg);
 
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
-				  string& reason);
+				  string& errmsg);
 
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
-				    string& reason);
+				    string& errmsg);
 
     virtual int set_vif_address(const string& ifname,
 				uint16_t if_index,
@@ -328,13 +328,13 @@ private:
 				const IPvX& addr,
 				const IPvX& dst_or_bcast,
 				uint32_t prefix_len,
-				string& reason);
+				string& errmsg);
 
     virtual int delete_vif_address(const string& ifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,
-				   string& reason);
+				   string& errmsg);
 
     NetlinkSocketReader	_ns_reader;
 };

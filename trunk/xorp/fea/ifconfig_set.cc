@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.10 2004/08/17 02:20:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.11 2004/09/09 04:58:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -152,11 +152,11 @@ IfConfigSet::push_interface(const IfTreeInterface& i)
 	if (curflags == newflags)
 	    break;		// XXX: nothing changed
 
-	string reason;
-	if (set_interface_flags(i.ifname(), if_index, newflags, reason) < 0) {
+	string errmsg;
+	if (set_interface_flags(i.ifname(), if_index, newflags, errmsg) < 0) {
 	    ifc().er().interface_error(i.ifname(),
 				       c_format("Failed to set interface flags to 0x%08x (%s)",
-						newflags, reason.c_str()));
+						newflags, errmsg.c_str()));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
 	}
@@ -175,11 +175,11 @@ IfConfigSet::push_interface(const IfTreeInterface& i)
 	    && (ii->second.mtu() == i.mtu()))
 	    break;		// Ignore: the MTU hasn't changed
 	
-	string reason;
-	if (set_interface_mtu(i.ifname(), if_index, i.mtu(), reason) < 0) {
+	string errmsg;
+	if (set_interface_mtu(i.ifname(), if_index, i.mtu(), errmsg) < 0) {
 	    ifc().er().interface_error(i.name(),
 				       c_format("Failed to set MTU of %u bytes (%s)",
-						i.mtu(), reason.c_str()));
+						i.mtu(), errmsg.c_str()));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
 	}
@@ -230,11 +230,11 @@ IfConfigSet::push_interface(const IfTreeInterface& i)
 	    return;
 	}
 
-	string reason;
-	if (set_interface_mac_address(i.ifname(), if_index, ea, reason) < 0) {
+	string errmsg;
+	if (set_interface_mac_address(i.ifname(), if_index, ea, errmsg) < 0) {
 	    ifc().er().interface_error(
 		i.name(),
-		c_format("Failed to set MAC address (%s)", reason.c_str()));
+		c_format("Failed to set MAC address (%s)", errmsg.c_str()));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
 	}
@@ -276,11 +276,11 @@ IfConfigSet::push_vif(const IfTreeInterface&	i,
 	if (curflags == newflags)
 	    break;		// XXX: nothing changed
 
-	string reason;
-	if (set_interface_flags(i.ifname(), if_index, newflags, reason) < 0) {
+	string errmsg;
+	if (set_interface_flags(i.ifname(), if_index, newflags, errmsg) < 0) {
 	    ifc().er().vif_error(i.ifname(), v.vifname(),
 				 c_format("Failed to set interface flags to 0x%08x (%s)",
-					  newflags, reason.c_str()));
+					  newflags, errmsg.c_str()));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
 	}
@@ -323,13 +323,13 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 		    a.is_marked(IfTreeItem::DELETED));
 
     if (deleted || !enabled) {
-	string reason;
+	string errmsg;
 	if (delete_vif_address(i.ifname(), if_index, IPvX(a.addr()),
-			       a.prefix_len(), reason)
+			       a.prefix_len(), errmsg)
 	    < 0) {
 	    string msg = c_format("Failed to delete address (%s): %s",
 				  (deleted) ? "deleted" : "not enabled",
-				  reason.c_str());
+				  errmsg.c_str());
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(), msg);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	}
@@ -382,14 +382,14 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	if (! new_address)
 	    break;		// Ignore: the address hasn't changed
 
-	string reason;
+	string errmsg;
 	if (set_vif_address(i.ifname(), if_index, a.broadcast(),
 			    a.point_to_point(), IPvX(a.addr()), IPvX(oaddr),
-			    prefix_len, reason)
+			    prefix_len, errmsg)
 	    < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
 				     c_format("Address configuration failed (%s)",
-					      reason.c_str()));
+					      errmsg.c_str()));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	}
 	
@@ -430,13 +430,13 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 		    a.is_marked(IfTreeItem::DELETED));
 
     if (deleted || !enabled) {
-	string reason;
+	string errmsg;
 	if (delete_vif_address(i.ifname(), if_index, a.addr(), a.prefix_len(),
-			       reason)
+			       errmsg)
 	    < 0) {
 	    string msg = c_format("Failed to delete address (%s): %s",
 				  (deleted) ? "deleted" : "not enabled",
-				  reason.c_str());
+				  errmsg.c_str());
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(), msg);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	}
@@ -489,13 +489,13 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	if (! new_address)
 	    break;		// Ignore: the address hasn't changed
 
-	string reason;
+	string errmsg;
 	if (set_vif_address(i.ifname(), if_index, false, a.point_to_point(),
-			    IPvX(a.addr()), IPvX(oaddr), prefix_len, reason)
+			    IPvX(a.addr()), IPvX(oaddr), prefix_len, errmsg)
 	    < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
 				     c_format("Address configuration failed (%s)",
-					      reason.c_str()));
+					      errmsg.c_str()));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	}
 	
