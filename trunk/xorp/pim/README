@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.15 2004/03/01 22:47:18 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.16 2004/03/02 00:32:31 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -71,6 +71,9 @@ it for each router:
    e.g., if you want to make incoming traffic with a non-local source address
    to appear as it is coming from a local subnet, then create a list
    of tuples "<virtual interface name> <subnet address>".
+   Typically, this is needed as a work-around solution when there are
+   uni-directional interfaces for sending and receiving traffic
+   (e.g., satellite links).
    [ Note: add alternative subnets with extreme care, only if you know what
    you are really doing! ]
    Example:
