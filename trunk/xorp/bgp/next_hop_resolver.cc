@@ -216,10 +216,11 @@ NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
     uint32_t metric;
     if (!_next_hop_cache.lookup_by_addr(addr, prefix_len, resolvable,
 					metric)) {
+	if (_next_hop_rib_request.premature_invalid(addr, prefix_len)) {
+	    return true;
+	}
 	XLOG_WARNING("address not found in next hop cache: %s/%d",
 		   addr.str().c_str(), prefix_len);
-	if (_next_hop_rib_request.busy())
-	    XLOG_WARNING("Waiting for a response from the RIB");
 	return false;
     }
 
@@ -618,7 +619,8 @@ NextHopRibRequest<A>::NextHopRibRequest(XrlStdRouter *xrl_router,
 					NextHopCache<A>& next_hop_cache,
 					BGPMain& bgp)
     : _xrl_router(xrl_router), _next_hop_resolver(next_hop_resolver),
-      _next_hop_cache(next_hop_cache), _bgp(bgp), _busy(false)
+      _next_hop_cache(next_hop_cache), _bgp(bgp), _busy(false),
+      _invalid(false)
 {
 }
 
@@ -801,9 +803,24 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** a base address for the covered region. So the comparison has to
     ** be masked by the prefix_len that is returned.
     */
-    
     XLOG_ASSERT(IPNet<A>(*addr, *prefix_len) ==
 		IPNet<A>(first_rr->nexthop(), *prefix_len));
+
+    /*
+    ** It is possible that we register interest in a nexthop and while
+    ** we were are waiting for the response the answer becomes invalid.
+    ** Unfortunately the invalid can arrive before the response. If we
+    ** have previously received an invalidate and it was not in our
+    ** cache then it was saved. If the invalid and response match then
+    ** register again.
+    */
+    if (_invalid) {
+	XLOG_ASSERT(*addr == _invalid_net.masked_addr() &&
+		    *prefix_len == _invalid_net.prefix_len());
+	_invalid = false;
+	send_next_request();
+	return;
+    }
 
     /*
     ** We have a lot to do here. This response may have satisfied
@@ -951,6 +968,23 @@ NextHopRibRequest<A>::send_next_request()
 	return;
     }
     XLOG_UNREACHABLE();
+}
+
+template<class A>
+bool
+NextHopRibRequest<A>::premature_invalid(const A& addr,
+					const uint32_t& prefix_len)
+{
+    if (!_busy)
+	return false;
+
+    XLOG_ASSERT(_busy);
+    XLOG_ASSERT(!_invalid);
+
+    _invalid = true;
+    _invalid_net = IPNet<A>(addr, prefix_len);
+
+    return true;
 }
 
 template<class A>

@@ -617,6 +617,11 @@ public:
 
 
     /**
+     * An unmatched invalidate has been received.
+     */
+    bool premature_invalid(const A& addr, const uint32_t& prefix_len);
+
+    /**
      * Deregister interest with the RIB about this next hop.
      *
      * @param nexthop The next hop that we are attempting to resolve.
@@ -690,12 +695,6 @@ public:
 				      uint32_t prefix_len,
 				      string comment);
 
-    /**
-     * Check the status of outstanding requests to the RIB.
-     *
-     * @return true if we are waiting for a response from the RIB.
-     */
-    bool busy() const {return _busy;}
 private:
     string _ribname;
     XrlStdRouter *_xrl_router;
@@ -707,6 +706,9 @@ private:
      * Are we currently waiting for a response from the RIB.
      */
     bool _busy;
+
+    bool _invalid;		// True if received an unmatched invalid call.
+    IPNet<A> _invalid_net;	// Saved invalid subnet.
 
     /**
      * The queue of outstanding requests.
