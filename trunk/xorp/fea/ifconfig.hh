@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.32 2004/10/26 01:03:43 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.33 2004/11/10 00:39:47 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -80,6 +80,7 @@ public:
     void    set_live_config(const IfTree& it) { _live_config = it; }
 
     const IfTree& pulled_config() { return (_pulled_config); }
+    const IfTree& pushed_config() { return (_pushed_config); }
 
     int register_ifc_get_primary(IfConfigGet *ifc_get);
     int register_ifc_set_primary(IfConfigSet *ifc_set);
@@ -344,6 +345,7 @@ private:
 
     IfTree		_live_config;	// The IfTree with live config
     IfTree		_pulled_config;	// The IfTree when we pull the config
+    IfTree		_pushed_config;	// The IfTree when we push the config
 
     list<IfConfigGet*>		_ifc_gets;
     list<IfConfigSet*>		_ifc_sets;
