@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.21 2004/07/09 04:43:54 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.22 2004/07/09 05:28:36 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -144,6 +144,13 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 	MISC: - Add/update the information about building XORP on
                 various platforms.
+
+========================================================================
+1270.	TASK: Update xorp/ERRATA
+	WHO:  Everyone
+	WHEN: 1 day before the release date
+	MISC: - If there are no known issues for a module, then just add
+		"No known issues."
 
 ========================================================================
 1300.	TASK: Modify the date on the front page on all documents in
