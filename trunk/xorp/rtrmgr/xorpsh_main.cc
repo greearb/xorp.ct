@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.7 2003/04/23 21:09:32 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.8 2003/05/03 21:26:47 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -40,7 +40,23 @@ static const char* default_xrl_dir 	       = "../xrl/targets";
 
 static bool running;
 
-static void signalhandler(int) {
+static void
+signal_handler(int signal_value)
+{
+    switch (signal_value) {
+    case SIGINT:
+	// Ignore Ctrl-C: it is used by the CLI to interrupt a command.
+	break;
+    default:
+	// XXX: anything else we have intercepted will terminate us.
+	running = false;
+	break;
+    }
+}
+
+static void
+exit_handler(CliClient*)
+{
     running = false;
 }
 
@@ -106,10 +122,12 @@ void
 XorpShell::run() {
     //signal handlers so we can clean up when we're killed
     running = true;
-    signal(SIGTERM, signalhandler);
-    signal(SIGINT, signalhandler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
 
-
+    // Set the callback when the CLI exits (e.g., after Ctrl-D)
+    _cli_node.set_cli_client_delete_callback(callback(exit_handler));
+    
     const uint32_t uid = getuid();
     _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name, 
 					callback(this, 
@@ -418,8 +436,7 @@ int main(int argc, char *argv[]) {
     //
     xlog_stop();
     xlog_exit();
-    
-    printf("connection closed\n");
+
     return 0;
 }
 
