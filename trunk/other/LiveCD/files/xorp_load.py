@@ -57,32 +57,34 @@ def copyFileIn(fe):
   shutil.copyfile(fe.source,fe.destination);
   os.chown(fe.destination,pwd.getpwnam(fe.owner).pw_uid,grp.getgrnam(fe.group).gr_gid);
   os.chmod(fe.destination, int(fe.permission, 8));
-  print "copied in file " + fe.source + "."
+  print "copied in file: " + fe.source
+  print "            to: " + fe.destination + "."
 
 # Copy all files in
 def copyAllFilesIn(manifest):
-  print "Copying All files to floppy."
+  print "Copying preserved files in from floppy."
   for i in manifest:
     copyFileIn(i)
 
 # Copy file out
 
 def copyFileOut(fe):
-  shutil.copyfile(fe.destination,fe.source);
+  shutil.copyfile(fe.destination,fe.source)
+  os.system("/bin/sync")
   print "copied out file " + fe.destination + "."
 
 # Copy all files out
 
 def copyAllFilesOut(manifest):
-  print "Copying All files to floppy."
+  print "Copying all files to floppy."
   for i in manifest:
     copyFileOut(i)
 
 # Save file from os to disk, only called by router manager
 
 def singleFileSaveToFloppy(filename):
-  manifest_file_dir = "/mnt/floppy";
-  manifest_file_location = manifest_file_dir + "/manifest.dat";
+  manifest_file_dir = "/mnt/floppy"
+  manifest_file_location = manifest_file_dir + "/manifest.dat"
   manifest = loadManifest(manifest_file_location)
   ctr = 0
   for f in manifest:
