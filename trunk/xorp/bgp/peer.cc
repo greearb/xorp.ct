@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.42 2003/08/27 02:45:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.43 2003/08/27 22:32:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1049,17 +1049,31 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	    }
 	}
 
-	if (origin_attr == NULL) {
-	    debug_msg("Missing ORIGIN\n");
-	    uint8_t data = ORIGIN;
-	    return new NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
-	}
+	// Only if NLRI is present are the following mandatory.
+	if ( p->nlri_list().empty() == false )	{
+	    // The ORIGIN Path attribute is mandatory 
+	    if (origin_attr == NULL) {
+		debug_msg("Missing ORIGIN\n");
+		uint8_t data = ORIGIN;
+		return new 
+		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
+	    }
 
-	// The AS Path attribute is mandatory
-	if (as_path_attr == NULL) {
-	    debug_msg("Missing AS_PATH\n");
-	    uint8_t data = AS_PATH;
-	    return new NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
+	    // The AS Path attribute is mandatory
+	    if (as_path_attr == NULL) {
+		debug_msg("Missing AS_PATH\n");
+		uint8_t data = AS_PATH;
+		return new 
+		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
+	    }
+
+	    // The NEXT_HOP attribute is mandatory
+	    if (next_hop_attr == NULL) {
+		debug_msg("Missing NEXT_HOP\n");
+		uint8_t data = NEXT_HOP;
+		return new 
+		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
+	    }
 	}
 
 	if (!ibgp()) {
@@ -1074,12 +1088,6 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 		return new NotificationPacket(UPDATEMSGERR, MALASPATH);
 	}
 
-	// The NEXT_HOP attribute is mandatory
-	if (next_hop_attr == NULL) {
-	    debug_msg("Missing NEXT_HOP\n");
-	    uint8_t data = NEXT_HOP;
-	    return new NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
-	}
 
 	// XXX need also to check that the nexthop address is not
 	// one of our addresses, and with single hop EBGP that the
