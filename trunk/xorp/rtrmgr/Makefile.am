@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.19 2003/09/30 20:41:21 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.20 2003/11/17 07:02:40 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -162,6 +162,7 @@ xorpsh_LDADD	+= $(LDADD)
 # test_templates
 #
 test_templates_SOURCES	 = rtrmgr_module.h
+test_templates_SOURCES	+= y.boot_tab.h
 test_templates_SOURCES	+= y.tplt_tab.h
 
 test_templates_SOURCES	+= command_tree.hh
@@ -184,7 +185,9 @@ test_templates_SOURCES	+= xrl_rtrmgr_interface.hh
 test_templates_SOURCES	+= xrldb.hh
 
 test_templates_SOURCES	+= command_tree.cc
+test_templates_SOURCES	+= conf_tree.cc
 test_templates_SOURCES	+= conf_tree_node.cc
+test_templates_SOURCES	+= lex.boot.cc
 test_templates_SOURCES	+= lex.tplt.cc
 test_templates_SOURCES	+= module_command.cc
 test_templates_SOURCES	+= module_manager.cc
@@ -197,6 +200,7 @@ test_templates_SOURCES	+= unexpanded_xrl.cc
 test_templates_SOURCES	+= util.cc
 test_templates_SOURCES	+= xorp_client.cc
 test_templates_SOURCES	+= xrldb.cc
+test_templates_SOURCES	+= y.boot_tab.cc
 test_templates_SOURCES	+= y.tplt_tab.cc
 
 test_templates_LDADD 	 = $(LDADD)
@@ -254,6 +258,7 @@ test_sample_config_LDADD 	 = $(LDADD)
 # test_module_manager
 #
 test_module_manager_SOURCES	 = rtrmgr_module.h
+test_module_manager_SOURCES	+= y.boot_tab.h
 test_module_manager_SOURCES	+= y.tplt_tab.h
 
 test_module_manager_SOURCES	+= command_tree.hh
@@ -272,8 +277,9 @@ test_module_manager_SOURCES	+= util.hh
 test_module_manager_SOURCES	+= xorp_client.hh
 test_module_manager_SOURCES	+= xrldb.hh
 
-#test_module_manager_SOURCES	+= conf_tree.cc
+test_module_manager_SOURCES	+= conf_tree.cc
 test_module_manager_SOURCES	+= conf_tree_node.cc
+test_module_manager_SOURCES	+= lex.boot.cc
 test_module_manager_SOURCES	+= lex.tplt.cc
 test_module_manager_SOURCES	+= module_command.cc
 test_module_manager_SOURCES	+= module_manager.cc
@@ -286,6 +292,7 @@ test_module_manager_SOURCES	+= unexpanded_xrl.cc
 test_module_manager_SOURCES	+= util.cc
 test_module_manager_SOURCES	+= xorp_client.cc
 test_module_manager_SOURCES	+= xrldb.cc
+test_module_manager_SOURCES	+= y.boot_tab.cc
 test_module_manager_SOURCES	+= y.tplt_tab.cc
 
 test_module_manager_LDADD 	 = $(LDADD)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.9 2003/05/30 23:57:09 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.10 2003/05/31 06:13:15 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -34,8 +34,9 @@ class ConfTemplate;
 class MasterConfigTree :public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
-    MasterConfigTree(const string& conffile, TemplateTree *ct, 
-		     TaskManager& task_manager);
+    MasterConfigTree(const string& conffile, TemplateTree *ct,
+		     ModuleManager& mmgr, XorpClient& xclient,
+		     bool global_do_exec);
     bool read_file(string& configuration, const string& conffile,
 		   string& errmsg);
     bool parse(const string& configuration, const string& conffile);
@@ -91,7 +92,7 @@ private:
 
     XorpClient& xorp_client() const {return _task_manager.xorp_client();}
 
-    TaskManager& _task_manager;
+    TaskManager _task_manager;
     CallBack _commit_cb;
     bool _commit_in_progress;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.31 2003/09/25 00:54:10 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.32 2003/10/31 03:14:33 atanu Exp $"
 
 #include <signal.h>
 
@@ -266,9 +266,6 @@ main(int argc, char* const argv[])
     XrlStdRouter xrl_router(eventloop, "rtrmgr", fs->addr(), fs->port());
     XorpClient xclient(eventloop, xrl_router);
 
-    // initialize the Task Manager
-    TaskManager taskmgr(mmgr, xclient, do_exec);
-
     try {
 	// read the router startup configuration file,
 	// start the processes required, and initialize them
@@ -286,7 +283,8 @@ main(int argc, char* const argv[])
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	    }
 	}
-	MasterConfigTree* ct = new MasterConfigTree(boot_file, tt, taskmgr);
+	MasterConfigTree* ct = new MasterConfigTree(boot_file, tt,
+						    mmgr, xclient, do_exec);
 	//
 	// XXX: note that theoretically we may receive an XRL before
 	// we call XrlRtrmgrInterface::set_conf_tree().

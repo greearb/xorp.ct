@@ -12,22 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.21 2003/06/09 23:38:40 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.22 2003/10/01 21:20:02 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 #include "task.hh"
+#include "conf_tree.hh"
 #include "module_manager.hh"
 #include "module_command.hh"
 #include "xorp_client.hh"
+#include "unexpanded_xrl.hh"
 
 #define MAX_STATUS_RETRIES 30
 
 
 // ----------------------------------------------------------------------------
 // DelayValidation implementation
-DelayValidation::DelayValidation(EventLoop& eventloop, uint32_t ms)
-    : _eventloop(eventloop), _delay_in_ms(ms)
+DelayValidation::DelayValidation(const string& module_name,
+				 EventLoop& eventloop, uint32_t ms)
+    : Validation(module_name), _eventloop(eventloop), _delay_in_ms(ms)
 {
 }
 
@@ -49,9 +52,13 @@ DelayValidation::timer_expired()
 // ----------------------------------------------------------------------------
 // XrlStatusValidation implementation
 
-XrlStatusValidation::XrlStatusValidation(const string& target,
+XrlStatusValidation::XrlStatusValidation(const string& module_name,
+					 const XrlAction& xrl_action,
 					 TaskManager& taskmgr)
-    : _target(target), _task_manager(taskmgr),_retries(0)
+    : Validation(module_name),
+      _xrl_action(xrl_action),
+      _task_manager(taskmgr),
+      _retries(0)
 {
 }
 
@@ -67,11 +74,23 @@ XrlStatusValidation::validate(CallBack cb)
     _cb = cb;
     printf("validate\n");
     if (_task_manager.do_exec()) {
-	Xrl xrl(_target, "common/0.1/get_status");
-	printf("XRL: >%s<\n", xrl.str().c_str());
-	string response = "status:bool&reason:txt";
+	const ConfigTreeNode* ctn = _task_manager.config_tree().find_config_module(_module_name);
+	if (ctn == NULL) {
+	    XLOG_ERROR("Cannot find module %s that needs validation",
+		       _module_name.c_str());
+	    return;
+	}
+
+	UnexpandedXrl unexpanded_xrl(*ctn, _xrl_action);
+	Xrl* xrl = unexpanded_xrl.expand();
+	if (xrl == NULL) {
+	    XLOG_ERROR("Cannot expand XRL %s", unexpanded_xrl.str().c_str());
+	    return;
+	}
+	printf("XRL: >%s<\n", xrl->str().c_str());
+	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().
-	    send_now(xrl, callback(this, &XrlStatusValidation::xrl_done),
+	    send_now(*xrl, callback(this, &XrlStatusValidation::xrl_done),
 		     response, true);
     } else {
 	//when we're running with do_exec == false, we want to
@@ -116,8 +135,8 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
     } else if (e == XrlError::NO_SUCH_METHOD()) {
 	//The template file must have been wrong - the target doesn't
 	//support the common interface
-	XLOG_ERROR(("Target " + _target +
-		    " doesn't support get_status\n").c_str());
+	XLOG_ERROR("Module %s doesn't support status validation",
+		   _module_name.c_str());
 
 	//Just return true and hope everything's OK
 	_cb->dispatch(true);
@@ -136,9 +155,8 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 	    eventloop().new_oneoff_after_ms(1000,
                  callback(this, &StatusReadyValidation::validate, _cb));
     } else {
-	XLOG_ERROR(("Error while validating process "
-		    + _target + "\n").c_str());
-	XLOG_WARNING("Continuing anyway, cross your fingers...\n");
+	XLOG_ERROR("Error while validating module %s", _module_name.c_str());
+	XLOG_WARNING("Continuing anyway, cross your fingers...");
 	_cb->dispatch(true);
     }
 }
@@ -147,9 +165,10 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 // ----------------------------------------------------------------------------
 // StatusReadyValidation implementation
 
-StatusReadyValidation::StatusReadyValidation(const string& target,
+StatusReadyValidation::StatusReadyValidation(const string& module_name,
+					     const XrlAction& xrl_action,
 					     TaskManager& taskmgr)
-    : XrlStatusValidation(target, taskmgr)
+    : XrlStatusValidation(module_name, xrl_action, taskmgr)
 {
 }
 
@@ -188,9 +207,10 @@ StatusReadyValidation::handle_status_response(ProcessStatus status,
 // ----------------------------------------------------------------------------
 // StatusConfigMeValidation implementation
 
-StatusConfigMeValidation::StatusConfigMeValidation(const string& target,
+StatusConfigMeValidation::StatusConfigMeValidation(const string& module_name,
+						   const XrlAction& xrl_action,
 						   TaskManager& taskmgr)
-    : XrlStatusValidation(target, taskmgr)
+    : XrlStatusValidation(module_name, xrl_action, taskmgr)
 {
 }
 
@@ -228,9 +248,10 @@ StatusConfigMeValidation::handle_status_response(ProcessStatus status,
 // ----------------------------------------------------------------------------
 // StatusShutdownValidation implementation
 
-StatusShutdownValidation::StatusShutdownValidation(const string& target,
+StatusShutdownValidation::StatusShutdownValidation(const string& module_name,
+						   const XrlAction& xrl_action,
 						   TaskManager& taskmgr)
-    : XrlStatusValidation(target, taskmgr)
+    : XrlStatusValidation(module_name, xrl_action, taskmgr)
 {
 }
 
@@ -286,8 +307,8 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
     } else if (e == XrlError::NO_SUCH_METHOD()) {
 	//The template file must have been wrong - the target doesn't
 	//support the common interface
-	XLOG_ERROR(("Target " + _target +
-		    " doesn't support get_status\n").c_str());
+	XLOG_ERROR("Module %s doesn't support shutdown validation",
+		   _module_name.c_str());
 	//return false, and we can shut it down using kill
 	_cb->dispatch(false);
     } else if (e == XrlError::RESOLVE_FAILED()) {
@@ -298,8 +319,8 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 	//return false, and we can shut it down using kill
 	_cb->dispatch(false);
     } else {
-	XLOG_ERROR(("Error while validating process "
-		    + _target + "\n").c_str());
+	XLOG_ERROR("Error while shutdown validation of module %s",
+		   _module_name.c_str());
 	//return false, and we can shut it down using kill
 	_cb->dispatch(false);
     }
@@ -309,24 +330,28 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 // ----------------------------------------------------------------------------
 // Shutdown implementation
 
-Shutdown::Shutdown(const string& modname, TaskManager& taskmgr)
-    : _modname(modname), _task_manager(taskmgr)
+Shutdown::Shutdown(const string& module_name)
+    : _module_name(module_name)
 {
-}
-
-EventLoop&
-Shutdown::eventloop() const
-{
-    return _task_manager.eventloop();
 }
 
 
 // ----------------------------------------------------------------------------
 // XrlShutdown implementation
 
-XrlShutdown::XrlShutdown(const string& modname, TaskManager& taskmgr)
-    : Shutdown(modname, taskmgr)
+XrlShutdown::XrlShutdown(const string& module_name,
+			 const XrlAction& xrl_action,
+			 TaskManager& taskmgr)
+    : Shutdown(module_name),
+      _xrl_action(xrl_action),
+      _task_manager(taskmgr)
 {
+}
+
+EventLoop&
+XrlShutdown::eventloop() const
+{
+    return _task_manager.eventloop();
 }
 
 void
@@ -334,19 +359,30 @@ XrlShutdown::shutdown(CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
-	Xrl xrl(_modname, "common/0.1/shutdown");
-	printf("XRL: >%s<\n", xrl.str().c_str());
-	string response = "";
+	const ConfigTreeNode* ctn = _task_manager.config_tree().find_config_module(_module_name);
+	if (ctn == NULL) {
+	    XLOG_ERROR("Cannot find module %s that needs shutdown",
+		       _module_name.c_str());
+	    return;
+	}
+	UnexpandedXrl unexpanded_xrl(*ctn, _xrl_action);
+	Xrl* xrl = unexpanded_xrl.expand();
+	if (xrl == NULL) {
+	    XLOG_ERROR("Cannot expand XRL %s", unexpanded_xrl.str().c_str());
+	    return;
+	}
+	printf("XRL: >%s<\n", xrl->str().c_str());
+	// string response = "";
+	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().
-	    send_now(xrl, callback(this, &XrlShutdown::shutdown_done),
+	    send_now(*xrl, callback(this, &XrlShutdown::shutdown_done),
 		     response, true);
     } else {
 	//when we're running with do_exec == false, we want to
 	//exercise most of the same machinery, but we want to ensure
 	//that the xrl_done response gets the right arguments even
 	//though we're not going to call the XRL
-	printf("XRL: dummy call to %s common/0.1/shutdown\n",
-	       _modname.c_str());
+	printf("XRL: dummy call to %s\n", _xrl_action.request().c_str());
 	_dummy_timer =
 	    eventloop().new_oneoff_after_ms(1000,
                 callback(this, &XrlShutdown::dummy_response));
@@ -797,9 +833,13 @@ Task::eventloop() const
 // ----------------------------------------------------------------------------
 // TaskManager implementation
 
-TaskManager::TaskManager(ModuleManager& mmgr, XorpClient& xclient,
+TaskManager::TaskManager(ConfigTree& config_tree,
+			 ModuleManager& mmgr,
+			 XorpClient& xclient,
 			 bool global_do_exec)
-    : _module_manager(mmgr), _xorp_client(xclient),
+    : _config_tree(config_tree),
+      _module_manager(mmgr),
+      _xorp_client(xclient),
       _global_do_exec(global_do_exec)
 {
 }

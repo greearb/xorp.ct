@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.15 2003/11/17 22:10:44 pavlin Exp $ */
 
 protocols {
   bgp {
@@ -24,8 +24,8 @@ protocols {
     %modinfo: depends rib;
     %modinfo: path "bgp/xorp_bgp";
     %modinfo: default_targetname "bgp";
-    %modinfo: statusmethod xrl;
-    %modinfo: shutdownmethod xrl;
+    %modinfo: statusmethod xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
+    %modinfo: shutdownmethod xrl "$(bgp.targetname)/common/0.1/shutdown";
     targetname {
       %set:;
     }

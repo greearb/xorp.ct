@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.16 2003/11/17 22:10:44 pavlin Exp $ */
 
 interfaces {
   targetname: text = "fea";
@@ -34,8 +34,8 @@ interfaces {
   %modinfo: provides fea;
   %modinfo: path "fea/xorp_fea";
   %modinfo: default_targetname "fea";
-  %modinfo: statusmethod xrl;
-  %modinfo: shutdownmethod xrl;
+  %modinfo: statusmethod xrl "$(interfaces.targetname)/common/0.1/get_status->status:u32&reason:txt";
+  %modinfo: shutdownmethod xrl "$(interfaces.targetname)/common/0.1/shutdown";
   %modinfo: startcommit xrl "$(interfaces.targetname)/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
   %modinfo: endcommit xrl "$(interfaces.targetname)/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
   targetname {

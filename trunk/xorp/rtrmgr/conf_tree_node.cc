@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.20 2003/11/17 00:21:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.21 2003/11/17 19:34:31 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -450,6 +450,29 @@ ConfigTreeNode::find_all_modules(set <string>& all_modules) const {
     for (i=_children.begin(); i!=_children.end(); i++) {
 	(*i)->find_all_modules(all_modules);
     }
+}
+
+const ConfigTreeNode*
+ConfigTreeNode::find_config_module(const string& module_name) const
+{
+    if (module_name.empty())
+	return (NULL);
+
+    // Check if this node matches
+    if (_template != NULL) {
+	if (_template->module_name() == module_name)
+	    return (this);
+    }
+
+    // Check all children nodes
+    list <ConfigTreeNode*>::const_iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	const ConfigTreeNode* ctn = (*iter)->find_config_module(module_name);
+	if (ctn != NULL)
+	    return (ctn);
+    }
+
+    return (NULL);
 }
 
 void 

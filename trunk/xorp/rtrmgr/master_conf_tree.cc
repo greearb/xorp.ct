@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.18 2003/10/01 22:46:47 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.19 2003/11/17 19:34:31 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,9 +37,14 @@ extern string booterrormsg(const char *s);
  * Master Config Tree class
  *************************************************************************/
 
-MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt,
-				   TaskManager &task_manager)
-    : ConfigTree(tt), _task_manager(task_manager), _commit_in_progress(false)
+MasterConfigTree::MasterConfigTree(const string& conffile,
+				   TemplateTree *tt,
+				   ModuleManager& mmgr,
+				   XorpClient& xclient,
+				   bool global_do_exec)
+    : ConfigTree(tt),
+      _task_manager(*this, mmgr, xclient, global_do_exec),
+      _commit_in_progress(false)
 {
     string configuration;
     string errmsg;

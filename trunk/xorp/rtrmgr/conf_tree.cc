@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.6 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.7 2003/09/30 18:24:02 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -338,6 +338,12 @@ ConfigTree::find_node(const list <string>& path) {
 	path_copy.push_back(*ci);
     }
     return _root_node.find_node(path_copy);
+}
+
+const ConfigTreeNode*
+ConfigTree::find_config_module(const string& module_name) const
+{
+    return _root_node.find_config_module(module_name);
 }
 
 void

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.8 2003/11/17 00:21:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.9 2003/11/17 22:10:44 pavlin Exp $ */
 
 plumbing {
   rib {
@@ -12,8 +12,8 @@ plumbing {
     %modinfo: depends fea;
     %modinfo: path "rib/xorp_rib";
     %modinfo: default_targetname "rib";
-    %modinfo: statusmethod xrl;
-    %modinfo: shutdownmethod xrl;
+    %modinfo: statusmethod xrl "$(rib.targetname)/common/0.1/get_status->status:u32&reason:txt";
+    %modinfo: shutdownmethod xrl "$(rib.targetname)/common/0.1/shutdown";
     targetname {
       %set:;
     }

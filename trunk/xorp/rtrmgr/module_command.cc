@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.16 2003/11/17 00:21:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.17 2003/11/17 19:34:31 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -32,9 +32,10 @@ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
 			     const string& cmd_name)
     : Command(template_tree_node, cmd_name),
       _tt(template_tree),
-      _startcommit(NULL), _endcommit(NULL),
-      _status_method(NO_STATUS_METHOD),
-      _shutdown_method(NO_SHUTDOWN_METHOD),
+      _startcommit(NULL),
+      _endcommit(NULL),
+      _status_method(NULL),
+      _shutdown_method(NULL),
       _execute_done(false)
 {
     assert(cmd_name == "%modinfo");
@@ -46,30 +47,38 @@ ModuleCommand::~ModuleCommand()
 	delete _startcommit;
     if (_endcommit != NULL)
 	delete _endcommit;
+    if (_status_method != NULL)
+	delete _status_method;
+    if (_shutdown_method != NULL)
+	delete _shutdown_method;
 }
 
 void
 ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     throw (ParseError)
 {
-    if ((action.size() == 3)
-	&& ((action.front() == "startcommit")
-	    || (action.front() == "endcommit"))) {
-	//it's OK
-    } else if (action.size() != 2) {
-	fprintf(stderr, "Error in modinfo command:\n");
-	list <string>::const_iterator i = action.begin();
-	while (i != action.end()) {
-	    fprintf(stderr, ">%s< ", i->c_str());
-	    ++i;
-	}
-	fprintf(stderr, "\n");
-	if (action.size() > 2) {
-	    xorp_throw(ParseError, "too many parameters to %modinfo");
-	} else {
-	    xorp_throw(ParseError, "too few parameters to %modinfo");
-	}
+    size_t expected_action_size = 2;
+
+    //
+    // Check the subcommand size
+    //
+    if (action.size() < expected_action_size) {
+	xorp_throw(ParseError, "too few parameters to %modinfo");
     }
+    string subcommand = action.front();
+    if ((subcommand == "startcommit")
+	|| (subcommand == "endcommit")
+	|| (subcommand == "statusmethod")
+	|| (subcommand == "shutdownmethod")) {
+	expected_action_size = 3;
+    }
+    if (action.size() > expected_action_size) {
+	xorp_throw(ParseError, "too many parameters to %modinfo");
+    }
+    if (action.size() < expected_action_size) {
+	xorp_throw(ParseError, "too few parameters to %modinfo");
+    }
+
     typedef list<string>::const_iterator CI;
     CI ptr = action.begin();
     string cmd = *ptr;
@@ -133,19 +142,19 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     } else if (cmd == "statusmethod") {
 	list <string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front() == "xrl") {
-	    _status_method = STATUS_BY_XRL;
-	} else {
-	    xorp_throw(ParseError, "Unknown statusmethod " + newaction.front());
-	}
+	if (newaction.front()=="xrl")
+	    _status_method = new XrlAction(template_tree_node(), newaction,
+					   xrldb);
+	else
+	    _status_method = new Action(template_tree_node(), newaction);
     } else if (cmd == "shutdownmethod") {
 	list <string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front() == "xrl") {
-	    _shutdown_method = SHUTDOWN_BY_XRL;
-	} else {
-	    xorp_throw(ParseError, "Unknown shutdownmethod " + newaction.front());
-	}
+	if (newaction.front()=="xrl")
+	    _shutdown_method = new XrlAction(template_tree_node(), newaction,
+					     xrldb);
+	else
+	    _shutdown_method = new Action(template_tree_node(), newaction);
     } else {
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
 	xorp_throw(ParseError, err);
@@ -163,38 +172,58 @@ ModuleCommand::execute(TaskManager& taskmgr) const
 Validation*
 ModuleCommand::startup_validation(TaskManager &taskmgr) const
 {
-    if (_status_method == STATUS_BY_XRL) {
-	return new StatusConfigMeValidation(_modname, taskmgr);
+    if (_status_method != NULL) {
+	// TODO: for now we can handle only XRL actions
+	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
+	if (xa != NULL)
+	    return new StatusConfigMeValidation(_modname, *xa, taskmgr);
+	else
+	    return NULL;
     } else {
-	return new DelayValidation(taskmgr.eventloop(), 2000);
+	return new DelayValidation(_modname, taskmgr.eventloop(), 2000);
     }
 }
 
 Validation*
 ModuleCommand::ready_validation(TaskManager &taskmgr) const
 {
-    if (_status_method == STATUS_BY_XRL) {
-	return new StatusReadyValidation(_modname, taskmgr);
+    if (_status_method != NULL) {
+	// TODO: for now we can handle only XRL actions
+	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
+	if (xa != NULL)
+	    return new StatusReadyValidation(_modname, *xa, taskmgr);
+	else
+	    return NULL;
     } else {
-	return new DelayValidation(taskmgr.eventloop(), 2000);
+	return new DelayValidation(_modname, taskmgr.eventloop(), 2000);
     }
 }
 
 Validation*
 ModuleCommand::shutdown_validation(TaskManager &taskmgr) const
 {
-    if (_status_method == STATUS_BY_XRL) {
-	return new StatusShutdownValidation(_modname, taskmgr);
+    if (_status_method != NULL) {
+	// TODO: for now we can handle only XRL actions
+	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
+	if (xa != NULL)
+	    return new StatusShutdownValidation(_modname, *xa, taskmgr);
+	else
+	    return NULL;
     } else {
-	return new DelayValidation(taskmgr.eventloop(), 2000);
+	return new DelayValidation(_modname, taskmgr.eventloop(), 2000);
     }
 }
 
 Shutdown*
 ModuleCommand::shutdown_method(TaskManager &taskmgr) const
 {
-    if (_shutdown_method == SHUTDOWN_BY_XRL) {
-	return new XrlShutdown(_modname, taskmgr);
+    if (_shutdown_method != NULL) {
+	// TODO: for now we can handle only XRL actions
+	XrlAction* xa = dynamic_cast<XrlAction*>(_shutdown_method);
+	if (xa != NULL)
+	    return new XrlShutdown(_modname, *xa, taskmgr);
+	else
+	    return NULL;
     } else {
 	//we can always kill it from the module manager.
 	return NULL;

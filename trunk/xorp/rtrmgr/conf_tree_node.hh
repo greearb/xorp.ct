@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.9 2003/05/30 23:57:09 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.10 2003/11/17 00:21:50 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -61,6 +61,7 @@ public:
     void find_changed_modules(set <string>& changed_modules) const;
     void find_active_modules(set <string>& active_modules) const;
     void find_all_modules(set <string>& all_modules) const;
+    const ConfigTreeNode* find_config_module(const string& module_name) const;
     void initialize_commit();
     bool commit_changes(TaskManager& task_manager,
 			bool do_commit,

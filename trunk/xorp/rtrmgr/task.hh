@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.16 2003/05/31 22:33:28 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.17 2003/06/09 23:38:40 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -24,26 +24,28 @@
 #include "libxipc/xrl_router.hh"
 #include "unexpanded_xrl.hh"
 
+class ConfigTree;
+class ModuleCommand;
+class ModuleManager;
 class Task;
 class TaskManager;
 class XorpClient;
-class ModuleManager;
-class TaskManager;
-class ModuleCommand;
 
 class Validation {
 public:
     typedef XorpCallback1<void, bool>::RefPtr CallBack;
 
-    Validation() {};
+    Validation(const string& module_name) : _module_name(module_name) {};
     virtual ~Validation() {};
     virtual void validate(CallBack cb) = 0;
 protected:
+    const string _module_name;
 };
 
 class DelayValidation : public Validation {
 public:
-    DelayValidation(EventLoop& eventloop, uint32_t ms);
+    DelayValidation(const string& module_name, EventLoop& eventloop,
+		    uint32_t ms);
     void validate(CallBack cb);
 private:
     void timer_expired();
@@ -55,7 +57,7 @@ private:
 
 class XrlStatusValidation : public Validation {
 public:
-    XrlStatusValidation(const string& target, 
+    XrlStatusValidation(const string& module_name, const XrlAction& xrl_action,
 			TaskManager& taskmgr);
     virtual ~XrlStatusValidation() {}
     void validate(CallBack cb);
@@ -66,7 +68,7 @@ protected:
 					const string& reason) = 0;
     EventLoop& eventloop();
 
-    string _target;
+    const XrlAction& _xrl_action;
     TaskManager& _task_manager;
     CallBack _cb;
     XorpTimer _retry_timer;
@@ -75,7 +77,8 @@ protected:
 
 class StatusReadyValidation : public XrlStatusValidation {
 public:
-    StatusReadyValidation(const string& target, 
+    StatusReadyValidation(const string& module_name,
+			  const XrlAction& xrl_action,
 			  TaskManager& taskmgr);
 private:
     void handle_status_response(ProcessStatus status,
@@ -84,7 +87,8 @@ private:
 
 class StatusConfigMeValidation : public XrlStatusValidation {
 public:
-    StatusConfigMeValidation(const string& target, 
+    StatusConfigMeValidation(const string& module_name,
+			     const XrlAction& xrl_action,
 			     TaskManager& taskmgr);
 private:
     void handle_status_response(ProcessStatus status,
@@ -93,7 +97,8 @@ private:
 
 class StatusShutdownValidation : public XrlStatusValidation {
 public:
-    StatusShutdownValidation(const string& target, 
+    StatusShutdownValidation(const string& module_name,
+			     const XrlAction& xrl_action,
 			     TaskManager& taskmgr);
 private:
     void xrl_done(const XrlError& e, XrlArgs* xrlargs);
@@ -104,23 +109,27 @@ private:
 class Shutdown {
 public:
     typedef XorpCallback1<void, bool>::RefPtr CallBack;
-    Shutdown(const string& modname, TaskManager& taskmgr);
+    Shutdown(const string& module_name);
     virtual ~Shutdown() {}
     virtual void shutdown(CallBack cb) = 0;
-    EventLoop& eventloop() const;
 protected:
-    string _modname;
-    TaskManager& _task_manager;
+    const string _module_name;
 };
 
 class XrlShutdown : public Shutdown {
 public:
-    XrlShutdown(const string& modname, TaskManager& taskmgr);
+    XrlShutdown(const string& module_name, const XrlAction& xrl_action,
+		TaskManager& taskmgr);
     virtual ~XrlShutdown() {}
     void shutdown(CallBack cb);
+    EventLoop& eventloop() const;
+
 private:
     void dummy_response();
     void shutdown_done(const XrlError& err, XrlArgs* xrlargs);
+
+    const XrlAction& _xrl_action;
+    TaskManager& _task_manager;
     CallBack _cb;
     XorpTimer _dummy_timer;
 };
@@ -209,7 +218,9 @@ private:
 class TaskManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
-    TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient, 
+    TaskManager::TaskManager(ConfigTree& config_tree,
+			     ModuleManager& mmgr,
+			     XorpClient& xclient, 
 			     bool global_do_exec);
     ~TaskManager();
     void set_do_exec(bool do_exec);
@@ -221,6 +232,7 @@ public:
     void run(CallBack cb);
     XorpClient& xorp_client() const {return _xorp_client;}
     ModuleManager& module_manager() const {return _module_manager;}
+    ConfigTree& config_tree() const { return _config_tree; }
     bool do_exec() const {return _current_do_exec;}
     EventLoop& eventloop() const;
 
@@ -242,6 +254,7 @@ private:
     void fail_tasklist_initialization(const string& errmsg);
     Task& find_task(const string& modname);
 
+    ConfigTree& _config_tree;
     ModuleManager& _module_manager;
     XorpClient& _xorp_client;
     bool _global_do_exec; //false if we're never going to execute

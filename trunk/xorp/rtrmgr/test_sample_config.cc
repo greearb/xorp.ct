@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.9 2003/09/16 09:03:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.10 2003/10/02 19:39:29 hodson Exp $"
 
 #include <signal.h>
 
@@ -94,11 +94,9 @@ main(int argc, char* const argv[])
 				fs.port());
 	XorpClient xclient(eventloop, xrl_router);
 
-	TaskManager taskmgr(mmgr, xclient, false);
-
 	//read the router startup configuration file,
 	//start the processes required, and initialize them
-	MasterConfigTree ct(config_boot, tt, taskmgr);
+	MasterConfigTree ct(config_boot, tt, mmgr, xclient, false);
     } catch (InitError& e) {
 	xorp_print_standard_exceptions();
 	fprintf(stderr, "test_sample_config: failed to load config file\n");
