@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/policy/then.cc,v 1.1 2003/02/13 00:51:04 mjh Exp $"
 
-
+#include "policy_module.h"
 #include "then.hh"
 
 template <class A>
