@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.35 2004/09/24 04:52:21 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.36 2004/10/13 06:03:28 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -767,7 +767,8 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
 			    size_t			buffer_bytes)
 {
     debug_msg("read event %u (need at least %u)\n",
-	      buffer_bytes, sizeof(STCPPacketHeader));
+		static_cast<uint32_t>(buffer_bytes),
+		static_cast<uint32_t>(sizeof(STCPPacketHeader)));
     if (ev == BufferedAsyncReader::ERROR_CHECK_ERRNO) {
 	XLOG_ERROR("Read failed (errno = %d): %s\n", errno, strerror(errno));
 	die("read error");
@@ -815,7 +816,7 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     }
 
     debug_msg("Frame Bytes %u Available %u\n",
-	      sph->frame_bytes(), buffer_bytes);
+	      sph->frame_bytes(), static_cast<uint32_t>(buffer_bytes));
     if (sph->frame_bytes() > buffer_bytes) {
 	if (_reader->reserve_bytes() < sph->frame_bytes())
 	    _reader->set_reserve_bytes(sph->frame_bytes());
