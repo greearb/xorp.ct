@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.11 2003/11/20 06:37:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.12 2003/12/02 09:38:56 pavlin Exp $"
 
 // #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -27,7 +27,7 @@
 #include "cli.hh"
 #include "util.hh"
 
-extern int booterror(const char *s);
+extern int booterror(const char *s) throw (ParseError);
 
 /*************************************************************************
  * Slave Config Tree class
