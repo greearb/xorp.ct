@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.8 2004/06/10 22:41:40 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.9 2004/10/01 22:29:00 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -20,19 +20,6 @@
 
 #include "rt_tab_expect.hh"
 
-
-template <typename A>
-class ExpectedRouteChange {
-public:
-    ExpectedRouteChange(bool add, const IPRouteEntry<A>& route);
-    bool matches_add(const IPRouteEntry<A>& route) const;
-    bool matches_delete(const IPRouteEntry<A>* route) const;
-    string str() const;
-
-private:
-    bool		_add; 			// true = add, false = delete
-    IPRouteEntry<A>	_route;
-};
 
 template<class A>
 ExpectedRouteChange<A>::ExpectedRouteChange<A>(bool add,

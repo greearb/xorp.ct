@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_expect.hh,v 1.4 2004/06/10 22:41:40 hodson Exp $
+// $XORP: xorp/rib/rt_tab_expect.hh,v 1.5 2004/10/01 22:29:00 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPECT_HH__
 #define __RIB_RT_TAB_EXPECT_HH__
@@ -59,6 +59,19 @@ public:
 private:
     RouteTable<A>*			_parent;
     list<ExpectedRouteChange<A> >	_expected_route_changes;
+};
+
+template <typename A>
+class ExpectedRouteChange {
+public:
+    ExpectedRouteChange(bool add, const IPRouteEntry<A>& route);
+    bool matches_add(const IPRouteEntry<A>& route) const;
+    bool matches_delete(const IPRouteEntry<A>* route) const;
+    string str() const;
+
+private:
+    bool		_add; 			// true = add, false = delete
+    IPRouteEntry<A>	_route;
 };
 
 #endif // __RIB_RT_TAB_EXPECT_HH__
