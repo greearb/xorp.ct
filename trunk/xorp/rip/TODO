@@ -7,6 +7,8 @@ o Add accessors for counters, listing peers, getting peer counters,
   getting port counters, etc.  These form the basis for operational
   commands.
 
+o Update peer last active field.
+
 o Add Operational commands.
 
 o Check and double check nexthop handling paying attention to incoming
