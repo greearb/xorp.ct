@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.2 2004/03/11 14:39:43 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.3 2004/06/10 22:41:49 hodson Exp $"
 
 #include "rip/rip_module.h"
 
@@ -127,7 +127,9 @@ init_rip_socket(int if_num)
 #ifdef HAVE_IPV6
     in6_addr grp_addr;
     IPv6::RIP2_ROUTERS().copy_out(grp_addr);
-    int fd = comm_bind_join_udp6(&grp_addr, if_num, htons(521), /* reuse */1);
+    int fd = comm_bind_join_udp6(&grp_addr, if_num, htons(521),
+				 COMM_SOCK_ADDR_PORT_REUSE,
+				 COMM_SOCK_NONBLOCKING);
     if (fd < 0) {
 	cerr << "comm_bind_join_udp6 failed" << endl;
     }

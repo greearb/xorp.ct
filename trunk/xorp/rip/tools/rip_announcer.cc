@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.2 2004/03/19 23:21:28 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.3 2004/06/10 22:41:49 hodson Exp $"
 
 #include <vector>
 #include <fstream>
@@ -127,8 +127,9 @@ init_rip_socket(IPv4 if_addr)
 
     IPv4::RIP2_ROUTERS().copy_out(mcast_addr);
     if_addr.copy_out(join_if_addr);
-    int fd = comm_bind_join_udp4(&mcast_addr, &join_if_addr,
-				 htons(520), 0);
+    int fd = comm_bind_join_udp4(&mcast_addr, &join_if_addr, htons(520),
+				 COMM_SOCK_ADDR_PORT_DONTREUSE,
+				 COMM_SOCK_NONBLOCKING);
     if (fd < 0) {
 	cerr << "Could not instantiate socket" << endl;
 	fd = -1;
