@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.26 2004/09/28 21:17:32 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.27 2004/12/18 03:24:35 pavlin Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -855,7 +855,7 @@ void
 FinderClient::messenger_death_event(FinderMessengerBase* m)
 {
     finder_trace("messenger %p death\n", m);
-    XLOG_ASSERT(m == _messenger);
+    XLOG_ASSERT(0 == _messenger || m == _messenger);
     _messenger = 0;
     if (_observer)
 	_observer->finder_disconnect_event();
