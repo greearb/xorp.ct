@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.52 2005/02/03 06:51:50 bms Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.53 2005/02/15 02:08:38 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -210,6 +210,7 @@ libmld6igmpbase_la_SOURCES = mld6igmp_base.hh mld6igmp_base.cc
 $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif 			\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/mld6igmp.xif
 

@@ -866,6 +866,7 @@ $(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
 $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif 			\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/mld6igmp.xif
 $(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
