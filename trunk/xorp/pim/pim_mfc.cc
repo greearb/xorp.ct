@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.12 2003/07/12 01:14:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.13 2003/09/25 02:19:43 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -369,7 +369,7 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 int
 PimMfc::add_mfc_to_kernel()
 {
-    do {
+    if (pim_node().is_log_trace()) {
 	string res;
 	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (olist().test(i))
@@ -383,7 +383,7 @@ PimMfc::add_mfc_to_kernel()
 		   cstring(group_addr()),
 		   iif_vif_index(),
 		   res.c_str());
-    } while (false);
+    }
     
     if (pim_node().add_mfc_to_kernel(*this) < 0)
 	return (XORP_ERROR);
@@ -394,7 +394,7 @@ PimMfc::add_mfc_to_kernel()
 int
 PimMfc::delete_mfc_from_kernel()
 {
-    do {
+    if (pim_node().is_log_trace()) {
 	string res;
 	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (olist().test(i))
@@ -408,7 +408,7 @@ PimMfc::delete_mfc_from_kernel()
 		   cstring(group_addr()),
 		   iif_vif_index(),
 		   res.c_str());
-    } while (false);
+    }
     
     delete_all_dataflow_monitor();
     if (pim_node().delete_mfc_from_kernel(*this) < 0)
