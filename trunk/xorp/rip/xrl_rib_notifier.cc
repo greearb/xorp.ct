@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.1 2003/11/04 23:39:58 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -137,8 +137,8 @@ XrlRibNotifier<A>::XrlRibNotifier(EventLoop&		e,
 				  XrlRouter&		xr,
 				  uint32_t		mf,
 				  uint32_t		pms)
-    : RibNotifierBase<A>(e, uq, pms), _xs(xr),
-      _cname(xr.class_name()), _iname(xr.instance_name()),
+    : RibNotifierBase<A>(e, uq, pms), ServiceBase("RIB Updater"),
+      _xs(xr), _cname(xr.class_name()), _iname(xr.instance_name()),
       _max_inflight(mf), _inflight(0)
 {
     set_status(READY);
