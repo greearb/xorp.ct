@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.4 2003/02/25 04:05:20 mjh Exp $
+// $XORP: xorp/rib/route.hh,v 1.5 2003/03/10 23:20:55 hodson Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -97,7 +97,7 @@ public:
      *
      * @return the routing protocol that originated this route.
      */
-    const Protocol &protocol() const { return _proto; }
+    const Protocol& protocol() const { return _proto; }
 
     /**
      * Display the route for debugging purposes
@@ -164,7 +164,7 @@ public:
      * @param proto the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    IPRouteEntry(const IPNet<A> &net, Vif *vif, NextHop *nh,
+    IPRouteEntry(const IPNet<A>& net, Vif *vif, NextHop *nh,
 		 const Protocol& proto, uint16_t metric) :
 	RouteEntry(vif, nh, proto, metric), _net(net) {}
     /**
@@ -187,7 +187,7 @@ public:
      *
      * @return the route entry's subnet
      */
-    inline const IPNet<A> &net() const { return _net; }
+    inline const IPNet<A>& net() const { return _net; }
 
     /**
      * Get the prefix length of the route entry's subnet
@@ -250,7 +250,7 @@ public:
      * nexthop in the egp_parent into a local nexthop.
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
-    ResolvedIPRouteEntry(const IPNet<A> &net, Vif *vif, NextHop *nh,
+    ResolvedIPRouteEntry(const IPNet<A>& net, Vif *vif, NextHop *nh,
 			 const Protocol& proto, uint16_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent) :
