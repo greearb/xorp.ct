@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.23 2003/06/20 18:55:56 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.24 2003/06/23 19:32:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -74,6 +74,16 @@ Peer::Peer(EventLoop&    eventloop,
 	eventloop.run();
     }
     debug_msg("Peer router ready (%d)\n", _xrlrouter.ready());
+}
+
+void
+Peer::status(string& status)
+{
+    status = _peername + " ";
+    status += _established ? "established" : "";
+    status += " ";
+    status += "sent: " + c_format("%d", _trie_sent.update_count()) + " ";
+    status += "received: " + c_format("%d", _trie_recv.update_count()) + " ";
 }
 
 bool
@@ -397,6 +407,13 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
 	const fixed_header *header = 
 	    reinterpret_cast<const struct fixed_header *>(buf);
 	if(MESSAGETYPEUPDATE == header->type) {
+	    /*
+	    ** Save the update message in the sent trie.
+	    */
+	    TimeVal tv;
+	    _eventloop.current_time(tv);
+	    _trie_sent.process_update_packet(tv, buf, len);
+
 	    _smcb = callback(this, &Peer::send_dump_callback,
 			     fp, "mrtd_traffic_send");
 	    send_message(buf, len, _smcb);

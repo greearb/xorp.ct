@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.5 2003/06/19 00:46:09 hodson Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.6 2003/06/23 23:39:04 atanu Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
@@ -40,6 +40,11 @@ public:
     ** Accept a command for the coordinating process.
     */
     void command(const string& line) throw(InvalidString);
+
+    /*
+    ** Show the status of the peers.
+    */
+    void status(const string& peer, string& status);
 
     /*
     ** Test to see if there are any uncompleted commands.

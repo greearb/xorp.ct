@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/coord.hh,v 1.3 2003/05/07 23:15:13 mjh Exp $
+// $XORP: xorp/bgp/harness/coord.hh,v 1.4 2003/05/29 22:18:29 mjh Exp $
 
 #ifndef __BGP_HARNESS_COORD_HH__
 #define __BGP_HARNESS_COORD_HH__
@@ -24,6 +24,7 @@ class Coord {
 public:
     Coord(EventLoop& eventloop, Command& command);
     void command(const string& command);
+    void status(const string&	peer, string& status);
     bool pending();
     void datain(const string&  peer, const bool& status, const uint32_t& secs,
 		 const uint32_t& micro, const vector<uint8_t>&  data);
@@ -69,7 +70,13 @@ public:
 
     XrlCmdError coord_0_1_command(
 	// Input values, 
-	const string&	command);
+        const string&	command);
+
+    XrlCmdError coord_0_1_status(
+	// Input values, 
+	const string&	peer, 
+	// Output values, 
+	string&	status);
 
     XrlCmdError coord_0_1_pending(
 	// Output values, 

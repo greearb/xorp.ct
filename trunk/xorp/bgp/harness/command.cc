@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.9 2003/06/20 19:05:45 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.10 2003/06/23 23:39:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -87,6 +87,23 @@ Command::command(const string& line) throw(InvalidString)
 					   v[0].c_str()));
 
     cur->second.dispatch(this, line, v);
+}
+
+void
+Command::status(const string& peer, string& status)
+{
+    debug_msg("status: %s\n", peer.c_str());
+
+    /*
+    ** Are we in the peer table.
+    */
+    NamePeerMap::iterator cur  = _peers.find(peer);
+    if(cur == _peers.end()) {
+	status = "";
+	return;
+    }
+    ref_ptr<Peer> p = cur->second;
+    p->status(status);
 }
 
 bool

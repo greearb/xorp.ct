@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.7 2003/05/07 23:15:13 mjh Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.8 2003/05/29 22:18:29 mjh Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -95,6 +95,25 @@ XrlCoordTarget::coord_0_1_command(const string&	command)
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError 
+XrlCoordTarget::coord_0_1_status(const string& peer, string& status)
+{
+    debug_msg("status: %s\n", peer.c_str());
+
+    _incommand++;
+    try {
+	_coord.status(peer, status);
+    } catch(const XorpException& e) {
+	_incommand--;
+	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " + 
+					   (_coord.pending() ? 
+					   "true" : "false"));
+    }
+    _incommand--;
+
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError
 XrlCoordTarget::coord_0_1_pending(bool& pending)
 {
@@ -150,9 +169,15 @@ Coord::Coord(EventLoop& eventloop, Command& command)
 }
 
 void
-Coord::command(const string& command) 
+Coord::command(const string& command)
 {
     _command.command(command);
+}
+
+void
+Coord::status(const string& peer, string& status)
+{
+    _command.status(peer, status);
 }
 
 bool
