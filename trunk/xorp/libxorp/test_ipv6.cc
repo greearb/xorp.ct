@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.8 2003/09/30 18:27:04 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.9 2004/02/21 05:59:35 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -67,7 +67,7 @@ bool
 _verbose_match(const char* file, int line, const string& s1, const string& s2)
 {
     bool match = s1 == s2;
-    
+
     _verbose_log(file, line, "Comparing %s == %s : %s\n",
 		 s1.c_str(), s2.c_str(), match ? "OK" : "FAIL");
     if (match == false)
@@ -99,7 +99,7 @@ _verbose_assert(const char* file, int line, bool cond, const string& desc)
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -115,7 +115,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -152,49 +152,49 @@ test_ipv6_valid_constructors()
     sin6.sin6_family = AF_INET6;
     sin6.sin6_addr = in6_addr;
     struct sockaddr *sap = (struct sockaddr *)&sin6;
-    
+
     //
     // Default constructor.
     //
     IPv6 ip1;
     verbose_match(ip1.str(), "::");
-    
+
     //
     // Constructor from a string.
     //
     IPv6 ip2(addr_string);
     verbose_match(ip2.str(), addr_string);
-    
+
     //
     // Constructor from another IPv6 address.
     //
     IPv6 ip3(ip2);
     verbose_match(ip3.str(), addr_string);
-    
+
     //
     // Constructor from a (uint8_t *) memory pointer.
     //
     IPv6 ip4(ui8);
     verbose_match(ip4.str(), addr_string);
-    
+
     //
     // Constructor from a (uint32_t *) memory pointer.
     //
     IPv6 ip5(ui32);
     verbose_match(ip5.str(), addr_string);
-    
+
     //
     // Constructor from in6_addr structure.
     //
     IPv6 ip6(in6_addr);
     verbose_match(ip6.str(), addr_string);
-    
+
     //
     // Constructor from sockaddr structure.
     //
     IPv6 ip7(*sap);
     verbose_match(ip7.str(), addr_string);
-    
+
     //
     // Constructor from sockaddr_in6 structure.
     //
@@ -221,7 +221,7 @@ test_ipv6_invalid_constructors()
     sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
     sin6.sin6_addr = in6_addr;
     struct sockaddr *sap = (struct sockaddr *)&sin6;
-    
+
     //
     // Constructor from an invalid address string.
     //
@@ -236,7 +236,7 @@ test_ipv6_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid sockaddr structure.
     //
@@ -249,7 +249,7 @@ test_ipv6_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid sockaddr_in6 structure.
     //
@@ -287,10 +287,10 @@ test_ipv6_valid_copy_in_out()
 #endif
     sin6.sin6_family = AF_INET6;
     sin6.sin6_addr = in6_addr;
-    
+
     struct sockaddr *sap;
-    
-    
+
+
     //
     // Copy the IPv6 raw address to specified memory location.
     //
@@ -300,7 +300,7 @@ test_ipv6_valid_copy_in_out()
 		   "copy_out(uint8_t *) for IPv6 address");
     verbose_assert(memcmp(&ui8[0], &ip2_uint8[0], 16) == 0,
 		   "compare copy_out(uint8_t *) for IPv6 address");
-    
+
     //
     // Copy the IPv6 raw address to an in6_addr structure.
     //
@@ -321,7 +321,7 @@ test_ipv6_valid_copy_in_out()
 		   "copy_out(sockaddr&) for IPv6 address");
     verbose_assert(memcmp(&sin6, &ip6_sockaddr_in6, sizeof(sin6)) == 0,
 		   "compare copy_out(sockaddr&) for IPv6 address");
-    
+
     //
     // Copy the IPv6 raw address to a sockaddr_in6 structure.
     //
@@ -331,7 +331,7 @@ test_ipv6_valid_copy_in_out()
 		   "copy_out(sockaddr_in6&) for IPv6 address");
     verbose_assert(memcmp(&sin6, &ip10_sockaddr_in6, sizeof(sin6)) == 0,
 		   "compare copy_out(sockaddr_in6&) for IPv6 address");
-    
+
     //
     // Copy a raw address into IPv6 structure.
     //
@@ -339,7 +339,7 @@ test_ipv6_valid_copy_in_out()
     verbose_assert(ip12.copy_in(&ui8[0]) == 16,
 		   "copy_in(uint8_t *) for IPv6 address");
     verbose_match(ip12.str(), addr_string6);
-    
+
     //
     // Copy a raw IPv6 address from a in6_addr structure into IPv6 structure.
     //
@@ -356,7 +356,7 @@ test_ipv6_valid_copy_in_out()
     verbose_assert(ip16.copy_in(*sap) == 16,
 		   "copy_in(sockaddr&) for IPv6 address");
     verbose_match(ip16.str(), addr_string6);
-    
+
     //
     // Copy a raw address from a sockaddr_in6 structure into IPv6 structure.
     //
@@ -389,9 +389,9 @@ test_ipv6_invalid_copy_in_out()
 #endif
     sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
     sin6.sin6_addr = in6_addr;
-    
+
     struct sockaddr *sap;
-    
+
     //
     // Copy-in from a sockaddr structure for invalid address family.
     //
@@ -405,7 +405,7 @@ test_ipv6_invalid_copy_in_out()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Copy-in from a sockaddr_in6 structure for invalid address family.
     //
@@ -427,49 +427,49 @@ void
 test_ipv6_operators()
 {
     IPv6 ip_a("0000:ffff:0000:ffff:0000:ffff:0000:ffff");
-    IPv6 ip_b("ffff:0000:ffff:0000:ffff:0000:ffff:ffff"); 
+    IPv6 ip_b("ffff:0000:ffff:0000:ffff:0000:ffff:ffff");
     IPv6 ip_not_a("ffff:0000:ffff:0000:ffff:0000:ffff:0000");
     IPv6 ip_a_or_b("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
     IPv6 ip_a_and_b("::ffff");
     IPv6 ip_a_xor_b("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0000");
-    
+
     //
     // Equality Operator
     //
     verbose_assert(ip_a == ip_a, "operator==");
     verbose_assert(!(ip_a == ip_b), "operator==");
-    
+
     //
     // Not-Equal Operator
     //
     verbose_assert(!(ip_a != ip_a), "operator!=");
     verbose_assert(ip_a != ip_b, "operator!=");
-    
+
     //
     // Less-Than Operator
     //
     verbose_assert(ip_a < ip_b, "operator<");
-    
+
     //
     // Bitwise-Negation Operator
     //
     verbose_assert(~ip_a == ip_not_a, "operator~");
-    
+
     //
     // OR Operator
     //
     verbose_assert((ip_a | ip_b) == ip_a_or_b, "operator|");
-    
+
     //
     // AND Operator
     //
     verbose_assert((ip_a & ip_b) == ip_a_and_b, "operator&");
-    
+
     //
     // XOR Operator
     //
     verbose_assert((ip_a ^ ip_b) == ip_a_xor_b, "operator^");
-    
+
     //
     // Operator <<
     //
@@ -479,7 +479,7 @@ test_ipv6_operators()
     verbose_assert(IPv6("0000:ffff:0000:ffff:0000:ffff:0000:ffff") << 1 ==
 		   IPv6("0001:fffe:0001:fffe:0001:fffe:0001:fffe"),
 		   "operator<<");
-    
+
     //
     // Operator >>
     //
@@ -489,7 +489,7 @@ test_ipv6_operators()
     verbose_assert(IPv6("0000:ffff:0000:ffff:0000:ffff:0000:ffff") >> 1 ==
 		   IPv6("0000:7fff:8000:7fff:8000:7fff:8000:7fff"),
 		   "operator>>");
-    
+
     //
     // Decrement Operator
     //
@@ -499,7 +499,7 @@ test_ipv6_operators()
     verbose_assert(--IPv6("0000:0000:0000:0000:0000:0000:0000:0000") ==
 		   IPv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "operator--()");
-    
+
     //
     // Increment Operator
     //
@@ -521,12 +521,12 @@ test_ipv6_address_type()
     // Test if this address is numerically zero.
     //
     verbose_assert(IPv6("::").is_zero(), "is_zero()");
-    
+
     //
     // Test if this address is a valid unicast address.
     //
     verbose_assert(IPv6("fe80::1234:5678").is_unicast(), "is_unicast()");
-    
+
     //
     // Test if this address is a valid multicast address.
     //
@@ -545,12 +545,23 @@ test_ipv6_address_type()
     //
     verbose_assert(IPv6("ff01::1").is_nodelocal_multicast(),
 		       "is_nodelocal_multicast()");
-    
+
     //
     // Test if this address is a valid link-local multicast address.
     //
     verbose_assert(IPv6("ff02::2").is_linklocal_multicast(),
 		       "is_linklocal_multicast()");
+
+    //
+    // Test if this address is a valid loopback multicast address.
+    //
+    verbose_assert(IPv6("0::1").is_loopback(), "is_loopback()");
+
+    //
+    // Test if this address is a valid loopback multicast address.
+    //
+    verbose_assert(IPv6("1::0").is_loopback() == false, "is_loopback()");
+
 }
 
 /**
@@ -563,61 +574,61 @@ test_ipv6_address_const()
     // Test the address octet-size.
     //
     verbose_assert(IPv6::addr_size() == 16, "addr_size()");
-    
+
     //
     // Test the address bit-length.
     //
     verbose_assert(IPv6::addr_bitlen() == 128, "addr_bitlen()");
-    
+
     //
     // Test the mask length for the multicast base address.
     //
     verbose_assert(IPv6::ip_multicast_base_address_mask_len() == 8,
 		   "ip_multicast_base_address_mask_len()");
-    
+
     //
     // Test the address family.
     //
     verbose_assert(IPv6::af() == AF_INET6, "af()");
-    
+
     //
     // Test the IP protocol version.
     //
     verbose_assert(IPv6::ip_version() == 6, "ip_version()");
     verbose_assert(IPv6::ip_version_str() == "IPv6", "ip_version_str()");
-    
+
     //
     // Test pre-defined constant addresses
     //
     verbose_assert(IPv6::ZERO() == IPv6("::"), "ZERO()");
-    
+
     verbose_assert(IPv6::ANY() == IPv6("::"), "ANY()");
-    
+
     verbose_assert(IPv6::ALL_ONES() ==
 		   IPv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "ALL_ONES()");
-    
+
     verbose_assert(IPv6::MULTICAST_BASE() == IPv6("ff00::"),
 		   "MULTICAST_BASE()");
-    
+
     verbose_assert(IPv6::MULTICAST_ALL_SYSTEMS() == IPv6("ff02::1"),
 		   "MULTICAST_ALL_SYSTEMS()");
-    
+
     verbose_assert(IPv6::MULTICAST_ALL_ROUTERS() == IPv6("ff02::2"),
 		   "MULTICAST_ALL_ROUTERS()");
-    
+
     verbose_assert(IPv6::DVMRP_ROUTERS() == IPv6("ff02::4"),
 		   "DVMRP_ROUTERS()");
-    
+
     verbose_assert(IPv6::OSPFIGP_ROUTERS() == IPv6("ff02::5"),
 		   "OSPFIGP_ROUTERS()");
-    
+
     verbose_assert(IPv6::OSPFIGP_DESIGNATED_ROUTERS() == IPv6("ff02::6"),
 		   "OSPIGP_DESIGNATED_ROUTERS()");
-    
+
     verbose_assert(IPv6::RIP2_ROUTERS() == IPv6("ff02::9"),
 		   "RIP2_ROUTERS()");
-    
+
     verbose_assert(IPv6::PIM_ROUTERS() == IPv6("ff02::D"),
 		   "PIM_ROUTERS()");
 }
@@ -637,7 +648,7 @@ test_ipv6_manipulate_address()
 		   "make_prefix()");
     verbose_assert(IPv6().make_prefix(128) == IPv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "make_prefix()");
-    
+
     //
     // Test making an IPv6 address prefix.
     //
@@ -646,13 +657,13 @@ test_ipv6_manipulate_address()
 	IPv6("1234:5600::"),
 	"mask_by_prefix_len()"
 	);
-    
+
     //
     // Test getting the prefix length of the contiguous mask.
     //
     verbose_assert(IPv6("ffff:ff00::").mask_len() == 24,
 		   "mask_len()");
-    
+
     //
     // Test getting the raw value of the address.
     //
@@ -666,18 +677,18 @@ test_ipv6_manipulate_address()
 	memcmp(IPv6("1234:5678:9abc:def0:fed:cba9:8765:4321").addr(),
 	       ui32, sizeof(ui32)) == 0,
 	"addr()");
-    
+
     //
     // Test setting the address value
     //
     uint8_t  ui8[16];
     memcpy(&ui8[0], &in6_addr, sizeof(in6_addr));
-    
+
     IPv6 ip_a("ffff::");
     ip_a.set_addr(&ui8[0]);
     verbose_assert(ip_a == IPv6("1234:5678:9abc:def0:fed:cba9:8765:4321"),
 		   "set_addr()");
-    
+
     //
     // Test extracting bits from an address.
     //
@@ -693,7 +704,7 @@ void
 test_ipv6_invalid_manipulate_address()
 {
     const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
-    
+
     //
     // Test making an invalid IPv6 mask prefix.
     //
@@ -708,7 +719,7 @@ test_ipv6_invalid_manipulate_address()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Test masking with an invalid IPv6 mask prefix.
     //
@@ -723,13 +734,13 @@ test_ipv6_invalid_manipulate_address()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-}    
+}
 
 int
 main(int argc, char * const argv[])
 {
     int ret_value = 0;
-    
+
     //
     // Initialize and start xlog
     //
@@ -739,7 +750,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
 	switch (ch) {
@@ -760,7 +771,7 @@ main(int argc, char * const argv[])
     }
     argc -= optind;
     argv += optind;
-    
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	test_ipv6_valid_constructors();
@@ -778,12 +789,12 @@ main(int argc, char * const argv[])
 	xorp_print_standard_exceptions();
 	ret_value = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return (ret_value);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.10 2003/11/05 20:24:27 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.11 2004/02/21 05:59:21 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -21,13 +21,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-
-IPv6::IPv6(const uint8_t *from_uint8)
+IPv6::IPv6(const uint8_t* from_uint8)
 {
     memcpy(_addr, from_uint8, sizeof(_addr));
 }
 
-IPv6::IPv6(const uint32_t *from_uint32)
+IPv6::IPv6(const uint32_t* from_uint32)
 {
     _addr[0] = from_uint32[0];
     _addr[1] = from_uint32[1];
@@ -55,7 +54,7 @@ IPv6::IPv6(const sockaddr_in6& sin) throw (InvalidFamily)
     memcpy(_addr, sin.sin6_addr.s6_addr, sizeof(_addr));
 }
 
-IPv6::IPv6(const char *from_cstring) throw (InvalidString)
+IPv6::IPv6(const char* from_cstring) throw (InvalidString)
 {
     if (from_cstring == NULL)
 	xorp_throw(InvalidString, "Null value" );
@@ -68,7 +67,7 @@ IPv6::IPv6(const char *from_cstring) throw (InvalidString)
  * @return the number of copied octets.
  */
 size_t
-IPv6::copy_out(uint8_t *to_uint8) const
+IPv6::copy_out(uint8_t* to_uint8) const
 {
     memcpy(to_uint8, _addr, addr_size());
     return addr_size();
@@ -81,7 +80,7 @@ IPv6::copy_out(uint8_t *to_uint8) const
 size_t
 IPv6::copy_out(struct in6_addr& to_in6_addr) const
 {
-    return (copy_out((uint8_t *)&to_in6_addr));
+    return (copy_out((uint8_t* )&to_in6_addr));
 }
 
 /**
@@ -116,7 +115,7 @@ IPv6::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
  * @return the number of copied octets.
  */
 size_t
-IPv6::copy_in(const uint8_t *from_uint8)
+IPv6::copy_in(const uint8_t* from_uint8)
 {
     memcpy(_addr, from_uint8, addr_size());
     return (addr_size());
@@ -129,7 +128,7 @@ IPv6::copy_in(const uint8_t *from_uint8)
 size_t
 IPv6::copy_in(const in6_addr& from_in6_addr)
 {
-    return (copy_in(reinterpret_cast<const uint8_t *>(&from_in6_addr)));
+    return (copy_in(reinterpret_cast<const uint8_t*>(&from_in6_addr)));
 }
 
 /**
@@ -362,8 +361,8 @@ bool
 IPv6::is_unicast() const
 {
     // Icky casting because of alternate definitions of IN6_IS_ADDR_MULTICAST
-    uint32_t *nc = const_cast<uint32_t*>(_addr);
-    in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
+    uint32_t* nc = const_cast<uint32_t*>(_addr);
+    in6_addr* addr6 = reinterpret_cast<in6_addr*>(nc);
 
     return (! (IN6_IS_ADDR_MULTICAST(addr6)
 	       || IN6_IS_ADDR_UNSPECIFIED(const_cast<in6_addr*>(addr6))));
@@ -373,8 +372,8 @@ bool
 IPv6::is_multicast() const
 {
     // Icky casting because of alternate definitions of IN6_IS_ADDR_MULTICAST
-    uint32_t *nc = const_cast<uint32_t*>(_addr);
-    in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
+    uint32_t* nc = const_cast<uint32_t*>(_addr);
+    in6_addr* addr6 = reinterpret_cast<in6_addr*>(nc);
 
     return (IN6_IS_ADDR_MULTICAST(addr6));
 }
@@ -382,7 +381,7 @@ IPv6::is_multicast() const
 bool
 IPv6::is_linklocal_unicast() const
 {
-    const in6_addr *addr6 = reinterpret_cast<const in6_addr *>(_addr);
+    const in6_addr* addr6 = reinterpret_cast<const in6_addr*>(_addr);
 
     return (IN6_IS_ADDR_LINKLOCAL(addr6));
 }
@@ -392,8 +391,8 @@ IPv6::is_nodelocal_multicast() const
 {
     // Icky casting because of alternate definitions
     // of IN6_IS_ADDR_MC_NODELOCAL
-    uint32_t *nc = const_cast<uint32_t*>(_addr);
-    in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
+    uint32_t* nc = const_cast<uint32_t*>(_addr);
+    in6_addr* addr6 = reinterpret_cast<in6_addr*>(nc);
 
     return (IN6_IS_ADDR_MC_NODELOCAL(addr6));
 }
@@ -403,10 +402,18 @@ IPv6::is_linklocal_multicast() const
 {
     // Icky casting because of alternate definitions
     // of IN6_IS_ADDR_MC_LINKLOCAL
-    uint32_t *nc = const_cast<uint32_t*>(_addr);
-    in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
+    uint32_t* nc = const_cast<uint32_t*>(_addr);
+    in6_addr* addr6 = reinterpret_cast<in6_addr*>(nc);
 
     return (IN6_IS_ADDR_MC_LINKLOCAL(addr6));
+}
+
+bool
+IPv6::is_loopback() const
+{
+    const uint32_t* nc = _addr;
+    const in6_addr* addr6 = reinterpret_cast<const in6_addr*>(nc);
+    return IN6_IS_ADDR_LOOPBACK(addr6);
 }
 
 uint32_t

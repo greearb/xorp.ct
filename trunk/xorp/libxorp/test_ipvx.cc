@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.7 2003/09/30 18:27:04 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.8 2004/02/21 05:59:35 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -67,7 +67,7 @@ bool
 _verbose_match(const char* file, int line, const string& s1, const string& s2)
 {
     bool match = s1 == s2;
-    
+
     _verbose_log(file, line, "Comparing %s == %s : %s\n",
 		 s1.c_str(), s2.c_str(), match ? "OK" : "FAIL");
     if (match == false)
@@ -99,7 +99,7 @@ _verbose_assert(const char* file, int line, bool cond, const string& desc)
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -115,7 +115,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -146,7 +146,7 @@ test_ipvx_valid_constructors()
 #endif
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = ui;
-    
+
     // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
     const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
     struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
@@ -164,17 +164,17 @@ test_ipvx_valid_constructors()
 #endif
     sin6.sin6_family = AF_INET6;
     sin6.sin6_addr = in6_addr;
-    
+
     struct sockaddr *sap;
-    
-    
+
+
     //
     // Default constructor.
     //
     IPvX ip1;
     verbose_assert(ip1.af() == AF_INET, "Default constructor");
     verbose_match(ip1.str(), "0.0.0.0");
-    
+
     //
     // Constructor for a specified address family: IPv4.
     //
@@ -182,7 +182,7 @@ test_ipvx_valid_constructors()
     verbose_assert(ip2.af() == AF_INET,
 		   "Constructor for AF_INET address family");
     verbose_match(ip2.str(), "0.0.0.0");
-    
+
     //
     // Constructor for a specified address family: IPv6.
     //
@@ -190,7 +190,7 @@ test_ipvx_valid_constructors()
     verbose_assert(ip3.af() == AF_INET6,
 		   "Constructor for AF_INET6 address family");
     verbose_match(ip3.str(), "::");
-    
+
     //
     // Constructor from a string: IPv4.
     //
@@ -202,19 +202,19 @@ test_ipvx_valid_constructors()
     //
     IPvX ip5(addr_string6);
     verbose_match(ip5.str(), addr_string6);
-    
+
     //
     // Constructor from another IPvX address: IPv4.
     //
     IPvX ip6(ip4);
     verbose_match(ip6.str(), addr_string4);
-    
+
     //
     // Constructor from another IPvX address: IPv6.
     //
     IPvX ip7(ip5);
     verbose_match(ip7.str(), addr_string6);
-    
+
     //
     // Constructor from a (uint8_t *) memory pointer: IPv4.
     //
@@ -226,7 +226,7 @@ test_ipvx_valid_constructors()
     //
     IPvX ip9(AF_INET6, &ui8[0]);
     verbose_match(ip9.str(), addr_string6);
-    
+
     //
     // Constructor from an IPv4 address.
     //
@@ -252,7 +252,7 @@ test_ipvx_valid_constructors()
     //
     IPvX ip13(in6_addr);
     verbose_match(ip13.str(), addr_string6);
-    
+
     //
     // Constructor from sockaddr structure: IPv4
     //
@@ -308,7 +308,7 @@ test_ipvx_invalid_constructors()
 #endif
     sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
     sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
-    
+
     // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
     struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
 				     0x9a, 0xbc, 0xde, 0xf0,
@@ -325,9 +325,9 @@ test_ipvx_invalid_constructors()
 #endif
     sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
     sin6.sin6_addr = in6_addr;
-    
+
     struct sockaddr *sap;
-    
+
     //
     // Constructor for invalid address family.
     //
@@ -340,7 +340,7 @@ test_ipvx_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from a (uint8_t *) memory pointer for invalid address family.
     //
@@ -353,7 +353,7 @@ test_ipvx_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid address string: IPv4.
     //
@@ -367,7 +367,7 @@ test_ipvx_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid address string: IPv6.
     //
@@ -382,7 +382,7 @@ test_ipvx_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid sockaddr structure.
     //
@@ -409,7 +409,7 @@ test_ipvx_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid sockaddr_in6 structure.
     //
@@ -442,7 +442,7 @@ test_ipvx_valid_copy_in_out()
 #endif
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = ui;
-    
+
     // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
     const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
     struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
@@ -460,10 +460,10 @@ test_ipvx_valid_copy_in_out()
 #endif
     sin6.sin6_family = AF_INET6;
     sin6.sin6_addr = in6_addr;
-    
+
     struct sockaddr *sap;
-    
-    
+
+
     //
     // Copy the IPvX raw address to specified memory location: IPv4.
     //
@@ -473,7 +473,7 @@ test_ipvx_valid_copy_in_out()
 		   "copy_out(uint8_t *) for IPv4 address");
     verbose_assert(memcmp(&ui, &ip1_uint8[0], 4) == 0,
 		   "compare copy_out(uint8_t *) for IPv4 address");
-    
+
     //
     // Copy the IPvX raw address to specified memory location: IPv6.
     //
@@ -483,7 +483,7 @@ test_ipvx_valid_copy_in_out()
 		   "copy_out(uint8_t *) for IPv6 address");
     verbose_assert(memcmp(&ui8[0], &ip2_uint8[0], 16) == 0,
 		   "compare copy_out(uint8_t *) for IPv6 address");
-    
+
     //
     // Copy the IPvX raw address to an in_addr structure: IPv4.
     //
@@ -525,7 +525,7 @@ test_ipvx_valid_copy_in_out()
 		   "copy_out(sockaddr&) for IPv6 address");
     verbose_assert(memcmp(&sin6, &ip6_sockaddr_in6, sizeof(sin6)) == 0,
 		   "compare copy_out(sockaddr&) for IPv6 address");
-    
+
     //
     // Copy the IPvX raw address to a sockaddr_in structure: IPv4.
     //
@@ -546,7 +546,7 @@ test_ipvx_valid_copy_in_out()
 		   "copy_out(sockaddr_in&) for IPv6 address");
     verbose_assert(memcmp(&sin6, &ip8_sockaddr_in6, sizeof(sin6)) == 0,
 		   "compare copy_out(sockaddr_in&) for IPv6 address");
-    
+
     //
     // Copy the IPvX raw address to a sockaddr_in6 structure: IPv4.
     //
@@ -557,7 +557,7 @@ test_ipvx_valid_copy_in_out()
 		   "copy_out(sockaddr_in6&) for IPv4 address");
     verbose_assert(memcmp(&sin, &ip9_sockaddr_in, sizeof(sin)) == 0,
 		   "compare copy_out(sockaddr_in6&) for IPv4 address");
-    
+
     //
     // Copy the IPvX raw address to a sockaddr_in6 structure: IPv6.
     //
@@ -567,7 +567,7 @@ test_ipvx_valid_copy_in_out()
 		   "copy_out(sockaddr_in6&) for IPv6 address");
     verbose_assert(memcmp(&sin6, &ip10_sockaddr_in6, sizeof(sin6)) == 0,
 		   "compare copy_out(sockaddr_in6&) for IPv6 address");
-    
+
     //
     // Copy a raw address of specified family type into IPvX structure: IPv4.
     //
@@ -575,7 +575,7 @@ test_ipvx_valid_copy_in_out()
     verbose_assert(ip11.copy_in(AF_INET, (uint8_t *)&ui) == 4,
 		   "copy_in(uint8_t *) for IPv4 address");
     verbose_match(ip11.str(), addr_string4);
-    
+
     //
     // Copy a raw address of specified family type into IPvX structure: IPv6.
     //
@@ -583,7 +583,7 @@ test_ipvx_valid_copy_in_out()
     verbose_assert(ip12.copy_in(AF_INET6, &ui8[0]) == 16,
 		   "copy_in(uint8_t *) for IPv6 address");
     verbose_match(ip12.str(), addr_string6);
-    
+
     //
     // Copy a raw IPv4 address from a in_addr structure into IPvX structure.
     //
@@ -591,7 +591,7 @@ test_ipvx_valid_copy_in_out()
     verbose_assert(ip13.copy_in(in_addr) == 4,
 		   "copy_in(in_addr&) for IPv4 address");
     verbose_match(ip13.str(), addr_string4);
-    
+
     //
     // Copy a raw IPv6 address from a in6_addr structure into IPvX structure.
     //
@@ -617,7 +617,7 @@ test_ipvx_valid_copy_in_out()
     verbose_assert(ip16.copy_in(*sap) == 16,
 		   "copy_in(sockaddr&) for IPv6 address");
     verbose_match(ip16.str(), addr_string6);
-    
+
     //
     // Copy a raw address from a sockaddr_in structure into IPvX structure: IPv4.
     //
@@ -625,7 +625,7 @@ test_ipvx_valid_copy_in_out()
     verbose_assert(ip17.copy_in(sin) == 4,
 		   "copy_in(sockaddr_in&) for IPv4 address");
     verbose_match(ip17.str(), addr_string4);
-    
+
     //
     // Copy a raw address from a sockaddr_in structure into IPvX structure: IPv6.
     //
@@ -643,7 +643,7 @@ test_ipvx_valid_copy_in_out()
     verbose_assert(ip19.copy_in(*ip19_sockaddr_in6_p) == 4,
 		   "copy_in(sockaddr_in6&) for IPv4 address");
     verbose_match(ip19.str(), addr_string4);
-    
+
     //
     // Copy a raw address from a sockaddr_in6 structure into IPvX structure: IPv6.
     //
@@ -668,7 +668,7 @@ test_ipvx_invalid_copy_in_out()
 #endif
     sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
     sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
-    
+
     // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
     const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
     struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
@@ -686,9 +686,9 @@ test_ipvx_invalid_copy_in_out()
 #endif
     sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
     sin6.sin6_addr = in6_addr;
-    
+
     struct sockaddr *sap;
-    
+
     //
     // Mismatch copy-out: copy-out IPv6 address to in_addr structure.
     //
@@ -716,12 +716,12 @@ test_ipvx_invalid_copy_in_out()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     // XXX: we should test for copy_out() to sockaddr, sockaddr_in,
     // sockaddr_in6 structures that throw InvalidFamily.
     // To do so we must creast first IPvX with invalid address family.
     // However, this doesn't seem possible, hence we skip those checks.
-    
+
     //
     // Copy-in from a (uint8_t *) memory pointer for invalid address family.
     //
@@ -748,7 +748,7 @@ test_ipvx_invalid_copy_in_out()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Copy-in from a sockaddr_in structure for invalid address family.
     //
@@ -783,19 +783,19 @@ void
 test_ipvx_operators()
 {
     IPv4 ip4_a("0.255.0.255");
-    IPv4 ip4_b("255.0.255.255"); 
+    IPv4 ip4_b("255.0.255.255");
     IPv4 ip4_not_a("255.0.255.0");
     IPv4 ip4_a_or_b("255.255.255.255");
     IPv4 ip4_a_and_b("0.0.0.255");
     IPv4 ip4_a_xor_b("255.255.255.0");
-    
+
     IPvX ip6_a("0000:ffff:0000:ffff:0000:ffff:0000:ffff");
-    IPvX ip6_b("ffff:0000:ffff:0000:ffff:0000:ffff:ffff"); 
+    IPvX ip6_b("ffff:0000:ffff:0000:ffff:0000:ffff:ffff");
     IPvX ip6_not_a("ffff:0000:ffff:0000:ffff:0000:ffff:0000");
     IPvX ip6_a_or_b("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
     IPvX ip6_a_and_b("::ffff");
     IPvX ip6_a_xor_b("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0000");
-    
+
     //
     // Equality Operator
     //
@@ -804,7 +804,7 @@ test_ipvx_operators()
 
     verbose_assert(ip6_a == ip6_a, "operator==");
     verbose_assert(!(ip6_a == ip6_b), "operator==");
-    
+
     //
     // Not-Equal Operator
     //
@@ -813,42 +813,42 @@ test_ipvx_operators()
 
     verbose_assert(!(ip6_a != ip6_a), "operator!=");
     verbose_assert(ip6_a != ip6_b, "operator!=");
-    
+
     //
     // Less-Than Operator
     //
     verbose_assert(ip4_a < ip4_b, "operator<");
-    
+
     verbose_assert(ip6_a < ip6_b, "operator<");
-    
+
     //
     // Bitwise-Negation Operator
     //
     verbose_assert(~ip4_a == ip4_not_a, "operator~");
 
     verbose_assert(~ip6_a == ip6_not_a, "operator~");
-    
+
     //
     // OR Operator
     //
     verbose_assert((ip4_a | ip4_b) == ip4_a_or_b, "operator|");
 
     verbose_assert((ip6_a | ip6_b) == ip6_a_or_b, "operator|");
-    
+
     //
     // AND Operator
     //
     verbose_assert((ip4_a & ip4_b) == ip4_a_and_b, "operator&");
 
     verbose_assert((ip6_a & ip6_b) == ip6_a_and_b, "operator&");
-    
+
     //
     // XOR Operator
     //
     verbose_assert((ip4_a ^ ip4_b) == ip4_a_xor_b, "operator^");
 
     verbose_assert((ip6_a ^ ip6_b) == ip6_a_xor_b, "operator^");
-    
+
     //
     // Operator <<
     //
@@ -863,7 +863,7 @@ test_ipvx_operators()
     verbose_assert(IPvX("0000:ffff:0000:ffff:0000:ffff:0000:ffff") << 1 ==
 		   IPvX("0001:fffe:0001:fffe:0001:fffe:0001:fffe"),
 		   "operator<<");
-    
+
     //
     // Operator >>
     //
@@ -878,7 +878,7 @@ test_ipvx_operators()
     verbose_assert(IPvX("0000:ffff:0000:ffff:0000:ffff:0000:ffff") >> 1 ==
 		   IPvX("0000:7fff:8000:7fff:8000:7fff:8000:7fff"),
 		   "operator>>");
-    
+
     //
     // Decrement Operator
     //
@@ -886,14 +886,14 @@ test_ipvx_operators()
 		   "operator--()");
     verbose_assert(--IPvX("0.0.0.0") == IPvX("255.255.255.255"),
 		   "operator--()");
-    
+
     verbose_assert(--IPvX("0000:ffff:0000:ffff:0000:ffff:0000:ffff") ==
 		   IPvX("0000:ffff:0000:ffff:0000:ffff:0000:fffe"),
 		   "operator--()");
     verbose_assert(--IPvX("0000:0000:0000:0000:0000:0000:0000:0000") ==
 		   IPvX("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "operator--()");
-    
+
     //
     // Increment Operator
     //
@@ -901,7 +901,7 @@ test_ipvx_operators()
 		   "operator++()");
     verbose_assert(++IPvX("255.255.255.255") == IPvX("0.0.0.0"),
 		   "operator++()");
-    
+
     verbose_assert(++IPvX("0000:ffff:0000:ffff:0000:ffff:0000:ffff") ==
 		   IPvX("0000:ffff:0000:ffff:0000:ffff:0001:0000"),
 		   "operator++()");
@@ -922,19 +922,19 @@ test_ipvx_address_type()
     verbose_assert(IPvX("0.0.0.0").is_zero(), "is_zero()");
 
     verbose_assert(IPvX("::").is_zero(), "is_zero()");
-    
+
     //
     // Test if this address is a valid unicast address.
     //
     verbose_assert(IPvX("12.34.56.78").is_unicast(), "is_unicast()");
-    
+
     verbose_assert(IPvX("fe80::1234:5678").is_unicast(), "is_unicast()");
-    
+
     //
     // Test if this address is a valid multicast address.
     //
     verbose_assert(IPvX("224.1.2.3").is_multicast(), "is_multicast()");
-    
+
     verbose_assert(IPvX("ff00::1").is_multicast(), "is_multicast()");
 
 
@@ -957,7 +957,7 @@ test_ipvx_address_type()
 
     verbose_assert(IPvX("ff01::1").is_nodelocal_multicast(),
 		       "is_nodelocal_multicast()");
-    
+
     //
     // Test if this address is a valid link-local multicast address.
     //
@@ -966,6 +966,20 @@ test_ipvx_address_type()
 
     verbose_assert(IPvX("ff02::2").is_linklocal_multicast(),
 		       "is_linklocal_multicast()");
+
+    //
+    // Test if this address is a valid loopback multicast address.
+    //
+    verbose_assert(IPvX("127.255.0.1").is_loopback(), "is_loopback()");
+    verbose_assert(IPvX("0::1").is_loopback(), "is_loopback()");
+
+    //
+    // Test if this address is a valid loopback multicast address.
+    //
+    verbose_assert(IPvX("126.255.0.127").is_loopback() == false,
+		   "is_loopback()");
+    verbose_assert(IPvX("1::0").is_loopback() == false, "is_loopback()");
+
 }
 
 /**
@@ -980,14 +994,14 @@ test_ipvx_address_const()
     verbose_assert(IPvX::addr_size(AF_INET) == 4, "addr_size()");
 
     verbose_assert(IPvX::addr_size(AF_INET6) == 16, "addr_size()");
-    
+
     //
     // Test the address bit-length.
     //
     verbose_assert(IPvX::addr_bitlen(AF_INET) == 32, "addr_bitlen()");
 
     verbose_assert(IPvX::addr_bitlen(AF_INET6) == 128, "addr_bitlen()");
-    
+
     //
     // Test the mask length for the multicast base address.
     //
@@ -996,7 +1010,7 @@ test_ipvx_address_const()
 
     verbose_assert(IPvX::ip_multicast_base_address_mask_len(AF_INET6) == 8,
 		   "ip_multicast_base_address_mask_len()");
-    
+
     //
     // Test the address family.
     //
@@ -1005,7 +1019,7 @@ test_ipvx_address_const()
 
     IPvX ip2(AF_INET6);
     verbose_assert(ip2.af() == AF_INET6, "af()");
-    
+
     //
     // Test the IP protocol version.
     //
@@ -1016,27 +1030,27 @@ test_ipvx_address_const()
     IPvX ip4(AF_INET6);
     verbose_assert(ip4.ip_version() == 6, "ip_version()");
     verbose_assert(ip4.ip_version_str() == "IPv6", "ip_version_str()");
-    
+
     //
     // Test pre-defined constant addresses
     //
     verbose_assert(IPvX::ZERO(AF_INET) == IPvX("0.0.0.0"), "ZERO()");
     verbose_assert(IPvX::ZERO(AF_INET6) == IPvX("::"), "ZERO()");
-    
+
     verbose_assert(IPvX::ANY(AF_INET) == IPvX("0.0.0.0"), "ANY()");
     verbose_assert(IPvX::ANY(AF_INET6) == IPvX("::"), "ANY()");
-    
+
     verbose_assert(IPvX::ALL_ONES(AF_INET) == IPvX("255.255.255.255"),
 		   "ALL_ONES()");
     verbose_assert(IPvX::ALL_ONES(AF_INET6) ==
 		   IPvX("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "ALL_ONES()");
-    
+
     verbose_assert(IPvX::MULTICAST_BASE(AF_INET) == IPvX("224.0.0.0"),
 		   "MULTICAST_BASE()");
     verbose_assert(IPvX::MULTICAST_BASE(AF_INET6) == IPvX("ff00::"),
 		   "MULTICAST_BASE()");
-    
+
     verbose_assert(IPvX::MULTICAST_ALL_SYSTEMS(AF_INET) == IPvX("224.0.0.1"),
 		   "MULTICAST_ALL_SYSTEMS()");
     verbose_assert(IPvX::MULTICAST_ALL_SYSTEMS(AF_INET6) == IPvX("ff02::1"),
@@ -1046,22 +1060,22 @@ test_ipvx_address_const()
 		   "MULTICAST_ALL_ROUTERS()");
     verbose_assert(IPvX::MULTICAST_ALL_ROUTERS(AF_INET6) == IPvX("ff02::2"),
 		   "MULTICAST_ALL_ROUTERS()");
-    
+
     verbose_assert(IPvX::DVMRP_ROUTERS(AF_INET) == IPvX("224.0.0.4"),
 		   "DVMRP_ROUTERS()");
     verbose_assert(IPvX::DVMRP_ROUTERS(AF_INET6) == IPvX("ff02::4"),
 		   "DVMRP_ROUTERS()");
-    
+
     verbose_assert(IPvX::OSPFIGP_ROUTERS(AF_INET) == IPvX("224.0.0.5"),
 		   "OSPFIGP_ROUTERS()");
     verbose_assert(IPvX::OSPFIGP_ROUTERS(AF_INET6) == IPvX("ff02::5"),
 		   "OSPFIGP_ROUTERS()");
-    
+
     verbose_assert(IPvX::OSPFIGP_DESIGNATED_ROUTERS(AF_INET) == IPvX("224.0.0.6"),
 		   "OSPIGP_DESIGNATED_ROUTERS()");
     verbose_assert(IPvX::OSPFIGP_DESIGNATED_ROUTERS(AF_INET6) == IPvX("ff02::6"),
 		   "OSPIGP_DESIGNATED_ROUTERS()");
-    
+
     verbose_assert(IPvX::RIP2_ROUTERS(AF_INET) == IPvX("224.0.0.9"),
 		   "RIP2_ROUTERS()");
     verbose_assert(IPvX::RIP2_ROUTERS(AF_INET6) == IPvX("ff02::9"),
@@ -1081,7 +1095,7 @@ test_ipvx_manipulate_address()
 {
     const char *addr_string4 = "12.34.56.78";
     const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
-    
+
     //
     // Test making an IPvX mask prefix.
     //
@@ -1098,18 +1112,18 @@ test_ipvx_manipulate_address()
 		   "make_prefix()");
     verbose_assert(IPvX().make_prefix(AF_INET6, 128) == IPvX("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "make_prefix()");
-    
+
     //
     // Test making an IPvX mask prefix for the address family of this address.
     //
     IPvX ip04(AF_INET);
     verbose_assert(ip04.make_prefix(24) == IPvX("255.255.255.0"),
 		   "make_prefix()");
-    
+
     IPvX ip06(AF_INET6);
     verbose_assert(ip06.make_prefix(24) == IPvX("ffff:ff00::"),
 		   "make_prefix()");
-    
+
     //
     // Test making an IPvX address prefix.
     //
@@ -1123,7 +1137,7 @@ test_ipvx_manipulate_address()
 	IPvX("1234:5600::"),
 	"mask_by_prefix_len()"
 	);
-    
+
     //
     // Test getting the prefix length of the contiguous mask.
     //
@@ -1132,10 +1146,10 @@ test_ipvx_manipulate_address()
 
     verbose_assert(IPvX("ffff:ff00::").mask_len() == 24,
 		   "mask_len()");
-    
+
     // XXX: for IPvX we don't have addr() and set_addr() methods, hence
     // we don't test them.
-    
+
     //
     // Test extracting bits from an address.
     //
@@ -1143,33 +1157,33 @@ test_ipvx_manipulate_address()
     verbose_assert(IPvX("1234:5678:9abc:def0:fed:cba9:8765:4321").bits(0, 8)
 		   == 0x21,
 		   "bits()");
-    
+
     //
     // Test if this address is IPv4 address.
     //
     IPvX ip1(AF_INET);
     verbose_assert(ip1.is_ipv4() == true, "is_ipv4()");
-    
+
     //
     // Test if this address is IPv6 address.
     //
     IPvX ip2(AF_INET6);
     verbose_assert(ip2.is_ipv6() == true, "is_ipv6()");
-    
+
     //
     // Get IPv4 address.
     //
     IPvX ip3(addr_string4);
     IPv4 ip3_ipv4(addr_string4);
     verbose_assert(ip3.get_ipv4() == ip3_ipv4, "get_ipv4()");
-    
+
     //
     // Get IPv6 address.
     //
     IPvX ip4(addr_string6);
     IPv6 ip4_ipv6(addr_string6);
     verbose_assert(ip4.get_ipv6() == ip4_ipv6, "get_ipv6()");
-    
+
     //
     // Assign address value to an IPv4 address.
     //
@@ -1178,7 +1192,7 @@ test_ipvx_manipulate_address()
     IPv4 ip5_ipv4_tmp;
     ip5.get(ip5_ipv4_tmp);
     verbose_assert(ip5_ipv4_tmp == ip5_ipv4, "get(IPv4& to_ipv4)");
-    
+
     //
     // Assign address value to an IPv6 address.
     //
@@ -1197,7 +1211,7 @@ test_ipvx_invalid_manipulate_address()
 {
     const char *addr_string4 = "12.34.56.78";
     const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
-    
+
     //
     // Get invalid IPv4 address.
     //
@@ -1225,7 +1239,7 @@ test_ipvx_invalid_manipulate_address()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Assign invalid address value to an IPv4 address.
     //
@@ -1253,7 +1267,7 @@ test_ipvx_invalid_manipulate_address()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Test making an invalid IPvX mask prefix.
     //
@@ -1321,7 +1335,7 @@ int
 main(int argc, char * const argv[])
 {
     int ret_value = 0;
-    
+
     //
     // Initialize and start xlog
     //
@@ -1331,7 +1345,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
 	switch (ch) {
@@ -1352,7 +1366,7 @@ main(int argc, char * const argv[])
     }
     argc -= optind;
     argv += optind;
-    
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	test_ipvx_valid_constructors();
@@ -1370,12 +1384,12 @@ main(int argc, char * const argv[])
 	xorp_print_standard_exceptions();
 	ret_value = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return (ret_value);
 }

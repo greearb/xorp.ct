@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.8 2003/09/30 18:27:04 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.9 2004/02/21 05:59:34 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -67,7 +67,7 @@ bool
 _verbose_match(const char* file, int line, const string& s1, const string& s2)
 {
     bool match = s1 == s2;
-    
+
     _verbose_log(file, line, "Comparing %s == %s : %s\n",
 		 s1.c_str(), s2.c_str(), match ? "OK" : "FAIL");
     if (match == false)
@@ -99,7 +99,7 @@ _verbose_assert(const char* file, int line, bool cond, const string& desc)
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -115,7 +115,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -146,49 +146,49 @@ test_ipv4_valid_constructors()
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = ui;
     struct sockaddr *sap = (struct sockaddr *)&sin;
-    
+
     //
     // Default constructor.
     //
     IPv4 ip1;
     verbose_match(ip1.str(), "0.0.0.0");
-    
+
     //
     // Constructor from a string.
     //
     IPv4 ip2(addr_string);
     verbose_match(ip2.str(), addr_string);
-    
+
     //
     // Constructor from another IPv4 address.
     //
     IPv4 ip3(ip2);
     verbose_match(ip3.str(), addr_string);
-    
+
     //
     // Constructor from an integer value.
     //
     IPv4 ip4(ui);
     verbose_match(ip4.str(), addr_string);
-    
+
     //
     // Constructor from a (uint8_t *) memory pointer.
     //
     IPv4 ip5((uint8_t *)&ui);
     verbose_match(ip5.str(), addr_string);
-    
+
     //
     // Constructor from in_addr structure.
     //
     IPv4 ip6(in_addr);
     verbose_match(ip6.str(), addr_string);
-    
+
     //
     // Constructor from sockaddr structure.
     //
     IPv4 ip7(*sap);
     verbose_match(ip7.str(), addr_string);
-    
+
     //
     // Constructor from sockaddr_in structure.
     //
@@ -211,7 +211,7 @@ test_ipv4_invalid_constructors()
     sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
     sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
     struct sockaddr *sap = (struct sockaddr *)&sin;
-    
+
     //
     // Constructor from an invalid address string.
     //
@@ -225,7 +225,7 @@ test_ipv4_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid sockaddr structure.
     //
@@ -238,7 +238,7 @@ test_ipv4_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Constructor from an invalid sockaddr_in structure.
     //
@@ -271,10 +271,10 @@ test_ipv4_valid_copy_in_out()
 #endif
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = ui;
-    
+
     struct sockaddr *sap;
-    
-    
+
+
     //
     // Copy the IPv4 raw address to specified memory location.
     //
@@ -284,7 +284,7 @@ test_ipv4_valid_copy_in_out()
 		   "copy_out(uint8_t *) for IPv4 address");
     verbose_assert(memcmp(&ui, &ip1_uint8[0], 4) == 0,
 		   "compare copy_out(uint8_t *) for IPv4 address");
-    
+
     //
     // Copy the IPv4 raw address to an in_addr structure.
     //
@@ -294,7 +294,7 @@ test_ipv4_valid_copy_in_out()
 		   "copy_out(in_addr&) for IPv4 address");
     verbose_assert(memcmp(&in_addr, &ip3_in_addr, 4) == 0,
 		   "compare copy_out(in_addr&) for IPv4 address");
-    
+
     //
     // Copy the IPv4 raw address to a sockaddr structure.
     //
@@ -305,7 +305,7 @@ test_ipv4_valid_copy_in_out()
 		   "copy_out(sockaddr&) for IPv4 address");
     verbose_assert(memcmp(&sin, &ip5_sockaddr_in, sizeof(sin)) == 0,
 		   "compare copy_out(sockaddr&) for IPv4 address");
-    
+
     //
     // Copy the IPv4 raw address to a sockaddr_in structure.
     //
@@ -315,7 +315,7 @@ test_ipv4_valid_copy_in_out()
 		   "copy_out(sockaddr_in&) for IPv4 address");
     verbose_assert(memcmp(&sin, &ip7_sockaddr_in, sizeof(sin)) == 0,
 		   "compare copy_out(sockaddr_in&) for IPv4 address");
-    
+
     //
     // Copy a raw address into IPv4 structure.
     //
@@ -323,7 +323,7 @@ test_ipv4_valid_copy_in_out()
     verbose_assert(ip11.copy_in((uint8_t *)&ui) == 4,
 		   "copy_in(uint8_t *) for IPv4 address");
     verbose_match(ip11.str(), addr_string4);
-    
+
     //
     // Copy a raw IPv4 address from a in_addr structure into IPv4 structure.
     //
@@ -331,7 +331,7 @@ test_ipv4_valid_copy_in_out()
     verbose_assert(ip13.copy_in(in_addr) == 4,
 		   "copy_in(in_addr&) for IPv4 address");
     verbose_match(ip13.str(), addr_string4);
-    
+
     //
     // Copy a raw address from a sockaddr structure into IPv4 structure.
     //
@@ -365,9 +365,9 @@ test_ipv4_invalid_copy_in_out()
 #endif
     sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
     sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
-    
+
     struct sockaddr *sap;
-    
+
     //
     // Copy-in from a sockaddr structure for invalid address family.
     //
@@ -381,7 +381,7 @@ test_ipv4_invalid_copy_in_out()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-    
+
     //
     // Copy-in from a sockaddr_in structure for invalid address family.
     //
@@ -403,49 +403,49 @@ void
 test_ipv4_operators()
 {
     IPv4 ip_a("0.255.0.255");
-    IPv4 ip_b("255.0.255.255"); 
+    IPv4 ip_b("255.0.255.255");
     IPv4 ip_not_a("255.0.255.0");
     IPv4 ip_a_or_b("255.255.255.255");
     IPv4 ip_a_and_b("0.0.0.255");
     IPv4 ip_a_xor_b("255.255.255.0");
-    
+
     //
     // Equality Operator
     //
     verbose_assert(ip_a == ip_a, "operator==");
     verbose_assert(!(ip_a == ip_b), "operator==");
-    
+
     //
     // Not-Equal Operator
     //
     verbose_assert(!(ip_a != ip_a), "operator!=");
     verbose_assert(ip_a != ip_b, "operator!=");
-    
+
     //
     // Less-Than Operator
     //
     verbose_assert(ip_a < ip_b, "operator<");
-    
+
     //
     // Bitwise-Negation Operator
     //
     verbose_assert(~ip_a == ip_not_a, "operator~");
-    
+
     //
     // OR Operator
     //
     verbose_assert((ip_a | ip_b) == ip_a_or_b, "operator|");
-    
+
     //
     // AND Operator
     //
     verbose_assert((ip_a & ip_b) == ip_a_and_b, "operator&");
-    
+
     //
     // XOR Operator
     //
     verbose_assert((ip_a ^ ip_b) == ip_a_xor_b, "operator^");
-    
+
     //
     // Operator <<
     //
@@ -453,7 +453,7 @@ test_ipv4_operators()
 		   "operator<<");
     verbose_assert(IPv4("0.255.0.0") << 1 == IPv4("1.254.0.0"),
 		   "operator<<");
-    
+
     //
     // Operator >>
     //
@@ -461,7 +461,7 @@ test_ipv4_operators()
 		   "operator>>");
     verbose_assert(IPv4("0.0.0.255") >> 1 == IPv4("0.0.0.127"),
 		   "operator>>");
-    
+
     //
     // Decrement Operator
     //
@@ -469,7 +469,7 @@ test_ipv4_operators()
 		   "operator--()");
     verbose_assert(--IPv4("0.0.0.0") == IPv4("255.255.255.255"),
 		   "operator--()");
-    
+
     //
     // Increment Operator
     //
@@ -489,12 +489,12 @@ test_ipv4_address_type()
     // Test if this address is numerically zero.
     //
     verbose_assert(IPv4("0.0.0.0").is_zero(), "is_zero()");
-    
+
     //
     // Test if this address is a valid unicast address.
     //
     verbose_assert(IPv4("12.34.56.78").is_unicast(), "is_unicast()");
-    
+
     //
     // Test if this address is a valid multicast address.
     //
@@ -511,12 +511,23 @@ test_ipv4_address_type()
     //
     verbose_assert(IPv4("224.0.0.1").is_nodelocal_multicast() == false,
 		       "is_nodelocal_multicast()");
-    
+
     //
     // Test if this address is a valid link-local multicast address.
     //
     verbose_assert(IPv4("224.0.0.2").is_linklocal_multicast(),
 		       "is_linklocal_multicast()");
+
+    //
+    // Test if this address is a valid loopback multicast address.
+    //
+    verbose_assert(IPv4("127.255.0.1").is_loopback(), "is_loopback()");
+
+    //
+    // Test if this address is a valid loopback multicast address.
+    //
+    verbose_assert(IPv4("126.255.0.127").is_loopback() == false,
+		   "is_loopback()");
 }
 
 /**
@@ -529,60 +540,60 @@ test_ipv4_address_const()
     // Test the address octet-size.
     //
     verbose_assert(IPv4::addr_size() == 4, "addr_size()");
-    
+
     //
     // Test the address bit-length.
     //
     verbose_assert(IPv4::addr_bitlen() == 32, "addr_bitlen()");
-    
+
     //
     // Test the mask length for the multicast base address.
     //
     verbose_assert(IPv4::ip_multicast_base_address_mask_len() == 4,
 		   "ip_multicast_base_address_mask_len()");
-    
+
     //
     // Test the address family.
     //
     verbose_assert(IPv4::af() == AF_INET, "af()");
-    
+
     //
     // Test the IP protocol version.
     //
     verbose_assert(IPv4::ip_version() == 4, "ip_version()");
     verbose_assert(IPv4::ip_version_str() == "IPv4", "ip_version_str()");
-    
+
     //
     // Test pre-defined constant addresses
     //
     verbose_assert(IPv4::ZERO() == IPv4("0.0.0.0"), "ZERO()");
-    
+
     verbose_assert(IPv4::ANY() == IPv4("0.0.0.0"), "ANY()");
-    
+
     verbose_assert(IPv4::ALL_ONES() == IPv4("255.255.255.255"),
 		   "ALL_ONES()");
-    
+
     verbose_assert(IPv4::MULTICAST_BASE() == IPv4("224.0.0.0"),
 		   "MULTICAST_BASE()");
-    
+
     verbose_assert(IPv4::MULTICAST_ALL_SYSTEMS() == IPv4("224.0.0.1"),
 		   "MULTICAST_ALL_SYSTEMS()");
-    
+
     verbose_assert(IPv4::MULTICAST_ALL_ROUTERS() == IPv4("224.0.0.2"),
 		   "MULTICAST_ALL_ROUTERS()");
-    
+
     verbose_assert(IPv4::DVMRP_ROUTERS() == IPv4("224.0.0.4"),
 		   "DVMRP_ROUTERS()");
-    
+
     verbose_assert(IPv4::OSPFIGP_ROUTERS() == IPv4("224.0.0.5"),
 		   "OSPFIGP_ROUTERS()");
-    
+
     verbose_assert(IPv4::OSPFIGP_DESIGNATED_ROUTERS() == IPv4("224.0.0.6"),
 		   "OSPIGP_DESIGNATED_ROUTERS()");
-    
+
     verbose_assert(IPv4::RIP2_ROUTERS() == IPv4("224.0.0.9"),
 		   "RIP2_ROUTERS()");
-    
+
     verbose_assert(IPv4::PIM_ROUTERS() == IPv4("224.0.0.13"),
 		   "PIM_ROUTERS()");
 }
@@ -602,7 +613,7 @@ test_ipv4_manipulate_address()
 		   "make_prefix()");
     verbose_assert(IPv4().make_prefix(32) == IPv4("255.255.255.255"),
 		   "make_prefix()");
-    
+
     //
     // Test making an IPv4 address prefix.
     //
@@ -616,20 +627,20 @@ test_ipv4_manipulate_address()
     //
     verbose_assert(IPv4("255.255.255.0").mask_len() == 24,
 		   "mask_len()");
-    
+
     //
     // Test getting the raw value of the address.
     //
     uint32_t n = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
     verbose_assert(IPv4("12.34.56.78").addr() == n, "addr()");
-    
+
     //
     // Test setting the address value
     //
     IPv4 ip_a("1.2.3.4");
     ip_a.set_addr(htonl((12 << 24) | (34 << 16) | (56 << 8) | 78));
     verbose_assert(ip_a == IPv4("12.34.56.78"), "set_addr()");
-    
+
     //
     // Test extracting bits from an address.
     //
@@ -643,7 +654,7 @@ void
 test_ipv4_invalid_manipulate_address()
 {
     const char *addr_string4 = "12.34.56.78";
-    
+
     //
     // Test making an invalid IPv4 mask prefix.
     //
@@ -673,13 +684,13 @@ test_ipv4_invalid_manipulate_address()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
-}    
+}
 
 int
 main(int argc, char * const argv[])
 {
     int ret_value = 0;
-    
+
     //
     // Initialize and start xlog
     //
@@ -689,7 +700,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
 	switch (ch) {
@@ -710,7 +721,7 @@ main(int argc, char * const argv[])
     }
     argc -= optind;
     argv += optind;
-    
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	test_ipv4_valid_constructors();
@@ -728,12 +739,12 @@ main(int argc, char * const argv[])
 	xorp_print_standard_exceptions();
 	ret_value = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return (ret_value);
 }

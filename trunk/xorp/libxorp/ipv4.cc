@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.11 2004/02/12 02:35:07 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.12 2004/02/21 05:59:21 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -167,7 +167,7 @@ IPv4::operator>>(uint32_t right_shift) const
 	// XXX: special case, because in C the behavior is undefined.
 	return IPv4::ZERO();
     }
-    
+
     uint32_t tmp_addr = ntohl(_addr) >> right_shift;
     return IPv4(htonl(tmp_addr));
 }
@@ -269,6 +269,14 @@ IPv4::is_linklocal_multicast() const
     uint32_t addr4 = ntohl(_addr);
 
     return (IN_MULTICAST(addr4) && (addr4 <= INADDR_MAX_LOCAL_GROUP));
+}
+
+bool
+IPv4::is_loopback() const
+{
+    static const uint32_t loopnet = IN_LOOPBACKNET << 24;
+    uint32_t addr4 = ntohl(_addr);
+    return ((addr4 & IN_CLASSA_NET) == loopnet);
 }
 
 const string&

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.13 2003/11/05 20:24:28 hodson Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.14 2004/02/21 05:59:21 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -399,6 +399,13 @@ public:
      * and the scope of the address is link-local.
      */
     bool is_linklocal_multicast() const;
+
+    /**
+     * Test if this address is a valid loopback address.
+     *
+     * @return true if this address is a valid loopback address.
+     */
+    bool is_loopback() const;
 
     /**
      * Get the address octet-size.
