@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.35 2004/03/24 19:14:07 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.36 2004/05/24 01:22:32 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -137,6 +137,8 @@ mk_instance_name(EventLoop& e, const char* classname)
 // ----------------------------------------------------------------------------
 // XrlRouter code
 
+static const uint32_t FINDER_CONNECT_TIMEOUT_MS = 30 * 1000;
+
 uint32_t XrlRouter::_icnt = 0;
 
 void
@@ -149,7 +151,8 @@ XrlRouter::initialize(const char* class_name,
     _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
 
     _fac = new FinderTcpAutoConnector(_e, *_fc, _fc->commands(),
-				      finder_addr, finder_port);
+				      finder_addr, finder_port,
+				      true, FINDER_CONNECT_TIMEOUT_MS);
 
     _instance_name = mk_instance_name(_e, class_name);
 
@@ -168,7 +171,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     const char* finder_addr,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _finalized(false), _failed(false)
+    : XrlDispatcher(class_name), _e(e), _finalized(false)
 {
     IPv4 finder_ip;
     if (0 == finder_addr) {
@@ -188,7 +191,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     IPv4 	 finder_ip,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _finalized(false), _failed(false)
+    : XrlDispatcher(class_name), _e(e), _finalized(false)
 {
     if (0 == finder_port)
 	finder_port = FINDER_DEFAULT_PORT;
@@ -235,7 +238,7 @@ XrlRouter::ready() const
 bool
 XrlRouter::failed() const
 {
-    return _failed;
+    return _fac->enabled() == false && ready() == false;
 }
 
 bool
@@ -523,7 +526,7 @@ void
 XrlRouter::finder_disconnect_event()
 {
     debug_msg("Finder disconnect event\n");
-    _failed = true;
+    //    _failed = true;
 }
 
 void
