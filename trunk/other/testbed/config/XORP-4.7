@@ -22,10 +22,14 @@ cpu		I386_CPU
 cpu		I486_CPU
 cpu		I586_CPU
 cpu		I686_CPU
-ident		GENERIC
+ident		XORP
 maxusers	0
 
-#makeoptions	DEBUG=-g		#Build kernel with gdb(1) debug symbols
+makeoptions	DEBUG=-g		#Build kernel with gdb(1) debug symbols
+
+# XORP
+options		MAXDSIZ="(900*1024*1024)"
+options		DFLDSIZ="(900*1024*1024)" 
 
 options 	MATH_EMULATE		#Support for x87 emulation
 options 	INET			#InterNETworking
@@ -59,6 +63,31 @@ options		AHC_REG_PRETTY_PRINT	# Print register bitfields in debug
 					# output.  Adds ~128k to driver.
 options		AHD_REG_PRETTY_PRINT	# Print register bitfields in debug 
 					# output.  Adds ~215k to driver.
+# XORP
+options		IPFIREWALL
+options		DUMMYNET
+# Added by Atanu to get DISKLESS booting working.
+options		IPFIREWALL_DEFAULT_TO_ACCEPT
+options		MROUTING		# Multicast routing
+# XXX: to enable PIM, must add the PIM-patches to the kernel
+#options		PIM			# PIM multicast routing
+options		TCPDEBUG
+# Added by Atanu http://etherboot.sourceforge.net/doc/html/freebsd.html
+# Kernel BOOTP support  
+options		BOOTP		# Use BOOTP to obtain IP address/hostname
+options		BOOTP_NFSROOT	# NFS mount root filesystem using BOOTP info
+options		BOOTP_NFSV3	# Use NFS v3 to NFS mount root
+options		BOOTP_COMPAT	# Workaround for broken bootp daemons.
+options		BOOTP_WIRED_TO=fxp0
+options		DDB		# Debugging
+#
+# If using GDB remote mode to debug the kernel, there's a non-standard
+# extension to the remote protocol that can be used to use the serial
+# port as both the debugging port and the system console.  It's non-
+# standard and you're on your own if you enable it.  See also the
+# "remotechat" variables in the FreeBSD specific version of gdb.
+#
+options		GDB_REMOTE_CHAT
 
 # To make an SMP kernel, the next two are needed
 #options 	SMP			# Symmetric MultiProcessor Kernel
@@ -125,12 +154,12 @@ device		mly		# Mylex AcceleRAID/eXtremeRAID
 device		ciss		# Compaq SmartRAID 5* series
 
 # RAID controllers
-device		aac		# Adaptec FSA RAID, Dell PERC2/PERC3
-device		aacp		# SCSI passthrough for aac (requires CAM)
-device		ida		# Compaq Smart RAID
-device		amr		# AMI MegaRAID
-device		mlx		# Mylex DAC960 family
-device		twe		# 3ware Escalade
+#device		aac		# Adaptec FSA RAID, Dell PERC2/PERC3
+#device		aacp		# SCSI passthrough for aac (requires CAM)
+#device		ida		# Compaq Smart RAID
+#device		amr		# AMI MegaRAID
+#device		mlx		# Mylex DAC960 family
+#device		twe		# 3ware Escalade
 
 # atkbdc0 controls both the keyboard and the PS/2 mouse
 device		atkbdc0	at isa? port IO_KBD
@@ -156,15 +185,17 @@ device		sc0	at isa? flags 0x100
 device		npx0	at nexus? port IO_NPX irq 13
 
 # Power management support (see LINT for more options)
-device		apm0	at nexus? disable flags 0x20 # Advanced Power Management
+#device		apm0	at nexus? disable flags 0x20 # Advanced Power Management
 
 # PCCARD (PCMCIA) support
-device		card
-device		pcic0	at isa? irq 0 port 0x3e0 iomem 0xd0000
-device		pcic1	at isa? irq 0 port 0x3e2 iomem 0xd4000 disable
+#device		card
+#device		pcic0	at isa? irq 0 port 0x3e0 iomem 0xd0000
+#device		pcic1	at isa? irq 0 port 0x3e2 iomem 0xd4000 disable
 
 # Serial (COM) ports
-device		sio0	at isa? port IO_COM1 flags 0x10 irq 4
+# XORP: Enable a serial console. Atanu.
+device		sio0	at isa? port IO_COM1 flags 0x30 irq 4
+#device		sio0	at isa? port IO_COM1 flags 0x10 irq 4
 device		sio1	at isa? port IO_COM2 irq 3
 device		sio2	at isa? disable port IO_COM3 irq 5
 device		sio3	at isa? disable port IO_COM4 irq 9
@@ -259,3 +290,17 @@ device		urio		# Diamond Rio MP3 Player
 device		aue		# ADMtek USB ethernet
 device		cue		# CATC USB ethernet
 device		kue		# Kawasaki LSI USB ethernet
+
+# XORP
+options		HZ=1000
+options		NMBCLUSTERS=8192
+#options		CLK_USE_I8254_CALIBRATION
+#options		CLK_USE_TSC_CALIBRATION
+
+
+# XORP
+# This allows you to actually store this configuration file into
+# the kernel binary itself, where it may be later read by saying:
+#    strings -n 3 /kernel | sed -n 's/^___//p' > MYKERNEL
+#
+options		INCLUDE_CONFIG_FILE	# Include this file in kernel
