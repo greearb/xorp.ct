@@ -19,6 +19,7 @@
 
 #include <map>
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv4.hh"
 #include "route.hh"
@@ -78,9 +79,12 @@ public:
     const IPNet<A>& net() const			{ return _route->net();	}
 
     /**
-     * merge this entry with rr:
-     * replace route with the entry from rr if it is better, (XXX why ?)
+     * Merge this entry with another entry.
+     * 
+     * Replace route with the entry from rr if it is better, (XXX why ?)
      * shrink the intervals if the other one is smaller.
+     * 
+     * @param his_rr the entry to merge with.
      */
     void merge(const RouteRange *his_rr)	{
 	    const IPRouteEntry<A> *rrr = his_rr->route();
@@ -107,15 +111,14 @@ public:
 		_bottom = his_rr->bottom();
     }
 
-    // returns the largest subnet contained in the range.
+    // Return the largest subnet contained in the range.
     IPNet<A> minimal_subnet() const {
 	    for (size_t bits = 0; bits <= A::addr_bitlen(); bits++) {
 		IPNet<A> net(_req_addr, bits);
 		if (net.masked_addr() >= _bottom && net.top_addr() <= _top)
 		    return net; // we got it.
 	    }
-	    // can't get here
-	    abort();
+	    XLOG_UNREACHABLE();
     }
 
 private:
@@ -172,7 +175,7 @@ public:
     RouteTable *next_table() { return _next_table; }
 
     // parent is only supposed to be called on single-parent tables
-    virtual RouteTable *parent() { abort(); return NULL; }
+    virtual RouteTable *parent() { XLOG_UNREACHABLE(); return NULL; }
 
     virtual int type() const = 0;
     const string& tablename() const { return _tablename; }
