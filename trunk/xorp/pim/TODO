@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.16 2003/02/01 01:45:19 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.17 2003/02/04 20:01:48 pavlin Exp $
 #
+
+* IMPL: what to do when (S,G) packet received on wrong iif, and there
+  is no routing entry yet? Currently, PimMrt::receive_data() processing
+  returns in the following line (note that there is matching (*,*,RP)
+  PimMre entry if there is valid RP):
+     return;         // TODO: XXX: PAVPAVPAV: not in the spec (yet)
+  Maybe install MFC entry in the kernel to stop the kernel upcalls?
 
 * TESTSUITE: clean-up all test setup procedures: move all common stuff
   to "Test Setup".
