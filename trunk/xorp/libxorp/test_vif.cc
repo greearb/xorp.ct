@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.2 2003/03/10 23:20:36 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -535,26 +535,38 @@ test_vif_manipulate_address()
 		   "is_same_subnet(IPvX)");
     verbose_assert(! vif1.is_same_subnet(IPvX("99.99.99.99")),
 		   "is_same_subnet(IPvX)");
-    
-    //
-    // Test if a given address is directly connected to this vif: broadcast vif
-    //
-    verbose_assert(vif1.is_directly_connected(IPvX("11.11.11.22")),
-		   "is_directly_connected()");
-    verbose_assert(! vif1.is_directly_connected(IPvX("99.99.99.99")),
-		   "is_directly_connected()");
 
+    //
+    // Change vif capabilities and try again
+    //
+    vif1.set_broadcast_capable(false);
+    vif1.set_p2p(true);
+    verbose_assert(! vif1.is_same_subnet(vif_addr_a.subnet_addr()),
+		   "is_same_subnet(IPvXNet)");
+    verbose_assert(! vif1.is_same_subnet(IPvX("11.11.11.22")),
+		   "is_same_subnet(IPvX)");
+    // Restore the vif capabilities
+    vif1.set_broadcast_capable(true);
+    vif1.set_p2p(false);
+    
     //
     // Assign vif capabilities
     //
     vif1.set_broadcast_capable(false);
     vif1.set_p2p(true);
     vif1.add_address(vif_addr_c);
-    verbose_assert(vif1.is_directly_connected(vif_addr_c.peer_addr()),
-		   "is_directly_connected()");
-    verbose_assert(! vif1.is_directly_connected(IPvX("99.99.99.99")),
-		   "is_directly_connected()");
     
+    //
+    // Test if a given address belongs to the same point-to-point link
+    // as this vif.
+    //
+    verbose_assert(vif1.is_same_p2p(IPvX("33.33.33.33")),
+		   "is_same_p2p(IPvX)");
+    verbose_assert(vif1.is_same_p2p(IPvX("33.33.33.44")),
+		   "is_same_p2p(IPvX)");
+    verbose_assert(! vif1.is_same_p2p(IPvX("33.33.33.99")),
+		   "is_same_p2p(IPvX)");
+
     //
     // Convert this Vif from binary form to presentation format.
     //
