@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.6 2004/06/10 22:41:09 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.7 2004/11/04 22:11:42 pavlin Exp $"
 
 // test_xrl_args: String Serialization Tests
 
@@ -67,23 +67,23 @@ test_serialize_one(const XrlArgs& original)
 	// Check reported bytes used against expected
 	if (original_bytes > packed_bytes) {
 	    verbose_log("Packed more than promised "
-			"(buf_bytes = %u)\n", buf_bytes);
+			"(buf_bytes = %u)\n", XORP_UINT_CAST(buf_bytes));
 	    return 1;
 	} else if (original_bytes == packed_bytes) {
 	    if (buf_bytes < packed_bytes) {
 		verbose_log("Unexpected packing success "
-			    "(buf_bytes = %u)\n", buf_bytes);
+			    "(buf_bytes = %u)\n", XORP_UINT_CAST(buf_bytes));
 		return 1;
 	    }
 	} else if (original_bytes < packed_bytes) {
 	    if (original_bytes != 0) {
 		verbose_log("Packed less than promised "
-			    "(buf_bytes = %u)\n", buf_bytes);
+			    "(buf_bytes = %u)\n", XORP_UINT_CAST(buf_bytes));
 		return 1;
 	    }
 	    if (buf_bytes >= packed_bytes) {
 		verbose_log("Failed to pack within expected space "
-			    "(buf_bytes = %u)\n", buf_bytes);
+			    "(buf_bytes = %u)\n", XORP_UINT_CAST(buf_bytes));
 		return 1;
 	    }
 	}
@@ -98,9 +98,10 @@ test_serialize_one(const XrlArgs& original)
 	    if (rb > 0 && rb != packed_bytes) {
 		verbose_log("Unpacked wrong byte count %u != %u "
 			    "(buf_bytes = %u, r_bytes = %u)\n",
-			    static_cast<uint32_t>(rb),
-			    static_cast<uint32_t>(packed_bytes),
-			    buf_bytes, r_bytes);
+			    XORP_UINT_CAST(rb),
+			    XORP_UINT_CAST(packed_bytes),
+			    XORP_UINT_CAST(buf_bytes),
+			    XORP_UINT_CAST(r_bytes));
 		verbose_log("Input:  %s\nOutput: %s\n",
 			    original.str().c_str(), rendered.str().c_str());
 		return 1;
@@ -110,8 +111,10 @@ test_serialize_one(const XrlArgs& original)
 		if (r_bytes > packed_bytes) {
 		    verbose_log("Unpacked surplus with %u >= %u "
 				"(buf_bytes = %u, r_bytes = %u)\n",
-				r_bytes, packed_bytes,
-				buf_bytes, r_bytes);
+				XORP_UINT_CAST(r_bytes),
+				XORP_UINT_CAST(packed_bytes),
+				XORP_UINT_CAST(buf_bytes),
+				XORP_UINT_CAST(r_bytes));
 		    return 1;
 		}
 		continue;
@@ -120,7 +123,8 @@ test_serialize_one(const XrlArgs& original)
 	    if (rendered != original) {
 		verbose_log("Unpacked XrlArgs does not match original"
 			    "(buf_bytes = %u, r_bytes = %u)\n",
-			    buf_bytes, r_bytes);
+			    XORP_UINT_CAST(buf_bytes),
+			    XORP_UINT_CAST(r_bytes));
 		return 1;
 	    }
 	} /* r_bytes */
@@ -153,7 +157,8 @@ run_serialization_test()
 
     for (uint32_t st = 0; st < n_test_args; st++) {
 	for (uint32_t len = 0; len < n_test_args; len++) {
-	    verbose_log("Testing XrlArgs (st = %u, len = %u)\n", st, len);
+	    verbose_log("Testing XrlArgs (st = %u, len = %u)\n",
+			XORP_UINT_CAST(st), XORP_UINT_CAST(len));
 	    XrlArgs original;
 	    // Build XrlArgs with 0 -- n_test_args arguments with starting
 	    // position from 0 -- n_test_args.
@@ -162,7 +167,8 @@ run_serialization_test()
 	    }
 	    int r = test_serialize_one(original);
 	    if (r) {
-		verbose_log("Failed with start = %u, length = %u\n", st, len);
+		verbose_log("Failed with start = %u, length = %u\n",
+			    XORP_UINT_CAST(st), XORP_UINT_CAST(len));
 		return r;
 	    }
 	} /* len */
