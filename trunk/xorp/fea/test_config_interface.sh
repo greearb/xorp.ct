@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.3 2003/10/16 22:15:46 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.1 2003/10/17 22:26:13 pavlin Exp $
 #
 
 #
@@ -47,7 +47,7 @@ case ${HOSTNAME} in
 	xorp4)
 	IFNAME="eth3"
 	MAC="00:04:5A:49:5D:11"
-	TEST_MAC="00:04:5A:49:5D:12"
+	TEST_MAC="0:4:5a:49:5d:12"
 	;;
 
 	*)
