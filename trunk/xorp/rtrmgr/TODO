@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.2 2003/05/10 23:33:17 mjh Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.3 2003/05/31 23:23:25 mjh Exp $
 #
 
 Urgent
@@ -14,18 +14,17 @@ Configure Mode
     - Can delete some leaf nodes, but the xorpsh thinks there are still 
       uncommitted changes.
  - Implement $(@.DEFAULT) varname.
-
  - In xorpsh, variable expansion can fail (for example with FEA
    transation IDs).  Currently the xorpsh-side checks are disabled in
    slave_config_tree.cc, but this is the wrong solution to the
    problem.
+ - Implement the "help" and "quit" commands in the top-level xorpsh
+   command tree.
 
 
 Operational Mode
 
  - Ensure commands only appear when modules are loaded.
- - Remove 5 second timeout.
- - Interruption of commands in progress.
 
 
 Non-Urgent
@@ -50,6 +49,9 @@ Operational Mode
 Done
 ====
 
+ - Remove 5 second timeout.
+ - Interruption of commands in progress.
+   RESOLVED: Use Ctrl-C to interrupt xorpsh waiting for command completion.
  - If rtrmgr restarts, xorpsh will talk to the new rtrmgr, but will
    fail all authentication checks.  Handle this more gracefully.
 
