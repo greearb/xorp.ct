@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.23 2004/05/15 15:12:16 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.24 2004/05/15 16:05:21 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -426,7 +426,11 @@ DumpTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
     cp(37);
     XLOG_ASSERT(this->_parent == caller);
     XLOG_ASSERT(this->_next_table != NULL);
-    _dump_iter.peering_went_down(peer, genid);
+    if (peer != _peer) {
+	_dump_iter.peering_went_down(peer, genid);
+    } else {
+	//do nothing, we'll soon be unplumbed.
+    }
     this->_next_table->peering_went_down(peer, genid, this);
 }
 

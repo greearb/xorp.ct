@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.19 2004/05/15 16:37:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.20 2004/05/15 23:10:45 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -108,10 +108,10 @@ DumpIterator<A>::DumpIterator(const PeerHandler* peer,
     _current_peer = _peers_to_dump.begin();
     if (_current_peer != _peers_to_dump.end()) {
 	typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-	_state_i = _peers.find(_current_peer->peer_handler());
-	XLOG_ASSERT(_state_i != _peers.end());
-	_state_i->second->start_dump();
+		  PeerDumpState<A>* >::iterator state_i;
+	state_i = _peers.find(_current_peer->peer_handler());
+	XLOG_ASSERT(state_i != _peers.end());
+	state_i->second->start_dump();
     }
     _route_iterator_is_valid = false;
     _routes_dumped_on_current_peer = false;
@@ -147,12 +147,12 @@ DumpIterator<A>::route_dump(const InternalMessage<A> &rtmsg)
     // XXX inefficient sanity checks
     XLOG_ASSERT(rtmsg.origin_peer() == _current_peer->peer_handler());
     typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-    _state_i = _peers.find(_current_peer->peer_handler());
-    XLOG_ASSERT(_state_i != _peers.end());
-    debug_msg("route_dump: rtmsg.genid():%d _state_i->second->genid():%d\n",
-	   rtmsg.genid(), _state_i->second->genid());
-    switch (_state_i->second->status()) {
+		  PeerDumpState<A>* >::iterator state_i;
+    state_i = _peers.find(_current_peer->peer_handler());
+    XLOG_ASSERT(state_i != _peers.end());
+    debug_msg("route_dump: rtmsg.genid():%d state_i->second->genid():%d\n",
+	   rtmsg.genid(), state_i->second->genid());
+    switch (state_i->second->status()) {
     case STILL_TO_DUMP:
 	debug_msg("STILL_TO_DUMP\n");
 	break;
@@ -169,7 +169,7 @@ DumpIterator<A>::route_dump(const InternalMessage<A> &rtmsg)
 	debug_msg("OTHER\n");
 	break;
     }
-    XLOG_ASSERT(rtmsg.genid() == _state_i->second->genid());
+    XLOG_ASSERT(rtmsg.genid() == state_i->second->genid());
     // end sanity checks
 
     _routes_dumped_on_current_peer = true;
@@ -198,26 +198,26 @@ bool
 DumpIterator<A>::next_peer()
 {
     typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-    _state_i = _peers.find(_current_peer->peer_handler());
-    XLOG_ASSERT(_state_i != _peers.end());
+		  PeerDumpState<A>* >::iterator state_i;
+    state_i = _peers.find(_current_peer->peer_handler());
+    XLOG_ASSERT(state_i != _peers.end());
     
     //we've finished with the old peer
-    if (_state_i->second->status() == CURRENTLY_DUMPING)
-	_state_i->second->set_dump_complete();
+    if (state_i->second->status() == CURRENTLY_DUMPING)
+	state_i->second->set_dump_complete();
 
     //move to next undumped peer, if any remain
-    while (_state_i->second->status() != STILL_TO_DUMP) {
+    while (state_i->second->status() != STILL_TO_DUMP) {
 	_current_peer++;
 	if (_current_peer == _peers_to_dump.end())
 	    break;
 
-	_state_i = _peers.find(_current_peer->peer_handler());
+	state_i = _peers.find(_current_peer->peer_handler());
     }
 
     //record that we've started
     if (_current_peer != _peers_to_dump.end()) {
-	_state_i->second->start_dump();
+	state_i->second->start_dump();
     }
 
 
@@ -240,15 +240,17 @@ template <class A>
 void
 DumpIterator<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
 {
+    XLOG_ASSERT(peer != _peer);
+
     debug_msg("peering_is_down %p genid %d\n", peer, genid);
     /*
      * first we must locate the appropriate state for this peer
      */
     typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-    _state_i = _peers.find(peer);
+		  PeerDumpState<A>* >::iterator state_i;
+    state_i = _peers.find(peer);
 
-    if (_state_i == _peers.end()) {
+    if (state_i == _peers.end()) {
 	_peers[peer] = new PeerDumpState<A>(peer,
 					    DOWN_BEFORE_DUMP,
 					    genid);
@@ -259,12 +261,12 @@ DumpIterator<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
     /*
      * what we do depends on the peer state
      */
-    switch (_state_i->second->status()) {
+    switch (state_i->second->status()) {
 
     case STILL_TO_DUMP:
     case CURRENTLY_DUMPING:
     case DOWN_BEFORE_DUMP:
-	_state_i->second->set_delete_occurring(genid);
+	state_i->second->set_delete_occurring(genid);
 	return;
 
     case DOWN_DURING_DUMP:
@@ -282,28 +284,30 @@ template <class A>
 void
 DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 {
+    XLOG_ASSERT(peer != _peer);
+
     /*
      * first we must locate the appropriate state for this peer
      */
     typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-    _state_i = _peers.find(peer);
-    XLOG_ASSERT(_state_i != _peers.end());
+		  PeerDumpState<A>* >::iterator state_i;
+    state_i = _peers.find(peer);
+    XLOG_ASSERT(state_i != _peers.end());
 
     /*
      * what we do depends on the peer state
      */
-    switch (_state_i->second->status()) {
+    switch (state_i->second->status()) {
 
     case STILL_TO_DUMP:
-	_state_i->second->set_down(genid);
+	state_i->second->set_down(genid);
 	return;
 
     case CURRENTLY_DUMPING:
 	if (_routes_dumped_on_current_peer) {
-	    _state_i->second->set_down_during_dump(_last_dumped_net, genid);
+	    state_i->second->set_down_during_dump(_last_dumped_net, genid);
 	} else {
-	    _state_i->second->set_down(genid);
+	    state_i->second->set_down(genid);
 	}
 	next_peer();
 	return;
@@ -330,15 +334,17 @@ void
 DumpIterator<A>::peering_down_complete(const PeerHandler *peer,
 				       uint32_t genid)
 {
+    XLOG_ASSERT(peer != _peer);
+
     /*
      * first we must locate the appropriate state for this peer
      */
     typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-    _state_i = _peers.find(peer);
-    XLOG_ASSERT(_state_i != _peers.end());
+		  PeerDumpState<A>* >::iterator state_i;
+    state_i = _peers.find(peer);
+    XLOG_ASSERT(state_i != _peers.end());
 
-    _state_i->second->set_delete_complete(genid);
+    state_i->second->set_delete_complete(genid);
     return;
 }
 
@@ -374,21 +380,23 @@ template <class A>
 void
 DumpIterator<A>::peering_came_up(const PeerHandler *peer, uint32_t genid)
 {
+    XLOG_ASSERT(peer != _peer);
+
     /*
      * first we must locate the appropriate state for this peer
      */
     typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-    _state_i = _peers.find(peer);
+		  PeerDumpState<A>* >::iterator state_i;
+    state_i = _peers.find(peer);
 
-    if (_state_i == _peers.end()) {
+    if (state_i == _peers.end()) {
 	// we've not heard about this one.
 	_peers[peer] = new PeerDumpState<A>(peer, NEW_PEER, genid);
 	return;
     }
 
     
-    switch (_state_i->second->status()) {
+    switch (state_i->second->status()) {
     case STILL_TO_DUMP:
     case CURRENTLY_DUMPING:
 	XLOG_UNREACHABLE();
@@ -402,7 +410,7 @@ DumpIterator<A>::peering_came_up(const PeerHandler *peer, uint32_t genid)
 	// Anything prior to this must be obsolete data, but now the
 	// peer has actually come up properly.  We need to record it as
 	// a new peer now.
-	_peers.erase(_state_i);
+	_peers.erase(state_i);
 	_peers[peer] = new PeerDumpState<A>(peer, NEW_PEER, genid);
 	return;
     }
@@ -480,9 +488,9 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
      * first we must locate the appropriate state for this peer
      */
     typename map <const PeerHandler*, 
-		  PeerDumpState<A>* >::iterator _state_i;
-    _state_i = _peers.find(origin_peer);
-    if (_state_i == _peers.end()) {
+		  PeerDumpState<A>* >::iterator state_i;
+    state_i = _peers.find(origin_peer);
+    if (state_i == _peers.end()) {
 	// We have never seen this peer before.  this can only happen
 	// for peers that were down when we started the dump, but had
 	// stuff on background tasks in DeletionTable or NextHopLookup.
@@ -495,25 +503,25 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
     }
 
 
-    if (genid < _state_i->second->genid()) {
+    if (genid < state_i->second->genid()) {
 	// The route predates anything we know about.  We definitely
 	// don't want to pass this downstream - it's an obsolete
 	// route.
 	return false;
     }
 
-    switch (_state_i->second->status()) {
+    switch (state_i->second->status()) {
 
     case STILL_TO_DUMP:
 	debug_msg("STILL_TO_DUMP\n");
-	XLOG_ASSERT(genid == _state_i->second->genid());
+	XLOG_ASSERT(genid == state_i->second->genid());
 
 	// Don't pass downstream - we'll dump it later
 	return false;
 
     case CURRENTLY_DUMPING:
 	debug_msg("CURRENTLY_DUMPING\n");
-	XLOG_ASSERT(genid == _state_i->second->genid());
+	XLOG_ASSERT(genid == state_i->second->genid());
 
 	// Depends on whether we've dumped this route already.
 	if (_routes_dumped_on_current_peer) {
@@ -528,13 +536,13 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 
     case DOWN_DURING_DUMP:
 	debug_msg("DOWN_DURING_DUMP\n");
-	if (genid == _state_i->second->genid()) {
+	if (genid == state_i->second->genid()) {
 	    // The change is from the version of the rib we'd half dumped.
 	    debug_msg("last_net: %s, net: %s\n",
-		   _state_i->second->last_net().str().c_str(),
+		   state_i->second->last_net().str().c_str(),
 		   net.str().c_str());
-	    if (net ==_state_i->second->last_net()
-		|| net < _state_i->second->last_net()) {
+	    if (net ==state_i->second->last_net()
+		|| net < state_i->second->last_net()) {
 		//We have dumped this route already, so pass downstream.
 		return true;
 	    }
@@ -549,7 +557,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
     case DOWN_BEFORE_DUMP:
 	debug_msg("DOWN_BEFORE_DUMP\n");
 	// This peer went down before we'd had a chance to dump it.
-	if (genid == _state_i->second->genid()) {
+	if (genid == state_i->second->genid()) {
 	    // We hadn't dumped these - don't pass downstream any changes.
 	    return false;
 	}
@@ -570,7 +578,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 
     case FIRST_SEEN_DURING_DUMP:
 	debug_msg("FIRST_SEEN_DURING_DUMP\n");
-	XLOG_ASSERT(genid == _state_i->second->genid());
+	XLOG_ASSERT(genid == state_i->second->genid());
 	return false;
     }
     XLOG_UNREACHABLE();
