@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.53 2004/07/09 05:43:23 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.54 2004/07/24 01:24:05 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -52,12 +52,12 @@ Release 1.1 (2004/??/??)
     - 
 
   PIM-SM:
-    - Bug fix in overwriting the MRIB entries.
+    - Bug fixes in handling the MRIB entries and MRIB-related state.
 
     - Bug fix in scheduling the internal PimMre tasks.
 
   FIB2MRIB:
-    - 
+    - Bug fix in deleting the Fib2Mrib entries.
 
   CLI:
     - 
