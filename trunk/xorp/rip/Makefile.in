@@ -91,11 +91,11 @@ LDFLAGS =
 LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
 noinst_PROGRAMS = $(TESTS)
-TESTS = test_auth test_packets test_timers_update
+TESTS = test_auth test_packets test_timers
 
 test_auth_SOURCES = test_auth.cc
 test_packets_SOURCES = test_packets.cc
-test_timers_update_SOURCES = test_timers_update.cc
+test_timers_SOURCES = test_timers.cc
 librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh route_db.hh route_entry.hh update_queue.hh auth.cc port.cc route_db.cc route_entry.cc update_queue.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -120,11 +120,11 @@ test_packets_LDADD = $(LDADD)
 test_packets_DEPENDENCIES =  ./librip.a \
 $(top_builddir)/libxorp/libxorp.a
 test_packets_LDFLAGS = 
-test_timers_update_OBJECTS =  test_timers_update.o
-test_timers_update_LDADD = $(LDADD)
-test_timers_update_DEPENDENCIES =  ./librip.a \
+test_timers_OBJECTS =  test_timers.o
+test_timers_LDADD = $(LDADD)
+test_timers_DEPENDENCIES =  ./librip.a \
 $(top_builddir)/libxorp/libxorp.a
-test_timers_update_LDFLAGS = 
+test_timers_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -144,9 +144,9 @@ TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/auth.P .deps/port.P .deps/route_db.P \
 .deps/route_entry.P .deps/test_auth.P .deps/test_packets.P \
-.deps/test_timers_update.P .deps/update_queue.P
-SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_packets_SOURCES) $(test_timers_update_SOURCES)
-OBJECTS = $(librip_a_OBJECTS) $(test_auth_OBJECTS) $(test_packets_OBJECTS) $(test_timers_update_OBJECTS)
+.deps/test_timers.P .deps/update_queue.P
+SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_packets_SOURCES) $(test_timers_SOURCES)
+OBJECTS = $(librip_a_OBJECTS) $(test_auth_OBJECTS) $(test_packets_OBJECTS) $(test_timers_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -222,9 +222,9 @@ test_packets: $(test_packets_OBJECTS) $(test_packets_DEPENDENCIES)
 	@rm -f test_packets
 	$(CXXLINK) $(test_packets_LDFLAGS) $(test_packets_OBJECTS) $(test_packets_LDADD) $(LIBS)
 
-test_timers_update: $(test_timers_update_OBJECTS) $(test_timers_update_DEPENDENCIES)
-	@rm -f test_timers_update
-	$(CXXLINK) $(test_timers_update_LDFLAGS) $(test_timers_update_OBJECTS) $(test_timers_update_LDADD) $(LIBS)
+test_timers: $(test_timers_OBJECTS) $(test_timers_DEPENDENCIES)
+	@rm -f test_timers
+	$(CXXLINK) $(test_timers_LDFLAGS) $(test_timers_OBJECTS) $(test_timers_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
 .cc.lo:

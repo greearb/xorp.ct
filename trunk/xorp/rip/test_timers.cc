@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers_update.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.2 2003/04/10 02:41:50 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -33,8 +33,8 @@
 // Constants
 //
 
-static const char *program_name         = "test_timers_update";
-static const char *program_description  = "Test RIP timers and route scan ";
+static const char *program_name         = "test_timers";
+static const char *program_description  = "Test RIP timers and route scan";
 static const char *program_version_id   = "0.1";
 static const char *program_date         = "March, 2003";
 static const char *program_copyright    = "See file LICENSE.XORP";

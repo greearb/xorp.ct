@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.4 2003/04/11 22:00:18 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.5 2003/04/18 19:42:38 hodson Exp $
 ##
 
 noinst_LIBRARIES	 = librip.a
@@ -11,11 +11,11 @@ LDADD			+= $(top_builddir)/libxorp/libxorp.a
 noinst_PROGRAMS		 = $(TESTS)
 TESTS			 = test_auth
 TESTS			+= test_packets
-TESTS			+= test_timers_update
+TESTS			+= test_timers
 
 test_auth_SOURCES	 = test_auth.cc
 test_packets_SOURCES	 = test_packets.cc
-test_timers_update_SOURCES = test_timers_update.cc
+test_timers_SOURCES	 = test_timers.cc
 
 librip_a_SOURCES	 = rip_module.h
 
