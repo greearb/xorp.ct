@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.14 2003/08/07 01:07:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.15 2003/10/14 22:39:46 pavlin Exp $"
 
 
 //
@@ -547,7 +547,7 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 /**
  * Mld6igmpNode::enable_vif:
  * @vif_name: The name of the vif to enable.
- * @error_msg: The error message (if error_msgor).
+ * @error_msg: The error message (if error).
  * 
  * Enable an existing MLD6IGMP vif.
  * 
