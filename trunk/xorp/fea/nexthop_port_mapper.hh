@@ -13,13 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.1 2004/10/22 23:08:28 pavlin Exp $
 
 #ifndef __FEA_NEXTHOP_PORT_MAPPER_HH__
 #define __FEA_NEXTHOP_PORT_MAPPER_HH__
 
 #include <list>
 #include <map>
+
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipv4net.hh"
+#include "libxorp/ipv6net.hh"
 
 
 class NexthopPortMapperObserver;
