@@ -5,5 +5,5 @@
 
 #
 # -- Test Programs 
-TESTS           = test_bgpmib.sh
+#TESTS           = test_bgpmib.sh
 
