@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.12 2004/07/09 03:56:05 atanu Exp $
+# $XORP: xorp/ERRATA,v 1.13 2004/07/09 07:22:31 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -102,20 +102,6 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=121697
 
   RIB: 
-    - If an interface address is deleted, the RIB may trigger the following
-      error in the FEA:
-
-        [ 2004/06/07 16:08:57  ERROR xorp_fea:1605 FEA +259
-        fticonfig_entry_set_rtsock.cc delete_entry ] error writing to
-        routing socket: No such process
-        [ 2004/06/07 16:08:57  ERROR xorp_fea:1605 FEA +61 fti_transaction.cc
-        operation_result ] FTI transaction commit failed on DeleteEntry4: net =
-        172.16.124.0/24 gateway = 0.0.0.0 ifname =  vifname
-        =  metric = 0 admin_distance = 0 xorp_route = false is_deleted = false
-        [ 2004/06/07 16:08:57  ERROR xorp_fea:1605 FEA +259
-
-      This error has no side effects, and can be ignored.
-
     - In some rare cases, the RIB may fail to delete an existing route
       (See http://www.xorp.org/bugzilla/show_bug.cgi?id=62).
       We are aware of the issue and will attempt to fix it in the near future.
