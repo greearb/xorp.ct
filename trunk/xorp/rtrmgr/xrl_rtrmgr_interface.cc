@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.31 2004/12/23 22:47:46 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.32 2004/12/30 12:42:13 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -144,7 +144,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     user = _userdb.find_user_by_user_id(user_id);
     if (user == NULL) {
 	unlink(filename.c_str());
-	string err = c_format("User ID %d not found", user_id);
+	string err = c_format("User ID %u not found",
+			      XORP_UINT_CAST(user_id));
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -169,7 +170,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     if (fchown(fileno(file), user_id, (gid_t)-1) != 0) {
 	unlink(filename.c_str());
 	string err = c_format("Failed to chown temporary file %s to user_id %u",
-			      filename.c_str(), user_id);
+			      filename.c_str(), XORP_UINT_CAST(user_id));
 	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (fclose(file) != 0) {
@@ -327,7 +328,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
 	response = "You do not have permission for this operation.";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
-    XLOG_TRACE(_verbose, "user %d entering config mode\n", user_id);
+    XLOG_TRACE(_verbose, "user %u entering config mode\n",
+	       XORP_UINT_CAST(user_id));
     if (exclusive)
 	XLOG_TRACE(_verbose, "user requested exclusive config\n");
     else
@@ -370,8 +372,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
 	string err = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-    XLOG_TRACE(_verbose, "user %d leaving config mode\n",
-	       get_user_id_from_token(token));
+    XLOG_TRACE(_verbose, "user %u leaving config mode\n",
+	       XORP_UINT_CAST(get_user_id_from_token(token)));
     multimap<uint32_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
 	if (iter->second->authtoken() == token) {
@@ -405,7 +407,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
 	if (!user->is_a_zombie()) {
 	    users.append(XrlAtom(user->user_id()));
 	} else {
-	    XLOG_WARNING("user %d is a zombie\n", user->user_id());
+	    XLOG_WARNING("user %u is a zombie\n",
+			 XORP_UINT_CAST(user->user_id()));
 	}
     }
     return XrlCmdError::OKAY();
@@ -833,13 +836,15 @@ uint32_t
 XrlRtrmgrInterface::get_user_id_from_token(const string& token) const
 {
     uint32_t user_id;
+    unsigned int u;
     size_t tlen = token.size();
 
     if (token.size() < 10)
 	return (uint32_t)-1;
     string uidstr = token.substr(0, 10);
     string authstr = token.substr(10, tlen - 10);
-    sscanf(uidstr.c_str(), "%u", &user_id);
+    sscanf(uidstr.c_str(), "%u", &u);
+    user_id = u;
     return user_id;
 }
 
@@ -848,7 +853,7 @@ XrlRtrmgrInterface::generate_auth_token(const uint32_t& user_id,
 					const string& clientname)
 {
     string token;
-    token = c_format("%10u", user_id);
+    token = c_format("%10u", XORP_UINT_CAST(user_id));
     string shortcname;
     size_t clen = clientname.size();
 
