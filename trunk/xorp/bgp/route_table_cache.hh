@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.11 2004/05/05 18:35:51 atanu Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.12 2004/05/06 00:29:55 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -123,7 +123,7 @@ public:
 	    route_table->erase(current);
 	    if (current == route_table->end()) {
 		_route_tables.pop();
-		delete route_table;
+		route_table->delete_self();
 		break;
 	    }
 	}

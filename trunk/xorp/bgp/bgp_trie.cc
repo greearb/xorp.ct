@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.10 2004/04/12 22:12:18 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.11 2004/05/07 03:03:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -58,9 +58,14 @@ ChainedSubnetRoute<A>::unchain() const {
 /*************************************************************************/
 
 template<class A>
+BgpTrie<A>::BgpTrie()
+{
+}
+
+template<class A>
 BgpTrie<A>::~BgpTrie()
 {
-    if (_trie.begin() != _trie.end()) {
+    if (this->route_count() > 0) {
 	XLOG_FATAL("BgpTrie being deleted while still containing data\n");
     }
 }
@@ -79,7 +84,7 @@ BgpTrie<A>::insert(const IPNet& net, const SubnetRoute<A>& route)
 
     // The trie will copy chained_rt.  The copy constructor will insert
     // the copy into the chain after chained_rt.
-    iterator iter = _trie.insert(net, *chained_rt);
+    iterator iter = ((RouteTrie*)this)->insert(net, *chained_rt);
 
     if (found == NULL) {
 	debug_msg(" on new chain");
@@ -96,8 +101,8 @@ void
 BgpTrie<A>::erase(const IPNet& net)
 {
     // unlink the node from the _pathmap chain
-    iterator iter = _trie.lookup_node(net);
-    assert(iter != _trie.end());
+    iterator iter = this->lookup_node(net);
+    assert(iter != this->end());
     const ChainedSubnetRoute *found = &(iter.payload());
     assert(iter.key() == net);
     assert(found->net() == net);
@@ -122,9 +127,20 @@ BgpTrie<A>::erase(const IPNet& net)
     }
     debug_msg("\n");
 
-    // now delete it from the Trie
-    _trie.erase(iter);
+    // now delete it from the Actual Trie
+    ((RouteTrie*)this)->erase(iter);
 }
+
+template<class A>
+void
+BgpTrie<A>::delete_all_nodes()			
+{
+    while (_pathmap.empty() == false)
+	_pathmap.erase(_pathmap.begin());
+    ((RouteTrie*)this)->delete_all_nodes();
+}
+
+
 
 template class BgpTrie<IPv4>;
 template class BgpTrie<IPv6>;
