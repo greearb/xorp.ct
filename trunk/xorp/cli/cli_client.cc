@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.13 2003/10/02 16:47:58 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.17 2004/03/03 01:21:05 pavlin Exp $"
 
 
 //
@@ -502,7 +502,7 @@ CliClient::page_buffer2window_line_n(size_t buffer_line_n)
     size_t window_line_n = 0;
 
     for (i = 0; i <= buffer_line_n; i++) {
-	window_line_n += window_lines_n(buffer_line_n);
+	window_line_n += window_lines_n(i);
     }
 
     return (window_line_n);
