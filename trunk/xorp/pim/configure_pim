@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.29 2004/03/01 22:35:04 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.30 2004/03/02 00:32:32 pavlin Exp $
 #
 
 #
@@ -411,13 +411,13 @@ fi
 #
 if [ "${STATIC_RPS4}" != "" -a "${IP_VERSION}" = "IPV4" ] ; then
 	for rp in ${STATIC_RPS4}; do
-		pim_add_config_static_rp4 224.0.0.0/4 ${rp} 192 0
+		pim_add_config_static_rp4 224.0.0.0/4 ${rp} 192 30
 	done
 	pim_config_static_rp_done
 fi
 if [ "${STATIC_RPS6}" != "" -a "${IP_VERSION}" = "IPV6" ] ; then
 	for rp in ${STATIC_RPS6}; do
-		pim_add_config_static_rp6 FF00::/8 ${rp} 192 0
+		pim_add_config_static_rp6 FF00::/8 ${rp} 192 126
 	done
 	pim_config_static_rp_done
 fi
@@ -431,7 +431,7 @@ if [ "${CAND_BSR_VIF}" != "" ] ; then
 			pim_add_config_cand_bsr_by_vif_name4 224.0.0.0/4 false ${CAND_BSR_VIF} 1 30
 			;;
 		IPV6)
-			pim_add_config_cand_bsr_by_vif_name6 FF00::/8 false ${CAND_BSR_VIF} 1 30
+			pim_add_config_cand_bsr_by_vif_name6 FF00::/8 false ${CAND_BSR_VIF} 1 126
 			;;
 		*)
 			echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
