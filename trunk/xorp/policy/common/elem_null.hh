@@ -14,5 +14,31 @@
 
 // $XORP$
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#ifndef __POLICY_COMMON_ELEM_NULL_HH__
+#define __POLICY_COMMON_ELEM_NULL_HH__
+
+#include "element_base.hh"
+#include <string>
+
+/**
+ * @short An element representing nothing. Null.
+ *
+ * This is used by VarRW when an element being read is not available. For
+ * example, if the route is IPv4, but the IPv6 representation is being asked
+ * for.
+ *
+ * The dispatcher also treats Null arguments as a special case by returning a
+ * Null.
+ */
+class ElemNull : public Element {
+public:
+    static const char* id;
+            
+    ElemNull() : Element(id) {}
+    ElemNull(const char* /* c_str */) : Element(id) {}
+                
+    string str() const { return "null"; }
+                
+};
+
+#endif // __POLICY_COMMON_ELEM_NULL_HH__

@@ -14,5 +14,22 @@
 
 // $XORP$
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#ifndef __POLICY_COMMON_REGISTER_ELEMENTS_HH__
+#define __POLICY_COMMON_REGISTER_ELEMENTS_HH__
+
+/**
+ * @short Does the initial registration of ElementFactory callbacks.
+ *
+ * This class only has a constructor which registers callbacks. It is used to
+ * ensure that callbacks are registered once, and at the correct time.
+ */
+class RegisterElements {
+public:
+    /**
+     * Contains callback registration routines.
+     */
+    RegisterElements();
+
+};
+
+#endif // __POLICY_COMMON_REGISTER_ELEMENTS_HH__

@@ -14,5 +14,14 @@
 
 // $XORP$
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#ifndef __POLICY_TEST_PROCESS_WATCH_FAKE_HH__
+#define __POLICY_TEST_PROCESS_WATCH_FAKE_HH__
+
+#include "policy/process_watch_base.hh"
+
+class ProcessWatchFake : public ProcessWatchBase {
+public:
+    void add_interest(const string& proto);
+};
+
+#endif // __POLICY_TEST_PROCESS_WATCH_FAKE_HH__

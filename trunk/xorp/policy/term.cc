@@ -1,4 +1,4 @@
-// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,29 +12,98 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.1 2003/02/13 00:51:03 mjh Exp $"
+#ident "$XORP$"
 
 #include "policy_module.h"
-#include "term.hh"
+#include "config.h"
 
-template <class A>
-PolicyTerm<A>::PolicyTerm<A>(const PolicyFrom<A>& from, 
-			     const PolicyTo<A>& to, 
-			     const PolicyThen<A>& then)
-    : _from(from), _to(to), _then(then)
-{
+#include "term.hh"
+#include "policy/common/policy_utils.hh"
+
+using namespace policy_utils;
+
+Term::Term(const string& name) : _name(name),
+				 _source_nodes(NULL),
+				 _dest_nodes(NULL), 
+				 _action_nodes(NULL) {}
+
+
+Term::~Term() {
+    delete_vector(_source_nodes);
+    delete_vector(_dest_nodes);
+    delete_vector(_action_nodes);
+}
+
+void 
+Term::set_source(const string& src) {
+
+    // parse and check syntax error
+    Nodes* nodes = _parser.parse(src);
+    if(!nodes) {
+	string err = _parser.last_error();
+	
+	throw term_syntax_error("Syntax error in term " + _name + 
+				" source: " + err);
+    }
+
+    // replace configuration [successful parse]
+    delete_vector(_source_nodes);
+
+    _source = src;
+    _source_nodes = nodes;
+    
+}
+
+void 
+Term::set_dest(const string& dst) {
+    
+    // parse and check syntax errors
+    Nodes* nodes = _parser.parse(dst);
+    if(!nodes) {
+	string err = _parser.last_error();
+        throw term_syntax_error("Syntax error in term " + _name + 
+				" dest: " + err);
+    }
+
+    // replace conf
+    delete_vector(_dest_nodes);
+
+    _dest = dst;
+    _dest_nodes = nodes;
+}
+
+void 
+Term::set_action(const string& act) {
+
+    // parse and error check
+    Nodes* nodes = _parser.parse(act);
+    if(!nodes) {
+	throw term_syntax_error("Syntax error in term " + _name + 
+				" action: " + _parser.last_error());
+    }
+    
+    // replace conf
+    _action = act;
+    _action_nodes = nodes;
 }
 
 
-template <class A>
-void 
-PolicyTerm<A>::apply_policy(PolicyRoute<A>& route, 
-			    bool& changed, 
-			    bool& reject, 
-			    bool& last_term) const
-{
-    UNUSED(route);
-    UNUSED(changed);
-    UNUSED(reject);
-    UNUSED(last_term);
+string 
+Term::str() {
+    ostringstream oss;
+
+    oss << "term " << _name << " {" << endl;
+
+    oss << "source {" << endl;
+    oss << _source << "}" << endl;
+
+    oss << "dest {" << endl;
+    oss << _dest << "}" << endl;
+
+    oss << "action {" << endl;
+    oss << _action << "}" << endl;
+
+    oss << "}" << endl;
+
+    return oss.str();
 }

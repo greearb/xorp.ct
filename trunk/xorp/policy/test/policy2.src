@@ -1,0 +1,20 @@
+policy-statement rejected {
+	term a {
+		source {
+			protocol static_routes;
+			123 == 123;
+
+			123 != 1;
+
+			1 == 1 + 1 - 1 + 1 - 1;
+		}
+		dest {
+		}
+		action {
+			modify aspath = "6234" + aspath;
+			reject;
+		}
+	}
+}
+
+export bgp "rejected";

@@ -12,7 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+#ident "$XORP$"
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#include "filter.hh"
+
+std::string
+filter::filter2str(const filter::Filter& f) {
+    switch(f) {
+	case IMPORT:
+	    return "Import";
+	
+	case EXPORT_SOURCEMATCH:
+	    return "Export-SourceMatch";
+
+	case EXPORT:
+	    return "Export";
+    }
+
+    return "Unknown";
+}

@@ -14,5 +14,15 @@
 
 // $XORP$
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#ifndef __POLICY_TEST_FILTER_MANAGER_FAKE_HH__
+#define __POLICY_TEST_FILTER_MANAGER_FAKE_HH__
+
+#include "policy/filter_manager_base.hh"
+
+class FilterManagerFake : public FilterManagerBase {
+public:
+    void update_filter(const Code::Target& t);
+    void flush_updates(uint32_t msec);
+};
+
+#endif // __POLICY_TEST_FILTER_MANAGER_FAKE_HH__

@@ -1,4 +1,4 @@
-// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,30 +12,126 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.1 2003/01/30 19:21:11 mjh Exp $
+// $XORP$
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
 
-#include <list>
-#include "libxorp/xorp.h"
-#include "policy_route.hh"
-#include "from.hh"
-#include "to.hh"
-#include "then.hh"
+#include "policy/common/policy_exception.hh"
 
-template <class A>
-class PolicyTerm {
+#include "parser.hh"
+
+#include <vector>
+#include <string>
+
+/**
+ * @short A term is an atomic policy unit. 
+ *
+ * It is a complete specification of how a route needs to be matched, and what
+ * actions must be taken.
+ */
+class Term {
 public:
-    PolicyTerm(const PolicyFrom<A>& from, 
-	       const PolicyTo<A>& to, 
-	       const PolicyThen<A>& then);
-    void apply_policy(PolicyRoute<A>& route, 
-		      bool& changed, bool& reject, bool& last_term) const;
+    typedef vector<Node*> Nodes;
+
+    /**
+     * @short Exception thrown on a syntax error while parsing configuration.
+     */
+    class term_syntax_error :  public PolicyException {
+    public:
+	term_syntax_error(const string& r) : PolicyException(r) {}
+    };
+
+
+    /**
+     * @param name term name.
+     */
+    Term(const string& name);
+    ~Term();
+   
+    /**
+     * @return name of the term.
+     */
+    const string& name() const { return _name; }
+    
+    /**
+     * @return the original user source block configuration.
+     */
+    const string& source() const { return _source; }
+
+    /**
+     * @return the original user dest block configuration.
+     */
+    const string& dest() const { return _dest; }
+
+    /**
+     * @return the original user action block configuration.
+     */
+    const string& action() const { return _action; }
+   
+
+    /**
+     * @param src the un-parsed source block configuration.
+     */
+    void set_source(const string& src);
+
+    /**
+     * @param dst the un-parsed dest block configuration.
+     */
+    void set_dest(const string& dst); 
+
+    /**
+     * @param act the un-parsed action block configuration.
+     */
+    void set_action(const string& act); 
+
+    /**
+     * @return string representation of term.
+     */
+    string str(); 
+
+    /**
+     * Visitor implementation.
+     *
+     * @param v visitor used to visit this term.
+     */
+    const Element* accept(Visitor& v) {
+	return v.visit(*this);
+    }
+
+
+    /**
+     * @return parse tree of source block.
+     */
+    Nodes& source_nodes() { return *_source_nodes; }
+
+    /**
+     * @return parse tree of dest block.
+     */
+    Nodes& dest_nodes() { return *_dest_nodes; }
+
+    /**
+     * @return parse tree of action block.
+     */
+    Nodes& action_nodes() { return *_action_nodes; }
+
 private:
-    PolicyFrom<A> _from;
-    PolicyTo<A> _to;
-    PolicyThen<A> _then;
+    string _name;
+    
+    string _source;
+    Nodes* _source_nodes; 
+    
+    string _dest;
+    Nodes* _dest_nodes;
+    
+    string _action;
+    Nodes* _action_nodes;
+
+    Parser _parser;
+
+    // not impl
+    Term(const Term&);
+    Term& operator=(const Term&);
 };
 
 #endif // __POLICY_TERM_HH__

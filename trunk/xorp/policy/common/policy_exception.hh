@@ -14,5 +14,33 @@
 
 // $XORP$
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#ifndef __POLICY_COMMON_POLICY_EXCEPTION_HH__
+#define __POLICY_COMMON_POLICY_EXCEPTION_HH__
+
+#include <string>
+
+
+/**
+ * @short Base class for all policy exceptions.
+ *
+ * All policy exceptions have a string representing the error.
+ */
+class PolicyException {
+public:
+    /**
+     * @param reason the error message
+     */
+    PolicyException(const std::string& reason) : _reason(reason) {}
+    virtual ~PolicyException() {}
+
+    /**
+     * @return a human readable and possibly understandable error message
+     */
+     const std::string& str() const { return _reason; }
+
+private:
+    std::string _reason;
+};
+
+
+#endif // __POLICY_COMMON_POLICY_EXCEPTION_HH__

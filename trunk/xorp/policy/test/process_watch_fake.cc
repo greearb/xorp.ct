@@ -12,7 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+#ident "$XORP$"
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#include "config.h"
+
+#include "process_watch_fake.hh"
+#include <iostream>
+
+void
+ProcessWatchFake::add_interest(const string& id) {
+    cout << "ProcessWatchFake add_interest: " << id << endl;
+}

@@ -1,0 +1,14 @@
+policy-statement accepted {
+	term a {
+		source {
+			protocol static_routes;
+		}
+		dest {
+		}
+		action {
+			modify aspath = "6234" + aspath;
+		}
+	}
+}
+
+export bgp "accepted";

@@ -14,5 +14,23 @@
 
 // $XORP$
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#ifndef __POLICY_COMMON_REGISTER_OPERATIONS_HH__
+#define __POLICY_COMMON_REGISTER_OPERATIONS_HH__
+
+/**
+ * @short Do initial registration of dispatcher callbacks.
+ *
+ * The sole purpose of this class is to register the callbacks before the
+ * dispatcher is actually used, and register them only once at startup.
+ */
+class RegisterOperations {
+public:
+    /**
+     * Constructor which performs registrations
+     *
+     * In essence, this is where the grammar lives.
+     */
+    RegisterOperations();
+};
+
+#endif // __POLICY_COMMON_REGISTER_OPERATIONS_HH__

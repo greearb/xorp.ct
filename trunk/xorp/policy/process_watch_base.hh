@@ -14,5 +14,25 @@
 
 // $XORP$
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#ifndef __POLICY_PROCESS_WATCH_BASE_HH__
+#define __POLICY_PROCESS_WATCH_BASE_HH__
+
+#include <string>
+
+/**
+ * @short Base class for a process watcher.
+ *
+ * The VarMap registers interest in known protocols. Finally, the filter manager
+ * may be informed about which processes are alive.
+ */
+class ProcessWatchBase {
+public:
+    virtual ~ProcessWatchBase() {}
+
+    /**
+     * @param proto protocol to register interest in.
+     */
+    virtual void add_interest(const std::string& proto) = 0;
+};
+
+#endif // __POLICY_PROCESS_WATCH_BASE_HH__

@@ -12,7 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+#ident "$XORP$"
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#include "config.h"
+
+#include "filter_manager_fake.hh"
+#include <iostream>
+
+void
+FilterManagerFake::update_filter(const Code::Target& t) {
+    cout << "FilterManagerFake update_filter: " << t.str() << endl;
+}
+
+void
+FilterManagerFake::flush_updates(uint32_t msec) {
+    cout << "FilterManagerFake flush_updates msec: " << msec << endl;
+}

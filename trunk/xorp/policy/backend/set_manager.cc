@@ -12,7 +12,45 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+#ident "$XORP$"
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#include "config.h"
+#include "set_manager.hh"
+#include "policy/common/policy_utils.hh"
+
+SetManager::SetManager() : _sets(NULL) {
+}
+
+SetManager::~SetManager() {
+    clear();
+}
+
+const Element&
+SetManager::getSet(const string& setid) const {
+    if(!_sets)
+	throw SetNotFound("No sets initialized");
+
+    SetMap::iterator i = _sets->find(setid);
+    if(i == _sets->end())
+        throw SetNotFound("Set not found: " + setid);
+
+    Element* e = (*i).second;
+
+    return *e;
+}
+
+void
+SetManager::replace_sets(SetMap* sets) {
+    clear();
+
+    _sets = sets;
+}
+
+void
+SetManager::clear() {
+    if(_sets) {
+	policy_utils::clear_map(*_sets);
+	delete _sets;
+	_sets = NULL;
+    }
+}

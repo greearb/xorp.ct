@@ -12,7 +12,37 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+#ident "$XORP$"
 
-#define XORP_MODULE_NAME        "POLICY"
-#define XORP_MODULE_VERSION     "0.1"
+#include "policy_module.h"
+#include "config.h"
+
+#include "parser.hh"
+#include "policy_parser.hh"
+#include "policy/common/policy_utils.hh"
+
+
+// interface with lex & yacc
+extern int policy_parse(vector<Node*>& outnodes, 
+			const string& conf, 
+			string& outerr);
+
+
+Parser::Nodes* 
+Parser::parse(const string& text) {
+    Nodes* nodes = new Nodes();
+    
+    // there was an error
+    if(policy_parser::policy_parse(*nodes,text,_last_error)) {
+	
+	// delete semi-parsed tree  
+	policy_utils::delete_vector(nodes);
+	return NULL;
+    }	    
+
+    return nodes;
+}
+
+string Parser::last_error() {
+    return _last_error;
+}
