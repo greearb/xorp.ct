@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.3 2003/01/07 01:43:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.4 2003/01/26 04:06:24 pavlin Exp $"
 
 
 //
@@ -1248,7 +1248,11 @@ PimVif::upstream_join_timer_t_suppressed() const
 const struct timeval&
 PimVif::upstream_join_timer_t_override() const
 {
-    static struct timeval timeval = vif_override_interval();
+    static struct timeval timeval;
+    
+    // XXX: explicitly assign the value to 'timeval' every time this method
+    // is called, because 'timeval' is static.
+    timeval = vif_override_interval();
     
     // Randomize
     TIMEVAL_DIV(&timeval, 2, &timeval);
