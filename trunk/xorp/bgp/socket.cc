@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.64 2002/12/09 18:28:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -214,11 +214,22 @@ SocketClient::async_read_start(size_t cnt, size_t offset)
     _async_reader->start();
 }
 
+/*
+ * Handler for reading incoming data on a BGP connection.
+ *
+ * When a packet first comes in, we read the default amount of data,
+ * which is MINPACKETSIZE (i.e. the minimum size of a BGP message).
+ * This callback is then invoked a first time, and it can check the
+ * actual message length. If more bytes are needed, we call again
+ * async_read_start with the desired length (instructing it to skip
+ * whatever we already read).
+ * Once the packet is complete, we invoke the packet decoder with dispatch()
+ */
 void
 SocketClient::async_read_message(AsyncFileWriter::Event ev,
-				const uint8_t *buf,
-				const size_t buf_bytes,
-				const size_t offset)
+		const uint8_t *buf,	// the base of the buffer
+		const size_t buf_bytes,	// desired message size
+		const size_t offset)	// where we got so far (next free byte)
 {
     debug_msg("async_read_message %d %d %d %s\n", ev, buf_bytes, offset,
 	      get_remote_host());
@@ -228,47 +239,50 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
     switch (ev) {
     case AsyncFileReader::DATA:
 	XLOG_ASSERT(offset <= buf_bytes);
-	if(offset == buf_bytes) {
+	if (offset == buf_bytes) {		// message complete so far
 	    const fixed_header *header =
 		reinterpret_cast<const struct fixed_header *>(buf);
-	    struct fixed_header fh = *header;
-	    fh._length = ntohs(header->_length);
-	    if(fh._length < MINPACKETSIZE || fh._length > sizeof(_read_buf)) {
-		XLOG_ERROR("Illegal length value %d", fh._length);
-		if(!_callback->dispatch(BGPPacket::ILLEGAL_MESSAGE_LENGTH, buf,
-					buf_bytes))
+	    size_t fh_length = ntohs(header->_length);
+
+	    if (fh_length < MINPACKETSIZE || fh_length > sizeof(_read_buf)) {
+		XLOG_ERROR("Illegal length value %d", fh_length);
+		if (!_callback->dispatch(BGPPacket::ILLEGAL_MESSAGE_LENGTH,
+					buf, buf_bytes))
 		    return;
 	    }
 	    /*
-	    ** Keep reading until we have the whole message.
-	    */
-	    if(buf_bytes == fh._length) {
-		if(_callback->dispatch(BGPPacket::GOOD_MESSAGE,
+	     * Keep reading until we have the whole message.
+	     */
+	    if (buf_bytes == fh_length) {
+		if (_callback->dispatch(BGPPacket::GOOD_MESSAGE,
 				       buf, buf_bytes))
-		    async_read_start();
-	    } else {
-		async_read_start(fh._length, buf_bytes);
+		    async_read_start();		// ready for next message
+	    } else {				// read rest of the message
+		async_read_start(fh_length, buf_bytes);
 	    }
 	}
 	/*
 	** At this point if we have a valid _async_reader then it should
 	** have buffers into which we expect data.
 	*/
-	if(_async_reader && 0 == _async_reader->buffers_remaining())
+	if (_async_reader && 0 == _async_reader->buffers_remaining())
 	    XLOG_WARNING("No outstanding reads");
 	
 	XLOG_ASSERT(!_async_reader ||
 		    (_async_reader && _async_reader->buffers_remaining() > 0));
 	break;
+
     case AsyncFileReader::FLUSHING:
 	/*
-	** We are not using a dynamic buffer so don't worry.
-	*/
+	 * We are not using a dynamic buffer so don't worry.
+	 */
 	break;
+
     case AsyncFileReader::ERROR_CHECK_ERRNO:
 	debug_msg("Read failed: %s\n", strerror(errno));
 	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0);
 	break;
+
     case AsyncFileReader::END_OF_FILE:
 	debug_msg("End of file\n");
 	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0);
