@@ -8,16 +8,6 @@
 # This script started with no arguments will start all required process and
 # terminate them at the end of the tests.
 #
-# Preconditons
- # Preconditons
- # 1) Run a finder process
-# 2) Run a FEA process.
-# 3) Run a RIB process.
-# 4) Run xorp "../xorp_bgp"
-# 5) Run "./test_peer -s peer1"
-# 6) Run "./coord"
-# 7) Run "snmpd"
-#
 set -e
 
 # to debug
@@ -330,9 +320,8 @@ test2()
 }
 
 #
-# This test tests the BGP SNMP traps 
+# This test tests the BGP SNMP traps generated via XRLs
 #
-
 test3()
 {
     TFILE=$1
@@ -374,6 +363,58 @@ test3()
     # Reset the connection
     reset
 }
+
+#
+# This test verifies that the bgp process is sending SNMP traps when it detects
+# that the BGP4-MIB module is loaded. 
+#
+test4()
+{
+    TFILE=$1
+
+    echo "TEST4 - Verify that the BGP process is sending valid SNMP traps"
+
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+ 
+    sleep 2
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    # Reset the peers
+    reset
+
+    # Verify that the bgpEstablished trap has NOT been received
+    grep -v "BGP4-MIB::bgpEstablished" ${SNMPTRAPLOG} > /dev/null 
+
+    # Have peer1 connect to BGP 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+ 
+    # Verify that the bgpEstablished trap has been received
+    grep "BGP4-MIB::bgpEstablished" ${SNMPTRAPLOG} > /dev/null
+
+    # Verify that the bgpBackwardTransition trap has NOT been received
+    grep -v "BGP4-MIB::bgpBackwardTransition" ${SNMPTRAPLOG} > /dev/null 
+
+    # Reset the connection 
+    reset
+
+    # Verify that the bgpBackwardTransition trap has been received
+    grep "BGP4-MIB::bgpBackwardTransition" ${SNMPTRAPLOG} > /dev/null
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+}
+
+
 
 #
 # This is a convenient way to start everything up, and do nothing
@@ -424,7 +465,7 @@ just_start()
 }
 
 TESTS_NOT_FIXED='test2_full'
-TESTS='test1 test2 test3'
+TESTS='test1 test2 test3 test4'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
