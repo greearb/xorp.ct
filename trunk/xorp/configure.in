@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.36 2003/05/23 04:10:04 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.37 2003/05/23 19:08:29 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1238,6 +1238,7 @@ AC_OUTPUT(
 	mibs/tests/test_bgpmib.sh
 	rib/test_rib_direct.sh
 	rib/test_rib_xrls.sh
+	utils/pathconf.sh
 , 
 	echo timestamp > stamp-h
 	chmod a+x libxipc/test_xrl_parser.sh

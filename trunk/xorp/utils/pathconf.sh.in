@@ -1,0 +1,44 @@
+# !/bin/sh
+# @configure_input@
+
+xorp_abs_top_builddir=@abs_top_builddir@
+xorp_top_builddir=@top_builddir@
+xorp_builddir=@builddir@
+
+xorp_abs_top_srcdir=@abs_top_srcdir@
+xorp_top_srcdir=@top_srcdir@
+
+xorp_prefix=@prefix@
+xorp_exec_prefix=@exec_prefix@
+xorp_bindir=@bindir@
+xorp_sbindir=@sbindir@
+xorp_sysconfdir=@sysconfdir@
+
+#
+# Earlier versions of autoconf do not have top_buildir variables.
+# Attempt to locate builddir vars, by assuming this script is being
+# sourced from within the build directory.  This would be the case for
+# scripts in the make check target.
+#
+if [ ! -d ${xorp_abs_top_builddir} ] ; then
+    sdir=${PWD}
+    while [ ! ${sdir} -ef "/" ] ; do
+	if [ -f ${sdir}/utils/pathconf.sh ] ; then
+	    xorp_abs_top_builddir=${sdir}
+	    xorp_top_builddir=${sdir}
+	    break
+	fi
+	sdir=`echo ${sdir} | sed 'sX/[^/]*$XX'`
+    done
+    if [ ! -d ${xorp_abs_top_builddir} ] ; then
+	echo "Warning: failed to set build directory variables"
+    fi
+fi
+
+#
+# Similarly, earlier autoconf versions might not substitute
+# abs_top_srcdir.  We don't bother trying to expand location (yet!).
+#
+if [ ! -d ${xorp_abs_top_srcdir} ] ; then
+   xorp_abs_top_srcdir=${xorp_top_srcdir}
+fi
