@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.28 2003/10/28 21:53:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.29 2003/10/30 04:44:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -370,6 +370,20 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     return 0;
 }
 
+template <>
+bool 
+PeerHandler::multiprotocol<IPv4>(Safi safi, BGPPeerData::Direction d) const
+{
+    return _peer->peerdata()->multiprotocol<IPv4>(safi, d);
+}
+
+template <>
+bool
+PeerHandler::multiprotocol<IPv6>(Safi safi, BGPPeerData::Direction d) const
+{
+    return _peer->peerdata()->multiprotocol<IPv6>(safi, d);
+}
+
 int
 PeerHandler::start_packet(bool ibgp)
 {
@@ -389,6 +403,10 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
     XLOG_ASSERT(_packet != NULL);
+
+    // Check this peer want this NLRI
+    if (!multiprotocol<IPv4>(safi, BGPPeerData::RECEIVED))
+	return 0;
 
     if (_packet->big_enough()) {
 	push_packet();
@@ -443,6 +461,10 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
+
+    // Check this peer want this NLRI
+    if (!multiprotocol<IPv6>(safi, BGPPeerData::RECEIVED))
+	return 0;
 
     if (_packet->big_enough()) {
 	push_packet();
@@ -505,6 +527,10 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
     debug_msg("PeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
     XLOG_ASSERT(_packet != NULL);
 
+    // Check this peer want this NLRI
+    if (!multiprotocol<IPv4>(safi, BGPPeerData::RECEIVED))
+	return 0;
+
     if (_packet->big_enough()) {
 	push_packet();
 	start_packet(_ibgp);
@@ -536,6 +562,10 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
+
+    // Check this peer want this NLRI
+    if (!multiprotocol<IPv6>(safi, BGPPeerData::RECEIVED))
+	return 0;
 
     if (_packet->big_enough()) {
 	push_packet();
@@ -580,7 +610,16 @@ PeerHandler::push_packet()
     if(_packet->mpunreach<IPv6>(SAFI_MULTICAST))
 	wdr += _packet->mpunreach<IPv6>(SAFI_MULTICAST)->wr_list().size();
 
-    XLOG_ASSERT( (wdr+nlri) > 0);
+//     XLOG_ASSERT( (wdr+nlri) > 0);
+    // If we get here and wdr+nlri equals zero then we were trying to
+    // push an AFI/SAFI that our peer did not request so just drop
+    // the packet and return.
+    if (0 == (wdr+nlri)) {
+	delete _packet;
+	_packet = NULL;
+	return PEER_OUTPUT_OK;
+    }
+    
     if (nlri > 0)
 	XLOG_ASSERT(pa > 0);
 

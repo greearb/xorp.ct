@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.9 2003/10/30 04:44:01 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.10 2003/11/04 02:27:19 mjh Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -71,6 +71,10 @@ public:
      * @return true if an <AFI,SAFI> was found.
      */
     template <typename A> bool withdraw(const UpdatePacket *p, Safi safi);
+
+    template <typename A> bool multiprotocol(Safi safi, 
+					     BGPPeerData::Direction d) const;
+
 
     /**
      * add_route and delete_route are called by the plumbing to
