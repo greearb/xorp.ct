@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.12 2003/11/11 22:12:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.13 2004/02/25 09:45:49 pavlin Exp $"
 
 
 //
@@ -1596,10 +1596,17 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	cmsgp->cmsg_type  = IPV6_PKTINFO;
 	sndpktinfo = (struct in6_pktinfo *)CMSG_DATA(cmsgp);
 	memset(sndpktinfo, 0, sizeof(*sndpktinfo));
-	if (mfea_vif->pif_index() > 0)
+	if ((mfea_vif->pif_index() > 0)
+	    && !(dst.is_unicast() && !dst.is_linklocal_unicast())) {
+	    //
+	    // XXX: don't set the outgoing interface index if we are
+	    // sending an unicast packet to a non-link local unicast address.
+	    // Otherwise, the sending may fail with EHOSTUNREACH error.
+	    //
 	    sndpktinfo->ipi6_ifindex = mfea_vif->pif_index();
-	else
+	} else {
 	    sndpktinfo->ipi6_ifindex = 0;		// Let kernel fill in
+	}
 	src.copy_out(sndpktinfo->ipi6_addr);
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	
@@ -1721,5 +1728,3 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
     
     return (ret);
 }
-
-
