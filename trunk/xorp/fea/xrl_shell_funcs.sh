@@ -290,74 +290,118 @@ get_configured_prefix6()
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_prefix6?ifname:txt=$1&vif:txt=$2&address:ipv6=$3"
 }
 
-start_fti_transaction()
+start_redist_transaction4()
 {
     if [ $# -eq 0 ] ; then
-	tid=`$CALLXRL "finder://fea/fti/0.2/start_transaction" | sed 's/.*=//'`
+	tid=`$CALLXRL "finder://fea/redist_transaction4/0.1/start_transaction" | sed 's/.*=//'`
 	err=$?
 	echo $tid
 	return $err
     fi
 
     cat >&2 <<EOF
-usage: start_transaction 
+usage: start_redist_transaction4
        resulting transaction id is echoed on stdout on success
 EOF
     return 255
 }
 
-commit_fti_transaction()
+start_redist_transaction6()
 {
-    echo -n "commit_transaction"
+    if [ $# -eq 0 ] ; then
+	tid=`$CALLXRL "finder://fea/redist_transaction6/0.1/start_transaction" | sed 's/.*=//'`
+	err=$?
+	echo $tid
+	return $err
+    fi
+
+    cat >&2 <<EOF
+usage: start_redist_transaction6
+       resulting transaction id is echoed on stdout on success
+EOF
+    return 255
+}
+
+commit_redist_transaction4()
+{
+    echo -n "commit_redist_transaction4"
     if [ $# -eq 1 ] ; then
-	$CALLXRL "finder://fea/fti/0.2/commit_transaction?tid:u32=$1"
+	$CALLXRL "finder://fea/redist_transaction4/0.1/commit_transaction?tid:u32=$1"
 	return $?
     fi
     cat >&2 <<EOF
-usage: commit_transaction <tid>
+usage: commit_redist_transaction4 <tid>
        where <tid> is the id of the transaction to be committed.
 EOF
     return 255
 }
 
-abort_fti_transaction()
+commit_redist_transaction6()
 {
-    echo -n "abort_transaction"
+    echo -n "commit_redist_transaction6"
     if [ $# -eq 1 ] ; then
-	$CALLXRL "finder://fea/fti/0.2/abort_transaction?tid:u32=$1"
+	$CALLXRL "finder://fea/redist_transaction6/0.1/commit_transaction?tid:u32=$1"
 	return $?
     fi
     cat >&2 <<EOF
-usage: abort_transaction <tid>
+usage: commit_redist_transaction6 <tid>
+       where <tid> is the id of the transaction to be committed.
+EOF
+    return 255
+}
+
+abort_redist_transaction4()
+{
+    echo -n "abort_redist_transaction4"
+    if [ $# -eq 1 ] ; then
+	$CALLXRL "finder://fea/redist_transaction4/0.1/abort_transaction?tid:u32=$1"
+	return $?
+    fi
+    cat >&2 <<EOF
+usage: abort_redist_transaction4 <tid>
        where <tid> is the id of the transaction to be aborted.
 EOF
     return 255
 }
 
-add_entry4()
+abort_redist_transaction6()
+{
+    echo -n "abort_redist_transaction6"
+    if [ $# -eq 1 ] ; then
+	$CALLXRL "finder://fea/redist_transaction6/0.1/abort_transaction?tid:u32=$1"
+	return $?
+    fi
+    cat >&2 <<EOF
+usage: abort_redist_transaction6 <tid>
+       where <tid> is the id of the transaction to be aborted.
+EOF
+    return 255
+}
+
+redist_transaction4_add_route()
 {
     if [ $# -ne 8 ] ; then
 	cat >&2 <<EOF
-usage: add_entry4 <tid> <dest net> <gw> <ifname> <vifname> <metric> <admin_distance> <protocol_origin>
-eg:    add_entry4 6987662 187.1.0.0/16 164.27.13.1 ed0 10 20 BGP
+usage: redist_transaction4_add_route <tid> <dest net> <nh> <ifname> <vifname> <metric> <ad> <cookie> <protocol_origin>
+eg:    redist_transaction4_add_entry 6987662 187.1.0.0/16 164.27.13.1 ed0 10 20 all BGP
 EOF
 	return 127
     fi
 
-    $CALLXRL "finder://fea/fti/0.2/add_entry4?tid:u32=$1&dst:ipv4net=$2&gateway:ipv4=$3&ifname:txt=$4&vifname:txt=$5&metric:u32=$6&admin_distance:u32=$7&protocol_origin:txt=$8"
+    $CALLXRL "finder://fea/redist_transaction4/0.1/add_route?tid:u32=$1&dst:ipv4net=$2&nh:ipv4=$3&ifname:txt=$4&vifname:txt=$5&metric:u32=$6&ad:u32=$7&protocol_origin:txt=$8"
 }
 
-delete_entry4()
+redist_transaction4_delete_route()
 {
     if [ $# -ne 2 ] ; then
 	cat >&2 <<EOF
-usage: delete_entry4 <tid> <dest net>
-eg:    delete_entry4 276567373 187.1.0.0/16
+usage: redist_transaction4_delete_route <tid> <dest net>
+eg:    redist_transaction4_delete_route 276567373 187.1.0.0/16
 EOF
 	return 127
     fi
 
-    $CALLXRL "finder://fea/fti/0.2/delete_entry4?tid:u32=$1&dst:ipv4net=$2"
+    $CALLXRL "finder://fea/redist_transaction4/0.1/delete_route?tid:u32=$1&network:ipv4net=$2"
 }
 
 lookup_route4()

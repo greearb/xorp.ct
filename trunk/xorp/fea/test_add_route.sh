@@ -1,12 +1,12 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.15 2003/10/28 07:34:43 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.16 2003/10/30 07:22:50 pavlin Exp $
 #
 
 #
 # Test interaction between the FEA and the kernel unicast forwarding engine:
-#   - add/delete unicast forwarding entries, lookup, etc.
+#   - add/delete unicast routes, lookup, etc.
 #
 # Preconditions:
 # 1) Run a finder process (libxipc/xorp_finder)
@@ -44,6 +44,7 @@ DEST_HOST6="fe80:aaaa::aaaa"
 DEST_HOST6_2="fe80:bbbb::bbbb"
 METRIC="10"
 ADMIN_DISTANCE="20"
+COOKIE="all"
 PROTOCOL_ORIGIN="BGP"
 HAVE_IPV6="true"	# XXX: may be overwritten by host configuration
 
@@ -438,13 +439,13 @@ config_cleanup_gateway4()
 	# No gateway to delete for destination ${DEST4}"
 	return 0
     else
-	tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+	tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
 	if [ "${tid}" = "" ] ; then
 	    echo "ERROR: cannot start transaction: cannot get transaction ID"
 	    return 1
 	fi
-	fea_fti_delete_entry4 ${tid} ${DEST4}
-	fea_fti_commit_transaction ${tid}
+	fea_redist_transaction4_delete_route ${tid} ${DEST4}
+	fea_redist_transaction4_commit_transaction ${tid}
     fi
 }
 
@@ -465,40 +466,40 @@ config_cleanup_gateway6()
 	# No gateway to delete for destination ${DEST6}"
 	return 0
     else
-	tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+	tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
 	if [ "${tid}" = "" ] ; then
 	    echo "ERROR: cannot start transaction: cannot get transaction ID"
 	    return 1
 	fi
-	fea_fti_delete_entry6 ${tid} ${DEST6}
-	fea_fti_commit_transaction ${tid}
+	fea_redist_transaction6_delete_route ${tid} ${DEST6}
+	fea_redist_transaction6_commit_transaction ${tid}
     fi
 }
 
-subtest_add_entry4()
+subtest_add_route4()
 {
     echo "SUBTEST: Add ${GATEWAY4} as gateway for destination ${DEST4}"
 
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_add_entry4 ${tid} ${DEST4} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction4_add_route ${tid} ${DEST4} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction4_commit_transaction ${tid}
 }
 
-subtest_add_entry6()
+subtest_add_route6()
 {
     echo "SUBTEST: Add ${GATEWAY6} as gateway for destination ${DEST6}"
 
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_add_entry6 ${tid} ${DEST6} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction6_add_route ${tid} ${DEST6} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction6_commit_transaction ${tid}
 }
 
 subtest_lookup_entry4()
@@ -741,30 +742,30 @@ subtest_lookup_route6()
     echo "${_xrl_result}"
 }
 
-subtest_delete_entry4()
+subtest_delete_route4()
 {
     echo "SUBTEST: Delete the gateway for destination ${DEST4}"
 
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_delete_entry4 ${tid} ${DEST4}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction4_delete_route ${tid} ${DEST4}
+    fea_redist_transaction4_commit_transaction ${tid}
 }
 
-subtest_delete_entry6()
+subtest_delete_route6()
 {
     echo "SUBTEST: Delete the gateway for destination ${DEST6}"
 
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_delete_entry6 ${tid} ${DEST6}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction6_delete_route ${tid} ${DEST6}
+    fea_redist_transaction6_commit_transaction ${tid}
 }
 
 subtest_lookup_deleted_entry4()
@@ -869,10 +870,10 @@ test_add_delete_unicast_forwarding_entry4()
 
     _subtests=""
     _subtests="${_subtests} config_cleanup_gateway4"
-    _subtests="${_subtests} subtest_add_entry4"
+    _subtests="${_subtests} subtest_add_route4"
     _subtests="${_subtests} subtest_lookup_entry4"
     _subtests="${_subtests} subtest_lookup_route4"
-    _subtests="${_subtests} subtest_delete_entry4"
+    _subtests="${_subtests} subtest_delete_route4"
     _subtests="${_subtests} subtest_lookup_deleted_entry4"
     # Comment-out the test below, because in case of Linux a cloned entry
     # from the default route may be kept in the kernel for very long time.
@@ -895,10 +896,10 @@ test_add_delete_unicast_forwarding_entry6()
 
     _subtests=""
     _subtests="${_subtests} config_cleanup_gateway6"
-    _subtests="${_subtests} subtest_add_entry6"
+    _subtests="${_subtests} subtest_add_route6"
     _subtests="${_subtests} subtest_lookup_entry6"
     _subtests="${_subtests} subtest_lookup_route6"
-    _subtests="${_subtests} subtest_delete_entry6"
+    _subtests="${_subtests} subtest_delete_route6"
     _subtests="${_subtests} subtest_lookup_deleted_entry6"
     # Comment-out the test below, because in case of Linux a cloned entry
     # from the default route may be kept in the kernel for very long time.
@@ -913,21 +914,21 @@ test_add_delete_unicast_forwarding_entry6()
     done
 }
 
-test_delete_all_entries4()
+test_delete_all_routes4()
 {
-    echo "TEST: Delete all entries installed by XORP"
+    echo "TEST: Delete all routes installed by XORP"
 
-    # Add the entries
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    # Add the routes
+    tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_add_entry4 ${tid} ${DEST4} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
-    fea_fti_add_entry4 ${tid} ${DEST4_2} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction4_add_route ${tid} ${DEST4} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction4_add_route ${tid} ${DEST4_2} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction4_commit_transaction ${tid}
 
-    # Check that the entries were installed
+    # Check that the routes were installed
     _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
@@ -943,16 +944,16 @@ test_delete_all_entries4()
 	return ${_ret_value}
     fi
 
-    # Delete all entries
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    # Delete all routes
+    tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_delete_all_entries4 ${tid}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction4_delete_all_routes ${tid}
+    fea_redist_transaction4_commit_transaction ${tid}
 
-    # Check that the entries were deleted
+    # Check that the routes were deleted
     _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
@@ -969,21 +970,21 @@ test_delete_all_entries4()
     fi
 }
 
-test_delete_all_entries6()
+test_delete_all_routes6()
 {
-    echo "TEST: Delete all entries installed by XORP"
+    echo "TEST: Delete all routes installed by XORP"
 
-    # Add the entries
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    # Add the routes
+    tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_add_entry6 ${tid} ${DEST6} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
-    fea_fti_add_entry6 ${tid} ${DEST6_2} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction6_add_route ${tid} ${DEST6} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction6_add_route ${tid} ${DEST6_2} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction6_commit_transaction ${tid}
 
-    # Check that the entries were installed
+    # Check that the routes were installed
     _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
@@ -999,16 +1000,16 @@ test_delete_all_entries6()
 	return ${_ret_value}
     fi
 
-    # Delete all entries
-    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    # Delete all routes
+    tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_fti_delete_all_entries6 ${tid}
-    fea_fti_commit_transaction ${tid}
+    fea_redist_transaction6_delete_all_routes ${tid}
+    fea_redist_transaction6_commit_transaction ${tid}
 
-    # Check that the entries were deleted
+    # Check that the routes were deleted
     _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
@@ -1035,13 +1036,13 @@ TESTS="$TESTS test_have_ipv4"
 TESTS="$TESTS test_enable_disable_unicast_forwarding4"
 # Test adding/deleting and lookup of IPv4 forwarding entries
 TESTS="$TESTS test_add_delete_unicast_forwarding_entry4"
-TESTS="$TESTS test_delete_all_entries4"
+TESTS="$TESTS test_delete_all_routes4"
 if [ "${HAVE_IPV6}" = "true" ] ; then
     # Test IPv6 unicast forwarding enabling/disabling
     TESTS="$TESTS test_enable_disable_unicast_forwarding6"
     # Test adding/deleting and lookup of IPv6 forwarding entries
     TESTS="$TESTS test_add_delete_unicast_forwarding_entry6"
-    TESTS="$TESTS test_delete_all_entries6"
+    TESTS="$TESTS test_delete_all_routes6"
 fi
 
 # Include command line

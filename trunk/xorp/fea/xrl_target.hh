@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.31 2004/06/10 22:40:59 hodson Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.32 2004/07/28 05:13:56 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -568,62 +568,6 @@ public:
     //
     // Forwarding Table Interface
     //
-
-    XrlCmdError fti_0_2_start_transaction(
-	// Output values,
-	uint32_t&	tid);
-
-    XrlCmdError fti_0_2_commit_transaction(
-	// Input values,
-	const uint32_t&	tid);
-
-    XrlCmdError fti_0_2_abort_transaction(
-	// Input values,
-	const uint32_t&	tid);
-
-    XrlCmdError fti_0_2_add_entry4(
-	// Input values,
-	const uint32_t&	tid,
-	const IPv4Net&	dst,
-	const IPv4&	gateway,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric,
-	const uint32_t& admin_distance,
-	const string&	protocol_origin);
-
-    XrlCmdError fti_0_2_add_entry6(
-	// Input values,
-	const uint32_t&	tid,
-	const IPv6Net&	dst,
-	const IPv6&	gateway,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric,
-	const uint32_t& admin_distance,
-	const string&	protocol_origin);
-
-    XrlCmdError fti_0_2_delete_entry4(
-	// Input values,
-	const uint32_t&	tid,
-	const IPv4Net&	dst);
-
-    XrlCmdError fti_0_2_delete_entry6(
-	// Input values,
-	const uint32_t&	tid,
-	const IPv6Net&	dst);
-
-    XrlCmdError fti_0_2_delete_all_entries(
-	// Input values,
-	const uint32_t&	tid);
-
-    XrlCmdError fti_0_2_delete_all_entries4(
-	// Input values,
-	const uint32_t&	tid);
-
-    XrlCmdError fti_0_2_delete_all_entries6(
-	// Input values,
-	const uint32_t&	tid);
 
     XrlCmdError fti_0_2_lookup_route4(
 	// Input values,
