@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/harness/args.sh,v 1.4 2002/12/09 10:59:36 pavlin Exp $
+# $XORP: xorp/bgp/harness/args.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 #
@@ -65,7 +65,10 @@ if [ $START_PROGRAMS = "yes" -a $RESTART = "yes" ]
 then
     for i in $TESTS
     do
-	$0 $QUIET $VERBOSE -l -t $i
+	COMMAND="$0 $QUIET $VERBOSE -l -t $i"
+	echo "Entering $COMMAND"
+	$COMMAND
+	echo "Leaving $COMMAND"
     done
     trap '' 0
     exit 0
