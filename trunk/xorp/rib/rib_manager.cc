@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.10 2002/12/10 05:12:13 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
 
 #include "config.h"
 
@@ -197,3 +197,16 @@ RibManager::delete_vif_addr(const string& vifname,
 
     return XORP_OK;
 }
+
+void
+RibManager::set_fea_enabled(bool en)
+{
+    _fea.set_enabled(en);
+}
+
+bool
+RibManager::fea_enabled() const
+{
+    return _fea.enabled();
+}
+

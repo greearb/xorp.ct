@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.2 2003/01/16 00:29:37 atanu Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.3 2003/02/06 22:21:32 hodson Exp $
 
 #ifndef __RIB_FEA_CLIENT_HH__
 #define __RIB_FEA_CLIENT_HH__
@@ -42,13 +42,26 @@ public:
      * with the FEA
      * @param max_ops the maximum number of operations in a transaction.
      */
-    FeaClient(XrlRouter& xrl_router, uint32_t	max_ops = 100);
+    FeaClient(XrlRouter& xrl_router, uint32_t max_ops = 100);
 
     /**
      * FeaClient destructor
      */
     ~FeaClient();
 
+    /**
+     * Set enabled state.
+     *
+     * When enabled FeaClient attempts to send commands to the FEA.  When
+     * disabled it silently ignores the requests.
+     */
+    void set_enabled(bool en);
+
+    /**
+     * Get enabled state.
+     */
+    bool enabled() const;
+    
     /**
      * Communicate the addition of a new IPv4 route to the FEA.
      *
@@ -95,7 +108,6 @@ public:
      * @param dest the destination subnet of the route.
      */
     void delete_route(const IPv6Net& re);
-
 
     // The methods below are compatibility methods used by the
     // ExportTable - they are implemented in terms of the methods
@@ -164,6 +176,7 @@ protected:
 						// later deletion.
     const uint32_t _max_ops;	// Maximum allowed tasks in a transaction.
     uint32_t _op_count;		// Number of tasks in this transaction.
+    bool _en;			// Enabled state
 };
 
 #endif // __RIB_FEA_CLIENT_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.3 2003/01/26 04:06:24 pavlin Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.4 2003/02/06 22:21:32 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -290,11 +290,23 @@ ifname(const IPRouteEntry<A>& re)
 /* FeaClient */
 
 FeaClient::FeaClient(XrlRouter& rtr, uint32_t	max_ops)
-    : _xrl_router(rtr), _busy(false), _max_ops(max_ops)
+    : _xrl_router(rtr), _busy(false), _max_ops(max_ops), _en(true)
 {}
 
 FeaClient::~FeaClient()
 {}
+
+void
+FeaClient::set_enabled(bool en)
+{
+    _en = en;
+}
+
+bool
+FeaClient::enabled() const
+{
+    return _en;
+}
 
 void
 FeaClient::add_route(const IPv4Net& dest,
@@ -406,7 +418,7 @@ FeaClient::transaction_completed()
 void
 FeaClient::start()
 {
-    if(_busy) {
+    if (_busy) {
 	debug_msg("start: busy\n");
 	return;
     }
@@ -416,9 +428,14 @@ FeaClient::start()
 	return;
     }
 
-    debug_msg("start\n");
-    _busy = true;
-    _op_count = 0;
-    _tasks.front()->start(callback(this, &FeaClient::transaction_completed),
-			  callback(this, &FeaClient::get_next));
+    if (_en) {
+	debug_msg("start\n");
+	_busy = true;
+	_op_count = 0;
+	_tasks.front()->start(callback(this,
+				       &FeaClient::transaction_completed),
+			      callback(this, &FeaClient::get_next));
+    } else {
+	_tasks.clear();
+    }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.2 2002/12/14 23:43:09 hodson Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -139,6 +139,9 @@ public:
     int delete_vif_addr(const string& vifname, 
 			const IPv6& addr,
 			string& err);
+
+    void set_fea_enabled(bool en);
+    bool fea_enabled() const;
 private:
     EventLoop _event_loop;
     XrlStdRouter _xrl_rtr;
