@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.27 2004/03/03 21:16:10 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.28 2004/03/03 22:20:14 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -763,9 +763,11 @@ Port<A>::port_io_receive(const A&	src_address,
     //
     // Check this is not an attempt to inject routes from non-RIP port
     //
-    if (ph->command == RipPacketHeader::RESPONSE && src_port != RIP_PORT) {
+    if (ph->command == RipPacketHeader::RESPONSE &&
+	src_port != RIP_AF_CONSTANTS<A>::IP_PORT) {
 	record_bad_packet(c_format("RIP response originating on wrong port"
-				   " (%d != %d)", src_port, RIP_PORT),
+				   " (%d != %d)",
+				   src_port, RIP_AF_CONSTANTS<A>::IP_PORT),
 			  src_address, src_port, p);
 	return;
     }
@@ -801,12 +803,13 @@ Port<A>::port_io_receive(const A&	src_address,
     }
 #endif
 
-    if (src_port == RIP_PORT && ph->command == RipPacketHeader::RESPONSE) {
+    if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT &&
+	ph->command == RipPacketHeader::RESPONSE) {
 	record_response_packet(p);
 	parse_response(src_address, src_port, entries, n_entries);
     } else {
 	XLOG_ASSERT(ph->command == RipPacketHeader::REQUEST);
-	if (src_port == RIP_PORT) {
+	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	    record_request_packet(p);
 	} else {
 	    counters().incr_non_rip_requests_recv();
