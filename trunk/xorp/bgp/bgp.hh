@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.20 2003/10/11 03:17:55 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.21 2003/10/14 01:54:35 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -334,8 +334,8 @@ public:
     /**
      * To be called when the finder dies.
      */
-    void finder_death() {
-	_process_watch->finder_death();
+    void finder_death(const char *file, const int lineno) {
+	_process_watch->finder_death(file, lineno);
     }
 protected:
 private:

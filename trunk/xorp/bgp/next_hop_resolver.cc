@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.23 2003/09/30 03:07:55 pavlin Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.24 2003/10/13 20:43:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -782,7 +782,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	break;
 
     case NO_FINDER:
-	_bgp.finder_death();
+	_bgp.finder_death(__FILE__, __LINE__);
 	break;
 
     }
@@ -1150,7 +1150,7 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	break;
 
     case NO_FINDER:
-	_bgp.finder_death();
+	_bgp.finder_death(__FILE__, __LINE__);
 	break;
 
     case RESOLVE_FAILED:

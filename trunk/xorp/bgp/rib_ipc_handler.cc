@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.27 2003/10/11 03:17:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.28 2003/10/23 03:10:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -599,7 +599,7 @@ XrlQueue<A>::route_command_done(const XrlError& error,
 	}
 	break;
     case NO_FINDER:
-	_bgp->finder_death();
+	_bgp->finder_death(__FILE__, __LINE__);
 	break;
     case BAD_ARGS:
     case COMMAND_FAILED:
