@@ -72,7 +72,7 @@ img {
 #header {
    position: absolute;
    margin: 0px;
-   top: 0px;
+   top: 10px;
    height: 96px;
    left: 175px;
    right: 10em;
@@ -90,7 +90,7 @@ img {
 
 #main {
    position: absolute;
-   top: 96px;
+   top: 106px;
    left: 175px;
    right: 100px;
    background: white;
@@ -99,7 +99,7 @@ img {
 
 #navbar {
    position: absolute;
-   top: 96px;
+   top: 106px;
    left: 0em;
    width: 146px;
    padding: 0px;
