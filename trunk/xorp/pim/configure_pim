@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.16 2003/06/26 18:45:27 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.17 2003/07/16 17:46:34 pavlin Exp $
 #
 
 #
@@ -85,6 +85,13 @@ case ${HOSTNAME} in
 	ENABLE_VIFS="rl0"
 	CAND_BSR_VIF="rl0"
 	CAND_RP_VIF="rl0"
+	STATIC_RPS=""
+	;;
+
+	koala.icir.org)
+	ENABLE_VIFS="eth0"
+	CAND_BSR_VIF="eth0"
+	CAND_RP_VIF="eth0"
 	STATIC_RPS=""
 	;;
 
