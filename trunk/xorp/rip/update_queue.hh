@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.4 2003/07/09 00:06:53 hodson Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.5 2003/07/15 17:40:43 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -78,7 +78,8 @@ public:
 
     /**
      * Create a read iterator.  These are reference counted entities that
-     * need to be stored in order to operate.
+     * need to be stored in order to operate.  The newly created reader is
+     * set to the end of the update queue.
      */
     ReadIterator create_reader();
 
@@ -108,6 +109,11 @@ public:
      * updates occur.
      */
     void ffwd(ReadIterator& r);
+
+    /**
+     * Move read iterator to first entry of update queue.
+     */
+    void rwd(ReadIterator& r);
 
     /**
      * Return number of updates held.  Note: this may be more than are

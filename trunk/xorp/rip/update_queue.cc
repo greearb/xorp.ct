@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.4 2003/07/08 16:56:17 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.5 2003/07/15 17:40:43 hodson Exp $"
 
 #include <vector>
 #include <list>
@@ -280,6 +280,14 @@ public:
 	garbage_collect();
     }
 
+    void rwd_reader(uint32_t id)
+    {
+	XLOG_ASSERT(id < _readers.size());
+	XLOG_ASSERT(_readers[id] != 0);
+
+	_readers[id]->move_to(_update_blocks.begin(), 0);
+    }
+
     /**
      * Fast forward all readers to end of updates.
      */
@@ -414,6 +422,13 @@ void
 UpdateQueue<A>::ffwd(ReadIterator& r)
 {
     _impl->ffwd_reader(r->id());
+}
+
+template <typename A>
+void
+UpdateQueue<A>::rwd(ReadIterator& r)
+{
+    _impl->rwd_reader(r->id());
 }
 
 template <typename A>
