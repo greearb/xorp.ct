@@ -12,24 +12,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.68 2005/01/20 00:43:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.69 2005/02/12 08:09:05 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
-#include "config.h"
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
-
-#include "net/if.h"			/* Included for IFF_ definitions */
-
-#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
+
 #include "libxipc/xrl_std_router.hh"
+
 #include "xrl/interfaces/profile_client_xif.hh"
+//
+// XXX: file "libxorp/profile.hh" must be included after
+// "libxipc/xrl_std_router.hh" and "xrl/interfaces/profile_client_xif.hh"
+// Sigh...
+//
 #include "libxorp/profile.hh"
+
 
 #include "fticonfig.hh"
 #include "libfeaclient_bridge.hh"
@@ -2005,6 +2009,17 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     bool is_xorp_route;
     bool is_connected_route = false;
 
+    debug_msg("redist_transaction4_0_1_add_route(): "
+	      "dst = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s\n",
+	      dst.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      metric,
+	      admin_distance,
+	      protocol_origin.c_str());
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
@@ -2037,6 +2052,11 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     const string&	protocol_origin)
 {
     bool is_connected_route = false;
+
+    debug_msg("redist_transaction4_0_1_delete_route(): "
+	      "network = %s protocol_origin = %s\n",
+	      network.str().c_str(),
+	      protocol_origin.c_str());
 
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
@@ -2119,6 +2139,17 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     bool is_xorp_route;
     bool is_connected_route = false;
 
+    debug_msg("redist_transaction6_0_1_add_route(): "
+	      "dst = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s\n",
+	      dst.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      metric,
+	      admin_distance,
+	      protocol_origin.c_str());
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
@@ -2151,6 +2182,11 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     const string&	protocol_origin)
 {
     bool is_connected_route = false;
+
+    debug_msg("redist_transaction6_0_1_delete_route(): "
+	      "network = %s protocol_origin = %s\n",
+	      network.str().c_str(),
+	      protocol_origin.c_str());
 
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
@@ -2382,7 +2418,8 @@ XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
 XrlCmdError
 XrlFeaTarget::profile_0_1_enable(const string& pname)
 {
-    debug_msg("profile variable %s\n", pname.c_str());
+    debug_msg("enable profile variable %s\n", pname.c_str());
+
     try {
 	_profile.enable(pname);
     } catch(PVariableUnknown& e) {
@@ -2397,7 +2434,8 @@ XrlFeaTarget::profile_0_1_enable(const string& pname)
 XrlCmdError
 XrlFeaTarget::profile_0_1_disable(const string&	pname)
 {
-    debug_msg("profile variable %s\n", pname.c_str());
+    debug_msg("disable profile variable %s\n", pname.c_str());
+
     try {
 	_profile.disable(pname);
     } catch(PVariableUnknown& e) {
@@ -2411,7 +2449,7 @@ XrlCmdError
 XrlFeaTarget::profile_0_1_get_entries(const string& pname,
 				      const string& instance_name)
 {
-    debug_msg("profile variable %s instance %s\n", pname.c_str(),
+    debug_msg("get profile variable %s instance %s\n", pname.c_str(),
 	      instance_name.c_str());
 
     // Lock and initialize.
@@ -2433,7 +2471,8 @@ XrlFeaTarget::profile_0_1_get_entries(const string& pname,
 XrlCmdError
 XrlFeaTarget::profile_0_1_clear(const string& pname)
 {
-    debug_msg("profile variable %s\n", pname.c_str());
+    debug_msg("clear profile variable %s\n", pname.c_str());
+
     try {
 	_profile.clear(pname);
     } catch(PVariableUnknown& e) {
