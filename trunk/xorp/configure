@@ -6430,8 +6430,8 @@ _ACEOF
 fi
 
 
-	echo "$as_me:$LINENO: checking \"for sig_t\"" >&5
-echo $ECHO_N "checking \"for sig_t\"... $ECHO_C" >&6
+	echo "$as_me:$LINENO: checking for sig_t" >&5
+echo $ECHO_N "checking for sig_t... $ECHO_C" >&6
 if test "${xr_cv_type_sig_t+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
