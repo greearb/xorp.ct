@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.31 2004/12/06 00:31:05 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.32 2004/12/08 22:47:27 mjh Exp $"
 
 
 #include <sys/types.h>
@@ -94,6 +94,7 @@ XorpShell::XorpShell(const string& IPCname,
       _xorp_root_dir(xorp_root_dir),
       _verbose(verbose),
       _got_config(false),
+      _got_modules(false),
       _mode(MODE_INITIALIZING)
 {
     _ipc_name = IPCname;
@@ -202,9 +203,11 @@ XorpShell::run()
     _configuration = "";
     _got_config = false;
 
-    /* we wait now to receive the configuration and list of running
-       modules from the rtrmgr.  We don't have to ask for these - we
-       just get them automatically as a result of authenticating */
+    //
+    // We wait now to receive the configuration and list of running
+    // modules from the rtrmgr.  We don't have to ask for these - we
+    // just get them automatically as a result of authenticating.
+    //
 
     XLOG_TRACE(_verbose, "Waiting to receive configuration from rtrmgr...");
     while (_got_config == false) {
@@ -395,7 +398,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
     }
     if (_mode == MODE_INITIALIZING) {
 	// We were just starting up
-	assert(deletions == "");
+	XLOG_ASSERT(deletions == "");
 	_configuration = deltas;
 	_got_config = true;
 	return;
