@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.35 2004/11/15 21:01:07 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.36 2004/11/15 22:06:02 atanu Exp $
 #
 
 #
@@ -25,6 +25,7 @@ set -e
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
 . ${srcdir}/../xrl_shell_funcs.sh ""
+. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
 
 onexit()
 {
@@ -147,10 +148,8 @@ test1()
 
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
-    while pending | grep true
-    do
-	sleep 2
-    done
+    # Wait for the file to be transmitted by the test peer.
+    bgp_peer_unchanged peer2
 
     coord peer2 assert established
 
@@ -181,10 +180,7 @@ test2()
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
     # Wait for the file to be transmitted by the test peer.
-    while pending | grep true
-    do
-	sleep 2
-    done
+    bgp_peer_unchanged peer2
 
     # Bring up peer1 and wait for it to receive all the updates
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
@@ -591,8 +587,52 @@ test12()
     reset
 }
 
+test13()
+{
+    TFILE=$1
+
+    echo "TEST13"
+    echo "         1) Inject a saved peering - $TFILE"
+    echo "         2) Change next-hop resolution"
+    echo "         3) Drop peering"
+    echo "         4) Used to cause BGP to fail"
+
+    # Reset the peers
+    reset
+
+    VIF0="vif0"
+    IF1=172.16.1.1
+    GW1=172.16.1.2
+    NH1=192.150.187.2
+
+    register_rib "rib"
+    new_vif $VIF0
+    add_vif_addr4 $VIF0 $IF1 $IF1/24
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+
+    sleep 2
+
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE
+
+    bgp_peer_unchanged peer2
+
+    coord peer2 assert established
+
+    add_igp_table4 is-is isis isis true false
+    add_route4 is-is true false $NH1/24 $GW1 10
+    
+    # Reset the connection
+    reset
+    
+    # Establish the new connection.
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+}
+
 TESTS_NOT_FIXED='test10 test11 test12'
-TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9'
+TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test13'
 
 # Include command line
 . ${srcdir}/args.sh

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.33 2004/09/17 13:50:55 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.34 2004/11/16 01:48:51 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -60,6 +60,9 @@ void
 RibInTable<A>::ribin_peering_went_down()
 {
     _peer_is_up = false;
+
+    // Stop pushing changed nexthops.
+    stop_nexthop_push();
 
     /* When the peering goes down we unhook our entire RibIn routing
        table and give it to a new deletion table.  We plumb the
@@ -425,6 +428,8 @@ template<class A>
 void
 RibInTable<A>::push_next_changed_nexthop()
 {
+    XLOG_ASSERT(_peer_is_up);
+
     const ChainedSubnetRoute<A>* chained_rt, *first_rt;
     first_rt = chained_rt = _current_chain->second;
     while (1) {
@@ -523,6 +528,19 @@ RibInTable<A>::next_chain()
 	_current_chain = pmi;
 	return;
     }
+}
+
+template<class A>
+void
+RibInTable<A>::stop_nexthop_push()
+{
+    // When a peering goes down tear out all the nexthop change state
+
+    _changed_nexthops.clear();
+    _nexthop_push_active = false;
+    _current_changed_nexthop = A::ZERO();
+    _current_chain = _route_table->pathmap().end();
+    _push_timer.unschedule();
 }
 
 template<class A>

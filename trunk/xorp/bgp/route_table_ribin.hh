@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.18 2004/06/10 22:40:36 hodson Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.19 2004/06/12 13:20:50 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -134,6 +134,7 @@ private:
     void push_next_changed_nexthop();
     void deletion_nexthop_check(const SubnetRoute<A>* route);
     void next_chain();
+    void stop_nexthop_push();
     // end of IGP nexthop handing stuff
 };
 
