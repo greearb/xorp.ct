@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -45,6 +45,15 @@ FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
 
 #else // HAVE_ROUTING_SOCKETS
 
+//
+// XXX: in FreeBSD, the flag to indicate routes that were generated through
+// cloning is RTF_WASCLONED, but in NetBSD the flag name is RTF_CLONED.
+// Hence, if necessary, define RTF_WASCLONED, so later we can use only
+// this flag name.
+//
+#if !defined(RTF_WASCLONED) && defined(RTF_CLONED)
+#define RTF_WASCLONED	RTF_CLONED
+#endif
 
 // Reading route(4) manual page is a good start for understanding this
 bool
