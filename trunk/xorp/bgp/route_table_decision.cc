@@ -12,10 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.32 2005/03/01 22:47:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.33 2005/03/03 07:29:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+
+// All routes hold some internal state for example: is this route
+// resolvable? This internal state is required because the state of
+// a route may change. For example a route may go from being
+// resolvable to unresolvable. To maintain a consistent internal state
+// in the plumbing it is important when considering routes on other
+// branches to look at the cached state in the route itself, rather
+// than the actual state. Never change the state of a route that is
+// not on the current peering.
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -80,6 +89,8 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     //if the nexthop isn't resolvable, don't even consider the route
     debug_msg("testing resolvability\n");
+    XLOG_ASSERT(rtmsg.route()->nexthop_resolved() ==
+		resolvable(rtmsg.route()->nexthop()));
     if (!resolvable(rtmsg.route()->nexthop())) {
 	debug_msg("route not resolvable\n");
     	return ADD_UNUSED;
@@ -108,12 +119,12 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//the new route wins by default
 	new_winner = &new_route;
     }
-    assert(new_winner != NULL);
+    XLOG_ASSERT(new_winner != NULL);
 
     if (old_winner_clone != NULL) {
 	if (old_winner_clone->route() == new_winner->route()) {
 	    //the winner didn't change.
-	    assert(old_winner_clone != NULL);
+	    XLOG_ASSERT(old_winner_clone != NULL);
 	    delete old_winner_clone;
 	    return ADD_UNUSED;
 	}
@@ -276,7 +287,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     debug_msg("delete route: %s\n",
 	      rtmsg.route()->str().c_str());
     PARANOID_ASSERT(_parents.find(caller) != _parents.end());
-    assert(this->_next_table != NULL);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     //find the alternative routes, and the old winner if there was one.
     RouteData<A> *old_winner = NULL, *old_winner_clone = NULL;
@@ -312,7 +323,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	if (new_winner != NULL
 	    && old_winner_clone->route() == new_winner->route()) {
 	    //the winner didn't change.
-	    assert(old_winner_clone != NULL);
+	    XLOG_ASSERT(old_winner_clone != NULL);
 	    delete old_winner_clone;
 	    return -1;
 	}
@@ -437,7 +448,7 @@ DecisionTable<A>::find_alternative_routes(
 						    pti->peer_handler(),
 						    found_genid));
 		if (found_route->is_winner()) {
-		    assert(previous_winner == NULL);
+		    XLOG_ASSERT(previous_winner == NULL);
 		    previous_winner = &(alternatives.back());
 		}
 	    }
@@ -549,11 +560,9 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     ** Check if routes resolve.
     */
     for (i=alternatives.begin(); i!=alternatives.end();) {
-	if (!resolvable(i->route()->nexthop())) {
-	    i->route()->set_nexthop_resolved(false);
+	if (!i->route()->nexthop_resolved()) {
 	    i = alternatives.erase(i);
 	} else {
-	    i->route()->set_nexthop_resolved(true);
 	    i++;
 	}
     }
@@ -576,7 +585,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     i = alternatives.begin(); i++;
     while(i!=alternatives.end()) {
 	int lp = local_pref(i->route(), i->peer_handler());
-	assert(lp >= 0);
+	XLOG_ASSERT(lp >= 0);
 	//prefer higher preference
 	if (lp < test_pref) {
 	    i = alternatives.erase(i);
@@ -613,7 +622,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     i = alternatives.begin(); i++;
     while(i!=alternatives.end()) {
 	int len = i->route()->attributes()->aspath().path_length();
-	assert(len >= 0);
+	XLOG_ASSERT(len >= 0);
 	//prefer shortest path
 	if (len > test_aspath_length) {
 	    i = alternatives.erase(i);
