@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.25 2003/11/21 20:11:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.26 2003/12/02 09:38:54 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -385,6 +385,8 @@ ConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 	}
 
 	if (!_existence_committed) {
+	    if (! _template->module_name().empty())
+		changed_modules.insert(_template->module_name());
 	    cmd = _template->const_command("%create");
 	    if (cmd != NULL) {
 		modules = cmd->affected_xrl_modules(*this);
