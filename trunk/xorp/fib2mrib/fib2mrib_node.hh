@@ -1,0 +1,468 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
+// Copyright (c) 2001-2003 International Computer Science Institute
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
+
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.2 2004/02/14 00:05:03 pavlin Exp $
+
+#ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
+#define __FIB2MRIB_FIB2MRIB_NODE_HH__
+
+
+//
+// Fib2mrib node definition.
+//
+
+#include <map>
+
+#include "libxorp/service.hh"
+#include "libxorp/status_codes.h"
+
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
+
+
+class EventLoop;
+
+/**
+ * @short A Fib2mrib helper class.
+ * 
+ * This class is used to store a routing entry.
+ */
+class Fib2mribRoute {
+public:
+    /**
+     * Constructor for a given IPv4 route.
+     * 
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
+     * @param metric the metric distance for this route.
+     */
+    Fib2mribRoute(bool unicast, bool multicast, const IPv4Net& network,
+		  const IPv4& nexthop, uint32_t metric)
+	: _unicast(unicast), _multicast(multicast),
+	  _network(network), _nexthop(nexthop), _metric(metric) {}
+
+    /**
+     * Constructor for a given IPv6 route.
+     * 
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
+     * @param metric the metric distance for this route.
+     */
+    Fib2mribRoute(bool unicast, bool multicast, const IPv6Net& network,
+		  const IPv6& nexthop, uint32_t metric)
+	: _unicast(unicast), _multicast(multicast),
+	  _network(network), _nexthop(nexthop), _metric(metric) {}
+
+    /**
+     * Test if this is an IPv4 route.
+     * 
+     * @return true if this is an IPv4 route, otherwise false.
+     */
+    bool is_ipv4() const { return _network.is_ipv4(); }
+
+    /**
+     * Test if this is an IPv6 route.
+     * 
+     * @return true if this is an IPv6 route, otherwise false.
+     */
+    bool is_ipv6() const { return _network.is_ipv6(); }
+
+    /**
+     * Test if this route would be used for unicast routing.
+     * 
+     * @return true if this route would be used for unicast routing,
+     * otherwise false.
+     */
+    bool unicast() const { return _unicast; }
+
+    /**
+     * Test if this route would be used for multicast routing.
+     * 
+     * @return true if this route would be used for multicast routing,
+     * otherwise false.
+     */
+    bool multicast() const { return _multicast; }
+
+    /**
+     * Get the network address prefix this route applies to.
+     * 
+     * @return the network address prefix this route appies to.
+     */
+    const IPvXNet& network() const { return _network; }
+
+    /**
+     * Get the address of the next-hop router for this route.
+     * 
+     * @return the address of the next-hop router for this route.
+     */
+    const IPvX& nexthop() const { return _nexthop; }
+
+    /**
+     * Get the metric distance for this route.
+     * 
+     * @return the metric distance for this route.
+     */
+    uint32_t metric() const { return _metric; }
+
+    /**
+     * Test if this is a route to add.
+     * 
+     * @return true if this is a route to add, otherwise false.
+     */
+    bool is_add_route() const { return (_route_type == ADD_ROUTE); }
+
+    /**
+     * Test if this is a replacement route.
+     * 
+     * @return true if this is a replacement route, otherwise false.
+     */
+    bool is_replace_route() const { return (_route_type == REPLACE_ROUTE); }
+
+    /**
+     * Test if this is a route to delete.
+     * 
+     * @return true if this is a route to delete, otherwise false.
+     */
+    bool is_delete_route() const { return (_route_type == DELETE_ROUTE); }
+
+    /**
+     * Set the type of this route to "a route to add".
+     */
+    void set_add_route() { _route_type = ADD_ROUTE; }
+
+    /**
+     * Set the type of this route to "a replacement route".
+     */
+    void set_replace_route() { _route_type = REPLACE_ROUTE; }
+
+    /**
+     * Set the type of this route to "a route to delete".
+     */
+    void set_delete_route() { _route_type = DELETE_ROUTE; }
+
+    /**
+     * Check whether the route entry is valid.
+     * 
+     * @param error_msg the error message (if error).
+     * @return true if the route entry is valid, otherwise false.
+     */
+    bool is_valid_entry(string& error_msg) const;
+
+private:
+    bool	_unicast;
+    bool	_multicast;
+    IPvXNet	_network;
+    IPvX	_nexthop;
+    uint32_t	_metric;
+    enum RouteType { ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
+    RouteType	_route_type;
+};
+
+
+/**
+ * @short The Fib2mrib node class.
+ * 
+ * There should be one node per Fib2mrib instance.
+ */
+class Fib2mribNode : public IfMgrHintObserver, public ServiceBase {
+public:
+    /**
+     * Constructor for a given event loop.
+     * 
+     * @param eventloop the event loop to use.
+     */
+    Fib2mribNode(EventLoop& eventloop);
+
+    /**
+     * Destructor
+     */
+    virtual ~Fib2mribNode();
+
+    /**
+     * Get the event loop this node is added to.
+     * 
+     * @return the event loop this node is added to.
+     */
+    EventLoop&	eventloop()	{ return _eventloop; }
+
+    /**
+     * Get the protocol name.
+     * 
+     * @return a string with the protocol name.
+     */
+    const string& protocol_name() const { return _protocol_name; }
+
+    /**
+     * Start the node operation.
+     */
+    void	startup();
+
+    /**
+     * Shutdown the node operation.
+     */
+    void	shutdown();
+
+    /**
+     * Get the node status (see @ref ProcessStatus).
+     * 
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the status.
+     * @return the node status (see @ref ProcessStatus).
+     */
+    ProcessStatus	node_status(string& reason_msg);
+
+    /**
+     * Test if the node processing is done.
+     * 
+     * @return true if the node processing is done, otherwise false.
+     */
+    bool	is_done() const { return (_node_status == PROC_DONE); }
+
+    /**
+     * Add an IPv4 route.
+     *
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
+     * @param metric the metric distance for this route.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_route4(bool unicast, bool multicast,
+		   const IPv4Net& network, const IPv4& nexthop,
+		   uint32_t metric, string& error_msg);
+
+    /**
+     * Add an IPv6 route.
+     *
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
+     * @param metric the metric distance for this route.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_route6(bool unicast, bool multicast,
+		   const IPv6Net& network, const IPv6& nexthop,
+		   uint32_t metric, string& error_msg);
+
+    /**
+     * Replace an IPv4 route.
+     *
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
+     * @param metric the metric distance for this route.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int replace_route4(bool unicast, bool multicast,
+		       const IPv4Net& network, const IPv4& nexthop,
+		       uint32_t metric, string& error_msg);
+
+    /**
+     * Replace an IPv6 route.
+     *
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
+     * @param metric the metric distance for this route.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int replace_route6(bool unicast, bool multicast,
+		       const IPv6Net& network, const IPv6& nexthop,
+		       uint32_t metric, string& error_msg);
+
+    /**
+     * Delete an IPv4 route.
+     *
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int delete_route4(bool unicast, bool multicast,
+		      const IPv4Net& network, string& error_msg);
+
+    /**
+     * Delete an IPv6 route.
+     *
+     * @param unicast if true, then the route would be used for unicast
+     * routing.
+     * @param multicast if true, then the route would be used in the MRIB
+     * (Multicast Routing Information Base) for multicast purpose (e.g.,
+     * computing the Reverse-Path Forwarding information).
+     * @param network the network address prefix this route applies to.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int delete_route6(bool unicast, bool multicast,
+		      const IPv6Net& network, string& error_msg);
+
+    //
+    // Debug-related methods
+    //
+    
+    /**
+     * Test if trace log is enabled.
+     * 
+     * This method is used to test whether to output trace log debug messges.
+     * 
+     * @return true if trace log is enabled, otherwise false.
+     */
+    bool	is_log_trace() const { return (_is_log_trace); }
+    
+    /**
+     * Enable/disable trace log.
+     * 
+     * This method is used to enable/disable trace log debug messages output.
+     * 
+     * @param is_enabled if true, trace log is enabled, otherwise is disabled.
+     */
+    void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
+
+protected:
+    //
+    // IfMgrHintObserver methods
+    //
+    void tree_complete();
+    void updates_made();
+
+    void incr_startup_requests_n();
+    void decr_startup_requests_n();
+    void incr_shutdown_requests_n();
+    void decr_shutdown_requests_n();
+    void update_status();
+
+private:
+    /**
+     * Initiate startup of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void ifmgr_startup() = 0;
+
+    /**
+     * Initiate shutdown of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void ifmgr_shutdown() = 0;
+
+    /**
+     * Initiate registration with the RIB.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void rib_register_startup() = 0;
+
+    /**
+     * Initiate de-registration with the RIB.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void rib_register_shutdown() = 0;
+
+    /**
+     * Add an IPvX route.
+     *
+     * @param fib2mrib_route the route to add.
+     * @see Fib2mribRoute
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_route(const Fib2mribRoute& fib2mrib_route, string& error_msg);
+
+    /**
+     * Replace a Fib2mrib IPvX route.
+     *
+     * @param fib2mrib_route the replacement route.
+     * @see Fib2mribRoute
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int replace_route(const Fib2mribRoute& fib2mrib_route, string& error_msg);
+
+    /**
+     * Delete a Fib2mrib IPvX route.
+     *
+     * @param fib2mrib_route the route to delete.
+     * @see Fib2mribRoute
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int delete_route(const Fib2mribRoute& fib2mrib_route, string& error_msg);
+
+    /**
+     * Inform the RIB about a route change.
+     *
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @param fib2mrib_route the route with the information about the change.
+     */
+    virtual void inform_rib_route_change(const Fib2mribRoute& fib2mrib_route) = 0;
+
+    virtual const IfMgrIfTree&	iftree() const = 0;
+
+    EventLoop&		_eventloop;		// The event loop
+    ProcessStatus	_node_status;		// The node/process status
+    const string	_protocol_name;		// The protocol name
+
+    list<Fib2mribRoute>	_fib2mrib_routes;
+
+    size_t		_startup_requests_n;
+    size_t		_shutdown_requests_n;
+
+    //
+    // Debug and test-related state
+    //
+    bool	_is_log_trace;		// If true, enable XLOG_TRACE()
+};
+
+#endif // __FIB2MRIB_FIB2MRIB_NODE_HH__
