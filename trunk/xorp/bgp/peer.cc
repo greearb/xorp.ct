@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.53 2003/10/28 22:44:43 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.54 2003/12/11 03:04:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -387,7 +387,7 @@ BGPPeer::event_start()			// EVENTBGPSTART
 	// Initalise resources
 	start_connect_retry_timer();
 	set_state(STATECONNECT);
-	connect_to_peer(callback(this, &BGPPeer:: connect_to_peer_complete));
+	connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
 	break;
 
     // in all other cases, remain in the same state
@@ -891,6 +891,8 @@ BGPPeer::event_open(const int sock)
     debug_msg("Connection attempt: State %d ", _state);
     if (_state == STATECONNECT || _state == STATEACTIVE) {
 	debug_msg("accepted\n");
+	if (_state == STATECONNECT)
+	    _SocketClient->connect_break();
 	_SocketClient->connected(sock);
 	event_open();
     } else {
