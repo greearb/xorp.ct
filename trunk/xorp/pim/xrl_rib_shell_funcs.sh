@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.7 2003/10/16 18:23:07 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.8 2004/05/20 23:45:45 pavlin Exp $
 #
 
 #
@@ -64,134 +64,6 @@ rib_stop_rib()
     echo "rib_stop_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/stop_rib"
     XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_add_rib_client4()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_add_rib_client4 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_add_rib_client4" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/add_rib_client4"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_add_rib_client6()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_add_rib_client6 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_add_rib_client6" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/add_rib_client6"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_delete_rib_client4()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_delete_rib_client4 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_delete_rib_client4" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/delete_rib_client4"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_delete_rib_client6()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_delete_rib_client6 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_delete_rib_client6" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/delete_rib_client6"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_enable_rib_client4()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_enable_rib_client4 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_enable_rib_client4" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/enable_rib_client4"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_enable_rib_client6()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_enable_rib_client6 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_enable_rib_client6" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/enable_rib_client6"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_disable_rib_client4()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_disable_rib_client4 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_disable_rib_client4" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/disable_rib_client4"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_disable_rib_client6()
-{
-    if [ $# -lt 3 ] ; then
-	echo "Usage: rib_disable_rib_client6 <target_name:txt> <unicast:bool> <multicast:bool>"
-	exit 1
-    fi
-    target_name=$1
-    unicast=$2
-    multicast=$3
-    
-    echo "rib_disable_rib_client6" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/disable_rib_client6"
-    XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
