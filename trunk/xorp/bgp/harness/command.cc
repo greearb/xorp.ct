@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.13 2003/07/02 02:08:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.14 2003/08/05 22:14:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,8 +103,10 @@ Command::status(const string& peer, string& status)
 bool
 Command::pending()
 {
-    if(_xrlrouter.pending())
-	return true;
+    debug_msg("pending\n");
+
+//     if(_xrlrouter.pending())
+// 	return true;
 
     /*
     ** Pending count is non zero when we are attempting to configure a

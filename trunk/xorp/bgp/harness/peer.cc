@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.38 2003/09/10 03:19:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.39 2003/09/16 00:38:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -195,8 +195,8 @@ Peer::pending()
     debug_msg("pending? : %s\n", (_session && !_established && !_passive)
 		  ? "true" : "false");
 
-    if(_xrlrouter->pending())
-	return true;
+//     if(_xrlrouter->pending())
+// 	return true;
 
     if(_busy > 0)
 	return true;
