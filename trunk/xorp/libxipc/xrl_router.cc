@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.9 2003/03/05 18:19:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.10 2003/03/06 01:18:58 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -287,10 +287,15 @@ public:
 			   const XrlRouter*	r,
 			   const Xrl&		x,
 			   const XrlCallback&	xcb)
-	: DLinkElement(de), _rtr(r), _xrl(x), _xcb(xcb)
+	: DLinkElement(de), _rtr(r), _xrl(x), _xcb(xcb), _xrs(0)
     {
     }
 
+    ~XrlRouterDispatchState()
+    {
+	delete _xrs;
+    }
+    
     inline const XrlRouter* router() const { return _rtr; }
 
     inline const Xrl& xrl() const { return _xrl; }
@@ -300,10 +305,13 @@ public:
 	_xcb->dispatch(e, a);
     }
 
+    inline void set_sender(XrlPFSender* s) { _xrs = s; }
+    
 protected:
     const XrlRouter*		_rtr;
     Xrl				_xrl;
     XrlRouter::XrlCallback	_xcb;
+    XrlPFSender*		_xrs;
 };
 
 static class DispatchStateManager {
@@ -460,6 +468,7 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
 	XrlPFSender* s = XrlPFSenderFactory::create(_e,
 						    x.protocol().c_str(),
 						    x.target().c_str());
+	ds->set_sender(s);
 	if (s) {
 	    trace_xrl("Sending ", x);
 	    _spend++;
