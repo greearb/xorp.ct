@@ -12,9 +12,10 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.3 2003/03/15 02:28:39 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.4 2003/03/16 07:18:59 pavlin Exp $"
 
 #include "rib_module.h"
+#include "libxorp/xlog.h"
 #include "rt_tab_redist.hh"
 #define DEBUG_ROUTE_TABLE
 
@@ -46,8 +47,7 @@ int
 RedistTable<A>::add_route(const IPRouteEntry<A>& route, 
 		       RouteTable<A> *caller) 
 {
-    if (caller != _from_table)
-	abort();
+    XLOG_ASSERT(caller == _from_table);
     printf("RT[%s]: Adding route %s\n", _tablename.c_str(), 
 	   route.str().c_str());
     
@@ -62,8 +62,7 @@ int
 RedistTable<A>::delete_route(const IPRouteEntry<A> *route, 
 			  RouteTable<A> *caller) 
 {
-    if (caller != _from_table)
-	abort();
+    XLOG_ASSERT(caller == _from_table);
     _next_table->delete_route(route, this);
 
     cout << "Delete route called on redist table\n";
@@ -87,14 +86,10 @@ RedistTable<A>::lookup_route(const A& addr) const
 template<class A>
 void
 RedistTable<A>::replumb(RouteTable<A> *old_parent, 
-		     RouteTable<A> *new_parent) 
+			RouteTable<A> *new_parent) 
 {
-    if (_from_table == old_parent) {
-	_from_table = new_parent;
-    } else {
-	// shouldn't be possible
-	abort();
-    }
+    XLOG_ASSERT(_from_table == old_parent);
+    _from_table = new_parent;
 }
 
 template<class A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.13 2003/04/22 19:20:25 mjh Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.14 2003/05/08 05:51:27 mjh Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -270,6 +270,12 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int no_fea();
+
+    /**
+     * Make some errors we'd normally mask fatal.  Should be used for
+     * testing only.
+     */
+    void make_errors_fatal();
     
 private:
     /**

@@ -12,9 +12,10 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.3 2003/03/15 02:28:39 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.4 2003/03/16 07:18:59 pavlin Exp $"
 
 #include "rib_module.h"
+#include "libxorp/xlog.h"
 #include "rt_tab_merged.hh"
 
 //A = Address Type
@@ -60,7 +61,7 @@ add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller)
 	cp(6);
 	other_table = _table_b;
     } else {
-	abort();
+	XLOG_UNREACHABLE();
     }
     const IPRouteEntry<A> *found;
     found = other_table->lookup_route(route.net());
@@ -97,7 +98,7 @@ MergedTable<A>::delete_route(const IPRouteEntry<A> *route,
 	cp(12);
 	other_table = _table_b;
     } else {
-	abort();
+	XLOG_UNREACHABLE();
     }
     const IPRouteEntry<A> *found;
     found = other_table->lookup_route(route->net());
@@ -207,8 +208,7 @@ MergedTable<A>::replumb(RouteTable<A> *old_parent,
 	cp(27);
 	_table_b = new_parent;
     } else {
-	/// shouldn't be possible
-	abort();
+	XLOG_UNREACHABLE();
     }
 }
 

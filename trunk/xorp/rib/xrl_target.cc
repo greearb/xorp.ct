@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.15 2003/05/07 23:15:16 mjh Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.16 2003/05/08 05:51:27 mjh Exp $"
 
 #include "libxorp/status_codes.h"
 #include "version.h"
@@ -224,6 +224,13 @@ XrlCmdError
 XrlRibTarget::rib_0_1_no_fea()
 {
     _rib_manager->no_fea();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlRibTarget::rib_0_1_make_errors_fatal()
+{
+    _rib_manager->make_errors_fatal();
     return XrlCmdError::OKAY();
 }
 
@@ -660,7 +667,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
 	    // this shouldn't be possible
-	    abort();
+	    XLOG_UNREACHABLE();
 	case PEER_NEXTHOP:
 	case ENCAPS_NEXTHOP:
 	    resolves = true;
@@ -711,7 +718,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
 	    // this shouldn't be possible
-	    abort();
+	    XLOG_UNREACHABLE();
 	case PEER_NEXTHOP:
 	case ENCAPS_NEXTHOP:
 	    resolves = true;

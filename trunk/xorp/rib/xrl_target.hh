@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.8 2003/05/07 23:15:17 mjh Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.9 2003/05/19 23:36:19 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -152,6 +152,8 @@ protected:
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_no_fea();
+
+    XrlCmdError rib_0_1_make_errors_fatal();
 
     XrlCmdError rib_0_1_add_igp_table4(
 	// Input values, 

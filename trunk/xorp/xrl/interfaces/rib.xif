@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.5 2003/03/22 04:29:46 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.6 2003/03/24 19:11:42 hodson Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -51,6 +51,11 @@ interface rib/0.1 {
 	 * Don't send anything to the FEA - used for testing only
 	 */	
 	no_fea 
+
+	/**
+	 * Make errors fatal; used to detect errors we'd normally mask
+	 */	
+	make_errors_fatal
 
 	add_igp_table4 ? protocol:txt & unicast:bool & multicast:bool
 

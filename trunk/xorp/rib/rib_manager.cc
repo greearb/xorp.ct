@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.15 2003/05/08 05:51:27 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.16 2003/05/15 03:47:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -504,4 +504,13 @@ RibManager::no_fea()
     _vif_manager.no_fea();
     
     return (XORP_OK);
+}
+
+void
+RibManager::make_errors_fatal()
+{
+    _urib4.set_errors_are_fatal();
+    _urib6.set_errors_are_fatal();
+    _mrib4.set_errors_are_fatal();
+    _mrib6.set_errors_are_fatal();
 }

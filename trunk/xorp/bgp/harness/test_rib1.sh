@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.5 2003/03/10 18:50:20 hodson Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.6 2003/03/10 20:26:47 mjh Exp $
 #
 
 #
@@ -81,6 +81,7 @@ NH2=172.16.2.1
 configure_rib()
 {
     no_fea
+    make_rib_errors_fatal
 
     VIF0="vif0"
     VIF1="vif1"

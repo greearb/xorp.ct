@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.8 2003/03/20 00:57:53 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.9 2003/03/20 04:29:22 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -75,6 +75,11 @@ public:
      * set test-mode: don't try to send to RIB clients.
      */
     void no_rib_clients() { _no_rib_clients = true; }
+
+    /**
+     * set test-mode: abort on some errors that we'd normally mask
+     */
+    void set_errors_are_fatal() { _errors_are_fatal = true; }
 
     /**
      * Initialize the RIB's ExportTable so that the winning routes are
@@ -518,6 +523,7 @@ protected:
     RegisterTable<A>	*_register_table;
     bool _mcast;
     bool _no_rib_clients;
+    bool _errors_are_fatal;
 
     map<const string, RouteTable<A> *>	_tables;
     map<const string, Protocol *>	_protocols;

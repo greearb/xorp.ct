@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.6 2003/03/16 07:18:59 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.7 2003/05/14 10:32:25 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -33,12 +33,10 @@ OriginTable<A>::OriginTable<A>(const string& tablename,
     : RouteTable<A>(tablename)
 {
     cp(1);
-    if ((igp != IGP) && (igp != EGP))
-    	abort();
+    XLOG_ASSERT((igp == IGP) || (igp == EGP));
     _igp = igp;
 
-    if (admin_distance < 0 || admin_distance > 255)
-	abort();
+    XLOG_ASSERT(admin_distance >= 0 && admin_distance <= 255);
     _admin_distance = admin_distance;
 }
 

@@ -2,7 +2,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/test2.sh,v 1.6 2002/12/09 10:59:37 pavlin Exp $
+# $XORP: xorp/bgp/harness/test2.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 #
@@ -60,6 +60,7 @@ configure_bgp()
 configure_rib()
 {
     RIB=../../rib/xrl_shell_funcs.sh
+    $RIB make_rib_errors_fatal
     $RIB new_vif $VIF
     $RIB add_vif_addr4 $VIF 172.16.0.1 172.16.0.0/24
 }

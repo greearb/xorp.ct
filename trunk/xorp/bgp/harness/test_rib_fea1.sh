@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.2 2002/12/13 01:46:07 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.3 2003/01/31 03:00:25 atanu Exp $
 #
 
 #
@@ -90,6 +90,14 @@ configure_bgp()
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE  $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
+}
+
+configure_rib()
+{
+    echo "Configuring rib"
+    export CALLXRL
+    RIB_FUNCS=../../rib/xrl_shell_funcs.sh
+    $RIB_FUNCS make_rib_errors_fatal
 }
 
 configure_fea()
@@ -182,6 +190,7 @@ test1()
 
     coord peer1 send $PACKET1
     coord peer1 send $PACKET2
+    echo "Sent routes to BGP, waiting..."
     sleep 2
 
     coord peer2 trie recv lookup 10.10.10.0/24 not
@@ -326,6 +335,8 @@ fi
 if [ $CONFIGURE = "yes" ]
 then
     configure_fea
+    set +e
+    configure_rib
     set +e
     configure_bgp
     set -e

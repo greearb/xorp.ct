@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.11 2003/03/20 04:29:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.12 2003/05/14 10:32:25 pavlin Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -175,7 +175,8 @@ merge_tablename(const string& table_a, const string& table_b)
 template<class A>
 RIB<A>::RIB(RibTransportType t)
     : _final_table(NULL),
-      _register_table(NULL)
+      _register_table(NULL),
+      _errors_are_fatal(false)
 {
     if (t == UNICAST) {
 	_mcast = false;
@@ -332,15 +333,61 @@ RIB<A>::new_extint_table(const string& tablename,
     return 0;
 }
 
-template<class A> 
+template<> 
 int
-RIB<A>::new_vif(const string& vifname, const Vif& vif) 
+RIB<IPv4>::new_vif(const string& vifname, const Vif& vif) 
 {
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
     if (_vifs.find(vifname) == _vifs.end()) {
 	// Can't use _vifs[vifname] = vif because no Vif() constructor
 	map<const string, Vif>::value_type v(vifname, vif);
 	_vifs.insert(_vifs.end(), v);
+
+	//We need to add the routes from the VIF to the connected table
+	map<const string, Vif>::iterator i = _vifs.find(vifname);
+	XLOG_ASSERT(i != _vifs.end());
+	Vif* new_vif = &(i->second);
+	XLOG_ASSERT(new_vif != NULL);
+	list<VifAddr>::const_iterator ai;
+	for (ai = new_vif->addr_list().begin();
+	     ai != new_vif->addr_list().end();
+	     ai++) {
+	    if (ai->addr().is_ipv4()) {
+		add_route("connected", ai->subnet_addr().get_ipv4net(), 
+			  ai->addr().get_ipv4(), 0);
+	    }
+	}
+	
+	return 0;
+    }
+    return -1;
+}
+
+template<> 
+int
+RIB<IPv6>::new_vif(const string& vifname, const Vif& vif) 
+{
+    debug_msg("RIB::new_vif: %s\n", vifname.c_str());
+    if (_vifs.find(vifname) == _vifs.end()) {
+	// Can't use _vifs[vifname] = vif because no Vif() constructor
+	map<const string, Vif>::value_type v(vifname, vif);
+	_vifs.insert(_vifs.end(), v);
+
+	//We need to add the routes from the VIF to the connected table
+	map<const string, Vif>::iterator i = _vifs.find(vifname);
+	XLOG_ASSERT(i != _vifs.end());
+	Vif* new_vif = &(i->second);
+	XLOG_ASSERT(new_vif != NULL);
+	list<VifAddr>::const_iterator ai;
+	for (ai = new_vif->addr_list().begin();
+	     ai != new_vif->addr_list().end();
+	     ai++) {
+	    if (ai->addr().is_ipv6()) {
+		add_route("connected", ai->subnet_addr().get_ipv6net(), 
+			  ai->addr().get_ipv6(), 0);
+	    }
+	}
+	
 	return 0;
     }
     return -1;
@@ -427,25 +474,38 @@ RIB<A>::add_route(const string& tablename,
 {
     RouteTable<A> *rt = find_table(tablename);
     if (rt == NULL) {
-	XLOG_ERROR("Attempting to add route to unknown table \"%s\".",
-		   tablename.c_str());
-	abort();
-	return -1;
+	if (_errors_are_fatal) {
+	    XLOG_FATAL("Attempting to add route to unknown table \"%s\".",
+		       tablename.c_str());
+	} else {
+	    XLOG_ERROR("Attempting to add route to unknown table \"%s\".",
+		       tablename.c_str());
+	    return -1;
+	}
     }
 
     Protocol *proto = find_protocol(tablename);
     if (proto == NULL) {
-	XLOG_ERROR("Attempting to add route with unknown protocol \"%s\".",
-		   tablename.c_str());
-	abort();
-	return -1;
+	if (_errors_are_fatal) {
+	    XLOG_FATAL("Attempting to add route with unknown protocol \"%s\".",
+		       tablename.c_str());
+	} else {
+	    XLOG_ERROR("Attempting to add route with unknown protocol \"%s\".",
+		       tablename.c_str());
+	    return -1;
+	}
     }
 
     OriginTable<A> *ot = dynamic_cast<OriginTable<A> *>(rt);
     if (ot == NULL) {
-	XLOG_ERROR("Attempting to add route to table \"%s\" that is not "
-		   "an origin table.", tablename.c_str());
-	return -1;
+	if (_errors_are_fatal) {
+	    XLOG_FATAL("Attempting to add route to table \"%s\" that is not "
+		       "an origin table.", tablename.c_str());
+	} else {
+	    XLOG_ERROR("Attempting to add route to table \"%s\" that is not "
+		       "an origin table.", tablename.c_str());
+	    return -1;
+	}
     }
 
     // Find the vif so we can see if the nexthop is a peer.  first
@@ -796,9 +856,9 @@ RIB<A>::add_origin_table(const string& tablename, int type)
     //
 
     // First step: find out what tables already exist
-    RouteTable<A> *igp_table = 0;
-    RouteTable<A> *egp_table = 0;
-    ExtIntTable<A> *ei_table = 0;
+    RouteTable<A> *igp_table = NULL;
+    RouteTable<A> *egp_table = NULL;
+    ExtIntTable<A> *ei_table = NULL;
 
     typedef typename map<string, RouteTable<A> *>::iterator Iter;
     Iter rtpair = _tables.begin();
@@ -810,18 +870,17 @@ RIB<A>::add_origin_table(const string& tablename, int type)
 
 	OriginTable<A> *ot = dynamic_cast<OriginTable<A> *>(rtpair->second);
 	if (ot) {
-	    // XXX igp() as a method name (?)
-	    if (ot->igp() == IGP) {
+	    if (ot->proto_type() == IGP) {
 		igp_table = ot;
-	    } else if (ot->igp() == EGP) {
+	    } else if (ot->proto_type() == EGP) {
 		egp_table = ot; 
 	    } else {
-		abort();
+		XLOG_UNREACHABLE();
 	    }
 	    continue;
 	}
 	
-	if (ei_table == 0)
+	if (ei_table == NULL)
 	    ei_table = dynamic_cast<ExtIntTable<A> *>(rtpair->second);
     }
 
@@ -830,15 +889,13 @@ RIB<A>::add_origin_table(const string& tablename, int type)
     // depending on which tables already exist, we may need to create
     // a MergedTable or an ExtInt table
     //
-    if (((igp_table == 0) && (type == IGP)) || 
-	((egp_table == 0) && (type == EGP))) {
+    if (((igp_table == NULL) && (type == IGP)) || 
+	((egp_table == NULL) && (type == EGP))) {
 	// we're going to need to create an ExtInt table
 
-	if (ei_table) {
-	    // sanity check: we've found an ExtIntTable, when there
-	    // weren't both IGP and EGP tables
-	    abort();
-	}
+	// sanity check: we've found an ExtIntTable, when there
+	// weren't both IGP and EGP tables
+	XLOG_ASSERT(ei_table == NULL);
 
 	if ((egp_table == 0) && (igp_table == 0)) {
 	    // There are tables, but neither IGP or EGP origin tables
@@ -846,7 +903,7 @@ RIB<A>::add_origin_table(const string& tablename, int type)
 	    // a RegisterTable (MRIB's have no ExportTable<A>)
 	    if (_final_table->type() != EXPORT_TABLE 
 		&& _final_table->type() != REGISTER_TABLE) {
-		abort();
+		XLOG_UNREACHABLE();
 	    }
 
 	    // there may be existing single-parent tables before the

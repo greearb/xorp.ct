@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.8 2003/03/29 19:03:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.9 2003/03/29 19:30:11 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -138,7 +138,7 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 	else {
 	    // this can't happen because registrations can't be
 	    // overlapped by more specific routes
-	    abort();
+	    XLOG_UNREACHABLE();
 	}
 	return true;
     }
@@ -190,8 +190,7 @@ RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
 {
     debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
     print();
-    if (caller != _parent)
-	abort();
+    XLOG_ASSERT(caller == _parent);
     if (_next_table != NULL)
 	_next_table->add_route(route, this);
 
@@ -209,8 +208,7 @@ RegisterTable<A>::delete_route(const IPRouteEntry<A> *route,
     debug_msg("[REGT]: delete_route: %p\n%s\n", route, route->str().c_str());
     debug_msg("Before:\n");
     print();
-    if (caller != _parent)
-	abort();
+    XLOG_ASSERT(caller == _parent);
     if (_next_table != NULL)
 	_next_table->delete_route(route, this);
 
@@ -414,7 +412,7 @@ RegisterTable<A>::notify_route_changed(
     switch (nh->type()) {
     case GENERIC_NEXTHOP:
 	// this shouldn't be possible
-	abort();
+	XLOG_UNREACHABLE();
     case PEER_NEXTHOP:
     case ENCAPS_NEXTHOP:
 	resolves = true;

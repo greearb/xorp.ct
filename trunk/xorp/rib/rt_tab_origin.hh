@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.3 2003/03/19 09:05:20 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -129,10 +129,9 @@ public:
     int admin_distance() const			{ return _admin_distance; }
 
     /**
-     * @return true if the routing protocol associated with this table
-     * if an IGP, else false.  
+     * @return the routing protocol type (IGP or EGP)
      */
-    int igp() const				{ return _igp;		}
+    int proto_type() const			{ return _igp;		}
 
     /**
      * @return ORIGIN_TABLE

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.6 2003/01/24 01:29:11 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.7 2003/01/31 03:00:26 atanu Exp $
 #
 
 #
@@ -97,6 +97,8 @@ configure_bgp()
 
 configure_rib()
 {
+    make_rib_errors_fatal
+
     VIF0="vif0"
     VIF1="vif1"
     VIF2="vif2"
