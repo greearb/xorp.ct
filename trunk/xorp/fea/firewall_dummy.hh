@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_dummy.hh,v 1.2 2004/09/01 23:47:15 bms Exp $
+// $XORP: xorp/fea/firewall_dummy.hh,v 1.3 2004/09/14 15:03:37 bms Exp $
 
 #ifndef __FEA_FIREWALL_DUMMY_HH__
 #define __FEA_FIREWALL_DUMMY_HH__
@@ -101,7 +101,12 @@ public:
 		return (0);
 	}
 
-	// XXX: What about rule retrieval?
+	inline int take_table_ownership() {
+		// Do nothing. The dummy provider does not need
+		// to tag the intermediate representation with
+		// any data.
+		return (XORP_OK);
+	}
 
 private:
 	bool		_initialized;

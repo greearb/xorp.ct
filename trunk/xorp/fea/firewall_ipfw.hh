@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.3 2004/09/14 10:15:26 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.4 2004/09/14 15:03:38 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -89,6 +89,7 @@ public:
 	int delete_rule4(FwRule4& rule);
 	uint32_t get_num_xorp_rules4() const;
 	uint32_t get_num_system_rules4() const;
+	int take_table_ownership();
 
 	//---------------------------------
 	// IPv6 firewall provider interface

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipf.hh,v 1.2 2004/09/02 01:55:38 bms Exp $
+// $XORP: xorp/fea/firewall_ipf.hh,v 1.3 2004/09/14 15:03:38 bms Exp $
 
 #ifndef __FEA_FIREWALL_IPF_HH__
 #define __FEA_FIREWALL_IPF_HH__
@@ -72,6 +72,8 @@ public:
 	inline const char* get_provider_version() const {
 		return ("0.1");
 	}
+
+	int take_table_ownership();
 
 	//---------------------------------
 	// IPv4 firewall provider interface
