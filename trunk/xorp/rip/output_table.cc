@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_table.cc,v 1.1 2003/08/01 04:08:11 hodson Exp $"
+#ident "$XORP: xorp/rip/output_table.cc,v 1.2 2003/08/01 17:10:44 hodson Exp $"
 
 #include "output_table.hh"
 #include "packet_assembly.hh"
@@ -44,8 +44,10 @@ OutputTable<A>::output_packet()
 	rpa.packet_add_route(r->net(), p.first, p.second, r->tag());
 
 	done++;
-	if (rpa.packet_full())
+	if (rpa.packet_full()) {
+	    _rw.next_route();
 	    break;
+	}
     }
 
     if (done == 0 || rpa.packet_finish() == false) {
