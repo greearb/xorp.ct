@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.7 2003/05/31 15:22:32 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.8 2003/09/13 02:33:44 pavlin Exp $
 dnl
 
 dnl
@@ -74,6 +74,7 @@ AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast routing)
 dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on Linux
 AC_TRY_COMPILE([
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/socket.h>
 #include <net/if.h>
 #include <net/if_var.h>
