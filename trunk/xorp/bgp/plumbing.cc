@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.30 2003/10/23 03:10:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.31 2003/10/30 04:39:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,12 +35,12 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
     : _rib_handler(ribhandler),
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
       _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
+      _safi(safi),
       _plumbing_ipv4("(IPv4:" + c_format("%d", safi) + ")", *this,
 		     _next_hop_resolver_ipv4),
       _plumbing_ipv6("(IPv6:" + c_format("%d", safi)+ ")", *this, 
 		     _next_hop_resolver_ipv6),
-      _my_AS_number(AsNum::AS_INVALID),
-      _safi(safi)
+      _my_AS_number(AsNum::AS_INVALID)
 {
 }
 

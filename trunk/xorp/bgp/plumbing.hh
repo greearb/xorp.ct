@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.16 2003/10/14 01:54:36 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.17 2003/10/23 03:10:05 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -180,12 +180,12 @@ private:
     NextHopResolver<IPv4>& _next_hop_resolver_ipv4;
     NextHopResolver<IPv6>& _next_hop_resolver_ipv6;
 
+    const Safi _safi;
+
     BGPPlumbingAF<IPv4> _plumbing_ipv4;
     BGPPlumbingAF<IPv6> _plumbing_ipv6;
 
     AsNum _my_AS_number;
-
-    const Safi _safi;
 };
 
 #endif // __BGP_PLUMBING_HH__
