@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.5 2004/06/14 23:58:04 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.6 2004/06/15 00:58:41 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -78,6 +78,11 @@
   BGP:
     - Once BGP selects a route it is taking too long to install it in
       the kernel.
+
+    - The RIB bug above where deleting an existing route can fail is sometimes
+      triggered by BGP. When BGP receives the deletion failure error
+      from the RIB it considers this to be a fatal error and
+      exits. This problem will be fixed before the XORP 1.0 Release.
 
   STATIC_ROUTES:
     - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
