@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.5 2004/03/02 19:49:28 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.6 2004/03/03 21:17:40 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -260,7 +260,8 @@ public:
 					   const A&		addr,
 					   const A&		peer,
 					   XrlAtomList&		descriptions,
-					   XrlAtomList&		values);
+					   XrlAtomList&		values,
+					   uint32_t&		peer_last_pkt);
 
     XrlCmdError ripx_0_1_add_static_route(const IPNet<A>& 	network,
 					  const A&	 	nexthop,
@@ -1035,12 +1036,14 @@ XrlRipCommonTarget<A>::ripx_0_1_get_counters(const string&	ifn,
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(const string&	ifn,
-						  const string&	vifn,
-						  const A&	addr,
-						  const A&	peer_addr,
-						  XrlAtomList&	descriptions,
-						  XrlAtomList&	values)
+XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(
+					const string&	ifn,
+					const string&	vifn,
+					const A&	addr,
+					const A&	peer_addr,
+					XrlAtomList&	descriptions,
+					XrlAtomList&	values,
+					uint32_t&	peer_last_active)
 {
     pair<Port<A>*, XrlCmdError> pp = find_port(ifn, vifn, addr);
     if (pp.first == 0)
@@ -1081,6 +1084,8 @@ XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(const string&	ifn,
 
     descriptions.append(XrlAtom("", string("Bad Routes Received")));
     values.append(XrlAtom(peer->counters().bad_routes()));
+
+    peer_last_active = peer->last_active().secs();
 
     return XrlCmdError::OKAY();
 }

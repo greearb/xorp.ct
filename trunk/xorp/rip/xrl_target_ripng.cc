@@ -440,9 +440,11 @@ XrlRipngTarget::ripng_0_1_get_peer_counters(const string&	ifn,
 					    const IPv6&		addr,
 					    const IPv6&		peer,
 					    XrlAtomList&	descs,
-					    XrlAtomList&	vals)
+					    XrlAtomList&	vals,
+					    uint32_t&		last_active)
 {
-    return _ct->ripx_0_1_get_peer_counters(ifn, vifn, addr, peer, descs, vals);
+    return _ct->ripx_0_1_get_peer_counters(ifn, vifn, addr, peer,
+					   descs, vals, last_active);
 }
 
 XrlCmdError

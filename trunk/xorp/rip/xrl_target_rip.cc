@@ -525,9 +525,11 @@ XrlRipTarget::rip_0_1_get_peer_counters(const string&	ifn,
 					const IPv4&	addr,
 					const IPv4&	peer,
 					XrlAtomList&	descs,
-					XrlAtomList&	vals)
+					XrlAtomList&	vals,
+					uint32_t&	peer_last_active)
 {
-    return _ct->ripx_0_1_get_peer_counters(ifn, vifn, addr, peer, descs, vals);
+    return _ct->ripx_0_1_get_peer_counters(ifn, vifn, addr, peer,
+					   descs, vals, peer_last_active);
 }
 
 XrlCmdError
