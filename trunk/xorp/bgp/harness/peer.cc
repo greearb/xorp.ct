@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.43 2003/09/18 05:04:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.44 2003/09/18 23:26:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1384,11 +1384,13 @@ public:
 	// constructor argument.
 	: PathAttribute(&_valid[0]) {
 
+	_init_string = attr;
+
 	string line = attr;
 	vector<string> v;
 	tokenize(line, v, ",");
 
-	_data = new uint8_t [v.size()];
+	_data = new uint8_t [_size];
 	for(size_t i = 0; i < v.size(); i++) {
 	    _data[i] = strtol(v[i].c_str(), 0, 0);
 // 	    fprintf(stderr, "%#x ", _data[i]);
@@ -1397,9 +1399,12 @@ public:
 
     };
     
-    PathAttribute *clone() const { XLOG_UNREACHABLE(); }
+    PathAttribute *clone() const { 
+	return new AnyAttribute(_init_string.c_str());
+    }
 private:
     static const uint8_t _valid[];
+    string _init_string;
 };
 
 const uint8_t AnyAttribute::_valid[] = {0x80|0x40, 255, 1, 1};
