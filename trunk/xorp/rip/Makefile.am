@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.16 2003/11/04 23:39:58 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.17 2003/12/04 07:20:04 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -47,6 +47,8 @@ xorp_rip4_LDADD			+= $(top_builddir)/libfeaclient/libfeaclient.a
 xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
 xorp_rip4_LDADD			+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
+xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a
+xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
 xorp_rip4_LDADD			+= $(top_builddir)/libxipc/libxipc.a
 xorp_rip4_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 xorp_rip4_LDADD			+= $(top_builddir)/libxorp/libxorp.a
@@ -98,10 +100,12 @@ librip_a_SOURCES		+= update_queue.cc
 
 # -- RIP Xrl library sources
 libripxrl_a_SOURCES		 = xrl_port_manager.hh
+libripxrl_a_SOURCES		+= xrl_port_io.hh
 libripxrl_a_SOURCES		+= xrl_process_spy.hh
 libripxrl_a_SOURCES		+= xrl_rib_notifier.hh
 
 libripxrl_a_SOURCES		+= xrl_port_manager.cc
+libripxrl_a_SOURCES		+= xrl_port_io.cc
 libripxrl_a_SOURCES		+= xrl_process_spy.cc
 libripxrl_a_SOURCES		+= xrl_rib_notifier.cc
 

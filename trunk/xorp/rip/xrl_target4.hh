@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/xrl_target4.hh,v 1.1 2003/11/04 23:39:59 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET4_HH__
 #define __RIP_XRL_TARGET4_HH__
@@ -65,6 +65,24 @@ public:
 						const string&	vifname,
 						const IPv4&	addr,
 						string&		status);
+
+    XrlCmdError socket4_user_0_1_recv_event(const string&	sockid,
+					    const IPv4&		src_host,
+					    const uint32_t&	src_port,
+					    const vector<uint8_t>& pdata);
+
+    XrlCmdError socket4_user_0_1_connect_event(const string&	sockid,
+					       const IPv4&	src_host,
+					       const uint32_t&	src_port,
+					       const string&	new_sockid,
+					       bool&		accept);
+
+    XrlCmdError socket4_user_0_1_error_event(const string&	sockid,
+					     const string& 	reason,
+					     const bool&	fatal);
+
+    XrlCmdError socket4_user_0_1_close_event(const string&	sockid,
+					     const string&	reason);
 
 protected:
     XrlProcessSpy&	_pspy;

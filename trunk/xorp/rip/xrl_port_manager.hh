@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.1 2003/11/04 23:39:58 hodson Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -21,24 +21,44 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "port_manager.hh"
 
+#include "xrl_port_io.hh"
+#include "port.hh"
+
+class XrlRouter;
+
 template <typename A>
 class XrlPortManager
-    : public PortManagerBase<A>, public IfMgrHintObserver
+    : public PortManagerBase<A>,
+      public IfMgrHintObserver,
+      public ServiceBase,
+      public ServiceChangeObserverBase
 {
 public:
-    XrlPortManager(System<A>& system, IfMgrXrlMirror& ifm)
-	: PortManagerBase<A>(system), _ifm(ifm)
+    inline XrlPortManager(System<A>& 		system,
+			  XrlRouter& 		xr,
+			  IfMgrXrlMirror& 	ifm)
+	: PortManagerBase<A>(system), _xr(xr), _ifm(ifm)
     {
 	_ifm.attach_hint_observer(this);
     }
 
-    ~XrlPortManager()
-    {
-	_ifm.detach_hint_observer(this);
-    }
+    ~XrlPortManager();
 
     /**
-     * Add an address to run RIP on.
+     * Request start up of instance.
+     */
+    void startup();
+
+    /**
+     * Request shutdown of instance..
+     */
+    void shutdown();
+
+    /**
+     * Request the addition of an address to run RIP on.  If the
+     * address is known to exist on the specified interface and vif, a
+     * request is sent to the FEA to create an appropriately
+     * bound RIP socket.
      *
      * @param interface to run RIP on.
      * @param vif virtual interface to run RIP on.
@@ -72,13 +92,23 @@ protected:
     void tree_complete();
     void updates_made();
 
+    //
+    // ServiceChangeObserverBase methods
+    // - used for observing status changes of XrlPortIO objects instantiated
+    //   by XrlPortManager instance.
+    //
+    void status_change(ServiceBase*	service,
+		       ServiceStatus	old_status,
+		       ServiceStatus 	new_status);
+
 private:
     XrlPortManager(const XrlPortManager&);		// not implemented
     XrlPortManager& operator=(const XrlPortManager&);	// not implemented
 
 protected:
-    IfMgrXrlMirror& _ifm;		// Interface Mirror
-
+    XrlRouter& 				_xr;	// XrlRouter
+    IfMgrXrlMirror& 			_ifm;	// Interface Mirror
+    map<ServiceBase*, Port<A>*>	_dead_ports; // Ports awaiting io shutdown
 };
 
 #endif // __RIP_XRL_PORT_MANAGER_HH__

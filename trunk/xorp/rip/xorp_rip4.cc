@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/rip/xorp_rip4.cc,v 1.1 2003/11/04 23:39:58 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -27,6 +27,7 @@
 
 #include "rip/system.hh"
 #include "rip/xrl_target4.hh"
+#include "rip/xrl_port_manager.hh"
 #include "rip/xrl_process_spy.hh"
 #include "rip/xrl_rib_notifier.hh"
 
@@ -58,11 +59,12 @@ rip_main(const string& finder_host, uint16_t finder_port)
 {
     XorpUnexpectedHandler catch_all(xorp_unexpected_handler);
     try {
-	EventLoop e;
-	System<IPv4> rip_system(e);
-	XrlStdRouter xsr(e, "rip4", finder_host.c_str(), finder_port);
-
-	XrlProcessSpy xps(xsr);
+	EventLoop 	     e;
+	System<IPv4> 	     rip_system(e);
+	XrlStdRouter 	     xsr(e, "rip4", finder_host.c_str(), finder_port);
+	XrlProcessSpy	     xps(xsr);
+	IfMgrXrlMirror	     ixm(e);
+	XrlPortManager<IPv4> xpm(rip_system, xsr, ixm);
 
 	bool stop_requested(false);
 	XrlRip4Target xr4t(xsr, xps, stop_requested);
@@ -80,9 +82,11 @@ rip_main(const string& finder_host, uint16_t finder_port)
 	// Start up rib notifier
 	xn.startup();
 
-	// Instantiate and start libfeaclient based interface mirror
-	IfMgrXrlMirror ixm(e);
+	// Start up interface mirror
 	ixm.startup();
+
+	// Start up xrl port manager
+	xpm.startup();
 
 	while (stop_requested == false &&
 	       xn.status() != FAILED) {

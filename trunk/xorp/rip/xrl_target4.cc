@@ -153,3 +153,50 @@ XrlRip4Target::rip4_0_1_get_rip_address_status(const string& ifname,
 
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError
+XrlRip4Target::socket4_user_0_1_recv_event(const string&	sockid,
+					   const IPv4&		src_host,
+					   const uint32_t&	src_port,
+					   const vector<uint8_t>& pdata)
+{
+    debug_msg("socket4_user_0_1_recv_event %s %s/%u %u bytes\n",
+	      sockid.c_str(), src_host.str().c_str(), src_port,
+	      static_cast<uint32_t>(pdata.size()));
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRip4Target::socket4_user_0_1_connect_event(const string&	sockid,
+					      const IPv4&	src_host,
+					      const uint32_t&	src_port,
+					      const string&	new_sockid,
+					      bool&		accept)
+{
+    debug_msg("socket4_user_0_1_connect_event %s %s/%u %s\n",
+	      sockid.c_str(), src_host.str().c_str(), src_port,
+	      new_sockid.c_str());
+    accept = false;
+    return XrlCmdError::COMMAND_FAILED("Connect not requested.");
+}
+
+XrlCmdError
+XrlRip4Target::socket4_user_0_1_error_event(const string&	sockid,
+					    const string& 	reason,
+					    const bool&		fatal)
+{
+    debug_msg("socket4_user_0_1_error_event %s %s %s \n",
+	      sockid.c_str(), reason.c_str(),
+	      fatal ? "fatal" : "non-fatal");
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRip4Target::socket4_user_0_1_close_event(const string&	sockid,
+					    const string&	reason)
+{
+    debug_msg("socket4_user_0_1_close_event %s %s\n",
+	      sockid.c_str(), reason.c_str());
+    return XrlCmdError::OKAY();
+}
+

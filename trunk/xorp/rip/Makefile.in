@@ -110,7 +110,7 @@ LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Real Program Sources
 xorp_rip4_SOURCES = xorp_rip4.cc xrl_target4.hh xrl_target4.cc
-xorp_rip4_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/librip4base.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+xorp_rip4_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/librip4base.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 xorp_rip6_SOURCES = xorp_rip6.cc
 
@@ -127,7 +127,7 @@ test_outputs_SOURCES = test_outputs.cc
 librip_a_SOURCES = rip_module.h auth.hh constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh rib_notifier_base.hh route_db.hh route_entry.hh system.hh update_queue.hh auth.cc output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc route_db.cc route_entry.cc update_queue.cc
 
 # -- RIP Xrl library sources
-libripxrl_a_SOURCES = xrl_port_manager.hh xrl_process_spy.hh xrl_rib_notifier.hh xrl_port_manager.cc xrl_process_spy.cc xrl_rib_notifier.cc
+libripxrl_a_SOURCES = xrl_port_manager.hh xrl_port_io.hh xrl_process_spy.hh xrl_rib_notifier.hh xrl_port_manager.cc xrl_port_io.cc xrl_process_spy.cc xrl_rib_notifier.cc
 
 
 ################################################################
@@ -148,7 +148,8 @@ librip_a_OBJECTS = $(am_librip_a_OBJECTS)
 libripxrl_a_AR = $(AR) cru
 libripxrl_a_LIBADD =
 am_libripxrl_a_OBJECTS = xrl_port_manager.$(OBJEXT) \
-	xrl_process_spy.$(OBJEXT) xrl_rib_notifier.$(OBJEXT)
+	xrl_port_io.$(OBJEXT) xrl_process_spy.$(OBJEXT) \
+	xrl_rib_notifier.$(OBJEXT)
 libripxrl_a_OBJECTS = $(am_libripxrl_a_OBJECTS)
 bin_PROGRAMS = xorp_rip4$(EXEEXT) xorp_rip6$(EXEEXT)
 noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
@@ -204,6 +205,8 @@ xorp_rip4_DEPENDENCIES = ./libripxrl.a ./librip.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/xrl/interfaces/libsocket4locatorxif.a \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -231,7 +234,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
 @AMDEP_TRUE@	$(DEPDIR)/update_queue.Po $(DEPDIR)/xorp_rip4.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xorp_rip6.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_rip6.Po $(DEPDIR)/xrl_port_io.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_port_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_process_spy.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_rib_notifier.Po \
@@ -360,6 +363,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip6.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_port_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_port_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_process_spy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_rib_notifier.Po@am__quote@
