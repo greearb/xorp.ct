@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.6 2003/05/14 01:13:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.7 2003/05/14 09:37:55 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -180,10 +180,8 @@ XrlInterfaceManager::add(uint32_t tid, const Operation& op)
 XrlCmdError
 XrlInterfaceManager::commit_transaction(uint32_t tid)
 {
-    // XXX copy existing config ?
-    IfTree& local_config = iftree();
-
-    // IfTree backup_config = local_config;
+    IfTree& local_config = iftree();	// The current config
+    
     if (_itm.commit(tid)) {
 	if (_itm.error().empty() == false) {
 	    return XrlCmdError::COMMAND_FAILED(_itm.error());
@@ -193,16 +191,35 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 	// If we get here we have updated the local copy of the config
 	// successfully.
 	//
+	IfTree backup_config = local_config;
 	bool push_success = ifconfig().push_config(local_config);
 	local_config.finalize_state();
-
+	
+	//
 	// Align with device configuration, so that any stuff that failed
-	// in push is not held over in config
+	// in push is not held over in config.
+	//
 	const IfTree& dev_config = ifconfig().pull_config();
 	debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
 	debug_msg("LOCAL CONFIG %s\n", local_config.str().c_str());
 	
-	local_config.align_with(dev_config);
+	local_config.align_with(dev_config, true);
+	
+	debug_msg("LOCAL CONFIG AFTER ALIGN %s\n", local_config.str().c_str());
+	
+	//
+	// Propagate the configuration changes to all listeners.
+	//
+	ifconfig().report_updates(backup_config);
+	backup_config.finalize_state();
+	
+	//
+	// Align with device configuration, and if any of the commit failed,
+	// propagate the removal to all listeners.
+	//
+	backup_config.align_with(dev_config, false);
+	ifconfig().report_updates(backup_config);
+	backup_config.finalize_state();
 	
 	if (push_success) {
 	    return XrlCmdError::OKAY();
