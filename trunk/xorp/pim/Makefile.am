@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.18 2004/04/30 02:39:25 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.19 2004/05/04 00:14:46 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -77,16 +77,18 @@ test_pim_SOURCES += $(top_builddir)/rib/rib_manager.cc
 test_pim_SOURCES += $(top_builddir)/rib/xrl_target.hh
 test_pim_SOURCES += $(top_builddir)/rib/xrl_target.cc
 
-test_pim_LDADD	  = $(LDADD)
-test_pim_LDADD	 += $(top_builddir)/libfeaclient/libfeaclient.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+test_pim_LDADD	 = $(LDADD)
+test_pim_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
 ### socket server libraries and related
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4userxif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4xif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket6userxif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket6xif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/targets/libsocketserverbase.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 
 # -- Library Sources
 libpim_a_SOURCES  = pim_module.h
