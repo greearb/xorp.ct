@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.29 2004/09/21 18:09:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.30 2004/09/28 00:43:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -434,9 +434,9 @@ XrlBgpTarget::bgp_0_2_get_peer_list_next(
 					 // Input values, 
 					 const uint32_t&	token, 
 					 // Output values, 
-					 IPv4&	local_ip, 
+					 string&	local_ip, 
 					 uint32_t&	local_port, 
-					 IPv4&	peer_ip, 
+					 string&	peer_ip, 
 					 uint32_t&	peer_port, 
 					 bool&	more)
 {
@@ -448,14 +448,14 @@ XrlBgpTarget::bgp_0_2_get_peer_list_next(
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_id(
 				  // Input values, 
-				  const IPv4&	local_ip, 
+				  const string&	local_ip, 
 				  const uint32_t&	local_port, 
-				  const IPv4&	peer_ip, 
+				  const string&	peer_ip, 
 				  const uint32_t&	peer_port, 
 				  // Output values, 
 				  IPv4&	peer_id)
 {
-    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     if (!_bgp.get_peer_id(iptuple, peer_id)) {
 	return XrlCmdError::COMMAND_FAILED();
     }
@@ -465,15 +465,15 @@ XrlBgpTarget::bgp_0_2_get_peer_id(
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_status(
 				      // Input values, 
-				      const IPv4&	local_ip, 
+				      const string&	local_ip, 
 				      const uint32_t&	local_port, 
-				      const IPv4&	peer_ip, 
+				      const string&	peer_ip, 
 				      const uint32_t&	peer_port, 
 				      // Output values, 
 				      uint32_t&	peer_state, 
 				      uint32_t&	admin_status)
 {
-    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     if (!_bgp.get_peer_status(iptuple, peer_state, admin_status)) {
 	return XrlCmdError::COMMAND_FAILED();
     }
@@ -483,14 +483,14 @@ XrlBgpTarget::bgp_0_2_get_peer_status(
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_negotiated_version(
 						  // Input values, 
-						  const IPv4& local_ip, 
+						  const string& local_ip, 
 						  const uint32_t& local_port, 
-						  const IPv4& peer_ip, 
+						  const string& peer_ip, 
 						  const uint32_t& peer_port, 
 						  // Output values, 
 						  int32_t& neg_version)
 {
-    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     if (!_bgp.get_peer_negotiated_version(iptuple, neg_version)) {
 	return XrlCmdError::COMMAND_FAILED();
     }
@@ -500,14 +500,14 @@ XrlBgpTarget::bgp_0_2_get_peer_negotiated_version(
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_as(
 				  // Input values, 
-				  const IPv4& local_ip, 
+				  const string& local_ip, 
 				  const uint32_t& local_port, 
-				  const IPv4&	peer_ip, 
+				  const string&	peer_ip, 
 				  const uint32_t& peer_port, 
 				  // Output values, 
 				  uint32_t& peer_as)
 {
-    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     if (!_bgp.get_peer_as(iptuple, peer_as)) {
 	return XrlCmdError::COMMAND_FAILED();
     }
@@ -517,9 +517,9 @@ XrlBgpTarget::bgp_0_2_get_peer_as(
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_msg_stats(
 					 // Input values, 
-					 const IPv4& local_ip, 
+					 const string& local_ip, 
 					 const uint32_t& local_port, 
-					 const IPv4& peer_ip, 
+					 const string& peer_ip, 
 					 const uint32_t& peer_port, 
 					 // Output values, 
 					 uint32_t&	in_updates, 
@@ -529,7 +529,7 @@ XrlBgpTarget::bgp_0_2_get_peer_msg_stats(
 					 uint32_t&	last_error, 
 					 uint32_t&	in_update_elapsed)
 {
-    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     uint16_t last_error_short;
     if (!_bgp.get_peer_msg_stats(iptuple, in_updates, out_updates,
 				 in_msgs, out_msgs, last_error_short, 
@@ -543,15 +543,15 @@ XrlBgpTarget::bgp_0_2_get_peer_msg_stats(
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_established_stats(
 						 // Input values, 
-						 const IPv4& local_ip, 
+						 const string& local_ip, 
 						 const uint32_t& local_port, 
-						 const IPv4& peer_ip, 
+						 const string& peer_ip, 
 						 const uint32_t& peer_port, 
 						 // Output values, 
 						 uint32_t& transitions, 
 						 uint32_t& established_time)
 {
-    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     if (!_bgp.get_peer_established_stats(iptuple, transitions, 
 					 established_time)) {
 	return XrlCmdError::COMMAND_FAILED();
@@ -562,9 +562,9 @@ XrlBgpTarget::bgp_0_2_get_peer_established_stats(
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_timer_config(
 					    // Input values, 
-					    const IPv4&	local_ip, 
+					    const string&	local_ip, 
 					    const uint32_t& local_port, 
-					    const IPv4&	peer_ip, 
+					    const string&	peer_ip, 
 					    const uint32_t& peer_port, 
 					    // Output values, 
 					    uint32_t& retry_interval, 
@@ -575,7 +575,7 @@ XrlBgpTarget::bgp_0_2_get_peer_timer_config(
 					    uint32_t& min_as_origin_interval,
 					    uint32_t& min_route_adv_interval)
 {
-    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
 				    keep_alive, hold_time_conf,
 				    keep_alive_conf, min_as_origin_interval,

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.34 2004/11/24 07:27:02 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.35 2004/12/05 16:14:34 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -163,9 +163,9 @@ public:
     bool get_peer_list_start(uint32_t& token);
 
     bool get_peer_list_next(const uint32_t& token, 
-			    IPv4& local_ip, 
+			    string& local_ip, 
 			    uint32_t& local_port, 
-			    IPv4& peer_ip, 
+			    string& peer_ip, 
 			    uint32_t& peer_port);
 
     bool get_peer_id(const Iptuple& iptuple, IPv4& peer_id);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.24 2004/09/17 13:50:56 abittau Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.25 2004/09/21 18:09:48 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -164,26 +164,26 @@ public:
         // Input values,
         const uint32_t&	token,
 	// Output values,
-	IPv4&	local_ip,
+	string&	local_ip,
 	uint32_t&	local_port,
-	IPv4&	peer_ip,
+	string&	peer_ip,
 	uint32_t&	peer_port,
 	bool&	more);
 
     XrlCmdError bgp_0_2_get_peer_id(
         // Input values,
-        const IPv4&	local_ip,
+        const string&	local_ip,
 	const uint32_t&	local_port,
-	const IPv4&	peer_ip,
+	const string&	peer_ip,
 	const uint32_t&	peer_port,
 	// Output values,
 	IPv4&	peer_id);
 
     XrlCmdError bgp_0_2_get_peer_status(
         // Input values,
-        const IPv4&	local_ip,
+        const string&	local_ip,
 	const uint32_t&	local_port,
-	const IPv4&	peer_ip,
+	const string&	peer_ip,
 	const uint32_t&	peer_port,
 	// Output values,
 	uint32_t&	peer_state,
@@ -191,27 +191,27 @@ public:
 
     XrlCmdError bgp_0_2_get_peer_negotiated_version(
         // Input values,
-        const IPv4& local_ip,
+        const string& local_ip,
 	const uint32_t& local_port,
-	const IPv4& peer_ip,
+	const string& peer_ip,
 	const uint32_t& peer_port,
 	// Output values,
 	int32_t& neg_version);
 
     XrlCmdError bgp_0_2_get_peer_as(
         // Input values,
-        const IPv4& local_ip,
+        const string& local_ip,
 	const uint32_t& local_port,
-	const IPv4&	peer_ip,
+	const string&	peer_ip,
 	const uint32_t& peer_port,
 	// Output values,
 	uint32_t& peer_as);
 
     XrlCmdError bgp_0_2_get_peer_msg_stats(
         // Input values,
-        const IPv4& local_ip,
+        const string& local_ip,
 	const uint32_t& local_port,
-	const IPv4& peer_ip,
+	const string& peer_ip,
 	const uint32_t& peer_port,
 	// Output values,
 	uint32_t&	in_updates,
@@ -223,9 +223,9 @@ public:
 
     XrlCmdError bgp_0_2_get_peer_established_stats(
         // Input values,
-        const IPv4& local_ip,
+        const string& local_ip,
 	const uint32_t& local_port,
-	const IPv4& peer_ip,
+	const string& peer_ip,
 	const uint32_t& peer_port,
 	// Output values,
 	uint32_t& transitions,
@@ -233,9 +233,9 @@ public:
 
     XrlCmdError bgp_0_2_get_peer_timer_config(
         // Input values,
-        const IPv4&	local_ip,
+        const string&	local_ip,
 	const uint32_t& local_port,
-	const IPv4&	peer_ip,
+	const string&	peer_ip,
 	const uint32_t& peer_port,
 	// Output values,
 	uint32_t& retry_interval,

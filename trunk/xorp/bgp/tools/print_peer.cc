@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.13 2004/10/06 20:38:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.14 2004/12/05 08:44:03 atanu Exp $"
 
 #include "print_peer.hh"
 
@@ -86,9 +86,10 @@ PrintPeers::get_peer_list_start_done(const XrlError& e,
 }
 
 void
-PrintPeers::get_peer_list_next() {
-    XorpCallback6<void, const XrlError&, const IPv4*, 
-	const uint32_t*, const IPv4*, const uint32_t*, 
+PrintPeers::get_peer_list_next()
+{
+    XorpCallback6<void, const XrlError&, const string*, 
+	const uint32_t*, const string*, const uint32_t*, 
 	const bool*>::RefPtr cb;
     cb = callback(this, &PrintPeers::get_peer_list_next_done);
     send_get_peer_list_next("bgp", _token, cb);
@@ -96,9 +97,9 @@ PrintPeers::get_peer_list_next() {
 
 void
 PrintPeers::get_peer_list_next_done(const XrlError& e, 
-				    const IPv4* local_ip, 
+				    const string* local_ip, 
 				    const uint32_t* local_port, 
-				    const IPv4* peer_ip, 
+				    const string* peer_ip, 
 				    const uint32_t* peer_port, 
 				    const bool* more) 
 {
@@ -116,8 +117,8 @@ PrintPeers::get_peer_list_next_done(const XrlError& e,
 	
     _count++;
     printf("Peer %d: local %s/%d remote %s/%d\n", _count,
-	   local_ip->str().c_str(), *local_port,
-	   peer_ip->str().c_str(), *peer_port);
+	   local_ip->c_str(), *local_port,
+	   peer_ip->c_str(), *peer_port);
     if (_verbose) {
 	_more = *more;
 	print_peer_verbose(*local_ip, *local_port, 
@@ -133,9 +134,9 @@ PrintPeers::get_peer_list_next_done(const XrlError& e,
 }
 
 void 
-PrintPeers::print_peer_verbose(const IPv4& local_ip, 
+PrintPeers::print_peer_verbose(const string& local_ip, 
 			       uint32_t local_port, 
-			       const IPv4& peer_ip, 
+			       const string& peer_ip, 
 			       uint32_t peer_port) 
 {
     //node: ports are still in network byte order

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_peer.hh,v 1.6 2003/01/19 00:59:26 mjh Exp $
+// $XORP: xorp/bgp/tools/print_peer.hh,v 1.8 2004/06/10 22:40:41 hodson Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -34,14 +34,14 @@ public:
 				  const bool* more);
     void get_peer_list_next();
     void get_peer_list_next_done(const XrlError& e, 
-				 const IPv4* local_ip, 
+				 const string* local_ip, 
 				 const uint32_t* local_port, 
-				 const IPv4* peer_ip, 
+				 const string* peer_ip, 
 				 const uint32_t* peer_port, 
 				 const bool* more);
-    void print_peer_verbose(const IPv4& local_ip, 
+    void print_peer_verbose(const string& local_ip, 
 			    uint32_t local_port, 
-			    const IPv4& peer_ip, 
+			    const string& peer_ip, 
 			    uint32_t peer_port);
     void get_peer_id_done(const XrlError& e, 
 			  const IPv4* peer_id);

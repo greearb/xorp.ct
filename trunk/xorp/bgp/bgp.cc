@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.42 2004/11/24 07:27:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.43 2004/12/05 16:14:34 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -545,16 +545,18 @@ BGPMain::next_hop_rewrite_filter(const Iptuple& iptuple, const IPv4& next_hop)
 }
 
 bool
-BGPMain::get_peer_list_start(uint32_t& token) {
+BGPMain::get_peer_list_start(uint32_t& token)
+{
     return _peerlist->get_peer_list_start(token);
 }
 
 bool
 BGPMain::get_peer_list_next(const uint32_t& token,
-			IPv4& local_ip,
+			string& local_ip,
 			uint32_t& local_port,
-			IPv4& peer_ip,
-			uint32_t& peer_port) {
+			string& peer_ip,
+			uint32_t& peer_port)
+{
     return _peerlist->get_peer_list_next(token, local_ip, local_port,
 					 peer_ip, peer_port);
 }
