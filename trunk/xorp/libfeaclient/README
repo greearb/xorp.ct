@@ -1,3 +1,7 @@
+#
+# $XORP$
+#
+
 This directory contains code that may be useful to clients of the FEA.
 
 The goal is to mirror the FEA interface configuration state across

@@ -1,3 +1,7 @@
+#
+# $XORP$
+#
+
 This directory contains Makefile includes.  These are intended to help
 with generating consistent documentation.  At present only one include
 files exist: Makefile.doc.am
