@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.8 2003/04/02 18:57:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.9 2003/04/02 19:51:14 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -259,7 +259,7 @@ PimMre::register_stop_timer_timeout()
     set_register_join_pending_state();
     // Stop timer(**) (** The RegisterStopTimer is set to Register_Probe_Time
     register_stop_timer() =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0),
 	    callback(this, &PimMre::register_stop_timer_timeout));
     // Send Null Register
@@ -310,7 +310,7 @@ PimMre::receive_register_stop()
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    register_stop_tv,
 	    callback(this, &PimMre::register_stop_timer_timeout));
     return;
@@ -325,7 +325,7 @@ PimMre::receive_register_stop()
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    register_stop_tv,
 	    callback(this, &PimMre::register_stop_timer_timeout));
     return;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.9 2003/02/26 00:12:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.10 2003/03/10 23:20:28 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -54,9 +54,9 @@ class STCPRequestHandler {
 public:
     STCPRequestHandler(XrlPFSTCPListener& parent, int fd) :
 	_parent(parent), _fd(fd), _request(),
-	_reader(parent.event_loop(), fd), _writer(parent.event_loop(), fd)
+	_reader(parent.eventloop(), fd), _writer(parent.eventloop(), fd)
     {
-	EventLoop& e = _parent.event_loop();
+	EventLoop& e = _parent.eventloop();
 	_life_timer = e.new_oneoff_after_ms(QUIET_LIFE_MS,
 					    callback(this,
 						     &STCPRequestHandler::die,
@@ -351,7 +351,7 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdDispatcher* x, uint16_t
     }
 
     _address_slash_port = address_slash_port(addr, port);
-    _event_loop.add_selector(_fd, SEL_RD,
+    _eventloop.add_selector(_fd, SEL_RD,
 			     callback(this, &XrlPFSTCPListener::connect_hook));
 }
 
@@ -362,7 +362,7 @@ XrlPFSTCPListener::~XrlPFSTCPListener()
 	delete *i;
 	*i = 0;
     }
-    _event_loop.remove_selector(_fd);
+    _eventloop.remove_selector(_fd);
     close(_fd);
 }
 
@@ -486,7 +486,7 @@ XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     _requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
 
     RequestState& r = _requests_pending.back();
-    r.timeout = _event_loop.new_oneoff_after_ms(_timeout_ms,
+    r.timeout = _eventloop.new_oneoff_after_ms(_timeout_ms,
 		    callback(this,
 			     &XrlPFSTCPSender::timeout_request, r.seqno));
 
@@ -734,7 +734,7 @@ XrlPFSTCPSender::set_keepalive_ms(uint32_t t)
 inline void
 XrlPFSTCPSender::start_keepalives()
 {
-    _keepalive_timer = _event_loop.new_periodic(_keepalive_ms,
+    _keepalive_timer = _eventloop.new_periodic(_keepalive_ms,
 						callback(this, &XrlPFSTCPSender::send_keepalive));
     _keepalive_packet.resize(sizeof(STCPPacketHeader));
     _keepalive_in_progress = false;

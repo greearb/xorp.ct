@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.9 2003/04/02 22:58:58 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.10 2003/04/03 00:24:02 hodson Exp $"
 
 
 //
@@ -166,14 +166,14 @@ main(int argc, char *argv[])
     //
     try {
 	Foo f;
-	EventLoop event_loop;
+	EventLoop eventloop;
 	
 	//
 	// Finder
 	//
 	FinderNGServer *finder = 0;
 	try {
-	    finder = new FinderNGServer(event_loop);
+	    finder = new FinderNGServer(eventloop);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
 	}
@@ -184,10 +184,10 @@ main(int argc, char *argv[])
 	// CLI
 	//
 #if DO_IPV4
-	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, event_loop);
+	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
 	cli_node4.set_cli_port(12000);
 #else
-	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, event_loop);
+	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
 	cli_node6.set_cli_port(12000);
 #endif // ! DO_IPV4
 	//
@@ -205,10 +205,10 @@ main(int argc, char *argv[])
 	// Create and configure the CLI XRL interface
 	//
 #if DO_IPV4
-	XrlStdRouter xrl_std_router_cli4(event_loop, cli_node4.module_name());
+	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name());
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
 #else
-	XrlStdRouter xrl_std_router_cli6(event_loop, cli_node6.module_name());
+	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name());
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
 #endif // ! DO_IPV4
 	
@@ -228,16 +228,16 @@ main(int argc, char *argv[])
 	// cli_node6.start();
 	
 	// Test timer    
-	XorpTimer wakeywakey = event_loop.new_periodic(1000, callback(wakeup_hook));
-	XorpTimer wakeywakey2 = event_loop.new_periodic(5000, callback(wakeup_hook2, 3, 5));
-	XorpTimer wakeywakey3 = event_loop.new_periodic(2000, callback(f, &Foo::print));
+	XorpTimer wakeywakey = eventloop.new_periodic(1000, callback(wakeup_hook));
+	XorpTimer wakeywakey2 = eventloop.new_periodic(5000, callback(wakeup_hook2, 3, 5));
+	XorpTimer wakeywakey3 = eventloop.new_periodic(2000, callback(f, &Foo::print));
 	
 	
 	//
 	// Main loop
 	//
 	for (;;) {
-	    event_loop.run();
+	    eventloop.run();
 	}
 	
     } catch(...) {

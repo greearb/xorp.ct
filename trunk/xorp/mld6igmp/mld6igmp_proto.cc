@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.3 2003/03/31 04:20:10 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.4 2003/04/16 04:53:43 pavlin Exp $"
 
 
 //
@@ -75,7 +75,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 		      ipaddr_zero);
 	_startup_query_count = 0;		// XXX: not a startup case
 	_query_timer =
-	    mld6igmp_node().event_loop().new_oneoff_after(
+	    mld6igmp_node().eventloop().new_oneoff_after(
 		TimeVal(IGMP_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
@@ -89,7 +89,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 		      ipaddr_zero);
 	_startup_query_count = 0;		// XXX: not a startup case
 	_query_timer =
-	    mld6igmp_node().event_loop().new_oneoff_after(
+	    mld6igmp_node().eventloop().new_oneoff_after(
 		TimeVal(MLD_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
@@ -143,7 +143,7 @@ Mld6igmpVif::query_timer_timeout()
 #endif // HAVE_IPV6
     
     _query_timer =
-	mld6igmp_node().event_loop().new_oneoff_after(
+	mld6igmp_node().eventloop().new_oneoff_after(
 	    TimeVal(query_interval, 0),
 	    callback(this, &Mld6igmpVif::query_timer_timeout));
 }

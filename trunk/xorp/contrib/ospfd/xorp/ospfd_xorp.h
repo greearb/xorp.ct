@@ -27,7 +27,7 @@
 
 class XorpOspfd : public OSInstance {
   public:
-    XorpOspfd(EventLoop& event_loop, XrlRouter& r);
+    XorpOspfd(EventLoop& eventloop, XrlRouter& r);
     ~XorpOspfd();
     void time_update();
     

@@ -63,7 +63,7 @@ void OSInstance::monitor_response(struct MonMsg *msg, uns16 code, int len, int f
  * class.
  */
 
-OSInstance::OSInstance(EventLoop& e, uns16 mon_port) : OspfSysCalls(), _event_loop(e)
+OSInstance::OSInstance(EventLoop& e, uns16 mon_port) : OspfSysCalls(), _eventloop(e)
 
 {
     ospfd_mon_port = mon_port;
@@ -167,7 +167,7 @@ void OSInstance::accept_monitor_connection()
         TcpConn *conn;
 	conn = new TcpConn(fd);
 	monfds.add(conn);
-	if (!_event_loop.add_selector(fd, SEL_ALL,
+	if (!_eventloop.add_selector(fd, SEL_ALL,
 				      callback(this, 
 					       &OSInstance::tcp_data_cb,
 					       conn))) {
@@ -184,7 +184,7 @@ void OSInstance::close_monitor_connection(TcpConn *conn)
 
 {
     close(conn->monfd());
-    _event_loop.remove_selector(conn->monfd());
+    _eventloop.remove_selector(conn->monfd());
 
     monfds.remove(conn);
     if (ospf)
@@ -224,7 +224,7 @@ void OSInstance::monitor_listen()
 	XLOG_FATAL("Monitor listen failed: %s", strerror(errno));
     }
 
-    if (_event_loop.add_selector(listenfd, SEL_RD, 
+    if (_eventloop.add_selector(listenfd, SEL_RD, 
 				 callback(this, &OSInstance::accept_cb)
 				 ) == false) {
 	XLOG_FATAL("Monitor could not add selector.");

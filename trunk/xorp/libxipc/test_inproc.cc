@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.6 2003/02/26 00:12:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.7 2003/03/10 23:20:25 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -137,27 +137,27 @@ print_twirl()
 static void
 run_test()
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
     XrlCmdDispatcher cmd_dispatcher("tester");
 
     cmd_dispatcher.add_handler("hello", callback(hello_recv_handler));
     cmd_dispatcher.add_handler("get_int32", callback(int32_recv_handler));
 
-    XrlPFInProcListener listener(event_loop, &cmd_dispatcher);
-    XrlPFInProcSender s(event_loop, listener.address());
+    XrlPFInProcListener listener(eventloop, &cmd_dispatcher);
+    XrlPFInProcSender s(eventloop, listener.address());
 
     trace("listener address: %s\n", listener.address());
 
-    XorpTimer dp = event_loop.new_periodic(500, callback(&print_twirl));
+    XorpTimer dp = eventloop.new_periodic(500, callback(&print_twirl));
     assert(dp.scheduled());
 
     trace("Testing XRLPFInProc\n");
     for (int i = 0; i < 100000; i++) {
-	test_hello(event_loop, s);
-	test_int32(event_loop, s);
-	// Can't call event_loop.run() because it blocks and inproc
+	test_hello(eventloop, s);
+	test_int32(eventloop, s);
+	// Can't call eventloop.run() because it blocks and inproc
 	// send/recv stuff happens instantaneously.
-	event_loop.timer_list().run();
+	eventloop.timer_list().run();
     }
     assert(dp.scheduled());
     printf("\n");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.12 2003/04/02 19:51:13 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.13 2003/04/16 04:53:43 pavlin Exp $"
 
 
 //
@@ -307,7 +307,7 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 	_querier_addr = src;
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
 	_other_querier_timer =
-	    mld6igmp_node().event_loop().new_oneoff_after(
+	    mld6igmp_node().eventloop().new_oneoff_after(
 		TimeVal(MLD_OTHER_QUERIER_PRESENT_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
@@ -346,7 +346,7 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 	    
 	    if (left_resp_tv > received_resp_tv) {
 		member_query->_member_query_timer =
-		    mld6igmp_node().event_loop().new_oneoff_after(
+		    mld6igmp_node().eventloop().new_oneoff_after(
 			received_resp_tv,
 			callback(member_query,
 				 &MemberQuery::member_query_timer_timeout));
@@ -426,7 +426,7 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
     }
     
     member_query->_member_query_timer =
-	mld6igmp_node().event_loop().new_oneoff_after(
+	mld6igmp_node().eventloop().new_oneoff_after(
 	    TimeVal(MLD_MULTICAST_LISTENER_INTERVAL, 0),
 	    callback(member_query, &MemberQuery::member_query_timer_timeout));
 
@@ -476,7 +476,7 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 	    // Group found
 	    if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
 		member_query->_member_query_timer =
-		    mld6igmp_node().event_loop().new_oneoff_after(
+		    mld6igmp_node().eventloop().new_oneoff_after(
 			TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL
 				* MLD_LAST_LISTENER_QUERY_COUNT),
 			0),
@@ -490,7 +490,7 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 			       * MLD_TIMER_SCALE),
 			      member_query->group());
 		member_query->_last_member_query_timer =
-		    mld6igmp_node().event_loop().new_oneoff_after(
+		    mld6igmp_node().eventloop().new_oneoff_after(
 			TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
 			callback(member_query,
 				 &MemberQuery::last_member_query_timer_timeout));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.7 2003/04/02 17:10:41 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.8 2003/04/02 22:49:12 pavlin Exp $"
 
 
 //
@@ -285,9 +285,9 @@ MfeaDfe::mfea_dft() const
 }
 
 EventLoop&
-MfeaDfe::event_loop() const
+MfeaDfe::eventloop() const
 {
-    return (mfea_dft().mfea_node().event_loop());
+    return (mfea_dft().mfea_node().eventloop());
 }
 
 int
@@ -450,13 +450,13 @@ void
 MfeaDfe::start_measurement()
 {
     _measurement_timer =
-	event_loop().new_oneoff_after(_measurement_interval,
+	eventloop().new_oneoff_after(_measurement_interval,
 				      callback(this,
 					       &MfeaDfe::measurement_timer_timeout));
     
     TimeVal now;
     
-    mfea_dft().mfea_node().event_loop().current_time(now);
+    mfea_dft().mfea_node().eventloop().current_time(now);
     _start_time[_delta_sg_count_index] = now;
 }
 

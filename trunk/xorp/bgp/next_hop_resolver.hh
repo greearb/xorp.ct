@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.12 2003/04/18 23:27:44 mjh Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.13 2003/04/19 20:39:46 mjh Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -80,7 +80,7 @@ template<class A> class NHRequest;
 template<class A>
 class NextHopResolver {
 public:
-    NextHopResolver(XrlStdRouter *xrl_router, EventLoop& event_loop);
+    NextHopResolver(XrlStdRouter *xrl_router, EventLoop& eventloop);
 
     virtual ~NextHopResolver();
 
@@ -195,13 +195,13 @@ public:
     /**
      * Get a reference to the main timer list
      */
-    EventLoop& event_loop() {return _event_loop;}
+    EventLoop& eventloop() {return _eventloop;}
 protected:
     DecisionTable<A> *_decision;
 private:
     string _ribname;	// RIB name to use in XRL calls
     XrlStdRouter *_xrl_router;
-    EventLoop& _event_loop;
+    EventLoop& _eventloop;
     NextHopCache<A> _next_hop_cache;
     NextHopRibRequest<A> _next_hop_rib_request;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.8 2003/04/02 22:49:12 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.9 2003/04/21 22:02:56 mjh Exp $"
 
 
 //
@@ -153,7 +153,7 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
     iter_end_dft = mfea_node().mfea_dft().group_by_prefix_end(group_range);
     TimeVal now;
     
-    mfea_node().event_loop().current_time(now);
+    mfea_node().eventloop().current_time(now);
     
     for (iter_dft = iter_begin_dft; iter_dft != iter_end_dft; ++iter_dft) {
 	MfeaDfeLookup *mfea_dfe_lookup = iter_dft->second;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.4 2003/03/30 03:50:44 pavlin Exp $
+// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.5 2003/03/31 03:45:19 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_DATAFLOW_HH__
@@ -322,7 +322,7 @@ public:
      * 
      * @return a reference to the @ref EventLoop.
      */
-    EventLoop& event_loop() const;
+    EventLoop& eventloop() const;
     
     /**
      * Get the address family.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.9 2003/03/18 02:44:37 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.10 2003/03/27 00:19:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -67,9 +67,9 @@ public:
      * @param module_id the module ID (@ref xorp_module_id). Should be
      * XORP_MODULE_PIMSM Note: if/after PIM-DM is implemented,
      * XORP_MODULE_PIMDM would be allowed as well.
-     * @param event_loop the event loop to use.
+     * @param eventloop the event loop to use.
      */
-    PimNode(int family, xorp_module_id module_id, EventLoop& event_loop);
+    PimNode(int family, xorp_module_id module_id, EventLoop& eventloop);
     
     /**
      * Destructor

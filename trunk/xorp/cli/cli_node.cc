@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.7 2003/03/27 01:51:58 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.8 2003/04/01 00:56:14 pavlin Exp $"
 
 
 //
@@ -56,13 +56,13 @@
  * @init_family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
  * @init_module_id: The module ID (must be %XORP_MODULE_CLI).
- * @init_event_loop: The event loop.
+ * @init_eventloop: The event loop.
  * 
  * CLI node constructor.
  **/
 CliNode::CliNode(int init_family, xorp_module_id module_id,
-		 EventLoop& init_event_loop)
-    : ProtoNode<Vif>(init_family, module_id, init_event_loop),
+		 EventLoop& init_eventloop)
+    : ProtoNode<Vif>(init_family, module_id, init_eventloop),
       _cli_command_root(NULL, "", "")
 {
     assert(module_id == XORP_MODULE_CLI);
@@ -105,7 +105,7 @@ CliNode::start(void)
     // Start accepting connections
     //
     if (sock_serv_open() >= 0) {
-	event_loop().add_selector(_cli_socket, SEL_RD,
+	eventloop().add_selector(_cli_socket, SEL_RD,
 				  callback(this, &CliNode::accept_connection));
     }
     
@@ -132,7 +132,7 @@ CliNode::stop(void)
     // TODO: add as necessary
     
     delete_pointers_list(_client_list);
-    event_loop().remove_selector(_cli_socket, SEL_RD);
+    eventloop().remove_selector(_cli_socket, SEL_RD);
     
     return (XORP_OK);
 }

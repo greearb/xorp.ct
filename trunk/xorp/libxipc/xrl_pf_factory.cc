@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.4 2003/03/04 23:41:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.5 2003/03/10 23:20:28 hodson Exp $"
 
 #include "config.h"
 
@@ -30,17 +30,17 @@
 #include "libxorp/xlog.h"
 
 XrlPFSender*
-XrlPFSenderFactory::create(EventLoop&	event_loop,
+XrlPFSenderFactory::create(EventLoop&	eventloop,
 			   const char*	protocol,
 			   const char*	address)
 {
     try {
 	if (string(XrlPFSUDPSender::protocol()) == protocol)
-	    return new XrlPFSUDPSender(event_loop, address);
+	    return new XrlPFSUDPSender(eventloop, address);
 	else if (string(XrlPFSTCPSender::protocol()) == protocol)
-	    return new XrlPFSTCPSender(event_loop, address);
+	    return new XrlPFSTCPSender(eventloop, address);
 	else if (string(XrlPFInProcSender::protocol()) == protocol)
-	    return new XrlPFInProcSender(event_loop, address);
+	    return new XrlPFInProcSender(eventloop, address);
     } catch (XorpException& e) {
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
     }
@@ -48,7 +48,7 @@ XrlPFSenderFactory::create(EventLoop&	event_loop,
 }
 
 XrlPFSender*
-XrlPFSenderFactory::create(EventLoop& event_loop,
+XrlPFSenderFactory::create(EventLoop& eventloop,
 			   const char* protocol_colon_address) {
     char *colon = strstr(protocol_colon_address, ":");
     if (colon == 0) {
@@ -58,7 +58,7 @@ XrlPFSenderFactory::create(EventLoop& event_loop,
     }
 
     string protocol(protocol_colon_address, colon - protocol_colon_address);
-    return create(event_loop, protocol.c_str(), colon + 1);
+    return create(eventloop, protocol.c_str(), colon + 1);
 }
 
 

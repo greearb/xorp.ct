@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.11 2003/03/09 00:57:58 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.12 2003/03/10 23:20:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -204,7 +204,7 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	debug_msg("Creating master socket\n");
 	sender_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sender_fd > 0) {
-	    _event_loop.add_selector(sender_fd, SEL_RD,
+	    _eventloop.add_selector(sender_fd, SEL_RD,
 				     callback(&XrlPFSUDPSender::recv));
 	} else {
 	    xorp_throw(XrlPFConstructorError,
@@ -223,7 +223,7 @@ XrlPFSUDPSender::~XrlPFSUDPSender()
     debug_msg("~XrlPFSUDPSender - instance count %d\n", instance_count);
 
     if (instance_count == 0) {
-	_event_loop.remove_selector(sender_fd, SEL_RD);
+	_eventloop.remove_selector(sender_fd, SEL_RD);
 	close(sender_fd);
 	sender_fd = 0;
     }
@@ -267,7 +267,7 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     assert(requests_pending[request.xuid].xuid == request.xuid);
 
     requests_pending[request.xuid].timeout =
-	_event_loop.new_oneoff_after_ms(SUDP_REPLY_TIMEOUT_MS,
+	_eventloop.new_oneoff_after_ms(SUDP_REPLY_TIMEOUT_MS,
 	    callback(this, &XrlPFSUDPSender::timeout_hook, request.xuid));
     debug_msg("XrlPFSUDPSender::send (qsize %u)\n",
 	      (uint32_t)requests_pending.size());
@@ -369,13 +369,13 @@ XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdDispatcher* xr)
     }
     _addr = address_slash_port(addr, port);
 
-    _event_loop.add_selector(_fd, SEL_RD,
+    _eventloop.add_selector(_fd, SEL_RD,
 			     callback(this, &XrlPFSUDPListener::recv));
 }
 
 XrlPFSUDPListener::~XrlPFSUDPListener()
 {
-    _event_loop.remove_selector(_fd);
+    _eventloop.remove_selector(_fd);
     close(_fd);
 }
 

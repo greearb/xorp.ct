@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.15 2003/03/10 23:20:48 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.16 2003/04/01 00:56:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -304,7 +304,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()));
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -322,7 +322,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     set_assert_winner_metric_wc(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
     set_i_am_assert_loser_state(vif_index);
@@ -333,7 +333,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()));
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -422,7 +422,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, source_addr());
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
@@ -440,7 +440,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     set_assert_winner_metric_sg(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
     set_i_am_assert_loser_state(vif_index);
@@ -458,7 +458,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, source_addr());
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
@@ -482,7 +482,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     set_assert_winner_metric_sg(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
     //  * If I is RPF_interface(S) Set SPTbit(S,G) to TRUE
@@ -528,7 +528,7 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, assert_source_addr);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -577,7 +577,7 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, source_addr());
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
@@ -743,7 +743,7 @@ PimMre::assert_timer_timeout_wc(uint16_t vif_index)
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()));
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -784,7 +784,7 @@ PimMre::assert_timer_timeout_sg(uint16_t vif_index)
     pim_vif->pim_assert_mre_send(this, source_addr());
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));

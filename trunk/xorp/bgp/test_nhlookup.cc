@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.14 2003/04/02 20:34:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.15 2003/04/22 19:20:22 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,8 +29,8 @@
 template <class A>
 class DummyResolver : public NextHopResolver<A> {
 public:
-    DummyResolver(EventLoop& event_loop) 
-	: NextHopResolver<A>(0, event_loop) 
+    DummyResolver(EventLoop& eventloop) 
+	: NextHopResolver<A>(0, eventloop) 
     {
 	_ofile = NULL;
 	_response = false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node.hh,v 1.5 2003/03/30 03:50:44 pavlin Exp $
+// $XORP: xorp/mfea/mfea_node.hh,v 1.6 2003/03/31 03:45:20 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_HH__
@@ -65,9 +65,9 @@ public:
      * IPv4 and IPv6 respectively).
      * @param module_id the module ID (@ref xorp_module_id). Should be
      * equal to XORP_MODULE_MFEA.
-     * @param event_loop the event loop to use.
+     * @param eventloop the event loop to use.
      */
-    MfeaNode(int family, xorp_module_id module_id, EventLoop& event_loop);
+    MfeaNode(int family, xorp_module_id module_id, EventLoop& eventloop);
     
     /**
      * Destructor

@@ -86,7 +86,7 @@ XorpOspfd::XorpOspfd(EventLoop& e, XrlRouter& r)
     setsockopt(_netfd, IPPROTO_IP, IP_HDRINCL, &hincl, sizeof(hincl));
 
     // Call receive raw when _netfd has data to be read
-    if (_event_loop.add_selector(_netfd, SEL_RD, 
+    if (_eventloop.add_selector(_netfd, SEL_RD, 
 		       callback(this, &XorpOspfd::raw_receive)) == false) {
 	XLOG_FATAL("Failed to add net fd.");
     }
@@ -101,7 +101,7 @@ XorpOspfd::XorpOspfd(EventLoop& e, XrlRouter& r)
     _igmpfd = -1;
 
     // Set up one second timer
-    _one_sec_ticker = _event_loop.new_periodic(1000,
+    _one_sec_ticker = _eventloop.new_periodic(1000,
 					       callback(this, &XorpOspfd::one_second_tick));
 }
 
@@ -562,7 +562,7 @@ void
 XorpOspfd::initiate_rib_add_table() 
 {
     _rib_add_table_ticker = 
-	_event_loop.new_oneoff_after_ms(
+	_eventloop.new_oneoff_after_ms(
 	    100, callback(this, &XorpOspfd::rib_add_table)
 	    );
 }
@@ -576,16 +576,16 @@ XorpOspfd::initiate_rib_add_table()
 static void ospfd_main()
 
 {
-    EventLoop event_loop;
-    XrlStdRouter xrtr(event_loop, "ospfd");
-    XrlPFSUDPListener listener(event_loop);
+    EventLoop eventloop;
+    XrlStdRouter xrtr(eventloop, "ospfd");
+    XrlPFSUDPListener listener(eventloop);
     xrtr.add_listener(&listener);
 
-    XorpOspfd ospfd_sys(event_loop, xrtr);
+    XorpOspfd ospfd_sys(eventloop, xrtr);
     sys = &ospfd_sys; // Set global ospf system pointer to the one in use
 
     // Instantiate Xrl Handler object
-    XrlOspfTarget xrl_target(event_loop, xrtr, ospfd_sys, &ospf);
+    XrlOspfTarget xrl_target(eventloop, xrtr, ospfd_sys, &ospf);
 
     XLOG_INFO("Starting v%d.%d", OSPF::vmajor, OSPF::vminor);
     XLOG_INFO("Awaiting router id");
@@ -593,7 +593,7 @@ static void ospfd_main()
     // Spin until ospf object instantiated.
     ospf = 0;
     while (ospf == 0)
-	event_loop.run();
+	eventloop.run();
     XLOG_INFO("Router ID set.");
 
     ospfd_sys.read_kernel_interfaces();
@@ -614,9 +614,9 @@ static void ospfd_main()
 
 	// Run until next OSPFD timer is scheduled to fire
 	bool breakout = false;
-	XorpTimer t = event_loop.set_flag_after_ms(msec_tmo, &breakout);
+	XorpTimer t = eventloop.set_flag_after_ms(msec_tmo, &breakout);
 	while (false == breakout)
-	    event_loop.run();
+	    eventloop.run();
 
 	// Process pending OSPFD timers
 	ospf->tick();

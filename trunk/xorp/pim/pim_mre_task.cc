@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.5 2003/03/10 23:20:48 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.6 2003/04/01 00:56:21 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -201,7 +201,7 @@ void
 PimMreTask::schedule_task()
 {
     _time_slice_timer =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(0, 1),
 	    callback(this, &PimMreTask::time_slice_timer_timeout));
 }

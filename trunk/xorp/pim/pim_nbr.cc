@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.3 2003/03/10 23:20:49 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.4 2003/04/01 00:56:22 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -130,7 +130,7 @@ PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     // (Re)start the timer to send the J/P message after time 0.
     // XXX: the automatic restarting will postpone the sending of
     // the message until we have no more entries to add to that message.
-    _jp_send_timer = pim_node().event_loop().new_oneoff_after(
+    _jp_send_timer = pim_node().eventloop().new_oneoff_after(
 	TimeVal(0, 0),
 	callback(this, &PimNbr::jp_send_timer_timeout));
     

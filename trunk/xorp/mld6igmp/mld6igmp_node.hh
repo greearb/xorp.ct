@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.4 2003/03/18 02:44:35 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.5 2003/04/16 04:53:43 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -59,9 +59,9 @@ public:
      * IPv4 and IPv6 respectively).
      * @param module_id the module ID (@ref xorp_module_id). Should be
      * equal to XORP_MODULE_MLD6IGMP.
-     * @param event_loop the event loop to use.
+     * @param eventloop the event loop to use.
      */
-    Mld6igmpNode(int family, xorp_module_id module_id, EventLoop& event_loop);
+    Mld6igmpNode(int family, xorp_module_id module_id, EventLoop& eventloop);
     
     /**
      * Destructor

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.7 2003/03/07 18:23:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.8 2003/04/02 22:58:56 hodson Exp $"
 
 #include <stdlib.h>
 
@@ -102,17 +102,17 @@ got_integer(const XrlError&	e,
 void
 test_main()
 {
-    EventLoop		event_loop;
+    EventLoop		eventloop;
 
     // Normally the Finder runs as a separate process, but for this
     // test we create a Finder in process as we can't guarantee Finder
     // is already running.  Most XORP processes do not have to do this.
     
-    FinderNGServer* finder = new FinderNGServer(event_loop);
+    FinderNGServer* finder = new FinderNGServer(eventloop);
     
     // Create and configure "party_A"
-    XrlRouter		party_a(event_loop, "party_A");
-    XrlPFSUDPListener	listener_a(event_loop);
+    XrlRouter		party_a(eventloop, "party_A");
+    XrlPFSUDPListener	listener_a(eventloop);
     party_a.add_listener(&listener_a);
 
     // Add command that party_A knows about
@@ -122,8 +122,8 @@ test_main()
     party_a.finalize();
     
     // Create and configure "party_B"
-    XrlRouter		party_b(event_loop, "party_B");
-    XrlPFSUDPListener	listener_b(event_loop);
+    XrlRouter		party_b(eventloop, "party_B");
+    XrlPFSUDPListener	listener_b(eventloop);
     party_b.add_listener(&listener_b);
     party_b.finalize();
 
@@ -133,9 +133,9 @@ test_main()
     // for time being and finder does.
     //
     bool finito = false;
-    XorpTimer t = event_loop.set_flag_after_ms(1000, &finito);
+    XorpTimer t = eventloop.set_flag_after_ms(1000, &finito);
     while (finito == false) {
-	event_loop.run();
+	eventloop.run();
     }
     
     // "Party_B" send "hello world" to "Party_A"
@@ -149,9 +149,9 @@ test_main()
 
     // Just run...
     finito = false;
-    t = event_loop.set_flag_after_ms(5000, &finito);
+    t = eventloop.set_flag_after_ms(5000, &finito);
     while (step1_done == false || step2_done == false) {
-	event_loop.run();
+	eventloop.run();
 	if (finito) {
 	    fprintf(stderr, "Test timed out (%d %d)\n",
 		    step1_done, step2_done);

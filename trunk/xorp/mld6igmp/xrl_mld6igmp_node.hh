@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.11 2003/03/25 06:55:08 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.12 2003/04/16 04:53:43 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -47,8 +47,8 @@ class XrlMld6igmpNode : public Mld6igmpNode,
 			public Mld6igmpNodeCli {
 public:
     XrlMld6igmpNode(int family, xorp_module_id module_id, 
-		    EventLoop& event_loop, XrlRouter* xrl_router)
-	: Mld6igmpNode(family, module_id, event_loop),
+		    EventLoop& eventloop, XrlRouter* xrl_router)
+	: Mld6igmpNode(family, module_id, eventloop),
 	  XrlMld6igmpTargetBase(xrl_router),
 	  XrlCommonV0p1Client(xrl_router),
 	  XrlMfeaV0p1Client(xrl_router),

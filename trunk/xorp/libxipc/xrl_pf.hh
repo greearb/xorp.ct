@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.10 2003/03/10 23:20:28 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.11 2003/03/16 08:20:32 pavlin Exp $
 
 // XRL Protocol Family Header
 
@@ -40,7 +40,7 @@ class XrlCmdDispatcher;
 class XrlPFListener {
 public:
     XrlPFListener(EventLoop& e, XrlCmdDispatcher* d = 0)
-	: _event_loop(e), _dispatcher(d) {}
+	: _eventloop(e), _dispatcher(d) {}
     virtual ~XrlPFListener() {}
     virtual const char*	address() const = 0;
     virtual const char*	protocol() const = 0;
@@ -48,7 +48,7 @@ public:
     inline bool set_dispatcher(XrlCmdDispatcher* d);
     inline const XrlCmdDispatcher* dispatcher() const { return _dispatcher; }
 
-    EventLoop& event_loop() const { return _event_loop; }
+    EventLoop& eventloop() const { return _eventloop; }
 
     struct Reply {
 	XUID		xuid;
@@ -60,7 +60,7 @@ public:
 	~Reply() {}
     };
 protected:
-    EventLoop& _event_loop;
+    EventLoop& _eventloop;
     const XrlCmdDispatcher* _dispatcher;
 };
 
@@ -70,7 +70,7 @@ protected:
 class XrlPFSender {
 public:
     XrlPFSender(EventLoop& e, const char* address = "")
-	: _event_loop(e), _address(address) {}
+	: _eventloop(e), _address(address) {}
 
     virtual ~XrlPFSender() {}
 
@@ -82,7 +82,7 @@ public:
     virtual bool sends_pending() const = 0;
 
     const string& address() const { return _address; }
-    EventLoop& event_loop() const { return _event_loop; }
+    EventLoop& eventloop() const { return _eventloop; }
 
     struct Request {
 	XrlPFSender*	parent;
@@ -97,7 +97,7 @@ public:
     };
 
 protected:
-    EventLoop& _event_loop;
+    EventLoop& _eventloop;
     string _address;
 };
 

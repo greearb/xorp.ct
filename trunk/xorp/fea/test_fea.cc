@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea.cc,v 1.2 2002/12/14 23:42:51 hodson Exp $"
+#ident "$XORP: xorp/fea/test_fea.cc,v 1.3 2003/03/10 23:20:17 hodson Exp $"
 
 /* XXX THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
@@ -302,12 +302,12 @@ response_complete(const XrlError& e, XrlRouter& xrlrouter,
 void
 print_routing_table(const char *host)
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     if (0 == host)
 	host = "localhost";
 
-    XrlStdRouter test_fea(event_loop, client, host);
+    XrlStdRouter test_fea(eventloop, client, host);
 
     routing_cookie rc;
 
@@ -317,7 +317,7 @@ print_routing_table(const char *host)
     test_fea.send(x, start_reading, (void *)&rc);
 
     while(rc.completed() == false)
-	event_loop.run();
+	eventloop.run();
 }
 
 /**
@@ -336,12 +336,12 @@ bool
 add(const char *host, Fti::TransactionType tt, char *dst, char *gateway,
     char *netmask, char *ifname)
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     if (0 == host)
 	host = "localhost";
 
-    XrlStdRouter test_fea(event_loop, client, host);
+    XrlStdRouter test_fea(eventloop, client, host);
 
     /*
     ** The response function to the send is common for all transaction
@@ -372,7 +372,7 @@ add(const char *host, Fti::TransactionType tt, char *dst, char *gateway,
     test_fea.send(x, start_transaction, &rc);
 
     while(rc.completed() == false)
-	event_loop.run();
+	eventloop.run();
 
     return rc.error();
 }
@@ -390,12 +390,12 @@ add(const char *host, Fti::TransactionType tt, char *dst, char *gateway,
 bool
 del(const char *host, Fti::TransactionType tt, char *dst, char *netmask)
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     if (0 == host)
 	host = "localhost";
 
-    XrlStdRouter test_fea(event_loop, client, host);
+    XrlStdRouter test_fea(eventloop, client, host);
 
     /*
     ** begin - set up the routing cookie with the next call.
@@ -420,7 +420,7 @@ del(const char *host, Fti::TransactionType tt, char *dst, char *netmask)
     test_fea.send(x, start_transaction, &rc);
 
     while(rc.completed() == false)
-	event_loop.run();
+	eventloop.run();
 
     return rc.error();
 }
@@ -471,12 +471,12 @@ private:
 bool
 create_interface(const char *host, char *interface)
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     if (0 == host)
 	host = "localhost";
 
-    XrlStdRouter test_fea(event_loop, client, host);
+    XrlStdRouter test_fea(eventloop, client, host);
 
     Xrl x(server, "create_interface");
     x.args().add_string("ifname", interface);
@@ -487,7 +487,7 @@ create_interface(const char *host, char *interface)
     test_fea.send(x, callback(dcb, &DeviceCallback::create_interface));
 
     while(dcb.completed() == false)
-	event_loop.run();
+	eventloop.run();
 
     return true;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.3 2003/03/03 13:46:21 hodson Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.4 2003/03/10 23:20:30 hodson Exp $"
 
 #include <signal.h>
 
@@ -130,7 +130,7 @@ AsyncFileReader::start() {
 	return false;
     }
 
-    EventLoop& e = _event_loop;
+    EventLoop& e = _eventloop;
     if (e.add_selector(_fd, SEL_RD, 
 		       callback(this, &AsyncFileReader::read)) == false) {
 	XLOG_ERROR("Async reader failed to add_selector.");
@@ -143,7 +143,7 @@ AsyncFileReader::start() {
 
 void
 AsyncFileReader::stop() {
-    _event_loop.remove_selector(_fd, SEL_RD);
+    _eventloop.remove_selector(_fd, SEL_RD);
     _running = false;
 }
 
@@ -238,7 +238,7 @@ AsyncFileWriter::start() {
 	return false;
     }
 
-    EventLoop& e = _event_loop;
+    EventLoop& e = _eventloop;
     if (e.add_selector(_fd, SEL_WR, 
 		       callback(this, &AsyncFileWriter::write)) == false) {
 	XLOG_ERROR("Async reader failed to add_selector.");
@@ -249,7 +249,7 @@ AsyncFileWriter::start() {
 
 void
 AsyncFileWriter::stop() {
-    _event_loop.remove_selector(_fd, SEL_WR);
+    _eventloop.remove_selector(_fd, SEL_WR);
     _running = false;
 }
 

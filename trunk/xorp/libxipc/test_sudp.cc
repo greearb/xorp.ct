@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.5 2003/02/26 00:12:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.6 2003/03/10 23:20:25 hodson Exp $"
 
 #include <map>
 
@@ -158,7 +158,7 @@ test_xrlerror_note(EventLoop&e, XrlPFSUDPListener& l)
 static void
 run_test()
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     XrlCmdDispatcher cmd_dispatcher("tester");
     cmd_dispatcher.add_handler("hello", callback(hello_recv_handler));
@@ -166,13 +166,13 @@ run_test()
     cmd_dispatcher.add_handler("no_execute",
 			callback(no_execute_recv_handler, NOISE));
 
-    XrlPFSUDPListener listener(event_loop, &cmd_dispatcher);
+    XrlPFSUDPListener listener(eventloop, &cmd_dispatcher);
 
     trace("listener address: %s\n", listener.address());
 
-    test_hello(event_loop, listener);
-    test_int32(event_loop, listener);
-    test_xrlerror_note(event_loop, listener);
+    test_hello(eventloop, listener);
+    test_int32(eventloop, listener);
+    test_xrlerror_note(eventloop, listener);
 }
 
 // ----------------------------------------------------------------------------

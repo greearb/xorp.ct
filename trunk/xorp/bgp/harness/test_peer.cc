@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.7 2003/04/02 22:19:00 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.8 2003/04/21 05:46:52 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -751,13 +751,13 @@ main(int argc, char **argv)
     }
    
     try {
-	EventLoop event_loop;
-	XrlStdRouter router(event_loop, server, finder_host);
-	TestPeer test_peer(event_loop, router, server, verbose);
+	EventLoop eventloop;
+	XrlStdRouter router(eventloop, server, finder_host);
+	TestPeer test_peer(eventloop, router, server, verbose);
 	XrlTestPeerTarget xrl_target(&router, test_peer);
 
 	while(!test_peer.done()) {
-	    event_loop.run();
+	    eventloop.run();
 	}
 
     } catch(...) {

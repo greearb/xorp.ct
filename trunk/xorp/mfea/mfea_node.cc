@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.6 2003/03/30 03:50:44 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.7 2003/03/31 03:45:20 pavlin Exp $"
 
 
 //
@@ -57,13 +57,13 @@
  * @family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
  * @module_id: The module ID (must be %XORP_MODULE_MFEA).
- * @event_loop: The event loop.
+ * @eventloop: The event loop.
  * 
  * MFEA node constructor.
  **/
 MfeaNode::MfeaNode(int family, xorp_module_id module_id,
-		   EventLoop& event_loop)
-    : ProtoNode<MfeaVif>(family, module_id, event_loop),
+		   EventLoop& eventloop)
+    : ProtoNode<MfeaVif>(family, module_id, eventloop),
     _mrib_table(family),
     _mrib_table_default_metric_preference(MRIB_TABLE_DEFAULT_METRIC_PREFERENCE),
     _mrib_table_default_metric(MRIB_TABLE_DEFAULT_METRIC),
@@ -140,7 +140,7 @@ MfeaNode::start(void)
     // Start the timer to read immediately the MRIB table
     mrib_table().clear();
     _mrib_table_read_timer =
-	event_loop().new_oneoff_after(TimeVal(0,0),
+	eventloop().new_oneoff_after(TimeVal(0,0),
 				      callback(this, &MfeaNode::mrib_table_read_timer_timeout));
     
     return (XORP_OK);
@@ -1892,7 +1892,7 @@ MfeaNode::mrib_table_read_timer_timeout()
     // Start again the timer
     //
     _mrib_table_read_timer =
-	event_loop().new_oneoff_after(TimeVal(MRIB_TABLE_READ_PERIOD_SEC,
+	eventloop().new_oneoff_after(TimeVal(MRIB_TABLE_READ_PERIOD_SEC,
 					      MRIB_TABLE_READ_PERIOD_USEC),
 				      callback(this,
 					       &MfeaNode::mrib_table_read_timer_timeout));

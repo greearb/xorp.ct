@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.5 2003/03/07 18:23:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.6 2003/03/10 23:20:22 hodson Exp $"
 
 #include "finder_module.h"
 #include "finder_messenger.hh"
@@ -23,7 +23,7 @@
 FinderMessengerBase::FinderMessengerBase(EventLoop&		 e,
 					 FinderMessengerManager* fmm,
 					 XrlCmdMap& 		 cmds)
-    : _event_loop(e), _manager(fmm), _cmds(cmds)
+    : _eventloop(e), _manager(fmm), _cmds(cmds)
 {
     //    _manager.messenger_birth_event(this);
     debug_msg("Constructor for %p\n", this);

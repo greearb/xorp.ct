@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.6 2003/04/02 19:44:45 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.7 2003/04/02 20:34:39 mjh Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -98,8 +98,8 @@ private:
 template <class A>
 class DummyNextHopResolver2 : public NextHopResolver<A> {
 public:
-    DummyNextHopResolver2(EventLoop& event_loop) :
-	NextHopResolver<A>(0, event_loop)	
+    DummyNextHopResolver2(EventLoop& eventloop) :
+	NextHopResolver<A>(0, eventloop)	
     {
 	// Must set a ribname to force RIB interactions.
 	register_ribname("bogus");	
@@ -117,8 +117,8 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -210,8 +210,8 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -306,8 +306,8 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -408,8 +408,8 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -495,8 +495,8 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -647,8 +647,8 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -725,8 +725,8 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -859,8 +859,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    EventLoop event_loop;
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(event_loop);
+    EventLoop eventloop;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop);
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);

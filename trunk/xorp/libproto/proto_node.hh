@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.5 2003/03/18 02:44:33 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.6 2003/04/01 00:56:15 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -57,12 +57,12 @@ public:
      * @param init_family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
      * @param init_module_id the module ID XORP_MODULE_* (@ref xorp_module_id).
-     * @param init_event_loop the event loop to use.
+     * @param init_eventloop the event loop to use.
      */
     ProtoNode(int init_family, xorp_module_id init_module_id,
-	      EventLoop& init_event_loop)
+	      EventLoop& init_eventloop)
 	: ProtoUnit(init_family, init_module_id),
-	  _event_loop(init_event_loop),
+	  _eventloop(init_eventloop),
 	  _is_vif_setup_completed(false) {}
     
     /**
@@ -205,7 +205,7 @@ public:
      * 
      * @return the event loop this node is added to.
      */
-    EventLoop& event_loop() { return (_event_loop); }
+    EventLoop& eventloop() { return (_eventloop); }
     
     /**
      * Test if the vif setup is completed.
@@ -394,7 +394,7 @@ private:
     // TODO: add vifs, etc
     
     vector<V *> _proto_vifs;	// The array with all protocol vifs
-    EventLoop&	_event_loop;	// The event loop to use
+    EventLoop&	_eventloop;	// The event loop to use
     
     map<string, uint16_t> _vif_name2vif_index_map;
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.13 2003/04/01 02:00:04 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.14 2003/04/02 19:51:13 hodson Exp $"
 
 
 //
@@ -323,7 +323,7 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
 	igmp_message_version = IGMP_V1;
 	// TODO: set the timer for any router or only if I am a querier?
 	_igmpv1_router_present_timer =
-	    mld6igmp_node().event_loop().set_flag_after(
+	    mld6igmp_node().eventloop().set_flag_after(
 		TimeVal(IGMP_VERSION1_ROUTER_PRESENT_TIMEOUT, 0),
 		&_dummy_flag);
     }
@@ -339,7 +339,7 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
 	_querier_addr = src;
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
 	_other_querier_timer =
-	    mld6igmp_node().event_loop().new_oneoff_after(
+	    mld6igmp_node().eventloop().new_oneoff_after(
 		TimeVal(IGMP_OTHER_QUERIER_PRESENT_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
@@ -377,7 +377,7 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
 	    
 	    if (left_resp_tv > received_resp_tv) {
 		member_query->_member_query_timer =
-		    mld6igmp_node().event_loop().new_oneoff_after(
+		    mld6igmp_node().eventloop().new_oneoff_after(
 			received_resp_tv,
 			callback(member_query,
 				 &MemberQuery::member_query_timer_timeout));
@@ -457,7 +457,7 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
     }
     
     member_query->_member_query_timer =
-	mld6igmp_node().event_loop().new_oneoff_after(
+	mld6igmp_node().eventloop().new_oneoff_after(
 	    TimeVal(IGMP_GROUP_MEMBERSHIP_INTERVAL, 0),
 	    callback(member_query, &MemberQuery::member_query_timer_timeout));
     
@@ -472,7 +472,7 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
 	// corresponding timer has to be started only for queriers.
 	//
 	member_query->_igmpv1_host_present_timer =
-	    mld6igmp_node().event_loop().set_flag_after(
+	    mld6igmp_node().eventloop().set_flag_after(
 		TimeVal(IGMP_GROUP_MEMBERSHIP_INTERVAL, 0),
 		&_dummy_flag);
     }
@@ -538,7 +538,7 @@ Mld6igmpVif::igmp_leave_group_recv(const IPvX& src,
 	    }
 	    if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
 		member_query->_member_query_timer =
-		    mld6igmp_node().event_loop().new_oneoff_after(
+		    mld6igmp_node().eventloop().new_oneoff_after(
 			TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL
 				* IGMP_LAST_MEMBER_QUERY_COUNT,
 				0),
@@ -551,7 +551,7 @@ Mld6igmpVif::igmp_leave_group_recv(const IPvX& src,
 			      (IGMP_LAST_MEMBER_QUERY_INTERVAL * IGMP_TIMER_SCALE),
 			      member_query->group());
 		member_query->_last_member_query_timer =
-		    mld6igmp_node().event_loop().new_oneoff_after(
+		    mld6igmp_node().eventloop().new_oneoff_after(
 			TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL, 0),
 			callback(member_query,
 				 &MemberQuery::last_member_query_timer_timeout));

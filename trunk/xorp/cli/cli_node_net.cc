@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.9 2003/04/02 02:53:50 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.10 2003/04/02 22:48:37 pavlin Exp $"
 
 
 //
@@ -220,7 +220,7 @@ CliNode::add_connection(int client_socket)
     {
 	TimeVal now;
 	
-	event_loop().current_time(now);
+	eventloop().current_time(now);
 	cli_client->set_cli_session_start_time(now);
     }
     cli_client->set_is_cli_session_active(true);
@@ -248,7 +248,7 @@ CliNode::delete_connection(CliClient *cli_client)
 int
 CliClient::start_connection(void)
 {
-    if (cli_node().event_loop().add_selector(cli_fd(), SEL_RD,
+    if (cli_node().eventloop().add_selector(cli_fd(), SEL_RD,
 					     callback(this, &CliClient::client_read))
 	== false)
 	return (XORP_ERROR);
@@ -367,12 +367,12 @@ CliClient::block_connection(bool block_bool)
     
     if (block_bool) {
 	// Un-select()
-	cli_node().event_loop().remove_selector(cli_fd(), SEL_ALL);
+	cli_node().eventloop().remove_selector(cli_fd(), SEL_ALL);
 	return (XORP_OK);
     }
 
     // Do-select()
-    if (cli_node().event_loop().add_selector(cli_fd(), SEL_RD,
+    if (cli_node().eventloop().add_selector(cli_fd(), SEL_RD,
 					     callback(this, &CliClient::client_read))
 	== false)
 	return (XORP_ERROR);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.4 2003/03/30 03:50:43 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.5 2003/04/03 19:12:21 pavlin Exp $"
 
 
 //
@@ -128,7 +128,7 @@ CliClient::~CliClient()
     set_log_output(false);
     
     if (_cli_fd >= 0) {
-	cli_node().event_loop().remove_selector(_cli_fd);
+	cli_node().eventloop().remove_selector(_cli_fd);
 	comm_close(_cli_fd);
     }
     if (_gl != NULL)
@@ -859,7 +859,7 @@ CliClient::post_process_command(bool timer_timeout)
 	// TODO: currently, the waiting time is hardcoded to 5000ms (5 sec)
 	if (! timer_timeout) {
 	    _waiting_for_result_timer =
-		cli_node().event_loop().new_oneoff_after_ms(5000,
+		cli_node().eventloop().new_oneoff_after_ms(5000,
 							    callback(this, &CliClient::post_process_command, true));
 	    return;
 	}

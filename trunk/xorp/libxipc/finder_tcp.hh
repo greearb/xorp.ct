@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.8 2003/03/04 23:41:23 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.9 2003/03/10 23:20:23 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -167,7 +167,7 @@ protected:
     FinderTcpListenerBase(const FinderTcpListenerBase&);	    // Not impl
     FinderTcpListenerBase& operator=(const FinderTcpListenerBase&); // Not impl
 
-    inline EventLoop& event_loop() const { return _e; }
+    inline EventLoop& eventloop() const { return _e; }
     
 protected:
     EventLoop&	_e;

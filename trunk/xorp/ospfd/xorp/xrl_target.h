@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.2 2002/12/14 23:43:09 hodson Exp $
+// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.3 2003/03/10 23:20:46 hodson Exp $
 
 #ifndef __XORP_OSPF_XORP_XRL_TARGET_HH__
 #define __XORP_OSPF_XORP_XRL_TARGET_HH__
@@ -24,7 +24,7 @@
 class XrlOspfTarget : public XrlOspfTargetBase {
 public:
     XrlOspfTarget(EventLoop& e, XrlRouter& r, XorpOspfd& xo, OSPF** ppo) : 
-	XrlOspfTargetBase(&r), _event_loop(e), _xorp_ospfd(xo), _pp_ospf(ppo) 
+	XrlOspfTargetBase(&r), _eventloop(e), _xorp_ospfd(xo), _pp_ospf(ppo) 
     {}
     ~XrlOspfTarget() {}
 
@@ -694,7 +694,7 @@ protected:
     inline bool ospf_ready() const { return (*_pp_ospf != 0); }
     inline OSPF* ospf() { return *_pp_ospf; }
 
-    EventLoop& _event_loop;
+    EventLoop& _eventloop;
     XorpOspfd& _xorp_ospfd;
     OSPF**     _pp_ospf;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.8 2003/03/10 23:20:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.9 2003/03/12 20:02:44 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -235,7 +235,7 @@ bool
 FinderNGTcpListener::connection_event(int fd)
 {
     FinderTcpMessenger* m =
-	new FinderTcpMessenger(event_loop(), &_mm, fd, _cmds);
+	new FinderTcpMessenger(eventloop(), &_mm, fd, _cmds);
     // Check if manager has taken responsibility for messenger and clean up if
     // not.
     if (_mm.manages(m) == false)

@@ -287,13 +287,13 @@ void XorpOspfd::set_multicast_routing(bool enabled)
 	    XLOG_ERROR("MRT_INIT failed: %s", strerror(errno));
 	    return;
 	}
-	if (_event_loop.add_selector(_igmpfd, SEL_RD,
+	if (_eventloop.add_selector(_igmpfd, SEL_RD,
 		     callback(this, &XorpOspfd::raw_receive))) {
 	    XLOG_ERROR("IGMP failed to add selector.");
 	}
     }
     else {
-	_event_loop.remove_selector(_igmpfd);
+	_eventloop.remove_selector(_igmpfd);
 
 	on = 0;
 	if (setsockopt(_igmpfd, IPPROTO_IP, MRT_DONE, &on, sizeof(on)) == -1){

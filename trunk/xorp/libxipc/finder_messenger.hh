@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.5 2003/03/10 23:20:22 hodson Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.6 2003/03/16 08:20:27 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER_HH__
 #define __LIBXIPC_FINDER_MESSENGER_HH__
@@ -87,7 +87,7 @@ public:
     virtual bool pending() const = 0;
 
     inline XrlCmdMap& command_map();
-    inline EventLoop& event_loop();
+    inline EventLoop& eventloop();
 
     void unhook_manager();
     FinderMessengerManager* manager();
@@ -118,7 +118,7 @@ private:
 		      FinderMessengerBase* fmb)
 	    : scb(cb)
 	{
-	    expiry = fmb->event_loop().new_oneoff_after_ms(response_timeout_ms,
+	    expiry = fmb->eventloop().new_oneoff_after_ms(response_timeout_ms,
 			callback(fmb,  &FinderMessengerBase::response_timeout,
 				 seqno));
 	}
@@ -133,7 +133,7 @@ private:
     friend class ResponseState;
 
 private:
-    EventLoop&				_event_loop;
+    EventLoop&				_eventloop;
     FinderMessengerManager*		_manager;
     SeqNoResponseMap		 	_expected_responses;
     XrlCmdMap&			 	_cmds;
@@ -150,9 +150,9 @@ FinderMessengerBase::command_map()
 }
 
 inline EventLoop&
-FinderMessengerBase::event_loop()
+FinderMessengerBase::eventloop()
 {
-    return _event_loop;
+    return _eventloop;
 }
 
 inline FinderMessengerManager*

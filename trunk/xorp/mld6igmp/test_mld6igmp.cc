@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.13 2003/04/03 00:24:01 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.14 2003/04/16 04:53:43 pavlin Exp $"
 
 
 //
@@ -152,14 +152,14 @@ main(int argc, char *argv[])
 	//
 	// Init stuff
 	//
-	EventLoop event_loop;
+	EventLoop eventloop;
 	
 	//
 	// Finder
 	//
 	FinderNGServer *finder = NULL;
 	try {
-	    finder = new FinderNGServer(event_loop);
+	    finder = new FinderNGServer(eventloop);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
 	}
@@ -168,10 +168,10 @@ main(int argc, char *argv[])
 	// CLI
 	//
 #if DO_IPV4
-	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, event_loop);
+	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
 	cli_node4.set_cli_port(12000);
 #else
-	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, event_loop);
+	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
 	cli_node6.set_cli_port(12000);
 #endif // ! DO_IPV4
 	//
@@ -188,11 +188,11 @@ main(int argc, char *argv[])
 	// Create and configure the CLI XRL interface
 	//
 #if DO_IPV4
-	XrlStdRouter xrl_std_router_cli4(event_loop, cli_node4.module_name(),
+	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
 					 finder_hostname);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
 #else
-	XrlStdRouter xrl_std_router_cli6(event_loop, cli_node6.module_name(),
+	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
 					 finder_hostname);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
 #endif // ! DO_IPV4
@@ -201,20 +201,20 @@ main(int argc, char *argv[])
 	// MFEA node
 	//
 #if DO_IPV4
-	XrlStdRouter xrl_std_router_mfea4(event_loop,
+	XrlStdRouter xrl_std_router_mfea4(eventloop,
 					  xorp_module_name(AF_INET,
 							   XORP_MODULE_MFEA),
 					  finder_hostname);
 	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA,
-				   event_loop,
+				   eventloop,
 				   &xrl_std_router_mfea4);
 #else
-	XrlStdRouter xrl_std_router_mfea6(event_loop,
+	XrlStdRouter xrl_std_router_mfea6(eventloop,
 					  xorp_module_name(AF_INET6,
 							   XORP_MODULE_MFEA),
 					  finder_hostname);
 	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
-				   event_loop,
+				   eventloop,
 				   &xrl_std_router_mfea6);
 #endif // ! DO_IPV4
 	
@@ -222,20 +222,20 @@ main(int argc, char *argv[])
 	// MLD6IGMP node
 	//
 #if DO_IPV4
-	XrlStdRouter xrl_std_router_mld6igmp4(event_loop,
+	XrlStdRouter xrl_std_router_mld6igmp4(eventloop,
 					      xorp_module_name(AF_INET,
 							       XORP_MODULE_MLD6IGMP),
 					      finder_hostname);
 	XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, XORP_MODULE_MLD6IGMP,
-					   event_loop,
+					   eventloop,
 					   &xrl_std_router_mld6igmp4);
 #else
-	XrlStdRouter xrl_std_router_mld6igmp6(event_loop,
+	XrlStdRouter xrl_std_router_mld6igmp6(eventloop,
 					      xorp_module_name(AF_INET6,
 							       XORP_MODULE_MLD6IGMP),
 					      finder_hostname);
 	XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, XORP_MODULE_MLD6IGMP,
-					   event_loop,
+					   eventloop,
 					   &xrl_std_router_mld6igmp6);
 #endif // ! DO_IPV4
 	
@@ -281,7 +281,7 @@ main(int argc, char *argv[])
 	// Main loop
 	//
 	for (;;) {
-	    event_loop.run();
+	    eventloop.run();
 	}
 
 	//

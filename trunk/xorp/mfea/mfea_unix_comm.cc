@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.11 2003/04/16 05:12:28 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.12 2003/04/16 15:56:16 pavlin Exp $"
 
 
 //
@@ -411,7 +411,7 @@ UnixComm::close_ioctl_socket(void)
 	return (XORP_ERROR);
     
     // Remove it just in case, even though it may not be select()-ed
-    mfea_node().event_loop().remove_selector(_ioctl_socket);
+    mfea_node().eventloop().remove_selector(_ioctl_socket);
     
     // Close the socket and reset it to -1
     if (close(_ioctl_socket) < 0) {
@@ -466,7 +466,7 @@ UnixComm::close_mrib_socket(void)
 	return (XORP_ERROR);
     
     // Remove it just in case, even though it may not be select()-ed
-    mfea_node().event_loop().remove_selector(_mrib_socket);
+    mfea_node().eventloop().remove_selector(_mrib_socket);
 
     // Close the socket and reset it to -1
     if (close(_mrib_socket) < 0) {
@@ -540,7 +540,7 @@ UnixComm::close_mrouter_socket(void)
 	// XXX: this special UnixComm only would open/close the mrouter_socket
 
 	// Remove it just in case, even though it may not be select()-ed
-	mfea_node().event_loop().remove_selector(_mrouter_socket);
+	mfea_node().eventloop().remove_selector(_mrouter_socket);
 	
 	// Close the socket and reset it to -1
 	if (close(_mrouter_socket) < 0) {
@@ -2507,7 +2507,7 @@ UnixComm::open_proto_socket(void)
     }
     
     // Assign a function to read from this socket
-    if (mfea_node().event_loop().add_selector(_proto_socket, SEL_RD,
+    if (mfea_node().eventloop().add_selector(_proto_socket, SEL_RD,
 		      callback(this, &UnixComm::proto_socket_read))
 	== false) {
 	return (XORP_ERROR);
@@ -2556,7 +2556,7 @@ UnixComm::close_proto_socket(void)
     
     if (sock_close_flag) {
 	// Remove it just in case, even though it may not be select()-ed
-	mfea_node().event_loop().remove_selector(_proto_socket);
+	mfea_node().eventloop().remove_selector(_proto_socket);
 	// We can close the socket
 	close(_proto_socket);
     }

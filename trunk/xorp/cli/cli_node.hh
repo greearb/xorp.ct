@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.7 2003/03/25 01:21:45 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.8 2003/03/27 01:51:58 hodson Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -61,10 +61,10 @@ public:
      * both IPv4 and IPv6.
      * @param init_module_id the module ID (@ref xorp_module_id). Should be
      * equal to XORP_MODULE_CLI.
-     * @param init_event_loop the event loop to use.
+     * @param init_eventloop the event loop to use.
      */
     CliNode(int init_family, xorp_module_id init_module_id,
-	    EventLoop& init_event_loop);
+	    EventLoop& init_eventloop);
 
     /**
      * Destructor

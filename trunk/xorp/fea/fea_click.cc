@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_click.cc,v 1.2 2002/12/14 23:42:50 hodson Exp $"
+#ident "$XORP: xorp/fea/fea_click.cc,v 1.3 2003/03/10 23:20:13 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -96,7 +96,7 @@ main(int argc, char *argv[])
     ** and all that other good stuff.
     */
 
-    EventLoop event_loop;
+    EventLoop eventloop;
     ForwardingEngine* fe = 0;
 
     /*
@@ -108,7 +108,7 @@ main(int argc, char *argv[])
 	    XLOG_ERROR("Couldn't load click");
 	    return 0;
 	}
-	fe = new ClickForwardingEngine(event_loop);
+	fe = new ClickForwardingEngine(eventloop);
     } catch(FtiError& xe) {
 	XLOG_ERROR(c_format("%s from %s -> %s",
 			    xe.what().c_str(),
@@ -131,16 +131,16 @@ main(int argc, char *argv[])
     /*
     ** Configure fea.
     */
-    XrlStdRouter fea(event_loop, server, finder_host);
+    XrlStdRouter fea(eventloop, server, finder_host);
 
     /*
     ** Add commands.
     */
-    XrlFeaTarget xft(event_loop, &fea, fti, ifmgr);
+    XrlFeaTarget xft(eventloop, &fea, fti, ifmgr);
 
     try {
 	for (;;)
-	    event_loop.run();
+	    eventloop.run();
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

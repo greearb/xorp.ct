@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.7 2003/04/01 00:56:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.8 2003/04/02 18:57:02 pavlin Exp $"
 
 
 //
@@ -251,7 +251,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	TimeVal tv(hello_triggered_delay().get(), 0);
 	tv = random_uniform(tv);
 	_hello_once_timer =
-	    pim_node().event_loop().new_oneoff_after(
+	    pim_node().eventloop().new_oneoff_after(
 		tv,
 		callback(this, &PimVif::hello_once_timer_timeout));
 	
@@ -312,7 +312,7 @@ PimNbr::pim_hello_holdtime_process(uint16_t holdtime)
     default:
 	// Start the Neighbor Liveness Timer
 	_neighbor_liveness_timer =
-	    pim_node().event_loop().new_oneoff_after(
+	    pim_node().eventloop().new_oneoff_after(
 		TimeVal(holdtime, 0),
 		callback(this, &PimNbr::neighbor_liveness_timer_timeout));
 	break;
@@ -460,7 +460,7 @@ void
 PimVif::hello_timer_start(uint32_t sec, uint32_t usec)
 {
     _hello_timer =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(sec, usec),
 	    callback(this, &PimVif::hello_timer_timeout));
 }
@@ -475,7 +475,7 @@ PimVif::hello_timer_start_random(uint32_t sec, uint32_t usec)
     tv = random_uniform(tv);
     
     _hello_timer =
-	pim_node().event_loop().new_oneoff_after(
+	pim_node().eventloop().new_oneoff_after(
 	    tv,
 	    callback(this, &PimVif::hello_timer_timeout));
 }

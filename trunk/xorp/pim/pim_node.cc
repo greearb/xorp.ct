@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.5 2003/03/18 02:44:36 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.6 2003/03/27 00:19:03 pavlin Exp $"
 
 
 //
@@ -59,13 +59,13 @@
  * @module_id: The module ID (must be either %XORP_MODULE_PIMSM
  * or %XORP_MODULE_PIMDM).
  * TODO: XXX: XORP_MODULE_PIMDM is not implemented yet.
- * @event_loop: The event loop.
+ * @eventloop: The event loop.
  * 
  * PIM node constructor.
  **/
 PimNode::PimNode(int family, xorp_module_id module_id,
-		 EventLoop& event_loop)
-    : ProtoNode<PimVif>(family, module_id, event_loop),
+		 EventLoop& eventloop)
+    : ProtoNode<PimVif>(family, module_id, eventloop),
     _pim_mrt(*this),
     _pim_mrib_table(*this),
     _pim_bsr(*this),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.12 2003/04/18 23:27:43 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.13 2003/04/19 20:39:46 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,9 +29,9 @@
 
 template <class A>
 NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,
-				    EventLoop& event_loop)
+				    EventLoop& eventloop)
     : _xrl_router(xrl_router),
-      _event_loop(event_loop),
+      _eventloop(eventloop),
       _next_hop_rib_request(xrl_router, *this, _next_hop_cache)
 {
 }
@@ -766,7 +766,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    //All we need to do is resend it after a respectable delay
 	    A nexthop = *addr;
 	    _rtx_delay_timer = 
-                 _next_hop_resolver.event_loop().new_oneoff_after_ms(1000,
+                 _next_hop_resolver.eventloop().new_oneoff_after_ms(1000,
                       ::callback(this,
 				 &NextHopRibRequest<A>::register_interest,
 				 nexthop));
@@ -1154,7 +1154,7 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	    //The request will still be on the request queue.
 	    //All we need to do is resend it after a respectable delay
 	    _rtx_delay_timer = 
-		_next_hop_resolver.event_loop().new_oneoff_after_ms(1000,
+		_next_hop_resolver.eventloop().new_oneoff_after_ms(1000,
                       ::callback(this,
 				 &NextHopRibRequest<A>::deregister_interest,
 				 addr, prefix_len));

@@ -61,7 +61,7 @@ class OSInstance : public OspfSysCalls {
     AVLtree monfds; // Current monitoring connections
 
  protected:
-    EventLoop& _event_loop;
+    EventLoop& _eventloop;
 };
 
 class TcpConn : public AVLitem {

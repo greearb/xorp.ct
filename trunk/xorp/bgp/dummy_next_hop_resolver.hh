@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dummy_next_hop_resolver.hh,v 1.4 2003/04/02 19:44:44 mjh Exp $
+// $XORP: xorp/bgp/dummy_next_hop_resolver.hh,v 1.5 2003/04/02 20:34:38 mjh Exp $
 
 #ifndef __BGP_DUMMY_NEXT_HOP_RESOLVER_HH__
 #define __BGP_DUMMY_NEXT_HOP_RESOLVER_HH__
@@ -23,7 +23,7 @@
 template<class A>
 class DummyNextHopResolver : public NextHopResolver<A> {
 public:
-    DummyNextHopResolver(EventLoop& event_loop);
+    DummyNextHopResolver(EventLoop& eventloop);
 
     virtual ~DummyNextHopResolver();
 

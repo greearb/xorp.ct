@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.11 2003/03/08 20:54:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.12 2003/03/10 23:20:22 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -116,7 +116,7 @@ preprocess_file(XrlParserFileInput& xfp)
 }
 
 static int
-input_file(EventLoop& event_loop,
+input_file(EventLoop& eventloop,
 	   XrlRouter& router,
 	   XrlParserFileInput& xfp)
 {
@@ -127,7 +127,7 @@ input_file(EventLoop& event_loop,
 	/* if line length is zero or line looks like a preprocessor directive
 	 * continue. */
 	if (l.length() == 0 || l[0] == '#') continue;
-	int err = call_xrl(event_loop, router, l.c_str());
+	int err = call_xrl(eventloop, router, l.c_str());
 	if (err) {
 	    cerr << xfp.stack_trace() << endl;
 	    cerr << "Xrl failed: " << l;

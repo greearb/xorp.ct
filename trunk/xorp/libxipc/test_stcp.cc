@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.6 2003/02/26 00:12:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.7 2003/03/10 23:20:25 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -180,7 +180,7 @@ print_twirl()
 static void
 run_test()
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     XrlCmdDispatcher cmd_dispatcher("tester");
     cmd_dispatcher.add_handler("hello", callback(hello_recv_handler));
@@ -188,32 +188,32 @@ run_test()
     cmd_dispatcher.add_handler("no_execute",
 			callback(no_execute_recv_handler, NOISE));
 
-    XrlPFSTCPListener listener(event_loop, &cmd_dispatcher);
-    XrlPFSTCPSender s(event_loop, listener.address());
+    XrlPFSTCPListener listener(eventloop, &cmd_dispatcher);
+    XrlPFSTCPSender s(eventloop, listener.address());
     s.set_keepalive_ms(2500);
 
     tracef("listener address: %s\n", listener.address());
 
-    XorpTimer dp = event_loop.new_periodic(500, callback(&print_twirl));
+    XorpTimer dp = eventloop.new_periodic(500, callback(&print_twirl));
 
     tracef("Testing XrlPFSTCP\n");
     for (int i = 1; i < 50; i++) {
-	test_hello(event_loop, s);
+	test_hello(eventloop, s);
 	assert(s.alive());
 
 	if ((i % 10) == 0) {
 	    // keepalive test
 	    bool flag = false;
-	    XorpTimer t = event_loop.set_flag_after_ms(4000, &flag);
+	    XorpTimer t = eventloop.set_flag_after_ms(4000, &flag);
 	    while (flag == false) {
-		event_loop.run();
+		eventloop.run();
 	    }
 	}
 
-	test_int32(event_loop, s);
+	test_int32(eventloop, s);
 	assert(s.alive());
     }
-    test_xrlerror_note(event_loop, listener);
+    test_xrlerror_note(eventloop, listener);
 }
 
 // ----------------------------------------------------------------------------

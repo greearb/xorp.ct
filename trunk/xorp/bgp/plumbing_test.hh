@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing_test.hh,v 1.4 2003/04/02 19:44:44 mjh Exp $
+// $XORP: xorp/bgp/plumbing_test.hh,v 1.5 2003/04/02 20:34:38 mjh Exp $
 
 #ifndef __BGP_PLUMBING_TEST_HH__
 #define __BGP_PLUMBING_TEST_HH__
@@ -35,7 +35,7 @@ public:
 
 class PlumbingTest : public BGPPlumbing {
 public:
-    PlumbingTest(EventLoop& event_loop);
+    PlumbingTest(EventLoop& eventloop);
     bool run_tests();
     bool test1();
     bool test2();
