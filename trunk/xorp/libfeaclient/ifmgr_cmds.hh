@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.4 2003/09/19 18:41:18 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.5 2003/09/30 03:07:57 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -138,6 +138,28 @@ public:
 
 protected:
     Mac _mac;
+};
+
+/**
+ * @short Command to set physical interface index.
+ */
+class IfMgrIfSetPifIndex : public IfMgrIfCommandBase {
+public:
+    inline IfMgrIfSetPifIndex(const string& ifname, uint16_t pif)
+	: IfMgrIfCommandBase(ifname), _pif(pif) {}
+
+    inline uint32_t pif_index() const			{ return _pif; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    uint16_t _pif;
 };
 
 

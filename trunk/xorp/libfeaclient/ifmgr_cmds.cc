@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.6 2003/09/30 03:07:57 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.7 2003/10/15 19:19:25 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -32,12 +32,12 @@ bool2str(bool t)
 }
 
 /*
- * Makes string starting: IfMgrIfCommandXXX("if0"
+ * Makes string starting: IfMgrIfXXX("if0"
  */
 static string
 if_str_begin(const IfMgrIfCommandBase* i, const char* cmd)
 {
-    return string("IfMgrIfCommand") + cmd + "(\"" + i->ifname() + "\"";
+    return string("IfMgrIf") + cmd + "(\"" + i->ifname() + "\"";
 }
 
 /*
@@ -50,12 +50,12 @@ if_str_end()
 }
 
 /*
- * Makes string starting: IfMgrVifCommandXXX("if0", "vif32"
+ * Makes string starting: IfMgrVifXXX("if0", "vif32"
  */
 static string
 vif_str_begin(const IfMgrVifCommandBase* v, const char* cmd)
 {
-    return string("IfMgrVifCommand") + cmd +
+    return string("IfMgrVif") + cmd +
 	"(\"" + v->ifname() + ", \"" + v->vifname() + "\"";
 }
 
@@ -69,12 +69,12 @@ vif_str_end()
 }
 
 /*
- * Makes string starting: IfMgrIPv4CommandXXX("if0", "vif32"
+ * Makes string starting: IfMgrIPv4XXX("if0", "vif32"
  */
 static string
 ipv4_str_begin(const IfMgrIPv4CommandBase* i, const char* cmd)
 {
-    return string("IfMgrIPv4Command") + cmd +
+    return string("IfMgrIPv4") + cmd +
 	"(\"" + i->ifname() + ", \"" + i->vifname() + "\", " + i->addr().str();
 }
 
@@ -88,12 +88,12 @@ ipv4_str_end()
 }
 
 /*
- * Makes string starting: IfMgrIPv6CommandXXX("if0", "vif32"
+ * Makes string starting: IfMgrIPv6XXX("if0", "vif32"
  */
 static string
 ipv6_str_begin(const IfMgrIPv6CommandBase* i, const char* cmd)
 {
-    return string("IfMgrIPv6Command") + cmd +
+    return string("IfMgrIPv6") + cmd +
 	"(\"" + i->ifname() + ", \"" + i->vifname() + "\", " + i->addr().str();
 }
 
@@ -288,7 +288,42 @@ IfMgrIfSetMac::forward(XrlSender&		sender,
 string
 IfMgrIfSetMac::str() const
 {
-    return if_str_begin(this, "Mac") + ", " + mac().str() + if_str_end();
+    return if_str_begin(this, "SetMac") + ", " + mac().str() + if_str_end();
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrIfSetPifIndex
+
+bool
+IfMgrIfSetPifIndex::execute(IfMgrIfTree& t) const
+{
+    IfMgrIfTree::IfMap& ifs = t.ifs();
+    const string& n = ifname();
+
+    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
+    if (i != ifs.end()) {
+	IfMgrIfAtom& interface = i->second;
+	interface.set_pif_index(pif_index());
+	return true;
+    }
+    return false;
+}
+
+bool
+IfMgrIfSetPifIndex::forward(XrlSender&			sender,
+			    const string&		xrl_target,
+			    const IfMgrXrlSendCB&	xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_interface_set_pif_index(xt, ifname(), pif_index(), xcb);
+}
+
+string
+IfMgrIfSetPifIndex::str() const
+{
+    return if_str_begin(this, "SetPifIndex") +
+	c_format(", %u", pif_index()) + if_str_end();
 }
 
 

@@ -9,6 +9,7 @@ interface fea_ifmgr_mirror/0.1 {
 	interface_set_enabled ? ifname:txt & enabled:bool
 	interface_set_mtu ? ifname:txt & mtu_bytes:u32
 	interface_set_mac ? ifname:txt & mac:mac
+	interface_set_pif_index ? ifname:txt & index:u32
 
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.1 2003/10/14 21:56:27 hodson Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.2 2003/10/17 21:03:26 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -146,10 +146,10 @@ LibFeaClientBridge::interface_update(const string& ifname,
     _rm->push(new IfMgrIfSetEnabled(ifname, ii->second.enabled()));
     _rm->push(new IfMgrIfSetMtu(ifname, ii->second.mtu()));
     _rm->push(new IfMgrIfSetMac(ifname, ii->second.mac()));
+    _rm->push(new IfMgrIfSetPifIndex(ifname, ii->second.pif_index()));
 
     //
     // XXX TODO / TBD if need doing...
-    // _rm->push(new IfMgrIfSetPifIndex(ifname, ii->pif_index()));
     // _rm->push(new IfMgrIfSetIfFlags(ifname, ii- if_flags - relevant ????
     //
 }
@@ -838,6 +838,13 @@ public:
 				ifi.mac().str().c_str(),
 				imi.mac().str().c_str());
 	}
+	if (ifi.pif_index() != imi.pif_index()) {
+	    _errlog += c_format("+ Interface %s pif_index %u != %u\n",
+				ifi.name().c_str(),
+				ifi.pif_index(),
+				imi.pif_index());
+	}
+
 	if (ifi.vifs().size() != imi.vifs().size()) {
 	    _errlog += "Interface %s vif count mismatch\n";
 	    string fvifs;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.1 2003/08/22 23:19:02 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.2 2003/08/25 16:58:03 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -80,6 +80,10 @@ test_main()
     }
     if (IfMgrIfSetMac("if0", Mac("00:2e:dd:01:02:03")).execute(t) == false) {
 	verbose_log("Failed to set mac address\n");
+	return 1;
+    }
+    if (IfMgrIfSetPifIndex("if0", 3).execute(t) == false) {
+	verbose_log("Failed to set pif index\n");
 	return 1;
     }
 

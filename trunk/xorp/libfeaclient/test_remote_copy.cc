@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.1 2003/09/10 19:21:33 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.2 2003/09/20 00:15:47 hodson Exp $"
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.1 2003/09/10 19:21:33 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.2 2003/09/20 00:15:47 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -123,6 +123,10 @@ populate_iftree(IfMgrIfTree& t)
     }
     if (IfMgrIfSetMac("if0", Mac("00:2e:dd:01:02:03")).execute(t) == false) {
 	verbose_log("Failed to set mac address\n");
+	return 1;
+    }
+    if (IfMgrIfSetPifIndex("if0", 3).execute(t) == false) {
+	verbose_log("Failed to set pif\n");
 	return 1;
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.1 2003/09/20 00:15:46 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.2 2003/09/30 03:07:57 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -91,6 +91,11 @@ protected:
 	// Input values,
 	const string&	ifname,
 	const Mac&	mac);
+
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_pif_index(
+	// Input values,
+	const string&	ifname,
+	const uint32_t&	pif_index);
 
     XrlCmdError fea_ifmgr_mirror_0_1_vif_add(
 	// Input values,
@@ -356,6 +361,20 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mac(
 	)
 {
     _dispatcher.push(new IfMgrIfSetMac(ifname, mac));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_pif_index(
+	const string&	ifname,
+	const uint32_t&	pif
+	)
+{
+    _dispatcher.push(new IfMgrIfSetPifIndex(ifname,
+					    static_cast<uint16_t>(pif)));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

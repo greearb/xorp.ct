@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.7 2003/09/30 03:07:57 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.8 2003/10/15 19:19:25 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -174,6 +174,9 @@ public:
     inline const Mac&	mac() const			{ return _mac; }
     inline void		set_mac(const Mac& mac)		{ _mac = mac; }
 
+    inline uint16_t	pif_index() const		{ return _pif; }
+    inline void		set_pif_index(uint16_t pif)	{ _pif = pif; }
+
     inline const VifMap& vifs() const			{ return _vifs; }
     inline VifMap& vifs()				{ return _vifs; }
 
@@ -188,6 +191,7 @@ protected:
     bool	_en;		// enabled
     uint32_t	_mtu;		// mtu in bytes
     Mac		_mac;		// MAC address
+    uint16_t	_pif;		// Physical interface index
 
     VifMap	_vifs;		// map of vifname-vif
 };
