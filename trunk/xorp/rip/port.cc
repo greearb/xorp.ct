@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.13 2004/01/09 00:15:55 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.16 2004/02/06 00:32:25 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -515,16 +515,34 @@ Port<A>::parse_request(const Addr&			src_addr,
 	XLOG_INFO("Discarding RIP request: port io disabled.");
     }
 
+    XLOG_INFO("RIP request received from %s/%u entries %u",
+	      src_addr.str().c_str(), src_port, n_entries
+	      );
     if (n_entries == 1 && entries[0].is_table_request()) {
 	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	    // if already doing unsolicited dump, then ignore
 	    // set unsolicited timer timeout to zero to trigger port
 	    // route dump
+	    unsolicited_response_timeout();
 	} else {
 	    if (queries_blocked())
 		return;
+
 	    // if already doing a debug dump, then ignore
 	    // start debug route dump
+	    if (_su_out && _su_out->running())
+		return;
+
+	    // Delete existing solicited update output, which is just lying
+	    // around, and re-instantiate to reply to table dump request
+	    delete _su_out;
+
+	    EventLoop& e = _pm.eventloop();
+	    RouteDB<A>& rdb = _pm.system().route_db();
+	    _su_out = new OutputTable<A>(e, *this, *_packet_queue, rdb,
+					 src_addr, src_port);
+	    _su_out->start();
+
 	    block_queries();
 	}
 	return;
@@ -533,12 +551,8 @@ Port<A>::parse_request(const Addr&			src_addr,
     if (queries_blocked())
 	return;
 
-    // XXXX
-    // NEED TO DISTINGUISH BETWEEN FULL TABLE QUERIES AND ROUTE QUERIES
-    // XXXX
-
     //
-    // Answer query
+    // This is a query for a set of routes.  Answer it.
     //
     uint32_t i = 0;
     ResponsePacketAssembler<A> rpa(*this);
