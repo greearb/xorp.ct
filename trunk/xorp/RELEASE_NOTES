@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.44 2003/11/19 00:35:25 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.45 2004/02/24 23:06:28 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -45,6 +45,10 @@ Release ?.?? (200?/??/??)
   PIM-SM:
     - Updated to support the lastest PIM-SM spec
       (draft-ietf-pim-sm-v2-new-09.{ps,txt})
+    - Added support for "alternative subnet" configuration such that
+      non-local senders appear as senders connected to the same subnet.
+      Needed as a work-around solution when there are uni-directional
+      interfaces for sending and receiving traffic (e.g., satellite links).
 
   CLI:
     - 
