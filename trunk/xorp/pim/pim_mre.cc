@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.23 2003/06/12 03:01:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.24 2003/06/13 01:32:32 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -979,13 +979,7 @@ PimMre::recompute_stop_vif_rp(uint16_t vif_index)
     downstream_expiry_timer_timeout_rp(vif_index);
     _downstream_expiry_timers[vif_index].unschedule();
     
-    // TODO: remove the assert-related stuff?
-    // _assert_timers[vif_index].unschedule();
-    // set_assert_tracking_desired_state(vif_index, false);
-    // set_could_assert_state(vif_index, false);
-    // TODO: reset '_asserts_rate_limit'
-    // delete_assert_winner_metric(vif_index);
-    // set_assert_noinfo_state(vif_index);
+    // XXX: assert-related state doesn't apply for (*,*,RP) entry
     
     set_local_receiver_include(vif_index, false);
     set_local_receiver_exclude(vif_index, false);
@@ -1011,9 +1005,9 @@ PimMre::recompute_stop_vif_wc(uint16_t vif_index)
     _assert_timers[vif_index].unschedule();
     set_assert_tracking_desired_state(vif_index, false);
     set_could_assert_state(vif_index, false);
-    // TODO: reset '_asserts_rate_limit'
     delete_assert_winner_metric_wc(vif_index);
     set_assert_noinfo_state(vif_index);
+    _asserts_rate_limit.reset(vif_index);
     
     set_local_receiver_include(vif_index, false);
     set_local_receiver_exclude(vif_index, false);
@@ -1035,14 +1029,15 @@ PimMre::recompute_stop_vif_sg(uint16_t vif_index)
     
     assert_timer_timeout_sg(vif_index);
     delete_assert_winner_metric_sg(vif_index);
-    set_assert_winner_metric_is_better_than_spt_assert_metric_sg(vif_index, false);
+    set_assert_winner_metric_is_better_than_spt_assert_metric_sg(vif_index,
+								 false);
     
     _assert_timers[vif_index].unschedule();
     set_assert_tracking_desired_state(vif_index, false);
     set_could_assert_state(vif_index, false);
-    // TODO: reset '_asserts_rate_limit'
     delete_assert_winner_metric_sg(vif_index);
     set_assert_noinfo_state(vif_index);
+    _asserts_rate_limit.reset(vif_index);
     
     set_local_receiver_include(vif_index, false);
     set_local_receiver_exclude(vif_index, false);
@@ -1062,13 +1057,7 @@ PimMre::recompute_stop_vif_sg_rpt(uint16_t vif_index)
     downstream_expiry_timer_timeout_sg_rpt(vif_index);
     _downstream_expiry_timers[vif_index].unschedule();
     
-    // TODO: remove the assert-related stuff?
-    // assert_timers[vif_index].unschedule();
-    // set_assert_tracking_desired_state(vif_index, false);
-    // set_could_assert_state(vif_index, false);
-    // TODO: reset '_asserts_rate_limit'
-    // delete_assert_winner_metric(vif_index);
-    // set_assert_noinfo_state(vif_index);
+    // XXX: assert-related state doesn't apply for (S,G,rpt) entry
     
     set_local_receiver_include(vif_index, false);
     set_local_receiver_exclude(vif_index, false);
