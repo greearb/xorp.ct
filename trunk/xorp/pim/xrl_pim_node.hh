@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.10 2003/03/03 02:07:01 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.11 2003/03/10 23:20:54 hodson Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -47,13 +47,13 @@ class XrlPimNode : public PimNode,
 		   public PimNodeCli {
 public:
     XrlPimNode(int family, x_module_id module_id,
-	       EventLoop& event_loop, XrlRouter* r)
+	       EventLoop& event_loop, XrlRouter* xrl_router)
 	: PimNode(family, module_id, event_loop),
-	  XrlPimTargetBase(r),
-	  XrlCommonV0p1Client(r),
-	  XrlMfeaV0p1Client(r),
-	  XrlMld6igmpV0p1Client(r),
-	  XrlCliManagerV0p1Client(r),
+	  XrlPimTargetBase(xrl_router),
+	  XrlCommonV0p1Client(xrl_router),
+	  XrlMfeaV0p1Client(xrl_router),
+	  XrlMld6igmpV0p1Client(xrl_router),
+	  XrlCliManagerV0p1Client(xrl_router),
 	  PimNodeCli(*static_cast<PimNode *>(this))
 	{ }
     virtual ~XrlPimNode() { PimNode::stop(); PimNodeCli::stop(); }

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.2 2003/03/05 03:05:25 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -28,6 +28,12 @@ LDADD		+= $(top_builddir)/mld6igmp/libmld6igmp.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.a
+### RIB libraries
+LDADD		+= $(top_builddir)/rib/librib.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaftixif.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libribclientxif.a
+LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
 ### MFEA libraries
 LDADD		+= $(top_builddir)/mfea/libmfea.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
