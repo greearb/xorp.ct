@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.28 2004/10/06 20:39:16 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.29 2004/12/09 07:54:36 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -52,8 +52,10 @@ response_handler(const XrlError& e,
 		   e.str().c_str(), xrl->str().c_str());
 	exit(-1);
     }
-    printf("%s\n", response->str().c_str());
-    fflush(stdout);
+    if (!response->str().empty()) {
+	printf("%s\n", response->str().c_str());
+	fflush(stdout);
+    }
     *done_flag = true;
 }
 
