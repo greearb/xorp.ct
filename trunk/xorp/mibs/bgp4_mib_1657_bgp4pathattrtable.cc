@@ -70,6 +70,7 @@ static void get_v4_route_list_next_done(const XrlError& e, const IPv4* peer_id,
 static void rm_old_routes (void *, void *); 
 static uint32_t rows_are_equal(bgp4PathAttrTable_context * lr, 
     bgp4PathAttrTable_context * rr);
+static void bgp4PathAttrTable_delete_row(bgp4PathAttrTable_context * ctx);
 static int bgp4PathAttrTable_extract_index(bgp4PathAttrTable_context * ctx, 
     netsnmp_index * hdr);
 
@@ -383,6 +384,19 @@ bgp4PathAttrTable_create_row( netsnmp_index* hdr)
     return ctx;
 }
 
+/************************************************************
+ * bgp4PathAttrTable_delete_row - frees a row structure 
+ *
+ */
+static void
+bgp4PathAttrTable_delete_row(bgp4PathAttrTable_context * ctx)
+{
+    if (NULL == ctx) return;
+    free(ctx->index.oids);
+    free(ctx);
+}
+
+
 
 /****************************************************************************
  * bgp4PathAttrTable_extract_index - extract the row indices 
@@ -582,6 +596,7 @@ get_v4_route_list_next_done(const XrlError& e,
     if (NULL != local_row) {
 	if (rows_are_equal(row, local_row)) {
 	    local_row->update_signature = update.list_token;
+	    bgp4PathAttrTable_delete_row(row);
 	} else {
 	    CONTAINER_REMOVE(cb.container, &index);
 	    CONTAINER_INSERT(cb.container, row);
@@ -595,6 +610,7 @@ get_v4_route_list_next_done(const XrlError& e,
 	    "adding %s route to local table\n", 
 	    net->masked_addr().str().c_str()));
     }
+    
 
     // Done with this row, request next
     local_route_table_update();
