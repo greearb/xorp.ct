@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.15 2003/03/10 23:20:00 hodson Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.16 2003/08/27 02:08:14 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -206,10 +206,14 @@ public:
 
     void add_withdrawn(const BGPUpdateAttrib& wdr);
     void add_pathatt(const PathAttribute& pa);
+    void add_pathatt(PathAttribute *pa);
     void add_nlri(const BGPUpdateAttrib& nlri);
     const BGPUpdateAttribList& wr_list() const		{ return _wr_list; }
     const PathAttributeList<IPv4>& pa_list() const	{ return _pa_list; }
     const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
+    MPReachNLRIAttribute<IPv6> *mpreach()		{ return _mpreach; }
+    MPUNReachNLRIAttribute<IPv6> *mpunreach()		{ return _mpunreach;}
+
     const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
 
     bool big_enough() const;
@@ -219,11 +223,19 @@ public:
 protected:
 
 private:
+    /**
+     * Stash pointers to multiprotocol packets.
+     * @param pa path attribute.
+     */
+    void multi_protocol(PathAttribute *pa);
+
     // don't allow the use of the default copy constructor
     UpdatePacket(const UpdatePacket& UpdatePacket);
     BGPUpdateAttribList		_wr_list;
     PathAttributeList<IPv4>	_pa_list;
     BGPUpdateAttribList		_nlri_list;
+    MPReachNLRIAttribute<IPv6>	*_mpreach;
+    MPUNReachNLRIAttribute<IPv6> *_mpunreach;
 };
 
 /* **************** BGPNotificationPacket *********************** */

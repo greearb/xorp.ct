@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.21 2003/03/10 23:20:08 hodson Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.22 2003/09/19 04:50:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -38,7 +38,7 @@ void dump_bytes(const uint8_t*, size_t) {}
 
 /* **************** UpdatePacket *********************** */
 
-UpdatePacket::UpdatePacket()
+UpdatePacket::UpdatePacket() : _mpreach(0), _mpunreach(0)
 {
     _Type = MESSAGETYPEUPDATE;
 }
@@ -55,9 +55,34 @@ UpdatePacket::add_nlri(const BGPUpdateAttrib& nlri)
 }
 
 void
+UpdatePacket::multi_protocol(PathAttribute *pa)
+{
+    if(MP_REACH_NLRI == pa->type()) {
+	if(0 != _mpreach)
+	    XLOG_WARNING("Two multiprotocol reach attributes!!! %s %s", 
+			 _mpreach->str().c_str(), pa->str().c_str());
+	_mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(pa);
+    } else if(MP_UNREACH_NLRI == pa->type()) {
+	if(0 != _mpunreach)
+	    XLOG_WARNING("Two multiprotocol unreach attributes!!! %s %s", 
+			 _mpunreach->str().c_str(), pa->str().c_str());
+	_mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(pa);
+    }
+}
+
+void
 UpdatePacket::add_pathatt(const PathAttribute& pa)
 {
-    _pa_list.push_back(pa.clone());
+    PathAttribute *paclone = pa.clone();
+    multi_protocol(paclone);
+   _pa_list.push_back(paclone);
+}
+
+void
+UpdatePacket::add_pathatt(PathAttribute *pa)
+{
+    multi_protocol(pa);
+    _pa_list.push_back(pa);
 }
 
 void
@@ -135,8 +160,9 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     return d;
 }
 
-UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
-	throw(CorruptMessage)
+UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l) 
+    throw(CorruptMessage)
+    : _mpreach(0), _mpunreach(0)
 {
     debug_msg("UpdatePacket constructor called\n");
     _Type = MESSAGETYPEUPDATE;
@@ -180,7 +206,8 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 		   c_format("failed to read path attribute"),
 		   UPDATEMSGERR, ATTRLEN);
 
-	_pa_list.push_back(pa);
+	add_pathatt(pa);
+// 	_pa_list.push_back(pa);
 	d += used;
 	pa_len -= used;
     }
