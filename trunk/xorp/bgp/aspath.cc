@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.11 2003/01/28 19:15:17 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.12 2003/01/28 20:09:21 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,7 +63,7 @@ AsSegment::_encode(size_t &len) const
     debug_msg("AsSegment encode\n");
     len = 2; // number of header bytes
 
-    list <AsNum>::const_iterator iter = _aslist.begin();
+    const_iterator iter = _aslist.begin();
     for (;iter != _aslist.end(); ++iter)
 	len += 2;
     assert(_aslist.size() == _entries);		// XXX this is expensive
@@ -105,7 +105,7 @@ AsSegment::str() const
 {
     string s;
     string sep = (_type == AS_SET) ? "{": "[";	// separator
-    list <AsNum>::const_iterator iter = _aslist.begin();
+    const_iterator iter = _aslist.begin();
 
     for (u_int i = 0; i<_entries; i++, ++iter) {
 	s += sep ;
@@ -128,8 +128,8 @@ AsSegment::operator==(const AsSegment& him) const
     //more in common in the ASs near us than in the ASs further away.
     //Much of the time we can detect disimilarity in the first AS if
     //we start at the end.
-    list <AsNum>::const_reverse_iterator my_i = _aslist.rbegin();
-    list <AsNum>::const_reverse_iterator his_i = him._aslist.rbegin();
+    const_reverse_iterator my_i = _aslist.rbegin();
+    const_reverse_iterator his_i = him._aslist.rbegin();
     for (;my_i != _aslist.rend(); my_i++, his_i++)
 	if (*my_i != *his_i)
 	    return false;
@@ -148,8 +148,8 @@ AsSegment::operator<(const AsSegment& him) const
 	return true;
     if (mysize > hissize)
 	return false;
-    list <AsNum>::const_reverse_iterator my_i = _aslist.rbegin();
-    list <AsNum>::const_reverse_iterator his_i = him._aslist.rbegin();
+    const_reverse_iterator my_i = _aslist.rbegin();
+    const_reverse_iterator his_i = him._aslist.rbegin();
     for (; my_i != _aslist.rend(); my_i++, his_i++) {
 	if (*my_i < *his_i)
 	    return true;
@@ -167,7 +167,7 @@ AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
     uint8_t *p = buf;
     *p = (uint8_t)_type;  p++;
     *p = (uint8_t)_entries; p++;
-    list <AsNum>::const_iterator i;
+    const_iterator i;
     for (i = _aslist.begin(); i!= _aslist.end(); i++) {
 	*p = i->as()/256; p++;
 	*p = i->as()&255; p++;
@@ -319,13 +319,8 @@ AsPath::encode(size_t &len) const
     return data;
 }
 
-/* add_As_in_sequence is what we call when we're As prepending.  We
-   add the As number to the begining of the As sequence that starts
-   the As path, or if the As path starts with an As set, then we add a
-   new As sequence to the start of the As path */
-
 void
-AsPath::add_AS_in_sequence(const AsNum &asn)
+AsPath::prepend_as(const AsNum &asn)
 {
     if (_segments.empty() || _segments.front().type() == AS_SET) {
 	AsSegment seg = AsSegment(AS_SEQUENCE);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.11 2003/01/28 19:15:17 rizzo Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.12 2003/01/28 20:09:21 rizzo Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -640,7 +640,7 @@ BGPMain::add_route(const OriginType origin,  const AsNum& as,
     ** place.
     */
     AsPath aspath;
-    aspath.add_AS_in_sequence(as);
+    aspath.prepend_as(as);
 
     return _rib_ipc_handler->insert_static_route(origin, aspath, next_hop,
 						nlri);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.9 2003/01/27 18:04:52 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.10 2003/01/28 20:09:21 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -844,7 +844,7 @@ AggregatorAttribute::AggregatorAttribute(const AggregatorAttribute& att)
 }
 
 AggregatorAttribute::AggregatorAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(NoFlags), _aggregatoras((uint32_t)0)
+    : PathAttribute(NoFlags), _aggregatoras(AsNum::AS_INVALID)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.6 2003/01/17 03:50:48 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.7 2003/01/28 22:06:59 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,7 +29,8 @@
 #include "dump_iterators.hh"
 
 
-int main(int, char** argv) {
+int main(int, char** argv)
+{
     //stuff needed to create an eventloop
     xlog_init(argv[0], NULL);
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
@@ -68,15 +69,17 @@ int main(int, char** argv) {
     OriginAttribute igp_origin_att(IGP);
 
     AsPath aspath1;
-    aspath1.add_AS_in_sequence(AsNum(1));
-    aspath1.add_AS_in_sequence(AsNum(2));
-    aspath1.add_AS_in_sequence(AsNum(3));
+    aspath1.prepend_as(AsNum(1));
+    aspath1.prepend_as(AsNum(2));
+    aspath1.prepend_as(AsNum(3));
+    AsPath foo("3,2,1");
+    assert (foo == aspath1);
     ASPathAttribute aspathatt1(aspath1);
 
     AsPath aspath2;
-    aspath2.add_AS_in_sequence(AsNum(3));
-    aspath2.add_AS_in_sequence(AsNum(4));
-    aspath2.add_AS_in_sequence(AsNum(5));
+    aspath2.prepend_as(AsNum(3));
+    aspath2.prepend_as(AsNum(4));
+    aspath2.prepend_as(AsNum(5));
     ASPathAttribute aspathatt2(aspath2);
 
     PathAttributeList<IPv4>* palist1 =

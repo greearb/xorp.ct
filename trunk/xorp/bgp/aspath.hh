@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.7 2003/01/26 17:55:48 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.8 2003/01/27 19:21:24 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -67,6 +67,10 @@ enum ASPathSegType {
  */
 class AsSegment {
 public:
+    typedef list <AsNum>::iterator iterator;
+    typedef list <AsNum>::const_iterator const_iterator;
+    typedef list <AsNum>::const_reverse_iterator const_reverse_iterator;
+
     /**
      * Constructor of an empty AsSegment
      */
@@ -260,7 +264,12 @@ public:
      */
     const uint8_t *encode(size_t &len) const;
 
-    void add_AS_in_sequence(const AsNum &asn);
+    /**
+     * Add the As number to the begining of the AS_SEQUENCE that starts
+     * the As path, or if the AsPath starts with an AS_SET, then add a
+     * new AS_SEQUENCE with the new AsNum to the start of the AsPath
+     */
+    void prepend_as(const AsNum &asn);
 
     bool operator==(const AsPath& him) const;
 

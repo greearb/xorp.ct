@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.11 2003/01/28 19:15:17 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.12 2003/01/28 22:06:57 rizzo Exp $"
 
+#include "libxorp/xorp.h"
 #include "packet.hh"
 #include "path_attribute_list.hh"
 
@@ -22,9 +23,7 @@ int test_simple_open_packet()
     /* In this test we create an Open Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
-    // XXX is the compiler confused here ???
-    AsNum as666(666);
-    OpenPacket openpacket(as666, IPv4("1.2.3.4"), 1234);
+    OpenPacket openpacket(AsNum(666), IPv4("1.2.3.4"), 1234);
 
     const uint8_t *buf;
     size_t len;

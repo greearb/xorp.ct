@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.5 2002/12/17 22:06:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.6 2003/01/28 22:06:58 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -120,22 +120,22 @@ int main(int, char** argv) {
     OriginAttribute incomplete_origin_att(INCOMPLETE);
 
     AsPath aspath1;
-    aspath1.add_AS_in_sequence(AsNum(1));
-    aspath1.add_AS_in_sequence(AsNum(2));
-    aspath1.add_AS_in_sequence(AsNum(3));
+    aspath1.prepend_as(AsNum(1));
+    aspath1.prepend_as(AsNum(2));
+    aspath1.prepend_as(AsNum(3));
     ASPathAttribute aspathatt1(aspath1);
 
     AsPath aspath2;
-    aspath2.add_AS_in_sequence(AsNum(4));
-    aspath2.add_AS_in_sequence(AsNum(5));
-    aspath2.add_AS_in_sequence(AsNum(6));
-    aspath2.add_AS_in_sequence(AsNum(6));
+    aspath2.prepend_as(AsNum(4));
+    aspath2.prepend_as(AsNum(5));
+    aspath2.prepend_as(AsNum(6));
+    aspath2.prepend_as(AsNum(6));
     ASPathAttribute aspathatt2(aspath2);
 
     AsPath aspath3;
-    aspath3.add_AS_in_sequence(AsNum(7));
-    aspath3.add_AS_in_sequence(AsNum(8));
-    aspath3.add_AS_in_sequence(AsNum(9));
+    aspath3.prepend_as(AsNum(7));
+    aspath3.prepend_as(AsNum(8));
+    aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
     PathAttributeList<IPv4>* palist1 =

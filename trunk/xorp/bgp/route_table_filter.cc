@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.5 2002/12/17 22:06:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.6 2003/01/16 23:18:58 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -90,7 +90,7 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
 {
     //Create a new AS path with our AS number prepended to it.
     AsPath new_as_path(rtmsg->route()->attributes()->aspath());
-    new_as_path.add_AS_in_sequence(_as_num);
+    new_as_path.prepend_as(_as_num);
 
     //Form a new path attribute list containing the new AS path
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.5 2003/01/28 03:21:52 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.6 2003/01/28 22:06:57 rizzo Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -83,7 +83,7 @@ main(int argc, char* argv[])
     if (verbose) 
 	printf("Testing add_As_in_sequence - adding to existing sequence\n");
     asn = new AsNum(65000);
-    aspathcopy->add_AS_in_sequence(*asn);
+    aspathcopy->prepend_as(*asn);
     if (verbose) printf("Extended: %s\n", aspathcopy->str().c_str());
     assert(aspathcopy->contains(*asn) == true);
     delete asn;
@@ -104,7 +104,7 @@ main(int argc, char* argv[])
 	printf("Testing add_As_in_sequence - adding to existing set\n");
     asn = new AsNum(65001);
     if (verbose) printf("Before: %s\n", aspath->str().c_str());
-    aspath->add_AS_in_sequence(*asn);
+    aspath->prepend_as(*asn);
     if (verbose) printf("Extended: %s\n", aspath->str().c_str());
     assert(aspath->contains(*as[10]) == true);
     assert(aspath->contains(*as[11]) == true);
