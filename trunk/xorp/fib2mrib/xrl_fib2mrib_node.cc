@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.3 2004/03/18 13:17:21 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.4 2004/04/05 09:19:14 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -829,51 +829,107 @@ XrlFib2mribNode::send_rib_route_change()
     //
     if (fib2mrib_route.is_add_route()) {
 	if (fib2mrib_route.is_ipv4()) {
-	    success = _xrl_rib_client.send_add_route4(
-		_rib_target.c_str(),
-		Fib2mribNode::protocol_name(),
-		false,			/* unicast */
-		true,			/* multicast */
-		fib2mrib_route.network().get_ipv4net(),
-		fib2mrib_route.nexthop().get_ipv4(),
-		fib2mrib_route.metric(),
-		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    if (fib2mrib_route.is_interface_route()) {
+		success = _xrl_rib_client.send_add_interface_route4(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv4net(),
+		    fib2mrib_route.nexthop().get_ipv4(),
+		    fib2mrib_route.ifname(),
+		    fib2mrib_route.vifname(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_add_route4(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv4net(),
+		    fib2mrib_route.nexthop().get_ipv4(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    }
 	}
 	if (fib2mrib_route.is_ipv6()) {
-	    success = _xrl_rib_client.send_add_route6(
-		_rib_target.c_str(),
-		Fib2mribNode::protocol_name(),
-		false,			/* unicast */
-		true,			/* multicast */
-		fib2mrib_route.network().get_ipv6net(),
-		fib2mrib_route.nexthop().get_ipv6(),
-		fib2mrib_route.metric(),
-		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    if (fib2mrib_route.is_interface_route()) {
+		success = _xrl_rib_client.send_add_interface_route6(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv6net(),
+		    fib2mrib_route.nexthop().get_ipv6(),
+		    fib2mrib_route.ifname(),
+		    fib2mrib_route.vifname(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_add_route6(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv6net(),
+		    fib2mrib_route.nexthop().get_ipv6(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    }
 	}
     }
 
     if (fib2mrib_route.is_replace_route()) {
 	if (fib2mrib_route.is_ipv4()) {
-	    success = _xrl_rib_client.send_replace_route4(
-		_rib_target.c_str(),
-		Fib2mribNode::protocol_name(),
-		false,			/* unicast */
-		true,			/* multicast */
-		fib2mrib_route.network().get_ipv4net(),
-		fib2mrib_route.nexthop().get_ipv4(),
-		fib2mrib_route.metric(),
-		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    if (fib2mrib_route.is_interface_route()) {
+		success = _xrl_rib_client.send_replace_interface_route4(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv4net(),
+		    fib2mrib_route.nexthop().get_ipv4(),
+		    fib2mrib_route.ifname(),
+		    fib2mrib_route.vifname(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_replace_route4(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv4net(),
+		    fib2mrib_route.nexthop().get_ipv4(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    }
 	}
 	if (fib2mrib_route.is_ipv6()) {
-	    success = _xrl_rib_client.send_replace_route6(
-		_rib_target.c_str(),
-		Fib2mribNode::protocol_name(),
-		false,			/* unicast */
-		true,			/* multicast */
-		fib2mrib_route.network().get_ipv6net(),
-		fib2mrib_route.nexthop().get_ipv6(),
-		fib2mrib_route.metric(),
-		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    if (fib2mrib_route.is_interface_route()) {
+		success = _xrl_rib_client.send_replace_interface_route6(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv6net(),
+		    fib2mrib_route.nexthop().get_ipv6(),
+		    fib2mrib_route.ifname(),
+		    fib2mrib_route.vifname(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_replace_route6(
+		    _rib_target.c_str(),
+		    Fib2mribNode::protocol_name(),
+		    false,			/* unicast */
+		    true,			/* multicast */
+		    fib2mrib_route.network().get_ipv6net(),
+		    fib2mrib_route.nexthop().get_ipv6(),
+		    fib2mrib_route.metric(),
+		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    }
 	}
     }
 
