@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.8 2003/05/07 21:43:59 hodson Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.9 2003/06/03 19:10:31 hodson Exp $
 
 #ifndef	__LIBXIPC_XRL_ERROR_HH__
 #define __LIBXIPC_XRL_ERROR_HH__
@@ -37,7 +37,7 @@ enum XrlErrorCode {
     SEND_FAILED		  = 210,
     REPLY_TIMED_OUT	  = 211,
     SEND_FAILED_TRANSIENT = 212,
-    
+
     INTERNAL_ERROR	  = 220
 };
 
@@ -73,7 +73,7 @@ public:
      * Xrl target names
      */
     static const XrlError& NO_FINDER();
-    
+
     /**
      * Returned when an XRL cannot be dispatched because the target name
      * is not registered in the system.
@@ -85,7 +85,7 @@ public:
      * the receiver.
      */
     static const XrlError& NO_SUCH_METHOD();
-    
+
     /**
      * Returned when the underlying XRL transport mechanism fails.
      */
@@ -101,7 +101,7 @@ public:
      * Returned when the underlying XRL transport mechanism fails.
      */
     static const XrlError& SEND_FAILED_TRANSIENT();
-    
+
     /**
      * An error has occurred within the XRL system.  This is usually a sign
      * of an implementation issue.  This error replaces no longer
@@ -110,7 +110,7 @@ public:
      * contain more information.
      */
     static const XrlError& INTERNAL_ERROR();
-    
+
     /**
      * @return the unique identifer number associated with error.
      */
