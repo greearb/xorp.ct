@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.44 2004/05/31 02:32:16 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.45 2004/05/31 08:18:41 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -878,7 +878,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 	prev_iter = iter;
 	++iter;
 	debug_msg("  child: %s\n", (*prev_iter)->path().c_str());
-	result != (*prev_iter)->discard_changes(depth + 1, last_depth);
+	result += (*prev_iter)->discard_changes(depth + 1, last_depth);
     }
 
     return result;
