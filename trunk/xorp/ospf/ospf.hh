@@ -163,7 +163,15 @@ class Ospf {
      */
     bool delete_route();
 
+    /**
+     * Get the current OSPF version.
+     */
     bool get_version() const { return _version; }
+
+    /**
+     * @return a reference to the eventloop, required for timers etc...
+     */
+    EventLoop& get_eventloop() { return _eventloop; }
  private:
     const OspfTypes::Version _version;	// OSPF version.
     EventLoop& _eventloop;
