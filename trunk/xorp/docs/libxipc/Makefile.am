@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/libxipc/Makefile.am,v 1.1.1.1 2002/12/11 23:55:55 hodson Exp $
+## $XORP: xorp/docs/libxipc/Makefile.am,v 1.2 2003/03/06 21:39:12 mjh Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -11,7 +11,7 @@ DOCS			= libxipc_overview 				\
 #			  xrl_syntax
 
 # -- Document Sources
-libxipc_overview_LATEX	= libxipc_overview.tex
+libxipc_overview_LATEX	= ../tex/xorp.bib libxipc_overview.tex
 
 xrl_interfaces_LATEX	= ../tex/xorp.bib xrl_interfaces.tex
 xrl_interfaces_FIGURES	= figs/xrl_ifs.eps

@@ -5,20 +5,22 @@
 \usepackage{rotating}
 
 \newcommand{\eg}{\emph{e.g.\/}} % e.g.
+\newcommand{\ie}{\emph{i.e.\/}} % i.e.
 
 \title{XORP Inter-Process Communication Library Overview \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 10, 2003}
 
 \begin{document}
 \maketitle
-\begin{abstract}Extensibility and robustness are key goals of the eXtensible
+\begin{abstract}
+Extensibility and robustness are key goals of the eXtensible
 Open Router Project (XORP).  A step towards these goals is separating
 the tasks of router in multiple userland programs.  The programs may
 need to communicate with the kernel and may need to communicate across
@@ -64,7 +66,7 @@ alternatives exist.
 
 \item to be efficient.
 
-\item to potentially wrapper communication with non-Xorp processes,
+\item to potentially wrapper communication with non-XORP processes,
 \eg HTTP and SNMP servers.
 
 \item to be renderable in human readable form so XORP processes can
@@ -96,7 +98,7 @@ exists, and tools to translate these into callable C++ interfaces and
 into a set of C++ handler routines for handling the receipt of XRL
 calls.  These tools are described in document \cite{xorp:xrl_interfaces}.
 The tools reduce 
-the amount of familiarity the working programmer need have with the
+the amount of familiarity the working programmer needs to have with the
 internals of the XIPC library.  This document provides an overview of
 the XIPC library and is the recommended starting point before using
 the library.
@@ -123,7 +125,7 @@ passes the unresolved XRL to the Finder, which returns the resolved
 form with the appropriate protocol family and protocol family
 arguments.  The finder may also modify the other components of the
 XRL, but doesn't usually do so.  This functionality may be useful when
-supporting backwards compatibility of interfaces, ie the Finder could
+supporting backwards compatibility of interfaces, \ie the Finder could
 modify the interface number and method name.
 
 The resolved forms of XRLs are typically maintained in a client side
@@ -185,6 +187,7 @@ names into a parseable form to find the Xrl Protocol Family Listener.
 \item [XRL Router] an object responsible for dispatching and receiving
 XRL requests.  They manage all the underlying interactions and are the
 interface that users are expected to use for XRL interactions.
+% TODO: the above description of [XRL Router] is unclear.
 
 \item [Finder Client] an object associated with an XRL Router that
 manages the communication with the Finder.
@@ -205,5 +208,11 @@ instantiated to talk with them.
 \end{description}
 
 The kdoc documentation provides details of the particular classes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{../tex/xorp}
+\bibliographystyle{plain}
 
 \end{document}

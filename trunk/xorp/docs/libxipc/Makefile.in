@@ -108,7 +108,7 @@ DOCS = libxipc_overview 							  xrl_interfaces
 #			  xrl_syntax
 
 # -- Document Sources
-libxipc_overview_LATEX = libxipc_overview.tex
+libxipc_overview_LATEX = ../tex/xorp.bib libxipc_overview.tex
 
 xrl_interfaces_LATEX = ../tex/xorp.bib xrl_interfaces.tex
 xrl_interfaces_FIGURES = figs/xrl_ifs.eps
