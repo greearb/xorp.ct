@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.14 2003/06/03 17:50:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.15 2003/06/19 00:44:42 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -298,7 +298,7 @@ FinderTcpAutoConnector::FinderTcpAutoConnector(
 				   bool			   en)
     : FinderTcpConnector(e, *this, cmds, host, port),
       _real_manager(real_manager), _connected(false), _enabled(en),
-      _last_error(0), _consec_error(0)
+      _once_active(false), _last_error(0), _consec_error(0)
 {
     if (en) {
 	start_timer();
@@ -393,7 +393,7 @@ void
 FinderTcpAutoConnector::messenger_birth_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_birth_event(m);
-    set_enabled(false);
+    //    set_enabled(false);
 }
 
 void
@@ -401,7 +401,7 @@ FinderTcpAutoConnector::messenger_death_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_death_event(m);
     _connected = false;
-    if (_enabled)
+    if (_enabled && _once_active == false)
 	start_timer(CONNECT_RETRY_PAUSE_MS);
 }
 
@@ -409,8 +409,9 @@ void
 FinderTcpAutoConnector::messenger_active_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_active_event(m);
-
+    _once_active = true;
 }
+
 void
 FinderTcpAutoConnector::messenger_inactive_event(FinderMessengerBase* m)
 {
