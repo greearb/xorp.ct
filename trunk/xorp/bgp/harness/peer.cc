@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.55 2004/06/10 22:40:40 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.56 2004/10/07 06:54:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -144,7 +144,7 @@ Peer::PeerState
 Peer::is_this_you(const string& peer_name, const uint32_t genid) const
 {
     debug_msg("is this you: %s %s %u\n", _peername.c_str(), peer_name.c_str(),
-	      genid);
+	      XORP_UINT_CAST(genid));
     
     if(_up && peer_name == _peername && genid == _genid)
 	return Peer::YES_ITS_ME;
@@ -186,8 +186,8 @@ Peer::status(string& status)
     status = _peername + " ";
     status += _established ? "established" : "";
     status += " ";
-    status += "sent: " + c_format("%d", _trie_sent.update_count()) + " ";
-    status += "received: " + c_format("%d", _trie_recv.update_count()) + " ";
+    status += "sent: " + c_format("%u", XORP_UINT_CAST(_trie_sent.update_count())) + " ";
+    status += "received: " + c_format("%u", XORP_UINT_CAST(_trie_recv.update_count())) + " ";
 }
 
 bool
@@ -708,7 +708,7 @@ Peer::assertX(const string& line, const vector<string>& words)
 		xorp_throw(InvalidString, 
 			   c_format("Expected list size to be %d actual %u",
 				    atoi(words[3].c_str()),
-				    (uint32_t)_expect._list.size()));
+				    XORP_UINT_CAST(_expect._list.size())));
 	    break;
 	default:
 	    xorp_throw(InvalidString, 
@@ -800,7 +800,7 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     else if(6 == A::ip_version())
 	header.subtype = htons(AFI_IPV6);
     else
-	XLOG_FATAL("unknown ip version %d", A::ip_version());
+	XLOG_FATAL("unknown ip version %d", XORP_UINT_CAST(A::ip_version()));
 
     header.length = htonl(length + sizeof(viewbuf));
     
@@ -1215,7 +1215,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 {
     debug_msg("status: %d secs: %lu micro: %lu data length: %u\n",
 	      status, (unsigned long)tv.sec(), (unsigned long)tv.usec(),
-	      (uint32_t)data.size());
+	      XORP_UINT_CAST(data.size()));
 
     /*
     ** A bgp error has occured.
@@ -1260,9 +1260,10 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	}
 	    break;
 	case MESSAGETYPEKEEPALIVE: {
-	    debug_msg("KEEPALIVE Packet RECEIVED %u\n", (uint32_t)length);
+	    debug_msg("KEEPALIVE Packet RECEIVED %u\n",
+		      XORP_UINT_CAST(length));
 	    KeepAlivePacket pac(buf, length);
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 
 	    /* XXX
 	    ** Send any received keepalive right back.
@@ -1342,7 +1343,7 @@ Peer::datain_closed()
 void
 Peer::send_message(const uint8_t *buf, const size_t len, SMCB cb)
 {
-    debug_msg("len: %u\n", (uint32_t)len);
+    debug_msg("len: %u\n", XORP_UINT_CAST(len));
 
     if(!_traffic_sent.is_empty()) {
 	TimeVal tv;
