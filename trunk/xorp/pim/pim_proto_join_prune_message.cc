@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.2 2002/12/14 01:22:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.3 2002/12/17 10:03:47 pavlin Exp $"
 
 
 //
@@ -316,7 +316,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     IPvX	source_addr(family()), group_addr(family());
     list<PimJpGroup *>::iterator iter;
     PimMre	*pim_mre;
-    map<IPvX, IPvX> groups_map;
+    map<IPvX, IPvX> groups_map, join_wc_map;
     
     vif_index = pim_vif->vif_index();
     
@@ -351,12 +351,19 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     //
     for (iter = _jp_groups_list.begin(); iter != _jp_groups_list.end();
 	 ++iter) {
+	list<IPvX>::iterator iter2;
 	PimJpGroup *jp_group = *iter;
 	group_addr = jp_group->group_addr();
 	group_masklen = jp_group->group_masklen();
 	holdtime = _holdtime;
 	
-	list<IPvX>::iterator iter2;
+	//
+	// Build the map for all (*,G) Joins so far
+	//
+	if (i_am_target_router_bool) {
+	    if (! jp_group->wc()->j_list().empty())
+		join_wc_map.insert(pair<IPvX, IPvX>(group_addr, group_addr));
+	}
 	
 	// (*,*,RP) Join
 	for (iter2 = jp_group->rp()->j_list().begin();
@@ -526,7 +533,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		    join_wc_received_bool = true;
 		if (! join_wc_received_bool) {
 		    join_wc_received_bool
-			= (groups_map.find(group_addr) != groups_map.end());
+			= (join_wc_map.find(group_addr) != join_wc_map.end());
 		}
 		if (i_am_target_router_bool)
 		    pim_mre->receive_prune_sg_rpt(vif_index, holdtime,
