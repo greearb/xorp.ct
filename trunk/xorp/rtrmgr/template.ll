@@ -3,8 +3,7 @@
 #include "y.tplt_tab.h"
 #define YY_NO_UNPUT
 %}
-	int level = 0;
-	int linenum = 1;
+	int tplt_linenum = 1;
 	extern void* tpltlval;
 %option noyywrap
 %x comment
@@ -58,205 +57,173 @@ RE_IPV6_PREFIX	{RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 
+
 %%
+
 "{"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex({) ");
-#endif
-	level++;
 	return UPLEVEL;
 	}
+
 "}"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(})\n");
-#endif
-	level--;
 	return DOWNLEVEL;
-	}
-"text"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(text) ");
-#endif
-	tpltlval = strdup(tplttext);
-	return TEXT;
-	}
-"uint"	{
-	tpltlval = strdup(tplttext);
-	return UINT;
-	}
-"int"	{
-	tpltlval = strdup(tplttext);
-	return INT;
-	}
-"bool"	{
-	tpltlval = strdup(tplttext);
-	return BOOL;
-	}
-"toggle"	{
-	tpltlval = strdup(tplttext);
-	return TOGGLE;
-	}
-"ipv4"	{
-	tpltlval = strdup(tplttext);
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(ipv4:%s ", tplttext);
-#endif
-	return IPV4;
-	}
-"ipv4_prefix"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(ipv4_prefix:%s ", tplttext);
-#endif
-	tpltlval = strdup(tplttext);
-	return IPV4PREFIX;
-	}
-"ipv6"	{
-	tpltlval = strdup(tplttext);
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(ipv6:%s ", tplttext);
-#endif
-	return IPV6;
-	}
-"ipv6_prefix"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(ipv6_prefix:%s ", tplttext);
-#endif
-	tpltlval = strdup(tplttext);
-	return IPV6PREFIX;
-	}
-"macaddr"	{
-	tpltlval = strdup(tplttext);
-	return MACADDR;
-	}
-"="	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(=) ");
-#endif
-	return ASSIGN_DEFAULT;
-	}
-";"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(;)\n");
-#endif
-	return END;
-	}
-":"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(:) ");
-#endif
-	return COLON;
-	}
-","	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(,) ");
-#endif
-	return LISTNEXT;
-	}
-"->"	{
-	return RETURN;
-	}
-"true"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(init:true) ");
-#endif
-	tpltlval = strdup(tplttext);
-	return BOOL_INITIALIZER;
-	}
-"false"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(init:false) ");
-#endif
-	tpltlval = strdup(tplttext);
-	return BOOL_INITIALIZER;
-	}
-"/"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(/) ");
-#endif
-	return SLASH;
-        }
-"\\"	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(\\ (SLASH)) ");
-#endif
-	return SLASH;
-        }
-"\n"	{ 
-	linenum++;
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(newline)\n");
-#endif
 	}
 
 [ \t]+	/* whitespace */
 
-\%[a-z][a-z0-9\-_]*	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(command:%s) ", tplttext);
-#endif
-	tpltlval = strdup(tplttext);
-	return COMMAND;
-	}
-\$\([a-zA-Z@][a-zA-Z0-9\-_.@]*\)	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(variable:%s) ", tplttext);
-#endif
-	tpltlval = strdup(tplttext);
-	return VARIABLE;
-	}
-[ \t]"@"	{
-	return VARDEF;
+"\n"	{
+	tplt_linenum++;
 	}
 
-[a-zA-Z][a-zA-Z0-9\-_]*	{
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf(" lex(literal:%s) ", tplttext);
-#endif
-	tpltlval = strdup(tplttext);
-	return LITERAL;
-	}
-\"[a-zA-Z0-9\-_\[\]:/&.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
-	tpltlval = strdup(tplttext);
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf("STRING >%s<", (char *)tpltlval);
-#endif
-	return STRING;
+";"	{
+	return END;
 	}
 
-"/*"			BEGIN(comment);
-<comment>[^*\n]* 	/* eat up anything that's not a '*' */
-<comment>"*"+[^*/\n]* 	/* eat up '*'s not followed by "/"s */
-<comment>\n		linenum++;
-<comment>"*"+"/"	BEGIN(INITIAL);
+":"	{
+	return COLON;
+	}
+
+"="	{
+	return ASSIGN_DEFAULT;
+	}
+
+","	{
+	return LISTNEXT;
+	}
+
+"->"	{
+	tpltlval = strdup(tplttext);
+	return RETURN;
+	}
+
+"text"	{
+	tpltlval = strdup(tplttext);
+	return TEXT_TYPE;
+	}
+
+"int"	{
+	tpltlval = strdup(tplttext);
+	return INT_TYPE;
+	}
+
+"uint"	{
+	tpltlval = strdup(tplttext);
+	return UINT_TYPE;
+	}
+
+"bool"	{
+	tpltlval = strdup(tplttext);
+	return BOOL_TYPE;
+	}
+
+"toggle"	{
+	tpltlval = strdup(tplttext);
+	return TOGGLE_TYPE;
+	}
+
+"ipv4"	{
+	tpltlval = strdup(tplttext);
+	return IPV4_TYPE;
+	}
+
+"ipv4_prefix"	{
+	tpltlval = strdup(tplttext);
+	return IPV4PREFIX_TYPE;
+	}
+
+"ipv6"	{
+	tpltlval = strdup(tplttext);
+	return IPV6_TYPE;
+	}
+
+"ipv6_prefix"	{
+	tpltlval = strdup(tplttext);
+	return IPV6PREFIX_TYPE;
+	}
+
+"macaddr"	{
+	tpltlval = strdup(tplttext);
+	return MACADDR_TYPE;
+	}
+
+"true"	{
+	tpltlval = strdup(tplttext);
+	return BOOL_VALUE;
+	}
+
+"false"	{
+	tpltlval = strdup(tplttext);
+	return BOOL_VALUE;
+	}
 
 [\-]*[0-9]+	{
 	tpltlval = strdup(tplttext);
-	return INTEGER;
+	return INTEGER_VALUE;
 	}
 
 {RE_IPV4}	{
 	tpltlval = strdup(tplttext);
-	return IPV4_INITIALIZER;
+	return IPV4_VALUE;
 	}
 
-{RE_IPV4_PREFIX}	{
+{RE_IPV4_PREFIX} {
 	tpltlval = strdup(tplttext);
-	return IPV4PREFIX_INITIALIZER;
+	return IPV4PREFIX_VALUE;
 	}
 
 {RE_IPV6}	{
 	tpltlval = strdup(tplttext);
-	return IPV6_INITIALIZER;
+	return IPV6_VALUE;
 	}
 
-{RE_IPV6_PREFIX}	{
+{RE_IPV6_PREFIX} {
 	tpltlval = strdup(tplttext);
-	return IPV6PREFIX_INITIALIZER;
+	return IPV6PREFIX_VALUE;
 	}
 
 {RE_MACADDR}	{
 	tpltlval = strdup(tplttext);
-	return MACADDR_INITIALIZER;
+	return MACADDR_VALUE;
 	}
+
+[ \t]"@"	{
+	tpltlval = strdup("@");
+	return VARDEF;
+	}
+
+\%[a-z][a-z0-9\-_]*	{
+	tpltlval = strdup(tplttext);
+	return COMMAND;
+	}
+
+\$\([a-zA-Z@][a-zA-Z0-9\-_.@]*\)	{
+	tpltlval = strdup(tplttext);
+	return VARIABLE;
+	}
+
+[a-zA-Z][a-zA-Z0-9\-_]*	{
+	tpltlval = strdup(tplttext);
+	return LITERAL;
+	}
+
+\"[a-zA-Z0-9\-_\[\]:/&.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
+	tpltlval = strdup(tplttext);
+	return STRING;
+	}
+
+"/*"			BEGIN(comment);
+
+<comment>[^*\n]* 	/* eat up anything that's not a '*' */
+
+<comment>"*"+[^*/\n]* 	/* eat up '*'s not followed by "/"s */
+
+<comment>\n		tplt_linenum++;
+
+<comment>"*"+"/"	BEGIN(INITIAL);
+
+.	{
+	/* everything else is a syntax error */
+	return SYNTAX_ERROR;
+	}
+
 
 %%
