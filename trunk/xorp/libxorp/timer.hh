@@ -1,5 +1,3 @@
-
-
 // Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.14 2003/06/11 19:15:19 jcardona Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.15 2003/06/12 23:58:16 jcardona Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -33,18 +31,18 @@ class TimerList;
 typedef XorpCallback0<void>::RefPtr OneoffTimerCallback;
 
 // PeriodicTimerCallback methods should return true to reschedule
-typedef XorpCallback0<bool>::RefPtr PeriodicTimerCallback; 
+typedef XorpCallback0<bool>::RefPtr PeriodicTimerCallback;
 
 typedef XorpCallback1<void, XorpTimer&>::RefPtr BasicTimerCallback;
 
 /**
- * @short Abstract class used to receive TimerList notifications 
+ * @short Abstract class used to receive TimerList notifications
  *
  * TimerListObserverBase is a class that can be subtyped to receive
  * notifications on when timers are created or expired.  All the methods in
  * this class are private, since they must only be invoked by the friend class,
- * TimerList 
- * 
+ * TimerList
+ *
  * @see TimerList
  */
 class TimerListObserverBase {
@@ -75,7 +73,7 @@ private:
  * They are ordinarily created via TimerList methods, and they
  * must be associated with an TimerList object in order to be
  * runnable.
- * 
+ *
  * @see TimerList
  */
 class XorpTimer {
@@ -94,7 +92,7 @@ public:
 
     /**
      * Get the remaining time until the timer expires.
-     * 
+     *
      * @param remain the return-by-reference value with the remaining
      * time until the timer expires. If the current time is beyond
      * the expire time (e.g., if we are behind schedule with the timer
@@ -130,7 +128,7 @@ public:
      * Reschedule the @ref XorpTimer object.
      * @param ms milliseconds from the most recent expiry.
      */
-    void reschedule_after_ms(int ms);	
+    void reschedule_after_ms(int ms);
 
     /**
      * Unschedule the @ref XorpTimer object.  The XorpTimer callback is not
@@ -142,19 +140,19 @@ public:
      * Release reference to underlying state.
      */
     void clear();			// erase timer
-    
+
     XorpTimer()				: _node(0) { }
     XorpTimer(TimerList* list, BasicTimerCallback cb);
     XorpTimer(const XorpTimer&);
     ~XorpTimer();
-    
+
     XorpTimer& operator=(const XorpTimer&);
     TimerNode* node() const		{ return _node; }
 private:
     TimerNode* _node;
 
     XorpTimer(TimerNode* n);
-    
+
     friend class TimerList;
 };
 
@@ -176,7 +174,7 @@ typedef void (*query_current_time)(TimeVal*);
 <pre>
 TimerList timer_list;
 
-XorpTimer t = timer_list.new_oneoff_after_ms(100, 
+XorpTimer t = timer_list.new_oneoff_after_ms(100,
 			callback(some_function, some_arg));
 
 new_oneoff_after_ms(200, my_callback_b, my_parameter_a);
@@ -185,15 +183,15 @@ while ( ! timer_list.empty() ) {
 	timer_list.run();
 }
 </pre>
- * 
+ *
  * <code>my_callback_a</code> is called 100ms after the @ref XorpTimer
- * object is created.  
+ * object is created.
 
  * <code>my_callback_b</code> is never called
  * because no XorpTimer references the underlying element on the TimerList
  * after <code>TimerList::new_oneoff_after_ms()</code> is called.
  */
-class TimerList : public Heap { 
+class TimerList : public Heap {
 public:
     /**
      * @param query_current_time specifiable current time function.
@@ -203,7 +201,7 @@ public:
     inline ~TimerList() { }
 
     /**
-     * Expire all pending @ref XorpTimer objects associated with @ref 
+     * Expire all pending @ref XorpTimer objects associated with @ref
      * TimerList.
      */
     void run();
@@ -216,7 +214,7 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer new_oneoff_at(const TimeVal& when, 
+    XorpTimer new_oneoff_at(const TimeVal& when,
 			    const OneoffTimerCallback& ocb);
 
     /**
@@ -247,27 +245,27 @@ public:
      * @param pcb user callback object that is invoked when timer expires.
      * If the callback returns false the periodic XorpTimer is unscheduled.
      *
-     * @return the @ref XorpTimer created.  
+     * @return the @ref XorpTimer created.
      */
     XorpTimer new_periodic(int ms, const PeriodicTimerCallback& pcb);
 
     /**
      * Create a XorpTimer to set a flag.
      *
-     * @param when the absolute time when the timer expires.  
+     * @param when the absolute time when the timer expires.
      *
      * @param flag_ptr pointer to a boolean variable that is set to
      * false when this function is called and will be set to true when
      * the @ref XorpTimer expires.
      *
-     * @return the @ref XorpTimer created.  
+     * @return the @ref XorpTimer created.
      */
     XorpTimer set_flag_at(const TimeVal& when, bool *flag_ptr);
 
     /**
      * Create a XorpTimer to set a flag.
      *
-     * @param wait the relative time when the timer expires.  
+     * @param wait the relative time when the timer expires.
      *
      * @param flag_ptr pointer to a boolean variable that is set to
      * false when this function is called and will be set to true when
@@ -276,11 +274,11 @@ public:
      * @return the @ref XorpTimer created.
      */
     XorpTimer set_flag_after(const TimeVal& wait, bool *flag_ptr);
-    
+
     /**
      * Create a XorpTimer to set a flag.
      *
-     * @param ms the relative time in milliseconds when the timer expires.  
+     * @param ms the relative time in milliseconds when the timer expires.
      *
      * @param flag_ptr pointer to a boolean variable that is set to
      * false when this function is called and will be set to true when
@@ -292,13 +290,13 @@ public:
 
     /**
      * Custom XorpTimer creation method.  The @ref XorpTimer object created
-     * needs to be explicitly scheduled with the available @ref XorpTimer 
+     * needs to be explicitly scheduled with the available @ref XorpTimer
      * methods.
      *
      * @param hook user function to be invoked when XorpTimer expires.
      *
      * @param thunk user argument to be passed when user's function is
-     * invoked.  
+     * invoked.
      *
      * @return the @ref XorpTimer created.
      */
@@ -322,11 +320,11 @@ public:
      *
      * @param tv reference that is assigned expiry time of next timer.
      * If there is no @ref XorpTimer pending, this value is assigned the
-     * maximum @ref TimeVal::MAXIMUM().  The first function returns the 
-     * absolute time at which the timer expires, where the second returns the 
-     * difference between now and the expiry time.   
+     * maximum @ref TimeVal::MAXIMUM().  The first function returns the
+     * absolute time at which the timer expires, where the second returns the
+     * difference between now and the expiry time.
      *
-     * @return true if there is a XorpTimer awaiting expiry, false otherwise.  
+     * @return true if there is a XorpTimer awaiting expiry, false otherwise.
      */
     bool get_next_delay(TimeVal& tv) const;
     bool get_next_expire(TimeVal& tv) const;
@@ -340,11 +338,11 @@ public:
 
     /**
      * Default time querier.
-     * 
+     *
      * Get the current time by using the default time querier.
      * E.g., in non-simulation environment, this typically would
      * be gettimeofday(2).
-     * 
+     *
      * @param tv a pointer to the @ref TimeVal storage to store the current
      * time.
      */
@@ -352,20 +350,20 @@ public:
 
     /**
      * Register an observer object with this class
-     * 
-     * @param obs an observer object derived from @ref TimerListObserverBase 
+     *
+     * @param obs an observer object derived from @ref TimerListObserverBase
      */
-    void set_observer(TimerListObserverBase& obs);      
+    void set_observer(TimerListObserverBase& obs);
 
     /**
      * Unregister the current observer
      */
-    void remove_observer();                          
+    void remove_observer();
 
 private:
     void schedule_node(TimerNode* t);	// Put node in time ordered list pos.
     void unschedule_node(TimerNode* t); // Remove node from list.
-    
+
 
     void acquire_lock() const		{ /* nothing, for now */ }
     bool attempt_lock() const		{ return true; }
@@ -396,7 +394,7 @@ protected:
     bool scheduled()		const	{ return _pos_in_heap >= 0; }
     const TimeVal& expiry()	const	{ return _expires; }
     bool time_remaining(TimeVal& remain) const;
-    
+
     void schedule_at(const TimeVal&);
     void schedule_after(const TimeVal& wait);
     void schedule_after_ms(int x_ms);
@@ -411,7 +409,7 @@ protected:
 
     TimerList*	_list;		// TimerList this node is associated w.
     int		_pos_in_heap;	// position of this node in heap
-    
+
     friend class XorpTimer;
     friend class TimerList;
 };

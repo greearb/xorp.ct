@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.12 2003/06/14 01:03:29 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.13 2003/06/16 15:52:18 jcardona Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -59,10 +59,9 @@
 // ----------------------------------------------------------------------------
 // TimerNode methods
 
-TimerNode::TimerNode(TimerList* l, BasicTimerCallback cb) 
+TimerNode::TimerNode(TimerList* l, BasicTimerCallback cb)
     : _ref_cnt(0), _cb(cb), _list(l), _pos_in_heap(NOT_IN_HEAP)
 {
-    assert(_list);
 }
 
 TimerNode::~TimerNode()
@@ -71,9 +70,9 @@ TimerNode::~TimerNode()
 }
 
 void
-TimerNode::add_ref() 
+TimerNode::add_ref()
 {
-    _ref_cnt++; 
+    _ref_cnt++;
 }
 
 void
@@ -84,7 +83,7 @@ TimerNode::release_ref()
 }
 
 void
-TimerNode::expire(XorpTimer&, void*) 
+TimerNode::expire(XorpTimer&, void*)
 {
     // Implemented by children
 }
@@ -93,16 +92,16 @@ bool
 TimerNode::time_remaining(TimeVal& remain) const
 {
     TimeVal now;
-    
+
     assert(_list);
     _list->current_time(now);
-    
+
     remain = expiry();
     if (remain <= now)
 	remain = TimeVal::ZERO();
     else
 	remain -= now;
-    
+
     return (true);
 }
 
@@ -129,7 +128,7 @@ TimerNode::schedule_after(const TimeVal& wait)
     unschedule();
 
     TimeVal now;
-    
+
     _list->current_time(now);
     _expires = now + wait;
     _list->schedule_node(this);
@@ -167,8 +166,8 @@ TimerNode::reschedule_after_ms(int ms)
 
 class OneoffTimerNode2 : public TimerNode {
 public:
-    OneoffTimerNode2(TimerList *l, const OneoffTimerCallback& cb) 
-	: TimerNode (l, callback(this, &OneoffTimerNode2::expire, (void*)0)), 
+    OneoffTimerNode2(TimerList *l, const OneoffTimerCallback& cb)
+	: TimerNode (l, callback(this, &OneoffTimerNode2::expire, (void*)0)),
 	_cb(cb) {}
 private:
     OneoffTimerCallback _cb;
@@ -189,11 +188,24 @@ private:
     int _period_ms;
 
     void expire(XorpTimer& t, void*) {
-	if (_cb->dispatch()) 
+	if (_cb->dispatch())
 	    t.reschedule_after_ms(_period_ms);
     }
 };
 
+// ----------------------------------------------------------------------------
+// Dummy TimerNode instance
+
+// Note: the dummy node is shared between lists and has no associated
+// callback.  Originally, having a callback that would abort if
+// invoked was considered.  However, callbacks use ref_ptrs and as a
+// result there can be a race in the static destruction code between
+// the destruction of the (static) data structure used by the ref_ptr
+// instances and the destruction of the dummy timer node.
+
+TimerNode TimerList::_dummy_timer_node(0, 0);
+
+
 // ----------------------------------------------------------------------------
 // XorpTimer factories
 
@@ -206,11 +218,11 @@ TimerList::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& cb)
 }
 
 XorpTimer
-TimerList::new_oneoff_after(const TimeVal& wait, 
+TimerList::new_oneoff_after(const TimeVal& wait,
 			    const OneoffTimerCallback& cb)
 {
     TimerNode* n = new OneoffTimerNode2(this, cb);
-    
+
     n->schedule_after(wait);
     return XorpTimer(n);
 }
@@ -267,7 +279,7 @@ void
 TimerList::system_gettimeofday(TimeVal *tv)
 {
     struct timeval timeval_tmp;
-    
+
     if (tv != NULL) {
 	gettimeofday(&timeval_tmp, NULL);
 	tv->copy_in(timeval_tmp);
@@ -279,7 +291,7 @@ void
 TimerList::run()
 {
     TimeVal now;
-    
+
     _current_time_proc(&now);
     struct heap_entry *n;
     while ((n = top()) != 0 && n->key <= now) {
@@ -372,14 +384,14 @@ TimerList::unschedule_node(TimerNode *n)
     if (_observer) _observer->notify_unscheduled(n->expiry());
 }
 
-void 
+void
 TimerList::set_observer(TimerListObserverBase& obs)
 {
     _observer = &obs;
     _observer->_observed = this;
 }
 
-void 
+void
 TimerList::remove_observer()
 {
     if (_observer) _observer->_observed = NULL;
