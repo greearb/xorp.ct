@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.15 2003/08/08 18:17:10 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.16 2003/08/26 19:03:52 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -29,6 +29,7 @@ tgt_files		+= rib.tgt
 tgt_files		+= ribclient.tgt
 tgt_files		+= rtrmgr.tgt
 tgt_files		+= test.tgt
+tgt_files		+= test_fea_ifmgr_mirror.tgt
 tgt_files		+= test_finder_events.tgt
 tgt_files		+= test_peer.tgt
 tgt_files		+= xorp_if_mib.tgt
@@ -61,6 +62,7 @@ noinst_LIBRARIES	+= libribbase.a
 noinst_LIBRARIES	+= libribclientbase.a
 noinst_LIBRARIES	+= librtrmgrbase.a
 noinst_LIBRARIES	+= libtestbase.a
+noinst_LIBRARIES	+= libtestfeaifmgrmirrorbase.a
 noinst_LIBRARIES	+= libtestfindereventsbase.a
 noinst_LIBRARIES	+= libtestpeerbase.a
 noinst_LIBRARIES	+= libxorpifmibbase.a
@@ -105,6 +107,7 @@ libfeabase_a_SOURCES = fea_base.hh fea_base.cc
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
+		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt.xif
 
@@ -113,10 +116,10 @@ libfeaifmgrmirrorbase_a_SOURCES = fea_ifmgr_mirror_base.hh		\
 				  fea_ifmgr_mirror_base.cc
 $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
-		$(INTERFACES_DIR)/fea_ifmgr_client2.xif
+		$(INTERFACES_DIR)/fea_ifmgr_mirror.xif
 
 #
-# Finder
+# FINDER
 #
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
@@ -128,7 +131,7 @@ $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 		$(INTERFACES_DIR)/finder_event_notifier.xif
 
 #
-# Finder client
+# FINDER CLIENT
 #
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
@@ -187,8 +190,15 @@ $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
 
+# TEST FEA IFMGR MIRROR
+libtestfeaifmgrmirrorbase_a_SOURCES  = test_fea_ifmgr_mirror_base.hh
+libtestfeaifmgrmirrorbase_a_SOURCES += test_fea_ifmgr_mirror_base.cc
+$(srcdir)/test_fea_ifmgr_mirror_base.hh					\
+$(srcdir)/test_fea_ifmgr_mirror_base.hh:				\
+		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif
+
 #
-# Test finder events
+# TEST FINDER EVENTS
 #
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.

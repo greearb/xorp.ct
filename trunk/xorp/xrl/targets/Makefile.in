@@ -99,7 +99,7 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rib.tgt ribclient.tgt rtrmgr.tgt test.tgt test_finder_events.tgt test_peer.tgt xorp_if_mib.tgt xorpsh.tgt
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rib.tgt ribclient.tgt rtrmgr.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -108,7 +108,7 @@ xrls_files = $(tgt_files:%.tgt=%.xrls)
 data_DATA = $(xrls_files)
 
 # Add your target's library here
-noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
+noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestfeaifmgrmirrorbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -136,7 +136,7 @@ libfeaifmgrmirrorbase_a_SOURCES = fea_ifmgr_mirror_base.hh		\
 
 
 #
-# Finder
+# FINDER
 #
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
@@ -144,7 +144,7 @@ libfeaifmgrmirrorbase_a_SOURCES = fea_ifmgr_mirror_base.hh		\
 libfinderbase_a_SOURCES = finder_base.hh finder_base.cc
 
 #
-# Finder client
+# FINDER CLIENT
 #
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
@@ -172,8 +172,11 @@ libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
 # RTRMGR
 librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
 
+# TEST FEA IFMGR MIRROR
+libtestfeaifmgrmirrorbase_a_SOURCES = test_fea_ifmgr_mirror_base.hh test_fea_ifmgr_mirror_base.cc
+
 #
-# Test finder events
+# TEST FINDER EVENTS
 #
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
@@ -282,6 +285,12 @@ libtestbase_a_AR = $(AR) cru
 libtestbase_a_LIBADD =
 am_libtestbase_a_OBJECTS = test_base.$(OBJEXT)
 libtestbase_a_OBJECTS = $(am_libtestbase_a_OBJECTS)
+libtestfeaifmgrmirrorbase_a_AR = $(AR) cru
+libtestfeaifmgrmirrorbase_a_LIBADD =
+am_libtestfeaifmgrmirrorbase_a_OBJECTS = \
+	test_fea_ifmgr_mirror_base.$(OBJEXT)
+libtestfeaifmgrmirrorbase_a_OBJECTS = \
+	$(am_libtestfeaifmgrmirrorbase_a_OBJECTS)
 libtestfindereventsbase_a_AR = $(AR) cru
 libtestfindereventsbase_a_LIBADD =
 am_libtestfindereventsbase_a_OBJECTS = test_finder_events_base.$(OBJEXT)
@@ -317,6 +326,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/ospf_base.Po $(DEPDIR)/pim_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_base.Po $(DEPDIR)/ribclient_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rtrmgr_base.Po $(DEPDIR)/test_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_fea_ifmgr_mirror_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_finder_events_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peer_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_if_mib_base.Po \
@@ -340,13 +350,14 @@ DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
 	$(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) \
 	$(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) \
 	$(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) \
-	$(libtestbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) \
+	$(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) \
+	$(libtestfindereventsbase_a_SOURCES) \
 	$(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) \
 	$(libxorpshbase_a_SOURCES)
 DATA = $(data_DATA)
 
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
+SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
 
 all: all-am
 
@@ -432,6 +443,10 @@ libtestbase.a: $(libtestbase_a_OBJECTS) $(libtestbase_a_DEPENDENCIES)
 	-rm -f libtestbase.a
 	$(libtestbase_a_AR) libtestbase.a $(libtestbase_a_OBJECTS) $(libtestbase_a_LIBADD)
 	$(RANLIB) libtestbase.a
+libtestfeaifmgrmirrorbase.a: $(libtestfeaifmgrmirrorbase_a_OBJECTS) $(libtestfeaifmgrmirrorbase_a_DEPENDENCIES) 
+	-rm -f libtestfeaifmgrmirrorbase.a
+	$(libtestfeaifmgrmirrorbase_a_AR) libtestfeaifmgrmirrorbase.a $(libtestfeaifmgrmirrorbase_a_OBJECTS) $(libtestfeaifmgrmirrorbase_a_LIBADD)
+	$(RANLIB) libtestfeaifmgrmirrorbase.a
 libtestfindereventsbase.a: $(libtestfindereventsbase_a_OBJECTS) $(libtestfindereventsbase_a_DEPENDENCIES) 
 	-rm -f libtestfindereventsbase.a
 	$(libtestfindereventsbase_a_AR) libtestfindereventsbase.a $(libtestfindereventsbase_a_OBJECTS) $(libtestfindereventsbase_a_LIBADD)
@@ -472,6 +487,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ribclient_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_fea_ifmgr_mirror_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_events_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_base.Po@am__quote@
@@ -663,11 +679,12 @@ $(srcdir)/demo_fea_ifmgr_client_base.cc:				\
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
+		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt.xif
 $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
-		$(INTERFACES_DIR)/fea_ifmgr_client2.xif
+		$(INTERFACES_DIR)/fea_ifmgr_mirror.xif
 $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder.xif				\
@@ -703,6 +720,9 @@ $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
+$(srcdir)/test_fea_ifmgr_mirror_base.hh					\
+$(srcdir)/test_fea_ifmgr_mirror_base.hh:				\
+		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif
 $(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif

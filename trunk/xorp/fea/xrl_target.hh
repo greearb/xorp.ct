@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.16 2003/06/17 23:14:28 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.17 2003/08/16 00:00:34 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -36,7 +36,7 @@ public:
 		 XrlRawSocket4Manager*		xrsm = 0);
 
     bool done() const { return _done; }
-    
+
     XrlCmdError common_0_1_get_target_name(
 	// Output values,
 	string&	name);
@@ -81,39 +81,39 @@ public:
 	XrlAtomList&		ifnames);
 
     XrlCmdError ifmgr_0_1_get_all_vif_flags(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vif, 
-	// Output values, 
-	bool&	enabled, 
-	bool&	broadcast, 
-	bool&	loopback, 
-	bool&	point_to_point, 
+	// Input values,
+	const string&	ifname,
+	const string&	vif,
+	// Output values,
+	bool&	enabled,
+	bool&	broadcast,
+	bool&	loopback,
+	bool&	point_to_point,
 	bool&	multicast);
 
     XrlCmdError ifmgr_0_1_get_configured_vif_flags(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vif, 
-	// Output values, 
-	bool&	enabled, 
-	bool&	broadcast, 
-	bool&	loopback, 
-	bool&	point_to_point, 
+	// Input values,
+	const string&	ifname,
+	const string&	vif,
+	// Output values,
+	bool&	enabled,
+	bool&	broadcast,
+	bool&	loopback,
+	bool&	point_to_point,
 	bool&	multicast);
 
     XrlCmdError ifmgr_0_1_get_all_vif_pif_index(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vif, 
-	// Output values, 
+	// Input values,
+	const string&	ifname,
+	const string&	vif,
+	// Output values,
 	uint32_t&	pif_index);
 
     XrlCmdError ifmgr_0_1_get_configured_vif_pif_index(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vif, 
-	// Output values, 
+	// Input values,
+	const string&	ifname,
+	const string&	vif,
+	// Output values,
 	uint32_t&	pif_index);
 
     XrlCmdError ifmgr_0_1_start_transaction(
@@ -327,7 +327,7 @@ public:
 	const string&	vif,
 	const IPv4&	address,
 	bool&		enabled);
-    
+
     XrlCmdError ifmgr_0_1_set_prefix4(
 	// Input values,
 	const uint32_t&	tid,
@@ -449,7 +449,7 @@ public:
 	const string&	vif,
 	const IPv6&	address,
 	bool&		enabled);
-    
+
     XrlCmdError ifmgr_0_1_set_prefix6(
 	// Input values,
 	const uint32_t&	tid,
@@ -513,6 +513,14 @@ public:
     XrlCmdError ifmgr_0_1_unregister_all_interfaces_client(
 	// Input values,
 	const string&	spyname);
+
+    XrlCmdError ifmgr_replicator_0_1_register_ifmgr_mirror(
+	// Input values,
+	const string&	clientname);
+
+    XrlCmdError ifmgr_replicator_0_1_unregister_ifmgr_mirror(
+	// Input values,
+	const string&	clientname);
 
     //
     // Forwarding Table Interface
@@ -621,19 +629,19 @@ public:
 	string&		protocol_origin);
 
     XrlCmdError fti_0_2_get_unicast_forwarding_enabled4(
-	// Output values, 
+	// Output values,
 	bool&	enabled);
 
     XrlCmdError fti_0_2_get_unicast_forwarding_enabled6(
-	// Output values, 
+	// Output values,
 	bool&	enabled);
 
     XrlCmdError fti_0_2_set_unicast_forwarding_enabled4(
-	// Input values, 
+	// Input values,
 	const bool&	enabled);
 
     XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
-	// Input values, 
+	// Input values,
 	const bool&	enabled);
 
     //
@@ -675,7 +683,7 @@ private:
     XrlInterfaceManager 	_xifmgr;
     XrlIfConfigUpdateReporter&	_xifcur;
     XrlRawSocket4Manager*	_xrsm;
-    
+
     bool			_done;	// True if we are done
 };
 

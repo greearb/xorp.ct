@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libfeaclient/Makefile.am,v 1.1 2003/08/22 23:19:02 hodson Exp $
+## $XORP: xorp/libfeaclient/Makefile.am,v 1.2 2003/08/26 19:04:38 hodson Exp $
 ##
 
 # -- Real Programs
@@ -28,7 +28,7 @@ noinst_PROGRAMS		= test_local_copy
 
 # -- Libraries and library flags to link the binary programs
 LDADD			= ./libfeaclient.a
-LDADD		       += $(top_builddir)/xrl/interfaces/libfeaifmgrclient2xif.a
+LDADD		       += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 LDADD		       += $(top_builddir)/libxipc/libxipc.a
 LDADD		       += $(top_builddir)/libcomm/libcomm.a
 LDADD		       += $(top_builddir)/libxorp/libxorp.a
@@ -43,4 +43,3 @@ test_local_copy_SOURCES = test_local_copy.cc
 ##
 
 INCLUDES =	-I$(top_srcdir)
-

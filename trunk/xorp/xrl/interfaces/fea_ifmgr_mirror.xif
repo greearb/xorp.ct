@@ -3,7 +3,7 @@
  * changes in the Forwarding Engine Abstraction process.
  */
 
-interface fea_ifmgr_client/0.5 {
+interface fea_ifmgr_mirror/0.1 {
 	interface_add ? ifname:txt
 	interface_remove ? ifname:txt
 	interface_set_enabled ? ifname:txt & enabled:bool

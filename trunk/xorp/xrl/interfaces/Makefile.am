@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.9 2003/07/31 01:17:39 jcardona Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.10 2003/08/22 23:18:13 hodson Exp $
 ##
 
 ###############################################################################
@@ -48,10 +48,15 @@ noinst_LIBRARIES += libfeaifmgrclientxif.a
 libfeaifmgrclientxif_a_SOURCES  = fea_ifmgr_client_xif.hh
 libfeaifmgrclientxif_a_SOURCES += fea_ifmgr_client_xif.cc
 
-# FEA Interface Manager Client2 Interface
-noinst_LIBRARIES += libfeaifmgrclient2xif.a
-libfeaifmgrclient2xif_a_SOURCES  = fea_ifmgr_client2_xif.hh
-libfeaifmgrclient2xif_a_SOURCES += fea_ifmgr_client2_xif.cc
+# FEA Interface Manager Mirror Interface
+noinst_LIBRARIES += libfeaifmgrmirrorxif.a
+libfeaifmgrmirrorxif_a_SOURCES  = fea_ifmgr_mirror_xif.hh
+libfeaifmgrmirrorxif_a_SOURCES += fea_ifmgr_mirror_xif.cc
+
+# FEA Interface Manager Replicator Interface
+noinst_LIBRARIES += libfeaifmgrreplicatorxif.a
+libfeaifmgrreplicatorxif_a_SOURCES  = fea_ifmgr_replicator_xif.hh
+libfeaifmgrreplicatorxif_a_SOURCES += fea_ifmgr_replicator_xif.cc
 
 # Forwarding Table Interface Client Interface
 noinst_LIBRARIES += libftixif.a
@@ -64,8 +69,8 @@ libfearawpkt_a_SOURCES += fea_rawpkt_xif.cc
 
 # FEA Raw Packet Client Interface
 noinst_LIBRARIES += libfearawpktclient.a
-libfearawpktclient_a_SOURCES  = fea_rawpkt_client_xif.hh 
-libfearawpktclient_a_SOURCES += fea_rawpkt_client_xif.cc 
+libfearawpktclient_a_SOURCES  = fea_rawpkt_client_xif.hh
+libfearawpktclient_a_SOURCES += fea_rawpkt_client_xif.cc
 
 # Finder Interface
 noinst_LIBRARIES += libfinderxif.a

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libfeaclient/xrl_ifmgr_mirror.hh,v 1.1 2003/08/26 19:04:39 hodson Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -97,7 +97,6 @@ public:
 		   uint16_t	finder_port,
 		   const char*	reg_tgt = DEFAULT_REGISTRATION_TARGET);
 
-
     ~XrlIfMgrMirror();
 
     inline const IfMgrIfTree& iftree() const		{ return _iftree; }
@@ -108,13 +107,18 @@ protected:
     void finder_ready_event();
     void finder_disconnect_event();
 
+    void register_with_ifmgr();
+
 protected:
+    EventLoop&			_e;
     XrlIfMgrMirrorRouter*	_rtr;
     IfMgrIfTree	   		_iftree;
     IfMgrCommandDispatcher	_dispatcher;
     XrlIfMgrMirrorTarget*	_xrl_tgt;
-    const char*			_rtarget;
+    const char*			_rtarget;	// registration target (ifmgr)
     Status			_status;
+
+    XorpTimer			_reg_timer;	// registration timer
 };
 
 #endif // __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__

@@ -106,7 +106,7 @@ TESTS = test_local_copy
 noinst_PROGRAMS = test_local_copy
 
 # -- Libraries and library flags to link the binary programs
-LDADD = ./libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrclient2xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = ./libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 test_local_copy_SOURCES = test_local_copy.cc
@@ -133,7 +133,7 @@ am_test_local_copy_OBJECTS = test_local_copy.$(OBJEXT)
 test_local_copy_OBJECTS = $(am_test_local_copy_OBJECTS)
 test_local_copy_LDADD = $(LDADD)
 test_local_copy_DEPENDENCIES = ./libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclient2xif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a

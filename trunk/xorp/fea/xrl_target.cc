@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.22 2003/06/17 23:14:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.23 2003/08/16 00:00:35 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1120,6 +1120,22 @@ XrlFeaTarget::ifmgr_0_1_unregister_all_interfaces_client(const string& client)
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
 				       string(" not registered."));
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_replicator_0_1_register_ifmgr_mirror(
+	const string& /* clientname */
+	)
+{
+    return XrlCmdError::COMMAND_FAILED("Not implemented");
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
+	const string& /* clientname */
+	)
+{
+    return XrlCmdError::COMMAND_FAILED("Not implemented");
 }
 
 // ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.1 2003/08/26 19:04:39 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.2 2003/08/27 17:13:55 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -52,170 +52,170 @@ protected:
 
     XrlCmdError common_0_1_shutdown();
 
-    XrlCmdError fea_ifmgr_client_0_5_interface_add(
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_add(
 	// Input values,
 	const string&	ifname);
 
-    XrlCmdError fea_ifmgr_client_0_5_interface_remove(
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_remove(
 	// Input values,
 	const string&	ifname);
 
-    XrlCmdError fea_ifmgr_client_0_5_interface_set_enabled(
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_enabled(
 	// Input values,
 	const string&	ifname,
 	const bool&	enabled);
 
-    XrlCmdError fea_ifmgr_client_0_5_interface_set_mtu(
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_mtu(
 	// Input values,
 	const string&	ifname,
 	const uint32_t&	mtu_bytes);
 
-    XrlCmdError fea_ifmgr_client_0_5_interface_set_mac(
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_mac(
 	// Input values,
 	const string&	ifname,
 	const Mac&	mac);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_add(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_add(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_remove(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_remove(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_set_enabled(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_enabled(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	enabled);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_set_multicast_capable(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_multicast_capable(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	capable);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_set_broadcast_capable(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_broadcast_capable(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	capable);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_set_p2p_capable(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_p2p_capable(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	capable);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_set_loopback(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_loopback(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	loopback);
 
-    XrlCmdError fea_ifmgr_client_0_5_vif_set_pif_index(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_pif_index(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	index);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_add(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_add(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_remove(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_remove(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_set_prefix(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_prefix(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
 	const uint32_t&	prefix);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_set_enabled(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_enabled(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
 	const bool&	enabled);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_set_multicast_capable(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_multicast_capable(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
 	const bool&	capable);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_set_loopback(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_loopback(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
 	const bool&	loopback);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_set_broadcast(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_broadcast(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
 	const IPv4&	oaddr);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv4_set_endpoint(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
 	const IPv4&	oaddr);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv6_add(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv6_add(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv6_remove(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv6_remove(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv6_set_prefix(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv6_set_prefix(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
 	const uint32_t&	prefix);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv6_set_enabled(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv6_set_enabled(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
 	const bool&	enabled);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv6_set_loopback(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv6_set_loopback(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
 	const bool&	loopback);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv6_set_multicast_capable(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv6_set_multicast_capable(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
 	const bool&	capable);
 
-    XrlCmdError fea_ifmgr_client_0_5_ipv6_set_endpoint(
+    XrlCmdError fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
@@ -279,7 +279,7 @@ XrlIfMgrMirrorTarget::common_0_1_shutdown()
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_add(const string& ifname)
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_add(const string& ifname)
 {
     _dispatcher.push(new IfMgrIfAdd(ifname));
     if (_dispatcher.execute() == true) {
@@ -289,7 +289,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_add(const string& ifname)
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_remove(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_remove(
 	const string& ifname
 	)
 {
@@ -301,7 +301,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_set_enabled(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_enabled(
 	const string&	ifname,
 	const bool&	en
 	)
@@ -314,7 +314,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_set_mtu(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mtu(
 	const string&	ifname,
 	const uint32_t&	mtu_bytes
 	)
@@ -327,7 +327,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_set_mtu(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_set_mac(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mac(
 	const string&	ifname,
 	const Mac&	mac
 	)
@@ -340,7 +340,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_interface_set_mac(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_add(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_add(
 	const string& ifname,
 	const string& vifname
 	)
@@ -353,7 +353,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_add(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_remove(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_remove(
 	const string& ifname,
 	const string& vifname
 	)
@@ -366,7 +366,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_enabled(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_enabled(
 	const string& ifname,
 	const string& vifname,
 	const bool&   en
@@ -380,7 +380,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_multicast_capable(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_multicast_capable(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -394,7 +394,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_multicast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_broadcast_capable(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_broadcast_capable(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -408,7 +408,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_broadcast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_p2p_capable(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_p2p_capable(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -422,7 +422,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_p2p_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_loopback(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_loopback(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -436,7 +436,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_loopback(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_pif_index(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_pif_index(
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	pif_index
@@ -450,7 +450,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_vif_set_pif_index(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_add(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_add(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr
@@ -464,7 +464,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_add(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_remove(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_remove(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr
@@ -478,7 +478,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_prefix(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_prefix(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
@@ -493,7 +493,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_prefix(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_enabled(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_enabled(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
@@ -508,7 +508,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_multicast_capable(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_multicast_capable(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -523,7 +523,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_multicast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_loopback(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_loopback(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -538,7 +538,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_loopback(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_broadcast(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_broadcast(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -553,7 +553,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_broadcast(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_endpoint(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -568,7 +568,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv4_set_endpoint(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_add(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_add(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr
@@ -582,7 +582,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_add(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_remove(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_remove(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr
@@ -596,7 +596,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_prefix(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_prefix(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
@@ -611,7 +611,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_prefix(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_enabled(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_enabled(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
@@ -626,7 +626,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_multicast_capable(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_multicast_capable(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv6&	addr,
@@ -641,7 +641,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_multicast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_loopback(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_loopback(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv6&	addr,
@@ -656,7 +656,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_loopback(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_client_0_5_ipv6_set_endpoint(
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv6&	addr,
@@ -754,7 +754,7 @@ const char* XrlIfMgrMirror::DEFAULT_REGISTRATION_TARGET = "XXX tbd";
 
 XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
 			       const char*	rtarget)
-    : _dispatcher (_iftree), _rtarget(rtarget)
+    : _e(e), _dispatcher (_iftree), _rtarget(rtarget)
 {
     _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME);
     _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
@@ -764,7 +764,7 @@ XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
 XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
 			       IPv4		finder_addr,
 			       const char*	rtarget)
-    : _dispatcher (_iftree), _rtarget(rtarget)
+    : _e(e), _dispatcher (_iftree), _rtarget(rtarget)
 {
     _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME, finder_addr);
     _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
@@ -775,7 +775,7 @@ XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
 			       IPv4		finder_addr,
 			       uint16_t		finder_port,
 			       const char*	rtarget)
-    : _dispatcher (_iftree), _rtarget(rtarget)
+    : _e(e), _dispatcher (_iftree), _rtarget(rtarget)
 {
     _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME, finder_addr, finder_port);
     _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
@@ -799,5 +799,10 @@ XrlIfMgrMirror::finder_disconnect_event()
 void
 XrlIfMgrMirror::finder_ready_event()
 {
-    
+    register_with_ifmgr();
+}
+
+void
+XrlIfMgrMirror::register_with_ifmgr()
+{
 }

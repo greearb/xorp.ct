@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.1 2003/08/22 23:19:02 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.2 2003/08/25 16:59:10 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -20,7 +20,7 @@
 #include "ifmgr_cmds.hh"
 
 #include "libxipc/xrl_router.hh"
-#include "xrl/interfaces/fea_ifmgr_client2_xif.hh"
+#include "xrl/interfaces/fea_ifmgr_mirror_xif.hh"
 
 // ----------------------------------------------------------------------------
 // Helper functions
@@ -143,7 +143,7 @@ IfMgrIfAdd::forward(XrlRouter&		rtr,
 		    const string&	xrl_target,
 		    IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_interface_add(xt, ifname(), xcb);
 }
@@ -176,7 +176,7 @@ IfMgrIfRemove::forward(XrlRouter&	rtr,
 		       const string&	xrl_target,
 		       IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_interface_remove(xt, ifname(), xcb);
 }
@@ -210,7 +210,7 @@ IfMgrIfSetEnabled::forward(XrlRouter&		rtr,
 			   const string&	xrl_target,
 			   IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_interface_set_enabled(xt, ifname(), en(), xcb);
 }
@@ -245,7 +245,7 @@ IfMgrIfSetMtu::forward(XrlRouter&	rtr,
 		       const string&	xrl_target,
 		       IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_interface_set_mtu(xt, ifname(), mtu_bytes(), xcb);
 }
@@ -280,7 +280,7 @@ IfMgrIfSetMac::forward(XrlRouter&	rtr,
 		       const string&	xrl_target,
 		       IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_interface_set_mac(xt, ifname(), mac(), xcb);
 }
@@ -325,7 +325,7 @@ IfMgrVifAdd::forward(XrlRouter&	    rtr,
 		     const string&   xrl_target,
 		     IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_vif_add(xt, ifname(), vifname(), xscb);
 }
@@ -362,7 +362,7 @@ IfMgrVifRemove::forward(XrlRouter&      rtr,
 			const string&   xrl_target,
 			IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_vif_remove(xt, ifname(), vifname(), xscb);
 }
@@ -392,7 +392,7 @@ IfMgrVifSetEnabled::forward(XrlRouter&	    rtr,
 			    const string&   xrl_target,
 			    IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_vif_set_enabled(xt, ifname(), vifname(), en(), xscb);
 }
@@ -423,7 +423,7 @@ IfMgrVifSetMulticastCapable::forward(XrlRouter&		rtr,
 				     const string&	xrl_target,
 				     IfMgrXrlSendCB&	xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& in = ifname();
     const string& vn = vifname();
@@ -456,7 +456,7 @@ IfMgrVifSetBroadcastCapable::forward(XrlRouter&		rtr,
 				     const string&	xrl_target,
 				     IfMgrXrlSendCB&	xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& in = ifname();
     const string& vn = vifname();
@@ -489,7 +489,7 @@ IfMgrVifSetP2PCapable::forward(XrlRouter&      rtr,
 			       const string&   xrl_target,
 			       IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const bool& cap = capable();
     return c.send_vif_set_p2p_capable(xt, ifname(), vifname(), cap, xscb);
@@ -521,7 +521,7 @@ IfMgrVifSetLoopbackCapable::forward(XrlRouter&      rtr,
 				    const string&   xrl_target,
 				    IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const bool& cap = capable();
     return c.send_vif_set_loopback(xt, ifname(), vifname(), cap, xscb);
@@ -553,7 +553,7 @@ IfMgrVifSetPifIndex::forward(XrlRouter&      rtr,
 			     const string&   xrl_target,
 			     IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& in = ifname();
     const string& vn = vifname();
@@ -595,7 +595,7 @@ IfMgrIPv4Add::forward(XrlRouter&	rtr,
 		      const string&	xrl_target,
 		      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_ipv4_add(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -630,7 +630,7 @@ IfMgrIPv4Remove::forward(XrlRouter&	 rtr,
 			 const string&	 xrl_target,
 			 IfMgrXrlSendCB& xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_ipv4_remove(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -660,7 +660,7 @@ IfMgrIPv4SetPrefix::forward(XrlRouter&		rtr,
 			    const string&	xrl_target,
 			    IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -693,7 +693,7 @@ IfMgrIPv4SetEnabled::forward(XrlRouter&		rtr,
 			     const string&	xrl_target,
 			     IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_ipv4_set_enabled(xt, ifname(), vifname(), addr(), en(), xcb);
 }
@@ -724,7 +724,7 @@ IfMgrIPv4SetMulticastCapable::forward(XrlRouter&	rtr,
 				      const string&	xrl_target,
 				      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -758,7 +758,7 @@ IfMgrIPv4SetLoopback::forward(XrlRouter&	rtr,
 			      const string&	xrl_target,
 			      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -792,7 +792,7 @@ IfMgrIPv4SetBroadcast::forward(XrlRouter&	rtr,
 			       const string&	xrl_target,
 			       IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -825,7 +825,7 @@ IfMgrIPv4SetEndpoint::forward(XrlRouter&	rtr,
 			      const string&	xrl_target,
 			      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -866,7 +866,7 @@ IfMgrIPv6Add::forward(XrlRouter&	rtr,
 		      const string&	xrl_target,
 		      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_ipv6_add(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -901,7 +901,7 @@ IfMgrIPv6Remove::forward(XrlRouter&		rtr,
 			 const string&		xrl_target,
 			 IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_ipv6_remove(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -931,7 +931,7 @@ IfMgrIPv6SetPrefix::forward(XrlRouter&		rtr,
 			    const string&	xrl_target,
 			    IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -964,7 +964,7 @@ IfMgrIPv6SetEnabled::forward(XrlRouter&		rtr,
 			     const string&	xrl_target,
 			     IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     return c.send_ipv6_set_enabled(xt, ifname(), vifname(), addr(), en(), xcb);
 }
@@ -995,7 +995,7 @@ IfMgrIPv6SetMulticastCapable::forward(XrlRouter&	rtr,
 				      const string&	xrl_target,
 				      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -1029,7 +1029,7 @@ IfMgrIPv6SetLoopback::forward(XrlRouter&	rtr,
 			      const string&	xrl_target,
 			      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -1062,7 +1062,7 @@ IfMgrIPv6SetEndpoint::forward(XrlRouter&	rtr,
 			      const string&	xrl_target,
 			      IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrClientV0p5Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
