@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
+// $XORP: xorp/rip/packets.hh,v 1.2 2003/04/11 22:00:18 hodson Exp $
 
 #ifndef __RIP_PACKETS_HH__
 #define __RIP_PACKETS_HH__
@@ -22,6 +22,8 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipv6net.hh"
 
+#include "constants.hh"
+
 /**
  * @short Header appearing at the start of each RIP packet.
  */
@@ -30,6 +32,7 @@ struct RipPacketHeader {
     uint8_t version;		// 1 - IPv4 RIPv1/IPv6 RIPng, 2 - IPv4 RIP v2
     uint8_t unused[2];
 
+    inline void initialize(uint8_t cmd, uint8_t vers);
     inline bool valid_command() const;
     inline bool valid_version(uint8_t v) const { return version == v; }
     inline bool valid_padding() const;
@@ -37,6 +40,14 @@ struct RipPacketHeader {
     static const uint8_t REQUEST  = 1;
     static const uint8_t RESPONSE = 2;
 };
+
+inline void
+RipPacketHeader::initialize(uint8_t cmd, uint8_t vers)
+{
+    command = cmd;
+    version = vers;
+    unused[0] = unused[1] = 0;
+}
 
 inline bool
 RipPacketHeader::valid_command() const
@@ -63,17 +74,22 @@ struct PacketRouteEntry {
 /**
  * Smallest RIPv2 packet size.
  */
-static const size_t RIPv2_MIN_PACKET_SIZE = 4 + 20;
+static const size_t RIPv2_MIN_PACKET_BYTES = 4 + 20;
+
+/**
+ * Largest RIPv2 packet size.
+ */
+static const size_t RIPv2_MAX_PACKET_BYTES = 4 + 20 * RIPv2_ROUTES_PER_PACKET;
 
 
 /**
  * @short Route Entry appearing in RIP packets on IPv4.
  *
  * This payload is carried in RIP packets on IPv4.  The entry contains
- * all the fields for RIPv2.  RIPv1 and RIPv2 use the same size structure,
- * except RIPv1 treats the route tag, subnet mask and nexthop fields as
- * Must-Be-Zero (MBZ) items.  The interpretation of the fields is described
- * in RFC2453.
+ * all the fields for RIPv2.  RIPv1 and RIPv2 use the same size
+ * structure, except RIPv1 treats the route tag, subnet mask and
+ * nexthop fields as Must-Be-Zero (MBZ) items.  The interpretation of
+ * the fields is described in RFC2453.
  *
  * All items in the route entry are stored in network order.  The
  * accessor methods provide values in host order, and the modifiers
@@ -89,7 +105,10 @@ protected:
     uint32_t _metric;
 
 public:
-    inline void initialize(uint16_t tag, IPv4Net& net, IPv4 nh, uint32_t cost);
+    inline void initialize(uint16_t	  tag,
+			   const IPv4Net& net,
+			   IPv4		  nh,
+			   uint32_t	  cost);
     inline uint16_t addr_family() const 	{ return ntohs(_af); }
     inline uint16_t tag() const			{ return ntohs(_tag); }
     inline IPv4Net  net() const;
@@ -97,13 +116,14 @@ public:
     inline uint32_t metric() const		{ return ntohl(_metric); }
 
     static const uint16_t ADDR_FAMILY = 2;
+    static const uint16_t AUTH_ADDR_FAMILY = 0xffff;
 };
 
 inline void
-PacketRouteEntry<IPv4>::initialize(uint16_t tag,
-				   IPv4Net& net,
-				   IPv4	    nh,
-				   uint32_t cost)
+PacketRouteEntry<IPv4>::initialize(uint16_t	  tag,
+				   const IPv4Net& net,
+				   IPv4		  nh,
+				   uint32_t	  cost)
 {
     _af     = htons(ADDR_FAMILY);
     _tag    = htons(tag);
@@ -152,7 +172,7 @@ public:
 	s.copy(_pw, 16);
     }
     
-    static const uint16_t ADDR_FAMILY = 0xffff;    
+    static const uint16_t ADDR_FAMILY = 0xffff;
     static const uint16_t AUTH_TYPE = 2;
 };
 
@@ -172,12 +192,15 @@ public:
  * accessor methods provide values in host order, and the modifiers
  * take arguments in host order.
  *
+ * NB We describe the field labelled as "RIP-2 Packet Length" on page 5 of
+ * RFC 2082 as the "auth_offset".  This matches the textual description in
+ * the RFC.
  */
 struct MD5PacketRouteEntry4 {
 protected:
     uint16_t _af;			// 0xffff - Authentication header
     uint16_t _auth;			// authentication type
-    uint16_t _pkt_bytes;		// RIP-2 packet length
+    uint16_t _auth_offset;		// Offset of authentication data
     uint8_t  _key_id;			// Key number used
     uint8_t  _auth_bytes;		// auth data length at end of packet
     uint32_t _seqno;			// monotonically increasing seqno
@@ -186,12 +209,12 @@ protected:
 public:
     inline uint16_t addr_family() const		{ return ntohs(_af); }
     inline uint16_t auth_type() const		{ return ntohs(_auth); }
-    inline uint16_t packet_bytes() const	{ return ntohs(_pkt_bytes); }
+    inline uint16_t auth_offset() const		{ return ntohs(_auth_offset); }
     inline uint8_t  key_id() const		{ return _key_id; }
     inline uint8_t  auth_bytes() const		{ return _auth_bytes; }
     inline uint32_t seqno() const		{ return htonl(_seqno); }
 
-    inline void set_packet_bytes(uint16_t b) 	{ _pkt_bytes = htons(b); }
+    inline void set_auth_offset(uint16_t b) 	{ _auth_offset = htons(b); }
     inline void set_key_id(uint8_t id)		{ _key_id = id; }
     inline void set_auth_bytes(uint8_t b)	{ _auth_bytes = b; }
     inline void set_seqno(uint32_t sno)		{ _seqno = htonl(sno); }
@@ -205,7 +228,7 @@ public:
 };
 
 inline void
-MD5PacketRouteEntry4::initialize(uint16_t packet_bytes,
+MD5PacketRouteEntry4::initialize(uint16_t auth_offset,
 				 uint8_t  key_id,
 				 uint8_t  auth_bytes,
 				 uint32_t seqno)
@@ -213,10 +236,40 @@ MD5PacketRouteEntry4::initialize(uint16_t packet_bytes,
     _af = ADDR_FAMILY;
     _auth = htons(AUTH_TYPE);
     _mbz[0] = _mbz[1] = 0;
-    set_packet_bytes(packet_bytes);
+    set_auth_offset(auth_offset);
     set_key_id(key_id);
     set_auth_bytes(auth_bytes);
     set_seqno(seqno);
+}
+
+
+/**
+ * @short Container for MD5 trailer.
+ */
+class MD5PacketTrailer {
+public:
+    inline void initialize();
+    inline uint8_t* data() 				{ return _data; }
+    inline const uint8_t* data() const			{ return _data; }
+    inline uint32_t data_bytes() const			{ return 16; }
+    inline bool valid() const;
+protected:
+    uint16_t _af;			// 0xffff - Authentication header
+    uint16_t _one;			// 0x01	  - RFC2082 defined
+    uint8_t  _data[16];			// 16 bytes of data
+};
+
+inline void
+MD5PacketTrailer::initialize()
+{
+    _af = 0xffff;
+    _one = htons(1);
+}
+
+bool
+MD5PacketTrailer::valid() const
+{
+    return _af == 0xffff && htons(_one) == 1;
 }
 
 

@@ -84,11 +84,12 @@ LDFLAGS =
 LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
 noinst_PROGRAMS = $(TESTS)
-TESTS = test_packets test_timers_update
+TESTS = test_auth test_packets test_timers_update
 
+test_auth_SOURCES = test_auth.cc
 test_packets_SOURCES = test_packets.cc
 test_timers_update_SOURCES = test_timers_update.cc
-librip_a_SOURCES = rip_module.h constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh route_db.hh route_entry.hh update_queue.hh port.cc route_db.cc route_entry.cc update_queue.cc
+librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh route_db.hh route_entry.hh update_queue.hh auth.cc port.cc route_db.cc route_entry.cc update_queue.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -99,9 +100,14 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 librip_a_LIBADD = 
-librip_a_OBJECTS =  port.o route_db.o route_entry.o update_queue.o
+librip_a_OBJECTS =  auth.o port.o route_db.o route_entry.o \
+update_queue.o
 PROGRAMS =  $(noinst_PROGRAMS)
 
+test_auth_OBJECTS =  test_auth.o
+test_auth_LDADD = $(LDADD)
+test_auth_DEPENDENCIES =  ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_auth_LDFLAGS = 
 test_packets_OBJECTS =  test_packets.o
 test_packets_LDADD = $(LDADD)
 test_packets_DEPENDENCIES =  ./librip.a \
@@ -132,10 +138,11 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/port.P .deps/route_db.P .deps/route_entry.P \
-.deps/test_packets.P .deps/test_timers_update.P .deps/update_queue.P
-SOURCES = $(librip_a_SOURCES) $(test_packets_SOURCES) $(test_timers_update_SOURCES)
-OBJECTS = $(librip_a_OBJECTS) $(test_packets_OBJECTS) $(test_timers_update_OBJECTS)
+DEP_FILES =  .deps/auth.P .deps/port.P .deps/route_db.P \
+.deps/route_entry.P .deps/test_auth.P .deps/test_packets.P \
+.deps/test_timers_update.P .deps/update_queue.P
+SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_packets_SOURCES) $(test_timers_update_SOURCES)
+OBJECTS = $(librip_a_OBJECTS) $(test_auth_OBJECTS) $(test_packets_OBJECTS) $(test_timers_update_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -202,6 +209,10 @@ clean-noinstPROGRAMS:
 distclean-noinstPROGRAMS:
 
 maintainer-clean-noinstPROGRAMS:
+
+test_auth: $(test_auth_OBJECTS) $(test_auth_DEPENDENCIES)
+	@rm -f test_auth
+	$(CXXLINK) $(test_auth_LDFLAGS) $(test_auth_OBJECTS) $(test_auth_LDADD) $(LIBS)
 
 test_packets: $(test_packets_OBJECTS) $(test_packets_DEPENDENCIES)
 	@rm -f test_packets

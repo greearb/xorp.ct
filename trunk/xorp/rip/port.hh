@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.2 2003/04/11 22:00:18 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -161,6 +161,8 @@ template <typename A>
 struct AuthManager
 {};
 
+class AuthHandlerBase;
+
 /**
  * @short Authentication Manager for RIPv2.
  *
@@ -170,21 +172,26 @@ template<>
 struct AuthManager<IPv4>
 {
 public:
-    enum AuthType { None, PlainText, MD5 };
-    struct InternalState;
+    /**
+     * Set authentication handler.
+     *
+     * @param h handler to be used.
+     * @return pointer to former handler.
+     */
+    AuthHandlerBase* set_auth_handler(AuthHandlerBase* h);
     
-public:
-    virtual ~AuthManager() {}
-    void set_auth_type(const AuthType& type) { _type = type; }
-    const AuthType& auth_type() const { return _type; }
+    /**
+     * Get authentication handler.
+     */
+    const AuthHandlerBase* auth_handler() const;
 
-    void set_key(const string& key) { _key = key; }
-    const string& key() const { return _key; }
-    
-protected:
-    AuthType		  _type;
-    string		  _key;
-    struct InternalState* _istate;
+    /**
+     * Get authentication handler.
+     */
+    AuthHandlerBase* auth_handler();
+
+private:
+    AuthHandlerBase* _ah;
 };
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers_update.cc,v 1.2 2003/04/10 02:41:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_packets.cc,v 1.1 2003/04/11 22:00:18 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -65,11 +65,12 @@ test_main()
     static_assert(sizeof(RipPacketHeader) == 4);
     static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
     static_assert(sizeof(RipPacketHeader) + sizeof(PacketRouteEntry<IPv4>)
-		  == RIPv2_MIN_PACKET_SIZE);
+		  == RIPv2_MIN_PACKET_BYTES);
     static_assert(sizeof(PacketRouteEntry<IPv4>)
 		  == sizeof(PlaintextPacketRouteEntry4));
     static_assert(sizeof(PacketRouteEntry<IPv4>)
 		  == sizeof(MD5PacketRouteEntry4));
+    static_assert(sizeof(MD5PacketTrailer) == 20);
     static_assert(sizeof(PacketRouteEntry<IPv4>)
 		  == sizeof(PacketRouteEntry<IPv6>));
 
@@ -233,7 +234,7 @@ test_main()
 	} else if (pre->auth_type() != MD5PacketRouteEntry4::AUTH_TYPE) {
 	    verbose_log("bad auth type accessor\n");
 	    return 1;
-	} else if (pre->packet_bytes() != 0x7fee) {
+	} else if (pre->auth_offset() != 0x7fee) {
 	    verbose_log("bad packet bytes accessor\n");
 	    return 1;
 	} else if (pre->key_id() != 0xcc) {

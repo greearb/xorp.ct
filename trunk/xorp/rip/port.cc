@@ -12,17 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.2 2003/04/11 22:00:18 hodson Exp $"
 
 #include "rip_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
 #include "constants.hh"
 #include "packets.hh"
+
+#include "auth.hh"
 #include "port.hh"
 #include "port_manager.hh"
 
@@ -137,6 +140,30 @@ Port<A>::port_io_enabled_change(bool)
 }
 
 // ----------------------------------------------------------------------------
+// AuthManager<IPv4> Specialized methods
+//
+
+AuthHandlerBase*
+AuthManager<IPv4>::set_auth_handler(AuthHandlerBase* nh)
+{
+    AuthHandlerBase* oh = _ah;
+    _ah = nh;
+    return oh;
+}
+
+const AuthHandlerBase*
+AuthManager<IPv4>::auth_handler() const
+{
+    return _ah;
+}
+
+AuthHandlerBase*
+AuthManager<IPv4>::auth_handler()
+{
+    return _ah;
+}
+
+// ----------------------------------------------------------------------------
 // Port<IPv4> Specialized methods
 //
 
@@ -147,14 +174,16 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
 			    const uint8_t*	rip_packet,
 			    size_t		rip_packet_bytes)
 {
+    static_assert(sizeof(RipPacketHeader) == 4);
+    static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
+    
     Peer<IPv4>* p = peer(src_address);
     record_packet(p);
-
-    static_assert(sizeof(RipPacketHeader) == 4);
-    if (rip_packet_bytes < RIPv2_MIN_PACKET_SIZE) {
+		  
+    if (rip_packet_bytes < RIPv2_MIN_PACKET_BYTES) {
 	record_bad_packet(c_format("Packet size less than minimum (%d < %d)",
 				   uint32_t(rip_packet_bytes),
-				   RIPv2_MIN_PACKET_SIZE),
+				   RIPv2_MIN_PACKET_BYTES),
 			  src_address, src_port, p);
 	return;
     }
@@ -188,7 +217,27 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
 			  src_address, src_port, p);
 	return;
     }
-    
+
+    //
+    // Authenticate packet (actually we should check what packet wants
+    // before authenticating - we may not care in all cases...)
+    // 
+    const PacketRouteEntry<IPv4>* entries = 0;
+
+    if (auth_handler()) {
+	size_t n_entries = auth_handler()->authenticate(rip_packet,
+							rip_packet_bytes,
+							entries);
+	if (n_entries == 0) {
+	    record_bad_packet(c_format("packet failed authentication "
+				       "(%s): %s",
+				       auth_handler()->name(),
+				       auth_handler()->error().c_str()),
+			      src_address, src_port, p);
+	    return;
+	}
+    }
+
     if (src_port == RIP_PORT) {
 	// Expecting a query
 	
