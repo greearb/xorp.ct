@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.1 2003/07/15 17:40:43 hodson Exp $"
 
 #include <set>
 
@@ -155,7 +155,7 @@ make_nets(set<IPv4Net>& nets, uint32_t n)
     while (nets.size() != n) {
 	IPv4 addr(htonl(fake_random()));
 	IPv4Net net = IPv4Net(addr, 1 + n % 23 + fake_random() % 8);
-	if (find(nets.begin(), nets.end(), net) == nets.end()) {
+	if (nets.find(net) == nets.end()) {
 	    nets.insert(net);
 	    fails = 0;
 	} else {

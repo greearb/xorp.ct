@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.1 2003/07/11 22:10:59 hodson Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.2 2003/07/12 16:18:22 hodson Exp $"
+
+#include <set>
 
 #include "rip_module.h"
 
@@ -97,15 +99,15 @@ fake_random()
 }
 
 static void
-make_nets(vector<IPv4Net>& nets, uint32_t n)
+make_nets(set<IPv4Net>& nets, uint32_t n)
 {
     uint32_t fails = 0;
     // attempt at deterministic nets sequence
     while (nets.size() != n) {
 	IPv4 addr(htonl(fake_random()));
 	IPv4Net net = IPv4Net(addr, 1 + n % 23 + fake_random() % 8);
-	if (find(nets.begin(), nets.end(), net) == nets.end()) {
-	    nets.push_back(net);
+	if (nets.find(net) == nets.end()) {
+	    nets.insert(net);
 	    fails = 0;
 	} else {
 	    // Does not occur with test parameters in practice
@@ -116,6 +118,7 @@ make_nets(vector<IPv4Net>& nets, uint32_t n)
     }
 }
 
+
 // ----------------------------------------------------------------------------
 // Type specific helpers
 
@@ -230,20 +233,21 @@ public:
 	const uint32_t n_routes = 20000;
 
 	verbose_log("Generating nets\n");
-	vector<IPNet<A> > nets;
+	set<IPNet<A> > nets;
 	make_nets(nets, n_routes);
 
 	verbose_log("Creating routes for nets\n");
 	RouteDB<A>& rdb = _rip_system.route_db();
-	for(uint32_t i = 0; i < nets.size(); ++i) {
-	    if (rdb.update_route(nets[i], A::ZERO(), 5, 0,
+
+	for (typename set<IPNet<A> >::const_iterator n = nets.begin();
+	     n != nets.end(); ++n) {
+	    if (rdb.update_route(*n, A::ZERO(), 5, 0,
 				 _pm.the_peer()) == false) {
 		verbose_log("Failed to add route for %s\n",
-			    nets[i].str().c_str());
+			    n->str().c_str());
 		return 1;
 	    }
 	}
-
 	// Walk routes on 1ms timer
 	// We make 2 passes over routes with 97 routes read per 1ms
 	// Total time taken 2 * 20000 / 97 * 0.001 = 407ms
