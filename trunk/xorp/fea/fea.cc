@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.1 2003/05/02 07:50:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.2 2003/05/05 19:34:00 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -54,13 +54,14 @@ fea_main(const char* finder_host)
     // 1. FtiConfig
     //
     FtiConfig fticonfig(e);
+    fticonfig.start();
     
     //
     // 2. Interface Configurator and reporters
     //
     XrlIfConfigUpdateReporter ifreporter(rtr);
     IfConfigErrorReporter iferr;
-
+    
     IfConfig ifconfig(e, ifreporter, iferr);
     ifconfig.start();
     
@@ -94,9 +95,9 @@ main(int argc, char *argv[])
     int c;
     const char *finder_host = "localhost";
 
-    /*
-    ** Initialize and start xlog
-    */
+    //
+    // Initialize and start xlog
+    //
     xlog_init(argv[0], NULL);
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     // XXX: verbosity of the error messages temporary increased
@@ -114,10 +115,11 @@ main(int argc, char *argv[])
 	}
     }
 
-    /* XXX
-     * Do all that daemon stuff take off into the background disable signals
-     * and all that other good stuff.
-     */
+    //
+    // XXX
+    // Do all that daemon stuff take off into the background disable signals
+    // and all that other good stuff.
+    //
 
     try {
 	fea_main(finder_host);
@@ -125,10 +127,11 @@ main(int argc, char *argv[])
 	xorp_catch_standard_exceptions();
     }
 
-    /*
-     * Gracefully stop and exit xlog
-     */
+    //
+    // Gracefully stop and exit xlog
+    //
     xlog_stop();
     xlog_exit();
+    
     return 0;
 }

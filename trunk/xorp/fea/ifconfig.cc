@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.3 2003/05/02 07:50:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.4 2003/05/02 23:21:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -61,11 +61,7 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _ifc_set_ioctl(*this),
       _ifc_observer_rtsock(*this)
 {
-    pull_config(_live_config);
-    _live_config.finalize_state();
-    
-    debug_msg("Start configuration read: %s\n", _live_config.str().c_str());
-    debug_msg("\nEnd configuration read.\n");
+
 }
 
 int
@@ -107,6 +103,12 @@ IfConfig::start()
 	if (_ifc_observer->start() < 0)
 	    return (XORP_ERROR);
     }
+    
+    pull_config(_live_config);
+    _live_config.finalize_state();
+    
+    debug_msg("Start configuration read: %s\n", _live_config.str().c_str());
+    debug_msg("\nEnd configuration read.\n");
     
     return (XORP_OK);
 }
