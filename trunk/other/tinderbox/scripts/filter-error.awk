@@ -53,6 +53,14 @@ function dump_error() {
     next;
 }
 
+/Stop.$/ {
+    # Error with Makefile or related rather than compilation error
+    dump_error();
+    print;
+    errcnt++;
+    exit;
+}
+
 // {
     if (depth == 0) print;
     errlog[depth] = (errlog[depth] $0 "\n");
