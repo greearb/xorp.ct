@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.26 2005/02/24 00:50:15 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.27 2005/02/28 19:53:08 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -1617,6 +1617,19 @@ XrlFib2mribNode::fea_fib_client_0_1_add_route4(
 {
     string error_msg;
 
+    debug_msg("fea_fib_client_0_1_add_route4(): "
+	      "network = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s "
+	      "xorp_route = %s\n",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      metric,
+	      admin_distance,
+	      protocol_origin.c_str(),
+	      (xorp_route)? "true" : "false");
+
     if (Fib2mribNode::add_route4(network, nexthop, ifname, vifname,
 				 metric, admin_distance,
 				 protocol_origin, xorp_route,
@@ -1640,6 +1653,19 @@ XrlFib2mribNode::fea_fib_client_0_1_add_route6(
     const bool&	xorp_route)
 {
     string error_msg;
+
+    debug_msg("fea_fib_client_0_1_add_route6(): "
+	      "network = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s "
+	      "xorp_route = %s\n",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      metric,
+	      admin_distance,
+	      protocol_origin.c_str(),
+	      (xorp_route)? "true" : "false");
 
     if (Fib2mribNode::add_route6(network, nexthop, ifname, vifname,
 				 metric, admin_distance,
@@ -1689,6 +1715,19 @@ XrlFib2mribNode::fea_fib_client_0_1_replace_route4(
 {
     string error_msg;
 
+    debug_msg("fea_fib_client_0_1_replace_route4(): "
+	      "network = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s "
+	      "xorp_route = %s\n",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      metric,
+	      admin_distance,
+	      protocol_origin.c_str(),
+	      (xorp_route)? "true" : "false");
+
     if (Fib2mribNode::replace_route4(network, nexthop, ifname, vifname,
 				     metric, admin_distance,
 				     protocol_origin, xorp_route,
@@ -1712,6 +1751,19 @@ XrlFib2mribNode::fea_fib_client_0_1_replace_route6(
     const bool&	xorp_route)
 {
     string error_msg;
+
+    debug_msg("fea_fib_client_0_1_replace_route6(): "
+	      "network = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s "
+	      "xorp_route = %s\n",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      metric,
+	      admin_distance,
+	      protocol_origin.c_str(),
+	      (xorp_route)? "true" : "false");
 
     if (Fib2mribNode::replace_route6(network, nexthop, ifname, vifname,
 				     metric, admin_distance,
@@ -1742,6 +1794,12 @@ XrlFib2mribNode::fea_fib_client_0_1_delete_route4(
 {
     string error_msg;
 
+    debug_msg("fea_fib_client_0_1_delete_route4(): "
+	      "network = %s ifname = %s vifname = %s\n",
+	      network.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str());
+
     if (Fib2mribNode::delete_route4(network, ifname, vifname, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1758,6 +1816,12 @@ XrlFib2mribNode::fea_fib_client_0_1_delete_route6(
     const string&	vifname)
 {
     string error_msg;
+
+    debug_msg("fea_fib_client_0_1_delete_route6(): "
+	      "network = %s ifname = %s vifname = %s\n",
+	      network.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str());
 
     if (Fib2mribNode::delete_route6(network, ifname, vifname, error_msg)
 	!= XORP_OK) {
