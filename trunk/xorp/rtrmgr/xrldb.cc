@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.5 2003/12/02 09:39:01 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.6 2004/01/14 03:00:36 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -193,7 +193,7 @@ XRLdb::XRLdb(const string& xrldir) throw (InitError)
 }
 
 bool
-XRLdb::check_xrl_syntax(const string &xrlstr) const
+XRLdb::check_xrl_syntax(const string& xrlstr) const
 {
 #ifdef DEBUG_XRLDB
     printf("XRLdb: checking xrl syntax: %s\n", xrlstr.c_str());
@@ -218,7 +218,7 @@ XRLdb::check_xrl_syntax(const string &xrlstr) const
 }
 
 XRLMatchType
-XRLdb::check_xrl_exists(const string &xrlstr) const
+XRLdb::check_xrl_exists(const string& xrlstr) const
 {
 #if DEBUG_XRLDB
     printf("XRLdb: checking xrl exists: %s\n", xrlstr.c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.13 2004/01/05 23:40:48 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.14 2004/01/13 00:52:31 pavlin Exp $"
 
 // #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -42,7 +42,7 @@ SlaveConfigTree::SlaveConfigTree(XorpClient& xclient)
 
 SlaveConfigTree::SlaveConfigTree(const string& configuration,
 				 TemplateTree* tt,
-				 XorpClient &xclient) throw (InitError)
+				 XorpClient& xclient) throw (InitError)
     : ConfigTree(tt),
       _xclient(xclient)
 {
@@ -66,7 +66,7 @@ SlaveConfigTree::parse(const string& configuration, const string& config_file,
 }
 
 bool
-SlaveConfigTree::commit_changes(string &result, XorpShell& xorpsh, CallBack cb)
+SlaveConfigTree::commit_changes(string& result, XorpShell& xorpsh, CallBack cb)
 {
     bool success = true;
 

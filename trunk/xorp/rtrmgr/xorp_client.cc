@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.16 2003/12/02 09:39:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.17 2004/01/14 21:36:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -38,7 +38,7 @@ XorpClient::XorpClient(EventLoop& eventloop, XrlRouter& xrlrouter)
 }
 
 void
-XorpClient::send_now(const Xrl &xrl, XrlRouter::XrlCallback cb, 
+XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb, 
 		     const string& xrl_return_spec, bool do_exec) 
 {
     if (do_exec) {

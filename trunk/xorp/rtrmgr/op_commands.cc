@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.10 2004/01/13 00:22:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.11 2004/01/14 03:00:35 pavlin Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -358,8 +358,8 @@ OpCommand::remove_instance(OpInstance* instance) const
     _instances.erase(_instances.find(instance));
 }
 
-OpCommandList::OpCommandList(const string &config_template_dir,
-			     const TemplateTree *tt) throw (InitError)
+OpCommandList::OpCommandList(const string& config_template_dir,
+			     const TemplateTree* tt) throw (InitError)
 {
     list<string> files;
     string errmsg;
@@ -636,7 +636,7 @@ OpCommandList::top_level_commands() const
 }
 
 set<string>
-OpCommandList::childlist(const string& path, bool &make_executable) const
+OpCommandList::childlist(const string& path, bool& make_executable) const
 {
     set<string> children;
     list<string> pathparts = split(path, ' ');

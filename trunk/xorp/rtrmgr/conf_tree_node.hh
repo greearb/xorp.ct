@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.16 2004/01/13 00:36:59 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.17 2004/01/14 22:50:06 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -36,7 +36,7 @@ class ConfigTreeNode {
 public:
     ConfigTreeNode();
     ConfigTreeNode(const ConfigTreeNode& ctn);
-    ConfigTreeNode(const string &node_name, const string &path, 
+    ConfigTreeNode(const string& node_name, const string& path, 
 		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
 		   uid_t user_id);
     ~ConfigTreeNode();
@@ -67,7 +67,7 @@ public:
     void initialize_commit();
     bool commit_changes(TaskManager& task_manager, bool do_commit,
 			int depth, int last_depth, string& result);
-    bool check_commit_status(string &response) const;
+    bool check_commit_status(string& response) const;
     void finalize_commit();
     string discard_changes(int depth, int last_depth);
     int type() const;

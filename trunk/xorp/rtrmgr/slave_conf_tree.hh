@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.8 2003/12/02 09:38:56 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.9 2004/01/13 00:52:31 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -43,7 +43,7 @@ public:
 
     bool parse(const string& configuration, const string& config_file,
 	       string& errmsg);
-    bool commit_changes(string &response, XorpShell& xorpsh, CallBack cb);
+    bool commit_changes(string& response, XorpShell& xorpsh, CallBack cb);
     void commit_phase2(const XrlError& e, const bool* locked,
 		       const uint32_t* lock_holder, CallBack cb,
 		       XorpShell *xorpsh);
@@ -71,11 +71,11 @@ public:
     }
 
 private:
-    XorpClient &_xclient;
+    XorpClient&	_xclient;
 
     XorpShell::LOCK_CALLBACK _stage2_cb;
 
-    string _commit_errmsg;
+    string	_commit_errmsg;
 };
 
 #endif // __RTRMGR_SLAVE_CONF_FILE_HH__

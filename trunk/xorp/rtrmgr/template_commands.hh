@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.17 2004/01/05 23:43:04 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.18 2004/01/13 01:06:44 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -76,7 +76,7 @@ private:
 
 class Command {
 public:
-    Command(TemplateTreeNode& template_tree_node, const string &cmd_name);
+    Command(TemplateTreeNode& template_tree_node, const string& cmd_name);
     virtual ~Command();
 
     void add_action(const list<string>& action, const XRLdb& xrldb);
