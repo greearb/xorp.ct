@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.23 2003/09/19 20:54:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.24 2003/10/23 09:41:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -164,7 +164,7 @@ UpdatePacket::multi_protocol(PathAttribute *pa)
 }
 
 MPReachNLRIAttribute<IPv4> *
-UpdatePacket::mpreach_ipv4(Safi safi)
+UpdatePacket::mpreach_ipv4(Safi safi) const
 {
     XLOG_ASSERT(SAFI_MULTICAST == safi);
 
@@ -172,7 +172,7 @@ UpdatePacket::mpreach_ipv4(Safi safi)
 }
 
 MPUNReachNLRIAttribute<IPv4> *
-UpdatePacket::mpunreach_ipv4(Safi safi)
+UpdatePacket::mpunreach_ipv4(Safi safi) const
 {
     XLOG_ASSERT(SAFI_MULTICAST == safi);
 
@@ -180,7 +180,7 @@ UpdatePacket::mpunreach_ipv4(Safi safi)
 }
 
 MPReachNLRIAttribute<IPv6> *
-UpdatePacket::mpreach_ipv6(Safi safi)
+UpdatePacket::mpreach_ipv6(Safi safi) const
 {
     switch(safi) {
     case SAFI_UNICAST:
@@ -195,7 +195,7 @@ UpdatePacket::mpreach_ipv6(Safi safi)
 }
 
 MPUNReachNLRIAttribute<IPv6> *
-UpdatePacket::mpunreach_ipv6(Safi safi)
+UpdatePacket::mpunreach_ipv6(Safi safi) const
 {
     switch(safi) {
     case SAFI_UNICAST:
