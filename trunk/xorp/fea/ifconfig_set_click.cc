@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.5 2004/11/12 00:31:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.6 2004/11/12 00:47:36 bms Exp $"
 
 
 #include "fea_module.h"
@@ -97,40 +97,14 @@ IfConfigSetClick::config_begin(string& errmsg)
 int
 IfConfigSetClick::config_end(string& errmsg)
 {
-    string config;
-
     debug_msg("config_end\n");
 
-    config = generate_config();
-
-    string write_config = c_format("WRITEDATA hotconfig %u\n",
-				   static_cast<uint32_t>(config.size()));
-    write_config += config;
-    if (ClickSocket::write(write_config.c_str(), write_config.size())
-	!= static_cast<ssize_t>(write_config.size())) {
-	errmsg = c_format("Error writing to Click socket: %s",
-			  strerror(errno));
-	return (XORP_ERROR);
-    }
-
     //
-    // Check the command status
+    // Write the configuration
     //
-    bool is_warning, is_error;
-    string command_warning, command_error;
-    if (ClickSocket::check_command_status(is_warning, command_warning,
-					  is_error, command_error,
-					  errmsg) != XORP_OK) {
-	errmsg = c_format("Error verifying the command status after writing to Click socket: %s",
-			  errmsg.c_str());
-	return (XORP_ERROR);
-    }
-
-    if (is_warning) {
-	XLOG_WARNING("Click command warning: %s", command_warning.c_str());
-    }
-    if (is_error) {
-	XLOG_ERROR("Click command error: %s", command_error.c_str());
+    string config = generate_config();
+    string handler = "hotconfig";
+    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK) {
 	return (XORP_ERROR);
     }
 

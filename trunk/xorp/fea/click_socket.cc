@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.3 2004/10/27 01:19:02 bms Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.4 2004/11/10 00:32:18 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -196,6 +196,56 @@ ClickSocket::shutdown()
 	    _fd = -1;
 	}
     }
+}
+
+int
+ClickSocket::write_config(const string& handler, const string& data,
+			  string& errmsg)
+{
+    if (is_kernel_click()) {
+	//
+	// TODO: XXX: PAVPAVPAV: implement it.
+	//
+    }
+
+    if (is_user_click()) {
+	string config = c_format("WRITEDATA %s %u\n",
+				 handler.c_str(),
+				 static_cast<uint32_t>(data.size()));
+	config += data;
+
+	if (ClickSocket::write(config.c_str(), config.size())
+	    != static_cast<ssize_t>(config.size())) {
+	    errmsg = c_format("Error writing to Click socket: %s",
+			      strerror(errno));
+	    return (XORP_ERROR);
+	}
+
+	//
+	// Check the command status
+	//
+	bool is_warning, is_error;
+	string command_warning, command_error;
+	if (check_command_status(is_warning, command_warning,
+				 is_error, command_error,
+				 errmsg) != XORP_OK) {
+	    errmsg = c_format("Error verifying the command status after "
+			      "writing to Click socket: %s",
+			      errmsg.c_str());
+	    return (XORP_ERROR);
+	}
+
+	if (is_warning) {
+	    XLOG_WARNING("Click command warning: %s", command_warning.c_str());
+	}
+	if (is_error) {
+	    errmsg = c_format("Click command error: %s",
+			      command_error.c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+    return (XORP_OK);
 }
 
 ssize_t

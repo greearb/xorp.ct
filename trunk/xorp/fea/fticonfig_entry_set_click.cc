@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.4 2004/11/12 00:31:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.5 2004/11/12 01:36:54 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -132,8 +132,6 @@ FtiConfigEntrySetClick::delete_entry6(const Fte6& fte)
 bool
 FtiConfigEntrySetClick::add_entry(const FteX& fte)
 {
-    string config;
-    string errmsg;
     int port = -1;
 
     debug_msg("add_entry "
@@ -182,46 +180,17 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 	return (false);
     }
 
-    config = c_format("%s %s %d\n",
-		      fte.net().str().c_str(),
-		      fte.nexthop().str().c_str(),
-		      port);
-
     //
-    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is almost a copy
-    // from IfConfigSetClick::config_end(). Add a new method
-    // to ClickSocket that eliminates the need for such replication.
+    // Write the configuration
     //
-    string write_config = c_format("WRITEDATA _xorp_rt.add %u\n",
-				   static_cast<uint32_t>(config.size()));
-    write_config += config;
-    if (ClickSocket::write(write_config.c_str(), write_config.size())
-	!= static_cast<ssize_t>(write_config.size())) {
-	errmsg = c_format("Error writing to Click socket: %s",
-			  strerror(errno));
+    string config = c_format("%s %s %d\n",
+			     fte.net().str().c_str(),
+			     fte.nexthop().str().c_str(),
+			     port);
+    string handler = "_xorp_rt.add";
+    string errmsg;
+    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK) {
 	XLOG_ERROR("%s", errmsg.c_str());
-	return (false);
-    }
-
-    //
-    // Check the command status
-    //
-    bool is_warning, is_error;
-    string command_warning, command_error;
-    if (ClickSocket::check_command_status(is_warning, command_warning,
-					  is_error, command_error,
-					  errmsg) != XORP_OK) {
-	errmsg = c_format("Error verifying the command status after writing to Click socket: %s",
-			  errmsg.c_str());
-	XLOG_ERROR("%s", errmsg.c_str());
-	return (false);
-    }
-
-    if (is_warning) {
-	XLOG_WARNING("Click command warning: %s", command_warning.c_str());
-    }
-    if (is_error) {
-	XLOG_ERROR("Click command error: %s", command_error.c_str());
 	return (false);
     }
 
@@ -231,8 +200,6 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 bool
 FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 {
-    string config;
-    string errmsg;
     int port = -1;
 
     debug_msg("delete_entry "
@@ -281,46 +248,17 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 	return (false);
     }
 
-    config = c_format("%s %s %d\n",
-		      fte.net().str().c_str(),
-		      fte.nexthop().str().c_str(),
-		      port);
-
     //
-    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is almost a copy
-    // from IfConfigSetClick::config_end(). Add a new method
-    // to ClickSocket that eliminates the need for such replication.
+    // Write the configuration
     //
-    string write_config = c_format("WRITEDATA _xorp_rt.remove %u\n",
-				   static_cast<uint32_t>(config.size()));
-    write_config += config;
-    if (ClickSocket::write(write_config.c_str(), write_config.size())
-	!= static_cast<ssize_t>(write_config.size())) {
-	errmsg = c_format("Error writing to Click socket: %s",
-			  strerror(errno));
+    string config = c_format("%s %s %d\n",
+			     fte.net().str().c_str(),
+			     fte.nexthop().str().c_str(),
+			     port);
+    string handler = "_xorp_rt.remove";
+    string errmsg;
+    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK) {
 	XLOG_ERROR("%s", errmsg.c_str());
-	return (false);
-    }
-
-    //
-    // Check the command status
-    //
-    bool is_warning, is_error;
-    string command_warning, command_error;
-    if (ClickSocket::check_command_status(is_warning, command_warning,
-					  is_error, command_error,
-					  errmsg) != XORP_OK) {
-	errmsg = c_format("Error verifying the command status after writing to Click socket: %s",
-			  errmsg.c_str());
-	XLOG_ERROR("%s", errmsg.c_str());
-	return (false);
-    }
-
-    if (is_warning) {
-	XLOG_WARNING("Click command warning: %s", command_warning.c_str());
-    }
-    if (is_error) {
-	XLOG_ERROR("Click command error: %s", command_error.c_str());
 	return (false);
     }
 

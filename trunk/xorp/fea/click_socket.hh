@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.1 2004/10/21 00:44:22 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.2 2004/11/10 00:32:18 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -179,6 +179,17 @@ public:
      * @return true if the Click socket is open, otherwise false.
      */
     inline bool is_open() const { return _fd >= 0; }
+
+    /**
+     * Write Click configuration.
+     *
+     * @param handler the Click handler to write the configuration to.
+     * @param data the configuration data to write.
+     * @param errmsg the error message (if an error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int write_config(const string& handler, const string& data,
+		     string& errmsg);
 
     /**
      * Write data to Click socket.
