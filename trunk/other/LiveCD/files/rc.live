@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Copyright 2001 2002 Edson Brandi <ebrandi.home@uol.com.br>
+# Copyright 2004-2005 International Computer Science Institute (ICSI)
 # All Rights Reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -13,19 +14,17 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY EDSON BRANDI ``AS IS'' AND ANY
+# THIS SOFTWARE IS PROVIDED BY EDSON BRANDI AND ICSI ``AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED.  IN NO EVENT EDSON BRANDI BE LIABLE
+# PURPOSE ARE DISCLAIMED.  IN NO EVENT EDSON BRANDI OR ICSI BE LIABLE
 # FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
-# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
 # BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
-# USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-# DAMAGE.
-
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ############################################
 
 echo "Creating  /dev under MFS..."
@@ -62,6 +61,20 @@ tar -xzpf /mfs/root.tgz -C / >/dev/null 2>&1
 echo "Generating /usr/local/etc under MFS"
 mount_mfs -s 32768 -c 20 -o noatime swap /usr/local/etc 2>&1
 tar -xzpf /mfs/local_etc.tgz -C / >/dev/null 2>&1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "Generating /usr/local/xorp under MFS"
 echo "(umount /usr/local/xorp to reveal a version with debugging enabled)"
