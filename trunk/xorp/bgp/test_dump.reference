@@ -546,7 +546,7 @@ SubnetRoute:
 [** TABLE DebugTable-D3 **]
 [PUSH]
 [separator]-------------------------------------
-[comment] ONE EVENT RUN
+[comment] TWO EVENT RUN
 [comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -1110,7 +1110,7 @@ SubnetRoute:
 [** TABLE DebugTable-D3 **]
 [PUSH]
 [separator]-------------------------------------
-[comment] ONE EVENT RUN
+[comment] TWO EVENT RUN
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -1423,7 +1423,7 @@ SubnetRoute:
 [** TABLE DebugTable-D3 **]
 [PUSH]
 [separator]-------------------------------------
-[comment] ONE EVENT RUN
+[comment] TWO EVENT RUN
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.25 2004/02/25 05:03:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.26 2004/03/03 02:24:13 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -557,8 +557,9 @@ test_dump(TestInfo& /*info*/)
     bgpmain.eventloop().run();
 
     debug_table1->write_separator();
-    debug_table1->write_comment("ONE EVENT RUN");
+    debug_table1->write_comment("TWO EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+    bgpmain.eventloop().run();
     bgpmain.eventloop().run();
 
     debug_table1->write_separator();
@@ -1007,8 +1008,9 @@ test_dump(TestInfo& /*info*/)
     bgpmain.eventloop().run();
 
     debug_table1->write_separator();
-    debug_table1->write_comment("ONE EVENT RUN");
+    debug_table1->write_comment("TWO EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
+    bgpmain.eventloop().run();
     bgpmain.eventloop().run();
 
     debug_table1->write_separator();
@@ -1177,8 +1179,9 @@ test_dump(TestInfo& /*info*/)
     bgpmain.eventloop().run();
 
     debug_table1->write_separator();
-    debug_table1->write_comment("ONE EVENT RUN");
+    debug_table1->write_comment("TWO EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
+    bgpmain.eventloop().run();
     bgpmain.eventloop().run();
 
     debug_table1->write_separator();
