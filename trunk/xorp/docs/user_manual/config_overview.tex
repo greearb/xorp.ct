@@ -130,7 +130,7 @@ then {\tt enable-unicast-forwarding6} must be set to {\tt true}.
 \section{Protocols}
 \label{sec:protocols}
 
-An unicast router typically needs to be configured with one or several
+A unicast router typically will be configured with one or more
 of the following protocols:
 StaticRoutes (Section~\ref{sec:protocols:static_routes}),
 RIP (Section~\ref{sec:protocols:rip})
@@ -144,9 +144,9 @@ Currently, PIM-SM is the only multicast routing protocol implemented
 routes need to be installed in the MRIB (for computing the reverse-path
 forwarding information), those can be specified in the StaticRoutes
 configuration (Section~\ref{sec:protocols:static_routes}).
-Eventually (\eg if there are no
-unicast routing protocols configured), the FIB2MRIB module may
-need to be configured too (Section~\ref{sec:protocols:fib2mrib}).
+If there are no
+unicast routing protocols configured, the FIB2MRIB module may
+also need to be configured too (Section~\ref{sec:protocols:fib2mrib}).
 
 \subsection{Static Routes}
 \label{sec:protocols:static_routes}
@@ -614,22 +614,21 @@ A number of parameters have default values, therefore
 they don't have to be configured (those parameters are commented-out
 in the above sample configuration).
 
-Note that the interface/vif named {\tt register\_vif} is special
+Note that the interface/vif named {\tt register\_vif} is special.
 If PIM-SM is configured, then {\tt register\_vif} must be enabled.
 
 The {\tt dr-priority} parameter is used to configure the Designated Router
 priority per virtual interface (note that in case of {\tt register\_vif}
 it is not used).
 
-The {\tt alternative-subnet} statement is used to add
-{\tt alternative subnets} 
-to a network interface. For example, if you want to make incoming traffic
-with a non-local source address appear as it is coming from a local subnet,
-then {\tt alternative-subnet} can be used. Typically, this is needed as a
-work-around solution when we use uni-directional interfaces for
-receiving traffic (e.g., satellite links).
-Note: use {\tt alternative-subnet} with extreme care, only if you know
-what you are really doing!
+The {\tt alternative-subnet} statement is used to associate additional
+subnets with a network interface. For example, if you want to make
+incoming traffic with a non-local source address appear as it is
+coming from a local subnet, then {\tt alternative-subnet} can be
+used. Typically, this is needed as a work-around solution when we use
+uni-directional interfaces for receiving traffic (e.g., satellite
+links).  Note: use {\tt alternative-subnet} with extreme care, only if
+you know what you are really doing!
 
 If PIM-SM uses static RPs, those can be configured within the
 {\tt static-rps} section. For each RP, an {\tt rp} section is needed, and each
@@ -638,7 +637,7 @@ configured with. The RP priority can be modified with the {\tt rp-priority}
 parameter.
 
 If PIM-SM uses the Bootstrap mechanism to obtain the Candidate-RP set,
-that can be configured in the {\tt bootstrap} section.
+this can be configured in the {\tt bootstrap} section.
 If the XORP router is to be used as a Candidate-BSR, this should be
 specified in the {\tt cand-bsr} section.
 For a router to be a Candidate-BSR it must advertise for

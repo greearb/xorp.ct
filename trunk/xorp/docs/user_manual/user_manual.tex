@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/user_manual.tex,v 1.3 2004/07/22 13:45:21 mjh Exp $
+% $XORP: xorp/docs/user_manual/user_manual.tex,v 1.4 2004/07/31 21:54:27 mjh Exp $
 %
 
 \documentclass[11pt]{book}
@@ -48,8 +48,11 @@
 % \renewcommand{\cbend}{\end{colorcode}}
 
 %\newcommand{\xorpsh}{\textsc{xorpsh}}
+\newcommand{\xorp}{{\small XORP}\xspace}
 \newcommand{\xorpsh}{{\sf\small xorpsh}\xspace}
+\newcommand{\rtrmgr}{{\sf\small xorp\_rtrmgr}\xspace}
 \newcommand{\stt}{\tt\small}
+\newcommand{\ssf}{\sf\small}
 
 \title{{\Huge XORP User Manual}\\
 \vspace{1ex}
@@ -76,9 +79,8 @@ Version 1.0}
 \begin{document}
 \maketitle
 \input{preface}
-%\begin{spacing}{0.0}
 \tableofcontents
-%\end{spacing}
+\input{glossary}
 \input{cli_intro}
 \input{config_overview}
 \input{interfaces}

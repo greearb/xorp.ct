@@ -94,4 +94,30 @@ protocols \{\\
 
 \section{Monitoring RIP}
 
-op-mode stuff.
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> {\bf show route table ipv4 unicast rip}\\
+Network 172.16.0.0/24\\
+/>Nexthop := 172.16.0.1\\
+/>Metric :=     1    Protocol := rip    Interface := dc0    Vif := dc0\\
+Network 172.16.1.0/24\\
+/>Nexthop := 172.16.1.1\\
+/>Metric :=     1    Protocol := rip    Interface := dc1    Vif := dc1\\
+Network 172.16.2.0/24\\
+/>Nexthop := 172.16.2.1\\
+/>Metric :=     1    Protocol := rip    Interface := dc2    Vif := dc2\\
+Network 172.16.3.0/24\\
+/>Nexthop := 172.16.3.1\\
+/>Metric :=     1    Protocol := rip    Interface := dc3    Vif := dc3\\
+Network 192.150.187.0/25\\
+/>Nexthop := 192.150.187.112\\
+/>Metric :=     1    Protocol := rip    Interface := fxp0    Vif := fxp0
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+

@@ -2,7 +2,7 @@
 \label{bgp}
 \section{BGP Terminology and Concepts}
 
-BGP is the Border Gateway Protocol, which is the pricipal inter-domain
+BGP is the Border Gateway Protocol, which is the principal inter-domain
 routing protocol in the Internet.  BGP version 4 is specified in RFC
 1771.  However, RFC 1771 is shortly to be replaced by a much improved
 newer RFC, and XORP BGP is compliant with the new RFC.  Earlier
@@ -17,7 +17,7 @@ we will mention a few of the main concepts.
 
 \subsection{Key BGP Concepts}
 
-The main concept used in BGP is that of the Autonomous System or AS
+The main concept used in BGP is that of the Autonomous System, or AS
 for short.  An AS corresponds to a routing domain that is under one
 administrative authority, and which implements its own routing
 policies.  BGP is used in two different ways:
@@ -25,27 +25,30 @@ policies.  BGP is used in two different ways:
 \item EBGP is used to exchange routing information between routers
 that are in different ASes.
 \item IBGP is used to exchange routing information between routers
-that are in the same AS.
+that are in the same AS.  Typically these routes were originally
+learned from EBGP.
 \end{itemize}
 Each BGP route carries with it an AS Path, which essentially records
 the autonomous systems through which the route has passed between the
 AS where the route was originally advertised and the current AS.  When
 a BGP router passes a route to a router in a neighboring AS, it
 prepends its own AS number to the AS path.  The AS path is used to
-prevent route looping, and also can be used in policy filters to
+prevent routes from looping, and also can be used in policy filters to
 decide whether or not to accept a route.
 
-When a route reaches an AS over an EBGP connection, the router first
-decides if this is the best path to the destination, based on a
+When a route reaches a router over an EBGP connection, the router
+first decides if this is the best path to the destination, based on a
 complex decision process and local policy configuration.  If the route
 is the best path, the route is passed on to all the other BGP routers
-in the same domain using IBGP connections.  If a router receives a
-route from an IBGP peer, and the router decides this route is the best
-route to the destination, then it will pass the route on to it's EBGP
-peers, but it will not normally pass the route onto another IBGP peer.
-This prevents routing information looping within the AS, but it means
-that by default every BGP router in a domain must be peered with every
-other BGP router in the domain.  
+in the same domain using IBGP connections, as well as on to all the
+EBGP peers (as allowed by policy).
+
+When a router receives a route from an IBGP peer, if the router decides
+this route is the best route to the destination, then it will pass the
+route on to its EBGP peers, but it will not normally pass the route
+onto another IBGP peer.  This prevents routing information looping
+within the AS, but it means that by default every BGP router in a
+domain must be peered with every other BGP router in the domain.
 
 Of course such a full mesh of configured BGP peerings does not scale
 well to large domains, so two techniques can be used to improve
@@ -56,7 +59,7 @@ scaling:
 \end{itemize}
 As of the 1.0 release, XORP BGP does not support confederations, and
 does not support being used as a route reflector, although it can be
-used as a route reflector client.
+used as a route reflector client.  This capability will be added soon.
 
 BGP peerings are conducted over TCP connections which must be manually
 configured.  A connection is an IBGP peering if both routers are
@@ -64,19 +67,19 @@ configured to be in the same AS; otherwise it is an EBGP peering.
 
 Routers typically have multiple IP addresses, with at least one for
 each interface, and often an additional routable IP address associated
-with the loopback interface (Note: 127.0.0.1 is {\it not} routable).
+with the loopback interface\footnote{Note: 127.0.0.1 is {\it not} routable.}.
 When configuring an IBGP connection, it is good practice to set up the
 peering to be between the IP addresses on the loopback interfaces.
 This makes the connection independent of the state of any particular
 interface.  However, most EBGP peerings will be configured using the
-IP address if the router that is directly connected to the EBGP peer
+IP address of the router that is directly connected to the EBGP peer
 router.  Thus if the interface to that peer goes down, the peering
 session will also go down, causing the routing to correctly fail over
 to an alternative path.
 
 \section{Standards}
 
-XORP BGP Complies with the following standards:
+XORP BGP complies with the following standards:
 \begin{description}
 \item{\bf draft-ietf-idr-bgp4-22.txt}: BGP-4 Specification (obsoletes RFC 1771)
 \item{\bf RFC 1657}: Definitions of Managed Objects for the Fourth Version
@@ -163,37 +166,48 @@ The configuration parameters are used as follows:
   in which this router resides.  Any peers of this router must be
   configured to know this AS number - if there is a mismatch, a
   peering will not be established.  It is a 16-bit integer.
-\item{\tt peer}: this delimits the configuration for a BGP peering
+\item{\tt peer}: this delimits the configuration of a BGP peering
   association with another router.  Most BGP routers will have
-  multiple peerings configured.  The peer ID is normally the IPv4
-  unicast address of the router we are peering with (the syntax allows
-  domain names for convenience, but this is {\it not} recommended in
-  production settings).  For IBGP peerings this will normally be an IP
-  address bound to the router's loopback address, so it is not
-  associated with a specific interface, meaning that the peering will
-  not go down if a single internal interface fails.  For EBGP
-  peerings, this will normally be the IP address of the peer router on
-  the interface over which we wish to exchange traffic, so that if the
-  interface goes down, the peering will drop.
+  multiple peerings configured.  The {\stt peer} directive takes a
+  parameter which is the peer identifier for the peer router. This
+  peer identifier should normally be the IPv4 unicast address of the
+  router we are peering with.  The syntax allows it to be the domain
+  names of the peer router for convenience, but this is {\it not}
+  recommended in production settings.  
+
+  For IBGP peerings the peer identifier will normally be an IP address
+  bound to the router's loopback address, so it is not associated with
+  a specific interface, meaning that the peering will not go down if a
+  single internal interface fails.  
+
+  For EBGP peerings, the peer identifier will normally be the IP
+  address of the peer router on the interface over which we wish to
+  exchange traffic, so that if the interface goes down, the peering
+  will drop.
 
   For each configured {\stt peer}, the following
   configuration options can be specified:
 \begin{description}
-\item{\tt local-ip}: This is the IP address on this router that we
-  will use for BGP connections to this peer.  It is mandatory to specify.
+\item{\tt local-ip}: This is the IP address of this router that we
+  will use for BGP connections to this peer.  It is mandatory to
+  specify, and must be the same as the IP address configured on the
+  peer router for this peering.
 \item{\tt as}: this gives the AS number of this peer.  This must match
   the AS number that the peer itself advertises to us, or the BGP
   peering will not be established.  It is a 16-bit integer, and is
   mandatory to specify.
-\item{\tt next-hop}: this is the IPv4 address that we will as the
+\item{\tt next-hop}: this is the IPv4 address that will be sent as the
   nexthop router address in routes that we send to this peer.
   Typically this is only specified for EBGP peerings.
 \item{\tt local-port}: by default, BGP establishes its BGP connections
   over a TCP connection between port 179 on the local router and port
   179 on the remote router.  The local port for this peering can be
-  changed by modifying this attribute.
-\item{\tt peer-port}: The remote port for this peering can be
-  changed by modifying this attribute. See also: {\stt local-port}.
+  changed by modifying this attribute.  This must be the same as the
+  corresponding {\stt remote-port} on the remote peer router or a
+  connection will not be established.
+\item{\tt peer-port}: The port for this peering on the remote router
+  can be changed by modifying this attribute. See also: {\stt
+  local-port}.
 \item{\tt holdtime}: This is the holdtime BGP should use when
   negotiating the connection with this peer.  If no message is
   received from a BGP peer during the negotiated holdtime, the
@@ -203,37 +217,39 @@ The configuration parameters are used as follows:
   a peering to be taken down temporarily without removing the
   configuration.
 \item{\tt enable-ipv4-multicast}: this specifies that BGP should
-  negotiation multiprotocol support to allow separate routes to be
-  used for IPv4 unicast and IPv4 multicast.  Normally this would only
-  be enabled if PIM-SM multicast routing is running on the router.
+  negotiate multiprotocol support with this peer to allow separate
+  routes to be used for IPv4 unicast and IPv4 multicast.  Normally
+  this would only be enabled if PIM-SM multicast routing is running on
+  the router.
 \item{\tt enable-ipv6-unicast}: this specifies that BGP should
-  negotiation multiprotocol support to allow IPv6 unicast routes to be
-  exchanged.
+  negotiate multiprotocol support with this peer to allow IPv6 unicast
+  routes to be exchanged.
 \item{\tt enable-ipv6-multicast}: this specifies that BGP should
-  negotiate multiprotocol support to allow IPv6 multicast routes to be
-  exchanged separately from IPv6 unicast routes.  It is possible to
-  enable IPv6 multicast support without enabling IPv6 unicast support.
+  negotiate multiprotocol support with this peer to allow IPv6
+  multicast routes to be exchanged separately from IPv6 unicast
+  routes.  It is possible to enable IPv6 multicast support without
+  enabling IPv6 unicast support.
 \end{description}
 \item{\tt network4}: this specifies an IPv4 route to be advertised
   into the BGP routing, originating from this router.  The parameter
-  is an IPv4 subnet in the format IPv4-address/prefix-length.  For
+  is an IPv4 subnet in the format {\it address/prefix-length}.  For
   example {\stt 10.0.0.0/24}.
 \begin{description}
-\item{\tt next-hop}: this is the next-hop router IPv4 address to be used
-  in BGP advertisements for this route.  Typically it will be one of
-  the router's IP addresses.
+\item{\tt next-hop}: this is the IPv4 address of the next-hop router
+  to be used in BGP advertisements for this route.  Typically it will
+  be one of the router's IP addresses.
 \item{\tt unicast}: this takes the value {\stt true} or {\stt false}
-and specifies whether this route should be advertised to be unsed to
+and specifies whether this route should be advertised to be used to
 route unicast packets.
 \item{\tt multicast}: this takes the value {\stt true} or {\stt false}
-and specifies whether this route should be advertised to be unsed to
+and specifies whether this route should be advertised to be used to
 route multicast packets.  Either {\stt unicast} or {\stt multicast} or
 both must be true.
 \end{description}
 
 \item{\tt network6}: this specifies an IPv6 route to be advertised
   into the BGP routing, originating from this router.  The parameter
-  is an IPv6 subnet in the format IPv4-address/prefix-length.  For
+  is an IPv6 subnet in the format {\it address/prefix-length}.  For
   example {\stt 10:0:0:10::/64}.
 \end{description}
 
@@ -282,36 +298,38 @@ protocols \{\\
 \vspace{0.1in}
 
 This configuration is from a BGP router in AS 45678.  The router has a
-BGP identifier of 128.16.32.1, which will normally one of the router's
+BGP identifier of 128.16.32.1, which will normally be one of the router's
 IP addresses.
 
 This router has only one BGP peering configured, with a peer on IP
-address 192.168.150.1.  This peering is an EBGP connection because
-the peer is in a different AS (34567).  The IP address of the router
-that is used for this peering is 128.16.64.4, and the router is also
-configured to set the next hop router field in routes it advertises to
-the peer to be 128.16.64.4.  Setting local-ip and next-hop to be the
-same is common for EBGP connections.  The holdtime for the peering is
-configured to be 120 seconds, but the precise value of the holdtime
-actually used depends on negotiation with the peer.  In addition to
-IPv4 unicast routing, which is enabled by default, this peering is
-configured to allow the sending an receiving of IPv4 multicast routes
-and IPv6 unicast routes.
+address 192.168.150.1.  This peering is an EBGP connection because the
+peer is in a different AS (34567).  This router's IP address used for
+this peering is 128.16.64.4, and the router is also configured to set
+the next hop router field in routes it advertises to the peer to be
+128.16.64.4.  Setting local-ip and next-hop to be the same is common
+for EBGP connections.  The holdtime for the peering is configured to
+be 120 seconds, but the precise value of the holdtime actually used
+depends on negotiation with the peer.  In addition to IPv4 unicast
+routing, which is enabled by default, this peering is configured to
+allow the sending an receiving of IPv4 multicast routes and IPv6
+unicast routes.
 
-This router is also configured to originate routing advertisements for
-two subnets.  Whether these subnets are directly connected, or
-reachable via IGP routing, is not clear from just this part of the
-configuration.  
+This router is also configured to {\it originate} routing
+advertisements for two subnets.  These subnets might be directly
+connected, or might be reachable via IGP routing.
 
 The first advertisement this router originates is for subnet
-128.16.16/24, reachable via both unicast and multicast.  If we had any
-IGP peerings, the advertisement would indicate that 128.16.16/24 was
-reachable via next hop 128.16.64.1, but in this case there is only one
-EBGP peering, and the next hop in {\it all} routes sent to that peer
-is set to 128.16.64.4.
+128.16.16/24, reachable via both unicast and multicast.  The nexthop
+specified in 128.16.64.1, and this must be reachable via other routes
+in the routing table, or this advertisement will not be made.  If this
+router had any IBGP peerings, then the BGP route advertised to those
+peers would indicate that 128.16.16/24 was reachable via next hop
+128.16.64.1. However in this case the only peering is an EBGP peering,
+and the next hop in {\it all} routes sent to that peer is set to
+128.16.64.4 according to the {\stt nexthop} directive for the peering.
 
-The second advertisement is for an IPv6 route, usable only by IPv6
-unicast traffic.
+The second advertisement is for an IPv6 route, configured to be usable
+only by IPv6 unicast traffic.
 
 \newpage
 \section{Monitoring BGP}
@@ -319,7 +337,7 @@ unicast traffic.
 On a router running BGP, the BGP routing state can be displayed using
 the {\stt show bgp} operational-mode command.  Information is available
 about the status of BGP peerings and about the routes received and
-used.  In the 1.0 release, the set of commands is fairly crude, and
+used.  In the 1.0 release, the set of commands is fairly limited, and
 will be increased in future releases to provide better ways to display
 subsets of this information.
 
@@ -434,6 +452,7 @@ Peer 2: local 192.150.187.112/179 remote 192.150.187.2/179\\
 \end{minipage}
 } 
 
+\vspace{0.1in}
 The most important piece of information is typically whether or not
 the peering is in ESTABLISHED state, indicating that the peering is up
 and capable of exchanging routes.  ACTIVE state means that the peering
@@ -444,7 +463,7 @@ unreachable, or because no BGP instance is running on the remote peer.
 \newpage
 The {\stt show bgp routes} command displays the routes received by BGP
 from its peers.  On a router with a full BGP routing table (140000
-routes as of July 2003) this command will produce a large amount of
+routes as of July 2004) this command will produce a large amount of
 output:
 
 \vspace{0.1in}
@@ -479,10 +498,10 @@ Origin Codes: i IGP, e EGP, ? incomplete\\
 
 The format of the output is one route per line.  On each line:
 \begin{itemize}
-\item A status code is displayed, showing whether the route is valid
-(available for us to use because it isn't filtered by the inbound BGP
-filters and the nexthop is reachable), and whether it was the best BGP
-route this router has received.
+\item A status code is displayed, showing whether the route is valid,
+  and whether it was the best BGP route this router has received.  A
+  route is valid if the nexthop is reachable and it isn't filtered by
+  the inbound BGP filters.
 \item The network prefix for which the route applies is listed in the
   form {\stt 4.17.226.0/23}.  This indicates the base address for the
   network (address {\stt 4.17.226.0}), and the prefix length ({\stt 23} bits).

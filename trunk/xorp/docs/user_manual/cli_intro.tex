@@ -1,27 +1,28 @@
 \chapter{Command Structure}
+\label{xorpsh}
 
 \section{Introduction}
-To interact with a XORP router using the command line interface (CLI),
-a user runs \xorpsh.  This allows configuration of the router and
-monitoring of the router state.  
+To interact with a \xorp router using the command line interface (CLI),
+a user runs the \xorp command shell ``\xorpsh''.  This allows
+configuration of the router and monitoring of the router state.
 
-In this document we describe how to interact with \xorpsh.  This
-document does not provide specifics of how to configure BGP, PIM, SNMP
-and other processes - this will eventually be described in additional
-documents.
+In this chapter we describe how to interact with \xorpsh.  In later
+chapters we describe the details of how to configure BGP, PIM, SNMP and
+other processes.
 
 The user interface style is loosely modelled on that of a Juniper
 router.  This manual and the xorpsh itself are works in progress, and
 so may change significantly in the future.
 
 \section{Running xorpsh}
-\xorpsh provides an interactive command shell to a XORP user, similar
+\xorpsh provides an interactive command shell to a \xorp user, similar
 in many ways to the role played by a Unix shell.  In a production
-router, it is envisaged that \xorpsh might be set up as a user's login
-shell - they would login to the router via ssh and be directly in the
-\xorpsh environment.  However, for research and development purposes,
-it makes more sense to login normally to the machine running the
-rtrmgr process, and to run \xorpsh directly from the Unix command line.
+router or on the \xorp live CD, \xorpsh might be set up as a user's
+login shell - they would login to the router via ssh and be directly
+in the \xorpsh environment.  However, for research and development
+purposes, it makes more sense to login normally to the machine running
+the \xorp processes, and to run \xorpsh directly from the Unix command
+line.
 
 \xorpsh should normally be run as a regular user; it is neither
 necessary or desirable to run it as root.  If the user is to be
@@ -29,10 +30,10 @@ permitted to make changes to the running router configuration, they
 need to be in the Unix group {\tt xorp}.  The choice of GID for group
 xorp is not important.
 
-\xorpsh needs to be able to communicate with the rtrmgr using the local
-file system.  If the rtrmgr cannot write files in /tmp that \xorpsh
-can read, then \xorpsh will not be able to authenticate the user to the
-rtrmgr.
+\xorpsh needs to be able to communicate with the \xorp router
+management process \rtrmgr using the local file system.  If
+the \rtrmgr cannot write files in /tmp that \xorpsh can read, then
+\xorpsh will not be able to authenticate the user to the \rtrmgr.
 
 Multiple users can run \xorpsh simultaneously.  There is some degree of
 configuration locking to prevent simultaneous changes to the router
@@ -155,7 +156,7 @@ current cursor location.
 \xorpsh has two command modes:
 \begin{description}
 \item{\bf Operational Mode,}  which allows interaction with the router
-to monitor it's operation and status.
+to monitor its operation and status.
 \item{\bf Configuration Mode,} which allows the user to view the
 configuration of the router, to change that configuration, and to
 load and save configurations to file.
@@ -166,7 +167,7 @@ would seriously impact the operation of the router.  In contrast,
 configuration mode allows all aspects of router operation to be
 modified.
 
-In the long run, \xorpsh and the rtrmgr will probably come to support
+In the long run, \xorpsh and the \rtrmgr will probably come to support
 fine-grained access control, so that some users can be given
 permission to change only subsets of the router configuration.  At the
 present time though, there is no fine-grained access control.
@@ -402,7 +403,7 @@ XORP>
 
 \subsection{Loading and Saving Configurations}
 
-On startup, the rtrmgr will read a configuration file.  It will then
+On startup, the \rtrmgr will read a configuration file.  It will then
 start up and configure the various router components as specified in
 the configuration file.
 

@@ -21,17 +21,17 @@ that a router might have more than one route that matches a
 destination address, and under such circumstances, it will use the
 route that has the longest prefix.   For example, if a router has two routes:
 \begin{itemize}
-\item Subnet: {\tt 128.16.0.0/16} Nexthop: {\tt 10.0.0.1}
-\item Subnet: {\tt 128.16.64.0/24} Nexthop: {\tt 10.0.0.2}
+\item Subnet: {\ssf 128.16.0.0/16}, nexthop: {\ssf 10.0.0.1}
+\item Subnet: {\ssf 128.16.64.0/24}, nexthop: {\ssf 10.0.0.2}
 \end{itemize}
-\noindent A packet destined for {\tt 128.16.0.1} would match the first
-route only, and so would be forwarded to {\tt 10.0.0.1}.  However a
-packet destined for {\tt 128.16.64.1} would match both routes, and so
-would be forwarded to {\tt 10.0.0.2} because the second route has a
+\noindent A packet destined for {\ssf 128.16.0.1} would match the first
+route only, and so would be forwarded to {\ssf 10.0.0.1}.  However a
+packet destined for {\ssf 128.16.64.1} would match both routes, and so
+would be forwarded to {\ssf 10.0.0.2} because the second route has a
 longer prefix (24 is longer than 16).
 
-To be useful, a router needs to populate its forwarding table.  It can
-do this in three ways:
+To be useful, a router needs to populate its forwarding table.  It
+does this in three ways:
 \begin{itemize}
 \item Routes for directly connected subnets are automatically entered into
 the forwarding table.
@@ -42,7 +42,7 @@ routes}. Static routes will be discussed in chapter \ref{staticroutes}.
 protocol.  Such routes are known as {\it dynamic routes}.
 \end{itemize}
 
-\subsection{Dyanmic Routing}
+\subsection{Dynamic Routing}
 
 Many different routing protocols can supply dynamic routes.  The dynamic
 routing protocols that are in most common use are:
@@ -50,7 +50,7 @@ routing protocols that are in most common use are:
 \item {\bf Border Gateway Protocol (BGP)}.  This is used for
 inter-domain routing.
 \item {\bf Routing Information Protocol (RIP)}.  This is probably the
-simplest intra-domain routing protocol, and tends to be used on small
+simplest intra-domain routing protocol, and is often used on small
 networks.
 \item {\bf Open Shortest Path First (OSPF)}.  Used for intra-domain routing,
 often on large ISP networks.
@@ -71,10 +71,12 @@ A router can run multiple routing protocols simultaneously.  For
 example, we may use RIP to distribute routes within our network, and
 BGP to learn external routes.  In some situations this can lead to a
 router learning the same route from more than one routing protocol.
-For example, we might learn the following routes:
+For example, we might learn the two routes:
 \begin{itemize}
-\item Subnet: {\tt 128.16.64.0/24} nexthop: {\tt 192.150.187.1}, Learned from BGP via an external peering. AS Path: {\tt 123 567 987}.
-\item Subnet: {\tt 128.16.64.0/24} Nexthop: {\tt 10.0.0.2}, Learned from RIP with metric 13
+\item Subnet: {\ssf 128.16.64.0/24}, nexthop: {\ssf 192.150.187.1},
+learned from BGP via an external peering. AS Path: {\tt 123 567 987}.
+\item Subnet: {\ssf 128.16.64.0/24}, nexthop: {\ssf 10.0.0.2}, learned
+from RIP with metric 13
 \end{itemize}
 The longest prefix match rule doesn't help us because the prefix
 lengths are the same, and the metric used for RIP is not directly
@@ -98,8 +100,10 @@ xxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \>RIP:\>120\\
 \>BGP, heard from internal peer\>200\\
 \end{tabbing}
-As of the XORP 1.0 release, the is no way to modify these defaults,
-but this capability will be added soon.
+Hence, in the example above, the route learned from BGP will be prefered.
+
+As of the XORP 1.0 release, the is no way to modify these default
+administrative distances, but this capability will be added soon.
 
 \subsection{Route Redistribution}
 
@@ -107,12 +111,12 @@ A common requirement is to redistribute routes between routing
 protocols.  Some examples might be:
 \begin{itemize}
 \item When interconnecting some subnets that are statically routed
-  with some subnets that are dynamically routed using RIP.  Rather
+  with some subnets use RIP for dynamic routing.  Rather
   that configure the static routes and additionally tell RIP to
   originate route advertisements for the same subnets, it is simpler
   and less error prone to configure the router to simply redistribute
   all the static routes into RIP.
-\item When a network is using RIP internally, and also uses BGP to
+\item When a network uses RIP internally, and also uses BGP to
   peer with the rest of the Internet.  One solution would be to
   configure BGP at the border routes to originate route advertisements
   for the internal subnets, but if a new subnet is added internally,
@@ -127,3 +131,11 @@ routing table, so if the directive {\stt export static} is added to
 the RIP configuration, then this indicates that RIP should export all
 the static routes to its neighbors via the RIP protocol.
 
+While route redistribution is a powerful tool, it needs to be used
+carefully.  For example, redistributing BGP routes into RIP at one
+router, and redistributing RIP routes into BGP at another router,
+would cause all the BGP routes to lose their original AS paths, and
+hence for much of the Internet to believe your AS is the best way to
+everywhere.  In any event, it is rarely a good idea to distribute a
+large number of BGP routes into an IGP because most IGPs simply do not
+cope well with large routing tables.

@@ -8,11 +8,37 @@ general, static routes should only be used for very simple network
 topologies, or to override the behaviour of a dyanmic routing protocol
 for a small number of routes.
 
+Static routes can be configured for IPv4 and IPv6.  Each route can be
+specified as to be used for unicast forwarding, or as part of the
+multicast topology used by multicast routing, or both.  
+
+The term {\it RIB} refers to the router's {\it Routing Information
+Base}.  This is the collection of all routes the router has learned
+from its configuration or from its dynamic routing protocols.  The RIB
+maintains separate collections of routes for IPv4 and IPv6.  Within
+each of those collections, the router also maintains separate route
+tables for unicast routes and for multicast routes.  Unicast routes
+will be used to determine the forwarding table used for unicast packet
+forwarding.  Multicast routes do not directly determine the multicast
+forwarding table, but instead are used by multicast routing protocols
+such as PIM.  PIM uses this to determine the reverse-path
+information\footnote{the path back to a source} needed to route
+multicast control information that in turn sets up the multicast
+forwarding tree.  The part of the {\it RIB} used to contain multicast
+topology informtaion is called the {\it Multicast RIB} or {\it MRIB}.
+
+\newpage
 \section{Configuration of Static Routes}
+
+When a static route is specified, it is necessary to indicate not only
+the {\it destination subnet} and {\it nexthop} router, but also
+whether the route should be placed in the unicast RIB or in the MRIB
+or both.
 
 \subsection{Configuration Syntax}
 
 The syntax for defining static routes is shown below.
+
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
@@ -49,17 +75,74 @@ protocols \{\\
 }
 \vspace{0.1in}
 
-\noindent
 The configuration parameters are used as follows:
 \begin{description}
+\item{\tt protocols}: this delimits the configuation for all routing
+  protocols in the XORP router configuration.  It is mandatory that
+  BGP configuration is under the {\stt protocols} node in the
+  configuration.
 \item{\tt static}: the delimits the part of the router configuration
   that is related to configuring static routes.
-\item{\tt targetname} this is the name for this instance of static\_routes.  It
-  defaults to ``{\stt static\_routes}'', and it is not recommended that this
-  default is overridden under normal usage scenarios.
+\item{\tt targetname}: this is the name for this instance of
+  static\_routes.  It defaults to ``{\stt static\_routes}'', and it is
+  not recommended that this default is overridden under normal usage
+  scenarios.
+\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+  and determines whether any static routes are installed or not.
+  Setting it to {\stt false} has the same effect as deleting the whole
+  static routes configuration, but without losing what the old
+  configuration actually was.
+\item{\tt route4}: this specifies an IPv4 unicast route to be
+  installed in the RIB.  The parameter is an IPv4 destination subnet
+  expressed in the form {\it address/prefix-length}.
+
+  Each {\stt route4}: specification takes the following mandatory
+  attributes:
+\begin{description}
+\item{\tt nexthop}: this specifies the IPv4 address of the nexthop
+  router towards the destination subnet.
+\item{\tt metric}: this specifies the routing metric or cost for this
+  route.  It is a non-negative integer.  The metric for a static route
+  is not directly used to decide which route to use, but may affect
+  the choice of routes for protocols such as BGP and PIM-SM that
+  indirectly use this information.  For example, BGP uses the IGP
+  metric to the nexthop to decide between alternative routes as part
+  of its decision process.  As with all routing metrics, lower values
+  indicate better routes.
+\end{description}
+\item{\tt mrib-route4}: this specifies an IPv4 multicast route to be
+  installed in the Multicast RIB.  The parameter is an IPv4
+  destination subnet expressed in the form {\it
+  address/prefix-length}.  This route will not directly affect
+  forwarding, but will be used by multicast routing protocols such as
+  PIM-SM to control how multicast trees are formed.
+
+  An {\stt mrib-route4} specification takes the same attributes as a
+  {\stt route4} specification.
+\item{\tt route6}: this specifies an IPv6 unicast route to be
+  installed in the RIB.  The parameter is an IPv6 destination subnet
+  expressed in the form {\it address/prefix-length}.
+
+  Each {\stt route6}: specification takes the following mandatory
+  attributes:
+\begin{description}
+\item{\tt nexthop}: this specifies the IPv6 address of the nexthop
+  router towards the destination subnet.
+\item{\tt metric}: this specifies the routing metric or cost for this
+  route.  See {\stt route4 metric} for details.
+\end{description}
+\item{\tt mrib-route6}: this specifies an IPv4 multicast route to be
+  installed in the Multicast RIB.  The parameter is an IPv6
+  destination subnet expressed in the form {\it
+  address/prefix-length}.  This route will not directly affect
+  forwarding, but will be used by multicast routing protocols such as
+  PIM-SM to control how multicast trees are formed.
+
+  An {\stt mrib-route6} specification takes the same attributes as a
+  {\stt route6} specification.
 \end{description}
 
-
+\newpage
 \subsection{Example Configurations}
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
@@ -97,4 +180,52 @@ protocols \{\\
 
 \section{Monitoring Static Routes}
 
-do we have any op-mode commands for this?
+IPv4 static routes can be displayed using the command {\stt show route
+table ipv4 unicast static}:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show route table ipv4 unicast static}\\
+Xorp> {\bf show route table ipv4 unicast static}
+Network 192.168.0.0/24
+\>Nexthop := 192.150.187.1
+\>Metric :=     1    Protocol := static    Interface := fxp0    Vif := fxp0
+Network 192.168.1.0/24
+\>Nexthop := 192.150.187.2
+\>Metric :=     1    Protocol := static    Interface := fxp0    Vif := fxp0
+Xorp> 
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\vspace{0.1in} 
+The information shown for each route not only indicates the configured
+information (Network, Nexthop and Metric), but also the interface
+and vif via which this route will forward packets.
+
+If the nexthop is not actually reachable, the route will not be shown
+by this command because there is not current interface or vif.
+
+\vspace{0.2in}
+IPv6 static routes can be displayed using the command {\stt show route
+table ipv6 unicast static}:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show route table ipv6 unicast static}\\
+\\
+TBD\\
+\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
