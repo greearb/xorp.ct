@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.3 2003/05/21 03:08:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.4 2003/05/21 05:32:50 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -88,7 +88,7 @@ FtiConfigEntryGetRtsock::lookup_route4(const IPv4& dst, Fte4& fte)
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.gateway().get_ipv4(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
-	       ftex.admin_distance());
+	       ftex.admin_distance(), ftex.xorp_route());
     
     return (ret_value);
 }
@@ -111,7 +111,7 @@ FtiConfigEntryGetRtsock::lookup_entry4(const IPv4Net& dst, Fte4& fte)
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.gateway().get_ipv4(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
-	       ftex.admin_distance());
+	       ftex.admin_distance(), ftex.xorp_route());
     
     return (ret_value);
 }
@@ -134,7 +134,7 @@ FtiConfigEntryGetRtsock::lookup_route6(const IPv6& dst, Fte6& fte)
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.gateway().get_ipv6(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
-	       ftex.admin_distance());
+	       ftex.admin_distance(), ftex.xorp_route());
     
     return (ret_value);
 }
@@ -157,7 +157,7 @@ FtiConfigEntryGetRtsock::lookup_entry6(const IPv6Net& dst, Fte6& fte)
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.gateway().get_ipv6(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
-	       ftex.admin_distance());
+	       ftex.admin_distance(), ftex.xorp_route());
     
     return (ret_value);
 }

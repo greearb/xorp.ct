@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.6 2003/05/21 05:32:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.7 2003/05/21 18:28:52 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -62,7 +62,8 @@ bool
 FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance());
+	      fte.vifname(), fte.metric(), fte.admin_distance(),
+	      fte.xorp_route());
     
     return (add_entry(ftex));
 }
@@ -71,7 +72,8 @@ bool
 FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance());
+	      fte.vifname(), fte.metric(), fte.admin_distance(),
+	      fte.xorp_route());
     
     return (delete_entry(ftex));
 }
@@ -80,7 +82,8 @@ bool
 FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance());
+	      fte.vifname(), fte.metric(), fte.admin_distance(),
+	      fte.xorp_route());
     
     return (add_entry(ftex));
 }
@@ -89,7 +92,8 @@ bool
 FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance());
+	      fte.vifname(), fte.metric(), fte.admin_distance(),
+	      fte.xorp_route());
     
     return (delete_entry(ftex));
 }
@@ -117,7 +121,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     struct sockaddr_in	*sin_dst, *sin_gateway, *sin_netmask;
     RoutingSocket&	rs = *this;
     int			family = fte.net().af();
-
+    
     //
     // Set the request
     //

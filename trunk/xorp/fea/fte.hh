@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.1 2003/05/02 07:50:42 pavlin Exp $
+// $XORP: xorp/fea/fte.hh,v 1.2 2003/05/20 23:25:13 atanu Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -42,7 +42,7 @@ public:
 	const string&	vifname,
 	uint32_t	metric,
 	uint32_t	admin_distance,
-	bool		xorp_route = false) :
+	bool		xorp_route) :
 	_net(net), _gateway(gateway), _ifname(ifname), _vifname(vifname),
 	_metric(metric), _admin_distance(admin_distance),
 	_xorp_route(xorp_route) {}

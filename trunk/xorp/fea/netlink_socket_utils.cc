@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.2 2003/05/05 19:34:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.3 2003/05/14 01:13:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -250,8 +250,9 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     //
     // TODO: define default routing metric and admin distance instead of ~0
     //
+    // TODO: XXX: PAVPAVPAV: must set the xorp_route flag!!
     fte = FteX(IPvXNet(dst_addr, dst_masklen), gateway_addr, if_name, if_name,
-	       ~0, ~0);
+	       ~0, ~0, false /* TODO: XXX: PAVPAVPAV: xorp_route */);
     
     return true;
 }
