@@ -92,7 +92,7 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-bin_PROGRAMS = xorp_rtrmgr xorpsh
+bin_PROGRAMS = xorp_rtrmgr xorpsh xorp_profiler
 
 # -- Test Programs
 TESTS = test_templates test_sample_config test_module_manager
@@ -124,6 +124,13 @@ xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/
 xorpsh_SOURCES = rtrmgr_module.h y.boot_tab.h y.opcmd_tab.h y.tplt_tab.h cli.hh command_tree.hh conf_tree.hh conf_tree_node.hh module_command.hh module_manager.hh op_commands.hh path_segment.hh popen.hh rtrmgr_error.hh slave_conf_tree.hh slave_conf_tree_node.hh slave_module_manager.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xorpsh_main.hh xrl_xorpsh_interface.hh xrldb.hh cli.cc command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.opcmd.cc lex.tplt.cc module_command.cc op_commands.cc popen.cc slave_conf_tree.cc slave_conf_tree_node.cc slave_module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc util.cc xorp_client.cc xorpsh_main.cc xrl_xorpsh_interface.cc xrldb.cc y.boot_tab.cc y.opcmd_tab.cc y.tplt_tab.cc
 
 xorpsh_LDADD = $(top_builddir)/cli/libcli.a $(top_builddir)/libproto/libproto.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/librtrmgrxif.a $(top_builddir)/xrl/targets/libxorpshbase.a $(LDADD)
+
+#
+# xorp_profiler
+#
+xorp_profiler_SOURCES = profiler.cc
+
+xorp_profiler_LDADD = $(top_builddir)/xrl/interfaces/libprofilexif.a $(top_builddir)/xrl/targets/libprofileclientbase.a $(LDADD)
 
 #
 # test_templates
@@ -160,7 +167,8 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
-bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT)
+bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT) \
+	xorp_profiler$(EXEEXT)
 noinst_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
 	test_module_manager$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -208,6 +216,16 @@ test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_templates_LDFLAGS =
+am_xorp_profiler_OBJECTS = profiler.$(OBJEXT)
+xorp_profiler_OBJECTS = $(am_xorp_profiler_OBJECTS)
+xorp_profiler_DEPENDENCIES = \
+	$(top_builddir)/xrl/interfaces/libprofilexif.a \
+	$(top_builddir)/xrl/targets/libprofileclientbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_profiler_LDFLAGS =
 am_xorp_rtrmgr_OBJECTS = conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 	lex.boot.$(OBJEXT) lex.tplt.$(OBJEXT) main_rtrmgr.$(OBJEXT) \
 	master_conf_tree.$(OBJEXT) module_command.$(OBJEXT) \
@@ -262,7 +280,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/module_command.Po \
 @AMDEP_TRUE@	$(DEPDIR)/module_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/op_commands.Po $(DEPDIR)/popen.Po \
-@AMDEP_TRUE@	$(DEPDIR)/randomness.Po \
+@AMDEP_TRUE@	$(DEPDIR)/profiler.Po $(DEPDIR)/randomness.Po \
 @AMDEP_TRUE@	$(DEPDIR)/slave_conf_tree.Po \
 @AMDEP_TRUE@	$(DEPDIR)/slave_conf_tree_node.Po \
 @AMDEP_TRUE@	$(DEPDIR)/slave_module_manager.Po $(DEPDIR)/task.Po \
@@ -292,9 +310,10 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(test_module_manager_SOURCES) \
 	$(test_sample_config_SOURCES) $(test_templates_SOURCES) \
-	$(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
+	$(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) \
+	$(xorpsh_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(test_module_manager_SOURCES) $(test_sample_config_SOURCES) $(test_templates_SOURCES) $(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
+SOURCES = $(test_module_manager_SOURCES) $(test_sample_config_SOURCES) $(test_templates_SOURCES) $(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
 
 all: all-am
 
@@ -347,6 +366,9 @@ test_sample_config$(EXEEXT): $(test_sample_config_OBJECTS) $(test_sample_config_
 test_templates$(EXEEXT): $(test_templates_OBJECTS) $(test_templates_DEPENDENCIES) 
 	@rm -f test_templates$(EXEEXT)
 	$(CXXLINK) $(test_templates_LDFLAGS) $(test_templates_OBJECTS) $(test_templates_LDADD) $(LIBS)
+xorp_profiler$(EXEEXT): $(xorp_profiler_OBJECTS) $(xorp_profiler_DEPENDENCIES) 
+	@rm -f xorp_profiler$(EXEEXT)
+	$(CXXLINK) $(xorp_profiler_LDFLAGS) $(xorp_profiler_OBJECTS) $(xorp_profiler_LDADD) $(LIBS)
 xorp_rtrmgr$(EXEEXT): $(xorp_rtrmgr_OBJECTS) $(xorp_rtrmgr_DEPENDENCIES) 
 	@rm -f xorp_rtrmgr$(EXEEXT)
 	$(CXXLINK) $(xorp_rtrmgr_LDFLAGS) $(xorp_rtrmgr_OBJECTS) $(xorp_rtrmgr_LDADD) $(LIBS)
@@ -373,6 +395,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/module_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/op_commands.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/popen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profiler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/randomness.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_conf_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_conf_tree_node.Po@am__quote@

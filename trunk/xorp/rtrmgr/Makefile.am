@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.29 2004/08/19 02:00:20 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.30 2004/09/17 19:43:32 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS	 = xorp_rtrmgr xorpsh
+bin_PROGRAMS	 = xorp_rtrmgr xorpsh xorp_profiler
 
 # -- Test Programs
 TESTS		 = test_templates
@@ -149,6 +149,15 @@ xorpsh_LDADD	+= @CLI_CURSES_LIB@
 xorpsh_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgrxif.a
 xorpsh_LDADD	+= $(top_builddir)/xrl/targets/libxorpshbase.a
 xorpsh_LDADD	+= $(LDADD)
+
+#
+# xorp_profiler
+#
+xorp_profiler_SOURCES	= profiler.cc
+
+xorp_profiler_LDADD =  $(top_builddir)/xrl/interfaces/libprofilexif.a
+xorp_profiler_LDADD +=  $(top_builddir)/xrl/targets/libprofileclientbase.a
+xorp_profiler_LDADD += $(LDADD)
 
 #
 # test_templates
