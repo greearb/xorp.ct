@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.8 2004/11/23 00:53:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.9 2004/11/28 22:47:01 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -27,7 +27,7 @@
 
 #include "libxorp/eventloop.hh"
 
-#include "xrl/interfaces/fea_rawpkt_client_xif.hh"
+#include "xrl/interfaces/fea_rawpkt4_client_xif.hh"
 #include "ifmanager.hh"
 #include "rawsock4.hh"
 #include "xrl_rawsock4.hh"
@@ -115,12 +115,12 @@ public:
 	//
 	// Instantiate client sending interface
 	//
-	XrlRawPacketClientV0p1Client cl(&_rsm.router());
+	XrlRawPacket4ClientV0p1Client cl(&_rsm.router());
 
 	// Send notification, note callback goes to owning
 	// XrlRawSocket4Manager instance since send failure to xrl_target
 	// is useful for reaping all filters to connected to target
-	cl.send_recv_raw4(
+	cl.send_recv_raw(
 	    _tgt.c_str(), _if, _vif, data,
 	    callback(&_rsm, &XrlRawSocket4Manager::xrl_vif_send_handler, _tgt)
 	    );

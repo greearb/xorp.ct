@@ -127,7 +127,7 @@ xorp_fea_SOURCES = fea.cc
 ### socket server libraries and related
 ### XRL client for Profile
 ### XORP misc libraries
-xorp_fea_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libfeafibclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la $(top_builddir)/xrl/interfaces/libfearawpktclient.la $(top_builddir)/xrl/targets/libfeabase.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libclimanagerxif.la $(top_builddir)/xrl/interfaces/libmfeaclientxif.la $(top_builddir)/xrl/targets/libmfeabase.la $(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/targets/libfirewallbase.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
+xorp_fea_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libfeafibclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la $(top_builddir)/xrl/interfaces/libfearawpkt4client.la $(top_builddir)/xrl/targets/libfeabase.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libclimanagerxif.la $(top_builddir)/xrl/interfaces/libmfeaclientxif.la $(top_builddir)/xrl/targets/libmfeabase.la $(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/targets/libfirewallbase.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for xorp_fea_dummy
 xorp_fea_dummy_CXXFLAGS = -DFEA_DUMMY
@@ -145,7 +145,7 @@ test_mfea_SOURCES = test_mfea.cc
 ### socket server libraries and releated
 ### XRL client for Profile
 ### XORP misc libraries
-test_mfea_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libfeafibclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la $(top_builddir)/xrl/interfaces/libfearawpktclient.la $(top_builddir)/xrl/targets/libfeabase.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libclimanagerxif.la $(top_builddir)/xrl/interfaces/libmfeaclientxif.la $(top_builddir)/xrl/targets/libmfeabase.la $(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
+test_mfea_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libfeafibclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la $(top_builddir)/xrl/interfaces/libfearawpkt4client.la $(top_builddir)/xrl/targets/libfeabase.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libclimanagerxif.la $(top_builddir)/xrl/interfaces/libmfeaclientxif.la $(top_builddir)/xrl/targets/libmfeabase.la $(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for test_ifmanager_transaction
 test_ifmanager_transaction_SOURCES = test_ifmanager_transaction.cc iftree.cc
@@ -250,7 +250,7 @@ test_mfea_OBJECTS = $(am_test_mfea_OBJECTS)
 test_mfea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -302,7 +302,7 @@ xorp_fea_OBJECTS = $(am_xorp_fea_OBJECTS)
 xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -334,7 +334,7 @@ xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
 xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \

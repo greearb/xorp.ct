@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.24 2004/11/10 00:37:54 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.25 2004/11/12 02:44:51 bms Exp $
 ##
 
 ###############################################################################
@@ -78,15 +78,15 @@ libfib2mribxif_la_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
 noinst_LTLIBRARIES += libftixif.la
 libftixif_la_SOURCES = fti_xif.hh fti_xif.cc
 
-# FEA Raw Packet Server Interface
-noinst_LTLIBRARIES += libfearawpkt.la
-libfearawpkt_la_SOURCES  = fea_rawpkt_xif.hh
-libfearawpkt_la_SOURCES += fea_rawpkt_xif.cc
+# FEA IPv4 Raw Packet Server Interface
+noinst_LTLIBRARIES += libfearawpkt4.la
+libfearawpkt4_la_SOURCES  = fea_rawpkt4_xif.hh
+libfearawpkt4_la_SOURCES += fea_rawpkt4_xif.cc
 
 # FEA Raw Packet Client Interface
-noinst_LTLIBRARIES += libfearawpktclient.la
-libfearawpktclient_la_SOURCES  = fea_rawpkt_client_xif.hh
-libfearawpktclient_la_SOURCES += fea_rawpkt_client_xif.cc
+noinst_LTLIBRARIES += libfearawpkt4client.la
+libfearawpkt4client_la_SOURCES  = fea_rawpkt4_client_xif.hh
+libfearawpkt4client_la_SOURCES += fea_rawpkt4_client_xif.cc
 
 # Finder Interface
 noinst_LTLIBRARIES += libfinderxif.la

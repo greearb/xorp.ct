@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.42 2004/11/11 10:36:38 bms Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.43 2004/11/18 14:25:28 bms Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -37,7 +37,7 @@ public:
 		 InterfaceManager& 		ifmgr,
 		 XrlIfConfigUpdateReporter&	ifupd,
 		 Profile&			profile,
-		 XrlRawSocket4Manager*		xrsm	= 0,
+		 XrlRawSocket4Manager*		xrsm4	= 0,
 		 LibFeaClientBridge*		lfbr	= 0,
 		 XrlSocketServer*		xss	= 0);
 
@@ -952,7 +952,7 @@ public:
     // Raw Socket Server Interface
     //
 
-    XrlCmdError raw_packet_0_1_send4(
+    XrlCmdError raw_packet4_0_1_send(
 	// Input values,
 	const IPv4&		src_address,
 	const IPv4&		dst_address,
@@ -963,19 +963,19 @@ public:
 	const vector<uint8_t>&	options,
 	const vector<uint8_t>&	payload);
 
-    XrlCmdError raw_packet_0_1_send_raw4(
+    XrlCmdError raw_packet4_0_1_send_raw(
 	// Input values,
 	const string&		vifname,
 	const vector<uint8_t>&	packet);
 
-    XrlCmdError raw_packet_0_1_register_vif_receiver(
+    XrlCmdError raw_packet4_0_1_register_vif_receiver(
 	// Input values,
 	const string&	router_name,
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	proto);
 
-    XrlCmdError raw_packet_0_1_unregister_vif_receiver(
+    XrlCmdError raw_packet4_0_1_unregister_vif_receiver(
 	// Input values,
 	const string&	router_name,
 	const string&	ifname,
@@ -1026,7 +1026,7 @@ private:
     XrlInterfaceManager 	_xifmgr;
     XrlIfConfigUpdateReporter&	_xifcur;
     Profile&			_profile;
-    XrlRawSocket4Manager*	_xrsm;
+    XrlRawSocket4Manager*	_xrsm4;
     LibFeaClientBridge*		_lfcb;
     XrlSocketServer*		_xss;
 

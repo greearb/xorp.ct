@@ -1,10 +1,10 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawpkt_client.xif,v 1.1 2002/11/15 00:09:04 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt_client.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * Interface for receiving packets on a raw socket. 
  */
 
-interface raw_packet_client/0.1 {
+interface raw_packet4_client/0.1 {
 	/**
 	 * Receive a packet from a raw socket.
 	 * 
@@ -15,7 +15,7 @@ interface raw_packet_client/0.1 {
 	 *		  bits in binary packet is undefined.  All fields
 	 *		  in the IPv4 header should be in network order.
 	 */
-	recv_raw4 ?							      \
+	recv_raw ?							      \
 		if_name:txt &						      \
 		vif_name:txt &						      \
 	        packet:binary

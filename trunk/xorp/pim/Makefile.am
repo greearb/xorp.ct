@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.28 2004/11/12 02:44:45 bms Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.29 2004/11/23 22:43:46 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -46,7 +46,7 @@ LDADD		+= $(top_builddir)/fea/libfea.la
 # FEA-specific begin
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeabase.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
 # FEA-specific end

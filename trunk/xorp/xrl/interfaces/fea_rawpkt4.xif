@@ -1,11 +1,11 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawpkt.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt.xif,v 1.2 2003/01/28 02:20:34 pavlin Exp $ */
 
 /*
  * Interface for sending packets on a raw socket. Typically implemented by the
  * fea.
  */
 
-interface raw_packet/0.1 {
+interface raw_packet4/0.1 {
 	/**
 	 * Send a packet on a raw socket.
 	 *
@@ -20,7 +20,7 @@ interface raw_packet/0.1 {
 	 * @param payload. The payload, everything after the IP header and
 	 *                 options.
 	 */
-	send4 ?  							      \
+	send ?  							      \
 	        src_address:ipv4 & 				      	      \
 	        dst_address:ipv4 & 					      \
 	        vif_name:txt & 						      \
@@ -40,7 +40,7 @@ interface raw_packet/0.1 {
 	 *                 
 	 * @param packet.  Raw IPv4 packet including header and payload.
 	 */
-	send_raw4 ? 							      \
+	send_raw ? 							      \
 		    vif_name:txt &					      \
 		    packet:binary
 

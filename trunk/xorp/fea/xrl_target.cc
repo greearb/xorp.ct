@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.55 2004/11/11 10:36:38 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.56 2004/11/18 14:25:28 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -45,11 +45,11 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   InterfaceManager&	 	ifmgr,
 			   XrlIfConfigUpdateReporter&	xifcur,
 			   Profile&			profile,
-			   XrlRawSocket4Manager*	xrsm,
+			   XrlRawSocket4Manager*	xrsm4,
 			   LibFeaClientBridge*		lfcb,
 			   XrlSocketServer*		xss)
     : XrlFeaTargetBase(&r), _xrl_router(r), _xftm(e, ftic, &r),
-      _xifmgr(e, ifmgr), _xifcur(xifcur), _profile(profile), _xrsm(xrsm),
+      _xifmgr(e, ifmgr), _xifcur(xifcur), _profile(profile), _xrsm4(xrsm4),
       _lfcb(lfcb), _xss(xss), _done(false),
       _have_ipv4(false), _have_ipv6(false)
 {
@@ -2073,7 +2073,7 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
 static const char* XRL_RAW_SOCKET_NULL = "XrlRawSocket4Manager not present" ;
 
 XrlCmdError
-XrlFeaTarget::raw_packet_0_1_send4(
+XrlFeaTarget::raw_packet4_0_1_send(
 				   // Input values,
 				   const IPv4&		  src_address,
 				   const IPv4&		  dst_address,
@@ -2088,15 +2088,15 @@ XrlFeaTarget::raw_packet_0_1_send4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm == 0) {
+    if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
     }
-    return _xrsm->send(src_address, dst_address, vifname,
+    return _xrsm4->send(src_address, dst_address, vifname,
 		       proto, ttl, tos, options, payload);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet_0_1_send_raw4(
+XrlFeaTarget::raw_packet4_0_1_send_raw(
 				       // Input values,
 				       const string&		vifname,
 				       const vector<uint8_t>&	packet
@@ -2105,14 +2105,14 @@ XrlFeaTarget::raw_packet_0_1_send_raw4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm == 0) {
+    if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
     }
-    return _xrsm->send(vifname, packet);
+    return _xrsm4->send(vifname, packet);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet_0_1_register_vif_receiver(
+XrlFeaTarget::raw_packet4_0_1_register_vif_receiver(
 						   // Input values,
 						   const string&   router_name,
 						   const string&   ifname,
@@ -2120,14 +2120,14 @@ XrlFeaTarget::raw_packet_0_1_register_vif_receiver(
 						   const uint32_t& proto
 						   )
 {
-    if (_xrsm == 0) {
+    if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
     }
-    return _xrsm->register_vif_receiver(router_name, ifname, vifname, proto);
+    return _xrsm4->register_vif_receiver(router_name, ifname, vifname, proto);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet_0_1_unregister_vif_receiver(
+XrlFeaTarget::raw_packet4_0_1_unregister_vif_receiver(
 						     // Input values,
 						     const string& router_name,
 						     const string& ifname,
@@ -2135,10 +2135,10 @@ XrlFeaTarget::raw_packet_0_1_unregister_vif_receiver(
 						     const uint32_t& proto
 						     )
 {
-    if (_xrsm == 0) {
+    if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
     }
-    return _xrsm->unregister_vif_receiver(router_name, ifname, vifname, proto);
+    return _xrsm4->unregister_vif_receiver(router_name, ifname, vifname, proto);
 }
 
 XrlCmdError

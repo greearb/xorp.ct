@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.47 2004/11/19 10:54:28 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.48 2004/11/23 22:43:42 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -41,7 +41,7 @@ xorp_fea_LDADD		 = $(noinst_LTLIBRARIES)
 ### FEA XRL libraries
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la
-xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.la
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.la
 ### MFEA XRL libraries
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
@@ -90,7 +90,7 @@ test_mfea_LDADD		 = $(noinst_LTLIBRARIES)
 # FEA-specific begin
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la
-test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.la
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.la
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
 # FEA-specific end

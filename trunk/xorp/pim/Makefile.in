@@ -121,7 +121,7 @@ noinst_LTLIBRARIES = libpim.la
 ### CLI libraries
 ### XRL client for Profile
 ### XORP misc libraries
-LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.la $(top_builddir)/xrl/targets/libpimbase.la $(top_builddir)/mld6igmp/libmld6igmp.la $(top_builddir)/xrl/interfaces/libmfeaxif.la $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la $(top_builddir)/xrl/targets/libmld6igmpbase.la $(top_builddir)/rib/librib.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/interfaces/libribclientxif.la $(top_builddir)/xrl/targets/libribbase.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/fea/libfea.la $(top_builddir)/xrl/interfaces/libfeafibclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la $(top_builddir)/xrl/interfaces/libfearawpktclient.la $(top_builddir)/xrl/targets/libfeabase.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libclimanagerxif.la $(top_builddir)/xrl/interfaces/libmfeaclientxif.la $(top_builddir)/xrl/targets/libmfeabase.la $(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
+LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.la $(top_builddir)/xrl/targets/libpimbase.la $(top_builddir)/mld6igmp/libmld6igmp.la $(top_builddir)/xrl/interfaces/libmfeaxif.la $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la $(top_builddir)/xrl/targets/libmld6igmpbase.la $(top_builddir)/rib/librib.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/interfaces/libribclientxif.la $(top_builddir)/xrl/targets/libribbase.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/fea/libfea.la $(top_builddir)/xrl/interfaces/libfeafibclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la $(top_builddir)/xrl/interfaces/libfearawpkt4client.la $(top_builddir)/xrl/targets/libfeabase.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libclimanagerxif.la $(top_builddir)/xrl/interfaces/libmfeaclientxif.la $(top_builddir)/xrl/targets/libmfeabase.la $(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_pimsm4_SOURCES = xorp_pimsm4.cc
@@ -186,7 +186,7 @@ test_pim_DEPENDENCIES = libpim.la \
 	$(top_builddir)/fea/libfea.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -245,7 +245,7 @@ xorp_pimsm4_DEPENDENCIES = libpim.la \
 	$(top_builddir)/fea/libfea.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -283,7 +283,7 @@ xorp_pimsm6_DEPENDENCIES = libpim.la \
 	$(top_builddir)/fea/libfea.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
