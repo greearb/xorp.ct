@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.2 2004/09/17 23:55:22 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.3 2004/09/18 02:06:19 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -25,7 +25,7 @@
 
 template <class A>
 BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify)
-    : _orig_rtmsg(rtmsg), _filtered_rtmsg(NULL), 
+    : _orig_rtmsg(rtmsg), _filtered_rtmsg(NULL), _got_fmsg(false),
       _wrote_ptags(false), 
       _palist(*(rtmsg.route()->attributes())), // XXX: pointer deref in ctr
       _no_modify(no_modify),
@@ -73,6 +73,14 @@ BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify)
     }
 }
 
+template <class A>
+BGPVarRW<A>::~BGPVarRW()
+{
+    // nobody ever obtained the filtered message but we actually created one. We
+    // must delete it as no one else can, at this point.
+    if(!_got_fmsg && _filtered_rtmsg)
+	delete _filtered_rtmsg;
+}
 
 template<>
 void
@@ -112,6 +120,7 @@ template <class A>
 InternalMessage<A>*
 BGPVarRW<A>::filtered_message()
 {
+    _got_fmsg = true;
     return _filtered_rtmsg;
 }
 

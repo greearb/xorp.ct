@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.2 2004/09/17 23:55:22 pavlin Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.3 2004/09/18 02:06:19 pavlin Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -42,9 +42,11 @@ public:
      */
      
     BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify);
+    ~BGPVarRW();
 
     /**
      * Caller owns the message [responsible for delete].
+     * Calling multiple times will always return the same message, not a copy.
      *
      * @return the modified message. Null if no changes were made.
      */
@@ -56,8 +58,8 @@ public:
     void single_end();
 
     /**
-     * Users should always test value of modified. If it is true they must
-     * delete/use filtererd_message.
+     * If a route is modified, the caller may obtain it via the filtered_message
+     * call.
      *
      * @return true if route was modified. False otherwise.
      */
@@ -80,20 +82,23 @@ private:
      */
     bool write_nexthop(const string& id, const Element& e);
 
+
+
     const InternalMessage<A>&	_orig_rtmsg;
 
-    ElementFactory _ef;
+    ElementFactory		_ef;
 
-    InternalMessage<A>*	_filtered_rtmsg;
+    InternalMessage<A>*		_filtered_rtmsg;
+    bool			_got_fmsg;
 
-    PolicyTags _ptags;
-    bool _wrote_ptags;
+    PolicyTags			_ptags;
+    bool			_wrote_ptags;
 
-    PathAttributeList<A> _palist;
+    PathAttributeList<A>	_palist;
 
-    bool _no_modify;
+    bool			_no_modify;
+    bool			_modified;
 
-    bool _modified;
 
     // not impl
     BGPVarRW(const BGPVarRW&);
