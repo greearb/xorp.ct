@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.4 2003/02/25 01:38:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.5 2003/03/03 02:07:00 pavlin Exp $"
 
 
 //
@@ -270,6 +270,30 @@ PimScopeZoneTable::is_scoped(const PimScopeZoneId& zone_id,
 	 ++iter) {
 	const PimScopeZone& pim_scope_zone = *iter;
 	if (pim_scope_zone.is_scoped(zone_id, vif_index))
+	    return (true);
+    }
+    
+    return (false);
+}
+
+/**
+ * PimScopeZoneTable::is_zone_border_router:
+ * @group_prefix: The group prefix to test.
+ * 
+ * Test if the router is a Zone Border Router (ZBR) for @group_prefix.
+ * 
+ * Return value: True if the router is a ZBR for @group_prefix, otherwise
+ * false.
+ **/
+bool
+PimScopeZoneTable::is_zone_border_router(const IPvXNet& group_prefix) const
+{
+    list<PimScopeZone>::const_iterator iter;
+    for (iter = _pim_scope_zone_list.begin();
+	 iter != _pim_scope_zone_list.end();
+	 ++iter) {
+	const PimScopeZone& pim_scope_zone = *iter;
+	if (pim_scope_zone.scope_zone_prefix().contains(group_prefix))
 	    return (true);
     }
     
