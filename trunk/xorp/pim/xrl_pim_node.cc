@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.69 2005/03/15 00:52:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.70 2005/03/16 21:54:54 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -21,6 +21,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 #include "libxorp/status_codes.h"
+#include "libxorp/utils.hh"
 
 #include "pim_mfc.hh"
 #include "pim_node.hh"
@@ -86,6 +87,7 @@ XrlPimNode::XrlPimNode(int		family,
 XrlPimNode::~XrlPimNode()
 {
     shutdown();
+    delete_pointers_list(_xrl_tasks_queue);
 }
 
 bool
@@ -396,7 +398,7 @@ XrlPimNode::mfea_register_shutdown()
 	return;
     }
 
-    send_mfea_delete_protocol();
+    add_task(new MfeaAddDeleteProtocol(*this, false));
 }
 
 void
@@ -473,6 +475,18 @@ XrlPimNode::send_mfea_add_protocol()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
+    if (_xrl_tasks_queue.empty())
+	return;		// No more changes
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAddDeleteProtocol* entry;
+
+    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+    XLOG_ASSERT(is_add == true);
+
     //
     // Register the protocol with the MFEA
     //
@@ -506,38 +520,7 @@ XrlPimNode::send_mfea_add_protocol()
 	//
 	XLOG_ERROR("Failed to add protocol with the MFEA. "
 		   "Will try again.");
-	_mfea_add_protocol_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_mfea_add_protocol));
-	return;
-    }
-
-    //
-    // Enable the receiving of kernel signal messages
-    //
-    if (! _is_mfea_allow_signal_messages_registered) {
-	success = _xrl_mfea_client.send_allow_signal_messages(
-	    _mfea_target.c_str(),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    true,			// XXX: enable
-	    callback(this,
-		     &XrlPimNode::mfea_client_send_allow_signal_messages_cb));
-	if (success)
-	    return;
-    }
-
-    if (! success) {
-	//
-	// If an error, then start a timer to try again
-	//
-	XLOG_ERROR("Failed to enable the receiving of kernel signal messages "
-		   "with the MFEA. "
-		   "Will try again.");
-	_mfea_add_protocol_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_mfea_add_protocol));
+	retry_xrl_task();
 	return;
     }
 }
@@ -545,14 +528,24 @@ XrlPimNode::send_mfea_add_protocol()
 void
 XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 {
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAddDeleteProtocol* entry;
+
+    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+    XLOG_ASSERT(is_add == true);
+
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then we are done
+	// If success, then send the next change
 	//
 	_is_mfea_add_protocol_registered = true;
-	send_mfea_add_protocol();
 	PimNode::decr_startup_requests_n();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -593,15 +586,56 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 	// If a transient error, then start a timer to try again
 	// (unless the timer is already running).
 	//
-	if (! _mfea_add_protocol_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add protocol with the MFEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _mfea_add_protocol_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::send_mfea_add_protocol));
-	}
+	XLOG_ERROR("Failed to add protocol with the MFEA: %s. "
+		   "Will try again.",
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
+    }
+}
+
+//
+// Enable the receiving of kernel signal messages
+//
+void
+XrlPimNode::send_mfea_allow_signal_messages()
+{
+    bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (_xrl_tasks_queue.empty())
+	return;		// No more changes
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAllowSignalMessages* entry;
+
+    entry = dynamic_cast<MfeaAllowSignalMessages*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    if (! _is_mfea_allow_signal_messages_registered) {
+	success = _xrl_mfea_client.send_allow_signal_messages(
+	    _mfea_target.c_str(),
+	    my_xrl_target_name(),
+	    string(PimNode::module_name()),
+	    PimNode::module_id(),
+	    true,			// XXX: enable
+	    callback(this,
+		     &XrlPimNode::mfea_client_send_allow_signal_messages_cb));
+	if (success)
+	    return;
+    }
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again
+	//
+	XLOG_ERROR("Failed to enable the receiving of kernel signal messages "
+		   "with the MFEA. "
+		   "Will try again.");
+	retry_xrl_task();
+	return;
     }
 }
 
@@ -609,14 +643,21 @@ void
 XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     const XrlError& xrl_error)
 {
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAllowSignalMessages* entry;
+
+    entry = dynamic_cast<MfeaAllowSignalMessages*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
 	// If success, then we are done
 	//
 	_is_mfea_allow_signal_messages_registered = true;
-	send_mfea_add_protocol();
 	PimNode::decr_startup_requests_n();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -657,14 +698,10 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
 	// If a transient error, then start a timer to try again
 	// (unless the timer is already running).
 	//
-	if (! _mfea_add_protocol_timer.scheduled()) {
-	    XLOG_ERROR("Failed to allow signal messages with the MFEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _mfea_add_protocol_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::send_mfea_add_protocol));
-	}
+	XLOG_ERROR("Failed to allow signal messages with the MFEA: %s. "
+		   "Will try again.",
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
     }
 }
@@ -680,6 +717,21 @@ XrlPimNode::send_mfea_delete_protocol()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
+    if (_xrl_tasks_queue.empty())
+	return;		// No more changes
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAddDeleteProtocol* entry;
+
+    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+    XLOG_ASSERT(is_add == false);
+
+    //
+    // De-register the protocol with the MFEA
+    //
     if (_is_mfea_add_protocol_registered) {
 	if (PimNode::is_ipv4()) {
 	    bool success4;
@@ -717,14 +769,25 @@ XrlPimNode::send_mfea_delete_protocol()
 void
 XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 {
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAddDeleteProtocol* entry;
+
+    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+    XLOG_ASSERT(is_add == false);
+
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then we are done
+	// If success, then send the next change
 	//
 	_is_mfea_add_protocol_registered = false;
 	_is_mfea_allow_signal_messages_registered = false;
 	PimNode::decr_shutdown_requests_n();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -748,6 +811,8 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 	_is_mfea_add_protocol_registered = false;
 	_is_mfea_allow_signal_messages_registered = false;
 	PimNode::decr_shutdown_requests_n();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case BAD_ARGS:
@@ -767,14 +832,10 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 	// If a transient error, then start a timer to try again
 	// (unless the timer is already running).
 	//
-	if (! _mfea_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::mfea_register_shutdown));
-	}
+	XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
+		   "Will try again.",
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
     }
 }
@@ -1056,8 +1117,8 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(
 	// If success, then we are done
 	//
 	_is_rib_redist_transaction_enabled = true;
-	send_rib_redist_transaction_enable();
 	PimNode::decr_startup_requests_n();
+	send_rib_redist_transaction_enable();
 	break;
 
     case COMMAND_FAILED:
@@ -1223,6 +1284,51 @@ XrlPimNode::rib_client_send_redist_transaction_disable_cb(
     }
 }
 
+void
+XrlPimNode::add_task(XrlTaskBase* xrl_task)
+{
+    _xrl_tasks_queue.push_back(xrl_task);
+
+    // If the queue was empty before, start sending the changes
+    if (_xrl_tasks_queue.size() == 1)
+	send_xrl_task();
+}
+
+void
+XrlPimNode::send_xrl_task()
+{
+    if (_xrl_tasks_queue.empty())
+	return;
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    XLOG_ASSERT(xrl_task_base != NULL);
+
+    xrl_task_base->dispatch();
+}
+
+void
+XrlPimNode::pop_xrl_task()
+{
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    XLOG_ASSERT(xrl_task_base != NULL);
+
+    delete xrl_task_base;
+    _xrl_tasks_queue.pop_front();
+}
+
+void
+XrlPimNode::retry_xrl_task()
+{
+    if (_xrl_tasks_queue_timer.scheduled())
+	return;		// XXX: already scheduled
+
+    _xrl_tasks_queue_timer = _eventloop.new_oneoff_after(
+	RETRY_TIMEVAL,
+	callback(this, &XrlPimNode::send_xrl_task));
+}
+
 int
 XrlPimNode::start_protocol_kernel_vif(uint16_t vif_index)
 {
@@ -1233,15 +1339,9 @@ XrlPimNode::start_protocol_kernel_vif(uint16_t vif_index)
 		   "no such vif", vif_index);
 	return (XORP_ERROR);
     }
-    
-    _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, true));
 
     PimNode::incr_startup_requests_n();
-
-    // If the queue was empty before, start sending the changes
-    if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
-	send_start_stop_protocol_kernel_vif();
-    }
+    add_task(new StartStopProtocolKernelVif(*this, vif_index, true));
 
     return (XORP_OK);
 }
@@ -1256,15 +1356,9 @@ XrlPimNode::stop_protocol_kernel_vif(uint16_t vif_index)
 		   "no such vif", vif_index);
 	return (XORP_ERROR);
     }
-    
-    _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, false));
 
     PimNode::incr_shutdown_requests_n();
-
-    // If the queue was empty before, start sending the changes
-    if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
-	send_start_stop_protocol_kernel_vif();
-    }
+    add_task(new StartStopProtocolKernelVif(*this, vif_index, false));
 
     return (XORP_OK);
 }
@@ -1278,18 +1372,25 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_start_stop_protocol_kernel_vif_queue.empty())
+    if (_xrl_tasks_queue.empty())
 	return;			// No more changes
 
-    uint16_t vif_index = _start_stop_protocol_kernel_vif_queue.front().first;
-    bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    StartStopProtocolKernelVif* entry;
+
+    entry = dynamic_cast<StartStopProtocolKernelVif*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    uint16_t vif_index = entry->vif_index();
+    bool is_start = entry->is_start();
 
     //
     // Check whether we have already registered with the MFEA
     //
     if (! _is_mfea_add_protocol_registered) {
 	success = false;
-	goto start_timer_label;
+	retry_xrl_task();
+	return;
     }
 
     pim_vif = PimNode::vif_find_by_vif_index(vif_index);
@@ -1298,8 +1399,8 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		   "no such vif",
 		   (is_start)? "start" : "stop",
 		   vif_index);
-	_start_stop_protocol_kernel_vif_queue.pop_front();
-	goto start_timer_label;
+	pop_xrl_task();
+	retry_xrl_task();
     }
 
     if (is_start) {
@@ -1366,10 +1467,7 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		   "Will try again.",
 		   (is_start)? "start" : "stop",
 		   pim_vif->name().c_str());
-    start_timer_label:
-	_start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
+	retry_xrl_task();
     }
 }
 
@@ -1377,19 +1475,25 @@ void
 XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
     const XrlError& xrl_error)
 {
-    bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    StartStopProtocolKernelVif* entry;
+
+    entry = dynamic_cast<StartStopProtocolKernelVif*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_start = entry->is_start();
 
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
 	// If success, then send the next change
 	//
-	_start_stop_protocol_kernel_vif_queue.pop_front();
-	send_start_stop_protocol_kernel_vif();
 	if (is_start)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -1414,9 +1518,9 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 	if (is_start) {
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
-	    _start_stop_protocol_kernel_vif_queue.pop_front();
-	    send_start_stop_protocol_kernel_vif();
 	    PimNode::decr_shutdown_requests_n();
+	    pop_xrl_task();
+	    send_xrl_task();
 	}
 	break;
 
@@ -1437,15 +1541,11 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 	// If a transient error, then start a timer to try again
 	// (unless the timer is already running).
 	//
-	if (! _start_stop_protocol_kernel_vif_queue_timer.scheduled()) {
-	    XLOG_ERROR("Failed to %s protocol vif with the MFEA: %s. "
-		       "Will try again.",
-		       (is_start)? "start" : "stop",
-		       xrl_error.str().c_str());
-	    _start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
-	}
+	XLOG_ERROR("Failed to %s protocol vif with the MFEA: %s. "
+		   "Will try again.",
+		   (is_start)? "start" : "stop",
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
     }
 }
@@ -1461,11 +1561,10 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
 		   "no such vif", cstring(multicast_group), vif_index);
 	return (XORP_ERROR);
     }
-    
-    _join_leave_multicast_group_queue.push_back(
-	JoinLeaveMulticastGroup(vif_index, multicast_group, true));
 
     PimNode::incr_startup_requests_n();
+    _join_leave_multicast_group_queue.push_back(
+	JoinLeaveMulticastGroup(vif_index, multicast_group, true));
 
     // If the queue was empty before, start sending the changes
     if (_join_leave_multicast_group_queue.size() == 1) {
@@ -1486,11 +1585,10 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
 		   "no such vif", cstring(multicast_group), vif_index);
 	return (XORP_ERROR);
     }
-    
-    _join_leave_multicast_group_queue.push_back(
-	JoinLeaveMulticastGroup(vif_index, multicast_group, false));
 
     PimNode::incr_shutdown_requests_n();
+    _join_leave_multicast_group_queue.push_back(
+	JoinLeaveMulticastGroup(vif_index, multicast_group, false));
 
     // If the queue was empty before, start sending the changes
     if (_join_leave_multicast_group_queue.size() == 1) {
@@ -1621,12 +1719,12 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 	//
 	// If success, then send the next change
 	//
-	_join_leave_multicast_group_queue.pop_front();
-	send_join_leave_multicast_group();
 	if (is_join)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
+	_join_leave_multicast_group_queue.pop_front();
+	send_join_leave_multicast_group();
 	break;
 
     case COMMAND_FAILED:
@@ -1651,9 +1749,9 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 	if (is_join) {
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
+	    PimNode::decr_shutdown_requests_n();
 	    _join_leave_multicast_group_queue.pop_front();
 	    send_join_leave_multicast_group();
-	    PimNode::decr_shutdown_requests_n();
 	}
 	break;
 
@@ -2151,10 +2249,9 @@ XrlPimNode::add_protocol_mld6igmp(uint16_t vif_index)
 	return (XORP_ERROR);
     }
 
+    PimNode::incr_startup_requests_n();
     _add_delete_protocol_mld6igmp_queue.push_back(make_pair(vif_index, true));
     _add_protocol_mld6igmp_vif_index_set.insert(vif_index);
-
-    PimNode::incr_startup_requests_n();
 
     // If the queue was empty before, start sending the changes
     if (_add_delete_protocol_mld6igmp_queue.size() == 1) {
@@ -2176,10 +2273,9 @@ XrlPimNode::delete_protocol_mld6igmp(uint16_t vif_index)
 	return (XORP_ERROR);
     }
 
+    PimNode::incr_shutdown_requests_n();
     _add_delete_protocol_mld6igmp_queue.push_back(make_pair(vif_index, false));
     _add_protocol_mld6igmp_vif_index_set.erase(vif_index);
-
-    PimNode::incr_shutdown_requests_n();
 
     // If the queue was empty before, start sending the changes
     if (_add_delete_protocol_mld6igmp_queue.size() == 1) {
@@ -2302,12 +2398,12 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 	//
 	// If success, then send the next change
 	//
-	_add_delete_protocol_mld6igmp_queue.pop_front();
-	send_add_delete_protocol_mld6igmp();
 	if (is_add)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
+	_add_delete_protocol_mld6igmp_queue.pop_front();
+	send_add_delete_protocol_mld6igmp();
 	break;
 
     case COMMAND_FAILED:
@@ -2332,9 +2428,9 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 	if (is_add) {
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
+	    PimNode::decr_shutdown_requests_n();
 	    _add_delete_protocol_mld6igmp_queue.pop_front();
 	    send_add_delete_protocol_mld6igmp();
-	    PimNode::decr_shutdown_requests_n();
 	}
 	break;
 
@@ -2815,7 +2911,8 @@ XrlPimNode::finder_event_observer_0_1_xrl_target_birth(
 {
     if (target_class == _mfea_target) {
 	_is_mfea_alive = true;
-	send_mfea_add_protocol();
+	add_task(new MfeaAddDeleteProtocol(*this, true));
+	add_task(new MfeaAllowSignalMessages(*this));
     }
 
     if (target_class == _rib_target) {
@@ -6445,7 +6542,7 @@ XRL_GET_PIMSTAT_PER_NODE(rx_prune_sg_rpt)
 
 #define XRL_GET_PIMSTAT_PER_VIF(stat_name)			\
 XrlCmdError							\
-XrlPimNode::pim_0_1_pimstat_##stat_name##_per_vif(			\
+XrlPimNode::pim_0_1_pimstat_##stat_name##_per_vif(		\
     /* Input values, */						\
     const string&	vif_name,				\
     /* Output values, */					\

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.47 2005/02/19 02:55:15 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.48 2005/02/23 17:37:37 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2108,6 +2108,7 @@ protected:
 	uint32_t&	value);
 
 private:
+    class XrlTaskBase;
     class AddDeleteMfc;
     class AddDeleteDataflowMonitor;
 
@@ -2125,6 +2126,14 @@ private:
      */
     virtual void finder_disconnect_event();
 
+    //
+    // Methods to handle the XRL tasks
+    //
+    void add_task(XrlTaskBase* xrl_task);
+    void send_xrl_task();
+    void pop_xrl_task();
+    void retry_xrl_task();
+
     void mfea_register_startup();
     void finder_register_interest_mfea_cb(const XrlError& xrl_error);
     void mfea_register_shutdown();
@@ -2132,6 +2141,7 @@ private:
 
     void send_mfea_add_protocol();
     void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
+    void send_mfea_allow_signal_messages();
     void mfea_client_send_allow_signal_messages_cb(const XrlError& xrl_error);
     void send_mfea_delete_protocol();
     void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
@@ -2387,6 +2397,73 @@ private:
 	AddDeleteDataflowMonitor*	_dataflow_monitor;
     };
 
+    /**
+     * A base class for handling tasks for sending XRL requests.
+     */
+    class XrlTaskBase {
+    public:
+	XrlTaskBase(XrlPimNode& xrl_pim_node)
+	    : _xrl_pim_node(xrl_pim_node) {}
+	virtual ~XrlTaskBase() {}
+
+	virtual void dispatch() = 0;
+
+    protected:
+	XrlPimNode&	_xrl_pim_node;
+    private:
+    };
+
+    class StartStopProtocolKernelVif : public XrlTaskBase {
+    public:
+	StartStopProtocolKernelVif(XrlPimNode& xrl_pim_node,
+				   uint16_t vif_index, bool is_start)
+	    : XrlTaskBase(xrl_pim_node),
+	      _vif_index(vif_index),
+	      _is_start(is_start) {}
+
+	uint16_t	vif_index() const { return _vif_index; }
+	bool		is_start() const { return _is_start; }
+	void		dispatch() {
+	    _xrl_pim_node.send_start_stop_protocol_kernel_vif();
+	}
+
+    private:
+	uint16_t	_vif_index;
+	bool		_is_start;
+
+    };
+
+    class MfeaAddDeleteProtocol : public XrlTaskBase {
+    public:
+	MfeaAddDeleteProtocol(XrlPimNode& xrl_pim_node, bool is_add)
+	    : XrlTaskBase(xrl_pim_node),
+	      _is_add(is_add) {}
+
+	bool		is_add() const { return _is_add; }
+	void		dispatch() {
+	    if (is_add())
+		_xrl_pim_node.send_mfea_add_protocol();
+	    else
+		_xrl_pim_node.send_mfea_delete_protocol();
+	}
+
+    private:
+	bool		_is_add;
+    };
+
+    class MfeaAllowSignalMessages : public XrlTaskBase {
+    public:
+	MfeaAllowSignalMessages(XrlPimNode& xrl_pim_node)
+	    : XrlTaskBase(xrl_pim_node) {}
+
+	void		dispatch() {
+	    _xrl_pim_node.send_mfea_allow_signal_messages();
+	}
+
+    private:
+	bool		_is_add;
+    };
+
     EventLoop&			_eventloop;
     const string		_class_name;
     const string		_instance_name;
@@ -2414,7 +2491,6 @@ private:
     XorpTimer			_mfea_register_shutdown_timer;
     bool			_is_mfea_add_protocol_registered;
     bool			_is_mfea_allow_signal_messages_registered;
-    XorpTimer			_mfea_add_protocol_timer;
 
     bool			_is_rib_alive;
     bool			_is_rib_registered;
@@ -2432,8 +2508,8 @@ private:
     XorpTimer			_mld6igmp_register_startup_timer;
     XorpTimer			_mld6igmp_register_shutdown_timer;
 
-    list<pair<uint16_t, bool> >	_start_stop_protocol_kernel_vif_queue;
-    XorpTimer			_start_stop_protocol_kernel_vif_queue_timer;
+    list<XrlTaskBase* >		_xrl_tasks_queue;
+    XorpTimer			_xrl_tasks_queue_timer;
     list<JoinLeaveMulticastGroup> _join_leave_multicast_group_queue;
     XorpTimer			_join_leave_multicast_group_queue_timer;
     list<AddDeleteMfcDataflowMonitor> _add_delete_mfc_dataflow_monitor_queue;
