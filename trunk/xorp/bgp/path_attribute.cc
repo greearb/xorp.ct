@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.28 2003/08/14 16:46:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.29 2003/09/04 03:07:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -606,7 +606,7 @@ template <class A>
 string
 MPReachNLRIAttribute<A>::str() const
 {
-    string s = c_format("Multiprotocol Reachable NLRI AFI = %d SAFI =%d\n",
+    string s = c_format("Multiprotocol Reachable NLRI AFI = %d SAFI = %d\n",
 			_afi, _safi);
     s += c_format("   - Next Hop Attribute %s\n", nexthop().str().c_str());
     s += c_format("   - Link Local Next Hop Attribute %s\n",
