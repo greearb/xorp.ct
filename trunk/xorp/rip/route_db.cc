@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.12 2004/02/20 01:22:04 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.13 2004/04/02 00:27:56 mjh Exp $"
 
 #include "config.h"
 #include <map>
@@ -151,7 +151,7 @@ RouteDB<A>::update_route(const Net&	net,
 	if (r == 0) {
 	    r = new Route(net, nexthop, cost, o, tag);
 	    set_expiry_timer(r);
-	    bool ok(_routes.insert(typename 
+	    bool ok(_routes.insert(typename
 				   RouteContainer::value_type(net, r)).second);
 	    XLOG_ASSERT(ok);
 	    _uq->push_back(r);
@@ -160,7 +160,7 @@ RouteDB<A>::update_route(const Net&	net,
 
 	// Resurrect route
 	updated = true;
-	bool ok(_routes.insert(typename 
+	bool ok(_routes.insert(typename
 			       RouteContainer::value_type(net, r)).second);
 	XLOG_ASSERT(ok);
     } else {

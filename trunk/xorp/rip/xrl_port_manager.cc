@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.11 2004/04/04 18:34:53 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.12 2004/04/22 01:11:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -274,7 +274,7 @@ XrlPortManager<A>::add_rip_address(const string& ifname,
 
     // Check if port already exists
     typename PortManagerBase<A>::PortList::const_iterator pi;
-    pi = find_if(this->ports().begin(), this->ports().end(), 
+    pi = find_if(this->ports().begin(), this->ports().end(),
 		 port_has_address<A>(addr));
     if (pi != this->ports().end())
 	return true;
@@ -359,7 +359,7 @@ XrlPortManager<A>::find_port(const string& 	ifname,
 			     const A&		addr)
 {
     typename PortManagerBase<A>::PortList::iterator pi;
-    pi = find_if(this->ports().begin(), this->ports().end(), 
+    pi = find_if(this->ports().begin(), this->ports().end(),
 		 port_has_address<A>(addr));
     if (pi == this->ports().end()) {
 	return 0;
@@ -380,7 +380,7 @@ XrlPortManager<A>::find_port(const string& 	ifname,
 			     const A&		addr) const
 {
     typename PortManagerBase<A>::PortList::const_iterator pi;
-    pi = find_if(this->ports().begin(), this->ports().end(), 
+    pi = find_if(this->ports().begin(), this->ports().end(),
 		 port_has_address<A>(addr));
     if (pi == this->ports().end()) {
 	return 0;
