@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.1 2003/11/04 23:39:58 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.2 2004/01/09 00:29:03 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -114,13 +114,16 @@ XrlPortManager<A>::add_rip_address(const string& ifname,
 				   const A&	 addr)
 {
     if (status() != RUNNING) {
+	debug_msg("add_rip_address failed: not running.\n");
 	return false;
     }
 
     // Check whether address exists and is enabled, fail if not.
     const IfMgrIfTree& iftree = _ifm.iftree();
-    if (address_enabled(iftree, ifname, vifname, addr) == false)
+    if (address_enabled(iftree, ifname, vifname, addr) == false) {
+	debug_msg("add_rip_address failed: address does not exist or is not enabled.\n");
 	return false;
+    }
 
     // Check if port already exists
     typename PortManagerBase<A>::PortList::const_iterator pi;

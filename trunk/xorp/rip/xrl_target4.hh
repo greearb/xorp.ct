@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target4.hh,v 1.1 2003/11/04 23:39:59 hodson Exp $
+// $XORP: xorp/rip/xrl_target4.hh,v 1.2 2004/01/09 00:29:03 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET4_HH__
 #define __RIP_XRL_TARGET4_HH__
@@ -22,10 +22,14 @@
 
 class XrlRouter;
 class XrlProcessSpy;
+template<typename A> class XrlPortManager;
 
 class XrlRip4Target : public XrlRip4TargetBase {
 public:
-    XrlRip4Target(XrlRouter& rtr, XrlProcessSpy& pspy, bool& should_exit);
+    XrlRip4Target(XrlRouter& 		xr,
+		  XrlProcessSpy& 	xps,
+		  XrlPortManager<IPv4>& xpm,
+		  bool& 		should_exit);
     ~XrlRip4Target();
 
     void set_status(ProcessStatus ps, const string& annotation = "");
@@ -85,11 +89,12 @@ public:
 					     const string&	reason);
 
 protected:
-    XrlProcessSpy&	_pspy;
-    bool&		_should_exit;
+    XrlProcessSpy&		_xps;
+    XrlPortManager<IPv4>&	_xpm;
+    bool&			_should_exit;
 
-    ProcessStatus	_status;
-    string		_status_note;
+    ProcessStatus		_status;
+    string			_status_note;
 };
 
 #endif // __RIP_XRL_TARGET4_HH__

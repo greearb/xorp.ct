@@ -23,11 +23,13 @@
 
 #include "xrl_target4.hh"
 #include "xrl_process_spy.hh"
+#include "xrl_port_manager.hh"
 
-XrlRip4Target::XrlRip4Target(XrlRouter&		r,
-			     XrlProcessSpy&	pspy,
-			     bool&		should_exit)
-    : XrlRip4TargetBase(&r), _pspy(pspy), _should_exit(should_exit),
+XrlRip4Target::XrlRip4Target(XrlRouter&			xr,
+			     XrlProcessSpy&		xps,
+			     XrlPortManager<IPv4>& 	xpm,
+			     bool&			should_exit)
+    : XrlRip4TargetBase(&xr), _xps(xps), _xpm(xpm), _should_exit(should_exit),
       _status(PROC_NULL), _status_note("")
 {
 }
@@ -79,7 +81,7 @@ XrlCmdError
 XrlRip4Target::finder_event_observer_0_1_xrl_target_birth(const string& cname,
 							  const string& iname)
 {
-    _pspy.birth_event(cname, iname);
+    _xps.birth_event(cname, iname);
     return XrlCmdError::OKAY();
 }
 
@@ -87,7 +89,7 @@ XrlCmdError
 XrlRip4Target::finder_event_observer_0_1_xrl_target_death(const string& cname,
 							  const string& iname)
 {
-    _pspy.death_event(cname, iname);
+    _xps.death_event(cname, iname);
     return XrlCmdError::OKAY();
 }
 
@@ -96,8 +98,11 @@ XrlRip4Target::rip4_0_1_add_rip_address(const string& ifname,
 					const string& vifname,
 					const IPv4&   addr)
 {
-    debug_msg("rip4_0_1_add_rip_address %s/%s/%s",
+    debug_msg("rip4_0_1_add_rip_address %s/%s/%s\n",
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+    if (_xpm.add_rip_address(ifname, vifname, addr) == false) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
     return XrlCmdError::OKAY();
 }
 
@@ -106,8 +111,11 @@ XrlRip4Target::rip4_0_1_remove_rip_address(const string& ifname,
 					   const string& vifname,
 					   const IPv4&   addr)
 {
-    debug_msg("rip4_0_1_remove_rip_address %s/%s/%s",
+    debug_msg("rip4_0_1_remove_rip_address %s/%s/%s\n",
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+    if (_xpm.remove_rip_address(ifname, vifname, addr) == false) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
     return XrlCmdError::OKAY();
 }
 
