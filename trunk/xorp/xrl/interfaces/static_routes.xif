@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.13 2003/09/30 18:27:07 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/static_routes.xif,v 1.1 2004/02/12 20:02:43 pavlin Exp $ */
 
 /*
  * Static Routes XRL interface.
@@ -44,6 +44,39 @@ interface static_routes/0.1 {
 	delete_route4	? unicast:bool & multicast:bool & network:ipv4net
 
 	delete_route6	? unicast:bool & multicast:bool & network:ipv6net
+
+	/**
+	 * Add/replace a static route by explicitly specifying the network
+	 * interface toward the destination.
+	 *
+	 * @param unicast if true, then the route would be used for unicast
+	 * routing.
+	 * @param multicast if true, then the route would be used in the
+	 * MRIB (Multicast Routing Information Base) for multicast purpose
+	 * (e.g., computing the Reverse-Path Forwarding information).
+	 * @param network the network address prefix this route applies to.
+	 * @param nexthop the address of the next-hop router for this route.
+	 * @param ifname of the name of the physical interface toward the
+	 * destination.
+	 * @param vifname of the name of the virtual interface toward the
+	 * destination.
+	 * @param metric the metric distance for this route.
+	 */
+	add_interface_route4	? unicast:bool & multicast:bool		\
+				& network:ipv4net & nexthop:ipv4	\
+				& ifname:txt & vifname:txt & metric:u32
+
+	add_interface_route6	? unicast:bool & multicast:bool		\
+				& network:ipv6net & nexthop:ipv6	\
+				& ifname:txt & vifname:txt & metric:u32
+
+	replace_interface_route4 ? unicast:bool & multicast:bool	\
+				& network:ipv4net & nexthop:ipv4	\
+				& ifname:txt & vifname:txt & metric:u32
+
+	replace_interface_route6 ? unicast:bool & multicast:bool	\
+				& network:ipv6net & nexthop:ipv6	\
+				& ifname:txt & vifname:txt & metric:u32
 
 	/**
 	 * Enable/disable the StaticRoutes trace log for all operations.
