@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.3 2003/03/05 02:11:48 atanu Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.4 2003/03/05 02:22:36 atanu Exp $"
 
 #include "config.h"
 
@@ -89,10 +89,10 @@ spawn(const string& process, const char *output = "")
 	    if(output != "") {
 		close(0);
 		close(1);
-		close(2);
+// 		close(2);
 		open(output, O_RDONLY);
 		open(output, O_WRONLY);
-		open(output, O_WRONLY);
+//		open(output, O_WRONLY);
 	    }
 
 	    vector<string> tokens;
@@ -195,7 +195,8 @@ sigchld(int)
 		    " exited status: " << WEXITSTATUS(status) << " " << 
 		    pid << endl;
 	    }
-	    commands.erase(i);
+	    i->_pid = Command::EMPTY;
+// 	    commands.erase(i);
 	    return;
 	}
     }
@@ -348,7 +349,7 @@ main(int argc, char *argv[])
     */
     for(unsigned int i = 0; i < commands.size(); i++) {
 	commands[i]._pid = spawn(commands[i]._command, output);
-	sleep(1);
+ 	sleep(1);
 	if("" != commands[i]._wait_command) {
 	    wait_command = commands[i]._wait_command;
 	    wait_command_pid = spawn(commands[i]._wait_command.c_str(),
