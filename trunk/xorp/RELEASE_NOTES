@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.39 2003/11/06 20:23:56 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.40 2003/11/06 20:49:21 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -68,7 +68,7 @@ Release 0.5 (2003/??/??)
     - 
 
   SNMP:
-    - 
+    - No significant changes.
 
   RIP:
     - Code added to talk to FEA and RIB.  To become functional it
