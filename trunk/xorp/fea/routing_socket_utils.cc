@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.20 2004/11/05 00:47:17 bms Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.21 2004/11/05 01:27:53 bms Exp $"
 
 
 #include "fea_module.h"
@@ -283,11 +283,14 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     int family = fte.nexthop().af();
     bool is_family_match = false;
     bool is_deleted = false;
+    bool xorp_route = false;
     
     XLOG_ASSERT((rtm->rtm_type == RTM_ADD)
 		|| (rtm->rtm_type == RTM_DELETE)
 		|| (rtm->rtm_type == RTM_CHANGE)
-		|| (rtm->rtm_type == RTM_GET));
+		|| (rtm->rtm_type == RTM_GET)
+		|| (rtm->rtm_type == RTM_MISS)
+		|| (rtm->rtm_type == RTM_RESOLVE));
     debug_msg("%p index %d type %s\n", rtm, if_index,
 	      rtm_msg_type(rtm->rtm_type).c_str());
 
@@ -319,7 +322,16 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 	    is_family_match = true;
 	}
     }
-    
+
+    // Deal with BSD upcalls. These only ever have RTAX_DST, and
+    // only contain host addresses.
+    if ((rtm->rtm_type == RTM_MISS) || (rtm->rtm_type == RTM_RESOLVE)) {
+	nexthop_addr = IPvX::ZERO(family);
+	dst_mask_len = IPvX::addr_bitlen(family);
+	if_name = "";
+	goto skip_ifindex;
+    }
+
     //
     // Get the next-hop router address
     //
@@ -362,7 +374,6 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     //
     // Test whether we installed this route
     //
-    bool xorp_route = false;
     if (rtm->rtm_flags & RTF_PROTO1)
 	xorp_route = true;
 
