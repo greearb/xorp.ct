@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.1 2004/01/09 00:28:13 hodson Exp $"
+
+#define DEBUG_LOGGING
+#include "libxorp/debug.h"
 
 #include "constants.hh"
 #include "xrl_port_io.hh"
@@ -66,12 +69,17 @@ XrlPortIO<IPv4>::send(const IPv4& 		dst_addr,
 		      uint16_t 			dst_port,
 		      const vector<uint8_t>&  	rip_packet)
 {
-    if (_pending)
+    if (_pending) {
+	debug_msg("Send skipped (pending).\n");
 	return false;
+    }
 
     XrlSocket4V0p1Client cl(&_xr);
     if (cl.send_send_to(_ss.c_str(), _sid, dst_addr, dst_port, rip_packet,
 			callback(this, &XrlPortIO<IPv4>::send_cb))) {
+	debug_msg("Sent %u bytes to %s/%u\n",
+		  static_cast<uint32_t>(rip_packet.size()),
+		  dst_addr.str().c_str(), dst_port);
 	_pending = true;
 	return true;
     }
@@ -173,12 +181,14 @@ XrlPortIO<A>::socket_open_cb(const XrlError& e, const string* psid)
     _sid = *psid;
     _pending = false;
     set_status(RUNNING);
+    set_enabled(true);
 }
 
 template <typename A>
 void
 XrlPortIO<A>::send_cb(const XrlError& xe)
 {
+    debug_msg("SendCB %s\n", xe.str().c_str());
     _pending = false;
     _user.port_io_send_completion(xe == XrlError::OKAY());
 }
@@ -192,5 +202,3 @@ XrlPortIO<A>::socket_close_cb(const XrlError&)
 
 template XrlPortIO<IPv4>;
 template XrlPortIO<IPv6>;
-
-
