@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.3 2003/03/11 01:23:30 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.4 2003/03/11 01:38:26 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -87,7 +87,8 @@ it for each router:
    "show pim interface" will show the list of all interfaces known to
    PIM and their status. At each moment you can press <TAB> for the
    list of existing commands at each level, and a brief description
-   of them. Command-line editing is similar to tcsh: e.g., Ctrl-A and
+   of them. Pressing '?' after a command has similar function.
+   Command-line editing is similar to tcsh: e.g., Ctrl-A and
    Ctrl-E to go to the beginning or end of the current line, Ctrl-A
    to kill the remaining part of the current line, etc.
    To exit, press Ctrl-D when you are on a new empty line.
