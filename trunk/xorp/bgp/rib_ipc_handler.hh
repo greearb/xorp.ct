@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.19 2003/12/19 01:19:03 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.20 2003/12/19 01:31:09 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -57,6 +57,7 @@ private:
 	IPNet<A> net;
 	A nexthop;
 	uint32_t id;
+	string comment;
     };
 
     deque <Queued> _xrl_queue;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.34 2003/12/19 01:19:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.35 2003/12/19 01:31:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,8 +30,8 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, BGPMain& bgp)
       _ribname(""),
       _xrl_router(xrl_router),
       _v4_queue(this, xrl_router, &bgp),
-    _v6_queue(this, xrl_router, &bgp),
-    _fake_id((unsigned int)0)
+      _v6_queue(this, xrl_router, &bgp),
+      _fake_id((unsigned int)0)
 {
 }
 
@@ -361,6 +361,13 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
     q.net = net;
     q.nexthop = nexthop;
     q.id = _id++;
+    q.comment = 
+	c_format("add_route: ribname %s %s safi %d net %s nexthop %s",
+		 ribname.c_str(),
+		 ibgp ? "ibgp" : "ebgp",
+		 safi,
+		 net.str().c_str(),
+		 nexthop.str().c_str());
 
     _xrl_queue.push_back(q);
 
@@ -380,6 +387,12 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
     q.safi = safi;
     q.net = net;
     q.id = _id++;
+    q.comment = 
+	c_format("delete_route: ribname %s %s safi %d net %s",
+		 ribname.c_str(),
+		 ibgp ? "ibgp" : "ebgp",
+		 safi,
+		 net.str().c_str());
 
     _xrl_queue.push_back(q);
 
@@ -468,7 +481,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
-				     q.id, "add_route"));
+				     q.id, q.comment.c_str()));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route4(q.ribname.c_str(),
@@ -477,7 +490,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 				      q.net,
 				      ::callback(this,
 						 &XrlQueue::route_command_done,
-						 q.id, "delete_route"));
+						 q.id, q.comment.c_str()));
     }
 
     return sent;
@@ -507,7 +520,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
-				     q.id, "add_route"));
+				     q.id, q.comment.c_str()));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route6(q.ribname.c_str(),
@@ -515,7 +528,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			       unicast, multicast,
 			       q.net,
 			       callback(this, &XrlQueue::route_command_done,
-					q.id, "delete_route"));
+					q.id, q.comment.c_str()));
     }
 
     return sent;
