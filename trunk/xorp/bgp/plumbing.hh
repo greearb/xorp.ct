@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.15 2003/10/13 23:42:26 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.16 2003/10/14 01:54:36 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -28,6 +28,7 @@
 #include "peer.hh"
 #include "rib_ipc_handler.hh"
 #include "next_hop_resolver.hh"
+#include "parameter.hh"
 
 class BGPPlumbing;
 
@@ -110,7 +111,7 @@ class RibIpcHandler;
 
 class BGPPlumbing {
 public:
-    BGPPlumbing(const string& safi,
+    BGPPlumbing(const Safi safi,
 		RibIpcHandler* rib_handler,
 		NextHopResolver<IPv4>&,
 		NextHopResolver<IPv6>&);
@@ -122,7 +123,7 @@ public:
     int peering_came_up(PeerHandler* peer_handler);
     int delete_peering(PeerHandler* peer_handler);
 
-    int add_route(const InternalMessage<IPv4> &rtmsg, 
+    int add_route(const InternalMessage<IPv4> &rtmsg,
 		  PeerHandler* peer_handler);
     int add_route(const InternalMessage<IPv6> &rtmsg, 
 		  PeerHandler* peer_handler);
@@ -168,6 +169,11 @@ public:
      * true otherwise 
      */
     bool status(string& reason) const;
+
+    /**
+     * @return Safi of this plumb.
+     */
+    Safi safi() const {return _safi;}
 private:
     RibIpcHandler *_rib_handler;
 
@@ -178,6 +184,8 @@ private:
     BGPPlumbingAF<IPv6> _plumbing_ipv6;
 
     AsNum _my_AS_number;
+
+    const Safi _safi;
 };
 
 #endif // __BGP_PLUMBING_HH__

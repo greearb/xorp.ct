@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.5 2003/08/04 21:58:58 pavlin Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.6 2003/10/03 00:26:59 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -24,11 +24,13 @@
 #include "libxorp/xlog.h"
 #include "route_table_base.hh"
 #include "route_queue.hh"
+#include "parameter.hh"
 
 template<class A>
 class RibOutTable : public BGPRouteTable<A>  {
 public:
     RibOutTable(string tablename, BGPRouteTable<A> *parent,
+		Safi safi,
 		PeerHandler *peer);
     ~RibOutTable();
     void print_queue(const list<const RouteQueueEntry<A> *>& queue) const;
@@ -68,6 +70,8 @@ public:
 			   BGPRouteTable<A> *caller);
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
+
+    Safi safi() const {return _safi; }
 private:
     //pointers to all the active routes, so we can efficiently handle
     //route refresh.
@@ -80,6 +84,7 @@ private:
     PeerHandler *_peer;
     bool _peer_busy;
     bool _upstream_queue_exists;
+    const Safi _safi;
 };
 
 #endif // __BGP_ROUTE_TABLE_RIBOUT_HH__

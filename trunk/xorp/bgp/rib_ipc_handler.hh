@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.13 2003/07/14 21:58:54 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.14 2003/10/11 03:17:56 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -114,14 +114,14 @@ public:
     int start_packet(bool ibgp);
     /* add_route and delete_route are called to propagate a route *to*
        the RIB. */
-    int add_route(const SubnetRoute<IPv4> &rt);
-    int add_route(const SubnetRoute<IPv6> &rt);
+    int add_route(const SubnetRoute<IPv4> &rt, Safi safi);
+    int add_route(const SubnetRoute<IPv6> &rt, Safi safi);
     int replace_route(const SubnetRoute<IPv4> &old_rt,
-		      const SubnetRoute<IPv4> &new_rt);
+		      const SubnetRoute<IPv4> &new_rt, Safi safi);
     int replace_route(const SubnetRoute<IPv6> &old_rt,
-		      const SubnetRoute<IPv6> &new_rt);
-    int delete_route(const SubnetRoute<IPv4> &rt);
-    int delete_route(const SubnetRoute<IPv6> &rt);
+		      const SubnetRoute<IPv6> &new_rt, Safi safi);
+    int delete_route(const SubnetRoute<IPv4> &rt, Safi safi);
+    int delete_route(const SubnetRoute<IPv6> &rt, Safi safi);
     void rib_command_done(const XrlError& error, const char *comment);
     PeerOutputState push_packet();
 

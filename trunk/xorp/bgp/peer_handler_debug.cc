@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.3 2003/10/03 00:26:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.4 2003/10/11 03:17:56 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -41,7 +41,7 @@ DebugPeerHandler::start_packet(bool ibgp)
 }
 
 int 
-DebugPeerHandler::add_route(const SubnetRoute<IPv4> &rt) 
+DebugPeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi) 
 {
     debug_msg("DebugPeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
     fprintf(_ofile, "[PEER: ADD_ROUTE]\n");
@@ -50,7 +50,7 @@ DebugPeerHandler::add_route(const SubnetRoute<IPv4> &rt)
 }
 
 int 
-DebugPeerHandler::add_route(const SubnetRoute<IPv6>& rt) {
+DebugPeerHandler::add_route(const SubnetRoute<IPv6>& rt, Safi) {
     debug_msg("DebugPeerHandler::add_route(IPv6) %p\n", &rt);
     fprintf(_ofile, "[PEER: ADD_ROUTE]\n");
     fprintf(_ofile, "%s\n", rt.str().c_str());
@@ -59,7 +59,7 @@ DebugPeerHandler::add_route(const SubnetRoute<IPv6>& rt) {
 
 int 
 DebugPeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
-			     const SubnetRoute<IPv4> &new_rt) {
+			     const SubnetRoute<IPv4> &new_rt, Safi) {
     debug_msg("DebugPeerHandler::replace_route(IPv4) %p %p\n", &old_rt, &new_rt);
     fprintf(_ofile, "[PEER: REPLACE_ROUTE]\n");
     fprintf(_ofile, "[PEER: OLD]\n");
@@ -71,7 +71,7 @@ DebugPeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
 
 int 
 DebugPeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
-			     const SubnetRoute<IPv6> &new_rt) {
+			     const SubnetRoute<IPv6> &new_rt, Safi) {
     debug_msg("DebugPeerHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
     fprintf(_ofile, "[PEER: REPLACE_ROUTE]\n");
     fprintf(_ofile, "[PEER: OLD]\n");
@@ -82,7 +82,7 @@ DebugPeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 }
 
 int 
-DebugPeerHandler::delete_route(const SubnetRoute<IPv4> &rt)
+DebugPeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
 {
     debug_msg("DebugPeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
     fprintf(_ofile, "[PEER: DELETE_ROUTE]\n");
@@ -91,7 +91,7 @@ DebugPeerHandler::delete_route(const SubnetRoute<IPv4> &rt)
 }
 
 int 
-DebugPeerHandler::delete_route(const SubnetRoute<IPv6>& rt)
+DebugPeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi)
 {
     debug_msg("DebugPeerHandler::delete_route(IPv6) %p\n", &rt);
     fprintf(_ofile, "[PEER: DELETE_ROUTE]\n");

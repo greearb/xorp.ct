@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.28 2003/10/14 01:54:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.29 2003/10/21 23:23:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,16 +28,19 @@
 #include "plumbing.hh"
 #include "bgp.hh"
 
-BGPPlumbing::BGPPlumbing(const string& safi,
+BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,
 			 NextHopResolver<IPv4>& next_hop_resolver_ipv4,
 			 NextHopResolver<IPv6>& next_hop_resolver_ipv6)
     : _rib_handler(ribhandler),
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
       _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
-      _plumbing_ipv4("(IPv4:" + safi + ")", *this, _next_hop_resolver_ipv4),
-      _plumbing_ipv6("(IPv6:" + safi + ")", *this, _next_hop_resolver_ipv6),
-      _my_AS_number(AsNum::AS_INVALID)
+      _plumbing_ipv4("(IPv4:" + c_format("%d", safi) + ")", *this,
+		     _next_hop_resolver_ipv4),
+      _plumbing_ipv6("(IPv6:" + c_format("%d", safi)+ ")", *this, 
+		     _next_hop_resolver_ipv6),
+      _my_AS_number(AsNum::AS_INVALID),
+      _safi(safi)
 {
 }
 
@@ -300,7 +303,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
 
     _ipc_rib_out_table =
 	new RibOutTable<A>(ribname + "IpcRibOutTable",
-			      cache_out, _master.rib_handler());
+			   cache_out, master.safi(), _master.rib_handler());
     _out_map[_master.rib_handler()] = _ipc_rib_out_table;
     cache_out->set_next_table(_ipc_rib_out_table);
     
@@ -390,7 +393,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 
     RibOutTable<A>* rib_out =
 	new RibOutTable<A>(_ribname + "RibOut" + peername,
-			      cache_out, peer_handler);
+			      cache_out, _master.safi(), peer_handler);
     cache_out->set_next_table(rib_out);
     _out_map[peer_handler] = rib_out;
     _reverse_out_map[rib_out] = peer_handler;

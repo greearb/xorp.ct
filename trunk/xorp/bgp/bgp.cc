@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.16 2003/10/13 23:42:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.17 2003/10/14 01:54:35 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -63,11 +63,11 @@ BGPMain::BGPMain()
     _next_hop_resolver_ipv6 = new NextHopResolver<IPv6>(_xrl_router,
 							eventloop(),
 							*this);
-    _plumbing_unicast = new BGPPlumbing("Unicast",
+    _plumbing_unicast = new BGPPlumbing(SAFI_UNICAST,
 					_rib_ipc_handler,
 					*_next_hop_resolver_ipv4,
 					*_next_hop_resolver_ipv6);
-    _plumbing_multicast = new BGPPlumbing("Multicast",
+    _plumbing_multicast = new BGPPlumbing(SAFI_MULTICAST,
 					  _rib_ipc_handler,
 					  *_next_hop_resolver_ipv4,
 					  *_next_hop_resolver_ipv6);

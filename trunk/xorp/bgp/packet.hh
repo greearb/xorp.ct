@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.18 2003/09/27 03:42:20 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.19 2003/09/27 08:36:18 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -208,8 +208,9 @@ public:
     const BGPUpdateAttribList& wr_list() const		{ return _wr_list; }
     const PathAttributeList<IPv4>& pa_list() const	{ return _pa_list; }
     const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
-    MPReachNLRIAttribute<IPv6> *mpreach()		{ return _mpreach; }
-    MPUNReachNLRIAttribute<IPv6> *mpunreach()		{ return _mpunreach;}
+
+    MPReachNLRIAttribute<IPv6> *mpreach(Safi)		{ return _mpreach; }
+    MPUNReachNLRIAttribute<IPv6> *mpunreach(Safi)	{ return _mpunreach;}
 
     const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
 

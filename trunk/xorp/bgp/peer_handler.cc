@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.22 2003/10/03 00:26:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.23 2003/10/11 03:17:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -252,7 +252,7 @@ PeerHandler::start_packet(bool ibgp)
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv4> &rt)
+PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi)
 {
     debug_msg("PeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
     assert(_packet != NULL);
@@ -283,7 +283,7 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt)
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv6> &rt)
+PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     assert(_packet != NULL);
@@ -314,36 +314,36 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt)
 	_packet->add_pathatt(mp);
     }
 
-    XLOG_ASSERT(_packet->mpreach());
-    _packet->mpreach()->add_nlri(rt.net());
+    XLOG_ASSERT(_packet->mpreach(safi));
+    _packet->mpreach(safi)->add_nlri(rt.net());
 
     return 0;
 }
 
 int
 PeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
-			   const SubnetRoute<IPv4> &new_rt)
+			   const SubnetRoute<IPv4> &new_rt, Safi safi)
 {
     // in the basic PeerHandler, we can ignore the old route, because
     // to change a route, the BGP protocol just sends the new
     // replacement route
     UNUSED(old_rt);
-    return add_route(new_rt);
+    return add_route(new_rt, safi);
 }
 
 int
 PeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
-			   const SubnetRoute<IPv6> &new_rt)
+			   const SubnetRoute<IPv6> &new_rt, Safi safi)
 {
     // in the basic PeerHandler, we can ignore the old route, because
     // to change a route, the BGP protocol just sends the new
     // replacement route
     UNUSED(old_rt);
-    return add_route(new_rt);
+    return add_route(new_rt, safi);
 }
 
 int
-PeerHandler::delete_route(const SubnetRoute<IPv4> &rt)
+PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
 {
     debug_msg("PeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
     assert(_packet != NULL);
@@ -359,17 +359,17 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt)
 }
 
 int
-PeerHandler::delete_route(const SubnetRoute<IPv6>& rt)
+PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     assert(_packet != NULL);
 
-    if (0 == _packet->mpunreach()) {
+    if (0 == _packet->mpunreach(safi)) {
 	MPUNReachNLRIAttribute<IPv6> mp;
 	_packet->add_pathatt(mp);
     }
 
-    _packet->mpunreach()->add_withdrawn(rt.net());
+    _packet->mpunreach(safi)->add_withdrawn(rt.net());
 
     return 0;
 }
@@ -387,11 +387,11 @@ PeerHandler::push_packet()
     int pa = _packet->pa_list().size();
 
     // Account for IPv6
-    if(_packet->mpunreach())
-	wdr += _packet->mpunreach()->wr_list().size();
+    if(_packet->mpunreach(SAFI_UNICAST))
+	wdr += _packet->mpunreach(SAFI_UNICAST)->wr_list().size();
 
-    if(_packet->mpreach())
-	nlri += _packet->mpreach()->nlri_list().size();
+    if(_packet->mpreach(SAFI_UNICAST))
+	nlri += _packet->mpreach(SAFI_UNICAST)->nlri_list().size();
 
     XLOG_ASSERT( (wdr+nlri) > 0);
     if (nlri > 0)
@@ -422,4 +422,3 @@ PeerHandler::eventloop() const
 {
     return _peer->main()->eventloop();
 }
-

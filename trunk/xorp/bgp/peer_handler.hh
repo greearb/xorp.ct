@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.6 2003/04/22 19:20:17 mjh Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.7 2003/10/11 03:17:56 atanu Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -20,10 +20,12 @@
 class BGPMain;
 class BGPPeer;
 class BGPPlumbing;
+
 #include "libxorp/debug.h"
 #include "internal_message.hh"
 #include "packet.hh"
 #include "peer.hh"
+#include "parameter.hh"
 
 /**
  * PeerHandler's job is primarily format conversion. But it also
@@ -54,14 +56,16 @@ public:
      */
     virtual int start_packet(bool ibgp);
 
-    virtual int add_route(const SubnetRoute<IPv4> &rt);
-    virtual int add_route(const SubnetRoute<IPv6> &rt);
+    virtual int add_route(const SubnetRoute<IPv4> &rt, Safi safi);
+    virtual int add_route(const SubnetRoute<IPv6> &rt, Safi safi);
     virtual int replace_route(const SubnetRoute<IPv4> &old_rt,
-			      const SubnetRoute<IPv4> &new_rt);
+			      const SubnetRoute<IPv4> &new_rt,
+			      Safi safi);
     virtual int replace_route(const SubnetRoute<IPv6> &old_rt,
-			      const SubnetRoute<IPv6> &new_rt);
-    virtual int delete_route(const SubnetRoute<IPv4> &rt);
-    virtual int delete_route(const SubnetRoute<IPv6> &rt);
+			      const SubnetRoute<IPv6> &new_rt,
+			      Safi safi);
+    virtual int delete_route(const SubnetRoute<IPv4> &rt, Safi safi);
+    virtual int delete_route(const SubnetRoute<IPv6> &rt, Safi safi);
     virtual PeerOutputState push_packet();
     virtual void output_no_longer_busy();
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.12 2003/05/29 17:59:09 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,8 +42,9 @@ TypeName<IPv6>::get()
 template<class A>
 RibOutTable<A>::RibOutTable(string table_name,
 			    BGPRouteTable<A> *init_parent,
+			    Safi safi,
 			    PeerHandler *peer)
-    : BGPRouteTable<A>("RibOutTable-" + table_name)
+    : BGPRouteTable<A>("RibOutTable-" + table_name), _safi(safi)
 {
     _parent = init_parent;
     _peer = peer;
@@ -319,12 +320,12 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	    if ((*i)->op() == RTQUEUE_OP_ADD ) {
 		debug_msg("* Announce\n");
 		// the sanity checking was done in add_route...
-		_peer->add_route(*((*i)->route()));
+		_peer->add_route(*((*i)->route()), safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {
 		// the sanity checking was done in delete_route...
 		debug_msg("* Withdraw\n");
-		_peer->delete_route(*((*i)->route()));
+		_peer->delete_route(*((*i)->route()), safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {
 		debug_msg("* Replace\n");
@@ -334,7 +335,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		assert(i != tmp_queue.end());
 		assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 		const SubnetRoute<A> *new_route = (*i)->route();
-		_peer->replace_route(*old_route, *new_route);
+		_peer->replace_route(*old_route, *new_route, safi());
 		delete old_queue_entry;
 		delete (*i);
 	    } else {

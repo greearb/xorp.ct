@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.26 2003/10/03 00:26:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.27 2003/10/11 03:17:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -183,7 +183,7 @@ RibIpcHandler::start_packet(bool ibgp)
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt) 
+RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, Safi) 
 {
     debug_msg("RibIpcHandler::add_route(IPv4) %x\n", (u_int)(&rt));
 
@@ -196,7 +196,8 @@ RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt)
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt) {
+RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, Safi)
+{
     debug_msg("RibIpcHandler::add_route(IPv6) %p\n", &rt);
 
     if ("" == _ribname)
@@ -209,24 +210,28 @@ RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt) {
 
 int 
 RibIpcHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
-			     const SubnetRoute<IPv4> &new_rt) {
+			     const SubnetRoute<IPv4> &new_rt,
+			     Safi safi)
+{
     debug_msg("RibIpcHandler::replace_route(IPv4) %p %p\n", &old_rt, &new_rt);
-    delete_route(old_rt);
-    add_route(new_rt);
+    delete_route(old_rt, safi);
+    add_route(new_rt, safi);
     return 0;
 }
 
 int 
 RibIpcHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
-			     const SubnetRoute<IPv6> &new_rt) {
+			     const SubnetRoute<IPv6> &new_rt,
+			     Safi safi)
+{
     debug_msg("RibIpcHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
-    delete_route(old_rt);
-    add_route(new_rt);
+    delete_route(old_rt, safi);
+    add_route(new_rt, safi);
     return 0;
 }
 
 int 
-RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt)
+RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
 
@@ -239,7 +244,7 @@ RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt)
 }
 
 int 
-RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt)
+RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv6) %p\n", &rt);
     UNUSED(rt);
