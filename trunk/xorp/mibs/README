@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.6 2003/04/29 18:30:36 pavlin Exp $
+# $XORP: xorp/mibs/README,v 1.1 2003/06/06 18:31:28 jcardona Exp $
 #
 
 MIB modules for Net-SNMP
@@ -53,4 +53,9 @@ The MIB development framework is complete except for SNMP trap support.
 
 Currenly we have partially implemented BGP4-MIB (RFC 1657), more specifically,
 the scalar bgpVersion and the table bgpPeerTable.
+ 
+Known problems
+==============
+
+Terminating snmpd (v 5.0.8) with XORP modules still loaded causes a core dump in FreeBSD.  
 
