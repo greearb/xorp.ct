@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_table.cc,v 1.2 2003/08/01 17:10:44 hodson Exp $"
+#ident "$XORP: xorp/rip/output_table.cc,v 1.3 2003/08/05 06:37:39 hodson Exp $"
 
 #include "output_table.hh"
 #include "packet_assembly.hh"
@@ -38,11 +38,11 @@ OutputTable<A>::output_packet()
     for (r = _rw.current_route(); r != 0; r = _rw.next_route()) {
 	pair<A,uint16_t> p = _port.route_policy(*r);
 
-	if (p.second > RIP_INFINITY)
+	if (p.second > RIP_INFINITY) {
 	    continue;
+	}
 
 	rpa.packet_add_route(r->net(), p.first, p.second, r->tag());
-
 	done++;
 	if (rpa.packet_full()) {
 	    _rw.next_route();
@@ -56,6 +56,7 @@ OutputTable<A>::output_packet()
     } else {
 	_pkt_queue.enqueue_packet(pkt);
 	_port.push_packets();
+	incr_packets_sent();
     }
 
     if (r == 0) {
@@ -69,6 +70,22 @@ OutputTable<A>::output_packet()
 	_rw.pause(interpacket_gap_ms());
     }
 }
+
+template <typename A>
+void
+OutputTable<A>::start_output_processing()
+{
+    output_packet();		// starts timer
+}
+
+template <typename A>
+void
+OutputTable<A>::stop_output_processing()
+{
+    _op_timer.unschedule();	// stop timer
+}
+
+
 
 template class OutputTable<IPv4>;
 template class OutputTable<IPv6>;

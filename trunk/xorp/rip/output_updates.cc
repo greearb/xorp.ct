@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.3 2003/08/04 23:41:10 hodson Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.4 2003/08/07 00:40:44 hodson Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -29,13 +29,12 @@ OutputUpdates<A>::OutputUpdates(EventLoop&	e,
     : OutputBase<A>(e, port, pkt_queue, dst_addr, dst_port),
       _uq(rdb.update_queue())
 {
-    _uq_iter = _uq.create_reader();
 }
 
 template <typename A>
 OutputUpdates<A>::~OutputUpdates()
 {
-    _uq.destroy_reader(_uq_iter);
+    stop_output_processing();
 }
 
 template <typename A>
@@ -76,6 +75,7 @@ OutputUpdates<A>::output_packet()
     } else {
 	_pkt_queue.enqueue_packet(pkt);
 	_port.push_packets();
+	incr_packets_sent();
     }
 
     if (r != 0) {
@@ -85,6 +85,22 @@ OutputUpdates<A>::output_packet()
     } else {
 	// Finished with updates for this run.  Do not set timer.
     }
+}
+
+template <typename A>
+void OutputUpdates<A>::start_output_processing()
+{
+    if (_uq.reader_valid(_uq_iter) == false) {
+	_uq_iter = _uq.create_reader();
+    }
+    output_packet();
+}
+
+template <typename A>
+void OutputUpdates<A>::stop_output_processing()
+{
+    _uq.destroy_reader(_uq_iter);
+    _op_timer.unschedule();
 }
 
 template class OutputUpdates<IPv4>;

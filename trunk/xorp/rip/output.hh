@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/output.hh,v 1.1 2003/08/01 04:08:11 hodson Exp $
+// $XORP: xorp/rip/output.hh,v 1.2 2003/08/01 17:10:44 hodson Exp $
 
 #ifndef __RIP_OUTPUT_HH__
 #define __RIP_OUTPUT_HH__
@@ -36,8 +36,8 @@ class PacketQueue;
 template <typename A>
 class OutputBase {
 public:
-    typedef A				Addr;
-    typedef IPNet<A>			Net;
+    typedef A		Addr;
+    typedef IPNet<A>	Net;
 
 public:
     OutputBase(EventLoop&	e,
@@ -68,7 +68,17 @@ public:
      * will remain in "running" so long as data is available and will
      * continue to generate packets until the data is exhausted.
      */
-    inline void run();
+    inline void start();
+
+    /**
+     * Stop packet train.
+     */
+    inline void stop();
+
+    /**
+     * Get number of packets placed on packet queue for output.
+     */
+    inline void packets_sent() const			{ return _pkts_out; }
 
 protected:
     /**
@@ -78,6 +88,18 @@ protected:
     inline uint32_t interpacket_gap_ms() const;
 
     /**
+     * Derived classes should implement this to start output processing.
+     * It is invoked when start() is called.
+     */
+    virtual void start_output_processing() = 0;
+
+    /**
+     * Derived classes should implement this to stop output processing.
+     * It is invoked when stop() is called.
+     */
+    virtual void stop_output_processing() = 0;
+
+    /**
      * Output packet if suitable data is available, and place it in
      * the PacketQueue associated with this instance.  Should data still be
      * available after packet is generated then implementations of this
@@ -85,6 +107,8 @@ protected:
      * interpacket_gap_ms milliseconds.
      */
     virtual void output_packet() = 0;
+
+    inline void incr_packets_sent()			{ _pkts_out++; }
 
 private:
     OutputBase(const OutputBase<A>& o);			// Not implemented
@@ -97,6 +121,7 @@ protected:
     const A		_ip_addr;   // IP address for output packets
     const uint16_t	_ip_port;   // IP port for output packets
     XorpTimer		_op_timer;  // Timer invoking output_packet()
+    uint32_t		_pkts_out;  // Packets sent
 };
 
 template <typename A>
@@ -106,7 +131,7 @@ OutputBase<A>::OutputBase(EventLoop&	  e,
 			  const A&	  ip_addr,
 			  uint16_t	  ip_port)
     : _e(e), _port(port), _pkt_queue(pkt_queue),
-      _ip_addr(ip_addr), _ip_port(ip_port)
+      _ip_addr(ip_addr), _ip_port(ip_port), _pkts_out(0)
 {
 }
 
@@ -119,10 +144,17 @@ OutputBase<A>::running() const
 
 template <typename A>
 inline void
-OutputBase<A>::run()
+OutputBase<A>::start()
 {
     if (running() == false)
-	output_packet();
+	start_output_processing();
+}
+
+template <typename A>
+inline void
+OutputBase<A>::stop()
+{
+    stop_output_processing();
 }
 
 template <typename A>

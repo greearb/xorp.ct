@@ -437,6 +437,7 @@ public:
 
 	PacketQueue<A> op_out;				      // Output pkt qu.
 	OutputClass    ou(_e, *_pm.test_port(), op_out, rdb); // Output pkt gen
+	ou.start();
 
 	verbose_log("Injecting routes from test peer.\n");
 	for (typename set<IPNet<A> >::const_iterator n = _tpn.begin();
@@ -462,7 +463,7 @@ public:
 
 	bool timeout = false;
 	XorpTimer tot = _e.set_flag_after_ms(3000, &timeout);
-	ou.run();
+	ou.start();
 
 	while (ou.running() && timeout == false) {
 	    _e.run();
