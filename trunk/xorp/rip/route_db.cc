@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.10 2004/02/07 00:59:28 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.11 2004/02/12 17:58:11 hodson Exp $"
 
 #include "config.h"
 #include <map>
@@ -245,9 +245,6 @@ RouteDB<A>::routes()
     return _routes;
 }
 
-template class RouteDB<IPv4>;
-template class RouteDB<IPv6>;
-
 
 // ----------------------------------------------------------------------------
 // RouteWalker
@@ -358,5 +355,16 @@ RouteWalker<A>::reset()
     _pos = _route_db.routes().begin();
 }
 
+
+// ----------------------------------------------------------------------------
+// Instantiations
+
+#ifdef INSTANTIATE_IPV4
+template class RouteDB<IPv4>;
 template class RouteWalker<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
+template class RouteDB<IPv6>;
 template class RouteWalker<IPv6>;
+#endif

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.4 2003/08/07 00:40:44 hodson Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.5 2004/02/06 00:27:26 hodson Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -103,5 +103,14 @@ void OutputUpdates<A>::stop_output_processing()
     _op_timer.unschedule();
 }
 
+
+// ----------------------------------------------------------------------------
+// Instantiations
+
+#ifdef INSTANTIATE_IPV4
 template class OutputUpdates<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
 template class OutputUpdates<IPv6>;
+#endif

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.3 2003/07/09 00:11:02 hodson Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.4 2003/07/16 05:03:34 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -227,8 +227,16 @@ RouteEntryOrigin<A>::find_route(const Net& n) const
     return i->second;
 }
 
+
+// ----------------------------------------------------------------------------
+// Instantiations
+
+#ifdef INSTANTIATE_IPV4
 template class RouteEntryOrigin<IPv4>;
 template class RouteEntry<IPv4>;
+#endif
 
+#ifdef INSTANTIATE_IPV6
 template class RouteEntryOrigin<IPv6>;
 template class RouteEntry<IPv6>;
+#endif

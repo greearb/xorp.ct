@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.1 2003/11/04 23:39:58 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.2 2004/01/13 20:38:33 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -83,6 +83,7 @@ struct Send {
 // IPv4 Specialized Function pointers
 //
 
+#ifdef INSTANTIATE_IPV4
 template <>
 Send<IPv4>::AddIgpTable
 Send<IPv4>::add_igp_table = &XrlRibV0p1Client::send_add_igp_table4;
@@ -102,11 +103,12 @@ Send<IPv4>::replace_route = &XrlRibV0p1Client::send_replace_route4;
 template <>
 Send<IPv4>::DeleteRoute
 Send<IPv4>::delete_route = &XrlRibV0p1Client::send_delete_route4;
+#endif // INSTANTIATE_IPV4
 
 //
 // IPv6 Specialized Function pointers
 //
-
+#ifdef INSTANTIATE_IPV6
 template <>
 Send<IPv6>::AddIgpTable
 Send<IPv6>::add_igp_table = &XrlRibV0p1Client::send_add_igp_table6;
@@ -126,6 +128,7 @@ Send<IPv6>::replace_route = &XrlRibV0p1Client::send_replace_route6;
 template <>
 Send<IPv6>::DeleteRoute
 Send<IPv6>::delete_route = &XrlRibV0p1Client::send_delete_route6;
+#endif INSTANTIATE_IPV6
 
 
 // ----------------------------------------------------------------------------
@@ -329,5 +332,10 @@ XrlRibNotifier<A>::updates_available()
     }
 }
 
+#ifdef INSTANTIATE_IPV4
 template class XrlRibNotifier<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
 template class XrlRibNotifier<IPv6>;
+#endif

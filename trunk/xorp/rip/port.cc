@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.17 2004/02/12 19:08:55 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.18 2004/02/14 00:28:22 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -49,6 +49,8 @@ range_random(const uint32_t lo, const uint32_t hi)
 // ----------------------------------------------------------------------------
 // Address Family specific Port methods
 
+#ifdef INSTANTIATE_IPV4
+
 PortAFSpecState<IPv4>::PortAFSpecState()
 {
     set_auth_handler(new NullAuthHandler());
@@ -78,6 +80,9 @@ PortAFSpecState<IPv4>::auth_handler()
 {
     return _ah;
 }
+
+#endif // INSTANTIATE_IPV4
+
 
 // ----------------------------------------------------------------------------
 // Generic Port<A> Implementation
@@ -586,6 +591,7 @@ Port<A>::parse_request(const Addr&			src_addr,
 // Port<IPv4> Specialized methods
 //
 
+#ifdef INSTANTIATE_IPV4
 template <>
 void
 Port<IPv4>::parse_response(const Addr&				src_addr,
@@ -747,11 +753,13 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     }
 }
 
+#endif // INSTANTIATE_IPV4
 
 // ----------------------------------------------------------------------------
 // Port<IPv6> Specialized methods
 //
 
+#ifdef INSTANTIATE_IPV6
 template <>
 void
 Port<IPv6>::port_io_receive(const IPv6&		/* address */,
@@ -761,6 +769,16 @@ Port<IPv6>::port_io_receive(const IPv6&		/* address */,
 			    )
 {
 }
+#endif // INSTANTIATE_IPV6
 
+
+// ----------------------------------------------------------------------------
+// Instantiations
+
+#ifdef INSTANTIATE_IPV4
 template class Port<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
 template class Port<IPv6>;
+#endif

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.4 2004/02/12 19:10:41 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.5 2004/02/14 00:28:22 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -303,5 +303,10 @@ XrlPortManager<A>::~XrlPortManager()
     }
 }
 
+#ifdef INSTANTIATE_IPV4
 template class XrlPortManager<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
 template class XrlPortManager<IPv6>;
+#endif

@@ -12,9 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip6.cc,v 1.1 2003/11/04 23:39:58 hodson Exp $"
+#ident "$XORP: xorp/rip/xorp_rip.cc,v 1.1 2004/02/17 19:47:08 hodson Exp $"
 
-int main()
+#include "rip/xorp_rip_common.hh"
+
+int
+main(int argc, char* const argv[])
 {
-    return 0;
+    XorpRip<IPv6> xorp_rip;
+    return xorp_rip.main(argc, argv);
 }
+

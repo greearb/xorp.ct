@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.3 2004/02/07 00:54:34 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.4 2004/02/14 00:28:22 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "libxorp/debug.h"
@@ -22,11 +22,13 @@
 
 #include "libxipc/xrl_router.hh"
 
-#include "xrl/interfaces/socket4_locator_xif.hh"
-#include "xrl/interfaces/socket4_xif.hh"
-
 // ----------------------------------------------------------------------------
 // IPv4 specialized XrlPortIO
+
+#ifdef INSTANTIATE_IPV4
+
+#include "xrl/interfaces/socket4_locator_xif.hh"
+#include "xrl/interfaces/socket4_xif.hh"
 
 template <>
 bool
@@ -86,40 +88,76 @@ XrlPortIO<IPv4>::send(const IPv4& 		dst_addr,
     return false;
 }
 
+#endif // INSTANTIATE_IPV4
+
 
 // ----------------------------------------------------------------------------
 // IPv6 specialized XrlPortIO
+
+#ifdef INSTANTIATE_IPV6
+
+#include "xrl/interfaces/socket6_locator_xif.hh"
+#include "xrl/interfaces/socket6_xif.hh"
 
 template <>
 bool
 XrlPortIO<IPv6>::request_socket_server()
 {
-    return false;
+    XrlSocket6LocatorV0p1Client cl(&_xr);
+    return cl.send_find_socket_server_for_addr("fea", _addr,
+		callback(this, &XrlPortIO<IPv6>::socket_server_cb));
 }
 
 template <>
 bool
 XrlPortIO<IPv6>::request_socket_open()
 {
-    return false;
+    XrlSocket6V0p1Client cl(&_xr);
+    return cl.send_udp_open_bind_join(
+		_ss.c_str(),
+		_xr.instance_name(),
+		_addr,
+		RIP_AF_CONSTANTS<IPv6>::IP_PORT,
+		RIP_AF_CONSTANTS<IPv6>::IP_GROUP(),
+		RIP_TTL,
+		false,
+		callback(this, &XrlPortIO<IPv6>::socket_open_cb)
+		);
 }
 
 template <>
 bool
 XrlPortIO<IPv6>::request_socket_close()
 {
-    return false;
+    XrlSocket6V0p1Client cl(&_xr);
+    return cl.send_close(_ss.c_str(), _sid,
+			 callback(this, &XrlPortIO<IPv6>::socket_close_cb));
 }
 
 template <>
 bool
-XrlPortIO<IPv6>::send(const IPv6& 		/* dst_addr */,
-		      uint16_t			/* dst_port */,
-		      const vector<uint8_t>&	/* rip_packet*/)
-
+XrlPortIO<IPv6>::send(const IPv6& 		dst_addr,
+		      uint16_t 			dst_port,
+		      const vector<uint8_t>&  	rip_packet)
 {
+    if (_pending) {
+	debug_msg("Send skipped (pending).\n");
+	return false;
+    }
+
+    XrlSocket6V0p1Client cl(&_xr);
+    if (cl.send_send_to(_ss.c_str(), _sid, dst_addr, dst_port, rip_packet,
+			callback(this, &XrlPortIO<IPv6>::send_cb))) {
+	debug_msg("Sent %u bytes to %s/%u\n",
+		  static_cast<uint32_t>(rip_packet.size()),
+		  dst_addr.str().c_str(), dst_port);
+	_pending = true;
+	return true;
+    }
     return false;
 }
+
+#endif // INSTANTIATE_IPV6
 
 
 // ----------------------------------------------------------------------------
@@ -203,5 +241,10 @@ XrlPortIO<A>::socket_close_cb(const XrlError&)
     set_status(SHUTDOWN);
 }
 
-template XrlPortIO<IPv4>;
-template XrlPortIO<IPv6>;
+#ifdef INSTANTIATE_IPV4
+template class XrlPortIO<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
+template class XrlPortIO<IPv6>;
+#endif

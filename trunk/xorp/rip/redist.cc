@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.1 2003/07/09 00:11:02 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -43,9 +43,6 @@ RedistRouteOrigin<A>::deletion_secs() const
 {
     return DEFAULT_DELETION_SECS;
 }
-
-template class RedistRouteOrigin<IPv4>;
-template class RedistRouteOrigin<IPv6>;
 
 
 // ----------------------------------------------------------------------------
@@ -98,5 +95,16 @@ RouteRedistributor<A>::tag() const
     return _tag;
 }
 
+
+// ----------------------------------------------------------------------------
+// Instantiations
+
+#ifdef INSTANTIATE_IPV4
+template class RedistRouteOrigin<IPv4>;
 template class RouteRedistributor<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
 template class RouteRedistributor<IPv6>;
+template class RedistRouteOrigin<IPv6>;
+#endif

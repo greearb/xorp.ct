@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/rib_notifier_base.cc,v 1.1 2003/11/04 23:38:50 hodson Exp $"
 
 #include "rib_notifier_base.hh"
 
@@ -59,8 +59,16 @@ RibNotifierBase<A>::poll_updates()
     return true;
 }
 
-#include "libxorp/ipv4.hh"
-#include "libxorp/ipv6.hh"
+
+// ----------------------------------------------------------------------------
+// Instantiations
 
+#ifdef INSTANTIATE_IPV4
+#include "libxorp/ipv4.hh"
 template class RibNotifierBase<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
+#include "libxorp/ipv6.hh"
 template class RibNotifierBase<IPv6>;
+#endif

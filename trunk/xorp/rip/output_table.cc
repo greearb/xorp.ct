@@ -85,7 +85,14 @@ OutputTable<A>::stop_output_processing()
     _op_timer.unschedule();	// stop timer
 }
 
+
+// ----------------------------------------------------------------------------
+// Instantiations
 
-
+#ifdef INSTANTIATE_IPV4
 template class OutputTable<IPv4>;
+#endif
+
+#ifdef INSTANTIATE_IPV6
 template class OutputTable<IPv6>;
+#endif
