@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/profile.hh,v 1.1 2004/09/21 17:59:47 atanu Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -104,6 +104,7 @@ class Profile {
 	inline void zap() const {delete _log;}
 	inline void set_iterator(logentries::iterator i) {_i = i;}
 	inline void get_iterator(logentries::iterator& i) {i = _i;}
+	inline int size() const {return _log->size();}
 	const string& comment() const {return _comment;}
 
     private:

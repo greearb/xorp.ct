@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.1 2004/09/21 17:59:47 atanu Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.2 2004/09/21 21:36:22 atanu Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -220,6 +220,8 @@ class List: public unary_function<pair<string,
  public:
     void operator()(const pair<string, ref_ptr<Profile::ProfileState> >& p) {
 	_result += p.first;
+	_result += "\t";
+	_result += c_format("%d", p.second->size());
 	_result += "\t";
 	_result += p.second->enabled() ? "enabled" : "disabled";
 	_result += "\t";
