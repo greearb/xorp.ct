@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.3 2003/05/29 23:34:02 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.4 2003/09/25 01:28:42 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -84,7 +84,7 @@ time_wait_seconds()
     # If there are less than 200 PCB's in TIMEWAIT then return 0.
 
     local twc
-    twc=`netstat | grep TIME_WAIT | grep 19999 | wc -l`
+    twc=`netstat -n | grep TIME_WAIT | grep 19999 | wc -l`
     if [ $twc -lt 200 ]
     then
 	echo "0"
