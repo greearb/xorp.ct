@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.19 2004/02/24 03:16:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.20 2004/02/25 05:03:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -284,7 +284,7 @@ bool
 RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 {
     typename BgpTrie<A>::iterator route_iterator;
-    debug_msg("dump_next_route\n");
+    debug_msg("dump iter: %s\n", dump_iter.str().c_str());
 
     if (dump_iter.route_iterator_is_valid()) {
 	debug_msg("route_iterator is valid\n");
@@ -498,14 +498,3 @@ RibInTable<A>::next_chain()
 
 template class RibInTable<IPv4>;
 template class RibInTable<IPv6>;
-
-
-
-
-
-
-
-
-
-
-
