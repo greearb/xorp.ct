@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.4 2003/04/02 22:18:59 pavlin Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.5 2003/06/19 00:46:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
@@ -69,6 +69,9 @@ public:
 private:
     EventLoop& _eventloop;
     XrlRouter& _xrlrouter;
+
+    uint32_t _init_count;	// Number of initialisations with
+				// test_peers currently in progress.
 
     /*
     ** Supported commands.

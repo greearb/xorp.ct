@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.8 2003/06/19 00:46:09 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.9 2003/06/20 19:05:45 atanu Exp $"
+
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -45,7 +48,9 @@ tokenize(const string& str,
 
 Command::Command(EventLoop& eventloop, XrlRouter& xrlrouter)
     : _eventloop(eventloop),
-      _xrlrouter(xrlrouter)
+      _xrlrouter(xrlrouter),
+      _init_count(0)
+    
 {
     load_command_map();
 }
@@ -89,6 +94,18 @@ Command::pending()
 {
     if(_xrlrouter.pending())
 	return true;
+
+    /*
+    ** Pending count is non zero when we are attempting to configure a
+    ** new peer. In which case "_xrlrouter.pending()", must return
+    ** true.
+    */
+    //    XLOG_ASSERT(_pending_count == 0);
+    if(_init_count != 0) {
+	XLOG_WARNING("_xrlrouter.pending() is false but _init_count is %d",
+		     _init_count);
+	return true;
+    }
 
     NamePeerMap::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
@@ -232,6 +249,8 @@ Command::reset(const string& /*line*/, const vector<string>& /*v*/)
     NamePeerMap _tmp_peers;
     swap(_peers, _tmp_peers);
     _tmp_peers.clear();
+
+    _init_count = 0;
 }
 
 /*
@@ -314,13 +333,22 @@ Command::initialise(const string& line, const vector<string>& v)
     test_peer.send_reset(peername,
 			 callback(this, &Command::initialise_callback, 
 				  string(peername)));
+
+    _init_count++;
 }
 
 void
-Command::initialise_callback(const XrlError& /*error*/, string peername)
+Command::initialise_callback(const XrlError& error, string peername)
 {
     debug_msg("callback: %s\n", peername.c_str());
-    
+    _init_count--;
+
+    if(XrlError::OKAY() != error) {
+	XLOG_ERROR("%s: Failed to initialise peer %s", error.str().c_str(),
+		   peername.c_str());
+	return;
+    }
+
     /* Add to the peer structure */
     Peer* p = new Peer(_eventloop,
 		       _xrlrouter.finder_address(),
