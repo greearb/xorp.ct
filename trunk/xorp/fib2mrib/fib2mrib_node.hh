@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.4 2004/04/12 01:53:22 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.5 2004/04/22 01:14:11 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -299,7 +299,7 @@ public:
     const string& protocol_name() const { return _protocol_name; }
 
     /**
-     * Start the node operation.
+     * Startup the node operation.
      *
      * @return true on success, false on failure.
      */
@@ -489,6 +489,16 @@ protected:
 
 private:
     /**
+     * Get a reference to the interface manager tree.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the interface manager tree.
+     */
+    virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
+
+    /**
      * Initiate startup of the interface manager.
      * 
      * This is a pure virtual function, and it must be implemented
@@ -589,8 +599,6 @@ private:
      * @param fib2mrib_route the route with the request that would be canceled.
      */
     virtual void cancel_rib_route_change(const Fib2mribRoute& fib2mrib_route) = 0;
-
-    virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
 
     /**
      * Test if an address is directly connected to an interface.
