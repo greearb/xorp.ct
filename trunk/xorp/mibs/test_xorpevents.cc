@@ -19,23 +19,24 @@
 #include "libxipc/xrl_args.hh"
 #include "libxipc/finder_server.hh"
 
-#ifndef UNUSED
-#define UNUSED(x) (x) = (x)
-#endif
-
-
-
+#include "libxipc/finder_ng.hh"
+#include "libxipc/finder_tcp_messenger.hh"
+#include "libxipc/finder_ng_xrl_target.hh"
+#include "libxipc/permits.hh"
+#include "libxipc/sockutil.hh"
+ 
 enum TestResult {
     ALL_PASS = 0,
     TEST_FAIL = 1,
-    INTERNAL_FAIL =2};
+    INTERNAL_FAIL = 2
+};
+
+typedef std::set<int>  FakeSnmpdFdSet;
 
 // Local variables
 static TestResult test_result = INTERNAL_FAIL;
 static int cb1_counter, cb2_counter, cb3_counter;
-static std::set<int> exported_readfds;
-static std::set<int> exported_writefds;
-static std::set<int> exported_exceptfds;
+static FakeSnmpdFdSet exported_readfds, exported_writefds, exported_exceptfds;
 
 
 // declared here so it can be called by the test program.  Not public
@@ -49,6 +50,11 @@ int
 register_readfd(int fd, void (*func) (int, void *), void *data)
 {
     XLOG_INFO("Read file descriptor %d exported", fd);
+    if (exported_readfds.end() != exported_readfds.find(fd)) 
+	{
+	XLOG_ERROR("fd %d was already exported!!", fd);
+	exit(TEST_FAIL);
+	}
     exported_readfds.insert(fd);
     return FD_REGISTERED_OK;
 }
@@ -57,6 +63,11 @@ int
 register_writefd(int fd, void (*func) (int, void *), void *data)
 {
     XLOG_INFO("Write file descriptor %d exported", fd);
+    if (exported_writefds.end() != exported_writefds.find(fd)) 
+	{
+	XLOG_ERROR("fd %d was already exported!!", fd);
+	exit(TEST_FAIL);
+	}
     exported_writefds.insert(fd);
     return FD_REGISTERED_OK;
 }
@@ -65,6 +76,11 @@ int
 register_exceptfd(int fd, void (*func) (int, void *), void *data)
 {
     XLOG_INFO("Exception file descriptor %d exported", fd);
+    if (exported_exceptfds.end() != exported_exceptfds.find(fd)) 
+	{
+	XLOG_ERROR("fd %d was already exported!!", fd);
+	exit(TEST_FAIL);
+	}
     exported_exceptfds.insert(fd);
     return FD_REGISTERED_OK;
 }
@@ -241,7 +257,7 @@ fake_snmpd()
     tl.get_next_delay(t);
     t.copy_out(tv);
     FD_ZERO(&readfds); FD_ZERO(&writefds); FD_ZERO(&exceptfds);
-    std::set<int>::iterator p;
+    FakeSnmpdFdSet::iterator p;
     for (p = exported_readfds.begin(); p != exported_readfds.end(); p++) {
 	FD_SET (*p, &readfds);
 	XLOG_INFO("fake snmp added fd %d to read fd mask", *p);
@@ -306,20 +322,10 @@ run_test_1()
 // test xrl communication.  This test is based on the one found in 
 // test_xrl_router.cc
 //
-#ifdef ORIGINAL_FINDER
 
 
 
-#else
 
-
-#include "libxipc/finder_ng.hh"
-#include "libxipc/finder_tcp_messenger.hh"
-#include "libxipc/finder_ng_xrl_target.hh"
-#include "libxipc/permits.hh"
-#include "libxipc/sockutil.hh"
- 
-#endif
 
 void
 run_test_2()
@@ -330,20 +336,7 @@ run_test_2()
     // test we create a Finder in process as we can't guarantee Finder
     // is already running.  Most XORP processes do not have to do this.
     
-#ifdef ORIGINAL_FINDER
-
-    FinderServer*	finder = 0;
-    try {
-	finder = new FinderServer(e);
-    } catch (const FinderTCPServerIPCFactory::FactoryError& e) {
-	printf("Could not instantiate Finder.  Assuming this is because it's already running.\n");
-    }
-
-#else
-
     FinderNGServer* finder = new FinderNGServer(e);
-
-#endif // ORIGINAL_FINDER
     
     // Create and configure "party_A"
     XrlRouter		party_a(e, "party_A");
