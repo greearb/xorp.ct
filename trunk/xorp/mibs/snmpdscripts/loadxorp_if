@@ -16,7 +16,7 @@
  . ../snmpconfig/snmpenv.sh
 
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i create
-snmpset localhost UCD-DLMOD-MIB::dlmodName.$1 s "xorp_if_mib_module" UCD-DLMOD-MIB::dlmodPath.$1 s "${XORP}/mibs/xorp_if_mib_module.so"
+snmpset localhost UCD-DLMOD-MIB::dlmodName.$1 s "xorp_if_mib_module" UCD-DLMOD-MIB::dlmodPath.$1 s "${XORP_TOP_BUILDDIR}/mibs/xorp_if_mib_module.so"
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i load
 echo "The BGP module should appear as loaded in position $1"
 snmptable localhost UCD-DLMOD-MIB::dlmodTable

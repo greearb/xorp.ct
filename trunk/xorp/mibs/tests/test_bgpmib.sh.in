@@ -20,17 +20,16 @@ set -e
 
 # to debug 
 # set -x
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
 
-PATH_TO_BGP='../../bgp'
-
-. ${PATH_TO_BGP}/harness/xrl_shell_funcs.sh ""
-. ${PATH_TO_BGP}/xrl_shell_funcs.sh ""
+. ${BGP_SRCDIR}/harness/xrl_shell_funcs.sh ""
+. ${BGP_SRCDIR}/xrl_shell_funcs.sh ""
 
 onexit()
 {
     last=$?
-    if [ $last = "0" ]
-    then
+    if [ ${last} -eq 0 ] ; then
 	echo "$0: Tests Succeeded"
     else
 	echo "$0: Tests Failed"
@@ -65,7 +64,7 @@ PEER2_AS=65000
 
 HOLDTIME=5
 
-TRAFFIC_FILES="../../../data/bgp/icsi1.mrtd"
+TRAFFIC_FILES="${srcdir}/../../../data/bgp/icsi1.mrtd"
 
 configure_bgp()
 {
@@ -121,6 +120,7 @@ test1()
 
     # load the BGP mib
     ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
     ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" 
 
     # verify that the BGP mib is loaded
@@ -129,7 +129,7 @@ test1()
     # testing the BGP version
     bgp_ver=`snmpget localhost  BGP4-MIB::bgpVersion.0 | sed -e 's/BGP4-MIB::bgpVersion\.0 = STRING: //'`  
     
-    if [ $bgp_ver != '"4"' ]; then exit 1; fi
+    if [ "${bgp_ver}" != '"4"' ]; then exit 1; fi
 
     # walk the values of the BGP peer table one by one using get next
     snmpwalk localhost  BGP4-MIB::bgpPeerTable > bgpPeerTable1.tmp
@@ -178,33 +178,33 @@ TESTS='test1'
 TIME_WAIT=`time_wait_seconds`
 
 # Include command line
-. ${PATH_TO_BGP}/harness/args.sh
+. ${BGP_SRCDIR}/harness/args.sh
 
-if [ $START_PROGRAMS = "yes" ]
+if [ ${START_PROGRAMS} = "yes" ]
 then
     # Prepare snmp call variables
     DBGTOK=bgp4_mib_1657,xorp_if_mib_module
-    SNMPCFG=`(cd ../snmpconfig ; pwd)`/snmpd.conf
-    . ../snmpconfig/snmpenv.sh
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP}/mibs
+    . ${srcdir}/../snmpconfig/snmpenv.sh
+    SNMPCFG=${NEW_SNMPD_CONF}
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs
     export LD_LIBRARY_PATH
     SNMPD=@snmpd@
-    if [ "$SNMPD" == "not_found" ]; then exit 1; fi
+    if [ "$SNMPD" = "not_found" ]; then exit 1; fi
 
     CXRL="$CALLXRL -r 10"
-    PTH="${PATH_TO_BGP}/harness"
-    ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/finder
-    ${PATH_TO_BGP}/bgp         = $CXRL finder://bgp/common/0.1/get_target_name
-    ${PTH}/test_peer -s peer1  = $CXRL finder://peer1/common/0.1/get_target_name
-    ${PTH}/coord               = $CXRL finder://coord/common/0.1/get_target_name
-    ${SNMPD} -f -l ${XORP}/mibs/tests/snmp.log -D${DBGTOK} -c ${SNMPCFG} -r localhost:51515 = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    BGP_BUILDDIR=${XORP_TOP_BUILDDIR}/bgp
+    ${XORP_TOP_BUILDDIR}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ${XORP_TOP_BUILDDIR}/libxipc/finder
+    ${BGP_BUILDDIR}/bgp = $CXRL finder://bgp/common/0.1/get_target_name
+    ${BGP_BUILDDIR}/harness/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
+    ${BGP_BUILDDIR}/harness/coord = $CXRL finder://coord/common/0.1/get_target_name
+    ${SNMPD} -f -l ${XORP_BUILDDIR}/mibs/tests/snmp.log -D${DBGTOK} -c ${SNMPCFG} -r localhost:51515 = $CXRL finder://xorp_if_mib/common/0.1/get_status
 EOF
     trap '' 0
     exit $?
 fi
 
-if [ $CONFIGURE = "yes" ]
+if [ "${CONFIGURE}" = "yes" ]
 then
     configure_bgp
 fi
@@ -213,13 +213,13 @@ for i in $TESTS
 do
     for t in $TRAFFIC_FILES
     do 
-	if [ -f $t ]
+	if [ -f "$t" ]
 	then
 	    $i $t
 	    echo "Waiting $TIME_WAIT seconds for TCP TIME_WAIT state timeout"
 	    sleep $TIME_WAIT
 	else
-	    echo "Traffic file $t missing."
+	    echo "Traffic file \"$t\" missing."
 	fi
     done
 done
