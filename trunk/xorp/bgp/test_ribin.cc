@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.20 2004/02/24 03:16:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.21 2004/03/03 02:24:14 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -30,8 +30,15 @@
 #include "dump_iterators.hh"
 
 bool
+validate_reference_file(string reference_file, string output_file,
+			string testname);
+
+bool
 test_ribin_dump(TestInfo& /*info*/)
 {
+    struct passwd *pwd = getpwuid(getuid());
+    string filename = "/tmp/test_ribin_dump.";
+    filename += pwd->pw_name;
     BGPMain bgpmain;
     LocalData localdata;
     BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
@@ -44,7 +51,7 @@ test_ribin_dump(TestInfo& /*info*/)
     DebugTable<IPv4>* debug_table
 	= new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)ribin);
     ribin->set_next_table(debug_table);
-    debug_table->set_output_file(stdout);
+    debug_table->set_output_file(filename);
 
     IPNet<IPv4> net1("10.0.0.0/8");
     IPNet<IPv4> net2("30.0.0.0/8");
@@ -84,8 +91,8 @@ test_ribin_dump(TestInfo& /*info*/)
     ribin->dump_next_route(*dump_iter);
 
     debug_table->write_comment("The dump has started now add a new route"
-			       " it should appear once we start dumping again"
-			       " but it doesn't");
+			       " it should appear once we start "
+			       "dumping again");
 
     sr3 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
@@ -110,7 +117,9 @@ test_ribin_dump(TestInfo& /*info*/)
     ribin->dump_next_route(*dump_iter);
     ribin->dump_next_route(*dump_iter);
 
-    delete dump_iter;
+    // Notify the dump iterator that the peering went down. Otherwise
+    // it will still have an iterator pointing at the RIB-IN trie.
+    dump_iter->peering_went_down(&handler1, 1);
 
     // Delete all the allocated memory
     // Delete the routes from the ribin.
@@ -140,7 +149,12 @@ test_ribin_dump(TestInfo& /*info*/)
     delete ribin;
     delete debug_table;
 
-    return true;
+    // Delete the dump iterator last to verify it no longer has any
+    // references to the RIB-IN.
+    delete dump_iter;
+
+    return validate_reference_file("/test_ribin_dump.reference", filename,
+				   "RIBIN DUMP");
 }
 
 bool
@@ -570,58 +584,5 @@ test_ribin(TestInfo& /*info*/)
     delete ribin;
     delete debug_table;
 
-    FILE *file = fopen(filename.c_str(), "r");
-    if (file == NULL) {
-	fprintf(stderr, "Failed to read %s\n", filename.c_str());
-	fprintf(stderr, "TEST RIBIN FAILED\n");
-	fclose(file);
-	return false;
-    }
-#define BUFSIZE 8192
-    char testout[BUFSIZE];
-    memset(testout, 0, BUFSIZE);
-    int bytes1 = fread(testout, 1, BUFSIZE, file);
-    if (bytes1 == BUFSIZE) {
-	fprintf(stderr, "Output too long for buffer\n");
-	fprintf(stderr, "TEST RIBIN FAILED\n");
-	fclose(file);
-	return false;
-    }
-    fclose(file);
-
-    string ref_filename;
-    const char* srcdir = getenv("srcdir");
-    if (srcdir) {
-	ref_filename = string(srcdir); 
-    } else {
-	ref_filename = ".";
-    }
-    ref_filename += "/test_ribin.reference";
-    file = fopen(ref_filename.c_str(), "r");
-    if (file == NULL) {
-	fprintf(stderr, "Failed to read %s\n", ref_filename.c_str());
-	fprintf(stderr, "TEST RIBIN FAILED\n");
-	fclose(file);
-	return false;
-    }
-    char refout[BUFSIZE];
-    memset(refout, 0, BUFSIZE);
-    int bytes2 = fread(refout, 1, BUFSIZE, file);
-    if (bytes2 == BUFSIZE) {
-	fprintf(stderr, "Output too long for buffer\n");
-	fprintf(stderr, "TEST RIBIN FAILED\n");
-	fclose(file);
-	return false;
-    }
-    fclose(file);
-    
-    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1)!= 0)) {
-	fprintf(stderr, "Output in %s doesn't match reference output\n",
-		filename.c_str());
-	fprintf(stderr, "TEST RIBIN FAILED\n");
-	return false;
-	
-    }
-    unlink(filename.c_str());
-    return true;
+    return validate_reference_file("/test_ribin.reference", filename, "RIBIN");
 }
