@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.2 2002/12/17 10:03:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.3 2003/01/13 20:40:22 pavlin Exp $"
 
 
 //
@@ -704,16 +704,20 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
     // Compute the upstream state
     //
     string upstream_state;
-    if (pim_mre->is_joined_state())
-	upstream_state += "Joined ";
-    if (pim_mre->is_not_joined_state())
-	upstream_state += "NotJoined ";
-    if (pim_mre->is_sg_rpt() && pim_mre->is_rpt_not_joined_state())
-	upstream_state += "RptNotJoined ";
-    if (pim_mre->is_pruned_state())
-	upstream_state += "Pruned ";
-    if (pim_mre->is_not_pruned_state())
-	upstream_state += "NotPruned ";
+    if (pim_mre->is_rp() || pim_mre->is_wc() || pim_mre->is_sg()) {
+	if (pim_mre->is_joined_state())
+	    upstream_state += "Joined ";
+	if (pim_mre->is_not_joined_state())
+	    upstream_state += "NotJoined ";
+    }
+    if (pim_mre->is_sg_rpt()) {
+	if (pim_mre->is_rpt_not_joined_state())
+	    upstream_state += "RptNotJoined ";
+	if (pim_mre->is_pruned_state())
+	    upstream_state += "Pruned ";
+	if (pim_mre->is_not_pruned_state())
+	    upstream_state += "NotPruned ";
+    }
     
     //
     // Compute the Register state
@@ -761,7 +765,7 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 		       (pim_mre->mrib_next_hop_rp() != NULL)?
 		       cstring(pim_mre->mrib_next_hop_rp()->addr())
 		       : "UNKNOWN"));
-    if (pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+    if (pim_mre->is_sg()) {
 	cli_print(c_format("    Upstream MRIB next hop (S):  %s\n",
 			   (pim_mre->mrib_next_hop_s() != NULL)?
 			   cstring(pim_mre->mrib_next_hop_s()->addr())

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.67 2002/12/09 18:29:26 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -622,13 +622,13 @@ PimMre::compute_mrib_next_hop_rp() const
 //
 // Return the MRIB-based RPF neighbor toward the S
 //
-// Note: applies only to (S,G), but works also for (S,G,rpt).
+// Note: applies only to (S,G), but if needed can work also for (S,G,rpt).
 // XXX: the return info does NOT take into account the Asserts
 // XXX: if the source is directly connected, return NULL.
 PimNbr *
 PimMre::compute_mrib_next_hop_s() const
 {
-    if (! (is_sg() || is_sg_rpt()))
+    if (! is_sg())
 	return (NULL);
     
     if (rpf_interface_s() == Vif::VIF_INDEX_INVALID)
