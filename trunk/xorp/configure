@@ -4510,8 +4510,9 @@ echo "${ECHO_T}no" >&6
     fi
 fi
 
-oldCPPFLAGS=${CPPFLAGS}
-CPPFLAGS=`net-snmp-config --cflags`
+if test "${net_snmp_found}" = "true";  then
+    oldCPPFLAGS=${CPPFLAGS}
+    CPPFLAGS=`net-snmp-config --cflags`
 
 for ac_header in net-snmp/library/container.h
 do
@@ -4525,9 +4526,9 @@ else
 #line $LINENO "configure"
 #include "confdefs.h"
 
-    #include <net-snmp/net-snmp-config.h>
-    #include <net-snmp/net-snmp-includes.h>
-    #include <net-snmp/agent/net-snmp-agent-includes.h>
+        #include <net-snmp/net-snmp-config.h>
+        #include <net-snmp/net-snmp-includes.h>
+        #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 
 
@@ -4566,17 +4567,18 @@ fi
 
 done
 
-CPPFLAGS=${oldCPPFLAGS}
+    CPPFLAGS=${oldCPPFLAGS}
 
-if test "${net_snmp_container_bug}" = "yes" ; then
-echo "-------------------------------------------------------------   "
-{ echo "$as_me:$LINENO: WARNING: You should apply the patch xorp/mibs/container.h.patch" >&5
+    if test "${net_snmp_container_bug}" = "yes" ; then
+    echo "-------------------------------------------------------------   "
+    { echo "$as_me:$LINENO: WARNING: You should apply the patch xorp/mibs/container.h.patch" >&5
 echo "$as_me: WARNING: You should apply the patch xorp/mibs/container.h.patch" >&2;}
-echo -n "To do that, copy that file to "
-echo -n `net-snmp-config --prefix`
-echo "/include/net-snmp/library"
-echo "and execute (as root) command 'patch < container.h.patch'"
-echo "-------------------------------------------------------------   "
+    echo -n "To do that, copy that file to "
+    echo -n `net-snmp-config --prefix`
+    echo "/include/net-snmp/library"
+    echo "and execute (as root) command 'patch < container.h.patch'"
+    echo "-------------------------------------------------------------   "
+    fi
 fi
 
 if test "${snmpd_valid}" = "yes" ; then
