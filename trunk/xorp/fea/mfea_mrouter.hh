@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.4 2003/06/02 02:17:18 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.5 2003/08/05 05:44:59 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -110,7 +110,7 @@ public:
     /**
      * Adopt control over the mrouter socket.
      * 
-     * When the @see MfeaMrouter adopts control over the mrouter socket,
+     * When the MfeaMrouter adopts control over the mrouter socket,
      * it is the one that will be reading from that socket.
      * 
      * @return the socket value on success, otherwise XORP_ERROR.
