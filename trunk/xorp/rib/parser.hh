@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.13 2004/11/02 22:52:14 bms Exp $
+// $XORP: xorp/rib/parser.hh,v 1.14 2004/11/02 23:39:38 bms Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -38,9 +38,9 @@ public:
     virtual ~Datum() {}
 };
 
-class IntDatum : public Datum {
+class Uint32Datum : public Datum {
 public:
-    IntDatum(const string& s) {
+    Uint32Datum(const string& s) {
 	_n = 0;
 	for (size_t i = 0; i < s.size(); i++) {
 	    if (!xorp_isdigit(s[i]))
@@ -49,10 +49,10 @@ public:
 	    _n += s[i] - '0';
 	}
     }
-    const int& get() const { return _n; }
+    const uint32_t& get() const { return _n; }
 
 protected:
-    int _n;
+    uint32_t _n;
 };
 
 class StringDatum : public Datum {
@@ -96,9 +96,9 @@ private:
     const string _argname;
 };
 
-class IntArgumentParser : public ArgumentParser {
+class Uint32ArgumentParser : public ArgumentParser {
 public:
-    IntArgumentParser() : ArgumentParser("~Int") {}
+    Uint32ArgumentParser() : ArgumentParser("~Uint32") {}
     Datum* parse(const string& str) const; 
 };
 
@@ -155,18 +155,18 @@ public:
     virtual void transfer(Datum* d) throw (Parse_error) = 0;
 };
 
-class DatumIntBinding : public DatumVariableBinding {
+class DatumUint32Binding : public DatumVariableBinding {
 public:
-    DatumIntBinding(int& i) : _i(i) {}
+    DatumUint32Binding(uint32_t& i) : _i(i) {}
     void transfer(Datum* d) throw (Parse_error) {
-	IntDatum* id = dynamic_cast<IntDatum *>(d);
+	Uint32Datum* id = dynamic_cast<Uint32Datum *>(d);
 	if (NULL == id)
 	    throw Parse_error("Wrong type ? int decoding failed");
 	_i = id->get();
     }
 
 private:
-    int& _i;
+    uint32_t& _i;
 };
 
 class DatumStringBinding : public DatumVariableBinding {
@@ -235,7 +235,7 @@ protected:
     // can be decoded into a member variable.
     //
     void bind(int n, DatumVariableBinding* b);
-    void bind_int(int n, int& i);
+    void bind_uint32(int n, uint32_t& i);
     void bind_string(int n, string& s);
     void bind_ipv4(int n, IPv4& addr);
     void bind_ipv4net(int n, IPv4Net& net);
@@ -252,15 +252,15 @@ protected:
 
 class TableOriginCommand : public Command {
 public:
-    TableOriginCommand() : Command("table origin ~String ~Int", 2) {
+    TableOriginCommand() : Command("table origin ~String ~Uint32", 2) {
 	bind_string(0, _tablename);
-	bind_int(1, _admin_distance);
+	bind_uint32(1, _admin_distance);
     }
     virtual int execute() = 0;
 
 protected:
     string	_tablename;
-    int		_admin_distance;
+    uint32_t	_admin_distance;
 };
 
 class TableMergedCommand : public Command {
@@ -295,11 +295,11 @@ protected:
 
 class RouteAddCommand : public Command {
 public:
-    RouteAddCommand() : Command("route add ~String ~IPv4Net ~IPv4 ~Int", 4) {
+    RouteAddCommand() : Command("route add ~String ~IPv4Net ~IPv4 ~Uint32", 4) {
 	bind_string(0, _tablename);
 	bind_ipv4net(1, _net);
 	bind_ipv4(2, _nexthop);
-	bind_int(3, _metric);
+	bind_uint32(3, _metric);
     }
     virtual int execute() = 0;
 
@@ -307,17 +307,17 @@ protected:
     string	_tablename;
     IPv4Net	_net;
     IPv4	_nexthop;
-    int         _metric;
+    uint32_t	_metric;
 };
 
 class RouteVifAddCommand : public Command {
 public:
-    RouteVifAddCommand() : Command("route vifadd ~String ~IPv4Net ~String ~IPv4 ~Int", 5) {
+    RouteVifAddCommand() : Command("route vifadd ~String ~IPv4Net ~String ~IPv4 ~Uint32", 5) {
 	bind_string(0, _tablename);
 	bind_ipv4net(1, _net);
 	bind_string(2, _vifname);
 	bind_ipv4(3, _nexthop);
-	bind_int(4, _metric);
+	bind_uint32(4, _metric);
     }
     virtual int execute() = 0;
 
@@ -326,7 +326,7 @@ protected:
     IPv4Net	_net;
     string	_vifname;
     IPv4	_nexthop;
-    int         _metric;
+    uint32_t	_metric;
 };
 
 class RouteDeleteCommand : public Command {
@@ -345,13 +345,13 @@ protected:
 class RouteVerifyCommand : public Command {
 public:
     RouteVerifyCommand() : Command(
-"route verify ~String ~IPv4 ~String ~IPv4 ~Int", 5)
+"route verify ~String ~IPv4 ~String ~IPv4 ~Uint32", 5)
     {
 	bind_string(0, _type);
 	bind_ipv4(1, _lookupaddr);
 	bind_string(2, _ifname);
 	bind_ipv4(3, _nexthop);
-	bind_int(4, _metric);
+	bind_uint32(4, _metric);
     }
     virtual int execute() = 0;
 
@@ -360,52 +360,52 @@ protected:
     string	_ifname;
     IPv4	_lookupaddr;
     IPv4	_nexthop;
-    int		_metric;
+    uint32_t	_metric;
 };
 
 class DiscardVifCommand : public Command {
 public:
-    DiscardVifCommand() : Command("vif Discard ~String ~IPv4 ~Int", 3) {
+    DiscardVifCommand() : Command("vif Discard ~String ~IPv4 ~Uint32", 3) {
 	bind_string(0, _ifname);
 	bind_ipv4(1, _addr);
-	bind_int(2, _prefix_len);
+	bind_uint32(2, _prefix_len);
     }
     virtual int execute() = 0;
 
 protected:
     string	_ifname;
     IPv4	_addr;
-    int		_prefix_len;
+    uint32_t	_prefix_len;
 };
 
 class EtherVifCommand : public Command {
 public:
-    EtherVifCommand() : Command("vif Ethernet ~String ~IPv4 ~Int", 3) {
+    EtherVifCommand() : Command("vif Ethernet ~String ~IPv4 ~Uint32", 3) {
 	bind_string(0, _ifname);
 	bind_ipv4(1, _addr);
-	bind_int(2, _prefix_len);
+	bind_uint32(2, _prefix_len);
     }
     virtual int execute() = 0;
 
 protected:
     string	_ifname;
     IPv4	_addr;
-    int		_prefix_len;
+    uint32_t	_prefix_len;
 };
 
 class LoopbackVifCommand : public Command {
 public:
-    LoopbackVifCommand() : Command("vif Loopback ~String ~IPv4 ~Int", 3) {
+    LoopbackVifCommand() : Command("vif Loopback ~String ~IPv4 ~Uint32", 3) {
 	bind_string(0, _ifname);
 	bind_ipv4(1, _addr);
-	bind_int(2, _prefix_len);
+	bind_uint32(2, _prefix_len);
     }
     virtual int execute() = 0;
 
 protected:
     string	_ifname;
     IPv4	_addr;
-    int		_prefix_len;
+    uint32_t	_prefix_len;
 };
 
 class RedistEnableCommand : public Command {

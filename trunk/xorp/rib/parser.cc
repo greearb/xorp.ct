@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.11 2004/03/19 23:45:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.12 2004/06/10 22:41:37 hodson Exp $"
 
 #include <stdexcept>
 
@@ -29,11 +29,11 @@
 // Argument Parsing methods
 
 Datum*
-IntArgumentParser::parse(const string& str) const 
+Uint32ArgumentParser::parse(const string& str) const 
 {
     try {
 	printf(">>>str=%s\n", str.c_str());
-	return new IntDatum(str);
+	return new Uint32Datum(str);
     } catch (const InvalidString&) {
 	return NULL;
     }
@@ -110,9 +110,9 @@ Command::bind(int n, DatumVariableBinding* d)
 }
 
 void
-Command::bind_int(int n, int& i)
+Command::bind_uint32(int n, uint32_t& i)
 {
-    bind(n, new DatumIntBinding(i));
+    bind(n, new DatumUint32Binding(i));
 }
 
 void
@@ -149,7 +149,7 @@ Command::set_arg(int n, Datum* d) throw (Parse_error)
 Parser::Parser()
     : _separator(' ')
 {
-    add_argtype(new IntArgumentParser());
+    add_argtype(new Uint32ArgumentParser());
     add_argtype(new StringArgumentParser());
     add_argtype(new IPv4ArgumentParser());
     add_argtype(new IPv4NetArgumentParser());
