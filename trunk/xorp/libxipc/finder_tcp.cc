@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.2 2003/01/22 00:32:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.3 2003/01/24 01:45:39 hodson Exp $"
 
 #include <functional>
 
@@ -246,15 +246,18 @@ FinderTcpBase::closed() const
 ///////////////////////////////////////////////////////////////////////////////
 // FinderTcpListenerBase
 
-FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e, uint16_t port)
+FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
+					     IPv4	interface,
+					     uint16_t	port)
     throw (InvalidPort)
     : _e(e)
 {
     comm_init();
 
-    in_addr ipc_if = if_get_preferred();
+    in_addr if_ia;
+    if_ia.s_addr = interface.addr();
 
-    _lfd = comm_bind_tcp4(&ipc_if, port);
+    _lfd = comm_bind_tcp4(&if_ia, port);
     if (XORP_ERROR == _lfd) {
 	xorp_throw(InvalidPort, strerror(errno));
     }
@@ -263,8 +266,6 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e, uint16_t port)
     if (false == e.add_selector(_lfd, SEL_RD, cb)) {
 	XLOG_FATAL("Failed to add selector\n");
     }
-
-    add_permitted_host(IPv4(ipc_if));
 }
 
 FinderTcpListenerBase::~FinderTcpListenerBase()

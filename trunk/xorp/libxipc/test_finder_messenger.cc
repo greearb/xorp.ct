@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.1 2003/01/21 18:51:36 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -134,10 +134,13 @@ protected:
 class DummyFinder : public FinderTcpListenerBase {
 public:
     DummyFinder(EventLoop&  e,
+		IPv4	    interface,
 		uint16_t    port = FINDER_TCP_DEFAULT_PORT)
 	throw (InvalidPort)
-	: FinderTcpListenerBase(e, port), _messenger(0)
-    {}
+	: FinderTcpListenerBase(e, interface, port), _messenger(0)
+    {
+	add_permitted_host(interface);
+    }
 
     ~DummyFinder()
     {
@@ -217,7 +220,9 @@ test_main(void)
     EventLoop e;
 
     FinderTcpMessenger* client = 0;
-    DummyFinder finder(e);
+
+    IPv4 ipc_addr = if_get_preferred();
+    DummyFinder finder(e, ipc_addr);
 
     add_commands(xrl_cmds);
 
