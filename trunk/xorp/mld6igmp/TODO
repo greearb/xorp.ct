@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.9 2003/07/05 19:43:18 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.10 2003/07/12 01:02:05 pavlin Exp $
 #
 
 * Implement graceful stopping of node and/or a vif. I.e., perform
@@ -53,17 +53,12 @@
 * Instead of using Join/Prune in the context of IGMP/MLD6, use
   Join/Leave instead?
 
-* mld6igmp_recv() should have hlim as one of the arguments.
-
 * The IGMP spec must say that the Group Address in Membership Report
   and Leave Group messages must be a valid multicast address.
 
 * In mld6igmp_recv(), if the mld6igmp_vif interface is NULL, e.g.
   the interface is not configured, then print a warning or at least a message??
   Currently, the program will crash (XLOG_UNREACHABLE()).
-
-* One of the function arguments in the received. mld6/igmp message
-  should be "int hlim" for hop-limits (?)
 
 * mld6igmp_recv() should decode the first 4/8 octets and pass
 the rest to igmp_process() and mld6_process()
