@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_callback.cc,v 1.3 2003/12/20 00:26:58 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_callback.cc,v 1.4 2004/02/11 20:18:48 hodson Exp $"
 
 //
 // Callback test program
@@ -54,6 +54,7 @@ int
 main()
 {
     Widget w;
+
     TestCallback cbm;
 
     // The callback should be empty
@@ -107,14 +108,18 @@ main()
 
     // Test destructor of callback correctly interacts with
     // CallbackSafeObject correctly.
-    int counter2 = 0;
-    sw = new SafeWidget(&counter2);
     {
-	cbm = callback(sw, &SafeWidget::notify);
-	cbm->dispatch(0);
-	TestCallback cbm2 = cbm;
+	int counter2 = 0;
+	SafeWidget* sw = new SafeWidget(&counter2);
+	{
+	    TestCallback cbset[10];
+	    for (int i = 0; i < 10; i++) {
+		cbset[i] = callback(sw, &SafeWidget::notify);
+	    }
+	    cbset[0] = 0;
+	}
+	delete sw;
     }
-    delete sw;
 
     return (0);
 }
