@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.5 2003/02/27 03:11:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.6 2003/03/02 04:58:52 pavlin Exp $"
 
 
 //
@@ -348,6 +348,83 @@ PimNode::reset_vif_join_prune_period(const string& vif_name)
     return (XORP_OK);
 }
 
+int
+PimNode::add_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
+					   const string& vif_name)
+{
+    // Find the vif
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	XLOG_ERROR("Cannot add configure scope zone with vif %s: "
+		   "no such vif",
+		   vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    pim_scope_zone_table().add_scope_zone(scope_zone_id, pim_vif->vif_index());
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::add_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
+					   const IPvX& vif_addr)
+{
+    // Find the vif
+    PimVif *pim_vif = vif_find_by_addr(vif_addr);
+    
+    if (pim_vif == NULL) {
+	XLOG_ERROR("Cannot add configure scope zone with vif address %s: "
+		   "no such vif",
+		   cstring(vif_addr));
+	return (XORP_ERROR);
+    }
+    
+    pim_scope_zone_table().add_scope_zone(scope_zone_id, pim_vif->vif_index());
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::delete_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
+					      const string& vif_name)
+{
+    // Find the vif
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	XLOG_ERROR("Cannot delete configure scope zone with vif %s: "
+		   "no such vif",
+		   vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    pim_scope_zone_table().delete_scope_zone(scope_zone_id,
+					     pim_vif->vif_index());
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::delete_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
+					      const IPvX& vif_addr)
+{
+    // Find the vif
+    PimVif *pim_vif = vif_find_by_addr(vif_addr);
+    
+    if (pim_vif == NULL) {
+	XLOG_ERROR("Cannot delete configure scope zone with vif address %s: "
+		   "no such vif",
+		   cstring(vif_addr));
+	return (XORP_ERROR);
+    }
+    
+    pim_scope_zone_table().delete_scope_zone(scope_zone_id, pim_vif->vif_index());
+    
+    return (XORP_OK);
+}
+
 //
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
@@ -358,7 +435,7 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 					 uint8_t bsr_priority,
 					 uint8_t hash_masklen)
 {
-    // XXX: Find the vif address
+    // Find the vif
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
@@ -473,7 +550,7 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 					uint8_t rp_priority,
 					uint16_t rp_holdtime)
 {
-    // XXX: Find the vif address
+    // Find the vif
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
@@ -569,7 +646,7 @@ PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 					   bool is_scope_zone,
 					   const string& vif_name)
 {
-    // XXX: Find the vif address
+    // Find the vif
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {

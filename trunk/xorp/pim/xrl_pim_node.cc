@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.6 2003/02/25 01:38:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.7 2003/02/27 03:11:05 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2481,6 +2481,166 @@ XrlPimNode::pim_0_1_stop_bsr(
     string&		reason)
 {
     if (stop_bsr() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name4(
+    // Input values, 
+    const IPv4Net&	scope_zone_id, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
+						   vif_name) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name6(
+    // Input values, 
+    const IPv6Net&	scope_zone_id, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
+						   vif_name) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_addr4(
+    // Input values, 
+    const IPv4Net&	scope_zone_id, 
+    const IPv4&		vif_addr, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::add_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
+						   IPvX(vif_addr)) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_addr6(
+    // Input values, 
+    const IPv6Net&	scope_zone_id, 
+    const IPv6&		vif_addr, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::add_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
+						   IPvX(vif_addr)) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_name4(
+    // Input values, 
+    const IPv4Net&	scope_zone_id, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::delete_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
+						      vif_name) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_name6(
+    // Input values, 
+    const IPv6Net&	scope_zone_id, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::delete_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
+						      vif_name) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr4(
+    // Input values, 
+    const IPv4Net&	scope_zone_id, 
+    const IPv4&		vif_addr, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::delete_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
+						      IPvX(vif_addr)) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr6(
+    // Input values, 
+    const IPv6Net&	scope_zone_id, 
+    const IPv6&		vif_addr, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::delete_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
+						      IPvX(vif_addr)) < 0) {
 	fail = true;
     } else {
 	fail = false;

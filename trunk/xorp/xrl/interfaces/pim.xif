@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.4 2003/02/25 01:38:50 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.5 2003/02/27 03:11:06 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -55,6 +55,42 @@ interface pim/0.1 {
 	disable_bsr			-> fail:bool & reason:txt
 	start_bsr			-> fail:bool & reason:txt
 	stop_bsr			-> fail:bool & reason:txt
+
+	/**
+	 * Add/delete scope zone.
+	 *
+	 * @param scope_zone_id the ID of the configured zone.
+	 * @param vif_name the name of the vif to use as a bondary of the
+	 * scope zone.
+	 * @param vif_addr the address of the vif to use as a bondary of the
+	 * scope zone.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	add_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
+						& vif_name:txt		\
+						-> fail:bool & reason:txt
+	add_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
+						& vif_name:txt		\
+						-> fail:bool & reason:txt
+	add_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
+						& vif_addr:ipv4		\
+						-> fail:bool & reason:txt
+	add_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
+						& vif_addr:ipv6		\
+						-> fail:bool & reason:txt
+	delete_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
+						& vif_name:txt		\
+						-> fail:bool & reason:txt
+	delete_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
+						& vif_name:txt		\
+						-> fail:bool & reason:txt
+	delete_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
+						& vif_addr:ipv4		\
+						-> fail:bool & reason:txt
+	delete_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
+						& vif_addr:ipv6		\
+						-> fail:bool & reason:txt
 
 	/**
 	 * Add/delete candidate-BSR configuration.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.3 2003/02/19 05:35:17 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.4 2003/02/25 01:38:49 pavlin Exp $"
 
 
 //
@@ -165,11 +165,13 @@ PimScopeZoneTable::~PimScopeZoneTable(void)
 /**
  * PimScopeZoneTable::add_scope_zone:
  * @scope_zone_prefix: The prefix address of the zone to add.
+ * @vif_index: The vif index of the interface to add as zone boundary.
  * 
  * Add a scope zone.
  **/
 void
-PimScopeZoneTable::add_scope_zone(const IPvXNet& scope_zone_prefix)
+PimScopeZoneTable::add_scope_zone(const IPvXNet& scope_zone_prefix,
+				  uint16_t vif_index)
 {
     // Test first if we have that scope zone already
     list<PimScopeZone>::iterator iter;
@@ -177,23 +179,30 @@ PimScopeZoneTable::add_scope_zone(const IPvXNet& scope_zone_prefix)
 	 iter != _pim_scope_zone_list.end();
 	 ++iter) {
 	PimScopeZone& pim_scope_zone = *iter;
-	if (pim_scope_zone.is_same_scope_zone(scope_zone_prefix))
-	    return;		// We already have this scope zone
+	if (pim_scope_zone.is_same_scope_zone(scope_zone_prefix)) {
+	    // We already have entry for this scope zone
+	    pim_scope_zone.set_scoped_vif(vif_index, true);
+	    return;
+	}
     }
     
     // Add the new scope
-    PimScopeZone pim_scope_zone(scope_zone_prefix);
-    _pim_scope_zone_list.push_back(scope_zone_prefix);
+    Mifset scoped_vifs;
+    scoped_vifs.set(vif_index);
+    PimScopeZone pim_scope_zone(scope_zone_prefix, scoped_vifs);
+    _pim_scope_zone_list.push_back(pim_scope_zone);
 }
 
 /**
  * PimScopeZoneTable::delete_scope_zone:
  * @scope_zone_prefix: The prefix address of the zone to delete.
+ * @vif_index: The vif index of the interface to delete as zone boundary.
  * 
  * Delete a scope zone.
  **/
 void
-PimScopeZoneTable::delete_scope_zone(const IPvXNet& scope_zone_prefix)
+PimScopeZoneTable::delete_scope_zone(const IPvXNet& scope_zone_prefix,
+				     uint16_t vif_index)
 {
     // Find the scope zone and delete it
     list<PimScopeZone>::iterator iter;
@@ -203,7 +212,10 @@ PimScopeZoneTable::delete_scope_zone(const IPvXNet& scope_zone_prefix)
 	PimScopeZone& pim_scope_zone = *iter;
 	if (pim_scope_zone.is_same_scope_zone(scope_zone_prefix)) {
 	    // Found
-	    _pim_scope_zone_list.erase(iter);
+	    pim_scope_zone.set_scoped_vif(vif_index, false);
+	    // If last scope zone boundary, remove the entry
+	    if (pim_scope_zone.is_empty())
+		_pim_scope_zone_list.erase(iter);
 	    return;
 	}
     }
@@ -262,18 +274,6 @@ PimScopeZoneTable::is_scoped(const PimScopeZoneId& zone_id,
     }
     
     return (false);
-}
-
-/**
- * PimScopeZone::PimScopeZone:
- * @scope_zone_prefix: The scope zone address prefix.
- * 
- * PimScopeZone constructor.
- **/
-PimScopeZone::PimScopeZone(const IPvXNet& scope_zone_prefix)
-    : _scope_zone_prefix(scope_zone_prefix)
-{
-    
 }
 
 /**

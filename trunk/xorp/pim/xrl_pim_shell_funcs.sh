@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.4 2003/02/25 01:38:50 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.5 2003/02/27 03:11:06 pavlin Exp $
 #
 
 #
@@ -15,7 +15,7 @@ PIM_TARGET="PIMSM_4"
 pim_enable_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_enable_vif <vif_name>"
+	echo "Usage: pim_enable_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -29,7 +29,7 @@ pim_enable_vif()
 pim_disable_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_disable_vif <vif_name>"
+	echo "Usage: pim_disable_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -43,7 +43,7 @@ pim_disable_vif()
 pim_start_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_start_vif <vif_name>"
+	echo "Usage: pim_start_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -57,7 +57,7 @@ pim_start_vif()
 pim_stop_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_stop_vif <vif_name>"
+	echo "Usage: pim_stop_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -201,6 +201,129 @@ pim_stop_bsr()
     echo "pim_stop_bsr" $*
     XRL="finder://$PIM_TARGET/pim/0.1/stop_bsr"
     XRL_ARGS=""
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+#
+# Add/delete scope zone configuration.
+#
+pim_add_config_scope_zone_by_vif_name4()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_add_config_scope_zone_by_vif_name4 <scope_zone_id:ipv4net> <vif_name:txt>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_name=$2
+    
+    echo "pim_add_config_scope_zone_by_vif_name4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_name4"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_name:txt=$vif_name"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_config_scope_zone_by_vif_name6()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_add_config_scope_zone_by_vif_name6 <scope_zone_id:ipv6net> <vif_name:txt>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_name=$2
+    
+    echo "pim_add_config_scope_zone_by_vif_name6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_name6"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_name:txt=$vif_name"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_config_scope_zone_by_vif_addr4()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_add_config_scope_zone_by_vif_addr4 <scope_zone_id:ipv4net> <vif_addr:ipv4>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_addr=$2
+    
+    echo "pim_add_config_scope_zone_by_vif_addr4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_addr4"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_addr:ipv4=$vif_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_config_scope_zone_by_vif_addr6()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_add_config_scope_zone_by_vif_addr6 <scope_zone_id:ipv6net> <vif_addr:ipv6>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_addr=$2
+    
+    echo "pim_add_config_scope_zone_by_vif_addr6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_addr6"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_addr:ipv6=$vif_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_delete_config_scope_zone_by_vif_name4()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_delete_config_scope_zone_by_vif_name4 <scope_zone_id:ipv4net> <vif_name:txt>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_name=$2
+    
+    echo "pim_delete_config_scope_zone_by_vif_name4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_name4"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_name:txt=$vif_name"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_delete_config_scope_zone_by_vif_name6()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_delete_config_scope_zone_by_vif_name6 <scope_zone_id:ipv6net> <vif_name:txt>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_name=$2
+    
+    echo "pim_delete_config_scope_zone_by_vif_name6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_name6"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_name:txt=$vif_name"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_delete_config_scope_zone_by_vif_addr4()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_delete_config_scope_zone_by_vif_addr4 <scope_zone_id:ipv4net> <vif_addr:ipv4>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_addr=$2
+    
+    echo "pim_delete_config_scope_zone_by_vif_addr4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_addr4"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_addr:ipv4=$vif_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_delete_config_scope_zone_by_vif_addr6()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_delete_config_scope_zone_by_vif_addr6 <scope_zone_id:ipv6net> <vif_addr:ipv6>"
+	exit 1
+    fi
+    scope_zone_id=$1
+    vif_addr=$2
+    
+    echo "pim_delete_config_scope_zone_by_vif_addr6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_addr6"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_addr:ipv6=$vif_addr"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
@@ -528,7 +651,7 @@ pim_config_rp_done()
 pim_get_vif_proto_version()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_proto_version <vif_name>"
+	echo "Usage: pim_get_vif_proto_version <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -542,7 +665,7 @@ pim_get_vif_proto_version()
 pim_set_vif_proto_version()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_proto_version <vif_name> <proto_version>"
+	echo "Usage: pim_set_vif_proto_version <vif_name:txt> <proto_version:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -557,7 +680,7 @@ pim_set_vif_proto_version()
 pim_reset_vif_proto_version()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_proto_version <vif_name>"
+	echo "Usage: pim_reset_vif_proto_version <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -571,7 +694,7 @@ pim_reset_vif_proto_version()
 pim_get_vif_hello_triggered_delay()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_hello_triggered_delay <vif_name>"
+	echo "Usage: pim_get_vif_hello_triggered_delay <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -585,7 +708,7 @@ pim_get_vif_hello_triggered_delay()
 pim_set_vif_hello_triggered_delay()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_hello_triggered_delay <vif_name> <hello_triggered_delay>"
+	echo "Usage: pim_set_vif_hello_triggered_delay <vif_name:txt> <hello_triggered_delay:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -600,7 +723,7 @@ pim_set_vif_hello_triggered_delay()
 pim_reset_vif_hello_triggered_delay()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_hello_triggered_delay <vif_name>"
+	echo "Usage: pim_reset_vif_hello_triggered_delay <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -614,7 +737,7 @@ pim_reset_vif_hello_triggered_delay()
 pim_get_vif_hello_period()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_hello_period <vif_name>"
+	echo "Usage: pim_get_vif_hello_period <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -628,7 +751,7 @@ pim_get_vif_hello_period()
 pim_set_vif_hello_period()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_hello_period <vif_name> <hello_period>"
+	echo "Usage: pim_set_vif_hello_period <vif_name:txt> <hello_period:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -643,7 +766,7 @@ pim_set_vif_hello_period()
 pim_reset_vif_hello_period()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_hello_period <vif_name>"
+	echo "Usage: pim_reset_vif_hello_period <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -657,7 +780,7 @@ pim_reset_vif_hello_period()
 pim_get_vif_hello_holdtime()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_hello_holdtime <vif_name>"
+	echo "Usage: pim_get_vif_hello_holdtime <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -671,7 +794,7 @@ pim_get_vif_hello_holdtime()
 pim_set_vif_hello_holdtime()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_hello_holdtime <vif_name> <hello_holdtime>"
+	echo "Usage: pim_set_vif_hello_holdtime <vif_name:txt> <hello_holdtime:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -686,7 +809,7 @@ pim_set_vif_hello_holdtime()
 pim_reset_vif_hello_holdtime()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_hello_holdtime <vif_name>"
+	echo "Usage: pim_reset_vif_hello_holdtime <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -700,7 +823,7 @@ pim_reset_vif_hello_holdtime()
 pim_get_vif_dr_priority()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_dr_priority <vif_name>"
+	echo "Usage: pim_get_vif_dr_priority <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -714,7 +837,7 @@ pim_get_vif_dr_priority()
 pim_set_vif_dr_priority()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_dr_priority <vif_name> <dr_priority>"
+	echo "Usage: pim_set_vif_dr_priority <vif_name:txt> <dr_priority:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -729,7 +852,7 @@ pim_set_vif_dr_priority()
 pim_reset_vif_dr_priority()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_dr_priority <vif_name>"
+	echo "Usage: pim_reset_vif_dr_priority <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -743,7 +866,7 @@ pim_reset_vif_dr_priority()
 pim_get_vif_lan_delay()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_lan_delay <vif_name>"
+	echo "Usage: pim_get_vif_lan_delay <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -757,7 +880,7 @@ pim_get_vif_lan_delay()
 pim_set_vif_lan_delay()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_lan_delay <vif_name> <lan_delay>"
+	echo "Usage: pim_set_vif_lan_delay <vif_name:txt> <lan_delay:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -772,7 +895,7 @@ pim_set_vif_lan_delay()
 pim_reset_vif_lan_delay()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_lan_delay <vif_name>"
+	echo "Usage: pim_reset_vif_lan_delay <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -786,7 +909,7 @@ pim_reset_vif_lan_delay()
 pim_get_vif_override_interval()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_override_interval <vif_name>"
+	echo "Usage: pim_get_vif_override_interval <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -800,7 +923,7 @@ pim_get_vif_override_interval()
 pim_set_vif_override_interval()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_override_interval <vif_name> <override_interval>"
+	echo "Usage: pim_set_vif_override_interval <vif_name:txt> <override_interval:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -815,7 +938,7 @@ pim_set_vif_override_interval()
 pim_reset_vif_override_interval()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_override_interval <vif_name>"
+	echo "Usage: pim_reset_vif_override_interval <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -829,7 +952,7 @@ pim_reset_vif_override_interval()
 pim_get_vif_is_tracking_support_disabled()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_is_tracking_support_disabled <vif_name>"
+	echo "Usage: pim_get_vif_is_tracking_support_disabled <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -843,7 +966,7 @@ pim_get_vif_is_tracking_support_disabled()
 pim_set_vif_is_tracking_support_disabled()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_is_tracking_support_disabled <vif_name> <is_tracking_support_disabled>"
+	echo "Usage: pim_set_vif_is_tracking_support_disabled <vif_name:txt> <is_tracking_support_disabled:bool>"
 	exit 1
     fi
     vif_name=$1
@@ -858,7 +981,7 @@ pim_set_vif_is_tracking_support_disabled()
 pim_reset_vif_is_tracking_support_disabled()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_is_tracking_support_disabled <vif_name>"
+	echo "Usage: pim_reset_vif_is_tracking_support_disabled <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -872,7 +995,7 @@ pim_reset_vif_is_tracking_support_disabled()
 pim_get_vif_accept_nohello_neighbors()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_accept_nohello_neighbors <vif_name>"
+	echo "Usage: pim_get_vif_accept_nohello_neighbors <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -886,7 +1009,7 @@ pim_get_vif_accept_nohello_neighbors()
 pim_set_vif_accept_nohello_neighbors()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_accept_nohello_neighbors <vif_name> <accept_nohello_neighbors>"
+	echo "Usage: pim_set_vif_accept_nohello_neighbors <vif_name:txt> <accept_nohello_neighbors:bool>"
 	exit 1
     fi
     vif_name=$1
@@ -901,7 +1024,7 @@ pim_set_vif_accept_nohello_neighbors()
 pim_reset_vif_accept_nohello_neighbors()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_accept_nohello_neighbors <vif_name>"
+	echo "Usage: pim_reset_vif_accept_nohello_neighbors <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -915,7 +1038,7 @@ pim_reset_vif_accept_nohello_neighbors()
 pim_get_vif_join_prune_period()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_join_prune_period <vif_name>"
+	echo "Usage: pim_get_vif_join_prune_period <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -929,7 +1052,7 @@ pim_get_vif_join_prune_period()
 pim_set_vif_join_prune_period()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_join_prune_period <vif_name> <join_prune_period>"
+	echo "Usage: pim_set_vif_join_prune_period <vif_name:txt> <join_prune_period:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -944,7 +1067,7 @@ pim_set_vif_join_prune_period()
 pim_reset_vif_join_prune_period()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_join_prune_period <vif_name>"
+	echo "Usage: pim_reset_vif_join_prune_period <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -974,7 +1097,7 @@ pim_disable_log_trace()
 pim_add_test_jp_entry4()
 {
     if [ $# -lt 7 ] ; then
-	echo "Usage: pim_add_test_jp_entry4 <source_addr> <group_addr> <group_masklen> <mrt_entry_type> <action_jp> <holdtime> <new_group_bool>"
+	echo "Usage: pim_add_test_jp_entry4 <source_addr:ipv4> <group_addr:ipv4> <group_masklen:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
 	exit 1
     fi
     source_addr=$1
@@ -994,7 +1117,7 @@ pim_add_test_jp_entry4()
 pim_add_test_jp_entry6()
 {
     if [ $# -lt 7 ] ; then
-	echo "Usage: pim_add_test_jp_entry6 <source_addr> <group_addr> <group_masklen> <mrt_entry_type> <action_jp> <holdtime> <new_group_bool>"
+	echo "Usage: pim_add_test_jp_entry6 <source_addr:ipv6> <group_addr:ipv6> <group_masklen:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
 	exit 1
     fi
     source_addr=$1
@@ -1014,7 +1137,7 @@ pim_add_test_jp_entry6()
 pim_send_test_jp_entry4()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_send_test_jp_entry4 <nbr_addr>"
+	echo "Usage: pim_send_test_jp_entry4 <nbr_addr:ipv4>"
 	exit 1
     fi
     nbr_addr=$1
@@ -1028,7 +1151,7 @@ pim_send_test_jp_entry4()
 pim_send_test_jp_entry6()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_send_test_jp_entry6 <nbr_addr>"
+	echo "Usage: pim_send_test_jp_entry6 <nbr_addr:ipv6>"
 	exit 1
     fi
     nbr_addr=$1
@@ -1042,7 +1165,7 @@ pim_send_test_jp_entry6()
 pim_send_test_assert4()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_send_test_assert4 <vif_name> <source_addr> <group_addr> <rpt_bit> <metric_preference> <metric>"
+	echo "Usage: pim_send_test_assert4 <vif_name:txt> <source_addr:ipv4> <group_addr:ipv4> <rpt_bit:bool> <metric_preference:u32> <metric:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -1061,7 +1184,7 @@ pim_send_test_assert4()
 pim_send_test_assert6()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_send_test_assert6 <vif_name> <source_addr> <group_addr> <rpt_bit> <metric_preference> <metric>"
+	echo "Usage: pim_send_test_assert6 <vif_name:txt> <source_addr:ipv6> <group_addr:ipv6> <rpt_bit:bool> <metric_preference:u32> <metric:u32>"
 	exit 1
     fi
     vif_name=$1
@@ -1080,7 +1203,7 @@ pim_send_test_assert6()
 pim_add_test_bsr_zone4()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_add_test_bsr_zone4 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <bsr_addr> <bsr_priority> <hash_masklen> <fragment_tag>"
+	echo "Usage: pim_add_test_bsr_zone4 <zone_id_scope_zone_prefix:ipv4net> <zone_id_is_scope_zone:bool> <bsr_addr:ipv4> <bsr_priority:u32> <hash_masklen:u32> <fragment_tag:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
@@ -1099,7 +1222,7 @@ pim_add_test_bsr_zone4()
 pim_add_test_bsr_zone6()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_add_test_bsr_zone6 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <bsr_addr> <bsr_priority> <hash_masklen> <fragment_tag>"
+	echo "Usage: pim_add_test_bsr_zone6 <zone_id_scope_zone_prefix:ipv6net> <zone_id_is_scope_zone:bool> <bsr_addr:ipv6> <bsr_priority:u32> <hash_masklen:u32> <fragment_tag:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
@@ -1118,7 +1241,7 @@ pim_add_test_bsr_zone6()
 pim_add_test_bsr_group_prefix4()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_test_bsr_group_prefix4 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <is_scope_zone> <expected_rp_count>"
+	echo "Usage: pim_add_test_bsr_group_prefix4 <zone_id_scope_zone_prefix:ipv4net> <zone_id_is_scope_zone:bool> <group_prefix:ipv4net> <is_scope_zone:bool> <expected_rp_count:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
@@ -1136,7 +1259,7 @@ pim_add_test_bsr_group_prefix4()
 pim_add_test_bsr_group_prefix6()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_test_bsr_group_prefix6 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <is_scope_zone> <expected_rp_count>"
+	echo "Usage: pim_add_test_bsr_group_prefix6 <zone_id_scope_zone_prefix:ipv6net> <zone_id_is_scope_zone:bool> <group_prefix:ipv6net> <is_scope_zone:bool> <expected_rp_count:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
@@ -1154,7 +1277,7 @@ pim_add_test_bsr_group_prefix6()
 pim_add_test_bsr_rp4()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_add_test_bsr_rp4 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <rp_addr> <rp_priority> <rp_holdtime>"
+	echo "Usage: pim_add_test_bsr_rp4 <zone_id_scope_zone_prefix:ipv4net> <zone_id_is_scope_zone:bool> <group_prefix:ipv4net> <rp_addr:ipv4> <rp_priority:u32> <rp_holdtime:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
@@ -1173,7 +1296,7 @@ pim_add_test_bsr_rp4()
 pim_add_test_bsr_rp6()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_add_test_bsr_rp6 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <rp_addr> <rp_priority> <rp_holdtime>"
+	echo "Usage: pim_add_test_bsr_rp6 <zone_id_scope_zone_prefix:ipv6net> <zone_id_is_scope_zone:bool> <group_prefix:ipv6net> <rp_addr:ipv6> <rp_priority:u32> <rp_holdtime:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
@@ -1192,7 +1315,7 @@ pim_add_test_bsr_rp6()
 pim_send_test_bootstrap()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_send_test_bootstrap <vif_name>"
+	echo "Usage: pim_send_test_bootstrap <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
@@ -1206,7 +1329,7 @@ pim_send_test_bootstrap()
 pim_send_test_bootstrap_by_dest4()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_send_test_bootstrap_by_dest4 <vif_name> <dest_addr>"
+	echo "Usage: pim_send_test_bootstrap_by_dest4 <vif_name:txt> <dest_addr:ipv4>"
 	exit 1
     fi
     vif_name=$1
@@ -1221,7 +1344,7 @@ pim_send_test_bootstrap_by_dest4()
 pim_send_test_bootstrap_by_dest6()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_send_test_bootstrap_by_dest6 <vif_name> <dest_addr>"
+	echo "Usage: pim_send_test_bootstrap_by_dest6 <vif_name:txt> <dest_addr:ipv6>"
 	exit 1
     fi
     vif_name=$1

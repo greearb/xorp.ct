@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.8 2003/02/25 01:38:50 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.9 2003/02/27 03:11:06 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -931,6 +931,82 @@ protected:
 	string&	reason);
 
     XrlCmdError pim_0_1_stop_bsr(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Add/delete scope zone.
+     *  
+     *  @param scope_zone_id the ID of the configured zone.
+     *  
+     *  @param vif_name the name of the vif to use as a bondary of the scope
+     *  zone.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    XrlCmdError pim_0_1_add_config_scope_zone_by_vif_name4(
+	// Input values, 
+	const IPv4Net&	scope_zone_id, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_add_config_scope_zone_by_vif_name6(
+	// Input values, 
+	const IPv6Net&	scope_zone_id, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_add_config_scope_zone_by_vif_addr4(
+	// Input values, 
+	const IPv4Net&	scope_zone_id, 
+	const IPv4&	vif_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_add_config_scope_zone_by_vif_addr6(
+	// Input values, 
+	const IPv6Net&	scope_zone_id, 
+	const IPv6&	vif_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_delete_config_scope_zone_by_vif_name4(
+	// Input values, 
+	const IPv4Net&	scope_zone_id, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_delete_config_scope_zone_by_vif_name6(
+	// Input values, 
+	const IPv6Net&	scope_zone_id, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_delete_config_scope_zone_by_vif_addr4(
+	// Input values, 
+	const IPv4Net&	scope_zone_id, 
+	const IPv4&	vif_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_delete_config_scope_zone_by_vif_addr6(
+	// Input values, 
+	const IPv6Net&	scope_zone_id, 
+	const IPv6&	vif_addr, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);

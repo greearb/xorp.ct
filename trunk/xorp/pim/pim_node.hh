@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.4 2003/02/25 01:38:48 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.5 2003/02/27 03:11:05 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -773,6 +773,15 @@ public:
     int		set_vif_join_prune_period(const string&	vif_name,
 					  uint16_t join_prune_period);
     int		reset_vif_join_prune_period(const string& vif_name);
+    //
+    int		add_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
+						  const string& vif_name);
+    int		add_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
+						  const IPvX& vif_addr);
+    int		delete_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
+						     const string& vif_name);
+    int		delete_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
+						     const IPvX& vif_addr);
     //
     int		add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 						bool is_scope_zone,
