@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.2 2003/09/30 03:07:57 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.3 2003/10/22 21:09:32 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -831,39 +831,12 @@ static const char* CLSNAME = "ifmgr_mirror";
 const char* IfMgrXrlMirror::DEFAULT_REGISTRATION_TARGET = "XXX tbd";
 
 IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
-			       const char*	rtarget)
-    : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
-{
-    _rtr = new IfMgrXrlMirrorRouter(e, CLSNAME);
-    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
-
-    _rtr->attach(this);
-    _xrl_tgt->attach(this);
-}
-
-IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
-			       IPv4		finder_addr,
-			       const char*	rtarget)
-    : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
-{
-    _rtr = new IfMgrXrlMirrorRouter(e, CLSNAME, finder_addr);
-    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
-
-    _rtr->attach(this);
-    _xrl_tgt->attach(this);
-}
-
-IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
-			       IPv4		finder_addr,
+			       IPv4		finder_host,
 			       uint16_t		finder_port,
 			       const char*	rtarget)
-    : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
+    : _e(e), _finder_host(finder_host), _finder_port(finder_port),
+      _dispatcher(_iftree), _rtarget(rtarget), _rtr(0), _xrl_tgt(0)
 {
-    _rtr = new IfMgrXrlMirrorRouter(e, CLSNAME, finder_addr, finder_port);
-    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
-
-    _rtr->attach(this);
-    _xrl_tgt->attach(this);
 }
 
 IfMgrXrlMirror::~IfMgrXrlMirror()
@@ -871,14 +844,43 @@ IfMgrXrlMirror::~IfMgrXrlMirror()
     _xrl_tgt->detach(this);
     _rtr->detach(this);
     delete _xrl_tgt;
+    _xrl_tgt = 0;
     delete _rtr;
+    _rtr = 0;
+}
+
+void
+IfMgrXrlMirror::startup()
+{
+    if (status() == READY) {
+	_rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME,
+					_finder_host, _finder_port);
+	_xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
+	_rtr->attach(this);
+	_xrl_tgt->attach(this);
+	set_status(STARTING, "Initializing Xrl Router.");
+    }
+}
+
+void
+IfMgrXrlMirror::shutdown()
+{
+    if (status() == RUNNING) {
+	set_status(SHUTTING_DOWN);
+	_iftree.clear();
+	unregister_with_ifmgr();
+    }
 }
 
 void
 IfMgrXrlMirror::finder_disconnect_event()
 {
-    set_status(NO_FINDER);
     _iftree.clear();
+    if (status() == SHUTTING_DOWN) {
+	set_status(SHUTDOWN);
+    } else {
+	set_status(FAILED);
+    }
 }
 
 void
@@ -890,7 +892,7 @@ IfMgrXrlMirror::finder_ready_event()
 void
 IfMgrXrlMirror::tree_complete()
 {
-    set_status(READY);
+    set_status(RUNNING);
     list<IfMgrHintObserver*>::const_iterator ci;
     for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
 	IfMgrHintObserver* ho = *ci;
@@ -940,29 +942,41 @@ IfMgrXrlMirror::register_with_ifmgr()
 				     callback(this,
 					      &IfMgrXrlMirror::register_cb))
 	== false) {
-	XLOG_FATAL("Failed to send registration to ifmgr");
+	set_status(FAILED, "Failed to send registration to ifmgr");
+	return;
     }
-    set_status(REGISTERING_WITH_FEA);
+    set_status(STARTING, "Registering with FEA interface manager.");
 }
 
 void
 IfMgrXrlMirror::register_cb(const XrlError& e)
 {
     if (e == XrlError::OKAY()) {
-	set_status(WAITING_FOR_TREE_IMAGE);
+	set_status(STARTING, "Waiting to receive interface data.");
     } else {
-	XLOG_FATAL("Failed to register with ifmgr: \"%s\"", e.str().c_str());
+	set_status(FAILED, "Failed to send registration to ifmgr");
     }
 }
 
-IfMgrXrlMirror::Status
-IfMgrXrlMirror::status() const
+void
+IfMgrXrlMirror::unregister_with_ifmgr()
 {
-    return _status;
+    XrlIfmgrReplicatorV0p1Client c(_rtr);
+    if (c.send_unregister_ifmgr_mirror(_rtarget.c_str(), _rtr->instance_name(),
+		callback(this, &IfMgrXrlMirror::unregister_cb))
+	== false) {
+	set_status(FAILED, "Failed to send unregister to FEA");
+	return;
+    }
+    set_status(SHUTTING_DOWN, "De-registering with FEA interface manager.");
 }
 
 void
-IfMgrXrlMirror::set_status(Status s)
+IfMgrXrlMirror::unregister_cb(const XrlError& e)
 {
-    _status = s;
+    if (e == XrlError::OKAY()) {
+	set_status(SHUTDOWN);
+    } else {
+	set_status(FAILED, "Failed to de-registration to ifmgr");
+    }
 }

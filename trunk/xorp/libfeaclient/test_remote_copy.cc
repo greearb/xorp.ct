@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.2 2003/09/20 00:15:47 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.3 2003/10/22 21:09:32 hodson Exp $"
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.2 2003/09/20 00:15:47 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.3 2003/10/22 21:09:32 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -301,12 +301,17 @@ test_main()
     // Create mirror
     IfMgrXrlMirror m0(e, fs->addr(), fs->port(), mrtr.class_name().c_str());
 
+    m0.startup();
+
     expired = false;
     t = e.set_flag_after_ms(3000, &expired);
-    while (expired == false && m0.status() !=  IfMgrXrlMirror::READY) {
+    while (m0.status() != RUNNING) {
 	e.run();
 	if (expired) {
-	    verbose_log("Did not get complete tree.\n");
+	    verbose_log("Did reach running state: "
+			"state = %s note = \"%s\".\n",
+			service_status_name(m0.status()),
+			m0.status_note().c_str());
 	    return -1;
 	}
     }
@@ -314,6 +319,19 @@ test_main()
     if (m0.iftree() != mgr.iftree()) {
 	verbose_log("Local and remote trees do not match up.\n");
 	return -1;
+    }
+
+    m0.shutdown();
+    expired = false;
+    t = e.set_flag_after_ms(3000, &expired);
+    while (expired == false && m0.status() != SHUTDOWN) {
+	e.run();
+	if (expired) {
+	    verbose_log("Failed to shutdown: state = %s note = %s\n",
+			service_status_name(m0.status()),
+			m0.status_note().c_str());
+	    return -1;
+	}
     }
 
     return 0;

@@ -12,14 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.3 2003/09/10 19:21:33 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.1 2003/09/20 00:15:46 hodson Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 
 #include "config.h"
 
+#include "libxorp/service.hh"
+#include "libxipc/finder_constants.hh"
+
 #include "xrl/targets/fea_ifmgr_mirror_base.hh"
+
 #include "ifmgr_atoms.hh"
 #include "ifmgr_cmd_queue.hh"
 
@@ -56,34 +60,35 @@ public:
  * state via Xrls sent by the IfMgr.
  *
  * The IfMgrXrlMirror contains a copy of the central interface
- * configuration state.  Upon construction it registers itself with
- * the main configuration state maintainer.  It should then receive the
- * complete configuration tree and future updates to the tree.
+ * configuration state.  The IfMgrXrlMirror class implements the @ref
+ * ServiceBase interface.  When @ref startup() is called it attempts
+ * to register with the @ref IfMgrXrlReplicationManager instance
+ * running within the FEA.  If registration succeeds it will receive
+ * the complete configuration tree and receive future configuration
+ * tree.  Once the configuration tree is received it transitions into
+ * the RUNNING state and is considered operational.
  *
- * The local copy of the interface configuration state is accessible
- * through the @ref iftree() method.  The status of IfMgrXrlMirror
- * is obtainable through the @ref status() method. Only when the
- * IfMgrXrlMirror has the @ref READY status should the information
- * returned by @ref iftree() be relied upon.
+ * When the status of the IfMgrXrlMirror is RUNNING, then a copy of
+ * the interface configuration state is accessible through the
+ * @ref iftree() method.  If the instance is another state then
+ * configuration tree available through the IfMgrXrlMirror will be
+ * empty.
  *
- * Interested parties can register as hint observers through the
- * @ref attach_hint_observer() and @ref detach_hint_observer() methods.
- * They will then receive notification of when the complete
- * IfMgrIfTree state has been received and told when they should
- * check the state again.
+ * For parties that are interested in receiving synchronous
+ * configuration tree change notifications, they can register as hint
+ * observers.  Hints provide coarse indication that a change has
+ * occured - they announce the which item in the tree has changed and
+ * should be checked.  Hint observers express interest through the
+ * @ref attach_hint_observer() and @ref detach_hint_observer()
+ * methods.
  */
 class IfMgrXrlMirror
-    : protected IfMgrXrlMirrorRouterObserver, protected IfMgrHintObserver
+    : public	ServiceBase,
+      protected	IfMgrXrlMirrorRouterObserver,
+      protected	IfMgrHintObserver
 {
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
-
-    enum Status {
-	NO_FINDER,
-	REGISTERING_WITH_FEA,
-	WAITING_FOR_TREE_IMAGE,
-	READY
-    };
 
     /**
      * Default Xrl Target to register interest with.
@@ -95,50 +100,37 @@ public:
      * Constructor
      *
      * @param eventloop to use for events.
-     * @param reg_tgt name of Xrl class or target to supply interface
-     * configuration updates.
-     */
-    IfMgrXrlMirror(EventLoop&	eventloop,
-		   const char*	reg_tgt = DEFAULT_REGISTRATION_TARGET);
-
-    /**
-     * Constructor
-     *
-     * @param eventloop to use for events.
-     * @param finder_addr address to route finder messages to.
-     * @param reg_tgt name of Xrl class or target to supply interface
-     * configuration updates.
-     */
-    IfMgrXrlMirror(EventLoop&	eventloop,
-		   IPv4		finder_addr,
-		   const char*	reg_tgt = DEFAULT_REGISTRATION_TARGET);
-
-    /**
-     * Constructor
-     *
-     * @param eventloop to use for events.
-     * @param finder_addr address to route finder messages to.
+     * @param finder_host address to route finder messages to.
      * @param finder_port port to direct finder messages to.
      * @param reg_tgt name of Xrl class or target to supply interface
      *                configuration updates.
      */
     IfMgrXrlMirror(EventLoop&	e,
-		   IPv4		finder_addr,
-		   uint16_t	finder_port,
-		   const char*	reg_tgt = DEFAULT_REGISTRATION_TARGET);
-
+		   IPv4		finder_host = FINDER_DEFAULT_HOST,
+		   uint16_t	finder_port = FINDER_DEFAULT_PORT,
+		   const char*	reg_tgt     = DEFAULT_REGISTRATION_TARGET);
     ~IfMgrXrlMirror();
+
+    /**
+     * Start running.  Attempt to register instance with the
+     * registration target supplied in the constructor and await
+     * interface configuration tree data.  When data is received
+     * transition into the RUNNING state (see @ref ServiceBase for
+     * states).
+     */
+    void startup();
+
+    /**
+     * Stop running and shutdown.  Deregister with the registration
+     * target and transition to SHUTDOWN state when complete.
+     */
+    void shutdown();
 
     /**
      * @return interface configuration tree.  Should only be trusted when
      * status() is READY.
      */
     inline const IfMgrIfTree& iftree() const		{ return _iftree; }
-
-    /**
-     * @return state of current IfMgrXrlMirror.
-     */
-    Status status() const;
 
     /**
      * Attach an observer interested in receiving IfMgr hints.
@@ -158,23 +150,27 @@ protected:
     void finder_ready_event();
     void finder_disconnect_event();
     void register_with_ifmgr();
+    void unregister_with_ifmgr();
 
 protected:
     void tree_complete();
     void updates_made();
 
 protected:
-    void set_status(Status s);
     void register_cb(const XrlError& e);
+    void unregister_cb(const XrlError& e);
 
 protected:
     EventLoop&			_e;
-    IfMgrXrlMirrorRouter*	_rtr;
+    IPv4			_finder_host;
+    uint16_t			_finder_port;
     IfMgrIfTree	   		_iftree;
     IfMgrCommandDispatcher	_dispatcher;
-    IfMgrXrlMirrorTarget*	_xrl_tgt;
     string			_rtarget;	// registration target (ifmgr)
-    Status			_status;
+
+    IfMgrXrlMirrorRouter*	_rtr;
+    IfMgrXrlMirrorTarget*	_xrl_tgt;
+
     list<IfMgrHintObserver*>	_hint_observers;
 
     XorpTimer			_reg_timer;	// registration timer
