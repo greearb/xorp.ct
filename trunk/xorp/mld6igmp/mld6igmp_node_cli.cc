@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.9 2004/02/29 22:58:01 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.10 2004/03/02 04:06:26 pavlin Exp $"
 
 
 //
@@ -258,7 +258,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface_address(const vector<string>& argv)
 	     secondary_addr_iter != secondary_addr_list.end();
 	     ++secondary_addr_iter) {
 	    IPvX& secondary_addr = *secondary_addr_iter;
-	    cli_print(c_format("%-14s %-39s %-39s\n",
+	    cli_print(c_format("%-14s %-15s %-15s\n",
 			       " ",
 			       " ",
 			       cstring(secondary_addr)));
