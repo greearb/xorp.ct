@@ -1,15 +1,15 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.7 2003/05/05 19:34:00 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.8 2003/05/07 21:58:08 pavlin Exp $
 ##
 
 
 bin_PROGRAMS		 = fea
 bin_PROGRAMS 		+= demo_fea_ifmgr_client
-check_PROGRAMS		+= test_rawsock4 test_ifmanager_transaction
+check_PROGRAMS		 = test_rawsock4 test_ifmanager_transaction
 TESTS			 = $(check_PROGRAMS)
 
-demo_fea_ifmgr_client_SOURCES += demo_fea_ifmgr_client.cc
+demo_fea_ifmgr_client_SOURCES  = demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD    = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxipc/libxipc.a
@@ -38,7 +38,7 @@ test_ifmanager_transaction_SOURCES += iftree.cc
 test_ifmanager_transaction_LDADD    = $(top_builddir)/libxorp/libxorp.a
 
 test_rawsock4_SOURCES	 = test_rawsock4.cc rawsock4.cc
-test_rawsock4_LDADD	+= $(top_builddir)/libxorp/libxorp.a
+test_rawsock4_LDADD	 = $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
 
