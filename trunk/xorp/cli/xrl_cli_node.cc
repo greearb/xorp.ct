@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.9 2003/05/08 00:01:35 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.10 2003/05/29 21:17:14 mjh Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -109,8 +109,8 @@ XrlCliNode::common_0_1_get_status(
 XrlCmdError
 XrlCliNode::common_0_1_shutdown()
 {
-    //XXX this is a placeholder - I don't think this should be used.
-    return XrlCmdError::COMMAND_FAILED();
+    // TODO: XXX: PAVPAVPAV: implement it!!
+    return XrlCmdError::COMMAND_FAILED("Not implemented yet");
 }
 
 XrlCmdError
@@ -147,7 +147,8 @@ XrlCmdError
 XrlCliNode::cli_manager_0_1_stop_cli()
 {
     if (stop_cli() != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED("Failed to stop CLI");
+	string msg = c_format("Failed to stop CLI");
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
     return XrlCmdError::OKAY();
