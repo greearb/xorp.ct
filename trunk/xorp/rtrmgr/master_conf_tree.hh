@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.21 2004/05/28 22:27:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.22 2004/06/10 22:41:52 hodson Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -67,6 +67,11 @@ public:
 		      const string& save_hook, string& errmsg);
     bool load_from_file(const string& filename, uid_t user_id, string& errmsg,
 			string& deltas, string& deletions);
+
+    ModuleManager& module_manager() const {
+	return _task_manager.module_manager();
+    }
+
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,
 		      ConfigTree& deletion_tree);
@@ -80,10 +85,6 @@ private:
 
     bool do_exec() const { return _task_manager.do_exec(); }
     bool verbose() const { return _task_manager.verbose(); }
-
-    ModuleManager& module_manager() const {
-	return _task_manager.module_manager();
-    }
 
     XorpClient& xorp_client() const { return _task_manager.xorp_client(); }
 

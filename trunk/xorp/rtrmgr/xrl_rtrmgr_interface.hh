@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.15 2004/12/06 00:31:05 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.16 2004/12/06 00:51:40 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -174,6 +174,8 @@ private:
     bool verify_token(const string& token) const;
     uint32_t get_user_id_from_token(const string& token) const;
     void lock_timeout();
+    void initialize_client_state(uint32_t user_id, UserInstance *user);
+    void send_client_state(uint32_t user_id, UserInstance *user);
 
     XrlRtrmgrClientV0p2Client _client_interface;
     multimap<uint32_t, UserInstance*> _users;
@@ -190,6 +192,9 @@ private:
     bool	_config_locked;
     uint32_t	_lock_holder;
     XorpTimer	_lock_timer;
+
+    // generic place to store background task callback timers
+    list <XorpTimer> _background_tasks;
 
     bool	_verbose;	//  Set to true if output is verbose
 };

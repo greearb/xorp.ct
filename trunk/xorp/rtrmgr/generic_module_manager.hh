@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.1 2004/12/06 00:31:42 mjh Exp $
+// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.2 2004/12/07 10:45:50 pavlin Exp $
 
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
@@ -51,7 +51,10 @@ public:
 	MODULE_SHUTTING_DOWN	= 5,
 
 	// The process has not been started
-	MODULE_NOT_STARTED	= 6
+	MODULE_NOT_STARTED	= 6,
+
+	// We have no record of such a module
+	NO_SUCH_MODULE          = 7
     };
  
     virtual string str() const;

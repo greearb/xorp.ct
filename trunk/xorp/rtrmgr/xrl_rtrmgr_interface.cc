@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.24 2004/08/19 00:44:08 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.25 2004/12/06 00:51:40 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -220,11 +220,55 @@ XrlRtrmgrInterface::rtrmgr_0_1_authenticate_client(
     }
     if (token == user->authtoken()) {
 	user->set_authenticated(true);
+	initialize_client_state(user_id, user);
 	return XrlCmdError::OKAY();
     } else {
 	string err = "Bad authtoken";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+}
+
+void
+XrlRtrmgrInterface::initialize_client_state(uint32_t user_id, 
+					    UserInstance *user)
+{
+    /* we need to send the running config and module state to the
+       client, but we first need to return from the current XRL, so we
+       schedule this on a zero-second timer */
+    XorpTimer t;
+    t = _eventloop.new_oneoff_after_ms(0,
+             callback(this, &XrlRtrmgrInterface::send_client_state, 
+		      user_id, user));
+    _background_tasks.push_front(t);
+}
+
+void
+XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
+{
+    debug_msg("send_client_state %s\n", user->clientname().c_str());
+    string config = _master_config_tree->show_tree();
+    string client = user->clientname();
+    GENERIC_CALLBACK cb2;
+    cb2 = callback(this, &XrlRtrmgrInterface::client_updated, 
+		   user_id, user);
+    debug_msg("Sending config changed to %s\n", client.c_str());
+    _client_interface.send_config_changed(client.c_str(),
+					  0, config, "", cb2);
+
+    debug_msg("Sending mod status changed to %s\n", client.c_str());
+    list <string> module_names;
+    ModuleManager &mmgr(_master_config_tree->module_manager());
+    mmgr.get_module_list(module_names);
+    list <string>::iterator i;
+    for(i = module_names.begin(); i != module_names.end(); i++) {
+	debug_msg("module: %s\n", (*i).c_str());
+	Module::ModuleStatus status = mmgr.module_status(*i);
+	if (status != Module::NO_SUCH_MODULE) {
+	    debug_msg("status %d\n", status);
+	    _client_interface.send_module_status(client.c_str(),
+                 *i, (uint32_t)status, cb2);
+	}
+    } 
 }
 
 XrlCmdError 
@@ -322,6 +366,14 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
     }
     return XrlCmdError::OKAY();
 }
+
+/**
+ * this interface is deprecated as the main way for xorpsh to get the
+ * running config from the router manager.  It is retained for
+ * debugging purposes.  xorpsh now gets its config automatically
+ * immediatedly after registering which removes a potential timing
+ * hole where the client could be told about a change to the config
+ * before it has asked what the current config is. */
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(

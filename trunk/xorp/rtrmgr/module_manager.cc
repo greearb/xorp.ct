@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.35 2004/12/06 00:31:05 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.36 2004/12/06 01:15:59 mjh Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -687,6 +687,17 @@ ModuleManager::module_exists(const string& module_name) const
     return _modules.find(module_name) != _modules.end();
 }
 
+Module::ModuleStatus 
+ModuleManager::module_status(const string& module_name) const
+{
+    const Module *m = const_find_module(module_name);
+    if (m) {
+	return m->status();
+    } else {
+	return Module::NO_SUCH_MODULE;
+    }
+}
+
 void
 ModuleManager::module_status_changed(const string& module_name,
 				     Module::ModuleStatus old_status,
@@ -694,6 +705,15 @@ ModuleManager::module_status_changed(const string& module_name,
 {
     UNUSED(old_status);
     _xrl_interface->module_status_changed(module_name, new_status);
+}
+
+void
+ModuleManager::get_module_list(list <string>& modules)
+{
+    map<string, Module *>::iterator i;
+    for (i = _modules.begin(); i != _modules.end(); i++) {
+	modules.push_back(i->first);
+    }
 }
 
 void

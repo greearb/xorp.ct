@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.30 2004/08/19 01:01:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.31 2004/12/06 00:31:05 mjh Exp $"
 
 
 #include <sys/types.h>
@@ -199,8 +199,12 @@ XorpShell::run()
     }
 
     _mode = MODE_INITIALIZING;
+    _configuration = "";
+    _got_config = false;
 
-    request_config();
+    /* we wait now to receive the configuration and list of running
+       modules from the rtrmgr.  We don't have to ask for these - we
+       just get them automatically as a result of authenticating */
 
     XLOG_TRACE(_verbose, "Waiting to receive configuration from rtrmgr...");
     while (_got_config == false) {
@@ -275,6 +279,7 @@ XorpShell::generic_done(const XrlError& e)
     exit(1);
 }
 
+#if 0
 void 
 XorpShell::request_config()
 {
@@ -309,6 +314,7 @@ XorpShell::receive_config(const XrlError& e, const bool* ready,
     }
     exit(1);
 }
+#endif
 
 void
 XorpShell::lock_config(LOCK_CALLBACK cb)
@@ -387,6 +393,13 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	// This is the response back to our own request
 	return;
     }
+    if (_mode == MODE_INITIALIZING) {
+	// We were just starting up
+	assert(deletions == "");
+	_configuration = deltas;
+	_got_config = true;
+	return;
+    }
 
     string response;
     if (!_ct->apply_deltas(user_id, deltas,
@@ -409,6 +422,11 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	// XXX: it's not clear we can continue if this happens
     }
 
+    if (_mode == MODE_LOADING) {
+	// No need to notify, as the change was caused by us.
+	return;
+    }
+
     // Notify the user that the config changed
     struct passwd *pwent = getpwuid(user_id);
     string username;
@@ -417,10 +435,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
     else
 	username = pwent->pw_name;
 
-    if (_mode == MODE_LOADING) {
-	// No need to notify, as the change was caused by us.
-	return;
-    }
+    
     string alert = "The configuration had been changed by user " +
 	username + "\n";
     _router_cli->notify_user(alert, true);
@@ -432,6 +447,8 @@ XorpShell::module_status_change(const string& modname,
 {
     UNUSED(modname);
     UNUSED(status);
+    debug_msg("Module status change: %s status %d\n",
+	      modname.c_str(), (int)status);
 }
 
 
