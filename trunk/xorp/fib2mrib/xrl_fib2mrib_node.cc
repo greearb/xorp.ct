@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.13 2004/09/17 14:23:20 abittau Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.14 2004/09/17 19:39:48 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -890,6 +890,31 @@ XrlFib2mribNode::fea_fib_client_0_1_delete_route6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Route resolve notification.
+ *
+ *  @param network the network address prefix of the lookup
+ *  which failed or for which upper layer intervention is
+ *  requested from the FIB.
+ */
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_resolve_route4(
+    // Input values,
+    const IPv4Net&	network)
+{
+    UNUSED(network);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_resolve_route6(
+    // Input values,
+    const IPv6Net&	network)
+{
+    UNUSED(network);
     return XrlCmdError::OKAY();
 }
 

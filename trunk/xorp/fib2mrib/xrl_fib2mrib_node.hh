@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.7 2004/06/02 18:28:16 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.8 2004/06/10 22:41:01 hodson Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -205,6 +205,21 @@ protected:
 	const IPv6Net&	network,
 	const string&	ifname,
 	const string&	vifname);
+
+    /**
+     *  Route resolve notification.
+     *
+     *  @param network the network address prefix of the lookup
+     *  which failed or for which upper layer intervention is
+     *  requested from the FIB.
+     */
+    XrlCmdError fea_fib_client_0_1_resolve_route4(
+	// Input values,
+	const IPv4Net&	network);
+
+    XrlCmdError fea_fib_client_0_1_resolve_route6(
+	// Input values,
+	const IPv6Net&	network);
 
     /**
      *  Enable/disable/start/stop Fib2mrib.

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_fib_client.xif,v 1.2 2004/03/18 13:13:43 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_fib_client.xif,v 1.3 2004/10/26 01:29:51 bms Exp $ */
 
 /*
  * FEA Forwarding Information Base Client XRL interface.
@@ -63,4 +63,16 @@ interface fea_fib_client/0.1 {
 	 */
 	delete_route4	? network:ipv4net & ifname:txt & vifname: txt
 	delete_route6	? network:ipv6net & ifname:txt & vifname: txt
+
+	/**
+	 * Notification of a route resolution request. This is issued
+	 * when the forwarding plane cannot find any route to a given
+	 * destination, even a candidate default.
+	 *
+	 * @param network the address of the destination.
+	 * forwarding plane requires a route to be resolved by the
+	 * upper layer.
+	 */
+	resolve_route4	? network:ipv4net
+	resolve_route6	? network:ipv6net
 }
