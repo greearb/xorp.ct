@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.6 2003/04/02 04:46:53 hodson Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.7 2003/04/03 19:03:30 hodson Exp $"
 
 #include <strings.h>
 #include "libxorp_module.h"
@@ -73,7 +73,7 @@ Heap::resize(int new_size)
         return 1 ; /* error */
     } 
     if (_size > 0) {
-        bcopy(_p, p, _size * sizeof(*p) );
+        memcpy(p, _p, _size * sizeof(*p) );
         delete[] _p;
     }
     _p = p ;
@@ -236,7 +236,7 @@ Heap::heapify()
 
 Heap::Heap(int ofs)
 {
-    bzero(this, sizeof(*this) );
+    memset(this, 0, sizeof(*this) );
     _offset = ofs ;
     DBG(fprintf(stderr, "++ constructor for 0x%p\n", this););
 }
@@ -246,7 +246,7 @@ Heap::~Heap()
 {
     if (_size >0 )
         delete[] _p ;
-    bzero(this, sizeof(*this) );
+    memset(this, 0, sizeof(*this) );
 }
 
 void
