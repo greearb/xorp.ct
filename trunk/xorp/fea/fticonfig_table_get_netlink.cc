@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.9 2003/10/01 22:49:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.10 2003/10/13 02:05:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -117,6 +117,11 @@ FtiConfigTableGetNetlink::get_table4(list<Fte4>& fte_list)
 bool
 FtiConfigTableGetNetlink::get_table6(list<Fte6>& fte_list)
 {
+#ifndef HAVE_IPV6
+    UNUSED(fte_list);
+    
+    return false;
+#else
     list<FteX> ftex_list;
     
     // Get the table
@@ -135,6 +140,7 @@ FtiConfigTableGetNetlink::get_table6(list<Fte6>& fte_list)
     }
     
     return true;
+#endif // HAVE_IPV6
 }
 
 #ifndef HAVE_NETLINK_SOCKETS
