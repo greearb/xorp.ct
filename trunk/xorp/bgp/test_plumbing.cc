@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.18 2003/09/27 02:17:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.1 2003/09/27 02:20:50 atanu Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
 #include "bgp.hh"
-#include "plumbing_test.hh"
+#include "test_plumbing.hh"
 
 PlumbingTest::PlumbingTest(EventLoop& eventloop, BGPMain& bgp) 
     //dummy args to BGPPlumbing because we'll not use this constructor
