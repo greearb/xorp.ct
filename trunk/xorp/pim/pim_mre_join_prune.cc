@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.3 2002/12/17 10:03:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.4 2003/01/07 02:36:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1657,7 +1657,7 @@ PimMre::recompute_is_join_desired_rp()
 			      new_group_bool);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
-    // Restart the JoinTimer
+    // Set JoinTimer to t_periodic
     join_timer().start(join_prune_period, 0,
 		       pim_mre_join_timer_timeout, this);
     // Set the new state
@@ -1685,7 +1685,7 @@ PimMre::recompute_is_join_desired_rp()
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
 			      new_group_bool);
     }
-    // Cancel the JoinTimer
+    // Cancel Join Timer
     join_timer().cancel();
     // Set the new state
     set_not_joined_state();
@@ -1745,7 +1745,7 @@ PimMre::recompute_is_join_desired_wc()
 	    join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
 	}
     }
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     join_timer().start(join_prune_period, 0,
 		       pim_mre_join_timer_timeout, this);
     // Set the new state
@@ -1781,7 +1781,7 @@ PimMre::recompute_is_join_desired_wc()
 				  new_group_bool);
 	}
     }
-    // Cancel the JoinTimer
+    // Cancel Join Timer
     join_timer().cancel();
     // Set the new state
     set_not_joined_state();
@@ -1832,7 +1832,7 @@ PimMre::recompute_is_join_desired_sg()
 			      new_group_bool);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     join_timer().start(join_prune_period, 0,
 		       pim_mre_join_timer_timeout, this);
     // Set the new state
@@ -1860,7 +1860,7 @@ PimMre::recompute_is_join_desired_sg()
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
 			      new_group_bool);
     }
-    // Cancel the JoinTimer
+    // Cancel Join Timer
     join_timer().cancel();
     // SPTbit(S,G) to FALSE
     set_spt(false);
@@ -1978,7 +1978,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 				  new_group_bool);
 	}
     }
-    // Cancel the OverrideTimer
+    // Cancel Override Timer
     override_timer().cancel();
     set_pruned_state();
     return (true);
@@ -2102,7 +2102,7 @@ pim_mre_join_timer_timeout(void *data_pointer)
 			      new_group_bool);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     pim_mre->join_timer().start(join_prune_period, 0,
 				pim_mre_join_timer_timeout, pim_mre);
     return;
@@ -2140,7 +2140,7 @@ pim_mre_join_timer_timeout(void *data_pointer)
 	    join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
 	}
     }
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     pim_mre->join_timer().start(join_prune_period, 0,
 				pim_mre_join_timer_timeout, pim_mre);
     return;
@@ -2170,7 +2170,7 @@ pim_mre_join_timer_timeout(void *data_pointer)
 			      new_group_bool);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     pim_mre->join_timer().start(join_prune_period, 0,
 				pim_mre_join_timer_timeout, pim_mre);
     return;
