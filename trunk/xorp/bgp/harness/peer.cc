@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.7 2003/01/21 18:54:27 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.8 2003/01/22 02:46:35 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -597,7 +597,7 @@ Peer::assertX(const string& line, const vector<string>& words)
 	       _expect._list.size())
 		xorp_throw(InvalidString, 
 			   c_format("Expected list size to be %d actual %d",
-			      atoi(words[4].c_str()), _expect._list.size()));
+			      atoi(words[3].c_str()), _expect._list.size()));
 	    break;
 	default:
 	    xorp_throw(InvalidString, 
