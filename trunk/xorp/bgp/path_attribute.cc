@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.41 2003/10/23 04:10:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.42 2003/10/23 06:26:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -604,7 +604,7 @@ MPReachNLRIAttribute<IPv4>::encode()
 
 template <>
 MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI),
+    : PathAttribute((Flags)(Optional), MP_REACH_NLRI),
       _afi(AFI_IPV6),
       _safi(safi)
 {
@@ -613,7 +613,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(Safi safi)
 
 template <>
 MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI),
+    : PathAttribute((Flags)(Optional), MP_REACH_NLRI),
       _afi(AFI_IPV4),
       _safi(safi)
 {
@@ -641,7 +641,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
     : PathAttribute(d)
 {
-    if (!optional() || !transitive())
+    if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
@@ -758,7 +758,7 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
     : PathAttribute(d)
 {
-    if (!optional() || !transitive())
+    if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
@@ -968,7 +968,7 @@ MPUNReachNLRIAttribute<IPv4>::encode()
 
 template <>
 MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI),
+    : PathAttribute((Flags)(Optional), MP_UNREACH_NLRI),
       _afi(AFI_IPV6),
       _safi(safi)
 {
@@ -977,7 +977,7 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(Safi safi)
 
 template <>
 MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI),
+    : PathAttribute((Flags)(Optional), MP_UNREACH_NLRI),
       _afi(AFI_IPV4),
       _safi(safi)
 {
@@ -1004,7 +1004,7 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
     : PathAttribute(d)
 {
-    if (!optional() || !transitive())
+    if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
@@ -1071,7 +1071,7 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
     : PathAttribute(d)
 {
-    if (!optional() || !transitive())
+    if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
