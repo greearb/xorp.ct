@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.16 2003/06/25 18:57:52 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.17 2003/06/26 02:22:04 atanu Exp $
 #
 
 #
@@ -197,6 +197,10 @@ test2()
 	bgp_peer_updates_received peer1
     done
 
+    # The reset above will have removed state about peer2 from the coordinator
+    # but the tcp connection between test_peer2 and the bgp process will not
+    # have been dropped. So by re-initialising like this we will toggle the
+    # original connection.
     coord target $HOST $PORT2
     coord initialise attach peer2
 
