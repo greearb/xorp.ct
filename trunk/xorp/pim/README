@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.13 2004/02/22 03:18:45 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.14 2004/02/26 13:21:39 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -58,17 +58,18 @@ it for each router:
 	;;
 
  - If you don't want to configure the PIM-SM router as a Candidate-BSR
-   and/or a Candidate-RP, then comment-out the CAND_BSR_VIF
-   and/or CAND_RP_VIF respectively.
+   or a Candidate-RP, then comment-out CAND_BSR_VIF or CAND_RP_VIF
+   respectively.
 
  - If you want to configure static RPs, add all IP addresses to the
-   variable STATIC_RPS:
+   variable STATIC_RPS4 or STATIC_RPS6 (for IPv4 and IPv6 respectively):
 
-	STATIC_RPS="10.2.0.1 10.4.0.2"
+	STATIC_RPS4="10.2.0.1 10.4.0.2"
+	STATIC_RPS6=""
 
  - All configuration variables described above (ENABLE_VIFS, CAND_BSR_VIF,
-   CAND_RP_VIF, and STATIC_RPS) can be predefined in your shell
-   environment instead.
+   CAND_RP_VIF, STATIC_RPS4, and STATIC_RPS6) can be predefined in your
+   shell environment instead.
 
  - By default, ``./test_pim'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
