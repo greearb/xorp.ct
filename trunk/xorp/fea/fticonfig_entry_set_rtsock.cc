@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.8 2003/05/22 01:05:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.9 2003/09/16 19:29:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -50,13 +50,12 @@ FtiConfigEntrySetRtsock::start()
 {
     return (RoutingSocket::start());
 }
-    
+
 int
 FtiConfigEntrySetRtsock::stop()
 {
     return (RoutingSocket::stop());
 }
-
 
 bool
 FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
@@ -115,8 +114,8 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& )
 bool
 FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 {
-#define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
-    char		rtmbuf[RTMBUFSIZE];
+    static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
+    char		rtmbuf[buffer_size];
     struct rt_msghdr	*rtm;
     struct sockaddr_in	*sin_dst, *sin_gateway, *sin_netmask;
     RoutingSocket&	rs = *this;
@@ -189,8 +188,8 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 bool
 FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 {
-#define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
-    char		rtmbuf[RTMBUFSIZE];
+    static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
+    char		rtmbuf[buffer_size];
     struct rt_msghdr	*rtm;
     struct sockaddr_in	*sin_dst, *sin_netmask = NULL;
     RoutingSocket&	rs = *this;
