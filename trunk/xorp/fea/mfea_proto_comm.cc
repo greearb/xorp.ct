@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.3 2003/05/16 19:23:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.4 2003/05/21 05:32:51 pavlin Exp $"
 
 
 //
@@ -235,6 +235,14 @@ ProtoComm::start(void)
 	}
     }
     
+    // If necessary, start PIM multicast routing
+    if (_ipproto == IPPROTO_PIM) {
+	if (mfea_node().mfea_mrouter().start_pim() < 0) {
+	    stop();
+	    return (XORP_ERROR);
+	}
+    }
+    
     return (XORP_OK);
 }
 
@@ -251,6 +259,11 @@ ProtoComm::stop(void)
 {
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
+    
+    // If necessary, stop PIM multicast routing
+    if (_ipproto == IPPROTO_PIM) {
+	mfea_node().mfea_mrouter().stop_pim();
+    }
     
     close_proto_socket();
     
