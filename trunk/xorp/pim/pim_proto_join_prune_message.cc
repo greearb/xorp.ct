@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.5 2003/01/07 02:36:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.6 2003/01/12 04:56:30 pavlin Exp $"
 
 
 //
@@ -386,11 +386,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (create_flags)
 		    goto pim_mre_find_error;
 	    } else {
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_join_rp(vif_index, holdtime);
-		else
+		} else {
 		    pim_mre->rp_see_join_rp(vif_index, holdtime,
 					    target_nbr_addr);
+		}
 	    }
 	}
 	// (*,*,RP) Prune
@@ -413,11 +414,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (create_flags)
 		    goto pim_mre_find_error;
 	    } else {
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_prune_rp(vif_index, holdtime);
-		else
+		} else {
 		    pim_mre->rp_see_prune_rp(vif_index, holdtime,
 					     target_nbr_addr);
+		}
 	    }
 	}
 	// (*,G) Join
@@ -441,11 +443,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (create_flags)
 		    goto pim_mre_find_error;
 	    } else {
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_join_wc(vif_index, holdtime);
-		else
+		} else {
 		    pim_mre->wc_see_join_wc(vif_index, holdtime,
 					    target_nbr_addr);
+		}
 	    }
 	}
 	// (*,G) Prune
@@ -471,11 +474,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (create_flags)
 		    goto pim_mre_find_error;
 	    } else {
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_prune_wc(vif_index, holdtime);
-		else
+		} else {
 		    pim_mre->wc_see_prune_wc(vif_index, holdtime,
 					     target_nbr_addr);
+		}
 	    }
 	}
 	// (S,G,rpt) Join
@@ -499,11 +503,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (create_flags)
 		    goto pim_mre_find_error;
 	    } else {
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_join_sg_rpt(vif_index, holdtime);
-		else
+		} else {
 		    pim_mre->sg_rpt_see_join_sg_rpt(vif_index, holdtime,
 						    target_nbr_addr);
+		}
 	    }
 	}
 	// (S,G,rpt) Prune
@@ -520,10 +525,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    
 	    lookup_flags	= PIM_MRE_SG_RPT;
 	    // XXX: even if no entry, the (S,G,rpt) Prune should create one
+	    // XXX: even if the (S,G,rpt) Prune is not for me, try to create
+	    // an entry.
 	    if (i_am_target_router_bool)
 		create_flags = lookup_flags;
 	    else
-		create_flags = 0;
+		create_flags = lookup_flags;
 	    pim_mre = pim_mrt().pim_mre_find(source_addr, group_addr,
 					     lookup_flags, create_flags);
 	    if (pim_mre == NULL) {
@@ -539,12 +546,14 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		    join_wc_received_bool
 			= (join_wc_map.find(group_addr) != join_wc_map.end());
 		}
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_prune_sg_rpt(vif_index, holdtime,
 						  join_wc_received_bool);
-		else
+		} else {
 		    pim_mre->sg_rpt_see_prune_sg_rpt(vif_index, holdtime,
 						     target_nbr_addr);
+		    pim_mre->entry_try_remove();
+		}
 	    }
 	    
 	    //
@@ -588,11 +597,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (create_flags)
 		    goto pim_mre_find_error;
 	    } else {
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_join_sg(vif_index, holdtime);
-		else
+		} else {
 		    pim_mre->sg_see_join_sg(vif_index, holdtime,
 					    target_nbr_addr);
+		}
 	    }
 	}
 	// (S,G) Prune
@@ -616,11 +626,12 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (create_flags)
 		    goto pim_mre_find_error;
 	    } else {
-		if (i_am_target_router_bool)
+		if (i_am_target_router_bool) {
 		    pim_mre->receive_prune_sg(vif_index, holdtime);
-		else
+		} else {
 		    pim_mre->sg_see_prune_sg(vif_index, holdtime,
 					     target_nbr_addr);
+		}
 	    }
 	    
 	    //
@@ -629,16 +640,27 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    //
 	    if (! i_am_target_router_bool) {
 		PimMre *pim_mre_sg_rpt = NULL;
-		if (pim_mre != NULL) {
+		if (pim_mre != NULL)
 		    pim_mre_sg_rpt = pim_mre->sg_rpt_entry();
-		} else {
+		if (pim_mre_sg_rpt == NULL) {
+		    // XXX: always create the (S,G,rpt) entry even
+		    // if the (S,G) Prune is not for me
+		    lookup_flags = PIM_MRE_SG_RPT;
+		    create_flags = lookup_flags;
 		    pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr,
 							    group_addr,
-							    PIM_MRE_SG_RPT, 0);
+							    lookup_flags,
+							    create_flags);
+		    if (pim_mre_sg_rpt == NULL) {
+			if (create_flags)
+			    goto pim_mre_find_error;
+		    }
 		}
-		if (pim_mre_sg_rpt != NULL)
+		if (pim_mre_sg_rpt != NULL) {
 		    pim_mre_sg_rpt->sg_rpt_see_prune_sg(vif_index, holdtime,
 							target_nbr_addr);
+		    pim_mre_sg_rpt->entry_try_remove();
+		}
 	    }
 	}
     }
