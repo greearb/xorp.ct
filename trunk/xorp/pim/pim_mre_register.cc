@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.13 2004/02/22 03:45:34 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.14 2004/02/23 10:21:41 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -266,8 +266,8 @@ PimMre::register_stop_timer_timeout()
 	    TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0),
 	    callback(this, &PimMre::register_stop_timer_timeout));
     // Send Null Register
-    pim_vif = pim_node().vif_find_same_subnet_or_p2p(source_addr());
-    if ((pim_vif != NULL) && (pim_vif->is_up()) && (rp_addr_ptr() != NULL)) {
+    pim_vif = pim_node().vif_find_by_vif_index(rpf_interface_s());
+    if ((pim_vif != NULL) && pim_vif->is_up() && (rp_addr_ptr() != NULL)) {
 	pim_vif->pim_register_null_send(*rp_addr_ptr(),
 					source_addr(),
 					group_addr());
