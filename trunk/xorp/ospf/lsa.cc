@@ -160,7 +160,7 @@ Lsa_header::str() const
 	break;
     }
 
-    output += c_format(" LS type %u", get_ls_type());
+    output += c_format(" LS type %#x", get_ls_type());
     output += c_format(" Link State ID %u", get_link_state_id());
     output += c_format(" Advertising Router %#x", get_advertising_router());
     output += c_format(" LS sequence number %u", get_ls_sequence_number());
@@ -278,7 +278,7 @@ LsaDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
     i = _lsa_decoders.find(type);
     if (i == _lsa_decoders.end())
 	xorp_throw(BadPacket,
-		   c_format("OSPF Version %u Unknown LSA Type %u",
+		   c_format("OSPF Version %u Unknown LSA Type %#x",
 			    version, type));
     
     Lsa *lsa = i->second;
