@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.10 2003/07/31 00:35:18 pavlin Exp $
+## $XORP: xorp/Makefile.am,v 1.11 2003/08/06 21:42:18 hodson Exp $
 ##
 
 # --- Options
@@ -8,7 +8,8 @@ AUTOMAKE_OPTIONS	= foreign
 ETAGS_ARGS		= --c++
 
 # --- Libraries and utilities (directory ordering is important)
-SUBDIRS	 = libxorp libcomm libxipc libproto mrt xrl cli policy utils
+SUBDIRS	 = libxorp libcomm libxipc libproto mrt xrl libfeaclient
+SUBDIRS += cli policy utils
 
 # --- Dual Libraries/Applications (directory ordering should not matter)
 SUBDIRS	+= fea rib
@@ -28,6 +29,6 @@ SUBDIRS += @OSPFD@ @MIBS@
 ## to anybody else
 ##
 
-# --- Stop compilation here if not using GNU make 
+# --- Stop compilation here if not using GNU make
 -include NON_EXISTANT_GNUMAKEFILE
 

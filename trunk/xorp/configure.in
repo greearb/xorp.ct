@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.57 2003/08/01 23:38:56 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.58 2003/08/21 23:56:25 fred Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -189,23 +189,23 @@ dnl ----------------------------
 dnl --with-path-to-snmpd
 dnl ----------------------------
 AC_ARG_WITH(path-to-snmpd, [  --with-path-to-snmpd=DIR specify path to the snmpd executable],
-	    [snmpd=${withval}/snmpd;], [snmpd="not_found";] 
+	    [snmpd=${withval}/snmpd;], [snmpd="not_found";]
 )
 
 dnl ----------------------------
 dnl --with-path-to-net-snmp-src
 dnl ----------------------------
-AC_ARG_WITH(path-to-net-snmp-src, 
+AC_ARG_WITH(path-to-net-snmp-src,
 	    [  --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree],
-	    [path_to_net_snmp_src=${withval};], [path_to_net_snmp_src="no";] 
+	    [path_to_net_snmp_src=${withval};], [path_to_net_snmp_src="no";]
 )
 
 dnl ----------------------------
 dnl --without-snmp
 dnl ----------------------------
-AC_ARG_WITH(snmp, 
+AC_ARG_WITH(snmp,
 	    [  --without-snmp          do not build XORP MIBs for Net-SNMP],
-	    [snmp="no";], [snmp="yes";] 
+	    [snmp="no";], [snmp="yes";]
 )
 
 
@@ -233,7 +233,7 @@ dnl  Get project-specific macros
 dnl ----------------------------
 
 builtin(include, config/acxorp.m4)
- 
+
 dnl ---------------------------------------------------------------------------
 dnl Additional tool probes
 dnl ---------------------------------------------------------------------------
@@ -284,7 +284,7 @@ AC_CACHE_CHECK(if default make is GNU make, xorp_cv_default_gmake,
 AC_CHECK_PROGS(PYTHON, python2 python, "NO_PYTHON")
 if test "${PYTHON}" != "NO_PYTHON" ; then
   AC_CACHE_CHECK(
-    "python version 2.0 or above", xorp_python_good, 
+    "python version 2.0 or above", xorp_python_good,
     changequote(<<,>>)dnl
     PY_VERSION=`$PYTHON -c 'import sys; print sys.version[[:3]]' | tr -cd '[[:digit:]]'`
     changequote([,])dnl
@@ -318,7 +318,7 @@ if test "${xr_openssl_prefix}" = "" ; then
 # User has not specified an OpenSSL prefix, may be in cache, otherwise take
 # a guess
     AC_CACHE_CHECK(
-	"OpenSSL installation prefix", 
+	"OpenSSL installation prefix",
 	xr_cv_openssl_prefix,
 	[
 	    # Prefer base install over local install, assume base if not found
@@ -339,7 +339,7 @@ elif test "${xr_openssl_prefix}" != "${xr_cv_openssl_prefix}"; then
 
     # This cache check is doomed to fail because we unset variable,
     # but use it for consistent looking output.
-    AC_CACHE_CHECK("OpenSSL installation prefix", 
+    AC_CACHE_CHECK("OpenSSL installation prefix",
 		   xr_cv_openssl_prefix,
 		   xr_cv_openssl_prefix="${xr_openssl_prefix}")
 fi
@@ -356,7 +356,7 @@ else
 fi
 
 dnl ---------------------------------------------------------------------------
-dnl Check for programs 
+dnl Check for programs
 dnl ---------------------------------------------------------------------------
 
 dnl ---------------------------------------------------------------------------
@@ -365,16 +365,16 @@ dnl ---------------------------------------------------------------------------
 
 if test "${snmp}" = "yes"; then
     AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
-else 
+else
     net_snmp_found="skip_check"
     snmpd="skip_check"
 fi
 
 if test "${net_snmp_found}" = "true";  then
     net_snmp_v=`net-snmp-config --version`
-    net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.` 
-    net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.` 
-    net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.` 
+    net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.`
+    net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.`
+    net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.`
     AC_CACHE_CHECK(if net-snmp version equal or newer than 5.0.6,
     ac_cv_net_snmp_usable,
 	net_snmp_too_old=false
@@ -393,7 +393,7 @@ if test "${net_snmp_found}" = "true";  then
 	fi
     )
     if test "${ac_cv_net_snmp_usable}" != "yes" ; then
-	AC_MSG_WARN(net-snmp version too old) 
+	AC_MSG_WARN(net-snmp version too old)
     fi
 elif test "${net_snmp_found}" = "no"; then
     AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
@@ -414,10 +414,10 @@ fi
 if test "${snmpd}" = "not_found" ; then
     AC_MSG_WARN("snmpd not found:  snmp test scripts will not work")
 elif test "${snmpd}" = "skip_check"; then
-    AC_MSG_CHECKING(if snmpd can be started)   
+    AC_MSG_CHECKING(if snmpd can be started)
     AC_MSG_RESULT(skipped)
 else
-    AC_MSG_CHECKING(if snmpd can be started)   
+    AC_MSG_CHECKING(if snmpd can be started)
     # use the dlmod directive to see if the agent was compiled with dynamic
     # MIB support.  dummy MIB modules will only generate warnings
     echo 'dlmod dummy doubledummy' > conftestsnmp.conf
@@ -430,7 +430,7 @@ else
 	    kill ${pid} >& /dev/null
 	    snmpd_valid=yes
 	    break
-	fi	
+	fi
 	kill ${pid} >& /dev/null
     done
     if test "${snmpd_valid}" = "yes" ; then
@@ -456,7 +456,7 @@ else
         echo "-------------------------------------------------------------   "
         echo "Unable to start snmpd. This is the snmpd log file:              "
 	echo
-	cat conftestsnmp.log 
+	cat conftestsnmp.log
 	echo ""
 	echo "If you don't know how to resolve the problem and do not want to "
 	echo "see this message again, run ./configure --without-snmp          "
@@ -467,7 +467,7 @@ fi
 oldCPPFLAGS=${CPPFLAGS}
 CPPFLAGS=`net-snmp-config --cflags`
 AC_CHECK_HEADERS([net-snmp/library/container.h],net_snmp_container_bug=no,
-    net_snmp_container_bug=yes, 
+    net_snmp_container_bug=yes,
     [
     #include <net-snmp/net-snmp-config.h>
     #include <net-snmp/net-snmp-includes.h>
@@ -480,14 +480,14 @@ if test "${net_snmp_container_bug}" = "yes" ; then
 echo "-------------------------------------------------------------   "
 AC_WARN([You should apply the patch xorp/mibs/container.h.patch])
 echo -n "To do that, copy that file to "
-echo -n `net-snmp-config --prefix` 
+echo -n `net-snmp-config --prefix`
 echo "/include/net-snmp/library"
 echo "and execute (as root) command 'patch < container.h.patch'"
 echo "-------------------------------------------------------------   "
 fi
 
 if test "${snmpd_valid}" = "yes" ; then
-    MIBS="mibs"	
+    MIBS="mibs"
 else
     AC_MSG_WARN(XORP MIBs will not be built)
     MIBS=""
@@ -499,7 +499,7 @@ dnl ---------------------------------------------------------------------------
 dnl Check for libraries
 dnl ---------------------------------------------------------------------------
 
-dnl XXX Into C to avoid name mangling problems when checking libraries 
+dnl XXX Into C to avoid name mangling problems when checking libraries
 AC_LANG_C
 
 AC_SEARCH_LIBS(socket, socket)
@@ -553,7 +553,7 @@ dnl Check for ether_ntoa
 dnl
 AC_CACHE_CHECK(for ether_ntoa in $xr_cv_ether_header,
 	       xr_cv_have_ether_ntoa,
-	       AC_EGREP_HEADER(ether_ntoa, 
+	       AC_EGREP_HEADER(ether_ntoa,
 			       $xr_cv_ether_header,
 			       xr_cv_have_ether_ntoa=yes,
 			       xr_cv_have_ether_ntoa=no)
@@ -568,7 +568,7 @@ dnl Check for ether_aton
 dnl
 AC_CACHE_CHECK(for ether_aton in $xr_cv_ether_header,
 	       xr_cv_have_ether_aton,
-	       AC_EGREP_HEADER(ether_aton, 
+	       AC_EGREP_HEADER(ether_aton,
 			       $xr_cv_ether_header,
 			       xr_cv_have_ether_aton=yes,
 			       xr_cv_have_ether_aton=no)
@@ -916,7 +916,7 @@ main()
 {
   int sock;
   int rtm_version = RTM_VERSION;
-  
+
   sock = socket(AF_ROUTE, SOCK_RAW, 0);
   if ((sock < 0) && (errno == EINVAL))
     return (1);
@@ -964,7 +964,7 @@ AC_TRY_RUN([
 main()
 {
   int sock;
-  
+
   sock = socket(AF_NETLINK, SOCK_RAW, AF_INET);
   if ((sock < 0) && (errno == EINVAL))
     return (1);
@@ -997,13 +997,13 @@ main()
     int sock, lastlen;
     struct ifconf ifconf;
     int ifnum = 1024;
-    
+
     ifconf.ifc_buf = NULL;
     lastlen = 0;
-    
+
     if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	return (1);
-    
+
     /* Loop until SIOCGIFCONF success. */
     for ( ; ; ) {
         ifconf.ifc_len = ifnum*sizeof(struct ifreq);
@@ -1019,7 +1019,7 @@ main()
         }
         ifnum += 10;
     }
-    
+
     return (0);
 }
 ],
@@ -1049,10 +1049,10 @@ main()
     size_t buflen;
     /* Interface list and routing table dump MIBs */
     int mib1[] = { CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0 };
-    
+
     if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), NULL, &buflen, NULL, 0) < 0)
 	return (1);
-    
+
     return (0);
 }
 ],
@@ -1082,10 +1082,10 @@ main()
     size_t buflen;
     /* Interface list and routing table dump MIBs */
     int mib1[] = {CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_DUMP, 0};
-    
+
     if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), NULL, &buflen, NULL, 0) < 0)
 	return (1);
-    
+
     return (0);
 }
 ],
@@ -1112,10 +1112,10 @@ dnl ---------------------------------------------------------------------------
 AC_CACHE_CHECK(ospfd platform, xorp_cv_ospfd_os,
 [
     case "${host_os}" in
-	freebsd* ) 
+	freebsd* )
 	    xorp_cv_ospfd_os="freebsd"
 	;;
-	linux* ) 
+	linux* )
 	    xorp_cv_ospfd_os="unsupported"
 	    dnl TODO: Uncomment the next line and remove the previous line
 	    dnl TODO: if OSPFD is supported on Linux.
@@ -1195,7 +1195,7 @@ if test "${GCC}" = "yes" ; then
 	dnl XXX: Flag -Wtraditional is not recommended for C, because:
 	dnl	- On FreeBSD-4.5 macros like IN_CLASSA(i) from netinet/in.h
 	dnl	  create a warning for gcc 2.95.3
-	dnl	- On Linux RedHat 7.2, #elif creates a warning for gcc 2.96 
+	dnl	- On Linux RedHat 7.2, #elif creates a warning for gcc 2.96
 	dnl
 	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs -Wnon-const-format"
 	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wmissing-prototypes -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wnon-const-format -Wtraditional"
@@ -1210,7 +1210,7 @@ if test "${GCC}" = "yes" ; then
 		CFLAGS=`echo $CFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
 		CXXFLAGS=`echo $CXXFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
 	fi
-		
+
 	dnl default compiler flags have optimization turned on which
 	dnl can cause helpful debugging info to be optimized out.
 	if test "${enable_optimize}" != "yes" ; then
@@ -1262,13 +1262,14 @@ AC_OUTPUT(
 	etc/templates/Makefile
 	fea/Makefile
 	libcomm/Makefile
+	libfeaclient/Makefile
 	libproto/Makefile
 	libxipc/Makefile
 	libxorp/Makefile
 	mibs/Makefile
 	mibs/snmpdscripts/Makefile
         mibs/tests/Makefile
-	mld6igmp/Makefile 
+	mld6igmp/Makefile
 	mrt/Makefile
 	ospfd/Makefile
 	ospfd/src/Makefile
@@ -1286,7 +1287,7 @@ AC_OUTPUT(
 	xrl/tests/Makefile
 	mibs/tests/test_bgpmib.sh
 	mibs/snmpdscripts/startsnmp
-, 
+,
 	echo timestamp > stamp-h
 	chmod a+x mibs/tests/test_bgpmib.sh
 	chmod a+x mibs/snmpdscripts/startsnmp
