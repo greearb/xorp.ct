@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.22 2004/04/12 23:17:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.23 2004/04/15 16:13:28 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -38,7 +38,6 @@ CacheTable<A>::~CacheTable()
 	XLOG_WARNING("CacheTable trie was not empty on deletion\n");
     }
 }
-
 
 template<class A>
 void
@@ -67,7 +66,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
     IPNet<A> net = rtmsg.net();
 
     //check we don't already have this cached
-    assert(_route_table.lookup_node(net) == _route_table.end());
+    XLOG_ASSERT(_route_table.lookup_node(net) == _route_table.end());
 
     if (rtmsg.changed()==false) {
 	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -229,7 +228,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     if (old_rtmsg_ptr != &old_rtmsg) {
 	delete old_rtmsg_ptr;
-	assert(old_route_reference != NULL);
+	XLOG_ASSERT(old_route_reference != NULL);
 	delete old_route_reference;
     }
 
@@ -292,8 +291,9 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-CacheTable<A>::push(BGPRouteTable<A> *caller) {
-    assert(caller == this->_parent);
+CacheTable<A>::push(BGPRouteTable<A> *caller)
+{
+    XLOG_ASSERT(caller == this->_parent);
     return this->_next_table->push((BGPRouteTable<A>*)this);
 }
 
@@ -301,15 +301,16 @@ template<class A>
 int 
 CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller,
-			  const PeerHandler *dump_peer) {
-    assert(caller == this->_parent);
+			  const PeerHandler *dump_peer)
+{
+    XLOG_ASSERT(caller == this->_parent);
     if (rtmsg.changed()) {
 	//Check we've got it cached.  Clear the changed bit so we
 	//don't confuse anyone downstream.
 	IPNet<A> net = rtmsg.route()->net();
 	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
 	iter = _route_table.lookup_node(net);
-	assert(iter != _route_table.end());
+	XLOG_ASSERT(iter != _route_table.end());
 
 	//It's the responsibility of the recipient of a changed route
 	//to store or delete it.  We don't need it anymore (we found
@@ -326,7 +327,7 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     } else {
 	//We must not have this cached
 	IPNet<A> net = rtmsg.route()->net();
-	assert(_route_table.lookup_node(net) == _route_table.end());
+	XLOG_ASSERT(_route_table.lookup_node(net) == _route_table.end());
 
 	return this->_next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, 
 				       dump_peer);
@@ -335,7 +336,8 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 const SubnetRoute<A>*
-CacheTable<A>::lookup_route(const IPNet<A> &net) const {
+CacheTable<A>::lookup_route(const IPNet<A> &net) const
+{
     //return our cached copy if there is one, otherwise ask our parent
     typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
     iter = _route_table.lookup_node(net);
@@ -347,7 +349,8 @@ CacheTable<A>::lookup_route(const IPNet<A> &net) const {
 
 template<class A>
 void
-CacheTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
+CacheTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
+{
     this->_parent->route_used(rt, in_use);
 }
 
@@ -361,7 +364,8 @@ CacheTable<A>::str() const {
 /* mechanisms to implement flow control in the output plumbing */
 template<class A>
 void 
-CacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
+CacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
+{
     XLOG_ASSERT(this->_next_table == next_table);
 
     this->_parent->output_state(busy, this);
@@ -369,7 +373,8 @@ CacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
 
 template<class A>
 bool 
-CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
+CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table)
+{
     XLOG_ASSERT(this->_next_table == next_table);
 
     return this->_parent->get_next_message(this);
@@ -377,8 +382,3 @@ CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
 
 template class CacheTable<IPv4>;
 template class CacheTable<IPv6>;
-
-
-
-
-
