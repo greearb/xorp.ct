@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.6 2003/05/14 09:37:55 pavlin Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.7 2003/10/22 19:30:44 pavlin Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
@@ -120,7 +120,9 @@ public:
 
     inline IfTree& iftree() const	{ return _ifm.iftree(); }
 
-    inline IfConfig& ifconfig() const		{ return _ifm.ifc(); }
+    inline IfTree& old_iftree() const	{ return _ifm.old_iftree(); }
+
+    inline IfConfig& ifconfig() const	{ return _ifm.ifc(); }
 
 protected:
     XrlCmdError get_if_from_config(const IfTree&	it,

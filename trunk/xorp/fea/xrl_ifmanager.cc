@@ -12,24 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.11 2003/08/12 21:55:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.12 2003/08/14 15:20:15 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
 
 static const char* MAX_TRANSACTIONS_HIT =
-			"Resource limit on number of pending "
-"transactions hit.";
+		"Resource limit on number of pending transactions hit.";
 
 static const char* BAD_ID =
 			"Expired or invalid transaction id presented.";
 
+static const char* MISSING_IF = "Interface %s does not exist.";
 
-static const char* MISSING_IF =
-			"Interface %s does not exist.";
-
-static const char* MISSING_VIF =
-			"Vif %s on interface %s does not exist.";
+static const char* MISSING_VIF = "Vif %s on interface %s does not exist.";
 
 static const char* MISSING_ADDR =
 			"Address %s on Vif %s on Interface %s does not exist.";
@@ -180,69 +176,62 @@ XrlInterfaceManager::add(uint32_t tid, const Operation& op)
 XrlCmdError
 XrlInterfaceManager::commit_transaction(uint32_t tid)
 {
-    IfTree& local_config = iftree();	// The current config
-    
-    if (_itm.commit(tid)) {
-	if (_itm.error().empty() == false) {
-	    return XrlCmdError::COMMAND_FAILED(_itm.error());
-	}
+    IfTree& local_config = iftree();		// The current configuration
+    IfTree& old_local_config = old_iftree();	// The previous configuration
 
-	//
-	// If we get here we have updated the local copy of the config
-	// successfully.
-	//
-	
-	//
-	// Ignore operations that don't change anything
-	//
-	local_config.ignore_duplicates(ifconfig().pull_config());
-	
-	//
-	// Push the configuration
-	//
-	IfTree backup_config = local_config;
-	bool push_success = ifconfig().push_config(local_config);
-	local_config.finalize_state();
-	
-	//
-	// Align with device configuration, so that any stuff that failed
-	// in push is not held over in config.
-	//
-	const IfTree& dev_config = ifconfig().pull_config();
-	debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
-	debug_msg("LOCAL CONFIG %s\n", local_config.str().c_str());
-	
-	local_config.align_with(dev_config, true);
-	
-	debug_msg("LOCAL CONFIG AFTER ALIGN %s\n", local_config.str().c_str());
-	
-	//
-	// Propagate the configuration changes to all listeners.
-	//
-	ifconfig().report_updates(backup_config, false);
-	backup_config.finalize_state();
-	
-	//
-	// Align with device configuration, and if any of the commit failed,
-	// propagate the removal to all listeners.
-	//
-	backup_config.align_with(dev_config, false);
-	ifconfig().report_updates(backup_config, false);
-	backup_config.finalize_state();
-	
-	if (push_success) {
-	    return XrlCmdError::OKAY();
-	}
+    if (_itm.commit(tid) != true)
+	return XrlCmdError::COMMAND_FAILED(BAD_ID);
 
-	// XXX align local_config with h/w config, so we don't have any extra
-	// information being held.
-	
-	// XXX restore
-	// if (ifconfig().push_config(backup_config) != true) {
-	    // Argh! Die, Die, Die, Die Again
-	// }
+    if (_itm.error().empty() != true)
+	return XrlCmdError::COMMAND_FAILED(_itm.error());
+
+    //
+    // If we get here we have updated the local copy of the config
+    // successfully.
+    //
+
+    //
+    // Push the configuration
+    //
+    if (ifconfig().push_config(local_config) != true) {
+	// TODO: we should reverse-back to the previous working configuration
 	return XrlCmdError::COMMAND_FAILED(ifconfig().push_error());
     }
 
-    return XrlCmdError::COMMAND_FAILED(BAD_ID);
+    //
+    // Pull the new device configuration
+    //
+    const IfTree& dev_config = ifconfig().pull_config();    
+    debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
+    debug_msg("LOCAL CONFIG %s\n", local_config.str().c_str());
+
+    //
+    // Align with device configuration, so that any stuff that failed
+    // in push is not held over in config.
+    //
+    local_config.align_with(dev_config);
+    debug_msg("LOCAL CONFIG AFTER ALIGN %s\n", local_config.str().c_str());
+
+    //
+    // Prune deleted state that was never added earlier
+    //
+    local_config.prune_bogus_deleted_state(old_local_config);
+
+    //
+    // Propagate the configuration changes to all listeners.
+    //
+    ifconfig().report_updates(local_config, false);
+
+    //
+    // Flush-out config state
+    //
+    local_config.finalize_state();
+
+    //
+    // Save a backup copy of the configuration state
+    //
+    old_local_config = local_config;
+    old_local_config.finalize_state();
+
+    return XrlCmdError::OKAY();
 }
