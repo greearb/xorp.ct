@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.20 2003/04/15 16:37:46 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.21 2003/04/15 17:09:17 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -330,9 +330,10 @@ dnl
 AC_CHECK_HEADERS(sys/ioctl.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h md5global.h)
 
 dnl
-dnl XXX ether_addr is defined in sys/ethernet.h or net/ethernet.h
+dnl XXX ether_addr is defined in one of the following header files:
+dnl sys/ethernet.h, net/ethernet.h or net/if_ether.h
 dnl
-AC_CHECK_HEADERS(sys/ethernet.h net/ethernet.h)
+AC_CHECK_HEADERS(sys/ethernet.h net/ethernet.h net/if_ether.h)
 if test "$ac_cv_header_sys_ethernet_h" = "yes"
 then
 	xr_cv_ether_header="sys/ethernet.h"
@@ -340,6 +341,10 @@ fi
 if test "$ac_cv_header_net_ethernet_h" = "yes"
 then
 	xr_cv_ether_header="net/ethernet.h"
+fi
+if test "$ac_cv_header_net_if_ether_h" = "yes"
+then
+	xr_cv_ether_header="net/if_ether.h"
 fi
 
 dnl
@@ -822,6 +827,7 @@ AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_RUN([
 #include <stdlib.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/socket.h>
@@ -853,6 +859,7 @@ AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_RUN([
 #include <stdlib.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/socket.h>

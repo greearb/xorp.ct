@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_rtread_sysctl.cc,v 1.4 2003/03/10 23:20:41 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_rtread_sysctl.cc,v 1.5 2003/04/10 03:12:03 pavlin Exp $"
 
 
 //
@@ -199,8 +199,10 @@ UnixComm::get_mrib_table_osdep(Mrib *return_mrib_table[])
 	mrib->set_metric_preference(mfea_node().mrib_table_default_metric_preference().get());
 	mrib->set_metric(mfea_node().mrib_table_default_metric().get());
 	
+#ifdef RTF_MULTICAST
 	if (rtm->rtm_flags & RTF_MULTICAST)
 	    continue;		// XXX: ignore multicast entries
+#endif // RTF_MULTICAST
 	
 	if (rtm->rtm_flags & RTF_GATEWAY) {
 	    // The address of the gateway router and the vif to it
@@ -222,7 +224,12 @@ UnixComm::get_mrib_table_osdep(Mrib *return_mrib_table[])
 	    }
 	} else if (rtm->rtm_flags & RTF_LLINFO) {
 	    //  Link-local entry (could be the broadcast address as well)
-	    if (! (rtm->rtm_flags & RTF_BROADCAST))
+	    bool not_bcast_addr = true;
+#ifdef RTF_BROADCAST
+	    if (rtm->rtm_flags & RTF_BROADCAST)
+		not_bcast_addr = false;
+#endif
+	    if (not_bcast_addr)
 		mrib->set_next_hop_router_addr(mrib->dest_prefix().masked_addr());
 	    mfea_vif = mfea_node().vif_find_direct(mrib->next_hop_router_addr());
 	    if (mfea_vif != NULL) {

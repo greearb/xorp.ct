@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.2 2003/03/10 23:20:31 hodson Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.3 2003/04/15 17:09:36 pavlin Exp $
  */
 
 /* Ethernet manipulation compatibility functions */
@@ -29,6 +29,9 @@
 
 #ifdef HAVE_NET_ETHERNET_H
 #include <net/ethernet.h>
+#elif defined(HAVE_NET_IF_ETHER_H)
+#include <net/if.h>
+#include <net/if_ether.h>
 #elif defined(HAVE_SYS_ETHERNET_H)
 #include <sys/types.h>
 #include <sys/ethernet.h>

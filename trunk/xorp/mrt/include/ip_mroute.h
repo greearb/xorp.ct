@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.2 2003/03/10 23:20:46 hodson Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -33,8 +33,15 @@
 #include "mrt/include/linux/netinet/mroute.h"
 #endif
 
+#ifdef HOST_OS_NETBSD
+/* XXX: in NetBSD, struct igmpmsg definition can be seen only by kernel... */
+#define	_KERNEL
+#endif
 #ifndef HOST_OS_LINUX
 #include <netinet/ip_mroute.h>
+#endif
+#ifdef HOST_OS_NETBSD
+#undef _KERNEL
 #endif
 
 #endif /* ! (ENABLE_ADVANCED_MCAST_API && HOST_OS_FREEBSD) */

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.2 2003/03/10 23:20:42 hodson Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -101,6 +101,30 @@
  */
 #define DVMRP_INFO_VERSION	1	/* version string		     */
 #define DVMRP_INFO_NEIGHBORS	2	/* neighbors2 data		     */
+
+/*
+ * Backward-compatibility definitions
+ */
+#if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#ifndef IGMP_MEMBERSHIP_QUERY
+#define IGMP_MEMBERSHIP_QUERY		IGMP_HOST_MEMBERSHIP_QUERY
+#endif
+#ifndef IGMP_V1_MEMBERSHIP_REPORT
+#define IGMP_V1_MEMBERSHIP_REPORT	IGMP_v1_HOST_MEMBERSHIP_REPORT
+#endif
+#ifndef IGMP_V2_MEMBERSHIP_REPORT
+#define IGMP_V2_MEMBERSHIP_REPORT	IGMP_v2_HOST_MEMBERSHIP_REPORT
+#endif
+#ifndef IGMP_V2_LEAVE_GROUP
+#define IGMP_V2_LEAVE_GROUP		IGMP_HOST_LEAVE_MESSAGE
+#endif
+#ifndef IGMP_MTRACE_RESP
+#define IGMP_MTRACE_RESP		IGMP_MTRACE_REPLY
+#endif
+#ifndef IGMP_MTRACE
+#define IGMP_MTRACE			IGMP_MTRACE_QUERY
+#endif
+#endif /* HOST_OS_NETBSD || HOST_OS_OPENBSD */
 
 /*
  * Structures, typedefs and macros
