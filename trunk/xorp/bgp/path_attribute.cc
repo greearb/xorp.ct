@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.13 2003/01/29 05:43:55 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -75,13 +75,13 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
     l = length(d) + (d[0] & Extended ? 4 : 3);
     if (max_len < l)
 	xorp_throw(CorruptMessage,
-                c_format("PathAttribute too short %d bytes need %d",
-			    max_len, l),
+                c_format("PathAttribute too short %d bytes need %u",
+			    max_len, (uint32_t)l),
                         UPDATEMSGERR, UNSPECIFIED);
 
     // now we are sure that the data block is large enough.
-    debug_msg("++ create type %d max_len %d actual_len %d\n",
-	d[1], max_len, l);
+    debug_msg("++ create type %d max_len %d actual_len %u\n",
+	d[1], max_len, (uint32_t)l);
     switch (d[1]) {	// depending on type, do the right thing.
     case ORIGIN:
 	pa = new OriginAttribute(d);
@@ -241,7 +241,7 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
 {
     if (length(d) != 1)
 	xorp_throw(CorruptMessage,
-                c_format("OriginAttribute bad length %d", length(d)),
+                c_format("OriginAttribute bad length %u", (uint32_t)length(d)),
                         UPDATEMSGERR, UNSPECIFIED);
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
@@ -467,7 +467,7 @@ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
 {
     if (length(d) != 0)
 	xorp_throw(CorruptMessage,
-                c_format("AtomicAggregate bad length %d", length(d)),
+                c_format("AtomicAggregate bad length %u", (uint32_t)length(d)),
                         UPDATEMSGERR, UNSPECIFIED);
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
@@ -494,7 +494,7 @@ AggregatorAttribute::AggregatorAttribute(const uint8_t* d)
 {
     if (length(d) != 6)
 	xorp_throw(CorruptMessage,
-                c_format("Aggregator bad length %d", length(d)),
+                c_format("Aggregator bad length %u", (uint32_t)length(d)),
                         UPDATEMSGERR, UNSPECIFIED);
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.4 2003/01/30 00:36:37 rizzo Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.5 2003/01/30 01:10:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -536,7 +536,7 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	xorp_throw(CorruptMessage, "Badly constructed Parameters\n",
 		   OPENMSGERROR, 0);
     }
-    debug_msg("param type %d len+header %d\n", param_type, len);
+    debug_msg("param type %d len+header %u\n", param_type, (uint32_t)len);
 
     BGPParameter *p = NULL;
     switch (param_type) {
@@ -569,7 +569,7 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	debug_msg("Send invalid packet");
 	xorp_throw(CorruptMessage,
 	       c_format("Unrecognised optional parameter %d max_len %u len %u",
-			param_type, max_len, len),
+			param_type, max_len, (uint32_t)len),
 	       OPENMSGERROR, UNSUPOPTPAR);
     }
     return p;
