@@ -49,7 +49,7 @@ def output_xrls(tgt_name, methods):
 # Target file output related
 # -----------------------------------------------------------------------------
 
-def kdoc_comment(method, indent_chars):
+def kdoc_comment(method, indent_chars, preamble = ""):
     kdoc_source = method.annotation()
     if kdoc_source == "":
         return ""
@@ -62,14 +62,13 @@ def kdoc_comment(method, indent_chars):
     for a in method.rargs():
         params.append(a.name())
 
-    comment = "Pure-virtual function that needs to be implemented to:"
-
-    return kdt.output_kdoc(indent_chars, params, comment)
+    return kdt.output_kdoc(indent_chars, params, preamble)
 
 def target_virtual_fns(methods):
     r = ""
     for x in methods:
-        kdoc_note = kdoc_comment(x, "    ")
+        kdoc_note = kdoc_comment(x, "    ",
+                                 "Pure-virtual function that needs to be implemented to:")
         if len(kdoc_note):
             r += kdoc_note + "\n"
         r += "    virtual XrlCmdError %s("% cpp_name(x.name())
