@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.19 2004/09/02 22:40:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.20 2004/09/02 22:45:42 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -198,6 +198,7 @@ NetlinkSocket::start(int af)
 	XLOG_ERROR("Failed to add netlink socket to EventLoop");
 	close(_fd);
 	_fd = -1;
+	return (XORP_ERROR);
     }
     
     return (XORP_OK);
