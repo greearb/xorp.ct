@@ -60,7 +60,7 @@ XORP is called an <I>extensible</I> router platform for good reason.  We believe
 
 <LI><a href="#research">Network researchers</a> needing a platform for experimentation.</LI>
 
-<LI><a href="#operators">Network operators</a> needing a cheap stable routing platform on
+<LI><a href="#operators">Network operators</a> needing a low-cost stable routing platform on
 commodity hardware.</LI>
 
 <LI><a href="#vendors">Network equipment vendors</a> with special purpose hardware.</LI>
@@ -121,7 +121,7 @@ think it is unique in its ability to allow novel uses of existing
 router code.</LI>
 </UL>
 
-<a name="operators"><h2>XORP as a Cheap Router</h2></a>
+<a name="operators"><h2>XORP as a Low-Cost Router</h2></a>
 <P>
 There are many organizations that need router functionality, but
 cannot justify buying an expensive commercial router.  Although there
@@ -130,12 +130,6 @@ intended to run any non-trivial routing configuration.  A modern $300
 PC has enough forwarding capability to saturate a few 100Mb/s network
 links, and ethernet NICs are extremely cheap, so with a little
 knowledge, it's very viable to build your own PC-based router.
-<P>
-We offer XORP as a Live CD - a CD image that you can burn to a
-bootable CD which allows you to run XORP without installing any
-software or knowing anything about Unix system administration.  As it
-runs from a readonly CD, this configuration is more secure than a
-normal Unix installation.
 <P>
 The goal is that you shouldn't need to know anything about how XORP
 works internally to run it as a router.  XORP has a single unified
@@ -149,10 +143,24 @@ XORP already supports IPv4 and IPv6, together with BGP4+ and RIP for
 unicast routing, PIM-SM and IGMPv2 for multicast, and limited SNMP
 support.  
 <P>
+We offer XORP as a Live CD - a CD image that you can burn to a
+bootable CD which allows you to run XORP without installing any
+software or knowing anything about Unix system administration.  As it
+runs from a readonly CD, this configuration is more secure than a
+normal Unix installation.
+<P>
+On the subject of security, the XORP architecture permits different
+routing protocols to run in different security sandboxes.  For
+example, BGP does not need access to the router's filesystem or need
+privileged access to communicate with its peers so, should something
+go wrong, it's much harder to compromise the rest of the router.  The
+aim is for XORP to be more robust and secure than alternative router
+platforms.
+<P>
 It is very important to us that XORP is both very stable and has
-sufficient features for mission-critical production use.  We'll realise this
-goal only with extensive feedback from our users with regards to what
-works well in the real world, and what doesn't.
+sufficient features for mission-critical production use.  We'll
+realise this goal only with extensive feedback from our users with
+regards to what works well in the real world, and what doesn't.
 
 
 <a name="vendors"><h2>XORP for Equipment Vendors</h2></a>
@@ -202,7 +210,7 @@ see what novel network functionality this enables in the future.
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.6 2004/07/09 06:40:07 pavlin Exp $.
-<br>Generated on 12/Jul/2004 at 21:06:37.</em>
+<br>Generated on 13/Jul/2004 at 10:46:40.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
