@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/devnotes/mfea2fea_merge_plan.txt,v 1.1 2003/03/26 23:42:10 pavlin Exp $
 #
 
 This file contains a strawman plan for merging the MFEA functionalities
@@ -88,6 +88,10 @@ further discussion):
    Open question: can vif_index be used by third party? E.g., if IGMP
    sends an XRL to PIM, can it use vif_index instead of (ifname="foo",
    vif_name="bar")?
+   Clarification: most of XRLs will continue to have ifname and vif_name
+   only when referring to an interface. The vif_index will be used _only_
+   in the few XRLs where it is really needed (e.g., the add_mfc()
+   multicast-related XRLs).
 
  * When the FEA sends notifications about interface-related changes
    (flags, addresses, etc), each notification should carry a flag
