@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.37 2004/06/10 22:41:52 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.38 2004/08/12 07:16:43 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -304,9 +304,9 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	if (mc->depends().empty()) {
 	    debug_msg("%s has no dependencies\n", (*iter).c_str());
 	    additional_done.insert(*iter);
-	    additional_modules.erase(iter);
 	    ordered_modules.push_back(*iter);
 	    satisfied.insert(*iter);
+	    additional_modules.erase(iter);
 	    continue;
 	}
 
