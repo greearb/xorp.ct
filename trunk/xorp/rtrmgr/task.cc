@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.23 2003/11/18 23:03:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.24 2003/11/19 23:08:24 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -617,18 +617,18 @@ Task::~Task()
 }
 
 void
-Task::start_module(const string& modname,
+Task::start_module(const string& module_name,
 		   Validation* validation)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
     _start_module = true;
-    _modname = modname;
+    _module_name = module_name;
     _start_validation = validation;
 }
 
 void
-Task::shutdown_module(const string& modname,
+Task::shutdown_module(const string& module_name,
 		      Validation* validation,
 		      Shutdown* shutdown)
 {
@@ -637,7 +637,7 @@ Task::shutdown_module(const string& modname,
     assert(_shutdown_validation == NULL);
     assert(_shutdown_method == NULL);
     _stop_module = true;
-    _modname = modname;
+    _module_name = module_name;
     _shutdown_validation = validation;
     _shutdown_method = shutdown;
 }
@@ -657,7 +657,7 @@ Task::set_ready_validation(Validation* validation)
 void
 Task::run(CallBack cb)
 {
-    printf("Task::run %s\n", _modname.c_str());
+    printf("Task::run %s\n", _module_name.c_str());
     _task_complete_cb = cb;
     step1_start();
 }
@@ -665,10 +665,10 @@ Task::run(CallBack cb)
 void
 Task::step1_start()
 {
-    printf("step1 (%s)\n", _modname.c_str());
+    printf("step1 (%s)\n", _module_name.c_str());
     if (_start_module) {
 	_taskmgr.module_manager()
-	    .start_module(_modname, do_exec(),
+	    .start_module(_module_name, do_exec(),
 			  callback(this, &Task::step1_done));
     } else {
 	step2_wait();
@@ -678,17 +678,17 @@ Task::step1_start()
 void
 Task::step1_done(bool success)
 {
-    printf("step1_done (%s)\n", _modname.c_str());
+    printf("step1_done (%s)\n", _module_name.c_str());
     if (success)
 	step2_wait();
     else
-	task_fail("Can't start process " + _modname, false);
+	task_fail("Can't start process " + _module_name, false);
 }
 
 void
 Task::step2_wait()
 {
-    printf("step2 (%s)\n", _modname.c_str());
+    printf("step2 (%s)\n", _module_name.c_str());
     if (_start_module && (_start_validation != NULL)) {
 	_start_validation->validate(callback(this, &Task::step2_done));
     } else {
@@ -699,17 +699,17 @@ Task::step2_wait()
 void
 Task::step2_done(bool success)
 {
-    printf("step2_done (%s)\n", _modname.c_str());
+    printf("step2_done (%s)\n", _module_name.c_str());
     if (success)
 	step3_config();
     else
-	task_fail("Can't validate start of process " + _modname, true);
+	task_fail("Can't validate start of process " + _module_name, true);
 }
 
 void
 Task::step3_config()
 {
-    printf("step3 (%s)\n", _modname.c_str());
+    printf("step3 (%s)\n", _module_name.c_str());
     if (_xrls.empty()) {
 	step4_wait();
     } else {
@@ -739,7 +739,7 @@ Task::step3_config()
 void
 Task::xrl_done(bool success, bool fatal, string errmsg)
 {
-    printf("xrl_done (%s)\n", _modname.c_str());
+    printf("xrl_done (%s)\n", _module_name.c_str());
     if (success) {
 	_xrls.pop_front();
 	_config_done = true;
@@ -752,7 +752,7 @@ Task::xrl_done(bool success, bool fatal, string errmsg)
 void
 Task::step4_wait()
 {
-    printf("step4 (%s)\n", _modname.c_str());
+    printf("step4 (%s)\n", _module_name.c_str());
     if (_ready_validation && _config_done) {
 	_ready_validation->validate(callback(this, &Task::step4_done));
     } else {
@@ -766,7 +766,7 @@ Task::step4_done(bool success)
     if (success) {
 	step5_stop();
     } else {
-	task_fail("Reconfig of process " + _modname +
+	task_fail("Reconfig of process " + _module_name +
 		  " caused process to fail.", true);
     }
 }
@@ -774,7 +774,7 @@ Task::step4_done(bool success)
 void
 Task::step5_stop()
 {
-    printf("step5 (%s)\n", _modname.c_str());
+    printf("step5 (%s)\n", _module_name.c_str());
     if (_stop_module) {
 	if (_shutdown_method != NULL) {
 	    _shutdown_method->shutdown(callback(this, &Task::step5_done));
@@ -789,20 +789,20 @@ Task::step5_stop()
 void
 Task::step5_done(bool success)
 {
-    printf("step5_done (%s)\n", _modname.c_str());
+    printf("step5_done (%s)\n", _module_name.c_str());
     if (success) {
 	step6_wait();
     } else {
-	XLOG_WARNING(("Can't subtly stop process " + _modname).c_str());
+	XLOG_WARNING(("Can't subtly stop process " + _module_name).c_str());
 	_taskmgr.module_manager()
-	    .kill_module(_modname, callback(this, &Task::step6_wait));
+	    .kill_module(_module_name, callback(this, &Task::step6_wait));
     }
 }
 
 void
 Task::step6_wait()
 {
-    printf("step6 (%s)\n", _modname.c_str());
+    printf("step6 (%s)\n", _module_name.c_str());
     if (_stop_module && (_shutdown_validation != NULL)) {
 	_shutdown_validation->validate(callback(this, &Task::step6_done));
     } else {
@@ -813,22 +813,23 @@ Task::step6_wait()
 void
 Task::step6_done(bool success)
 {
-    printf("step6_done (%s)\n", _modname.c_str());
+    printf("step6_done (%s)\n", _module_name.c_str());
     if (success) {
 	step7_report();
     } else {
-	XLOG_WARNING(("Can't validate stop of process " + _modname).c_str());
+	string msg = "Can't validate stop of process " + _module_name;
+	XLOG_WARNING(msg.c_str());
 	//An error here isn't fatal - module manager will simply kill
 	//the process less subtly.
 	_taskmgr.module_manager()
-	    .kill_module(_modname, callback(this, &Task::step7_report));
+	    .kill_module(_module_name, callback(this, &Task::step7_report));
     }
 }
 
 void
 Task::step7_report()
 {
-    printf("step7 (%s)\n", _modname.c_str());
+    printf("step7 (%s)\n", _module_name.c_str());
     debug_msg("Task done\n");
     _task_complete_cb->dispatch(true, "");
 }
@@ -838,9 +839,9 @@ Task::task_fail(string errmsg, bool fatal)
 {
     debug_msg((errmsg + "\n").c_str());
     if (fatal) {
-	XLOG_ERROR(("Shutting down fatally wounded process " + _modname)
+	XLOG_ERROR(("Shutting down fatally wounded process " + _module_name)
 		   .c_str());
-	_taskmgr.kill_process(_modname);
+	_taskmgr.kill_process(_module_name);
     }
     _task_complete_cb->dispatch(false, errmsg);
 }
@@ -904,54 +905,57 @@ TaskManager::reset()
 int
 TaskManager::add_module(const ModuleCommand& module_command)
 {
-    string modname = module_command.name();
-    string modpath = module_command.path();
-    if (_tasks.find(modname) == _tasks.end()) {
-	Task* newtask = new Task(modname, *this);
-	_tasks[modname] = newtask;
+    string module_name = module_command.module_name();
+    string module_exec_path = module_command.module_exec_path();
+    if (_tasks.find(module_name) == _tasks.end()) {
+	Task* newtask = new Task(module_name, *this);
+	_tasks[module_name] = newtask;
 	_tasklist.push_back(newtask);
     }
 
-    if (_module_manager.module_exists(modname)) {
-	if (_module_manager.module_has_started(modname)) {
+    if (_module_manager.module_exists(module_name)) {
+	if (_module_manager.module_has_started(module_name)) {
 	    return XORP_OK;
 	}
     } else {
-	if (!_module_manager.new_module(modname, modpath)) {
+	if (!_module_manager.new_module(module_name, module_exec_path)) {
 	    fail_tasklist_initialization("Can't create module");
 	    return XORP_ERROR;
 	}
     }
 
     Validation* validation = module_command.startup_validation(*this);
-    find_task(modname).start_module(modname, validation);
+    find_task(module_name).start_module(module_name, validation);
 
-    _module_commands[modname] = &module_command;
+    _module_commands[module_name] = &module_command;
     return XORP_OK;
 }
 
 void
-TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl,
+TaskManager::add_xrl(const string& module_name, const UnexpandedXrl& xrl,
 		     XrlRouter::XrlCallback& cb)
 {
-    Task& t(find_task(modname));
+    Task& t(find_task(module_name));
     t.add_xrl(xrl, cb);
 
     if (t.ready_validation() != NULL)
 	return;
 
-    XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
-    t.set_ready_validation(_module_commands[modname]->ready_validation(*this));
+    XLOG_ASSERT(_module_commands.find(module_name) != _module_commands.end());
+    t.set_ready_validation(_module_commands[module_name]->ready_validation(*this));
 }
 
 void
-TaskManager::shutdown_module(const string& modname)
+TaskManager::shutdown_module(const string& module_name)
 {
-    Task& t(find_task(modname));
-    XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
-    t.shutdown_module(modname,
-		      _module_commands[modname]->shutdown_validation(*this),
-		      _module_commands[modname]->shutdown_method(*this));
+    Task& t(find_task(module_name));
+
+    map<string, const ModuleCommand*>::iterator iter;
+    iter = _module_commands.find(module_name);
+    XLOG_ASSERT(iter != _module_commands.end());
+    const ModuleCommand* mc = iter->second;
+    t.shutdown_module(module_name, mc->shutdown_validation(*this),
+		      mc->shutdown_method(*this));
     _shutdown_order.push_front(&t);
 }
 
@@ -1039,23 +1043,24 @@ TaskManager::fail_tasklist_initialization(const string& errmsg)
 }
 
 Task&
-TaskManager::find_task(const string& modname)
+TaskManager::find_task(const string& module_name)
 {
     map<string, Task*>::iterator i;
-    i = _tasks.find(modname);
+    i = _tasks.find(module_name);
     if (i == _tasks.end()) {
 	//The task didn't exist, so we create one.  This is only valid
 	//if we've already started the module.
-	XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
-	const ModuleCommand* module_command = _module_commands[modname];
-	string modname = module_command->name();
-	string modpath = module_command->path();
-	if (_tasks.find(modname) == _tasks.end()) {
-	    Task* newtask = new Task(modname, *this);
-	    _tasks[modname] = newtask;
+	XLOG_ASSERT(_module_commands.find(module_name)
+		    != _module_commands.end());
+	const ModuleCommand* module_command = _module_commands[module_name];
+	string module_name = module_command->module_name();
+	string module_exec_path = module_command->module_exec_path();
+	if (_tasks.find(module_name) == _tasks.end()) {
+	    Task* newtask = new Task(module_name, *this);
+	    _tasks[module_name] = newtask;
 	    _tasklist.push_back(newtask);
 	}
-	i = _tasks.find(modname);
+	i = _tasks.find(module_name);
     }
     assert(i != _tasks.end());
     assert(i->second != NULL);
@@ -1063,12 +1068,12 @@ TaskManager::find_task(const string& modname)
 }
 
 void
-TaskManager::kill_process(const string& modname)
+TaskManager::kill_process(const string& module_name)
 {
     //XXX We really should try to restart the failed process, but for
     //now we'll just kill it.
     XorpCallback0<void>::RefPtr null_cb;
-    _module_manager.kill_module(modname, null_cb);
+    _module_manager.kill_module(module_name, null_cb);
 }
 
 EventLoop&

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.17 2003/11/17 19:34:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.18 2003/11/18 23:03:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -38,7 +38,7 @@ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
       _shutdown_method(NULL),
       _execute_done(false)
 {
-    assert(cmd_name == "%modinfo");
+    XLOG_ASSERT(cmd_name == "%modinfo");
 }
 
 ModuleCommand::~ModuleCommand()
@@ -85,27 +85,27 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     ++ptr;
     string value = *ptr;
     if (cmd == "provides") {
-	_modname = value;
-	_tt.register_module(_modname, this);
-	template_tree_node().set_module_name(_modname);
+	_module_name = value;
+	_tt.register_module(_module_name, this);
+	template_tree_node().set_module_name(_module_name);
     } else if (cmd == "depends") {
-	if (_modname.empty()) {
+	if (_module_name.empty()) {
 	    xorp_throw(ParseError, "\"depends\" must be preceded by \"provides\"");
 	}
 	_depends.push_back(value);
     } else if (cmd == "path") {
-	if (_modname == "") {
+	if (_module_name == "") {
 	    xorp_throw(ParseError, "\"path\" must be preceded by \"provides\"");
 	}
-	if (_modpath != "") {
+	if (_module_exec_path != "") {
 	    xorp_throw(ParseError, "duplicate \"path\" subcommand");
 	}
 	if (value[0]=='"')
-	    _modpath = value.substr(1,value.length()-2);
+	    _module_exec_path = value.substr(1, value.length() - 2);
 	else
-	    _modpath = value;
+	    _module_exec_path = value;
     } else if (cmd == "default_targetname") {
-	if (_modname == "") {
+	if (_module_name == "") {
 	    xorp_throw(ParseError, "\"default_targetname\" must be preceded by \"provides\"");
 	}
 	if (_default_target_name != "") {
@@ -176,11 +176,11 @@ ModuleCommand::startup_validation(TaskManager &taskmgr) const
 	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
 	if (xa != NULL)
-	    return new StatusConfigMeValidation(_modname, *xa, taskmgr);
+	    return new StatusConfigMeValidation(_module_name, *xa, taskmgr);
 	else
 	    return NULL;
     } else {
-	return new DelayValidation(_modname, taskmgr.eventloop(), 2000);
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
     }
 }
 
@@ -191,11 +191,11 @@ ModuleCommand::ready_validation(TaskManager &taskmgr) const
 	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
 	if (xa != NULL)
-	    return new StatusReadyValidation(_modname, *xa, taskmgr);
+	    return new StatusReadyValidation(_module_name, *xa, taskmgr);
 	else
 	    return NULL;
     } else {
-	return new DelayValidation(_modname, taskmgr.eventloop(), 2000);
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
     }
 }
 
@@ -206,11 +206,11 @@ ModuleCommand::shutdown_validation(TaskManager &taskmgr) const
 	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
 	if (xa != NULL)
-	    return new StatusShutdownValidation(_modname, *xa, taskmgr);
+	    return new StatusShutdownValidation(_module_name, *xa, taskmgr);
 	else
 	    return NULL;
     } else {
-	return new DelayValidation(_modname, taskmgr.eventloop(), 2000);
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
     }
 }
 
@@ -221,7 +221,7 @@ ModuleCommand::shutdown_method(TaskManager &taskmgr) const
 	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_shutdown_method);
 	if (xa != NULL)
-	    return new XrlShutdown(_modname, *xa, taskmgr);
+	    return new XrlShutdown(_module_name, *xa, taskmgr);
 	else
 	    return NULL;
     } else {
@@ -268,8 +268,8 @@ string
 ModuleCommand::str() const
 {
     string tmp;
-    tmp= "ModuleCommand: provides: " + _modname + "\n";
-    tmp+="               path: " + _modpath + "\n";
+    tmp= "ModuleCommand: provides: " + _module_name + "\n";
+    tmp+="               path: " + _module_exec_path + "\n";
     typedef list<string>::const_iterator CI;
     CI ptr = _depends.begin();
     while (ptr != _depends.end()) {

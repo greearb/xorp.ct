@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.17 2003/06/09 23:38:40 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.18 2003/11/18 23:03:57 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -200,7 +200,7 @@ protected:
 private:
     string _name; //the name of the task
     TaskManager& _taskmgr;
-    string _modname; //the name of the module to start and stop
+    string _module_name; // the name of the module to start and stop
     bool _start_module;
     bool _stop_module;
     Validation* _start_validation; // the validation mechanism for the module 
@@ -226,9 +226,9 @@ public:
     void set_do_exec(bool do_exec);
     void reset();
     int add_module(const ModuleCommand& mod_cmd);
-    void add_xrl(const string& modname, const UnexpandedXrl& xrl, 
+    void add_xrl(const string& module_name, const UnexpandedXrl& xrl, 
 		 XrlRouter::XrlCallback& cb);
-    void shutdown_module(const string& modname);
+    void shutdown_module(const string& module_name);
     void run(CallBack cb);
     XorpClient& xorp_client() const {return _xorp_client;}
     ModuleManager& module_manager() const {return _module_manager;}
@@ -244,15 +244,16 @@ public:
      * here we can't communicate with the process using XRLs, so we
      * just kill it outright.
      * 
-     * @param modname the module name of the process to be killed.  
+     * @param module_name the module name of the process to be killed.  
      */
-    void kill_process(const string& modname);
+    void kill_process(const string& module_name);
+
 private:
     void reorder_tasks();
     void run_task();
     void task_done(bool success, string errmsg);
     void fail_tasklist_initialization(const string& errmsg);
-    Task& find_task(const string& modname);
+    Task& find_task(const string& module_name);
 
     ConfigTree& _config_tree;
     ModuleManager& _module_manager;
@@ -269,7 +270,7 @@ private:
     //_shutdown_order maintains the shutdown ordering
     list <Task*> _shutdown_order;
 
-    map <string, const ModuleCommand*> _module_commands;
+    map<string, const ModuleCommand*> _module_commands;
 
     CallBack _completion_cb;
 };
