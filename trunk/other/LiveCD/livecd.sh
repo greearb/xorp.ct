@@ -106,7 +106,7 @@ check_prerequisites() {
     fi
     
     if [ ! -d "$XORPSRCDIR" ]; then
-	dialog --title "XORP LiveCD" --msgbox "XORP source directory $XORPSRCDIR does not exist." 5 60
+	dialog --title "XORP LiveCD" --msgbox "XORP source directory $XORPSRCDIR does not exist." 6 60
 	exit 1
     fi
     
