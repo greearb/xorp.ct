@@ -15,9 +15,9 @@
 # can make changes.
 #
 
-if (!@ARGV) {
-        die "Usage: logcheck filename\n";
-}
+#if (!@ARGV) {
+#        die "Usage: logcheck filename\n";
+#}
 $filename = $ARGV[0];
 $tmpfile = $filename . "tmp";
 
