@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.9 2003/10/16 18:23:06 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.10 2003/12/20 01:43:34 pavlin Exp $
 #
 
 #
@@ -39,6 +39,7 @@ cli_enable_cli()
     fi
     enable=$1
 
+    echo "cli_enable_cli" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/enable_cli"
     XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
