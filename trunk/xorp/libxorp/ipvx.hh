@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.2 2003/01/16 19:09:28 hodson Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -42,7 +42,7 @@ public:
      * 
      * @param family the address family.
      */
-    IPvX(int family) throw (InvalidFamily);
+    explicit IPvX(int family) throw (InvalidFamily);
     
     /**
      * Constructor from a (uint8_t *) memory pointer.

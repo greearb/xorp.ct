@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/transaction.hh,v 1.10 2002/12/11 18:08:53 hodson Exp $
+// $XORP: xorp/libxorp/transaction.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_TRANSACTION_HH__
 #define __LIBXORP_TRANSACTION_HH__
@@ -276,8 +276,3 @@ private:
 };
 
 #endif // __LIBXORP_TRANSACTION_HH__
-
-
-
-
-

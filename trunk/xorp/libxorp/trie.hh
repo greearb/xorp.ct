@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.4 2003/01/25 01:49:44 mjh Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.5 2003/02/07 05:35:39 mjh Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -62,7 +62,7 @@ public:
     TrieNode(const Key& key, const Payload& p, TrieNode* up = 0) :
 	_up(up), _left(0), _right(0), _k(key), _p(new PPayload(p)) {}
 
-    TrieNode(const Key& key, TrieNode* up = 0) :
+    explicit TrieNode(const Key& key, TrieNode* up = 0) :
 	_up(up), _left(0), _right(0), _k(key), _p(0) {}
 
     ~TrieNode() 				
@@ -334,7 +334,7 @@ public:
      * constructor for exact searches: both the current node and the search
      * key are taken from n, so the iterator will only loop once.
      */
-    TrieIterator(Node *n)			{
+    explicit TrieIterator(Node *n)			{
 	_cur = n;
 	if (n)
 	    _root = n->k();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.38 2002/12/09 18:29:12 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -60,7 +60,7 @@ IPv4::make_prefix(size_t len)
 {
     assert(len <= 32);
     uint32_t m = (len == 0) ? 0 : ((~0) << (32 - len));
-    return htonl(m);		// XXX: implicitly create IPv4 return object
+    return IPv4(htonl(m));
 }
 
 IPv4
@@ -73,7 +73,7 @@ IPv4::operator<<(size_t left_shift) const
     }
     
     uint32_t tmp_addr = ntohl(_addr) << left_shift;
-    return htonl(tmp_addr);	// XXX: implicitly create IPv4 return object
+    return IPv4(htonl(tmp_addr));
 }
 
 IPv4
@@ -86,7 +86,7 @@ IPv4::operator>>(size_t right_shift) const
     }
     
     uint32_t tmp_addr = ntohl(_addr) >> right_shift;
-    return htonl(tmp_addr);	// XXX: implicitly create IPv4 return object
+    return IPv4(htonl(tmp_addr));
 }
 
 bool

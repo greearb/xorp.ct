@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.2 2003/01/26 04:06:21 pavlin Exp $"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -52,10 +52,10 @@ v4_serialization_test()
 	IPv4		v4;
 	uint32_t	prefix;
     } srep[] = {
-	{ "128.16.92.160/27", htonl_literal(0x80105ca0U), 27 },
-	{ "128.16.0.0/16", htonl_literal(0x80100000U), 16 },
-	{ "255.255.255.255/32", htonl_literal(0xffffffffU), 32},
-	{ "0.0.0.0/16", htonl_literal(0x00000000U), 16 },
+	{ "128.16.92.160/27", IPv4(htonl_literal(0x80105ca0U)), 27 },
+	{ "128.16.0.0/16", IPv4(htonl_literal(0x80100000U)), 16 },
+	{ "255.255.255.255/32", IPv4(htonl_literal(0xffffffffU)), 32},
+	{ "0.0.0.0/16", IPv4(htonl_literal(0x00000000U)), 16 },
     };
 
     for (size_t i = 0; i < sizeof(srep) / sizeof(srep[0]); i++) {

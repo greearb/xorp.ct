@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.49 2002/12/09 18:29:16 hodson Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -38,7 +38,7 @@ public:
      * 
      * @param ipvx_addr the interface address.
      */
-    VifAddr(const IPvX& ipvx_addr);
+    explicit VifAddr(const IPvX& ipvx_addr);
 
     /**
      * Constructor for a given address, and its associated addresses.
@@ -185,7 +185,7 @@ public:
      * (e.g., "port 0").
      * @param ifname string representation of associated interface.
      */
-    Vif(const string& vifname, const string& ifname = string(""));
+    explicit Vif(const string& vifname, const string& ifname = string(""));
     
     /**
      * Constructor to clone a Vif.

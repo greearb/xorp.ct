@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.2 2003/01/21 01:12:13 rizzo Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -59,7 +59,7 @@ public:
      * 
      * @param value 32-bit unsigned integer to assign to the address.
      */
-    IPv4(uint32_t value)    { _addr = value; }
+    explicit IPv4(uint32_t value)    { _addr = value; }
     
     /**
      * Constructor from a (uint8_t *) memory pointer.
@@ -67,7 +67,7 @@ public:
      * @param from_uint8 the pointer to the memory to copy the address value
      * from.
      */
-    IPv4(const uint8_t *from_uint8);
+    explicit IPv4(const uint8_t *from_uint8);
     
     /**
      * Constructor from in_addr structure.

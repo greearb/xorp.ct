@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.2 2003/01/16 19:09:28 hodson Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.3 2003/01/21 01:12:13 rizzo Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -53,7 +53,7 @@ public:
      * @param from_uint8 the pointer to the memory to copy the address value
      * from.
      */
-    IPv6(const uint8_t *from_uint8);
+    explicit IPv6(const uint8_t *from_uint8);
 
     /**
      * Constructor from a (uint32_t *) memory pointer.
@@ -61,7 +61,7 @@ public:
      * @param from_uint32 the pointer to the memory to copy the address value
      * from.
      */
-    IPv6(const uint32_t *from_uint32);
+    explicit IPv6(const uint32_t *from_uint32);
 
     /**
      * Constructor from in6_addr structure.
@@ -457,7 +457,7 @@ inline IPv6 IPv6::operator~() const {
     tmp_addr[1] = ~_addr[1];
     tmp_addr[2] = ~_addr[2];
     tmp_addr[3] = ~_addr[3];
-    return (tmp_addr);
+    return IPv6(tmp_addr);
 }
 
 inline IPv6 IPv6::operator|(const IPv6& other) const {
@@ -466,7 +466,7 @@ inline IPv6 IPv6::operator|(const IPv6& other) const {
     tmp_addr[1] = _addr[1] | other._addr[1];
     tmp_addr[2] = _addr[2] | other._addr[2];
     tmp_addr[3] = _addr[3] | other._addr[3];
-    return (tmp_addr);	// XXX: implicitly create IPv6 return object
+    return IPv6(tmp_addr);
 }
 
 inline IPv6 IPv6::operator&(const IPv6& other) const {
@@ -475,7 +475,7 @@ inline IPv6 IPv6::operator&(const IPv6& other) const {
     tmp_addr[1] = _addr[1] & other._addr[1];
     tmp_addr[2] = _addr[2] & other._addr[2];
     tmp_addr[3] = _addr[3] & other._addr[3];
-    return (tmp_addr);	// XXX: implicitly create IPv6 return object
+    return IPv6(tmp_addr);
 }
 
 inline IPv6 IPv6::operator^(const IPv6& other) const {
@@ -484,7 +484,7 @@ inline IPv6 IPv6::operator^(const IPv6& other) const {
     tmp_addr[1] = _addr[1] ^ other._addr[1];
     tmp_addr[2] = _addr[2] ^ other._addr[2];
     tmp_addr[3] = _addr[3] ^ other._addr[3];
-    return (tmp_addr);	// XXX: implicitly create IPv6 return object
+    return IPv6(tmp_addr);
 }
 
 #endif // __LIBXORP_IPV6_HH__

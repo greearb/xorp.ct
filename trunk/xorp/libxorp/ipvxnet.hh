@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.40 2002/12/09 18:29:13 hodson Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -71,7 +71,7 @@ public:
      * 
      * @param family the address family.
      */
-    IPvXNet(int family)	
+    explicit IPvXNet(int family)	
 	// : _masked_addr(family), _prefix_len(0)
 	// XXX: G++ 2.95 croaks on this
     {

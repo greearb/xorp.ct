@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.10 2002/12/09 18:29:11 hodson Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
@@ -73,7 +73,7 @@ public:
      * Heap *h = new Heap (OFFSET_OF(x, my_index));
      * </PRE>
      */
-    Heap(int); // heap supporting removal from the middle
+    explicit Heap(int); // heap supporting removal from the middle
     
     /**
      * Destructor

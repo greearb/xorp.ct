@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/buffer.hh,v 1.15 2002/12/09 18:29:11 hodson Exp $
+// $XORP: xorp/libxorp/buffer.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
 
 #ifndef __LIBXORP_BUFFER_HH__
 #define __LIBXORP_BUFFER_HH__
@@ -40,7 +40,7 @@ public:
      * @param init_max_size the maximum amount of data that can be stored
      * in the buffer.
      */
-    Buffer(size_t init_max_size) : _max_size(init_max_size) {
+    explicit Buffer(size_t init_max_size) : _max_size(init_max_size) {
 	_data = new uint8_t[_max_size];
 	reset();
     }

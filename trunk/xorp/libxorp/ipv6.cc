@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.45 2002/12/09 18:29:12 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -115,7 +115,7 @@ IPv6::operator<<(size_t ls) const
     tmp_addr[2] = htonl(tmp_addr[2]);
     tmp_addr[3] = htonl(tmp_addr[3]);
     
-    return (tmp_addr);		// XXX: implicitly create IPv6 return object
+    return IPv6(tmp_addr);
 }
 
 IPv6
@@ -170,7 +170,7 @@ IPv6::operator>>(size_t rs) const
     tmp_addr[2] = htonl(tmp_addr[2]);
     tmp_addr[3] = htonl(tmp_addr[3]);
     
-    return (tmp_addr);		// XXX: implicitly create IPv6 return object
+    return IPv6(tmp_addr);
 }
 
 bool
