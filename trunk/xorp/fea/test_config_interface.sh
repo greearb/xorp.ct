@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.14 2004/06/30 18:02:26 mjh Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.15 2004/07/07 20:01:30 pavlin Exp $
 #
 
 #
@@ -1532,7 +1532,6 @@ test_create_address6()
     _subtests="${_subtests} subtest_create_address6"
     _subtests="${_subtests} subtest_get_address6"
     _subtests="${_subtests} subtest_get_prefix6"
-    _subtests="${_subtests} subtest_get_broadcast6"
     _subtests="${_subtests} subtest_get_endpoint6"
     _subtests="${_subtests} subtest_get_address_flags6"
     _subtests="${_subtests} subtest_delete_address6"
