@@ -4682,6 +4682,7 @@ trap 'rm -fr `echo "Makefile
 	pim/Makefile
 	policy/Makefile
 	rib/Makefile
+	rip/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
 	utils/Makefile
@@ -4842,6 +4843,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	pim/Makefile
 	policy/Makefile
 	rib/Makefile
+	rip/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
 	utils/Makefile
