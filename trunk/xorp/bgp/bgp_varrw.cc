@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.4 2004/09/27 10:35:15 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.5 2004/10/04 17:55:05 abittau Exp $"
 
 #include "bgp_module.h"
 
@@ -38,7 +38,7 @@ BGPVarRW<A>::~BGPVarRW()
 {
     // nobody ever obtained the filtered message but we actually created one. We
     // must delete it as no one else can, at this point.
-    if(!_got_fmsg && _filtered_rtmsg)
+    if (!_got_fmsg && _filtered_rtmsg)
 	delete _filtered_rtmsg;
 }
 
