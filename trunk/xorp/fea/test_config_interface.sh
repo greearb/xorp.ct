@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.8 2003/10/26 23:57:43 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.9 2003/10/27 00:36:34 pavlin Exp $
 #
 
 #
@@ -43,62 +43,75 @@ TEST_MTU="1400"
 HAVE_IPV6="true"	# XXX: may be overwritten by host configuration
 
 case ${HOSTNAME} in
-	xorp1)
-	HAVE_IPV6="true"
-	IFNAME="fxp3"
-	MAC="00:02:b3:10:e3:e7"
-	TEST_MAC="00:02:b3:10:e3:e8"
-	PIF_INDEX="5"
-	VIF_FLAG_BROADCAST="true"
-	VIF_FLAG_LOOPBACK="false"
-	VIF_FLAG_POINT_TO_POINT="false"
-	VIF_FLAG_MULTICAST="true"
-	;;
+    xorp1)
+    HAVE_IPV6="true"
+    IFNAME="fxp3"
+    MAC="00:02:b3:10:e3:e7"
+    TEST_MAC="00:02:b3:10:e3:e8"
+    PIF_INDEX="5"
+    VIF_FLAG_BROADCAST="true"
+    VIF_FLAG_LOOPBACK="false"
+    VIF_FLAG_POINT_TO_POINT="false"
+    VIF_FLAG_MULTICAST="true"
+    ;;
 
-	xorp4)
+    xorp4)
+    HAVE_IPV6="false"
+    IFNAME="eth3"
+    MAC="00:04:5A:49:5D:11"
+    TEST_MAC="0:4:5a:49:5d:12"
+    PIF_INDEX="5"
+    VIF_FLAG_BROADCAST="true"
+    VIF_FLAG_LOOPBACK="false"
+    VIF_FLAG_POINT_TO_POINT="false"
+    VIF_FLAG_MULTICAST="true"
+    ;;
+
+    carp | carp.icir.org)
+    MAC="00:01:02:71:1B:48"
+    TEST_MAC="0:1:2:71:1b:49"
+    VIF_FLAG_BROADCAST="true"
+    VIF_FLAG_LOOPBACK="false"
+    VIF_FLAG_POINT_TO_POINT="false"
+    VIF_FLAG_MULTICAST="true"
+    case ${OS} in
+	Linux)
 	HAVE_IPV6="false"
-	IFNAME="eth3"
-	MAC="00:04:5A:49:5D:11"
-	TEST_MAC="0:4:5a:49:5d:12"
-	PIF_INDEX="5"
-	VIF_FLAG_BROADCAST="true"
-	VIF_FLAG_LOOPBACK="false"
-	VIF_FLAG_POINT_TO_POINT="false"
-	VIF_FLAG_MULTICAST="true"
+	IFNAME="eth1"
+	PIF_INDEX="3"
 	;;
 
-	carp.icir.org)
-	case ${OS} in
-	    Linux)
-	    HAVE_IPV6="false"
-	    IFNAME="eth1"
-	    PIF_INDEX="3"
-	    ;;
-
-	    OpenBSD)
-	    HAVE_IPV6="true"
-	    IFNAME="fxp0"
-	    PIF_INDEX="0"
-	    ;;
-
-	    *)
-	    echo "Unknown OS : ${OS}"
-	    exit 1
-	    ;;
-	esac
-
+	FreeBSD)
+	HAVE_IPV6="true"
+	IFNAME="fxp0"
 	MAC="00:01:02:71:1B:48"
-	TEST_MAC="0:1:2:71:1b:49"
-	VIF_FLAG_BROADCAST="true"
-	VIF_FLAG_LOOPBACK="false"
-	VIF_FLAG_POINT_TO_POINT="false"
-	VIF_FLAG_MULTICAST="true"
+	TEST_MAC="00:01:02:71:1b:49"
+	PIF_INDEX="2"
+	;;
+
+	NetBSD)
+	HAVE_IPV6="true"
+	IFNAME="fxp0"
+	PIF_INDEX="2"
+	;;
+
+	OpenBSD)
+	HAVE_IPV6="true"
+	IFNAME="fxp0"
+	PIF_INDEX="2"
 	;;
 
 	*)
-	echo "Unknown host : ${HOSTNAME}"
+	echo "Unknown OS : ${OS}"
 	exit 1
 	;;
+    esac
+    ;;
+
+    *)
+    echo "Unknown host : ${HOSTNAME}"
+    exit 1
+    ;;
 esac
 
 # XXX: for now the vifname is same as the ifname
@@ -580,6 +593,18 @@ test_set_interface_mac()
     local _ret_value _subtests
 
     echo "TEST: Set interface MAC address"
+
+    case ${OS} in
+	NetBSD | OpenBSD)
+	# XXX: currently (NetBSD-1.6.1 and OpenBSD-3.3) don't support
+	# setting the MAC address.
+	echo "WARNING: this system OS (${OS}) doesn't support setting the MAC address. Test skipped."
+	return 0
+	;;
+
+	*)
+	;;
+    esac
 
     _subtests=""
     _subtests="${_subtests} config_cleanup_interface"
