@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.4 2003/10/17 22:14:18 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.5 2003/10/21 02:10:51 pavlin Exp $
 #
 
 #
@@ -249,8 +249,8 @@ test_lookup_deleted_route4()
 
     echo "TEST: Look-up deleted route for destination ${DEST_HOST}"
 
-    echo "Sleeping for 2 seconds (to timeout any obsoleted cloned entries)..."
-    sleep 2
+    echo "Sleeping for 3 seconds (to timeout any obsoleted cloned entries)..."
+    sleep 3
 
     _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST}`
     _ret_value=$?
