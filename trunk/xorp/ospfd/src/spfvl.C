@@ -120,7 +120,7 @@ bool OSPF::qryVL(struct CfgVL& msg, aid_t transit_id, rtid_t nbr_id) const
 /* Get all virtual links 
  */
 
-void OSPF::getVLs(list<CfgVL>& l, aid_t transit_id) const
+void OSPF::getVLs(std::list<CfgVL>& l, aid_t transit_id) const
 
 {
     SpfArea* tap = FindArea(transit_id);

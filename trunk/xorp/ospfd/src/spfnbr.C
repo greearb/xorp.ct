@@ -146,7 +146,7 @@ bool OSPF::qryNbr(struct CfgNbr& msg, InAddr nbr_address) const
 /* Get all neighbor information.
  */
 
-void OSPF::getNbrs(list<CfgNbr>& l) const
+void OSPF::getNbrs(std::list<CfgNbr>& l) const
 
 {
     IfcIterator iter(this);

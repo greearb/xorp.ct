@@ -196,7 +196,7 @@ bool OSPF::qryExRt(struct CfgExRt& msg, InAddr net, InMask mask,
     return false;
 }
 
-void OSPF::getExRts(list<CfgExRt>& l, InAddr net, InMask mask) const
+void OSPF::getExRts(std::list<CfgExRt>& l, InAddr net, InMask mask) const
 
 {
     INrte *rte = inrttbl->find(net, mask);

@@ -562,7 +562,7 @@ bool OSPF::qryHost(struct CfgHost& msg,
 
 /* Get all host information associated with area
  */
-void OSPF::getHosts(list<CfgHost>& l, aid_t area_id) const
+void OSPF::getHosts(std::list<CfgHost>& l, aid_t area_id) const
 
 {
     SpfArea* ap = FindArea(area_id);

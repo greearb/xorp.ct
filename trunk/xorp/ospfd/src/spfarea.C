@@ -176,7 +176,7 @@ bool OSPF::qryArea(struct CfgArea& msg, aid_t area_id) const
 
 /* Get all areas
  */
-void OSPF::getAreas(list<CfgArea>& l) const
+void OSPF::getAreas(std::list<CfgArea>& l) const
 
 {
     AreaIterator a_iter(ospf);
@@ -522,7 +522,7 @@ bool OSPF::qryRnge(struct CfgRnge& msg,
     return true;
 }
 
-void OSPF::getRnges(list<CfgRnge>& l, aid_t area_id) const
+void OSPF::getRnges(std::list<CfgRnge>& l, aid_t area_id) const
 
 {
     SpfArea *ap = ospf->FindArea(area_id);

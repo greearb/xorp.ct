@@ -406,14 +406,14 @@ class OSPF : public ConfigItem {
 		 int		 phyint) const;
 
     // Query all routines - retrive list of all known values of given types.
-    void getAreas(list<CfgArea>& l) const;
-    void getRnges(list<CfgRnge>& l, aid_t area_id) const;
-    void getIfcs(list<CfgIfc>& l) const;
-    void getHosts(list<CfgHost>& l, aid_t area_id) const;
-    void getVLs(list<CfgVL>& l, aid_t transit_id) const;
-    void getAuKeys(list<CfgAuKey>& l, InAddr address, int phyint) const;
-    void getNbrs(list<CfgNbr>& l) const;
-    void getExRts(list<CfgExRt>& l, InAddr net, InMask mask) const;
+    void getAreas(std::list<CfgArea>& l) const;
+    void getRnges(std::list<CfgRnge>& l, aid_t area_id) const;
+    void getIfcs(std::list<CfgIfc>& l) const;
+    void getHosts(std::list<CfgHost>& l, aid_t area_id) const;
+    void getVLs(std::list<CfgVL>& l, aid_t transit_id) const;
+    void getAuKeys(std::list<CfgAuKey>& l, InAddr address, int phyint) const;
+    void getNbrs(std::list<CfgNbr>& l) const;
+    void getExRts(std::list<CfgExRt>& l, InAddr net, InMask mask) const;
 
     friend class IfcIterator;
     friend class AreaIterator;

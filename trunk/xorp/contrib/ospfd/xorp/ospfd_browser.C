@@ -1655,18 +1655,18 @@ const char *page_footer = "\
 /* The error page.
  */ 
 
-const char *error_page = "\
-    <table cellpadding=0 cellspacing=0 border=0 width=400>\n\
-    <center>
-    <tr>\n\
-    <td align=\"center\">\n\
-    Data connection error:\n\
-    <br>
-    $operation$: $errno$\n\
-    </td>\n\
-    </tr>\n\
-    </center>\n\
-    </table>\n";
+const char *error_page =
+"<table cellpadding=0 cellspacing=0 border=0 width=400>\n"
+"    <center>\n"
+"    <tr>\n"
+"    <td align=\"center\">\n"
+"    Data connection error:\n"
+"    <br>"
+"    $operation$: $errno$\n"
+"    </td>\n"
+"    </tr>\n"
+"    </center>\n"
+"    </table>\n";
 
 /* Display the error page, converting errno to
  * a string first.

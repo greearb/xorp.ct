@@ -49,8 +49,8 @@ void *LsaListElement::operator new(size_t)
     ep = (LsaListElement *) ::new char[BlkSize * sizeof(LsaListElement)];
 
     if (!ep) 
-	throw bad_alloc();
-
+	throw std::bad_alloc();
+    
     n_free = BlkSize - 1;
     n_allocated += BlkSize;
     for (freelist = ep, i = 0; i < BlkSize - 2; i++, ep++)

@@ -230,7 +230,7 @@ bool OSPF::qryIfc(struct CfgIfc& msg, InAddr address, int phyint) const
 
 /* Get all interfaces
  */
-void OSPF::getIfcs(list<CfgIfc>& l) const
+void OSPF::getIfcs(std::list<CfgIfc>& l) const
 
 {
     IfcIterator iter(this);
@@ -723,7 +723,7 @@ bool OSPF::qryAuKey(struct CfgAuKey& msg,
 /* Get all keys associated with interface.
  */
 
-void OSPF::getAuKeys(list<CfgAuKey>& l,
+void OSPF::getAuKeys(std::list<CfgAuKey>& l,
 		     InAddr	     address,
 		     int	     phyint) const
 
