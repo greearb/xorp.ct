@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.20 2003/07/30 19:05:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.21 2003/11/12 19:10:07 pavlin Exp $"
 
 
 //
@@ -400,8 +400,8 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
     // XXX: here we should compare the old and new querier
     // addresses, but we don't really care.
     //
-    XLOG_ASSERT(addr_ptr() != NULL);
-    if (src < *addr_ptr()) {
+    XLOG_ASSERT(primary_addr() != IPvX::ZERO(family()));
+    if (src < primary_addr()) {
 	// Eventually a new querier
 	_query_timer.unschedule();
 	_querier_addr = src;
