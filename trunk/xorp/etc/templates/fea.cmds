@@ -1,25 +1,13 @@
-/* $XORP: xorp/etc/templates/fea.cmds,v 1.5 2004/05/16 07:15:16 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.cmds,v 1.6 2004/05/21 08:08:01 pavlin Exp $ */
 
-show interface $(interfaces.interface.*) {
+show interfaces {
     %command: "fea/tools/show_interfaces" %help: HELP;
     %module: fea;
-    %opt_parameter: "brief" %help: BRIEF;
-    %opt_parameter: "detail" %help: DETAIL;
-    %opt_parameter: "extensive" %help: EXTENSIVE;
     %tag: HELP "Show network interface information";
-    %tag: BRIEF "Show brief network interface information";
-    %tag: DETAIL "Show detailed network interface information";
-    %tag: EXTENSIVE "Show extensive network interface information";
 }
 
-show vif $(interfaces.interface.*.vif.*) {
+show interfaces $(interfaces.interface.*) {
     %command: "fea/tools/show_interfaces" %help: HELP;
     %module: fea;
-    %opt_parameter: "brief" %help: BRIEF;
-    %opt_parameter: "detail" %help: DETAIL;
-    %opt_parameter: "extensive" %help: EXTENSIVE;
-    %tag: HELP "Show virtual interface information";
-    %tag: BRIEF "Show brief virtual interface information";
-    %tag: DETAIL "Show detailed virtual interface information";
-    %tag: EXTENSIVE "Show extensive virtual interface information";
+    %tag: HELP "Show information about a single network interface";
 }
