@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.23 2004/07/09 06:23:37 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.24 2004/07/09 06:25:37 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -272,6 +272,7 @@ the login shell is csh or tcsh):
  cp -p ../RELEASE_NOTES .
  cp -p ../rtrmgr/config.boot.sample .
  ln -s config.boot.sample config.boot.sample.txt
+ gmake
  gmake
  rm */*.aux */*.bbl */*.blg */*.dvi */*.lof */*.log */*.lot */*.toc
  cd ..
