@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/harness/args.sh,v 1.3 2003/10/23 00:13:47 pavlin Exp $
+# $XORP: xorp/utils/args.sh,v 1.1 2003/10/23 00:20:43 pavlin Exp $
 #
 
 #
@@ -68,8 +68,18 @@ then
 	COMMAND="$0 $QUIET $VERBOSE -l -t $i"
 	echo "Entering $COMMAND"
 	$COMMAND
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    echo "$0: Tests Failed"
+	    exit ${_ret_value}
+	fi
 	echo "Leaving $COMMAND"
     done
     trap '' 0
     exit 0
 fi
+
+# Local Variables:
+# mode: shell-script
+# sh-indentation: 4
+# End:
