@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.3 2003/08/01 04:08:13 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.1 2003/08/04 23:46:44 hodson Exp $"
 
 #include <set>
 
@@ -242,14 +242,13 @@ template <typename A>
 class HorizonValidatorBase
 {
 public:
-    HorizonValidatorBase()
-	: _total_routes_seen(0), _test_peer_routes_seen(0)
+    HorizonValidatorBase(const set<IPNet<A> >& tpn, const set<IPNet<A> >& opn)
+	: _total_routes_seen(0), _test_peer_routes_seen(0),
+	  _tpn(tpn), _opn(opn)
     {}
 
     /* Check an individual response packet is valid */
-    virtual bool valid_response(const RipPacket<A>*	p,
-				const set<IPNet<A> >&	test_peer_nets,
-				const set<IPNet<A> >&	other_peer_nets) = 0;
+    virtual bool valid_response(const RipPacket<A>* p) = 0;
 
     /* Final check responses valid */
     virtual bool valid_in_sum() const = 0;
@@ -267,23 +266,25 @@ public:
 protected:
     uint32_t _total_routes_seen;
     uint32_t _test_peer_routes_seen;
+    const set<IPNet<A> >& _tpn;
+    const set<IPNet<A> >& _opn;
 };
 
 template <typename A>
 class NoHorizonValidator : public HorizonValidatorBase<A> {
 public:
-    bool valid_response(const RipPacket<A>*	p,
-			const set<IPNet<A> >&	test_peer_nets,
-			const set<IPNet<A> >&	other_peer_nets)
+    NoHorizonValidator(const set<IPNet<A> >& tpn, const set<IPNet<A> >& opn)
+	: HorizonValidatorBase<A>(tpn, opn)
+    {}
+
+    bool valid_response(const RipPacket<A>* p)
     {
 	for (uint32_t i = 0; i < p->max_entries(); i++) {
 	    _total_routes_seen++;
 
-	    if (test_peer_nets.find(p->route_entry(i)->net()) !=
-		test_peer_nets.end()) {
+	    if (_tpn.find(p->route_entry(i)->net()) != _tpn.end()) {
 		_test_peer_routes_seen++;
-	    } else if (other_peer_nets.find(p->route_entry(i)->net()) !=
-		       other_peer_nets.end()) {
+	    } else if (_opn.find(p->route_entry(i)->net()) != _opn.end()) {
 		// No-op
 	    } else {
 		// Not a test peer net and not an other peer net
@@ -300,6 +301,11 @@ public:
 
     bool valid_in_sum() const
     {
+	if (test_peer_routes_seen() != _tpn.size()) {
+	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
+			test_peer_routes_seen(), _tpn.size());
+	    return false;
+	}
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",
 		    total_routes_seen(), test_peer_routes_seen());
 	return test_peer_routes_seen() * 2 == total_routes_seen();
@@ -309,14 +315,15 @@ public:
 template <typename A>
 class SplitHorizonValidator : public HorizonValidatorBase<A> {
 public:
-    bool valid_response(const RipPacket<A>*	p,
-			const set<IPNet<A> >&	/* test_peer_nets */,
-			const set<IPNet<A> >&	other_peer_nets)
+    SplitHorizonValidator(const set<IPNet<A> >& tpn, const set<IPNet<A> >& opn)
+	: HorizonValidatorBase<A>(tpn, opn)
+    {}
+
+    bool valid_response(const RipPacket<A>* p)
     {
 	for (uint32_t i = 0; i < p->max_entries(); i++) {
 	    _total_routes_seen++;
-	    if (other_peer_nets.find(p->route_entry(i)->net()) ==
-		       other_peer_nets.end()) {
+	    if (_opn.find(p->route_entry(i)->net()) == _opn.end()) {
 		verbose_log("Saw own or alien route with split horizon\n");
 		// ==> it's bogus
 		verbose_log("Failed Processing entry %d / %d %s cost %d\n",
@@ -331,33 +338,72 @@ public:
 
     bool valid_in_sum() const
     {
+	if (test_peer_routes_seen() != 0) {
+	    verbose_log("Test peer routes seen (%d) does not match expected "
+			"(%d)\n", test_peer_routes_seen(), 0);
+	    return false;
+	}
+
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",
 		    total_routes_seen(), test_peer_routes_seen());
-	return test_peer_routes_seen() == 0;
+	return total_routes_seen() == (uint32_t)_opn.size();
+    }
+};
+
+template <typename A>
+class PoisonReverseValidator : public HorizonValidatorBase<A> {
+public:
+    PoisonReverseValidator(const set<IPNet<A> >& tpn,
+			   const set<IPNet<A> >& opn)
+	: HorizonValidatorBase<A>(tpn, opn)
+    {}
+
+    bool valid_response(const RipPacket<A>* p)
+    {
+	for (uint32_t i = 0; i < p->max_entries(); i++) {
+	    _total_routes_seen++;
+
+	    if (_tpn.find(p->route_entry(i)->net()) != _tpn.end() &&
+		p->route_entry(i)->metric() == RIP_INFINITY) {
+		_test_peer_routes_seen++;
+	    } else if (_opn.find(p->route_entry(i)->net()) != _opn.end()) {
+		// No-op
+	    } else {
+		// Not a test peer net and not an other peer net
+		// ==> it's bogus
+		verbose_log("Failed Processing entry %d / %d %s cost %d\n",
+			    i, p->max_entries(),
+			    p->route_entry(i)->net().str().c_str(),
+			    p->route_entry(i)->metric());
+		return false;
+	    }
+	}
+	return true;
+    }
+
+    bool valid_in_sum() const
+    {
+	if (test_peer_routes_seen() != _tpn.size()) {
+	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
+			test_peer_routes_seen(), _tpn.size());
+	    return false;
+	}
+	verbose_log("total routes seen %d, test peer routes seen = %d\n",
+		    total_routes_seen(), test_peer_routes_seen());
+	return test_peer_routes_seen() * 2 == total_routes_seen();
     }
 };
 
 
-// ----------------------------------------------------------------------------
-// Injected Network state
-
-static void
-make_nets(const IPv4Net& base, uint32_t n, set<IPv4Net>& nets)
-{
-    IPv4Net ipn = base;
-    while (n > 0) {
-	nets.insert(ipn);
-	++ipn;
-	--n;
-    }
-}
 
 template <typename A>
-class UpdateQueueTester
+class OutputUpdatesTester
 {
 public:
-    UpdateQueueTester()
-	: _e(), _rip_system(_e), _pm(_rip_system)
+    OutputUpdatesTester(const set<IPNet<A> >& test_peer_nets,
+			const set<IPNet<A> >& other_peer_nets)
+	: _e(), _rip_system(_e), _pm(_rip_system),
+	  _tpn(test_peer_nets), _opn(other_peer_nets)
     {
 	_pm.test_port()->constants().set_expiry_secs(10);
 	_pm.test_port()->constants().set_deletion_secs(5);
@@ -376,7 +422,7 @@ public:
 			new BlockedPortIO<A>(*_pm.other_port()), true);
     }
 
-    ~UpdateQueueTester()
+    ~OutputUpdatesTester()
     {
 	RouteDB<A>& rdb = _rip_system.route_db();
 	rdb.flush_routes();
@@ -388,21 +434,14 @@ public:
     {
 	_pm.test_port()->set_horizon(horizon);
 
-	const uint32_t n_routes = 577;
-	RouteDB<A>&	 rdb = _rip_system.route_db();
-
-	set<IPv4Net> tpeer_nets;
-	set<IPv4Net> opeer_nets;
-
-	make_nets(IPNet<A>(DefaultPeer<A>::get(), 16), n_routes, tpeer_nets);
-	make_nets(IPNet<A>(OtherPeer<A>::get(), 16), n_routes, opeer_nets);
+	RouteDB<A>&    rdb = _rip_system.route_db();
 
 	PacketQueue<A>	 op_out;				// Output out
 	OutputUpdates<A> ou(_e, *_pm.test_port(), op_out, rdb); // Update gen
 
 	verbose_log("Injecting routes from test peer.\n");
-	for (typename set<IPNet<A> >::const_iterator n = tpeer_nets.begin();
-	     n != tpeer_nets.end(); n++) {
+	for (typename set<IPNet<A> >::const_iterator n = _tpn.begin();
+	     n != _tpn.end(); n++) {
 	    RouteEntryOrigin<A>* reo = _pm.test_peer();
 	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo) == false) {
 		verbose_log("Failed to add route for %s\n",
@@ -412,8 +451,8 @@ public:
 	}
 
 	verbose_log("Injecting routes from other peer.\n");
-	for (typename set<IPNet<A> >::const_iterator n = opeer_nets.begin();
-	     n != opeer_nets.end(); n++) {
+	for (typename set<IPNet<A> >::const_iterator n = _opn.begin();
+	     n != _opn.end(); n++) {
 	    RouteEntryOrigin<A>* reo = _pm.other_peer();
 	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo) == false) {
 		verbose_log("Failed to add route for %s\n",
@@ -438,10 +477,7 @@ public:
 
 	uint32_t cnt = 0;
 	while (op_out.empty() == false) {
-	    verbose_log("==> Processing packet %d %d bytes remain\n",
-			cnt, op_out.buffered_bytes());
-	    if (validator.valid_response(op_out.head(), tpeer_nets, opeer_nets)
-		== false) {
+	    if (validator.valid_response(op_out.head()) == false) {
 		verbose_log("Failed on packet validation.\n");
 		return 1;
 	    }
@@ -453,7 +489,6 @@ public:
 	    verbose_log("Not valid in sum.\n");
 	    return 1;
 	}
-
 	return 0;
     }
 
@@ -461,6 +496,8 @@ protected:
     EventLoop		_e;
     System<A>		_rip_system;
     SpoofPortManager<A> _pm;
+    const set<IPNet<A> >& _tpn;
+    const set<IPNet<A> >& _opn;
 };
 
 
@@ -493,6 +530,22 @@ usage(const char* progname)
     fprintf(stderr, "       -h          : usage (this message)\n");
     fprintf(stderr, "       -v          : verbose output\n");
 }
+
+
+// ----------------------------------------------------------------------------
+// Injected Network state
+
+static void
+make_nets(const IPv4Net& base, uint32_t n, set<IPv4Net>& nets)
+{
+    IPv4Net ipn = base;
+    while (n > 0) {
+	nets.insert(ipn);
+	++ipn;
+	--n;
+    }
+}
+
 
 int
 main(int argc, char* const argv[])
@@ -531,22 +584,30 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
+	static const uint32_t n_routes = 577;
+	set<IPNet<IPv4> > tpn;	// networks associated with peer under test
+	set<IPNet<IPv4> > opn;	// networks associated with other peer.
+
+	make_nets(IPNet<IPv4>(DefaultPeer<IPv4>::get(), 16), n_routes, tpn);
+	make_nets(IPNet<IPv4>(OtherPeer<IPv4>::get(), 16), n_routes, opn);
 
 	{
-	    UpdateQueueTester<IPv4> uqt;
-	    SplitHorizonValidator<IPv4> shv;
-	    rval += uqt.run_test(SPLIT, shv);
+	    verbose_log("=== No Horizon test ===\n");
+	    OutputUpdatesTester<IPv4> tester(tpn, opn);
+	    NoHorizonValidator<IPv4> nohv(tpn, opn);
+	    rval |= tester.run_test(NONE, nohv);
 	}
-#if 0
 	{
-	    UpdateQueueTester<IPv4> uqt;
-	    rval += uqt.run_test(SPLIT_POISON_REVERSE);
+	    verbose_log("=== Split Horizon test ===\n");
+	    OutputUpdatesTester<IPv4> tester(tpn, opn);
+	    SplitHorizonValidator<IPv4> shv(tpn, opn);
+	    rval |= tester.run_test(SPLIT, shv);
 	}
-#endif
 	{
-	    UpdateQueueTester<IPv4> uqt;
-	    NoHorizonValidator<IPv4> nohv;
-	    rval += uqt.run_test(NONE, nohv);
+	    verbose_log("=== Split Horizon Poison Reverse test ===\n");
+	    OutputUpdatesTester<IPv4> tester(tpn, opn);
+	    PoisonReverseValidator<IPv4> prv(tpn, opn);
+	    rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
 	}
     } catch (...) {
         // Internal error
