@@ -1,6 +1,9 @@
 #
-# $XORP: xorp/pim/TODO,v 1.15 2003/02/01 00:40:45 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.16 2003/02/01 01:45:19 pavlin Exp $
 #
+
+* TESTSUITE: clean-up all test setup procedures: move all common stuff
+  to "Test Setup".
 
 * SPEC+IMPL: Add text to beginning of Section 4.6 that if an implementation
   incorrectly fails to send Hello messages on p2p interfaces, then the
