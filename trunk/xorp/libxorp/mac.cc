@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.8 2004/12/15 22:55:59 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.9 2004/12/17 00:09:40 pavlin Exp $"
+
+#include <vector>
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -124,11 +126,11 @@ EtherMac::get_ether_addr(struct ether_addr& ea) const
     // XXX: work-around because of broken ether_aton() declarations that
     // are missing the 'const' in the argument.
     //
-    char buf[_srep.size() + 1];
-    strncpy(buf, _srep.c_str(), sizeof(buf) - 1);
-    buf[sizeof(buf) - 1] = '\0';
+    vector<char> buf(_srep.size() + 1);
+    strncpy(&buf[0], _srep.c_str(), buf.size() - 1);
+    buf[buf.size() - 1] = '\0';
 
-    const struct ether_addr* ep = ether_aton(buf);
+    const struct ether_addr* ep = ether_aton(&buf[0]);
     if (ep != NULL) {
 	memcpy(&ea, ep, sizeof(ea));
 	return true;
@@ -143,11 +145,11 @@ EtherMac::valid(const string& s)
     // XXX: work-around because of broken ether_aton() declarations that
     // are missing the 'const' in the argument.
     //
-    char buf[s.size() + 1];
-    strncpy(buf, s.c_str(), sizeof(buf) - 1);
-    buf[sizeof(buf) - 1] = '\0';
+    vector<char> buf(s.size() + 1);
+    strncpy(&buf[0], s.c_str(), buf.size() - 1);
+    buf[buf.size() - 1] = '\0';
 
-    return (ether_aton(buf) != NULL);
+    return (ether_aton(&buf[0]) != NULL);
 }
 
 string
@@ -157,9 +159,9 @@ EtherMac::normalize(const string& s) throw (InvalidString)
     // XXX: work-around because of broken ether_aton() declarations that
     // are missing the 'const' in the argument.
     //
-    char buf[s.size() + 1];
-    strncpy(buf, s.c_str(), sizeof(buf) - 1);
-    buf[sizeof(buf) - 1] = '\0';
+    vector<char> buf(s.size() + 1);
+    strncpy(&buf[0], s.c_str(), buf.size() - 1);
+    buf[buf.size() - 1] = '\0';
 
     //
     // Convert the string with an EtherMAC address into
@@ -169,7 +171,7 @@ EtherMac::normalize(const string& s) throw (InvalidString)
     // "00:00:00:00:00:00" -> "0:0:0:0:0:0"
     //
     struct ether_addr* ep;
-    ep = ether_aton(buf);
+    ep = ether_aton(&buf[0]);
     if (ep == NULL) {
 	xorp_throw(InvalidString,
 		   c_format("Bad EtherMac representation: %s", s.c_str()));
