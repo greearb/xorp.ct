@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.8 2003/04/16 07:45:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.9 2004/06/10 22:41:15 hodson Exp $"
 
 #include <strings.h>
 #include "libxorp_module.h"
@@ -122,7 +122,7 @@ Heap::push(Heap_Key k, void *p, int son)
         int father = HEAP_FATHER(son) ;
         struct heap_entry tmp  ;
 
-        if ( _p[father].key < _p[son].key )
+        if ( _p[father].key <= _p[son].key )
             break ; /* found right position */
         /* son smaller than father, swap and repeat */
         HEAP_SWAP(_p[son], _p[father], tmp) ;
