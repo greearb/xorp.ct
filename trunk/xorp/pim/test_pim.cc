@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.21 2003/06/01 21:38:13 hodson Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.22 2003/06/02 04:11:08 pavlin Exp $"
 
 
 //
@@ -99,7 +99,7 @@ usage(const char *argv0, int exit_value)
 
     fprintf(output, "Usage: %s [-F <finder_hostname>[:<finder_port>]]\n",
 	    progname);
-    fprintf(output, "           -f <finder_hostname>[:<finder_port>]  : finder hostname and port\n");
+    fprintf(output, "           -F <finder_hostname>[:<finder_port>]  : finder hostname and port\n");
     fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "\n");
     fprintf(output, "Program name:   %s\n", progname);
