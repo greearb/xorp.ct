@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.30 2004/05/04 16:16:57 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.31 2004/09/17 13:57:14 abittau Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -56,7 +56,7 @@ xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
 xorp_rip_LDADD			+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
 xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a
 xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
-xorp_rip_LDADD                  += $(top_builddir)/policy/backend/libpolicybackend.a
+xorp_rip_LDADD			+= $(top_builddir)/policy/backend/libpolicybackend.a
 xorp_rip_LDADD			+= $(top_builddir)/libxipc/libxipc.a
 xorp_rip_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 xorp_rip_LDADD			+= $(top_builddir)/libxorp/libxorp.a
@@ -76,7 +76,7 @@ xorp_ripng_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
 xorp_ripng_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
 xorp_ripng_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6locatorxif.a
 xorp_ripng_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
-xorp_ripng_LDADD                += $(top_builddir)/policy/backend/libpolicybackend.a
+xorp_ripng_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
 xorp_ripng_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 xorp_ripng_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 xorp_ripng_LDADD		+= $(top_builddir)/libxorp/libxorp.a
@@ -88,30 +88,35 @@ test_auth_LDADD			 = ./librip.a $(LDADD)
 test_packets_SOURCES		 = test_packets.cc test_utils.hh
 test_packets_LDADD		 = ./librip.a $(LDADD)
 
-test_request_SOURCES             = test_request.cc test_utils.hh
-test_request_LDADD               = ./librip.a
-test_request_LDADD              += $(top_builddir)/policy/backend/libpolicybackend.a
-test_request_LDADD              += $(top_builddir)/libxipc/libxipc.a $(LDADD)
+test_request_SOURCES		 = test_request.cc test_utils.hh
+test_request_LDADD		 = ./librip.a
+test_request_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
+test_request_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+test_request_LDADD		+= $(LDADD)
 
-test_route_walk_SOURCES          = test_route_walk.cc test_utils.hh
-test_route_walk_LDADD            = ./librip.a ./libripng.a
-test_route_walk_LDADD           += $(top_builddir)/policy/backend/libpolicybackend.a
-test_route_walk_LDADD           += $(top_builddir)/libxipc/libxipc.a $(LDADD)
+test_route_walk_SOURCES		 = test_route_walk.cc test_utils.hh
+test_route_walk_LDADD		 = ./librip.a ./libripng.a
+test_route_walk_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
+test_route_walk_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+test_route_walk_LDADD		+= $(LDADD)
 
-test_timers_SOURCES              = test_timers.cc test_utils.hh
-test_timers_LDADD                = ./librip.a ./libripng.a
-test_timers_LDADD               += $(top_builddir)/policy/backend/libpolicybackend.a
-test_timers_LDADD               += $(top_builddir)/libxipc/libxipc.a $(LDADD)
+test_timers_SOURCES		 = test_timers.cc test_utils.hh
+test_timers_LDADD		 = ./librip.a ./libripng.a
+test_timers_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
+test_timers_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+test_timers_LDADD		+= $(LDADD)
 
-test_update_queue_SOURCES        = test_update_queue.cc test_utils.hh
-test_update_queue_LDADD          = ./librip.a ./libripng.a
-test_update_queue_LDADD         += $(top_builddir)/policy/backend/libpolicybackend.a
-test_update_queue_LDADD         += $(top_builddir)/libxipc/libxipc.a $(LDADD)
+test_update_queue_SOURCES	 = test_update_queue.cc test_utils.hh
+test_update_queue_LDADD		 = ./librip.a ./libripng.a
+test_update_queue_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
+test_update_queue_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+test_update_queue_LDADD		+= $(LDADD)
 
-test_outputs_SOURCES             = test_outputs.cc test_utils.hh
-test_outputs_LDADD               = ./librip.a libripng.a
-test_outputs_LDADD              += $(top_builddir)/policy/backend/libpolicybackend.a
-test_outputs_LDADD              += $(top_builddir)/libxipc/libxipc.a $(LDADD)
+test_outputs_SOURCES		 = test_outputs.cc test_utils.hh
+test_outputs_LDADD		 = ./librip.a libripng.a
+test_outputs_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
+test_outputs_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+test_outputs_LDADD		+= $(LDADD)
 
 
 # -- RIP Core Library Sources
@@ -133,7 +138,7 @@ librip_a_SOURCES		+= port_manager.hh
 librip_a_SOURCES		+= port_vars.hh
 librip_a_SOURCES		+= redist.hh
 librip_a_SOURCES		+= rib_notifier_base.hh
-librip_a_SOURCES                += rip_varrw.hh
+librip_a_SOURCES		+= rip_varrw.hh
 librip_a_SOURCES		+= route_db.hh
 librip_a_SOURCES		+= route_entry.hh
 librip_a_SOURCES		+= system.hh
@@ -147,7 +152,7 @@ librip_a_SOURCES		+= peer.cc
 librip_a_SOURCES		+= port.cc
 librip_a_SOURCES		+= redist.cc
 librip_a_SOURCES		+= rib_notifier_base.cc
-librip_a_SOURCES                += rip_varrw.cc
+librip_a_SOURCES		+= rip_varrw.cc
 librip_a_SOURCES		+= route_db.cc
 librip_a_SOURCES		+= route_entry.cc
 librip_a_SOURCES		+= update_queue.cc
@@ -170,7 +175,7 @@ libripng_a_SOURCES		+= port_manager.hh
 libripng_a_SOURCES		+= port_vars.hh
 libripng_a_SOURCES		+= redist.hh
 libripng_a_SOURCES		+= rib_notifier_base.hh
-libripng_a_SOURCES              += rip_varrw.hh
+libripng_a_SOURCES		+= rip_varrw.hh
 libripng_a_SOURCES		+= route_db.hh
 libripng_a_SOURCES		+= route_entry.hh
 libripng_a_SOURCES		+= system.hh
@@ -183,7 +188,7 @@ libripng_a_SOURCES		+= peer.cc
 libripng_a_SOURCES		+= port.cc
 libripng_a_SOURCES		+= redist.cc
 libripng_a_SOURCES		+= rib_notifier_base.cc
-libripng_a_SOURCES              += rip_varrw.cc
+libripng_a_SOURCES		+= rip_varrw.cc
 libripng_a_SOURCES		+= route_db.cc
 libripng_a_SOURCES		+= route_entry.cc
 libripng_a_SOURCES		+= update_queue.cc
