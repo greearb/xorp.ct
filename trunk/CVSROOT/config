@@ -18,4 +18,4 @@
 #
 LocalKeyword=XORP=CVSHeader
 
-#UseNewInfoFormatStrings=yes
+UseNewInfoFmtStrings=yes
