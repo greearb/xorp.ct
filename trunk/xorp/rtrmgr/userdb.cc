@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.8 2004/11/30 15:35:28 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.9 2004/11/30 20:01:14 bms Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
@@ -59,7 +59,8 @@ User::add_acl_capability(const string& capname)
 }
 
 UserInstance::UserInstance(uint32_t user_id, const string& username) 
-    : User(user_id, username)
+    : User(user_id, username), _authenticated(false), _config_mode(false),
+      _is_a_zombie(false)
 {
 
 }
