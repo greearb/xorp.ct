@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.8 2003/10/06 22:41:08 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.9 2003/10/25 00:42:03 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -113,7 +113,7 @@ public:
 	RECEIVED = 1,		// Received from peer.
 	NEGOTIATED = 2,		// Both sides agree.
 	// Note: ARRAY_SIZE must be larger than all previous values
-	ARRAY_SIZE = 2
+	ARRAY_SIZE = 3
     };
 
     bool unicast_ipv4(Direction d = NEGOTIATED) const {
