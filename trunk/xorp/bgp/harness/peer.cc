@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.50 2003/10/23 04:10:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.51 2004/04/01 19:54:09 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1500,20 +1500,24 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		debug_msg("aspath: %s\n", 
 			  AsPath(aspath.c_str()).str().c_str());
 	    } else if("nexthop" == words[i]) {
-		IPv4NextHopAttribute nha(IPv4(words[i+1].c_str()));
+		IPv4NextHopAttribute nha(IPv4((const char*)
+					      (words[i+1].c_str())));
 		bgpupdate->add_pathatt(nha);
 	    } else if("nexthop6" == words[i]) {
-		mpipv6_nlri.set_nexthop(IPv6(words[i+1].c_str()));
+		mpipv6_nlri.set_nexthop(IPv6((const char*)
+					     (words[i+1].c_str())));
 	    } else if("localpref" == words[i]) {
 		LocalPrefAttribute lpa(atoi(words[i+1].c_str()));
 		bgpupdate->add_pathatt(lpa);
 	    } else if("nlri" == words[i]) {
-		BGPUpdateAttrib upa(IPv4Net(words[i+1].c_str()));
+		BGPUpdateAttrib upa(IPv4Net((const char*)
+					    (words[i+1].c_str())));
 		bgpupdate->add_nlri(upa);
 	    } else if("nlri6" == words[i]) {
 		mpipv6_nlri.add_nlri(words[i+1].c_str());
 	    } else if("withdraw" == words[i]) {
-		BGPUpdateAttrib upa(IPv4Net(words[i+1].c_str()));
+		BGPUpdateAttrib upa(IPv4Net((const char*)
+					    (words[i+1].c_str())));
 		bgpupdate->add_withdrawn(upa);
 	    } else if("withdraw6" == words[i]) {
 		mpipv6_withdraw.add_withdrawn(IPv6Net(words[i+1].c_str()));
