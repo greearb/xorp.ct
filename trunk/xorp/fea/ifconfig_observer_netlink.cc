@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.1 2003/10/14 01:36:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.2 2003/10/14 01:45:02 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -52,7 +52,9 @@ IfConfigObserverNetlink::IfConfigObserverNetlink(IfConfig& ifc)
 
 IfConfigObserverNetlink::~IfConfigObserverNetlink()
 {
+#ifdef HAVE_NETLINK_SOCKETS
     stop();
+#endif
 }
 
 int
