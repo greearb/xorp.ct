@@ -35,7 +35,13 @@ WAKEFILE=".wake-$$"
 cd ${XORPDIR}
 rm -f ${WAKEFILE} 2>/dev/null
 
-( ( ./configure 2>&1 && gmake -k $@ 2>&1 ) ; cat /dev/null > ${WAKEFILE} ) &
+#
+# This little nasty run these commands in the background.  We use
+# ${WAKEFILE} both to detect the completion of these commands and to
+# propagate the return value.
+#
+( ( ./configure 2>&1 && gmake -k $@ 2>&1 ) ; echo $? > ${WAKEFILE} ) &
+
 #( ( funkster ) ; cat /dev/null > ${WAKEFILE} ) &
 
 expiry=`date "+%s"`
@@ -50,5 +56,9 @@ while [ ! -f ${WAKEFILE} ] ; do
 done
 
 if [ -f ${WAKEFILE} ] ; then
+    err=`cat ${WAKEFILE}`
     rm -f ${WAKEFILE}
+    exit $err
 fi
+
+exit 100
