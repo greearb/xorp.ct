@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.3 2002/12/17 22:06:05 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -269,10 +269,21 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	//Check we've got it cached.  Clear the changed bit so we
 	//don't confuse anyone downstream.
 	IPNet<A> net = rtmsg.route()->net();
-	assert(_route_table.lookup_node(net) != _route_table.end());
-	rtmsg.clear_changed();
+	Trie<A, const SubnetRoute<A> >::iterator iter;
+	iter = _route_table.lookup_node(net);
+	assert(iter != _route_table.end());
+
+	//the message we pass on needs to contain our cached
+	//route, because the MED info in it may not be in the original
+	//version of the route.
+	InternalMessage<A> new_msg(&(iter.payload()), rtmsg.origin_peer(),
+				   rtmsg.genid());
+	return _next_table->route_dump(new_msg, (BGPRouteTable<A>*)this, 
+				       dump_peer);
+    } else {
+	return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, 
+				       dump_peer);
     }
-    return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, dump_peer);
 }
 
 template<class A>
