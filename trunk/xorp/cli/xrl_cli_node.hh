@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.12 2004/03/18 00:38:47 pavlin Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.13 2004/06/10 22:40:43 hodson Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -20,7 +20,7 @@
 #include <string>
 
 #include "libxorp/xlog.h"
-#include "libxipc/xrl_router.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "xrl/targets/cli_base.hh"
 #include "xrl/interfaces/cli_processor_xif.hh"
 #include "cli_node.hh"
@@ -28,9 +28,15 @@
 //
 // TODO: XrlCliProcessorV1p0Client should NOT be a base class. Temp. solution..
 //
-class XrlCliNode : public XrlCliTargetBase {
+class XrlCliNode : public XrlStdRouter,
+		   public XrlCliTargetBase {
 public:
-    XrlCliNode(XrlRouter* xrl_router, CliNode& cli_node);
+    XrlCliNode(EventLoop&	eventloop,
+	       const string&	class_name,
+	       const string&	finder_hostname,
+	       uint16_t		finder_port,
+	       const string&	finder_target,
+	       CliNode&		cli_node);
     virtual ~XrlCliNode() {}
 
     //
@@ -40,7 +46,14 @@ public:
     int disable_cli();
     int start_cli();
     int stop_cli();
-    
+
+    /**
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    XrlRouter&	xrl_router() { return *this; }
+
 protected:
     //
     // Methods to be implemented by derived classes supporting this interface.
@@ -198,6 +211,13 @@ protected:
 				     const uint32_t *cli_session_id,
 				     const string *command_output);
 private:
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_disconnect_event();
+
     const string& my_xrl_target_name() {
 	return XrlCliTargetBase::name();
     }

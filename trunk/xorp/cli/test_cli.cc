@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.33 2005/02/01 00:06:40 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.34 2005/02/03 04:12:18 pavlin Exp $"
 
 
 //
@@ -31,7 +31,6 @@
 #include "libxorp/xlog.h"
 
 #include "libxipc/finder_server.hh"
-#include "libxipc/xrl_std_router.hh"
 
 #include "cli_client.hh"
 #include "xrl_cli_node.hh"
@@ -109,7 +108,8 @@ cli_node()
 }
 
 static void
-cli_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
+cli_main(const string& finder_hostname, uint16_t finder_port,
+	 bool start_finder)
 {
     string error_msg;
     EventLoop eventloop;
@@ -124,7 +124,7 @@ cli_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     FinderServer *finder = NULL;
     if (start_finder) {
 	try {
-	    finder = new FinderServer(eventloop, IPv4(finder_hostname),
+	    finder = new FinderServer(eventloop, IPv4(finder_hostname.c_str()),
 				      finder_port);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
@@ -157,19 +157,25 @@ cli_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     //
     // Create and configure the CLI XRL interface
     //
-    XrlStdRouter xrl_std_router_cli(eventloop, cli_node.module_name(),
-				    finder_hostname, finder_port);
-    XrlCliNode xrl_cli_node(&xrl_std_router_cli, cli_node);
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli);
+    XrlCliNode xrl_cli_node(eventloop,
+			    cli_node.module_name(),
+			    finder_hostname,
+			    finder_port,
+			    "finder",
+			    cli_node);
+    wait_until_xrl_router_is_ready(eventloop, xrl_cli_node.xrl_router());
 
 #if 0
 #ifdef HAVE_IPV6
     CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
     cli_node6.set_cli_port(12000);
-    XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
-				     finder_hostname, finder_port);
-    XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli6);
+    XrlCliNode xrl_cli_node(eventloop,
+			    cli_node6.module_name(),
+			    finder_hostname,
+			    finder_port,
+			    "finder",
+			    cli_node6);
+    wait_until_xrl_router_is_ready(eventloop, xrl_cli_node.xrl_router());
 #endif // HAVE_IPV6
 #endif // 0
 
@@ -546,7 +552,7 @@ main(int argc, char *argv[])
     // Run everything
     //
     try {
-	cli_main(finder_hostname.c_str(), finder_port, true);
+	cli_main(finder_hostname, finder_port, true);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

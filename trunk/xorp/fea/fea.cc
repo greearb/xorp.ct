@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.42 2004/12/09 07:54:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.43 2004/12/13 14:24:31 bms Exp $"
 
 #include "fea_module.h"
 
@@ -91,12 +91,14 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-fea_main(const char* finder_hostname, uint16_t finder_port)
+fea_main(const string& finder_hostname, uint16_t finder_port)
 {
     string error_msg;
     EventLoop eventloop;
 
-    XrlStdRouter xrl_std_router_fea(eventloop, xrl_entity, finder_hostname,
+    XrlStdRouter xrl_std_router_fea(eventloop,
+				    xrl_entity,
+				    finder_hostname.c_str(),
 				    finder_port);
 
     //
@@ -184,8 +186,10 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
    //
    PaTableManager ptm;
    PaTransactionManager patm(eventloop, ptm);
-   XrlStdRouter xrl_std_router_packet_acl(eventloop, "packet_acl",
-					  finder_hostname, finder_port);
+   XrlStdRouter xrl_std_router_packet_acl(eventloop,
+					  "packet_acl",
+					  finder_hostname.c_str(),
+					  finder_port);
    XrlPacketAclTarget xrl_packet_acl_target(&xrl_std_router_packet_acl,
 					    eventloop, patm);
    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_packet_acl);
@@ -197,10 +201,13 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     // XXX: currently, the access to the CLI is either IPv4 or IPv6
     CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
     cli_node4.set_cli_port(12000);
-    XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
-				     finder_hostname, finder_port);
-    XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli4);
+    XrlCliNode xrl_cli_node(eventloop,
+			    cli_node4.module_name(),
+			    finder_hostname,
+			    finder_port,
+			    "finder",
+			    cli_node4);
+    wait_until_xrl_router_is_ready(eventloop, xrl_cli_node.xrl_router());
 
     //
     //  MFEA node
@@ -209,7 +216,8 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     XrlStdRouter xrl_std_router_mfea4(eventloop,
 				      xorp_module_name(AF_INET,
 						       XORP_MODULE_MFEA),
-				      finder_hostname, finder_port);
+				      finder_hostname.c_str(),
+				      finder_port);
     XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, eventloop,
 			       &xrl_std_router_mfea4,
 			       xorp_module_name(AF_INET, XORP_MODULE_FEA),
@@ -220,7 +228,8 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     XrlStdRouter xrl_std_router_mfea6(eventloop,
 				      xorp_module_name(AF_INET6,
 						       XORP_MODULE_MFEA),
-				      finder_hostname, finder_port);
+				      finder_hostname.c_str(),
+				      finder_port);
     XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
 			       &xrl_std_router_mfea6,
 			       xorp_module_name(AF_INET6, XORP_MODULE_FEA),
@@ -289,7 +298,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 
     while (xrl_std_router_fea.pending()
 #ifndef FEA_DUMMY
-	   || xrl_std_router_cli4.pending()
+	   || xrl_cli_node.xrl_router().pending()
 	   || xrl_std_router_mfea4.pending()
 #ifdef HAVE_IPV6_MULTICAST
 	   || xrl_std_router_mfea6.pending()

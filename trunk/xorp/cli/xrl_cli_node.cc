@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.16 2004/05/30 03:37:03 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.17 2004/06/10 22:40:43 hodson Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -21,13 +21,22 @@
 #include "cli_node.hh"
 
 
-XrlCliNode::XrlCliNode(XrlRouter* xrl_router, CliNode& cli_node)
-    : XrlCliTargetBase(xrl_router),
+XrlCliNode::XrlCliNode(EventLoop&	eventloop,
+		       const string&	class_name,
+		       const string&	finder_hostname,
+		       uint16_t		finder_port,
+		       const string&	finder_target,
+		       CliNode&		cli_node)
+    : XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+		   finder_port),
+    XrlCliTargetBase(&xrl_router()),
       _cli_node(cli_node),
-      _xrl_cli_processor_client(xrl_router)
+      _xrl_cli_processor_client(&xrl_router())
 {
     _cli_node.set_send_process_command_callback(
 	callback(this, &XrlCliNode::send_process_command));
+
+    UNUSED(finder_target);
 }
 
 //
@@ -73,6 +82,20 @@ XrlCliNode::stop_cli()
 	ret_code = XORP_ERROR;
     
     return (ret_code);
+}
+
+//
+// Finder-related events
+//
+void
+XrlCliNode::finder_disconnect_event()
+{
+    XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+
+    stop_cli();
+
+    // CliNode::set_status(FAILED);
+    // CliNode::update_status();
 }
 
 XrlCmdError

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.44 2005/01/28 03:34:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.45 2005/02/11 07:38:28 pavlin Exp $"
 
 
 //
@@ -110,7 +110,8 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
+pim_main(const string& finder_hostname, uint16_t finder_port,
+	 bool start_finder)
 {
     string error_msg;
     EventLoop eventloop;
@@ -125,7 +126,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     FinderServer *finder = NULL;
     if (start_finder) {
 	try {
-	    finder = new FinderServer(eventloop, IPv4(finder_hostname),
+	    finder = new FinderServer(eventloop,
+				      IPv4(finder_hostname.c_str()),
 				      finder_port);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
@@ -138,10 +140,13 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     // XXX: we use a single CLI node to handle both IPv4 and IPv6
     CliNode cli_node(AF_INET, XORP_MODULE_CLI, eventloop);
     cli_node.set_cli_port(12000);
-    XrlStdRouter xrl_std_router_cli(eventloop, cli_node.module_name(),
-				    finder_hostname, finder_port);
-    XrlCliNode xrl_cli_node(&xrl_std_router_cli, cli_node);
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli);
+    XrlCliNode xrl_cli_node(eventloop,
+			    cli_node.module_name(),
+			    finder_hostname,
+			    finder_port,
+			    "finder",
+			    cli_node);
+    wait_until_xrl_router_is_ready(eventloop, xrl_cli_node.xrl_router());
 
     //
     // FEA
@@ -149,7 +154,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_fea(
 	eventloop,
 	xorp_module_name(AF_INET, XORP_MODULE_FEA),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
 
     //
     // Profile entity
@@ -234,7 +240,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_mfea4(
 	eventloop,
 	xorp_module_name(AF_INET, XORP_MODULE_MFEA),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
     XrlMfeaNode xrl_mfea_node4(
 	AF_INET,
 	XORP_MODULE_MFEA,
@@ -248,7 +255,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_mfea6(
 	eventloop,
 	xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
     XrlMfeaNode xrl_mfea_node6(
 	AF_INET6, XORP_MODULE_MFEA,
 	eventloop,
@@ -264,7 +272,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_mld6igmp4(
 	eventloop,
 	xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
     XrlMld6igmpNode xrl_mld6igmp_node4(
 	AF_INET,
 	XORP_MODULE_MLD6IGMP,
@@ -277,7 +286,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_mld6igmp6(
 	eventloop,
 	xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
     XrlMld6igmpNode xrl_mld6igmp_node6(
 	AF_INET6,
 	XORP_MODULE_MLD6IGMP,
@@ -294,7 +304,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_rib(
 	eventloop,
 	xorp_module_name(AF_INET, XORP_MODULE_RIB),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
     RibManager rib_manager(
 	eventloop,
 	xrl_std_router_rib,
@@ -324,7 +335,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_pimsm4(
 	eventloop,
 	xorp_module_name(AF_INET, XORP_MODULE_PIMSM),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
     XrlPimNode xrl_pimsm_node4(
 	AF_INET,
 	XORP_MODULE_PIMSM,
@@ -344,7 +356,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     XrlStdRouter xrl_std_router_pimsm6(
 	eventloop,
 	xorp_module_name(AF_INET6, XORP_MODULE_PIMSM),
-	finder_hostname, finder_port);
+	finder_hostname.c_str(),
+	finder_port);
     XrlPimNode xrl_pimsm_node6(
 	AF_INET6,
 	XORP_MODULE_PIMSM,
@@ -429,7 +442,7 @@ main(int argc, char *argv[])
     // Run everything
     //
     try {
-	pim_main(finder_hostname.c_str(), finder_port, true);
+	pim_main(finder_hostname, finder_port, true);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
