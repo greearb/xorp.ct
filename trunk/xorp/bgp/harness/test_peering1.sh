@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.4 2003/02/02 19:40:10 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.5 2003/02/04 21:55:52 atanu Exp $
 #
 
 #
@@ -54,7 +54,7 @@ PORT2=10002
 PEER2_PORT=20002
 PEER2_AS=65000
 
-HOLDTIME=5
+HOLDTIME=30
 
 configure_bgp()
 {
@@ -91,8 +91,7 @@ reset()
 
 test1()
 {
-    HOLD_TIME=3
-    echo "TEST1 - Establish a peering with a holdtime of $HOLD_TIME wait for expiration"
+    echo "TEST1 - Establish a peering with a holdtime of $HOLDTIME wait for expiration"
 
     reset
     # XXX
@@ -109,11 +108,11 @@ test1()
     coord peer1 expect packet keepalive
     coord peer1 expect packet notify $HOLD_TIMER
     coord peer1 establish AS $PEER1_AS \
-	holdtime $HOLD_TIME \
+	holdtime $HOLDTIME \
 	id 192.150.187.100 \
 	keepalive false
 
-    sleep $HOLD_TIME
+    sleep $HOLDTIME
     sleep 2
 
     sleep 2
