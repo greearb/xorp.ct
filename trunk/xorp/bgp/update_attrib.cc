@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.2 2003/01/29 20:32:32 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.3 2003/02/07 05:53:06 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -61,8 +61,8 @@ BGPUpdateAttribList::wire_size() const
 
     for (const_iterator uai = begin() ; uai != end(); ++uai)
         len += uai->wire_size();
-    debug_msg("BGPUpdateAttribList::wire_size %p is %d (list size %u)\n",
-	this, len, (uint32_t)size());
+    debug_msg("BGPUpdateAttribList::wire_size %p is %u (list size %u)\n",
+	this, (uint32_t)len, (uint32_t)size());
     return len;
 }
 
