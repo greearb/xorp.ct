@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.10 2003/11/20 06:05:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.11 2003/11/20 06:37:38 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -122,12 +122,12 @@ TemplateTree::pop_path() {
     if (_segment_lengths.size()==0) {
 	xorp_throw(ParseError, "Mismatched braces");
     }
-    int segments_to_pop = _segment_lengths.front();
+    size_t segments_to_pop = _segment_lengths.front();
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("pop_path: %d\n", segments_to_pop);
 #endif
     _segment_lengths.pop_front();
-    for(int i =0; i<segments_to_pop; i++) {
+    for (size_t i = 0; i < segments_to_pop; i++) {
 	_current_node = _current_node->parent();
     }
 #ifdef DEBUG_TEMPLATE_PARSER
@@ -200,11 +200,13 @@ TemplateTree::push_path(int type, char* cinit) {
 #endif
     list <PathSegment>::const_iterator iter;
     iter = _path_segments.begin();
-    int len = _path_segments.size();
-    for (int i = 0; i< len-1; i++) {
-	//add all except the last segment
-	add_untyped_node(iter->segname(), iter->is_tag());
-	iter++;
+    size_t len = _path_segments.size();
+    if (len > 0) {
+	for (size_t i = 0; i < len - 1; i++) {
+	    // add all except the last segment
+	    add_untyped_node(iter->segname(), iter->is_tag());
+	    ++iter;
+	}
     }
     add_node(iter->segname(), type, cinit);
 

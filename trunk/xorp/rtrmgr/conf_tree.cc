@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.9 2003/11/20 06:05:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.10 2003/11/20 06:37:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -58,11 +58,12 @@ ConfigTree::parse(const string& configuration, const string& config_file)
     return true;
 }
 
-void ConfigTree::add_default_children() {
+void ConfigTree::add_default_children()
+{
     _root_node.recursive_add_default_children();
 }
 
-TemplateTreeNode *ConfigTree::find_template(const list <string>& path_segments)
+TemplateTreeNode *ConfigTree::find_template(const list<string>& path_segments)
     throw (ParseError)
 {
     TemplateTreeNode *ttn;
@@ -81,6 +82,7 @@ ConfigTree::path_as_segments() const
 {
     list<string> path_segments;
     ConfigTreeNode* ctn = _current_node;
+
     while (ctn->parent() != NULL) {
 	path_segments.push_front(ctn->segname());
 	ctn = ctn->parent();
@@ -89,9 +91,11 @@ ConfigTree::path_as_segments() const
 }
 
 string
-ConfigTree::current_path_as_string() const {
+ConfigTree::current_path_as_string() const
+{
     string path;
     ConfigTreeNode* ctn = _current_node;
+
     while (ctn->parent() != NULL) {
 	if (ctn == _current_node)
 	    path = ctn->segname();
@@ -103,28 +107,33 @@ ConfigTree::current_path_as_string() const {
 }
 
 string
-ConfigTree::path_as_string(const list <string>& path_segments) const {
+ConfigTree::path_as_string(const list<string>& path_segments) const
+{
     string path;
-    list <string>::const_iterator i;
-    for (i = path_segments.begin(); i!= path_segments.end(); ++i) {
+    list<string>::const_iterator iter;
+
+    for (iter = path_segments.begin(); iter != path_segments.end(); ++iter) {
 	if (path.empty())
-	    path = *i;
+	    path = *iter;
 	else
-	    path += " " + *i;
+	    path += " " + *iter;
     }
     return path;
 }
 
 void
-ConfigTree::extend_path(const string &segment) {
+ConfigTree::extend_path(const string& segment)
+{
     _path_segments.push_back(segment);
 }
 
 void
-ConfigTree::pop_path() {
-    int segments_to_pop = _segment_lengths.front();
+ConfigTree::pop_path()
+{
+    size_t segments_to_pop = _segment_lengths.front();
+
     _segment_lengths.pop_front();
-    for(int i =0; i < segments_to_pop; i++) {
+    for(size_t i = 0; i < segments_to_pop; i++) {
 	_current_node = _current_node->parent();
     }
 }
@@ -136,10 +145,10 @@ ConfigTree::push_path() {
 
     //keep track of how many segments comprise this frame so we can
     //pop the right number later
-    int len = _path_segments.size();
+    size_t len = _path_segments.size();
     _segment_lengths.push_front(len);
 
-    list <string>::const_iterator i;
+    list<string>::const_iterator i;
     for (i = _path_segments.begin(); i != _path_segments.end(); i++) {
 	add_node(*i);
     }
@@ -150,7 +159,7 @@ ConfigTree::push_path() {
 
 void
 ConfigTree::add_node(const string& segment) {
-    list <ConfigTreeNode*>::const_iterator i;
+    list<ConfigTreeNode*>::const_iterator i;
     i = _current_node->children().begin();
     ConfigTreeNode *found = NULL;
     while (i!= _current_node->children().end()) {
@@ -291,11 +300,11 @@ ConfigTree::terminal_value(char *value, int type) {
 }
 
 const ConfigTreeNode*
-ConfigTree::find_config_node(const list <string>& path_segments) const {
+ConfigTree::find_config_node(const list<string>& path_segments) const {
     const ConfigTreeNode *found = &_root_node;
     const ConfigTreeNode *found2 = found;
-    list <string>::const_iterator pi;
-    list <ConfigTreeNode *>::const_iterator ci;
+    list<string>::const_iterator pi;
+    list<ConfigTreeNode *>::const_iterator ci;
     int i = 0;
     for (pi = path_segments.begin(); pi != path_segments.end(); pi++) {
 	i++;
@@ -316,7 +325,7 @@ ConfigTree::find_config_node(const list <string>& path_segments) const {
 
 
 string
-ConfigTree::show_subtree(const list <string>& path_segments) const {
+ConfigTree::show_subtree(const list<string>& path_segments) const {
     const ConfigTreeNode *found = find_config_node(path_segments);
     if (found == NULL)
 	return "ERROR";
@@ -339,10 +348,10 @@ ConfigTree::show_unannotated_tree() const {
 }
 
 ConfigTreeNode*
-ConfigTree::find_node(const list <string>& path) {
+ConfigTree::find_node(const list<string>& path) {
     /* copy the path so we can modify it while searching... */
-    list <string> path_copy;
-    list <string>::const_iterator ci;
+    list<string> path_copy;
+    list<string>::const_iterator ci;
     for (ci=path.begin(); ci != path.end(); ci++) {
 	path_copy.push_back(*ci);
     }
@@ -414,12 +423,12 @@ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
 
 void
 ConfigTree::expand_varname_to_matchlist(const string& varname,
-				      list <string>& matches) const {
+				      list<string>& matches) const {
     //trim $( and )
     string trimmed = varname.substr(2, varname.size()-3);
 
     //split on dots
-    list <string> sl = split(trimmed, '.');
+    list<string> sl = split(trimmed, '.');
 
     //copy into a vector
     int len = sl.size();
