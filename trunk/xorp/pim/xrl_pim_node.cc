@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.75 2005/03/18 01:16:57 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.76 2005/03/19 23:51:53 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -4806,6 +4806,17 @@ XrlPimNode::pim_0_1_delete_config_static_rp6(
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_config_all_static_rps()
+{
+    string error_msg;
+    
+    if (PimNode::delete_config_all_static_rps(error_msg) < 0)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
 }

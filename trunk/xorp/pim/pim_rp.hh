@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_rp.hh,v 1.5 2004/06/10 22:41:34 hodson Exp $
+// $XORP: xorp/pim/pim_rp.hh,v 1.6 2005/03/14 18:59:49 pavlin Exp $
 
 
 #ifndef __PIM_PIM_RP_HH__
@@ -158,6 +158,7 @@ public:
     int		delete_rp(const IPvX& rp_addr,
 			  const IPvXNet& group_prefix,
 			  PimRp::rp_learned_method_t rp_learned_method);
+    int		delete_all_rps(PimRp::rp_learned_method_t rp_learned_method);
     bool	apply_rp_changes();
     
     void	add_pim_mre(PimMre *pim_mre);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.25 2004/06/10 22:41:30 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.26 2005/02/27 20:49:47 pavlin Exp $"
 
 
 //
@@ -1554,6 +1554,33 @@ PimNode::delete_config_static_rp(const IPvXNet& group_prefix,
 			     "for group prefix %s",
 			     cstring(rp_addr),
 			     cstring(group_prefix));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    // XXX: config_static_rp_done() will complete the configuration setup
+    
+    return (XORP_OK);
+}
+
+//
+// Delete all statically configured RPs
+//
+// Return: %XORP_OK on success, otherwise %XORP_ERROR.
+//
+// XXX: we don't call end_config(), because config_static_rp_done() will
+// do it when the RP configuration is completed.
+//
+int
+PimNode::delete_config_all_static_rps(string& error_msg)
+{
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    if (rp_table().delete_all_rps(PimRp::RP_LEARNED_METHOD_STATIC)
+	!= XORP_OK) {
+	// XXX: don't call end_config(error_msg);
+	error_msg = c_format("Cannot delete configure all static RPs");
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
