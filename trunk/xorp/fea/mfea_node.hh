@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.3 2003/05/19 06:48:37 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.4 2003/05/21 14:26:27 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -111,6 +111,200 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_vif(const string& vif_name, string& err);
+    
+    /**
+     * Add a configured vif.
+     * 
+     * @param vif_name the name of the vif to add.
+     * @param vif_index the vif index of the vif to add.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		add_config_vif(const string& vif_name,
+			       uint16_t vif_index,
+			       string& reason);
+
+    /**
+     * Delete a configured vif.
+     * 
+     * @param vif_name the name of the vif to delete.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		delete_config_vif(const string& vif_name,
+				  string& reason);
+
+    /**
+     * Add an address to a configured vif.
+     * 
+     * @param vif_name the name of the vif.
+     * @param addr the address to add.
+     * @param subnet the subnet address to add.
+     * @param broadcast the broadcast address to add.
+     * @param peer the peer address to add.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		add_config_vif_addr(const string& vif_name,
+				    const IPvX& addr,
+				    const IPvXNet& subnet,
+				    const IPvX& broadcast,
+				    const IPvX& peer,
+				    string& reason);
+    
+    /**
+     * Delete an address from a configured vif.
+     * 
+     * @param vif_name the name of the vif.
+     * @param addr the address to delete.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		delete_config_vif_addr(const string& vif_name,
+				       const IPvX& addr,
+				       string& reason);
+    
+    /**
+     * Set the vif flags to a configured vif.
+     * 
+     * @param vif_name the name of the vif.
+     * @param is_pim_register true if the vif is a PIM Register interface.
+     * @param is_p2p true if the vif is point-to-point interface.
+     * @param is_loopback true if the vif is a loopback interface.
+     * @param is_multicast true if the vif is multicast capable.
+     * @param is_broadcast true if the vif is broadcast capable.
+     * @param is_up true if the underlying vif is UP.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_config_vif_flags(const string& vif_name,
+				     bool is_pim_register,
+				     bool is_p2p,
+				     bool is_loopback,
+				     bool is_multicast,
+				     bool is_broadcast,
+				     bool is_up,
+				     string& reason);
+    
+    /**
+     * Complete the set of vif configuration changes.
+     * 
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_config_all_vifs_done(string& reason);
+    
+    /**
+     * Send to a client to add a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif to add.
+     * @param vif_index the vif index of the vif to add.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int	send_add_config_vif(const string& dst_module_instance_name,
+				    xorp_module_id dst_module_id,
+				    const string& vif_name,
+				    uint16_t vif_index) = 0;
+    
+    /**
+     * Send to a client to delete a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif to delete.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int	send_delete_config_vif(const string& dst_module_instance_name,
+				       xorp_module_id dst_module_id,
+				       const string& vif_name) = 0;
+    
+    /**
+     * Send to a client to add an address to a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif.
+     * @param addr the address to add.
+     * @param subnet the subnet address to add.
+     * @param broadcast the broadcast address to add.
+     * @param peer the peer address to add.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int	send_add_config_vif_addr(const string& dst_module_instance_name,
+					 xorp_module_id dst_module_id,
+					 const string& vif_name,
+					 const IPvX& addr,
+					 const IPvXNet& subnet,
+					 const IPvX& broadcast,
+					 const IPvX& peer) = 0;
+    
+    /**
+     * Send to a client to delete an address from a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif.
+     * @param addr the address to delete.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int	send_delete_config_vif_addr(const string& dst_module_instance_name,
+					    xorp_module_id dst_module_id,
+					    const string& vif_name,
+					    const IPvX& addr) = 0;
+    
+    /**
+     * Send to a client to set the vif flags to a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif.
+     * @param is_pim_register true if the vif is a PIM Register interface.
+     * @param is_p2p true if the vif is point-to-point interface.
+     * @param is_loopback true if the vif is a loopback interface.
+     * @param is_multicast true if the vif is multicast capable.
+     * @param is_broadcast true if the vif is broadcast capable.
+     * @param is_up true if the underlying vif is UP.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int	send_set_config_vif_flags(const string& dst_module_instance_name,
+					  xorp_module_id dst_module_id,
+					  const string& vif_name,
+					  bool is_pim_register,
+					  bool is_p2p,
+					  bool is_loopback,
+					  bool is_multicast,
+					  bool is_broadcast,
+					  bool is_up) = 0;
+    
+    /**
+     * Send to a client to complete the set of vif configuration changes.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int	send_set_config_all_vifs_done(const string& dst_module_instance_name,
+					      xorp_module_id dst_module_id) = 0;
     
     /**
      * Start MFEA on all enabled interfaces.

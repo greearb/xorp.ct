@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.7 2003/05/31 06:44:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.8 2003/05/31 16:16:57 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -451,6 +451,215 @@ XrlMfeaNode::xrl_result_recv_kernel_signal_message(const XrlError& xrl_error)
     }
 }
 
+/**
+ * Send to a client to add a configured vif.
+ * 
+ * @param dst_module_instance_name the name of the protocol
+ * instance-destination of the message.
+ * @param dst_module_id the module ID of the protocol-destination
+ * of the message.
+ * @param vif_name the name of the vif to add.
+ * @param vif_index the vif index of the vif to add.
+ * @return  XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+XrlMfeaNode::send_add_config_vif(const string& dst_module_instance_name,
+				 xorp_module_id , // dst_module_id,
+				 const string& vif_name,
+				 uint16_t vif_index)
+{
+    XrlMfeaClientV0p1Client::send_new_vif(
+	dst_module_instance_name.c_str(),
+	vif_name,
+	vif_index,
+	callback(this, &XrlMfeaNode::xrl_result_new_vif));
+    
+    return (XORP_OK);
+}
+
+/**
+ * Send to a client to delete a configured vif.
+ * 
+ * @param dst_module_instance_name the name of the protocol
+ * instance-destination of the message.
+ * @param dst_module_id the module ID of the protocol-destination
+ * of the message.
+ * @param vif_name the name of the vif to delete.
+ * @return  XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+XrlMfeaNode::send_delete_config_vif(const string& dst_module_instance_name,
+				    xorp_module_id , // dst_module_id,
+				    const string& vif_name)
+{
+    XrlMfeaClientV0p1Client::send_delete_vif(
+	dst_module_instance_name.c_str(),
+	vif_name,
+	callback(this, &XrlMfeaNode::xrl_result_delete_vif));
+    
+    return (XORP_OK);
+}
+
+/**
+ * Send to a client to add an address to a configured vif.
+ * 
+ * @param dst_module_instance_name the name of the protocol
+ * instance-destination of the message.
+ * @param dst_module_id the module ID of the protocol-destination
+ * of the message.
+ * @param vif_name the name of the vif.
+ * @param addr the address to add.
+ * @param subnet the subnet address to add.
+ * @param broadcast the broadcast address to add.
+ * @param peer the peer address to add.
+ * @return  XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
+				      xorp_module_id , // dst_module_id,
+				      const string& vif_name,
+				      const IPvX& addr,
+				      const IPvXNet& subnet,
+				      const IPvX& broadcast,
+				      const IPvX& peer)
+{
+    do {
+	if (MfeaNode::is_ipv4()) {
+	    XrlMfeaClientV0p1Client::send_add_vif_addr4(
+		dst_module_instance_name.c_str(),
+		vif_name,
+		addr.get_ipv4(),
+		subnet.get_ipv4net(),
+		broadcast.get_ipv4(),
+		peer.get_ipv4(),
+		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
+	    break;
+	}
+	
+	if (MfeaNode::is_ipv6()) {
+	    XrlMfeaClientV0p1Client::send_add_vif_addr6(
+		dst_module_instance_name.c_str(),
+		vif_name,
+		addr.get_ipv6(),
+		subnet.get_ipv6net(),
+		broadcast.get_ipv6(),
+		peer.get_ipv6(),
+		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
+    
+    return (XORP_OK);
+}
+
+/**
+ * Send to a client to delete an address from a configured vif.
+ * 
+ * @param dst_module_instance_name the name of the protocol
+ * instance-destination of the message.
+ * @param dst_module_id the module ID of the protocol-destination
+ * of the message.
+ * @param vif_name the name of the vif.
+ * @param addr the address to delete.
+ * @return  XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
+					 xorp_module_id , // dst_module_id,
+					 const string& vif_name,
+					 const IPvX& addr)
+{
+    do {
+	if (MfeaNode::is_ipv4()) {
+	    XrlMfeaClientV0p1Client::send_delete_vif_addr4(
+		dst_module_instance_name.c_str(),
+		vif_name,
+		addr.get_ipv4(),
+		callback(this, &XrlMfeaNode::xrl_result_delete_vif_addr));
+	    break;
+	}
+	
+	if (MfeaNode::is_ipv6()) {
+	    XrlMfeaClientV0p1Client::send_delete_vif_addr6(
+		dst_module_instance_name.c_str(),
+		vif_name,
+		addr.get_ipv6(),
+		callback(this, &XrlMfeaNode::xrl_result_delete_vif_addr));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
+    
+    return (XORP_OK);
+}
+
+/**
+ * Send to a client to set the vif flags to a configured vif.
+ * 
+ * @param dst_module_instance_name the name of the protocol
+ * instance-destination of the message.
+ * @param dst_module_id the module ID of the protocol-destination
+ * of the message.
+ * @param vif_name the name of the vif.
+ * @param is_pim_register true if the vif is a PIM Register interface.
+ * @param is_p2p true if the vif is point-to-point interface.
+ * @param is_loopback true if the vif is a loopback interface.
+ * @param is_multicast true if the vif is multicast capable.
+ * @param is_broadcast true if the vif is broadcast capable.
+ * @param is_up true if the underlying vif is UP.
+ * @return  XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
+				       xorp_module_id , // dst_module_id,
+				       const string& vif_name,
+				       bool is_pim_register,
+				       bool is_p2p,
+				       bool is_loopback,
+				       bool is_multicast,
+				       bool is_broadcast,
+				       bool is_up)
+{
+    XrlMfeaClientV0p1Client::send_set_vif_flags(
+	dst_module_instance_name.c_str(),
+	vif_name,
+	is_pim_register,
+	is_p2p,
+	is_loopback,
+	is_multicast,
+	is_broadcast,
+	is_up,
+	callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
+    
+    return (XORP_OK);
+}
+
+/**
+ * Send to a client to complete the set of vif configuration changes.
+ * 
+ * @param dst_module_instance_name the name of the protocol
+ * instance-destination of the message.
+ * @param dst_module_id the module ID of the protocol-destination
+ * of the message.
+ * @return  XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+XrlMfeaNode::send_set_config_all_vifs_done(const string& dst_module_instance_name,
+					   xorp_module_id // dst_module_id
+    )
+{
+    XrlMfeaClientV0p1Client::send_set_all_vifs_done(
+	dst_module_instance_name.c_str(),
+	callback(this, &XrlMfeaNode::xrl_result_set_all_vifs_done));
+    
+    return (XORP_OK);
+}
+
 void
 XrlMfeaNode::xrl_result_new_vif(const XrlError& xrl_error)
 {
@@ -762,6 +971,8 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     //
     for (uint16_t i = 0; i < MfeaNode::maxvifs(); i++) {
 	MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(i);
+	if (mfea_vif == NULL)
+	    continue;
 	XrlMfeaClientV0p1Client::send_new_vif(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
@@ -775,7 +986,6 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	    XrlMfeaClientV0p1Client::send_add_vif_addr4(
 		xrl_sender_name.c_str(),
 		mfea_vif->name(),
-		mfea_vif->vif_index(),
 		vif_addr.addr().get_ipv4(),
 		vif_addr.subnet_addr().get_ipv4net(),
 		vif_addr.broadcast_addr().get_ipv4(),
@@ -785,7 +995,6 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	XrlMfeaClientV0p1Client::send_set_vif_flags(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
-	    mfea_vif->vif_index(),
 	    mfea_vif->is_pim_register(),
 	    mfea_vif->is_p2p(),
 	    mfea_vif->is_loopback(),
@@ -858,6 +1067,8 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     //
     for (uint16_t i = 0; i < MfeaNode::maxvifs(); i++) {
 	MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(i);
+	if (mfea_vif == NULL)
+	    continue;
 	XrlMfeaClientV0p1Client::send_new_vif(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
@@ -871,7 +1082,6 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	    XrlMfeaClientV0p1Client::send_add_vif_addr6(
 		xrl_sender_name.c_str(),
 		mfea_vif->name(),
-		mfea_vif->vif_index(),
 		vif_addr.addr().get_ipv6(),
 		vif_addr.subnet_addr().get_ipv6net(),
 		vif_addr.broadcast_addr().get_ipv6(),
@@ -881,7 +1091,6 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	XrlMfeaClientV0p1Client::send_set_vif_flags(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
-	    mfea_vif->vif_index(),
 	    mfea_vif->is_pim_register(),
 	    mfea_vif->is_p2p(),
 	    mfea_vif->is_loopback(),
