@@ -178,7 +178,8 @@ void XorpOspfd::raw_receive(int fd, SelectorMask m)
     //Even worse, FreeBSD modifies the IP header length to remove the IP
     //length to remove the IP header - add it back on.
     pkt->i_len = ntoh16(pkt->i_len + (iph->ip_hl*4));
-    assert(pkt->i_len <= sizeof(buffer));
+
+    //    assert(pkt->i_len <= sizeof(buffer)); // always true
 
     // Dispatch based on IP protocol
     switch (pkt->i_prot) {
