@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.8 2004/06/06 02:06:48 hodson Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.9 2004/06/10 22:41:48 hodson Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -174,8 +174,8 @@ protected:
 
     //
     // Attempt to start next io handler.  Walk list of ports, check
-    // none are in state STARTING and call start on first found to be
-    // in state READY.
+    // none are in state SERVICE_STARTING and call start on first found to be
+    // in state SERVICE_READY.
     //
     // We start 1 at a time to avoid races trying to create
     // sockets with the fea.

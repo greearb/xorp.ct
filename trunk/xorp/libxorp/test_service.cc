@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_service.cc,v 1.4 2004/06/10 22:41:21 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_service.cc,v 1.5 2005/01/30 07:08:51 pavlin Exp $"
 
 #include "config.h"
 
@@ -30,10 +30,10 @@
 // TestService and TestServiceChangeObserver.  TestService is derived
 // from ServiceBase and implements ServiceBase::startup() and
 // ServiceBase::shutdown().  With both methods, invocation sets the
-// current status to the relevant intermediate state (STARTING_UP or
-// SHUTTING_DOWN) and also sets a timer.  When the timer expires it
-// sets the current state to the requested state (RUNNING or
-// SHUTDOWN).  The timer expiry time is after TRANS_MS milliseconds.
+// current status to the relevant intermediate state (SERVICE_STARTING or
+// SERVICE_SHUTTING_DOWN) and also sets a timer.  When the timer expires it
+// sets the current state to the requested state (SERVICE_RUNNING or
+// SERVICE_SHUTDOWN).  The timer expiry time is after TRANS_MS milliseconds.
 //
 // TestServiceChangeObserver assumes it is going to be informed of
 // these changes and verifies that the origin and order of changes
@@ -81,7 +81,7 @@ public:
     bool
     startup()
     {
-	set_status(STARTING, "Waiting for timed start event");
+	set_status(SERVICE_STARTING, "Waiting for timed start event");
 	_xt = _e.new_oneoff_after_ms(TRANS_MS,
 				     callback(this, &TestService::go_running));
 	return true;
@@ -90,7 +90,7 @@ public:
     bool
     shutdown()
     {
-	set_status(SHUTTING_DOWN, "Waiting for timed shutdown event");
+	set_status(SERVICE_SHUTTING_DOWN, "Waiting for timed shutdown event");
 	_xt = _e.new_oneoff_after_ms(TRANS_MS,
 				     callback(this, &TestService::go_shutdown));
 	return true;
@@ -99,12 +99,12 @@ public:
 protected:
     void go_running()
     {
-	set_status(RUNNING);
+	set_status(SERVICE_RUNNING);
     }
 
     void go_shutdown()
     {
-	set_status(SHUTDOWN);
+	set_status(SERVICE_SHUTDOWN);
     }
 
 protected:
@@ -136,30 +136,30 @@ public:
 	}
 
 	ServiceStatus e_old, e_new;
-	e_old = e_new = FAILED; // pessimism is...
+	e_old = e_new = SERVICE_FAILED; // pessimism is...
 	switch (_cc++) {
 	case 0:
-	    // First change expected READY -> STARTING
-	    e_old = READY;
-	    e_new = STARTING;
+	    // First change expected SERVICE_READY -> SERVICE_STARTING
+	    e_old = SERVICE_READY;
+	    e_new = SERVICE_STARTING;
 	    break;
 
 	case 1:
-	    // Second change expected STARTING -> RUNNING
-	    e_old = STARTING;
-	    e_new = RUNNING;
+	    // Second change expected SERVICE_STARTING -> SERVICE_RUNNING
+	    e_old = SERVICE_STARTING;
+	    e_new = SERVICE_RUNNING;
 	    break;
 
 	case 2:
-	    // Third change expected RUNNING -> SHUTTING_DOWN
-	    e_old = RUNNING;
-	    e_new = SHUTTING_DOWN;
+	    // Third change expected SERVICE_RUNNING -> SERVICE_SHUTTING_DOWN
+	    e_old = SERVICE_RUNNING;
+	    e_new = SERVICE_SHUTTING_DOWN;
 	    break;
 
 	case 3:
-	    // Fourth change expected SHUTTING_DOWN -> SHUTDOWN
-	    e_old = SHUTTING_DOWN;
-	    e_new = SHUTDOWN;
+	    // Fourth change expected SERVICE_SHUTTING_DOWN -> SERVICE_SHUTDOWN
+	    e_old = SERVICE_SHUTTING_DOWN;
+	    e_new = SERVICE_SHUTDOWN;
 	    break;
 	default:
 	    verbose_log("%u. Too many changes.\n", XORP_UINT_CAST(_cc));
@@ -231,7 +231,7 @@ run_test()
     bool timed_out = false;
     XorpTimer timeout = e.set_flag_after_ms(EXIT_MS + 3 * TRANS_MS, &timed_out);
 
-    while (timed_out == false && ts.status() != SHUTDOWN) {
+    while (timed_out == false && ts.status() != SERVICE_SHUTDOWN) {
 	e.run();
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.8 2004/12/09 07:54:41 pavlin Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.9 2005/02/01 03:57:07 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -98,7 +98,7 @@ protected:
 
 public:
     Service2XrlTargetStatus(typename XrlTarget<A>::Type& t)
-	: _t(t), _st(READY)
+	: _t(t), _st(SERVICE_READY)
     {}
 
     ~Service2XrlTargetStatus()
@@ -144,31 +144,31 @@ public:
 	    _st = ServiceStatus(_st | sb->status());
 	}
 
-	if (_st & FAILED) {
+	if (_st & SERVICE_FAILED) {
 	    string svcs;
 	    for_each(_services.begin(), _services.end(),
-		     service_names_in(FAILED, svcs));
+		     service_names_in(SERVICE_FAILED, svcs));
 	    _t.set_status(PROC_FAILED, "Failure(s): " + svcs);
 	    return;
 	}
 
-	if (_st & SHUTTING_DOWN) {
+	if (_st & SERVICE_SHUTTING_DOWN) {
 	    string svcs;
 	    for_each(_services.begin(), _services.end(),
-		     service_names_in(SHUTTING_DOWN, svcs));
+		     service_names_in(SERVICE_SHUTTING_DOWN, svcs));
 	    _t.set_status(PROC_SHUTDOWN, "Awaiting shutdown of: " + svcs);
 	    return;
 	}
 
-	if (_st & (STARTING|READY)) {
+	if (_st & (SERVICE_STARTING | SERVICE_READY)) {
 	    string svcs;
 	    for_each(_services.begin(), _services.end(),
-		     service_names_in(STARTING, svcs));
+		     service_names_in(SERVICE_STARTING, svcs));
 	    _t.set_status(PROC_STARTUP, "Awaiting start up of: " + svcs);
 	    return;
 	}
 
-	XLOG_ASSERT(_st == RUNNING);
+	XLOG_ASSERT(_st == SERVICE_RUNNING);
 	_t.set_status(PROC_READY, "");
     }
     inline bool have_status(ServiceStatus st) {
@@ -293,7 +293,9 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	xrm.startup();
 	smon.add_service(&xrm);
 
-	while (_stop_flag == false && smon.have_status(FAILED) == false && xsr.failed() == false) {
+	while ((_stop_flag == false)
+	       && (smon.have_status(SERVICE_FAILED) == false)
+	       && (xsr.failed() == false)) {
 	    e.run();
 	}
 
@@ -306,7 +308,8 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	bool flag(false);
 	XorpTimer t = e.set_flag_after_ms(5000, &flag);
 	while (flag == false &&
-	       smon.have_status(ServiceStatus(~(FAILED|SHUTDOWN)))) {
+	       smon.have_status(
+		   ServiceStatus(~(SERVICE_FAILED | SERVICE_SHUTDOWN)))) {
 	    e.run();
 	}
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_state.cc,v 1.5 2004/05/19 04:48:40 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_state.cc,v 1.6 2004/06/10 22:41:04 hodson Exp $"
 
 
 //
@@ -77,7 +77,7 @@ ProtoState::start()
     if (ProtoState::startup() != true)
 	return (XORP_ERROR);
 
-    ServiceBase::set_status(RUNNING);
+    ServiceBase::set_status(SERVICE_RUNNING);
 
     return (XORP_OK);
 }
@@ -91,7 +91,7 @@ ProtoState::stop()
     if (ProtoState::shutdown() != true)
 	return (XORP_ERROR);
 
-    ServiceBase::set_status(SHUTDOWN);
+    ServiceBase::set_status(SERVICE_SHUTDOWN);
 
     return (XORP_OK);
 }
@@ -106,7 +106,7 @@ ProtoState::pending_start()
     if (is_pending_up())
 	return (XORP_OK);		// Already pending UP
 
-    ServiceBase::set_status(STARTING);
+    ServiceBase::set_status(SERVICE_STARTING);
     
     return (XORP_OK);
 }
@@ -119,7 +119,7 @@ ProtoState::pending_stop()
     if (is_pending_down())
 	return (XORP_OK);		// Already pending DOWN
 
-    ServiceBase::set_status(SHUTTING_DOWN);
+    ServiceBase::set_status(SERVICE_SHUTTING_DOWN);
 
     return (XORP_OK);
 }
@@ -130,11 +130,11 @@ ProtoState::startup()
     //
     // Test the service status
     //
-    if ((ServiceBase::status() == STARTING)
-	|| (ServiceBase::status() == RUNNING))
+    if ((ServiceBase::status() == SERVICE_STARTING)
+	|| (ServiceBase::status() == SERVICE_RUNNING))
 	return true;
 
-    if (ServiceBase::status() != READY)
+    if (ServiceBase::status() != SERVICE_READY)
 	return false;
 
     return true;
@@ -146,13 +146,13 @@ ProtoState::shutdown()
     //
     // Test the service status
     //
-    if ((ServiceBase::status() == SHUTDOWN)
-	|| (ServiceBase::status() == SHUTTING_DOWN)
-	|| (ServiceBase::status() == FAILED)) {
+    if ((ServiceBase::status() == SERVICE_SHUTDOWN)
+	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
+	|| (ServiceBase::status() == SERVICE_FAILED)) {
 	return true;
     }
 
-    if (ServiceBase::status() != RUNNING)
+    if (ServiceBase::status() != SERVICE_RUNNING)
 	return false;
 
     return true;
@@ -190,9 +190,9 @@ ProtoState::state_str() const
 bool
 ProtoState::is_up() const
 {
-    return (ServiceBase::status() == RUNNING);
+    return (ServiceBase::status() == SERVICE_RUNNING);
 }
-    
+
 /**
  * Test if the unit state is DOWN.
  * 
@@ -201,8 +201,8 @@ ProtoState::is_up() const
 bool
 ProtoState::is_down() const
 {
-    return ((ServiceBase::status() == READY)
-	    || (ServiceBase::status() == SHUTDOWN));
+    return ((ServiceBase::status() == SERVICE_READY)
+	    || (ServiceBase::status() == SERVICE_SHUTDOWN));
 }
 
 /**
@@ -213,7 +213,7 @@ ProtoState::is_down() const
 bool
 ProtoState::is_pending_up() const
 {
-    return (ServiceBase::status() == STARTING);
+    return (ServiceBase::status() == SERVICE_STARTING);
 }
 
 /**
@@ -224,5 +224,5 @@ ProtoState::is_pending_up() const
 bool
 ProtoState::is_pending_down() const
 {
-    return (ServiceBase::status() == SHUTTING_DOWN);
+    return (ServiceBase::status() == SERVICE_SHUTTING_DOWN);
 }

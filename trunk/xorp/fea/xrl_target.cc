@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.67 2004/12/17 00:19:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.68 2005/01/20 00:43:17 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2343,7 +2343,7 @@ XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
     if (_xss == 0) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server is not present.");
     }
-    if (_xss->status() != RUNNING) {
+    if (_xss->status() != SERVICE_RUNNING) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
     }
     UNUSED(addr);
@@ -2368,7 +2368,7 @@ XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
     if (_xss == 0) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server is not present.");
     }
-    if (_xss->status() != RUNNING) {
+    if (_xss->status() != SERVICE_RUNNING) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
     }
 

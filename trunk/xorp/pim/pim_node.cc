@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.54 2004/12/17 20:30:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.55 2005/01/28 03:34:19 pavlin Exp $"
 
 
 //
@@ -323,7 +323,8 @@ PimNode::status_change(ServiceBase*  service,
 {
     XLOG_ASSERT(this == service);
 
-    if ((old_status == STARTING) && (new_status == RUNNING)) {
+    if ((old_status == SERVICE_STARTING)
+	&& (new_status == SERVICE_RUNNING)) {
 	// The startup process has completed
 	if (final_start() < 0) {
 	    XLOG_ERROR("Cannot complete the startup process; "
@@ -335,7 +336,8 @@ PimNode::status_change(ServiceBase*  service,
 	return;
     }
 
-    if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+    if ((old_status == SERVICE_SHUTTING_DOWN)
+	&& (new_status == SERVICE_SHUTDOWN)) {
 	// The shutdown process has completed
 	final_stop();
 	// Set the node status

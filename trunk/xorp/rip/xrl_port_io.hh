@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_io.hh,v 1.4 2004/04/22 01:11:51 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.5 2004/06/10 22:41:47 hodson Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -46,7 +46,7 @@ public:
      * Startup.  Sends request to FEA for socket server for address
      * and then attempts to instantiate socket with socket server.  If
      * both operations are successful, instance status transitions to
-     * RUNNING.  Otherwise, it transitions to failed.
+     * SERVICE_RUNNING.  Otherwise, it transitions to failed.
      *
      * @return true on success, false on failure.
      */
@@ -54,8 +54,8 @@ public:
 
     /**
      * Shutdown.  Sends request to close socket and transitions into
-     * SHUTTING_DOWN state.  When socket is closed transition to
-     * SHUTDOWN occurs.
+     * SERVICE_SHUTTING_DOWN state.  When socket is closed transition to
+     * SERVICE_SHUTDOWN occurs.
      *
      * @return true on success, false on failure.
      */

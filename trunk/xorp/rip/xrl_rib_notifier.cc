@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.9 2004/06/10 22:41:48 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.10 2004/09/17 13:57:16 abittau Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -145,7 +145,7 @@ XrlRibNotifier<A>::XrlRibNotifier(EventLoop&		e,
       _xs(xr), _cname(xr.class_name()), _iname(xr.instance_name()),
       _max_inflight(mf), _inflight(0)
 {
-    set_status(READY);
+    set_status(SERVICE_READY);
 }
 
 template <typename A>
@@ -196,10 +196,10 @@ XrlRibNotifier<A>::startup()
 	(xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
 	 callback(this, &XrlRibNotifier<A>::add_igp_cb)) == false) {
 	XLOG_ERROR("Failed to send table creation request.");
-	set_status(FAILED);
+	set_status(SERVICE_FAILED);
 	return false;
     }
-    set_status(STARTING);
+    set_status(SERVICE_STARTING);
     incr_inflight();
 
     return true;
@@ -212,11 +212,11 @@ XrlRibNotifier<A>::add_igp_cb(const XrlError& xe)
     decr_inflight();
     if (xe != XrlError::OKAY()) {
 	XLOG_ERROR("add_igp failed: %s\n", xe.str().c_str());
-	set_status(FAILED);
+	set_status(SERVICE_FAILED);
 	return;
     }
     this->start_polling();
-    set_status(RUNNING);
+    set_status(SERVICE_RUNNING);
 }
 
 
@@ -225,7 +225,7 @@ bool
 XrlRibNotifier<A>::shutdown()
 {
     this->stop_polling();
-    set_status(SHUTTING_DOWN);
+    set_status(SERVICE_SHUTTING_DOWN);
 
     XrlRibV0p1Client c(&_xs);
 
@@ -236,7 +236,7 @@ XrlRibNotifier<A>::shutdown()
 	(xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
 	 callback(this, &XrlRibNotifier<A>::delete_igp_cb)) == false) {
 	XLOG_ERROR("Failed to send table creation request.");
-	set_status(FAILED);
+	set_status(SERVICE_FAILED);
 	return false;
     }
     incr_inflight();
@@ -250,10 +250,10 @@ XrlRibNotifier<A>::delete_igp_cb(const XrlError& e)
 {
     decr_inflight();
     if (e != XrlError::OKAY()) {
-	set_status(FAILED);
+	set_status(SERVICE_FAILED);
 	return;
     }
-    set_status(SHUTDOWN);
+    set_status(SERVICE_SHUTDOWN);
 }
 
 
@@ -330,7 +330,7 @@ XrlRibNotifier<A>::updates_available()
 	if (_inflight == _max_inflight) {
 	    break;
 	}
-	if (status() != RUNNING) {
+	if (status() != SERVICE_RUNNING) {
 	    // If we're not running just skip any available updates.
 	    continue;
 	}

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.19 2005/02/09 23:29:40 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.20 2005/02/11 02:49:31 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -91,7 +91,7 @@ XrlStaticRoutesNode::finder_disconnect_event()
 {
     XLOG_ERROR("Finder disconnect event. Exiting immediately...");
 
-    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::set_status(SERVICE_FAILED);
     StaticRoutesNode::update_status();
 }
 
@@ -232,7 +232,7 @@ XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
     _is_fea_deregistering = false;
     _is_fea_registered = false;
 
-    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::set_status(SERVICE_FAILED);
     StaticRoutesNode::update_status();
 }
 
@@ -375,7 +375,7 @@ XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
     _is_rib_deregistering = false;
     _is_rib_registered = false;
 
-    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::set_status(SERVICE_FAILED);
     StaticRoutesNode::update_status();
 }
 
@@ -538,7 +538,7 @@ XrlStaticRoutesNode::send_rib_delete_tables()
     }
 
     if (! success) {
-	StaticRoutesNode::set_status(FAILED);
+	StaticRoutesNode::set_status(SERVICE_FAILED);
 	StaticRoutesNode::update_status();
     }
 }
@@ -558,7 +558,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(const XrlError& xrl_er
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::set_status(SERVICE_FAILED);
     StaticRoutesNode::update_status();
 }
 
@@ -577,7 +577,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(const XrlError& xrl_er
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    StaticRoutesNode::set_status(FAILED);
+    StaticRoutesNode::set_status(SERVICE_FAILED);
     StaticRoutesNode::update_status();
 }
 
@@ -650,7 +650,7 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
 	//
 	_is_fea_alive = true;
 	if (_ifmgr.startup() != true) {
-	    StaticRoutesNode::ServiceBase::set_status(FAILED);
+	    StaticRoutesNode::ServiceBase::set_status(SERVICE_FAILED);
 	    StaticRoutesNode::update_status();
 	}
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_process_spy.cc,v 1.5 2004/05/23 01:19:50 atanu Exp $"
+#ident "$XORP: xorp/rip/xrl_process_spy.cc,v 1.6 2004/06/10 22:41:48 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -44,18 +44,20 @@ XrlProcessSpy::~XrlProcessSpy()
 bool
 XrlProcessSpy::fea_present() const
 {
-    if (status() == RUNNING)
+    if (status() == SERVICE_RUNNING)
 	return _iname[FEA_IDX].empty() == false;
-    debug_msg("XrlProcessSpy::fea_present() called when not RUNNING.\n");
+    debug_msg("XrlProcessSpy::fea_present() called when not "
+	      "SERVICE_RUNNING.\n");
     return false;
 }
 
 bool
 XrlProcessSpy::rib_present() const
 {
-    if (status() == RUNNING)
+    if (status() == SERVICE_RUNNING)
 	return _iname[RIB_IDX].empty() == false;
-    debug_msg("XrlProcessSpy::rib_present() called when not RUNNING.\n");
+    debug_msg("XrlProcessSpy::rib_present() called when not "
+	      "SERVICE_RUNNING.\n");
     return false;
 }
 
@@ -100,9 +102,9 @@ XrlProcessSpy::death_event(const string& class_name,
 bool
 XrlProcessSpy::startup()
 {
-    if (status() == READY || status() == SHUTDOWN) {
+    if (status() == SERVICE_READY || status() == SERVICE_SHUTDOWN) {
 	send_register(0);
-	set_status(STARTING);
+	set_status(SERVICE_STARTING);
     }
 
     return true;
@@ -145,7 +147,7 @@ XrlProcessSpy::register_cb(const XrlError& xe, uint32_t idx)
     if (idx < END_IDX) {
 	send_register(idx);
     } else {
-	set_status(RUNNING);
+	set_status(SERVICE_RUNNING);
     }
 }
 
@@ -153,9 +155,9 @@ XrlProcessSpy::register_cb(const XrlError& xe, uint32_t idx)
 bool
 XrlProcessSpy::shutdown()
 {
-    if (status() == RUNNING) {
+    if (status() == SERVICE_RUNNING) {
 	send_deregister(0);
-	set_status(SHUTTING_DOWN);
+	set_status(SERVICE_SHUTTING_DOWN);
     }
 
     return true;
@@ -199,6 +201,6 @@ XrlProcessSpy::deregister_cb(const XrlError& xe, uint32_t idx)
     if (idx < END_IDX) {
 	send_deregister(idx);
     } else {
-	set_status(SHUTDOWN);
+	set_status(SERVICE_SHUTDOWN);
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.17 2004/09/02 03:15:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.18 2004/11/23 00:53:20 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -516,7 +516,7 @@ bool
 XrlSocketServer::startup()
 {
     _r->finalize();
-    set_status(STARTING);
+    set_status(SERVICE_STARTING);
 
     return true;
 }
@@ -524,7 +524,7 @@ XrlSocketServer::startup()
 bool
 XrlSocketServer::shutdown()
 {
-    set_status(SHUTTING_DOWN);
+    set_status(SERVICE_SHUTTING_DOWN);
 
     return true;
 }
@@ -642,7 +642,7 @@ XrlSocketServer::socket4_0_1_tcp_open_and_bind(const string&	creator,
 					       const bool&	is_blocking,
 					       string&		sockid)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -676,7 +676,7 @@ XrlSocketServer::socket4_0_1_udp_open_and_bind(const string&	creator,
 					       const bool&	is_blocking,
 					       string&		sockid)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -718,7 +718,7 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
 	      creator.c_str(), local_addr.str().c_str(), local_port,
 	      mcast_addr.str().c_str(), ttl, reuse);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -782,7 +782,7 @@ XrlSocketServer::socket4_0_1_tcp_open_bind_connect(
     string&		sockid
     )
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -829,7 +829,7 @@ XrlSocketServer::socket4_0_1_udp_open_bind_connect(
     string&		sockid
     )
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -867,7 +867,7 @@ XrlSocketServer::socket4_0_1_udp_join_group(const string&	sockid,
 					    const IPv4&		group,
 					    const IPv4&		if_addr)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::const_iterator ci = find_if(_v4sockets.begin(),
@@ -902,7 +902,7 @@ XrlSocketServer::socket4_0_1_udp_leave_group(const string&	sockid,
 					    const IPv4&		group,
 					    const IPv4&		if_addr)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::const_iterator ci = find_if(_v4sockets.begin(),
@@ -935,7 +935,7 @@ XrlSocketServer::socket4_0_1_udp_leave_group(const string&	sockid,
 XrlCmdError
 XrlSocketServer::socket4_0_1_close(const string& sockid)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::iterator i4;
@@ -953,7 +953,7 @@ XrlCmdError
 XrlSocketServer::socket4_0_1_tcp_listen(const string&	sockid,
 					const uint32_t&	backlog)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::const_iterator ci;
@@ -977,7 +977,7 @@ XrlSocketServer::socket4_0_1_send(
     const vector<uint8_t>&	data
     )
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::const_iterator ci;
@@ -1003,7 +1003,7 @@ XrlSocketServer::socket4_0_1_send_with_flags(
     const bool&			end_of_file
     )
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::const_iterator ci;
@@ -1055,7 +1055,7 @@ XrlSocketServer::socket4_0_1_send_to(const string&		sockid,
 				     const uint32_t&		remote_port,
 				     const vector<uint8_t>&	data)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::const_iterator ci;
@@ -1090,7 +1090,7 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
 						const bool&	end_of_record,
 						const bool&	end_of_file)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V4Sockets::const_iterator ci;
@@ -1153,7 +1153,7 @@ XrlSocketServer::socket4_0_1_send_from_multicast_if(
 					const vector<uint8_t>& 	data
 					)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -1197,7 +1197,7 @@ XrlSocketServer::socket4_0_1_set_socket_option(const string&	sockid,
 					       const string&	optname,
 					       const uint32_t&	optval)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     const char* o_cstr = optname.c_str();
@@ -1234,7 +1234,7 @@ XrlSocketServer::socket4_0_1_get_socket_option(const string&	sockid,
 					       const string&	optname,
 					       uint32_t&	optval)
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     const char* o_cstr = optname.c_str();
@@ -1280,7 +1280,7 @@ XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -1316,7 +1316,7 @@ XrlSocketServer::socket6_0_1_udp_open_and_bind(const string&	creator,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -1356,7 +1356,7 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -1416,7 +1416,7 @@ XrlSocketServer::socket6_0_1_tcp_open_bind_connect(
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -1466,7 +1466,7 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -1507,7 +1507,7 @@ XrlSocketServer::socket6_0_1_udp_join_group(const string&	sockid,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::const_iterator ci = find_if(_v6sockets.begin(),
@@ -1547,7 +1547,7 @@ XrlSocketServer::socket6_0_1_udp_leave_group(const string&	sockid,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::const_iterator ci = find_if(_v6sockets.begin(),
@@ -1585,7 +1585,7 @@ XrlSocketServer::socket6_0_1_close(const string& sockid)
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::iterator i6;
@@ -1606,7 +1606,7 @@ XrlSocketServer::socket6_0_1_tcp_listen(const string&	sockid,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::const_iterator ci;
@@ -1632,7 +1632,7 @@ XrlSocketServer::socket6_0_1_send(
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::const_iterator ci;
@@ -1661,7 +1661,7 @@ XrlSocketServer::socket6_0_1_send_with_flags(
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::const_iterator ci;
@@ -1716,7 +1716,7 @@ XrlSocketServer::socket6_0_1_send_to(const string&		sockid,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::const_iterator ci;
@@ -1754,7 +1754,7 @@ XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     V6Sockets::const_iterator ci;
@@ -1818,7 +1818,7 @@ XrlSocketServer::socket6_0_1_send_from_multicast_if(
 					)
 {
 #ifdef HAVE_IPV6
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
@@ -1872,7 +1872,7 @@ XrlSocketServer::socket6_0_1_set_socket_option(const string&	sockid,
 					       const uint32_t&	optval)
 {
 #ifdef HAVE_IPV6
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     const char* o_cstr = optname.c_str();
@@ -1916,7 +1916,7 @@ XrlSocketServer::socket6_0_1_get_socket_option(const string&	sockid,
 					       uint32_t&	optval)
 {
 #ifdef HAVE_IPV6
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     const char* o_cstr = optname.c_str();
@@ -2011,6 +2011,6 @@ void
 XrlSocketServer::xrl_router_ready(const string& iname)
 {
     if (iname == _r->instance_name())
-	set_status(RUNNING);
+	set_status(SERVICE_RUNNING);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_rib_notifier.hh,v 1.2 2004/04/22 01:11:52 pavlin Exp $
+// $XORP: xorp/rip/xrl_rib_notifier.hh,v 1.3 2004/06/10 22:41:48 hodson Exp $
 
 #ifndef __RIP_XRL_RIB_NOTIFIER_HH__
 #define __RIP_XRL_RIB_NOTIFIER_HH__
@@ -37,13 +37,13 @@ class XrlRouter;
  * the RIB.
  *
  * The XrlRibNotifier may be in one of several states enumerated by
- * @ref RunStatus.  Before startup(), an instances state is READY.
+ * @ref RunStatus.  Before startup(), an instances state is SERVICE_READY.
  * Then when startup is called it transitions into
- * INSTALLING_RIP_TABLE and transitions into RUNNING.  When in RUNNING
- * state updates are sent to the RIB.  When shutdown() is called it
- * enters UNINSTALLING_RIP_TABLE before entering SHUTDOWN.  At any
- * time it may fall into state FAILED if communication with the RIB
- * fails.
+ * INSTALLING_RIP_TABLE and transitions into SERVICE_RUNNING.  When in
+ * SERVICE_RUNNING state updates are sent to the RIB.  When shutdown() is
+ * called it enters UNINSTALLING_RIP_TABLE before entering SERVICE_SHUTDOWN.
+ * At any time it may fall into state SERVICE_FAILED if communication with
+ * the RIB fails.
  */
 template <typename A>
 class XrlRibNotifier : public RibNotifierBase<A>, public ServiceBase

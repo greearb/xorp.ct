@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.7 2004/06/10 22:41:03 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.8 2004/12/09 07:54:36 pavlin Exp $"
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.7 2004/06/10 22:41:03 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.8 2004/12/09 07:54:36 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -310,7 +310,7 @@ test_main()
 
     expired = false;
     t = e.set_flag_after_ms(3000, &expired);
-    while (m0.status() != RUNNING) {
+    while (m0.status() != SERVICE_RUNNING) {
 	e.run();
 	if (expired) {
 	    verbose_log("Did reach running state: "
@@ -329,7 +329,7 @@ test_main()
     m0.shutdown();
     expired = false;
     t = e.set_flag_after_ms(3000, &expired);
-    while (expired == false && m0.status() != SHUTDOWN) {
+    while (expired == false && m0.status() != SERVICE_SHUTDOWN) {
 	e.run();
 	if (expired) {
 	    verbose_log("Failed to shutdown: state = %s note = %s\n",

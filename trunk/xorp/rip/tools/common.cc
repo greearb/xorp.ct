@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/common.cc,v 1.2 2004/06/10 22:41:49 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/common.cc,v 1.3 2005/02/01 08:03:20 pavlin Exp $"
 
 #include <string>
 
@@ -86,7 +86,7 @@ XrlJobQueue::XrlJobQueue(EventLoop& 	e,
     : _e(e), _fhost(finder_host), _fport(finder_port), _tgt(tgtname),
       _rtr(0), _rtr_poll_cnt(0)
 {
-    set_status(READY);
+    set_status(SERVICE_READY);
 }
 
 XrlJobQueue::~XrlJobQueue()
@@ -101,7 +101,7 @@ XrlJobQueue::startup()
 			  XORP_UINT_CAST(getpid()));
     _rtr = new XrlStdRouter(_e, cls.c_str(), _fhost.c_str(), _fport);
     _rtr->finalize();
-    set_status(STARTING);
+    set_status(SERVICE_STARTING);
     _rtr_poll = _e.new_periodic(100,
 			callback(this, &XrlJobQueue::xrl_router_ready_poll));
     return true;
@@ -113,7 +113,7 @@ XrlJobQueue::shutdown()
     while (_jobs.empty() == false) {
 	_jobs.pop_front();
     }
-    set_status(SHUTDOWN);
+    set_status(SERVICE_SHUTDOWN);
     return true;
 }
 
@@ -148,7 +148,7 @@ XrlJobQueue::xrl_router_ready_poll()
 	return false;
     }
     if (_rtr_poll_cnt++ > 50) {
-	set_status(FAILED, "Could not contact XORP Finder process");
+	set_status(SERVICE_FAILED, "Could not contact XORP Finder process");
     }
     return true;
 }
@@ -157,6 +157,6 @@ void
 XrlJobQueue::process_next_job()
 {
     if (_jobs.front()->dispatch() == false) {
-	set_status(FAILED, "Could not dispatch xrl");
+	set_status(SERVICE_FAILED, "Could not dispatch xrl");
     }
 }

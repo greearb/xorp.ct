@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.44 2005/01/21 03:25:06 atanu Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.45 2005/01/21 22:02:04 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -100,42 +100,42 @@ RibManager::status_updater()
     //
     ServiceStatus vif_mgr_status = _vif_manager.status();
     switch (vif_mgr_status) {
-    case READY:
+    case SERVICE_READY:
 	break;
-    case STARTING:
+    case SERVICE_STARTING:
 	s = PROC_NOT_READY;
 	reason = "VifManager starting";
 	break;
-    case RUNNING:
+    case SERVICE_RUNNING:
 	break;
-    case PAUSING:
+    case SERVICE_PAUSING:
 	s = PROC_NOT_READY;
 	reason = "VifManager pausing";
 	break;
-    case PAUSED:
+    case SERVICE_PAUSED:
 	s = PROC_NOT_READY;
 	reason = "VifManager paused";
 	break;
-    case RESUMING:
+    case SERVICE_RESUMING:
 	s = PROC_NOT_READY;
 	reason = "VifManager resuming";
 	break;
-    case SHUTTING_DOWN:
+    case SERVICE_SHUTTING_DOWN:
 	s = PROC_SHUTDOWN;
 	reason = "VifManager shutting down";
 	break;
-    case SHUTDOWN:
+    case SERVICE_SHUTDOWN:
 	s = PROC_DONE;
 	reason = "VifManager Shutdown";
        break;
-    case FAILED:
+    case SERVICE_FAILED:
 	// VifManager failed: set process state to failed.
 	// TODO: XXX: Should we exit here, or wait to be restarted?
 	s = PROC_FAILED;
 	reason = "VifManager Failed";
 	ret = false;
 	break;
-    case ALL:
+    case SERVICE_ALL:
 	XLOG_UNREACHABLE();
 	break;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.8 2005/01/27 01:36:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.9 2005/02/01 07:30:46 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -219,7 +219,7 @@ ShowRoutesProcessor::~ShowRoutesProcessor()
 bool
 ShowRoutesProcessor::startup()
 {
-    if (status() != READY) {
+    if (status() != SERVICE_READY) {
 	return false;
     }
 
@@ -239,7 +239,7 @@ ShowRoutesProcessor::startup()
     _t = _e.new_periodic(250,
 			 callback(this,
 				  &ShowRoutesProcessor::poll_ready_failed));
-    set_status(STARTING);
+    set_status(SERVICE_STARTING);
     return true;
 }
 
@@ -250,10 +250,12 @@ ShowRoutesProcessor::shutdown()
     this->set_command_map(NULL);
 
     ServiceStatus st = this->status();
-    if (st == FAILED || st == SHUTTING_DOWN || st == SHUTDOWN)
+    if (st == SERVICE_FAILED
+	|| st == SERVICE_SHUTTING_DOWN
+	|| st == SERVICE_SHUTDOWN)
 	return false;
 
-    set_status(SHUTTING_DOWN);
+    set_status(SERVICE_SHUTTING_DOWN);
     step_1000_request_cease();
     return true;
 }
@@ -264,11 +266,11 @@ ShowRoutesProcessor::poll_ready_failed()
     if (_rtr == 0) {
 	return false;
     } else if (_rtr->ready()) {
-	set_status(RUNNING);
+	set_status(SERVICE_RUNNING);
 	step_100_watch_rib();
 	return false;
     } else if (_rtr->failed()) {
-	set_status(FAILED, "Failed: No Finder?");
+	set_status(SERVICE_FAILED, "Failed: No Finder?");
 	return false;
     }
     return true;
@@ -282,8 +284,9 @@ ShowRoutesProcessor::step_100_watch_rib()
     if (fen.send_register_class_event_interest(
 		"finder", _rtr->instance_name(), _opts.xrl_target,
 		callback(this, &ShowRoutesProcessor::watch_rib_cb)) == false) {
-	set_status(FAILED, c_format("Failed to register interest in %s",
-				   _opts.xrl_target.c_str()));
+	set_status(SERVICE_FAILED,
+		   c_format("Failed to register interest in %s",
+			    _opts.xrl_target.c_str()));
 	return;
     }
 }
@@ -295,8 +298,9 @@ ShowRoutesProcessor::watch_rib_cb(const XrlError& xe)
 	step_200_request_redist();
 	return;
     }
-    set_status(FAILED, c_format("Failed to register interest in %s",
-				_opts.xrl_target.c_str()));
+    set_status(SERVICE_FAILED,
+	       c_format("Failed to register interest in %s",
+			_opts.xrl_target.c_str()));
     return;
 }
 
@@ -335,7 +339,7 @@ ShowRoutesProcessor::step_200_request_redist()
     }
 
     if (sent == false) {
-	set_status(FAILED, "Failed to request redist.");
+	set_status(SERVICE_FAILED, "Failed to request redist.");
     }
 }
 
@@ -345,7 +349,7 @@ ShowRoutesProcessor::request_redist_cb(const XrlError& xe)
     if (xe == XrlError::OKAY()) {
 	return;
     }
-    set_status(FAILED,
+    set_status(SERVICE_FAILED,
 	       c_format("Request for routes to be redistributed from %s "
 			"failed.\nThe protocol is probably not active.",
 			_opts.protocol));
@@ -377,16 +381,16 @@ ShowRoutesProcessor::step_1000_request_cease()
     }
 
     if (sent == false) {
-	set_status(FAILED, "Failed to request redistribution end.");
+	set_status(SERVICE_FAILED, "Failed to request redistribution end.");
 	return;
     }
-    set_status(SHUTTING_DOWN);
+    set_status(SERVICE_SHUTTING_DOWN);
 }
 
 void
 ShowRoutesProcessor::request_cease_cb(const XrlError& /* xe */)
 {
-    set_status(SHUTDOWN);
+    set_status(SERVICE_SHUTDOWN);
     return;
 }
 
@@ -421,16 +425,16 @@ ShowRoutesProcessor::common_0_1_get_status(uint32_t&	status,
 					   string&	/* reason */)
 {
     switch (this->status()) {
-    case READY:		status = PROC_NULL;		break;
-    case STARTING:	status = PROC_STARTUP;		break;
-    case RUNNING:	status = PROC_READY;		break;
-    case PAUSED:					/* FALLTHRU */
-    case PAUSING:					/* FALLTHRU */
-    case RESUMING:	status = PROC_NOT_READY;	break;
-    case SHUTTING_DOWN:	status = PROC_SHUTDOWN;		break;
-    case SHUTDOWN:	status = PROC_DONE;		break;
-    case FAILED:	status = PROC_FAILED;		break;
-    case ALL:						break;
+    case SERVICE_READY:		status = PROC_NULL;		break;
+    case SERVICE_STARTING:	status = PROC_STARTUP;		break;
+    case SERVICE_RUNNING:	status = PROC_READY;		break;
+    case SERVICE_PAUSED:					/* FALLTHRU */
+    case SERVICE_PAUSING:					/* FALLTHRU */
+    case SERVICE_RESUMING:	status = PROC_NOT_READY;	break;
+    case SERVICE_SHUTTING_DOWN:	status = PROC_SHUTDOWN;		break;
+    case SERVICE_SHUTDOWN:	status = PROC_DONE;		break;
+    case SERVICE_FAILED:	status = PROC_FAILED;		break;
+    case SERVICE_ALL:						break;
     }
     return XrlCmdError::OKAY();
 }
@@ -486,7 +490,7 @@ ShowRoutesProcessor::redist4_0_1_add_route(const IPv4Net&	dst,
 					   const uint32_t&	admin_distance,
 					   const string&	cookie)
 {
-    if (this->status() != RUNNING || check_cookie(cookie) == false) {
+    if (this->status() != SERVICE_RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
     }
 
@@ -526,7 +530,7 @@ ShowRoutesProcessor::redist6_0_1_add_route(const IPv6Net&	dst,
 					   const uint32_t&	admin_distance,
 					   const string&	cookie)
 {
-    if (this->status() != RUNNING || check_cookie(cookie) == false) {
+    if (this->status() != SERVICE_RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
     }
     display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
@@ -684,11 +688,12 @@ main(int argc, char* const argv[])
 	ShowRoutesProcessor srp(e, sr_opts);
 
 	srp.startup();
-	while (srp.status() != FAILED && srp.status() != SHUTDOWN) {
+	while ((srp.status() != SERVICE_FAILED)
+	       && (srp.status() != SERVICE_SHUTDOWN)) {
 	    e.run();
 	}
 
-	if (srp.status() == FAILED) {
+	if (srp.status() == SERVICE_FAILED) {
 	    srp.shutdown();
 	    if (srp.status_note().empty() == false) {
 		cout << srp.status_note() << endl;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.59 2005/01/25 00:52:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.60 2005/01/28 03:34:20 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -409,7 +409,7 @@ XrlPimNode::send_mfea_deregistration()
     if (! success) {
 	XLOG_ERROR("Failed to deregister with the MFEA. "
 		   "Will give up.");
-	PimNode::set_status(FAILED);
+	PimNode::set_status(SERVICE_FAILED);
 	PimNode::update_status();
     }
 }
@@ -429,7 +429,7 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    PimNode::set_status(FAILED);
+    PimNode::set_status(SERVICE_FAILED);
     PimNode::update_status();
 }
 
@@ -555,7 +555,7 @@ XrlPimNode::send_rib_deregistration()
     if (! success) {
 	XLOG_ERROR("Failed to deregister with the RIB. "
 		   "Will give up.");
-	PimNode::set_status(FAILED);
+	PimNode::set_status(SERVICE_FAILED);
 	PimNode::update_status();
     }
 }
@@ -574,7 +574,7 @@ XrlPimNode::rib_client_send_redist_transaction_disable_cb(const XrlError& xrl_er
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    PimNode::set_status(FAILED);
+    PimNode::set_status(SERVICE_FAILED);
     PimNode::update_status();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.8 2004/12/09 07:54:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.9 2005/01/27 01:38:06 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -64,26 +64,26 @@ InterfaceMonitor::startup()
     //
     // Test the service status
     //
-    if ((ServiceBase::status() == STARTING)
-	|| (ServiceBase::status() == RUNNING))
+    if ((ServiceBase::status() == SERVICE_STARTING)
+	|| (ServiceBase::status() == SERVICE_RUNNING))
 	return true;
 
-    if (ServiceBase::status() != READY)
+    if (ServiceBase::status() != SERVICE_READY)
 	return false;
 
     //
-    // Transition to RUNNING occurs when all transient startup operations
-    // are completed (e.g., after we have the interface/vif/address state
-    // available, etc.)
+    // Transition to SERVICE_RUNNING occurs when all transient startup
+    // operations are completed (e.g., after we have the interface/vif/address
+    // state available, etc.)
     //
-    ServiceBase::set_status(STARTING);
+    ServiceBase::set_status(SERVICE_STARTING);
 
     //
     // Startup the interface manager
     //
     if (ifmgr_startup() != true) {
 	XLOG_ERROR("Cannot startup the interface mirroring manager");
-	ServiceBase::set_status(FAILED);
+	ServiceBase::set_status(SERVICE_FAILED);
 	return false;
     }
 
@@ -94,28 +94,29 @@ bool
 InterfaceMonitor::shutdown()
 {
     //
-    // We cannot shutdown if our status is SHUTDOWN or FAILED.
+    // We cannot shutdown if our status is SERVICE_SHUTDOWN or SERVICE_FAILED.
     //
-    if ((ServiceBase::status() == SHUTDOWN)
-	|| (ServiceBase::status() == FAILED)) {
+    if ((ServiceBase::status() == SERVICE_SHUTDOWN)
+	|| (ServiceBase::status() == SERVICE_FAILED)) {
 	return true;
     }
 
-    if (ServiceBase::status() != RUNNING)
+    if (ServiceBase::status() != SERVICE_RUNNING)
 	return false;
 
     //
-    // Transition to SHUTDOWN occurs when all transient shutdown operations
-    // are completed (e.g., after we have deregistered with the FEA, etc.)
+    // Transition to SERVICE_SHUTDOWN occurs when all transient shutdown
+    // operations are completed (e.g., after we have deregistered with the
+    // FEA, etc.)
     //
-    ServiceBase::set_status(SHUTTING_DOWN);
+    ServiceBase::set_status(SERVICE_SHUTTING_DOWN);
 
     //
     // Shutdown the interface manager
     //
     if (ifmgr_shutdown() != true) {
 	XLOG_ERROR("Cannot shutdown the interface mirroring manager");
-	ServiceBase::set_status(FAILED);
+	ServiceBase::set_status(SERVICE_FAILED);
 	return false;
     }
 
@@ -129,12 +130,14 @@ InterfaceMonitor::status_change(ServiceBase*  service,
 {
     if (service == this) {
 	// My own status has changed
-	if ((old_status == STARTING) && (new_status == RUNNING)) {
+	if ((old_status == SERVICE_STARTING)
+	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
 	    return;
 	}
 
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    // The shutdown process has completed
 	    return;
 	}
@@ -146,7 +149,8 @@ InterfaceMonitor::status_change(ServiceBase*  service,
     }
 
     if (service == ifmgr_mirror_service_base()) {
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    decr_shutdown_requests_n();
 	}
     }
@@ -190,31 +194,31 @@ InterfaceMonitor::update_status()
     //
     // Test if the startup process has completed
     //
-    if (ServiceBase::status() == STARTING) {
+    if (ServiceBase::status() == SERVICE_STARTING) {
 	if (_startup_requests_n > 0)
 	    return;
 
 	// The startup process has completed
-	ServiceBase::set_status(RUNNING);
+	ServiceBase::set_status(SERVICE_RUNNING);
 	return;
     }
 
     //
     // Test if the shutdown process has completed
     //
-    if (ServiceBase::status() == SHUTTING_DOWN) {
+    if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) {
 	if (_shutdown_requests_n > 0)
 	    return;
 
 	// The shutdown process has completed
-	ServiceBase::set_status(SHUTDOWN);
+	ServiceBase::set_status(SERVICE_SHUTDOWN);
 	return;
     }
 
     //
     // Test if we have failed
     //
-    if (ServiceBase::status() == FAILED) {
+    if (ServiceBase::status() == SERVICE_FAILED) {
 	return;
     }
 }
@@ -476,11 +480,11 @@ interface_monitor_main(const char* finder_hostname, uint16_t finder_port,
     //
     // Main loop
     //
-    while (ifmon.status() == STARTING) {
+    while (ifmon.status() == SERVICE_STARTING) {
 	eventloop.run();
     }
 
-    if (ifmon.status() == RUNNING) {
+    if (ifmon.status() == SERVICE_RUNNING) {
 	ifmon.print_interfaces(print_iface_name);
     }
 
@@ -488,7 +492,7 @@ interface_monitor_main(const char* finder_hostname, uint16_t finder_port,
     // Shutdown
     //
     ifmon.shutdown();
-    while (ifmon.status() == SHUTTING_DOWN) {
+    while (ifmon.status() == SERVICE_SHUTTING_DOWN) {
 	eventloop.run();
     }
 

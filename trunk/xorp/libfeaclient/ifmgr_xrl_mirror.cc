@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.12 2004/12/09 07:54:36 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.13 2005/02/09 23:27:26 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -878,7 +878,7 @@ IfMgrXrlMirror::~IfMgrXrlMirror()
 bool
 IfMgrXrlMirror::startup()
 {
-    if (status() != READY)
+    if (status() != SERVICE_READY)
 	return false;
 
     if (_rtr == NULL) {
@@ -890,7 +890,7 @@ IfMgrXrlMirror::startup()
 	_xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
 	_xrl_tgt->attach(this);
     }
-    set_status(STARTING, "Initializing Xrl Router.");
+    set_status(SERVICE_STARTING, "Initializing Xrl Router.");
 
     return true;
 }
@@ -898,10 +898,10 @@ IfMgrXrlMirror::startup()
 bool
 IfMgrXrlMirror::shutdown()
 {
-    if (status() != RUNNING)
+    if (status() != SERVICE_RUNNING)
 	return false;
 
-    set_status(SHUTTING_DOWN);
+    set_status(SERVICE_SHUTTING_DOWN);
     unregister_with_ifmgr();
 
     return true;
@@ -911,10 +911,10 @@ void
 IfMgrXrlMirror::finder_disconnect_event()
 {
     _iftree.clear();
-    if (status() == SHUTTING_DOWN) {
-	set_status(SHUTDOWN);
+    if (status() == SERVICE_SHUTTING_DOWN) {
+	set_status(SERVICE_SHUTDOWN);
     } else {
-	set_status(FAILED);
+	set_status(SERVICE_FAILED);
     }
 }
 
@@ -927,14 +927,14 @@ IfMgrXrlMirror::finder_ready_event()
 void
 IfMgrXrlMirror::tree_complete()
 {
-    if (status() != STARTING) {
+    if (status() != SERVICE_STARTING) {
 	// XXX In case shutdown is called or a failure occurs before
 	// tree_complete message is received.  If either happens we don't
 	// want to advertise the tree as complete.
 	return;
     }
 
-    set_status(RUNNING);
+    set_status(SERVICE_RUNNING);
     list<IfMgrHintObserver*>::const_iterator ci;
     for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
 	IfMgrHintObserver* ho = *ci;
@@ -945,7 +945,9 @@ IfMgrXrlMirror::tree_complete()
 void
 IfMgrXrlMirror::updates_made()
 {
-    if (status() & ServiceStatus(SHUTTING_DOWN | SHUTDOWN | FAILED))
+    if (status() & ServiceStatus(SERVICE_SHUTTING_DOWN
+				 | SERVICE_SHUTDOWN
+				 | SERVICE_FAILED))
 	return;
 
     list<IfMgrHintObserver*>::const_iterator ci;
@@ -958,7 +960,9 @@ IfMgrXrlMirror::updates_made()
 bool
 IfMgrXrlMirror::attach_hint_observer(IfMgrHintObserver* o)
 {
-    if (status() & ServiceStatus(SHUTTING_DOWN | SHUTDOWN | FAILED))
+    if (status() & ServiceStatus(SERVICE_SHUTTING_DOWN
+				 | SERVICE_SHUTDOWN
+				 | SERVICE_FAILED))
 	return false;
 
     if (find(_hint_observers.begin(), _hint_observers.end(), o)
@@ -990,19 +994,19 @@ IfMgrXrlMirror::register_with_ifmgr()
 				     callback(this,
 					      &IfMgrXrlMirror::register_cb))
 	== false) {
-	set_status(FAILED, "Failed to send registration to ifmgr");
+	set_status(SERVICE_FAILED, "Failed to send registration to ifmgr");
 	return;
     }
-    set_status(STARTING, "Registering with FEA interface manager.");
+    set_status(SERVICE_STARTING, "Registering with FEA interface manager.");
 }
 
 void
 IfMgrXrlMirror::register_cb(const XrlError& e)
 {
     if (e == XrlError::OKAY()) {
-	set_status(STARTING, "Waiting to receive interface data.");
+	set_status(SERVICE_STARTING, "Waiting to receive interface data.");
     } else {
-	set_status(FAILED, "Failed to send registration to ifmgr");
+	set_status(SERVICE_FAILED, "Failed to send registration to ifmgr");
     }
 }
 
@@ -1013,10 +1017,11 @@ IfMgrXrlMirror::unregister_with_ifmgr()
     if (c.send_unregister_ifmgr_mirror(_rtarget.c_str(), _rtr->instance_name(),
 		callback(this, &IfMgrXrlMirror::unregister_cb))
 	== false) {
-	set_status(FAILED, "Failed to send unregister to FEA");
+	set_status(SERVICE_FAILED, "Failed to send unregister to FEA");
 	return;
     }
-    set_status(SHUTTING_DOWN, "De-registering with FEA interface manager.");
+    set_status(SERVICE_SHUTTING_DOWN,
+	       "De-registering with FEA interface manager.");
 }
 
 void
@@ -1025,8 +1030,8 @@ IfMgrXrlMirror::unregister_cb(const XrlError& e)
     _iftree.clear();
 
     if (e == XrlError::OKAY()) {
-	set_status(SHUTDOWN);
+	set_status(SERVICE_SHUTDOWN);
     } else {
-	set_status(FAILED, "Failed to de-registration to ifmgr");
+	set_status(SERVICE_FAILED, "Failed to de-registration to ifmgr");
     }
 }

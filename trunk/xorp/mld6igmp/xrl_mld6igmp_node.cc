@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.29 2004/06/10 22:41:27 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.30 2005/01/25 00:52:32 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -282,7 +282,7 @@ XrlMld6igmpNode::send_mfea_deregistration()
     if (! success) {
 	XLOG_ERROR("Failed to deregister with the MFEA. "
 		   "Will give up.");
-	Mld6igmpNode::set_status(FAILED);
+	Mld6igmpNode::set_status(SERVICE_FAILED);
 	Mld6igmpNode::update_status();
     }
 }
@@ -301,7 +301,7 @@ XrlMld6igmpNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    Mld6igmpNode::set_status(FAILED);
+    Mld6igmpNode::set_status(SERVICE_FAILED);
     Mld6igmpNode::update_status();
 }
 

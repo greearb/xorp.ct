@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.15 2005/02/11 02:57:27 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.16 2005/02/11 04:21:39 pavlin Exp $"
 
 
 //
@@ -59,19 +59,19 @@ Fib2mribNode::startup()
     //
     // Test the service status
     //
-    if ((ServiceBase::status() == STARTING)
-	|| (ServiceBase::status() == RUNNING))
+    if ((ServiceBase::status() == SERVICE_STARTING)
+	|| (ServiceBase::status() == SERVICE_RUNNING))
 	return true;
 
-    if (ServiceBase::status() != READY)
+    if (ServiceBase::status() != SERVICE_READY)
 	return false;
 
     //
-    // Transition to RUNNING occurs when all transient startup operations
-    // are completed (e.g., after we have the interface/vif/address state
-    // available, after we have registered with the RIB, etc.)
+    // Transition to SERVICE_RUNNING occurs when all transient startup
+    // operations are completed (e.g., after we have the interface/vif/address
+    // state available, after we have registered with the RIB, etc.)
     //
-    ServiceBase::set_status(STARTING);
+    ServiceBase::set_status(SERVICE_STARTING);
 
     //
     // Set the node status
@@ -95,28 +95,28 @@ bool
 Fib2mribNode::shutdown()
 {
     //
-    // We cannot shutdown if our status is SHUTDOWN or FAILED.
+    // We cannot shutdown if our status is SERVICE_SHUTDOWN or SERVICE_FAILED.
     //
-    if ((ServiceBase::status() == SHUTDOWN)
-	|| (ServiceBase::status() == SHUTTING_DOWN)
-	|| (ServiceBase::status() == FAILED)) {
+    if ((ServiceBase::status() == SERVICE_SHUTDOWN)
+	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
+	|| (ServiceBase::status() == SERVICE_FAILED)) {
 	return true;
     }
 
-    if ((ServiceBase::status() != RUNNING)
-	&& (ServiceBase::status() != STARTING)
-	&& (ServiceBase::status() != PAUSING)
-	&& (ServiceBase::status() != PAUSED)
-	&& (ServiceBase::status() != RESUMING)) {
+    if ((ServiceBase::status() != SERVICE_RUNNING)
+	&& (ServiceBase::status() != SERVICE_STARTING)
+	&& (ServiceBase::status() != SERVICE_PAUSING)
+	&& (ServiceBase::status() != SERVICE_PAUSED)
+	&& (ServiceBase::status() != SERVICE_RESUMING)) {
 	return false;
     }
 
     //
-    // Transition to SHUTDOWN occurs when all transient shutdown operations
-    // are completed (e.g., after we have deregistered with the FEA
+    // Transition to SERVICE_SHUTDOWN occurs when all transient shutdown
+    // operations are completed (e.g., after we have deregistered with the FEA
     // and the RIB, etc.)
     //
-    ServiceBase::set_status(SHUTTING_DOWN);
+    ServiceBase::set_status(SERVICE_SHUTTING_DOWN);
 
     //
     // De-register with the RIB
@@ -148,13 +148,15 @@ Fib2mribNode::status_change(ServiceBase*  service,
 {
     if (service == this) {
 	// My own status has changed
-	if ((old_status == STARTING) && (new_status == RUNNING)) {
+	if ((old_status == SERVICE_STARTING)
+	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
 	    _node_status = PROC_READY;
 	    return;
 	}
 
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    // The shutdown process has completed
 	    _node_status = PROC_DONE;
 	    return;
@@ -167,7 +169,8 @@ Fib2mribNode::status_change(ServiceBase*  service,
     }
 
     if (service == ifmgr_mirror_service_base()) {
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    decr_shutdown_requests_n();
 	}
     }
@@ -211,12 +214,12 @@ Fib2mribNode::update_status()
     //
     // Test if the startup process has completed
     //
-    if (ServiceBase::status() == STARTING) {
+    if (ServiceBase::status() == SERVICE_STARTING) {
 	if (_startup_requests_n > 0)
 	    return;
 
 	// The startup process has completed
-	ServiceBase::set_status(RUNNING);
+	ServiceBase::set_status(SERVICE_RUNNING);
 	_node_status = PROC_READY;
 	return;
     }
@@ -224,12 +227,12 @@ Fib2mribNode::update_status()
     //
     // Test if the shutdown process has completed
     //
-    if (ServiceBase::status() == SHUTTING_DOWN) {
+    if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) {
 	if (_shutdown_requests_n > 0)
 	    return;
 
 	// The shutdown process has completed
-	ServiceBase::set_status(SHUTDOWN);
+	ServiceBase::set_status(SERVICE_SHUTDOWN);
 	// Set the node status
 	_node_status = PROC_DONE;
 	return;
@@ -238,7 +241,7 @@ Fib2mribNode::update_status()
     //
     // Test if we have failed
     //
-    if (ServiceBase::status() == FAILED) {
+    if (ServiceBase::status() == SERVICE_FAILED) {
 	// Set the node status
 	_node_status = PROC_DONE;
 	return;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.43 2005/02/10 04:54:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.44 2005/02/10 05:14:33 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -370,7 +370,7 @@ StatusShutdownValidation::handle_status_response(ProcessStatus status,
     case PROC_NOT_READY:
     case PROC_READY:
     case PROC_FAILED:
-	// The process should be in SHUTDOWN state, or it should not
+	// The process should be in PROC_SHUTDOWN state, or it should not
 	// be able to respond to Xrls because it's in NULL state.
 	_cb->dispatch(false);
 	return;

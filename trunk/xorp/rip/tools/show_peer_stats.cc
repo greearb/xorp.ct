@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.5 2004/06/10 22:41:49 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.6 2004/12/09 07:54:41 pavlin Exp $"
 
 #include <iomanip>
 
@@ -543,8 +543,8 @@ main(int argc, char* const argv[])
 	    }
 
 	    job_queue.startup();
-	    while (job_queue.status() != SHUTDOWN) {
-		if (job_queue.status() == FAILED) {
+	    while (job_queue.status() != SERVICE_SHUTDOWN) {
+		if (job_queue.status() == SERVICE_FAILED) {
 		    cerr << "Failed: " << job_queue.status_note() << endl;
 		    break;
 		}

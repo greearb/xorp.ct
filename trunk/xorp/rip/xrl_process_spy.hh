@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_process_spy.hh,v 1.3 2004/05/03 23:09:48 hodson Exp $
+// $XORP: xorp/rip/xrl_process_spy.hh,v 1.4 2004/06/10 22:41:48 hodson Exp $
 
 #ifndef __RIP_XRL_PROCESS_SPY_HH__
 #define __RIP_XRL_PROCESS_SPY_HH__
@@ -51,7 +51,7 @@ public:
      * Get indication of whether FEA is present.
      *
      * @return true if FEA is present, false if FEA is not present or
-     * @ref run_status() is not in RUNNING state.
+     * @ref run_status() is not in SERVICE_RUNNING state.
      */
     bool fea_present() const;
 
@@ -59,7 +59,7 @@ public:
      * Get indication of whether RIB is present.
      *
      * @return true if RIB is present, false if RIB is not present or
-     * @ref run_status() is not in RUNNING state.
+     * @ref run_status() is not in SERVICE_RUNNING state.
      */
     bool rib_present() const;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.18 2005/02/11 02:57:27 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.19 2005/02/11 04:21:40 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -100,7 +100,7 @@ XrlFib2mribNode::finder_disconnect_event()
 {
     XLOG_ERROR("Finder disconnect event. Exiting immediately...");
 
-    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
 }
 
@@ -253,7 +253,7 @@ XrlFib2mribNode::finder_deregister_interest_fea_cb(
     _is_fea_deregistering = false;
     _is_fea_registered = false;
 
-    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
 }
 
@@ -396,7 +396,7 @@ XrlFib2mribNode::finder_deregister_interest_rib_cb(
     _is_rib_deregistering = false;
     _is_rib_registered = false;
 
-    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
 }
 
@@ -647,7 +647,7 @@ XrlFib2mribNode::send_fea_delete_fib_client()
     }
 
     if (! success) {
-	Fib2mribNode::set_status(FAILED);
+	Fib2mribNode::set_status(SERVICE_FAILED);
 	Fib2mribNode::update_status();
     }
 }
@@ -669,7 +669,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_e
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
 }
 
@@ -690,7 +690,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_e
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
 }
 
@@ -851,7 +851,7 @@ XrlFib2mribNode::send_rib_delete_tables()
     }
 
     if (! success) {
-	Fib2mribNode::set_status(FAILED);
+	Fib2mribNode::set_status(SERVICE_FAILED);
 	Fib2mribNode::update_status();
     }
 }
@@ -871,7 +871,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error)
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
 }
 
@@ -890,7 +890,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error)
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
 }
 
@@ -966,7 +966,7 @@ XrlFib2mribNode::finder_event_observer_0_1_xrl_target_birth(
 	//
 	_is_fea_alive = true;
 	if (_ifmgr.startup() != true) {
-	    Fib2mribNode::ServiceBase::set_status(FAILED);
+	    Fib2mribNode::ServiceBase::set_status(SERVICE_FAILED);
 	    Fib2mribNode::update_status();
 	} else {
 	    send_fea_add_fib_client();

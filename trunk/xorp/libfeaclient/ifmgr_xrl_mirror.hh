@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.7 2004/12/09 07:54:36 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.8 2005/02/09 23:25:30 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -68,9 +68,9 @@ public:
  * running within the FEA.  If registration succeeds it will receive
  * the complete configuration tree and receive future configuration
  * tree.  Once the configuration tree is received it transitions into
- * the RUNNING state and is considered operational.
+ * the SERVICE_RUNNING state and is considered operational.
  *
- * When the status of the IfMgrXrlMirror is RUNNING, then a copy of
+ * When the status of the IfMgrXrlMirror is SERVICE_RUNNING, then a copy of
  * the interface configuration state is accessible through the
  * @ref iftree() method.  If the instance is another state then
  * configuration tree available through the IfMgrXrlMirror will be
@@ -113,7 +113,7 @@ public:
      * Start running.  Attempt to register instance with the
      * registration target supplied in the constructor and await
      * interface configuration tree data.  When data is received
-     * transition into the RUNNING state (see @ref ServiceBase for
+     * transition into the SERVICE_RUNNING state (see @ref ServiceBase for
      * states).
      *
      * @return true on success, false on failure.
@@ -122,7 +122,7 @@ public:
 
     /**
      * Stop running and shutdown.  Deregister with the registration
-     * target and transition to SHUTDOWN state when complete.
+     * target and transition to SERVICE_SHUTDOWN state when complete.
      *
      * @return true on success, false on failure.
      */
@@ -130,7 +130,7 @@ public:
 
     /**
      * @return interface configuration tree.  Should only be trusted when
-     * status() is READY.
+     * status() is SERVICE_READY.
      */
     inline const IfMgrIfTree& iftree() const		{ return _iftree; }
 

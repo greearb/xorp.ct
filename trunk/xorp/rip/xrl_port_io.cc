@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.14 2005/02/01 02:51:13 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.15 2005/02/01 03:07:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -326,9 +326,10 @@ bool
 XrlPortIO<A>::startup()
 {
     _pending = true;
-    set_status(STARTING);
+    set_status(SERVICE_STARTING);
     if (request_socket_server() == false) {
-	set_status(FAILED, "Failed to find appropriate socket server.");
+	set_status(SERVICE_FAILED,
+		   "Failed to find appropriate socket server.");
 	return false;
     }
 
@@ -341,9 +342,9 @@ XrlPortIO<A>::shutdown()
 {
     _pending = true;
     this->set_enabled(false);
-    set_status(SHUTTING_DOWN);
+    set_status(SERVICE_SHUTTING_DOWN);
     if (request_socket_leave() == false) {
-	set_status(SHUTDOWN);
+	set_status(SERVICE_SHUTDOWN);
     }
 
     return true;
@@ -354,7 +355,7 @@ void
 XrlPortIO<A>::socket_server_cb(const XrlError& e, const string* pss)
 {
     if (e != XrlError::OKAY()) {
-	set_status(FAILED);
+	set_status(SERVICE_FAILED);
 	return;
     }
 
@@ -373,14 +374,14 @@ XrlPortIO<A>::socket_server_cb(const XrlError& e, const string* pss)
 	//		   ->request_socket_join()
 	//
 	if (request_open_bind_socket() == false) {
-	    set_status(FAILED,
+	    set_status(SERVICE_FAILED,
 		       "Failed sending RIP socket open request.");
 	}
     } else {
 	// RIP socket exists, join appropriate interface to multicast
 	// group.
 	if (request_socket_join() == false) {
-	    set_status(FAILED,
+	    set_status(SERVICE_FAILED,
 		       "Failed sending multicast join request.");
 	}
     }
@@ -391,7 +392,7 @@ void
 XrlPortIO<A>::open_bind_socket_cb(const XrlError& e, const string* psid)
 {
     if (e != XrlError::OKAY()) {
-	set_status(FAILED, "Failed to instantiate RIP socket.");
+	set_status(SERVICE_FAILED, "Failed to instantiate RIP socket.");
 	return;
     }
 
@@ -399,7 +400,7 @@ XrlPortIO<A>::open_bind_socket_cb(const XrlError& e, const string* psid)
     socket_manager.add_sockid(_ss, _sid);
 
     if (request_ttl_one() == false) {
-	set_status(FAILED, "Failed requesting ttl/hops of 1.");
+	set_status(SERVICE_FAILED, "Failed requesting ttl/hops of 1.");
     }
 }
 
@@ -411,7 +412,8 @@ XrlPortIO<A>::ttl_one_cb(const XrlError& e)
 	XLOG_WARNING("Failed to set ttl/hops to 1");
     }
     if (request_no_loop() == false) {
-	set_status(FAILED, "Failed requesting multicast loopback off.");
+	set_status(SERVICE_FAILED,
+		   "Failed requesting multicast loopback off.");
     }
 }
 
@@ -423,7 +425,7 @@ XrlPortIO<A>::no_loop_cb(const XrlError& e)
 	XLOG_WARNING("Failed to turn off multicast loopback.");
     }
     if (request_socket_join() == false) {
-	set_status(FAILED, "Failed to send join request.");
+	set_status(SERVICE_FAILED, "Failed to send join request.");
     }
 }
 
@@ -432,7 +434,7 @@ void
 XrlPortIO<A>::socket_join_cb(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	set_status(FAILED,
+	set_status(SERVICE_FAILED,
 		   c_format("Failed to join group on %s/%s/%s.",
 			    this->ifname().c_str(), this->vifname().c_str(),
 			    this->address().str().c_str())
@@ -441,7 +443,7 @@ XrlPortIO<A>::socket_join_cb(const XrlError& e)
     }
 
     _pending = false;
-    set_status(RUNNING);
+    set_status(SERVICE_RUNNING);
     this->set_enabled(true);
 }
 
@@ -449,7 +451,7 @@ template <typename A>
 void
 XrlPortIO<A>::socket_leave_cb(const XrlError& /* e */)
 {
-    set_status(SHUTDOWN);
+    set_status(SERVICE_SHUTDOWN);
 }
 
 template <typename A>

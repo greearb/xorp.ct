@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.40 2004/12/17 20:30:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.41 2005/01/28 03:34:18 pavlin Exp $"
 
 
 //
@@ -162,7 +162,7 @@ MfeaNode::start()
     // Startup the interface manager
     //
     if (ifmgr_startup() != true) {
-	ServiceBase::set_status(FAILED);
+	ServiceBase::set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
     }
 
@@ -255,7 +255,7 @@ MfeaNode::stop()
     // Shutdown the interface manager
     //
     if (ifmgr_shutdown() != true) {
-	ServiceBase::set_status(FAILED);
+	ServiceBase::set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
     }
 
@@ -335,7 +335,8 @@ MfeaNode::status_change(ServiceBase*  service,
 {
     if (service == this) {
 	// My own status has changed
-	if ((old_status == STARTING) && (new_status == RUNNING)) {
+	if ((old_status == SERVICE_STARTING)
+	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
 	    if (final_start() < 0) {
 		XLOG_ERROR("Cannot complete the startup process; "
@@ -347,7 +348,8 @@ MfeaNode::status_change(ServiceBase*  service,
 	    return;
 	}
 
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    // The shutdown process has completed
 	    final_stop();
 	    // Set the node status
@@ -362,7 +364,8 @@ MfeaNode::status_change(ServiceBase*  service,
     }
 
     if (service == ifmgr_mirror_service_base()) {
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    MfeaNode::decr_shutdown_requests_n();
 	}
     }

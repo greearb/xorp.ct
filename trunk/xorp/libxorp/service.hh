@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/service.hh,v 1.4 2004/04/22 01:10:26 pavlin Exp $
+// $XORP: xorp/libxorp/service.hh,v 1.5 2004/06/10 22:41:18 hodson Exp $
 
 #ifndef __LIBXORP_SERVICE_HH__
 #define __LIBXORP_SERVICE_HH__
@@ -21,18 +21,24 @@
  * Enumeration of states objects derived from ServiceBase may be in.
  */
 enum ServiceStatus {
-    READY		= 0x001,	// Ready for startup
-    STARTING		= 0x002,	// Starting up
-    RUNNING		= 0x004,	// Running, service operational
-    PAUSING		= 0x008,	// Transitioning to paused state
-    PAUSED		= 0x010,	// Paused, non-operational
-    RESUMING		= 0x020,	// Resuming from pause
-    SHUTTING_DOWN	= 0x040,	// Transitioning to shutdown
-    SHUTDOWN		= 0x080,	// Shutdown, non-operational
-    FAILED		= 0x100,	// Failed, non-operational
-    ALL			= READY | STARTING | RUNNING |
-    			  PAUSING | PAUSED | RESUMING |
-			  SHUTTING_DOWN | SHUTDOWN | FAILED
+    SERVICE_READY	= 0x001,	// Ready for startup
+    SERVICE_STARTING	= 0x002,	// Starting up
+    SERVICE_RUNNING	= 0x004,	// Running, service operational
+    SERVICE_PAUSING	= 0x008,	// Transitioning to paused state
+    SERVICE_PAUSED	= 0x010,	// Paused, non-operational
+    SERVICE_RESUMING	= 0x020,	// Resuming from pause
+    SERVICE_SHUTTING_DOWN = 0x040,	// Transitioning to shutdown
+    SERVICE_SHUTDOWN	= 0x080,	// Shutdown, non-operational
+    SERVICE_FAILED	= 0x100,	// Failed, non-operational
+    SERVICE_ALL		= SERVICE_READY |
+			  SERVICE_STARTING |
+			  SERVICE_RUNNING |
+    			  SERVICE_PAUSING |
+			  SERVICE_PAUSED |
+			  SERVICE_RESUMING |
+			  SERVICE_SHUTTING_DOWN |
+			  SERVICE_SHUTDOWN |
+			  SERVICE_FAILED
 };
 
 /**
@@ -72,25 +78,25 @@ public:
     virtual ~ServiceBase() = 0;
 
     /**
-     * Start service.  Service should transition from READY to
-     * STARTING immediately and onto RUNNING or FAILED in the near
-     * future.
+     * Start service.  Service should transition from SERVICE_READY to
+     * SERVICE_STARTING immediately and onto SERVICE_RUNNING or
+     * SERVICE_FAILED in the near future.
      *
      * @return true on success, false on failure.
      */
     virtual bool startup() = 0;
 
     /**
-     * Shutdown service.  Service should transition from RUNNING to
-     * SHUTTING_DOWN immediately and onto SHUTDOWN or FAILED in the
-     * near future.
+     * Shutdown service.  Service should transition from SERVICE_RUNNING to
+     * SERVICE_SHUTTING_DOWN immediately and onto SERVICE_SHUTDOWN or
+     * SERVICE_FAILED in the near future.
      *
      * @return true on success, false on failure.
      */
     virtual bool shutdown() = 0;
 
     /**
-     * Reset service.  Service should transition in READY from
+     * Reset service.  Service should transition in SERVICE_READY from
      * whichever state it is in.
      *
      * The default implementation always returns false as there is no
@@ -101,8 +107,8 @@ public:
     virtual bool reset();
 
     /**
-     * Pause service.  Service should transition from RUNNING to
-     * PAUSING and asynchronously into PAUSED.
+     * Pause service.  Service should transition from SERVICE_RUNNING to
+     * SERVICE_PAUSING and asynchronously into SERVICE_PAUSED.
      *
      * The default implementation always returns false as there is no
      * default behaviour.
@@ -112,8 +118,8 @@ public:
     virtual bool pause();
 
     /**
-     * Resume paused service.  Service should transition from PAUSED
-     * to PAUSING and asynchronously into RUNNING.
+     * Resume paused service.  Service should transition from SERVICE_PAUSED
+     * to SERVICE_PAUSING and asynchronously into SERVICE_RUNNING.
      *
      * The default implementation always returns false as there is no
      * default behaviour.

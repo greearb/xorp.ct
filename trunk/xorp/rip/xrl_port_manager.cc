@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.16 2004/06/10 22:41:48 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.17 2005/02/01 02:46:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -196,8 +196,8 @@ template <typename A>
 bool
 XrlPortManager<A>::startup()
 {
-    set_status(STARTING);
-    // Transition to RUNNING occurs when tree_complete() is called, ie
+    set_status(SERVICE_STARTING);
+    // Transition to SERVICE_RUNNING occurs when tree_complete() is called, ie
     // we have interface/vif/address state available.
 
     return true;
@@ -207,7 +207,7 @@ template <typename A>
 bool
 XrlPortManager<A>::shutdown()
 {
-    set_status(SHUTTING_DOWN);
+    set_status(SERVICE_SHUTTING_DOWN);
 
     typename PortManagerBase<A>::PortList& pl = this->ports();
     typename PortManagerBase<A>::PortList::iterator i = pl.begin();
@@ -243,7 +243,7 @@ XrlPortManager<A>::tree_complete()
 {
     debug_msg("XrlPortManager<IPv%u>::tree_complete notification\n",
 	      XORP_UINT_CAST(A::ip_version()));
-    set_status(RUNNING);
+    set_status(SERVICE_RUNNING);
 }
 
 template <typename A>
@@ -279,7 +279,7 @@ XrlPortManager<A>::add_rip_address(const string& ifname,
 				   const string& vifname,
 				   const A&	 addr)
 {
-    if (status() != RUNNING) {
+    if (status() != SERVICE_RUNNING) {
 	debug_msg("add_rip_address failed: not running.\n");
 	return false;
     }
@@ -442,7 +442,7 @@ XrlPortManager<A>::status_change(ServiceBase* 	service,
 
     try_start_next_io_handler();
 
-    if (new_status != SHUTDOWN)
+    if (new_status != SERVICE_SHUTDOWN)
 	return;
 
     typename map<ServiceBase*, Port<A>*>::iterator i;
@@ -472,7 +472,7 @@ XrlPortManager<A>::try_start_next_io_handler()
 {
     typename PortManagerBase<A>::PortList::const_iterator cpi;
     cpi = find_if(this->ports().begin(), this->ports().end(),
-		  port_has_io_in_state<A>(STARTING));
+		  port_has_io_in_state<A>(SERVICE_STARTING));
     if (cpi != this->ports().end()) {
 	return;
     }
@@ -481,7 +481,7 @@ XrlPortManager<A>::try_start_next_io_handler()
     XrlPortIO<A>* xio = 0;
     while (xio == 0) {
 	pi = find_if(pi, this->ports().end(),
-		     port_has_io_in_state<A>(READY));
+		     port_has_io_in_state<A>(SERVICE_READY));
 	if (pi == this->ports().end()) {
 	    return;
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.17 2004/06/10 22:40:43 hodson Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.18 2005/02/12 04:50:25 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -94,7 +94,7 @@ XrlCliNode::finder_disconnect_event()
 
     stop_cli();
 
-    // CliNode::set_status(FAILED);
+    // CliNode::set_status(SERVICE_FAILED);
     // CliNode::update_status();
 }
 
@@ -122,7 +122,7 @@ XrlCliNode::common_0_1_get_status(
     uint32_t& status,
     string&	reason)
 {
-    // XXX: Default to READY status because this probably won't be used.
+    // XXX: Default to PROC_READY status because this probably won't be used.
     status = PROC_READY;
     reason = "Ready";
     return XrlCmdError::OKAY();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.34 2004/11/05 03:19:26 bms Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.35 2005/01/21 03:25:06 atanu Exp $"
 
 #include "rib_module.h"
 
@@ -89,7 +89,7 @@ VifManager::start()
     // Startup the interface manager
     //
     if (ifmgr_startup() != true) {
-	ServiceBase::set_status(FAILED);
+	ServiceBase::set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
     }
 
@@ -146,7 +146,7 @@ VifManager::stop()
     // Shutdown the interface manager
     //
     if (ifmgr_shutdown() != true) {
-	ServiceBase::set_status(FAILED);
+	ServiceBase::set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
     }
 
@@ -185,7 +185,8 @@ VifManager::status_change(ServiceBase*  service,
 {
     if (service == this) {
 	// My own status has changed
-	if ((old_status == STARTING) && (new_status == RUNNING)) {
+	if ((old_status == SERVICE_STARTING)
+	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
 	    if (final_start() < 0) {
 		XLOG_ERROR("Cannot complete the startup process; "
@@ -196,7 +197,8 @@ VifManager::status_change(ServiceBase*  service,
 	    return;
 	}
 
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    // The shutdown process has completed
 	    final_stop();
 	    return;
@@ -209,7 +211,8 @@ VifManager::status_change(ServiceBase*  service,
     }
 
     if (service == ifmgr_mirror_service_base()) {
-	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
 	    decr_shutdown_requests_n();
 	}
     }
@@ -221,31 +224,31 @@ VifManager::update_status()
     //
     // Test if the startup process has completed
     //
-    if (ServiceBase::status() == STARTING) {
+    if (ServiceBase::status() == SERVICE_STARTING) {
 	if (_startup_requests_n > 0)
 	    return;
 
 	// The startup process has completed
-	ServiceBase::set_status(RUNNING);
+	ServiceBase::set_status(SERVICE_RUNNING);
 	return;
     }
 
     //
     // Test if the shutdown process has completed
     //
-    if (ServiceBase::status() == SHUTTING_DOWN) {
+    if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) {
 	if (_shutdown_requests_n > 0)
 	    return;
 
 	// The shutdown process has completed
-	ServiceBase::set_status(SHUTDOWN);
+	ServiceBase::set_status(SERVICE_SHUTDOWN);
 	return;
     }
 
     //
     // Test if we have failed
     //
-    if (ServiceBase::status() == FAILED) {
+    if (ServiceBase::status() == SERVICE_FAILED) {
 	return;
     }
 }

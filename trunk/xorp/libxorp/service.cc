@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/service.cc,v 1.2 2004/01/09 23:18:25 hodson Exp $"
+#ident "$XORP: xorp/libxorp/service.cc,v 1.3 2004/06/10 22:41:18 hodson Exp $"
 
 #include "config.h"
 #include <string>
@@ -26,16 +26,16 @@ const char*
 service_status_name(ServiceStatus s)
 {
     switch (s) {
-    case READY:		return "Ready";
-    case STARTING:	return "Starting";
-    case RUNNING:	return "Running";
-    case PAUSING:	return "Pausing";
-    case PAUSED:	return "Paused";
-    case RESUMING:	return "Resuming";
-    case SHUTTING_DOWN: return "Shutting down";
-    case SHUTDOWN:	return "Shutdown";
-    case FAILED:	return "Failed";
-    case ALL:		return "All";				// Invalid
+    case SERVICE_READY:		return "Ready";
+    case SERVICE_STARTING:	return "Starting";
+    case SERVICE_RUNNING:	return "Running";
+    case SERVICE_PAUSING:	return "Pausing";
+    case SERVICE_PAUSED:	return "Paused";
+    case SERVICE_RESUMING:	return "Resuming";
+    case SERVICE_SHUTTING_DOWN: return "Shutting down";
+    case SERVICE_SHUTDOWN:	return "Shutdown";
+    case SERVICE_FAILED:	return "Failed";
+    case SERVICE_ALL:		return "All";			// Invalid
     }
     return "Unknown";
 }
@@ -44,7 +44,7 @@ service_status_name(ServiceStatus s)
 // ServiceBase implmentation
 
 ServiceBase::ServiceBase(const string& n)
-    : _name(n), _status(READY), _observer(0)
+    : _name(n), _status(SERVICE_READY), _observer(0)
 {
 }
 
