@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.18 2003/06/18 22:12:07 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.19 2003/09/29 17:58:15 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -224,8 +224,13 @@ SelectorList::select(TimeVal* timeout)
 	case EINVAL:
 	    XLOG_FATAL("Bad select argument (probably timeval)");
 	    break;
+	case EINTR:
+	    // The system call was interrupted by a signal, hence return
+	    // immediately to the event loop without printing an error.
+	    debug_msg("SelectorList::select() interrupted by a signal\n");
+	    break;
 	default:
-	    XLOG_ERROR("SelectorList::select failed: %s", strerror(errno));
+	    XLOG_ERROR("SelectorList::select() failed: %s", strerror(errno));
 	    break;
 	}
 	return 0;
