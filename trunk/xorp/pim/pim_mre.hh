@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.30 2003/07/08 01:36:55 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.31 2003/07/12 01:14:37 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -73,7 +73,7 @@ enum {
     PIM_MRE_REGISTER_PRUNE_STATE = 1 << 12,	// The Register tunnel for
 						// (S,G) is in Prune state
     PIM_MRE_REGISTER_JOIN_PENDING_STATE = 1 << 13, // The Register tunnel for
-						   // (S,G) is in Join Pending
+						   // (S,G) is in Join-Pending
 						   // state
     PIM_MRE_COULD_REGISTER_SG	= 1 << 14,   // The macro "CouldRegister(S,G)"
 					     // is true
@@ -210,12 +210,12 @@ public:
     void	recompute_mrib_next_hop_rp_changed();
     void	recompute_mrib_next_hop_rp_gen_id_changed();
     // (*,G)-related upstream changes
-    void	recompute_mrib_next_hop_rp_g_changed();
-    void	recompute_rpfp_nbr_wc_changed();
+    void	recompute_rpfp_nbr_wc_assert_changed();
+    void	recompute_rpfp_nbr_wc_not_assert_changed();
     void	recompute_rpfp_nbr_wc_gen_id_changed();
     // (S,G)-related upstream changes
-    void	recompute_mrib_next_hop_s_changed();
-    void	recompute_rpfp_nbr_sg_changed();
+    void	recompute_rpfp_nbr_sg_assert_changed();
+    void	recompute_rpfp_nbr_sg_not_assert_changed();
     void	recompute_rpfp_nbr_sg_gen_id_changed();
     // (S,G,rpt)-related upstream changes
     void	recompute_rpfp_nbr_sg_rpt_changed();
@@ -427,7 +427,7 @@ public:
     const Mifset& downstream_prune_tmp_state() const;
     const Mifset& downstream_prune_pending_tmp_state() const;
     Mifset	_downstream_join_state;			// Join state
-    Mifset	_downstream_prune_pending_state;	// PrunePending state
+    Mifset	_downstream_prune_pending_state;	// Prune-Pending state
     Mifset	_downstream_prune_state;		// Prune state
     Mifset	_downstream_tmp_state;			// P' and PP' state
     Mifset	_downstream_processed_wc_by_sg_rpt; // (S,G,rpt)J/P processed
@@ -449,7 +449,7 @@ public:
     // Note: applies only for (S,G,rpt)
     void	downstream_prune_pending_timer_timeout_sg_rpt(uint16_t vif_index);
     XorpTimer	_downstream_expiry_timers[MAX_VIFS];	// Expiry timers
-    XorpTimer	_downstream_prune_pending_timers[MAX_VIFS]; // PrunePending timers
+    XorpTimer	_downstream_prune_pending_timers[MAX_VIFS]; // Prune-Pending timers
     
     
     //
@@ -731,6 +731,14 @@ public:
     bool	recompute_assert_winner_nbr_wc_gen_id_changed(
 	uint16_t vif_index,
 	const IPvX& nbr_addr);
+    // Note: applies only for (S,G)
+    bool	recompute_assert_winner_nbr_sg_nlt_expired(
+	uint16_t vif_index,
+	const IPvX& nbr_addr);
+    // Note: applies only for (*,G)
+    bool	recompute_assert_winner_nbr_wc_nlt_expired(
+	uint16_t vif_index,
+	const IPvX& nbr_addr);
     
     // Assert rate-limiting stuff
     void	asserts_rate_limit_timer_timeout();
@@ -753,13 +761,13 @@ public:
     // Note: applies for all entries
     bool	is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const;
     // Note: applies for all entries
-    bool	is_switch_to_spt_desired_sg(uint32_t threshold_interval_sec,
-					    uint32_t threshold_bytes) const;
+    bool	is_switch_to_spt_desired_sg(uint32_t measured_interval_sec,
+					    uint32_t measured_bytes) const;
     // Note: applies for all entries
     bool	check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
 				       PimMre*& pim_mre_sg,
-				       uint32_t threshold_interval_sec,
-				       uint32_t threshold_bytes);
+				       uint32_t measured_interval_sec,
+				       uint32_t measured_bytes);
     
     
     //
