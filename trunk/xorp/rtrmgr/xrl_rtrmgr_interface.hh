@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.14 2004/08/19 00:44:08 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.15 2004/12/06 00:31:05 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -22,6 +22,8 @@
 
 #include "xrl/targets/rtrmgr_base.hh"
 #include "xrl/interfaces/rtrmgr_client_xif.hh"
+
+#include "generic_module_manager.hh"
 
 
 #define CNAMELEN 40
@@ -121,6 +123,9 @@ public:
 
     void apply_config_change_done_cb(const XrlError&);
     void client_updated(const XrlError& e, uid_t user_id, UserInstance* user);
+
+    void module_status_changed(const string& modname,
+			       GenericModule::ModuleStatus status);
 
     XrlCmdError rtrmgr_0_1_lock_config(
 	// Input values, 

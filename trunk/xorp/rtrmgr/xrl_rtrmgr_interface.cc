@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.23 2004/06/10 22:41:56 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.24 2004/08/19 00:44:08 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -435,7 +435,7 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 	    GENERIC_CALLBACK cb2;
 	    cb2 = callback(this, &XrlRtrmgrInterface::client_updated, 
 			   iter->first, iter->second);
-	    debug_msg("Sending config changed to %s\n", target.c_str());
+	    debug_msg("Sending config changed to %s\n", client.c_str());
 	    _client_interface.send_config_changed(client.c_str(),
 						  user_id,
 						  deltas, deletions, cb2);
@@ -484,6 +484,23 @@ XrlRtrmgrInterface::client_updated(const XrlError& e, uid_t user_id,
 	}
     }
 }
+
+void 
+XrlRtrmgrInterface::module_status_changed(const string& modname,
+					  GenericModule::ModuleStatus status)
+{
+    multimap<uint32_t, UserInstance*>::iterator iter;
+    for (iter = _users.begin(); iter != _users.end(); ++iter) {
+	string client = iter->second->clientname();
+	GENERIC_CALLBACK cb2;
+	cb2 = callback(this, &XrlRtrmgrInterface::client_updated, 
+		       iter->first, iter->second);
+	debug_msg("Sending mod statis changed to %s\n", client.c_str());
+	_client_interface.send_module_status(client.c_str(), 
+					     modname, (uint32_t)status, cb2);
+    }
+}
+
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
