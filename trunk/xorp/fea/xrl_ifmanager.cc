@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.8 2003/05/23 22:24:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.9 2003/05/23 23:35:00 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -190,6 +190,15 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 	//
 	// If we get here we have updated the local copy of the config
 	// successfully.
+	//
+	
+	//
+	// Ignore operations that don't change anything
+	//
+	local_config.ignore_duplicates(ifconfig().pull_config());
+	
+	//
+	// Push the configuration
 	//
 	IfTree backup_config = local_config;
 	bool push_success = ifconfig().push_config(local_config);
