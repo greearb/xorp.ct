@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.3 2003/05/22 01:05:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.4 2003/05/28 21:50:53 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -61,7 +61,7 @@ FtiConfigEntryGetNetlink::~FtiConfigEntryGetNetlink()
 int
 FtiConfigEntryGetNetlink::start()
 {
-    return (NetlinkSocket::start());
+    return (NetlinkSocket::start(AF_INET));
 }
     
 int
@@ -313,12 +313,22 @@ FtiConfigEntryGetNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
     size_t d = 0, off = 0;
     pid_t my_pid = ns.pid();
     
+    UNUSED(my_pid);	// XXX: (see below)
+    
     _cache_data.resize(nbytes);
     
     while (d < nbytes) {
 	const nlmsghdr* nlh = reinterpret_cast<const nlmsghdr*>(data + d);
-	if (((pid_t)nlh->nlmsg_pid == my_pid)
-	    && (nlh->nlmsg_seq == _cache_seqno)) {
+	if (nlh->nlmsg_seq == _cache_seqno) {
+	    //
+	    // TODO: XXX: here we should add the following check as well:
+	    //       ((pid_t)nlh->nlmsg_pid == my_pid)
+	    // However, it appears that on return Linux doesn't fill-in
+	    // nlh->nlmsg_pid to our pid (e.g., it may be set to 0xffffefff).
+	    // Unfortunately, Linux's netlink(7) is not helpful on the
+	    // subject, hence we ignore this additional test.
+	    //
+	    
 #if 0	    // TODO: XXX: PAVPAVPAV: remove this assert?
 	    XLOG_ASSERT(_cache_valid == false); // Do not overwrite cache data
 #endif
