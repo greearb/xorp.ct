@@ -12,10 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.3 2003/07/08 16:57:20 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.4 2003/07/09 00:11:02 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
+
+#include "config.h"
+#include <map>
 
 #include "libxorp/ref_ptr.hh"
 #include "libxorp/trie.hh"
@@ -25,9 +28,29 @@ class EventLoop;
 
 template <typename A>
 class UpdateQueue;
+
 template <typename A>
 class PacketRouteEntry;
 
+template <typename A>
+class RouteWalker;
+
+template <typename A>
+struct NetCmp {
+    typedef IPNet<A> Net;
+    bool operator() (const Net& l, const Net& r);
+};
+
+/**
+ * @short Class that manages routes.
+ *
+ * The RouteDB class holds routes and manages their updates.
+ * Successful updates are placed in the update queue contained within
+ * the RouteDB instance.  The UpdateQueue is used for generating
+ * triggered update messages.
+ *
+ * The @ref RouteWalker class provides a way to walk the routes held.
+ */
 template <typename A>
 class RouteDB {
 public:
@@ -37,8 +60,8 @@ public:
     typedef RouteEntryOrigin<A>			RouteOrigin;
     typedef ref_ptr<RouteEntry<A> >		DBRouteEntry;
     typedef ref_ptr<const RouteEntry<A> >	ConstDBRouteEntry;
-    typedef Trie<A, DBRouteEntry>		RouteTrie;
     typedef PacketRouteEntry<A>			PacketizedRoute;
+    typedef map<Net, DBRouteEntry, NetCmp<A> >	RouteContainer;
 
 public:
     RouteDB(EventLoop& e);
@@ -66,12 +89,22 @@ public:
 		      RouteOrigin* origin);
 
     /**
-     * Flatten routing table representation from Trie to Vector.
+     * Flatten route entry collection into a Vector.
      *
      * @param routes vector where routes are to be appended.
      */
     void dump_routes(vector<ConstDBRouteEntry>& routes);
 
+    /**
+     * Flush routes.
+     */
+    void flush_routes();
+
+    /**
+     * @return count of routes in database.
+     */
+    uint32_t route_count() const;
+    
     /**
      * Resolve a route and take a reference to it.  While the reference
      * exists the route will not be deleted from memory, though may be
@@ -96,6 +129,8 @@ public:
      */
     const UpdateQueue<A>& update_queue() const;
 
+    inline EventLoop& eventloop() 			{ return _eventloop; }
+
 protected:
     RouteDB(const RouteDB&);			// not implemented
     RouteDB& operator=(const RouteDB&);		// not implemented
@@ -107,9 +142,105 @@ protected:
     void set_deletion_timer(Route* r);
 
 protected:
+    RouteContainer& routes();
+
+protected:
     EventLoop&		_eventloop;
-    RouteTrie		_routes;
+    RouteContainer	_routes;
     UpdateQueue<A>*	_uq;
+
+    friend class RouteWalker<A>;
+};
+
+/**
+ * @short Asynchronous RouteDB walker.
+ *
+ * The RouteWalker class walks the routes in a RouteDB.  It assumes
+ * the walking is broken up into a number of shorter walks, and that
+ * each short walk is triggered from a XorpTimer.  The end of a short
+ * walk causes state to saved and is signalled using the pause()
+ * method.  When the next short walk is ready to start, resume()
+ * should be called.  These calls save and resume state are relatively
+ * expensive.
+ */
+template <typename A>
+class RouteWalker
+{
+public:
+    typedef A			  		Addr;
+    typedef IPNet<A>		  		Net;
+    typedef typename RouteDB<A>::RouteContainer	RouteContainer;
+    typedef typename RouteDB<A>::Route		Route;
+
+    enum State { RUNNING, PAUSED };
+
+public:
+    RouteWalker(RouteDB<A>& route_db);
+
+    ~RouteWalker();
+
+    /**
+     * @return current state of instance.
+     */
+    inline State state() const			{ return _state; }
+
+    /**
+     * Move iterator to next available route.
+     *
+     * @return true on success, false if route not available or instance is
+     *         not in the RUNNING state.
+     */
+    const Route* next_route();
+
+    /**
+     * Get current route.
+     *
+     * @return pointer to route if available, 0 if route not available or
+     *	       not in RUNNING state.
+     */
+    const Route* current_route();
+
+    /**
+     * Pause route walking operation.  The instance state is
+     * transitioned from RUNNING to PAUSED on the assumption that
+     * route walking will be resumed at some point in the future (@see
+     * resume).  If the current route has a deletion timer associated
+     * with it that would expire within pause_ms, the timer expiry is
+     * pushed back so it will expire at a time after the expected
+     * resume time.  Thus in most cases a walk can safely resume from
+     * where it was paused.
+     *
+     * @param pause_ms the expected time before resume is called.
+     */
+    void pause(uint32_t pause_ms);
+
+    /**
+     * Resume route walking.  The instance state is transitioned from
+     * PAUSED to RUNNING.  The internal iterator is checked for validity and
+     * recovery steps taken should the route pointed to have been deleted.
+     */
+    void resume();
+
+    /**
+     * Effect a reset.  The internal iterator is moved to the first
+     * stored route and the state is set to RUNNING.
+     */
+    void reset();
+
+protected:
+    RouteWalker(const RouteWalker&);				// Not impl
+    RouteWalker& operator=(const RouteWalker&);			// Not impl
+
+private:
+    static const Net NO_NET;
+
+private:
+    RouteDB<A>& _route_db;	// RouteDB to be walked.
+    State _state;		// Current state (RUNNING/PAUSED).
+    Net _last_visited;		// Last route output before entering PAUSED.
+    				// if set to RouteWalker::no_net there was
+    				// no valid route when paused.
+    typename RouteContainer::iterator _pos;	// Current route when RUNNING.
 };
 
 #endif // __RIP_ROUTE_DB_HH__
