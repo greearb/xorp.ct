@@ -1,0 +1,978 @@
+\documentclass{article}
+\title{XORP Policy filters\\implementation v0.00}
+\author{ab $<$a.bittau@cs.ucl.ac.uk$>$}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+At the highest level of abstraction, the overall policy framework in XORP is
+divided into two components: the back end filters and the front end policy
+manager. Developers wishing to support policy based filtering in their routing
+protocols, including route redistribution, will only have to know a minimum
+about the framework to do so. The addition of basic functionality to the filters
+should not be problematic as well. A high level overview of how a user may
+implement policy filtering in his/her protocol, followed by a more detailed
+description of implementation issues and choices made both in the back end and
+front end is presented.
+
+
+\section{Overview of XORP policy framework}
+The main goal of the policy framework in XORP was flexibility. The user should
+be able to express complex concepts in the configuration. This may result in
+complex semantic checking and parsing which is undesirable to have replicated in
+all routing protocols which wish to support filtering. Thus, the task has been
+divided between a smart front end {\em policy manager} and a relatively dumb
+back end generic filter.
+
+The user configuration is sent from the rtrmgr to the policy manager. Currently,
+the rtrmgr only parses the high level structure, sending the actual policy
+expressions as un-parsed strings to the policy process. Hence, the first step of
+the policy manager is to terminate the parsing. On a successful configuration,
+the policies are semantically checked for validity. If all goes well,
+configuration of relevant filters residing inside the various routing protocols
+may begin.
+
+The back end filters are able to interpret an intermediate language. They know
+nothing about user configuration syntax. The policy manager will ``compile'' the
+expressions in the configuration and send a simple assembly language style
+program to the back end filters. The parsing and interpretation of this language
+is trivially done in the back end with the use of a simple stack machine. The
+back end does no semantic checking and run time errors will occur if a bogus
+program is being executed.
+
+There is a special component residing in the RIB which also is controlled by the
+policy manager. It is the policy redistribution table which regulates the route
+flows from the origin protocol to the protocol being used for export.  This is
+accomplished via policy tags.
+
+\section{Policy tags}
+Policy tags mark routes in the input branch of routing protocols. These tags are
+then used to send the relevant routes to export protocols which requested them,
+ultimately allowing route redistribution.
+
+The RIB XRL interface has now changed to support policy tags:
+\begin{verbatim}
+        add_route4      ? protocol:txt & unicast:bool      \
+                        & multicast:bool & network:ipv4net \ 
+                        & nexthop:ipv4 & metric:u32        \
+                        & policytags:list
+
+        replace_route4  ? protocol:txt & unicast:bool    \
+                        & multicast:bool network:ipv4net \
+                        & nexthop:ipv4 metric:u32        \
+                        & policytags:list
+
+\end{verbatim}
+The same changes occur for add\_route6 and replace\_route6. They also occur in
+add / replace of interface\_route. The delete family does not use tags as
+deletion is done based on the network, and not on tags.
+
+These tags are merely a set of unsigned integers. In the most simple case, where
+a protocol wishes to not support filtering, supplying an empty XrlAtomList will
+suffice. This is currently seen in the OSPF implementation.
+
+Other routing protocols must add a PolicyTags entry in all their routes. The
+PolicyTags class is provided by the policy back end library. These tags should
+not be altered other than from within filters. The interface provides two
+useful utility methods:
+\begin{verbatim}
+    XrlAtomList xrl_atomlist() const;
+    string str() const;
+\end{verbatim}
+Thus, when an XRL needs to be sent to the RIB, calling the xrl\_atomlist()
+method on the tags will be enough to convert them. If curious about how tags look
+in real-life, then the str() method may be invoked.
+
+
+
+\section{Implementation of filtering in protocols}
+A developer wishing to implement policy filtering in a routing protocol may
+safely ignore all the details and internals of the policy framework. The overall
+work that needs to be done is:
+\begin{enumerate}
+\item implement the policy\_backend XRL interface.
+\item implement a VarRW compatible interface.
+\item have a mechanism to push routes through filters when requested.
+\item if the protocol may be used to redistribute routes, implement the relevant
+IPv6 / IPv4 policy\_redist XRL interface.
+\item provide a varmap configuration.
+\end{enumerate}
+The only task which may lead to complications is the third one. Thus when
+designing new protocols where filtering is desired, a design which will aid the
+simplicity of route pushing will help greatly.  All these tasks will now be
+examined in detail.
+
+\subsection{Policy backend XRL interface}
+There are three routines which need to be implemented in order to use the
+generic policy filters. These may be found in policy\_backend.xif:
+\begin{verbatim}
+        configure ? filter:u32 & conf:txt
+	
+        reset ? filter:u32
+
+        push_routes
+\end{verbatim}
+The first two need no implementation at all, as they are directly handled by the
+policy filter interface. The last one will be discussed separately in
+section~\ref{rpush}.
+
+A routing protocol must have a single instantiation of a PolicyFilters class.
+This class is a container which supports 3 filters:
+\begin{description}
+\item[import filter] Deals with import policies.
+\item[source match filter] Allows route redistribution, used in export
+policies. It basically adds tags to routes.
+\item[export filter] Deals with export policies.
+\end{description}
+The interface for the class is:
+\begin{verbatim}
+    void configure(const uint32_t& type, const string& conf);
+    
+    void reset(const uint32_t& type);
+    
+    bool run_filter(const uint32_t& type, 
+                    VarRW& varrw, 
+                    ostream* os);
+\end{verbatim}
+The first two methods directly map the XRL interface, so the XRL call may be
+simply forwarded to the filters.
+
+The last method actually does the filtering. It returns true or false depending
+on whether a route was accepted. Here is a summary of the arguments:
+\begin{description}
+\item[type] Identifies which filter needs to be run. This will depend on where
+filtering is being applied, whether it is the input or output branch of a
+protocol. The valid values are filter::IMPORT, filter::EXPORT\_SOURCEMATCH and
+filter::EXPORT as defined in the filter namespace.
+
+\item[varrw] The VarRW to use. This will become clear in the next section.
+\item[os] If not NULL, the filter will output an execution trace to the stream.
+It may be useful to point os to an ostringstream for debugging.
+\end{description}
+
+\subsection{The VarRW interface}
+VarRW stands for Variable Read Write. It may be thought of as a symbol table. The
+policy filter will request to read a variable and sometimes will request to
+write one. In this case, a variable will be an attribute of a route such as the
+next-hop address or metric. This interface allows the generic filter to match
+routes and to modify them without knowing what attributes routes have in a
+specific routing protocol and how they are stored internally.
+
+The interface to VarRW is:
+\begin{verbatim}
+    virtual const Element& read(const string& id) = 0;
+    
+    virtual void write(const string& id, const Element& e) = 0;
+
+    virtual void sync() = 0;
+\end{verbatim}
+The id parameter is the textual representation of the requested attribute, such
+as ``metric'' or ``ipnet4''. The protocol knows about these, and in fact it
+supplies all the variables it supports to the policy manager via a configuration
+file as explained in section~\ref{varmap}. Elements will be explained in
+section~\ref{elems}, but
+they act similarly
+to XrlAtoms. 
+
+Elements obtained via read() must be accessible even after read() returns (they
+must be available for the whole execution of the policy), thus storing them on
+the heap is usually a solution. The VarRW implementation is responsible for
+deleting elements created on the heap. On the other hand, elements passed on a
+write must not be deleted or modified.
+
+Sync will be called when all writes need to be executed in case the VarRW
+implementation chooses to delay writes by caching them. If pointers to elements
+passed by write are held, they will become invalid after a sync. Sync is usually
+called once when the policy execution has terminated.
+
+Policy filtering may now be achieved by associating a VarRW to a route and
+running a filter with that VarRW. This will result in the route being accepted
+or rejected, and possibly modified.
+
+A more ``easy to use'' VarRW interface is provided which may be used by routing
+protocols. It is the SingleVarRW.
+
+\subsubsection{SingleVarRW}
+With a normal VarRW many writes and reads for the same variable may be requested
+per policy, depending on its complexity. A wise solution would be to cache and
+re-use elements instead of creating new ones each time. Also, care must be taken
+to garbage collect elements created.
+
+To simplify this process, a VarRW is provided which will assure that each write
+will be executed only once per variable if necessary. Also, all memory
+management is done by the VarRW. This implementation is called SingleVarRW. The
+interface follows:
+\begin{verbatim}
+    void initialize(const string& id, Element* e);
+
+    virtual void single_start() = 0;
+    
+    virtual void single_write(const string& id, 
+                              const Element& e) = 0;
+
+    virtual void single_end() = 0;
+\end{verbatim}
+The first action an implementor of SingleVarRW will do is to initialize all the
+variable the protocol supports. This will be done by calling the initialize
+method once per variable. The SingleVarRW owns the Element pointer, so the
+implementation does not need to worry about deleting the created element. The
+element must be a heap object. All this will normally be done in the
+implementation's constructor.
+
+If the filter modifies the route, the SingleVarRW will then start to mark the
+beginning of writes. It will call write once per each variable modified and
+finally call end to indicate the termination of writes.
+
+Writes must be done right away, if a pointer to an element passed by a write is
+held, it may become invalid after single\_write returns.
+
+
+\subsection{\label{rpush}Route pushing}
+When the configuration of a filter changes, routes need to be re-filtered. The
+complexity of passing the routes through the filter greatly depends on the
+design of the protocol. In general, there were two design styles in XORP:
+\begin{enumerate}
+\item Pipeline: as seen in BGP and the RIB.
+\item Central database / queues: present in RIP and static routes.
+\end{enumerate}
+
+When routes need to be re filtered, there must be an indication whether the
+route was previously filtered (i.e. if the route was previously rejected by a
+filter). Also, original routes need to be re-filtered, not the possibly modified
+``current'' routes. This adds a requirement for protocols to have a {\em
+is\_filtered} flag and keep the original copy of the route somewhere.
+
+In a pipeline structure, original routes are generally stored in a table at the
+beginning of the pipeline. Pushing routes through the pipeline again will
+involve iterating through the initial table and sending an add / replace / dump
+downstream. In fact, which request should be sent down is the tricky bit. The
+best solution is probably to have a specialized route dump for policies. The
+temporary solution in BGP was to use the existing route dump which will be
+intercepted by a policy filter which will then forward the request as an
+appropriate add / replace / delete.
+
+In a central database structure, routes may be scanned through directly and
+modified right away. However the database must hold a pointer to the original
+routes in order to re-filter original routes. Currently, route pushing in RIP is
+a hack --- the database is flushed. Routes will only be re-filtered on
+re-advertisements. There is however an attempt to refilter routes learned from
+the RIB. In the static\_routes protocol, routes are simply re-filtered from the
+database, and the modified copy is sent to the RIB (the database will always
+contain originals).
+
+Blindly sending a replace after re-filtering will not work. Consider the case
+where a route has been rejected and now accepted. The replace will most likely
+fail since the route to be replaced will not be found down stream.
+
+Table~\ref{pushmatrix} illustrates the general case to what actions should be
+taken on re-filtering.
+\begin{table}
+\begin{tabular}{l l l}
+               & accepted & rejected \\
+was accepted   & replace  & delete, then return \\
+was rejected   & add      & return \\
+\end{tabular}
+\caption{\label{pushmatrix}Route pushing action matrix}
+\end{table}
+Consider the first case, where a replace is suggested. If there is a way to
+check that the route was not modified compared to the previously added route,
+then a replace would be superfluous (replacing the same route). This does occur
+for example in BGP and there is a check for this condition. However, it is wise
+to send the route downstream anyway (in a pipeline structure) because maybe a
+filter later in the pipeline has changed its configuration and may affect the
+route.
+
+\section{Route redistribution interface}
+Protocols may wish to be used for export. This is certainly not the case for
+static routes, but probably the case for most, if not all, dynamic routing
+protocols. Some protocols may support only IPv4 and others may have separate
+processes for v4 and v6 implementations. For this reason two interfaces are
+provided for IPv4 and IPv6 route redistribution based on policy.
+
+The XRL interface is:
+\begin{verbatim}
+    add_route4      ? network:ipv4net & unicast:bool \
+                    & multicast:bool  & nexthop:ipv4 \ 
+                    & metric:u32 & policytags:list
+
+    delete_route4   ? network:ipv4net & unicast:bool \
+                    & multicast:bool
+\end{verbatim}
+This resembles the normal RIB interface, and a similar one is provided for IPv6.
+
+Many protocols chose to emulate the RIB as a peer. Thus, the interface may be
+readily implemented by making the simulated peer inject and delete routes. Care
+must be taken however to make the simulated peer act as a real peer. For
+example, the RIP process assumes that routes are re-advertised periodically. The
+RIB will not send an add\_route periodically, thus it is RIP's responsibility to
+ensure RIB routes are periodically updated in its internal database.
+
+The PolicyTags class has a conversion constructor which will deal with
+XrlAtomLists. An exception may be thrown if the list, or its atoms are invalid.
+
+Currently, the protocol should not die if a delete is performed on a
+non-existing route, or an add is performed on an already added route. It should
+give a warning but discard the operation. This needs to be fixed in the future.
+
+\section{\label{varmap}The variable map}
+As stated earlier, the VarRW reads variables based on their string represented
+name such as ``metric.'' There must be a mechanism to ensure that only valid
+names are read and written. Furthermore, there must be a way to check that only
+specific variables may be written to (read-only variables). All this is done by
+the semantic checker in the policy manager. More precisely, the semantic checker
+also needs to know which protocols exist.
+
+All this is achieved through a VarMap (variable map). The VarMap reads a
+configuration supplied by the routing protocols which describe who they are, 
+what variables they support and whether they are read-only. The syntax for the
+VarMap configuration is very crude at the moment. Here is an indicative sample:
+\begin{verbatim}
+bgp     nexthop6        ipv6    rw
+bgp     nexthop4        ipv4    rw
+bgp     aspath          str     rw
+bgp     origin          u32     r
+
+ripng   network6        ipv6net r
+rip     network4        ipv4net r
+\end{verbatim}
+The first column identifies the protocol name which will be typed by the user in
+the configuration. Currently this has to match the XRL target name (although
+making it aliasable is trivial). The next column is the actual variable name.
+Following that is the textual representation of the type. Finally, the access of
+the variable where r is read-only and rw is read-write.
+
+The allowed types are described in the elements section.
+
+\section{\label{elems}Elements}
+Elements are very similar to XrlAtoms. Perhaps their only difference is in their
+design. XrlAtoms seem to have a fat interface which i did not use. The basic
+element interface is:
+\begin{verbatim}
+    Element(const std::string& type);
+    
+    virtual std::string str() const = 0;
+
+    const std::string& type() const;
+\end{verbatim}
+This ensures that every elements has a string representable type and its value
+may be converted to a string. 
+
+The decision of having every elements require a string representation simplified
+the developing process but also had a practical need. Configurations are sent
+via XRLs to the policy filters. This configuration is textual. The configuration
+will contain elements, so therefore each element must be converted to a string
+sooner or later. Also, if the user will match a route attribute with
+``something'', that ``something'' will most likely be a textual representation
+of the attribute he/she enters.
+
+The element type must be unique per type. It may sound obvious, but it has to be
+enforced. Many internal components rely on the uniqueness of elements types.
+
+Elements may be created via their concrete implementations. However, to ensure
+flexibility and allow this generic framework to work, an ElementFactory is
+provided to simplify the creation of elements.
+
+\subsection{The element factory}
+An element factory creates an element based on its type and assigns to it an
+initial value. The interface is:
+\begin{verbatim}
+    Element* create(const string& key, const char* arg);
+\end{verbatim}
+The caller is responsible for the deletion of the element. {\em Key} represents the
+textual type of the element which wants to be created. {\em Arg} is the string
+representation of the value with which the element should be initialized. If arg
+is NULL, the element is assigned its default value.
+
+This gives an additional constraint to elements which support the factory.
+Indeed the factory is used through out the policy framework, so having a const
+char* constructor in the element base type would be a good idea. The constraints
+are that all elements must have a default initialization value and all elements
+must be able to construct from a string representation.
+
+The argument for why all elements need to be capable of initialization via
+a string is similar to the previous one about why elements should be string
+convertible.  Firstly, if the user enters an ``element'' in the configuration
+file, there must be a way of parsing it. Also, if all elements may be converted
+to a string, there probably should be a way of constructing an elements from
+that string.
+
+Because of these requirements, the factory may also used as a clone factory,
+although it is not intended to. Consider the following code:
+\begin{verbatim}
+Element* clone = factory.create(elem.type(),elem.str().c_str());
+\end{verbatim}
+
+\subsection{Element types}
+Currently, the element factory supports elements listed in
+table~\ref{elemtypes}.
+\begin{table}
+\begin{tabular}{l l}
+Type	& Description \\
+i32	& 32 bit integer. \\
+u32	& 32 bit unsigned integer. \\
+str	& textual string. \\
+bool	& boolean value. \\
+ipv4	& IPv4 address. \\
+ipv6	& IPv6 address. \\
+ipv4net	& IPv4 network. \\
+ipv6net & IPv6 network. \\
+null	& NULL element. Represents nothing. \\
+set	& a set of strings. (all elements promoted to string for now). \\
+\end{tabular}
+\caption{\label{elemtypes}Factory supported element types}
+\end{table}
+
+It now becomes evident that implementing a VarRW in a protocol becomes trivial.
+Elements may be created via the element factory. On writes, elements may safely
+be casted to their concrete type as the semantic checker will go through type
+checking.
+
+Recall however that in the previous VarMap configuration of BGP, support was
+given both for IPv4 and IPv6 in the same process. What happens if the filter
+attempts to read an ipv6net on an IPv4 route? The VarRW must return the null
+element. BGP supports both v4 and v6 and the filter is expecting the VarRW to
+reply correctly for all variables it supports, even if they are not present in
+the currently examined route. The same applies for attributes which are present
+only sometimes such as local pref. The NULL element must be returned for each
+attribute not present, but supported. NULL elements will never be received for
+writes.
+
+If the SingleVarRW interface is used, a NULL pointer may be passed to the
+initialize function if the variable is not present, without having to explicitly
+create a NULL element (do not confuse the NULL element with a pointer to 0).
+
+Also, PolicyTags may be converted to Element pointers to ease the read()
+implementation of VarRW interfaces.
+
+
+
+\section{Common policy component internals}
+The ElementFactory was briefly discussed and it should be clear that elements
+may be created with ease. Creating elements is only partially useful if there
+is not way to manipulate them. 
+
+ElementFactory will always return the base type of elements and operations will
+have different semantics according to the concrete type of their arguments.  An
+unary operation will depend only on the element itself so calling
+element.unary() will suffice as a standard polymorphism technique. Consider the
+more useful and frequent binary operations however. They depend on the types of
+two elements. Standard polymorphism will not help here. 
+
+I have implemented multi methods as explained by Alexandrescu and Meyers. The
+solution lies in a dispatcher which takes an operation and two base elements,
+and will execute the correct method based on the operation and the concrete type
+of the elements.
+
+\subsection{The dispatcher}
+The client interface to the dispatcher is very simple:
+\begin{verbatim}
+    Element* run(const BinOper& op,
+                 const Element& left, 
+                 const Element& right) const;
+		 
+    Element* run(const UnOper& op, const Element& arg) const;
+
+    Element* run(const Oper& op, const ArgList& args) const;
+\end{verbatim}
+It currently supports three ways of executing operations. The most generic way
+is providing an operation and an argument list. An argument list is a vector of
+Element pointers.
+
+There are also two utility functions for executing explicit unary and binary
+operations. If the magic occurs, the Element of the resulting operation is
+obtained (caller is responsible for deletion). On error, an exception is thrown.
+
+Being able to create elements from their string representation and being able to
+perform operations on base elements makes the design of the policy filter
+conceptually easy.
+
+Internally, the dispatcher has a map from a key to a callback. The key
+represents the requested operation and the types of arguments in order. If an
+entry is not found, it means the permutation is invalid and an exception is
+thrown. On success, the callback is executed and the return value is passed to
+caller (double dispatch).
+
+There must be a way to register callbacks with the dispatcher in order to add
+entries to the map. This is done via the add functions:
+\begin{verbatim}
+    template<class T, Element* (*funct)(const T&)>
+    void add(const UnOper& op);
+
+    template<class L, class R, 
+             Element* (*funct)(const L&,const R&)>
+    void add(const BinOper& op);
+\end{verbatim}
+Currently there is no way to add n-ary callbacks, but it is trivial to do so, if
+the function will take an ArgList as a parameters instead of explicitly expanded
+parameters. Notice that the template parameters are concrete types of the
+elements for the operation being added.
+
+It is important to have only one global map, and to register the callbacks
+before the map is used. The map is therefore static, and the callbacks are
+registered via a RegisterOperations class.
+
+Arguments of the Element NULL type are treated as a special case. By definition,
+any operation which has a NULL argument will return a new NULL element. This
+becomes useful, for example, when testing if a IPv4 address equals the next-hop
+of an IPv6 route (remember that a NULL element will be returned by VarRW in this
+case). Returning true or false will be misleading, thus the choice is returning
+another NULL element.
+
+
+\subsubsection{Register operations with dispatcher}
+The dispatcher class has a static member of RegisterOperations initialized right
+after the map. This will ensure that the RegisterOperations constructor will be
+called right after the map initialization, and only once (static).
+
+The sole purpose of the RegisterOperations is to initialize the dispatcher map.
+In fact, it only has a constructor which will perform the adds to the
+dispatcher. 
+
+If a new operation needs to be added to the whole policy framework it should be
+enough to add it in the RegisterOperations class. If this operation requires a
+new symbol to be used in the configuration, then the appropriate modifications
+need to be done in the front end and back end lexers and grammars. Also, a new
+operation class needs to be created to represent it. To increase flexibility,
+operations may be created via a factory in the future which would not require
+modification of the backend possibly.
+
+Notice that sometimes it suffices to add different permutations of arguments and
+existing operations to the dispatcher. This will in essence change the ``dynamic
+grammar'' and what permutations of argument types / operations are allowed
+(possibly overloading existing operations).
+
+\subsection{Details on ElementFactory}
+With a flexible dispatcher like the one described above, elements may
+theoretically be created via it. It should be possible to simply register an
+operation CreateElement which takes a string element as argument.
+
+The ElementFactory works almost exactly as the dispatcher, but is different in
+nature. For this reason I kept the two separate.  The dispatcher executes based
+on the type of arguments. The factory creates based on the value of arguments.
+Note that subtle difference, although the argument passed to the factory
+actually is a type identifier of the element, the factory treats it a value, not
+a type.
+
+Elements may be registered with the factory in a similar way as with the
+dispatcher:
+\begin{verbatim}
+    typedef Element* (*Callback)(const char*);
+
+    void add(const string& key, Callback cb);
+\end{verbatim}
+{\em Key} represents the type of the element (its string representation). The callback
+function will construct the element via a c-style string. If the pointer is NULL,
+a default value should be assigned to the newly created element.  Default
+initialized elements are extensively used by the front end semantic checker.
+
+As with the dispatcher, the map is static and a RegisterElements class is
+provided for initialization.
+
+Adding elements to the factory simply requires registering them and creating a
+derived version of the Element class. Currently, the lexer does all type
+identification, so that must be modified with a regular expression to match the
+new element type. There is no run-time ``type guessing'' mechanism, which I
+think should be added. The new element must be added in the grammar too.
+
+A utility template ElemAny is provided which may help in creating new elements.
+Currently IPv4/6 and others are implemented using this wrapper.
+
+\section{Operators}
+Operators were met in the dispatcher, both in the run and add methods. The
+interface for operators is:
+\begin{verbatim}
+    virtual unsigned arity() const = 0;
+
+    virtual string str() const = 0;
+\end{verbatim}
+Each operator has an arity associated (the number of arguments it takes). This
+is useful for asserting correctness of argument lists. To check if user supplied
+right number of arguments. Each operator is string representable.
+
+Again, the justification is that the compiled programs need to be sent in a
+string form to the backend. Also, the user will type them in text (hopefully) in
+the configuration file. So there must be a string representation. The string
+representation must be unique! The dispatcher uses it for the creation of the
+key in the map lookup for example.
+
+There are two more utility base classes for operators, namely BinOper and UnOper
+which define the arity to 2 and 1 respectively. This way new binary and unary
+operators may be derived without the need to worry about arity. It also helps
+grouping operations in a hierarchy.
+
+\section{Policy backend internals} Having the ability to create elements and
+perform operations on them makes the
+design of the backend filter conceptually easy. Backend filters are implemented
+as a simple stack machine. They read a pseudo-code assembly like program, and
+execute it. No semantic checks are done, thus exceptions may be thrown on bogus
+programs (although they should not reach the filter in the first place).
+
+The parse of the program will result in a list of Policy Instructions. A policy
+instruction is simply a container of term instructions, which is itself a
+container of instructions. Basically, the result will be having a structure of
+ordered instruction classes.
+
+All instructions are derived from a same base and implement the Visitor design
+pattern as proposed by Alexandrescu. This allows traversing the structure with
+different implementations (visitors). The only drawback of using visitors is
+that if new instructions are added, all the visitors need to be updated.
+However, in this case instructions will change little over time, and only one
+visitor is present anyway.
+
+The visitor present is in fact the interpreter of the program. The execution
+visitor IvExec.
+
+\subsection{Backend execution visitor}
+The execution visitor is generic enough to support N-ary instructions. It also
+supports the creation of any element. Thus if a new element is registered with
+the factory, the visitor remains unchanged. The same goes for operations,
+although the backend parser will need to cope with creating the proper
+instructions.
+
+The interpreter will use the VarRW interface to load and store route attributes.
+It will also need an entity called the SetManager to reference sets. Ideally,
+sets should be transferred independently from policies and managed on their own.
+Sets may be sharded among policies, so having one copy both eases maintenance
+and saves memory. This is currently not the case however. Sets are bound to
+programs.
+
+The only instruction which is treated as a special case is the REGEX. Any
+element may be compared to a regular expression. Recall that all elements have a
+string representation, so a regex match will always be possible.
+
+The ON\_FALSE\_EXIT will exit the current term if a false or null is on the top
+of the stack. Execution will resume on the next term. It does not pop elements
+from the stack.
+
+If a STORE operation needs to be executed, and the argument is a null element,
+the operation is silently discarded.
+
+An IvExec will return a {\em flow action} from its execution. Currently it may
+be to accept the route, reject it, or perform the default action. Default
+actions should be user settable and changeable from within policies. They
+currently are not, but it should be easy to add a variable named {\em default
+action} and allow the user to modify it.
+
+\subsection{Set manager}
+The Set manager owns all the sets of a filter. It is responsible for their
+maintenance and memory management. A set manager is similar to the VarRW from
+the IvExec point of view. The only difference is that the IvExec will only read
+sets and never write to them.
+
+The IvExec refers to a set via its name, and the set manager will return the
+corresponding ElemSet if it exists. Sets act like pointers in the mini language
+and the SetManager is responsible for dereferencing them.
+
+
+\section{Policy manager: the front end}
+The front end needs to cope with serval tasks:
+\begin{itemize}
+\item sanity check user configuration and requests.
+\item generate code for policies.
+\item track configuration changes and apply modifications.
+\item manage backend filters.
+\item manage the RIB redistribution map.
+\end{itemize}
+The hardest tasks probably lie in sanity checks and trying to reconfigure
+filters the least possible on configuration changes. If a filter is
+reconfigured, routes will need to be pushed, which is an expensive operation.
+
+\subsection{Dependency tracking and sanity checks}
+Most of the sanity checks involve tracking dependencies between protocols and
+policies, and policies and sets. The policy manager should not allow a user to
+delete a set which is in use for example. Also, the policy manager should not
+allow a user to create a policy which already exists.
+
+In general, policies depend on sets. If a policy uses a set, the set may not be
+deleted. Also, policies instantiations via the import or export directive depend
+on the policies which they refer to. Thus, a policy may not be deleted if it is
+being used for an import or export.
+
+Similarly, policies and sets need to be defined before they may be referenced.
+This may be avoided, but for simplicity forward definition is a requirement.
+
+To allow dependency tracking, a Dependency template is used. It owns pointers to
+objects. These objects are referred to by names, and also have a dependency list
+which refers to who is currently using them. It does not mean the object itself
+depends on anything --- the list contains who depends on the object. This
+template is used to track dependencies both in policies and sets.
+
+\subsection{Code generation}
+The parsing implementation is similar to the backend. All statements are parsed
+and result in a PolicyStatement which contains a list of Terms which contain a
+list of nodes.
+
+All nodes implement the visitor interface. The usefulness of visitors becomes
+apparent in this case. At least two passes need to be done on the nodes
+(although they may probably be done in one go). First a semantic check, and then
+the code generation pass.
+
+Code generation and semantic checks are done only on instantiated policies. A
+policy which is not used is totally ignored and no possible errors are reported.
+This may be fixed by having a generic semantic check visitor pass through the
+policy to try and see if it makes at least {\em any} sense.
+
+\subsubsection{Semantic check pass}
+The nodes must first be semantically checked as the static grammar does only a
+minimum. The real semantic check resides in actually trying to execute the
+policy and see if the combination of types and operations is supported by the
+dispatcher. This check is done by executing the nodes of the parse tree directly.
+Execution is done on all nodes (all flows of the program).
+
+A special VarRW called the SemanticVarRW will try emulating the protocol
+requested by the execution visitor. This is done via the VarMap configuration.
+The SemanticVarRW knows exactly what type is expected from a certain variable.
+Also, misspelling of variable names or invalid reads/writes will be caught at
+this time.
+
+The existence of sets will be checked too. Although set errors will probably
+be caught when the SetDep visitor is executed to track policy and set
+dependencies.
+
+\subsubsection{Code generation pass}
+There are three different visitors which generate code depending on how the policy
+is instantiated. If the policy is an import, then the Import code generator is
+used.
+
+For export policies two passes need to be done. The source match code
+generation and the export part. The export part acts much like import policy
+code generation but the source block matches policy tags.
+
+The source match code generation will match the source block, ignore the dest
+block and set policy tags as actions. However, the code generated may be for
+multiple {\em targets} where a target is a protocol and filter pair. Consider
+the following policy fragment:
+\begin{verbatim}
+term a {
+    source {
+        protocol static_routes;
+        metric == 4;
+    }
+}
+term b {
+    source {
+        protocol rip;
+        metric == 3;
+    }
+}    
+\end{verbatim}
+The source match will generate two code fragments of which one will need to be
+sent to static\_routes and one to RIP.
+
+
+\subsection{Tracking configuration changes}
+Source match may generate code fragments for different targets.  Suppose policy
+A generates a source match for RIP and static routes. Suppose a policy B is now
+added which also generates a source match for RIP. No problem, just append the
+code. 
+
+If policy B is deleted, the source match dependency for RIP has to be tracked
+down. Then, somehow, the code relevant to B has to be deleted. If the code was
+kept as ``a whole'' it would not be possible, so policy A would have to be
+re-compiled, and possibly any other policies which generate source match for
+RIP.
+
+For this reason, generated code is always kept fragmented. There is a close
+resemblance to what a compiler does by keeping separated object files and
+linking them when needed. The same occurs with the policy manager.
+
+In the previous example, the code fragment of policy A would be deleted, and the
+source match filter for RIP would be re-linked and the configuration would be
+sent off.
+
+Policies are instantiated via the export / import list of a protocol. This list
+is managed via the PolicyList which will also contain all the code fragments
+generated by the instantiation.
+
+\subsubsection{Policy lists}
+A policy list is what instantiates policies. Each policy list will have its
+independent generated code for the policies which it refers to. A policy list is
+either an export or import list, depending on user configuration.
+
+Internally a list of the policy names will be stored and for each policy there
+will be a code list associated with it. A code list is simply a collection of
+code fragments. The code list will be all code generated for the instantiation
+of that policy. If it were an export policy list, the code list will contain all
+the source match code, even if it was destined to a different protocol.
+Thus, the code fragments in a policy list may be for many different targets.
+
+Keeping code fragments this way allows tracking affected targets on policy
+changes easier.  For example if policy A changes, each Policy list which
+contains policy A is tracked. The policy lists found will then extract all the
+targets in the code list for policy A. These are the affected targets.
+
+When a target changes, the code fragments are re-linked and sent to the filter
+manager. The filter manager is responsible with keeping backend filters synchronized
+with the latest configuration.
+
+\subsection{Filter manager}
+The Configuration class always contains the most up to date configuration for
+all targets. It is the responsibility of the filter manager to ensure that
+backend filters are synchronized with the configuration.
+
+Normally the filter manager will receive update requests from the configuration
+class. The filter manager will then queue a configuration request for the
+target. These requests are queued in order to try and aggregate configuration
+changes and especially route pushing. Particularly, on boot-up of the XORP router,
+many small configuration changes will occur in a short period of time.
+Currently, updates are flushed 2 seconds after the last update.
+
+The filter manager closely works with the process watcher. If a protocol dies,
+then no updates are longer sent to that protocol. Conversely, if a protocol is
+born, any configuration present must be sent to it.
+
+Upon configuration changes, the filter manager tracks down which protocols need
+to have their routes pushed. These are also queued and flushed with a delay to
+attempt aggregation.
+
+There currently is a problem with the whole implementation structure. If
+redistribution from protocol A to B is requested and only A is alive, the
+routes will reach the RIB. When B come to life, it will never receive the
+routes. As a hack, the filter manager will cause routes of A will to pushed when
+B comes to life.
+
+\subsection{RIB redistribution map}
+The RIB redistribution map is trivially implemented. A route table is present
+before the register table in the RIB. As a route flows through, the table checks the
+policy tags and determines where route should be redistributed.
+
+It is configured via the filter manager which tracks down which tags are
+associated to which protocol.
+
+
+\section{Current XORP integration}
+Currently, some degree of policy support is implemented in:
+\begin{description}
+\item[BGP] Import, source match, export, IPv4/6 redistribution.
+\item[RIP] Import, source match, export, IPv4/6 redistribution.
+\item[static routes] Import, source match.
+\item[connected] source match.
+\end{description}
+If source match filtering is supported, then the protocol may be used as the
+source for a route redistribution.
+
+Following is an outline of the current implementation in the various routing protocols.
+
+\subsection{BGP}
+A generic route policy table is implemented. It suffices for export filtering.
+The import and source match filters are specialized because they contain other
+functionality needed to allow route pushing.
+
+The import policy filter table is placed in each branch for every peering just
+after the standard filter in table. The source match filter is placed right
+before the fan out table. Finally, the export filter table is placed in each
+branch for ever peering just after the filter out table.
+
+The BGPVarRW implementation supports a subset of the most important attributes
+which need to be examined. For example, variables that indicate which peering
+the route came from still need to be added.
+
+The route pushing interface of BGP has to be redesigned.
+
+\subsubsection{BGP route push}
+Route pushing in BGP is a proof of concept and should not be used. It uses dump
+iterators but is not a background task. The dump to peer is set to NULL to
+differentiate it from normal route dumps. 
+
+The source match filter initiates the route dump for its strategical position
+--- it has access to peerinfo from the fanout table, and may use the decision
+table to spread the route dump request to all branches. It will try to dump all
+routes in one go, and will not check if routes are flowing in the pipeline as
+the dump is initiated.  The RibIn table will dump all routes if the dump to peer
+is set to NULL (even routes which are not winners).
+
+The policy import filter will intercept route dumps with the dump peer set to NULL. It
+will recognize them as policy route dumps. It will then transform the request to
+either an add, replace or delete according to the matrix in table~\ref{pushmatrix}.
+For this reason, import filters need to be present in each branch, even though
+filtering may not desired such as the RIB peer branch.
+
+The routes will then flow through the pipeline most likely causing unnecessary
+updates. It is important to have the routes flow all the way down, even if
+nothing changed, as maybe the export filter lower in the pipeline will change them.
+
+
+\subsection{RIP}
+RIP has the worse policy implementation. 
+
+For import filtering, All the RIP ``magic'' occurs in the update\_route routine
+of the RouteDB. An attempt is made to try to filter routes and modify them.
+
+Output filtering is slightly better and occurs both for the route table outputs
+and the updates output.
+
+Because of reference counting, I was not able to find a clean way to copy a RIP
+route without having to create a new structure containing the same data. As a
+result, I ended up copying routes by setting a NULL origin to force reference
+counting not to occur. For this reason, the current RIPVarRW has no information
+about origin, so matching may only be done on a subset of what is possible.
+
+Route pushing in RIP does not exist. The route database will be flushed, as
+copies of original routes are not stored. For the filters to take effect,
+new advertisements have to come in. An attempt is made to re-filter routes
+learned from the RIB.
+
+
+\subsection{Static routes}
+Static routes probably has the most correct and safe policy implementation due
+to its simplicity. Filtering may occur only on the import branch. The route
+database will always contain original routes, and routes are possibly modified
+by filters as they are sent to the RIB.
+
+Route pushing should be safe and should work correctly.
+
+
+\subsection{Connected routes}
+Connected routes may only be used as a source for route redistribution. They may
+not be modified nor filtered. Notice that modifying policy tags on a route, does
+not modify the route itself. It is pure meta-data used exclusively by the policy
+framework.
+
+Route pushing is implemented by having the connected route filter table in the
+RIB store all the routes itself. This is a waste of space, as the Origin table
+will have the same exact information. On a push request, the filter table will
+initiate a replace\_policytags call which should only be used by the policy
+redist table. The policy redist table will then decide which protocols should
+stop advertising the route and which should start.
+
+Changes only to the policy tags should be propagated in a similar way in all
+routing protocols, as it will not cause route adds / deletes inside the process
+(in this case the RIB), which is desirable. 
+
+Currently, the user has to specify rib as the protocol instead of connected due
+to a lack of protocol to process mapping in the VarMap (which may be used by the
+filter manager).
+
+
+\section{General problems}
+The XORP integration should be fixed as stated in the above sections. The
+biggest problem is route pushing. Other problems may arise due to race
+conditions. The following list are issues which should be considered:
+\begin{itemize}
+\item What happens if the source protocol is alive, but the export is dead.
+\item How to configure VarMap ?
+\item Configuration integration with rtrmgr for source / action / dest block.
+\item ElemSet --- do not treat everything as a string!
+\item Route pushing propagate only real route changes, and propagate policy tags
+changes with another mechanism.
+\item Counters in filters indicating how many times a term was matched.
+\end{itemize}
+
+
+\section{Conclusion}
+I believe that the overall idea of having generic filters was good. If it works,
+and works well, it will make life easy for protocol developers which would
+like to support policy in their implementations. There are considerations to
+make about how fast these filters run as flexibility does come with a
+cost. The work is still under development and un-stable. The ``real-life''
+testing was basically null, possibly due to bad time management on my part.
+
+Hopefully this work will give an idea to what are the problems and possible
+solutions in implementing a policy framework for XORP. I belive however the
+current implementation reached a good starting point for it to be extended. If
+this design is accepted and kept, the major components and ideas are deployed.
+It is now a question of correcting, extending and optimizing them.
+
+\end{document}
