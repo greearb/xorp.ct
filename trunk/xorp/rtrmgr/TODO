@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.6 2003/09/12 00:53:21 hodson Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.7 2003/10/02 00:14:49 hodson Exp $
 #
 
 Urgent
@@ -43,6 +43,12 @@ General
    and list all *.cc files there in alphabetical order
  - When the rtrmgr is running in no-exec mode do not instantiate a
    finder and XrlRouter.
+ - Audit the number of symbols copied by strncpy in the lex/yacc
+   files, and write '\0' at the end of the array. E.g., always
+   do something like:
+	char buf[1024];
+	strncpy(buf, input, sizeof(buf) - 1);
+	buf[sizeof(buf) - 1] = '\0';
 
 Configure Mode
 
