@@ -12,12 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.3 2003/05/14 01:13:43 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.4 2003/09/20 00:41:02 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
 
 #include "fte.hh"
+
+//
+// TODO: XXX: a temporary definition of RTPROT_XORP (e.g., in case of Linux)
+// that is used to mark the routes installed by XORP.
+// XXX: RTPROT_XORP must be unique
+// (see <linux/rtnetlink.h> for definition of all RTPROT_* protocols).
+//
+#if defined(RTPROT_UNSPEC) && !defined(RTPROT_XORP)
+#define RTPROT_XORP 14
+#endif
 
 /**
  * @short Helper class for various NETLINK-format related utilities.
