@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.3 2003/06/02 23:20:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.4 2003/09/20 00:34:54 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -140,7 +140,7 @@ NetlinkSocket::start(int af)
     snl.nl_family = AF_NETLINK;
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;		// no multicast
-    if (bind(_fd, (struct sockaddr *)&snl, sizeof(snl)) < 0) {
+    if (bind(_fd, reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl)) < 0) {
 	XLOG_ERROR("bind(AF_NETLINK) failed: %s", strerror(errno));
 	close(_fd);
 	_fd = -1;
@@ -151,7 +151,7 @@ NetlinkSocket::start(int af)
     // Double-check the result socket is AF_NETLINK
     //
     snl_len = sizeof(snl);
-    if (getsockname(_fd, (struct sockaddr *)&snl, &snl_len) < 0) {
+    if (getsockname(_fd, reinterpret_cast<struct sockaddr*>(&snl), &snl_len) < 0) {
 	XLOG_ERROR("getsockname(AF_NETLINK) failed: %s", strerror(errno));
 	close(_fd);
 	_fd = -1;
