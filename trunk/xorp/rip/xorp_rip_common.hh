@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/xorp_rip_common.hh,v 1.1 2004/02/20 01:22:04 hodson Exp $
 
 #ifndef __RIP_XORP_RIP_COMMON_HH__
 #define __RIP_XORP_RIP_COMMON_HH__
@@ -49,11 +49,13 @@ struct XrlTarget {};
 template <>
 struct XrlTarget<IPv4> {
     typedef XrlRipTarget Type;
+    static const char* name() { return "rip"; }
 };
 
 template <>
 struct XrlTarget<IPv6> {
     typedef XrlRipngTarget Type;
+    static const char* name() { return "ripng"; }
 };
 
 
@@ -221,7 +223,8 @@ protected:
 	try {
 	    EventLoop	      e;
 	    System<A>	      rip_system(e);
-	    XrlStdRouter      xsr(e, "rip", finder_host.c_str(), finder_port);
+	    XrlStdRouter      xsr(e, XrlTarget<A>::name(),
+				  finder_host.c_str(), finder_port);
 	    XrlProcessSpy     xps(xsr);
 	    IfMgrXrlMirror    ixm(e, "fea");
 	    XrlPortManager<A> xpm(rip_system, xsr, ixm);
