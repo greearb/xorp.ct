@@ -1,0 +1,85 @@
+This directory contains Makefile includes.  These are intended to help
+with generating consistent documentation.  At present only three include
+files exist:  Makefile.latex, Makefile.fig, and Makefile.doc.am
+
+=============================================
+Makefile.latex:
+
+Makefile.latex assumes you have a directory containing a latex file
+for each Postscript and PDF file you wish to generate.  Your Makefile
+needs to look like:
+      
+      LATEX_SOURCES=doc1.tex
+      include $(MKDIR)/Makefile.latex
+
+The Makefile uses latex/dvips to generate Postscript and pdflatex to
+generate PDF.
+
+=============================================
+Makefile.fig:
+
+If the document contains graphics, we assume the graphicx package is
+used and that raw .fig files exist in a directory called "figs" that
+is under the latex source directory.  Using graphicx allows documents
+to include either Postscript or PDF files and to pull in the correct
+file type for Postscript and PDF files depending on whether latex or
+pdflatex are being run.  Files are included without their file type
+suffix within the latex document, eg.
+
+       \begin{figure}
+         \centerline{\includegraphics[width=0.80\textwidth]{figs/circles}}
+         \caption{\label{fig:circles} Beautiful round circles. }
+       \end{figure}
+
+In the "figs" directory, the Makefile only need set the variable
+FIG_SOURCES and include Makefile.fig.  Postscript and PDF files are
+generated for each .fig file.
+
+=============================================
+Makefile.doc.am:
+
+Makefile.doc.am is an alternative to the above Makefile.latex and
+Makefile.fig. It is suppose to be used with Makefile.am files.
+Currently, the Makefile.am should contain the following:
+
+ * DOCS: the list of documents.
+
+ * For each document foo in "DOCS" there should be the foo_LATEX with
+   the Latex and Bibtex files for that document. Note that the
+   main Latex file for document foo MUST be named foo.tex. Otherwise,
+   we would have to introduce additional semantics to Makefile.am.
+
+ * All figures for that document should be listed in foo_FIGURES.
+   A file with a figures can be in any directory, and the file name
+   can have any extention, though it is recommended that all files
+   should be Encapsulated Postscript (i.e., *.eps). If a file extention
+   is *.eps or *.ps and if there is a correspoding *.fig file in the
+   same directory, then the *.eps or *.ps file will be regenerated
+   whenever the *.fig file is modified: if the listed file name is *.eps,
+   the regenerated file will be Encapsulated Postscript; if the listed
+   file name is *.ps, the regenerated file will be Postscript.
+
+ * Note that the only Postscript files "gmake clean" would remove are
+   the foo.ps final documents, hence it is safe to have other *.ps files
+   in the directory with the Latex source files. Though, it is recommended
+   that all figures are in a subdirectory; for Xorp, the common
+   convention is that directory name to be "figs".
+   Other files that "gmake clean" removes are:
+     - all foo.pdf final documents
+     - all files with suffix *.aux *.bbl *.blg *.dvi *.log
+
+Example of a Makefile.am file that uses Makefile.doc.am:
+
+## Process this file with automake to produce Makefile.in.
+
+include $(top_srcdir)/docs/mk/Makefile.doc.am
+
+# -- Document Names
+DOCS			= mydoc
+
+# -- Document Sources
+mydoc_LATEX		= mydoc.bib mydoc.tex
+mydoc_FIGURES	=						\
+			figs/fig1.eps				\
+			figs/fig2.eps
+

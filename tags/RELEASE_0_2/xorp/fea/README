@@ -1,0 +1,30 @@
+#
+# $XORP: xorp/fea/README,v 1.9 2002/12/09 11:13:05 pavlin Exp $
+#
+
+Forwarding Engine Abstraction
+=============================
+
+The FEA is intended to fulfill several roles:
+
+    1) it manages network interfaces.
+
+    2) it reports changes to network interface configurations.
+
+    3) it manages the forwarding tables of the underlying forwarding plane.
+
+    4) it allows UDP and RAW packets to be sent from network interfaces.
+
+Documentation
+=============
+
+The FEA architecture is described in xorp/docs/fea.
+
+Status
+======
+
+Two FEA implementations exist: fea_dummy and fea_rtsock.  fea_rtsock
+is an FEA for systems implementing FreeBSD's routing socket interface.
+It has been developed and tested on FreeBSD versions 4.5--4.7.
+fea_dummy is a functional FEA substitute for other systems.  Neither
+FEA version is extensively tested.

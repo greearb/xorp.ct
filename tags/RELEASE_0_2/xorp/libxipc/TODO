@@ -1,0 +1,5 @@
+o Rework the xrl parser related routines to make them more akin to the
+  parsing capabilities of the python scripts used to generate XRL
+  interfaces.
+
+o Add support for pipelining to Xrl protocol families.

@@ -1,0 +1,14 @@
+/* $XORP: xorp/xrl/interfaces/rtrmgr_client.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
+ 
+/*
+ * Router Manager Client XRL interface.
+ * These are asynchronous callbacks from the Router Manager
+ */
+
+interface rtrmgr_client/0.1 {
+    new_config_user ? userid:u32
+
+    config_change_done ? success:bool & errmsg:txt
+
+    config_changed ? userid:u32 & deltas:txt & deletions:txt
+}

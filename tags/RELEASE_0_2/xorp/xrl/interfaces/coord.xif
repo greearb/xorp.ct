@@ -1,0 +1,21 @@
+/* $XORP: xorp/xrl/interfaces/coord.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+
+/*
+ * Interface to the coordinating BGP test process.
+ */
+
+interface coord/0.1 {
+	/**
+	 * Command to be executed by the coordinating process.
+	 *
+	 * @param command to be sent to the coordinator.
+	 */
+	command ? command:txt
+
+	/**
+	 * If there are still any outstanding commands pending will return
+	 * true. Can be used to poll the coordinating process to verify that
+	 * the previous command has completed.
+	 */
+	pending -> pending:bool
+}

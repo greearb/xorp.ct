@@ -1,0 +1,19 @@
+#
+# $XORP: xorp/libcomm/README,v 1.1 2001/11/30 02:17:20 pavlin Exp $
+#
+
+This directory contains the COMM socket library.
+
+This library includes a number of handy functions that
+make it easier to perform various things with communication sockets:
+open, close, bind to a local address and a port, join a multicast group, etc.
+The library supports both IPv4 and IPv6.
+
+The complete API to the library is in the "comm_api.h" file.
+The API has two parts: the high-level `user' API, and the lower-lever
+`sock' API. The lower-level API performs the particular operations on
+a socket (e.g., join a multicast group on a socket).
+The higher-level API usually combines several lower-level operations
+together: e.g., open a socket, bind it to a multicast address and a port,
+and join that multicast address.
+

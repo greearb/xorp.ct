@@ -1,0 +1,84 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/bootstrap,v 1.13 2002/07/31 17:11:45 hodson Exp $
+#
+#
+# A script of autoconf/automake/libtool commands to bring the system
+# up to date if some of the configuration files are modified
+#
+
+# Prototype: check_necessary <this_script_name>      
+check_necessary()
+{
+    if [ $# -ne 1 ] ; then
+	echo "Incorrect argument count"
+	exit 1
+    fi
+
+    checkfile=./Makefile.in
+    if [ ! -e ${checkfile} ] ; then
+	checkfile=$1
+    fi	
+
+    if [ ! -f ${checkfile} ] ; then
+	echo "${checkfile} does not exist or is not an ordinary file"
+	exit 1
+    fi
+
+    echo -n "Checking configuration files..."
+
+    NEWER_AM_FILES=`find . -name 'Makefile.am' -a -newer ${checkfile}`
+    NEWER_CONFIG_IN=`find . -name 'configure.in' -a -newer ${checkfile}`
+
+    echo "done."
+
+    NEWER_FILES="${NEWER_AM_FILES}${NEWER_CONFIG_IN}"
+
+    if [ "${NEWER_FILES}"X = "X" ] ; then
+
+	cat <<EOF 
+
+Neither configure.in nor Makefile.am's have been edited.  You almost
+certainly do not want to run this script which will regenerate
+automake/autoconf output files.
+
+Proceed at your own risk (y/n)?
+EOF
+
+	read carry_on
+	if [ "${carry_on}X" != "yX" ] ; then 
+	    echo "Okay, stopping here."
+	    exit 1
+	fi
+    fi
+}
+
+run()
+{
+	echo $@
+	if ! $@ ; then
+		echo "Error running '$@'"
+		exit 1
+	fi
+}
+
+check_necessary $0
+
+run rm -f config.cache
+run rm -f aclocal.m4		# XXX: temporary (2001/09/11)
+
+run aclocal -I config --output=config/aclocal.m4
+# run libtoolize --force --copy		# XXX: uncomment for LIBTOOL
+
+run autoheader
+
+
+# XXX: in case of non-GNU 'make', we must use 'automake -i'
+# XXX: we must use 'automake -i' before distributing the source code!!!
+# run automake -i --add-missing --copy 
+
+run automake --add-missing --copy 	# XXX: uncomment for AUTOMAKE
+run autoconf -l config
+
+exit 0

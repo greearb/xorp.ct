@@ -1,0 +1,328 @@
+#! /usr/bin/env python
+
+"""Program to generate Xrl Target related files"""
+
+import os, sys
+
+# This is a bit of mess as this code was split into separate files
+import Xif.util
+
+from Xif.util import \
+     joining_csv, csv, cpp_name, cpp_classname, xorp_indent_string, xorp_indent
+
+from Xif.xiftypes import \
+     XrlArg, XrlMethod, XrlInterface, XrlTarget
+
+from Xif.parse import \
+     XifParser
+
+from Xif.kdoc import \
+     XifKdocThing
+
+# -----------------------------------------------------------------------------
+# Xrl output list
+# -----------------------------------------------------------------------------
+
+def xrl_arg_str(a):
+    return a.name() + ":" + a.type()
+
+def output_xrls(tgt_name, methods):
+    s = ""
+
+    for m in methods:
+        kdoc_note = kdoc_comment(m, "")
+        if len(kdoc_note):
+            s += kdoc_note + "\n"
+            
+        s += "finder://%s/%s" % (tgt_name, m.name())
+        if len(m.args()):
+            s += "?"
+            s += csv(map(xrl_arg_str, m.args()), "&")
+        if len(m.rargs()):
+            s += "->"
+            s += csv(map(xrl_arg_str, m.rargs()), "&")
+        s += "\n\n"
+
+    return s
+    
+# -----------------------------------------------------------------------------
+# Target file output related
+# -----------------------------------------------------------------------------
+
+def kdoc_comment(method, indent_chars):
+    kdoc_source = method.annotation()
+    if kdoc_source == "":
+        return ""
+
+    kdt = Xif.kdoc.parse_kdoc_comment(kdoc_source)
+
+    params = []
+    for a in method.args():
+        params.append(a.name())
+    for a in method.rargs():
+        params.append(a.name())
+
+    comment = "Pure-virtual function that needs to be implemented to:"
+
+    return kdt.output_kdoc(indent_chars, params, comment)
+
+def target_virtual_fns(methods):
+    r = ""
+    for x in methods:
+        kdoc_note = kdoc_comment(x, "    ")
+        if len(kdoc_note):
+            r += kdoc_note + "\n"
+        r += "    virtual XrlCmdError %s("% cpp_name(x.name())
+
+        # input args
+        args = []
+        if len(x.args()):
+            args.append("\n%s// Input values" % xorp_indent(2))
+
+        for a in x.args():
+            cpa = "\n%sconst %s&\t%s" % \
+                  (xorp_indent(2), a.cpp_type(), cpp_name(a.name()))
+            args.append(cpa)
+        
+        # output args
+
+        if len(x.rargs()):
+            args.append("\n%s// Output values" % xorp_indent(2))
+
+        for a in x.rargs():
+            cpa = "\n%s%s&\t%s" % \
+                  (xorp_indent(2), a.cpp_type(), cpp_name(a.name()))
+            args.append(cpa)
+        r += csv(args)
+
+        r += ") = 0;\n\n"
+    return r
+
+def target_declare_handlers(methods):
+    s = ""
+    for x in methods:
+        s += "    const XrlCmdError handle_%s(const Xrl& x, XrlArgs* a);\n\n" \
+             % cpp_name(x.name())
+    return s;
+
+def target_handler_hooks(cls, name, methods):
+    s = "    void add_handlers()\n    {\n"
+    for m in methods:
+        s += "\tif (_cmds->add_handler(\"%s\", " % m.name()
+        s += "\n%scallback(this, &%s::handle_%s)) == false) {\n" % \
+             (xorp_indent(3), cls, cpp_name(m.name()))
+        s += "\t    XLOG_ERROR(\"Failed to xrl handler finder://%s/%s\");\n\t}\n" % \
+              (name, m.name())
+    s += "\t_cmds->finalize();\n"
+    s += "    }\n\n"
+
+    s += "    void remove_handlers()\n    {\n"
+    for m in methods:
+        s += "\t_cmds->remove_handler(\"%s\");\n" % m.name()
+    s += "    }\n"
+    
+    return s;
+
+def target_handler_methods(cls, name, methods):
+    s = ""
+    for m in methods:
+        s += "const XrlCmdError\n"
+        if len(m.rargs()):
+            argarg = "args"
+        else:
+            argarg = "/* args */"	
+        s += "%s::handle_%s(const Xrl& xrl, XrlArgs* %s)\n" % \
+             (cls, cpp_name(m.name()), argarg)
+        s += "{"
+        s += """
+    if (xrl.const_args().size() != %d) { 
+	XLOG_ERROR(\"Wrong number of arguments (%%u != %d) handling %s\", (uint32_t)xrl.const_args().size());
+	return XrlCmdError::BAD_ARGS();
+    }
+""" % (len(m.args()), len(m.args()), m.name())
+
+        if len(m.rargs()):
+            s += """
+    if (args == 0) {
+	XLOG_FATAL(\"Return list empty\");
+	return XrlCmdError::BAD_ARGS();
+    }
+"""
+    	s += "\n    /* Return value declarations */\n"
+    	for r in m.rargs():
+            s += "    %s %s; \n" % (r.cpp_type(), cpp_name(r.name()))
+
+        s += xorp_indent(1) + "try {\n"
+        s += xorp_indent(2) + "XrlCmdError e = %s(" % cpp_name(m.name())
+        get_reqs = []
+        for a in m.args():
+            get_reqs.append("\n" + xorp_indent(3) + "xrl.const_args().%s(\"%s\")" % \
+                            (a.accessor(), a.name()))
+        ret_vals = []
+        for r in m.rargs():
+            ret_vals.append("\n" + xorp_indent(3) + "%s" % cpp_name(r.name()))
+        s += csv(get_reqs + ret_vals) + ");\n"
+
+        s += \
+"""	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING(\"Handling method for %s failed: %%s \\\"%%s\\\"\",
+            		 e.str().c_str(), e.note().c_str());
+	    return e;
+        }
+""" % m.name()
+
+    	s += \
+"""    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR(\"Argument not found\");
+	return XrlCmdError::BAD_ARGS();
+    }
+"""
+
+        if m.rargs():
+            s += "\n    /* Marshall return values */\n    try {\n"
+            for r in m.rargs():
+                s += xorp_indent(2) + "args->add(\"%s\", %s);\n" % \
+                     (r.name(), cpp_name(r.name()))
+            s += \
+"""    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+"""        
+
+        s += "    return XrlCmdError::OKAY();\n}\n\n"
+    return s
+
+def protect(file):
+    return "__XRL_INTERFACES_%s__" % file.upper().replace(".", "_")
+
+def prepare_target_hh(modulename, hh_file):
+    s   = Xif.util.standard_preamble(1, hh_file)
+    s  += \
+"""
+#ifndef %s
+#define %s
+
+#undef XORP_LIBRARY_NAME
+#define XORP_LIBRARY_NAME "%s"
+
+#include "libxorp/xlog.h"
+#include "libxipc/xrl_cmd_map.hh"
+""" % (protect(hh_file), protect(hh_file), modulename)
+    return s
+
+def output_target_hh(cls, tgt_name, tgt_version, methods):
+    s = """
+class %s {
+protected:
+    XrlCmdMap* _cmds;
+    
+public:
+    %s(XrlCmdMap* cmds) : _cmds(cmds) { add_handlers(); }
+    virtual ~%s() { remove_handlers(); }
+
+    inline const string& name() const { return _cmds->name(); }
+    inline const char* version() const { return "%s/%s"; }
+
+protected:
+
+""" % (cls, cls, cls, tgt_name, tgt_version)
+
+    s += target_virtual_fns(methods)
+    s += "private:\n"
+    s += target_declare_handlers(methods)
+    s += target_handler_hooks(cls, tgt_name, methods)
+
+    s += "};\n"
+
+    return s
+
+def finish_target_hh(hh_file):
+    return "\n#endif /* %s */\n" % protect(hh_file)
+
+def prepare_target_cc(target_hh, target_cc):
+    s = Xif.util.standard_preamble(0, target_cc)
+    s += "\n#include \"%s\"\n\n" % target_hh
+    return s
+
+def output_target_cc(cls, tgt_name, methods):
+    s = target_handler_methods(cls, tgt_name, methods)
+    return s
+
+def generate_target_methods(tgt, interfaces):
+    methods = []
+    # tgt.interfaces is a list of tuples ("interface_name", "interface_version")
+    # Convert this to a list of methods
+    for tif_info in tgt.interfaces():
+        found = 0
+        for tif in interfaces:
+            if (tif.name() == tif_info[0]) & (tif.version() == tif_info[1]):
+                found = 1
+                break
+        if found == 0:
+            print "Error interface %s data not found" % tif_info[0]
+            sys.exit(1)
+        for m in tif.methods():
+            full_name = Xif.util.xrl_method_name(tif.name(), tif.version(), m.name())
+            fq_method = m
+            fq_method.set_name(full_name)
+            methods.append(fq_method)
+    return methods
+
+
+def main():
+    # Command line arguments passed on to cpp
+    pipe_string = "cpp -C "
+    for a in sys.argv[1:]:
+	pipe_string += "%s " % a
+
+    cpp_pipe = os.popen(pipe_string, 'r')
+
+    xp = XifParser(cpp_pipe)
+
+    tgts = xp.targets()
+    if len(tgts) == 0:
+        print "Not targets found in input files."
+        sys.exit(1)
+
+    sourcefile = tgts[0].sourcefile()
+    for tgt in tgts:
+        if (tgt.sourcefile() != sourcefile):
+            print "Multiple .tgt files presented, expected just one."
+            sys.exit(1)
+
+    # basename transformation - this is a lame test
+    if sourcefile[-4:] != ".tgt":
+        print "Source file does not end in .tgt suffix - basename transform failure."
+        sys.exit(1)
+    basename = sourcefile[:-4]
+
+    modulename = "Xrl%sTarget" % cpp_classname(basename)
+    hh_file = "%s_base.hh" % basename
+    cc_file = "%s_base.cc" % basename
+    xrl_file = "%s.xrls" % basename
+
+    hh_txt  = prepare_target_hh(modulename, hh_file)
+    cc_txt  = prepare_target_cc(hh_file, cc_file)
+    xrl_txt = Xif.util.standard_preamble(1, xrl_file)
+
+    for tgt in tgts:
+        tgt_methods = generate_target_methods(tgt, xp.interfaces())
+        cls = "Xrl%sTargetBase" % cpp_classname(tgt.name())
+        hh_txt += output_target_hh(cls, tgt.name(), tgt.version(), tgt_methods)
+        hh_txt += finish_target_hh(hh_file) 
+        cc_txt += output_target_cc(cls, tgt.name(), tgt_methods)
+        xrl_txt += output_xrls(tgt.name(), tgt_methods)
+
+    Xif.util.file_write_string(hh_file, hh_txt)
+    Xif.util.file_write_string(cc_file, cc_txt)
+    Xif.util.file_write_string(xrl_file, xrl_txt)
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+

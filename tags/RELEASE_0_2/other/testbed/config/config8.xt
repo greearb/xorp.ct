@@ -1,0 +1,59 @@
+# $XORP: other/testbed/config/config8.xt,v 1.4 2003/02/07 03:12:08 pavlin Exp $
+#
+# Shared testbed configuration:
+#
+# xorp0 - Traffic generator. Shared use.
+# xorp1, xorp2, xorp3 and xorp4 - Multicast testing. Pavlin.
+# xorp6 - Traffic generator. Shared use.
+# xorp7 - Traffic sink. Shared use.
+#
+#	   -------------| |--------------
+#          |   --------xorp4--------	|
+#      	   |  /       /  /  \       \	|
+#      	   | /       /  /    \       \	|
+#          xorp6    /  /      \     xorp7
+#            \     /  /    /-- \ ----*
+#             \   /  /    /     \   /
+#            xorp1--*--xorp2-----xorp3
+#             /      \            /
+#            /        \----------/
+#          xorp0
+#
+# NOTE: if the above topology is changed, please apply those changes
+# to the corresponding config.fig file, and regenerate the Postscript figures:
+#     fig2dev -Lps config8.fig > config8.ps
+#     fig2dev -Leps config8.fig > config8.eps
+#
+
+#
+# Default kernel (non-SMP)
+kernel[/home/xorpc/u2/freebsd.kernels/kernel] = xorp0, xorp7
+
+#
+# Pavlin's FreeBSD multicast kernel
+kernel[/home/xorpc/u2/homes/pavlin/kernel] = xorp1, xorp2, xorp3, xorp6
+
+#
+# Pavlin's Linux multicast kernel
+kernel[/home/xorpc/u2/homes/pavlin/kernel.linux.xorp4] = xorp4
+
+# Designate xorp2 as the router
+router = xorp2
+
+vlan[net 10.1.0.0/24] = xorp0.t0[10.1.0.1], xorp1.t2[10.1.0.2]
+# XXX: temporary disable xorp3's connectivity to subnet 10.2.0.0/24
+# vlan[net 10.2.0.0/24] = xorp1.t0[10.2.0.1], xorp2.t1[10.2.0.2], xorp3.t3[10.2.0.3], xorp4.t6[10.2.0.4]
+vlan[net 10.2.0.0/24] = xorp1.t0[10.2.0.1], xorp2.t1[10.2.0.2], xorp4.t6[10.2.0.4]
+vlan[net 10.3.0.0/24] = xorp2.t0[10.3.0.1], xorp3.t2[10.3.0.2]
+# XXX: temporary disable xorp2's connectivity to subnet 10.4.0.0/24
+# vlan[net 10.4.0.0/24] = xorp3.t0[10.4.0.1], xorp7.t0[10.4.0.2], xorp2.t3[10.4.0.3]
+vlan[net 10.4.0.0/24] = xorp3.t0[10.4.0.1], xorp7.t0[10.4.0.2]
+vlan[net 10.5.0.0/24] = xorp6.t0[10.5.0.1], xorp4.t1[10.5.0.2]
+vlan[net 10.6.0.0/24] = xorp6.t1[10.6.0.1], xorp1.t3[10.6.0.2]
+vlan[net 10.7.0.0/24] = xorp4.t0[10.7.0.1], xorp7.t1[10.7.0.2]
+
+vlan[net 10.8.0.0/24] = xorp1.t1[10.8.0.1], xorp4.t2[10.8.0.2]
+vlan[net 10.9.0.0/24] = xorp3.t1[10.9.0.1], xorp4.t3[10.9.0.2]
+
+vlan[net 10.10.0.0/24] = xorp4.t4[10.10.0.1], xorp6.t2[10.10.0.2]
+vlan[net 10.11.0.0/24] = xorp4.t5[10.11.0.1], xorp7.t2[10.11.0.2]

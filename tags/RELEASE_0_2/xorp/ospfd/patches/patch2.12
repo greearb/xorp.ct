@@ -1,0 +1,127 @@
+diff -X exclude_files -Nabur ospfd2.11/linux/ospfd_linux.C ospfd2.12/linux/ospfd_linux.C
+--- ospfd2.11/linux/ospfd_linux.C	Thu Nov  8 11:19:37 2001
++++ ospfd2.12/linux/ospfd_linux.C	Thu Nov 15 13:04:46 2001
+@@ -270,6 +270,7 @@
+     int plen;
+     unsigned int fromlen;
+     nlmsghdr *msg;
++    BSDPhyInt *phyp;
+ 
+     plen = recvfrom(fd, buffer, sizeof(buffer), 0, 0, &fromlen);
+     if (plen <= 0) {
+@@ -315,6 +316,11 @@
+ 		}
+ 	    }
+ 	    syslog(LOG_NOTICE, "Interface addr change %s", inet_ntoa(in));
++	    if (msg->nlmsg_type == RTM_DELADDR &&
++	        (phyp = (BSDPhyInt *) phyints.find(ifm->ifa_index, 0)) &&
++		!(ifm->ifa_flags & IFA_F_SECONDARY)) {
++	        set_flags(phyp, phyp->flags & ~IFF_UP);
++	    }
+ 	    read_config();
+ 	    break;
+           case RTM_NEWROUTE:
+@@ -624,6 +630,8 @@
+     int blen;
+     AVLsearch iter(&directs);
+     DirectRoute *rte;
++    AVLsearch iter2(&phyints);
++    BSDPhyInt *phyp;
+ 
+     blen = MAXIFs*sizeof(ifreq);
+     ifcbuf = new char[blen];
+@@ -642,11 +650,14 @@
+     interface_map.clear();
+     while ((rte = (DirectRoute *)iter.next()))
+         rte->valid = false;
++    while((phyp = (BSDPhyInt *)iter2.next())) {
++        phyp->addr = 0;
++	phyp->mask = 0;
++    }
+ 
+     ifrp = (ifreq *) ifcbuf;
+     end = (ifreq *)(ifcbuf + cfgreq.ifc_len);
+     for (; ifrp < end; ifrp = (ifreq *)(((byte *)ifrp) + size)) {
+-	BSDPhyInt *phyp;
+ 	ifreq ifr;
+ 	sockaddr_in *insock;
+ 	InAddr addr;
+@@ -654,6 +665,8 @@
+ 	size = sizeof(InAddr) + sizeof(ifrp->ifr_name);
+ 	if (size < sizeof(ifreq))
+ 	    size = sizeof(ifreq);
++	if (ifrp->ifr_addr.sa_family != AF_INET)
++	    continue;
+ 	// Get interface flags
+ 	short ifflags;
+ 	memcpy(ifr.ifr_name, ifrp->ifr_name, sizeof(ifr.ifr_name));
+@@ -707,17 +720,18 @@
+ 	// store address information; real IP interfaces only
+ 	// Allow loopback interfaces; just not 127.x.x.x addresses
+ 	insock = (sockaddr_in *) &ifrp->ifr_addr;
+-	if (phyp->tunl ||
+-	    ifrp->ifr_addr.sa_family != AF_INET ||
+-	    (ntoh32(insock->sin_addr.s_addr) & 0xff000000) == 0x7f000000)
++	if ((ntoh32(insock->sin_addr.s_addr) & 0xff000000) == 0x7f000000)
+ 	    continue;
+-	addr = phyp->addr = ntoh32(insock->sin_addr.s_addr);
++	addr = ntoh32(insock->sin_addr.s_addr);
+ 	// Get subnet mask
+ 	if (ioctl(udpfd, SIOCGIFNETMASK, (char *)&ifr) < 0) {
+ 	    syslog(LOG_ERR, "SIOCGIFNETMASK Failed: %m");
+ 	    exit(1);
+ 	}
+ 	insock = (sockaddr_in *) &ifr.ifr_addr;
++	if (phyp->tunl && ntoh32(insock->sin_addr.s_addr) == 0xffffffff)
++	    continue;
++	phyp->addr = addr;
+ 	phyp->mask = ntoh32(insock->sin_addr.s_addr);
+ 	add_direct(phyp, addr, phyp->mask);
+ 	add_direct(phyp, addr, 0xffffffffL);
+diff -X exclude_files -Nabur ospfd2.11/src/ospf.h ospfd2.12/src/ospf.h
+--- ospfd2.11/src/ospf.h	Thu Nov  8 11:19:37 2001
++++ ospfd2.12/src/ospf.h	Thu Nov 15 13:04:46 2001
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 11,	// Minor version number
++	vminor = 12,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.11/src/rtrlsa.C ospfd2.12/src/rtrlsa.C
+--- ospfd2.11/src/rtrlsa.C	Thu Nov  8 11:19:37 2001
++++ ospfd2.12/src/rtrlsa.C	Thu Nov 15 13:04:46 2001
+@@ -107,6 +107,13 @@
+     return(2 * sizeof(RtrLink));
+ }
+ 
++/* How we advertise a point-to-point link's addresses depends
++ * on the interface mask. If set to all ones (0xffffffff) or 0, we
++ * do the traditional thing of advertising the neighbor's
++ * address. If instead the mask is set to something else, we
++ * advertise a route to the entire subnet.
++ */
++
+ RtrLink *PPIfc::rl_insert(RTRhdr *rtrhdr, RtrLink *rlp)
+ 
+ {
+@@ -134,9 +141,16 @@
+ 
+   adv_stub: // Advertise stub link to neighbor's IP address
+ 
+-    if (state() == IFS_PP && !unnumbered() && np) {
++    if (state() == IFS_PP && !unnumbered() &&
++	(np || (if_mask != 0xffffffffL && if_mask != 0))) {
++        if (if_mask != 0xffffffffL && if_mask != 0) {
++	    rlp->link_id = hton32(if_net);
++	    rlp->link_data = hton32(if_mask);
++	}
++	else {
+ 	rlp->link_id = hton32(np->addr());
+ 	rlp->link_data = hton32(0xffffffffL);
++	}
+ 	rlp->link_type = LT_STUB;
+ 	rlp->n_tos = 0;
+ 	rlp->metric = hton16(if_cost);

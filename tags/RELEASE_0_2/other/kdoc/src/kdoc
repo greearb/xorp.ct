@@ -1,0 +1,287 @@
+#!/usr/local/bin/perl
+
+# KDOC -- C++ and CORBA IDL interface documentation tool.
+# Sirtaj Singh Kang <taj@kde.org>, Jan 1999.
+# $Id$
+
+# All files in this project are distributed under the GNU General
+# Public License. This is Free Software.
+
+require 5.6.0;
+
+use Carp;
+use Getopt::Long;
+use File::Basename;
+use strict;
+
+use Ast;
+
+use kdocUtil;
+use kdocAstUtil;
+use kdocParser;
+
+use vars qw/ 
+ $Version $cSourceNode $currentfile $debug $defcppcmd $doPrivate
+ $exe $inExtern $includeclasses $libdir $libname $liboutdir $outputdir
+ $parseonly $quiet $readstdin $skipInternal %flagnames %formats %options
+ %stats @formats_wanted @includeclasses @libdirs @libs $currfile
+/;
+     
+## globals
+
+# All options
+
+%options = ();				# hash of options (set getopt below)
+@formats_wanted = ();
+$libdir = $ENV{KDOCLIBS};
+$libname = "";
+$outputdir = ".";
+@libs = ();				# list of includes
+@libdirs = ();
+
+@includeclasses = ();                     # names of classes to include
+$includeclasses = "";
+
+$doPrivate = 0;
+$Version = "$Version\$";
+
+$quiet = 0;
+$debug = 0;
+$parseonly = 0;
+
+$defcppcmd = "g++ -Wp,-C -E";
+
+$exe = basename $0;
+
+# Supported formats
+%formats = ( "html" => "kdocCxxHTML", "latex" => "kdocCxxLaTeX",
+	"texinfo" => "kdoctexi", "docbook" => "kdocCxxDocbook",
+	"check" => "kdocDocHelper", "idlhtml" => "kdocIDLhtml",
+	"man" => "kdocMan" );
+
+# these are for expansion of method flags
+%flagnames = ( v => 'virtual', 's' => 'static', p => 'pure',
+	c => 'const', l => 'slot', i => 'inline', n => 'signal',
+	e => "" );
+	
+
+=head1 KDOC -- Source documentation tool 
+
+	Sirtaj Singh Kang <taj@kde.org>, Dec 1998.
+
+=cut
+
+# read options
+
+Getopt::Long::config qw( no_ignore_case permute bundling auto_abbrev );
+
+GetOptions( \%options,
+	"format|f=s", \@formats_wanted,
+	"url|u=s",
+	"skip-internal", \$skipInternal,
+	"skip-deprecated|e", 
+	"document-all|a",
+	"compress|z",
+
+	# HTML options
+	"html-cols=i",
+	"html-logo=s",
+	"html-css=s",
+	
+	"strip-h-path",	\$kdocParser::striphpath,
+	"outputdir|d=s", \$outputdir,
+	"stdin|i",	\$readstdin,
+	"name|n=s",	\$libname,
+	"help|h", 	\&show_usage,
+	"version|v|V", 	\&show_version,
+	"private|p",	\$doPrivate,
+	"libdir|L=s",	\@libdirs, 
+	"liboutdir|N=s", \$liboutdir,
+	"xref|l=s",	\@libs,
+	"classes|c=s",    \@includeclasses,
+	
+	"cpp|P",	\$kdocParser::cpp,
+	"docincluded",  \$kdocParser::docincluded,
+	"cppcmd|C=s",	\$kdocParser::cppcmd,
+	"includedir|I=s", \@kdocParser::includes,
+
+	"quiet|q",	\$quiet,
+	"debug|D",	\$debug,
+	"parse-only",	\$parseonly )
+		|| exit 1;
+
+$| = 1 if $debug;
+
+# preprocessor settings
+
+if ( $kdocParser::cppcmd eq "" ) {
+	$kdocParser::cppcmd = $defcppcmd;
+}
+else {
+	$kdocParser::cpp = 1;
+}
+
+if ($#includeclasses>=0)
+{
+    $includeclasses = join (" ", @includeclasses). " ";
+    $includeclasses =~ s/=/ /g;
+    print STDERR "Using Classes: $includeclasses\n"; # unless $quiet;
+}
+
+if ( $#kdocParser::includes >= 0 && !$kdocParser::cpp ) {
+	die "$exe: --includedir requires --cpp\n";
+}
+
+# Check output formats. HTML is the default
+if( $#formats_wanted < 0 ) {
+	push @formats_wanted, "html";
+}
+
+foreach my $format ( @formats_wanted ) {
+	die "$exe: unsupported format '$format'.\n" 
+		if !defined $formats{$format};
+}
+
+# Check if there any files to process.
+# We do it here to prevent the libraries being loaded up first.
+
+checkFileArgs();
+
+# work out libdir. This is created by kdocLib:writeDoc when
+# required.
+if( $#libdirs < 0 ) {
+	$libdir = $ENV{HOME}."/.kdoc" unless $libdir ne "";
+	$liboutdir = $libdir unless $liboutdir ne "";
+
+	push @libdirs, $libdir;
+}
+else {
+	$liboutdir = $libdirs[0] unless $liboutdir ne "";
+}
+
+
+######
+###### main program
+######
+	readLibraries();
+	my $roots = kdocParser::parseFiles($includeclasses);
+
+	if ( $parseonly ) {
+		print "\n\tParse Tree\n\t------------\n\n";
+		foreach my $root ( keys %$roots  ){
+			kdocAstUtil::dumpAst( $root );
+		}
+	}
+	else {
+		writeDocumentation( $roots );
+		writeLibrary() unless $libname eq "";
+	}
+
+	#	kdocAstUtil::printDebugStats() if $debug;
+
+	exit 0;
+######
+
+sub checkFileArgs
+{
+	return unless $#ARGV < 0;
+
+	die "$exe: no input files.\n" unless $readstdin;
+
+	# read filenames from standard input
+    	while (<STDIN>) {
+		chop;
+		$_ =~ s,\\,/,g;	# back to fwd slash (for Windows)
+		foreach my $file ( split( /\s+/, $_ ) ) {
+			push @ARGV, $file;
+		}
+	}
+}
+
+sub readLibraries
+{
+	return if $#libs < 0;
+
+	require kdocLib;
+	foreach my $lib ( @libs ) {
+		print "$exe: reading lib: $lib\n" unless $quiet;
+
+		my $relpath = exists $options{url} ?  $options{url} : $outputdir;
+		kdocLib::readLibrary( \&kdocParser::getRoot, $lib, \@libdirs, $relpath );
+	}
+}
+
+
+sub writeDocumentation
+{
+	my $roots = shift;
+
+	foreach my $node ( values %$roots ) {
+		# postprocess
+		print STDERR "postprocessing...\n" if $debug;
+		kdocAstUtil::linkNamespaces( $node );
+		kdocAstUtil::makeInherit( $node, $node );
+		kdocAstUtil::linkReferences( $node, $node );
+		kdocAstUtil::linkGlobalsToSources( $node, $node );
+		kdocAstUtil::calcStats( \%stats, $node, $node );
+
+		# write
+		no strict "refs";
+		foreach my $format ( @formats_wanted ) {
+			my $pack = $formats{ $format };
+			require $pack.".pm";
+
+			print "Generating documentation in $format ",
+				"format...\n" unless $quiet;
+
+			my $f = "$pack\::writeDoc";
+			&$f( $libname, $node, $outputdir, \%options );
+		}
+	}
+}
+
+sub writeLibrary
+{
+	return if $libname eq "";
+
+	require kdocLib;
+	my $roots = kdocParser::allRoots();
+	foreach my $lang ( keys %$roots ) {
+		my $node = $roots->{ $lang };
+		kdocLib::writeDoc( $libname, $node, $lang, $liboutdir,
+				$outputdir, $options{url},
+				exists $options{compress} ? 1 : 0 );
+	}
+}
+
+
+=head2 show_usage
+
+	Display usage information and quit.
+
+=cut
+
+sub show_usage
+{
+print<<EOF;
+usage:
+	$exe [options] [-f format] [-d outdir] [-n name] files... [-llib..]
+
+See the man page kdoc[1] for more info.
+EOF
+	exit 1;
+}
+
+
+=head2 show_version
+
+	Display short version information and quit.
+
+=cut
+
+sub show_version
+{
+	die "$exe: $Version (c) Sirtaj S. Kang <taj\@kde.org>\n";
+}
+
+

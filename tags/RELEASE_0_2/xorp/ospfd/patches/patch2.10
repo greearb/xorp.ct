@@ -1,0 +1,39 @@
+diff -X exclude_files -Nabur ospfd2.9/linux/system.C ospfd2.10/linux/system.C
+--- ospfd2.9/linux/system.C	Fri Oct 26 15:00:37 2001
++++ ospfd2.10/linux/system.C	Wed Oct 31 09:48:27 2001
+@@ -502,6 +502,7 @@
+     rtm->rtm_family = AF_INET;
+     rtm->rtm_dst_len = prefix_length;
+     rtm->rtm_src_len = 0;
++    rtm->rtm_tos = 0;
+     rtm->rtm_table = 0;
+     rtm->rtm_protocol = PROT_OSPF;
+     rtm->rtm_scope = RT_SCOPE_UNIVERSE;
+@@ -582,6 +583,7 @@
+     rtm->rtm_family = AF_INET;
+     rtm->rtm_dst_len = prefix_length;
+     rtm->rtm_src_len = 0;
++    rtm->rtm_tos = 0;
+     rtm->rtm_table = 0;
+     rtm->rtm_protocol = PROT_OSPF;
+     rtm->rtm_scope = RT_SCOPE_UNIVERSE;
+@@ -631,6 +633,7 @@
+     rtm->rtm_family = AF_INET;
+     rtm->rtm_dst_len = 0;
+     rtm->rtm_src_len = 0;
++    rtm->rtm_tos = 0;
+     rtm->rtm_table = 0;
+     rtm->rtm_protocol = PROT_OSPF;
+     rtm->rtm_scope = RT_SCOPE_UNIVERSE;
+diff -X exclude_files -Nabur ospfd2.9/src/ospf.h ospfd2.10/src/ospf.h
+--- ospfd2.9/src/ospf.h	Fri Oct 26 15:00:36 2001
++++ ospfd2.10/src/ospf.h	Wed Oct 31 09:48:26 2001
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 9,	// Minor version number
++	vminor = 10,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code

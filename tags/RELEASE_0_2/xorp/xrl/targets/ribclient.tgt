@@ -1,0 +1,5 @@
+/* $XORP: xorp/xrl/targets/ribclient.tgt,v 1.1 2002/09/24 18:58:04 mjh Exp $ */
+
+#include "rib_client.xif"
+
+target ribclient implements rib_client/0.1

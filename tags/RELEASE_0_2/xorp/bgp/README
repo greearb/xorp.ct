@@ -1,0 +1,58 @@
+#
+# $XORP: xorp/bgp/README,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+#
+
+Border Gateway Protocol (BGP) Implementation
+============================================
+
+This directory contains the XORP implementation of the BGP protocol.
+
+Configuration
+=============
+
+BGP like most Xorp processes does not take its configuration
+parameters from the command line. Its parameters are provided via
+XRLs. At the very least a BGP process must be provided with its AS
+number and its ID.
+
+Startup
+=======
+
+In normal operation, bgp would be started by the XORP router manager
+process, not directly from the command line.  
+
+For testing and debugging purposes, BGP can be manually started.  The
+Xorp BGP process assumes that a number of programs will be running
+before it is started:
+
+../libxipc/finder (or rtrmgr which includes a finder)
+../rib/rib
+../fea/fea
+
+Structure
+=========
+
+The structure of the BGP code is described in ../docs/bgp/bgp.ps
+
+Testing
+=======
+
+As with most XORP processes, running "gmake check" in the bgp
+directory will run a set of validation checks.  Any new functionality
+committed to bgp must come with it's own set of validation checks.
+
+Status
+======
+
+March 2003: The core functionality of BGP is basically complete.  We
+have a reasonable number of test suites available, but nowhere near
+enough to be sure of correct operation in all cases.  Pretty much no
+optional functionality is supported:
+
+- No user-configurable filters are supported (but the internal code to
+  hold and apply filters is operational).
+- Confederations are not supported.
+- Route Reflection is not supported.
+- IPv6 is not supported (although most of the internal code is v6 capable).
+- Route import from IGPs is not supported.
+

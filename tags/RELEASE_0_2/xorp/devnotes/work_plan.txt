@@ -1,0 +1,85 @@
+#
+# $XORP: xorp/devnotes/WORKPLAN,v 1.2 2003/01/15 00:31:34 pavlin Exp $
+#
+
+Priority:
+ - H (High)
+ - M (Medium)
+ - L (Low)
+ - Defer (Deferred)
+Who:
+ - AG (Atanu Ghosh)
+ - MH (Mark Handley)
+ - OH (Orion Hodson)
+ - PR (Pavlin Radoslavov)
+ - LR (Luigi Rizzo)
+
+================================ BGP =========================================
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+* Finish Kdoc'ing BGP                                   M	as needed
+* Integration tests 					H	AG
+* Filter to add and remove MEDs on EBGP peerings        H	MH
+* IPv6 support						L	AG
+* Handle unrecognized optional transitive attributes	H	MH
+* Test harness vs Cisco and Zebra to validate tests     L	AG
+* Monitoring/Instrumentation (show ip bgp, MIB)		H	AG + MH
+* Filters						M	??
+   - which user-specified filters?	
+   - how to do user configuration?
+   - how to handle filter changes?
+* Originating routes					M	AG
+* Handling routes redistributed from IGPs.		M	AG + MH
+* Implement MinRouteAdvertisementInterval		M	??
+
+The list above is the intended functionality for a 1.0 release of Xorp BGP
+
+Longer Term tasks
+-----------------
+* Communities
+* Route flap damping
+* Optionally not storing RIB-IN
+* Confederations
+* Route Reflector
+* Route Refresh
+* TCP MD5
+
+================================ Multicast ===================================
+
+Immediate Tasks                                       Priority Who  Time
+---------------                                       -------- ---  ----
+* Finish PIM testing (manual)				H	PR  < 1 month
+* Testing of IGMPv1,2 (manual)				H	PR  1 weeks
+* RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
+* Commit PIM patches to FreeBSD				H       PR+LR Jan 2003
+* Framework for regression tests for multicast		H-M	PR+other 1 m
+* FEA and MFEA merging					M	PR  2w - 1m
+* Integration of PIM/MLD/MFEA and RTRMGR		M	PR  2 weeks
+* IPv6 support and tests for PIM/MLD/MFEA		M	PR  1-1.5m
+  - Initial support: e.g. no scoping
+* Finish Kdoc'ing PIM, MLD6IGMP, MFEA			M	PR  background
+* IGMPv3 and MLDv2 implementation			L	PR+other 1-2m
+* PIM-SSM support					L	PR  1 week
+
+Longer Term tasks
+-----------------
+* Bidir-PIM implementation				Wish	PR  1.5-3m
+* Implement multicast support for Click			Wish	PR  2-3 months
+
+================================ Other =======================================
+* Simulation-like environment for running XORP		H Defer	PR  3-6 months
+* Rewrite CLI						L	PR  2-3 weeks
+
+================================ Next Release ================================
+* Next release (xorp-0.2): February 27, 2003
+  - Add file with release notes (to xorp repository and Web page)
+  - Update current status web page
+  - gcc-3.x support
+  - new XRL finder
+  - Complete PIM-SM testing
+  - Complete IGMPv1,2 testing (if time)
+  - More Kdoc-ing of PIM-SM and IGMP (if time)
+  - Kdoc BGP
+  - Read the documentation and make sure it is consistent with the code;
+    if necessary, edit it as appropriate.
