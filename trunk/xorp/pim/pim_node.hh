@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.34 2004/03/04 01:46:37 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.35 2004/04/29 23:39:28 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -635,20 +635,6 @@ public:
      */
     int		delete_membership(uint16_t vif_index, const IPvX& source,
 				  const IPvX& group);
-    
-    /**
-     * Add an entry to the MRIB table (@ref MribTable).
-     * 
-     * @param mrib the @ref Mrib entry to add.
-     */
-    void add_mrib_entry(const Mrib& mrib) { _pim_mrib_table.insert(mrib); }
-    
-    /**
-     * Delete an entry from the MRIB table (@ref MribTable).
-     * 
-     * @param mrib the @ref Mrib entry to delete.
-     */
-    void delete_mrib_entry(const Mrib& mrib) { _pim_mrib_table.remove(mrib); }
     
     /**
      * Test if an address is directly connected to a specified virtual
