@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.23 2003/09/30 18:27:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.24 2003/09/30 18:42:40 pavlin Exp $"
 
 
 //
@@ -1805,7 +1805,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
     return (false);
     
  bsr_zone_state_no_info_label:
-    // No Info state
+    // NoInfo state
     // -> AP state
     set_bsr_zone_state(BsrZone::STATE_ACCEPT_PREFERRED);
     // Forward BSM  : will happen in the parent function
@@ -2113,7 +2113,7 @@ BsrZone::scope_zone_expiry_timer_timeout()
     return;
     
  bsr_zone_state_accept_any_label:
-    // No Info state
+    // NoInfo state
     set_bsr_zone_state(BsrZone::STATE_NO_INFO);
     // Cancel timers
     // Clear state
