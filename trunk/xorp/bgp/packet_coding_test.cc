@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.10 2003/01/26 04:06:17 pavlin Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.11 2003/01/28 19:15:17 rizzo Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -23,7 +23,7 @@ int test_simple_open_packet()
        pretend to receive it, and check that what we sent is what we
        received */
     // XXX is the compiler confused here ???
-    AsNum as666((uint16_t)666);
+    AsNum as666(666);
     OpenPacket openpacket(as666, IPv4("1.2.3.4"), 1234);
 
     const uint8_t *buf;
@@ -47,7 +47,7 @@ int test_simple_open_packet()
 
     //check the information we put in came out again OK.
     assert(receivedpacket.HoldTime() == 1234);
-    assert(receivedpacket.AutonomousSystemNumber() == AsNum((uint16_t)666));
+    assert(receivedpacket.AutonomousSystemNumber() == AsNum(666));
     assert(receivedpacket.BGPIdentifier() == IPv4("1.2.3.4"));
     assert(receivedpacket.Version() == 4);
 
@@ -244,7 +244,7 @@ int test_announce_packet(bool verbose)
     AsNum *as[13];
     int i;
     for (i=0;i<=9;i++) {
-	as[i] = new AsNum((uint16_t)i);
+	as[i] = new AsNum(i);
     }
     AsSegment seq1 = AsSegment(AS_SEQUENCE);
     seq1.add_as(*(as[1]));
@@ -280,7 +280,7 @@ int test_announce_packet(bool verbose)
     AtomicAggAttribute atomic_agg_att;
     palist.add_path_attribute(atomic_agg_att);
 
-    AggregatorAttribute agg_att(IPv4("20.20.20.2"), AsNum((uint16_t)701));
+    AggregatorAttribute agg_att(IPv4("20.20.20.2"), AsNum(701));
     palist.add_path_attribute(agg_att);
 
     CommunityAttribute com_att;
@@ -397,7 +397,7 @@ int test_announce_packet(bool verbose)
 	    const AggregatorAttribute *aa = 
 		(const AggregatorAttribute *)pa;
 	    assert(aa->route_aggregator() == IPv4("20.20.20.2"));
-	    assert(aa->aggregator_as() == AsNum((uint16_t)701));
+	    assert(aa->aggregator_as() == AsNum(701));
 	    if (verbose) printf("%s\n", pa->str().c_str());
 	    break;
 	}

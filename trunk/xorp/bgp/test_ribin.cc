@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.5 2002/12/17 22:06:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.6 2003/01/17 03:50:48 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -68,15 +68,15 @@ int main(int, char** argv) {
     OriginAttribute igp_origin_att(IGP);
 
     AsPath aspath1;
-    aspath1.add_AS_in_sequence(AsNum((uint16_t)1));
-    aspath1.add_AS_in_sequence(AsNum((uint16_t)2));
-    aspath1.add_AS_in_sequence(AsNum((uint16_t)3));
+    aspath1.add_AS_in_sequence(AsNum(1));
+    aspath1.add_AS_in_sequence(AsNum(2));
+    aspath1.add_AS_in_sequence(AsNum(3));
     ASPathAttribute aspathatt1(aspath1);
 
     AsPath aspath2;
-    aspath2.add_AS_in_sequence(AsNum((uint16_t)3));
-    aspath2.add_AS_in_sequence(AsNum((uint16_t)4));
-    aspath2.add_AS_in_sequence(AsNum((uint16_t)5));
+    aspath2.add_AS_in_sequence(AsNum(3));
+    aspath2.add_AS_in_sequence(AsNum(4));
+    aspath2.add_AS_in_sequence(AsNum(5));
     ASPathAttribute aspathatt2(aspath2);
 
     PathAttributeList<IPv4>* palist1 =

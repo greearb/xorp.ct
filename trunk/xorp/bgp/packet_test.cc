@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.7 2003/01/26 17:03:18 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_test.cc,v 1.8 2003/01/28 19:15:17 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -242,11 +242,11 @@ UpdatePacket* BGPTestPacket::create_update()
     AsSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
     debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
-    as_seq.add_as(AsNum((uint16_t)12));
+    as_seq.add_as(AsNum(12));
     debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
-    as_seq.add_as(AsNum((uint16_t)13));
+    as_seq.add_as(AsNum(13));
     debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
-    as_seq.add_as(AsNum((uint16_t)14));
+    as_seq.add_as(AsNum(14));
     AsPath p;
     p.add_segment(as_seq);
     debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
@@ -283,7 +283,7 @@ OpenPacket* BGPTestPacket::create_open()
     //ld->add_parameter(p);
     //ld->add_parameter(p2);
 
-    OpenPacket* op = new OpenPacket(AsNum((uint16_t)1234),
+    OpenPacket* op = new OpenPacket(AsNum(1234),
 					  IPv4("192.168.1.1"),
 					  20 /* holdtime */);
 	
@@ -298,9 +298,9 @@ NotificationPacket* BGPTestPacket::create_notification()
 
 bool BGPTestPacket::test_aspath()
 {
-    AsNum* asnum1 = new AsNum((uint16_t)16);
-    AsNum* asnum2 = new AsNum((uint16_t)16);
-    AsNum* asnum3 = new AsNum((uint16_t)17); 
+    AsNum* asnum1 = new AsNum(16);
+    AsNum* asnum2 = new AsNum(16);
+    AsNum* asnum3 = new AsNum(17); 
     AsNum* asnum4 = new AsNum((uint32_t)16);
     AsNum* asnum5 = new AsNum((uint32_t)16);
 

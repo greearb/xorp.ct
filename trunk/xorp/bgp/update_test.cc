@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_test.cc,v 1.2 2002/12/13 22:38:55 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_test.cc,v 1.3 2003/01/22 02:46:35 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -41,7 +41,7 @@ test1(unsigned int as_size)
 {
     AsSegment seq1 = AsSegment(AS_SEQUENCE);
     for (unsigned int i = 0; i < as_size; i++)
-	seq1.add_as(AsNum((uint16_t)10));
+	seq1.add_as(AsNum(10));
 
     size_t len;
     const uint8_t *d = seq1._encode(len);

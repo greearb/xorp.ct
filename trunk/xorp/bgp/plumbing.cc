@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.6 2003/01/17 03:50:48 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.7 2003/01/25 02:10:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,7 +30,7 @@ BGPPlumbing::BGPPlumbing(XrlStdRouter *xrl_router, RibIpcHandler* ribhandler)
     : _rib_handler(ribhandler), 
     _v4_plumbing("IPv4", *this, xrl_router), 
     _v6_plumbing("IPv6", *this, xrl_router),
-    _my_AS_number((uint16_t)0)
+    _my_AS_number(AsNum::AS_INVALID)
 {
     /*most of the interesting stuff happens in the address-family
       specific code */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.5 2003/01/24 22:14:44 rizzo Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.6 2003/01/28 19:15:17 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -25,9 +25,9 @@ extern void dump_bytes(const uint8_t *d, size_t l);
 
 OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
     // XXX assigning dummy value is bad practice
-    : _AutonomousSystemNumber((uint16_t)0)
+    : _AutonomousSystemNumber(AsNum::AS_INVALID)
 {
-    debug_msg("OpenPacket(char, uint16_t) constructor called\n");
+    debug_msg("OpenPacket(const uint8_t *, uint16_t) constructor called\n");
     _Length = l;
     _Type = MESSAGETYPEOPEN;
 

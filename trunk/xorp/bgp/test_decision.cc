@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.4 2002/12/16 04:05:14 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.5 2002/12/17 22:06:06 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -45,7 +45,7 @@ int main(int, char** argv) {
 
     Iptuple iptuple1("3.0.0.127", 179, "2.0.0.1", 179);
     BGPPeerData *peer_data1 =
-	new BGPPeerData(iptuple1, AsNum((uint16_t)1), IPv4("2.0.0.1"), 30);
+	new BGPPeerData(iptuple1, AsNum(1), IPv4("2.0.0.1"), 30);
     // start off with both being IBGP
     peer_data1->set_internal_peer(true);
     peer_data1->set_id("2.0.0.0");
@@ -54,7 +54,7 @@ int main(int, char** argv) {
 
     Iptuple iptuple2("3.0.0.127", 179, "2.0.0.2", 179);
     BGPPeerData *peer_data2 =
-	new BGPPeerData(iptuple2, AsNum((uint16_t)1), IPv4("2.0.0.2"), 30);
+	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.2"), 30);
     // start off with both being IBGP
     peer_data2->set_internal_peer(true);
     peer_data2->set_id("2.0.0.0");
@@ -63,7 +63,7 @@ int main(int, char** argv) {
 
     Iptuple iptuple3("3.0.0.127", 179, "2.0.0.3", 179);
     BGPPeerData *peer_data3 =
-	new BGPPeerData(iptuple2, AsNum((uint16_t)1), IPv4("2.0.0.3"), 30);
+	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.3"), 30);
     // start off with both being IBGP
     peer_data3->set_internal_peer(true);
     peer_data3->set_id("2.0.0.0");
@@ -120,22 +120,22 @@ int main(int, char** argv) {
     OriginAttribute incomplete_origin_att(INCOMPLETE);
 
     AsPath aspath1;
-    aspath1.add_AS_in_sequence(AsNum((uint16_t)1));
-    aspath1.add_AS_in_sequence(AsNum((uint16_t)2));
-    aspath1.add_AS_in_sequence(AsNum((uint16_t)3));
+    aspath1.add_AS_in_sequence(AsNum(1));
+    aspath1.add_AS_in_sequence(AsNum(2));
+    aspath1.add_AS_in_sequence(AsNum(3));
     ASPathAttribute aspathatt1(aspath1);
 
     AsPath aspath2;
-    aspath2.add_AS_in_sequence(AsNum((uint16_t)4));
-    aspath2.add_AS_in_sequence(AsNum((uint16_t)5));
-    aspath2.add_AS_in_sequence(AsNum((uint16_t)6));
-    aspath2.add_AS_in_sequence(AsNum((uint16_t)6));
+    aspath2.add_AS_in_sequence(AsNum(4));
+    aspath2.add_AS_in_sequence(AsNum(5));
+    aspath2.add_AS_in_sequence(AsNum(6));
+    aspath2.add_AS_in_sequence(AsNum(6));
     ASPathAttribute aspathatt2(aspath2);
 
     AsPath aspath3;
-    aspath3.add_AS_in_sequence(AsNum((uint16_t)7));
-    aspath3.add_AS_in_sequence(AsNum((uint16_t)8));
-    aspath3.add_AS_in_sequence(AsNum((uint16_t)9));
+    aspath3.add_AS_in_sequence(AsNum(7));
+    aspath3.add_AS_in_sequence(AsNum(8));
+    aspath3.add_AS_in_sequence(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
     PathAttributeList<IPv4>* palist1 =
@@ -2099,7 +2099,7 @@ int main(int, char** argv) {
     next_hop_resolver.set_nexthop_metric(nexthop1, 200);
     next_hop_resolver.set_nexthop_metric(nexthop3, 100);
     peer_data2->set_internal_peer(false);
-    peer_data2->set_as_num(AsNum((uint16_t)9));
+    peer_data2->set_as_num(AsNum(9));
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 13");
     debug_table->write_comment("TEST OF IBGP vs EBGP");

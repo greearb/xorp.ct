@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.4 2003/01/26 17:03:18 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.5 2003/01/28 03:21:52 rizzo Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -35,7 +35,7 @@ main(int argc, char* argv[])
     AsNum *as[13];
     int i;
     for (i=0;i<=9;i++) {
-	as[i] = new AsNum((uint16_t)i);
+	as[i] = new AsNum(i);
     }
     AsSegment seq1 = AsSegment(AS_SEQUENCE);
     seq1.add_as(*(as[1]));
@@ -72,7 +72,7 @@ main(int argc, char* argv[])
 
     AsNum *asn;
     for (i=1;i<=9;i++) {
-	asn = new AsNum((uint16_t)i);
+	asn = new AsNum(i);
 	assert(aspathcopy->contains(*asn) == true);
 	delete asn;
     }
@@ -82,14 +82,14 @@ main(int argc, char* argv[])
 
     if (verbose) 
 	printf("Testing add_As_in_sequence - adding to existing sequence\n");
-    asn = new AsNum((uint16_t)65000);
+    asn = new AsNum(65000);
     aspathcopy->add_AS_in_sequence(*asn);
     if (verbose) printf("Extended: %s\n", aspathcopy->str().c_str());
     assert(aspathcopy->contains(*asn) == true);
     delete asn;
 
     for (i=10;i<=12;i++) {
-	as[i] = new AsNum((uint16_t)i);
+	as[i] = new AsNum(i);
     }
     AsSegment set2 = AsSegment(AS_SET);
     set2.add_as(*(as[10]));
@@ -102,7 +102,7 @@ main(int argc, char* argv[])
     aspath->add_segment(seq1);
     if (verbose) 
 	printf("Testing add_As_in_sequence - adding to existing set\n");
-    asn = new AsNum((uint16_t)65001);
+    asn = new AsNum(65001);
     if (verbose) printf("Before: %s\n", aspath->str().c_str());
     aspath->add_AS_in_sequence(*asn);
     if (verbose) printf("Extended: %s\n", aspath->str().c_str());
@@ -122,18 +122,18 @@ main(int argc, char* argv[])
 
     {
 	AsSegment seq = AsSegment(AS_SEQUENCE);
-	seq.add_as(AsNum((uint16_t)65008));
-	seq.add_as(AsNum((uint16_t)1));
-	seq.add_as(AsNum((uint16_t)2));
+	seq.add_as(AsNum(65008));
+	seq.add_as(AsNum(1));
+	seq.add_as(AsNum(2));
 	
 	aspath_con.add_segment(seq);
     }
 
     {
 	AsSegment set = AsSegment(AS_SET);
-	set.add_as(AsNum((uint16_t)3));
-	set.add_as(AsNum((uint16_t)4));
-	set.add_as(AsNum((uint16_t)5));
+	set.add_as(AsNum(3));
+	set.add_as(AsNum(4));
+	set.add_as(AsNum(5));
 	
 	aspath_con.add_segment(set);
     }	
@@ -141,15 +141,15 @@ main(int argc, char* argv[])
     {
 	AsSegment seq = AsSegment(AS_SEQUENCE);
 	seq.set_type(AS_SEQUENCE);
-	seq.add_as(AsNum((uint16_t)6));
+	seq.add_as(AsNum(6));
 	
 	aspath_con.add_segment(seq);
     }
 
     {
 	AsSegment set = AsSegment(AS_SET);
-	set.add_as(AsNum((uint16_t)7));
-	set.add_as(AsNum((uint16_t)8));
+	set.add_as(AsNum(7));
+	set.add_as(AsNum(8));
 	
 	aspath_con.add_segment(set);
     }	
@@ -157,7 +157,7 @@ main(int argc, char* argv[])
     {
 	AsSegment seq;
 	seq.set_type(AS_SEQUENCE);
-	seq.add_as(AsNum((uint16_t)9));
+	seq.add_as(AsNum(9));
 	
 	aspath_con.add_segment(seq);
     }
@@ -181,7 +181,7 @@ main(int argc, char* argv[])
 
 
     for (i=1;i<=9;i++) {
-	asn = new AsNum((uint16_t)i);
+	asn = new AsNum(i);
 	assert(aspath->contains(*asn) == true);
 	delete asn;
     }
