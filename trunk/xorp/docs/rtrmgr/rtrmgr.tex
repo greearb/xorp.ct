@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.17 2004/05/18 01:19:34 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.18 2004/05/18 07:11:09 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -849,8 +849,8 @@ router commands, the information about operational mode commands is
 loaded from another set of template files.  A simple example might be:
 
 \begin{verbatim}
-show interface $(interfaces.interface.*) {
-        %command: "path/to/show_interface" %help: HELP;
+show interfaces $(interfaces.interface.*) {
+        %command: "path/to/show_interfaces -i $3" %help: HELP;
         %module: fea;
         %opt_parameter: "brief" %help: BRIEF;
         %opt_parameter: "detail" %help: DETAIL;
@@ -861,7 +861,7 @@ show interface $(interfaces.interface.*) {
         %tag: EXTENSIVE "Show extensive network interface information";
 }
 show vif $(interfaces.interface.*.vif.*) {
-        %command: "path/to/show_vif" %help: "Show vif information";
+        %command: "path/to/show_vif -i $3" %help: "Show vif information";
         %module: fea;
         %opt_parameter: "brief" %help: "Show brief vif information";
         %opt_parameter: "detail" %help: DETAIL;
@@ -871,10 +871,10 @@ show vif $(interfaces.interface.*.vif.*) {
 }
 \end{verbatim}
 
-This template file defines two operational mode commands: ``{\tt show
-interface}'' and ``{\tt show vif}''.
+This template file defines two operational mode commands:
+``{\tt show interfaces}'' and ``{\tt show vif}''.
 
-The ``show interface'' command takes one mandatory parameter, whose
+The ``show interfaces'' command takes one mandatory parameter, whose
 value must be the name of one of the configuration tree nodes taken
 from the variable name wildcard expansion {\tt
 \$(interfaces.interface.*)}.  Thus if the router had config tree nodes
@@ -886,16 +886,25 @@ Additional optional parameters might be {\tt brief}, {\tt detail}, or
 {\tt extensive} - the set of allowed optional parameters is specified
 by the {\tt \%opt\_parameter} commands.  
 
-The {\tt \%command} command indicates the program or script to be
+The {\tt \%command} command indicates the program or script (and its
+arguments) to be
 executed to implement this command - the script should return
 human-readable output preceded by a MIME content type indicating
 whether the text is structured or not\footnote{Only {\tt text/plain}
-is currently supported.}.  The entire command line typed by the user
-is passed into the command.  Thus the xorpsh might invoke the {\tt
-show\_interface} command using the Unix command line:
+is currently supported.}.
+If the command specification contains any positional arguments
+(\eg {\tt \$0}, {\tt \$1}, {\tt \$2}) they are resolved by substituting
+them with the particular substring from the typed command line command:
+{\tt \$0} is substituted with the complete string from the command line,
+{\tt \$1} is substituted with the first token from the command line,
+{\tt \$2} is substituted with the second token from the command line,
+The resolved positional arguments along with the remaining arguments
+(if any) are passed to the executable command.
+For example, if the user types ``show interfaces xl0'', the xorpsh might invoke
+the {\tt show\_interface} command using the Unix command line:
 
 \begin{verbatim}
-    path/to/show_interface show interface xl0 brief
+    path/to/show_interfaces -i xl0
 \end{verbatim}
 
 The pathname to a command must be
