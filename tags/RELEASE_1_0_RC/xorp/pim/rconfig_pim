@@ -1,0 +1,68 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/rconfig_pim,v 1.2 2004/02/27 00:20:18 pavlin Exp $
+#
+
+#
+# Run configure_pim on a remote machine
+# Usage: 'rconfig_pim [-4 | -6 ] [<hostname1> [<hostname2>] ... ]
+#
+
+#
+# The optional first argument should be either -4 or -6 to specify
+# IPv4 or IPv6 mode.
+#
+usage()
+{
+	echo "Usage: $0 [-4 | -6 ] [<hostname1> [<hostname2>] ... ]"
+}
+
+IP_VERSION_ARGUMENT="-4"	# XXX: IP version defaults to IPv4
+
+#
+# Get the arguments
+#
+if [ $# -gt 0 ] ; then
+	case "${1}" in
+		-4)
+			IP_VERSION_ARGUMENT="${1}"
+			shift
+			;;
+		-6)
+			IP_VERSION_ARGUMENT="${1}"
+			shift
+			;;
+		-h)
+			usage;
+			exit 0
+			;;
+		-*)
+			# XXX: all other options are invalid
+			echo "Invalid option ${1}"
+			usage;
+			exit 1
+			;;
+		*)
+			;;
+	esac
+fi
+
+if [ $# -lt 1 ] ; then
+    # Configure the local host
+    os=`uname -s`
+    config_path="~/work/xorp/$os-xorp/pim"
+    cd $config_path; ./configure_pim ${IP_VERSION_ARGUMENT}
+    exit 0
+fi
+
+while [ $# -gt 0 ]; do
+    # Configure for each hostname
+    hostname=$1
+    os=`ssh $hostname uname -s`
+    config_path="~/work/xorp/$os-xorp/pim"
+    ssh $hostname "(cd $config_path; ./configure_pim ${IP_VERSION_ARGUMENT}; )"
+    shift
+done
+
+exit 0

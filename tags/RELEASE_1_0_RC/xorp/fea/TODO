@@ -1,0 +1,176 @@
+#
+# $XORP: xorp/fea/TODO,v 1.17 2004/06/09 19:30:47 pavlin Exp $
+#
+
+* Refactor IfTree::align_with() when updating the FEA local config
+  interface tree with the system interface tree. Currenty, some of
+  the logic (see revision 1.22 of fea/iftree.cc) is that an item
+  on the local config interface tree is not updated if the item
+  is disabled. A better solution would be that fields like
+  physical interface index are updated even if the item is disabled.
+  One possible solution is to add align_with() method for each item
+  in the IfTree. That align_with() method would be aware of the internals
+  of the item it serves and can update appropriately some of the fields
+  even if the item is disabled.
+  Note: if this solution is applied, then reverse-back the
+  "fea_ifmgr_set_interface_enabled" and "fea_ifmgr_set_vif_enabled"
+  added to test_get_vif_pif_index() in revision 1.13 of
+  fea/test_config_interface.sh.
+  
+* Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
+  distribution (which returns "struct ip_tunnel_parm"),
+  and ioctl(SIOCGETTUNNEL6) which returns "struct ip6_tunnel_parm".
+  The source/destination addresses are in
+  iptunnel.iph.saddr/iptunnel.iph.daddr
+  and ip6tunnel.git_ip6h.ip6_src/ip6tunnel.git_ip6h.ip6_dst
+  respectively.
+
+  First, check whether the existing methods on Linux already
+  take care of tunnels, and only if they don't then call the above
+  two ioctls as appropriate.
+
+* Check whether a returned MAC addresses of an interface is an
+  Ethernet address before attempting to assign it as an Ethernet
+  address.
+
+* Do we need to include <asm/types.h> for Linux, when we include
+  <linux/rtnetlink.h> ?
+
+* Fix test files like test_ifconfig_rtsock.cc
+
+* Sync by renaming all "IfTree& iftree" to "IfTree& it" (or vice-versa).
+
+* When obtaining the forwarding table from the kernel,
+  do we need to take special care of the
+  (rtm->rtm_flags & RTF_LLINFO) entries? (see the mfea code for that).
+
+* Make sure that the interfaces in the interface tree are deleted properly
+  whenever the underlying interfaces in the kernel change. E.g.,
+  especially be careful in case an interface disappears, and immediately
+  after that a new interface with different name but same interface index
+  appears. In that case, we need to update properly the local cache
+  that maps interface names to indexes.
+
+* Add UDP interfaces for sending and receiving.
+
+* Resurrect click based FEA.
+
+* The following files inside "fea" are not used?
+  click.hh click_glue.hh fti_click.hh ifconfig_click.hh
+  click.cc fea_click.cc test_fea.cc test_fti.cc test_ifmanager.cc
+  Refactor them?
+
+==============================================================================
+==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
+
+* Try to replicate the following error message during shutdown:
+[ 2004/06/07 09:38:21  ERROR xorp_fea:20735 MFEA +1601 mfea_mrouter.cc get_sg_count ] ioctl(SIOCGETSGCNT, (18.18.0.1 224.0.1.1)) failed: Bad file descriptor
+
+* During shutdown, the following code in MfeaNode::final_stop()
+  may actually return XORP_ERROR:
+
+    if (! (is_up() || is_pending_up() || is_pending_down()))
+        return (XORP_ERROR);
+  However, in case of PIM the above check is OK.
+  Investigate the problem and fix it.
+
+* The IPv4 raw packet input in case of OpenBSD has changed between versions.
+  E.g., if (defined(__OpenBSD__) && (OpenBSD < 200311))
+  then the processing should be same as FreeBSD and NetBSD.
+  In other words, newer OpenBSD behave differently.
+
+* When start/stop multicast routing, call start_pim/stop_pim XRL as well.
+
+* Implement following methods and their friends:
+  - set_allow_kernel_signal_messages(bool v)
+  - set_allow_mrib_messages(bool v)
+
+* Set the pif_index for MfeaVif
+
+* In MfeaDfe::is_valid(), the min threshold value must be defined
+  somewhere else, and it should be consistent with
+  BW_UPCALL_THRESHOLD_INTERVAL_MIN_SEC and
+  BW_UPCALL_THRESHOLD_INTERVAL_MIN_USEC
+
+* Rename MfeaNode::get_mrib_table() and UnixComm::get_mrib_table() and
+  friends (get_mrib_table_*) to get_mrib_entries
+
+* Rename protocol_name and protocol_id in the send protocol messages
+  to src_module_instance_name and src_module_id (or sth. like that).
+
+* The min. required TTL to forward on a MFC entry should be configurable
+  per vif.
+
+* Rename "functions" with "methods" in classes inside *.hh
+  (e.g., "Private functions". Same for all *.hh in other directories:
+  mrt, cli, mld6igmp, pim, libproto
+
+* Use start_pim() and stop_pim() as appropriate.
+
+* If a protocol deletes itself from the MFEA, make sure that all
+  the groups it has joined will be left.
+
+* Replace all assert() with XORP_ASSERT() (inside MFEA, CLI, MLD6IGMP, PIM)
+
+* Fix all messages like the one below to print a more explicit information
+  where the error happened. Apply same for CLI, MLD6IGMP, PIM
+    if (is_invalid_family) {
+	// Invalid address family
+	reason = c_format("Received protocol message with invalid "
+			  "address family: IPv4");
+	fail = true;
+	return XrlCmdError::OKAY();
+    }
+
+* Wnen added a new protocol, schedule the sending back of the Vif
+  info to happen AFTER the return of the XRL handler (???).
+  If the registering protocol doesn't consider the return value
+  from the registration before accepting any other info, then
+  we don't need that. However, if the return value from the registration
+  is important whether to start accepting info from the MFEA,
+  then we must do the above.
+
+* Some of the ProtoComm::_sndbuf0/1 or _rcvbuf0/1 are not used and/or
+  should be much smaller.
+
+* A single ProtoComm should be able to handle more than one protocol modules.
+
+* 'int proto' (e.g. IPPROTO_IGMP, etc) should be renamed to 'proto_number'
+   or sth. like that
+
+* Use if_nametoindex(3) when available
+
+* Take care of scope_id for IPv6:
+		struct sockaddr_in6 addr;
+               if (IN6_IS_ADDR_LINKLOCAL(&addr.sin6_addr))
+                {
+                        addr.sin6_scope_id = if_nametoindex(ifa->ifa_name);
+		}
+
+* Make the behavior consistent: if we use ioctl() to get the list of
+  interfaces, if there is an error, we return immediately;
+  However, if we use sysctl method and if there is an error, we
+  continue with the next interface.
+
+* If closing the _mrouter_socket, make sure that _proto_socket for
+  IGMP or ICMP6 is closed too (??).
+
+* When sending a request using ProtoComm, make sure we are using the
+  right socket (e.g., IOCTL, etc)
+
+* In function headers, make sure that constants have % in front.
+  E.g.: %XORP_OK %XORP_ERROR 
+
+* Send email to KAME. In the mean time detect the problem in configure.in
+#ifdef GET_TIME
+#undef GET_TIME		// TODO: on FreeBSD-4.3 including both ip_mroute.h
+			// and ip6_mroute.h is broken
+#endif
+
+
+* Change all "FOO node definition" to "FOO node declaration" (?)
+
+* _max_rate_limit should be uint64_t, otherwise cannot create an
+  explicit restriction to forward more than 4Gbps. However, the UNIX
+  kernel uses u_int for that, so we don't have much choice.
+

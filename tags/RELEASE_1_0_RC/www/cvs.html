@@ -1,0 +1,206 @@
+<!-- $XORP: www/cvs.html,v 1.10 2004/04/22 18:12:25 hodson Exp $ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<TITLE>XORP CVS Access</TITLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<table border="0" cellspacing="0" cellpadding="8"><tr><td>
+<img src="images/xorp-logo-medium.jpg" align="top" alt="XORP logo">
+<TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#FFFFFF">
+<H1> XORP CVS Access </H1>
+<A HREF="#Anonymous">Anonymous Access</a> | <A HREF="#Developer">Developer Access</A> | <A HREF="#Modules">Modules</A> | <A HREF="#Examples">Examples</A> | <A HREF="#Trouble">Troubleshooting</A>
+
+<p> Concurrent Versions System (CVS) is a version control system that
+allows multiple developers to work on files at the same time.  The
+software developed and modified on the XORP project is stored in a <a
+href = "http://www.cvshome.org/">CVS</a> repository.  Anonymous access
+to the CVS repository is available to access the current code for the
+purpose of porting, patching, and testing the software. </p>
+
+<p>The code in the CVS repository may be buggy or non-functional from time to
+time, so be prepared to encounter problems and report them.  This is
+part of the purpose of making anonymous CVS access available.</p>
+
+<p>Bug reports, code contributions, and comments for applications in
+the CVS repository should be sent to the appropriate <a href =
+"index.html#mail">mailing list</a>.  If no mailing list exists for that
+application, then use feedback&#64;xorp&#46;org.
+
+<p>We recommend the use of CVS version 1.9 and later.  Links on CVS
+that may be of interest are:
+<ul>
+<li><A href="http://www.cvshome.org/">Concurrent Versions System Home</A>.</li>
+<li><A href="http://www.csc.calpoly.edu/~dbutler/tutorials/winter96/cvs/">CVS Tutorial</A> from Cal Poly.</li>
+</ul>
+
+<H2><A NAME="Anonymous">Anonymous Access to the XORP CVS Repository</a></H2>
+
+<p> Anonymous CVS has read-only access to the repository.
+
+<ul>
+<li>The repository root (CVSROOT) is:
+<pre>:pserver:xorpcvs@cvs.xorp.org:/cvs</pre>
+<li>The password for read-only access is empty.
+
+<li>See <a href="#Examples">examples</a> for quick start information.
+</ul>
+
+<H2><A NAME="Developer">Developer Access</A></H2>
+
+The access method for developers with full priveleges is through <A
+HREF="#ssh">SSH</a>.
+
+<H3><A NAME="ssh">SSH Access</a></H3> 
+
+For SSH access to the XORP respository you will need an account
+on the XORP machines at ICIR.
+
+<ul>
+<li> Set environment variable CVS_RSH to ssh and CVSROOT to
+point to the XORP repository:
+
+<PRE>
+setenv CVS_RSH ssh
+setenv CVSROOT :ext:&lt;username&gt;@cvs.xorp.org:/usr/local/www/data/cvs
+</PRE>
+
+<li> Use ssh-agent to avoid re-typing your passphrase when CVS uses SSH to connect to the server:
+	<ul>
+	<li> One time actions:
+		<ol>
+		<li> Check if ~/.ssh/id_dsa.pub (or identity.pub in the case
+		of SSH1) exists on local host.  If not run ssh-keygen, pick
+		hard to guess passphrase.
+		<li> Append the contents of ~/.ssh/id_dsa.pub (identity.pub
+		SSH1) to ~/.ssh/authorized_keys2 (authorized_keys SSH1) on
+		remote machine (e.g., the XORP cvs server).
+		</ol>
+	<li> Login actions:
+		<ol>
+		<li> Start X session or parent shell with ssh-agent, i.e.
+		<pre> % ssh-agent xinit </pre>
+		<li> Run ssh-add, typing passphrase when prompted; ssh-agent
+		will now automatically handle password exchanges each time you
+		connect to remote machine with ssh.
+		</ol>
+	</ul>
+</ul>
+
+<H2><A NAME="Modules">Modules</A></H2>
+
+<p>The repository contains source code for versions of the software
+   developed and modified at ICSI/ICIR for XORP.  The names and
+   descriptions of the modules are listed in the table below.
+
+<CENTER>
+<TABLE BORDER=0>
+<TR bgcolor="#b0b0b0">
+  <TH ALIGN=LEFT>Module</TH>
+  <TH ALIGN=CENTER>Description</TH>
+</TR>
+
+<TR bgcolor="#eeeeee">
+  <TD><tt>xorp</tt></td>
+  <TD>The XORP source tree. </TD>
+</TR>
+
+<TR bgcolor="#eeeeee">
+  <TD><tt>other</tt></TD>
+
+  <TD>Utilities and tools found to be useful by the XORP developers at
+     ICSI/ICIR.</TD>
+</TR>
+
+<TR bgcolor="#eeeeee">
+  <TD><tt>www</tt></TD>
+  <TD>The material for XORP WWW pages.</TD>
+</TR>         
+
+</TABLE>
+</CENTER>
+
+<h2><A NAME="Examples">Examples</A></h2>
+
+<h3> UNIX </h3>
+
+<table border="0" width="100%"><tr><td bgcolor="#BEEAE0"><PRE>
+% setenv CVSROOT :pserver:xorpcvs@cvs.xorp.org:/cvs
+% cvs login
+(Logging in to xorpcvs@cvs.xorp.org)
+CVS password:
+% cvs checkout xorp
+cvs server: updating xorp
+U xorp/.cvsignore
+U xorp/LICENSE
+...
+% ls
+./             TODO           config.h.in    libcomm/       pim/
+../            VERSION        config.log     libproto/      rib/
+.cvsignore     acconfig.h     config.status* libxipc/       rip/
+CVS/           bgp/           configure*     libxipc.new/   rtrmgr/
+LICENSE        bootstrap*     configure.in   libxorp/       stamp-h
+Makefile       cli/           devnotes/      mfea/          stamp-h.in
+Makefile.am    config/        docs/          mld6igmp/      utils/
+Makefile.in    config.cache   etc/           mrt/           xrl/
+README         config.h       fea/           ospfd/
+</PRE></td></tr></table>
+
+<h2><A NAME="Trouble">Troubleshooting</A></h2>
+
+<p><i>Any comments or problems with anonymous cvs access with XORP should
+be sent to feedback&#64;xorp&#46;org. </i></P>
+
+</td>
+</TR>
+</TABLE>
+</td>
+<td valign="top" width="20%">
+      <table border="0" cellspacing="0" cellpadding="1"  bgcolor="#b0b0b0" width="100%">
+         <tr>
+            <td>
+            <table border="0" bgcolor="#ffffff" width="100%" cellspacing="0" cellpadding="1">
+  	    <tr><td bgcolor="#b0b0b0" colspan="2"><b>Quick&nbsp;Links</b></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="index.html">XORP Home</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="news.html">News</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="downloads.html">Downloads</a></small></td></tr>
+  	    <tr><td width="10" bgcolor="#d00000"></td>
+	      <td bgcolor="#d0d0d0"><small><a href="cvs.html">Anonymous&nbsp;CVS</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="http://xorpc.icir.org/cgi-bin/cvsweb.cgi/">CVSweb&nbsp;access</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="releases/current/docs/status.html">Software&nbsp;Status</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="docs.html">Documentation</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="getting_started.html">Getting&nbsp;Started</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="index.html#mail">Mailing&nbsp;Lists</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="contributing.html">Contributing</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="people.html">People</a></small></td></tr>
+            </table>
+  	  </td>
+          </tr>
+      </table>
+</td></tr></table>
+
+<hr>
+<address>feedback&#64;xorp&#46;org</address>
+<!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
+<!-- hhmts start -->
+<small>
+Last modified: $Date$.
+</small>
+<!-- hhmts end -->
+
+</BODY>
+</HTML>

@@ -1,0 +1,34 @@
+/* $XORP: xorp/etc/templates/fea.tp,v 1.23 2004/06/04 04:47:04 pavlin Exp $ */
+
+fea {
+    targetname:			txt = "fea";
+    enable-unicast-forwarding4: bool;
+    enable-unicast-forwarding6: bool;
+}
+
+fea {
+    %help:	short		"Configure the Forwarding Engine Abstraction";
+    %modinfo:	provides	fea;
+    %modinfo:	depends		interfaces;
+    %modinfo:	path		"fea/xorp_fea";
+    %modinfo:	default_targetname "fea";
+
+    %mandatory:	targetname;
+
+    targetname {
+	%help:	short "Set the target name";
+	%set:;
+    }
+
+    enable-unicast-forwarding4 {
+	%help:		short "Enable IPv4 unicast forwarding";
+	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$(@)";
+	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
+    }
+
+    enable-unicast-forwarding6 {
+	%help:		short "Enable IPv6 unicast forwarding";
+	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=$(@)";
+	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
+    }
+}

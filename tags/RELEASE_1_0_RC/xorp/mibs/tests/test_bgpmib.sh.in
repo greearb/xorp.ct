@@ -1,0 +1,522 @@
+#!/usr/bin/env bash
+#
+# $Header$
+#
+#
+# Test the BGP MIB
+#
+# This script started with no arguments will start all required process and
+# terminate them at the end of the tests.
+#
+set -e
+
+# to debug
+# set -x
+
+
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
+XORP_TOP_BUILDDIR=`(cd ${PWD}/../..; pwd)`
+
+CALLXRL='../../libxipc/call_xrl -r 50'
+. ${BGP_SRCDIR}/harness/xrl_shell_funcs.sh ""
+. ${BGP_SRCDIR}/xrl_shell_funcs.sh ""
+
+# uncomment next line to use mpatrol
+# MPATROL='/usr/local/bin/mpatrol --leak-table --dynamic'
+
+MPATROL=${MPATROL:-""}
+
+configure_snmp()
+{
+    # configuration variables for the snmp agent
+    SNMPDCONF=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd.conf
+    LOGSTAMP=`date "+%y%m%d%H%M%S"`
+    export SNMPDLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd${LOGSTAMP}.log
+    SNMPDDBG="bgp4_mib_1657,xorp_if_mib_module,trap"
+    echo 'rwcommunity xorp' > ${SNMPDCONF}
+    echo "dlmod xorp_if_mib_module "					\
+	 "${XORP_TOP_BUILDDIR}/mibs/xorp_if_mib_module.so"		\
+	    >> ${SNMPDCONF}
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs
+    export LD_LIBRARY_PATH
+    MIBDIRS=+`(cd ${srcdir}/../textual; pwd)`
+    export MIBDIRS
+
+    # configuration variables for the trap daemon
+    SNMPTRAPPORT=51510
+    export SNMPTRAPLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmptrap${LOGSTAMP}.log
+    echo "trap2sink localhost xorp ${SNMPTRAPPORT}" >> ${SNMPDCONF}
+
+    # these variables are used by the tests
+    export SNMPCONF='-t 20 -c xorp -v 2c'
+    export SNMPHOST=localhost:51515
+    export SNMPTRAPHOST="localhost:${SNMPTRAPPORT}"
+}
+onexit()
+{
+    last=$?
+    if [ ${last} -eq 0 ] ; then
+	echo "$0: Tests Succeeded"
+
+        # Cleanup only on success
+	rm -f bgpPeerTable?.tmp bgp4PathAttrTable?.tmp snmp*.log
+    else
+	echo "$0: Tests Failed"
+    fi
+
+    trap '' 0 2
+
+    # Unload MIB if not unloaded yet
+    if [ "X${BGP_MIB_IDX}" != "X" ]; then
+
+	${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+	BGP_MIB_IDX=""
+    fi
+
+    ${CALLXRL} "finder://xorp_if_mib/common/0.1/shutdown"
+
+}
+
+trap onexit 0 2
+
+
+HOST=localhost
+LOCALHOST=$HOST
+ID=192.150.187.78
+AS=65008
+
+# EBGP
+PORT1=10002
+PEER1_PORT=20002
+PEER1_AS=65000
+
+HOLDTIME=5
+
+TRAFFIC_FILES="${srcdir}/../../../data/bgp/icsi1.mrtd"
+
+configure_bgp()
+{
+    local_config $AS $ID
+
+    # Don't try and talk to the rib.
+    register_rib ""
+
+    # Assign AS number
+    ${CALLXRL} "finder://bgp/bgp/0.2/set_local_as?as:u32=${AS}"
+
+    PEER=$HOST
+    NEXT_HOP=192.150.187.78
+    add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
+    enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
+
+}
+
+reset()
+{
+    coord reset
+
+    coord target $HOST $PORT1
+    coord initialise attach peer1
+
+    sleep 10
+}
+
+# block until a peer ($1) returns the same status after a 2 second wait.  
+# used to detect when a peer is done sending or receiving updates
+peer_stationary_state()
+{
+    while :
+    do
+        # debug
+        status $1
+
+        a=$(status $1)
+        sleep 2
+        b=$(status $1)
+        if [ "$a" = "$b" ]
+        then
+            break
+        fi
+    done
+}
+
+#
+# This test populates the list of peers with fake peers.  Only one of the 
+# peers will be enabled.  This is because the bgpPeerTable is indexed by the 
+# remote IP address of the peers, so we cannot have repeated IP addresses.
+#
+
+test1()
+{
+    echo "TEST1 - Read the bgpPeerTable" 
+
+    # Reset the peers
+    reset
+
+    # Connect to only one real peer (in fact, it's a process running on this
+    # same host
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+
+    # Create bogus peers to which we'll not try to connect
+    FAKE_PEER1=192.1.2.3 ; FPORT1=777 ; HTIME1=1000
+    FAKE_PEER2=192.4.5.6 ; FPORT2=888 ; HTIME2=2000 
+    FAKE_PEER3=192.7.8.9 ; FPORT3=999 ; HTIME3=3000
+    add_peer  $LOCALHOST $PORT1 $FAKE_PEER1 $FPORT1 $PEER1_AS $NEXT_HOP $HTIME1
+    add_peer  $LOCALHOST $PORT1 $FAKE_PEER2 $FPORT2 $PEER1_AS $NEXT_HOP $HTIME2
+    add_peer  $LOCALHOST $PORT1 $FAKE_PEER3 $FPORT3 $PEER1_AS $NEXT_HOP $HTIME3
+
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'`
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    echo -n getting the BGP version...
+    bgp_ver=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpVersion.0 | \
+	sed -e 's/BGP4-MIB::bgpVersion\.0 = Hex-STRING: //'`  
+    
+    if [ "${bgp_ver}" != "08 " ]; then exit 1; fi
+ 
+    echo "${bgp_ver}"
+
+    echo -n getting the local AS number...
+    bgp_local_as=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpLocalAs.0 | \
+	sed -e 's/BGP4-MIB::bgpLocalAs\.0 = INTEGER: //'`  
+
+    if [ "${bgp_local_as}" != "${AS}" ]; then exit 1; fi
+ 
+    echo "${bgp_local_as}"
+
+    ${CALLXRL} "finder://bgp/bgp/0.2/set_bgp_id?id:ipv4=${ID}"
+
+    echo -n getting the BGP identifier...
+    bgp_id=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpIdentifier.0 | \
+	sed -e 's/BGP4-MIB::bgpIdentifier\.0 = IpAddress: //'`  
+
+    if [ "${bgp_id}" != "${ID}" ]; then exit 1; fi
+ 
+    echo "${bgp_id}"
+
+    echo 'walking through the values of the BGP peer table... '
+    snmpwalk ${SNMPCONF} ${SNMPHOST} BGP4-MIB::bgpPeerTable > bgpPeerTable1.tmp
+    cat bgpPeerTable1.tmp
+
+    # confirm that we have established a connection with the real peer
+    tmp=`grep established < bgpPeerTable1.tmp | wc -l` 
+
+    if [ $tmp != '1' ]; then 
+	echo "too many established connections reported"; exit 1 
+    fi
+
+    echo 'reading the entire BGP peer table at once... '
+    snmptable ${SNMPCONF} -CH -Cf "," ${SNMPHOST}  BGP4-MIB::bgpPeerTable \
+        > bgpPeerTable2.tmp
+    cat bgpPeerTable2.tmp
+
+    echo 'read again to check the variables that change with time... '
+    snmpwalk ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpPeerTable > bgpPeerTable3.tmp
+
+    # verify that bgpPeerFsmEstablishedTime is changing for all 4 peers
+    tmp=`diff -y  bgpPeerTable{1,3}.tmp | grep FsmEstablishedTime | wc -l` 
+
+    if [ $tmp != '4' ]; then 
+	echo "invalid FsmEstablisedTime values"; exit 1 
+    fi
+
+    # verify that bgpPeerInUpdateElapsedTime is changing 
+    tmp=`diff -y  bgpPeerTable{1,3}.tmp | grep UpdateElapsedTime | wc -l` 
+
+    if [ $tmp = '0' ]; then 
+	echo "bgpPeerInUpdateElapsedTime not changing"; exit 1 
+    fi
+
+    # Unload MIB
+    sleep 10
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+    sleep 10
+
+    echo OK
+
+    # Reset the connection
+    reset
+}
+
+#
+# This test populates BGP route list with bogus routes, and reads the
+# PathAttrTable 
+#
+
+test2_full()
+{
+    TFILE=$1
+
+    echo "TEST2 - Read the bgp4PathAttrTable" 
+
+    # Reset the peers
+    reset
+
+    # Have peer1 connect to BGP and feed it routes 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+    
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE $2 ${ROUTE_UPDATES}
+
+    peer_stationary_state peer1
+
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    echo 'waiting until the BGP MIB receives the entire bgp4PathAttrTable...'
+    echo '(this may take several minutes)'
+    while ! grep "received last route" ${SNMPDLOG}
+    do
+	echo -n '.'
+	sleep 10
+    done
+
+    echo 'walking through the values of the BGP path attributes table... '
+    snmpwalk ${SNMPCONF} ${SNMPHOST} BGP4-MIB::bgp4PathAttrTable   \
+	> bgp4PathAttrTable1.tmp
+    cat bgp4PathAttrTable1.tmp
+
+    echo 'reading the entire BGP path attr table at once... '
+    snmptable ${SNMPCONF} -CB -CH -Cf "," ${SNMPHOST} \
+	BGP4-MIB::bgp4PathAttrTable > bgp4PathAttrTable2.tmp
+    cat bgp4PathAttrTable2.tmp
+
+    echo 'bulk reading the entire BGP path attr table... '
+    snmptable ${SNMPCONF} -CH -Cf "," ${SNMPHOST} \
+	BGP4-MIB::bgp4PathAttrTable > bgp4PathAttrTable3.tmp
+    cat bgp4PathAttrTable3.tmp
+
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+    # Reset the connection
+    reset
+}
+
+#
+# Limited version of the previous test
+#
+test2()
+{
+    ROUTE_UPDATES=50 test2_full $1 
+}
+
+#
+# This test tests the BGP SNMP traps generated via XRLs
+#
+test3()
+{
+    TFILE=$1
+
+    echo "TEST3 - Generate traps and verify that they are being received"
+    echo "by the management station"
+
+    # Reset the peers
+    reset
+
+    # Have peer1 connect to BGP 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+    
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    BOGUS_ERROR=`date "+%y%m%d%H%M%S"`
+
+    # ensure that this string is not in the trap log
+    grep -v ${BOGUS_ERROR} ${SNMPTRAPLOG} > /dev/null
+
+    ${CALLXRL} "finder://bgp4_mib/bgp_mib_traps/0.1/send_bgp_established_trap?bgp_last_error:txt=${BOGUS_ERROR}&bgp_state:u32=6"
+
+    # verify that the trap appears in the trap log
+    grep ${BOGUS_ERROR} ${SNMPTRAPLOG} > /dev/null
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+    # Reset the connection
+    reset
+}
+
+#
+# This test verifies that the bgp process is sending SNMP traps when it detects
+# that the BGP4-MIB module is loaded. 
+#
+test4()
+{
+    TFILE=$1
+
+    echo "TEST4 - Verify that the BGP process is sending valid SNMP traps"
+
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+ 
+    sleep 2
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    # Reset the peers
+    reset
+
+    # Verify that the bgpEstablished trap has NOT been received
+    grep -v "BGP4-MIB::bgpEstablished" ${SNMPTRAPLOG} > /dev/null 
+
+    # Have peer1 connect to BGP 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+ 
+    # Verify that the bgpEstablished trap has been received
+    grep "BGP4-MIB::bgpEstablished" ${SNMPTRAPLOG} > /dev/null
+
+    # Verify that the bgpBackwardTransition trap has NOT been received
+    grep -v "BGP4-MIB::bgpBackwardTransition" ${SNMPTRAPLOG} > /dev/null 
+
+    # Reset the connection 
+    reset
+
+    # Verify that the bgpBackwardTransition trap has been received
+    grep "BGP4-MIB::bgpBackwardTransition" ${SNMPTRAPLOG} > /dev/null
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+}
+
+
+
+#
+# This is a convenient way to start everything up, and do nothing
+# To invoke this function:
+#      ./test_bgpmib.sh -t just_start
+#
+just_start()
+{
+    TFILE=$1
+
+    echo "Start everything up, and wait for user input"
+
+    # Reset the peers
+    reset
+
+    # Have peer1 connect to BGP and feed it routes 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+    
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE  50
+
+    peer_stationary_state peer1
+
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    # wait for user to exit
+    touch rock
+    echo 'Remove the file "./rock" to continue'
+    while [ -e "rock" ]
+    do
+	sleep 1
+    done
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+    # Reset the connection
+    reset
+}
+
+TESTS_NOT_FIXED='test2_full test4'
+TESTS='test1 test2 test3'
+
+# Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
+TIME_WAIT=`time_wait_seconds`
+
+# Include command line
+. ${BGP_SRCDIR}/harness/args.sh
+
+if [ ${START_PROGRAMS} = "yes" ]
+then
+    SNMPD=@snmpd@
+    if [ "$SNMPD" = "not_found" ]; then exit 1; fi
+    SNMPTRAPD=`echo ${SNMPD} | sed -e 's/snmpd/snmptrapd/'`
+    configure_snmp
+    CXRL="$CALLXRL"
+    XTB=${XORP_TOP_BUILDDIR}
+    BH=${XTB}/bgp/harness
+    ${XTB}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ${XTB}/libxipc/xorp_finder
+    ${XTB}/fea/xorp_fea_dummy = $CXRL finder://fea/common/0.1/get_target_name
+    ${XTB}/rib/xorp_rib       = $CXRL finder://rib/common/0.1/get_target_name
+    ${XTB}/bgp/xorp_bgp       = $CXRL finder://bgp/common/0.1/get_target_name
+    ${BH}/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
+    ${BH}/coord = $CXRL finder://coord/common/0.1/get_target_name
+    ${MPATROL} ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r -I -memory_freebsd2 ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    ${SNMPTRAPD} -f -o ${SNMPTRAPLOG} ${SNMPTRAPHOST}
+EOF
+    trap '' 0
+    exit $?
+fi
+
+if [ "${CONFIGURE}" = "yes" ]
+then
+    configure_bgp
+fi
+
+for i in $TESTS
+do
+    for t in $TRAFFIC_FILES
+    do 
+	if [ -f "$t" ]
+	then
+	    $i $t
+	    echo "Waiting $TIME_WAIT seconds for TCP TIME_WAIT state timeout"
+	    sleep $TIME_WAIT
+	else
+	    echo "Traffic file \"$t\" missing."
+	fi
+    done
+done
+
+# Local Variables:
+# mode: shell-script
+# sh-indentation: 4
+# End:

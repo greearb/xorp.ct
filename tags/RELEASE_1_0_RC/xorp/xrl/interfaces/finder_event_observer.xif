@@ -1,0 +1,17 @@
+/**
+ * An interface to receive event notifications from the Finder.  The supported
+ * events are birth and deaths of Xrl targets.
+ */
+
+interface finder_event_observer/0.1 {
+
+	/**
+	 * Announce target birth.
+	 */	  
+	xrl_target_birth ? target_class:txt & target_instance:txt
+
+	/**
+	 * Announce target death.
+	 */	  
+	xrl_target_death ? target_class:txt & target_instance:txt
+}

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+CLICKPATH=. /usr/local/click/bin/click < xorp.click

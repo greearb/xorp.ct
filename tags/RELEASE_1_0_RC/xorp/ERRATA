@@ -1,0 +1,121 @@
+#
+# $XORP: xorp/ERRATA,v 1.6 2004/06/15 00:58:41 pavlin Exp $
+#
+
+		XORP ERRATA
+
+  ALL:
+    - Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
+      The simplest work-around is to rerun gmake or not to use the -j flag.
+
+    - Overwriting the default installation prefix by running
+      "./configure --prefix=/path/to/xorp" currently does not work.
+      This will be fixed for XORP Release 1.0.
+
+    - Some of the design documentation in ${XORP}/docs/ hasn't been updated
+      for this release candidate. This will be fixed for XORP Release 1.0.
+
+  LIBXORP:
+    - No known issues.
+
+  LIBXIPC:
+    - No known issues.
+
+  LIBFEACLIENT:
+    - No known issues.
+
+  XRL:
+    - No known issues.
+
+  RTRMGR:
+    - There are several known issues, but none of them is considered critical.
+      The list of known issues is available from
+      http://www.xorp.org/bugzilla/query.cgi
+
+  XORPSH:
+    - A problem was noticed very late in the release process; rather
+      than delay the release we have choosen to document the
+      problem. The xorpsh provides the command line to the XORP
+      router. The router configuration is structured as a tree,
+      for instance configuring a new protocol essentially adds a new
+      node to the tree. Removing a protocol involves deleting a node
+      from the tree. In some cases deleting a node does not remove all
+      the associated state; worse putting the same node back seems to
+      fail in the majority of cases.
+
+  FEA/MFEA:
+    - On Linux, the following error message may appear during graceful
+      shutdown (if PIM-SM is also running):
+
+        [ 2004/06/09 14:50:40  ERROR xorp_fea:14359 MFEA +1676
+        mfea_mrouter.cc get_sg_count ] ioctl(SIOCGETSGCNT, (10.10.10.10
+        224.0.1.20)) failed: Bad file descriptor
+
+      The error is harmless and can be ignored.
+
+  RIB: 
+    - If an interface address is deleted, the RIB may trigger the following
+      error in the FEA:
+
+        [ 2004/06/07 16:08:57  ERROR xorp_fea:1605 FEA +259
+        fticonfig_entry_set_rtsock.cc delete_entry ] error writing to
+        routing socket: No such process
+        [ 2004/06/07 16:08:57  ERROR xorp_fea:1605 FEA +61 fti_transaction.cc
+        operation_result ] FTI transaction commit failed on DeleteEntry4: net =
+        172.16.124.0/24 gateway = 0.0.0.0 ifname =  vifname
+        =  metric = 0 admin_distance = 0 xorp_route = false is_deleted = false
+        [ 2004/06/07 16:08:57  ERROR xorp_fea:1605 FEA +259
+
+      This error has no side effects, and can be ignored.
+
+    - In some rare cases, the RIB may fail to delete an existing route
+      (See http://www.xorp.org/bugzilla/show_bug.cgi?id=62).
+      We are aware of the issue and will attempt to fix it in the near future.
+
+  RIP:
+    - No known issues.
+
+  BGP:
+    - Once BGP selects a route it is taking too long to install it in
+      the kernel.
+
+    - The RIB bug above where deleting an existing route can fail is sometimes
+      triggered by BGP. When BGP receives the deletion failure error
+      from the RIB it considers this to be a fatal error and
+      exits. This problem will be fixed before the XORP 1.0 Release.
+
+  STATIC_ROUTES:
+    - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
+      printing lots of error messages.
+      
+  MLD/IGMP:
+    - If MLD/IGMP is started with a relatively large number of interfaces
+      (e.g., on the order of 20), then it may fail with the following error:
+
+        [ 2004/06/14 12:58:56  ERROR test_pim:16548 MFEA +666
+        mfea_proto_comm.cc join_multicast_group ] Cannot join group 224.0.0.2
+        on vif eth8: No buffer space available
+
+      The solution is to increase the multicast group membership limit.
+      E.g., to increase the value from 20 (the default) to 200, run as a root:
+
+        echo 200 > /proc/sys/net/ipv4/igmp_max_memberships
+
+  PIM-SM:
+    - If the kernel does not support PIM-SM, or if PIM-SM is not enabled
+      in the kernel, then running PIM-SM will fail with the following
+      error message:
+        [ 2004/06/12 10:26:41  ERROR xorp_fea:444 MFEA +529 mfea_mrouter.cc
+        start_mrt ] setsockopt(MRT_INIT, 1) failed: Operation not supported
+
+  FIB2MRIB:
+    - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
+      printing lots of error messages.
+
+  CLI:
+    - No known issues.
+
+  SNMP:
+    - net-snmp-5.1.* may have problems with some of its header files, hence
+      the XORP SNMP support won't be compiled if those problems exist.
+      Instead, use an earlier net-snmp version from the 5.0.x branch.

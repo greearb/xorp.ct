@@ -1,0 +1,339 @@
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.5 2003/12/16 23:35:15 pavlin Exp $ */
+
+/*
+ * Multicast Forwarding Engine Abstraction XRL interface.
+ */
+
+
+interface mfea/0.1 {
+
+	/**
+	 * Test if the underlying system supports IPv4 multicast routing.
+	 * 
+	 * @param result true if the underlying system supports IPv4
+	 * multicast routing, otherwise false.
+	 */
+	have_multicast_routing4 -> result:bool
+
+	/**
+	 * Test if the underlying system supports IPv6 multicast routing.
+	 * 
+	 * @param result true if the underlying system supports IPv6
+	 * multicast routing, otherwise false.
+	 */
+	have_multicast_routing6 -> result:bool
+
+	/**
+	 * Add/delete a protocol in the Multicast FEA.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol to add/delete.
+	 * @param protocol_id the ID of the protocol to add/delete
+	 * (both sides must agree on the particular values).
+	 */
+	/* TODO: the protocol names have to be globally defined */
+	add_protocol4	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32
+	add_protocol6	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32
+	
+	delete_protocol4 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32
+	delete_protocol6 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32
+
+	/**
+	 * Start/stop a protocol on an interface in the Multicast FEA.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol to start/stop on
+	 * the particular vif.
+	 * @param protocol_id the ID of the protocol to add/stop on the
+	 * particular vif (both sides must agree on the particular values).
+	 * @param vif_name the name of the vif to start/stop for the
+	 * particular protocol.
+	 * @param vif_index the index of the vif to start/stop for the
+	 * particular protocol.
+	 */
+	/* TODO: the protocol names have to be globally defined */
+	start_protocol_vif4 ? xrl_sender_name:txt			\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+	start_protocol_vif6 ? xrl_sender_name:txt			\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+	
+	stop_protocol_vif4 ? xrl_sender_name:txt			\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+	stop_protocol_vif6 ? xrl_sender_name:txt			\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+
+	/**
+	 * Enable/disable the receiving of kernel-originated signal messages.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol to add.
+	 * @param protocol_id the ID of the protocol to add (both sides must
+	 * agree on the particular values).
+	 * @param is_allow if true, enable the receiving of kernel-originated
+	 * signal messages by protocol 'protocol_name'.
+	 */
+	 /* TODO: enable/disable per message type? */
+	allow_signal_messages	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& is_allow:bool
+	
+	/**
+	 * Enable/disable the receiving of Multicast Routing Information Base
+	 * information.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol to add.
+	 * @param protocol_id the ID of the protocol to add (both sides must
+	 * agree on the particular values).
+	 * @param is_allow if true, enable the receiving of MRIB information
+	 * messages by protocol 'protocol_name'.
+	 */
+	allow_mrib_messages	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& is_allow:bool
+	
+	/**
+	 * Join/leave a multicast group.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol that joins/leave
+	 * the group.
+	 * @param protocol_id the ID of the protocol that joins/leave
+	 * the group (both sides must agree on the particular values).
+	 * @param vif_name the name of the vif to join/leave the multicast
+	 * group.
+	 * @param vif_index the index of the vif to join/leave the multicast
+	 * group.
+	 * @param group_address the multicast group to join/leave.
+	 */
+	join_multicast_group4	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& vif_name:txt & vif_index:u32		\
+				& group_address:ipv4
+	join_multicast_group6	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& vif_name:txt & vif_index:u32		\
+				& group_address:ipv6
+	
+	leave_multicast_group4	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& vif_name:txt & vif_index:u32		\
+				& group_address:ipv4
+	leave_multicast_group6	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& vif_name:txt & vif_index:u32		\
+				& group_address:ipv6
+	
+	/**
+	 * Add/delete a Multicast Forwarding Cache with the kernel.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param source_address the source address of the MFC to add/delete.
+	 * @param group_address the group address of the MFC to add/delete.
+	 * @param iif_vif_index the index of the vif that is the incoming
+	 * interface.
+	 * @param oiflist the bit-vector with the set of outgoing interfaces.
+	 * @param oiflist_disable_wrongvif the bit-vector with the set of
+	 * outgoing interfaces to disable WRONGVIF kernel signal.
+	 * @param max_vifs_oiflist the number of vifs covered
+	 * by oiflist or oiflist_disable_wrongvif .
+	 * @param rp_address the RP address of the MFC to add.
+	 */
+	add_mfc4	? xrl_sender_name:txt				\
+			& source_address:ipv4 & group_address:ipv4	\
+			& iif_vif_index:u32				\
+			& oiflist:binary				\
+			& oiflist_disable_wrongvif:binary		\
+			& max_vifs_oiflist:u32				\
+			& rp_address:ipv4
+	add_mfc6	? xrl_sender_name:txt				\
+			& source_address:ipv6 & group_address:ipv6	\
+			& iif_vif_index:u32				\
+			& oiflist:binary				\
+			& oiflist_disable_wrongvif:binary		\
+			& max_vifs_oiflist:u32				\
+			& rp_address:ipv6
+	delete_mfc4	? xrl_sender_name:txt				\
+			& source_address:ipv4 & group_address:ipv4
+	delete_mfc6	? xrl_sender_name:txt				\
+			& source_address:ipv6 & group_address:ipv6
+	
+	/**
+	 * Send a protocol message to the MFEA.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol that sends a message.
+	 * @param protocol_id the ID of the protocol that sends a message
+	 * (both sides must agree on the particular values).
+	 * @param vif_name the name of the vif to send the message.
+	 * @param vif_index the vif index of the vif to send the message.
+	 * @param source_address the address of the sender.
+	 * @param dest_address the destination address.
+	 * @param ip_ttl the TTL of the IP packet to send. If it has a
+	 * negative value, the TTL will be set by the lower layers.
+	 * @param ip_tos the TOS of the IP packet to send. If it has a
+	 * negative value, the TOS will be set by the lower layers.
+	 * @param is_router_alert set/reset the IP Router Alert option in
+	 * the IP packet to send (when applicable).
+	 */
+	send_protocol_message4	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& vif_name:txt & vif_index:u32		\
+				& source_address:ipv4 & dest_address:ipv4 \
+				& ip_ttl:i32 & ip_tos:i32		\
+				& is_router_alert:bool			\
+				& protocol_message:binary
+	send_protocol_message6	? xrl_sender_name:txt			\
+				& protocol_name:txt & protocol_id:u32	\
+				& vif_name:txt & vif_index:u32		\
+				& source_address:ipv6 & dest_address:ipv6 \
+				& ip_ttl:i32 & ip_tos:i32		\
+				& is_router_alert:bool			\
+				& protocol_message:binary
+	
+	/**
+	 * Add/delete a dataflow monitor with the MFEA.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param source_address the source address of the dataflow to
+	 * start/stop monitoring.
+	 * @param group_address the group address of the dataflow to
+	 * start/stop monitoring.
+	 * @param threshold_interval_sec the number of seconds in the
+	 * interval to measure.
+	 * @param threshold_interval_usec the number of microseconds in the
+	 * interval to measure.
+	 * @param threshold_packets the threshold (in number of packets)
+	 * to compare against.
+	 * @param threshold_bytes the threshold (in number of bytes)
+	 * to compare against.
+	 * @param is_threshold_in_packets if true, threshold_packets
+	 * is valid.
+	 * @param is_threshold_in_bytes if true, threshold_bytes
+	 * is valid.
+	 * @param is_geq_upcall if true, the operation for comparison is ">=".
+	 * @param is_leq_upcall if true, the operation for comparison is "<=".
+	 */
+	add_dataflow_monitor4	? xrl_sender_name:txt			\
+				& source_address:ipv4			\
+				& group_address:ipv4			\
+				& threshold_interval_sec:u32		\
+				& threshold_interval_usec:u32		\
+				& threshold_packets:u32			\
+				& threshold_bytes:u32			\
+				& is_threshold_in_packets:bool		\
+				& is_threshold_in_bytes:bool		\
+				& is_geq_upcall:bool			\
+				& is_leq_upcall:bool
+	add_dataflow_monitor6	? xrl_sender_name:txt			\
+				& source_address:ipv6			\
+				& group_address:ipv6			\
+				& threshold_interval_sec:u32		\
+				& threshold_interval_usec:u32		\
+				& threshold_packets:u32			\
+				& threshold_bytes:u32			\
+				& is_threshold_in_packets:bool		\
+				& is_threshold_in_bytes:bool		\
+				& is_geq_upcall:bool			\
+				& is_leq_upcall:bool
+	delete_dataflow_monitor4? xrl_sender_name:txt			\
+				& source_address:ipv4			\
+				& group_address:ipv4			\
+				& threshold_interval_sec:u32		\
+				& threshold_interval_usec:u32		\
+				& threshold_packets:u32			\
+				& threshold_bytes:u32			\
+				& is_threshold_in_packets:bool		\
+				& is_threshold_in_bytes:bool		\
+				& is_geq_upcall:bool			\
+				& is_leq_upcall:bool
+	delete_dataflow_monitor6? xrl_sender_name:txt			\
+				& source_address:ipv6			\
+				& group_address:ipv6			\
+				& threshold_interval_sec:u32		\
+				& threshold_interval_usec:u32		\
+				& threshold_packets:u32			\
+				& threshold_bytes:u32			\
+				& is_threshold_in_packets:bool		\
+				& is_threshold_in_bytes:bool		\
+				& is_geq_upcall:bool			\
+				& is_leq_upcall:bool
+	delete_all_dataflow_monitor4? xrl_sender_name:txt		\
+				& source_address:ipv4			\
+				& group_address:ipv4
+	delete_all_dataflow_monitor6? xrl_sender_name:txt		\
+				& source_address:ipv6			\
+				& group_address:ipv6
+
+	/**
+	 * Enable/disable/start/stop a MFEA vif interface.
+	 *
+	 * @param vif_name the name of the vif to enable/disable/start/stop.
+	 * @param enable if true, then enable the vif, otherwise
+	 * disable it.
+	 */
+	enable_vif	? vif_name:txt & enable:bool
+	start_vif	? vif_name:txt
+	stop_vif	? vif_name:txt
+
+	/**
+	 * Enable/disable/start/stop all MFEA vif interfaces.
+	 *
+	 * @param enable if true, then enable the vifs, otherwise
+	 * disable them.
+	 */
+	enable_all_vifs	? enable:bool
+	start_all_vifs
+	stop_all_vifs
+
+	/**
+	 * Enable/disable/start/stop the MFEA.
+	 *
+	 * @param enable if true, then enable the MFEA, otherwise
+	 * disable it.
+	 */
+	enable_mfea	? enable:bool
+	start_mfea
+	stop_mfea
+
+	/**
+	 * Enable/disable/start/stop the MFEA CLI access.
+	 *
+	 * @param enable if true, then enable the MFEA CLI access, otherwise
+	 * disable it.
+	 */
+	enable_cli	? enable:bool
+	start_cli
+	stop_cli
+
+	/**
+	 * Enable/disable the MFEA trace log for all operations.
+	 *
+	 * @param enable if true, then enable the trace log, otherwise
+	 * disable it.
+	 */
+	log_trace_all	? enable:bool
+
+	/**
+	 * Configure MFEA MRIB-related parameters.
+	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
+	 * XRLs reset the metrics to their default values.
+	 *
+	 * @param metric_preference the MRIB metric preference.
+	 * @param metric the MRIB metric.
+	 */
+	get_mrib_table_default_metric_preference ? -> metric_preference:u32
+	set_mrib_table_default_metric_preference ? metric_preference:u32
+	reset_mrib_table_default_metric_preference
+	get_mrib_table_default_metric ?	-> metric:u32
+	set_mrib_table_default_metric ?	metric:u32
+	reset_mrib_table_default_metric
+}

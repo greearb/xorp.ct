@@ -1,0 +1,61 @@
+#
+# $XORP: xorp/rib/TODO,v 1.9 2004/05/06 18:01:25 hodson Exp $
+#
+
+RIB To Do List
+=======================
+
+o ExtIntTable needs some re-writing to be more symetric so that
+recursive BGP nexthop lookups are possible.
+
+o VIF configuration should be automatic, by communicating directly
+with the FEA.
+
+o ExportTable needs a queue adding to rate control changes to the FEA
+when the FEA is not keeping up.
+
+o ExportTable should amalgamate deletes and adds in its queue for the
+same route.
+
+o RegisterServer should amalgamate deletes and adds in its queue for
+the same route.
+
+o RegisterServer should be smarter about the use of flush().
+
+o Route filters are needed for route redistribution.
+
+o Change OriginTable to hold data rather than pointers in the Trie.
+
+o Better, more extensive test suites.
+
+o Rething the logic computing whether a route is directly connected
+    (e.g., when we use Vif::is_same_subnet() or Vif::is_same_p2p()):
+    if vif is down, then the route is NOT directly connected?
+
+o Make test_rib_client.cc work properly
+
+o Prune Export Table code.  This can be done with Redist Table using
+  an export specific output, ie one that adds start and end
+  transaction around route add / delete xrls.
+
+o Repeated adding and deleting of a table does not work.
+  $ bgp/harness/test_routing2.sh -t test6.
+
+o Use ref_trie.hh not trie.hh.
+
+o The RIB provides a "register_interest[46]/deregister_interest[46]"
+interface for routes. The response to the register_interest call
+returns the requested answer. However, if a previous response becomes
+invalid the invalidation call comes via the rib_client interface. The
+client process can therefore information about a route via two
+different channels. This can mean that messages on one channel can
+overtake messages on the other channel.
+
+Therefore registering interest should not return the answer the answer
+should come later via the rib_client interface.
+
+Done
+=======================
+o Add new interface for PIM simply be able to get all the routes.
+
+o Add route redistribution.

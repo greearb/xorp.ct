@@ -1,0 +1,354 @@
+interface ripng/0.1 {
+
+    /**
+     * Add an address to run RIP process on.  The addition of address is
+     * not instantaneous, RIP has to instantiate state in the FEA to send
+     * and receive packets.  Once instantiated the address must be
+     * explicitly enabled with set_rip_address_enabled.
+     *
+     * @param ifname the interface that owns vif that has address.
+     * @param vifname virtual interface owning address.
+     * @param addr the address to be added.
+     */
+    add_rip_address ? ifname:txt					\
+		    & vifname:txt					\
+		    & addr:ipv6
+
+    /**
+     * Remove an address RIP process is running on.
+     *
+     * @param ifname the interface that owns vif that has address.
+     * @param vifname virtual interface owning address.
+     * @param addr the address to be removed.
+     */
+    remove_rip_address ? ifname:txt & vifname:txt & addr:ipv6
+
+    set_rip_address_enabled ? ifname:txt 	  			\
+			    & vifname:txt				\
+			    & addr:ipv6 				\
+			    & enabled:bool
+
+    rip_address_enabled	    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6					\
+			    -> enabled:bool
+
+    /**
+     * Set cost metric associated with address.
+     */
+    set_cost		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6 				\
+			    & cost:u32
+
+    /**
+     * Get cost metric associated with address.
+     */
+    cost		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6					\
+			    -> cost:u32
+
+    /**
+     * Set horizon type applied to routes advertised from address.
+     * @param horizon name of horizon type.
+     * Permitted values: "none",
+     *			 "poison-reverse"
+     *			 "split-horizon-poison-reverse"
+     */
+    set_horizon		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6 				\
+			    & horizon:txt
+
+    /**
+     * Get horizon type applied to routes advertised from address.
+     */
+    horizon		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6 				\
+			    -> horizon:txt
+
+    /**
+     * Make RIP passive (receive only) on interface/vif/address.
+     */
+    set_passive		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6					\
+			    & passive:bool
+
+    /**
+     * Get value indicating whether RIP is passive (receive only)
+     * on interface/vif/address.
+     */
+    passive		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6					\
+			    -> passive:bool
+
+    /**
+     * Accept and respond to non-RIP requests.
+     */
+    set_accept_non_rip_requests		? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					& accept:bool
+
+    /**
+     * Get value indicating whether non-RIP requests are accepted and
+     * responded to on interface/vif/address.
+     */
+    accept_non_rip_requests	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> accept:bool
+
+    /**
+     * Accept default route from peers.
+     */
+    set_accept_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				& accept:bool
+
+    /**
+     * Accessor for whether default route is accepted from peers.
+     */
+    accept_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> accept:bool
+
+    /**
+     * Advertise default route (if present).
+     */
+    set_advertise_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				& advertise:bool
+
+    /**
+     * Accessor for whether default route is advertised.
+     */
+    advertise_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> advertise:bool
+
+    /**
+     * Set period that routes associated with reception address will
+     * expire in the absence of updates.
+     */
+    set_route_expiry_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				& t_secs:u32
+
+    /**
+     * Get period that routes associated with reception address will
+     * expire in the absence of updates.
+     */
+    route_expiry_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> t_secs:u32
+
+    /**
+     * Set period that routes associated with reception address will be
+     * deleted after they've expired.
+     */
+    set_route_deletion_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				& t_secs:u32
+
+    /**
+     * Get period that routes associated with reception address will be
+     * deleted after they've expired.
+     */
+     route_deletion_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> t_secs:u32
+
+    /**
+     * Set period that route table requests should be sent from address
+     * when no peers are associated with it.
+     */
+    set_table_request_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				& t_secs:u32
+
+    /**
+     * Set period that route table requests should be sent from address
+     * when no peers are associated with it.
+     */
+    table_request_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> t_secs:u32
+
+    /**
+     * Set minimum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    set_unsolicited_response_min_seconds  ? ifname:txt			\
+					  & vifname:txt			\
+					  & addr:ipv6			\
+					  & t_secs:u32
+    /**
+     * Get minimum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    unsolicited_response_min_seconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> t_secs:u32
+
+    /**
+     * Set maximum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    set_unsolicited_response_max_seconds	? ifname:txt		\
+						& vifname:txt		\
+						& addr:ipv6		\
+						& t_secs:u32
+
+    /**
+     * Get maximum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    unsolicited_response_max_seconds  ?	ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> t_secs:u32
+
+    /**
+     * Set minimum period between sending triggered updates from address.
+     */
+    set_triggered_update_min_seconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					& t_secs:u32
+
+    /**
+     * Get minimum period between sending triggered updates from address.
+     */
+    triggered_update_min_seconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> t_secs:u32
+
+    /**
+     * Set maximum period between sending triggered updates from address.
+     */
+    set_triggered_update_max_seconds  ? ifname:txt			\
+				      & vifname:txt			\
+				      & addr:ipv6			\
+				      & t_secs:u32
+
+    /**
+     * Get maximum period between sending triggered updates from address.
+     */
+    triggered_update_max_seconds  ? ifname:txt			\
+				      & vifname:txt			\
+				      & addr:ipv6			\
+				      -> t_secs:u32
+
+    /**
+     * Set the inter-packet delay between the output of packets from
+     * address.
+     */
+    set_interpacket_delay_milliseconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					& t_msecs:u32
+
+    /**
+     * Get the inter-packet delay between the output of packets from
+     * address.
+     */
+    interpacket_delay_milliseconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> t_msecs:u32
+
+
+    /**
+     * Get a textual description of the status of address RIP is running
+     * upon.
+     *
+     * @param ifname the interface that owns vif that has the address.
+     * @param vifname virtual interface owns the address.
+     * @param addr the address to query.
+     */
+    rip_address_status			? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> status:txt
+
+    /**
+     * Get addresses running RIP.
+     */
+    get_all_addresses			-> ifnames:list			\
+					&  vifnames:list		\
+					&  addrs:list
+
+    /**
+     * Get counters associated with interface / vif /address.
+     */
+     get_counters			? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> counter_descriptions:list	\
+					&  counter_values:list
+
+    /**
+     * Get the list of peers associated with interface / vif / address.
+     */
+    get_peers				? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> peers:list
+
+    /**
+     * Get list of all peers known to RIP.  There is a 1-to-1 correspondence
+     * between the items in the lists of peers, ifnames, vifnames, addrs.
+     */
+    get_all_peers			-> peers:list			\
+					& ifnames:list			\
+					& vifnames:list			\
+					& addrs:list
+
+    /**
+     * Get counters associated with peer of interface / vif /address.
+     *
+     * @param counter_descriptions textual descriptions of counters.
+     * @param counter_values values associated with counters.
+     * @param peer_last_active is the number of seconds since TimeVal(0,0).
+     */
+     get_peer_counters			? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					& peer:ipv6			\
+					-> counter_descriptions:list	\
+					&  counter_values:list		\
+					&  peer_last_active:u32
+
+     /**
+      * Configure protocol route import.
+      *
+      * @param protocol_name name of protocol to import routes from.
+      * @param cost RIP cost metric to assign to protocol routes.
+      * @param tag RIP tag to associate with protocol routes.
+      */
+     import_protocol_routes ? protocol_name:txt & cost:u32 & tag:u32
+
+     /**
+      * Remove protocol route import.
+      *
+      * @param protocol_name name of protocol to stop import of routes from.
+      */
+     no_import_protocol_routes ? protocol_name:txt
+}

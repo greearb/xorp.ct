@@ -1,0 +1,904 @@
+<!-- $XORP: www/getting_started.html,v 1.13 2004/06/15 16:19:57 hodson Exp $ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<HEAD>
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<TITLE>Getting Started with XORP</TITLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<table border="0" cellspacing="0" cellpadding="8"><tr><td>
+<a href="/"><img src="images/xorp-logo-medium.jpg" alt="XORP logo"  border="0"></a>
+<h2>Getting Started with XORP</h2>
+
+This short guide is aimed at people new to XORP understand what XORP
+does and how to use it.  It's a work in progress - please let us know
+what additional help you would find useful.
+<P>
+<UL>
+
+<LI><a href="#getting">Getting XORP</a>
+<LI><a href="#os">Supported Operating Systems</a>
+<LI><a href="#compiling">Compiling XORP from source</a>
+<LI><a href="#validating">Validating a XORP Compilation</a>
+<LI><a href="#running">Running XORP</a>
+<LI><a href="#configuring">Configuring XORP</a>
+<LI><a href="#inside">Inside XORP</a>
+<LI><a href="#porting">Porting XORP to a new platform</a>
+<LI><a href="#bugs">Reporting Problems</a>
+</UL>
+<P>
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="getting"><B>Getting XORP</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+There are three ways to try out XORP.
+<UL>
+<LI><a href="downloads.html">Download</a> a release, and <a
+href="#compiling">compile</a> it from source.
+<LI>Get the current source snapshot <a href="cvs.html">from CVS</a> and <a
+href="#compiling">compile</a> it.
+<LI>Download a <a href="livecd.html">live CD</a>, and try out a
+precompiled release.
+</UL>
+If you want to develop new functionality for XORP, you'll obviously
+need to compile from source, but the live CD provides a way to try
+XORP out without needing to worry about having the right compilers or
+operating system installed.
+</td></tr></table><P>
+
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="os"><B>Supported Operating Systems</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+XORP should be fairly portable.  At the present time, the main
+development platforms for XORP are FreeBSD and Linux.  XORP should run
+on all recent versions of FreeBSD (as of April 2004, we recommend
+FreeBSD 4.9) and on most versions of Linux with a 2.4.x kernel.
+<P>
+XORP compiles on MacOS 10.2 or later, but there is not currently any
+forwarding support.  If you try XORP on another platform, let us know
+how you fare.  See <a href="#porting">porting</a> if you're interested
+in porting XORP to a new platform.
+<P>
+We aim to add Windows XP to our supported platforms during 2004.
+</td></tr></table><P>
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="compiling"><B>Compiling XORP from source</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+XORP is written in C++.  We've endeavoured to comply as far as
+possible with the ANSI standards, but currently XORP has only been
+compiled with variants of gcc.  XORP is known to compile on gcc
+2.95.x, 2.96, 3.2.x, 3.3.x, and pre-releases of 3.4.
+<P>
+Our <a href="#tinderbox">tinderbox</a> checks daily that XORP still
+compiles and passes its validation tests with 2.95.4, 3.3.4, and
+3.4-prerelease.  The aim is that you should always be able to check
+out a current source snapshot from CVS, compile it, and have it pass
+all the internal validation tests.  We don't always succeed, but
+failures identified by the tinderbox are always fixed very rapidly.
+<P>
+To compile XORP requires nearly 1GB of free disk space, and up to an
+hour depending on your CPU speed and the version of the compiler
+you're using.  Much of this is spent compiling the validation tests,
+which are always built by default.
+<P>
+To compile XORP, you will need <a
+href="http://www.gnu.org/software/make/make.html">gmake</a>
+installed. This is the default on Linux but not on FreeBSD.
+<P>
+Assuming you have a checked out copy of the XORP source, you should be
+able to compile XORP by typing (in the top-level XORP source directory
+where the file "VERSION" is located):
+<PRE>
+# ./configure
+# gmake
+</PRE>
+Note: gmake may be installed as make on some platforms.  Then go away
+and have a coffee or two.
+<P>
+This will build XORP "in place".  That is, the bgp binary (xorp_bgp)
+will be left in the bgp subdirectory, the XORP shell binary (xorpsh)
+will be left in the rtrmgr directory, and so on.  This default can be
+overridden (for example, if you're cross-compiling multiple platforms
+from the same source), but there's no need to if you're just starting
+out.
+</td></tr></table><P>
+
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="validating"><B>Validating a XORP Compilation</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+Assuming the compilation completed without errors, you should now
+validate that the build actually runs correctly.  In the top-level
+directory, type:
+<PRE>
+# gmake check
+</PRE>
+This will run all the internal validation tests for all the XORP
+modules.  This is a rather lengthy procedure (nearly an hour), but
+it's a good idea to be sure that everything is working.
+<P>
+The debugging output can sometimes be a little excessive, but what
+you're looking for is lines like:
+<pre>
+PASS: test_trie
+</pre>
+which indicates that a particular test program completed successfully.
+Hopefully you won't see any lines like:
+<pre>
+FAIL: test_peering1.sh
+</pre>
+which indicates a particular validation test failed.
+<P>
+There can be warnings such as:
+<pre>
+[ 2004/04/22 00:48:57 WARNING coord BGP ] TCP connection 
+from test_peer: peer1 to localhost closed
+</pre>
+Unless these result in a FAIL message, they are typically
+transient artifacts of the testing methodology, and can safely be
+ignored.
+<P>
+</td></tr></table><P>
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="running"><B>Running XORP</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+XORP tries to hide from the operator the internal structure of the
+software, so that the operator only needs to know the right commands
+to use to configure the router.  The operator should not need to know
+that XORP is internally composed of multiple processes, nor what those
+processes do.  All the operator needs to see is a single router
+configuration file that determines the startup configuration, and a
+single command line interface that can be used to configure XORP.
+<P>
+There is a single XORP process that manages the whole XORP router -
+this is called <B>xorp_rtrmgr</B> (short for XORP Router Manager).  If
+you built XORP from source using the defaults, the xorp_rtrmgr binary
+will be in the rtrmgr subdirectory.
+<P>
+xorp_rtrmgr will expect to find a configuration file in the same
+directory it is started from.  By default this configuration file is
+called <B>config.boot</B>.  There's a sample config.boot file in the
+rtrmgr directory - please <B>do not</B> use this without tailoring the
+IP addresses, interfaces and routing protocols to match your local
+network environment.  You can specify a different filename for the
+configuration file using the -b command line flag.  The -n "no
+execute" flag will cause xorp_rtrmgr to startup and pretend the router
+is operating normally, but to not actually start any processes.  This
+can be used to check configuration files.
+<P>
+Typically xorp_rtrmgr must be run as root.  This is because it starts
+up processes that need privileged access to insert routes into
+the forwarding path in the kernel.
+<P>
+If you are using the live CD, then xorp_rtrmgr should start by default
+after the OS has booted, and read the config.boot file from the floppy
+drive.
+<P>
+To interact with the router via the command line interface, the
+operator uses the XORP command shell <B>xorpsh</B>.  If you compiled
+from source, this should also be in the rtrmgr subdirectory.  xorpsh
+should not normally be run as root, but if a user is going to change
+the configuration of the router (as opposed to simply monitor the
+router's operation) then they need to be in the "xorp" Unix group.  If
+you are using the live CD then, by default, logging in as username
+xorp should cause the user's login shell to be xorpsh.
+<P>
+The <a
+href="/releases/current/docs/rtrmgr/xorpsh_userguide.pdf">xorpsh user
+manual</a> (PDF) provides basic information about how to use xorpsh.
+The "help" command also provides basic online help.  To learn how to
+configure specific routing protocols, interface IP addresses, and so
+forth, you need to see the <a
+href="/releases/current/docs/index.html">relevant user manuals</a>.
+</TD></TR>
+</table><P>
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="configuring"><B>Configuring XORP</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+A XORP router must be configured to perform the desired operations.
+The configuration information can be provided in one of the two ways:
+<UL>
+<LI>Use a configuration file when the rtrmgr is started.
+    By default, the rtrmgr will load the configuration from file
+    "config.boot" in the XORP installation directory.
+    This file can be specified by the "-b <filename> command line
+    option:
+<PRE>
+    xorp_rtrmgr -b my_config.boot
+</PRE>
+
+    See <A href="releases/current/docs/config.boot.sample.txt">
+    rtrmgr/config.boot.sample</A> for an example of a
+    configuration file (note that this file MUST be modified
+    before using it).
+
+<LI>Use the xorpsh command line interface after the rtrmgr is started.
+   It should be noted that command line completion in the xorpsh
+   does greatly simplify configuration.
+</UL>
+
+A mixture of both methods is permissible. For example,
+a configuration file can also be loaded from within the xorpsh.
+
+<H3>Network Interfaces</H3>
+
+A XORP router will only use interfaces that it has been explicitly
+configured to use. Even for protocols such as BGP that are agnostic to
+interfaces, if the next-hop router for a routing entry is not through
+a configured interface routes the route will not be installed.
+For protocols that are explicitly aware of interfaces only configured
+interfaces will be used.
+<P>
+Every physical network device in the system is considered to be an
+"interface". Every interface can contain a number of virtual
+interfaces ("vif"s). In the majority of cases the interface name and vif
+name will be identical and will map to the name given to the interface
+by the operating system. A virtual interface is configured with the address
+or addresses that should be used. At each level in the configuration
+hierarchy ("interface", "vif" and "address") it is necessary to enable
+this part of the configuration.
+
+<PRE>
+interfaces {
+    interface dc0 {
+	description: "data interface"
+	enabled: true
+	/* default-system-config */
+	vif dc0 {
+	    enabled: true
+	    address 10.10.10.10 {
+		prefix-length: 24
+		broadcast: 10.10.10.255
+		enabled: true
+	    }
+/*
+	    address 10:10:10:10:10:10:10:10 {
+		prefix-length: 64
+		enabled: true
+	    }
+*/
+	}
+    }
+}
+</PRE>
+
+We recommend that you select the interfaces that you want to use on
+your system and configure them as above. If you are configuring an
+interface that is currently being used by the the system make sure
+that there is no mismatch in the "address", "prefix-length" and
+"broadcast" arguments.
+If the "default-system-config" statement is used, it
+instructs the FEA that the interface should be configured by using
+the existing interface information from the underlying system.
+In that case, the "vif"s and "address"es must not be configured.
+
+<H3>Forwarding Engine Abstraction</H3>
+
+It is a requirement to explicitly enable forwarding for each
+protocol family.
+
+<PRE>
+fea {
+    enable-unicast-forwarding4: true
+    /* enable-unicast-forwarding6: true */
+}
+</PRE>
+
+If IPv4 forwarding is required you will require the configuration
+above.
+<P>
+Now that we have configured the interfaces and enabled forwarding we
+need to configure some routing protocols.
+
+<H3>Protocols</H3>
+
+<H4>Static Routes</H4>
+
+This is the simplest routing protocol in XORP. It allows the
+installation of unicast or multicast static routes (either IPv4 or IPv6).
+Note that in case of multicast the routes are installed only in the user-level
+Multicast Routing Information Base and are used for multicast-specific
+reverse-path information by multicast routing protocols such as PIM-SM.
+
+<PRE>
+protocols {
+    static {
+	route4 10.20.0.0/16 {
+	    nexthop: 10.10.10.20
+	    metric: 1
+	}
+	mrib-route4 10.20.0.0/16 {
+	    nexthop: 10.10.10.30
+	    metric: 1
+	}
+/*
+	route6 20:20:20:20::/64 {
+	    nexthop: 10:10:10:10:10:10:10:20
+	    metric: 1
+	}
+	mrib-route6 20:20:20:20::/64 {
+	    nexthop: 10:10:10:10:10:10:10:30
+	    metric: 1
+	}
+*/
+    }
+}
+</PRE>
+
+Static routes can be redistributed through the RIP protocol using RIP's
+"import" statement.
+
+<H4>Routing Information Protocol</H4>
+
+In order to run RIP it is sufficient to specify the "interface"s, "vif"s
+and "address"es on which RIP is enabled. Remember that each "address"
+must be explicitly enabled.
+<P>
+If you wish to announce routes then it is necessary to "import" the
+routes that are to be announced. For example, "connected", "static" and
+"rip".
+
+<PRE>
+protocols {
+    rip {
+/* Redistribute routes for connected interfaces */
+/*
+	import connected {
+	    metric: 0
+	    tag: 0
+	}
+*/
+/* Redistribute static routes */
+/*
+	import static {
+	    metric: 1
+	    tag: 0
+	}
+*/
+/* Run on specified network interface addresses */
+/*
+	interface dc0 {
+	    vif dc0 {
+		address 10.10.10.10 {
+		    enabled: true
+		}
+	    }
+	}
+*/
+    }
+}
+</PRE>
+
+<H4>Border Gateway Protocol</H4>
+
+In order to run BGP the "bgp-id" (BGP Identifier) and "local-as"
+(Autonomous System number) must be specified.
+<P>
+The "peer" statement specifies a peering. The argument to the peer
+statement is the IP address of the peer. The "local-ip" is the IP
+address that TCP should use. The "as" is the Autonomous System Number
+of the peer.
+
+<PRE>
+protocols {
+    bgp {
+	bgp-id: 10.10.10.10
+	local-as: 65002
+
+	peer 10.30.30.30 {
+	    local-ip: 10.10.10.10
+	    as: 65000
+	    next-hop: 10.10.10.20
+/*
+	    local-port: 179
+	    peer-port: 179
+*/
+	    /* holdtime: 120 */
+	    /* enabled: true */
+
+	    /* Optionally enable other AFI/SAFI combinations */
+	    /* enable-ipv4-multicast */
+
+            /* enable-ipv6-unicast */
+            /* enable-ipv6-multicast */
+	}
+
+	/* Originate IPv4 Routes */
+/*
+	network4 10.10.10.0/24 {
+	    next-hop: 10.10.10.10
+	    unicast: true
+	    multicast: true
+	}
+*/
+
+	/* Originate IPv6 Routes */
+/*
+	network6 10:10:10:10::/64 {
+	    next-hop: 10:10:10:10:10:10:10:10
+	    unicast: true
+	    multicast: true
+	}
+*/
+    }
+}
+</PRE>
+
+Currently BGP is not able to "import" routes from other routing
+protocols such as "static". It is however possible to originate routes
+using network statements such as in the above example.
+
+
+<H4>Multicast Forwarding Engine Abstraction</H4>
+
+The MFEA must be configured if the XORP router is to be used for multicast
+routing. The MFEA for IPv4 and IPv6 are configured separately.
+<P>
+In the configuration we must explicitly enable the entity itself, and
+each "vif". The "traceoptions" section is used to explicitly enable
+log information that can be used for debugging purpose.
+
+<PRE>
+plumbing {
+    mfea4 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+}
+
+plumbing {
+    mfea6 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+}
+</PRE>
+
+Note that the interface/vif named "register_vif" is special.
+If PIM-SM is configured, then "register_vif" must be enabled
+in the MFEA.
+
+<H4>Internet Group Management Protocol/Multicast Listener Discovery</H4>
+
+IGMP/MLD should be configured if the XORP router is to be used for multicast
+routing and if we want to track multicast group membership for directly
+connected subnets. Typically this is the case for a multicast router,
+therefore it should be enabled. IGMP and MLD are configured separately:
+IGMP is used for tracking IPv4 multicast members; MLD is used for tracking
+IPv6 multicast members.
+<P>
+In the configuration we must explicitly enable each entity and
+each "vif". The "traceoptions" section is used to explicitly enable
+log information that can be used for debugging purpose.
+
+<PRE>
+protocols {
+    igmp {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+}
+
+protocols {
+    mld {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+}
+</PRE>
+
+<H4>Protocol Independent Multicast - Sparse Mode</H4>
+
+PIM-SM should be configured if the XORP router is to be used for
+multicast routing in PIM-SM domain. PIM-SM for IPv4 and IPv6 are
+configured separately. At minimum, the entity itself and the
+virtual interfaces should be enabled, and the mechanism for obtaining
+the Candidate-RP set (either the Bootstrap mechanism, or a static-RP set).
+
+<PRE>
+protocols {
+    pimsm4 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+		/* dr-priority: 1 */
+		/* alternative-subnet 10.40.0.0/16 */
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		enabled: true
+	    }
+	}
+
+	static-rps {
+	    rp 10.60.0.1 {
+		group-prefix 224.0.0.0/4 {
+		    /* rp-priority: 192 */
+		    /* hash-mask-len: 30 */
+		}
+	    }
+	}
+
+	bootstrap {
+	    enabled: true
+	    cand-bsr {
+		scope-zone 224.0.0.0/4 {
+		    /* is-scope-zone: false */
+		    cand-bsr-by-vif-name: "dc0"
+		    /* bsr-priority: 1 */
+		    /* hash-mask-len: 30 */
+		}
+	    }
+
+	    cand-rp {
+		group-prefix 224.0.0.0/4 {
+		    /* is-scope-zone: false */
+		    cand-rp-by-vif-name: "dc0"
+		    /* rp-priority: 192 */
+		    /* rp-holdtime: 150 */
+		}
+	    }
+	}
+
+	switch-to-spt-threshold {
+	    /* approx. 1K bytes/s (10Kbps) threshold */
+	    enabled: true
+	    interval-sec: 100
+	    bytes: 102400
+	}
+
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+}
+
+protocols {
+    pimsm6 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+		/* dr-priority: 1 */
+		/* alternative-subnet 40:40:40:40::/64 */
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		enabled: true
+	    }
+	}
+
+	static-rps {
+	    rp 50:50:50:50:50:50:50:50 {
+		group-prefix ff00::/8 {
+		    /* rp-priority: 192 */
+		    /* hash-mask-len: 126 */
+		}
+	    }
+	}
+
+	bootstrap {
+	    enabled: true
+	    cand-bsr {
+		scope-zone ff00::/8 {
+		    /* is-scope-zone: false */
+		    cand-bsr-by-vif-name: "dc0"
+		    /* bsr-priority: 1 */
+		    /* hash-mask-len: 30 */
+		}
+	    }
+
+	    cand-rp {
+		group-prefix ff00::/8 {
+		    /* is-scope-zone: false */
+		    cand-rp-by-vif-name: "dc0"
+		    /* rp-priority: 192 */
+		    /* rp-holdtime: 150 */
+		}
+	    }
+	}
+
+	switch-to-spt-threshold {
+	    /* approx. 1K bytes/s (10Kbps) threshold */
+	    enabled: true
+	    interval-sec: 100
+	    bytes: 102400
+	}
+
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+}
+</PRE>
+
+A number of parameters have default values, therefore
+they don't have to be configured (those parameters are commented-out
+in the above sample configuration).
+<P>
+Note that the interface/vif named "register_vif" is special
+If PIM-SM is configured, then "register_vif" must be enabled.
+<P>
+The "dr-priority" parameter is used to configure the Designated Router
+priority per virtual interface (note that in case of "register_vif"
+it is not used).
+<P>
+The "alternative-subnet" statement is used to add "alternative subnets"
+to a network interface. For example, if you want to make incoming traffic
+with a non-local source address appear as it is coming from a local subnet,
+then "alternative-subnet" can be used. Typically, this is needed as a
+work-around solution when we use uni-directional interfaces for
+receiving traffic (e.g., satellite links).
+Note: use "alternative-subnet" with extreme care, only if you know
+what you are really doing!
+<P>
+If PIM-SM uses static RPs, those can be configured within the
+"static-rps" section. For each RP, an "rp" section is needed, and each
+section should contain the multicast prefix address the static RP is
+configured with. The RP priority can be modified with the "rp-priority"
+parameter.
+<P>
+If PIM-SM uses the Bootstrap mechanism to obtain the Candidate-RP set,
+that can be configured in the "bootstrap" section.
+If the XORP router is to be used as a Candidate-BSR, this should be
+specified in the "cand-bsr" section.
+For a router to be a Candidate-BSR it must advertise for
+each zone (scoped or non-scoped) the associated multicast prefix address.
+The "cand-bsr" section should contain "scope-zone" statements for each
+multicast prefix address.
+The vif name with the address that is to be used as the Candidate-BSR
+is specified by the "cand-bsr-by-vif-name" statement.
+The Candidate-BSR priority can be modified with the "bsr-priority"
+parameter.
+<P>
+If the XORP router is to be a Candidate-RP, this should be specified
+in the "cand-rp" section.
+For a router to be a Candidate-RP it must advertise for
+each zone (scoped or non-scoped) the associated multicast prefix address.
+The "cand-rp" section should contain "group-prefix" statements for each
+multicast prefix address.
+The vif name with the address that is to be used as the Candidate-RP
+is specified by the "cand-rp-by-vif-name" statement.
+The Candidate-RP priority can be modified with the
+"rp-priority" parameter; the Candidate-RP holdtime can be modified
+with the "rp-holdtime" parameter.
+<P>
+The "is-scope-zone" parameter is used to specify whether a Candidate-BSR
+"scope-zone" or a Candidate-RP "group-prefix" is scoped. Currently,
+scoped zones are not well tested, hence it is recommended "scope-zone"
+is always set to "false".
+Note that typically the "hash-mask-len" should not be modified; if you
+don't know what "hash-mask-len" is used for, don't modify it!
+<P>
+The "switch-to-spt-threshold" section can be used to specify the
+multicast data bandwidth threshold used by the last-hop PIM-SM routers
+and the RPs to initiate shortest-path switch toward the multicast source.
+Parameter "interval-sec" is used to specify the periodic measurement interval;
+parameter "bytes" is used to specify the threshold in number of bytes
+within the measurement interval. It is recommended that the measurement
+interval is not too small, and should be on the order of tens of seconds.
+<P>
+The "traceoptions" section is used to explicitly enable log information
+that can be used for debugging purpose.
+
+<H4>FIB2MRIB</H4>
+
+The FIB2MRIB module is used to obtain the Forwarding Information Base
+information from the underlying system (via the FEA), and to propagate
+it to the MRIB, so it can be used by multicast routing protocols
+such as PIM-SM. Typically, it is needed only if the unicast routing
+protocols (if any) on that router do not inject routes into the MRIB.
+Note that FIB2MRIB is disabled by default, therefore if it is needed
+it must be explicitly enabled.
+
+<PRE>
+protocols {
+    fib2mrib {
+	enabled: true
+    }
+}
+</PRE>
+
+</TD></TR>
+</table><P>
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="inside"><B>Inside XORP</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+<img src="releases/current/docs/processes3.png" ALT="Processes Diagram">
+<P>
+XORP is implemented as multiple processes communicated through a novel
+<a
+href="releases/current/docs/libxipc/xrl_interfaces.pdf">inter-process
+communication mechanism</a> (PDF) called XORP Resource Locators or
+XRLs for short.  A design overview is <a
+href="releases/current/docs/design_arch/design_arch.pdf">here</a>.
+</TD></TR> </table><P>
+
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="porting"><B>Porting XORP to a new platform</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+<P>
+Notes on porting:
+<P>
+Most of XORP should be relatively portable.  The first requirement is
+that you have a compatible C++ compiler.  All recent versions of gcc
+should work, but we don't yet know about other compilers.
+<P>
+The goal is for all of the system dependencies to be in the Forwarding
+Engine Abstraction (FEA) process.  To port XORP to a new platform, either an
+existing FEA must be ported to that platform, or a new bottom end to
+the FEA will need to be written.  FreeBSD and Linux use different bottom
+ends to the FEA.
+<P>
+The libxipc XRL IPC library may need work to port, but this should not
+be a significant problem on most platforms.
+<P>
+System dependencies on raw sockets, and similar things that differ
+from OS to OS should not be present in the routing protocols, but
+should rather be relayed through requests via the FEA.  At the present
+time this is not true of all routing protocols.
+
+</TD></TR>
+</table><P>
+
+<table border="0" cellpadding="5"  cellspacing="1"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="bugs"><B>Report Problems</B></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+ <p> If you try XORP, and it doesn't do what you expect or hope,
+      please let us know, either through email to feedback at xorp.org
+      or <a href="http://www.xorp.org/bugzilla/index.cgi">bugzilla</a>
+</TD></TR>
+
+</table><P>
+
+</td>
+<td valign="top" width="20%">
+      <table border="0" cellspacing="0" cellpadding="1"  bgcolor="#b0b0b0" width="100%">
+         <tr>
+            <td>
+            <table border="0" bgcolor="#ffffff" width="100%" cellspacing="0" cellpadding="1">
+  	    <tr><td bgcolor="#b0b0b0" colspan="2"><b>Quick&nbsp;Links</b></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="index.html">XORP Home</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="news.html">News</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="downloads.html">Downloads</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="cvs.html">Anonymous&nbsp;CVS</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="http://xorpc.icir.org/cgi-bin/cvsweb.cgi/">CVSweb&nbsp;access</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="releases/current/docs/status.html">Software&nbsp;Status</a></small></td></tr>
+  	    <tr><td></td>
+	      <td bgcolor="#d0d0d0" ><small><a href="docs.html"><B>Documentation</B></a></small></td></tr>
+  	    <tr><td width="10" bgcolor="#d00000"></td>
+	      <td bgcolor="#d0d0d0" ><small><a href="getting_started.html">Getting&nbsp;Started</a></small></td></tr>
+  	    <tr><td></td>
+	      <td bgcolor="#d0d0d0" ><small><a href="livecd.html">Live CD</a></small></td></tr>
+  	    <tr><td></td>
+	      <td bgcolor="#d0d0d0" ><small><a href="releases/current/docs/index.html">Design&nbsp;Docs</a></small></td></tr>
+  	    <tr><td></td>
+	      <td bgcolor="#d0d0d0" ><small><a href="releases/current/docs/kdoc/html/index.html">Software&nbsp;Docs</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="index.html#mail">Mailing&nbsp;Lists</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="contributing.html">Contributing</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="people.html">People</a></small></td></tr>
+            </table>
+  	  </td>
+          </tr>
+      </table>
+</td></tr></table>
+
+<hr>
+<address>feedback&#64;xorp&#46;org</address>
+<!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
+<!-- hhmts start -->
+<small>
+Last modified: $Date$.
+</small>
+<!-- hhmts end -->
+
+  </body>
+</html>
+

@@ -1,0 +1,90 @@
+#
+# $XORP: xorp/xrl/README,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $
+#
+
+This directory contains code for automatically generating Xrl
+interface and server code.  The generated code is primarily to make
+writing xrl dispatch and handler routines easier.  It takes care of
+the marshalling and checking of xrl types.  It is somewhat analogous
+to RPC gen.
+
+An "Xrl Interface" is a set of xrl methods.  Xrl Interface files have the
+suffix .xif.
+
+An "Xrl Target" implements a set of interfaces and all of the methods
+associated with an interface.  Xrl Target files have the suffix .tgt.
+
+Directory Structure
+-------------------
+
+xrl-+- interfaces	Interface definitions (.xif's) and corresponding 
+    |			generated headers and libraries.
+    |
+    +- scripts		python scripts used to generated C++ Xrl interface 
+    |			and target code.
+    |
+    +- targets		Xrl Target definitions (.tgt) and corresponding
+    |			generated headers and libraries.
+    |
+    +- tests		Test code for generated interfaces and targets.
+			Use 'gmake check' to run.
+
+Interface Client Generation
+---------------------------
+
+clnt-gen generates an interface client header and an associated
+library from .xif files.
+
+	% cpp engine.xif | python clnt-gen.py
+
+generates(*):
+
+	- engine_xif.hh
+	- libenginexif.a (via engine_xif.cc) 
+
+These files make it easy to send XRL's to an Target implementing and
+interface.  All marshalling and unmarshalling of XrlAtom types and
+associated checking are handled.  An API taking native parameter types
+is created.  The parameter names are derived from the Xrl parameter
+descriptions.
+
+(*) cpp is used for #include directive.
+
+Target Generation
+-----------------
+
+tgt-gen generates Xrl target related files.
+
+	% cpp car.tgt | python tgt-gen.py
+
+generates (*):
+
+	- car_xrl_server.hh
+	- libcarxrlserver.a (via car_xrl_server.cc)
+	- car.xrls (a list of Xrls supported by car target)
+
+These files implement marshalling and unmarshalling of XrlAtom
+types for the Xrl interfaces.  The implementor needs to derive
+a class from that defined in the header file.  The methods to
+be implemented also have native parameter types with names
+derived from the Xrl parameter names.
+
+(*) cpp is used for #include directive.
+
+
+List of valid names of Xrl atoms
+(TODO: temp. here until the Xrl document is added to the CVS)
+(See XrlAtomTypeMap(){} inside libxipc/xrl_atom.cc for latest list)
+---------------------------
+boolean		= "bool"
+int32		= "i32"
+uint32		= "u32"
+ipv4		= "ipv4"
+ipv4net		= "ipv4net"
+ipv6		= "ipv6"
+ipv6net		= "ipv6net"
+mac		= "mac"
+text		= "txt"
+list		= "list"
+binary		= "binary"
+

@@ -1,0 +1,774 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+# -- Subdirectories
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+FLOWER_MALLOC = @FLOWER_MALLOC@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
+
+SUBDIRS = . harness tools
+
+# -- Real Programs
+bin_PROGRAMS = xorp_bgp
+
+# -- Test Programs
+#TESTS		+= test_plumbing
+#TESTS		+= update_test
+TESTS = test_packet aspath_test test_packet_coding isolation_tests test_peer_data test_leaks.sh
+
+# -- No-install Programs
+noinst_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests test_peer_data
+
+# -- No-install Libraries
+noinst_LIBRARIES = libbgp.a
+
+# -- Libraries and library flags to link the binary programs
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+# -- Program Sources
+xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
+
+test_packet_SOURCES = test_test.hh test_packet.cc
+
+test_plumbing_SOURCES = test_plumbing.hh test_plumbing.cc bgp.hh bgp.cc
+test_plumbing_DEPENDENCIES = libbgp.a
+
+aspath_test_SOURCES = aspath_test.cc
+test_packet_coding_SOURCES = test_packet_coding.cc
+update_test_SOURCES = update_test.cc
+
+isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filter.cc test_cache.cc test_nhlookup.cc test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc test_next_hop_resolver.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc dummy_next_hop_resolver.hh peer_handler_debug.hh peer_handler_debug.cc test_subnet_route.cc
+
+test_peer_data_SOURCES = test_peer_data.cc
+
+# -- Library Sources
+libbgp_a_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
+
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests test_cache.reference test_decision.reference test_deletion.reference test_dump.reference test_fanout.reference test_filter.reference test_nhlookup.reference test_ribin.reference test_ribout.reference xrl_shell_funcs.sh
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+subdir = bgp
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libbgp_a_AR = $(AR) cru
+libbgp_a_LIBADD =
+am_libbgp_a_OBJECTS = aspath.$(OBJEXT) attribute_manager.$(OBJEXT) \
+	bgp_trie.$(OBJEXT) dump_iterators.$(OBJEXT) \
+	internal_message.$(OBJEXT) iptuple.$(OBJEXT) \
+	local_data.$(OBJEXT) next_hop_resolver.$(OBJEXT) \
+	notification_packet.$(OBJEXT) open_packet.$(OBJEXT) \
+	packet.$(OBJEXT) parameter.$(OBJEXT) path_attribute.$(OBJEXT) \
+	peer.$(OBJEXT) peer_data.$(OBJEXT) peer_handler.$(OBJEXT) \
+	peer_list.$(OBJEXT) plumbing.$(OBJEXT) process_watch.$(OBJEXT) \
+	rib_ipc_handler.$(OBJEXT) route_queue.$(OBJEXT) \
+	route_table_base.$(OBJEXT) route_table_cache.$(OBJEXT) \
+	route_table_decision.$(OBJEXT) route_table_deletion.$(OBJEXT) \
+	route_table_dump.$(OBJEXT) route_table_fanout.$(OBJEXT) \
+	route_table_filter.$(OBJEXT) route_table_nhlookup.$(OBJEXT) \
+	route_table_ribin.$(OBJEXT) route_table_ribout.$(OBJEXT) \
+	route_table_reader.$(OBJEXT) socket.$(OBJEXT) \
+	subnet_route.$(OBJEXT) update_attrib.$(OBJEXT) \
+	update_packet.$(OBJEXT) xrl_target.$(OBJEXT)
+libbgp_a_OBJECTS = $(am_libbgp_a_OBJECTS)
+bin_PROGRAMS = xorp_bgp$(EXEEXT)
+noinst_PROGRAMS = test_packet$(EXEEXT) test_plumbing$(EXEEXT) \
+	update_test$(EXEEXT) aspath_test$(EXEEXT) \
+	test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT) \
+	test_peer_data$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+
+am_aspath_test_OBJECTS = aspath_test.$(OBJEXT)
+aspath_test_OBJECTS = $(am_aspath_test_OBJECTS)
+aspath_test_LDADD = $(LDADD)
+aspath_test_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+aspath_test_LDFLAGS =
+am_isolation_tests_OBJECTS = test_main.$(OBJEXT) test_ribin.$(OBJEXT) \
+	test_deletion.$(OBJEXT) test_filter.$(OBJEXT) \
+	test_cache.$(OBJEXT) test_nhlookup.$(OBJEXT) \
+	test_decision.$(OBJEXT) test_fanout.$(OBJEXT) \
+	test_dump.$(OBJEXT) test_ribout.$(OBJEXT) \
+	test_next_hop_resolver.$(OBJEXT) route_table_debug.$(OBJEXT) \
+	dummy_main.$(OBJEXT) dummy_next_hop_resolver.$(OBJEXT) \
+	peer_handler_debug.$(OBJEXT) test_subnet_route.$(OBJEXT)
+isolation_tests_OBJECTS = $(am_isolation_tests_OBJECTS)
+isolation_tests_LDADD = $(LDADD)
+isolation_tests_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+isolation_tests_LDFLAGS =
+am_test_packet_OBJECTS = test_packet.$(OBJEXT)
+test_packet_OBJECTS = $(am_test_packet_OBJECTS)
+test_packet_LDADD = $(LDADD)
+test_packet_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_packet_LDFLAGS =
+am_test_packet_coding_OBJECTS = test_packet_coding.$(OBJEXT)
+test_packet_coding_OBJECTS = $(am_test_packet_coding_OBJECTS)
+test_packet_coding_LDADD = $(LDADD)
+test_packet_coding_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_packet_coding_LDFLAGS =
+am_test_peer_data_OBJECTS = test_peer_data.$(OBJEXT)
+test_peer_data_OBJECTS = $(am_test_peer_data_OBJECTS)
+test_peer_data_LDADD = $(LDADD)
+test_peer_data_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_peer_data_LDFLAGS =
+am_test_plumbing_OBJECTS = test_plumbing.$(OBJEXT) bgp.$(OBJEXT)
+test_plumbing_OBJECTS = $(am_test_plumbing_OBJECTS)
+test_plumbing_LDADD = $(LDADD)
+test_plumbing_LDFLAGS =
+am_update_test_OBJECTS = update_test.$(OBJEXT)
+update_test_OBJECTS = $(am_update_test_OBJECTS)
+update_test_LDADD = $(LDADD)
+update_test_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+update_test_LDFLAGS =
+am_xorp_bgp_OBJECTS = bgp.$(OBJEXT) main.$(OBJEXT)
+xorp_bgp_OBJECTS = $(am_xorp_bgp_OBJECTS)
+xorp_bgp_LDADD = $(LDADD)
+xorp_bgp_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_bgp_LDFLAGS =
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/aspath.Po $(DEPDIR)/aspath_test.Po \
+@AMDEP_TRUE@	$(DEPDIR)/attribute_manager.Po $(DEPDIR)/bgp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp_trie.Po $(DEPDIR)/dummy_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/dummy_next_hop_resolver.Po \
+@AMDEP_TRUE@	$(DEPDIR)/dump_iterators.Po \
+@AMDEP_TRUE@	$(DEPDIR)/internal_message.Po $(DEPDIR)/iptuple.Po \
+@AMDEP_TRUE@	$(DEPDIR)/local_data.Po $(DEPDIR)/main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/next_hop_resolver.Po \
+@AMDEP_TRUE@	$(DEPDIR)/notification_packet.Po \
+@AMDEP_TRUE@	$(DEPDIR)/open_packet.Po $(DEPDIR)/packet.Po \
+@AMDEP_TRUE@	$(DEPDIR)/parameter.Po $(DEPDIR)/path_attribute.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer.Po $(DEPDIR)/peer_data.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer_handler.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer_handler_debug.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer_list.Po $(DEPDIR)/plumbing.Po \
+@AMDEP_TRUE@	$(DEPDIR)/process_watch.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_ipc_handler.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_cache.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_debug.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_decision.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_deletion.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_dump.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_fanout.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_filter.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_nhlookup.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_reader.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_ribin.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_ribout.Po $(DEPDIR)/socket.Po \
+@AMDEP_TRUE@	$(DEPDIR)/subnet_route.Po $(DEPDIR)/test_cache.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_decision.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_deletion.Po $(DEPDIR)/test_dump.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_fanout.Po $(DEPDIR)/test_filter.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_next_hop_resolver.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_nhlookup.Po $(DEPDIR)/test_packet.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_packet_coding.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_peer_data.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_plumbing.Po $(DEPDIR)/test_ribin.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_ribout.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_subnet_route.Po \
+@AMDEP_TRUE@	$(DEPDIR)/update_attrib.Po \
+@AMDEP_TRUE@	$(DEPDIR)/update_packet.Po $(DEPDIR)/update_test.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) \
+	$(isolation_tests_SOURCES) $(test_packet_SOURCES) \
+	$(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) \
+	$(test_plumbing_SOURCES) $(update_test_SOURCES) \
+	$(xorp_bgp_SOURCES)
+
+RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
+	uninstall-info-recursive all-recursive install-data-recursive \
+	install-exec-recursive installdirs-recursive install-recursive \
+	uninstall-recursive check-recursive installcheck-recursive
+DIST_COMMON = README Makefile.am Makefile.in TODO
+DIST_SUBDIRS = $(SUBDIRS)
+SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(test_packet_SOURCES) $(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) $(test_plumbing_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
+
+all: all-recursive
+
+.SUFFIXES:
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  bgp/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libbgp.a: $(libbgp_a_OBJECTS) $(libbgp_a_DEPENDENCIES) 
+	-rm -f libbgp.a
+	$(libbgp_a_AR) libbgp.a $(libbgp_a_OBJECTS) $(libbgp_a_LIBADD)
+	$(RANLIB) libbgp.a
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	done
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+aspath_test$(EXEEXT): $(aspath_test_OBJECTS) $(aspath_test_DEPENDENCIES) 
+	@rm -f aspath_test$(EXEEXT)
+	$(CXXLINK) $(aspath_test_LDFLAGS) $(aspath_test_OBJECTS) $(aspath_test_LDADD) $(LIBS)
+isolation_tests$(EXEEXT): $(isolation_tests_OBJECTS) $(isolation_tests_DEPENDENCIES) 
+	@rm -f isolation_tests$(EXEEXT)
+	$(CXXLINK) $(isolation_tests_LDFLAGS) $(isolation_tests_OBJECTS) $(isolation_tests_LDADD) $(LIBS)
+test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES) 
+	@rm -f test_packet$(EXEEXT)
+	$(CXXLINK) $(test_packet_LDFLAGS) $(test_packet_OBJECTS) $(test_packet_LDADD) $(LIBS)
+test_packet_coding$(EXEEXT): $(test_packet_coding_OBJECTS) $(test_packet_coding_DEPENDENCIES) 
+	@rm -f test_packet_coding$(EXEEXT)
+	$(CXXLINK) $(test_packet_coding_LDFLAGS) $(test_packet_coding_OBJECTS) $(test_packet_coding_LDADD) $(LIBS)
+test_peer_data$(EXEEXT): $(test_peer_data_OBJECTS) $(test_peer_data_DEPENDENCIES) 
+	@rm -f test_peer_data$(EXEEXT)
+	$(CXXLINK) $(test_peer_data_LDFLAGS) $(test_peer_data_OBJECTS) $(test_peer_data_LDADD) $(LIBS)
+test_plumbing$(EXEEXT): $(test_plumbing_OBJECTS) $(test_plumbing_DEPENDENCIES) 
+	@rm -f test_plumbing$(EXEEXT)
+	$(CXXLINK) $(test_plumbing_LDFLAGS) $(test_plumbing_OBJECTS) $(test_plumbing_LDADD) $(LIBS)
+update_test$(EXEEXT): $(update_test_OBJECTS) $(update_test_DEPENDENCIES) 
+	@rm -f update_test$(EXEEXT)
+	$(CXXLINK) $(update_test_LDFLAGS) $(update_test_OBJECTS) $(update_test_LDADD) $(LIBS)
+xorp_bgp$(EXEEXT): $(xorp_bgp_OBJECTS) $(xorp_bgp_DEPENDENCIES) 
+	@rm -f xorp_bgp$(EXEEXT)
+	$(CXXLINK) $(xorp_bgp_LDFLAGS) $(xorp_bgp_OBJECTS) $(xorp_bgp_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/aspath.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/aspath_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/attribute_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_trie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_next_hop_resolver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dump_iterators.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/internal_message.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/iptuple.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/local_data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/next_hop_resolver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/notification_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/open_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parameter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/path_attribute.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_handler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_handler_debug.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/plumbing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/process_watch.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_ipc_handler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_cache.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_debug.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_decision.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_deletion.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_dump.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_fanout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_filter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_nhlookup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_reader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_ribin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_ribout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/subnet_route.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_cache.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_decision.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_deletion.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_dump.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_fanout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_filter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_next_hop_resolver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_nhlookup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet_coding.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_plumbing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_subnet_route.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_attrib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run `make' without going through this Makefile.
+# To change the values of `make' variables: instead of editing Makefiles,
+# (1) if the variable is set in `config.status', edit `config.status'
+#     (which will cause the Makefiles to be regenerated when you run `make');
+# (2) otherwise, pass the desired values on the `make' command line.
+$(RECURSIVE_TARGETS):
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
+mostlyclean-recursive clean-recursive distclean-recursive \
+maintainer-clean-recursive:
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	rev=''; for subdir in $$list; do \
+	  if test "$$subdir" = "."; then :; else \
+	    rev="$$subdir $$rev"; \
+	  fi; \
+	done; \
+	rev="$$rev ."; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for subdir in $$rev; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done && test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+	for subdir in $(SUBDIRS); do \
+	  if test "$$subdir" = .; then :; else \
+	    test -d $(distdir)/$$subdir \
+	    || mkdir $(distdir)/$$subdir \
+	    || exit 1; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$(top_distdir)" \
+	        distdir=../$(distdir)/$$subdir \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-recursive
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+installdirs: installdirs-recursive
+installdirs-am:
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-recursive
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-recursive
+
+clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
+
+distclean: distclean-recursive
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-recursive
+
+dvi-am:
+
+info: info-recursive
+
+info-am:
+
+install-data-am:
+
+install-exec-am: install-binPROGRAMS
+
+install-info: install-info-recursive
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-recursive
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-recursive
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+
+uninstall-info: uninstall-info-recursive
+
+.PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
+	clean clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-recursive distclean-tags distdir dvi dvi-am \
+	dvi-recursive info info-am info-recursive install install-am \
+	install-binPROGRAMS install-data install-data-am \
+	install-data-recursive install-exec install-exec-am \
+	install-exec-recursive install-info install-info-am \
+	install-info-recursive install-man install-recursive \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am installdirs-recursive maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-recursive \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-info-recursive uninstall-recursive
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

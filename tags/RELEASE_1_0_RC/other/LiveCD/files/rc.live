@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+# Copyright 2001 2002 Edson Brandi <ebrandi.home@uol.com.br>
+# All Rights Reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY EDSON BRANDI ``AS IS'' AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED.  IN NO EVENT EDSON BRANDI BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+# USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
+
+############################################
+
+echo "Creating  /dev under MFS..."
+mount_mfs -s 24000 -c 20 -o noatime swap /dev 2>&1
+tar -xzpf /mfs/dev.tgz -C / >/dev/null 2>&1
+cd /dev
+./MAKEDEV all  >/dev/null 2>&1
+#
+
+
+echo "Generating /tmp under MFS"
+mount_mfs -s 32768 -c 20 -o nodev,noexec,nosuid,noatime swap /tmp 2>&1
+
+echo "Generating /var under MFS"
+mount_mfs -s 32768 -c 20 -o noatime swap /var 2>&1
+/usr/sbin/mtree -deU -f /etc/mtree/BSD.var.dist -p /var >/dev/null 2>&1
+logs=`/usr/bin/awk '$1 != "#" { printf "%s ", $1 } ' /etc/newsyslog.conf`	
+if [ -n "$logs" ]; then
+    /usr/bin/touch $logs
+fi
+/usr/bin/touch /var/log/lastlog
+
+echo "Generating /etc under MFS"
+mount_mfs -s 32768 -c 20 -o noatime swap /etc 2>&1
+tar -xzpf /mfs/etc.tgz -C / >/dev/null 2>&1
+
+echo "Generating /home under MFS"
+mount_mfs -s 32768 -c 20 -o noatime swap /home 2>&1
+
+echo "Generating /root under MFS"
+mount_mfs -s 32768 -c 20 -o noatime swap /root 2>&1
+tar -xzpf /mfs/root.tgz -C / >/dev/null 2>&1
+
+echo "Generating /usr/local/etc under MFS"
+mount_mfs -s 32768 -c 20 -o noatime swap /usr/local/etc 2>&1
+tar -xzpf /mfs/local_etc.tgz -C / >/dev/null 2>&1
+
+echo "Generating /usr/local/xorp under MFS"
+echo "(umount /usr/local/xorp to reveal a version with debugging enabled)"
+mount_mfs -s 98304 -c 20 -o noatime swap /usr/local/xorp 2>&1
+tar -xzpf /mfs/local_xorp.tgz -C / >/dev/null 2>&1
+
+mount -t msdos /dev/fd0 /mnt/floppy 2>&1
+
+mount proc
+
+############################################

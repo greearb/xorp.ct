@@ -1,0 +1,161 @@
+<!-- $XORP: xorp/docs/status.html,v 1.19 2004/06/15 20:32:21 pavlin Exp $ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<META content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<TITLE>XORP Software Status</TITLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<table border="0" cellspacing="0" cellpadding="8"><tr><td>
+<img src="/xorp2.png" alt="XORP logo">
+<H1>XORP Software Status</H1>
+<center><img src="processes3.png" alt="XORP processes"></center>
+<P>
+See the <a href="index.html">software documentation</a> for details of the
+XORP processes.
+<P>
+As of June 2004 (1.0 Release Candidate), the status is as follows:
+<DL>
+<DT><B>RIB</B>
+
+<DD>The basic RIB is complete.  There are probably still some
+bugs but the core is reasonably stable. IPv4 and IPv6 are supported,
+and both unicast and multicast routes can be stored.
+Route redistribution from one routing protocol to another is supported.
+There is a mechanism to monitor the status of internal tables.
+While regular BGP nexthop resolution using IGP data works, recursive
+nexthop resolution does not work.
+
+<DT><B>FEA</B>
+
+<DD>The unicast FEA for FreeBSD, NetBSD, OpenBSD and Linux, and the dummy FEA
+for testing purposes are basically complete.  The FEA for Click doesn't
+currently work. The multicast FEA (MFEA) for FreeBSD and
+Linux is basically complete.  The MFEA for Click doesn't exist.
+
+<P>
+<DT><B>BGP</B>
+
+<DD>The core of BGP is basically complete, with respect to the
+functionality described in draft-ietf-idr-bgp4-23.txt.  There are
+probably still some bugs but the core is reasonably stable.
+<P>
+Monitoring is limited to listing all the routes and listing all the
+peers - basically all the information demanded by the base BGP MIB.
+More fine-grain monitoring is definitely needed.  You can't install
+any optional filters, which means in practice it isn't too useful.
+Redistribution of routes into BGP currently
+doesn't work.  IPv4 and IPv6 routing works. Multicast SAFI has been
+implemented and has been tested.
+
+<P>
+<DT><B>OSPF</B>
+
+<DD>A reasonably complete port of OSPFd to the XORP environment
+exists, but it hasn't been well enough tested to know if it works or
+doesn't work.  OSPFd is IPv4 only.
+
+<P>
+<DT><B>RIP</B>
+
+<DD> There are two RIP processes: RIPv2 for IPv4 and RIPng for IPv6.
+     RIPv2 is functionally complete and includes support for
+     authentication.  RIPng is written and uses much of the same code
+     as RIPv2 but needs requires additional testing.
+
+<P>
+<DT><B>IS-IS</B>
+
+<DD>Not yet started.
+
+<P>
+<DT><B>PIM-SM</B>
+
+<DD>The PIM-SM implementation (including the Bootstrap mechanism)
+is reasonably complete and fairly well tested, though there are still
+various minor things that need polishing.  The code appears stable, but
+probably there are still some bugs. The SSM support is not yet started.
+
+<P>
+<DT><B>IGMP</B>
+
+<DD>The IGMPv1 and v2 implementation is reasonably complete and fairly
+well tested, though there are still various minor things that need
+polishing.  The IGMPv3 implementation is not yet started.
+
+<P>
+<DT><B>MLD</B>
+
+<DD>The MLDv1 implementation is reasonably complete, but
+testing continues.  The MLDv2 implementation is not yet started.
+
+<P>
+<DT><B>Rtrmgr and Xorpsh Command Line Interface</B>
+
+<DD>The rtrmgr is capable of starting up and using xorpsh, a user can
+reconfigure the XORP processes that comprise a router. However, work
+continues on improving its stability. Operational mode (monitoring a running
+router) needs more polishing.
+
+<P>
+<DT><B>LibXIPC</B>
+
+<DD>The interfaces are stable, and the IPC mechanisms work well.  The
+finder code from release 0.1 has been replaced with much nicer finder
+design, which appears to be stable, but as with all new code there are
+probably new bugs.
+<P>
+<DT><B>SNMP</B>
+
+<DD>We are using the Net-SNMP agent.  We provide a XORP interface module that
+allows MIB modules to access information from XORP processes.  Currently we
+have fully implemented one such module, BGP4-MIB (RFC 1657).  The rtrmgr
+can be configured to start the SNMP agent and to load MIB modules.
+</DL>
+
+</td>
+<td valign="top" width="20%">
+      <table border="0" cellspacing="0" cellpadding="1"  bgcolor="#b0b0b0" width="100%">
+         <tr>
+            <td>
+            <table border="0" bgcolor="#ffffff" width="100%" cellspacing="0" cellpadding="1">
+  	    <tr><td bgcolor="#b0b0b0" colspan="2"><b>Quick&nbsp;Links</b></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../index.html">XORP Home</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../news.html">News</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../downloads.html">Downloads</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../cvs.html">Anonymous&nbsp;CVS</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="http://xorpc.icir.org/cgi-bin/cvsweb.cgi/">CVSweb&nbsp;access</a></small></td></tr>
+  	    <tr><td width="10" bgcolor="#d00000"></td>
+	      <td bgcolor="#d0d0d0"><small><a href="status.html">Software&nbsp;Status</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../docs.html">Documentation</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../getting_started.html">Getting&nbsp;Started</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../index.html#mail">Mailing&nbsp;Lists</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../contributing.html">Contributing</a></small></td></tr>
+  	    <tr><td></td>
+	      <td><small><a href="../../../people.html">People</a></small></td></tr>
+            </table>
+  	  </td>
+          </tr>
+      </table>
+</td></tr></table>
+<hr>
+<address>feedback&#64;xorp&#46;org</address>
+<!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
+<!-- hhmts start -->
+<small>
+Last modified: $Date$.
+</small>
+<!-- hhmts end -->
+
+</BODY>
+</HTML>

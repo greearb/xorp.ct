@@ -1,0 +1,201 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/fea/configure_mfea,v 1.8 2004/04/01 18:21:22 pavlin Exp $
+#
+
+#
+# Send configuration commands to a running MFEA process.
+#
+
+MODULE_NAME="MFEA"
+HOSTNAME=`hostname`
+IP_VERSION="IPV4"		# XXX: IP version defaults to IPv4
+
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+#
+# The optional first argument should be either -4 or -6 to specify
+# IPv4 or IPv6 mode.
+#
+usage()
+{
+	echo "Usage: $0 [-4 | -6 ]"
+}
+
+#
+# Get the arguments
+#
+if [ $# -gt 0 ] ; then
+	case "${1}" in
+		-4)
+			IP_VERSION="IPV4"
+			shift
+			;;
+		-6)
+			IP_VERSION="IPV6"
+			shift
+			;;
+		-h)
+			usage;
+			exit 0
+			;;
+		*)
+			;;
+	esac
+fi
+
+echo "Configuring ${MODULE_NAME} on ${HOSTNAME} in ${IP_VERSION} mode..."
+
+
+###############################################################
+# USER CONFIGURATION BEGIN
+###############################################################
+
+#
+# Select the vifs to enable
+#
+if [ ! -z "$ENABLE_VIFS" ] ; then
+	echo "Using predefined settings:"
+	echo "  ENABLE_VIFS=${ENABLE_VIFS}"
+else
+    case ${HOSTNAME} in
+	xorp1)
+	ENABLE_VIFS="dc1 dc4"
+	;;
+
+	xorp2)
+	ENABLE_VIFS="dc1 dc2"
+	;;
+
+	xorp3)
+	ENABLE_VIFS="dc0 dc1 dc2"
+	;;
+
+	xorp4)
+	ENABLE_VIFS="eth6 eth7"
+	;;
+
+	xorp6)
+	ENABLE_VIFS="dc1"
+	;;
+
+	possum.icir.org)
+	ENABLE_VIFS="rl0"
+	;;
+
+	oreo.icir.org)
+	ENABLE_VIFS="wi0"
+	ENABLE_VIFS="ed1"
+	;;
+
+	koala.icir.org)
+	ENABLE_VIFS="eth0"
+	;;
+	
+	pie)
+	ENABLE_VIFS="en1"
+	;;
+	
+	*)
+	echo "Unknown host : ${HOSTNAME}"
+	exit 1
+	;;
+    esac
+fi
+
+#
+# Comment-out to disable log trace
+#
+MFEA_LOG_TRACE_ALL_ENABLE=yes
+
+#
+# The subnets to enable/disable CLI access
+#
+CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
+
+###############################################################
+# USER CONFIGURATION END
+###############################################################
+
+
+#
+# Read-in the files with helper functions
+#
+. ${srcdir}/../cli/xrl_cli_shell_funcs.sh
+. ${srcdir}/../fea/xrl_fea_shell_funcs.sh
+. ${srcdir}/../fea/xrl_mfea_shell_funcs.sh
+
+#
+# Add the PIM 'register_vif' to the list of interfaces to enable
+#
+MFEA_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
+
+#
+# Enable/disable log trace
+#
+if [ "${MFEA_LOG_TRACE_ALL_ENABLE}" = "yes" ] ; then
+	mfea_log_trace_all true
+else
+	mfea_log_trace_all false
+fi
+
+#
+# Configure CLI
+#
+for subnet in ${CLI_ENABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
+	cli_add_enable_cli_access_from_subnet4 ${subnet}
+done
+for subnet in ${CLI_DISABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
+	cli_add_disable_cli_access_from_subnet4 ${subnet}
+done
+
+#
+# Enable and start CLI
+#
+cli_enable_cli true
+cli_start_cli
+
+#
+# Configure FEA interfaces
+#
+tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	exit 1
+fi
+for vif in ${ENABLE_VIFS}; do
+	fea_ifmgr_configure_interface_from_system ${tid} ${vif}
+done
+fea_ifmgr_commit_transaction ${tid}
+
+#
+# Enable and start MFEA CLI
+#
+mfea_enable_cli true
+mfea_start_cli
+
+#
+# Enable and start MFEA
+#
+mfea_enable_mfea true
+mfea_start_mfea
+
+#
+# Enable and start MFEA vifs
+#
+for vif in ${MFEA_ENABLE_VIFS}; do
+	mfea_enable_vif ${vif} true
+	mfea_start_vif ${vif}
+done
+
+#
+# Done
+#
+echo "Configuration done."
+
+exit 0

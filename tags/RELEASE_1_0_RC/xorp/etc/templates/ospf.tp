@@ -1,0 +1,132 @@
+/* $XORP: xorp/etc/templates/ospf.tp,v 1.14 2004/06/07 18:16:25 pavlin Exp $ */
+
+protocols {
+    ospf {
+	targetname:			txt = "ospf";
+	router-id:			ipv4;
+	lsdb-limit:			i32;
+	mospf:				toggle = false;
+	interarea-mc:			toggle = false;
+	overflow-interval:		i32;
+	flood-rate:			i32;
+	max-rxmt-window:		u32;
+	max-dds:			u32;
+	lsa-refresh-rate:		u32;
+	p2p-adj-limit:			u32 = 0;
+	random-refresh:			toggle = false;
+
+	area @: ipv4 {
+	    stub:			toggle = false;
+	    stub-metric:		u32 = 0;
+	    stub-summaries:		bool = false;
+
+	    interface @: txt {
+		enabled:		toggle = true;
+		hello-interval:		u32 = 30;
+		dead-interval:		u32 = 95;
+		poll-interval:		u32;
+		retransmit-interval:	u32;
+		transit-delay:		u32;
+		priority:		u32;
+		passive:		toggle = false;
+		cost:			u32 = 0;
+		mtu:			u32 = 1500;
+		on-demand:		toggle = false;
+		type:			txt = "broadcast";
+		if-index:		u32 = 0;
+	    }
+	}
+    }
+}
+
+protocols {
+    ospf {
+	%help:		short		"Configure the OSPF protocol";
+	%modinfo:	provides	ospf;
+	%modinfo:	depends		rib;
+	%modinfo:	path		"contrib/ospfd/xorp/xorp_ospf";
+	%modinfo:	default_targetname "ospf";
+	%modinfo:	status_method	xrl "$(ospf.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl "$(ospf.targetname)/common/0.1/shutdown";
+
+	%mandatory:	targetname;
+
+	targetname {
+	    %help:	short "Set the target name";
+	    %set:;
+	}
+
+	router-id {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_router_id?id:u32=$(@)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_router_id->id:u32";
+	}
+
+	lsdb-limit {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_lsdb_limit?limit:i32=$(@)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_lsdb_limit->limit:i32=$(@)";
+	}
+
+	mospf {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_mospf?enabled:bool=$(@)";
+	    %delete:	xrl "$(ospf.targetname)/ospf/0.1/set_mospf?enabled:bool=$(DEFAULT)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_mospf->enabled:bool=$(@)";
+	}
+
+	interarea-mc {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_interarea_mc?enabled:bool=$(@)";
+	    %delete:	xrl "$(ospf.targetname)/ospf/0.1/set_interarea_mc?enabled:bool=$(DEFAULT)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_interarea_mc->enabled:bool=$(@)";
+	}
+
+	overflow-interval {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_overflow_interval?ovfl_int:i32=$(@)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_overflow_interval->ovfl_int:i32=$(@)";
+	}
+
+	flood-rate {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_flood_rate?rate:i32=$(@)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_flood_rate->rate:i32=$(@)";
+	}
+
+	max-rxmt-window {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_max_rxmt_window?window:u32=$(@)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_max_rxmt_window->window:u32=$(@)";
+	}
+
+	max-dds {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_max_dds?max_dds:u32=$(@)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_max_dds->max_dds:u32=$(@)";
+	}
+
+	lsa-refresh-rate {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_lsa_refresh_rate?rate:u32=$(@)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_lsa_refresh_rate->rate:u32=$(@)";
+	}
+
+	p2p-adj-limit {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_p2p_adj_limit?max_adj:u32=$(@)";
+	    %delete:	xrl "$(ospf.targetname)/ospf/0.1/set_p2p_adj_limit?max_adj:u32=$(DEFAULT)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_p2p_adj_limit->max_adj:u32=$(@)";
+	}
+
+	random-refresh {
+	    %set:	xrl "$(ospf.targetname)/ospf/0.1/set_random_refresh?enabled:bool=$(@)";
+	    %delete:	xrl "$(ospf.targetname)/ospf/0.1/set_random_refresh?enabled:bool=$(DEFAULT)";
+	    %get:	xrl "$(ospf.targetname)/ospf/0.1/get_random_refresh->enabled:bool=$(@)";
+	}
+
+	area @ {
+	    %create:	xrl "$(ospf.targetname)/ospf/0.1/add_or_configure_area?area_id:u32=$(area.@)&is_stub:bool=$(@.stub)&default_cost:u32=$(@.stub-metric)&import_summary_routes:bool=$(@.stub-summaries)";
+	    %delete:	xrl "$(ospf.targetname)/ospf/0.1/delete_area?area_id:u32=$(area.@)";
+	    /* %setting: xrl "$(ospf.targetname)/ospf/0.1/add_or_configure_area?area_id:u32=$(area.@)&is_stub:bool=$(stub)&default_cost:u32=$(stub-metric)&import_summary_routes:bool=$(stub-summaries)";
+	    %getting:	xrl "$(ospf.targetname)/ospf/0.1/query_area?area_id:u32=$(area.@)->is_stub:bool=$(stub)&default_cost:u32=$(stub-metric)&import_summary_routes:bool=$(stub-summaries)";*/
+
+	    interface @ {
+		%create:	xrl "$(ospf.targetname)/ospf/0.1/add_interface?identifier:txt=$(@)&if_index:u32=$(@.if-index)&area_id:u32=$(area.@)&cost:u32=$(@.cost)&mtu:u32=$(@.mtu)&type:txt=$(@.type)&on_demand:bool=$(@.on-demand)&passive:bool=$(@.passive)";
+		dead-interval { 
+		    %set:	xrl "$(ospf.targetname)/ospf/0.1/interface_set_router_dead_interval?identifier:txt=$(interface.@)&interval_secs:u32=$(@)";
+		}
+	    }
+	}
+    }
+}

@@ -1,0 +1,29 @@
+# $XORP: other/testbed/config/clique.xt,v 1.2 2002/03/20 00:52:56 atanu Exp $
+# A clique configuration. xorp[0-4]
+
+# select a kernel.
+
+kernel
+[/home/xorpc/u2/freebsd4.5.usr/src/sys/compile/XORP-4.3/kernel.debug] =
+	xorp0, xorp1, xorp2, xorp3, xorp4
+
+kernel[/home/xorpc/u2/freebsd.kernels/kernel-sis0] = xorp5
+
+# xorp5 is currently hardwired into to xorp1.t2 and xorp2.t2. Don't allow
+# these interfaces to be used by accident.
+vlan[xorp1-xorp5 net 10.1.5.0/24] = xorp1.t2[10.1.5.101], xorp5.s0[10.1.5.105]
+vlan[xorp2-xorp5 net 10.2.5.0/24] = xorp2.t2[10.2.5.102], xorp5.s1[10.2.5.105]
+
+vlan = xorp0, xorp1
+vlan = xorp0, xorp2
+vlan = xorp0, xorp3
+vlan = xorp0, xorp4
+
+vlan = xorp1, xorp2
+vlan = xorp1, xorp3
+vlan = xorp1, xorp4
+
+vlan = xorp2, xorp3
+vlan = xorp2, xorp4
+
+vlan = xorp3, xorp4

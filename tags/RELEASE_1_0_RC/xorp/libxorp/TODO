@@ -1,0 +1,43 @@
+#
+# $XORP: xorp/libxorp/TODO,v 1.2 2003/03/07 02:34:06 pavlin Exp $
+#
+
+* Fix libxorp/test_ipvx and libxorp/test_ipvxnet
+  for Linux RedHat-7.2 (kernel 2.4.18), i.e. xorp4
+  Currently, they coredump in some weird way.
+
+* ether_compat.c is not linked against the library. Remove it
+  along with ether_compat.h??
+  If not, add to it the XORP copyright header (if that file was
+  written by us).
+
+* Change Vif::vif_index() type from uint16_t to size_t ??
+
+* Merge test_ipnet with test_ipv{4,6,x}net (or remove it if
+  the new test programs cover all tests in test_ipnet).
+
+* Remove/disable IPvX::copy_out(struct sockaddr_in&) for IPv6 addresses.
+  Similarly, remove/disable IPvX::copy_out(struct sockaddr_in6&) for IPv4
+  addresses. Do the same thing for the corresponding copy_in(). (OK???)
+
+* Rename ConfigParam::_initial_value and get_initial_value() to
+  default_value
+
+* Rename Trie to SomethingMoreAppropriate(TM) and rename Trie::route()
+  to SomethingMoreAppropriate::payload()
+
+* Rename Transaction to SomethingBatchLike(TM)
+
+* Rename IPvX *Vif::addr_ptr() to IPvX& Vif::vif_addr() instead?
+
+* All constants such as IP address size, should be static class constants.
+
+* Need to do something about multiple EventLoop instances (breaks xorp
+  ipc).  Some alternatives:
+	- we have an event loop instance count that stops multiple
+          instances.
+	- EventLoop::run() becomes a static member that runs all the 
+	  event loops.
+	- change the way ipc learns about the event loop.
+
+* Do kdoc-ify ref_trie.hh and trie.hh

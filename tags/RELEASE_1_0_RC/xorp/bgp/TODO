@@ -1,0 +1,207 @@
+#
+# $XORP: xorp/bgp/TODO,v 1.9 2004/05/05 18:35:50 atanu Exp $
+#
+
+------------------------------ TODO -----------------------------
+
+4) Make test packet code check more things, for example go through and
+check the results of the decoding against what was encoded.
+
+18) Check the validity of the withdrawn routes field in
+check_update_packet (peer.cc) and the validity of network reachability
+field.
+
+---added 2002-09-24 by mjh---
+
+21) Ensure we keep the right connection during simultaneous open.
+
+22) Why is the BGPPeer stopped timer 10 seconds?
+
+26) Encode method in BGPAuthParameter
+
+--added 2002-10-21 by APG---
+
+28) In FanoutTable's queue, we skip entries if they have the same
+origin peer as the output branch calling get_next_message.  If the
+queued origin peer is NULL, we use this to indicate it should go to
+all peers.  However, the RIB peerhandle is also NULL, so routes that
+come from the rib would then be sent back to the RIB, which is bad.
+Rewrite this code so it doesn't overload the NULL value.
+
+30) When a next hop changes for a particular address family both the
+unicast and multicast decision tables will be notified. This is not a
+big deal.
+
+-- added 2003-10-13 by AG
+
+32) It is possible to set a parameter using set_parameter, but there
+is no way to remove a parameter.
+
+Removing a parameter while a session is established should probably be
+illegal.
+
+-- added 2003-11-06 by AG
+
+33) Routes held in cache tables are deleted in the background using a
+timer. Perhaps the shutdown code should check that the deletion has
+completed before allowing exiting. A hook has been left to determine
+if deletion has completed (DeleteAllNodes::running()).
+
+-- added 2004-05-05 AG
+
+------------------------------ DONE -----------------------------
+1) Holdtimers in from milliseconds to seconds in config files. Plus
+changing router ID's to IP addresses.
+
+2) Make the test packet code work again. This involves writing a
+TestSocketClient rather than using SocketClient. Remove
+SocketClient::read_packet and place in TestSocketClient.
+
+3) Once 2 is done make the packet decode routines take a packet from
+the begining not 19 bytes in. Fix all code that subsequently
+breaks:-).
+
+4) Make test packet code check more things, for example go through and
+check the results of the decoding against what was encoded.
+
+8) replace ASNum with AsNum to be consistent
+
+9) Put code in BGPPeer::check_update_packet().
+
+12) Write next hop resolution code.
+
+13) In the decision process we ripple up that a route is not
+resolvable but currently we ignore this information.
+
+15) Local Preference. Need to add an ouput filter that will add a
+local preference path attribute when sending to an IBGP peer.
+
+RESOLVED BY MJH: the entry above is incorrect.  I added an input
+filter that adds LOCAL_PREF when receiving from an EBGP peer - it
+needs to be done on input so we make the same decision as the IBGP
+peers we forward the route to.  I also added an output filter that
+removes LOCAL_PREF when sending to an EBGP peer.
+
+17) The routine check_update_packet verifies that all the mandatory
+attributes are present in an update packet. It is legal however for a packet
+to contain only withdraw information. In this case Origin, AS Path and
+Next Hop do not have to be present. Unfortunately legal messages
+containing only withdraws are currently flagged as an error.
+
+19) In the constructor for BGPNotificationPacket we abort if the
+length is bad.  Handle this more gracefully.
+
+RESOLVED BY MJH: treat any bad notification as if it were a CEASE.
+
+20) we currently abort() in BGPPeer::get_message when decode fails.
+Handle this more gracefully.
+
+23) BGPFilterTable<A>::lookup_route needs implementing!
+
+24) Investigate interaction between flush and NhLookupTable.  Currently
+will abort if queue is not empty!
+
+RESOLVED BY MJH: remove flush bit from queued entries.  Propagate all
+flush requests, even if they're not strictly necessary. Send an
+explicit flush request every time a nexthop resolves.  This is safe,
+although not optimally efficient.
+
+25) Getting a delete_route when we haven't got the route in the RIB
+currently calls abort().  Should probably log a warning and be
+silently dropped.
+
+7) look at BGPAuthParameter and BGPParameter in general to see why
+there is no encode method.
+
+RESOLVED By Adam : BGPParameter follows the same pattern as the packet
+class and hence involves no direct encode or decode methods, instead
+they are left to the sub classes. BGPAuthParameter should have an encode
+method see item 26
+
+5) Implement BGP Capability Advertisement
+
+11) Rationalise main.cc and bgp.cc, with respect to where main is.
+
+27) Implement some capability functionality, the hooks to enable per peer
+capability advertisement exist but the functionality doesn't. Personnally
+I don't think this is required for the cvs opening.
+
+-- added 2002-12-06 by MJH
+
+RESOLVED BY AG: Had to be done in order to add multiprotocol functionality.
+
+6) Filling missing throw exceptions.
+	- use exception from BGPPacket.hh, filling the notification codes
+
+16) Fix open packet operator== method to check parameters, current
+problem due to received open packets and sent open packets storing
+data in different places.
+
+29) Under certain circumstances a new session may be sent withdraws
+that were meant for the previous session. This problem can be
+reproduced by running "test_peering2.sh" with the "-b" flag.
+
+-- added 2003-08-28 by AG
+
+31) The XRL interface for reading routing tables doesn't take a SAFI
+parameter, so only unicast tables can be read.
+
+-- added 2003-11-06 by AG
+
+------------------------------ TESTING --------------------------
+
+1) Memory exhaustion.
+2) IGP Metrics.
+3) Filters.
+4) Route flat damping.
+5) Bad updates.
+6) Capability mismatches.
+7) Peer up/down.
+8) SAFI.
+9) Synchronisation.
+10) Loop detection.
+11) EBGP vs IBGP.
+12) Route reflector.
+13) Confederations.
+14) IPv6
+15) Test FSM with inappropriate packets.
+16) IGP i.e. RIB interactions.
+17) Comparison against ideal.
+
+------------------------------ OLD ------------------------------
+Current work:
+Go through each packet in order to ensure that it meets the spec for decoding/encoding.
+- open packet
+	look at the data pointers comming in since the decode is wrong
+	put the peer data into the system and hence sort out the timers
+- keepalive packet
+- update packet
+- notification packet
+- find current authentication parameter types
+
+General TODO
+
+- In the socket code connect needs to be make non-blocking.
+- retry a connection when the peer isn't listening, instead of exiting.
+- limit recursion in BGPPeerFSM , use counter perhaps
+- defaults to switch statemates , particularly in get_packet. (see pathattrib for example)
+- tabs in all files need to be defaults
+- check return values on writev (a peer may not be dead because the transmit buffer is full due to congestion control, rather than dropping)
+- sockets should be non-blocking, particularly for use with peers which aren't keeping up
+- look at increasing the kernel buffer for a problematic socket and if this fails then drop peering.
+- look at adding buffering into socket class, add high water mark on the buffer and a timer, possibly informing via exception.
+- remove 1 second waits 
+- look at switching data structures to use STL
+- look at memory handling in packets
+- add proper destructors
+- check two sessions per peer problem.
+
+Packets
+
+General packets:
+- Marker is set and retrieved, but never used. This needs to be looked into.
+- Exception throwing for invalid length and type (BGPSocket.cc or .hh)
+Open message:
+- Version - set, when it is being evaluated by BGP need to check  
+- Holdtime - need to calculate and process
+- Authentication parameter - need to find more information on

@@ -1,0 +1,25 @@
+/* $XORP: xorp/etc/templates/mld.cmds,v 1.3 2004/05/26 04:25:09 pavlin Exp $ */
+
+show mld {
+    %command: "" %help: HELP;
+    %module: mld;
+    %tag: HELP "Display information about MLD";
+}
+
+show mld group {
+    %command: "cli/tools/send_cli_processor_xrl -t MLD $0" %help: HELP;
+    %module: mld;
+    %tag: HELP "Display information about MLD group membership";
+}
+
+show mld interface {
+    %command: "cli/tools/send_cli_processor_xrl -t MLD $0" %help: HELP;
+    %module: mld;
+    %tag: HELP "Display information about MLD interfaces";
+}
+
+show mld interface address {
+    %command: "cli/tools/send_cli_processor_xrl -t MLD $0" %help: HELP;
+    %module: mld;
+    %tag: HELP "Display information about addresses of MLD interfaces";
+}

@@ -1,0 +1,171 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/bootstrap,v 1.12 2003/05/23 01:24:20 pavlin Exp $
+#
+#
+# A script of autoconf/automake/libtool commands to bring the system
+# up to date if some of the configuration files are modified
+#
+
+# Prototype: check_necessary <this_script_name>
+check_necessary()
+{
+    if [ $# -ne 1 ] ; then
+	echo "check_necessary: incorrect argument count"
+	exit 1
+    fi
+
+    checkfile=./Makefile.in
+    if [ ! -e ${checkfile} ] ; then
+	checkfile=$1
+    fi
+
+    if [ ! -f ${checkfile} ] ; then
+	echo "${checkfile} does not exist or is not an ordinary file"
+	exit 1
+    fi
+
+    echo -n "Checking configuration files..."
+
+    NEWER_AM_FILES=`find . -name 'Makefile.am' -a -newer ${checkfile}`
+
+    # Look files included or used by Makefile.am files
+    SPECIAL_AM_FILES="docs/mk/Makefile.doc.am"
+    for s in ${SPECIAL_AM_FILES} ; do
+	if [ ${s} -nt ${checkfile} ] ; then
+	    NEWER_AM_FILES="${NEWER_AM_FILES} ${s}"
+	fi
+    done
+
+    NEWER_CONFIG_IN=`find . -name 'configure.in' -a -newer ${checkfile}`
+
+    echo "done."
+
+    NEWER_FILES="${NEWER_AM_FILES}${NEWER_CONFIG_IN}"
+
+    if [ "${NEWER_FILES}"X = "X" ] ; then
+
+	cat <<EOF
+
+Neither configure.in nor any Makefile.am files have been edited.  You
+almost certainly do not want to run this script which will regenerate
+automake/autoconf output files.
+
+Proceed at your own risk (y/n)?
+EOF
+
+	read carry_on
+	if [ "${carry_on}X" != "yX" ] ; then
+	    echo "Okay, stopping here."
+	    exit 1
+	fi
+    fi
+}
+
+run()
+{
+	echo $@
+	if ! $@ ; then
+		echo "Error running '$@'"
+		exit 1
+	fi
+}
+
+#
+# Prototype: program_flags <prog_name> <threshold_version>
+#			   <flags_if_newer> <flags_if_older>
+# On output prints the program flags
+program_flags()
+{
+    if [ $# -ne 4 ] ; then
+	echo "program_flags: incorrect argument count"
+	exit 1
+    fi
+    prog_name=$1
+    threshold_version=$2
+    flags_if_newer=$3
+    flags_if_older=$4
+
+    prog_maj_version=`${prog_name} --version | head -n 1 | awk '{print $NF}' | cut -f 1 -d.`
+    prog_min_version=`${prog_name} --version | head -n 1 | awk '{print $NF}' | cut -f 2 -d.`
+    threshold_maj_version=`echo ${threshold_version} | cut -f 1 -d.`
+    threshold_min_version=`echo ${threshold_version} | cut -f 2 -d.`
+
+    if [ ${prog_maj_version} -ge ${threshold_maj_version} \
+	-a ${prog_min_version} -ge ${threshold_min_version} ] ; then
+	echo ${flags_if_newer}
+    else
+	echo ${flags_if_older}
+    fi
+}
+
+#
+# Change to directory of script.  This script lives at the top of the source
+# tree and it's often useful to be able to run it from another location.
+#
+cd `dirname $0`
+if [ ! -d config ] ; then
+    echo "The \"config\" does not appear to exist"
+    exit 1
+fi
+
+check_necessary $0
+
+#
+# Cleanup
+#
+run rm -f config.cache
+run rm -f aclocal.m4
+run rm -f config/aclocal.m4
+
+#
+# If necessary, use "-I DIR" again to add more directories to search list
+# for .m4 files.
+#
+# XXX: note that the output file (aclocal.m4) should be generated
+# in the local directory (the default behavior), otherwise newer
+# versions of automake (e.g., automake-1.5) won't work anymore.
+#
+run aclocal -I config
+
+#
+# XXX: we don't use flag --force because with it libtoolize always
+# overwrites our config.guess and config.sub files, even though our
+# version is probably newer.
+#
+# run libtoolize --automake --copy
+
+#
+# If we are using newer version of autoconf/autoheader (e.g., autoconf-2.5*),
+# we need to add the new flag "--include=config".
+#
+autoheader_options=`program_flags autoheader 2.50 "--include=config" ""`
+run autoheader ${autoheader_options}
+
+#
+# XXX: in case of non-GNU 'make', we must use flag "-i".
+# XXX: we may have to use "-i" before distributing the source code (?)
+# run automake -i --add-missing --copy
+#
+run automake --add-missing --copy
+
+#
+# If we are using newer version of autoconf (e.g., autoconf-2.5*),
+# use the new flag "--include=config" instead of "-l config".
+# If necessary, use it again to add more directories to search list
+# for .m4 files.
+#
+autoconf_options=`program_flags autoconf 2.50 "--include=config" "-l config"`
+run autoconf ${autoconf_options}
+
+# Clean-up autom4te.cache directories
+echo "Removing autom4te.cache directories..."
+remove_dirs="./autom4te.cache cli/libtecla/autom4te.cache"
+for dir in ${remove_dirs} ; do
+    if [ -d  ${dir} ] ; then
+	run rm -rf ${dir}
+    fi
+done
+
+exit 0

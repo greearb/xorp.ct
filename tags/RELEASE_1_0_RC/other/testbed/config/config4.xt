@@ -1,0 +1,68 @@
+# $XORP: other/testbed/config/config4.xt,v 1.6 2002/04/30 22:53:06 atanu Exp $
+#
+#
+#           ---------- t0.xorp1.t2 --- s0.xorp5
+#           |               t1              s1
+#	    |               |   	    |
+#           |               |               |
+#	    |               |               |
+#           t5              t1  	    t2
+# |--- t6.xorp4.t4 --- t0.xorp0.t2 --- t3.xorp2.t0 ---------
+# |         t7              t3			           |
+# |         |               |				   |
+# |         |               |				   |
+# |-------- |  ----------   |   ----------------------------
+# 	    |               t3
+#           ---------- t0.xorp3
+
+# Only install kernels on xorp0 and xorp2
+# Pavlin's kernel on xorp3 and xorp4
+# Luigi is using the rest
+
+# Click compliant 4.5 kernel
+kernel
+[/home/xorpc/u2/freebsd4.5.usr/src/sys/compile/XORP-4.3/kernel.debug] =
+	xorp0, xorp2
+
+kernel[/home/xorpc/u2/homes/pavlin/kernel] = xorp3, xorp4
+
+# Install this kernel on xorp[0-4]
+#kernel[/home/xorpc/u2/freebsd.kernels/kernel-fxp0] = 
+#	xorp0, xorp1, xorp2, xorp3, xorp4
+
+# A special kernel that boots through interface sis0
+#kernel[/home/xorpc/u2/freebsd.kernels/kernel-sis0] = xorp5
+
+# Designate xorp0 as the router
+router = xorp0
+
+# xorp0 is xorp router so it doesn't require configuration.
+noconfig = xorp0
+
+# Star around xorp0 using quad card tulips only
+vlan[xorp0-xorp1 net 10.0.1.0/24] =
+		xorp0.t1[10.0.1.100],
+		xorp1.t1[10.0.1.101]
+
+vlan[xorp0-xorp2 net 10.0.2.0/24] =
+		xorp0.t2[10.0.2.100], 
+		xorp2.t3[10.0.2.102]
+
+vlan[xorp0-xorp3 net 10.0.3.0/24] = 
+		xorp0.t3[10.0.3.100], 
+		xorp3.t3[10.0.3.103]
+
+vlan[xorp0-xorp4 net 10.0.4.0/24] = 
+		xorp0.t0[10.0.4.100], 
+		xorp4.t4[10.0.4.104]
+
+# Star around xorp4 using linksys nc-100 tulips only
+#vlan[xorp0-xorp4 net 10.0.4.0/24] = xorp4.t4[10.0.4.104], xorp0.t0[10.0.4.100]
+vlan[xorp1-xorp4 net 10.1.4.0/24]= xorp4.t5[10.1.4.104], xorp1.t0[10.1.4.101]
+vlan[xorp2-xorp4 net 10.2.4.0/24] = xorp4.t6[10.2.4.104], xorp2.t0[10.2.4.102]
+vlan[xorp3-xorp4 net 10.3.4.0/24] = xorp4.t7[10.3.4.104], xorp3.t0[10.3.4.103]
+
+# Connect xorp5 into the mesh. These connections are currently hardwired
+# with crossover cables.
+vlan[xorp1-xorp5 net 10.1.5.0/24] = xorp1.t2[10.1.5.101], xorp5.s0[10.1.5.105]
+vlan[xorp2-xorp5 net 10.2.5.0/24] = xorp2.t2[10.2.5.102], xorp5.s1[10.2.5.105]

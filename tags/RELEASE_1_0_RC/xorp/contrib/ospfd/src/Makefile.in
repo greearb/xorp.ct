@@ -1,0 +1,381 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ../../..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+FLOWER_MALLOC = @FLOWER_MALLOC@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+noinst_LIBRARIES = libospfd.a
+
+AM_CPPFLAGS = -I$(srcdir)/../@OSPFD_OS@
+
+libospfd_a_SOURCES = arch.h avl.h config.h dbage.h globals.h ifcfsm.h igmp.h ip.h iterator.h lsa.h lsalist.h lshdr.h mcache.h monitor.h mospf.h nbrfsm.h opqlsa.h ospf.h ospfinc.h pat.h phyint.h priq.h rte.h spfarea.h spfifc.h spflog.h spfnbr.h spfparam.h spfpkt.h spftype.h spfutil.h stack.h system.h timer.h tlv.h asbrlsa.C asexlsa.C avl.C cksum.C config.C dbage.C grplsa.C helper.C hostmode.C ifcfsm.C lsa.C lsalist.C lsdb.C monitor.C mospf.C nbrfsm.C netlsa.C opqlsa.C ospf.C pat.C phyint.C priq.C restart.C rte.C rtrlsa.C spfack.C spfarea.C spfcalc.C spfdd.C spfhello.C spfvl.C spfifc.C spflood.C spfnbr.C spforig.C spfutil.C summlsa.C timer.C tlv.C
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+subdir = contrib/ospfd/src
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libospfd_a_AR = $(AR) cru
+libospfd_a_LIBADD =
+am_libospfd_a_OBJECTS = asbrlsa.$(OBJEXT) asexlsa.$(OBJEXT) \
+	avl.$(OBJEXT) cksum.$(OBJEXT) config.$(OBJEXT) dbage.$(OBJEXT) \
+	grplsa.$(OBJEXT) helper.$(OBJEXT) hostmode.$(OBJEXT) \
+	ifcfsm.$(OBJEXT) lsa.$(OBJEXT) lsalist.$(OBJEXT) lsdb.$(OBJEXT) \
+	monitor.$(OBJEXT) mospf.$(OBJEXT) nbrfsm.$(OBJEXT) \
+	netlsa.$(OBJEXT) opqlsa.$(OBJEXT) ospf.$(OBJEXT) pat.$(OBJEXT) \
+	phyint.$(OBJEXT) priq.$(OBJEXT) restart.$(OBJEXT) rte.$(OBJEXT) \
+	rtrlsa.$(OBJEXT) spfack.$(OBJEXT) spfarea.$(OBJEXT) \
+	spfcalc.$(OBJEXT) spfdd.$(OBJEXT) spfhello.$(OBJEXT) \
+	spfvl.$(OBJEXT) spfifc.$(OBJEXT) spflood.$(OBJEXT) \
+	spfnbr.$(OBJEXT) spforig.$(OBJEXT) spfutil.$(OBJEXT) \
+	summlsa.$(OBJEXT) timer.$(OBJEXT) tlv.$(OBJEXT)
+libospfd_a_OBJECTS = $(am_libospfd_a_OBJECTS)
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/asbrlsa.Po $(DEPDIR)/asexlsa.Po \
+@AMDEP_TRUE@	$(DEPDIR)/avl.Po $(DEPDIR)/cksum.Po \
+@AMDEP_TRUE@	$(DEPDIR)/config.Po $(DEPDIR)/dbage.Po \
+@AMDEP_TRUE@	$(DEPDIR)/grplsa.Po $(DEPDIR)/helper.Po \
+@AMDEP_TRUE@	$(DEPDIR)/hostmode.Po $(DEPDIR)/ifcfsm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/lsa.Po $(DEPDIR)/lsalist.Po \
+@AMDEP_TRUE@	$(DEPDIR)/lsdb.Po $(DEPDIR)/monitor.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mospf.Po $(DEPDIR)/nbrfsm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/netlsa.Po $(DEPDIR)/opqlsa.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ospf.Po $(DEPDIR)/pat.Po \
+@AMDEP_TRUE@	$(DEPDIR)/phyint.Po $(DEPDIR)/priq.Po \
+@AMDEP_TRUE@	$(DEPDIR)/restart.Po $(DEPDIR)/rte.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrlsa.Po $(DEPDIR)/spfack.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfarea.Po $(DEPDIR)/spfcalc.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfdd.Po $(DEPDIR)/spfhello.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfifc.Po $(DEPDIR)/spflood.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfnbr.Po $(DEPDIR)/spforig.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfutil.Po $(DEPDIR)/spfvl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/summlsa.Po $(DEPDIR)/timer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/tlv.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libospfd_a_SOURCES)
+DIST_COMMON = Makefile.am Makefile.in
+SOURCES = $(libospfd_a_SOURCES)
+
+all: all-am
+
+.SUFFIXES:
+.SUFFIXES: .C .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  contrib/ospfd/src/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libospfd.a: $(libospfd_a_OBJECTS) $(libospfd_a_DEPENDENCIES) 
+	-rm -f libospfd.a
+	$(libospfd_a_AR) libospfd.a $(libospfd_a_OBJECTS) $(libospfd_a_LIBADD)
+	$(RANLIB) libospfd.a
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asbrlsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asexlsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/avl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cksum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dbage.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/grplsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/helper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hostmode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifcfsm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsalist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/monitor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mospf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nbrfsm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/netlsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/opqlsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/phyint.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/priq.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/restart.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rte.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrlsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfack.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfarea.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfcalc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfdd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfhello.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfifc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spflood.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfnbr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spforig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfutil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfvl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/summlsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/timer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/tlv.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.C.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.C.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ../../..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+check: check-am
+all-am: Makefile $(LIBRARIES)
+
+installdirs:
+
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-am
+
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+
+distclean: distclean-am
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-am
+
+dvi-am:
+
+info: info-am
+
+info-am:
+
+install-data-am:
+
+install-exec-am:
+
+install-info: install-info-am
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-am
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-am
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-info-am
+
+.PHONY: GTAGS all all-am check check-am clean clean-generic \
+	clean-noinstLIBRARIES distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-info-am
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

@@ -1,0 +1,25 @@
+/* $XORP: xorp/etc/templates/igmp.cmds,v 1.3 2004/05/26 04:25:08 pavlin Exp $ */
+
+show igmp {
+    %command: "" %help: HELP;
+    %module: igmp;
+    %tag: HELP "Display information about IGMP";
+}
+
+show igmp group {
+    %command: "cli/tools/send_cli_processor_xrl -t IGMP $0" %help: HELP;
+    %module: igmp;
+    %tag: HELP "Display information about IGMP group membership";
+}
+
+show igmp interface {
+    %command: "cli/tools/send_cli_processor_xrl -t IGMP $0" %help: HELP;
+    %module: igmp;
+    %tag: HELP "Display information about IGMP interfaces";
+}
+
+show igmp interface address {
+    %command: "cli/tools/send_cli_processor_xrl -t IGMP $0" %help: HELP;
+    %module: igmp;
+    %tag: HELP "Display information about addresses of IGMP interfaces";
+}

@@ -1,0 +1,69 @@
+# -*- mode: shell-script -*-
+#
+# Tinderbox configurations
+#
+# A configuration consists of a set of configuration name postfixed variables:
+#
+# 	host_X       = host to run configuration on
+# 	home_X       = directory for the tinderbox build and execution
+# 	env_X        = environment variable to be set when
+#	buildflags_X = flags to passed to GNU Make during build phase
+#
+# Configurations must be named in the variable TINDERBOX_CONFIGS in order
+# to become part of the tinderbox build.
+#
+
+host_fbsd48_gcc34="panther.icir.org"
+env_fbsd48_gcc34="CC=gcc34 CXX=g++34 MALLOC_OPTIONS=AJ"
+home_fbsd48_gcc34="tinderbox/gcc34"
+buildflags_fbsd48_gcc34="-j 2"
+
+host_fbsd48_gcc33="panther.icir.org"
+env_fbsd48_gcc33="CC=gcc33 CXX=g++33 MALLOC_OPTIONS=AJ"
+home_fbsd48_gcc33="tinderbox/gcc33"
+buildflags_fbsd48_gcc33="-j 2"
+
+host_fbsd48_gcc295="panther.icir.org"
+home_fbsd48_gcc295="tinderbox/gcc295"
+env_fbsd48_gcc295="MALLOC_OPTIONS=AJ"
+buildflags_fbsd48_gcc295="-j 2"
+
+host_linux24_gcc296="koala.icir.org"
+home_linux24_gcc296="tinderbox"
+env_linux24_gcc296="MALLOC_CHECK_=2"
+buildflags_linux24_gcc296="-j 4"
+
+TINDERBOX_CONFIGS="fbsd48_gcc34 fbsd48_gcc33 fbsd48_gcc295 linux24_gcc296"
+
+#
+# Configuration variables for tinderbox
+#
+
+SCRIPTSDIR=$(dirname $0)
+
+ROOTDIR=${SCRIPTSDIR}/..
+LOGDIR=${ROOTDIR}/log
+
+LOCALHOST=`hostname`
+
+SSH_FLAGS="-i ${HOME}/.ssh/tinderbox"
+
+# Successful build mail address
+REPORTOKADDR="Xorp Tinderbox <xorp-tinderbox@xorp.org>"
+#REPORTOKADDR="orion@icir.org"
+
+# Badness Reporting Address
+REPORTBADADDR="${REPORTOKADDR}"
+
+# Feedback address
+REPLYTOADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
+
+# From address
+FROMADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
+
+# Post command
+POST="/usr/local/libexec/nmh/post"
+
+# make and make check timeout and timeout check interval, both in seconds
+TIMEOUT=6000
+TIMEOUT_CHECK=10

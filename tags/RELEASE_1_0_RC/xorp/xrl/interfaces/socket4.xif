@@ -1,0 +1,316 @@
+/**
+ * Interface implementing basic IPv4 socket functionality.  This interface
+ * provides methods for creating and binding sockets, sending data on
+ * sockets, and set configuration options on sockets.  The interface is
+ * part of a triumvariate:
+ *
+ *    - socket4_locator/0.1  interface for finding Xrl Target capable of
+ *			     of instantiating a socket bound to a
+ *			     particular address.
+ *
+ *    - socket4/0.1	     interface for creating sockets, sending
+ *			     data, setting options, etc.
+ *
+ *    - socket4_user/0.1     interface users of socket4/0.1 should implement
+ *			     to receive data and event notifications.
+ *
+ */
+interface socket4/0.1 {
+
+    /**
+     * Create a bound TCP socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param sockid return parameter that contains unique socket id when
+     *        socket instantiation is successful.
+     */
+    tcp_open_and_bind		? creator:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32			\
+				-> sockid:txt
+
+    /**
+     * Create a bound UDP socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param sockid return parameter that contains unique socket id when
+     *        socket instantiation is successful.
+     */
+    udp_open_and_bind		? creator:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32			\
+				-> sockid:txt
+
+
+    /**
+     * Create a bound UDP multicast socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param mcast_addr the multicast group address to join.
+     *
+     * @param ttl the ttl to use for this multicast socket.
+     *
+     * @param reuse allow other sockets to bind to same multicast group.
+     *
+     * @param sockid return parameter that contains unique socket id when
+     *        socket instantiation is successful.
+     */
+    udp_open_bind_join		? creator:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32			\
+				& mcast_addr:ipv4			\
+				& ttl:u32				\
+				& reuse:bool				\
+				-> sockid:txt
+
+
+    /**
+     * Create a bound and connected TCP socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param remote_addr the address to connect to.
+     *
+     * @param remote_port the remote port to connect to.
+     *
+     * @param sockid return parameter that contains unique socket id when
+     *        socket instantiation is successful.
+     */
+    tcp_open_bind_connect	? creator:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32			\
+				& remote_addr:ipv4			\
+				& remote_port:u32			\
+				-> sockid:txt
+
+    /**
+     * Create a bound and connected UDP socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param remote_addr the address to connect to.
+     *
+     * @param remote_port the remote port to connect to.
+     *
+     * @param sockid return parameter that contains unique socket id when
+     *        socket instantiation is successful.
+     */
+    udp_open_bind_connect	? creator:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32			\
+				& remote_addr:ipv4			\
+				& remote_port:u32			\
+				-> sockid:txt
+
+
+    /**
+     * Join multicast group on already bound socket.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param mcast_addr group to join.
+     *
+     * @param join_if_addr interface address to perform join on.
+     *
+     */
+    udp_join_group		? sockid:txt				\
+				& mcast_addr:ipv4			\
+				& join_if_addr:ipv4
+
+    /**
+     * Leave multicast group on already bound socket.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param mcast_addr group to leave.
+     *
+     * @param leave_if_addr interface address to perform leave on.
+     *
+     */
+    udp_leave_group		? sockid:txt				\
+				& mcast_addr:ipv4			\
+				& leave_if_addr:ipv4
+
+
+    /**
+     * Close socket.
+     *
+     * @param sockid unique socket id of socket to be closed.
+     */
+    close			? sockid:txt
+
+    /**
+     * Listen for inbound connections on socket.  When a connection request
+     * received the socket creator will receive notification through
+     * socket4_user/0.1/connect_event.
+     *
+     * @param sockid the unique socket id of the socket to perform listen.
+     *
+     * @param backlog the maximum number of pending connections.
+     */
+    tcp_listen			? sockid:txt				\
+				& backlog:u32
+
+
+    /**
+     * Send data on socket.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param data block of data to be sent.
+     */
+    send			? sockid:txt				\
+				& data:binary
+
+    /**
+     * Send data on socket with optional flags.  These flags provide hints
+     * to the forwarding engine on how to send the packets, they are not
+     * guaranteed to work.
+     *
+     * NB: There is no flag for "do not route" as this is always true since
+     * the particular forwarding engine sending the data may not have
+     * access to the full routing table.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param data block of data to be sent.
+     *
+     * @param out_of_band mark data as out of band.
+     *
+     * @param end_of_record data completes record.
+     *
+     * @param end_of_file data completes file.
+     */
+    send_with_flags		? sockid:txt				\
+				& data:binary				\
+				& out_of_band:bool			\
+				& end_of_record:bool			\
+				& end_of_file:bool
+
+
+    /**
+     * Send data on socket to a given destination.  The packet is not
+     * routed as the forwarding engine sending the packet may not have
+     * access to the full routing table.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param remote_addr destination address for data.
+     *
+     * @param remote_port destination port for data.
+     *
+     * @param data block of data to be sent.
+     */
+    send_to			? sockid:txt				\
+				& remote_addr:ipv4			\
+				& remote_port:u32			\
+				& data:binary
+
+    /**
+     * Send data on socket to a given destination.  The packet is not
+     * routed as the forwarding engine sending the packet may not have
+     * access to the full routing table.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param remote_addr destination address for data.
+     *
+     * @param remote_port destination port for data.
+     *
+     * @param data block of data to be sent.
+     *
+     * @param out_of_band mark data as out of band.
+     *
+     * @param end_of_record data completes record.
+     *
+     * @param end_of_file data completes file.
+     */
+    send_to_with_flags		? sockid:txt				\
+				& remote_addr:ipv4			\
+				& remote_port:u32			\
+				& data:binary				\
+				& out_of_band:bool			\
+				& end_of_record:bool			\
+				& end_of_file:bool
+
+    /**
+     * Send data on socket to a given multicast group from a given
+     * interface.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param group_addr destination address for data.
+     *
+     * @param group_port destination port for data.
+     *
+     * @param ifaddr interface address
+     */
+    send_from_multicast_if	? sockid:txt				\
+				& group_addr:ipv4			\
+				& group_port:u32			\
+				& ifaddr:ipv4				\
+				& data:binary
+
+
+    /**
+     * Set a named socket option.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param optname name of option to be set.  Valid values are:
+     * 		"multicast_loopback"
+     *		"multicast_ttl"
+     *
+     * @param optval value of option to be set.  If value is logically boolean
+     *        then zero represents false and any non-zero value true.
+     */
+    set_socket_option		? sockid:txt				\
+				& optname:txt				\
+				& optval:u32
+
+    /**
+     * Get a named socket option.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param optname name of option to be set.  Valid values are documented
+     * in set_socket_option.
+     *
+     * @param optval value of option to be set.  If value is logically boolean
+     *        then zero represents false and any non-zero value true.
+     */
+    get_socket_option		? sockid:txt				\
+				& optname:txt				\
+				-> optval:u32
+
+    /* TODO stats methods (perhaps in a separate interface). */
+    /* TODO non-integer socket options. */
+}

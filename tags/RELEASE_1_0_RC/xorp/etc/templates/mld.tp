@@ -1,0 +1,77 @@
+/* $XORP: xorp/etc/templates/mld.tp,v 1.7 2004/06/04 04:47:04 pavlin Exp $ */
+
+protocols {
+    mld {
+	targetname:		txt = "MLD";
+	enabled:		bool = true;
+
+	interface @: txt {
+	    vif @: txt {
+		enabled:	bool = true;
+	    }
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    enabled:	bool = false;
+		}
+	    }
+	}
+    }
+}
+
+protocols {
+    mld {
+	%help:		short		"Configure the MLD protocol";
+	%modinfo:	provides	mld;
+	%modinfo:	depends		mfea6;
+	%modinfo:	path		"mld6igmp/xorp_mld";
+	%modinfo:	default_targetname "mld6igmp";
+	%modinfo:	status_method	xrl "$(mld.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	startup_method	xrl "$(mld.targetname)/mld6igmp/0.1/start_mld6igmp";
+	%modinfo:	shutdown_method	xrl "$(mld.targetname)/common/0.1/shutdown";
+
+	%mandatory:	targetname;
+
+	targetname {
+	    %help:	short "Set the target name";
+	    %set:;
+	}
+
+	enabled {
+	    %help:	short "Enable the MLD protocol";
+	    %create:;
+	    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(@)";
+	    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(DEFAULT)";
+	}
+
+	interface @ {
+	    %help:	short "Configure MLD on a network interface";
+	    vif @ {
+		%help:	short "Configure MLD on a virtual interface";
+		%activate: xrl "$(mld.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
+
+		enabled {
+		    %help:	short "Enable MLD on an interface";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+	    }
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short "Configure all tracing operations";
+		    enabled {
+			%help:	short "Enable all tracing operations";
+			%set:	xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=$(@)";
+		    }
+		}
+	    }
+	}
+    }
+}

@@ -1,0 +1,8 @@
+--- master.passwd	Sun May 23 01:12:34 2004
++++ master.passwd.diff	Sun May 23 01:15:05 2004
+@@ -18,4 +18,5 @@
+ xten:*:67:67::0:0:X-10 daemon:/usr/local/xten:/sbin/nologin
+ pop:*:68:6::0:0:Post Office Owner:/nonexistent:/sbin/nologin
+ www:*:80:80::0:0:World Wide Web Owner:/nonexistent:/sbin/nologin
++xorp::1947:1947::0:0:XORP demo user:/etc:/usr/local/xorp/bin/xorpsh
+ nobody:*:65534:65534::0:0:Unprivileged user:/nonexistent:/sbin/nologin
