@@ -45,6 +45,7 @@
  */
 #include <sys/ioctl.h>
 #ifdef HAVE_SELECT
+#include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #endif
