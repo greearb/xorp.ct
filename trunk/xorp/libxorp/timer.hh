@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.15 2003/06/12 23:58:16 jcardona Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.16 2003/09/04 04:04:25 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -148,6 +148,7 @@ public:
 
     XorpTimer& operator=(const XorpTimer&);
     TimerNode* node() const		{ return _node; }
+
 private:
     TimerNode* _node;
 
@@ -361,14 +362,18 @@ public:
     void remove_observer();
 
 private:
-    void schedule_node(TimerNode* t);	// Put node in time ordered list pos.
-    void unschedule_node(TimerNode* t); // Remove node from list.
+    void schedule_node(TimerNode* t);		// insert in time ordered pos.
+    void unschedule_node(TimerNode* t);		// remove from list
 
+    inline void acquire_lock() const		{ /* nothing, for now */ }
+    inline bool attempt_lock() const		{ return true; }
+    inline void release_lock() const		{ /* nothing, for now */ }
 
-    void acquire_lock() const		{ /* nothing, for now */ }
-    bool attempt_lock() const		{ return true; }
-    void release_lock() const		{ /* nothing, for now */ }
+private:
+    TimerList(const TimerList&);		// not implemented
+    TimerList operator=(const TimerList&);	// not implemented
 
+private:
     query_current_time _current_time_proc;	// called to get time
     TimerListObserverBase * _observer;
 

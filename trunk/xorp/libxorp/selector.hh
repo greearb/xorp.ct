@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.8 2003/06/11 19:15:19 jcardona Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.9 2003/06/12 23:58:15 jcardona Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -46,10 +46,10 @@ class SelectorTag;
 typedef ref_ptr<SelectorTag> Selector;
 
 /**
- * @short Abstract class used to receive SelectorList notifications 
+ * @short Abstract class used to receive SelectorList notifications
  *
  * A SelectorListObserverBase abstract class can be subtyped to create classes
- * that will receive @ref SelectorList events. 
+ * that will receive @ref SelectorList events.
  * All methods in this class are private, since they must only be invoked by
  * the friend class SelectorList
  */
@@ -59,14 +59,14 @@ public:
 
 private:
     /**
-     * This function will get called when a new file descriptor is added to the
-     * SelectorList  
+     * This function will get called when a new file descriptor is
+     * added to the SelectorList.
      */
     virtual void notify_added(int fd, const SelectorMask& mask) = 0;
 
     /**
-     * This function will get called when a new file descriptor is removed from
-     * the SelectorList 
+     * This function will get called when a new file descriptor is
+     * removed from the SelectorList.
      */
     virtual void notify_removed(int fd, const SelectorMask& mask) = 0;
 
@@ -189,6 +189,10 @@ public:
 
 protected:
     void callback_bad_descriptors();
+
+private:
+    SelectorList(const SelectorList&);			// not implemented
+    SelectorList& operator=(const SelectorList&);	// not implemented
 
 private:
     enum {
