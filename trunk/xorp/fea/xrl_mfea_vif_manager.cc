@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.4 2003/05/19 23:35:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.5 2003/05/20 00:20:26 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -765,7 +765,8 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags4(const XrlError& e,
 	return;
     }
     
-    if (e != XrlError::COMMAND_FAILED()) {
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
 	update_state();
 	return;
     }
@@ -838,7 +839,8 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags6(const XrlError& e,
 	return;
     }
     
-    if (e != XrlError::COMMAND_FAILED()) {
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
 	update_state();
 	return;
     }
@@ -890,7 +892,8 @@ XrlMfeaVifManager::xrl_result_get_all_prefix4(const XrlError& e,
 	return;
     }
     
-    if (e != XrlError::COMMAND_FAILED()) {
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
 	update_state();
 	return;
     }
@@ -946,7 +949,8 @@ XrlMfeaVifManager::xrl_result_get_all_prefix6(const XrlError& e,
 	return;
     }
     
-    if (e != XrlError::COMMAND_FAILED()) {
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
 	update_state();
 	return;
     }
@@ -998,7 +1002,8 @@ XrlMfeaVifManager::xrl_result_get_all_broadcast4(const XrlError& e,
 	return;
     }
     
-    if (e != XrlError::COMMAND_FAILED()) {
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
 	update_state();
 	return;
     }
@@ -1050,7 +1055,8 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint4(const XrlError& e,
 	return;
     }
     
-    if (e != XrlError::COMMAND_FAILED()) {
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
 	update_state();
 	return;
     }
@@ -1106,7 +1112,8 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint6(const XrlError& e,
 	return;
     }
     
-    if (e != XrlError::COMMAND_FAILED()) {
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
 	update_state();
 	return;
     }
