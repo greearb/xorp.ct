@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.16 2003/07/10 23:44:31 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.17 2003/10/31 22:11:25 pavlin Exp $"
 
 
 //
@@ -74,7 +74,7 @@ CliNode::sock_serv_open()
 	break;
 #endif // HAVE_IPV6
     default:
-	assert(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -82,6 +82,29 @@ CliNode::sock_serv_open()
 	return (XORP_ERROR);
     
     return (_cli_socket);
+}
+
+/**
+ * CliNode::sock_serv_close:
+ * @: 
+ * 
+ * Close the socket that is used by the CLI to listen on for connections.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+CliNode::sock_serv_close()
+{
+    int ret_value = XORP_OK;
+
+    if (_cli_socket < 0)
+	return (XORP_OK);	// Nothing to do
+
+    if (comm_close(_cli_socket) < 0)
+	ret_value = XORP_ERROR;
+    _cli_socket = -1;
+
+    return (ret_value);
 }
 
 void

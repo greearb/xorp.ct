@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.10 2003/11/20 00:46:34 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.11 2003/11/20 01:06:19 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -373,6 +373,7 @@ private:
 			     const vector<string>& argv);
     
     int		sock_serv_open();
+    int		sock_serv_close();
     CliClient	*add_connection(int client_socket);
     int		delete_connection(CliClient *cli_client);
     void	accept_connection(int fd, SelectorMask mask);

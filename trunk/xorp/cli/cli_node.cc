@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.12 2003/11/20 00:46:35 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.13 2003/11/20 01:06:19 pavlin Exp $"
 
 
 //
@@ -116,24 +116,29 @@ CliNode::start(void)
 
 /**
  * CliNode::stop:
- * @void: 
+ * @: 
  * 
  * Stop the CLI operation.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliNode::stop(void)
+CliNode::stop()
 {
-    if (ProtoNode<Vif>::stop() < 0)
+    if (! is_up())
 	return (XORP_ERROR);
-    
+
     // Perform misc. CLI-specific stop operations
     // TODO: add as necessary
-    
+
     delete_pointers_list(_client_list);
+
     eventloop().remove_selector(_cli_socket, SEL_RD);
-    
+    sock_serv_close();
+
+    if (ProtoNode<Vif>::stop() < 0)
+	return (XORP_ERROR);
+
     return (XORP_OK);
 }
 
