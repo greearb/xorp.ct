@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.11 2003/06/01 21:37:27 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.12 2004/06/10 22:41:06 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -115,9 +115,6 @@ protected:
 
     uint32_t _isize;	// input buffer size as received.
     uint32_t _osize;	// output buffer size as advertised.
-
-    // Maximum size of _input_buffer.
-    static const uint32_t FINDER_TCP_BUFFER_BYTES = 8192;
 };
 
 class FinderTcpListenerBase {

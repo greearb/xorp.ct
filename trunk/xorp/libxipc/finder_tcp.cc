@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.19 2004/09/02 02:38:00 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.20 2005/01/21 01:59:49 atanu Exp $"
 
 #include <functional>
 
@@ -149,7 +149,7 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	// Read length of data to follow
 	_isize = ntohl(_isize);
 
-	if (0 == _isize || _isize > FinderTcpBase::FINDER_TCP_BUFFER_BYTES) {
+	if (0 == _isize) {
 	    XLOG_ERROR("Bad input buffer size (%d bytes) from wire, "
 		       "dropping connection", XORP_INT_CAST(_isize));
 	    error_event();
