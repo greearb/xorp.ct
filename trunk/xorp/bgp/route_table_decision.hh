@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.15 2004/06/12 15:02:27 mjh Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.16 2004/06/25 12:32:09 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -160,9 +160,6 @@ private:
     uint32_t med(const SubnetRoute<A> *route) const;
     bool resolvable(const A) const;
     uint32_t igp_distance(const A) const;
-    bool route_wins(const SubnetRoute<A> *test_route,
-		    const PeerHandler *test_peer,
-		    list<RouteData<A> >& alternatives) const;
     RouteData<A>* find_winner(list<RouteData<A> >& alternatives) const;
     map<BGPRouteTable<A>*, PeerTableInfo<A>* > _parents;
     map<IPv4, PeerTableInfo<A>* > _sorted_parents;
