@@ -13,10 +13,10 @@
 # to become part of the tinderbox build.
 #
 
-host_fbsd462_gcc32="xorpc.icir.org"
-env_fbsd462_gcc32="CC=gcc32 CXX=g++32 MALLOC_OPTIONS=AJ"
-home_fbsd462_gcc32="/home/xorpc/u1/hodson/build/tinderbox_gcc32"
-buildflags_fbsd462_gcc32="-j 2"
+host_fbsd462_gcc33="xorpc.icir.org"
+env_fbsd462_gcc33="CC=gcc33 CXX=g++33 MALLOC_OPTIONS=AJ"
+home_fbsd462_gcc33="/home/xorpc/u1/hodson/build/tinderbox_gcc33"
+buildflags_fbsd462_gcc33="-j 2"
 
 host_fbsd462_gcc295="xorpc.icir.org"
 home_fbsd462_gcc295="/home/xorpc/u1/hodson/build/tinderbox_gcc295"
@@ -28,7 +28,7 @@ home_linux24_gcc296="tinderbox"
 env_linux24_gcc296="MALLOC_CHECK_=2"
 buildflags_linux24_gcc296="-j 4"
 
-TINDERBOX_CONFIGS="fbsd462_gcc32 fbsd462_gcc295 linux24_gcc296"
+TINDERBOX_CONFIGS="fbsd462_gcc33 fbsd462_gcc295 linux24_gcc296"
 
 #
 # Configuration variables for tinderbox
