@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/TODO,v 1.5 2003/07/03 07:01:12 pavlin Exp $
+# $XORP: xorp/rib/TODO,v 1.6 2003/08/01 01:57:39 pavlin Exp $
 #
 
 RIB To Do List
@@ -30,8 +30,6 @@ the same route.
 
 10. Better, more extensive test suites.
 
-11. Add new interface for PIM simply be able to get all the routes.
-
 12. Change virtual XrlCmdError rib_0_1_no_fea(); to enable/disable
     RIB clients.
 
@@ -42,3 +40,13 @@ the same route.
     if vif is down, then the route is NOT directly connected?
 
 15. Make test_rib_client.cc work properly
+
+16. Repeated adding and deleting of a table does not work. 
+$ bgp/harness/test_routing2.sh -t test6.
+
+17. Use ref_trie.hh not trie.hh.
+
+Done
+=======================
+11. Add new interface for PIM simply be able to get all the routes.
+
