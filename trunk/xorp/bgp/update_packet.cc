@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.3 2002/12/17 04:49:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.4 2003/01/16 23:18:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -214,7 +214,7 @@ const uint8_t *UpdatePacket::encode(int &len) const
 	    PathAttribute* pa = *pai;
 	    debug_msg("Looping through path attributes\n");
 	    io[position].iov_base = 
-		(char *)const_cast<uint8_t *>(pa->get_data());
+		(char *)const_cast<uint8_t *>(pa->encode_and_get_data());
 	    io[position].iov_len = pa->get_size();
 	    path_size = path_size + pa->get_size();
 	    position++;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.4 2002/12/17 22:06:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.5 2003/01/16 23:18:58 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -557,8 +557,8 @@ DecisionTable<A>::local_pref(const SubnetRoute<A> *route,
      */
     cp(55);
     const PathAttributeList<A> *attrlist = route->attributes();
-    list<const PathAttribute*> l = attrlist->att_list();
-    list<const PathAttribute*>::const_iterator i;
+    list<PathAttribute*> l = attrlist->att_list();
+    list<PathAttribute*>::const_iterator i;
     for(i = l.begin(); i != l.end(); i++) {
 	if(LOCAL_PREF == (*i)->type()) {
 	    cp(56);
@@ -578,8 +578,8 @@ uint32_t
 DecisionTable<A>::med(const SubnetRoute<A> *route) const
 {
     const PathAttributeList<A> *attrlist = route->attributes();
-    list<const PathAttribute*> l = attrlist->att_list();
-    list<const PathAttribute*>::const_iterator i;
+    list<PathAttribute*> l = attrlist->att_list();
+    list<PathAttribute*>::const_iterator i;
     for(i = l.begin(); i != l.end(); i++) {
 	if(MED == (*i)->type()) {
 	    cp(59);

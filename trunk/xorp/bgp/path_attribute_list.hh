@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute_list.hh,v 1.24 2002/12/09 18:28:44 hodson Exp $
+// $XORP: xorp/bgp/path_attribute_list.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_LIST_HH__
 #define __BGP_PATH_ATTRIBUTE_LIST_HH__
@@ -42,7 +42,7 @@ public:
 	return _hash;
     }
 
-    const list<const PathAttribute*>& att_list() const {
+    const list<PathAttribute*>& att_list() const {
 // 	printf("PathAttributeList:att_list(): size = %d\n", _att_list.size());
 	return _att_list;
     }
@@ -71,13 +71,13 @@ public:
     bool operator== (const PathAttributeList<A> &them) const;
 protected:
 private:
-    void replace_attribute(const PathAttribute *att, PathAttType type);
+    void replace_attribute(PathAttribute *att, PathAttType type);
     void assert_rehash() const;
 
     NextHopAttribute<A> *_nexthop_att;
     ASPathAttribute *_aspath_att;
     OriginAttribute *_origin_att;
-    list <const PathAttribute*> _att_list;
+    list <PathAttribute*> _att_list;
 
     // hash is used for fast comparisons
     uint8_t _hash[16];

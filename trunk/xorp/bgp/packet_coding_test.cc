@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.3 2002/12/14 00:31:13 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.4 2002/12/15 04:09:28 mjh Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -300,7 +300,7 @@ int test_announce_packet(bool verbose)
     palist.rehash();
 
     const PathAttribute *pa;
-    list <const PathAttribute*>::const_iterator iter;
+    list <PathAttribute*>::const_iterator iter;
     iter = palist.att_list().begin();
     while(iter !=  palist.att_list().end()) {
 	pa = *iter;

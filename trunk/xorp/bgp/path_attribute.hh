@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.2 2002/12/13 23:57:05 rizzo Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.3 2002/12/17 04:49:17 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -70,13 +70,17 @@ public:
     PathAttribute(bool optional, bool transitive,
 		     bool partial, bool extended);
     virtual ~PathAttribute();
-    virtual void encode() const = 0;
+    virtual void encode() = 0;
     virtual void decode() = 0;
     virtual const PathAttType type() const = 0;
     virtual const PathAttSortType sorttype() const = 0;
-    virtual void add_hash(MD5_CTX *context) const;
+    virtual void add_hash(MD5_CTX *context);
 
-    const uint8_t * get_data() const;
+    const uint8_t * encode_and_get_data();
+    const uint8_t * get_data() const {
+	assert(_data != NULL);
+	return _data;
+    }
     uint16_t get_size() const { return _length; }
 
     void pretty_print();
@@ -93,9 +97,9 @@ public:
     bool extended() const { return _extended; }
     bool well_known() const { return !_optional; }
 protected:
-    mutable const uint8_t* _data; // data includes the PathAttribute header
+    const uint8_t* _data; // data includes the PathAttribute header
 
-    mutable uint8_t _length; // the length of the _data buffer (ie the
+    uint8_t _length; // the length of the _data buffer (ie the
                              // attribute data plus the PathAttribute header
 
     uint16_t _attribute_length; // the length of the attribute, minus
@@ -113,9 +117,9 @@ public:
     OriginAttribute(OriginType t);
     OriginAttribute(const OriginAttribute& origin);
     OriginAttribute(const uint8_t* d, uint16_t l);
-    void encode() const;
+    void encode();
     void decode();
-    void add_hash(MD5_CTX *context) const;
+    void add_hash(MD5_CTX *context);
     const PathAttType type() const { return ORIGIN; }
     const PathAttSortType sorttype() const { return SORT_ORIGIN; }
     OriginType origintype() const { return _origin; }
@@ -137,7 +141,7 @@ public:
     ASPathAttribute(const AsPath& as_path);
     ASPathAttribute(const ASPathAttribute& as_path);
     ASPathAttribute(const uint8_t* d, uint16_t l);
-    void encode() const;
+    void encode();
     void decode();
     const PathAttType type() const { return AS_PATH; }
     const PathAttSortType sorttype() const { return SORT_AS_PATH; }
@@ -166,9 +170,9 @@ public:
     // void set_nexthop(uint32_t t);
     //    void set_nexthop(const A &n) { _next_hop = n; debug_msg("IPv4 addr %s set as next hop\n", cstring(n)); }
     const A& nexthop() const { return _next_hop; }
-    void encode() const;
+    void encode();
     void decode();
-    void add_hash(MD5_CTX *context) const;
+    void add_hash(MD5_CTX *context);
     const PathAttType type() const { return NEXT_HOP; }
     const PathAttSortType sorttype() const { return SORT_NEXT_HOP; }
     string str() const;
@@ -192,7 +196,7 @@ public:
     MEDAttribute(uint32_t med);
     MEDAttribute(const MEDAttribute& med_att);
     MEDAttribute(const uint8_t* d, uint16_t l);
-    void encode() const;
+    void encode();
     void decode();
     const PathAttType type() const { return MED; }
     const PathAttSortType sorttype() const { return SORT_MED; }
@@ -215,7 +219,7 @@ public:
     LocalPrefAttribute(uint32_t localpref);
     LocalPrefAttribute(const LocalPrefAttribute& local_pref);
     LocalPrefAttribute(const uint8_t* d, uint16_t l);
-    void encode() const;
+    void encode();
     void decode();
     const PathAttType type() const { return LOCAL_PREF; }
     const PathAttSortType sorttype() const { return SORT_LOCAL_PREF; }
@@ -244,7 +248,7 @@ public:
     AtomicAggAttribute();
     AtomicAggAttribute(const AtomicAggAttribute& atomic);
     AtomicAggAttribute(const uint8_t* d, uint16_t l);
-    void encode() const;
+    void encode();
     void decode();
     const PathAttType type() const { return ATOMIC_AGGREGATE; }
     const PathAttSortType sorttype() const { return SORT_ATOMIC_AGGREGATE; }
@@ -266,7 +270,7 @@ public:
 			   const AsNum& aggregatoras);
     AggregatorAttribute(const AggregatorAttribute& agg);
     AggregatorAttribute(const uint8_t* d, uint16_t l);
-    void encode() const;
+    void encode();
     void decode();
     const PathAttType type() const { return AGGREGATOR; }
     const PathAttSortType sorttype() const { return SORT_AGGREGATOR; }
@@ -299,7 +303,7 @@ public:
     CommunityAttribute(const uint8_t* d, uint16_t l);
     void add_community(uint32_t community);
     const set <uint32_t>& community_set() const { return _communities; }
-    void encode() const;
+    void encode();
     void decode();
     const PathAttType type() const { return COMMUNITY; }
     const PathAttSortType sorttype() const { return SORT_COMMUNITY; }
@@ -317,7 +321,7 @@ public:
     UnknownAttribute();
     UnknownAttribute(const UnknownAttribute& agg);
     UnknownAttribute(const uint8_t* d, uint16_t l);
-    void encode() const;
+    void encode();
     void decode();
     const PathAttType type() const { return UNKNOWN; }
     const PathAttSortType sorttype() const { return _type; }

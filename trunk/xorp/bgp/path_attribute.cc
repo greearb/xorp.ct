@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.4 2002/12/14 00:21:01 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.5 2002/12/17 04:49:17 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -99,14 +99,14 @@ PathAttribute::decode()
 }
 
 void
-PathAttribute::add_hash(MD5_CTX *context) const
+PathAttribute::add_hash(MD5_CTX *context)
 {
     encode();
     MD5Update(context, _data, _length);
 }
 
 const uint8_t *
-PathAttribute::get_data() const
+PathAttribute::encode_and_get_data()
 {
     debug_msg("PathAttribute get_data() called\n");
     encode();
@@ -312,7 +312,7 @@ OriginAttribute::OriginAttribute(const uint8_t* d, uint16_t l)
 // class instance - we only re-encode it.
 
 void
-OriginAttribute::encode() const
+OriginAttribute::encode()
 {
     delete[] _data;
 
@@ -366,7 +366,7 @@ OriginAttribute::decode()
 }
 
 void
-OriginAttribute::add_hash(MD5_CTX *context) const
+OriginAttribute::add_hash(MD5_CTX *context)
 {
     MD5Update(context, (const uint8_t*)&_origin, sizeof(_origin));
 }
@@ -444,7 +444,7 @@ ASPathAttribute::ASPathAttribute(const uint8_t* d, uint16_t l)
 }
 
 void
-ASPathAttribute::encode() const
+ASPathAttribute::encode()
 {
     debug_msg("ASPathAttribute encode()\n");
 
@@ -585,7 +585,7 @@ NextHopAttribute<A>::NextHopAttribute<A>(const uint8_t* d, uint16_t l)
 }
 
 void
-NextHopAttribute<IPv4>::encode() const
+NextHopAttribute<IPv4>::encode()
 {
     delete[] _data;
 
@@ -601,7 +601,7 @@ NextHopAttribute<IPv4>::encode() const
 }
 
 void
-NextHopAttribute<IPv6>::encode() const
+NextHopAttribute<IPv6>::encode()
 {
     // XXXX A true nexthop attribute in BGP can only be IPv4.  Need to
     // figure out the IPv6 stuff later.
@@ -642,7 +642,8 @@ NextHopAttribute<A>::decode()
 
 template <class A>
 void
-NextHopAttribute<A>::add_hash(MD5_CTX *context) const {
+NextHopAttribute<A>::add_hash(MD5_CTX *context) 
+{
     MD5Update(context, (const uint8_t*)&_next_hop, sizeof(_next_hop));
 }
 
@@ -698,7 +699,7 @@ MEDAttribute::MEDAttribute(const uint8_t* d, uint16_t l)
 }
 
 void
-MEDAttribute::encode() const
+MEDAttribute::encode()
 {
     delete[] _data;
 
@@ -779,7 +780,7 @@ LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d, uint16_t l)
 }
 
 void
-LocalPrefAttribute::encode() const
+LocalPrefAttribute::encode()
 {
     delete[] _data;
 
@@ -862,7 +863,7 @@ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d, uint16_t l)
 }
 
 void
-AtomicAggAttribute::encode() const
+AtomicAggAttribute::encode()
 {
     delete[] _data;
 
@@ -940,7 +941,7 @@ AggregatorAttribute::AggregatorAttribute(const uint8_t* d, uint16_t l)
 }
 
 void
-AggregatorAttribute::encode() const
+AggregatorAttribute::encode()
 {
     delete[] _data;
 
@@ -1038,7 +1039,7 @@ CommunityAttribute::add_community(uint32_t community)
 }
 
 void
-CommunityAttribute::encode() const
+CommunityAttribute::encode()
 {
     delete[] _data;
 
@@ -1170,7 +1171,7 @@ UnknownAttribute::UnknownAttribute(const uint8_t* d, uint16_t l)
 }
 
 void
-UnknownAttribute::encode() const
+UnknownAttribute::encode()
 {
 }
 
