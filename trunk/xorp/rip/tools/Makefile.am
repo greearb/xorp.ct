@@ -57,4 +57,6 @@ $(top_builddir)/rip/tools/xrl_ripng_shell_funcs.sh:			\
 		$(ripng_xrls) $(gen_wrappers)
 	$(gen_wrappers) $(ripng_xrls) > $@
 
+################################################################
 
+INCLUDES =	-I$(top_srcdir)
