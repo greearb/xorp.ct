@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.9 2004/01/28 00:35:44 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.10 2004/02/26 13:52:16 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -60,6 +60,11 @@ public:
     void new_config_user(uid_t user_id);
     void leave_config_done(const XrlError& e);
     void notify_user(const string& alert, bool urgent);
+    int help_func(const string& ,
+		   const string& ,
+		   uint32_t ,
+		   const string& command_global_name,
+		   const vector<string>& argv);
     int logout_func(const string& ,
 		   const string& ,
 		   uint32_t ,
@@ -126,6 +131,10 @@ public:
     void load_communicated(const XrlError& e);
     void load_done(bool success, string errmsg);
 
+    map <string, string> op_mode_help(const string& path,
+				      bool& is_executable) const;
+    map <string, string> configure_mode_help(const string& path,
+					     bool& is_executable) const;
     typedef XorpCallback2<void, bool, const string&>::RefPtr OpModeCallback;
     void op_mode_cmd_done(bool success, const string& result);
 
@@ -198,9 +207,12 @@ private:
     void check_for_rtrmgr_restart();
     void verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid);
 
+    string get_help_o(const string& s) const;
+    string get_help_c(const string& s) const;
+
     TemplateTree*	template_tree();
     SlaveConfigTree*	config_tree();
-    OpCommandList*	op_cmd_list();
+    OpCommandList*	op_cmd_list() const;
 
     XorpShell&		_xorpsh;
 
@@ -223,6 +235,11 @@ private:
 					// nodes for each backet nested
     bool		_changes_made;	// true if there are uncommitted
 					// changes
+
+    map<string,string> _help_o;  //short help strings for operational
+				 //mode commands
+    map<string,string> _help_c;  //short help strings for configuration
+				 //mode commands
 };
 
 #endif // __RTRMGR_CLI_HH__

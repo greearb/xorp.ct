@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.23 2004/02/26 13:52:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.24 2004/02/27 12:12:48 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -35,6 +35,32 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node)
 {
     _current_config_node = &(config_tree()->root_node());
     operational_mode();
+
+    //we do all this here to allow for later extensions for
+    //internationalization
+    _help_o["configure"] = "Switch to configuration mode";
+    _help_o["configure exclusive"] 
+	= "Switch to configuration mode, locking out other users";
+    _help_o["help"] = "Provide help with commands";
+    _help_o["quit"] = "Quit this command session";
+
+
+    _help_c["commit"] = "Commit the current set of changes";
+    _help_c["delete"] = "Delete a configuration element";
+    _help_c["edit"] = "Edit a sub-element";
+    _help_c["exit"] = "Exit from this configuration level";
+    _help_c["exit configuration-mode"] =  "Exit from configuration mode";
+    _help_c["exit discard"] 
+	= "Exit from configuration mode, discarding changes";
+    _help_c["help"] = "Provide help with commands";
+    _help_c["load"] = "Load configuration from a file";
+    _help_c["quit"] = "Quit from this level";
+    _help_c["run"] = "Run an operational-mode command";
+    _help_c["save"] = "Save configuration to a file";
+    _help_c["set"] = "Set the value of a parameter";
+    _help_c["show"] = "Show the value of a parameter";
+    _help_c["top"] = "Exit to top level of configuration";
+    _help_c["up"] = "Exit one level of configuration";
 }
 
 RouterCLI::~RouterCLI()
@@ -42,6 +68,27 @@ RouterCLI::~RouterCLI()
     // TODO: for now we leave the deletion to be implicit when xorpsh exits
     // _cli_node.delete_stdio_client(&_cli_client);
 }
+
+string 
+RouterCLI::get_help_o(const string& s) const {
+    map<string,string>::const_iterator i = _help_o.find(s);
+    if (i == _help_o.end())
+	return string("");
+    else
+	return i->second;
+}
+
+
+string 
+RouterCLI::get_help_c(const string& s) const {
+    map<string,string>::const_iterator i = _help_c.find(s);
+    if (i == _help_c.end())
+	return string("");
+    else
+	return i->second;
+}
+
+
 
 void
 RouterCLI::commit_done_by_user(int uid)
@@ -72,7 +119,7 @@ RouterCLI::operational_mode()
 void
 RouterCLI::add_op_mode_commands(CliCommand* com0)
 {
-    CliCommand *com1, *com2;
+    CliCommand *com1, *com2, *help_com;
     // com0->add_command("clear", "Clear information in the system *");
 
     // If no root node is specified, default to the true root
@@ -81,17 +128,27 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 
     if (com0 == _cli_node.cli_command_root()) {
 	com1 = com0->add_command("configure",
-				 "Switch to configuration mode",
+				 get_help_o("configure"),
 				 callback(this, &RouterCLI::configure_func));
 	com1->set_global_name("configure");
 	com2 = com1->add_command("exclusive",
-				 "Switch to configuration mode, locking out other users",
+				 get_help_o("configure exclusive"),
 				 callback(this, &RouterCLI::configure_func));
 	com2->set_global_name("configure exclusive");
 
-	com0->add_command("help", "Provide help with commands");
+	/*Help Command*/
+	help_com = com0->add_command("help", get_help_o("help"));
+	help_com->set_global_name("help");
+	help_com->
+	    set_dynamic_children_callback(callback(this,
+						   &RouterCLI::op_mode_help));
+
+	help_com->
+	    set_dynamic_process_callback(callback(this,
+						  &RouterCLI::help_func));
+	/*Quit Command*/
 	com0->add_command("quit", 
-			  "Quit this command session",
+			  get_help_o("quit"),
 			  callback(this, &RouterCLI::logout_func));
     }
 
@@ -114,6 +171,48 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
     //    _set_node = com0->add_command("set", "Set CLI properties");
     //    _show_node = com0->add_command("show", "Show router operational imformation");
     //    com0->add_command("traceroute", "Trace the unicast path to a network host");
+}
+
+map<string, string> 
+RouterCLI::op_mode_help(const string& path,
+			bool& is_executable) const
+{
+    UNUSED(path);
+    UNUSED(is_executable);
+    map <string, string> children;
+    string trimmed_path;
+    XLOG_ASSERT(path.substr(0,4)=="help");
+    if (path.size()==4) {
+	trimmed_path == "";
+    } else {
+	XLOG_ASSERT(path.substr(0,5)=="help ");
+	trimmed_path = path.substr(5, path.size()-5);
+    }
+
+    if (trimmed_path == "") {
+	//Add the static commands:
+	children["configure"] = get_help_o("configure");
+	children["quit"] = get_help_o("quit");
+	children["help"] = get_help_o("help");
+	set<string> cmds = op_cmd_list()->top_level_commands();
+	set<string>::const_iterator iter;
+	for (iter = cmds.begin(); iter != cmds.end(); ++iter) {
+	    children[*iter] = "Give help on the " + (*iter) + "command";
+	}
+	is_executable = true;
+    } else if (trimmed_path == "configure") {
+	is_executable = true;
+	children["exclusive"] = get_help_o("configure exclusive");
+    } else if (trimmed_path == "configure exclusive") {
+	is_executable = true;
+    } else if (trimmed_path == "quit") {
+	is_executable = true;
+    } else if (trimmed_path == "help") {
+	is_executable = true;
+    } else {
+	children = op_cmd_list()->childlist(trimmed_path, is_executable);
+    }
+    return children;
 }
 
 void
@@ -216,26 +315,25 @@ RouterCLI::text_entry_mode()
 void
 RouterCLI::add_static_configure_mode_commands()
 {
-    CliCommand *com0, *com1, *com2;
+    CliCommand *com0, *com1, *com2, *help_com;
     com0 = _cli_node.cli_command_root();
     if (_changes_made) {
-	com0->add_command("commit", "Commit the current set of changes",
+	com0->add_command("commit", get_help_c("commit"),
 			  callback(this, &RouterCLI::commit_func));
     }
 
-    _delete_node = com0->add_command("delete",
-				     "Delete a configuration element");
+    _delete_node = com0->add_command("delete", get_help_c("delete"));
 
     // Edit command
-    _edit_node = com0->add_command("edit", "Edit a sub-element");
+    _edit_node = com0->add_command("edit", get_help_c("edit"));
     _edit_node->set_global_name("edit");
 
     // Exit command
-    com1 = com0->add_command("exit", "Exit from this configuration level",
+    com1 = com0->add_command("exit", get_help_c("exit"),
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("exit");
     com2 = com1->add_command("configuration-mode",
-			     "Exit from configuration mode",
+			     get_help_c("exit configuration_mode"),
 			     callback(this, &RouterCLI::exit_func));
     com2->set_global_name("exit configuration-mode");
     com2 = com1->add_command("discard",
@@ -243,42 +341,104 @@ RouterCLI::add_static_configure_mode_commands()
 			     callback(this, &RouterCLI::exit_func));
     com2->set_global_name("exit discard");
 
-    com0->add_command("help", "Provide help with commands");
-    //    com0->add_command("insert", "Insert a new configuration element");
+    /*Help Command*/
+    help_com = com0->add_command("help", get_help_c("help"));
+    help_com->set_global_name("help");
+    help_com->
+	set_dynamic_children_callback(callback(this,
+                                         &RouterCLI::configure_mode_help));
+    
+    help_com->
+	set_dynamic_process_callback(callback(this,
+					      &RouterCLI::help_func));
 
     // Load Command
-    com1 = com0->add_command("load", "Load configuration from a file",
+    com1 = com0->add_command("load", get_help_c("load"),
 			     callback(this, &RouterCLI::load_func));
     com1->set_global_name("load");
 
     // Quit Command
-    com1 = com0->add_command("quit", "Quit from this level",
+    com1 = com0->add_command("quit", get_help_c("quit"),
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("quit");
 
-    _run_node = com0->add_command("run", "Run an operational-mode command");
+    _run_node = com0->add_command("run", get_help_c("run"));
     add_op_mode_commands(_run_node);
 
-    com1 = com0->add_command("save", "Save configuration to a file",
+    com1 = com0->add_command("save", get_help_c("save"),
 			     callback(this, &RouterCLI::save_func));
     com1->set_global_name("save");
 
     // Set Command
-    _set_node = com0->add_command("set", "Set the value of a parameter");
+    _set_node = com0->add_command("set", get_help_c("set"));
 
     // Show Command
-    _show_node = com0->add_command("show", "Show the value of a parameter",
+    _show_node = com0->add_command("show", get_help_c("show"),
 				   callback(this, &RouterCLI::show_func));
 
     // Top Command
-    com1 = com0->add_command("top", "Exit to top level of configuration",
+    com1 = com0->add_command("top", get_help_c("top"),
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("top");
 
     // Up Command
-    com1 = com0->add_command("up", "Exit one level of configuration",
+    com1 = com0->add_command("up", get_help_c("up"),
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("up");
+}
+
+map<string, string>
+RouterCLI::configure_mode_help(const string& path,
+			       bool& is_executable) const
+{
+    UNUSED(path);
+    UNUSED(is_executable);
+    map <string, string> children;
+    string trimmed_path;
+    XLOG_ASSERT(path.substr(0,4)=="help");
+    if (path.size()==4) {
+	trimmed_path == "";
+    } else {
+	XLOG_ASSERT(path.substr(0,5)=="help ");
+	trimmed_path = path.substr(5, path.size()-5);
+    }
+
+    if (trimmed_path == "") {
+	//Add the static commands:
+	children["commit"] = get_help_c("commit");
+	children["delete"] = get_help_c("delete");
+	children["edit"] = get_help_c("edit");
+	children["exit"] = get_help_c("exit");
+	children["help"] = get_help_c("help");
+	children["load"] = get_help_c("load");
+	children["quit"] = get_help_c("quit");
+	children["run"] = get_help_c("run");
+	children["save"] = get_help_c("save");
+	children["set"] = get_help_c("set");
+	children["show"] = get_help_c("show");
+	children["top"] = get_help_c("top");
+	children["up"] = get_help_c("up");
+
+	//XXX need to insert the commands that come from the template
+	//tree here.
+
+	is_executable = true;
+    } else if (trimmed_path == "exit") {
+	children["configuration-mode"] = get_help_c("exit configuration-mode");
+	children["discard"] = get_help_c("exit discard");
+	is_executable = true;
+    } else {
+	//make the help for static commands executable
+	map<string,string>::const_iterator i;
+	is_executable = false;
+	for (i=_help_c.begin(); i!=_help_c.end(); i++) {
+	    if (trimmed_path == i->first) {
+		is_executable = true;
+		break;
+	    }
+	}
+    }
+    return children;
 }
 
 void
@@ -793,6 +953,30 @@ RouterCLI::notify_user(const string& alert, bool urgent)
 	_alerts.push_back(alert);
     } else {
 	_cli_client.cli_print(alert);
+    }
+}
+
+int
+RouterCLI::help_func(const string& ,
+		     const string& ,
+		     uint32_t ,		// cli_session_id
+		     const string& command_global_name,
+		     const vector<string>& argv)
+{
+    if (argv.size() == 0) {
+	string cmd_name = command_global_name;
+	string path;
+	if (cmd_name.size()==4) {
+	    XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
+	    path = "";
+	} else {
+	    XLOG_ASSERT(cmd_name.substr(0, 5) == "help ");
+	    path = cmd_name.substr(5, cmd_name.size() - 5);
+	}
+	_cli_client.cli_print("Help: " + path);
+	return (XORP_OK);
+    } else {
+	return (XORP_ERROR);
     }
 }
 
@@ -1599,7 +1783,7 @@ RouterCLI::template_tree()
 // Just to make the code more readable:
 //
 OpCommandList*
-RouterCLI::op_cmd_list()
+RouterCLI::op_cmd_list() const
 {
     return _xorpsh.op_cmd_list();
 }
