@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.13 2003/09/30 18:27:07 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.14 2003/12/16 23:35:16 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -11,37 +11,50 @@ interface pim/0.1 {
 	 * Enable/disable/start/stop a PIM vif interface.
 	 *
 	 * @param vif_name the name of the vif to enable/disable/start/stop.
+	 * @param enable if true, then enable the vif, otherwise
+	 * disable it.
 	 */
-	enable_vif	? vif_name:txt
-	disable_vif	? vif_name:txt
+	enable_vif	? vif_name:txt & enable:bool
 	start_vif	? vif_name:txt
 	stop_vif	? vif_name:txt
 
 	/**
 	 * Enable/disable/start/stop all PIM vif interfaces.
+	 *
+	 * @param enable if true, then enable the vifs, otherwise
+	 * disable them.
 	 */
-	enable_all_vifs
-	disable_all_vifs
+	enable_all_vifs	? enable:bool
 	start_all_vifs
 	stop_all_vifs
 	
 	/**
-	 * Enable/disable/start/stop PIM protocol and PIM CLI access.
+	 * Enable/disable/start/stop the PIM protocol.
+	 *
+	 * @param enable if true, then enable the PIM protocol, otherwise
+	 * disable it.
 	 */
-	enable_pim
-	disable_pim
-	enable_cli
-	disable_cli
+	enable_pim	? enable:bool
 	start_pim
 	stop_pim
+
+	/**
+	 * Enable/disable/start/stop the PIM CLI access.
+	 *
+	 * @param enable if true, then enable the PIM CLI access,
+	 * otherwise disable it.
+	 */
+	enable_cli	? enable:bool
 	start_cli
 	stop_cli
 
 	/**
 	 * Enable/disable/start/stop BSR.
+	 *
+	 * @param enable if true, then enable the BSR, otherwise
+	 * disable it.
 	 */
-	enable_bsr
-	disable_bsr
+	enable_bsr	? enable:bool
 	start_bsr
 	stop_bsr
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.32 2003/09/30 18:52:21 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.33 2003/12/16 23:40:46 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -969,29 +969,32 @@ protected:
 
     /**
      *  Enable/disable/start/stop a PIM vif interface.
-     *  
+     *
      *  @param vif_name the name of the vif to enable/disable/start/stop.
+     *
+     *  @param enable if true, then enable the vif, otherwise disable it.
      */
     XrlCmdError pim_0_1_enable_vif(
-	// Input values, 
-	const string&	vif_name);
-
-    XrlCmdError pim_0_1_disable_vif(
-	// Input values, 
-	const string&	vif_name);
+	// Input values,
+	const string&	vif_name,
+	const bool&	enable);
 
     XrlCmdError pim_0_1_start_vif(
-	// Input values, 
+	// Input values,
 	const string&	vif_name);
 
     XrlCmdError pim_0_1_stop_vif(
-	// Input values, 
+	// Input values,
 	const string&	vif_name);
 
     /**
      *  Enable/disable/start/stop all PIM vif interfaces.
+     *
+     *  @param enable if true, then enable the vifs, otherwise disable them.
      */
-    XrlCmdError pim_0_1_enable_all_vifs();
+    XrlCmdError pim_0_1_enable_all_vifs(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError pim_0_1_disable_all_vifs();
 
@@ -1000,19 +1003,28 @@ protected:
     XrlCmdError pim_0_1_stop_all_vifs();
 
     /**
-     *  Enable/disable/start/stop PIM protocol and PIM CLI access.
+     *  Enable/disable/start/stop the PIM protocol.
+     *
+     *  @param enable if true, then enable the PIM protocol, otherwise disable
+     *  it.
      */
-    XrlCmdError pim_0_1_enable_pim();
-
-    XrlCmdError pim_0_1_disable_pim();
-
-    XrlCmdError pim_0_1_enable_cli();
-
-    XrlCmdError pim_0_1_disable_cli();
+    XrlCmdError pim_0_1_enable_pim(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError pim_0_1_start_pim();
 
     XrlCmdError pim_0_1_stop_pim();
+
+    /**
+     *  Enable/disable/start/stop the PIM CLI access.
+     *
+     *  @param enable if true, then enable the PIM CLI access, otherwise
+     *  disable it.
+     */
+    XrlCmdError pim_0_1_enable_cli(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError pim_0_1_start_cli();
 
@@ -1020,10 +1032,12 @@ protected:
 
     /**
      *  Enable/disable/start/stop BSR.
+     *
+     *  @param enable if true, then enable the BSR, otherwise disable it.
      */
-    XrlCmdError pim_0_1_enable_bsr();
-
-    XrlCmdError pim_0_1_disable_bsr();
+    XrlCmdError pim_0_1_enable_bsr(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError pim_0_1_start_bsr();
 

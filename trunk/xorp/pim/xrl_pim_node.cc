@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.41 2003/11/19 01:03:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.42 2003/12/16 23:40:46 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2470,27 +2470,21 @@ XrlPimNode::mld6igmp_client_0_1_delete_membership6(
 
 XrlCmdError
 XrlPimNode::pim_0_1_enable_vif(
-    // Input values, 
-    const string&	vif_name)
+    // Input values,
+    const string&	vif_name,
+    const bool&	enable)
 {
     string error_msg;
-    
-    if (PimNode::enable_vif(vif_name, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
-    return XrlCmdError::OKAY();
-}
+    int ret_value;
 
-XrlCmdError
-XrlPimNode::pim_0_1_disable_vif(
-    // Input values, 
-    const string&	vif_name)
-{
-    string error_msg;
-    
-    if (PimNode::disable_vif(vif_name, error_msg) != XORP_OK)
+    if (enable)
+	ret_value = PimNode::enable_vif(vif_name, error_msg);
+    else
+	ret_value = PimNode::disable_vif(vif_name, error_msg);
+
+    if (ret_value != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -2521,24 +2515,26 @@ XrlPimNode::pim_0_1_stop_vif(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_enable_all_vifs()
+XrlPimNode::pim_0_1_enable_all_vifs(
+	// Input values,
+	const bool&	enable)
 {
-    if (PimNode::enable_all_vifs() != XORP_OK) {
-	string error_msg = c_format("Failed to enable all vifs");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    string error_msg;
+    int ret_value;
 
-XrlCmdError
-XrlPimNode::pim_0_1_disable_all_vifs()
-{
-    if (PimNode::disable_all_vifs() != XORP_OK) {
-	string error_msg = c_format("Failed to disable all vifs");
+    if (enable)
+	ret_value = PimNode::enable_all_vifs();
+    else
+	ret_value = PimNode::enable_all_vifs();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable all vifs");
+	else
+	    error_msg = c_format("Failed to disable all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -2565,46 +2561,26 @@ XrlPimNode::pim_0_1_stop_all_vifs()
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_enable_pim()
+XrlPimNode::pim_0_1_enable_pim(
+	// Input values,
+    const bool&	enable)
 {
-    if (enable_pim() != XORP_OK) {
-	string error_msg = c_format("Failed to enable PIM");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    string error_msg;
+    int ret_value;
 
-XrlCmdError
-XrlPimNode::pim_0_1_disable_pim()
-{
-    if (disable_pim() != XORP_OK) {
-	string error_msg = c_format("Failed to disable PIM");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    if (enable)
+	ret_value = enable_pim();
+    else
+	ret_value = disable_pim();
 
-XrlCmdError
-XrlPimNode::pim_0_1_enable_cli()
-{
-    if (enable_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to enable PIM CLI");
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable PIM");
+	else
+	    error_msg = c_format("Failed to disable PIM");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
-    return XrlCmdError::OKAY();
-}
 
-XrlCmdError
-XrlPimNode::pim_0_1_disable_cli()
-{
-    if (disable_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to disable PIM CLI");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
     return XrlCmdError::OKAY();
 }
 
@@ -2631,6 +2607,30 @@ XrlPimNode::pim_0_1_stop_pim()
 }
 
 XrlCmdError
+XrlPimNode::pim_0_1_enable_cli(
+    // Input values,
+    const bool&	enable)
+{
+    string error_msg;
+    int ret_value;
+
+    if (enable)
+	ret_value = enable_cli();
+    else
+	ret_value = disable_cli();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable PIM CLI");
+	else
+	    error_msg = c_format("Failed to disable PIM CLI");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlPimNode::pim_0_1_start_cli()
 {
     if (start_cli() != XORP_OK) {
@@ -2653,24 +2653,26 @@ XrlPimNode::pim_0_1_stop_cli()
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_enable_bsr()
+XrlPimNode::pim_0_1_enable_bsr(
+    // Input values,
+    const bool&	enable)
 {
-    if (enable_bsr() != XORP_OK) {
-	string error_msg = c_format("Failed to enable PIM BSR");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    string error_msg;
+    int ret_value;
 
-XrlCmdError
-XrlPimNode::pim_0_1_disable_bsr()
-{
-    if (disable_bsr() != XORP_OK) {
-	string error_msg = c_format("Failed to disable PIM BSR");
+    if (enable)
+	ret_value = enable_bsr();
+    else
+	ret_value = disable_bsr();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable PIM BSR");
+	else
+	    error_msg = c_format("Failed to disable PIM BSR");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
+
     return XrlCmdError::OKAY();
 }
 

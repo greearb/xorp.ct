@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.20 2003/10/16 18:23:07 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.21 2003/12/16 23:40:46 pavlin Exp $
 #
 
 #
@@ -33,32 +33,18 @@ esac
 
 pim_enable_vif()
 {
-    if [ $# -lt 1 ] ; then
-	echo "Usage: pim_enable_vif <vif_name:txt>"
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_enable_vif <vif_name:txt> <enable:bool>"
 	exit 1
     fi
     vif_name=$1
+    enable=$2
     
     echo "pim_enable_vif" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_vif"
-    XRL_ARGS="?vif_name:txt=$vif_name"
+    XRL_ARGS="?vif_name:txt=$vif_name&enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
-
-pim_disable_vif()
-{
-    if [ $# -lt 1 ] ; then
-	echo "Usage: pim_disable_vif <vif_name:txt>"
-	exit 1
-    fi
-    vif_name=$1
-    
-    echo "pim_disable_vif" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/disable_vif"
-    XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
 pim_start_vif()
 {
     if [ $# -lt 1 ] ; then
@@ -89,17 +75,15 @@ pim_stop_vif()
 
 pim_enable_all_vifs()
 {
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_enable_all_vifs <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
     echo "pim_enable_all_vifs" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_all_vifs"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-pim_disable_all_vifs()
-{
-    echo "pim_disable_all_vifs" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/disable_all_vifs"
-    XRL_ARGS=""
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -127,51 +111,17 @@ pim_is_vif_setup_completed()
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS is_completed:bool = true
 }
 
-pim_enable_cli()
-{
-    echo "pim_enable_cli" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/enable_cli"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-pim_disable_cli()
-{
-    echo "pim_disable_cli" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/disable_cli"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-pim_start_cli()
-{
-    echo "pim_start_cli" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/start_cli"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-pim_stop_cli()
-{
-    echo "pim_stop_cli" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/stop_cli"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARG
-}
-
 pim_enable_pim()
 {
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_enable_pim <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
     echo "pim_enable_pim" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_pim"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-pim_disable_pim()
-{
-    echo "pim_disable_pim" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/disable_pim"
-    XRL_ARGS=""
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -191,19 +141,47 @@ pim_stop_pim()
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
-pim_enable_bsr()
+pim_enable_cli()
 {
-    echo "pim_enable_bsr" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/enable_bsr"
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_enable_cli <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
+    echo "pim_enable_cli" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/enable_cli"
+    XRL_ARGS="?enable:bool=$enable"
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
+}
+
+pim_start_cli()
+{
+    echo "pim_start_cli" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/start_cli"
     XRL_ARGS=""
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
-pim_disable_bsr()
+pim_stop_cli()
 {
-    echo "pim_disable_bsr" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/disable_bsr"
+    echo "pim_stop_cli" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/stop_cli"
     XRL_ARGS=""
+    call_xrl_wrapper -r 0 $XRL$XRL_ARG
+}
+
+pim_enable_bsr()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_enable_bsr <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
+    echo "pim_enable_bsr" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/enable_bsr"
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
