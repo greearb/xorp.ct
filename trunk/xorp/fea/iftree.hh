@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.19 2004/06/10 03:32:20 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.20 2004/06/10 22:40:54 hodson Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -116,8 +116,7 @@ public:
      *
      * @param ifname interface name.
      *
-     * @return true on success, false if an interface with ifname already
-     * exists.
+     * @return true on success, false if an error.
      */
     bool add_if(const string& ifname);
 
@@ -363,7 +362,7 @@ public:
      *
      * @param v4addr address to be added.
      *
-     * @return true on success, false if address already exists
+     * @return true on success, false if an error.
      */
     bool add_addr(const IPv4& v4addr);
 
@@ -379,16 +378,16 @@ public:
     /**
      * Add address.
      *
-     * @param v4addr address to be added.
+     * @param v6addr address to be added.
      *
-     * @return true on success, false if address already exists
+     * @return true on success, false if an error.
      */
     bool add_addr(const IPv6& v6addr);
 
     /**
      * Mark address as DELETED.  Deletion occurs when finalize_state is called.
      *
-     * @param v4addr address to labelled.
+     * @param v6addr address to labelled.
      *
      * @return true on success, false if address does not exist.
      */
