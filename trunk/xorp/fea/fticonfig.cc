@@ -12,13 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.3 2003/05/10 00:06:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.4 2003/05/14 01:13:39 pavlin Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
 
 #include "fticonfig.hh"
 
@@ -44,9 +48,45 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
       _ftic_table_set_dummy(*this),
       _ftic_table_set_rtsock(*this),
       _ftic_table_observer_dummy(*this),
-      _ftic_table_observer_rtsock(*this)
+      _ftic_table_observer_rtsock(*this),
+      _unicast_forwarding_enabled4(false),
+      _unicast_forwarding_enabled6(false),
+      _accept_rtadv_enabled6(false)
 {
+    string error_msg;
     
+    //
+    // Get the old state from the underlying system
+    //
+    if (unicast_forwarding_enabled4(_unicast_forwarding_enabled4, error_msg)
+	< 0) {
+	XLOG_FATAL(error_msg.c_str());
+    }
+#ifdef HAVE_IPV6
+    if (unicast_forwarding_enabled6(_unicast_forwarding_enabled6, error_msg)
+	< 0) {
+	XLOG_FATAL(error_msg.c_str());
+    }
+    if (accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
+	XLOG_FATAL(error_msg.c_str());
+    }
+#endif // HAVE_IPV6
+}
+
+FtiConfig::~FtiConfig()
+{
+    string error_msg;
+    
+    stop();
+    
+    //
+    // Restore the old state in the underlying system
+    //
+    set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4, error_msg);
+#ifdef HAVE_IPV6
+    set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6, error_msg);
+    set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg);
+#endif // HAVE_IPV6
 }
 
 int
@@ -330,3 +370,320 @@ FtiConfig::get_table6(list<Fte6>& fte_list)
     return (_ftic_table_get->get_table6(fte_list));
 }
 
+/**
+ * Test whether the IPv4 unicast forwarding engine is enabled or disabled
+ * to forward packets.
+ * 
+ * @param ret_value if true on return, then the IPv4 unicast forwarding
+ * is enabled, otherwise is disabled.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
+{
+    size_t enabled = 0;
+    size_t sz = sizeof(enabled);
+    
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+    if (sysctlbyname("net.inet.ip.forwarding", &enabled, &sz, NULL, 0)
+	!= 0) {
+	error_msg = c_format("Cannot get 'net.inet.ip.forwarding': %s",
+			     strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#elif defined(HOST_OS_LINUX)
+    if (sysctlbyname("net.ipv4.conf.all.forwarding", &enabled, &sz, NULL, 0)
+	!= 0) {
+	error_msg = c_format("Cannot get 'net.ipv4.conf.all.forwarding': %s",
+			     strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#else
+#error "OS not supported: don't know how to test whether"
+#error "IPv4 unicast forwarding is enabled/disabled"
+#endif
+    
+    if (enabled > 0)
+	ret_value = true;
+    else
+	ret_value = false;
+    
+    return (XORP_OK);
+}
+
+/**
+ * Test whether the IPv6 unicast forwarding engine is enabled or disabled
+ * to forward packets.
+ * 
+ * @param ret_value if true on return, then the IPv6 unicast forwarding
+ * is enabled, otherwise is disabled.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
+{
+#ifndef HAVE_IPV6
+    ret_value = false;
+    error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
+			 "is enabled: IPv6 is not supported");
+    XLOG_ERROR(error_msg.c_str());
+    return (XORP_ERROR);
+    
+#else // HAVE_IPV6
+    
+    size_t enabled = 0;
+    size_t sz = sizeof(enabled);
+    
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+    if (sysctlbyname("net.inet6.ip6.forwarding", &enabled, &sz, NULL, 0)
+	!= 0) {
+	error_msg = c_format("Cannot get 'net.inet6.ip6.forwarding': %s",
+			     strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#elif defined(HOST_OS_LINUX)
+    if (sysctlbyname("net.ipv6.conf.all.forwarding", &enabled, &sz, NULL, 0)
+	!= 0) {
+	error_msg = c_format("Cannot get 'net.ipv6.conf.all.forwarding': %s",
+			     strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#else
+#error "OS not supported: don't know how to test whether"
+#error "IPv6 unicast forwarding is enabled/disabled"
+#endif
+
+    if (enabled > 0)
+	ret_value = true;
+    else
+	ret_value = false;
+    
+    return (XORP_OK);
+#endif // HAVE_IPV6
+}
+
+/**
+ * Test whether the acceptance of IPv6 Router Advertisement messages is
+ * enabled or disabled.
+ * 
+ * @param ret_value if true on return, then the acceptance of IPv6 Router
+ * Advertisement messages is enabled, otherwise is disabled.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
+{
+#ifndef HAVE_IPV6
+    ret_value = false;
+    error_msg = c_format("Cannot test whether the acceptance of IPv6 "
+			 "Router Advertisement messages is enabled: "
+			 "IPv6 is not supported");
+    XLOG_ERROR(error_msg.c_str());
+    return (XORP_ERROR);
+    
+#else // HAVE_IPV6
+    
+    size_t enabled = 0;
+    size_t sz = sizeof(enabled);
+    
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+    if (sysctlbyname("net.inet6.ip6.accept_rtadv", &enabled, &sz, NULL, 0)
+	!= 0) {
+	error_msg = c_format("Cannot get 'net.inet6.ip6.accept_rtadv': %s",
+			     strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#elif defined(HOST_OS_LINUX)
+    // XXX: nothing to do in case of Linux
+#else
+#error "OS not supported: don't know how to test whether"
+#error "the acceptance of IPv6 Router Advertisement messages"
+#error "is enabled/disabled"
+#endif
+    
+    if (enabled > 0)
+	ret_value = true;
+    else
+	ret_value = false;
+    
+    return (XORP_OK);
+#endif // HAVE_IPV6
+}
+
+/**
+ * Set the IPv4 unicast forwarding engine to enable or disable forwarding
+ * of packets.
+ * 
+ * @param v if true, then enable IPv4 unicast forwarding, otherwise
+ * disable it.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
+{
+    size_t enable = (v) ? 1 : 0;
+    bool old_value;
+    
+    if (unicast_forwarding_enabled4(old_value, error_msg) < 0)
+	return (XORP_ERROR);
+    
+    if (old_value == v)
+	return (XORP_OK);	// Nothing changed
+    
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+    if (sysctlbyname("net.inet.ip.forwarding", NULL, NULL,
+		     &enable, sizeof(enable))
+	!= 0) {
+	error_msg = c_format("Cannot set 'net.inet.ip.forwarding' "
+			     "to %d: %s", enable, strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#elif defined(HOST_OS_LINUX)
+    if (sysctlbyname("net.ipv4.conf.all.forwarding", NULL, NULL,
+		     &enable, sizeof(enable))
+	!= 0) {
+	error_msg = c_format("Cannot set 'net.ipv4.conf.all.forwarding' "
+			     "to %d: %s", enable, strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#else
+#error "OS not supported: don't know how to enable/disable"
+#error "IPv4 unicast forwarding"
+#endif
+    
+    return (XORP_OK);
+}
+
+/**
+ * Set the IPv6 unicast forwarding engine to enable or disable forwarding
+ * of packets.
+ * 
+ * @param v if true, then enable IPv6 unicast forwarding, otherwise
+ * disable it.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
+{
+#ifndef HAVE_IPV6
+    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
+			 "IPv6 is not supported", (v) ? "true": "false");
+    XLOG_ERROR(error_msg.c_str());
+    return (XORP_ERROR);
+    
+#else // HAVE_IPV6
+    
+    size_t enable = (v) ? 1 : 0;
+    bool old_value, old_value_accept_rtadv;
+    
+    if (unicast_forwarding_enabled6(old_value, error_msg) < 0)
+	return (XORP_ERROR);
+    if (accept_rtadv_enabled6(old_value_accept_rtadv, error_msg) < 0)
+	return (XORP_ERROR);
+    
+    if ((old_value == v) && (old_value_accept_rtadv == !v))
+	return (XORP_OK);	// Nothing changed
+    
+    if (set_accept_rtadv_enabled6(!v, error_msg) < 0)
+	return (XORP_ERROR);
+    
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+    if (sysctlbyname("net.inet6.ip6.forwarding", NULL, NULL,
+		     &enable, sizeof(enable))
+	!= 0) {
+	error_msg = c_format("Cannot set 'net.inet6.ip6.forwarding' "
+			     "to %d: %s", enable, strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	// Restore the old accept_rtadv value
+	if (old_value_accept_rtadv != !v) {
+	    string dummy_error_msg;
+	    set_accept_rtadv_enabled6(old_value_accept_rtadv, dummy_error_msg);
+	}
+	return (XORP_ERROR);
+    }
+#elif defined(HOST_OS_LINUX)
+    if (sysctlbyname("net.ipv6.conf.all.forwarding", NULL, NULL,
+		     &enable, sizeof(enable))
+	!= 0) {
+	error_msg = c_format("Cannot set 'net.ipv6.conf.all.forwarding' "
+			     "to %d: %s", enable, strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	// Restore the old accept_rtadv value
+	if (old_value_accept_rtadv != !v) {
+	    string dummy_error_msg;
+	    set_accept_rtadv_enabled6(old_value_accept_rtadv, dummy_error_msg);
+	}
+	return (XORP_ERROR);
+    }
+#else
+#error "OS not supported: don't know how to enable/disable"
+#error "IPv6 unicast forwarding"
+#endif
+    
+    return (XORP_OK);
+#endif // HAVE_IPV6
+}
+
+/**
+ * Enable or disable the acceptance of IPv6 Router Advertisement messages
+ * from other routers. It should be enabled for hosts, and disabled for
+ * routers.
+ * 
+ * @param v if true, then enable the acceptance of IPv6 Router Advertisement
+ * messages, otherwise disable it.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
+{
+#ifndef HAVE_IPV6
+    error_msg = c_format("Cannot set the acceptance of IPv6 "
+			 "Router Advertisement messages to %s: "
+			 "IPv6 is not supported",
+			 (v) ? "true": "false");
+    XLOG_ERROR(error_msg.c_str());
+    return (XORP_ERROR);
+    
+#else // HAVE_IPV6
+
+    size_t enable = (v) ? 1 : 0;
+    bool old_value;
+    
+    if (accept_rtadv_enabled6(old_value, error_msg) < 0)
+	return (XORP_ERROR);
+    
+    if (old_value == v)
+	return (XORP_OK);	// Nothing changed
+    
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+    if (sysctlbyname("net.inet6.ip6.accept_rtadv", NULL, NULL,
+		     &enable, sizeof(enable))
+	!= 0) {
+	error_msg = c_format("Cannot set 'net.inet6.ip6.accept_rtadv' "
+			     "to %d: %s", enable, strerror(errno));
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#elif defined(HOST_OS_LINUX)
+    // XXX: nothing to do in case of Linux
+#else
+#error "OS not supported: don't know how to enable/disable"
+#error "the acceptance of IPv6 Router Advertisement messages"
+#endif
+    
+    return (XORP_OK);
+#endif // HAVE_IPV6
+}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.6 2003/05/29 17:59:09 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -61,7 +61,7 @@ public:
     /**
      * Virtual destructor (in case this class is used as base class).
      */
-    virtual ~FtiConfig() { stop(); }
+    virtual ~FtiConfig();
 
     EventLoop& eventloop() { return _eventloop; }
 
@@ -248,6 +248,73 @@ public:
     virtual bool get_table6(list<Fte6>& fte_list);
 
     /**
+     * Test whether the IPv4 unicast forwarding engine is enabled or disabled
+     * to forward packets.
+     * 
+     * @param ret_value if true on return, then the IPv4 unicast forwarding
+     * is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const;
+
+    /**
+     * Test whether the IPv6 unicast forwarding engine is enabled or disabled
+     * to forward packets.
+     * 
+     * @param ret_value if true on return, then the IPv6 unicast forwarding
+     * is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const;
+    
+    /**
+     * Test whether the acceptance of IPv6 Router Advertisement messages is
+     * enabled or disabled.
+     * 
+     * @param ret_value if true on return, then the acceptance of IPv6 Router
+     * Advertisement messages is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int accept_rtadv_enabled6(bool& ret_value, string& error_msg) const;
+    
+    /**
+     * Set the IPv4 unicast forwarding engine to enable or disable forwarding
+     * of packets.
+     * 
+     * @param v if true, then enable IPv4 unicast forwarding, otherwise
+     * disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_enabled4(bool v, string& error_msg);
+
+    /**
+     * Set the IPv6 unicast forwarding engine to enable or disable forwarding
+     * of packets.
+     * 
+     * @param v if true, then enable IPv6 unicast forwarding, otherwise
+     * disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_enabled6(bool v, string& error_msg);
+    
+    /**
+     * Enable or disable the acceptance of IPv6 Router Advertisement messages
+     * from other routers. It should be enabled for hosts, and disabled for
+     * routers.
+     * 
+     * @param v if true, then enable the acceptance of IPv6 Router
+     * Advertisement messages, otherwise disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_accept_rtadv_enabled6(bool v, string& error_msg);
+    
+    /**
      * Get the IPv4 Trie (used for testing purpose).
      * 
      * @return the IPv4 Trie.
@@ -330,6 +397,13 @@ private:
     //
     FtiConfigTableObserverDummy	 _ftic_table_observer_dummy;
     FtiConfigTableObserverRtsock _ftic_table_observer_rtsock;
+    
+    //
+    // Original state from the underlying system before the FEA was started
+    //
+    bool _unicast_forwarding_enabled4;
+    bool _unicast_forwarding_enabled6;
+    bool _accept_rtadv_enabled6;
 };
 
 #endif	// __FEA_FTICONFIG_HH__
