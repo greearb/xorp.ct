@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/service.cc,v 1.1 2003/10/10 18:50:34 hodson Exp $"
 
 #include "config.h"
 #include <string>
@@ -43,8 +43,8 @@ service_status_name(ServiceStatus s)
 // ----------------------------------------------------------------------------
 // ServiceBase implmentation
 
-ServiceBase::ServiceBase()
-    : _status(READY), _observer(0)
+ServiceBase::ServiceBase(const string& n)
+    : _name(n), _status(READY), _observer(0)
 {
 }
 
