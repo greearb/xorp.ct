@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.43 2003/06/26 00:54:13 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.44 2003/06/26 01:34:41 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -1141,26 +1141,6 @@ for the kernel patches as well.
 * The set_foo(bool v) functions in pim_mrt.hh should not have
   the "bool v" argument. If set_foo(false) is needed,
   add functions reset_foo().
-
-* SPEC: Asserts rate-limit of (approx) 1 Assert/s
-  on same oif has to be per routing entry, i.e., (S,G) or (*,G).
-
-* IMPL: Rate limit the asserts (was it DONE before?):
-  - add 'mif_set oifs_assert_rate_limit'
-    and 'mtimer_t *oifs_assert_rate_limit_timer'
-    to 'pimdm_mrt_t' that can be used to rate-limit the asserts:
-    if the rate-limit timer is running, and the rate-limit bit for oif
-    is set, then don't send Assert. If the rate-limit timer is
-    running, but the rate-limit bit is not set, send an Assert, and
-    set the rate-limit bit. If the rate-limit timer is not running,
-    send an Assert, set the rate-limit bit, and start the rate-limit
-    timer with default (minimum?) of 1 second.
-    After the rate-limit timer expires, clear all rate-limit bits.
-    XXX: the rate-limit is not exactly accurate (e.g. the min.
-    time interval between two asserts on the same oif may be less than
-    1 second, but this reduces significantly the number of timers we
-    need to run (and the consumed memory). But on average, the
-    number of asserts sent on an interface would be 1 assert/s.
 
 * IMPL: All constants defined in pim_proto.h should be used as configurable
   variables inside the code.
