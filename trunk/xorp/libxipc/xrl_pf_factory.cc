@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.6 2003/04/22 23:27:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.7 2003/09/11 19:24:40 hodson Exp $"
 
 #include "config.h"
 
@@ -40,12 +40,19 @@ static list<XrlPFSTCPSender*> stcps;
 static XrlPFSTCPSender*
 stcp_find_or_create(EventLoop& e, const char* address)
 {
-    list<XrlPFSTCPSender*>::iterator i;
-    for (i = stcps.begin(); i != stcps.end(); ++i) {
+    list<XrlPFSTCPSender*>::iterator i = stcps.begin();
+    while (i != stcps.end()) {
 	XrlPFSTCPSender* s = *i;
+	if (s->alive() == false) {
+	    XLOG_INFO("Pruned dead XrlPFSTCPSender.");
+	    delete s;
+	    stcps.erase(i++);
+	    continue;
+	}
 	if (s->address() == address) {
 	    return s;
 	}
+	++i;
     }
 
     stcps.push_back(new XrlPFSTCPSender(e, address));
