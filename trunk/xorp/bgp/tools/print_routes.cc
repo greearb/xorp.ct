@@ -12,11 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.7 2003/01/25 02:06:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.1 2003/02/03 23:40:28 mjh Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
 #include "bgp/path_attribute.hh"
+
+#define MAX_REQUESTS 4
 
 PrintRoutes::PrintRoutes(bool verbose, int interval) 
     : XrlBgpV0p2Client(&_xrl_rtr), 
@@ -29,7 +31,7 @@ PrintRoutes::PrintRoutes(bool verbose, int interval)
 	_token = 0;
 	_count = 0;
 	get_v4_route_list_start();
-	while (_done == false) {
+	while (_done == false || _active_requests > 0) {
 	    _eventloop.run();
 	}
 	if (interval <= 0)
@@ -42,6 +44,7 @@ void
 PrintRoutes::get_v4_route_list_start() {
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
     cb = callback(this, &PrintRoutes::get_v4_route_list_start_done);
+    _active_requests = 0;
     send_get_v4_route_list_start("bgp", cb);
 }
 
@@ -63,7 +66,10 @@ PrintRoutes::get_v4_route_list_start_done(const XrlError& e,
     printf("\n------            -------          ----             -------\n");
 	   
     _token = *token;
-    get_v4_route_list_next();
+    for (int i = 0; i < MAX_REQUESTS; i++) {
+	_active_requests++;
+	get_v4_route_list_next();
+    }
 }
 
 void
@@ -99,6 +105,7 @@ PrintRoutes::get_v4_route_list_next_done(const XrlError& e,
     UNUSED(aspath);
 
     if (e != XrlError::OKAY()) {
+	_active_requests--;
 	_done = true;
 	return;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_peer.hh,v 1.6 2003/01/19 00:59:26 mjh Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.1 2003/02/03 23:40:28 mjh Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -54,6 +54,7 @@ private:
     bool _prev_no_bgp;
     bool _prev_no_routes;
 
+    int _active_requests;
 };
 
 #endif // __BGP_TOOLS_PRINT_PEER_HH__
