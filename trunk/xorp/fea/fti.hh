@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti.hh,v 1.2 2003/03/10 23:20:13 hodson Exp $
+// $XORP: xorp/fea/fti.hh,v 1.3 2003/05/02 07:50:42 pavlin Exp $
 
 #ifndef	__FEA_FTI_HH__
 #define __FEA_FTI_HH__
@@ -214,7 +214,6 @@ public:
      *
      * @param dst address to resolve.
      * @param fte a returned forwarding table entry.
-     *
      * @return true if lookup suceeded.
      */
     virtual bool lookup_route6(const IPv6& dst, Fte6& fte) = 0;

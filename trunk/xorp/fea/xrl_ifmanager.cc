@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.4 2003/05/02 07:50:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.5 2003/05/09 05:32:53 mjh Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -214,7 +214,7 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 	// information being held.
 	
 	// XXX restore
-	// if (ifconfig().push_config(backup_config) < 0) {
+	// if (ifconfig().push_config(backup_config) != true) {
 	    // Argh! Die, Die, Die, Die Again
 	// }
 	return XrlCmdError::COMMAND_FAILED(ifconfig().push_error());

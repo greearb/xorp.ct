@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.1 2003/05/02 07:50:44 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.2 2003/05/10 00:06:39 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -66,9 +66,9 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table4(list<Fte4>& fte_list) = 0;
+    virtual bool get_table4(list<Fte4>& fte_list) = 0;
 
     /**
      * Obtain the unicast forwarding table.
@@ -76,17 +76,17 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table6(list<Fte6>& fte_list) = 0;
+    virtual bool get_table6(list<Fte6>& fte_list) = 0;
 
     int sock(int family);
     
 protected:
-    int parse_buffer_rtm(int family, list<FteX>& fte_list, const uint8_t *buf,
-			 size_t buf_bytes);
-    int parse_buffer_nlm(int family, list<FteX>& fte_list, const uint8_t* buf,
-			 size_t buf_bytes);
+    bool parse_buffer_rtm(int family, list<FteX>& fte_list, const uint8_t *buf,
+			  size_t buf_bytes);
+    bool parse_buffer_nlm(int family, list<FteX>& fte_list, const uint8_t* buf,
+			  size_t buf_bytes);
     
     int	_s4;
     int _s6;
@@ -128,9 +128,9 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table4(list<Fte4>& fte_list);
+    virtual bool get_table4(list<Fte4>& fte_list);
 
     /**
      * Obtain the unicast forwarding table.
@@ -138,9 +138,9 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table6(list<Fte6>& fte_list);
+    virtual bool get_table6(list<Fte6>& fte_list);
     
 private:
     
@@ -179,9 +179,9 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table4(list<Fte4>& fte_list);
+    virtual bool get_table4(list<Fte4>& fte_list);
 
     /**
      * Obtain the unicast forwarding table.
@@ -189,12 +189,12 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table6(list<Fte6>& fte_list);
+    virtual bool get_table6(list<Fte6>& fte_list);
     
 private:
-    int get_table(int family, list<FteX>& fte_list);
+    bool get_table(int family, list<FteX>& fte_list);
     
 };
 
@@ -241,9 +241,9 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table4(list<Fte4>& fte_list);
+    virtual bool get_table4(list<Fte4>& fte_list);
 
     /**
      * Obtain the unicast forwarding table.
@@ -251,12 +251,12 @@ public:
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int get_table6(list<Fte6>& fte_list);
+    virtual bool get_table6(list<Fte6>& fte_list);
     
 private:
-    int get_table(int family, list<FteX>& fte_list);
+    bool get_table(int family, list<FteX>& fte_list);
     
     bool	    _cache_valid;	// Cache data arrived.
     uint32_t	    _cache_seqno;	// Seqno of netlink socket data to

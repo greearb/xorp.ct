@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.1 2003/05/02 23:21:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_dummy.cc,v 1.1 2003/05/10 00:06:39 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -57,11 +57,11 @@ FtiConfigEntrySetDummy::stop()
 }
 
 
-int
+bool
 FtiConfigEntrySetDummy::add_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
-	return (XORP_ERROR);
+	return false;
     
     int rc = ftic().trie4().route_count();
     XLOG_ASSERT(rc >= 0);
@@ -72,28 +72,28 @@ FtiConfigEntrySetDummy::add_entry4(const Fte4& fte)
 		     fte.net().str().c_str(), rc, ftic().trie4().route_count());
     }
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigEntrySetDummy::delete_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
-	return (XORP_ERROR);
+	return false;
     
     Trie4::iterator ti = ftic().trie4().find(fte.net());
     if (ti == ftic().trie4().end())
-	return (XORP_ERROR);
+	return false;
     ftic().trie4().erase(ti);
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigEntrySetDummy::add_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
-	return (XORP_ERROR);
+	return false;
     
     int rc = ftic().trie6().route_count();
     XLOG_ASSERT(rc >= 0);
@@ -104,19 +104,19 @@ FtiConfigEntrySetDummy::add_entry6(const Fte6& fte)
 		     fte.net().str().c_str(), rc, ftic().trie6().route_count());
     }
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigEntrySetDummy::delete_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
-	return (XORP_ERROR);
+	return false;
     
     Trie6::iterator ti = ftic().trie6().find(fte.net());
     if (ti == ftic().trie6().end())
-	return (XORP_ERROR);
+	return false;
     ftic().trie6().erase(ti);
     
-    return (XORP_OK);
+    return true;
 }

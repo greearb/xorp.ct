@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -362,7 +362,7 @@ protected:
 };
 #endif // HAVE_IPV6
 
-int
+bool
 IfConfigSetIoctl::push_config(const IfTree& it)
 {
     IfTree::IfMap::const_iterator ii;
@@ -380,14 +380,14 @@ IfConfigSetIoctl::push_config(const IfTree& it)
 	    ifc().er().interface_error(i.ifname(),
 				       "O/S does not recognise interface");
 	    XLOG_ERROR(ifc().er().last_error().c_str());
-	    return XORP_ERROR;
+	    return false;
 	}
 	for (vi = i.vifs().begin(); i.vifs().end() != vi; ++vi) {
 	    const IfTreeVif& v= vi->second;
 	    if (v.vifname() != i.ifname()) {
 		ifc().er().vif_error(i.ifname(), v.vifname(), "Bad vif name");
 		XLOG_ERROR(ifc().er().last_error().c_str());
-		return XORP_ERROR;
+		return false;
 	    }
 	}
     }
@@ -422,9 +422,9 @@ IfConfigSetIoctl::push_config(const IfTree& it)
     }
 
     if (ifc().er().error_count() != 0)
-	return XORP_ERROR;
+	return false;
     
-    return XORP_OK;
+    return true;
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -42,18 +42,18 @@
 //
 
 #ifndef HAVE_NETLINK_SOCKETS
-int
+bool
 FtiConfigTableGet::parse_buffer_nlm(int, list<FteX>& , const uint8_t* ,
 				    size_t )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
 #else // HAVE_NETLINK_SOCKETS
 
 
 // Reading route(4) manual page is a good start for understanding this
-int
+bool
 FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 				    const uint8_t* buf, size_t buf_bytes)
 {
@@ -78,7 +78,7 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 	}
 	
 	if (nlh->nlmsg_type == NLMSG_DONE)
-	    return (XORP_OK);			// Done
+	    return true;			// Done
 	if (nlh->nlmsg_type == NLMSG_NOOP)
 	    continue;
 	if (nlh->nlmsg_type != RTM_NEWROUTE)
@@ -101,11 +101,11 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 	    continue;		// XXX: ignore broadcast entries
 	
 	FteX fte(family);
-	if (NlmUtils::nlm_get_to_fte_cfg(fte, rtmsg, rta_len) >= 0)
+	if (NlmUtils::nlm_get_to_fte_cfg(fte, rtmsg, rta_len) == true)
 	    fte_list.push_back(fte);
     }
     
-    return (XORP_OK);
+    return true;
 }
 
 #endif // HAVE_NETLINK_SOCKETS

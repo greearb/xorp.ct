@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.10 2003/05/07 23:15:14 mjh Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.11 2003/05/09 05:32:54 mjh Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -929,7 +929,7 @@ XrlFeaTarget::fti_0_2_lookup_route4(
 	string&		protocol_origin)
 {
     Fte4 fte;
-    if (_xftm.ftic().lookup_route4(dst, fte)) {
+    if (_xftm.ftic().lookup_route4(dst, fte) == true) {
 	netmask = fte.net();
 	gateway = fte.gateway();
 	ifname = fte.ifname();
@@ -958,7 +958,7 @@ XrlFeaTarget::fti_0_2_lookup_route6(
 	string&		protocol_origin)
 {
     Fte6 fte;
-    if (_xftm.ftic().lookup_route6(dst, fte)) {
+    if (_xftm.ftic().lookup_route6(dst, fte) == true) {
 	netmask = fte.net();
 	gateway = fte.gateway();
 	ifname = fte.ifname();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.2 2003/05/02 23:21:36 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.3 2003/05/10 00:06:39 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -68,9 +68,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return bool on success, otherwise false.
      */
-    virtual int lookup_route4(const IPv4& dst, Fte4& fte) = 0;
+    virtual bool lookup_route4(const IPv4& dst, Fte4& fte) = 0;
 
     /**
      * Lookup entry.
@@ -78,9 +78,9 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry4(const IPv4Net& dst, Fte4& fte) = 0;
+    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte) = 0;
 
     /**
      * Lookup a route.
@@ -88,9 +88,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route6(const IPv6& dst, Fte6& fte) = 0;
+    virtual bool lookup_route6(const IPv6& dst, Fte6& fte) = 0;
 
     /**
      * Lookup entry.
@@ -98,15 +98,15 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry6(const IPv6Net& dst, Fte6& fte) = 0;
+    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte) = 0;
 
     int sock(int family);
     
 protected:
-    int parse_buffer_rtm(FteX& fte, const uint8_t *buf, size_t buf_bytes);
-    int parse_buffer_nlm(FteX& fte, const uint8_t *buf, size_t buf_bytes);
+    bool parse_buffer_rtm(FteX& fte, const uint8_t *buf, size_t buf_bytes);
+    bool parse_buffer_nlm(FteX& fte, const uint8_t *buf, size_t buf_bytes);
     
     int	_s4;
     int _s6;
@@ -148,9 +148,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route4(const IPv4& dst, Fte4& fte);
+    virtual bool lookup_route4(const IPv4& dst, Fte4& fte);
 
     /**
      * Lookup entry.
@@ -158,9 +158,9 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
 
     /**
      * Lookup a route.
@@ -168,9 +168,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route6(const IPv6& dst, Fte6& fte);
+    virtual bool lookup_route6(const IPv6& dst, Fte6& fte);
 
     /**
      * Lookup entry.
@@ -178,9 +178,9 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
 
 private:
 };
@@ -228,9 +228,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route4(const IPv4& dst, Fte4& fte);
+    virtual bool lookup_route4(const IPv4& dst, Fte4& fte);
 
     /**
      * Lookup entry.
@@ -238,9 +238,9 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
 
     /**
      * Lookup a route.
@@ -248,9 +248,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route6(const IPv6& dst, Fte6& fte);
+    virtual bool lookup_route6(const IPv6& dst, Fte6& fte);
 
     /**
      * Lookup entry.
@@ -258,9 +258,9 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
 
 private:
     /**
@@ -269,9 +269,9 @@ private:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route(const IPvX& dst, FteX& fte);
+    virtual bool lookup_route(const IPvX& dst, FteX& fte);
 
     /**
      * Lookup entry.
@@ -279,9 +279,9 @@ private:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry(const IPvXNet& dst, FteX& fte);
+    virtual bool lookup_entry(const IPvXNet& dst, FteX& fte);
 
     bool	    _cache_valid;	// Cache data arrived.
     uint32_t	    _cache_seqno;	// Seqno of routing socket data to
@@ -333,9 +333,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route4(const IPv4& dst, Fte4& fte);
+    virtual bool lookup_route4(const IPv4& dst, Fte4& fte);
 
     /**
      * Lookup entry.
@@ -343,9 +343,9 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
 
     /**
      * Lookup a route.
@@ -353,9 +353,9 @@ public:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route6(const IPv6& dst, Fte6& fte);
+    virtual bool lookup_route6(const IPv6& dst, Fte6& fte);
 
     /**
      * Lookup entry.
@@ -363,9 +363,9 @@ public:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
 
 private:
     /**
@@ -374,9 +374,9 @@ private:
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_route(const IPvX& dst, FteX& fte);
+    virtual bool lookup_route(const IPvX& dst, FteX& fte);
 
     /**
      * Lookup entry.
@@ -384,9 +384,9 @@ private:
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int lookup_entry(const IPvXNet& dst, FteX& fte);
+    virtual bool lookup_entry(const IPvXNet& dst, FteX& fte);
 
     bool	    _cache_valid;	// Cache data arrived.
     uint32_t	    _cache_seqno;	// Seqno of netlink socket data to

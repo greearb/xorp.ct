@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.1 2003/05/02 07:50:46 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -84,7 +84,7 @@ IfConfigGetIoctl::stop()
     return (XORP_OK);
 }
 
-int
+bool
 IfConfigGetIoctl::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
@@ -93,11 +93,11 @@ IfConfigGetIoctl::pull_config(IfTree& iftree)
 void
 IfConfigGetIoctl::receive_data(const uint8_t* data, size_t n_bytes)
 {
-    if (parse_buffer_ifreq(ifc().live_config(), AF_INET, data, n_bytes) < 0)
+    if (parse_buffer_ifreq(ifc().live_config(), AF_INET, data, n_bytes) != true)
 	return;
 
 #ifdef HAVE_IPV6
-    if (parse_buffer_ifreq(ifc().live_config(), AF_INET6, data, n_bytes) < 0)
+    if (parse_buffer_ifreq(ifc().live_config(), AF_INET6, data, n_bytes) != true)
 	return;
 #endif
     
@@ -112,17 +112,17 @@ IfConfigGetIoctl::receive_data(const uint8_t* data, size_t n_bytes)
 }
 
 #ifndef HAVE_IOCTL_SIOCGIFCONF
-int
+bool
 IfConfigGetIoctl::read_config(IfTree& )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
 #else // HAVE_IOCTL_SIOCGIFCONF
 
-static int ioctl_read_ifconf(int family, ifconf *ifconf);
+static bool ioctl_read_ifconf(int family, ifconf *ifconf);
 
-int
+bool
 IfConfigGetIoctl::read_config(IfTree& it)
 {
     struct ifconf ifconf;
@@ -130,8 +130,8 @@ IfConfigGetIoctl::read_config(IfTree& it)
     //
     // The IPv4 information
     //
-    if (ioctl_read_ifconf(AF_INET, &ifconf) < 0)
-	return (XORP_ERROR);
+    if (ioctl_read_ifconf(AF_INET, &ifconf) != true)
+	return false;
     parse_buffer_ifreq(it, AF_INET, (uint8_t *)ifconf.ifc_buf,
 		       ifconf.ifc_len);
     delete[] ifconf.ifc_buf;
@@ -140,17 +140,17 @@ IfConfigGetIoctl::read_config(IfTree& it)
     //
     // The IPv6 information
     //
-    if (ioctl_read_ifconf(AF_INET6, &ifconf) < 0)
-	return (XORP_ERROR);
+    if (ioctl_read_ifconf(AF_INET6, &ifconf) != true)
+	return false;
     parse_buffer_ifreq(it, AF_INET6, (uint8_t *)ifconf.ifc_buf,
 		       ifconf.ifc_len);
     delete[] ifconf.ifc_buf;
 #endif // HAVE_IPV6
     
-    return (XORP_OK);
+    return true;
 }
 
-static int
+static bool
 ioctl_read_ifconf(int family, ifconf *ifconf)
 {
     int s, ifnum, lastlen;
@@ -175,7 +175,7 @@ ioctl_read_ifconf(int family, ifconf *ifconf)
 		XLOG_ERROR("ioctl(SIOCGIFCONF) failed: %s", strerror(errno));
 		delete[] ifconf->ifc_buf;
 		close(s);
-		return (XORP_ERROR);
+		return false;
 	    }
 	} else {
 	    if (ifconf->ifc_len == lastlen)
@@ -187,7 +187,7 @@ ioctl_read_ifconf(int family, ifconf *ifconf)
     
     close(s);
     
-    return (XORP_OK);
+    return true;
 }
 
 #endif // HAVE_IOCTL_SIOCGIFCONF

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_sysctl.cc,v 1.1 2003/05/02 07:50:46 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -67,7 +67,7 @@ IfConfigGetSysctl::stop()
 void
 IfConfigGetSysctl::receive_data(const uint8_t* data, size_t n_bytes)
 {
-    if (parse_buffer_rtm(ifc().live_config(), data, n_bytes) < 0)
+    if (parse_buffer_rtm(ifc().live_config(), data, n_bytes) != true)
 	return;
     
     debug_msg("Start configuration read:\n");
@@ -80,7 +80,7 @@ IfConfigGetSysctl::receive_data(const uint8_t* data, size_t n_bytes)
     ifc().live_config().finalize_state();
 }
 
-int
+bool
 IfConfigGetSysctl::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
@@ -88,14 +88,14 @@ IfConfigGetSysctl::pull_config(IfTree& iftree)
 
 #ifndef HAVE_SYSCTL_NET_RT_IFLIST
 
-int
+bool
 IfConfigGetSysctl::read_config(IfTree& )
 {
-    return XORP_ERROR;
+    return false;
 }
 
 #else // HAVE_SYSCTL_NET_RT_IFLIST
-int
+bool
 IfConfigGetSysctl::read_config(IfTree& it)
 {
     int mib[6];
@@ -111,7 +111,7 @@ IfConfigGetSysctl::read_config(IfTree& it)
     size_t sz;
     if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, &sz, NULL, 0) != 0) {
 	XLOG_ERROR("sysctl(NET_RT_IFLIST) failed: %s", strerror(errno));
-	return XORP_ERROR;
+	return false;
     }
     
     //
@@ -134,7 +134,7 @@ IfConfigGetSysctl::read_config(IfTree& it)
 	    continue;
 	}
 	XLOG_ERROR("sysctl(NET_RT_IFLIST) failed: %s", strerror(errno));
-	return XORP_ERROR;
+	return false;
     }
 }
 

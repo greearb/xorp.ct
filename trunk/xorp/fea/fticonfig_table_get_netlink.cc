@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.1 2003/05/02 07:50:44 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -76,14 +76,14 @@ FtiConfigTableGetNetlink::receive_data(const uint8_t* data, size_t n_bytes)
     UNUSED(n_bytes);
 }
 
-int
+bool
 FtiConfigTableGetNetlink::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET, ftex_list) < 0)
-	return (XORP_ERROR);
+    if (get_table(AF_INET, ftex_list) != true)
+	return false;
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -95,17 +95,17 @@ FtiConfigTableGetNetlink::get_table4(list<Fte4>& fte_list)
 				ftex.metric(), ftex.admin_distance()));
     }
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigTableGetNetlink::get_table6(list<Fte6>& fte_list)
 {
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET6, ftex_list) < 0)
-	return (XORP_ERROR);
+    if (get_table(AF_INET6, ftex_list) != true)
+	return false;
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -117,15 +117,15 @@ FtiConfigTableGetNetlink::get_table6(list<Fte6>& fte_list)
 				ftex.metric(), ftex.admin_distance()));
     }
     
-    return (XORP_OK);
+    return true;
 }
 
 #ifndef HAVE_NETLINK_SOCKETS
 
-int
+bool
 FtiConfigTableGetNetlink::get_table(int , list<FteX>& )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
 void
@@ -136,7 +136,7 @@ FtiConfigTableGetNetlink::nlsock_data(const uint8_t* , size_t )
 
 #else // HAVE_NETLINK_SOCKETS
 
-int
+bool
 FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
 {
 #define RTMBUFSIZE (sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + 512)
@@ -171,7 +171,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
 		  sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("error writing to netlink socket: %s",
 		   strerror(errno));
-	return (XORP_ERROR);
+	return false;
     }
     
     //

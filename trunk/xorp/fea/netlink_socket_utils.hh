@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.1 2003/05/02 07:50:48 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.2 2003/05/05 19:34:00 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -48,8 +48,9 @@ public:
      * 
      * @param fte the return-by-reference @ref FteX entry to return the result.
      * @param nlm the netlink message.
+     * @return true on success, otherwise false.
      */
-    static int	nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg,
+    static bool	nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg,
 				   int rta_len);
 };
 

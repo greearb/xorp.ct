@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_dummy.cc,v 1.1 2003/05/10 00:06:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -64,7 +64,7 @@ FtiConfigTableGetDummy::receive_data(const uint8_t* data, size_t n_bytes)
     UNUSED(n_bytes);
 }
 
-int
+bool
 FtiConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
 {
     Trie4::iterator ti;
@@ -73,10 +73,10 @@ FtiConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
 	fte_list.push_back(fte);
     }
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigTableGetDummy::get_table6(list<Fte6>& fte_list)
 {
     Trie6::iterator ti;
@@ -85,5 +85,5 @@ FtiConfigTableGetDummy::get_table6(list<Fte6>& fte_list)
 	fte_list.push_back(fte);
     }
     
-    return (XORP_OK);
+    return true;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.2 2003/05/05 19:34:00 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -158,7 +158,7 @@ NlmUtils::get_rta_attr(const struct rtattr* rtattr, int rta_len,
     }
 }
 
-int
+bool
 NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 {
     const struct rtattr *rtattr;
@@ -177,16 +177,16 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     // rtmsg check
     if (rtmsg->rtm_type == RTN_LOCAL) {
 	// TODO: XXX: PAVPAVPAV: handle it, if needed!
-	return (XORP_ERROR);	// TODO: is it really an error?
+	return false;		// TODO: is it really an error?
     }
     if (rtmsg->rtm_type != RTN_UNICAST) {
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: "
 		   "wrong AF_NETLINK route type: %d instead of %d",
 		   rtmsg->rtm_type, RTN_UNICAST);
-	return (XORP_ERROR);
+	return false;
     }
     if (rtmsg->rtm_family != family)
-	return (XORP_ERROR);		// Invalid address family
+	return false;		// Invalid address family
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
@@ -205,7 +205,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 	if (! dst_addr.is_unicast()) {
 	    // TODO: should we make this check?
 	    fte.zero();
-	    return (XORP_ERROR);	// XXX: invalid unicast address
+	    return false;	// XXX: invalid unicast address
 	}
     }
     
@@ -228,7 +228,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 	if_index = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_OIF]));
     } else {
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: no interface found");
-	return (XORP_ERROR);
+	return false;
     }
     
     //
@@ -253,7 +253,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     fte = FteX(IPvXNet(dst_addr, dst_masklen), gateway_addr, if_name, if_name,
 	       ~0, ~0);
     
-    return (XORP_OK);
+    return true;
 }
 
 #endif // HAVE_NETLINK_SOCKETS

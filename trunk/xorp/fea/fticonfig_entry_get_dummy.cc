@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.1 2003/05/02 23:21:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_dummy.cc,v 1.1 2003/05/10 00:06:39 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -72,18 +72,18 @@ FtiConfigEntryGetDummy::receive_data(const uint8_t* data, size_t n_bytes)
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetDummy::lookup_route4(const IPv4& dst, Fte4& fte)
 {
     Trie4::iterator ti = ftic().trie4().find(dst);
     if (ti != ftic().trie4().end()) {
 	fte = ti.payload();
-	return (XORP_OK);
+	return true;
     }
     
-    return (XORP_ERROR);
+    return false;
 }
 
 /**
@@ -92,18 +92,18 @@ FtiConfigEntryGetDummy::lookup_route4(const IPv4& dst, Fte4& fte)
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetDummy::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 {
     Trie4::iterator ti = ftic().trie4().find(dst);
     if (ti != ftic().trie4().end()) {
 	fte = ti.payload();
-	return (XORP_OK);
+	return true;
     }
     
-    return (XORP_ERROR);
+    return false;
 }
 
 /**
@@ -112,18 +112,18 @@ FtiConfigEntryGetDummy::lookup_entry4(const IPv4Net& dst, Fte4& fte)
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetDummy::lookup_route6(const IPv6& dst, Fte6& fte)
 {
     Trie6::iterator ti = ftic().trie6().find(dst);
     if (ti != ftic().trie6().end()) {
 	fte = ti.payload();
-	return (XORP_OK);
+	return true;
     }
     
-    return (XORP_ERROR);
+    return false;
 }
 
 /**
@@ -132,16 +132,16 @@ FtiConfigEntryGetDummy::lookup_route6(const IPv6& dst, Fte6& fte)
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetDummy::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 { 
     Trie6::iterator ti = ftic().trie6().find(dst);
     if (ti != ftic().trie6().end()) {
 	fte = ti.payload();
-	return (XORP_OK);
+	return true;
     }
     
-    return (XORP_ERROR);
+    return false;
 }

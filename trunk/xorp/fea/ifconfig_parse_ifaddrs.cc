@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.1 2003/05/02 07:50:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -50,7 +50,7 @@
 
 #ifdef HAVE_GETIFADDRS
 
-int
+bool
 IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 {
     u_short if_index = 0;
@@ -295,7 +295,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	}
     }
     
-    return (XORP_OK);
+    return true;
 }
 
 #endif // HAVE_GETIFADDRS

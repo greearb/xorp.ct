@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -68,14 +68,14 @@ FtiConfigTableGetSysctl::receive_data(const uint8_t* data, size_t n_bytes)
     UNUSED(n_bytes);
 }
 
-int
+bool
 FtiConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET, ftex_list) < 0)
-	return (XORP_ERROR);
+    if (get_table(AF_INET, ftex_list) != true)
+	return false;
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -87,17 +87,17 @@ FtiConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
 				ftex.metric(), ftex.admin_distance()));
     }
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 {
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET6, ftex_list) < 0)
-	return (XORP_ERROR);
+    if (get_table(AF_INET6, ftex_list) != true)
+	return false;
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -109,20 +109,20 @@ FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 				ftex.metric(), ftex.admin_distance()));
     }
     
-    return (XORP_OK);
+    return true;
 }
 
 #ifndef HAVE_SYSCTL_NET_RT_DUMP
 
-int
+bool
 FtiConfigTableGetSysctl::get_table(int , list<FteX>& )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
 #else // HAVE_SYSCTL_NET_RT_DUMP
 
-int
+bool
 FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 {
     int mib[6];
@@ -138,7 +138,7 @@ FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
     size_t sz;
     if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, &sz, NULL, 0) != 0) {
 	XLOG_ERROR("sysctl(NET_RT_DUMP) failed: %s", strerror(errno));
-	return XORP_ERROR;
+	return false;
     }
     
     //
@@ -161,7 +161,7 @@ FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 	    continue;
 	}
 	XLOG_ERROR("sysctl(NET_RT_DUMP) failed: %s", strerror(errno));
-	return XORP_ERROR;
+	return false;
     }
 }
 

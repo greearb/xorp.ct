@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.2 2003/05/02 23:21:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.3 2003/05/10 00:06:39 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -218,115 +218,115 @@ FtiConfig::end_configuration()
     return ret_value;
 }
 
-int
+bool
 FtiConfig::add_entry4(const Fte4& fte)
 {
     if (_ftic_entry_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_set->add_entry4(fte));
 }
 
-int
+bool
 FtiConfig::delete_entry4(const Fte4& fte)
 {
     if (_ftic_entry_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_set->delete_entry4(fte));
 }
 
-int
+bool
 FtiConfig::set_table4(const list<Fte4>& fte_list)
 {
     if (_ftic_table_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_table_set->set_table4(fte_list));
 }
 
-int
+bool
 FtiConfig::delete_all_entries4()
 {
     if (_ftic_table_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_table_set->delete_all_entries4());
 }
 
-int
+bool
 FtiConfig::lookup_route4(const IPv4& dst, Fte4& fte)
 {
     if (_ftic_entry_get == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_get->lookup_route4(dst, fte));
 }
 
-int
+bool
 FtiConfig::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 {
     if (_ftic_entry_get == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_get->lookup_entry4(dst, fte));
 }
 
-int
+bool
 FtiConfig::get_table4(list<Fte4>& fte_list)
 {
     if (_ftic_table_get == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_table_get->get_table4(fte_list));
 }
 
-int
+bool
 FtiConfig::add_entry6(const Fte6& fte)
 {
     if (_ftic_entry_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_set->add_entry6(fte));
 }
 
-int
+bool
 FtiConfig::delete_entry6(const Fte6& fte)
 {
     if (_ftic_entry_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_set->delete_entry6(fte));
 }
 
-int
+bool
 FtiConfig::set_table6(const list<Fte6>& fte_list)
 {
     if (_ftic_table_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_table_set->set_table6(fte_list));
 }
 
-int
+bool
 FtiConfig::delete_all_entries6()
 {
     if (_ftic_table_set == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_table_set->delete_all_entries6());
 }
 
-int
+bool
 FtiConfig::lookup_route6(const IPv6& dst, Fte6& fte)
 {
     if (_ftic_entry_get == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_get->lookup_route6(dst, fte));
 }
 
-int
+bool
 FtiConfig::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 {
     if (_ftic_entry_get == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_entry_get->lookup_entry6(dst, fte));
 }
 
-int
+bool
 FtiConfig::get_table6(list<Fte6>& fte_list)
 {
     if (_ftic_table_get == NULL)
-	return XORP_ERROR;
+	return false;
     return (_ftic_table_get->get_table6(fte_list));
 }
 

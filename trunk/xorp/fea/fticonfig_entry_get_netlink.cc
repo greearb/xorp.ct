@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.1 2003/05/02 07:50:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -84,13 +84,13 @@ FtiConfigEntryGetNetlink::receive_data(const uint8_t* data, size_t n_bytes)
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetNetlink::lookup_route4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
-    int ret_value = XORP_ERROR;
+    bool ret_value = false;
     
     ret_value = lookup_route(IPvX(dst), ftex);
     
@@ -107,13 +107,13 @@ FtiConfigEntryGetNetlink::lookup_route4(const IPv4& dst, Fte4& fte)
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetNetlink::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
-    int ret_value = XORP_ERROR;
+    bool ret_value = false;
     
     ret_value = lookup_entry(IPvXNet(dst), ftex);
     
@@ -130,13 +130,13 @@ FtiConfigEntryGetNetlink::lookup_entry4(const IPv4Net& dst, Fte4& fte)
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetNetlink::lookup_route6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
-    int ret_value = XORP_ERROR;
+    bool ret_value = false;
     
     ret_value = lookup_route(IPvX(dst), ftex);
     
@@ -153,13 +153,13 @@ FtiConfigEntryGetNetlink::lookup_route6(const IPv6& dst, Fte6& fte)
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetNetlink::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 { 
     FteX ftex(dst.af());
-    int ret_value = XORP_ERROR;
+    bool ret_value = false;
     
     ret_value = lookup_entry(IPvXNet(dst), ftex);
     
@@ -172,15 +172,16 @@ FtiConfigEntryGetNetlink::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 
 #ifndef HAVE_NETLINK_SOCKETS
 
-int
+bool
 FtiConfigEntryGetNetlink::lookup_route(const IPvX& , FteX& )
 {
-    return (XORP_ERROR);
+    return false;
 }
-int
+
+bool
 FtiConfigEntryGetNetlink::lookup_entry(const IPvXNet& , FteX& )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
 void
@@ -197,9 +198,9 @@ FtiConfigEntryGetNetlink::nlsock_data(const uint8_t* , size_t )
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
 {
 #define RTMBUFSIZE (sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + 512)
@@ -218,7 +219,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     
     // Check that the destination address is valid
     if (! dst.is_unicast()) {
-	return (XORP_ERROR);
+	return false;
     }
     
     //
@@ -247,7 +248,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(rtmbuf)) {
 	XLOG_ERROR("AF_NETLINK buffer size error: %d instead of %d",
 		   sizeof(rtmbuf), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
-	return (XORP_ERROR);
+	return false;
     }
     rtattr = (struct rtattr *)(((uint8_t *)nlh) + NLMSG_ALIGN(nlh->nlmsg_len));
     rtattr->rta_type = RTA_DST;
@@ -265,7 +266,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
 		  sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("error writing to netlink socket: %s",
 		   strerror(errno));
-	return (XORP_ERROR);
+	return false;
     }
     
     //
@@ -289,9 +290,9 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return XORP_OK on success, otherwise XORP_ERROR.
+ * @return true on success, otherwise false.
  */
-int
+bool
 FtiConfigEntryGetNetlink::lookup_entry(const IPvXNet& dst, FteX& fte)
 {
     // TODO: XXX: PAVPAVPAV: implement it if Linux supports

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.1 2003/05/02 07:50:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -55,10 +55,10 @@
 //
 
 #ifndef HAVE_ROUTING_SOCKETS
-int
+bool
 IfConfigGet::parse_buffer_rtm(IfTree& , const uint8_t* , size_t )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
 #else // HAVE_ROUTING_SOCKETS
@@ -73,7 +73,7 @@ static void rtm_announce_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm,
 #endif
 
 // Reading route(4) manual page is a good start for understanding this
-int
+bool
 IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
 {
     bool recognized = false;
@@ -127,8 +127,9 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
     }
     
     if (! recognized)
-	return (XORP_ERROR);
-    return (XORP_OK);
+	return false;
+    
+    return true;
 }
 
 static void

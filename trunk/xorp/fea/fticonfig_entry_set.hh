@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.2 2003/05/02 23:21:37 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.3 2003/05/10 00:06:39 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -86,18 +86,18 @@ public:
      *
      * @param fte the entry to add.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int add_entry4(const Fte4& fte) = 0;
+    virtual bool add_entry4(const Fte4& fte) = 0;
 
     /**
      * Delete a single routing entry. Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_entry4(const Fte4& fte) = 0;
+    virtual bool delete_entry4(const Fte4& fte) = 0;
 
     /**
      * Add a single routing entry. Must be within a configuration
@@ -105,9 +105,9 @@ public:
      *
      * @param fte the entry to add.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int add_entry6(const Fte6& fte) = 0;
+    virtual bool add_entry6(const Fte6& fte) = 0;
 
     /**
      * Delete a single routing entry.  Must be within a configuration
@@ -115,9 +115,9 @@ public:
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_entry6(const Fte6& fte) = 0;
+    virtual bool delete_entry6(const Fte6& fte) = 0;
 
 protected:
     /**
@@ -178,18 +178,18 @@ public:
      *
      * @param fte the entry to add.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int add_entry4(const Fte4& fte);
+    virtual bool add_entry4(const Fte4& fte);
 
     /**
      * Delete a single routing entry. Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_entry4(const Fte4& fte);
+    virtual bool delete_entry4(const Fte4& fte);
 
     /**
      * Add a single routing entry. Must be within a configuration
@@ -197,9 +197,9 @@ public:
      *
      * @param fte the entry to add.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int add_entry6(const Fte6& fte);
+    virtual bool add_entry6(const Fte6& fte);
 
     /**
      * Delete a single routing entry.  Must be within a configuration
@@ -207,9 +207,9 @@ public:
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_entry6(const Fte6& fte);
+    virtual bool delete_entry6(const Fte6& fte);
     
 private:
 };
@@ -240,18 +240,18 @@ public:
      *
      * @param fte the entry to add.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int add_entry4(const Fte4& fte);
+    virtual bool add_entry4(const Fte4& fte);
 
     /**
      * Delete a single routing entry. Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_entry4(const Fte4& fte);
+    virtual bool delete_entry4(const Fte4& fte);
 
     /**
      * Add a single routing entry. Must be within a configuration
@@ -259,9 +259,9 @@ public:
      *
      * @param fte the entry to add.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int add_entry6(const Fte6& fte);
+    virtual bool add_entry6(const Fte6& fte);
 
     /**
      * Delete a single routing entry.  Must be within a configuration
@@ -269,13 +269,13 @@ public:
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_entry6(const Fte6& fte);
+    virtual bool delete_entry6(const Fte6& fte);
     
 private:
-    int add_entry(const FteX& fte);
-    int delete_entry(const FteX& fte);
+    bool add_entry(const FteX& fte);
+    bool delete_entry(const FteX& fte);
     
 };
 

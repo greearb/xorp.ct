@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.1 2003/05/02 07:50:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.2 2003/05/05 19:34:00 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -184,6 +184,9 @@ RtmUtils::get_rta_sockaddr(uint32_t amask, const struct sockaddr* sock,
     }
 }
 
+/*
+ * Return masklen on success, otherwise -1
+ */
 int
 RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 {
@@ -241,6 +244,8 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	    XLOG_ERROR("Unknown mask: family = %d, sa_len = %d",
 		       family, sock->sa_len);
 	    {
+		// XXX: a poor attempt to return something meaningful
+		
 		// XXX: sock->sa_family is undefined
 		const struct sockaddr_in *sin = (const struct sockaddr_in *)sock;
 		IPv4 netmask(sin->sin_addr);
@@ -270,10 +275,10 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
     }
 #endif // HAVE_SA_LEN
     
-    return (XORP_ERROR);
+    return (-1);
 }
 
-int
+bool
 RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 {
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
@@ -337,7 +342,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	if (sa->sa_family != AF_LINK) {
 	    // TODO: verify whether this is really an error.
 	    XLOG_ERROR("Ignoring RTM_GET with sa_family = %d", sa->sa_family);
-	    return (XORP_ERROR);
+	    return false;
 	}
 	const struct sockaddr_dl *sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
 	
@@ -366,7 +371,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     fte = FteX(IPvXNet(dst_addr, dst_masklen), gateway_addr, if_name, if_name,
 	       ~0, ~0);
     
-    return (XORP_OK);
+    return true;
 }
 
 #endif // HAVE_ROUTING_SOCKETS

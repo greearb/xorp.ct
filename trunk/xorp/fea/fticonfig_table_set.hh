@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.2 2003/05/02 23:21:38 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.3 2003/05/10 00:06:40 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -87,17 +87,17 @@ public:
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int set_table4(const list<Fte4>& fte_list) = 0;
+    virtual bool set_table4(const list<Fte4>& fte_list) = 0;
 
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_all_entries4() = 0;
+    virtual bool delete_all_entries4() = 0;
 
     /**
      * Set the unicast forwarding table.
@@ -105,17 +105,17 @@ public:
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int set_table6(const list<Fte6>& fte_list) = 0;
+    virtual bool set_table6(const list<Fte6>& fte_list) = 0;
     
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_all_entries6() = 0;
+    virtual bool delete_all_entries6() = 0;
 
 protected:
     /**
@@ -176,17 +176,17 @@ public:
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int set_table4(const list<Fte4>& fte_list);
+    virtual bool set_table4(const list<Fte4>& fte_list);
 
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_all_entries4();
+    virtual bool delete_all_entries4();
 
     /**
      * Set the unicast forwarding table.
@@ -194,17 +194,17 @@ public:
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int set_table6(const list<Fte6>& fte_list);
+    virtual bool set_table6(const list<Fte6>& fte_list);
     
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_all_entries6();
+    virtual bool delete_all_entries6();
     
 private:
     
@@ -236,17 +236,17 @@ public:
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int set_table4(const list<Fte4>& fte_list);
+    virtual bool set_table4(const list<Fte4>& fte_list);
 
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_all_entries4();
+    virtual bool delete_all_entries4();
 
     /**
      * Set the unicast forwarding table.
@@ -254,17 +254,17 @@ public:
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int set_table6(const list<Fte6>& fte_list);
+    virtual bool set_table6(const list<Fte6>& fte_list);
     
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return true on success, otherwise false.
      */
-    virtual int delete_all_entries6();
+    virtual bool delete_all_entries6();
     
 private:
     

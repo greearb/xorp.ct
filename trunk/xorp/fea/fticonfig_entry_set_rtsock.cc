@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rs.cc,v 1.1 2003/05/02 07:50:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.1 2003/05/02 23:21:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -58,7 +58,7 @@ FtiConfigEntrySetRtsock::stop()
 }
 
 
-int
+bool
 FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
@@ -67,7 +67,7 @@ FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
     return (add_entry(ftex));
 }
 
-int
+bool
 FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
@@ -76,7 +76,7 @@ FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
     return (delete_entry(ftex));
 }
 
-int
+bool
 FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
@@ -85,7 +85,7 @@ FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
     return (add_entry(ftex));
 }
 
-int
+bool
 FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
@@ -95,20 +95,20 @@ FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 }
 
 #ifndef HAVE_ROUTING_SOCKETS
-int
+bool
 FtiConfigEntrySetRtsock::add_entry(const FteX& )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
-int
+bool
 FtiConfigEntrySetRtsock::delete_entry(const FteX& )
 {
-    return (XORP_ERROR);
+    return false;
 }
 
 #else // HAVE_ROUTING_SOCKETS
-int
+bool
 FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 {
 #define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
@@ -168,7 +168,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
-	return (XORP_ERROR);
+	return false;
     }
     
     //
@@ -176,10 +176,10 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     // succeeded.
     //
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 {
 #define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
@@ -235,7 +235,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
-	return (XORP_ERROR);
+	return false;
     }
     
     //
@@ -243,6 +243,6 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     // succeeded.
     //
     
-    return (XORP_OK);
+    return true;
 }
 #endif // HAVE_ROUTING_SOCKETS

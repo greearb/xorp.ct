@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_rtsock.cc,v 1.1 2003/05/02 23:21:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_dummy.cc,v 1.1 2003/05/10 00:06:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -56,7 +56,7 @@ FtiConfigTableSetDummy::stop()
     return (XORP_OK);
 }
 
-int
+bool
 FtiConfigTableSetDummy::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
@@ -67,21 +67,21 @@ FtiConfigTableSetDummy::set_table4(const list<Fte4>& fte_list)
 	ftic().add_entry4(fte);
     }
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigTableSetDummy::delete_all_entries4()
 {
     if (in_configuration() == false)
-	return (XORP_ERROR);
+	return false;
     
     ftic().trie4().delete_all_nodes();
     
-    return (XORP_OK);
+    return true;
 }
 
-int
+bool
 FtiConfigTableSetDummy::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
@@ -92,16 +92,16 @@ FtiConfigTableSetDummy::set_table6(const list<Fte6>& fte_list)
 	ftic().add_entry6(fte);
     }
     
-    return (XORP_OK);
+    return true;
 }
-    
-int
+
+bool
 FtiConfigTableSetDummy::delete_all_entries6()
 {
     if (in_configuration() == false)
-	return (XORP_ERROR);
+	return false;
     
     ftic().trie6().delete_all_nodes();
     
-    return (XORP_OK);
+    return true;
 }
