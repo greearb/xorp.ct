@@ -12,8 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.50 2004/06/10 22:41:51 hodson Exp $"
-
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.51 2004/06/11 03:48:18 atanu Exp $"
 
 #include <pwd.h>
 
@@ -39,7 +38,8 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose)
       _cli_client(*(_cli_node.add_stdio_client())),
       _verbose(verbose),
       _mode(CLI_MODE_NONE),
-      _changes_made(false)
+      _changes_made(false),
+      _op_mode_cmd(0)
 {
     //
     // We do all this here to allow for later extensions for
@@ -2593,7 +2593,10 @@ RouterCLI::op_mode_func(const string& ,
 	// Clear the UI
 	idle_ui();
 
-	op_cmd_list()->execute(&(_xorpsh.eventloop()), path_segments,
+	// Verify that any previous command has been disposed of.
+	XLOG_ASSERT(0 == _op_mode_cmd);
+	_op_mode_cmd = op_cmd_list()->execute(&(_xorpsh.eventloop()),
+					      path_segments,
 			       callback(this, &RouterCLI::op_mode_cmd_print),
 			       callback(this, &RouterCLI::op_mode_cmd_done));
     } else {
@@ -2647,6 +2650,25 @@ RouterCLI::op_mode_cmd_done(bool success, const string& error_msg)
 	if (!error_msg.empty())
 	    _cli_client.cli_print(error_msg + "\n");
 	silent_reenable_ui();
+    }
+    op_mode_cmd_tidy();
+}
+
+void
+RouterCLI::op_mode_cmd_interrupt()
+{
+    // The user has sent an interrupt. If an operational mode command
+    // is running terminate it.
+    op_mode_cmd_tidy();
+}
+
+void
+RouterCLI::op_mode_cmd_tidy()
+{
+    if (_op_mode_cmd) {
+	_op_mode_cmd->terminate();
+	delete _op_mode_cmd;
+	_op_mode_cmd = 0;
     }
 }
 

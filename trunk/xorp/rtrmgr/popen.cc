@@ -23,7 +23,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.5 2004/05/28 22:27:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.6 2004/06/10 22:41:52 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/wait.h>
@@ -56,7 +56,7 @@ static struct pid_s {
 } *pidlist;
 
 
-void
+pid_t
 popen2(const string& command, FILE *& outstream, FILE *&errstream)
 {
     struct pid_s *cur;
@@ -68,11 +68,11 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
     errstream = NULL;
 
     if (pipe(pdes_out) < 0)
-	return;
+	return 0;
     if (pipe(pdes_err) < 0) {
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
-	return;
+	return 0;
     }
 
     if ((cur = (struct pid_s*)malloc(sizeof(struct pid_s))) == NULL) {
@@ -80,7 +80,7 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
-	return;
+	return 0;
     }
 
     /* Disable blocking on read */
@@ -93,7 +93,7 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
-	return;
+	return 0;
     }
     fl = fcntl(pdes_err[0], F_GETFL);
     if (fcntl(pdes_err[0], F_SETFL, fl | O_NONBLOCK) == -1) {
@@ -103,7 +103,7 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
-	return;
+	return 0;
     }
 
     string a1 = "sh";
@@ -120,7 +120,7 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
 	free(cur);
-	return;
+	return 0;
 	/* NOTREACHED */
     case 0:				/* Child. */
 	/*
@@ -165,6 +165,8 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
 
     outstream = iop_out;
     errstream = iop_err;
+
+    return pid;
 }
 
 /*

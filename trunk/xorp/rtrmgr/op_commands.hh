@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.16 2004/06/10 22:41:52 hodson Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.17 2004/06/11 03:48:19 atanu Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -46,6 +46,10 @@ public:
     void done(bool success);
     bool operator<(const OpInstance& them) const;
 
+    /**
+     * Terminate this command
+     */
+    void terminate();
 private:
     static const size_t OP_BUF_SIZE = 8192;
 
@@ -54,6 +58,9 @@ private:
     OpCommand*		_op_command;
     AsyncFileReader*	_stdout_file_reader;
     AsyncFileReader*	_stderr_file_reader;
+    pid_t		_pid;
+    FILE 		*_out_stream;
+    FILE 		*_err_stream;
     char		_outbuffer[OP_BUF_SIZE];
     char		_errbuffer[OP_BUF_SIZE];
     bool		_error;
@@ -104,11 +111,13 @@ public:
      * @param command_line command to execute and arguments
      * @param print_cb callback to be invoked with output from command.
      * @param done_cb callback to invoke when the command terminates.
+     *
+     * @return a pointer to the command instance on success.
      */
-    void execute(EventLoop* eventloop,
-		 const list<string>& command_line,
-		 RouterCLI::OpModePrintCallback print_cb,
-		 RouterCLI::OpModeDoneCallback done_cb);
+    OpInstance *execute(EventLoop* eventloop,
+			const list<string>& command_line,
+			RouterCLI::OpModePrintCallback print_cb,
+			RouterCLI::OpModeDoneCallback done_cb);
 
     bool command_match(const list<string>& path_parts,
 		       SlaveConfigTree* sct, bool exact_match) const;
@@ -143,9 +152,10 @@ public:
     OpCommand* add_op_command(const OpCommand& op_command);
     bool command_match(const list<string>& command_parts,
 		       bool exact_match) const;
-    void execute(EventLoop* eventloop, const list<string>& command_parts,
-		 RouterCLI::OpModePrintCallback print_cb,
-		 RouterCLI::OpModeDoneCallback done_cb) const;
+    OpInstance *execute(EventLoop* eventloop,
+			const list<string>& command_parts,
+			RouterCLI::OpModePrintCallback print_cb,
+			RouterCLI::OpModeDoneCallback done_cb) const;
     map<string, string> top_level_commands() const;
     map<string, string> childlist(const string& path,
 				  bool& is_executable,
