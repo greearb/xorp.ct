@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.37 2003/09/19 03:09:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.38 2003/09/19 21:06:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -492,7 +492,7 @@ MPReachNLRIAttribute<IPv6>::encode()
 {
     delete[] _data;	// Zap any old allocation.
 
-    XLOG_ASSERT(AFI_IPV6 == _afi && SAFI_NLRI_UNICAST == _safi);
+    XLOG_ASSERT(AFI_IPV6 == _afi && SAFI_UNICAST == _safi);
     XLOG_ASSERT(16 == IPv6::addr_size());
 
     /*
@@ -554,7 +554,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
     : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI)
 {
     _afi = AFI_IPV6;
-    _safi = SAFI_NLRI_UNICAST;
+    _safi = SAFI_UNICAST;
 
     encode();
 }
@@ -595,10 +595,10 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
 
     _safi = *data++;
 
-    if (_afi != AFI_IPV6 || _safi != SAFI_NLRI_UNICAST)
+    if (_afi != AFI_IPV6 || _safi != SAFI_UNICAST)
 	xorp_throw(CorruptMessage,
 		   c_format("Expected AFI/SAFI to be %d/%d not %d/%d",
-			    AFI_IPV6, SAFI_NLRI_UNICAST, _afi, _safi),
+			    AFI_IPV6, SAFI_UNICAST, _afi, _safi),
 		   UPDATEMSGERR, OPTATTR);
 
     /*
@@ -696,7 +696,7 @@ MPUNReachNLRIAttribute<IPv6>::encode()
 {
     delete[] _data;	// Zap any old allocation.
 
-    XLOG_ASSERT(AFI_IPV6 == _afi && SAFI_NLRI_UNICAST == _safi);
+    XLOG_ASSERT(AFI_IPV6 == _afi && SAFI_UNICAST == _safi);
     XLOG_ASSERT(16 == IPv6::addr_size());
 
     /*
@@ -739,7 +739,7 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute()
 	: PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI)
 {
     _afi = AFI_IPV6;
-    _safi = SAFI_NLRI_UNICAST;
+    _safi = SAFI_UNICAST;
 
     encode();
 }
@@ -779,10 +779,10 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
 
     _safi = *data++;
 
-    if (_afi != AFI_IPV6 || _safi != SAFI_NLRI_UNICAST)
+    if (_afi != AFI_IPV6 || _safi != SAFI_UNICAST)
 	xorp_throw(CorruptMessage,
 		   c_format("Expected AFI/SAFI to be %d/%d not %d/%d",
-			    AFI_IPV6, SAFI_NLRI_UNICAST, _afi, _safi),
+			    AFI_IPV6, SAFI_UNICAST, _afi, _safi),
 		   UPDATEMSGERR, OPTATTR);
 
     /*

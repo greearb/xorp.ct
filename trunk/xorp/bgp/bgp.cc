@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.14 2003/10/01 03:55:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.15 2003/10/11 03:17:55 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -575,10 +575,12 @@ BGPMain::register_ribname(const string& name)
     if (!_rib_ipc_handler->register_ribname(name))
 	return false;
 
-    if (!plumbing_unicast()->plumbing4().next_hop_resolver().register_ribname(name))
+    if (!plumbing_unicast()->
+	plumbing_ipv4().next_hop_resolver().register_ribname(name))
 	return false;
 
-    if (!plumbing_unicast()->plumbing6().next_hop_resolver().register_ribname(name))
+    if (!plumbing_unicast()->
+	plumbing_ipv6().next_hop_resolver().register_ribname(name))
 	return false;
 
     return true;
@@ -885,7 +887,7 @@ BGPMain::rib_client_route_info_changed4(const IPv4& addr,
 	      " addr %s prefix_len %d nexthop %s metric %d\n",
 	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
 
-    return plumbing_unicast()->plumbing4().
+    return plumbing_unicast()->plumbing_ipv4().
 	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
 							  nexthop, metric);
 }
@@ -900,7 +902,7 @@ BGPMain::rib_client_route_info_changed6(const IPv6& addr,
 	      " addr %s prefix_len %d nexthop %s metric %d\n",
 	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
 
-    return plumbing_unicast()->plumbing6().
+    return plumbing_unicast()->plumbing_ipv6().
 	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
 							  nexthop, metric);
 }
@@ -912,7 +914,7 @@ BGPMain::rib_client_route_info_invalid4(const IPv4& addr,
     debug_msg("rib_client_route_info_invalid4:"
 	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
-    return plumbing_unicast()->plumbing4().
+    return plumbing_unicast()->plumbing_ipv4().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
 }
 
@@ -923,7 +925,7 @@ BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
     debug_msg("rib_client_route_info_invalid6:"
 	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
-    return plumbing_unicast()->plumbing6().
+    return plumbing_unicast()->plumbing_ipv6().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
 }
 
@@ -955,7 +957,7 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
  	BGPPeerData *peerdata =
 	    const_cast<BGPPeerData *const>(peer->peerdata());
  	peerdata->add_sent_parameter(
-	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_NLRI_UNICAST));
+	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST));
     } else {
 	XLOG_WARNING("Unable to set unknown parameter: <%s>.",
 		     parameter.c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.47 2003/09/22 19:22:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.48 2003/09/25 02:57:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1364,7 +1364,7 @@ Peer::send_open()
     OpenPacket bgpopen(_as, _id, _holdtime);
     if(_ipv6)
 	bgpopen.add_parameter(
-		new BGPMultiProtocolCapability(AFI_IPV6, SAFI_NLRI_UNICAST));
+		new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST));
     size_t len;
     const uint8_t *buf = bgpopen.encode(len);
     debug_msg("OPEN Packet SENT\n%s", bgpopen.str().c_str());

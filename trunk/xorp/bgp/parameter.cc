@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.18 2003/10/06 22:41:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.19 2003/10/10 22:43:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -326,11 +326,11 @@ BGPMultiProtocolCapability::decode()
     debug_msg("address family %d\n", _address_family);
     uint8_t safi = *(_data+7);
     switch(safi) {
-    case SAFI_NLRI_UNICAST_VAL:
-	_subsequent_address_family = SAFI_NLRI_UNICAST;
+    case SAFI_UNICAST_VAL:
+	_subsequent_address_family = SAFI_UNICAST;
 	break;
-    case SAFI_NLRI_MULTICAST_VAL:
-	_subsequent_address_family = SAFI_NLRI_MULTICAST;
+    case SAFI_MULTICAST_VAL:
+	_subsequent_address_family = SAFI_MULTICAST;
 	break;
     default:
 	xorp_throw(CorruptMessage,

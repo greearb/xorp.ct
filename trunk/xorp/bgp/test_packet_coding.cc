@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.5 2003/09/11 03:18:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.6 2003/10/03 00:26:59 atanu Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -25,7 +25,7 @@
 bool
 test_multprotocol(TestInfo& /*info*/)
 {
-    BGPMultiProtocolCapability multi(AFI_IPV6, SAFI_NLRI_UNICAST);
+    BGPMultiProtocolCapability multi(AFI_IPV6, SAFI_UNICAST);
 
     multi.encode();
     assert(8 == multi.length());
@@ -139,7 +139,7 @@ test_open_packet_with_capabilities(TestInfo& /*info*/)
     OpenPacket openpacket(AsNum(666), IPv4("1.2.3.4"), 1234);
     // Add a multiprotocol parameter.
     openpacket.add_parameter(
-	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_NLRI_UNICAST));
+	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST));
     // Add a refresh parameter
     openpacket.add_parameter(
 	     new BGPRefreshCapability());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.9 2003/10/06 22:41:08 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.10 2003/10/10 22:42:41 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -23,7 +23,6 @@
 // Only use the following two defines in packet decode routines.
 #define	AFI_IPV4_VAL 1
 #define	AFI_IPV6_VAL 2
-
 enum Afi {
     AFI_IPV4 = AFI_IPV4_VAL,
     AFI_IPV6 = AFI_IPV6_VAL
@@ -33,12 +32,41 @@ enum Afi {
 // RFC 2858
 // NLRI = Network Layer Reachability Information
 // Only use the following two defines in packet decode routines.
-#define	SAFI_NLRI_UNICAST_VAL 1
-#define	SAFI_NLRI_MULTICAST_VAL 2
-
+#define	SAFI_UNICAST_VAL 1
+#define	SAFI_MULTICAST_VAL 2
 enum  Safi {
-    SAFI_NLRI_UNICAST = SAFI_NLRI_UNICAST_VAL,
-    SAFI_NLRI_MULTICAST = SAFI_NLRI_MULTICAST_VAL,
+    SAFI_UNICAST = SAFI_UNICAST_VAL,
+    SAFI_MULTICAST = SAFI_MULTICAST_VAL,
+};
+
+class AfiSafi {
+public:
+    static int afi_safi_index(Afi afi, Safi safi) {
+	switch(afi) {
+	case AFI_IPV4:
+	    switch(safi) {
+	    case SAFI_UNICAST:
+		return 0;
+	    case SAFI_MULTICAST:
+		return 1;
+	    }
+	case AFI_IPV6:
+	    switch(safi) {
+	    case SAFI_UNICAST:
+		return 2;
+	    case SAFI_MULTICAST:
+		return 3;
+	    }
+	}
+    }
+
+    static int begin() {
+	return 0;
+    }
+
+    static int end() {
+	return 4;
+    }
 };
 
 // #define SAFI_NLRI_UNICASTMULTICAST 3 - Removed in:

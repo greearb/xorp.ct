@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.25 2003/09/16 21:00:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.26 2003/10/11 03:17:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -32,8 +32,8 @@ BGPPlumbing::BGPPlumbing(const string& safi, XrlStdRouter *xrl_router,
 			 RibIpcHandler* ribhandler,
 			 EventLoop& eventloop, BGPMain& bgp)
     : _rib_handler(ribhandler),
-    _v4_plumbing("(IPv4:" + safi + ")", *this, xrl_router, eventloop, bgp), 
-    _v6_plumbing("(IPv6:" + safi + ")", *this, xrl_router, eventloop, bgp),
+    _plumbing_ipv4("(IPv4:" + safi + ")", *this, xrl_router, eventloop, bgp), 
+    _plumbing_ipv6("(IPv6:" + safi + ")", *this, xrl_router, eventloop, bgp),
     _my_AS_number(AsNum::AS_INVALID)
 {
 }
@@ -48,8 +48,8 @@ int
 BGPPlumbing::add_peering(PeerHandler* peer_handler) 
 {
     int result = 0;
-    result |= _v4_plumbing.add_peering(peer_handler);
-    result |= _v6_plumbing.add_peering(peer_handler);
+    result |= plumbing_ipv4().add_peering(peer_handler);
+    result |= plumbing_ipv6().add_peering(peer_handler);
     return result;
 }
 
@@ -58,8 +58,8 @@ BGPPlumbing::stop_peering(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::stop_peering\n");
     int result = 0;
-    result |= _v4_plumbing.stop_peering(peer_handler);
-    result |= _v6_plumbing.stop_peering(peer_handler);
+    result |= plumbing_ipv4().stop_peering(peer_handler);
+    result |= plumbing_ipv6().stop_peering(peer_handler);
     return result;
 }
 
@@ -68,8 +68,8 @@ BGPPlumbing::peering_went_down(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::peering_went_down\n");
     int result = 0;
-    result |= _v4_plumbing.peering_went_down(peer_handler);
-    result |= _v6_plumbing.peering_went_down(peer_handler);
+    result |= plumbing_ipv4().peering_went_down(peer_handler);
+    result |= plumbing_ipv6().peering_went_down(peer_handler);
     return result;
 }
 
@@ -78,8 +78,8 @@ BGPPlumbing::peering_came_up(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::peering_came_up\n");
     int result = 0;
-    result |= _v4_plumbing.peering_came_up(peer_handler);
-    result |= _v6_plumbing.peering_came_up(peer_handler);
+    result |= plumbing_ipv4().peering_came_up(peer_handler);
+    result |= plumbing_ipv6().peering_came_up(peer_handler);
     return result;
 }
 
@@ -88,8 +88,8 @@ BGPPlumbing::delete_peering(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::delete_peering\n");
     int result = 0;
-    result |= _v4_plumbing.delete_peering(peer_handler);
-    result |= _v6_plumbing.delete_peering(peer_handler);
+    result |= plumbing_ipv4().delete_peering(peer_handler);
+    result |= plumbing_ipv6().delete_peering(peer_handler);
     return result;
 }
 
@@ -98,7 +98,7 @@ BGPPlumbing::add_route(const InternalMessage<IPv4> &rtmsg,
 		       PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbing::add_route IPv4\n");
-    return _v4_plumbing.add_route(rtmsg, peer_handler);
+    return plumbing_ipv4().add_route(rtmsg, peer_handler);
 }
 
 int 
@@ -106,79 +106,82 @@ BGPPlumbing::add_route(const InternalMessage<IPv6> &rtmsg,
 		       PeerHandler* peer_handler)  
 {
     debug_msg("BGPPlumbing::add_route IPv6\n");
-    return _v6_plumbing.add_route(rtmsg, peer_handler);
+    return plumbing_ipv6().add_route(rtmsg, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const InternalMessage<IPv4> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
-    return _v4_plumbing.delete_route(rtmsg, peer_handler);
+    return plumbing_ipv4().delete_route(rtmsg, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const InternalMessage<IPv6> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
-    return _v6_plumbing.delete_route(rtmsg, peer_handler);
+    return plumbing_ipv6().delete_route(rtmsg, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const IPNet<IPv4>& net,
 			  PeerHandler* peer_handler) 
 {
-    return _v4_plumbing.delete_route(net, peer_handler);
+    return plumbing_ipv4().delete_route(net, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const IPNet<IPv6>& net,
 			  PeerHandler* peer_handler) 
 {
-    return _v6_plumbing.delete_route(net, peer_handler);
+    return plumbing_ipv6().delete_route(net, peer_handler);
 }
 
 const SubnetRoute<IPv4>* 
 BGPPlumbing::lookup_route(const IPNet<IPv4> &net) const 
 {
-    return _v4_plumbing.lookup_route(net);
+    return const_cast<BGPPlumbing *>(this)->
+	plumbing_ipv4().lookup_route(net);
 }
 
 const SubnetRoute<IPv6>* 
 BGPPlumbing::lookup_route(const IPNet<IPv6> &net) const 
 {
-    return _v6_plumbing.lookup_route(net);
+    return const_cast<BGPPlumbing *>(this)->
+	plumbing_ipv6().lookup_route(net);
 }
 
 void
 BGPPlumbing::push_ipv4(PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbing::push\n");
-    _v4_plumbing.push(peer_handler);
+    plumbing_ipv4().push(peer_handler);
 }
 
 void
 BGPPlumbing::push_ipv6(PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbing::push\n");
-    _v6_plumbing.push(peer_handler);
+    plumbing_ipv6().push(peer_handler);
 }
 
 void
 BGPPlumbing::output_no_longer_busy(PeerHandler *peer_handler) 
 {
-    _v4_plumbing.output_no_longer_busy(peer_handler);
+    plumbing_ipv4().output_no_longer_busy(peer_handler);
+    plumbing_ipv6().output_no_longer_busy(peer_handler);
 }
 
 uint32_t 
 BGPPlumbing::create_ipv4_route_table_reader() 
 {
-    return _v4_plumbing.create_route_table_reader();
+    return plumbing_ipv4().create_route_table_reader();
 }
 
 uint32_t 
 BGPPlumbing::create_ipv6_route_table_reader()
 {
-    return _v6_plumbing.create_route_table_reader();
+    return plumbing_ipv6().create_route_table_reader();
 }
 
 bool 
@@ -186,7 +189,7 @@ BGPPlumbing::read_next_route(uint32_t token,
 			     const SubnetRoute<IPv4>*& route, 
 			     IPv4& peer_id)
 {
-    return _v4_plumbing.read_next_route(token, route, peer_id);
+    return plumbing_ipv4().read_next_route(token, route, peer_id);
 }
 
 bool 
@@ -194,16 +197,18 @@ BGPPlumbing::read_next_route(uint32_t token,
 			     const SubnetRoute<IPv6>*& route, 
 			     IPv4& peer_id)
 {
-    return _v6_plumbing.read_next_route(token, route, peer_id);
+    return plumbing_ipv6().read_next_route(token, route, peer_id);
 }
 
 bool
 BGPPlumbing::status(string& reason) const
 {
-    if (_v4_plumbing.status(reason) == false) {
+    if (const_cast<BGPPlumbing *>(this)->
+	plumbing_ipv4().status(reason) == false) {
 	return false;
     }
-    if (_v6_plumbing.status(reason) == false) {
+    if (const_cast<BGPPlumbing *>(this)->
+	plumbing_ipv6().status(reason) == false) {
 	return false;
     }
     return true;

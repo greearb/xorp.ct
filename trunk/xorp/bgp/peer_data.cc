@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.10 2003/10/06 22:41:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.11 2003/10/10 22:42:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -175,19 +175,19 @@ BGPPeerData::open_negotiation()
 	    switch(afi) {
 	    case AFI_IPV4:
 		switch(safi) {
-		case SAFI_NLRI_UNICAST:
+		case SAFI_UNICAST:
 		    _unicast_ipv4 = true;
 		    break;
-		case SAFI_NLRI_MULTICAST:
+		case SAFI_MULTICAST:
 		    _multicast_ipv4 = true;
 		    break;
 		}
 	    case AFI_IPV6:
 		switch(safi) {
-		case SAFI_NLRI_UNICAST:
+		case SAFI_UNICAST:
 		    _unicast_ipv6 = true;
 		    break;
-		case SAFI_NLRI_MULTICAST:
+		case SAFI_MULTICAST:
 		    _multicast_ipv6 = true;
 		    break;
 		}

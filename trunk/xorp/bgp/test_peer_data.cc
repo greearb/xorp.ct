@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.1 2003/10/06 22:42:21 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -37,13 +37,13 @@ open_packet_parameters(ParameterList& parameters)
 {
     parameters.push_back(new BGPRefreshCapability());
     parameters.push_back(new BGPMultiProtocolCapability(AFI_IPV4,
-							SAFI_NLRI_UNICAST));
+							SAFI_UNICAST));
     parameters.push_back(new BGPMultiProtocolCapability(AFI_IPV6,
-							SAFI_NLRI_UNICAST));
+							SAFI_UNICAST));
     parameters.push_back(new BGPMultiProtocolCapability(AFI_IPV4,
-							SAFI_NLRI_MULTICAST));
+							SAFI_MULTICAST));
     parameters.push_back(new BGPMultiProtocolCapability(AFI_IPV6,
-							SAFI_NLRI_MULTICAST));
+							SAFI_MULTICAST));
 }
 
 bool
@@ -71,7 +71,7 @@ test1(TestInfo& info)
     ** We support Unicast IPv6.
     */
     pd.add_sent_parameter(new BGPMultiProtocolCapability(AFI_IPV6,
-							SAFI_NLRI_UNICAST));
+							 SAFI_UNICAST));
 
     /*
     ** Create a parameter list analogous to the list we get from an

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.13 2003/09/05 00:43:14 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.14 2003/10/11 03:17:56 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -142,8 +142,12 @@ public:
       lookup_route(const IPNet<IPv6> &net) const;
     const AsNum& my_AS_number() const {return _my_AS_number;}
     RibIpcHandler *rib_handler() const {return _rib_handler;}
-    BGPPlumbingAF<IPv4>& plumbing4() {return _v4_plumbing;}
-    BGPPlumbingAF<IPv6>& plumbing6() {return _v6_plumbing;}
+    BGPPlumbingAF<IPv4>& plumbing_ipv4() {
+	return _plumbing_ipv4;
+    }
+    BGPPlumbingAF<IPv6>& plumbing_ipv6() {
+	return _plumbing_ipv6;
+    }
 
     uint32_t create_ipv4_route_table_reader();
     uint32_t create_ipv6_route_table_reader();
@@ -166,8 +170,8 @@ public:
 private:
     RibIpcHandler *_rib_handler;
 
-    BGPPlumbingAF<IPv4> _v4_plumbing;
-    BGPPlumbingAF<IPv6> _v6_plumbing;
+    BGPPlumbingAF<IPv4> _plumbing_ipv4;
+    BGPPlumbingAF<IPv6> _plumbing_ipv6;
 
     AsNum _my_AS_number;
 };
