@@ -1591,7 +1591,7 @@ fi
 
 # Define the identity of the package.
 PACKAGE=xorp
-VERSION=0.3
+VERSION=0.4
 
 cat >>confdefs.h <<_ACEOF
 #define PACKAGE "$PACKAGE"
