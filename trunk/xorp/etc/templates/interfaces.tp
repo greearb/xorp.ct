@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.14 2005/02/16 04:27:28 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.15 2005/03/09 22:50:39 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -6,7 +6,7 @@ interfaces {
     interface @: txt {
 	disable:	toggle = false;
 	enabled:	bool;			/* %deprecated */
-	discard:	bool = false;
+	discard:	toggle = false;
 	description:	txt = "";
 	mac:		macaddr;
 	mtu:		u32;
