@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.26 2004/04/09 06:12:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.27 2004/04/29 23:32:19 pavlin Exp $"
 
 
 //
@@ -147,9 +147,6 @@ MfeaNode::~MfeaNode()
 int
 MfeaNode::start()
 {
-    if (is_up() || is_pending_up())
-	return (XORP_OK);
-
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
