@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.2 2003/03/10 23:20:36 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.3 2003/07/03 06:48:55 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -541,9 +541,9 @@ test_vif_manipulate_address()
     //
     vif1.set_broadcast_capable(false);
     vif1.set_p2p(true);
-    verbose_assert(! vif1.is_same_subnet(vif_addr_a.subnet_addr()),
+    verbose_assert(vif1.is_same_subnet(vif_addr_a.subnet_addr()),
 		   "is_same_subnet(IPvXNet)");
-    verbose_assert(! vif1.is_same_subnet(IPvX("11.11.11.22")),
+    verbose_assert(vif1.is_same_subnet(IPvX("11.11.11.22")),
 		   "is_same_subnet(IPvX)");
     // Restore the vif capabilities
     vif1.set_broadcast_capable(true);
