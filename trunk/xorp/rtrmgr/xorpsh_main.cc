@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.18 2003/09/30 20:50:51 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.19 2003/12/02 09:39:00 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -479,6 +479,7 @@ main(int argc, char *argv[])
 	case '?':
 	case 'h':
 	    usage(argv[0]);
+	    display_defaults();
 	    xlog_stop();
 	    xlog_exit();
 	    exit(-1);
