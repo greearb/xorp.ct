@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.5 2003/05/03 21:26:46 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.6 2003/05/10 23:23:03 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -23,30 +23,28 @@
 #include "cli/cli_client.hh"
 #include "libxipc/xrl_error.hh"
 
-class TemplateTree;
-class ConfigTree;
-class SlaveConfigTree;
-class ConfigTreeNode;
-class SlaveConfigTreeNode;
-class OpCommandList;
 
-enum CliModeType {
-    CLI_MODE_NONE = 0,
-    CLI_MODE_OPERATIONAL = 1,
-    CLI_MODE_CONFIGURE = 2,
-    CLI_MODE_TEXTENTRY = 3
-};
-
-class CommandTreeNode;
 class CommandTree;
-class RouterCLI;
+class CommandTreeNode;
+class ConfigTree;
+class ConfigTreeNode;
+class OpCommandList;
+class SlaveConfigTree;
+class SlaveConfigTreeNode;
+class TemplateTree;
 class XorpShell;
 class XrlAtomList;
 
+enum CliModeType {
+    CLI_MODE_NONE		= 0,
+    CLI_MODE_OPERATIONAL	= 1,
+    CLI_MODE_CONFIGURE		= 2,
+    CLI_MODE_TEXTENTRY		= 3
+};
+
 class RouterCLI {
 public:
-    RouterCLI::RouterCLI(XorpShell& xorpsh,
-			 CliNode& cli_node);
+    RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node);
     bool is_config_mode() const;
     void commit_done_by_user(int uid);
     void clear_command_set();
@@ -172,13 +170,14 @@ private:
      * typed by the user.
      *
      * @param path the configuration path to current position in the config 
-     *        tree */
+     * tree
+     */
     void add_immediate_commands(CliCommand& current_cli_node,
 				const CommandTree& command_tree,
-				const list <string>& cmd_names,
+				const list<string>& cmd_names,
 				bool include_intermediates,
 				const CLI_PROCESS_CALLBACK& cb,
-				string path);
+				const string& path);
     void add_edit_subtree();
     void add_delete_subtree();
     void add_set_subtree();
@@ -187,34 +186,34 @@ private:
     void display_config_mode_users() const;
     void display_alerts();
 
-    string run_set_command(string path,  const vector<string>& argv);
+    string run_set_command(const string& path, const vector<string>& argv);
 
     void check_for_rtrmgr_restart();
     void verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid);
 
-    TemplateTree* template_tree();
-    SlaveConfigTree* config_tree();
-    OpCommandList* op_cmd_list();
+    TemplateTree*	template_tree();
+    SlaveConfigTree*	config_tree();
+    OpCommandList*	op_cmd_list();
 
     XorpShell& _xorpsh;
 
-    SlaveConfigTreeNode *_current_config_node;
+    SlaveConfigTreeNode* _current_config_node;
 
-    CliNode& _cli_node;
-    CliClient& _cli_client;
+    CliNode&	_cli_node;
+    CliClient&	_cli_client;
     CliModeType _mode;
-    CliCommand *_set_node;
-    CliCommand *_show_node;
-    CliCommand *_edit_node;
-    CliCommand *_delete_node;
-    CliCommand *_run_node;
-    list <string> _path;
-    list <uint32_t> _config_mode_users;
-    list <string> _alerts;
-    int _nesting_depth; /* for text_entry mode: number of brackets deep */
-    list <int> _nesting_lengths; /* for text_entry mode: number of
-                                   nodes for each backet nested */
-    bool _changes_made; /* indicates there are uncommitted changes */
+    CliCommand* _set_node;
+    CliCommand* _show_node;
+    CliCommand* _edit_node;
+    CliCommand*	_delete_node;
+    CliCommand*	_run_node;
+    list<string>   _path;
+    list<uint32_t> _config_mode_users;
+    list<string>   _alerts;
+    int		_nesting_depth;	// for text_entry mode: number of brackets deep
+    list<int>	_nesting_lengths;	// for text_entry mode: number of
+					// nodes for each backet nested
+    bool	_changes_made;	// indicates there are uncommitted changes
 };
 
 #endif // __RTRMGR_CLI_HH__
