@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.11 2004/10/13 05:48:49 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.12 2004/11/26 23:44:50 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -76,7 +76,7 @@ AsyncFileReader::read(int fd, SelectorMask m) {
     assert(fd == _fd);
     assert(_buffers.empty() == false);
 
-    debug_msg("Buffer count %u\n", (uint32_t)_buffers.size());
+    debug_msg("Buffer count %u\n", XORP_UINT_CAST(_buffers.size()));
 
     BufferInfo& head = _buffers.front();
 
@@ -252,8 +252,7 @@ AsyncFileWriter::write(int fd, SelectorMask m)
     ssize_t done = ::writev(_fd, _iov, (int)iov_cnt);
     signal(SIGPIPE, saved_sigpipe);
 
-    debug_msg("Wrote %d of %u bytes\n", done,
-	      static_cast<uint32_t>(total_bytes));
+    debug_msg("Wrote %d of %u bytes\n", done, XORP_UINT_CAST(total_bytes));
 
     if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, errno)) {
 	debug_msg("Write error %d - %s\n", errno, strerror(errno));

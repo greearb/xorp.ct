@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.10 2003/10/02 03:51:53 hodson Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.11 2004/06/10 22:41:16 hodson Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -135,7 +135,7 @@ public:
      * of the address.
      */
     inline string str() const {
-	return _masked_addr.str() + c_format("/%u", (uint32_t)_prefix_len);
+	return _masked_addr.str() + c_format("/%u", XORP_UINT_CAST(_prefix_len));
     }
 
     /**

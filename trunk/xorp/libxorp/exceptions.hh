@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/exceptions.hh,v 1.3 2003/03/10 23:20:32 hodson Exp $
+// $XORP: xorp/libxorp/exceptions.hh,v 1.4 2004/06/10 22:41:15 hodson Exp $
 
 
 #ifndef __LIBXORP_EXCEPTIONS_HH__
@@ -21,6 +21,7 @@
 #include <exception>
 #include <stdarg.h>
 #include <string>
+#include "xorp.h"
 #include "libxorp/c_format.hh"
 
 /**
@@ -67,7 +68,7 @@ public:
      * for throwing an exception.
      */
     const string where() const { 
-	return c_format("line %u of %s", (uint32_t)_line, _file); 
+	return c_format("line %u of %s", XORP_UINT_CAST(_line), _file); 
     }
 
     /**

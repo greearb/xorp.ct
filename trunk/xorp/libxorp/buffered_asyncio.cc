@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.10 2004/09/27 01:07:39 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.1 2004/10/13 05:48:50 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -144,13 +144,13 @@ BufferedAsyncReader::selector_event(int fd, SelectorMask m)
 	_config.head_bytes += read_bytes;
 	if (_config.head_bytes >= _config.trigger_bytes) {
 	    debug_msg("YES notify - buffered i/o %u / %u\n",
-		      static_cast<uint32_t>(_config.head_bytes),
-		      static_cast<uint32_t>(_config.trigger_bytes));
+		      XORP_UINT_CAST(_config.head_bytes),
+		      XORP_UINT_CAST(_config.trigger_bytes));
 	    announce_event(DATA);
 	} else {
 	    debug_msg("NO notify - buffered i/o %u / %u read %d\n",
-		      static_cast<uint32_t>(_config.head_bytes),
-		      static_cast<uint32_t>(_config.trigger_bytes),
+		      XORP_UINT_CAST(_config.head_bytes),
+		      XORP_UINT_CAST(_config.trigger_bytes),
 		      read_bytes);
 	}
     } else if (read_bytes == 0) {
@@ -179,8 +179,8 @@ BufferedAsyncReader::announce_event(Event ev)
 	// Basically, we don't want to call the user below threshold.
 	//
 	debug_msg("announce_event: DATA (head_bytes = %u, trigger_bytes = %u)",
-		  static_cast<uint32_t>(_config.head_bytes),
-		  static_cast<uint32_t>(_config.trigger_bytes));
+		  XORP_UINT_CAST(_config.head_bytes),
+		  XORP_UINT_CAST(_config.trigger_bytes));
 	return;
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/transaction.cc,v 1.3 2003/03/18 01:01:30 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/transaction.cc,v 1.4 2004/06/10 22:41:22 hodson Exp $"
 
 #include <assert.h>
 
@@ -239,7 +239,7 @@ TransactionManager::timeout(uint32_t tid)
     TransactionDB::iterator i = _transactions.find(tid);
     if (i == _transactions.end())
 	return;
-    debug_msg("Timing out transaction id %d\n", tid);
+    debug_msg("Timing out transaction id %u\n", XORP_UINT_CAST(tid));
     _transactions.erase(i);
 }
 

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.7 2003/03/10 23:20:30 hodson Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.8 2004/06/10 22:41:14 hodson Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
 
 #include "config.h"
+#include "xorp.h"
 #include <sys/types.h>
 #include <inttypes.h>
 #include <string>
@@ -126,11 +127,11 @@ public:
      * of the AS number.
      */
     string str() const					{
-	return c_format("AS/%d", _as);
+	return c_format("AS/%d", XORP_INT_CAST(_as));
     }
 
     string short_str() const					{
-	return c_format("%d", _as);
+	return c_format("%d", XORP_INT_CAST(_as));
     }
     
 private:
