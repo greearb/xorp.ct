@@ -15,13 +15,18 @@
 
 host_fbsd410_gcc295="panther.icir.org"
 home_fbsd410_gcc295="tinderbox/gcc295"
-env_fbsd410_gcc295="MALLOC_OPTIONS=AJ"
+env_fbsd410_gcc295="MALLOC_OPTIONS=AJ CONFIGURE_ARGS=--with-snmp"
 buildflags_fbsd410_gcc295="-j 2"
 
 host_fbsd410_gcc34="panther.icir.org"
 home_fbsd410_gcc34="tinderbox/gcc34"
 env_fbsd410_gcc34="CC=gcc34 CXX=g++34 MALLOC_OPTIONS=AJ"
 buildflags_fbsd410_gcc34="-j 2"
+
+host_fbsd410_gcc34_stldebug="panther.icir.org"
+home_fbsd410_gcc34_stldebug="tinderbox/gcc34"
+env_fbsd410_gcc34_stldebug="CC=gcc34 CXX=g++34 MALLOC_OPTIONS=AJ CXXFLAGS='-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC'"
+buildflags_fbsd410_gcc34_stldebug="-j 2"
 
 host_fbsd410_gcc33="panther.icir.org"
 home_fbsd410_gcc33="tinderbox/gcc33"
@@ -38,7 +43,7 @@ home_linux26_gcc33="tinderbox"
 env_linux26_gcc33="MALLOC_CHECK_=2"
 buildflags_linux26_gcc33="-j 2"
 
-TINDERBOX_CONFIGS="fbsd410_gcc34 fbsd410_gcc33 fbsd410_gcc295 linux24_gcc296 linux26_gcc33"
+TINDERBOX_CONFIGS="fbsd410_gcc34 fbsd410_gcc34_stldebug fbsd410_gcc33 fbsd410_gcc295 linux24_gcc296 linux26_gcc33"
 
 #
 # Configuration variables for tinderbox

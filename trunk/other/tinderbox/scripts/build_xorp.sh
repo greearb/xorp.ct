@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP$
+# $XORP: other/tinderbox/scripts/build_xorp.sh,v 1.8 2004/10/19 08:26:48 bms Exp $
 #
 
 CONFIG="$(dirname $0)/config"
@@ -10,7 +10,7 @@ CONFIG="$(dirname $0)/config"
 
 XORPDIR=${ROOTDIR}/xorp
 wakefile=".wake-$$"
-build_command="./configure && gmake -k $@"
+build_command="./configure ${CONFIGURE_ARGS} && gmake -k $@"
 
 #
 # Remove any old completion tokens.
