@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.19 2003/01/29 23:38:12 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.20 2003/01/30 02:38:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -307,7 +307,6 @@ BGPPeer::send_notification(const NotificationPacket *p, bool error)
 	return;
     }
 
-    start_stopped_timer();
 }
 
 void
@@ -1385,6 +1384,10 @@ BGPPeer::set_state(FSMState s, bool error)
 	}
 	break;
     case STATESTOPPED:
+	if (previous_state != STATESTOPPED) {
+	    clear_all_timers();
+	    start_stopped_timer();
+	}
 	if (previous_state == STATEESTABLISHED) {
 	    // We'll have an active peerhandler, so we need to inactivate it.
 	    XLOG_ASSERT(0 != _handler);
