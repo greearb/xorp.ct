@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.20 2004/06/02 22:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.21 2004/06/10 22:40:53 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -38,8 +38,10 @@
 #include <netinet6/in6_var.h>
 #endif
 #ifdef HAVE_NETINET6_ND6_H
-// XXX: a hack because <netinet6/nd6.h> is not C++ friendly
+#ifdef HAVE_BROKEN_CXX_NETINET6_ND6_H
+// XXX: a hack needed if <netinet6/nd6.h> is not C++ friendly
 #define prf_ra in6_prflags::prf_ra
+#endif
 #include <netinet6/nd6.h>
 #endif
 
