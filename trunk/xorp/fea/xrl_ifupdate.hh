@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.8 2003/10/24 00:02:24 hodson Exp $
+// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.9 2003/10/28 19:52:50 pavlin Exp $
 
 #ifndef __FEA_XRL_IFUPDATE_HH__
 #define __FEA_XRL_IFUPDATE_HH__
@@ -147,6 +147,14 @@ public:
 			 const IPv6&	addr,
 			 const Update&	u,
 			 bool		is_system_interfaces_reportee);
+
+    /**
+     * Send announcement that updates have been completed.
+     *
+     * @param is_system_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all system interfaces.
+     */
+    void updates_completed(bool		is_system_interfaces_reportee);
 
     /**
      * @return true if we have config changes in flight

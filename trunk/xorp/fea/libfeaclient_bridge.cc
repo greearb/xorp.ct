@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.5 2004/03/24 19:14:06 atanu Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.6 2004/03/24 20:02:46 atanu Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -102,7 +102,7 @@ LibFeaClientBridge::interface_update(const string& ifname,
 				     const Update& update,
 				     bool	   system)
 {
-    debug_msg("%s update for interface %s (%s)\n",
+    debug_msg("%s update for interface %s (system = %s)\n",
 	      update_name(update), ifname.c_str(), truth_of(system));
 
     UNUSED(system);
@@ -162,7 +162,7 @@ LibFeaClientBridge::vif_update(const string& ifname,
 			       const Update& update,
 			       bool	     system)
 {
-    debug_msg("%s update for vif %s/%s (%s)\n",
+    debug_msg("%s update for vif %s/%s (system = %s)\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      truth_of(system));
 
@@ -242,7 +242,7 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 				    const Update& update,
 				    bool	  system)
 {
-    debug_msg("%s update for address %s/%s/%s (%s)\n",
+    debug_msg("%s update for address %s/%s/%s (system = %s)\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      addr.str().c_str(), truth_of(system));
 
@@ -341,7 +341,7 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 				    const Update& update,
 				    bool	  system)
 {
-    debug_msg("%s update for address %s/%s/%s (%s)\n",
+    debug_msg("%s update for address %s/%s/%s (system = %s)\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      addr.str().c_str(), truth_of(system));
 
@@ -421,6 +421,18 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 	      );
     _rm->push(new
 	      IfMgrIPv6SetEndpoint(ifname, vifname, addr, a6.endpoint()));
+}
+
+
+void
+LibFeaClientBridge::updates_completed(bool	  system)
+{
+    debug_msg("Updates completed (system = %s)\n", truth_of(system));
+
+    UNUSED(system);
+    XLOG_ASSERT(_iftree != 0);
+
+    _rm->push(new IfMgrHintUpdatesMade());
 }
 
 

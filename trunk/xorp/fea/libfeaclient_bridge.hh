@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.2 2003/10/17 21:03:26 hodson Exp $
+// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.3 2003/10/28 19:52:50 pavlin Exp $
 
 #ifndef __FEA_LIBFEACLIENT_BRIDGE_HH__
 #define __FEA_LIBFEACLIENT_BRIDGE_HH__
@@ -108,6 +108,8 @@ protected:
 			 const IPv6&   addr,
 			 const Update& update,
 			 bool	       is_system_interfaces_reportee);
+
+    void updates_completed(bool		is_system_interfaces_reportee);
 
 protected:
     IfMgrXrlReplicationManager* _rm;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.5 2003/09/24 01:11:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.6 2003/10/28 19:52:50 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -206,6 +206,24 @@ XrlIfConfigUpdateReporter::vifaddr6_update(const string& ifname,
 
     for (TgtList::const_iterator ti = tgts->begin(); ti != tgts->end(); ++ti) {
 	c.send_vifaddr6_update(ti->c_str(), ifname, vifname, ip, xrl_update(u),
+	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
+	_in_flight++;
+    }
+}
+
+void
+XrlIfConfigUpdateReporter::updates_completed(bool  is_system_interfaces_reportee)
+{
+    XrlFeaIfmgrClientV0p1Client c(&_rtr);
+    TgtList *tgts = NULL;
+    
+    if (is_system_interfaces_reportee)
+	tgts = &_system_interfaces_tgts;
+    else
+	tgts = &_configured_interfaces_tgts;
+
+    for (TgtList::const_iterator ti = tgts->begin(); ti != tgts->end(); ++ti) {
+	c.send_updates_completed(ti->c_str(),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
 	_in_flight++;
     }
