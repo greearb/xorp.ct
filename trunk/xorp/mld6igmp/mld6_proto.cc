@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.9 2003/03/30 03:50:45 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.10 2003/03/31 03:46:47 pavlin Exp $"
 
 
 //
@@ -333,21 +333,21 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 	    
 	    // Group found
 	    uint32_t sec, usec;
-	    TimeVal received_resp_timeval;
-	    TimeVal left_resp_timeval;
+	    TimeVal received_resp_tv;
+	    TimeVal left_resp_tv;
 	    
 	    sec = (MLD6_LAST_LISTENER_QUERY_COUNT * max_resp_time)
 		/ MLD6_TIMER_SCALE;
 	    usec = (MLD6_LAST_LISTENER_QUERY_COUNT * max_resp_time)
 		% MLD6_TIMER_SCALE;
 	    usec *= (1000000 / MLD6_TIMER_SCALE); // microseconds
-	    received_resp_timeval.set(sec, usec);
-	    member_query->_member_query_timer.time_remaining(left_resp_timeval);
+	    received_resp_tv.set(sec, usec);
+	    member_query->_member_query_timer.time_remaining(left_resp_tv);
 	    
-	    if (left_resp_timeval > received_resp_timeval) {
+	    if (left_resp_tv > received_resp_tv) {
 		member_query->_member_query_timer =
 		    mld6igmp_node().event_loop().new_oneoff_after(
-			received_resp_timeval,
+			received_resp_tv,
 			callback(member_query,
 				 &MemberQuery::member_query_timer_timeout));
 	    }
