@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.10 2003/09/30 18:27:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.11 2004/02/18 01:53:03 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -283,13 +283,24 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     u_short if_index = rtm->rtm_index;
     string if_name;
     int family = fte.gateway().af();
+    bool is_deleted = false;
     
-    XLOG_ASSERT(rtm->rtm_type == RTM_GET);
-    debug_msg("%p index %d RTM_GET\n", rtm, if_index);
+    XLOG_ASSERT((rtm->rtm_type == RTM_ADD)
+		|| (rtm->rtm_type == RTM_DELETE)
+		|| (rtm->rtm_type == RTM_CHANGE)
+		|| (rtm->rtm_type == RTM_GET));
+    debug_msg("%p index %d type %s\n", rtm, if_index,
+	      rtm_msg_type(rtm->rtm_type).c_str());
     
     // Reset the result
     fte.zero();
-    
+
+    // Test if this entry was deleted
+    if ((rtm->rtm_type == RTM_DELETE)
+	|| (! (rtm->rtm_flags & RTF_UP))) {
+	is_deleted = true;
+    }
+
     // Get the pointers to the corresponding data structures    
     sa = reinterpret_cast<const struct sockaddr*>(rtm + 1);
     RtmUtils::get_rta_sockaddr(rtm->rtm_addrs, sa, rti_info);
@@ -386,6 +397,8 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     //
     fte = FteX(IPvXNet(dst_addr, dst_mask_len), gateway_addr, if_name, if_name,
 	       ~0, ~0, xorp_route);
+    if (is_deleted)
+	fte.mark_deleted();
     
     return true;
 }
