@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.7 2003/05/14 01:13:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.8 2003/05/14 09:37:55 pavlin Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include <net/if.h>
 
 #include "ifconfig.hh"
 
@@ -159,8 +161,8 @@ const IfTree&
 IfConfig::pull_config()
 {
     if (_ifc_get != NULL)
-	_ifc_get->pull_config(_live_config);
-    return _live_config;
+	_ifc_get->pull_config(_pulled_config);
+    return _pulled_config;
 }
 
 void

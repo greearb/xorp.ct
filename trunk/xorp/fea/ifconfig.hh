@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.7 2003/05/14 09:37:55 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.8 2003/05/22 00:58:25 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -167,7 +167,8 @@ private:
     typedef map<uint32_t, string> IfIndex2NameMap;
     IfIndex2NameMap	_ifnames;
     
-    IfTree		_live_config;
+    IfTree		_live_config;	// The IfTree with live config
+    IfTree		_pulled_config;	// The IfTree when we pull the config
     
     IfConfigGet		*_ifc_get;
     IfConfigSet		*_ifc_set;
