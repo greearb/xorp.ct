@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.31 2003/08/28 15:54:53 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.32 2003/08/28 19:29:53 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -38,11 +38,11 @@ Release 0.4 (2003/08/28)
 
   LIBXIPC:
     - Addition of virtual methods in XrlRouter to provide processes with
-      an opportunity to detect finder connection, registristration, and
+      an opportunity to detect finder connection, registration, and
       disconnection events.
 
   XRL:
-    - Minor changes to clnt-gen to that changes the names of some typedefs.
+    - Minor changes to clnt-gen that changes the names of some typedefs.
 
   RTRMGR:
     - Now all relative paths to templates, xrl files, configuration
@@ -212,7 +212,7 @@ Release 0.3 (2003/06/09)
       get_ipv6Net() -> get_ipv6net()
 
   LIBXIPC:
-    - Removal of 0.1 release Finder code and compatability shims that allowed
+    - Removal of 0.1 release Finder code and compatibility shims that allowed
       newer and older code to co-exist.  Renaming of "FinderNG" classes
       and files to "Finder".
 
@@ -315,7 +315,7 @@ Release 0.3 (2003/06/09)
 
     - Refactoring of the Vif manager implementation.
 
-    - Support for returning the process status through thet get_status
+    - Support for returning the process status through the get_status
       XRL and shutting down using the shutdown XRL.
 
   BGP:
@@ -442,7 +442,7 @@ Release 0.2 (2003/03/10)
       peers, and VIF/interface state.
  
     - Re-implement how rtrmgr decides when to start processes.  This
-      fixes a fex bugs in the dependency tracking - prior to this the
+      fixes a few bugs in the dependency tracking - prior to this the
       RIB would not be started because it requires no direct configuration.
 
   FEA:
@@ -471,7 +471,7 @@ Release 0.2 (2003/03/10)
       to understand.
 
     - Change BGP to use reference-counted tries.  This greatly
-      simplies the implementation of background tasks.
+      simplifies the implementation of background tasks.
 
     - Correctly handle unrecognized optional transitive attributes.
 
@@ -495,7 +495,7 @@ Release 0.2 (2003/03/10)
     - Detailed testing of the basic protocol and the Bootstrap mechanism
       completed and documented in the XORP PIM-SM Test Suite document.
 
-    - Numerious bug fixes.
+    - Numerous bug fixes.
 
 
 Release 0.1 (2002/12/11)
