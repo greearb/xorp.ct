@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.22 2004/02/28 21:14:49 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.23 2004/05/25 22:40:39 pavlin Exp $"
 
 
 //
@@ -22,12 +22,18 @@
 
 #include "cli_module.h"
 #include "cli_private.hh"
+
 #include <errno.h>
 #include <termios.h>
+
 #include <arpa/telnet.h>
+#include <sys/ioctl.h>
+
 #include "libxorp/c_format.hh"
 #include "libxorp/token.hh"
+
 #include "libcomm/comm_api.h"
+
 #include "cli_client.hh"
 
 
