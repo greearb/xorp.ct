@@ -1,0 +1,31 @@
+#!/bin/sh
+
+DIR=`dirname $0`
+: ${DIR:="."}
+
+# Source RIPv2 specific shell functions
+. ${DIR}/xrl_rip_shell_funcs.sh
+
+# Source library shell functions
+. ${DIR}/../../utils/xrl_shell_lib.sh
+
+CALLXRL="${DIR}/../../libxipc/call_xrl"
+
+CMDS="show rip4 address status"
+for i in ${CMDS} ; do
+    if [ "${1}" != "${i}" ] ; then
+	echo "Unexpected argument: ${1} (!= ${i})."
+	exit 1
+    fi
+    shift
+done
+
+if [ $# -ne 3 ] ; then
+    echo "Expected <interface> <vif> <address>, but got $*"
+    exit 1
+fi
+
+rip4_rip4_get_rip_address_status $1 $2 $3
+
+exit 0
+
