@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.25 2004/02/06 22:44:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.26 2004/02/11 08:48:47 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -27,10 +27,29 @@
 
 #include "rib_manager.hh"
 
+template <typename A>
+void
+initialize_rib(RIB<A>& 			rib,
+	       list<RibClient*>& 	rib_clients_list,
+	       RegisterServer& 		register_server)
+{
+    if (rib.initialize_export(&rib_clients_list) != XORP_OK) {
+	XLOG_FATAL("Could not initialize export table for %s",
+		   rib.name().c_str());
+    }
+    if (rib.initialize_register(&register_server) != XORP_OK) {
+	XLOG_FATAL("Could not initialize register table for %s",
+		   rib.name().c_str());
+    }
+    if (rib.add_igp_table("connected", "", "") != XORP_OK) {
+	XLOG_FATAL("Could not add igp table \"connected\" for %s",
+		   rib.name().c_str());
+    }
+}
 
 RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
-    : _status_code(PROC_NOT_READY), 
-      _status_reason("Initializing"), 
+    : _status_code(PROC_NOT_READY),
+      _status_reason("Initializing"),
       _eventloop(eventloop),
       _xrl_router(xrl_std_router),
       _register_server(&_xrl_router),
@@ -39,32 +58,13 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
       _urib6(UNICAST, *this, _eventloop),
       _mrib6(MULTICAST, *this, _eventloop),
       _vif_manager(_xrl_router, _eventloop, this),
-      _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, 
+      _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6,
 		      _vif_manager, this)
 {
-    _urib4.initialize_export(&_urib4_clients_list);
-    _urib4.initialize_register(&_register_server);
-    if (_urib4.add_igp_table("connected", "", "") != XORP_OK) {
-	XLOG_FATAL("Could not add igp table \"connected\" for urib4");
-    }
-
-    _mrib4.initialize_export(&_mrib4_clients_list);
-    _mrib4.initialize_register(&_register_server);
-    if (_mrib4.add_igp_table("connected", "", "") != XORP_OK) {
-	XLOG_FATAL("Could not add igp table \"connected\" for mrib4");
-    }
-
-    _urib6.initialize_export(&_urib6_clients_list);
-    _urib6.initialize_register(&_register_server);
-    if (_urib6.add_igp_table("connected", "", "") != XORP_OK) {
-	XLOG_FATAL("Could not add igp table \"connected\" for urib6");
-    }
-
-    _mrib6.initialize_export(&_mrib6_clients_list);
-    _mrib6.initialize_register(&_register_server);
-    if (_mrib6.add_igp_table("connected", "", "") != XORP_OK) {
-	XLOG_FATAL("Could not add igp table \"connected\" for mrib6");
-    }
+    initialize_rib(_urib4, _urib4_clients_list, _register_server);
+    initialize_rib(_mrib4, _mrib4_clients_list, _register_server);
+    initialize_rib(_urib6, _urib6_clients_list, _register_server);
+    initialize_rib(_mrib6, _mrib6_clients_list, _register_server);
     PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
     _status_update_timer = _eventloop.new_periodic(1000, cb);
 }
@@ -72,7 +72,7 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
 RibManager::~RibManager()
 {
     stop();
-    
+
     delete_pointers_list(_urib4_clients_list);
     delete_pointers_list(_mrib4_clients_list);
     delete_pointers_list(_urib6_clients_list);
@@ -84,9 +84,9 @@ RibManager::start()
 {
     if (ProtoState::start() != XORP_OK)
 	return (XORP_ERROR);
-    
+
     _vif_manager.start();
-    
+
     return (XORP_OK);
 }
 
@@ -95,11 +95,11 @@ RibManager::stop()
 {
     if (! is_up())
 	return (XORP_ERROR);
-    
+
     _vif_manager.stop();
-    
+
     ProtoState::stop();
- 
+
     _status_code = PROC_SHUTDOWN;
     _status_reason = "Shutting down";
     status_updater();
@@ -162,138 +162,131 @@ RibManager::status_updater()
     return true;
 }
 
-int
-RibManager::new_vif(const string& vifname, const Vif& vif, string& err) 
+
+template <typename A>
+static int
+add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err)
 {
-    if (_urib4.new_vif(vifname, vif) != XORP_OK) {
-	err = (c_format("Failed to add vif \"%s\" to unicast IPv4 rib",
-			vifname.c_str()));
-	return XORP_ERROR;
+    int result = rib.new_vif(vifname, vif);
+    if (result != XORP_OK) {
+	err = c_format("Failed to add VIF \"%s\" to %s",
+			vifname.c_str(), rib.name().c_str());
     }
+    return result;
+}
 
-    if (_mrib4.new_vif(vifname, vif) != XORP_OK) {
-	err = (c_format("Failed to add vif \"%s\" to multicast IPv4 rib",
-			     vifname.c_str()));
-	return XORP_ERROR;
-    }
-
-    if (_urib6.new_vif(vifname, vif) != XORP_OK) {
-	err = (c_format("Failed to add vif \"%s\" to unicast IPv6 rib",
-			vifname.c_str()));
-	return XORP_ERROR;
-    }
-
-    if (_mrib6.new_vif(vifname, vif) != XORP_OK) {
-	err = (c_format("Failed to add vif \"%s\" to multicast IPv6 rib",
-			     vifname.c_str()));
+int
+RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
+{
+    if (add_rib_vif(_urib4, vifname, vif, err) != XORP_OK ||
+	add_rib_vif(_mrib4, vifname, vif, err) != XORP_OK ||
+	add_rib_vif(_urib6, vifname, vif, err) != XORP_OK ||
+	add_rib_vif(_mrib6, vifname, vif, err) != XORP_OK) {
 	return XORP_ERROR;
     }
     return XORP_OK;
 }
 
-int
-RibManager::delete_vif(const string& vifname, string& err) 
+template <typename A>
+static int
+delete_rib_vif(RIB<A>& rib, const string& vifname, string& err)
 {
-    if (_urib4.delete_vif(vifname) != XORP_OK) {
-	err = (c_format("Failed to delete vif \"%s\" from unicast IPv4 rib",
-			vifname.c_str()));
-	return XORP_ERROR;
+    int result = rib.delete_vif(vifname);
+    if (result != XORP_OK) {
+	err = c_format("Failed to delete VIF \"%s\" from %s",
+			vifname.c_str(), rib.name().c_str());
     }
+    return result;
+}
 
-    if (_mrib4.delete_vif(vifname) != XORP_OK) {
-	err = (c_format("Failed to delete vif \"%s\" from multicast IPv4 rib",
-			     vifname.c_str()));
-	return XORP_ERROR;
-    }
-
-    if (_urib6.delete_vif(vifname) != XORP_OK) {
-	err = (c_format("Failed to delete vif \"%s\" from unicast IPv6 rib",
-			vifname.c_str()));
-	return XORP_ERROR;
-    }
-
-    if (_mrib6.delete_vif(vifname) != XORP_OK) {
-	err = (c_format("Failed to delete vif \"%s\" from multicast IPv6 rib",
-			     vifname.c_str()));
+int
+RibManager::delete_vif(const string& vifname, string& err)
+{
+    if (delete_rib_vif(_urib4, vifname, err) != XORP_OK ||
+	delete_rib_vif(_mrib4, vifname, err) != XORP_OK ||
+	delete_rib_vif(_urib6, vifname, err) != XORP_OK ||
+	delete_rib_vif(_mrib6, vifname, err) != XORP_OK) {
 	return XORP_ERROR;
     }
     return XORP_OK;
 }
 
+
+template <typename A>
 int
-RibManager::add_vif_address(const string& vifname,
-			    const IPv4& addr,
-			    const IPv4Net& subnet,
-			    string& err)
+add_vif_address_to_ribs(RIB<A>& 	urib,
+			RIB<A>& 	mrib,
+			const string&	vifn,
+			const A& 	addr,
+			const IPNet<A>& subnet,
+			string& 	err)
 {
-    if (_urib4.add_vif_address(vifname, addr, subnet) != XORP_OK) {
-	err = "Failed to add IPv4 Vif address to unicast RIB";
-	return XORP_ERROR;
+    RIB<A>* ribs[2] = { &urib, &mrib };
+    for (uint32_t i = 0; i < sizeof(ribs)/sizeof(ribs[0]); i++) {
+	if (ribs[i]->add_vif_address(vifn, addr, subnet) != XORP_OK) {
+	    err = c_format("Failed to add VIF address %s to %s\n",
+			   addr.str().c_str(), ribs[i]->name().c_str());
+	    return XORP_ERROR;
+	}
     }
+    return XORP_OK;
+}
 
-    if (_mrib4.add_vif_address(vifname, addr, subnet) != XORP_OK) {
-	err = "Failed to add IPv4 Vif address to multicast RIB";
-	return XORP_ERROR;
+template <typename A>
+int
+delete_vif_address_from_ribs(RIB<A>& 		urib,
+			     RIB<A>& 		mrib,
+			     const string&	vifn,
+			     const A& 		addr,
+			     string& 		err)
+{
+    RIB<A>* ribs[2] = { &urib, &mrib };
+    for (uint32_t i = 0; i < sizeof(ribs)/sizeof(ribs[0]); i++) {
+	if (ribs[i]->delete_vif_address(vifn, addr) != XORP_OK) {
+	    err = c_format("Failed to delete VIF address %s from %s\n",
+			   addr.str().c_str(), ribs[i]->name().c_str());
+	    return XORP_ERROR;
+	}
     }
-
     return XORP_OK;
 }
 
 int
-RibManager::delete_vif_address(const string& vifname,
-			       const IPv4& addr,
-			       string& err)
+RibManager::add_vif_address(const string& 	vifn,
+			    const IPv4& 	addr,
+			    const IPv4Net& 	subnet,
+			    string& 		err)
 {
-    if (_urib4.delete_vif_address(vifname, addr) != XORP_OK) {
-	err = "Failed to delete IPv4 Vif address from unicast RIB";
-	return XORP_ERROR;
-    }
-
-    if (_mrib4.delete_vif_address(vifname, addr) != XORP_OK) {
-	err = "Failed to delete IPv4 Vif address from multicast RIB";
-	return XORP_ERROR;
-    }
-
-    return XORP_OK;
+    return add_vif_address_to_ribs(_urib4, _mrib4, vifn, addr, subnet, err);
 }
 
 int
-RibManager::add_vif_address(const string& vifname,
+RibManager::delete_vif_address(const string& 	vifn,
+			       const IPv4& 	addr,
+			       string& 		err)
+{
+    return delete_vif_address_from_ribs(_urib4, _mrib4, vifn, addr, err);
+}
+
+int
+RibManager::add_vif_address(const string& vifn,
 			    const IPv6& addr,
 			    const IPv6Net& subnet,
 			    string& err)
 {
-    if (_urib6.add_vif_address(vifname, addr, subnet) != XORP_OK) {
-	err = "Failed to add IPv6 Vif address to unicast RIB";
-	return XORP_ERROR;
-    }
-
-    if (_mrib6.add_vif_address(vifname, addr, subnet) != XORP_OK) {
-	err = "Failed to add IPv6 Vif address to multicast RIB";
-	return XORP_ERROR;
-    }
-
-    return XORP_OK;
+    int r = add_vif_address_to_ribs(_urib6, _mrib6, vifn, addr, subnet, err);
+    return r;
 }
 
 int
-RibManager::delete_vif_address(const string& vifname,
-			       const IPv6& addr,
-			       string& err)
+RibManager::delete_vif_address(const string& 	vifn,
+			       const IPv6& 	addr,
+			       string& 		err)
 {
-    if (_urib6.delete_vif_address(vifname, addr) != XORP_OK) {
-	err = "Failed to delete IPv6 Vif address from unicast RIB";
-	return XORP_ERROR;
-    }
-
-    if (_mrib6.delete_vif_address(vifname, addr) != XORP_OK) {
-	err = "Failed to delete IPv6 Vif address from multicast RIB";
-	return XORP_ERROR;
-    }
-
-    return XORP_OK;
+    return delete_vif_address_from_ribs(_urib6, _mrib6, vifn, addr, err);
 }
 
+
 //
 // Select the appropriate list of RIB clients
 //
@@ -302,7 +295,7 @@ RibManager::select_rib_clients_list(int family, bool unicast, bool multicast)
 {
     if (! (unicast ^ multicast))
 	return (NULL);	// Only one of the flags must be set
-    
+
     //
     // Select the appropriate list
     //
@@ -323,7 +316,7 @@ RibManager::select_rib_clients_list(int family, bool unicast, bool multicast)
 	XLOG_FATAL("Invalid address family: %d", family);
 	break;
     }
-    
+
     //
     // Nothing found
     //
@@ -339,11 +332,11 @@ RibManager::find_rib_client(const string& target_name, int family,
 			    bool unicast, bool multicast)
 {
     list<RibClient* >* rib_clients_list;
-    
+
     rib_clients_list = select_rib_clients_list(family, unicast, multicast);
     if (rib_clients_list == NULL)
 	return (NULL);
-    
+
     //
     // Search for a RIB client with the same target name
     //
@@ -355,7 +348,7 @@ RibManager::find_rib_client(const string& target_name, int family,
 	if (rib_client->target_name() == target_name)
 	    return (rib_client);
     }
-    
+
     //
     // Nothing found
     //
@@ -373,26 +366,26 @@ RibManager::add_rib_client(const string& target_name, int family,
 			   bool unicast, bool multicast)
 {
     list<RibClient* >* rib_clients_list;
-    
+
     //
     // Check if this RIB client has been added already
     //
     if (find_rib_client(target_name, family, unicast, multicast) != NULL)
 	return (XORP_OK);
-    
+
     //
     // Find the list of RIB clients to add the new client to.
     //
     rib_clients_list = select_rib_clients_list(family, unicast, multicast);
     if (rib_clients_list == NULL)
 	return (XORP_ERROR);
-    
+
     //
     // Create a new RibClient, and add it to the list
     //
     RibClient* rib_client = new RibClient(_xrl_router, target_name);
     rib_clients_list->push_back(rib_client);
-    
+
     return (XORP_OK);
 }
 
@@ -408,7 +401,7 @@ RibManager::delete_rib_client(const string& target_name, int family,
 {
     RibClient* rib_client;
     list<RibClient* >* rib_clients_list;
-    
+
     //
     // Find the RIB client
     //
@@ -422,7 +415,7 @@ RibManager::delete_rib_client(const string& target_name, int family,
     rib_clients_list = select_rib_clients_list(family, unicast, multicast);
     if (rib_clients_list == NULL)
 	return (XORP_ERROR);
-    
+
     list<RibClient* >::iterator iter;
     iter = find(rib_clients_list->begin(),
 		rib_clients_list->end(),
@@ -445,16 +438,16 @@ RibManager::enable_rib_client(const string& target_name, int family,
 			      bool unicast, bool multicast)
 {
     RibClient* rib_client;
-    
+
     //
     // Find the RIB client
     //
     rib_client = find_rib_client(target_name, family, unicast, multicast);
     if (rib_client == NULL)
 	return (XORP_ERROR);
-    
+
     rib_client->set_enabled(true);
-    
+
     return (XORP_OK);
 }
 
@@ -469,16 +462,16 @@ RibManager::disable_rib_client(const string& target_name, int family,
 			       bool unicast, bool multicast)
 {
     RibClient* rib_client;
-    
+
     //
     // Find the RIB client
     //
     rib_client = find_rib_client(target_name, family, unicast, multicast);
     if (rib_client == NULL)
 	return (XORP_ERROR);
-    
+
     rib_client->set_enabled(false);
-    
+
     return (XORP_OK);
 }
 
@@ -494,9 +487,9 @@ RibManager::no_fea()
     // TODO: FEA target name hardcoded
     disable_rib_client("fea", AF_INET, true, false);
     disable_rib_client("fea", AF_INET6, true, false);
-    
+
     _vif_manager.no_fea();
-    
+
     return (XORP_OK);
 }
 
@@ -509,7 +502,7 @@ RibManager::make_errors_fatal()
     _mrib6.set_errors_are_fatal();
 }
 
-void 
+void
 RibManager::register_interest_in_target(const string& target_class)
 {
     if (_targets_of_interest.find(target_class)
@@ -524,7 +517,7 @@ RibManager::register_interest_in_target(const string& target_class)
     }
 }
 
-void 
+void
 RibManager::register_interest_in_target_done(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
