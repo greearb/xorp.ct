@@ -31,14 +31,9 @@ function dump_error() {
     # Running 'make check', test failed, print line so we can see which
     # test failed, and dump whatever stdout o/p there was.
     #
-    print;
     dump_error();
+    print;
     next;
-}
-
-// {
-    if (depth == 0) print;
-    errlog[depth] = (errlog[depth] $0 "\n");
 }
 
 /gmake\[[0-9]+\]/ {
@@ -51,8 +46,16 @@ function dump_error() {
     } else if ($(NF-1) == "Error") {
 	dump_error();
 	errcnt++;
+    } else if ($(NF) == "Terminated") {
+	dump_error();
+	errcnt++;
     }
     next;
+}
+
+// {
+    if (depth == 0) print;
+    errlog[depth] = (errlog[depth] $0 "\n");
 }
 
 END {
