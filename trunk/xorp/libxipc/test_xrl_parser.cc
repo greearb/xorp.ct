@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_parser.cc,v 1.2 2002/12/19 01:29:11 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_parser.cc,v 1.3 2003/03/10 23:20:26 hodson Exp $"
 
 #include <stdio.h>
 #include <string>
@@ -114,11 +114,15 @@ main(int argc, char *argv[])
     xlog_start();
 
     uint32_t errcnt = 0;
-
-    for (int i = 1; i < argc; i++) {
-	XrlParserFileInput xpfi(argv[i]);
-	XrlParser xp(xpfi);
-	errcnt += parse_buffer(xp);
+    try {
+	for (int i = 1; i < argc; i++) {
+	    XrlParserFileInput xpfi(argv[i]);
+	    XrlParser xp(xpfi);
+	    errcnt += parse_buffer(xp);
+	}
+    } catch (...) {
+	xorp_catch_standard_exceptions();
+	errcnt++;
     }
 
     //
