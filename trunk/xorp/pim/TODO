@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.35 2003/06/12 03:02:03 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.36 2003/06/13 02:05:07 pavlin Exp $
 #
 
 * PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
@@ -92,10 +92,6 @@ probably should be replaced with
   whether other (S,G) and (S,G,rpt) methods need to be dual-computable.
 
 * IMPL: Rename all methods named recompute_foo_changed() to recompute_foo()
-
-* IMPL: CLI command "show pim join" :
-  Clean-up the output such that for each routing entry type
-  to print the output that makes sense for it.
 
 * IMPL: should "inherited_olist_sg_rpt() for PiMre (S,G) entry return
   the value computed via (S,G,rpt) entry? Similarly, should
@@ -209,10 +205,6 @@ probably should be replaced with
   but in the future we may want to enable/disable log traces
   per protocol message type, etc.
   This is true for MFEA, MLD6IMGP, PIM
-
-* IMPL: "show pim join" CLI command should not print
-  all info for all entries: e.g, only the (*,G) related
-  info should be print for (*,G) entry, and so on.
 
 * TEST: rerun all tests that use "show pim join" command
   up to Section 4.3 (included), so the output examples
