@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.10 2003/01/24 19:50:11 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.11 2003/01/24 20:08:25 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1387,8 +1387,6 @@ BGPPeer::set_state(FSMState s, bool error)
 	break;
     }
 }
-
-/* ********************** Timer Hook Methods ********************** */
 
 PeerOutputState
 BGPPeer::send_update_message(const UpdatePacket& p)
