@@ -1,0 +1,742 @@
+%
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.12 2003/11/06 20:28:59 hodson Exp $
+%
+
+\documentclass[11pt]{article}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
+\usepackage{fullpage}
+\usepackage{setspace}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{psfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\comment}[1]{}
+
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
+
+% \pagestyle{empty}
+
+\begin{document}
+
+\title{XORP Libxorp Library Overview \\
+\vspace{1ex}
+Version 0.5}
+\author{ XORP Project					\\
+	 International Computer Science Institute	\\
+	 Berkeley, CA 94704, USA			\\
+	 {\it feedback@xorp.org}
+}
+\date{November 6, 2003}
+
+\maketitle
+
+\thispagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+The \emph{libxorp} library contains a set of classes for basic
+XORP functionality such as IP addresses and subnets, timers, event
+loops, etc. It is used by virtually every other XORP component, and
+its main purpose is to simplify the implementation of those components.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Overview}
+
+Currently, the libxorp library contains the following classes and
+components (in alphabetical order):
+
+\begin{itemize}
+
+  \item \emph{asnum.hh: class AsNum}: A class for storing an AS number
+  used by protocols such as BGP.
+
+  \item \emph{asyncio.hh: class AsyncFileReader, class AsyncFileWriter}:
+  Asynchronous file transfer classes.
+
+  \item \emph{buffer.hh: class Buffer}:  A class for storing buffered
+  data.
+
+  \item \emph{c\_format.hh: c\_format()}: A macro that creates a C++ string
+  from a C-style printf(3)-formatted string.
+
+  \item \emph{callback.hh:} Callback mechanism.
+
+  \item \emph{config\_param.hh: template class ConfigParam}: A class for
+  storing a configuration parameter.
+
+  \item \emph{debug.h}: Provides facility for generating debug messages.
+
+  \item \emph{ether\_compat.h}: Ethernet manipulation compatibility functions.
+
+  \item \emph{eventloop.hh: class EventLoop}: Event loop class for
+  coordinated operations between timers and I/O operations on file
+  descriptors.
+
+  \item \emph{exceptions.hh}: Standard XORP C++ exceptions.
+
+  \item \emph{heap.hh: class Heap}: Provides Heap data structure.
+
+  \item \emph{ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh: class
+  IPv4Net, class IPv6Net, class IPvXNet}: Implementation of classes for
+  basic subnet addresses (for IPv4, IPv6 and dual IPv4/6 address family
+  respectively).
+
+  \item \emph{ipv4.hh, ipv6.hh, ipvx.hh: class
+  IPv4, class IPv6, class IPvX}: Implementation of classes for
+  basic IP addresses (for IPv4, IPv6 and dual IPv4/6 address family
+  respectively).
+
+  \item \emph{mac.hh: class Mac, class EtherMac}: Containers for
+  MAC types.
+
+  \item \emph{nexthop.hh}: Classes that contain routing next-hop
+  information.
+
+  \item \emph{ref\_ptr.hh: template class ref\_ptr}: Reference counted
+  pointer class.
+
+  \item \emph{ref\_trie.hh}: Implementation of a trie to support route
+  lookups.  Based on trie.hh, but with reference-counted storage
+  supporting delayed deletion.
+
+  \item \emph{selector.hh}: I/O multiplexing interface.
+
+  \item \emph{service.hh}: Provides base for asynchronous service classes.
+
+  \item \emph{status\_codes.h}: Process states status codes used by
+  processes when reporting their operational status to the router manager.
+
+  \item \emph{time\_slice.hh: class TimeSlice}: A class for computing
+  whether some processing is taking too long.
+
+  \item \emph{timer.hh, class XorpTimer}: XORP timer facility.
+
+  \item \emph{timeval.hh: class TimeVal}: A class for storing time values
+  (similar to \emph{struct timeval}).
+
+  \item \emph{token.hh}: Token related definitions.
+
+  \item \emph{transactions.hh}: Facility for transaction operations.
+
+  \item \emph{trie.hh}: Implementation of a trie to support route
+  lookups.
+
+  \item \emph{utility.h}: Contains various mini-utilities
+  (mostly compiler-related helpers).
+
+  \item \emph{utils.hh}: Contains various utilities (\eg to delete a
+  list or array of pointers and the objects pointed to).
+
+  \item \emph{vif.hh: class Vif, class VifAddr}: Virtual interface and
+  virtual interface address classes.
+
+  \item \emph{xlog.h}: Provides facility for log messages generation.
+
+  \item \emph{xorp.h}: The XORP main include file that should be included
+  by all XORP C and C++ files.
+
+\end{itemize}
+
+Each of the components is described in
+Section~\ref{sec:components_description}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Components Description}
+\label{sec:components_description}
+
+This section contains a brief description of each of the components of
+the \emph{libxorp} library. This description is for informative
+purpose only. The source code for each component is the ultimate source
+for programming reference, and implementation details.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{asnum.hh}
+
+This file contains \emph{class AsNum}: a class for storing an AS number
+used by protocols such as BGP.
+This class can be used to store an AS number that can be either
+16 or 32 bits.  Originally, the AS numbers were defined as 16-bit
+unsigned numbers.  Later the ``extended'' AS numbers were introduced,
+which are unsigned 32-bit numbers.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{asyncio.hh}
+
+This file contains
+asynchronous file transfer classes.  These utilize XORP EventLoop
+and its SelectorList to read or write files asynchronously.  The
+user creates an AsyncFile\{Reader,Writer\} and adds a buffer for
+reading or writing with add\_buffer().  A callback provided with
+each buffer is called every time I/O happens on the buffer.
+Reading or writing only begins when start() is called, and normally
+continues until there are no buffers left.
+
+From the developer's point of view, the following classes are of
+interest: \emph{class AsyncFileReader, class AsyncFileWriter}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{buffer.hh}
+
+This file contains \emph{class Buffer}: a class for conveniently storing
+and accessing buffered data.
+Currently it has limited applicability.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{c\_format.hh}
+
+This file contains \emph{c\_format()}: a macro that creates a C++ string
+from a C-style printf(3)-formatted string.
+It takes the same arguments as printf(3), but \%n is illegal and
+will cause abort to be called.
+
+In practice c\_format() is a nasty macro, but by doing this we can check
+the compile time arguments are sane and the run time arguments.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{callback.hh}
+
+This file contains an implementation of a callback mechanism.
+XORP is an asynchronous programming environment and as a result there
+are many places where callbacks are useful.  Callbacks are typically
+invoked to signify the completion or advancement of an asynchronous
+operation.
+
+XORP provides a generic and flexible callback interface that utilizes
+overloaded templatized functions for generating callbacks in
+conjunction with many small templatized classes. Whilst this makes the
+syntax a little unpleasant, it provides a great deal of flexibility.
+
+XorpCallback objects are objects created by the callback()
+function which returns a reference pointer to a newly created
+callback object.  The callback is invoked by calling the dispatch()
+method on that object.
+
+For more details on the callback mechanism, and for usage examples, see
+the beginning of \emph{callback.hh}.
+Note that this file is auto-generated by callback-gen.py (a Python script),
+therefore it should never be edited.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{config\_param.hh}
+
+This file contains the implementation of \emph{template class
+ConfigParam}: a class for storing a configuration parameter.
+
+This class can be used to store the value of a configuration parameter.
+Such parameter has a current and a default value.
+The \emph{ConfigParam} class has the facility to add a callback that is
+invoked whenever the value of the configuration parameter is changed.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{debug.h}
+
+This file provides facility for debug messages generation.
+More specifically, it defines the \verb=debug_msg()=, the macro
+responsible for generating debug messages.
+It takes the same arguments as printf(3). For example:
+
+\begin{verbatim}
+debug_msg("The number is %d\n", 5);
+\end{verbatim}
+
+For more details see the comments inside that file.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ether\_compat.h}
+
+This file contains Ethernet-related manipulation compatibility
+functions. For example, it includes the appropriate system files,
+and declares functions \verb=ether_aton()= and \verb=ether_ntoa()=
+(implemented locally in \emph{ether\_compat.c}) if the system is missing
+the corresponding \verb=ether_aton(3)= and \verb=ether_ntoa(3)=.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{eventloop.hh}
+
+This file defines \emph{class EventLoop}.
+It is used to co-ordinate interactions between a TimerList and a
+SelectorList for XORP processes.  All XorpTimer and select operations
+should be co-ordinated through this interface.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{exceptions.hh}
+
+This file contains \emph{class XorpException}: a base class for XORP C++
+exceptions. It contains also all standard XORP C++ exceptions.
+An example of such exception is \emph{class InvalidFamily} which is
+thrown if the address family is invalid (for example, by an IPvX
+constructor when invoked with an invalid address family).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{heap.hh}
+
+This file contains \emph{class Heap}.  The Heap class is used by the
+TimerList class as it's priority queue for timers. This implementation
+supports removal of arbitrary objects from the heap, even if they are
+not located at the top.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh}
+
+These files contain the declaration of the following classes:
+\emph{class IPv4Net, class IPv6Net, class IPvXNet}, which are
+classes for basic subnet addresses (for IPv4, IPv6 and dual IPv4/6
+address family respectively). IPvXNet can be used to store a subnet
+address that has either IPv4 or IPv6 address family.
+
+Most of the implementation is contained in file \emph{ipnet.hh}, which
+contains a \emph{template class IPNet}. The IPv4Net, IPv6Net, and
+IPvXNet classes are derived from that template.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ipv4.hh, ipv6.hh, ipvx.hh}
+
+These files contain the declaration for the following classes:
+\emph{class IPv4, class IPv6, class IPvX}, which are
+classes for basic IP addresses (for IPv4, IPv6 and dual IPv4/6
+address family respectively). IPvX can be used to store an
+address that has either IPv4 or IPv6 address family.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{mac.hh}
+
+This file declares the following classes: \emph{class Mac, class
+EtherMac}. The first class is a generic container for any type of MAC.
+The second class is a container for Ethernet MAC address.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{nexthop.hh}
+
+This file declares a number of classes that can be used to contain
+routing next-hop information. For example, \emph{class NextHop}
+is the generic class for holding information about routing
+next hops.  NextHops can be of many types, including immediate
+neighbors, remote routers (with IBGP), discard interfaces,
+encapsulation endpoints, etc.  NextHop itself doesn't really do
+anything useful, except to provide a generic handle for the
+specialized subclasses. The specialized subclasses are:
+
+\begin{itemize}
+
+  \item IPPeerNextHop is for next hops that are local peers.
+
+  \item IPEncapsNextHop is for ``next hops'' that are non-local, and require
+   encapsulation to reach. An example is the PIM Register Encapsulation.
+
+  \item IPExternalNextHop An IP nexthop that is not an intermediate
+  neighbor.
+
+  \item DiscardNextHop is a discard interface.
+
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ref\_ptr.hh}
+
+This file declares \emph{template class ref\_ptr}: reference counted
+pointer class.
+
+The ref\_ptr class is a strong reference class.  It maintains a count of
+how many references to an object exist and releases the memory associated
+with the object when the reference count reaches zero.  The reference
+pointer can be dereferenced like an ordinary pointer to call methods
+on the reference counted object.
+
+At the time of writing the only supported memory management is
+through the new and delete operators.  At a future date, this class
+should support the STL allocator classes or an equivalent to
+provide greater flexibility.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ref\_trie.hh}
+
+This file implements a trie to support route lookups.  The
+implementation is template-based, and is based on the code in
+trie.hh. From deleloper's point of view, templates RefTrie, RefTrieNode,
+RefTriePreOrderIterator, and RefTriePostOrderIterator are the most important.
+Those templates should be invoked
+with two classes, the basetype ``A'' for the search Key (which is a
+subnet, \verb=IPNet<A>=), and the Payload.
+
+RefTrie differs from Trie (and its associated classes) in that the
+RefTrieNode includes a reference count of how many RefTrieIterators
+are pointing at it.  If a RefTrieNode is deleted, but has a non-zero
+reference count, deletion will be delayed until the reference count
+becomes zero.  In this way, additions and deletions to the RefTrie
+cannot cause a RefTriePreOrderIterator or RefTriePostOrderIterator
+to reference invalid memory, although a deletion and subsequent addition can
+cause the payload data referenced by an iterator to change.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{selector.hh}
+
+This file contains the I/O multiplexing interface. The particular class
+of interest is \emph{class SelectorList}.
+
+A SelectorList provides an entity where callbacks for pending I/O
+operations on file descriptors may be registered.  The callbacks
+are invoked when one of the select methods is called and I/O
+is pending on the particular descriptors.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{service.hh}
+
+This declares \emph{class ServiceBase}.  A service is a class that can
+be started and stopped and would typically involve some asynchronous
+processing to transition between states.  The base class provides a
+state model and methods for transitioning between states.  Mandatory
+transition methods, like start and stop, are abstract in the base
+class.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{status\_codes.h}
+
+This file contains the enumerated \emph{ProcessStatus} codes
+that a XORP process should report to the XORP router manager
+(\emph{rtrmgr})~\cite{xorp:rtrmgr}.
+The file itself contains a detailed explanation of the process states
+(valid transaction between states, triggering events, actions, etc).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{time\_slice.hh}
+
+This file declares \emph{class TimeSlice}.
+This class can be used to compute whether some processing is taking
+too long time to complete. It is up to the program that uses
+TimeSlice to check whether the processing is taking too long,
+and suspend processing of that task if necessary.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{timer.hh}
+
+This file declares the XORP timer facility. The only class of interest
+from a developer's point of view is \emph{class XorpTimer}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{timeval.hh}
+
+This file contains implementation of \emph{class TimeVal} for
+storing time values (similar to \emph{struct timeval}).
+\emph{TimeVal} implements the appropriate constructors and numerous
+helper methods (\eg Less-Than and Addition operators, etc).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{token.hh}
+
+This file contains various token-related definitions. Token is a
+sequence of symbols separated from other tokens by some pre-defined
+symbols. In this implementation, the separators are the is\_space(3) and
+'|' characters.
+The facilities in that file are to copy tokens, removing them from a
+token line, etc.
+Currently, this file is used only by the CLI, therefore in the future it
+may be moved to the CLI itself.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{transactions.hh}
+
+This file contains facility for transactions.  A transaction consists
+of a sequence of transaction operations, each of which is a command.
+The TransactionManager class provides a front-end for creating,
+dispatching, and destroying transactions.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{trie.hh}
+
+This file implements a trie to support route lookups.
+The implementation is template-based. From deleloper's point
+of view, templates Trie, TrieNode, TriePreOrderIterator,
+and TriePostOrderIterator
+are the most important. Those templates should be invoked with two
+classes, the basetype ``A'' for the search Key (which is a subnet,
+\verb=IPNet<A>=), and the Payload.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{utility.h}
+
+This file contains various mini-utilities.  Those utilities are mostly
+compiler-related helpers; \eg compile-time assertion, \emph{UNUSED(var)}
+macro to suppress warnings about unused functions arguments, etc.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{utils.hh}
+
+This file contains various helper utilities. Currently, the only two
+utilities are template functions to delete a list or array
+of pointers and the objects pointed to.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{vif.hh}
+
+This file declares the following classes: \emph{class Vif, class
+VifAddr}.
+
+Class Vif holds information about a virtual interface.  A Vif may
+represent a physical interface, or may represent more abstract
+entities such as the Discard interface, or a VLAN on a physical
+interface.
+VifAddr holds information about an address of a virtual interface.
+A virtual interface may have more than one VifAddr.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{xlog.h}
+
+This file provides facility for log messages generation, similar to
+syslog. The log messages may be output to multiple output streams
+simultaneously. Below is a description of how to use the log utility.
+
+\begin{itemize}
+
+  \item The xlog utility assumes that \verb=XORP_MODULE_NAME= is defined
+   (per module). To do so, you must have in your directory a file like
+   ``foo\_module.h'', and inside it should contain something like:
+
+\begin{verbatim}
+#define XORP_MODULE_NAME "BGP"
+\end{verbatim}
+
+   This file then has to be included by each *.c and *.cc file,
+   and MUST be the first of the included local files.
+
+  \item Before using the xlog utility, a program MUST initialize it
+   first (think of this as the xlog constructor):
+
+\begin{verbatim}
+int xlog_init(const char *process_name, const char *preamble_message);
+\end{verbatim}
+
+   Further, if a program tries to use xlog without initializing it
+   first, the program will exit.
+
+  \item To add output streams, you MUST use one of the following (or both):
+
+\begin{verbatim}
+int xlog_add_output(FILE* fp);
+int xlog_add_default_output(void);
+\end{verbatim}
+
+  \item To change the verbosity of all xlog messages, use:
+
+\begin{verbatim}
+xlog_set_verbose(xlog_verbose_t verbose_level);
+\end{verbatim}
+
+   where ``verbose\_level'' is one of the following (\verb=XLOG_VERBOSE_MAX=
+   excluded):
+
+\begin{verbatim}
+typedef enum {
+    XLOG_VERBOSE_LOW = 0,       /* 0 */
+    XLOG_VERBOSE_MEDIUM,        /* 1 */
+    XLOG_VERBOSE_HIGH,          /* 2 */
+    XLOG_VERBOSE_MAX
+} xlog_verbose_t;
+\end{verbatim}
+
+   Default value is \verb=XLOG_VERBOSE_LOW= (least details).
+   Larger value for ``verbose\_level'' adds more details to the
+   preamble message (e.g., file name, line number, etc, about the place
+   where the log message was initiated).
+
+   Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL= (see
+   below) cannot be changed and is always set to the most verbose level
+   (\verb=XLOG_VERBOSE_HIGH=).
+
+  \item To change the verbosity of a particular message type, use:
+
+\begin{verbatim}
+void xlog_level_set_verbose(xlog_level_t log_level,
+	xlog_verbose_t verbose_level);
+\end{verbatim}
+
+where ``log\_level'' is one of the following (\verb=XLOG_LEVEL_MAX=
+excluded):
+
+\begin{verbatim}
+typedef enum {
+    XLOG_LEVEL_FATAL = 0,       /* 0 */
+    XLOG_LEVEL_ERROR,           /* 1 */
+    XLOG_LEVEL_WARNING,         /* 2 */
+    XLOG_LEVEL_INFO,            /* 3 */
+    XLOG_LEVEL_TRACE,           /* 4 */
+    XLOG_LEVEL_MAX
+} xlog_level_t;
+\end{verbatim}
+
+   Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL=
+   cannot be changed and is always set to the most verbose level
+   (\verb=XLOG_VERBOSE_HIGH=).
+
+  \item To start the xlog utility, you MUST use:
+
+\begin{verbatim}
+int xlog_start(void);
+\end{verbatim}
+
+
+  \item To enable or disable a particular message type, use:
+
+\begin{verbatim}
+int xlog_enable(xlog_level_t log_level);
+int xlog_disable(xlog_level_t log_level);
+\end{verbatim}
+
+	By default, all levels are enabled.
+	Note that \verb=XLOG_LEVEL_FATAL= cannot be disabled.
+
+  \item To stop the logging, use:
+
+\begin{verbatim}
+int xlog_stop(void);
+\end{verbatim}
+
+	Later you can restart it again by \verb=xlog_start()=
+
+  \item To gracefully exit the xlog utility, use
+
+\begin{verbatim}
+int     xlog_exit(void);
+\end{verbatim}
+
+	(think of this as the xlog destructor).
+	An example:
+
+\begin{verbatim}
+int
+main(int argc, char *argv[])
+{
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);	// Least verbose messages
+    // Increase verbosity of the error messages
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    // Do something
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+
+    exit (0);
+}
+\end{verbatim}
+
+\end{itemize}
+
+
+Typically, a developer would use the macros described below
+to print a message, add an assert statement, place a marker, etc.
+If a macro accepts a message to print, the format of the message is same
+as printf(3). The only difference is that the xlog utility automatically
+adds \verb='\n'=, (i.e. end-of-line) at the end of each string
+specified by \verb=format=:
+
+\begin{itemize}
+
+  \item \verb=XLOG_FATAL(const char *format, ...)=
+  \newline
+  Write a FATAL message to the xlog output streams and abort the program.
+
+  \item \verb=XLOG_ERROR(const char *format, ...)=
+  \newline
+  Write an ERROR message to the xlog output streams.
+
+  \item \verb=XLOG_WARNING(const char *format, ...)=
+  \newline
+  Write a WARNING message to the xlog output streams.
+
+  \item \verb=XLOG_INFO(const char *format, ...)=
+  \newline
+  Write an INFO message to the xlog output streams.
+
+  \item \verb=XLOG_TRACE(int cond_boolean, const char *format, ...)=
+  \newline
+  Write a TRACE message to the xlog output stream, but only
+  if \verb=cond_boolean= is not 0.
+
+  \item \verb=XLOG_ASSERT(assertion)=
+  \newline
+  The XORP replacement for assert(3), except that it cannot be
+  conditionally disabled and logs error messages through the standard
+  xlog mechanism. It calls \verb=XLOG_FATAL()= if the assertion fails.
+
+  \item \verb=XLOG_UNREACHABLE()=
+  \newline
+   A marker that can be used to indicate code that should never be executed.
+
+  \item \verb=XLOG_UNFINISHED()=
+  \newline
+  A marker that can be used to indicate code that is not yet implemented
+  and hence should not be run.
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{xorp.h}
+
+This is the XORP main include file that should be included by all XORP
+C and C++ files. This file itself includes a number of frequently used system
+header files, defines several commonly used values, etc.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Modification History}
+
+\begin{itemize}
+
+  \item December 11, 2002: Version 0.1 completed.
+
+  \item March 10, 2003: Updated to match XORP version 0.2 release code;
+  add information about RefTrie; cleanup.
+
+  \item June 9, 2003: Updated to match XORP version 0.3 release code.
+
+  \item August 28, 2003: Updated to match XORP version 0.4 release
+  code.
+
+  \item November 6, 2003: Updated to match XORP version 0.5 release code.
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{../tex/xorp}
+\bibliographystyle{plain}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}

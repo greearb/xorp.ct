@@ -1,0 +1,72 @@
+#
+# $XORP: xorp/bgp/BUGS,v 1.10 2002/12/09 10:59:36 pavlin Exp $
+#
+
+Known Bugs
+==========
+2) The BGP code when it receives an OPEN message checks the AS number
+of the peer against the expected value. If there is a mismatch then
+the session is dropped. Our current code seems to immediately retry
+the connection. It should really back off. I think there may be a
+draft about this (or perhaps there is something in the spec). I think
+that this BUG may have got fixed when I fixed the propogation of the
+error variable to the set_state routine.
+
+3) There are two reasons for taking a peering to IDLE. One is that an
+error has occured, the other is that the peering has been
+administratively taken to IDLE. If we have moved to IDLE due to an
+error bgp should attempt to bring up the peering (modulo back off
+timers). If we have been administratively taken to IDLE then we should
+not attempt to bring up the peering or allow our peer to bring up the
+peering.
+
+The routine set_state takes an argument that identifies if we are
+changing state due to an error. In the case that we are going to IDLE
+this error variable is used to determine if we should stay IDLE or
+not.
+
+We always go to state IDLE from state STOPPED. The STOPPED state
+exists to allow us to wait for the notification message to be sent.
+
+There are three ways of going from STOPPED to IDLE:
+
+	a) The notification message is sent. The completion method
+	contains the original reason that we were going to IDLE all is
+	fine.
+
+	b) The notification message is not sent. Then a timer expires
+	and again we have the original reason for going to IDLE.
+
+	c) A connection event arrives we are in stopped. At the moment
+	we unconditionally accept the connection. If we are in the
+	process of being administratively taken to IDLE, then we
+	*shouldn't* accept the connection (The BGP process is waiting
+	for a CEASE notification to be sent). We need to know why we
+	went to state stopped.
+
+4) Consider the following senario:
+A peer sends a large number of routes to our BGP process then closes
+the connection. If our BGP has not been able to keep up with the
+incoming updates then a TCP queue will have built up. The TCP FIN will
+be at the end of the buffer. The peer will consider the connection
+closed but our BGP process will not due to the buffered data. The peer
+now attempts to make a new connection. Our BGP process will reject the
+new connection as we are in the established state. We will then send a
+notify message to the original connection signalling a FSM error. The
+error is sent on the wrong connection where nothing is listening.
+
+Done
+====
+1) It doesn't seem like the holdtime that is configured is what sent
+in the open message. This whole keepalive/holdtime timer stuff needs
+to be looked at.
+
+2) Our BGP process will accept update messages without all the
+mandatory attributes. Need to check with the spec to see what the
+correct behaviour should be.
+
+4) It looks like the Cisco may send update packets containing only
+withdraw information. Not containing the mandatory
+attributes. check_update_packet will consider these packets to be bad
+and drop the peering. Need to check the spec if such packets are legal
+and change check_update_packet.

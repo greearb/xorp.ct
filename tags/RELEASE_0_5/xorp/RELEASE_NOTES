@@ -1,0 +1,603 @@
+#
+# $XORP: xorp/RELEASE_NOTES,v 1.42 2003/11/06 21:28:22 atanu Exp $
+#
+
+		XORP RELEASE NOTES
+
+This file contains XORP release notes (most recent releases first).
+
+Release 0.5 (2003/11/06)
+========================
+  ALL:
+    - New library libfeaclient to simplify interface configuration
+      replication and event reception.
+
+  LIBXORP:
+    - Addition of ServiceBase class (service.hh) for asynchronous
+      process components that might provide a service.  The
+      ServiceBase contains status information, (e.g. starting,
+      running, shutting down, shutdown) and methods for triggering
+      status changes (e.g.start, shutdown).  It also provides an
+      interface for observers to be notified of state changes.
+
+    - Addition of ctype(3) wrappers that work properly even if the
+      value of the int argument is not representable as an unsigned
+      char and doesn't have the value of EOF.
+
+  LIBXIPC:
+    - Minor refactoring and code clean-up.
+
+    - Fixes to XrlAtom binary marshalling methods and test code for
+      checking this functionality in future.
+
+  LIBFEACLIENT:
+    - Added to project.  Provides interface configuration tree
+      mirroring and update event notification.  Intended to unify how
+      this data is replicated between processes.
+
+  XRL:
+    - kdoc generation nits.
+
+  RTRMGR:
+    - Fix the process name of a started proces to be the same
+      as the binary name.
+
+    - Minor code cleanup.
+
+  XORPSH:
+    - No significant changes.
+
+  FEA/MFEA:
+    - Added Linux Netlink support for writing network interface information,
+      and routing entries to the kernel, and for observing the change of
+      that information in the kernel.
+
+    - Completed support for Linux /proc parsing to return network interface
+      information.
+
+    - Added support for NetBSD and OpenBSD to the unicast FEA.
+
+    - Added compilation-time check whether the underlying system
+      supports IPv6 multicast and IPv6 multicast routing, and isolate
+      the compilation of all MFEA code that is specific to IPv6 multicast
+      and IPv6 multicast routing.
+
+    - Added support for run-time check whether the underlying system
+      supports IPv4 or IPv6 multicast routing.
+
+    - Various bug fixes and cleanup
+
+  RIB: 
+    - No significant changes.
+
+  BGP:
+    - Supports multiprotocol IPv6.
+
+    - The code for multicast SAFI is enabled but is untested.
+
+    - MED processing is now deterministic.
+
+    - A memory leak exists.
+
+  MLD/IGMP:
+    - No significant changes.
+
+  PIM-SM:
+    - A bug fix related to the removal of timed-out multicast forwarding
+      entries.
+
+  CLI:
+    - Change slightly the command-line editing, so now Ctrl-W deletes
+      the word before the cursor. Before, Ctrl-W would delete the
+      whole line
+    - Apply a fix to libtecla in network mode such that
+      keyboard-generated signals are not propagated to the process
+      we have connected to.
+
+  SNMP:
+    - No significant changes.
+
+  RIP:
+    - Code added to talk to FEA and RIB.  To become functional it
+      still requires the ability to send packets and receive UDP
+      packets through the FEA (work in progress).
+
+Release 0.4 (2003/08/28)
+========================
+  ALL:
+    - Rename all process names from "foo" to "xorp_foo":
+      bgp -> xorp_bgp
+      fea -> xorp_fea
+      fea_dummy -> xorp_fea_dummy
+      finder -> xorp_finder
+      ospfd -> xorp_ospf
+      rib -> xorp_rib
+      rtrmgr -> xorp_rtrmgr
+
+    - Added support for "gmake install" that installs the required
+      XORP pieces under /usr/local/xorp.
+      Currently, the installed subdirectories and files follow
+      the organization in the XORP source code tree.
+      Only the following binaries are installed in subdirectory "bin":
+      call_xrl, xorp_rtrmgr, xorpsh.
+
+    - Removed old directory "mfea", because it is not needed anymore
+      (all the MFEA code has been merged with the FEA).
+
+    - The code does not compile anymore on MacOS X 10.2.x (or earlier),
+      due to compiler issues. After Apple starts distributing a better
+      compiler (probably with MacOS X 10.3.x?), then attempt will be
+      made to keep the code compiling again on MacOS X.
+
+  LIBXORP:
+    - Added pre-order iterators for Trie and RefTrie.
+
+  LIBXIPC:
+    - Addition of virtual methods in XrlRouter to provide processes with
+      an opportunity to detect finder connection, registration, and
+      disconnection events.
+
+  XRL:
+    - Minor changes to clnt-gen that changes the names of some typedefs.
+
+  RTRMGR:
+    - Now all relative paths to templates, xrl files, configuration
+      files, etc are computed relative to the root of the XORP tree.
+      The root is computed in the following order:
+      1. The shell environment XORP_ROOT (if exists).
+      2. The parent directory the rtrmgr is run from
+         (only if it contains the etc/templates and the xrl/targets
+         directories).
+      3. The XORP_ROOT value as defined in config.h (currently this is
+         the installation directory, and it defaults to /usr/local/xorp).
+
+  XORPSH:
+    - Now all relative paths to executable commands are computed
+      relative to the root of the XORP tree. The root is computed
+      similar to the rtrmgr root (see above), except that in step (2)
+      we consider the parent directory the xorpsh is run instead.
+
+  FEA/MFEA:
+    - Bug fix: if the multicast protocol to start/stop is PIM, then start/stop
+      PIM multicast routing in the kernel.
+
+    - Bug fix (Linux-specific): if IGMP/MLD is enabled, then the multicast
+      router will properly receive all IGMP/MLD messages.
+
+    - Added support to enable/disable unicast forwarding in the kernel
+      via the FEA.
+      Currently, the support is only for FreeBSD, but is not used yet.
+      Hence, the user must explicitly enable unicast forwarding
+      before starting XORP.
+      E.g., in case of FreeBSD run `sysctl net.inet.ip.forwarding=1`
+      as root. In case of Linux run
+      `echo 1 > /proc/sys/net/ipv4/ip_forward` as root.
+
+    - Fix a compilation problem for NetBSD
+      (courtesy Hitoshi Asaeda <Hitoshi.Asaeda@sophia.inria.fr>
+      and Jun-ichiro itojun Hagino <itojun@iijlab.net>).
+
+    - Initial support for Linux /proc parsing to return network interface
+      information (work in progress).
+
+    - Bug fixes in setting the broadcast or p2p flags and addresses
+      in the FEA internal interface tree (IfTree).
+
+    - Bug fix in computing the minimum size of a message received
+      on a routing socket.
+
+    - Change the MFEA configuration scripts so now the IPv4/IPv6 setup
+      is controlled by a single variable IP_VERSION that should be
+      either IPV4 or IPV6. Note that those configuration scripts
+      are temporary solution until the MFEA is integrated with
+      the rtrmgr.
+
+  RIB: 
+    - No significant changes.
+
+  BGP:
+    - Update packets with unknown path attributes are now correctly handled.
+
+  MLD/IGMP:
+    - Change the "RX" log messages to include the vif name a message was
+      received on.
+
+    - Initial support for returning the process status via get_status XRL.
+
+    - Change the MLD/IGMP configuration scripts so now the IPv4/IPv6 setup
+      is controlled by a single variable IP_VERSION that should be
+      either IPV4 or IPV6. Note that those configuration scripts
+      are temporary solution until the MLD/IGMP is integrated with
+      the rtrmgr.
+
+  PIM-SM:
+    - Change the "RX" log messages to include the vif name a message was
+      received on.
+
+    - Change the PIM configuration scripts so now the IPv4/IPv6 setup
+      is controlled by a single variable IP_VERSION that should be
+      either IPV4 or IPV6. Note that those configuration scripts
+      are temporary solution until the PIM is integrated with
+      the rtrmgr.
+
+    - Implement Join/Prune items fragmentation across Join/Prune messages
+      when generating Join/Prune messages.
+
+    - Fix some of the XRL names related to static RP configuration
+      in the configuration shell scripts.
+
+    - Fix the generation of Assert messages when data packets are received
+      on the wrong interface; in addition, the Assert messages triggered
+      by data packets are rate-limited to one Assert message/s (on
+      average, per (S,G) or (*,G) routing entry).
+
+    - Implement an optimization when generating Assert messages
+      triggered by the data packets received on the wrong interface:
+      suppress the second Assert message that is a duplicate.
+
+    - Implement bandwidth-prorated SPT switch triggering:
+      The SPT switch can be triggered at the last-hop router if the
+      bandwidth from a given source is above a configured threshold.
+      In addition, the same mechanism is implemented in the RP as well
+      (not in the spec, where the SPT switch in the RP is always triggered
+      by the first packet).
+
+    - Keep various PIM-related statistics (e.g., number of sent
+      or received PIM control messages per interface, etc), and add
+      the appropriate XRL interface to get or reset those statistics.
+
+    - Modify slightly the "show pim join" CLI output. E.g., print
+      "Could assert WC:" for all entries, print "Could assert SG:"
+      for (S,G,rpt) as well, etc.
+
+    - Bug fix: when receiving IPv6 PIM packets, use the IPv6-specific
+      pseudo-header to compute the checksum.
+
+  CLI:
+    - On exit, restore the original terminal flags in case of stdio-based
+      CLI access. This should fix a bug when running xorpsh from sh/bash
+      and pressing Ctrl-D leaves sh/bash in non-echo mode.
+
+    - Reverse the key binding of 'j' and 'k' in page mode. Now the
+      binding is same as in "vi/more/less":
+      'j' scroll down one line, while 'k' scroll up one line.
+
+  SNMP:
+    - Full implementation of BGP4-MIB module (RFC 1657) including traps.
+
+  RIP:
+    - Implementation functionally operational save communication with the RIB
+      for injecting routes, the FEA to send and receive packets, FEA 
+      interface monitoring code, and an XRL interface for configuration.
+
+Release 0.3 (2003/06/09)
+========================
+  ALL:
+    - Compilation fixes for GCC3.3 on FreeBSD 4.8R.
+
+    - Cross directory build and gmake check support.
+
+    - Purge of abort() calls.  Replacement by XLOG_UNFINISHED,
+      XLOG_UNREACHABLE and XLOG_ASSERT as appropriate, or in some
+      cases better error handling code.
+
+    - Change to autoconf-2.53 and automake-1.5 as standard autotool versions.
+      The older autoconf-2.13 and automake-1.4 should still work.
+
+    - Remove the multicast-specific timer implementation, and
+      use instead the default Xorp timers (XorpTimer).
+
+  LIBXORP:
+    - Allocation without construction bug fixed in SelectorList code.  Fixes
+      potential for junk values and sanity checking when the number of active
+      file descriptors is large.
+
+    - Addition of status codes for XORP processes to report operational 
+      state (to the rtrmgr).
+
+    - Addition of XLOG_UNFINISHED and XLOG_UNREACHABLE to xlog.h.
+
+    - Explicitly disable copy constructor and assignment operator for
+      EventLoop.
+
+    - Replacement of traditional struct timeval with TimeVal class.  TimeVal
+      comes with constructors and numerous helper methods.
+
+    - IPvXNet methods renaming:
+      get_ipv4Net() -> get_ipv4net()
+      get_ipv6Net() -> get_ipv6net()
+
+  LIBXIPC:
+    - Removal of 0.1 release Finder code and compatibility shims that allowed
+      newer and older code to co-exist.  Renaming of "FinderNG" classes
+      and files to "Finder".
+
+    - Use of class and instance names and Finder policy for having a
+      primary instance in a class (first registered is primary, then second
+      in case first exits/fails, and so forth).
+
+    - Support for tunneling XRLs and XRL responses to and from the Finder. 
+
+    - Implementation event notification through the Finder using tunneled 
+      XRLs.  XRL Targets can now request to be notified of the birth and
+      death of other XRL Targets by the Finder.
+
+    - Reduced number of XrlErrors to hopefully simplify handling errors.  
+
+    - Addition of new enumated type XrlErrorCode and change 
+      XrlError::error_code method to return this type.  Allows compiler to
+      detect unhandled error types in switch statements (if default case is
+      not used).
+
+    - Finder clients no longer reconnect to the Finder should they lose their
+      connection per ${XORP}/docs/design_arch/error_handling.tex.
+
+    - Increased Finder timeout for call_xrl.
+
+    - Fix memory corruption following Finder transport error events.
+
+    - Convert all code to use FinderServer class when they need to instantiate
+      a Finder.
+
+    - More consistent handling of defaults on send and receive sides of Finder.
+
+    - Fix xrl_parser_input.cc handling of absolute file names.
+
+    - Assorted minor clean-ups.
+
+  XRL:
+    - Addition of get_status and shutdown methods to the common interface.
+
+  RTRMGR:
+    - Workaround for yacc incompatibilities on newer Redhat releases.
+
+    - Implement a new TaskManager, which handles actually doing the
+      work during a commit, starting processes and validating that they
+      start, dependency interlocking between processes, and shutting
+      down processes that are no longer needed.
+
+    - rtrmgr will now shutdown processes after they are not needed.
+
+    - rtrmgr can now use the common XRL call get_status to monitor
+      process state, and the common XRL shutdown to gracefully shutdown a
+      process.  Added new modinfo subcommands to specify when to use
+      XRLs for these tasks.
+
+    - Use system MD5 for authentication.
+
+    - Better config file string parser.
+
+    - Add tinderbox tests to cover some of the basic functionality.
+
+    - Better error handling (more compliant with XORP Error Handling
+      document).
+
+  XORPSH:
+    - Ctrl-C now terminates the current command,  Ctrl-D exits xorpsh.
+
+  FEA:
+    - MFEA code merged with the unicast FEA, though logically the MFEA
+      is still a separate entity.
+
+    - Refactoring of FEA internals regarding reading/writing/observing
+      interfaces-related information and forwarding-table related
+      information.
+
+    - Support for few more OS-specific methods for reading
+      interface-related information or forwarding table related information.
+
+    - Addition of IPv6 support (where missing) for reading/writing information
+      regarding network interfaces or the unicast forwarding table.
+
+    - Addition of a command-line option to ``fea'' and ``fea_dummy'' to
+      specify the finder hostname and port number.
+
+    - On startup and shutdown remove from the kernel all forwarding entries
+      added by the fea.
+
+    - Addition of XRLs to obtain information about all network interfaces
+      (i.e., not only those that are configured by the rtrmgr).
+      Should be used only for debugging purpose (though temporary they
+      are used by the MFEA as well).
+
+    - ``fea_rtsock'' deprecated (replaced with the generic ``fea'').
+
+  RIB: 
+    - Export a RIB table to any target that registers interest.
+
+    - Replace fea_fti/0.1 XRL interface with fti/0.2.  The new interface
+      introduces metric, admin_distance and protocol_origin when RIB
+      information is propagated to the RIB clients.
+
+    - Refactoring of the Vif manager implementation.
+
+    - Support for returning the process status through the get_status
+      XRL and shutting down using the shutdown XRL.
+
+  BGP:
+    - More robust to XRL communication failures. In particular support
+      for retransmission.
+
+    - Replace calls to abort() with more self-explanatory self-destruction.
+
+    - Terminate interface removed and replaced with common shutdown XRL 
+      interface.
+
+    - Use system md5 header files.
+
+    - Peer list sorted by remote IP for snmp.
+
+    - Uninitialised variable bug fix in NextHopRibRequest.
+
+    - Initial support for returning the process status via get_status XRL.
+
+  MFEA:
+    - MFEA code merged with the unicast FEA, though logically the MFEA
+      is still a separate entity.
+      As part of the merging process, the MFEA now obtains the information
+      about network interfaces and the unicast forwarding table from the
+      FEA instead of the the kernel.
+
+    - Addition of a check for Router Alert IP option.
+
+    - Enable receiving of hop-by-hop options.
+
+    - Replace all MLD6_XXX with MLD_XXX (following KAME's recommendation).
+
+    - Compilation fixes for NetBSD-current (and probably NetBSD-1.6.1)
+      (courtesy Hitoshi Asaeda <Hitoshi.Asaeda@sophia.inria.fr>).
+
+    - Initial support for returning the process status via get_status XRL.
+ 
+    - Addition of a command-line option to ``test_mfea'' to specify the
+      finder hostname and port number.
+
+    - Misc. bug fixes, internal code refactoring, and cleanup.
+
+  MLD/IGMP:
+    - Protocol implementation testing completed.
+
+    - Replace all MLD6_XXX with MLD_XXX (following KAME's recommendation).
+
+    - Unify some of the MLD and IGMP protocol-specific code.
+
+    - Support for configurable setting of the protocol version per vif.
+
+    - Addition of a command-line option to ``test_mld6igmp'' to specify the
+      finder hostname and port number.
+
+    - Misc. bug fixes.
+
+  PIM-SM:
+    - Configuration-related fixes.
+
+    - Rename RP-related configuration commands and XRLs:
+      OLD: add_config_rp{4,6}, delete_config_rp{4,6}, config_rp_done
+      NEW: add_config_static_rp{4,6}, delete_config_static_rp{4,6},
+           config_static_rp_done
+
+    - Addition of XRL interface to receive MRIB-related updates
+      from the RIB; the interface is not used yet.
+
+    - Initial support for returning the process status via get_status XRL.
+
+    - Addition of a mechanism that should hold-off PIM-SM status
+      to PROC_NOT_READY until it has received all necessary confirmation
+      from both MFEA and MLD/IGMP.
+
+    - Addition of PIM configuration option and XRL interface to configure
+      the SPT-switch bandwidth threshold.  Currently, the SPT-switch is
+      enabled only for the corner cases: switch on the first packet, or
+      never switch.
+
+    - Addition of a command-line option to ``test_pim'' to specify the
+      finder hostname and port number.
+
+  CLI:
+    - Critical bug fix (could be triggered if a program like
+      ${XORP}/pim/test_pim is run in background, and is accessed
+      by the built-in CLI).
+
+    - Addition of Ctrl-C handling:
+      o If Ctrl-C is hit before <Enter>, then cancel the current line
+        and present a new prompt.
+      o If Ctrl-C is hit while waiting for command completion, then
+        cancel the wait and present a new prompt.
+
+    - Removed the 5 seconds timer that would timeout the waiting for
+      command completion (the user can use Ctrl-C to cancel the wait).
+
+    - Enable receiving Ctrl-C if the input is stdio (e.g., in case of xorpsh).
+
+  SNMP:
+    - Integrated with Net-SNMP agent.
+
+    - Implemented bgpVersion and bgpPeerTable from BGP4-MIB (RFC 1657).
+
+  RIP:
+    - Implementation started.
+
+Release 0.2 (2003/03/10)
+========================
+
+  ALL:
+    - Source code compiles under GCC 3.2.1 and on Mac OS X 10.2.x (GCC 3.1)
+      in addition to GCC 2.95.x and 2.96.
+
+  LIBXORP:
+    - Add libxorp/ref_trie.hh :
+      Implementation of a trie to support route
+      lookups.  Based on trie.hh, but with reference-counted storage
+      supporting delayed deletion.
+
+  LIBXIPC:
+    - Complete re-implementation of the XRL finder, so that
+      registration/deregistration to the finder uses XRLs.
+
+  RTRMGR:
+    - Add operational-mode commands for monitoring BGP routes and
+      peers, and VIF/interface state.
+ 
+    - Re-implement how rtrmgr decides when to start processes.  This
+      fixes a few bugs in the dependency tracking - prior to this the
+      RIB would not be started because it requires no direct configuration.
+
+  FEA:
+    - Bug fixes.
+
+  RIB: 
+    - Ensure that the originating protocol is propagated throughout
+      the RIB.
+
+    - Fix bug where routes for directly connected interfaces were
+      incorrectly being fed back to the FEA (which didn't expect to
+      see add_route for these subnets).
+
+  BGP:
+    - XRL interfaces for monitoring BGP peers and the complete BGP
+      routing table added.  Helper programs bgp/tools/show_routes and
+      bgp/tools/show_peers added, along with versions of these for
+      running from xorpsh.
+
+    - Support for adding/removing MEDs added.
+
+    - BGP message handling and Path Attribute handling re-written to
+      be much cleaner and more efficient.
+
+    - Re-structured the BGP peer state machine to make the code easier
+      to understand.
+
+    - Change BGP to use reference-counted tries.  This greatly
+      simplifies the implementation of background tasks.
+
+    - Correctly handle unrecognized optional transitive attributes.
+
+    - Merge isolation tests into a single binary.
+
+    - Added BGP/RIB/FEA integration tests.
+
+    - Too many bug fixes to list.
+
+  MFEA:
+    - Minor bug fixes.
+
+  MLD/IGMP:
+    - No changes.
+
+  PIM-SM:
+    - PIM-SM Bootstrap mechanism reimplemented and tested.
+      Note that the Bootstrap-related configuration commands in
+      pim/configure_pim have changed slightly.
+
+    - Detailed testing of the basic protocol and the Bootstrap mechanism
+      completed and documented in the XORP PIM-SM Test Suite document.
+
+    - Numerous bug fixes.
+
+
+Release 0.1 (2002/12/11)
+========================
+
+  - First public release.
+
+  - CVS repository opened to the world.

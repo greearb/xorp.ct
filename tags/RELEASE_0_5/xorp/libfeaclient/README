@@ -1,0 +1,32 @@
+This directory contains code that may be useful to clients of the FEA.
+
+The goal is to mirror the FEA interface configuration state across
+routing processes, the RIB, and any other interested parties.
+
+The FEA interface configuration state structures are defined in
+ifmgr_atoms.{hh,cc}.  The key classes are:
+
+   IfMgrIfTree - container of interfaces
+
+   IfMgrIfAtom - representation of individual interface state and
+	         container of the interface's virtual interfaces.
+
+   IfMgrVifAtom - representation of virtual interface state and
+		  container of addresses associated with the virtual
+		  interface.
+
+   IfMgrIPv4Atom - representation of IPv4 address state on a virtual
+		   interface.
+
+   IfMgrIPv6Atom - representation of IPv6 address state on a virtual
+		   interface.
+
+Each of these classes has a set of accessor and modifier methods.
+
+To assist with the remote synchronization, modification of these
+classes is intended to occur using a set of configuration command
+classes defined in ifmgr_cmds.{hh,cc}.  These have two methods:
+execute and forward.  The execute method applies a modification
+operation to an item within an IfMgrIfTree structure.  The forward
+method sends an XRL towards a remote target.  The remote target will
+receive the XRL and fix up it's configuration tree accordingly.

@@ -1,0 +1,20 @@
+#
+# $XORP: xorp/TODO,v 1.1.1.1 2002/12/11 23:55:48 hodson Exp $
+#
+
+* Change configure.in NOT to use AC_EGREP_HEADER to check
+  for various fields, etc in system header files. Instead,
+  it should use AC_TRY_COMPILE or AC_TRY_RUN.
+
+* Make all #include "config.h" to be #ifdef HAVE_CONFIG_H  (??)
+
+* Make the code as POSIX as possible.
+
+* When checking for AF_ROUTE, AF_NETLINK, etc. in configure.in, instead
+  of trying to run the test program, do only try to compile it instead.
+  After all, the software may be compiled on a machine that may not be
+  used to run the software, hence AF_NETLINK for example may not have
+  to be enabled.
+
+* Fix all file names.
+  E.g. all names non-capital letters + numbers, and use underscores.

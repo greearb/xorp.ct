@@ -1,0 +1,50 @@
+AC_INIT(src/qt2kdoc)
+
+AC_DEFUN(AC_FIND_PERL,
+[
+AC_MSG_CHECKING(for perl 5.6 or greater)
+if $srcdir/findperl; then
+	$1=`cat perlbin`
+	echo $$1
+else
+	echo "Couldn't find perl 5.6 or later. kdoc will not run."
+	exit 1
+fi	
+])
+
+AC_DEFUN(AC_KDOC_VERSION,
+[
+AC_MSG_CHECKING(kdoc version)
+$1=`cat $srcdir/Version | sed 's#Revision##g' | tr -d '\$:'`
+echo $$1
+])
+
+AC_DEFUN(KDOC_HTMLDIR,
+[
+AC_MSG_CHECKING([for htmldir])
+ 
+htmldir=""
+AC_ARG_WITH(htmldir,
+[  --with-htmldir=DIR   where the html documentation is installed ],
+htmldir=$withval, htmldir='${prefix}/share/doc/kdoc'
+)
+AC_MSG_RESULT($htmldir)
+AC_SUBST(htmldir)
+])
+  
+
+AC_PROG_INSTALL
+AC_FIND_PERL(perl)
+AC_SUBST(perl)
+AC_KDOC_VERSION(Version)
+AC_SUBST(Version)
+KDOC_HTMLDIR
+
+#mandir='${prefix}/man/man1'
+#docdir='${prefix}/doc/kdoc'
+
+#AC_SUBST(mandir)
+#AC_SUBST(docdir)
+
+
+AC_OUTPUT(Makefile doc/Makefile)

@@ -1,0 +1,10 @@
+#
+# $XORP: xorp/mrt/TODO,v 1.2 2003/03/11 00:13:13 pavlin Exp $
+#
+
+* Clean-up the test programs according to the new style.
+
+* Should remove() of Mrib entries remove them from the table, but
+  should not delete the entries themselves?
+
+* Do we want Mrt::start() and Mrt::stop() methods?

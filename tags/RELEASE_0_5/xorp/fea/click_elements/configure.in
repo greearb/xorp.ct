@@ -1,0 +1,187 @@
+dnl -*- mode: shell-script -*-
+dnl `configure.in' file for a sample package
+dnl Process this file with autoconf to produce a configure script.
+dnl
+dnl Permission is hereby granted, free of charge, to any person obtaining a
+dnl copy of this software and associated documentation files (the "Software"),
+dnl to deal in the Software without restriction, subject to the conditions
+dnl listed in the Click LICENSE file. These conditions include: you must
+dnl preserve this copyright notice, and you cannot mention the copyright
+dnl holders in advertising related to the Software without their permission.
+dnl The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+dnl notice is a summary of the Click LICENSE file; the license in that file is
+dnl legally binding.
+
+dnl
+dnl the usual `configure.in' boilerplate
+dnl
+
+AC_INIT(config.h.in)
+AC_CONFIG_HEADER(config.h)
+AC_SUBST(ac_configure_args)
+
+CLICK_INIT('$(top_srcdir)')
+
+
+dnl
+dnl locate Click install directory
+dnl
+
+AC_ARG_WITH(click, [  --with-click[=DIR]      Click install path is DIR [$prefix]],
+  [clickprefix=$withval; if test -z "$withval" -o "$withval" = yes; then clickprefix=$prefix; fi],
+  clickprefix=NONE)
+
+dnl Preset $prefix and $exec_prefix.
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+
+if test "$clickprefix" = NONE; then
+  clickprefix=$prefix
+fi
+
+clickbindir='${clickprefix}/bin'
+clicksbindir='${clickprefix}/sbin'
+
+AC_SUBST(clickprefix)
+AC_SUBST(clickbindir)
+AC_SUBST(clicksbindir)
+
+if test ! -r $clickprefix/include/click/pathvars.h ; then
+    AC_MSG_ERROR([
+==============================================
+
+\`$clickprefix/include/click/pathvars.h' not found.
+Are you sure \`$clickprefix' is a Click install directory?
+
+==============================================])
+fi
+
+
+dnl
+dnl extract properties of the Click installation
+dnl
+
+click_have_linuxmodule=`if grep 'define HAVE_LINUXMODULE_TARGET' $clickprefix/include/click/config-linuxmodule.h >/dev/null 2>&1; then echo 1; else echo 0; fi`
+linuxdir=`grep LINUX_SRCDIR $clickprefix/include/click/pathvars.h | sed 's/.*"\(.*\)".*/\1/'`
+click_have_bsdmodule=`if grep 'define HAVE_BSDMODULE_TARGET' $clickprefix/include/click/config-bsdmodule.h >/dev/null 2>&1; then echo 1; else echo 0; fi`
+freebsd_includedir=`grep FREEBSD_INCLUDEDIR $clickprefix/include/click/pathvars.h | sed 's/.*"\(.*\)".*/\1/'`
+
+
+dnl
+dnl The rest of this file is based on Click `configure.in'. You shouldn't
+dnl generally need to change it, although you may want to add to it.
+dnl
+
+CLICK_PROG_CC
+AC_PROG_CPP
+CLICK_PROG_CXX
+AC_PROG_CXXCPP
+CLICK_PROG_KERNEL_CXX
+
+AC_PATH_PROG(AR, ar)
+AC_PATH_PROG(LD, ld)
+AC_PATH_PROG(RANLIB, ranlib, :)
+AC_PATH_PROG(STRIP, strip, :)
+
+CLICK_PROG_INSTALL
+CLICK_PROG_AUTOCONF
+CLICK_PROG_GMAKE
+
+if test -z "$GMAKE"; then
+    AC_MSG_ERROR([
+==============================================
+
+I can't find GNU make. Either put "'`'"gmake' on your PATH and
+rerun "'`'"./configure', or set the GMAKE environment variable to
+GNU make's pathname.
+
+==============================================])
+fi
+
+
+dnl
+dnl build userlevel? Linux module? FreeBSD module?
+dnl
+
+AC_ARG_ENABLE(userlevel, [  --disable-userlevel     disable user-level driver], :, enable_userlevel=yes)
+AC_ARG_ENABLE(linuxmodule, [  --disable-linuxmodule   disable Linux kernel driver], :, enable_linuxmodule=yes)
+AC_ARG_ENABLE(bsdmodule, [  --enable-bsdmodule      enable FreeBSD kernel driver], :, enable_bsdmodule=no)
+
+
+dnl
+dnl Check for Linux source
+dnl
+
+if test "x$linuxdir" = xNONE -o "x$linuxdir" = xno -o "x$enable_linuxmodule" != xyes; then
+    ac_have_linux_kernel=n
+    linuxdir=NONE
+elif test -r $linuxdir/include/linux/skbuff.h; then
+    ac_have_linux_kernel=y
+    if test $click_have_linuxmodule = 0; then
+	AC_MSG_WARN([
+=========================================
+
+Compiling package for Linux kernel module,
+although Click reports it has not compiled a Linux kernel module.
+
+=========================================])
+    fi
+else
+  AC_MSG_ERROR([
+=========================================
+
+I can't find $linuxdir/include/linux/skbuff.h, although Click
+thinks $linuxdir contains Linux kernel source!
+
+=========================================])
+fi
+
+AC_SUBST(linuxdir)
+
+
+dnl
+dnl Check for FreeBSD source
+dnl
+
+if test "x$freebsd_includedir" = xNONE -o "x$freebsd_includedir" = xno -o "x$enable_bsdmodule" != xyes; then
+    freebsd_includedir=NONE
+elif test -r $freebsd_includedir/net/if_var.h; then
+    if test $click_have_bsdmodule = 0; then
+	AC_MSG_WARN([
+=========================================
+
+Compiling package for FreeBSD kernel module,
+although Click reports it has not compiled a FreeBSD kernel module.
+
+=========================================])
+    fi
+else
+  AC_MSG_ERROR([
+=========================================
+
+I can't find $freebsd_includedir/net/if_var.h, although Click
+thinks $freebsd_includedir contains FreeBSD kernel includes!
+
+=========================================])
+fi
+
+AC_SUBST(freebsd_includedir)
+
+
+dnl
+dnl Set HAVE_TARGET symbols
+dnl
+
+HAVE_USERLEVEL_TARGET=`if test "x$enable_userlevel" = xyes; then echo 1; else echo 0; fi`
+HAVE_LINUXMODULE_TARGET=`if test "x$linuxdir" = xNONE; then echo 0; else echo 1; fi`
+HAVE_BSDMODULE_TARGET=`if test "x$freebsd_includedir" = xNONE; then echo 0; else echo 1; fi`
+AC_SUBST(HAVE_USERLEVEL_TARGET)
+AC_SUBST(HAVE_LINUXMODULE_TARGET)
+AC_SUBST(HAVE_BSDMODULE_TARGET)
+
+
+dnl
+dnl Output
+dnl
+
+AC_OUTPUT(Makefile)

@@ -1,0 +1,52 @@
+This directory contains Makefile includes.  These are intended to help
+with generating consistent documentation.  At present only one include
+files exist: Makefile.doc.am
+
+=============================================
+Makefile.doc.am:
+
+Makefile.doc.am is intended to be used in conjunction with automake's
+Makefile.am files.  Currently, the Makefile.am should contain the
+following:
+
+ * DOCS: the list of documents.
+
+ * For each document foo in "DOCS" there should be the foo_LATEX with
+   the Latex and Bibtex files for that document. Note that the
+   main Latex file for document foo MUST be named foo.tex. Otherwise,
+   we would have to introduce additional semantics to Makefile.am.
+
+ * All figures for that document should be listed in foo_FIGURES.
+   A file with a figures can be in any directory, and the file name
+   can have any extention, though it is recommended that all files
+   should be Encapsulated Postscript (i.e., *.eps). If a file extention
+   is *.eps or *.ps and if there is a correspoding *.fig file in the
+   same directory, then the *.eps or *.ps file will be regenerated
+   whenever the *.fig file is modified: if the listed file name is *.eps,
+   the regenerated file will be Encapsulated Postscript; if the listed
+   file name is *.ps, the regenerated file will be Postscript.
+
+ * Note that the only Postscript files "gmake clean" would remove are
+   the foo.ps final documents, hence it is safe to have other *.ps files
+   in the directory with the Latex source files. Though, it is recommended
+   that all figures are in a subdirectory; for Xorp, the common
+   convention is that directory name to be "figs".
+   Other files that "gmake clean" removes are:
+     - all foo.pdf final documents
+     - all files with suffix *.aux *.bbl *.blg *.dvi *.log
+
+Example of a Makefile.am file that uses Makefile.doc.am:
+
+## Process this file with automake to produce Makefile.in.
+
+include $(top_srcdir)/docs/mk/Makefile.doc.am
+
+# -- Document Names
+DOCS			= mydoc
+
+# -- Document Sources
+mydoc_LATEX		= mydoc.bib mydoc.tex
+mydoc_FIGURES	=						\
+			figs/fig1.eps				\
+			figs/fig2.eps
+

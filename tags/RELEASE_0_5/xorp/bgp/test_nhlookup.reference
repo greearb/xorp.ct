@@ -1,0 +1,305 @@
+[comment] TEST 1
+[comment] ADD AND DELETE, NEXTHOP RESOLVES
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[separator]-------------------------------------
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[separator]-------------------------------------
+[comment] TEST 1a
+[comment] ADD AND DELETE, NEXTHOP NOT YET RESOLVED
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] TEST 1b
+[comment] ADD AND DELETE, NEXTHOP NOT YET RESOLVED
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] THEN NEXTHOP RESOLVES
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] NOW DELETE THE ROUTE
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[separator]-------------------------------------
+[comment] TEST 1c
+[comment] ADDx2 AND DELETE, NEXTHOP NOT YET RESOLVED
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.2.0/24
+[separator]-------------------------------------
+[comment] THEN NEXTHOP RESOLVES
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] NOW DELETE THE ROUTES
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.2.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[separator]-------------------------------------
+[comment] TEST 2
+[comment] ADD, REPLACE, RESOLVE, DELETE
+[comment] ADD
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] REPLACE
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[NH REGISTER]
+NextHop: 2.0.0.2
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] THEN NEXTHOP RESOLVES
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] NOW DELETE THE ROUTE
+[NH DEREGISTER]
+NextHop: 2.0.0.2
+Net: 1.0.1.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
+
+
+[separator]-------------------------------------
+[comment] TEST 2b
+[comment] ADD, REPLACE (OLD IS DELETED), RESOLVE, DELETE
+[comment] ADD
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] REPLACE
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[NH REGISTER]
+NextHop: 2.0.0.2
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] THEN NEXTHOP RESOLVES
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] NOW DELETE THE ROUTE
+[NH DEREGISTER]
+NextHop: 2.0.0.2
+Net: 1.0.1.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
+
+
+[separator]-------------------------------------
+[comment] TEST 3
+[comment] REPLACE, REPLACE, RESOLVE, DELETE
+[comment] FIRST REPLACE
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[NH REGISTER]
+NextHop: 2.0.0.2
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] SECOND REPLACE
+[NH DEREGISTER]
+NextHop: 2.0.0.2
+Net: 1.0.1.0/24
+[NH REGISTER]
+NextHop: 2.0.0.3
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] THEN NEXTHOP RESOLVES
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] NOW DELETE THE ROUTE
+[NH DEREGISTER]
+NextHop: 2.0.0.3
+Net: 1.0.1.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+
+
+[separator]-------------------------------------
+[comment] TEST 4
+[comment] TESTING PUSH
+[comment] ADDx2 AND DELETE, NEXTHOP NOT YET RESOLVED
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.2.0/24
+[comment] SEND PUSH
+[PUSH]
+[separator]-------------------------------------
+[comment] THEN NEXTHOP RESOLVES
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] NOW DELETE THE ROUTES
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[NH DEREGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.2.0/24
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+
+
+[comment] SEND PUSH AGAIN
+[PUSH]
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] SHUTDOWN AND CLEAN UP

@@ -1,0 +1,602 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+#
+# This Makefile builds all the shared object files in this directory but
+# without using libtool.  This forces us to use some hacks to build the
+# libraries, such as declare them as programs, and override the linker
+# default settings.
+#
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+FLOWER_MALLOC = @FLOWER_MALLOC@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+SUBDIRS = snmpdscripts tests
+
+#
+# This is the only shared object that needs to be installed.
+# By default it will be installed in directory @pkglibdir@ which
+# in our case defaults to $(libdir)/xorp
+# If we want to change the installation directory to something else,
+# then we need to redefine pkglibdir. E.g.:
+#pkglibdir=@libdir@
+#
+pkglib_PROGRAMS = libnetsnmpxorp.so
+
+#
+# These are the mib modules that will be loaded by the snmp agent.  They need
+# not to be installed. Add the MIB modules that you write to this list.
+# 
+noinst_PROGRAMS = bgp4_mib_1657.so ospf_mib_1850.so xorp_if_mib_module.so $(TESTS)
+
+# -- Test Programs 
+TESTS = test_xorpevents
+TESTS_ENVIRONMENT = LD_LIBRARY_PATH="$(top_builddir)/mibs"
+
+# -- Compiler and pre compiler flags
+AM_CPPFLAGS = `net-snmp-config --cflags` 
+
+# -- Libraries and library flags to link the binary programs
+
+# -Wl,--no-whole-archive must appear after the libraries, and that does not fit
+# into the standard Automake link model.  This is why we must use the LINK
+# directive
+libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+    $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@               \
+    $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a    \
+    $(top_builddir)/libcomm/libcomm.a -Wl,--no-whole-archive
+
+libnetsnmpxorp_so_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.a  $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+
+test_xorpevents_LDADD = $(top_builddir)/libxipc/libfinder.a -lnetsnmpxorp -L${top_builddir}/mibs
+
+bgp4_mib_1657_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lbgp4mibbase -L$(top_builddir)/xrl/targets $(top_builddir)/xrl/interfaces/libbgpxif.a
+bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
+bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
+
+ospf_mib_1850_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs  
+ospf_mib_1850_so_LDFLAGS = -shared -fPIC -fpic 
+ospf_mib_1850_so_DEPENDENCIES = libnetsnmpxorp.so
+
+xorp_if_mib_module_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lxorpifmibbase -L$(top_builddir)/xrl/targets 
+xorp_if_mib_module_so_LDFLAGS = -shared -fPIC -fpic 
+xorp_if_mib_module_so_DEPENDENCIES = libnetsnmpxorp.so
+
+
+# -- Test Program Sources
+test_xorpevents_SOURCES = test_xorpevents.cc
+
+# -- Library Sources (libnetsnmpxorp)
+libnetsnmpxorp_so_SOURCES = xorpevents.cc xorpevents.hh
+
+# -- Library Sources (bgp4_mib_1657)
+bgp4_mib_1657_so_SOURCES = bgp4_mib_1657.hh bgp4_mib_1657.cc bgp4_mib_1657_bgpversion.hh bgp4_mib_1657_bgpversion.cc bgp4_mib_1657_bgplocalas.cc bgp4_mib_1657_bgplocalas.hh bgp4_mib_1657_bgpidentifier.cc bgp4_mib_1657_bgpidentifier.hh bgp4_mib_1657_bgppeertable.hh bgp4_mib_1657_bgppeertable.cc bgp4_mib_1657_bgp4pathattrtable.hh bgp4_mib_1657_bgp4pathattrtable.cc bgp4_mib_xrl_target.cc
+
+# -- Library Sources (ospf_mib_1850)
+ospf_mib_1850_so_SOURCES = ospf_mib_1850.hh ospf_mib_1850.cc
+
+# -- Library Sources (xorp_if_mib_module)
+xorp_if_mib_module_so_SOURCES = xorp_if_mib_module.hh xorp_if_mib_module.cc xorp_if_mib_xrl_target.cc xorp_if_mib_xrl_target.hh
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+subdir = mibs
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+noinst_PROGRAMS = bgp4_mib_1657.so$(EXEEXT) ospf_mib_1850.so$(EXEEXT) \
+	xorp_if_mib_module.so$(EXEEXT) test_xorpevents$(EXEEXT)
+pkglib_PROGRAMS = libnetsnmpxorp.so$(EXEEXT)
+PROGRAMS = $(noinst_PROGRAMS) $(pkglib_PROGRAMS)
+
+am_bgp4_mib_1657_so_OBJECTS = bgp4_mib_1657.$(OBJEXT) \
+	bgp4_mib_1657_bgpversion.$(OBJEXT) \
+	bgp4_mib_1657_bgplocalas.$(OBJEXT) \
+	bgp4_mib_1657_bgpidentifier.$(OBJEXT) \
+	bgp4_mib_1657_bgppeertable.$(OBJEXT) \
+	bgp4_mib_1657_bgp4pathattrtable.$(OBJEXT) \
+	bgp4_mib_xrl_target.$(OBJEXT)
+bgp4_mib_1657_so_OBJECTS = $(am_bgp4_mib_1657_so_OBJECTS)
+am_libnetsnmpxorp_so_OBJECTS = xorpevents.$(OBJEXT)
+libnetsnmpxorp_so_OBJECTS = $(am_libnetsnmpxorp_so_OBJECTS)
+libnetsnmpxorp_so_LDADD = $(LDADD)
+libnetsnmpxorp_so_LDFLAGS =
+am_ospf_mib_1850_so_OBJECTS = ospf_mib_1850.$(OBJEXT)
+ospf_mib_1850_so_OBJECTS = $(am_ospf_mib_1850_so_OBJECTS)
+am_test_xorpevents_OBJECTS = test_xorpevents.$(OBJEXT)
+test_xorpevents_OBJECTS = $(am_test_xorpevents_OBJECTS)
+test_xorpevents_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a
+test_xorpevents_LDFLAGS =
+am_xorp_if_mib_module_so_OBJECTS = xorp_if_mib_module.$(OBJEXT) \
+	xorp_if_mib_xrl_target.$(OBJEXT)
+xorp_if_mib_module_so_OBJECTS = $(am_xorp_if_mib_module_so_OBJECTS)
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bgp4_mib_1657.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgp4pathattrtable.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgpidentifier.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgplocalas.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgppeertable.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgpversion.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_xrl_target.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ospf_mib_1850.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xorpevents.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_if_mib_module.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_if_mib_xrl_target.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorpevents.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(bgp4_mib_1657_so_SOURCES) $(libnetsnmpxorp_so_SOURCES) \
+	$(ospf_mib_1850_so_SOURCES) $(test_xorpevents_SOURCES) \
+	$(xorp_if_mib_module_so_SOURCES)
+
+RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
+	uninstall-info-recursive all-recursive install-data-recursive \
+	install-exec-recursive installdirs-recursive install-recursive \
+	uninstall-recursive check-recursive installcheck-recursive
+DIST_COMMON = README Makefile.am Makefile.in
+DIST_SUBDIRS = $(SUBDIRS)
+SOURCES = $(bgp4_mib_1657_so_SOURCES) $(libnetsnmpxorp_so_SOURCES) $(ospf_mib_1850_so_SOURCES) $(test_xorpevents_SOURCES) $(xorp_if_mib_module_so_SOURCES)
+
+all: all-recursive
+
+.SUFFIXES:
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  mibs/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+install-pkglibPROGRAMS: $(pkglib_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)
+	@list='$(pkglib_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-pkglibPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkglib_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(pkglibdir)/$$f"; \
+	  rm -f $(DESTDIR)$(pkglibdir)/$$f; \
+	done
+
+clean-pkglibPROGRAMS:
+	-test -z "$(pkglib_PROGRAMS)" || rm -f $(pkglib_PROGRAMS)
+bgp4_mib_1657.so$(EXEEXT): $(bgp4_mib_1657_so_OBJECTS) $(bgp4_mib_1657_so_DEPENDENCIES) 
+	@rm -f bgp4_mib_1657.so$(EXEEXT)
+	$(CXXLINK) $(bgp4_mib_1657_so_LDFLAGS) $(bgp4_mib_1657_so_OBJECTS) $(bgp4_mib_1657_so_LDADD) $(LIBS)
+libnetsnmpxorp.so$(EXEEXT): $(libnetsnmpxorp_so_OBJECTS) $(libnetsnmpxorp_so_DEPENDENCIES) 
+	@rm -f libnetsnmpxorp.so$(EXEEXT)
+	$(libnetsnmpxorp_so_LINK) $(libnetsnmpxorp_so_LDFLAGS) $(libnetsnmpxorp_so_OBJECTS) $(libnetsnmpxorp_so_LDADD) $(LIBS)
+ospf_mib_1850.so$(EXEEXT): $(ospf_mib_1850_so_OBJECTS) $(ospf_mib_1850_so_DEPENDENCIES) 
+	@rm -f ospf_mib_1850.so$(EXEEXT)
+	$(CXXLINK) $(ospf_mib_1850_so_LDFLAGS) $(ospf_mib_1850_so_OBJECTS) $(ospf_mib_1850_so_LDADD) $(LIBS)
+test_xorpevents$(EXEEXT): $(test_xorpevents_OBJECTS) $(test_xorpevents_DEPENDENCIES) 
+	@rm -f test_xorpevents$(EXEEXT)
+	$(CXXLINK) $(test_xorpevents_LDFLAGS) $(test_xorpevents_OBJECTS) $(test_xorpevents_LDADD) $(LIBS)
+xorp_if_mib_module.so$(EXEEXT): $(xorp_if_mib_module_so_OBJECTS) $(xorp_if_mib_module_so_DEPENDENCIES) 
+	@rm -f xorp_if_mib_module.so$(EXEEXT)
+	$(CXXLINK) $(xorp_if_mib_module_so_LDFLAGS) $(xorp_if_mib_module_so_OBJECTS) $(xorp_if_mib_module_so_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgp4pathattrtable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgpidentifier.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgplocalas.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgppeertable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgpversion.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_xrl_target.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf_mib_1850.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xorpevents.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_module.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_xrl_target.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorpevents.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run `make' without going through this Makefile.
+# To change the values of `make' variables: instead of editing Makefiles,
+# (1) if the variable is set in `config.status', edit `config.status'
+#     (which will cause the Makefiles to be regenerated when you run `make');
+# (2) otherwise, pass the desired values on the `make' command line.
+$(RECURSIVE_TARGETS):
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
+mostlyclean-recursive clean-recursive distclean-recursive \
+maintainer-clean-recursive:
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	rev=''; for subdir in $$list; do \
+	  if test "$$subdir" = "."; then :; else \
+	    rev="$$subdir $$rev"; \
+	  fi; \
+	done; \
+	rev="$$rev ."; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for subdir in $$rev; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done && test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+	for subdir in $(SUBDIRS); do \
+	  if test "$$subdir" = .; then :; else \
+	    test -d $(distdir)/$$subdir \
+	    || mkdir $(distdir)/$$subdir \
+	    || exit 1; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$(top_distdir)" \
+	        distdir=../$(distdir)/$$subdir \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-recursive
+all-am: Makefile $(PROGRAMS)
+installdirs: installdirs-recursive
+installdirs-am:
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)
+
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-recursive
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-recursive
+
+clean-am: clean-generic clean-noinstPROGRAMS clean-pkglibPROGRAMS \
+	mostlyclean-am
+
+distclean: distclean-recursive
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-recursive
+
+dvi-am:
+
+info: info-recursive
+
+info-am:
+
+install-data-am:
+
+install-exec-am: install-pkglibPROGRAMS
+
+install-info: install-info-recursive
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-recursive
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-recursive
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-info-am uninstall-pkglibPROGRAMS
+
+uninstall-info: uninstall-info-recursive
+
+.PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
+	clean clean-generic clean-noinstPROGRAMS clean-pkglibPROGRAMS \
+	clean-recursive distclean distclean-compile distclean-depend \
+	distclean-generic distclean-recursive distclean-tags distdir \
+	dvi dvi-am dvi-recursive info info-am info-recursive install \
+	install-am install-data install-data-am install-data-recursive \
+	install-exec install-exec-am install-exec-recursive \
+	install-info install-info-am install-info-recursive install-man \
+	install-pkglibPROGRAMS install-recursive install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	installdirs-recursive maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-recursive tags tags-recursive \
+	uninstall uninstall-am uninstall-info-am \
+	uninstall-info-recursive uninstall-pkglibPROGRAMS \
+	uninstall-recursive
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

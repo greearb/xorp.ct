@@ -1,0 +1,3944 @@
+diff -X exclude_files -Nabur ospfd2.3/linux/Makefile ospfd2.4/linux/Makefile
+--- ospfd2.3/linux/Makefile	Mon May 21 10:19:28 2001
++++ ospfd2.4/linux/Makefile	Thu Sep 13 16:05:44 2001
+@@ -15,6 +15,7 @@
+ 	  config.o \
+ 	  dbage.o \
+ 	  grplsa.o \
++	  helper.o \
+ 	  hostmode.o \
+ 	  ifcfsm.o \
+ 	  lsa.o \
+@@ -29,6 +30,7 @@
+ 	  pat.o \
+ 	  phyint.o \
+ 	  priq.o \
++	  restart.o \
+ 	  rte.o \
+ 	  rtrlsa.o \
+ 	  spfack.o \
+@@ -44,6 +46,7 @@
+ 	  spfvl.o \
+ 	  summlsa.o \
+ 	  timer.o \
++	  tlv.o \
+ 	  md5c.o
+ 
+ install: ospfd ospfd_mon ospfd_browser
+diff -X exclude_files -Nabur ospfd2.3/linux/ospfd_browser.C ospfd2.4/linux/ospfd_browser.C
+--- ospfd2.3/linux/ospfd_browser.C	Mon May 21 10:19:31 2001
++++ ospfd2.4/linux/ospfd_browser.C	Thu Sep 13 16:05:49 2001
+@@ -54,6 +54,7 @@
+ void display_html(char *);
+ void display_error(char *);
+ void get_opaques();
++void get_lllsa();
+ 
+ const int OSPFD_MON_PORT = 12767;
+ 
+@@ -93,6 +94,8 @@
+ extern char *select_lsa_top;
+ extern char *select_lsa_bottom;
+ extern char *expand_lsa_top;
++extern char *expand_lllsa_top;
++extern char *expand_vllsa_top;
+ extern char *expand_lsa_bottom;
+ extern char *error_page;
+ extern char *opaque_page_top;
+@@ -160,6 +163,32 @@
+     }
+ }
+ 
++/* Return the flooding scope of an LSA, based on its LS type.
++ */
++
++int flooding_scope(byte lstype)
++
++{
++    switch(lstype) {
++      case LST_LINK_OPQ:// Link-scoped Opaque-LSAs
++	return(LocalScope);
++      case LST_RTR: 	// Router-LSAs
++      case LST_NET: 	// Network-LSAs
++      case LST_SUMM:	// Summary-link LSAs (inter-area routes)
++      case LST_ASBR:	// ASBR-summaries (inter-area)
++      case LST_GM:	// Group-membership-LSA (MOSPF)
++      case LST_AREA_OPQ:// Area-scoped Opaque-LSAs
++	return(AreaScope);
++      case LST_ASL: 	// AS-external_LSAs
++      case LST_AS_OPQ:	// AS-scoped Opaque-LSAs
++	return(GlobalScope);
++      default:
++	break;
++    }
++
++    return(0);
++}
++
+ /* The ospfd_html program is a CGI application
+  * that establishes a TCP connection to the ospfd
+  * routing daemon, and then based on information
+@@ -261,7 +290,7 @@
+ 	else if (strncmp(command, "area", 4) == 0)
+ 	    get_areas(true);
+ 	else if (strncmp(command, "data", 4) == 0)
+-	    get_database(0);
++	    get_database(LST_RTR);
+ 	else if (strncmp(command, "as", 2) == 0)
+ 	    get_database(LST_ASL);
+ 	else if (strncmp(command, "int", 3) == 0)
+@@ -276,6 +305,8 @@
+ 	    get_lsa();
+ 	else if (strncmp(command, "opqs", 4) == 0)
+ 	    get_opaques();
++	else if (strncmp(command, "lladv", 5) == 0)
++	    get_lllsa();
+     }
+ 
+     display_html(page_footer);
+@@ -335,6 +366,8 @@
+     addVP(&pairs, "overflow", yesorno(s->overflow_state));
+     sprintf(buffer, "%d.%d", s->vmajor, s->vminor);
+     addVP(&pairs, "sw_vers", buffer);
++    sprintf(buffer, "%d", ntoh32(s->n_orig_allocs));
++    addVP(&pairs, "n_orig_allocs", buffer);
+     if (print)
+ 	display_html(statistics_page);
+ }
+@@ -443,13 +476,15 @@
+     int n_lsas = 0;
+     uns32 xsum = 0;
+     ValuePair *entry;
++    bool global_scope;
+ 
++    global_scope = (flooding_scope(lstype) == GlobalScope);
+     get_statistics(false);
+     if ((entry = (ValuePair *)pairs.find("area_id"))) {
+ 	a_id = ntoh32(inet_addr(entry->value));
+ 	display_html(database_page_top);
+     }
+-    else if (lstype != LST_ASL) {
++    else if (!global_scope) {
+         if (get_areas(false) > 1) {
+ 	    display_html(select_area_top);
+ 	    for (int i=0; ; i++) {
+@@ -474,7 +509,7 @@
+ 
+     ls_id = 0;
+     adv_rtr = 0;
+-    new_lstype = lstype;
++    new_lstype = 0;
+ 
+     while (1) {
+ 	MonHdr *mhdr;
+@@ -512,9 +547,7 @@
+ 	    break;
+ 	new_lstype = ntoh32(m->body.lsarq.ls_type);
+ 	if (new_lstype != lstype) {
+-	    if (lstype == LST_ASL)
+-		break;
+-	    if (new_lstype == LST_ASL) {
++	    if (flooding_scope(new_lstype) != flooding_scope(lstype)) {
+ 	        new_lstype++;
+ 		ls_id = 0;
+ 		adv_rtr = 0;
+@@ -587,7 +620,7 @@
+     display_html(database_page_bottom);
+ }
+ 
+-/* Get the Opaque-LSAs, through the registration interface.
++/* Get the Link-local LSAs.
+  */
+ 
+ void get_opaques()
+@@ -597,17 +630,15 @@
+     int mlen;
+     int n_lsas = 0;
+     uns32 xsum = 0;
++    InAddr if_addr = 0;
++    int phyint = 0;
++    aid_t taid = 0;
++    byte new_lstype = 0;
++    lsid_t ls_id = 0;
++    rtid_t adv_rtr = 0;
+ 
++    get_statistics(false);
+     display_html(opaque_page_top);
+-    req.hdr.version = OSPF_MON_VERSION;
+-    req.hdr.retcode = 0;
+-    req.hdr.exact = 0;
+-    mlen = sizeof(MonHdr);
+-    req.hdr.id = hton16(id++);
+-    if (!monpkt->sendpkt_suspend(&req, MonReq_OpqReg, 0, mlen)) {
+-        display_error("Send failed");
+-	exit(0);
+-    }
+ 
+     while (1) {
+ 	MonHdr *mhdr;
+@@ -622,9 +653,15 @@
+ 	req.hdr.version = OSPF_MON_VERSION;
+ 	req.hdr.retcode = 0;
+ 	req.hdr.exact = 0;
+-	mlen = sizeof(MonHdr);
++	mlen = sizeof(MonHdr) + sizeof(MonRqLLLsa);
+ 	req.hdr.id = hton16(id++);
+-	if (!monpkt->sendpkt_suspend(&req, MonReq_OpqNext, 0, mlen)) {
++	req.body.lllsarq.if_addr = hton32(if_addr);
++	req.body.lllsarq.phyint = hton32(phyint);
++	req.body.lllsarq.taid = hton32(taid);
++	req.body.lllsarq.ls_type = hton32(new_lstype);
++	req.body.lllsarq.ls_id = hton32(ls_id);
++	req.body.lllsarq.adv_rtr = hton32(adv_rtr);
++	if (!monpkt->sendpkt_suspend(&req, MonReq_LLLSA, 0, mlen)) {
+             display_error("Send failed");
+ 	    exit(0);
+ 	}
+@@ -637,37 +674,36 @@
+ 	m = (MonMsg *) mhdr;
+ 	if (m->hdr.retcode != 0)
+ 	    break;
+-	addVP(&pairs, "phyint", "n/a");
+-	addVP(&pairs, "if_addr", "n/a");
+-	addVP(&pairs, "area_id", "n/a");
+ 
+ 	n_lsas++;
+-	lshdr = (LShdr *) (((char *) m) + sizeof(MonHdr) + sizeof(OpqRsp));
++	lshdr = (LShdr *) (((char *) m) + sizeof(MonHdr) + sizeof(MonRqLLLsa));
+ 	xsum += ntoh16(lshdr->ls_xsum);
+ 	sprintf(buffer, "%d", lshdr->ls_type);
+ 	addVP(&pairs, "ls_typeno", buffer);
++	new_lstype = lshdr->ls_type;
+ 	// Print out Link state header
+-	switch (lshdr->ls_type) {
+-	case LST_LINK_OPQ:
+ 	    addVP(&pairs, "ls_type", "Link Opaque");
+-	    sprintf(buffer, "%d", ntoh32(m->body.opqrsp.phyint));
++	sprintf(buffer, "%d", ntoh32(m->body.lllsarq.phyint));
++	phyint = ntoh32(m->body.lllsarq.phyint);
+ 	    addVP(&pairs, "phyint", buffer);
+-	    in = *((in_addr *) &m->body.opqrsp.if_addr);
++	in = *((in_addr *) &m->body.lllsarq.if_addr);
+ 	    addVP(&pairs, "if_addr", inet_ntoa(in));
+-	    break;
+-	case LST_AREA_OPQ:
+-	    addVP(&pairs, "ls_type", "Area Opaque");
+-	    in = *((in_addr *) &m->body.opqrsp.a_id);
++	if_addr = ntoh32(in.s_addr);
++	in = *((in_addr *) &m->body.lllsarq.taid);
++	taid = ntoh32(in.s_addr);
++	addVP(&pairs, "taid", inet_ntoa(in));
++	// For link-local LSAs associated with virtual links,
++	// put transit area in phyint. If address already holds
++	// the Router ID of the other endpoint.
++	addVP(&pairs, "phyname", m->body.lllsarq.phyname);
++	in = *((in_addr *) &m->body.lllsarq.a_id);
+ 	    addVP(&pairs, "area_id", inet_ntoa(in));
+-	    break;
+-	case LST_AS_OPQ:
+-	    addVP(&pairs, "ls_type", "AS Opaque");
+-	    break;
+-	}
+ 	in = *((in_addr *) &lshdr->ls_id);
+ 	addVP(&pairs, "ls_id", inet_ntoa(in));
++	ls_id = ntoh32(in.s_addr);
+ 	in = *((in_addr *) &lshdr->ls_org);
+ 	addVP(&pairs, "adv_rtr", inet_ntoa(in));
++	adv_rtr = ntoh32(in.s_addr);
+ 	sprintf(buffer, "0x%08x", ntoh32(lshdr->ls_seqno));
+ 	addVP(&pairs, "seqno", buffer);
+ 	sprintf(buffer, "0x%04x", ntoh16(lshdr->ls_xsum));
+@@ -778,6 +814,77 @@
+     display_html(expand_lsa_bottom);
+ }
+ 
++/* Get a given link-local LSA, and print it out in detail.
++ */
++
++void get_lllsa()
++
++{
++    MonMsg req;
++    int mlen;
++    uns32 taid=0;
++    uns32 ls_id=0;
++    uns32 adv_rtr=0;
++    byte lstype=0;
++    InAddr if_addr=0;
++    int phyint=-1;
++    MonHdr *mhdr;
++    MonMsg *m;
++    LShdr *lshdr;
++    uns16 type;
++    uns16 subtype;
++    ValuePair *entry;
++
++    if ((entry = (ValuePair *)pairs.find("ls_type")))
++        lstype = atoi(entry->value);
++    if ((entry = (ValuePair *)pairs.find("ls_id")))
++        ls_id = ntoh32(inet_addr(entry->value));
++    if ((entry = (ValuePair *)pairs.find("adv_rtr")))
++        adv_rtr = ntoh32(inet_addr(entry->value));
++    if ((entry = (ValuePair *)pairs.find("taid")))
++	taid = ntoh32(inet_addr(entry->value));
++    if ((entry = (ValuePair *)pairs.find("if_addr")))
++	if_addr = ntoh32(inet_addr(entry->value));
++    if ((entry = (ValuePair *)pairs.find("phyint")) &&
++	strcmp(entry->value, "n/a") != 0)
++	phyint = atoi(entry->value);
++
++    req.hdr.version = OSPF_MON_VERSION;
++    req.hdr.retcode = 0;
++    req.hdr.exact = 1;
++    req.body.lllsarq.if_addr = hton32(if_addr);
++    req.body.lllsarq.phyint = hton32(phyint);
++    req.body.lllsarq.taid = hton32(taid);
++    req.body.lllsarq.ls_type = hton32(lstype);
++    req.body.lllsarq.ls_id = hton32(ls_id);
++    req.body.lllsarq.adv_rtr = hton32(adv_rtr);
++    mlen = sizeof(MonHdr) + sizeof(MonRqLLLsa);
++    req.hdr.id = hton16(id++);
++    if (!monpkt->sendpkt_suspend(&req, MonReq_LLLSA, 0, mlen)) {
++        display_error("Send failed");
++	exit(0);
++    }
++
++    if (monpkt->rcv_suspend((void **)&mhdr, type, subtype) == -1) {
++        display_error("Receive failed");
++	exit(0);
++    }
++
++    m = (MonMsg *) mhdr;
++    if (m->hdr.retcode != 0) {
++	printf("LSA not found\n");
++	return;
++    }
++    // Print out LSA
++    lshdr = (LShdr *) (((char *) m) + mlen);
++    if (taid == 0)
++        display_html(expand_lllsa_top);
++    else
++        display_html(expand_vllsa_top);
++    print_lsa(lshdr);
++    display_html(expand_lsa_bottom);
++}
++
+ /* Print out a line for each interface.
+  */
+ 
+@@ -1241,6 +1348,10 @@
+ <td>ospfd version</td>\n\
+ <td>$sw_vers$</td>\n\
+ </tr>\n\
++<tr>\n\
++<td># LSA orig. allocations</td>\n\
++<td>$n_orig_allocs$</td>\n\
++</tr>\n\
+ </table>\n";
+ 
+ /* The areas page.
+@@ -1393,15 +1504,16 @@
+ </table>\n\
+ </table>\n";
+ 
+-/* The pages used to display the Opaque-LSAs
++/* The pages used to display the Link-local LSAs
+  */
+ 
+ char *opaque_page_top = "\
+ <table>\n\
+ <tr>\n\
+ <td width=200>\n\
+-Router $router_id$'s link-state database for OSPF\n\
+-Area $area_id$. AS-external-LSAs are not included.\n\
++Router $router_id$'s link-local LSAs,\n\
++associated with the interfaces specified\n\
++by the first three columns.\n\
+ </td>\n\
+ </tr>\n\
+ <tr>\n\
+@@ -1409,8 +1521,8 @@
+ </center>\n\
+ <table border=1>\n\
+ <tr>\n\
+-<th>Phyint</th>\n\
+-<th>If Address</th>\n\
++<th>Phy</th>\n\
++<th>Addr</th>\n\
+ <th>Area</th>\n\
+ <th>LS type</th>\n\
+ <th>LS ID</th>\n\
+@@ -1423,10 +1535,10 @@
+ 
+ char *opaque_row = "\
+ <tr>\n\
+-<td>$phyint$</a></td>\n\
++<td>$phyname$</a></td>\n\
+ <td>$if_addr$</a></td>\n\
+ <td>$area_id$</a></td>\n\
+-<td>$ls_type$</a></td>\n\
++<td><a href=\"/cgi-bin/ospfd_browser?command=lladv&addr=$addr$&port=$port$&if_addr=$if_addr$&phyint=$phyint$&phyname=$phyname$&taid=$taid$&area_id=$area_id$&ls_type=$ls_typeno$&ls_id=$ls_id$&adv_rtr=$adv_rtr$\">$ls_type$</a></td>\n\
+ <td>$ls_id$</td>\n\
+ <td>$adv_rtr$</td>\n\
+ <td>$seqno$</td>\n\
+@@ -1510,6 +1622,25 @@
+ <hr>\n\
+ <pre>\n";
+ 
++char *expand_lllsa_top = "\
++<table cellpadding=0 border=0>\n\
++<tr>\n\
++<td>\n\
++The following link-local LSA was found for the\n\
++interface with IP address $if_addr$ and phyint $phyname$ attaching\n\
++to Area $area_id$:\n\
++<hr>\n\
++<pre>\n";
++
++char *expand_vllsa_top = "\
++<table cellpadding=0 border=0>\n\
++<tr>\n\
++<td>\n\
++The following link-local LSA was found for the\n\
++Virtual link to Router ID $if_addr$ through Transit Area $taid$.\n\
++<hr>\n\
++<pre>\n";
++
+ char *expand_lsa_bottom = "\
+ </pre>\n\
+ </td>\n\
+@@ -1628,14 +1759,14 @@
+ <font face=\"Geneva, Arial, Helvetica\" >\n\
+ <p><center>\n\
+ <a href=\"/cgi-bin/ospfd_browser?command=area&addr=$addr$&port=$port$\">Areas</a> |\n\
+-<a href=\"/cgi-bin/ospfd_browser?command=database&addr=$addr$&port=$port$\">Database</a> |\n\
++<a href=\"/cgi-bin/ospfd_browser?command=database&addr=$addr$&port=$port$\">Area Database</a> |\n\
+ <a href=\"/cgi-bin/ospfd_browser?command=interface&addr=$addr$&port=$port$\">Interfaces</a> |\n\
+ <a href=\"/cgi-bin/ospfd_browser?command=neighbor&addr=$addr$&port=$port$\">Neighbors</a> |\n\
+ <a href=\"/cgi-bin/ospfd_browser?command=statistics&addr=$addr$&port=$port$\">Statistics</a> |\n\
+ <a href=\"/cgi-bin/ospfd_browser?command=lsa&addr=$addr$&port=$port$\">LSA expansion</a> |\n\
+-<a href=\"/cgi-bin/ospfd_browser?command=ases&addr=$addr$&port=$port$\">AS externals</a> |\n\
++<a href=\"/cgi-bin/ospfd_browser?command=ases&addr=$addr$&port=$port$\">Global-scoped LSAs</a> |\n\
+ <a href=\"/cgi-bin/ospfd_browser?command=route&addr=$addr$&port=$port$\">Routing table</a> |\n\
+-<a href=\"/cgi-bin/ospfd_browser?command=opqs&addr=$addr$&port=$port$\">Opaque-LSAs</a>\n\
++<a href=\"/cgi-bin/ospfd_browser?command=opqs&addr=$addr$&port=$port$\">Link-local LSAs</a>\n\
+ </center>\n\
+ </td>\n\
+ </tr>\n\
+diff -X exclude_files -Nabur ospfd2.3/linux/ospfd_linux.C ospfd2.4/linux/ospfd_linux.C
+--- ospfd2.3/linux/ospfd_linux.C	Mon May 21 10:19:28 2001
++++ ospfd2.4/linux/ospfd_linux.C	Thu Sep 13 16:05:44 2001
+@@ -861,7 +861,7 @@
+ {
+     new_router_id = ntoh32(inet_addr(argv[1]));
+     if (!ospf)
+-	ospf = new OSPF(new_router_id);
++	ospf = new OSPF(new_router_id, sys_etime);
+     return(TCL_OK);
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.3/linux/ospfd_linux.h ospfd2.4/linux/ospfd_linux.h
+--- ospfd2.3/linux/ospfd_linux.h	Mon May 21 10:19:28 2001
++++ ospfd2.4/linux/ospfd_linux.h	Thu Sep 13 16:05:44 2001
+@@ -61,6 +61,7 @@
+     void upload_remnants();
+     char *phyname(int phyint);
+     void sys_spflog(int msgno, char *msgbuf);
++    void store_hitless_parms(int, int, struct MD5Seq *);
+     void halt(int code, char *string);
+ 
+     void read_config();
+diff -X exclude_files -Nabur ospfd2.3/linux/system.C ospfd2.4/linux/system.C
+--- ospfd2.3/linux/system.C	Mon May 21 10:19:28 2001
++++ ospfd2.4/linux/system.C	Thu Sep 13 16:05:44 2001
+@@ -664,3 +664,37 @@
+     else
+         exit(0);
+ }
++
++/* Store the hitless restart parameters in the file
++ * /etc/ospfd.restart. These are regular TCL commands, which
++ * will get read again when the ospfd restarts.
++ */
++
++const char *ospfd_rst_file = "/etc/ospfd.restart";
++
++void LinuxOspfd::store_hitless_parms(int grace_period, int n, MD5Seq *sns)
++
++{
++    FILE *f;
++    extern rtid_t new_router_id;
++    in_addr addr;
++
++    if (!(f = fopen(ospfd_rst_file, "w"))) {
++        syslog(LOG_ERR, "Can't open %s for writing: %m", ospfd_rst_file);
++	return;
++    }
++
++    fprintf(f, "grace_period %d\n", grace_period);
++    addr.s_addr = hton32(new_router_id);
++    fprintf(f, "routerid %s\n", inet_ntoa(addr));
++    for (int i = 0; i < n; i++) {
++        if (sns[i].if_addr != 0) {
++	    addr.s_addr = hton32(sns[i].if_addr);
++	    fprintf(f, "interface %s 1\n", inet_ntoa(addr));
++	}
++	else
++	    fprintf(f, "interface %s 1\n", phyname(sns[i].phyint));
++	fprintf(f, "md5_seqno %d\n", sns[i].seqno);
++    }
++    fclose(f);
++}
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/linux/Makefile ospfd2.4/ospf_sim/linux/Makefile
+--- ospfd2.3/ospf_sim/linux/Makefile	Mon May 21 10:19:33 2001
++++ ospfd2.4/ospf_sim/linux/Makefile	Thu Sep 13 16:05:52 2001
+@@ -17,6 +17,7 @@
+ 	  config.o \
+ 	  dbage.o \
+ 	  grplsa.o \
++	  helper.o \
+ 	  hostmode.o \
+ 	  ifcfsm.o \
+ 	  lsa.o \
+@@ -32,6 +33,7 @@
+ 	  pat.o \
+ 	  phyint.o \
+ 	  priq.o \
++	  restart.o \
+ 	  rte.o \
+ 	  rtrlsa.o \
+ 	  spfack.o \
+@@ -51,6 +53,7 @@
+ 	  linux.o \
+ 	  ospfd_sim.o \
+ 	  tcppkt.o \
++	  tlv.o \
+ 	  sim_system.o
+ 
+ 
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/mtrace.C ospfd2.4/ospf_sim/mtrace.C
+--- ospfd2.3/ospf_sim/mtrace.C	Mon May 21 10:19:32 2001
++++ ospfd2.4/ospf_sim/mtrace.C	Thu Sep 13 16:05:51 2001
+@@ -177,6 +177,9 @@
+     int len;
+     IgmpPkt *igmppkt;
+ 
++    if (!ospf)
++        return;
++
+     len = ntoh16(pkt->i_len);
+     igmppkt = (IgmpPkt *)(pkt + 1);
+     switch(igmppkt->ig_type) {
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/ospfd_sim.C ospfd2.4/ospf_sim/ospfd_sim.C
+--- ospfd2.3/ospf_sim/ospfd_sim.C	Mon May 21 10:19:32 2001
++++ ospfd2.4/ospf_sim/ospfd_sim.C	Thu Sep 13 16:05:50 2001
+@@ -112,6 +112,12 @@
+ 	// Flush any logging messages
+ 	if (ospf)
+ 	    ospf->logflush();
++	// If hitless restart preparation done, start ospfd again
++	if (simsys->hitless_preparation_complete) {
++	    simsys->hitless_preparation_complete = false;
++	    delete ospf;
++	    ospf = 0;
++	}
+ 	// Add connection to controller
+ 	n_fd = simsys->ctl_fd;
+ 	FD_SET(simsys->ctl_fd, &fdset);
+@@ -191,16 +197,12 @@
+     InAddr daddr;
+     SimRte *rte;
+ 
+-    // Discard packet if OSPF not ready
+-    if (!ospf)
+-        return;
+-
+     pkt = (InPkt *) (pkthdr+1);
+     daddr = ntoh32(pkt->i_dest);
+     xmt_stamp = pkthdr->ts;
+     if (!IN_CLASSD(daddr)) {
+ 	InAddr home;
+-        if ((!get_port_addr(daddr, home)) || (home != ospf->my_id())) {
++        if ((!get_port_addr(daddr, home)) || (home != my_id)) {
+ 	    if (!(rte = rttbl.best_match(daddr))) {
+ 	        sendicmp(ICMP_TYPE_UNREACH, ICMP_CODE_UNREACH_HOST,
+ 			 0, 0, pkt, 0, 0, 0);
+@@ -259,6 +261,8 @@
+ 
+     switch(pkt->i_prot) {
+       case PROT_OSPF:
++	// Discard packet if OSPF not ready
++	if (ospf)
+ 	ospf->rxpkt(phyint, pkt, ntoh16(pkt->i_len));
+ 	break;
+       case PROT_ICMP:
+@@ -337,7 +341,11 @@
+     socklen size;
+     SimHello hello;
+ 
++    grace_period = sys_etime;
++    hitless_preparation = false;
++    hitless_preparation_complete = false;
+     ctl_fd = fd;
++    my_addr = 0;
+     // Initialize time
+     ticks = 0;
+     // Allow core files
+@@ -404,6 +412,7 @@
+ 	PingStartMsg *pm;
+ 	MTraceHdr *mtrm;
+ 	MTraceSession *mtrace;
++	HitlessRestartMsg *htlm;
+ 	int phyint;
+         end = msg + nbytes;
+ 	xmt_stamp = sys_etime;
+@@ -419,7 +428,7 @@
+ 	    xmt_stamp = sys_etime;
+ 	    // Start OSPF, delayed so that time is initialized
+ 	    // correctly
+-	    ospf = new OSPF(my_id);
++	    ospf = new OSPF(my_id, sys_etime);
+ 	    break;
+ 	  case SIM_TICK:
+ 	    // Advance time
+@@ -429,6 +438,7 @@
+ 	    sys_etime.msec = (ticks%TICKS_PER_SECOND) * 1000/TICKS_PER_SECOND;
+ 	    xmt_stamp = sys_etime;
+ 	    // Process any pending timers
++	    if (ospf)
+ 	    ospf->tick();
+ 	    // Process any queued receives
+ 	    process_rcvqueue();
+@@ -440,6 +450,7 @@
+ 	    config(type, subtype, msg);
+ 	    break;
+  	  case SIM_SHUTDOWN:
++	    if (ospf)
+ 	    ospf->shutdown(10);
+ 	    break;
+ 	  case SIM_ADDRMAP:
+@@ -485,11 +496,13 @@
+ 	    break;
+ 	  case SIM_ADD_MEMBER:
+ 	    grpm = (GroupMsg *) msg;
++	    if (ospf)
+ 	    ospf->join_indication(grpm->group, grpm->phyint);
+ 	    join(grpm->group, grpm->phyint);
+ 	    break;
+ 	  case SIM_DEL_MEMBER:
+ 	    grpm = (GroupMsg *) msg;
++	    if (ospf)
+ 	    ospf->leave_indication(grpm->group, grpm->phyint);
+ 	    leave(grpm->group, grpm->phyint);
+ 	    break;
+@@ -508,6 +521,11 @@
+ 	    // Will then get First tick, and config
+ 	    break;
+  	  case SIM_RESTART_HITLESS:
++	    htlm = (HitlessRestartMsg *) msg;
++	    if (ospf)
++	        ospf->hitless_restart(htlm->period, 1);
++	    else
++	        ospf = new OSPF(my_id, grace_period);
+ 	    break;
+ 	  default:
+ 	    break;
+@@ -526,6 +544,9 @@
+     
+     status = (type == SIM_CONFIG) ? ADD_ITEM : DELETE_ITEM;
+ 
++    if (!ospf)
++        return;
++
+     switch(subtype) {
+         PhyintMap *phyp;
+ 	CfgIfc *ifcmsg;
+@@ -549,6 +570,8 @@
+ 	}
+ 	phyp->addr = ifcmsg->address;
+ 	phyp->mask = ifcmsg->mask;
++	if (!my_addr)
++	    my_addr = ifcmsg->address;
+ 	ospf->cfgIfc(ifcmsg, status);
+ 	break;
+       case CfgType_VL:
+@@ -587,7 +610,6 @@
+ 
+ {
+     DBStats *statp;
+-    AreaIterator iter(ospf);
+     SpfArea *ap;
+     SpfArea *low;
+     int mlen;
+@@ -595,16 +617,22 @@
+     low = 0;
+     statp = new DBStats;
+     mlen = sizeof(DBStats);
++
++    if (ospf) {
++	AreaIterator iter(ospf);
+     statp->n_exlsas = ospf->n_extLSAs();
+     statp->ex_dbxsum = ospf->xsum_extLSAs();
+-
+-
+     while ((ap = iter.get_next())) {
+       if (ap->n_active_if == 0)
+ 	  continue;
+       if (!low || low->id() > ap->id())
+ 	  low = ap;
+     }
++    }
++    else {
++	statp->n_exlsas = 0;
++	statp->ex_dbxsum = 0;
++    }
+ 
+     if (low) {
+ 	statp->area_id = low->id();
+@@ -695,6 +723,9 @@
+     SimPktHdr *data;
+     MCache *ce;
+ 
++    if (!ospf)
++        return;
++
+     len = ntoh16(pkt->i_len);
+     data = (SimPktHdr *) new byte[len+sizeof(SimPktHdr)];
+     data->ts = xmt_stamp;
+@@ -761,7 +792,7 @@
+         if (mapp->index1() != (uns32) phyint)
+ 	    break;
+ 	// Loopback ping packets
+-        if (mapp->home == ospf->my_id()) {
++        if (mapp->home == my_id) {
+ 	    if (loopback)
+ 	       rxpkt(data); 
+ 	    continue;
+@@ -936,7 +967,7 @@
+     iphdr->i_len = hton16(len);
+     iphdr->i_id = 0;
+     iphdr->i_ttl = ((ttl != 0) ? ttl : DEFAULT_TTL);
+-    iphdr->i_src = src ? hton32(src) : hton32(ospf->ip_source(dest));
++    iphdr->i_src = src ? hton32(src) : hton32(ip_source(dest));
+     iphdr->i_dest = hton32(dest);
+     iphdr->i_chksum = 0;	// Don't bother
+ 
+@@ -1053,5 +1084,22 @@
+ 	    break;
+     }
+ 
+-    return(rte->reject ? 0 : rte);
++    return((!rte || rte->reject) ? 0 : rte);
++}
++
++/* Find the source address that would be used to send
++ * packets to the given destination.
++ */
++
++InAddr SimSys::ip_source(InAddr dest)
++
++{
++    SimRte *rte;
++
++    if ((rte = rttbl.best_match(dest))) {
++        if (rte->if_addr != 0)
++	    return(rte->if_addr);
++    }
++
++    return(my_addr);
+ }
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/ospfd_sim.h ospfd2.4/ospf_sim/ospfd_sim.h
+--- ospfd2.3/ospf_sim/ospfd_sim.h	Mon May 21 10:19:32 2001
++++ ospfd2.4/ospf_sim/ospfd_sim.h	Thu Sep 13 16:05:50 2001
+@@ -78,6 +78,7 @@
+     int uni_fd;	// Connection for packets addressed to us
+     uns16 uni_port; // Our port for locally addressed packets
+     int ticks; // Elapsed time in simulated ticks
++    InAddr my_addr;	// One of router's IP addresses
+     AVLtree address_map; // IP address to group mapping
+     AVLtree port_map; // Phyint to file descriptor mapping
+     AVLtree membership; // Interface group membership		   
+@@ -90,6 +91,12 @@
+     AVLtree traceroutes;// Active traceroute sessions
+     AVLtree mtraces;	// Active multicast traceroutes
+     uns32 mtrace_qid;	// Next mtrace query ID
++    // Stored hitless restart parameters
++    bool hitless_preparation;
++    bool hitless_preparation_complete;
++    SPFtime grace_period;
++    int n_md5;
++    MD5Seq *snarray;
+   public:
+     SimSys(int fd);
+     ~SimSys();
+@@ -111,6 +118,7 @@
+     virtual void upload_remnants();
+     char *phyname(int phyint);
+     void sys_spflog(int code, char *buffer);
++    virtual void store_hitless_parms(int, int, struct MD5Seq *);
+     void halt(int code, char *string);
+ 
+     void process_uni_fd();
+@@ -129,6 +137,7 @@
+     void recv_ctl_command();
+     void config(int type, int subtype, void *msg);
+     void send_tick_response();
++    InAddr ip_source(InAddr dest);
+ 
+     friend int main(int argc, char *argv[]);
+     friend class PingSession;
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/sim.C ospfd2.4/ospf_sim/sim.C
+--- ospfd2.3/ospf_sim/sim.C	Mon May 21 10:19:32 2001
++++ ospfd2.4/ospf_sim/sim.C	Thu Sep 13 16:05:50 2001
+@@ -700,6 +700,7 @@
+     fd = file;
+     got_tick = true;
+     home_port = 0;
++    awaiting_htl_restart = false;
+     dbstats = 0;
+     sim->nodes[fd] = this;
+     sim->maxfd = MAX(file, sim->maxfd);
+@@ -781,13 +782,25 @@
+     SimNode *node;
+     HitlessRestartMsg m;
+ 
+-    m.period = 60;
++    m.period = 100;
+     id = ntoh32(inet_addr(argv[1]));
+     if (!(node = (SimNode *) sim->simnodes.find(id, 0)))
+         Tcl_VarEval(interp, "startrtr ", argv[1], 0);
+-    else
++    else if (node->awaiting_htl_restart) {
++	// Complete hitless restart
++        in_addr addr;
++        node->awaiting_htl_restart =  false;
+         node->pktdata.queue_xpkt(&m, SIM_RESTART_HITLESS, 0, sizeof(m));
+-
++	// Download node's configuration
++	addr.s_addr = hton32(node->id());
++	if (Tcl_VarEval(sim->interp,"sendcfg ", inet_ntoa(addr),0) != TCL_OK)
++	    printf("sendcfg: %s\n", sim->interp->result);
++    }
++    else {
++        // Prepare for hitless restart
++        node->awaiting_htl_restart = true;
++        node->pktdata.queue_xpkt(&m, SIM_RESTART_HITLESS, 0, sizeof(m));
++    }
+     return(TCL_OK);
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/sim_system.C ospfd2.4/ospf_sim/sim_system.C
+--- ospfd2.3/ospf_sim/sim_system.C	Mon May 21 10:19:32 2001
++++ ospfd2.4/ospf_sim/sim_system.C	Thu Sep 13 16:05:50 2001
+@@ -308,7 +308,28 @@
+ 
+ {   char buffer[80];
+ 
++    if (code == 0 && hitless_preparation) {
++        hitless_preparation = false;
++        hitless_preparation_complete = true;
++        return;
++    }
+     sprintf(buffer, "Exiting: %s, code %d", string, code);
+     sys_spflog(ERR_SYS, buffer);
+     abort();
+ }
++
++/* Simulated router has successfully prepared for a hitless
++ * restart.
++ */
++
++void SimSys::store_hitless_parms(int period, int n, MD5Seq *sns)
++
++{
++    time_add(sys_etime, period*Timer::SECOND, &grace_period);
++    delete snarray;
++    snarray = new MD5Seq[n];
++    n_md5 = n;
++    memcpy(snarray, sns, n*sizeof(MD5Seq));
++    hitless_preparation = true;
++}
++
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/simctl.h ospfd2.4/ospf_sim/simctl.h
+--- ospfd2.3/ospf_sim/simctl.h	Mon May 21 10:19:32 2001
++++ ospfd2.4/ospf_sim/simctl.h	Thu Sep 13 16:05:50 2001
+@@ -95,6 +95,7 @@
+     bool got_tick;	// Received tick response (init to true!)
+     NodeStats *dbstats; // Stored database statistics
+     uns16 home_port;	// Unicast listening port
++    bool awaiting_htl_restart;
+     int color;		// Current node color
+     enum {		// Available colors
+         WHITE,		// not synched
+diff -X exclude_files -Nabur ospfd2.3/ospf_sim/x86/Makefile ospfd2.4/ospf_sim/x86/Makefile
+--- ospfd2.3/ospf_sim/x86/Makefile	Mon May 21 10:19:31 2001
++++ ospfd2.4/ospf_sim/x86/Makefile	Thu Sep 13 16:05:50 2001
+@@ -17,6 +17,7 @@
+ 	  config.o \
+ 	  dbage.o \
+ 	  grplsa.o \
++	  helper.o \
+ 	  hostmode.o \
+ 	  ifcfsm.o \
+ 	  lsa.o \
+@@ -32,6 +33,7 @@
+ 	  pat.o \
+ 	  phyint.o \
+ 	  priq.o \
++	  restart.o \
+ 	  rte.o \
+ 	  rtrlsa.o \
+ 	  spfack.o \
+@@ -51,6 +53,7 @@
+ 	  linux.o \
+ 	  ospfd_sim.o \
+ 	  tcppkt.o \
++	  tlv.o \
+ 	  sim_system.o
+ 
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/asbrlsa.C ospfd2.4/src/asbrlsa.C
+--- ospfd2.3/src/asbrlsa.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/asbrlsa.C	Thu Sep 13 16:05:43 2001
+@@ -107,12 +107,12 @@
+     }
+ 
+  get_seqno:
+-    if ((seqno = ospf->ospf_get_seqno(olsap, length, forced)) == InvalidLSSeq)
++    if ((seqno = ospf->ospf_get_seqno(LST_ASBR,olsap, forced)) == InvalidLSSeq)
+ 	return;
+ 
+     // Fill in LSA contents
+     // Header
+-    hdr = ospf->orig_buffer();
++    hdr = ospf->orig_buffer(length);
+     hdr->ls_opts = 0;
+     if (ls_id != ospf->my_id())
+         hdr->ls_opts |= SPO_DC;
+@@ -131,6 +131,7 @@
+     summ->metric = hton32(cost);
+ 
+     (void) ospf->lsa_reorig(0, this, olsap, hdr, forced);
++    ospf->free_orig_buffer(hdr);
+ }
+ 
+ /* Figure out whether we should be injecting an indication-LSA
+diff -X exclude_files -Nabur ospfd2.3/src/asexlsa.C ospfd2.4/src/asexlsa.C
+--- ospfd2.3/src/asexlsa.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/asexlsa.C	Thu Sep 13 16:05:43 2001
+@@ -342,7 +342,7 @@
+ 	lsa_flush(olsap);
+ 	return;
+     }
+-    if ((seqno = ospf->ospf_get_seqno(olsap, length, forced))
++    if ((seqno = ospf->ospf_get_seqno(LST_ASL, olsap, forced))
+ 	== InvalidLSSeq)
+ 	return;
+ 
+@@ -350,7 +350,7 @@
+     rte->ase_orig = true;
+     // Fill in LSA contents
+     // Header
+-    hdr = ospf->orig_buffer();
++    hdr = ospf->orig_buffer(length);
+     hdr->ls_opts = SPO_DC | SPO_EXT;
+     if (exdata->mc)
+ 	hdr->ls_opts |= SPO_MC;
+@@ -369,6 +369,7 @@
+     ase->rtag = hton32(exdata->tag);
+ 
+     nlsap = (ASextLSA *) ospf->lsa_reorig(0, 0, olsap, hdr, forced);
++    ospf->free_orig_buffer(hdr);
+     if (nlsap)
+ 	nlsap->orig_rte = rte;
+ 
+@@ -418,6 +419,10 @@
+ void ASextLSA::reoriginate(int forced)
+ 
+ {
++    if (!orig_rte) {
++        lsa_flush(this);
++        return;
++    }
+     ospf->ase_orig(orig_rte, forced);
+ }
+ 
+@@ -640,7 +645,8 @@
+     if (intra_AS() && r_mpath == 0)
+ 	declare_unreachable();
+     // If the ASBR has changed, redo type-4 summary-LSAs
+-    if (state_changed() || otype != r_type || oa != area()) {
++    if (state_changed() || otype != r_type || oa != area() ||
++	ospf->exiting_htl_restart) {
+ 	ospf->ase_sched = true;
+ 	ospf->asbr_orig(this);
+     }
+@@ -905,7 +911,8 @@
+ 	new_type != r_type ||
+ 	best_cost != cost ||
+ 	best_t2cost != t2cost ||
+-	best_tag != tag) {
++	     best_tag != tag ||
++	     ospf->exiting_htl_restart) {
+ 	update(best_path);
+ 	r_type = new_type;
+ 	cost = best_cost;
+diff -X exclude_files -Nabur ospfd2.3/src/dbage.C ospfd2.4/src/dbage.C
+--- ospfd2.3/src/dbage.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/dbage.C	Thu Sep 13 16:05:43 2001
+@@ -106,6 +106,9 @@
+ 
+     // Age the link-state database
+     ospf->dbage();
++    // Exit helper mode?
++    if (ospf->topology_change)
++	ospf->htl_topology_change();
+     // Delete down neighbors
+     ospf->delete_down_neighbors();
+     // Establish more adjacencies?
+@@ -131,10 +134,18 @@
+     // Synchronize with kernel
+     ospf->krt_sync();
+ 
+-    // If not performing a hitless restart, upload remnants
++    // Upload remnants of routing table installed by previous instances
+     if (ospf->need_remnants) {
+         ospf->need_remnants = false;
+ 	sys->upload_remnants();
++    }
++
++    // Perform hitless restart processing
++    if (ospf->in_hitless_restart()) {
++        if (ospf->check_htl_termination)
++	    ospf->htl_exit_criteria();
++        if (ospf->start_htl_exit)
++	    ospf->exit_hitless_restart(ospf->htl_exit_reason);
+     }
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/grplsa.C ospfd2.4/src/grplsa.C
+--- ospfd2.3/src/grplsa.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/grplsa.C	Thu Sep 13 16:05:43 2001
+@@ -118,11 +118,11 @@
+     while ((entry = iter.next()) && entry->index1() == group)
+ 	maxlen += sizeof(GMref);
+     // Get LS Sequence Number
+-    seqno = ospf->ospf_get_seqno(olsap, maxlen, forced);
++    seqno = ospf->ospf_get_seqno(LST_GM, olsap, forced);
+     if (seqno == InvalidLSSeq)
+ 	return;
+     // Fill in LSA header
+-    hdr = ospf->orig_buffer();
++    hdr = ospf->orig_buffer(maxlen);
+     hdr->ls_opts = SPO_DC | SPO_MC;
+     if (!a_stub)
+ 	hdr->ls_opts |= SPO_EXT;
+@@ -196,6 +196,7 @@
+         hdr->ls_length = hton16(length);
+ 	(void) ospf->lsa_reorig(0, this, olsap, hdr, forced);
+     }
++    ospf->free_orig_buffer(hdr);
+ }
+ 
+ /* The state of an interface has changed, requiring us
+diff -X exclude_files -Nabur ospfd2.3/src/helper.C ospfd2.4/src/helper.C
+--- ospfd2.3/src/helper.C	Wed Dec 31 19:00:00 1969
++++ ospfd2.4/src/helper.C	Thu Sep 13 16:05:44 2001
+@@ -0,0 +1,285 @@
++/*
++ *   OSPFD routing daemon
++ *   Copyright (C) 2001 by John T. Moy
++ *   
++ *   This program is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU General Public License
++ *   as published by the Free Software Foundation; either version 2
++ *   of the License, or (at your option) any later version.
++ *   
++ *   This program is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *   GNU General Public License for more details.
++ *   
++ *   You should have received a copy of the GNU General Public License
++ *   along with this program; if not, write to the Free Software
++ *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ */
++
++#include "ospfinc.h"
++#include "monitor.h"
++#include "system.h"
++#include "ifcfsm.h"
++#include "nbrfsm.h"
++#include "phyint.h"
++#include "opqlsa.h"
++
++/* This file contains the routines implementing
++ * helper mode for hitless restart.
++ */
++
++/* If we are in helper mode, we should be advertising
++ * the neighbor as fully adjacent, even if it isn't.
++ */
++
++bool SpfNbr::adv_as_full()
++
++{
++    if (n_state == NBS_FULL)
++        return(true);
++    if (n_helptim.is_running())
++        return(true);
++    return(false);
++}
++
++/* If we are helping a neighbor perform a hitless restart,
++ * its timer should be running.
++ */
++
++bool SpfNbr::we_are_helping()
++
++{
++    return(n_helptim.is_running());
++}
++
++/* If the helper timer expires, we exit helper mode with
++ * a reason of "timeout".
++ */
++
++void HelperTimer::action()
++
++{
++    np->exit_helper_mode("Timeout");
++}
++
++/* We have received a grace-LSA from a neighbor. If after
++ * parsing the grace-LSA a) the link-state database has not
++ * changed (aside from refreshes) since the beginning
++ * of the requested refresh period and b) the refresh period has not
++ * expired, then we enter helper mode for the neighbor by
++ * setting the helper timer.
++ */
++
++void OSPF::grace_LSA_rx(opqLSA *lsap, LShdr *hdr)
++
++{
++    SpfNbr *np;
++    SPFtime grace_start;
++    int grace_period;
++    SPFtime grace_end;
++    char *refusal = 0;
++
++    // Ignore our own
++    if (lsap->adv_rtr() == myid)
++        return;
++    if (!(np = lsap->grace_lsa_parse((byte *)(hdr+1),
++				     ntoh16(hdr->ls_length)-sizeof(LShdr),
++				     grace_start, grace_period)))
++        return;
++
++    // Have associated grace-LSA with a neighbor
++    if (spflog(LOG_GRACERX, 5))
++        log(np);
++
++    // Now determine whether we should accept it
++    time_add(grace_start, grace_period*Timer::SECOND, &grace_end);
++    // Neighbor must be in Full state
++    if (np->n_state != NBS_FULL)
++        refusal = "Not full";
++    // No topology changes since grace period start
++    else if (time_less(grace_start, last_topology_change))
++        refusal = "Topology change";
++    // Grace period already expired?
++    else if (time_less(grace_end, sys_etime))
++        refusal = "Timeout";
++
++    /* If we are refusing the grace request, either exit
++     * helper mode if we are already helping, or just
++     * log the error.
++     */
++    if (refusal != 0 && !np->we_are_helping()) {
++	if (spflog(LOG_GRACE_REJECT, 5)) {
++	    log(np);
++	    log(":");
++	    log(refusal);
++	}
++    }
++    else if (refusal != 0)
++        np->exit_helper_mode(refusal);
++    else {
++        // (Re)enter helper mode
++	if (spflog(LOG_HELPER_START, 5))
++	    log(np);
++        if (np->we_are_helping()) {
++	    np->n_helptim.stop();
++	    np->n_ifp->if_helping--;
++	    n_helping--;
++	}
++	np->n_helptim.start(grace_period*Timer::SECOND, false);
++	np->n_ifp->if_helping++;
++	n_helping++;
++    }
++}
++
++/* When a grace-LSA is flushed, we exit helper mode.
++ * This is considered to be the successful completion
++ * of a hitless restart.
++ */
++
++void OSPF::grace_LSA_flushed(class opqLSA *lsap)
++
++{
++    SpfNbr *np;
++    SPFtime grace_start;
++    int grace_period;
++
++    // Ignore our own
++    if (lsap->adv_rtr() == myid)
++        return;
++    if (!(np = lsap->grace_lsa_parse(lsap->lsa_body,
++				     lsap->lsa_length - sizeof(LShdr),
++				     grace_start, grace_period)))
++        return;
++    // Exit helper mode
++    if (np->we_are_helping())
++        np->exit_helper_mode("Success");
++}
++
++/* Parse the body of a grace-LSA, determing a) the start of the
++ * requested grace period, b) the end, and c) the neighbor requesting
++ * grace.
++ */
++
++SpfNbr *opqLSA::grace_lsa_parse(byte *body, int len, 
++				SPFtime &g_start, int &g_period)
++
++{
++    TLVbuf buf(body, len);
++    int type;
++    InAddr nbr_addr = 0;
++    int32 val;
++
++    // Start of grace period determined by LS age
++    if (sys_etime.sec < lsa_age()) {
++        g_start.sec = 0;
++	g_start.msec = 0;
++    }
++    else {
++        g_start.sec = sys_etime.sec - lsa_age();
++	g_start.msec = sys_etime.msec;
++    }
++
++    // Parse body of grace-LSA
++    g_period = 0;
++    while (buf.next_tlv(type)) {
++	switch(type) {
++	  case HLRST_PERIOD:	// Length of grace period
++	    if (!buf.get_int(g_period))
++	        return(0);
++	    break;
++	  case HLRST_REASON:	// Reason for restart
++	    break;
++	  case HLRST_IFADDR:	// Interface address
++	    if (!buf.get_int(val))
++	        return(0);
++	    nbr_addr = (InAddr) val;
++	    break;
++	  default:
++	    break;
++	}
++    };
++
++    return(lsa_ifp->find_nbr(nbr_addr, adv_rtr()));
++}
++
++/* When exiting helper mode, we need to reoriginate
++ * router-LSAs, network-LSAs, and rerun the Designated Router
++ * calculation for the associated interface.
++ * If the neighbor we were helping is DR, make sure it
++ * stays DR until we receive its next Hello Packet.
++ */
++
++void SpfNbr::exit_helper_mode(char *reason, bool actions)
++
++{
++    if (ospf->spflog(LOG_HELPER_STOP, 5)) {
++        ospf->log(this);
++	ospf->log(":");
++	ospf->log(reason);
++    }
++    n_helptim.stop();
++    n_ifp->if_helping--;
++    ospf->n_helping--;
++    /* If neighbor is not yet full again, do the
++     * processing that should have been done when the
++     * neighjbor initially went out of FULL state,
++     */
++    if (n_state != NBS_FULL) {
++        SpfArea *tap;
++        tap = n_ifp->transit_area();
++	if (n_ifp->if_nfull-- == 1)
++	    n_ifp->reorig_all_grplsas();
++	if (tap && tap->n_VLs-- == 1 && actions)
++	    tap->rl_orig();
++    }
++    // Neighbor stays DR until next Hello
++    else if (n_ifp->if_dr_p == this)
++        n_dr = n_ifp->if_dr;
++    // Caller may take actions itself
++    if (actions) {
++        // Recalculate Designated Router
++        n_ifp->run_fsm(IFE_NCHG);
++	// Re-originate router-LSA
++	n_ifp->area()->rl_orig();
++	// And network-LSA
++	n_ifp->nl_orig(false);
++    }
++}
++
++/* A topology change has occurred. Cancel all helping modes,
++ * and reoriginate router-LSAs, network-LSAs and rerun
++ * Designated Router calculations, as necessary.
++ *
++ * Also note the time, for use in verifying future
++ * grace requests.
++ */
++
++void OSPF::htl_topology_change()
++
++{
++    // clear topolog change flag
++    topology_change = false;
++    // Update time of last topology change
++    last_topology_change = sys_etime;
++    // Cancel any helping sessions
++    if (n_helping != 0) {
++        IfcIterator iiter(this);
++	SpfIfc *ip;
++	while ((ip = iiter.get_next())) {
++	    NbrIterator niter(ip);
++	    SpfNbr *np;
++	    if (ip->if_helping == 0)
++	        continue;
++	    while ((np = niter.get_next()))
++	        if (np->we_are_helping())
++		    np->exit_helper_mode("Topology change", false);
++	    // Recalculate Designated Router
++	    ip->run_fsm(IFE_NCHG);
++	    // Reoriginate network-LSA
++	    ip->nl_orig(false);
++	}
++	// Re-originate all router-LSAs
++	rl_orig();
++    }
++}
+diff -X exclude_files -Nabur ospfd2.3/src/ifcfsm.C ospfd2.4/src/ifcfsm.C
+--- ospfd2.3/src/ifcfsm.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/ifcfsm.C	Thu Sep 13 16:05:43 2001
+@@ -304,10 +304,15 @@
+ 	    c_id = np->n_id;
+ 	}
+ 
++	// If we are helping the current DR through hitless
++	// restart, keep it as DR
++	if (if_dr_p && if_dr_p->we_are_helping())
++	    break;
++
+ 	// Initialize DR election
+ 	iter.reset();
+ 	if_dr_p = 0;
+-	if (if_dr == if_addr) {
++	if (if_dr == if_addr && if_drpri != 0) {
+ 	    c_pri = if_drpri;
+ 	    c_id = ospf->my_id();
+ 	}
+@@ -362,7 +367,7 @@
+     if (if_dr != prev_dr || if_bdr != prev_bdr) {
+         if (ospf->spflog(LOG_DRCH, 4)) {
+ 	    ospf->log(this);
+-	    ospf->log("DR ");
++	    ospf->log(" DR ");
+ 	    ospf->log(&if_dr);
+ 	    ospf->log(" Back ");
+ 	    ospf->log(&if_bdr);
+diff -X exclude_files -Nabur ospfd2.3/src/lsa.C ospfd2.4/src/lsa.C
+--- ospfd2.3/src/lsa.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/lsa.C	Thu Sep 13 16:05:43 2001
+@@ -57,6 +57,7 @@
+     sent_reply = false;
+     checkage = false;
+     min_failed = false;
++    we_orig = false;
+ 
+     // Fake LSAs aren't install in database
+     if (blen) {
+@@ -198,20 +199,22 @@
+  * routine is not reentrant.
+  */
+ 
+-LShdr *OSPF::BuildLSA(LSA *lsap)
++LShdr *OSPF::BuildLSA(LSA *lsap, LShdr *hdr)
+ 
+ {
+-    LShdr *hdr;
+     int	blen;
+ 
++    if (hdr == 0) {
+     if (lsap->lsa_length > build_size) {
+ 	delete [] build_area;
+ 	build_size = lsap->lsa_length;
+ 	build_area = new byte[lsap->lsa_length];
+     }
+-
+     hdr = (LShdr *) ospf->build_area;
++    }
++    // Fill in standard Link state header
+     *hdr = *lsap;
++    // Fill in body of LSA
+     if (!lsap->exception)
+ 	lsap->build(hdr);
+     else {
+diff -X exclude_files -Nabur ospfd2.3/src/lsa.h ospfd2.4/src/lsa.h
+--- ospfd2.3/src/lsa.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/lsa.h	Thu Sep 13 16:05:43 2001
+@@ -57,7 +57,8 @@
+ 	parsed:1,	// Parsed for easy calculation?
+         sent_reply:1,	// Sent reply for older LSA received
+         checkage:1,	// Queued for xsum verification
+-        min_failed:1;	// MinArrival failed
++        min_failed:1,	// MinArrival failed
++        we_orig:1;	// We have originated this LSA
+     uns16 lsa_hour;	// Hour counter, for DoNotAge refresh
+ 
+     static LSA *AgeBins[MaxAge+1];// Aging Bins
+@@ -110,6 +111,7 @@
+     friend LShdr& LShdr::operator=(class LSA &lsa);
+     friend inline uns16 Age2Bin(age_t);
+     friend inline age_t Bin2Age(uns16);
++    friend void lsa_flush(LSA *);
+ };
+ 
+ // Inline functions
+diff -X exclude_files -Nabur ospfd2.3/src/lsdb.C ospfd2.4/src/lsdb.C
+--- ospfd2.3/src/lsdb.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/lsdb.C	Thu Sep 13 16:05:43 2001
+@@ -138,22 +138,26 @@
+ /* Append all the LSAs of a particular type to a given lsalist.
+  * Use for example when creating a Database Summary list at the
+  * beginning of the Database Description process.
++ * When in hitless restart, we don't add our own router-LSAs
++ * to the list, as they will look like topology changes
++ * to the neighboring routers. Instead, we reflood the router-LSAs
++ * at the conclusion of hitless restart.
+  */
+ 
+ void SpfIfc::AddTypesToList(byte lstype, LsaList *lp)
+ 
+ {
+     AVLtree *btree;
+-    AVLitem *ptr;
++    LSA *lsap;
+     SpfArea *ap;
+ 
+     ap = area();
+     if (!(btree = ospf->FindLSdb(this, ap, lstype)))
+ 	return;
+ 
+-    ptr = (LSA *) btree->sllhead;
+-    for (; ptr; ptr = (LSA *) ptr->sll)
+-	lp->addEntry((LSA *) ptr);
++    lsap = (LSA *) btree->sllhead;
++    for (; lsap; lsap = (LSA *) lsap->sll)
++	lp->addEntry(lsap);
+ }
+ 
+ /* Add an LSA to the database. If there is already a database copy, and
+@@ -253,8 +257,14 @@
+     if (hdr->ls_type >= LST_LINK_OPQ && hdr->ls_type <= LST_AS_OPQ)
+         upload_opq(lsap);
+     // If changes, schedule new routing calculations
+-    if (changed)
++    if (changed) {
+ 	rtsched(lsap, old_rte);
++	// Only LS types 1-5 are significant for hitless restart
++	if (lsap->lsa_type <= LST_ASL)
++	    topology_change = true;
++	if (in_hitless_restart())
++	    htl_check_consistency(ap, hdr);
++    }
+ 
+     return(lsap);
+ }
+@@ -500,6 +510,56 @@
+ 	}
+ 	ls_type = 0;
+     } while ((ap = NextArea(a_id)));
++
++    return(lsap);
++}
++
++/* This version of Next LSA can be used to get Link-local LSAs.
++ * For link-local LSAs associated with virtual links, the
++ * taid is the virtual link's Transit Area (non-zero)
++ * and if_addr is the Router ID of the other endpoint of the
++ * virtual link.
++ */
++
++LSA *OSPF::NextLSA(InAddr if_addr, int phyint, aid_t taid, 
++		   byte ls_type, lsid_t id, rtid_t advrtr)
++
++{
++    LSA *lsap;
++    SpfIfc *ip;
++    AVLtree *tree;
++
++    // Iterate over all areas
++    lsap = 0;
++    ip = (taid ? find_vl(taid, if_addr) : find_ifc(if_addr, phyint));
++    do {
++	// Iterate over LS types
++	for (; ls_type <= MAX_LST; id = advrtr = 0, ++ls_type) {
++	    if (flooding_scope(ls_type) != LocalScope)
++	        continue;
++	    tree = FindLSdb(ip, 0, ls_type);
++	    if (tree) {
++	        AVLsearch iter(tree);
++		iter.seek(id, advrtr);
++	        if ((lsap = (LSA *) iter.next()))
++		    return(lsap);
++	    }
++	}
++	ls_type = 0;
++	if (ip && ip->is_virtual()) {
++	    taid = ip->transit_area()->a_id;
++	    if_addr = *ip->vl_endpt();
++	}
++	else if (ip) {
++	    if_addr = ip->if_addr;
++	    phyint = ip->if_phyint;
++	}
++	// Get next interface
++	if (taid) 
++	   ip = next_vl(taid, if_addr);
++	else if (!(ip = next_ifc(if_addr,phyint)))
++	   ip = next_vl(0, 0);
++    } while (ip);
+ 
+     return(lsap);
+ }
+diff -X exclude_files -Nabur ospfd2.3/src/lshdr.h ospfd2.4/src/lshdr.h
+--- ospfd2.3/src/lshdr.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/lshdr.h	Thu Sep 13 16:05:43 2001
+@@ -174,3 +174,41 @@
+     uns32 ls_type;	// Router-LSA or network-LSA
+     rtid_t ls_id;	// Link State ID
+ };
++
++/* Assigned Opaque Types.
++ */
++
++enum {
++    OPQ_T_TE = 1,	// Traffic Engineering extensions
++    OPQ_T_HLRST = 3,	// Hitless restart extensions
++};
++
++/* Format of the TLVs found in the body of some Opaque-LSAs.
++ * Length field covers only the body, not the header, and
++ * when the length is not a multiple of 4 bytes, the TLV
++ * is padded with zeroes.
++ */
++
++struct TLV {
++    uns16 type;
++    uns16 length;
++};
++
++/* TLV types used in the Hitless Restart extensions
++ */
++
++enum {
++    HLRST_PERIOD = 1,	// Length of grace period
++    HLRST_REASON = 2,	// Reason for restart
++    HLRST_IFADDR = 3,	// Interface address
++};
++
++/* Encodings for the reason for a hitless restart.
++ */
++
++enum {
++   HLRST_REASON_UNKNOWN = 0,
++   HLRST_REASON_RESTART = 1,
++   HLRST_REASON_RELOAD = 2,	// Reload/upgrade
++   HLRST_REASON_SWITCH = 3,	// Switch to redundant processor
++};
+diff -X exclude_files -Nabur ospfd2.3/src/monitor.C ospfd2.4/src/monitor.C
+--- ospfd2.3/src/monitor.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/monitor.C	Thu Sep 13 16:05:43 2001
+@@ -69,6 +69,7 @@
+     msg->body.statrsp.vmajor = vmajor;
+     msg->body.statrsp.vminor = vminor;
+     msg->body.statrsp.fill1 = 0;
++    msg->body.statrsp.n_orig_allocs = hton32(n_orig_allocs);
+ 
+     sys->monitor_response(msg, Stat_Response, mlen, conn_id);
+ }
+@@ -430,6 +431,87 @@
+     }
+ 
+     sys->monitor_response(msg, LSA_Response, mlen, conn_id);
++}
++
++/* Respond to a query to access a Link-local LSA.
++ */
++
++void OSPF::lllsa_stats(class MonMsg *req, int conn_id)
++
++{
++    MonRqLLLsa *llreq;
++    InAddr if_addr;
++    int phyint;
++    aid_t taid;
++    byte ls_type;
++    lsid_t id;
++    rtid_t advrtr;
++    LSA *lsap;
++    int mlen;
++    MonMsg *msg;
++    char *phyname;
++
++    llreq = &req->body.lllsarq;
++    if_addr = ntoh32(llreq->if_addr);
++    phyint = ntoh32(llreq->phyint);
++    taid = ntoh32(llreq->taid);
++    ls_type = ntoh32(llreq->ls_type);
++    id = ntoh32(llreq->ls_id);
++    advrtr = ntoh32(llreq->adv_rtr);
++
++    lsap = 0;
++
++    if (req->hdr.exact != 0) {
++	SpfIfc *ip;
++	if (taid != 0)
++	    ip = find_vl(taid, if_addr);
++	else
++	    ip = find_ifc(if_addr, phyint);
++	if (ip)
++	    lsap = FindLSA(ip, 0, ls_type, id, advrtr);
++    } else
++        lsap = NextLSA(if_addr, phyint, taid, ls_type, id, advrtr);
++
++    mlen = sizeof(MonHdr) + sizeof(MonRqLLLsa);
++    if (lsap)
++        mlen += lsap->ls_length();
++    msg = get_monbuf(mlen);
++    msg->hdr.version = OSPF_MON_VERSION;
++    msg->hdr.retcode = 1;
++    msg->hdr.exact = req->hdr.exact;
++    msg->hdr.id = req->hdr.id;
++
++    if (lsap) {
++        MonRqLLLsa *llrsp;
++	LShdr *hdr;
++	SpfIfc *ip;
++	ip = lsap->lsa_ifp;
++	msg->hdr.retcode = 0;
++	llrsp = &msg->body.lllsarq;
++	if (!ip->is_virtual()) {
++	    llrsp->if_addr = hton32(ip->if_addr);
++	    llrsp->taid = 0;
++	    phyname = sys->phyname(ip->if_phyint);
++	    strncpy(llrsp->phyname, phyname, MON_PHYLEN);
++	}
++	else {
++	    char *p;
++	    llrsp->taid = hton32(ip->transit_area()->id());
++	    llrsp->if_addr = hton32(*ip->vl_endpt());
++	    p = (char *) &llrsp->taid;
++	    sprintf(llrsp->phyname, "%d.%d.%d.%d",
++		    (int)p[0], (int)p[1], (int)p[2], (int)p[3]);
++	}
++	llrsp->phyint = hton32(ip->if_phyint);
++	llrsp->a_id = hton32(ip->area()->id());
++	llrsp->ls_type = hton32(lsap->lsa_type);
++	llrsp->ls_id = hton32(lsap->ls_id());
++	llrsp->adv_rtr = hton32(lsap->adv_rtr());
++	hdr = BuildLSA(lsap);
++	memcpy((llrsp + 1), hdr, lsap->ls_length());
++    }
++
++    sys->monitor_response(msg, LLLSA_Response, mlen, conn_id);
+ }
+ 
+ /* Get information concerning a routing table entry.
+diff -X exclude_files -Nabur ospfd2.3/src/monitor.h ospfd2.4/src/monitor.h
+--- ospfd2.3/src/monitor.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/monitor.h	Thu Sep 13 16:05:43 2001
+@@ -53,6 +53,20 @@
+     uns32 adv_rtr;
+ };
+ 
++struct MonRqLLLsa {
++    // Interface specification
++    InAddr if_addr;
++    int phyint;
++    aid_t taid;	// Transit area ID for virtual links
++    // Informational only
++    aid_t a_id;
++    char phyname[MON_PHYLEN]; // Interface name
++    // Link-local LSA specification
++    uns32 ls_type;
++    uns32 ls_id;
++    uns32 adv_rtr;
++};
++
+ struct MonRqRte {
+     InAddr net;
+     InAddr mask;
+@@ -77,6 +91,7 @@
+     byte vmajor;
+     byte vminor;
+     uns16 fill1;
++    uns32 n_orig_allocs;
+ };
+ 
+ /* Response to a request for area statistics.
+@@ -202,6 +217,7 @@
+         MonRqVL vlrq;
+ 	MonRqNbr nbrrq;
+ 	MonRqLsa lsarq;
++        MonRqLLLsa lllsarq;
+ 	MonRqRte rtrq;
+ 
+         StatRsp statrsp;// Responses
+@@ -228,6 +244,7 @@
+     MonReq_Rte,		// Dump routing table entry
+     MonReq_OpqReg,	// Register for Opaque-LSAs
+     MonReq_OpqNext,	// Get next Opaque-LSA
++    MonReq_LLLSA,	// Dump Link-local LSA contents
+ 
+     Stat_Response = 100, // Global statistics response
+     Area_Response,	// Area response
+@@ -236,6 +253,7 @@
+     LSA_Response,	// LSA
+     Rte_Response,	// Routing table entry
+     OpqLSA_Response,	// Opaque-LSA response
++    LLLSA_Response,	// Link-local LSA
+ 
+     OSPF_MON_VERSION = 1, // Version of monitoring messages
+ };
+diff -X exclude_files -Nabur ospfd2.3/src/nbrfsm.C ospfd2.4/src/nbrfsm.C
+--- ospfd2.3/src/nbrfsm.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/nbrfsm.C	Thu Sep 13 16:05:43 2001
+@@ -228,7 +228,7 @@
+     tap = n_ifp->transit_area();
+     // now Full
+     if (n_state == NBS_FULL) {
+-        if (n_ifp->if_nfull++ == 0)
++        if (!we_are_helping() && n_ifp->if_nfull++ == 0)
+ 	    n_ifp->reorig_all_grplsas();
+ 	ospf->n_dbx_nbrs--;
+ 	n_progtim.stop();
+@@ -242,12 +242,14 @@
+ 	ospf->n_dbx_nbrs++;
+     // Never go from Full state immed back into dbxchng
+     else if (n_ostate == NBS_FULL) {
++	if (!we_are_helping()) {
+ 	if (n_ifp->if_nfull-- == 1)
+ 	    n_ifp->reorig_all_grplsas();
+ 	if (tap && tap->n_VLs-- == 1)
+ 	    tap->rl_orig();
+ 	ap->rl_orig();
+     }
++    }
+     else if (n_state <= NBS_2WAY && n_ostate >= NBS_EXST) {
+ 	exit_dbxchg();
+ 	if (n_ostate > NBS_EXST)
+@@ -475,7 +477,6 @@
+     nba_clr_lists();
+     n_dr = UnknownAddr;
+     n_bdr = UnknownAddr;
+-    demand_helapse = 0;
+     rq_suppression = false;
+ 
+     // Stop remaining timers
+diff -X exclude_files -Nabur ospfd2.3/src/netlsa.C ospfd2.4/src/netlsa.C
+--- ospfd2.3/src/netlsa.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/netlsa.C	Thu Sep 13 16:05:43 2001
+@@ -30,35 +30,66 @@
+ /* Originate a network-LSA. Must be the Designated Router for the
+  * network, and be fully adjacent to at least one other
+  * router.
++ * if_nfull includes all those neighbors that we
++ * are currently helping through hitless restart.
+  */
+ 
+ void SpfIfc::nl_orig(int forced)
+ 
+ {
+     LSA *olsap;
++    LShdr *hdr;
++
++    // If in hitless restart, queue exit check
++    if (ospf->in_hitless_restart())
++        ospf->check_htl_termination = true;
+ 
+     olsap = ospf->myLSA(0, if_area, LST_NET, if_addr);
++    hdr = nl_raw_orig();
+ 
+-    if (if_state != IFS_DR)
+-	lsa_flush(olsap);
+-    else if (if_nfull == 0)
++    if (hdr == 0)
+ 	lsa_flush(olsap);
+     else {
++        seq_t seqno;
++	seqno = ospf->ospf_get_seqno(LST_NET, olsap, forced);
++	if (seqno != InvalidLSSeq) {
++	    // Fill in rest of LSA contents
++	    hdr->ls_seqno = hton32(seqno);
++	    (void) ospf->lsa_reorig(0, if_area, olsap, hdr, forced);
++	}
++	ospf->free_orig_buffer(hdr);
++    }
++}
++
++/* Build the contents of the network-LSA that should be
++ * originated for the interface. returning a pointer to the
++ * link-state header (built in a static memory space). If no
++ * network-LSA should be originated, 0 is returned.
++ * LS Sequence Number must be filled in by the caller, who also
++ * must call OSPF::free_orig_buffer() when done with the
++ * constructed LSA.
++ */
++
++LShdr *SpfIfc::nl_raw_orig()
++
++{
+ 	LShdr *hdr;
+ 	NetLShdr *nethdr;
+ 	uns16 length;
+-	seq_t seqno;
+ 	rtid_t *nbr_ids;
+ 	NbrIterator iter(this);
+ 	SpfNbr *np;
++
++    if (if_state != IFS_DR)
++	return(0);
++    else if (if_nfull == 0)
++	return(0);
++
+ 	// Build new LSA
+ 	length = sizeof(NetLShdr) + (if_nfull+1)*sizeof(rtid_t);
+ 	length += sizeof(LShdr);
+-	seqno = ospf->ospf_get_seqno(olsap, length, forced);
+-	if (seqno == InvalidLSSeq)
+-	    return;
+ 	// Fill in LSA contents
+-	hdr = ospf->orig_buffer();
++    hdr = ospf->orig_buffer(length);
+ 	hdr->ls_opts = SPO_DC;
+ 	if (!if_area->a_stub)
+ 	    hdr->ls_opts |= SPO_EXT;
+@@ -67,7 +98,6 @@
+ 	hdr->ls_type = LST_NET;
+ 	hdr->ls_id = hton32(if_addr);
+ 	hdr->ls_org = hton32(ospf->my_id());
+-	hdr->ls_seqno = hton32(seqno);
+ 	hdr->ls_length = hton16(length);
+ 	// Body
+ 	nethdr = (NetLShdr *) (hdr + 1);
+@@ -76,11 +106,10 @@
+ 	nbr_ids = (rtid_t *) (nethdr + 1);
+ 	*nbr_ids = hton32(ospf->my_id());
+ 	while ((np = iter.get_next()) != 0) {
+-	    if (np->state() == NBS_FULL)
++	if (np->adv_as_full())
+ 		*(++nbr_ids) = hton32(np->id());
+ 	}
+-	(void) ospf->lsa_reorig(0, if_area, olsap, hdr, forced);
+-    }
++    return(hdr);
+ }
+ 
+ /* Constructor for a network-LSA (internal representation).
+diff -X exclude_files -Nabur ospfd2.3/src/opqlsa.C ospfd2.4/src/opqlsa.C
+--- ospfd2.3/src/opqlsa.C	Mon May 21 10:19:28 2001
++++ ospfd2.4/src/opqlsa.C	Thu Sep 13 16:05:44 2001
+@@ -42,7 +42,7 @@
+  * the body of the LSA.
+  */
+ 
+-void opqLSA::parse(LShdr *)
++void opqLSA::parse(LShdr *hdr)
+ 
+ {
+     exception = true;
+@@ -51,14 +51,21 @@
+     phyint = (lsa_ifp ? lsa_ifp->if_phyint : -1);
+     if_addr = (lsa_ifp ? lsa_ifp->if_addr : 0);
+     a_id = (lsa_ap ? lsa_ap->id() : 0);
++
++    // Certain Opaque-LSAs are used by OSPF extensions
++    if (lsa_type == LST_LINK_OPQ && ls_id() == (OPQ_T_HLRST<<24))
++        ospf->grace_LSA_rx(this, hdr);
+ }
+ 
+-/* Unparse an opaque-LSA. NULL function.
++/* Unparse an opaque-LSA.
+  */
+ 
+ void opqLSA::unparse()
+ 
+ {
++    // Certain Opaque-LSAs are used by OSPF extensions
++    if (lsa_type == LST_LINK_OPQ && ls_id() == (OPQ_T_HLRST<<24))
++        ospf->grace_LSA_flushed(this);
+ }
+ 
+ /* Build an opaque-LSA. Since the parse function
+@@ -112,11 +119,11 @@
+     // Estimate size of LSA
+     maxlen = sizeof(LShdr) + blen;
+     // Get LS Sequence Number
+-    seqno = ospf_get_seqno(lsap, maxlen, forced);
++    seqno = ospf_get_seqno(lstype, lsap, forced);
+     if (seqno != InvalidLSSeq) {
+ 	LSA *nlsap;
+ 	// Fill in LSA header
+-        hdr = ospf->orig_buffer();
++        hdr = ospf->orig_buffer(maxlen);
+ 	hdr->ls_opts = SPO_DC;
+ 	if (ap && !ap->a_stub)
+ 	    hdr->ls_opts |= SPO_EXT;
+@@ -130,6 +137,7 @@
+         hdr->ls_length = hton16(maxlen);
+ 	if ((nlsap = ospf->lsa_reorig(ip, ap, lsap, hdr, forced)))
+ 	    lsap = (opqLSA *) nlsap;
++	ospf->free_orig_buffer(hdr);
+     }
+ 
+     // Store local copy of body, in case it is overwritten
+@@ -159,7 +167,7 @@
+     if (!(ip = find_ifc(ifaddr, phyint)))
+         return(false);
+ 
+-    opq_orig(ip, 0, LST_LINK_OPQ, lsid, body, blen, adv, 0);
++    opq_orig(ip, ip->area(), LST_LINK_OPQ, lsid, body, blen, adv, 0);
+     return(true);
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/opqlsa.h ospfd2.4/src/opqlsa.h
+--- ospfd2.3/src/opqlsa.h	Mon May 21 10:19:28 2001
++++ ospfd2.4/src/opqlsa.h	Thu Sep 13 16:05:44 2001
+@@ -42,6 +42,7 @@
+     virtual void unparse();
+     virtual void build(LShdr *hdr);
+     virtual void update_in_place(LSA *);
++    SpfNbr *grace_lsa_parse(byte *, int, SPFtime &, int &);
+     friend class OSPF;
+ };
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/ospf.C ospfd2.4/src/ospf.C
+--- ospfd2.3/src/ospf.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/ospf.C	Thu Sep 13 16:05:43 2001
+@@ -51,7 +51,7 @@
+ /* Create an instance of the OSPF protocol.
+  */
+ 
+-OSPF::OSPF(uns32 rtid) : myid(rtid)
++OSPF::OSPF(uns32 rtid, SPFtime grace) : myid(rtid)
+ 
+ {
+     int i;
+@@ -84,10 +84,16 @@
+     build_size = 0;
+     orig_buff = 0;
+     orig_size = 0;
++    orig_buff_in_use = false;
++    n_orig_allocs = 0;
+     mon_buff = 0;
+     mon_size = 0;
+     shutdown_phase = 0;
+     countdown = 0;
++    grace_period = 0;
++    restart_reason = HLRST_REASON_UNKNOWN;
++    hitless_prep_phase = 0;
++    phase_duration = 0;
+     delete_neighbors = false;
+     n_local_flooded = 0;
+     ases_pending = 0;
+@@ -107,6 +113,14 @@
+     full_sched = false;
+     ase_sched = false;
+     need_remnants = true;
++    start_htl_exit = false;
++    exiting_htl_restart = false;
++    check_htl_termination = false;
++    htl_exit_reason = 0;
++    topology_change = false;
++    start_time = sys_etime;
++    last_topology_change = sys_etime;
++    n_helping = 0;
+ 
+     n_dijkstras = 0;
+ 
+@@ -128,7 +142,21 @@
+     default_route = inrttbl->add(0, 0);
+     fa_tbl = new FWDtbl;
+ 
++    // Determine whether we are doing a hitless restart
++    if (!time_less(sys_etime, grace)) {
++        // Normal start
+     spflog(CFG_START, 5);
++    }
++    else {
++        // Hitless restart
++        int period;
++	period = time_diff(grace, sys_etime);
++	hlrsttim.start(period);
++	if (spflog(CFG_HTLRST, 5)) {
++	    log(period/Timer::SECOND);
++	    log("seconds");
++	}
++    }
+ }
+ 
+ /* Destructor for the OSPF class. Called when shutting
+@@ -148,11 +176,13 @@
+     // Signal configuration complete
+     cfgDone();
+ 
++    // Cancel pending timers
++    htltim.stop();
++    origtim.stop();
++    dbtim.stop();
++    oflwtim.stop();
++    hlrsttim.stop();
+     // Clean out global data structures
+-    Timer *tqelt;
+-    while ((tqelt = (Timer *) timerq.priq_rmhead())) {
+-        ; // Don't delete, as some aren't allocated
+-    }
+     inrttbl->root.clear();
+     fa_tbl->root.clear();
+     default_route = 0;
+@@ -501,6 +531,9 @@
+       case MonReq_OpqNext:
+ 	opq_stats(msg, conn_id);
+ 	break;
++      case MonReq_LLLSA:  // Dump Link-local LSA contents
++	lllsa_stats(msg, conn_id);
++	break;
+       default:
+ 	break;
+     }
+@@ -699,6 +732,11 @@
+ {
+     INrte *rte;
+ 
++    // Ignore delete notifications while in hitless restart
++    if (in_hitless_restart())
++        return;
++
++    // Normally store and reinstall into kernel after short delay
+     if ((rte = inrttbl->find(net, mask)) && rte->valid()) {
+         KrtSync *item;
+ 	item = new KrtSync(net, mask);
+@@ -717,6 +755,18 @@
+ {
+     INrte *rte;
+ 
++    // If we're in hitless restart, just store remnant
++    // for later processing
++    if (in_hitless_restart()) {
++        AVLitem *rem;
++	if (!(rem = remnants.find(net, mask))) {
++	    rem = new AVLitem(net, mask);
++	    remnants.add(rem);
++	}
++        return;
++    }
++
++    // Normally delete all remnants from the kernel immediately
+     if (!(rte = inrttbl->find(net, mask)) || !rte->valid()) {
+         if (spflog(LOG_REMNANT, 5)) {
+ 	    log(&net, &mask);
+@@ -854,4 +904,22 @@
+ 	sys->halt(0, "Shutdown complete");
+ 	break;
+     }
++}
++
++/* Entry point to initiate a hitless restart.
++ * After preparation is complete, halt will be called.
++ */
++
++void OSPF::hitless_restart(int seconds, byte reason)
++
++{
++    if (hitless_prep_phase > 0)
++        return;
++
++    grace_period = seconds;
++    restart_reason = reason;
++
++    hitless_prep_phase = 1;
++    phase_duration = 0;
++    prepare_hitless_restart();
+ }
+diff -X exclude_files -Nabur ospfd2.3/src/ospf.h ospfd2.4/src/ospf.h
+--- ospfd2.3/src/ospf.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/ospf.h	Thu Sep 13 16:05:43 2001
+@@ -38,6 +38,20 @@
+     virtual void action();
+ };
+ 
++// Hitless Restart Preparation Timer
++
++class HitlessPrepTimer : public Timer {
++  public:
++    virtual void action();
++};
++
++// Hitless Restart Timer
++
++class HitlessRSTTimer : public Timer {
++  public:
++    virtual void action();
++};
++
+ // Global timer queue
+ extern PriQ timerq;		// Currently pending timers
+ 
+@@ -80,10 +94,18 @@
+     uns16 build_size;	// size of build area
+     byte *orig_buff;	// Origination staging area
+     uns16 orig_size;	// size of staging area
++    bool orig_buff_in_use;// Staging area being used?
++    uns32 n_orig_allocs;// # allocs for staging area
+     byte *mon_buff;	// Monitor replay staging area
+     int mon_size;	// size of staging area
+     int	shutdown_phase;	// Shutting down if > 0
+     int	countdown;	// Number of seconds before exit
++    int hitless_prep_phase;// Hitless restart version
++    int phase_duration; // Time in current phase
++    HitlessPrepTimer htltim;
++    int grace_period;	// Length of grace period (current or next)
++    byte restart_reason;// Encoding in lshdr.h
++    TLVbuf tlvbuf;	// Buffer in which grace-LSAs are built
+     bool delete_neighbors; // Neighbors being deleted?
+     AVLtree phyints;	// Physical interfaces
+     AVLtree krtdeletes;	// Deleted, unsynced kernel routing entries
+@@ -135,6 +157,19 @@
+     bool enabled_msgno[MAXLOG+1];
+     AVLtree opq_uploads; // Opaque-LSA requesting connections
+ 
++    // Hitless restart variables
++    HitlessRSTTimer hlrsttim; // Timing grace period
++    AVLtree remnants;	// Entries installed before restart	
++    bool start_htl_exit;
++    bool exiting_htl_restart;
++    bool check_htl_termination;
++    char *htl_exit_reason;
++    // Helper variables
++    bool topology_change;
++    SPFtime start_time;
++    SPFtime last_topology_change;
++    int n_helping;	// # neighbors being helped
++
+     // Monitoring routines
+     class MonMsg *get_monbuf(int size);
+     void global_stats(class MonMsg *, int conn_id);
+@@ -146,6 +181,7 @@
+     void lsa_stats(class MonMsg *, int conn_id);
+     void rte_stats(class MonMsg *, int conn_id);
+     void opq_stats(class MonMsg *, int con_id);
++    void lllsa_stats(class MonMsg *, int conn_id);
+ 
+     // Utility routines
+     void clear_config();
+@@ -166,8 +202,9 @@
+     void phy_attach(int phyint);
+     void phy_detach(int phyint, InAddr if_addr);
+     void calc_my_addr();
++    LShdr *orig_buffer(int ls_len);
++    void free_orig_buffer(LShdr *);
+     inline int mospf_enabled();
+-    inline LShdr *orig_buffer();
+     inline bool	mc_abr();
+     inline bool	shutting_down();
+     inline int donotage();
+@@ -180,6 +217,7 @@
+     LSA	*AddLSA(SpfIfc *,SpfArea *, LSA *current, LShdr *hdr, bool changed);
+     void DeleteLSA(LSA *lsap);
+     LSA *NextLSA(aid_t, byte, lsid_t, rtid_t);
++    LSA *NextLSA(InAddr, int, aid_t, byte, lsid_t, rtid_t);
+     void update_lsdb_xsum(LSA *, bool add);
+     Range *GetBestRange(INrte *rte);
+     SpfArea *FindArea(aid_t id);
+@@ -187,7 +225,7 @@
+     inline SpfArea *SummaryArea();	// summary-LSAs from this area used
+     void ParseLSA(LSA *lsap, LShdr *hdr);
+     void UnParseLSA(LSA *lsap);
+-    LShdr *BuildLSA(LSA *lsap);
++    LShdr *BuildLSA(LSA *lsap, LShdr *hdr=0);
+     void send_updates();
+     bool maxage_free(byte lstype);
+     void flush_self_orig(AVLtree *tree);
+@@ -212,7 +250,7 @@
+     // LSA origination
+     int	self_originated(SpfNbr *, LShdr *hdr, LSA *database_copy);
+     int	get_lsid(INrte *rte, byte lstype, SpfArea *ap, lsid_t &id);
+-    seq_t ospf_get_seqno(LSA *lsap, int ls_len, int forced);
++    seq_t ospf_get_seqno(byte lstype, LSA *lsap, int forced);
+     LSA	*lsa_reorig(SpfIfc *,SpfArea *ap, LSA *olsap, LShdr *hdr, int forced);
+     void age_prematurely(LSA *);
+     void sl_orig(INrte *rte, bool transit_changes_only=false);
+@@ -254,6 +292,24 @@
+     void mospf_clear_external_source(INrte *rte);
+     void mospf_clear_group(InAddr);
+ 
++    // Hitless restart routines
++    // Preparation
++    void prepare_hitless_restart();
++    void send_grace_lsas();
++    bool verify_grace_acks();
++    void store_hitless_parameters();
++    void next_hitless_phase();
++    // Helper mode
++    void grace_LSA_rx(class opqLSA *, LShdr *);
++    void grace_LSA_flushed(class opqLSA *);
++    void htl_topology_change();
++    // While restarting hitlessly
++    bool in_hitless_restart();
++    void htl_exit_criteria();
++    void htl_check_consistency(SpfArea *, LShdr *);
++    void exit_hitless_restart(char *reason);
++    void htl_reorig(AVLtree *);
++
+     // Logging routines
+     bool spflog(int, int);
+     void log(int);
+@@ -273,11 +329,11 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 3,	// Minor version number
++	vminor = 4,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+-    OSPF(uns32 rtid);
++    OSPF(uns32 rtid, SPFtime grace);
+     ~OSPF();
+     void rxpkt(int phyint, InPkt *pkt, int plen);
+     int	timeout();
+@@ -295,6 +351,7 @@
+     InAddr ip_source(InAddr dest);
+     InAddr if_addr(int phyint);
+     void shutdown(int seconds);
++    void hitless_restart(int seconds, byte reason);
+     void logflush();
+     inline rtid_t my_id();
+     inline int n_extLSAs();
+@@ -354,6 +411,8 @@
+     friend class MPath;
+     friend class ExRtData;
+     friend class opqLSA;
++    friend class HitlessPrepTimer;
++    friend class HitlessRSTTimer;
+     friend void lsa_flush(class LSA *);
+     friend void ExRtData::clear_config();
+     friend SpfNbr *GetNextAdj();
+@@ -371,10 +430,6 @@
+ inline int OSPF::mospf_enabled()
+ {
+     return(g_mospf_enabled);
+-}
+-inline LShdr *OSPF::orig_buffer()
+-{
+-    return((LShdr *)orig_buff);
+ }
+ inline bool OSPF::mc_abr()
+ {
+diff -X exclude_files -Nabur ospfd2.3/src/ospfinc.h ospfd2.4/src/ospfinc.h
+--- ospfd2.3/src/ospfinc.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/ospfinc.h	Thu Sep 13 16:05:43 2001
+@@ -31,6 +31,7 @@
+ #include "avl.h"
+ #include "lshdr.h"
+ #include "spfparam.h"
++#include "tlv.h"
+ #include "config.h"
+ #include "pat.h"
+ #include "rte.h"
+diff -X exclude_files -Nabur ospfd2.3/src/restart.C ospfd2.4/src/restart.C
+--- ospfd2.3/src/restart.C	Wed Dec 31 19:00:00 1969
++++ ospfd2.4/src/restart.C	Thu Sep 13 16:05:44 2001
+@@ -0,0 +1,501 @@
++/*
++ *   OSPFD routing daemon
++ *   Copyright (C) 2001 by John T. Moy
++ *   
++ *   This program is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU General Public License
++ *   as published by the Free Software Foundation; either version 2
++ *   of the License, or (at your option) any later version.
++ *   
++ *   This program is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *   GNU General Public License for more details.
++ *   
++ *   You should have received a copy of the GNU General Public License
++ *   along with this program; if not, write to the Free Software
++ *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ */
++
++#include "ospfinc.h"
++#include "monitor.h"
++#include "system.h"
++#include "ifcfsm.h"
++#include "nbrfsm.h"
++#include "phyint.h"
++
++/* This file contains the routines implementing the
++ * hitless restart of an OSPF, as defined
++ * in draft-ietf-ospf-hitless-restart-00.txt.
++ * The first half of the routines are used by the
++ * router to prepare for hitless restart, and the second
++ * half for after the restart has occurred.
++ */
++
++/* Preparation for hitless restart goes through a number
++ * of phases. This routine is called on the one
++ * second timer OSPF::htltim to check whether the current phase
++ * is done. If so, the next phase is started by calling
++ * next_hitless_phase() and falling though the case statement.
++ * Each phase is limited to a 10 second duration.
++ *
++ * The phases are:
++ *	1 - Originate grace-LSAs
++ *	2 - check to see they are reliably delivered
++ *	3 - Save hitless info and restart
++ */
++
++void OSPF::prepare_hitless_restart()
++
++{
++    char *phase_name = "";
++
++    switch(hitless_prep_phase) {
++      case 1:	// Send grace-LSAs
++	send_grace_lsas();
++	next_hitless_phase();
++	// Fall through
++      case 2:	// Verify that neighbors have received grace-LSAs
++	phase_name = "Sending grace-LSAs";
++	if (!verify_grace_acks())
++	    break;
++	next_hitless_phase();
++	// Fall through
++      case 3:	// Doesn't return
++	store_hitless_parameters();
++	spflog(LOG_PREPDONE, 5);
++	// Inhibit logging from now
++	base_priority = 10;
++	sys->halt(0, "Hitless restart preparation complete");
++	break;
++      default:	// Shouldn't ever happen
++	return;
++    }
++
++    // Has current phase timed out?
++    if (++phase_duration > 10) {
++	if (spflog(LOG_PHASEFAIL, 5))
++	    log(phase_name);
++        next_hitless_phase();
++	// Recursion: start next phase immediately
++	prepare_hitless_restart();
++	return;
++    }
++
++    // Check for phase completion in another second
++    htltim.start(Timer::SECOND);
++}
++
++/* Advance to the next phase of hitless restart
++ * preparation.
++ */
++
++void OSPF::next_hitless_phase()
++
++{
++    hitless_prep_phase++;
++    phase_duration = 0;
++}
++
++/* When timer fires, check to see whether current
++ * phase of hitless restart preparation has completed.
++ */
++
++void HitlessPrepTimer::action()
++
++{
++    ospf->prepare_hitless_restart();
++}
++
++/* Send grace-LSAs out all interfaces.
++ */
++
++void OSPF::send_grace_lsas()
++
++{
++    IfcIterator ifcIter(ospf);
++    SpfIfc *ip;
++    byte *body;
++    int blen;
++    lsid_t ls_id;
++
++    // Build body of grace-LSA
++    ls_id = OPQ_T_HLRST << 24;
++
++    while ((ip = ifcIter.get_next())) {
++        tlvbuf.reset();
++	tlvbuf.put_int(HLRST_PERIOD, grace_period);
++	tlvbuf.put_byte(HLRST_REASON, restart_reason);
++	if (ip->is_multi_access())
++	    tlvbuf.put_int(HLRST_IFADDR, ip->if_addr);
++	body = tlvbuf.start();
++	blen = tlvbuf.length();
++        opq_orig(ip, ip->area(), LST_LINK_OPQ, ls_id, body, blen, true, 0);
++    }
++}
++
++/* Verify that all grace-LSAs have been acknowledged.
++ */
++
++bool OSPF::verify_grace_acks()
++
++{
++    IfcIterator ifcIter(ospf);
++    SpfIfc *ip;
++    lsid_t ls_id;
++    LSA *lsap;
++    int i;
++
++    ls_id = OPQ_T_HLRST << 24;
++
++    for (i = 0; (ip = ifcIter.get_next()); i++) {
++        lsap = myLSA(ip, 0, LST_LINK_OPQ, ls_id);
++	if (lsap && lsap->lsa_rxmt != 0)
++	    return(false);
++    }
++
++    if (spflog(LOG_GRACEACKS, 5)) {
++        log(i);
++	log(" interface(s)");
++    }
++    return(true);
++}
++
++/* Make the call to the system interface to store
++ * the hitless restart information in non-volatile
++ * storage.
++ */
++
++void OSPF::store_hitless_parameters()
++
++{
++    IfcIterator ifcIter(ospf);
++    SpfIfc *ip;
++    int i;
++    int n_md5;
++    MD5Seq *sns;
++
++    // Count interfaces using MD5
++    for (i = 0, n_md5 = 0; (ip = ifcIter.get_next()); i++)
++        if (ip->if_autype == AUT_CRYPT)
++	    n_md5++;
++
++    sns = (n_md5 != 0) ? new MD5Seq[n_md5] : 0;
++    ifcIter.reset();
++    for (i = 0, n_md5 = 0; (ip = ifcIter.get_next()); i++)
++	if (ip->if_autype == AUT_CRYPT) {
++	    sns[n_md5].phyint = ip->if_phyint;
++	    sns[n_md5].if_addr = ip->if_addr;
++	    sns[n_md5++].seqno = sys_etime.sec;
++	}
++
++    sys->store_hitless_parms(grace_period, n_md5, sns);
++    delete sns;
++}
++
++/* The rest of the file contains routines that are used by
++ * the router when it is really in hitless restart state --
++ * that is, it has completed its preparation and then restarted
++ * or reloaded. You can tell that it is this state
++ * by using OSPF::in_hitless_restart().
++ *
++ * When in hitless restart, we don't install/delete routes
++ * into/from the system kernel's routing table. However, we do
++ * still maintain our own routing table (inrttbl) so that we
++ * can get virtual links back up and running. We also a) don't
++ * delete remnants (stored in OSPF::remnants) from the system
++ * kernel and b) ignore delete notifications received from
++ * the kernel until we have exited hitless restart.
++ *
++ * When in hitless restart we don't originate LSAs, nor do
++ * we respond to received self-originated LSAs (OSPF::self_originated()).
++ * When we exit hitless restart, we go through all the
++ * seemingly self-originated LSAs in the database and update
++ * all of those that are necessary.
++ *
++ * Also when in hitless restart, we want to resume DR status
++ * when we have previously been DR. For that reason, we declare
++ * ourselves DR if the Hello causing the BackupSeen event lists
++ * us as DR.
++ *
++ * When to exit...
++ */
++
++/* We are in hitless restart as long as the grace period
++ * timer is running.
++ */
++
++bool OSPF::in_hitless_restart()
++
++{
++    return(hlrsttim.is_running());
++}
++
++/* Timer has fired forcing us to exit hitless restart state.
++ */
++
++void HitlessRSTTimer::action()
++
++{
++    ospf->exit_hitless_restart("Timeout");
++}
++
++/* Decide whether we should exit hitless restart, by comparing
++ * the router-LSAs that we have generated to the ones that
++ * we have received.
++ * If we haven't received a router-LSA for one of our areas
++ * having operational interfaces, we wait for the RouterDeadInterval
++ * or for the grace period, whichever is smaller.
++ * If we are Designated Router on a segment, we also need to check
++ * whether we would generate the same network-LSA that is in our
++ * link-state database.
++ * (We actually only compare the network-LSA's length, options field, and
++ * a checksum of the body, since we want to cover the case where the
++ * neighbors are simply reported in a different order).
++ */
++
++void OSPF::htl_exit_criteria()
++
++{
++    SpfArea *ap;
++    AreaIterator a_iter(this);
++
++    check_htl_termination = false;
++    while ((ap = a_iter.get_next())) {
++        IfcIterator i_iter(ap);
++	SpfIfc *ip;
++	int max_dead = 0;
++	LSA *rtrlsa;
++	// Check to see that router-LSA is same
++	if ((rtrlsa = myLSA(0, ap, LST_RTR, myid)) && !rtrlsa->we_orig)
++	    return;
++	while ((ip = i_iter.get_next())) {
++	    netLSA *rxnet;
++	    LShdr *hdr;
++	    bool no_exit = false;
++	    // Check network-LSAs
++	    rxnet = (netLSA *) myLSA(0, ap, LST_NET, ip->if_addr);
++	    hdr = ip->nl_raw_orig();
++	    if ((rxnet != 0) != (hdr != 0))
++	        no_exit = true;
++	    else if (rxnet) {
++	        int len;
++	        len = rxnet->lsa_length;
++		if (len != ntoh16(hdr->ls_length))
++		    no_exit = true;
++		else if (hdr->ls_opts != rxnet->lsa_opts)
++		    no_exit = true;
++		else {
++		    LShdr *rxhdr;
++		    rxhdr = BuildLSA(rxnet);
++		    len -= sizeof(LShdr);
++		    if (incksum((uns16 *)(hdr +1), len) != 
++			incksum((uns16 *)(rxhdr +1), len))
++		        no_exit = true;
++		}
++	    }
++	    if (hdr)
++	        free_orig_buffer(hdr);
++	    if (no_exit)
++	        return;
++	    if (ip->if_state != IFS_DOWN && max_dead < (int) ip->if_dint)
++	        max_dead = ip->if_dint;
++	}
++	// If no received router-LSA, wait maximum RouterDeadInterval
++	if (!rtrlsa &&
++	    time_diff(sys_etime, start_time) < max_dead*Timer::SECOND)
++	    return;
++    }
++
++    htl_exit_reason = "Success";
++    start_htl_exit = true;
++}
++
++/* An LSA with changed contents has been received. Check the
++ * old router-LSA that we originated for this area before
++ * the restart. If there was an adjacency to the LSA just received,
++ * but the LSA received is no longer reporting it, a neighbor
++ * has given up on us. If so, exit hitless restart.
++ */
++
++void OSPF::htl_check_consistency(SpfArea *ap, LShdr *hdr)
++
++{
++    RTRhdr  *rhdr;
++    RtrLink *rtlp;
++    byte *end;
++    int n_links;
++    int i;
++    TOSmetric *mp;
++    rtrLSA *rtrlsa;
++    Link *lp;
++
++    if (hdr->ls_type != LST_RTR && hdr->ls_type != LST_NET)
++        return;
++    if (!(rtrlsa = (rtrLSA *)myLSA(0, ap, LST_RTR, myid)))
++        return;
++    // Look for adjacency in network (old) copy
++    for (lp = rtrlsa->t_links; ; lp = lp->l_next) {
++	if (!lp)
++	    return;
++	if (lp->l_ltype == hdr->ls_type && lp->l_id == ntoh32(hdr->ls_id))
++	    break;
++    }
++
++    // We had an adjacency
++    // Now make sure it is still reported
++    if (hdr->ls_type == LST_RTR) {
++	// Make sure that router-LSA reports link to us
++	rhdr = (RTRhdr *) (hdr+1);
++	rtlp = (RtrLink *) (rhdr+1);
++	n_links = ntoh16(rhdr->nlinks);
++	end = ((byte *) hdr) + ntoh16(hdr->ls_length);
++	for (i = 0; i < n_links; i++) {
++	    if (((byte *) rtlp) > end)
++	        break;
++	    if (rtlp->link_type == LST_RTR && ntoh32(rtlp->link_id) == myid)
++	        return;
++	    // Step over non-zero TOS metrics
++	    mp = (TOSmetric *)(rtlp+1);
++	    mp += rtlp->n_tos;
++	    rtlp = (RtrLink *)mp;
++	}
++    }
++    else {
++	// Make sure that network-LSA lists us
++        NetLShdr *nethdr;
++	int len;
++	rtid_t *idp;
++	nethdr = (NetLShdr *) (hdr + 1);
++	len = ntoh16(hdr->ls_length);
++	len -= sizeof(LShdr);
++	len -= sizeof(NetLShdr);
++	idp = (rtid_t *) (nethdr + 1);
++	for (; len >= (int) sizeof(rtid_t); ) {
++	    if (ntoh32(*idp) == myid)
++	        return;
++	    // Progress to next link
++	    len -= sizeof(rtid_t);
++	    idp++;
++	}
++    }
++
++    // Old adjacncy has not been reported. Exit hitless restart
++    htl_exit_reason = "Database Inconsistency";
++    start_htl_exit = true;
++}
++
++/* Exit hitless restart.
++ * Stop the grace period timer, so that the rest of the
++ * code will know that we are no longer in hitless restart
++ * (in_hitless_restart() will return false). Set "exiting_htl_restart"
++ * to true to tell the routing calculations that they should
++ * install routing entries into the kernel and originate
++ * summary-LSAs/ASBR-summary-LSAs/AS-external-LSAs even if there
++ * have been no changes since the last calculations.
++ *
++ * Then we synchronize our link-state database and the kernel
++ * forwarding tables with the current local and network state.
++ * Any router-LSAs that we had prevented from flooding are now
++ * flooded. We reoriginate/flush any network-LSAs whose contents need
++ * to change. Then we rerun the routing calculations. Since
++ * "exiting_htl_restart" is true, this will download all routing
++ * table entries into the kernel and reoriginate any necessary
++ * summary/ASBR-summary/AS-external-LSAs.
++ *
++ * However, that does not deal with kernel forwarding table entries
++ * that need to be deleted, or with LSAs that now need to be
++ * flushed. For the former, we go through the remant list and delete
++ * any entries that are no longer valid (see
++ * OSPF::remnant_notification()). For the latter, we go through
++ * the link-state database and attempt to reoriginate (which
++ * will flush if necessary) and self-originated LSAs that we have
++ * not really originated (LSA::we_orig is false).
++ */
++
++void OSPF::exit_hitless_restart(char *reason)
++
++{
++    LSA *lsap;
++    IfcIterator i_iter(this);
++    SpfIfc *ip;
++    AVLsearch remn_iter(&remnants);
++    AVLitem *item;
++    AreaIterator a_iter(this);
++    SpfArea *ap;
++    lsid_t ls_id;
++
++    hlrsttim.stop();
++    exiting_htl_restart = true;
++    if (spflog(LOG_HTLEXIT, 5))
++        log(reason);
++
++    // Reoriginate any necessary router-LSAs
++    rl_orig();
++    // Re-originate any necessary network-LSAs
++    while ((ip = i_iter.get_next()))
++        ip->nl_orig(false);
++
++    // Rerun routing calculations
++    full_calculation();
++    do_all_ases();
++
++    // Delete kernel forwarding entries that are no longer valid
++    while ((item = remn_iter.next())) {
++        InAddr net;
++	InMask mask;
++	INrte *rte;
++	net = item->index1();
++	mask = item->index2();
++	if (!(rte = inrttbl->find(net, mask)) || !rte->valid()) {
++	    if (spflog(LOG_REMNANT, 5)) {
++	        log(&net, &mask);
++	    }
++	    sys->rtdel(net, mask, 0);
++	}
++    }
++
++    /* Flush/reoriginate all summary-LSAs and ASBR-summary-LSAs
++     * that have us as originator but have not been
++     * originated by the above (i.e., LSA::we_orig is false).
++     */
++    while ((ap = a_iter.get_next())) {
++        htl_reorig(FindLSdb(0, ap, LST_SUMM));
++        htl_reorig(FindLSdb(0, ap, LST_SUMM));
++    }
++    // Ditto for AS-external-LSAs
++    htl_reorig(FindLSdb(0, 0, LST_ASL));
++
++    // Flush grace-LSAs
++    i_iter.reset();
++    ls_id = OPQ_T_HLRST << 24;
++    while ((ip = i_iter.get_next())) {
++        if ((lsap = myLSA(ip, 0, LST_LINK_OPQ, ls_id)))
++	    lsa_flush(lsap);
++    }
++
++    // Done with hitless restart exit
++    exiting_htl_restart = false;
++}
++
++/* Attempt reorigination of all LSAs listing us
++ * as originator in the Advertising Router field, but that
++ * we may not have originated since the hitless restart.
++ * These LSAs will probably be flushed as a result.
++ */
++
++void OSPF::htl_reorig(AVLtree *tree)
++
++{
++    AVLsearch iter(tree);
++    LSA *lsap;
++
++    while ((lsap = (LSA *)iter.next())) {
++	if (lsap->adv_rtr() != myid)
++	    continue;
++	if (!lsap->we_orig)
++	    lsap->reoriginate(false);
++    }
++}
++
++    
+diff -X exclude_files -Nabur ospfd2.3/src/rte.C ospfd2.4/src/rte.C
+--- ospfd2.3/src/rte.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/rte.C	Thu Sep 13 16:05:43 2001
+@@ -53,7 +53,7 @@
+ {
+     NH paths[MAXPATH];
+ 
+-    if (ip->is_virtual() || ip->state() == IFS_DOWN)
++    if (ip->is_virtual())
+ 	return(0);
+     paths[0].if_addr = ip->if_addr;
+     paths[0].phyint = ip->if_phyint;
+@@ -260,17 +260,18 @@
+ 
+ {
+     int i;
+-    bool retval=false;
++    int n_ifcs=0;
+ 
+     for (i = 0; i < npaths; i++) {
+         SpfIfc *ip;
+         ip = ospf->find_ifc(NHs[i].if_addr, NHs[i].phyint);
+-	if (ip && ip->area() != a)
++	if (ip) {
++	    n_ifcs++;
++	    if (ip->area() != a)
+ 	    return(false);
+-	else
+-	    retval = true;
+     }
+-    return(retval);
++    }
++    return((n_ifcs != 0));
+ }
+ 
+ /* Determine whether some of the next hops go through
+diff -X exclude_files -Nabur ospfd2.3/src/rtrlsa.C ospfd2.4/src/rtrlsa.C
+--- ospfd2.3/src/rtrlsa.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/rtrlsa.C	Thu Sep 13 16:05:43 2001
+@@ -53,7 +53,7 @@
+ {
+     SpfNbr *np;
+ 
+-    if ((np = if_nlst) && np->state() == NBS_FULL) {
++    if ((np = if_nlst) && np->adv_as_full()) {
+ 	rlp->link_id = hton32(np->id());
+ 	rlp->link_data = hton32(if_addr);
+ 	rlp->link_type = LT_VL;
+@@ -66,15 +66,18 @@
+     return(rlp);
+ }
+ 
+-// Insert information concerning a broadcast or NBMA interface
+-// into a router-LSA
++/* Insert information concerning a broadcast or NBMA interface
++ * into a router-LSA
++ * if_nfull includes all those neighbors that we
++ * are currently helping through hitless restart.
++ */
+ 
+ RtrLink *DRIfc::rl_insert(RTRhdr *rtrhdr, RtrLink *rlp)
+ 
+ {
+     if ((if_state == IFS_DR && if_nfull > 0) ||
+ 	((if_state == IFS_BACKUP || if_state == IFS_OTHER) &&
+-	 (if_dr_p && if_dr_p->state() == NBS_FULL))) {
++	 (if_dr_p && if_dr_p->adv_as_full()))) {
+ 	rlp->link_id = hton32(if_dr);
+ 	rlp->link_data = hton32(if_addr);
+ 	rlp->link_type = LT_TNET;
+@@ -109,7 +112,7 @@
+ {
+     SpfNbr *np;
+ 
+-    if ((np = if_nlst) && np->state() == NBS_FULL) {
++    if ((np = if_nlst) && np->adv_as_full()) {
+ 	PPAdjAggr *adjaggr;
+ 	uns16 adv_cost;
+ 	adv_cost = if_cost;
+@@ -169,7 +172,7 @@
+ 
+     // Then add link for each FULL neighbor
+     while ((np = iter.get_next())) {
+-	if (np->state() != NBS_FULL)
++	if (!np->adv_as_full())
+ 	    continue;
+ 	rlp->link_id = hton32(np->id());
+ 	rlp->link_data = hton32(if_addr);
+@@ -227,6 +230,10 @@
+     seq_t seqno;
+     RtrLink *rlp;
+ 
++    // If in hitless restart, queue exit check
++    if (ospf->in_hitless_restart())
++        ospf->check_htl_termination = true;
++
+     // Current LSA in database
+     olsap = ospf->myLSA(0, this, LST_RTR, ospf->my_id());
+ 
+@@ -246,7 +253,7 @@
+ 	}
+     }
+     // Get sequence number to originate with
+-    seqno = ospf->ospf_get_seqno(olsap, maxlen, forced);
++    seqno = ospf->ospf_get_seqno(LST_RTR, olsap, forced);
+     if (seqno == InvalidLSSeq)
+ 	return;
+     // Convert bytes to number of links, to make sure
+@@ -263,7 +270,7 @@
+     ifmap_valid = true;
+ 
+     // Build LSA header
+-    hdr = ospf->orig_buffer();
++    hdr = ospf->orig_buffer(maxlen);
+     hdr->ls_opts = SPO_DC;
+     if (!a_stub)
+ 	hdr->ls_opts |= SPO_EXT;
+@@ -321,6 +328,10 @@
+      */
+     if (rtrhdr->nlinks == 0) {
+         lsa_flush(olsap);
++	delete [] ifmap;
++	ifmap = 0;
++	sz_ifmap = 0;
++	ospf->free_orig_buffer(hdr);
+ 	return;
+     }
+ 
+@@ -338,7 +349,34 @@
+     length = ((byte *) rlp) - ((byte *) hdr);
+     hdr->ls_length = hton16(length);
+     rtrhdr->nlinks = hton16(rtrhdr->nlinks);
+-    (void) ospf->lsa_reorig(0, this, olsap, hdr, forced);
++    /* If we can't originate for some reason, we will need
++     * to delete the interface map so that the routing
++     * calculation won't get confused during initialization.
++     * This situation only occurs during hitless restart.
++     */
++    if (ospf->lsa_reorig(0, this, olsap, hdr, forced) == 0 &&
++	olsap &&
++	ospf->in_hitless_restart()) {
++        LShdr *dbcopy;
++	int size;
++	RTRhdr *rhdr;	
++	RTRhdr *dbrhdr;
++	rhdr = (RTRhdr *)(hdr + 1);
++	dbcopy = ospf->BuildLSA(olsap);
++	dbrhdr = (RTRhdr *)(dbcopy + 1);
++	// Compare body of advertisements
++	size = olsap->lsa_length - sizeof(LShdr) - sizeof(RTRhdr);
++	if (hdr->ls_length != dbcopy->ls_length ||
++	    memcmp((rhdr + 1), (dbrhdr + 1), size) != 0) {
++	    delete [] ifmap;
++	    ifmap = 0;
++	    sz_ifmap = 0;
++	}
++	else
++	    ospf->full_sched = true;
++    }
++
++    ospf->free_orig_buffer(hdr);
+ }
+ 
+ /* Add an area's configured hosts to a router-LSA.
+diff -X exclude_files -Nabur ospfd2.3/src/spfarea.C ospfd2.4/src/spfarea.C
+--- ospfd2.3/src/spfarea.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfarea.C	Thu Sep 13 16:05:43 2001
+@@ -248,16 +248,10 @@
+     n_active_if += increment;
+     ospf->calc_my_addr();
+ 
+-    if (oldifcs == 0) {
++    if (oldifcs == 0)
+ 	ospf->n_area++;
+-	ospf->rl_orig();
+-	generate_summaries();
+-    }
+-    else if (n_active_if == 0) {
++    else if (n_active_if == 0)
+ 	ospf->n_area--;
+-	ospf->rl_orig();
+-	flush_lsdb(true);
+-    }
+ 
+     // Area MTU calculation
+     // and Global MTU calculation
+@@ -283,7 +277,14 @@
+     }
+     delete iiter;
+ 
+-    // Determine summary_area, if any
++    if (oldifcs == 0) {
++	ospf->rl_orig();
++	generate_summaries();
++    }
++    else if (n_active_if == 0) {
++	ospf->rl_orig();
++	flush_lsdb(true);
++    }
+ }
+ 
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/spfcalc.C ospfd2.4/src/spfcalc.C
+--- ospfd2.3/src/spfcalc.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfcalc.C	Thu Sep 13 16:05:43 2001
+@@ -537,7 +537,7 @@
+ 	RTRrte *abr;
+ 	AVLsearch rrsearch(&ap->abr_tbl);
+ 	root = (rtrLSA *) myLSA(0, ap, LST_RTR, myid);
+-	local_changed = (root != 0 && root->t_dest->changed);
++	local_changed = (root != 0 && root->parsed && root->t_dest->changed);
+ 
+ 	while ((abr = (RTRrte *)rrsearch.next())) {
+ 	    // ABR now unreachable?
+@@ -602,7 +602,7 @@
+ 	}
+ 	// On changes, re-originate summary-LSAs
+ 	// Ranges ignored if also physical link
+-	if (rte->changed || rte->state_changed()) {
++	if (rte->changed || rte->state_changed() || exiting_htl_restart) {
+ 	    rte->changed = false;
+ 	    rte->sys_install();
+ 	    if (!rte->is_range())
+@@ -629,17 +629,39 @@
+     AVLitem *item;
+     int msgno;
+ 
++    // If necessary, recalculate certain entries in the
++    // forwarding address table. This is only necessary
++    // for incremental changes
++    switch(r_type) {
++      case RT_DIRECT:
++	fa_tbl->resolve();
++	break;
++      case RT_NONE:
++      case RT_STATIC:
++      case RT_EXTT1:
++      case RT_EXTT2:
++	fa_tbl->resolve(this);
++	break;
++      default:
++	break;
++    }
++
+     // We're about to synchronize with the kernel
++    // Don't synchronize if we are in hitless restart
++    if (ospf->in_hitless_restart())
++        return;
++    // If kernel deleted entry, we're going to rewrite, so
++    // don't bother to respond in OSPF::krt_sync()
+     if ((item = ospf->krtdeletes.find(net(), mask()))) {
+         ospf->krtdeletes.remove(item);
+ 	delete item;
+     }
+ 
++    // Update system kernel's forwarding table
+     switch(r_type) {
+       case RT_NONE:
+ 	msgno = LOG_DELRT;
+ 	sys->rtdel(net(), mask(), last_mpath);
+-	fa_tbl->resolve(this);
+ 	break;
+       case RT_REJECT:
+ 	msgno = LOG_ADDREJECT;
+@@ -648,16 +670,6 @@
+       default:
+ 	msgno = LOG_ADDRT;
+ 	sys->rtadd(net(), mask(), r_mpath, last_mpath, false);
+-	switch (r_type) {
+-	  case RT_DIRECT:
+-	    fa_tbl->resolve();
+-	    break;
+-	  case RT_STATIC:
+-	  case RT_EXTT1:
+-	  case RT_EXTT2:
+-	    fa_tbl->resolve(this);
+-	    break;
+-	}
+ 	break;
+     }
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/spfhello.C ospfd2.4/src/spfhello.C
+--- ospfd2.3/src/spfhello.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfhello.C	Thu Sep 13 16:05:43 2001
+@@ -305,6 +305,11 @@
+ 	    backup_seen = true;
+ 	if (np->declared_bdr())
+ 	    backup_seen = true;
++	if (ospf->in_hitless_restart() && ntoh32(hlopkt->hlo_dr) == if_addr) {
++	    backup_seen = true;
++	    // Declare self to be DR again
++	    if_dr = if_addr;
++	}
+     }
+ 
+     // Possibly respond to hello
+@@ -328,19 +333,16 @@
+ {
+     if (np && np->hellos_suppressed && np->n_state == NBS_FULL)
+         return(true);
+-    if (if_demand && !elects_dr() && (!np || np->n_state < NBS_INIT)) {
+-        if (np) {
+-	    np->demand_helapse += if_hint;
+-	    if (np->demand_helapse < if_pint)
+-	        return(true);
+-	    np->demand_helapse = 0;
+-	}
+-	else {
++    if (if_demand && !elects_dr() && !np) {
+ 	    if_demand_helapse += if_hint;
+ 	    if (if_demand_helapse < if_pint)
+-	        return(true);
+-	    if_demand_helapse = 0;
++	    return(false);
++	else if (if_demand_helapse >= 2*if_pint) {
++	    if_demand_helapse = if_pint;
++	    return(false);
+ 	}
++	else
++	    return(true);
+     }
+     return(false);
+ }
+diff -X exclude_files -Nabur ospfd2.3/src/spfifc.C ospfd2.4/src/spfifc.C
+--- ospfd2.3/src/spfifc.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfifc.C	Thu Sep 13 16:05:43 2001
+@@ -214,6 +214,7 @@
+     if_nlst = 0;
+     if_nnbrs = 0;
+     if_nfull = 0;
++    if_helping = 0;
+     in_recv_update = false;
+     area_flood = false;
+     global_flood = false;
+diff -X exclude_files -Nabur ospfd2.3/src/spfifc.h ospfd2.4/src/spfifc.h
+--- ospfd2.3/src/spfifc.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfifc.h	Thu Sep 13 16:05:43 2001
+@@ -172,6 +172,7 @@
+     class SpfNbr *if_nlst; // List of associated neighbors
+     int	if_nnbrs;	// Number of neighbors
+     int	if_nfull;	// Number of fully adjacent neighbors
++    int if_helping;	// # neighbors being helped through hitless restart
+ 
+     SpfIfc(InAddr addr, int phyint); // Constructor
+     virtual ~SpfIfc(); 	// Destructor
+@@ -201,6 +202,7 @@
+     int add_to_update(LShdr *hdr);
+     void if_build_ack(LShdr *hdr, Pkt *pkt=0, class SpfNbr *np=0);
+     void nl_orig(int forced); // Originate network-LSA
++    LShdr *nl_raw_orig();
+     void finish_pkt(Pkt *pdesc, InAddr addr);
+     void nonbroadcast_send(Pkt *pdesc, InAddr addr);
+     void nonbroadcast_stop_hellos();
+diff -X exclude_files -Nabur ospfd2.3/src/spflog.h ospfd2.4/src/spflog.h
+--- ospfd2.3/src/spflog.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spflog.h	Thu Sep 13 16:05:43 2001
+@@ -26,6 +26,7 @@
+     CFG_DEL_AREA,       // Deleting area
+     CFG_ADD_IFC,        // Adding interface
+     CFG_DEL_IFC,        // Deleting interface
++    CFG_HTLRST,		// Hitless restart
+ 
+     RCV_SHORT = 100,	// Received packet too short
+     RCV_BADV,		// Received bad OSPF version number
+@@ -85,6 +86,16 @@
+     LOG_KRTSYNC,	// Synch kernel routing entry
+     LOG_REMNANT,	// Deleting remnant routing entry
+     LOG_DEBUGGING,	// Debug statements
++    LOG_HITLESSPREP,	// Preparing for hitless restart
++    LOG_PHASEFAIL,	// Hitless restart preparation failure
++    LOG_PREPDONE,	// Hitless restart preparation done
++    LOG_RESIGNDR,	// Resigned DR
++    LOG_GRACEACKS,	// Grace-LSAs acked
++    LOG_GRACERX,	// Grace-LSA received
++    LOG_HELPER_START,	// Enter helper mode
++    LOG_HELPER_STOP,	// Leave helper mode
++    LOG_GRACE_REJECT,	// Reject grace request
++    LOG_HTLEXIT,	// Exiting hitless restart
+     MAXLOG,		// KEEP THIS LAST!!!!
+ };
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/spflood.C ospfd2.4/src/spflood.C
+--- ospfd2.3/src/spflood.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spflood.C	Thu Sep 13 16:05:43 2001
+@@ -224,7 +224,7 @@
+     bool on_demand=false;
+     bool on_regular=false;
+ 
+-    lstype = hdr->ls_type;
++    lstype = lsa_type;
+     scope = flooding_scope(lstype);
+     r_ip = (from ? from->ifc() : 0);
+     if (!hdr)
+@@ -351,10 +351,11 @@
+ }
+ 
+ /* Determine whether LSAs should have DoNotAge set when
+- * flooded over this interface. For the moment, we always
++ * flooded over this interface. For the moment, we never
+  * set DoNotAge when flooding link-scoped LSAs over
+- * a demand interfaces, although we really should check to
+- * see that all the neighbors on that interface are DoNotAge-capable.
++ * a demand interfaces. This is done so that grace-LSAs work
++ * correctly, although should be revisited when we start originating
++ * other kinds of local-scoped LSAs.
+  */
+ 
+ bool SpfIfc::demand_flooding(byte lstype)
+@@ -364,7 +365,7 @@
+ 	return(false);
+     scope = flooding_scope(lstype);
+     if (scope == LocalScope)
+-        return(true);
++        return(false);
+     else if (scope == GlobalScope)
+         return(ospf->donotage());
+     else // Area scope
+diff -X exclude_files -Nabur ospfd2.3/src/spfnbr.C ospfd2.4/src/spfnbr.C
+--- ospfd2.3/src/spfnbr.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfnbr.C	Thu Sep 13 16:05:43 2001
+@@ -34,7 +34,7 @@
+ SpfNbr::SpfNbr(SpfIfc *ip, rtid_t _id, InAddr _addr)
+ : n_acttim(this), n_htim(this), n_holdtim(this),
+   n_ddrxtim(this), n_rqrxtim(this), n_lsarxtim(this),
+-  n_progtim(this)
++  n_progtim(this), n_helptim(this)
+     
+ {
+     n_ifp = ip;
+@@ -52,7 +52,6 @@
+     n_dr = 0;
+     n_bdr = 0;
+     database_sent = false;
+-    demand_helapse = 0;
+     rq_suppression = false;
+     hellos_suppressed = false;
+ 
+@@ -155,7 +154,7 @@
+     return(_dr_eligible);
+ }
+ 
+-/* Go through the collection of neighbors, deling those
++/* Go through the collection of neighbors, dealing those
+  * that are in down state and have been learned dynamically.
+  */
+ 
+@@ -173,7 +172,9 @@
+     while ((ip = iiter.get_next())) {
+ 	prev = &ip->if_nlst;
+ 	while ((np = *prev)) {
+-	    if (np->n_state == NBS_DOWN && !np->configured()) {
++	    if (np->n_state == NBS_DOWN &&
++		!np->configured() &&
++		!np->we_are_helping()) {
+ 		*prev = np->next;
+ 		delete np;
+ 		ip->if_nnbrs--;
+diff -X exclude_files -Nabur ospfd2.3/src/spfnbr.h ospfd2.4/src/spfnbr.h
+--- ospfd2.3/src/spfnbr.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfnbr.h	Thu Sep 13 16:05:43 2001
+@@ -114,6 +114,20 @@
+ {
+ }
+ 
++// Single shot timer. When fires, exit helper mode for the neighbor
++// due to timeout
++
++class HelperTimer : public Timer {
++    SpfNbr *np;
++public:
++    inline HelperTimer(SpfNbr *);
++    virtual void action();
++};
++
++inline HelperTimer::HelperTimer(SpfNbr *nbr) : np(nbr)
++{
++}
++
+ /* Definition of the OSPF neighbor class, and its associated
+  * fields. As usual, the configured part of the neighbor structure
+  * is in the initial piece.
+@@ -142,7 +156,6 @@
+ 	n_rmt_init:1;	// Remotely initiated?
+     bool rq_suppression;// Requested hello suppression?
+     bool hellos_suppressed; // Hellos suppressed?
+-    uns32 demand_helapse;// Elapsed hello time, demand only
+     SpfNbr *n_next_pend; // Pending adjacency list
+ 
+     // Four-part retransmission list
+@@ -166,6 +179,7 @@
+     RqRxmtTimer n_rqrxtim; // Request retransmit timer
+     LsaRxmtTimer n_lsarxtim; // LSA retransmit timer
+     ProgressTimer n_progtim; // DD progress timer
++    HelperTimer n_helptim; // Timeout helper mode
+ 
+ protected:
+     SpfNbr *next; 	// List, per OSPF interface
+@@ -231,6 +245,9 @@
+     void DelPendAdj();
+     void exit_dbxchg();
+     void dump_stats(struct NbrRsp *nrsp);
++    bool adv_as_full();
++    bool we_are_helping();
++    void exit_helper_mode(char *reason, bool actions=true);
+     
+     virtual bool configured();
+     virtual bool dr_eligible();
+diff -X exclude_files -Nabur ospfd2.3/src/spforig.C ospfd2.4/src/spforig.C
+--- ospfd2.3/src/spforig.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spforig.C	Thu Sep 13 16:05:43 2001
+@@ -37,6 +37,7 @@
+     bool flush_it;
+     SpfIfc *ip;
+     SpfArea *ap;
++    age_t lsage;
+ 
+     ip = np->n_ifp;
+     ap = ip->area();
+@@ -55,15 +56,26 @@
+      * database_copy after it is replaced in database.
+      */
+     flush_it = (!database_copy) || database_copy->lsa_age() == MaxAge;
++    lsage = ntoh16(hdr->ls_age);
++    hdr->ls_age = hton16(lsage & ~DoNotAge);
+     lsap = AddLSA(ip, ap, database_copy, hdr, true);
++    /* If in hitless restart, flood received copy then attempt
++     * to override it. The override won't work, but at least
++     * It checks to see whether we would have originated with
++     * same contents.
++     */
++    if (in_hitless_restart()) {
++        lsap->flood(np, hdr);
++	lsap->reoriginate(true);
++    }
+     // Flush if don't want to advertise
+     // Otherwise, simply bump database copy's sequence number
+-    if (ntoh32(hdr->ls_org) != my_id() || flush_it) {
+-	age_prematurely(lsap);
++    else if (ntoh32(hdr->ls_org) != my_id() || flush_it) {
++	lsa_flush(lsap);
+     }
+     else if (ntoh32(hdr->ls_seqno) == (seq_t) MaxLSSeq) {
+ 	lsap->rollover = true;
+-	age_prematurely(lsap);
++	lsa_flush(lsap);
+     }
+     else {
+         /* This strange logic to make sure that if the new
+@@ -89,22 +101,23 @@
+  *
+  * If shutting down, return InvalidLSSeq to inhibit further
+  * LSA origination.
++ *
++ * While in hitless restart, we always return a LS sequence number.
++ * This allows LSAs to be built, but lsa_reorig() will later
++ * inhibit their installation and flooding. By the way, the
++ * deferred and rollover logic does not work during hitless
++ * restart.
+  */
+ 
+-seq_t OSPF::ospf_get_seqno(LSA *lsap, int ls_len, int forced)
++seq_t OSPF::ospf_get_seqno(byte lstype, LSA *lsap, int forced)
+ 
+ {
+     if (shutting_down() || host_mode)
+ 	return(InvalidLSSeq);
+-    // Allocate large LSA build buffer, if necessary
+-    if (ls_len > orig_size) {
+-	orig_size = ls_len;
+-	delete [] orig_buff;
+-	orig_buff = new byte[orig_size];
+-    }
+-
+     if (!lsap || !lsap->valid())
+ 	return(InitLSSeq);
++    if (in_hitless_restart())
++        return(lsap->ls_seqno());
+     if ((!forced) && 
+ 	lsap->in_agebin && lsap->since_received() < MinLSInterval) {
+ 	lsap->deferring = true;
+@@ -142,7 +155,16 @@
+ void lsa_flush(LSA *lsap)
+ 
+ {
+-    if (lsap && lsap->valid() && lsap->lsa_age() != MaxAge) {
++    if (!lsap)
++        return;
++    if (ospf->in_hitless_restart() &&
++	lsap->lsa_type == LST_LINK_OPQ &&
++	lsap->ls_id()==(OPQ_T_HLRST<<24))
++        return;
++    if (ospf->in_hitless_restart() &&
++	(lsap->lsa_type >= LST_RTR && lsap->lsa_type <= LST_ASL))
++	lsap->we_orig = false;
++    else if (lsap->valid() && lsap->lsa_age() != MaxAge) {
+ 	ospf->age_prematurely(lsap);
+     }
+ }
+@@ -156,6 +178,12 @@
+  * the appropriate routing calculations when the contents have changed.
+  *
+  * Returns new LSA if originated, 0 otherwise.
++ *
++ * In hitless restart, we abort the LSA origination of LS types 1-5,
++ * assuming that the network copies are more recent. We abort here
++ * rather than in OSPF::ospf_get_seqno() so that we can tell when
++ * the LSA that we would originate is the same as the network
++ * copy (part of the hitless restart exit criteria).
+  */
+ 
+ LSA *OSPF::lsa_reorig(SpfIfc *ip,SpfArea *ap,LSA *olsap,LShdr *hdr,int forced)
+@@ -163,6 +191,7 @@
+ {
+     int changes;
+     LSA *lsap;
++    byte lstype=hdr->ls_type;
+ 
+     hdr->ls_age = 0;
+     if (donotage() && 
+@@ -170,14 +199,22 @@
+ 	(refresh_rate < 0 || refresh_rate > LSRefreshTime))
+         hdr->ls_age = hton16(ntoh16(hdr->ls_age) | DoNotAge);
+     changes = (olsap ? olsap->cmp_contents(hdr) : true);
+-    if (!changes && !forced && olsap->do_not_age() == hdr->do_not_age())
++    if (!changes && !forced && olsap->do_not_age() == hdr->do_not_age()) {
++        olsap->we_orig = true;
+ 	return(0);
++    }
++    if (in_hitless_restart() &&	(lstype >= LST_RTR && lstype <= LST_ASL)) {
++        if (olsap)
++	    olsap->we_orig = (!changes);
++        return(0);
++    }
+     // Perform origination
+     hdr->generate_cksum();
+     if (spflog(LOG_LSAORIG, 3))
+ 	log(hdr);
+     // Add to database and flood
+     lsap = AddLSA(ip, ap, olsap, hdr, changes);
++    lsap->we_orig = true;
+     lsap->flood(0, hdr);
+     return(lsap);
+ }
+@@ -231,7 +268,8 @@
+     age_t oldage;
+     int msgno;
+     
+-    hdr = ospf->BuildLSA(lsap);
++    hdr = orig_buffer(lsap->lsa_length);
++    hdr = ospf->BuildLSA(lsap, hdr);
+     oldage = ntoh16(hdr->ls_age);
+     hdr->ls_age = hton16(MaxAge);
+     hdr->generate_cksum();
+@@ -244,4 +282,42 @@
+     // lsap may be deleted after this line
+     nlsap = AddLSA(lsap->lsa_ifp, lsap->area(), lsap, hdr, true);
+     nlsap->flood(0, hdr);
++    free_orig_buffer(hdr);
++}
++
++/* Set aside the staging area for originating a new LSA.
++ * We use a static area of the maximum size we have yet encountered,
++ * unless the staging area is already in use, in which case
++ * we do a new temporary allocation.
++ */
++
++LShdr *OSPF::orig_buffer(int ls_len)
++{
++    // Staging area already in use?
++    if (orig_buff_in_use) {
++        n_orig_allocs++;
++        return((LShdr *) new byte[ls_len]);
++    }
++    // Allocate large LSA build buffer, if necessary
++    if (ls_len > orig_size) {
++	orig_size = ls_len;
++	delete [] orig_buff;
++	orig_buff = new byte[orig_size];
++    }
++
++    orig_buff_in_use = true;
++    return((LShdr *)orig_buff);
++}
++
++/* Free the staging area. If it isn't the static one, return
++ * it to the heap.
++ */
++
++void OSPF::free_orig_buffer(LShdr *hdr)
++
++{
++    if (((byte *)hdr) != orig_buff)
++        delete [] ((byte *)hdr);
++    // Static stating area is now available
++    orig_buff_in_use = false;
+ }
+diff -X exclude_files -Nabur ospfd2.3/src/spfutil.C ospfd2.4/src/spfutil.C
+--- ospfd2.3/src/spfutil.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/spfutil.C	Thu Sep 13 16:05:43 2001
+@@ -304,6 +304,8 @@
+       case LOG_DELRT:
+ 	return("Deleting");
+ 	// Errors
++      case CFG_HTLRST:
++	return("Hitless restart, period");
+       case RCV_SHORT:
+ 	return("Received packet too short");
+       case RCV_BADV:
+@@ -412,6 +414,26 @@
+ 	return("Deleting remnant");
+       case LOG_DEBUGGING:
+ 	return("");
++      case LOG_HITLESSPREP:
++	return("Preparing for hitless restart");
++      case LOG_PHASEFAIL:
++	return("Hitless restart preparation failure:");
++      case LOG_PREPDONE:
++	return("Hitless restart preparation complete");
++      case LOG_RESIGNDR:
++	return("Resigned DR");
++      case LOG_GRACEACKS:
++	return("Grace-LSAs acked");
++      case LOG_GRACERX:
++	return("Grace-LSA received");
++      case LOG_HELPER_START:
++        return("Entering helper mode");
++      case LOG_HELPER_STOP:
++	return("Leaving helper mode");
++      case LOG_GRACE_REJECT:
++	return("Rejecting grace request");
++      case LOG_HTLEXIT:
++	return("Exiting hitless restart:");
+       default:
+ 	break;
+     }
+diff -X exclude_files -Nabur ospfd2.3/src/summlsa.C ospfd2.4/src/summlsa.C
+--- ospfd2.3/src/summlsa.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/summlsa.C	Thu Sep 13 16:05:43 2001
+@@ -45,6 +45,10 @@
+     uns32 cost;
+     summLSA *nlsap;
+ 
++    if (!orig_rte) {
++        lsa_flush(this);
++        return;
++    }
+     cost = lsa_ap->sl_cost(orig_rte);
+     nlsap = lsa_ap->sl_reorig(this, ls_id(), cost, orig_rte, forced);
+     if (nlsap)
+@@ -189,13 +193,13 @@
+ 	lsa_flush(olsap);
+ 	return(0);
+     }
+-    else if ((seqno = ospf->ospf_get_seqno(olsap, length, forced))
++    else if ((seqno = ospf->ospf_get_seqno(LST_SUMM, olsap, forced))
+ 	     == InvalidLSSeq)
+ 	return(0);
+ 
+     // Fill in LSA contents
+     // Header
+-    hdr = ospf->orig_buffer();
++    hdr = ospf->orig_buffer(length);
+     hdr->ls_opts = SPO_DC;
+     if (!a_stub)
+ 	hdr->ls_opts |= SPO_EXT;
+@@ -212,6 +216,7 @@
+     summ->metric = hton32(cost);
+ 
+     nlsap = ospf->lsa_reorig(0, this, olsap, hdr, forced);
++    ospf->free_orig_buffer(hdr);
+     return((summLSA *)nlsap);
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.3/src/system.h ospfd2.4/src/system.h
+--- ospfd2.3/src/system.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/system.h	Thu Sep 13 16:05:43 2001
+@@ -47,8 +47,20 @@
+     virtual void monitor_response(struct MonMsg *, uns16, int, int)=0;
+     virtual char *phyname(int phyint)=0;
+     virtual void sys_spflog(int msgno, char *msgbuf)=0;
++    virtual void store_hitless_parms(int, int, struct MD5Seq *) = 0;
+     virtual void halt(int code, char *string)=0;
+ };
++
++/* Class used to indicate MD5 sequence numbers in use
++ * on a particular interface.
++ */
++
++struct MD5Seq {
++    int phyint;
++    InAddr if_addr;
++    uns32 seqno;
++};
++
+ 
+ extern OspfSysCalls *sys;
+ extern SPFtime sys_etime;
+diff -X exclude_files -Nabur ospfd2.3/src/timer.C ospfd2.4/src/timer.C
+--- ospfd2.3/src/timer.C	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/timer.C	Thu Sep 13 16:05:43 2001
+@@ -48,6 +48,16 @@
+     timerq.priq_delete(this);
+ }
+ 
++/* When a timer is destoyed, make sure that it is
++ * stopped.
++ */
++
++Timer::~Timer()
++
++{
++    stop();
++}
++
+ /* Start a single shot timer with a given period.
+  * If timer is already running, do nothing - restart
+  * must be called to restart a running timer.
+diff -X exclude_files -Nabur ospfd2.3/src/timer.h ospfd2.4/src/timer.h
+--- ospfd2.3/src/timer.h	Mon May 21 10:19:27 2001
++++ ospfd2.4/src/timer.h	Thu Sep 13 16:05:43 2001
+@@ -44,6 +44,7 @@
+     virtual void start(int milliseconds, bool randomize=true);
+     virtual void fire();
+     virtual void action() = 0;
++    virtual ~Timer();
+ };
+ 
+ // Inline functions
+diff -X exclude_files -Nabur ospfd2.3/src/tlv.C ospfd2.4/src/tlv.C
+--- ospfd2.3/src/tlv.C	Wed Dec 31 19:00:00 1969
++++ ospfd2.4/src/tlv.C	Thu Sep 13 16:05:44 2001
+@@ -0,0 +1,273 @@
++/*
++ *   OSPFD routing daemon
++ *   Copyright (C) 2001 by John T. Moy
++ *   
++ *   This program is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU General Public License
++ *   as published by the Free Software Foundation; either version 2
++ *   of the License, or (at your option) any later version.
++ *   
++ *   This program is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *   GNU General Public License for more details.
++ *   
++ *   You should have received a copy of the GNU General Public License
++ *   along with this program; if not, write to the Free Software
++ *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ */
++
++/* This file contains the routines used to build and parse
++ * TLVs within the body of OSPF LSAs.
++ */
++
++#include "machdep.h"
++#include "spftype.h"
++#include "spfparam.h"
++#include "ip.h"
++#include "arch.h"
++#include "lshdr.h"
++#include "tlv.h"
++
++/* Return the length of the TLV, including header and
++ * padding, given the length of the value within the
++ * body.
++ */
++
++int TLVbuf::tlen(int vlen)
++
++{
++    int len;
++    len = 4*((vlen + 3)/4);
++    len += sizeof(TLV);
++    return(len);
++}
++
++/* Reserve space in the TLV buffer for a new TLV,
++ * given the length of its value. Reallocate
++ * the current buffer, copying its contents, if necessary.
++ */
++
++TLV *TLVbuf::reserve(int vlen)
++
++{
++    int len;
++    byte *end;
++    byte *old;
++    TLV *fill;
++    int used;
++
++    len = tlen(vlen);
++    end = buf + blen;
++    if (buf == 0) {
++        buf = new byte[len];
++	current = (TLV *)buf;
++	blen = len;
++    }
++    else if ((((byte *)current) + len) > end) {
++        old = buf;
++	used = ((byte *)current) - buf;
++	buf = new byte[len + used];
++	memcpy(buf, old, used);
++	blen = len + used;
++	current = (TLV *)(buf + used);
++	delete old;
++    }
++    // Update current length
++    fill = current;
++    memset(fill, 0, len);
++    current = (TLV *) (((byte *)fill) + len);
++    return(fill);
++}
++
++/* Constructor for a buffer of TLVs that is to be
++ * parsed.
++ */
++
++TLVbuf::TLVbuf(byte *body, int len)
++
++{
++    buf = body;
++    blen = len;
++    current = 0;	// Indicates no TLV has been parsed
++}
++
++/* Get the type of the next TLV in the buffer. Subsequent
++ * calls to other methods (like get_int()) will be used to
++ * get the value out of the TLV.
++ * A return of false indicates that there are no more TLVs
++ * available.
++ */
++
++bool TLVbuf::next_tlv(int & type)
++
++{
++    byte *end;
++    TLV *next;
++
++    if (current == 0)
++        next = (TLV *) buf;
++    else
++        next = (TLV *) (((byte *)current) + tlen(ntoh16(current->length)));
++
++    // Check to see the entire TLV is cont ained with the buffer
++    end = buf + blen;
++    if (end < (((byte *)next) + sizeof(TLV)) ||
++	end < (((byte *)next) + tlen(ntoh16(next->length))))
++        return(false);
++
++    type = ntoh16(next->type);
++    current = next;
++    return(true);
++}
++
++/* Check to see that the value within the current TLV is 4 bytes, and if
++ * so, return it as an integer.
++ */
++
++bool TLVbuf::get_int(int32 & val)
++
++{
++    int32 *ptr;
++    if (!current || ntoh16(current->length) != sizeof(int32))
++        return(false);
++    ptr = (int32 *)(current + 1);
++    val = ntoh32(*ptr);
++    return(true);
++}
++
++/* Check to see that the value within the current TLV is 2 bytes, and if
++ * so, return it as an unsigned short.
++ */
++
++bool TLVbuf::get_short(uns16 & val)
++
++{
++    uns16 *ptr;
++    if (!current || ntoh16(current->length) != sizeof(uns16))
++        return(false);
++    ptr = (uns16 *)(current + 1);
++    val = ntoh16(*ptr);
++    return(true);
++}
++
++/* Check to see that the value within the current TLV is 1 byte, and if
++ * so, return it.
++ */
++
++bool TLVbuf::get_byte(byte & val)
++
++{
++    byte *ptr;
++    if (!current || ntoh16(current->length) != sizeof(byte))
++        return(false);
++    ptr = (byte *)(current + 1);
++    val = *ptr;
++    return(true);
++}
++
++/* If there us a current TLV, return a pointer to its body and
++ * indicate its length. A return of 0 indicates that there
++ * was no TLV to parse.
++ */
++
++char *TLVbuf::get_string(int & len)
++
++{
++    if (!current)
++        return(0);
++    len = ntoh16(current->length);
++    return((char *)(current + 1));
++}
++
++/* Routines used to build an LSA body consisting of TLVs.
++ */
++
++/* When TLVbuf originally constructed, it has no buffer
++ * associated with it. As TLVs are added, reserve() will allocate
++ * appropriate buffer space.
++ */
++
++TLVbuf::TLVbuf()
++
++{
++    buf = 0;
++    blen = 0;
++    current = 0;
++}
++
++/* To re-use a TLV transmit buffer, simply set current to the
++ * begiining of the buffer. When building the packet, current
++ * is always pointing to the end of the TLVs that are current
++ * in the buffer.
++ */
++
++void TLVbuf::reset()
++
++{
++    current = (TLV *) buf;
++}
++
++/* Put a TLV with a 4-byte integer value into the buffer.
++ */
++
++void TLVbuf::put_int(int type, int32 val)
++
++{
++    TLV *fill;
++    int32 *ptr;
++
++    fill = reserve(sizeof(val));
++    fill->type = hton16(type);
++    fill->length = hton16(sizeof(val));
++    ptr = (int32 *)(fill + 1);
++    *ptr = hton32(val);
++}
++
++/* Put a TLV with a 2-byte integer value into the buffer.
++ */
++
++void TLVbuf::put_short(int type, uns16 val)
++
++{
++    TLV *fill;
++    uns16 *ptr;
++
++    fill = reserve(sizeof(val));
++    fill->type = hton16(type);
++    fill->length = hton16(sizeof(val));
++    ptr = (uns16 *)(fill + 1);
++    *ptr = hton16(val);
++}
++
++/* Put a TLV with a one byte value into the buffer.
++ */
++
++void TLVbuf::put_byte(int type, byte val)
++
++{
++    TLV *fill;
++    byte *ptr;
++
++    fill = reserve(sizeof(val));
++    fill->type = hton16(type);
++    fill->length = hton16(sizeof(val));
++    ptr = (byte *)(fill + 1);
++    *ptr = val;
++}
++
++/* Put a TLV with a string value into the buffer.
++ */
++
++void TLVbuf::put_string(int type, char *str, int len)
++
++{
++    TLV *fill;
++    byte *ptr;
++
++    fill = reserve(len);
++    fill->type = hton16(type);
++    fill->length = hton16(len);
++    ptr = (byte *)(fill + 1);
++    memcpy(ptr, str, len);
++}
+diff -X exclude_files -Nabur ospfd2.3/src/tlv.h ospfd2.4/src/tlv.h
+--- ospfd2.3/src/tlv.h	Wed Dec 31 19:00:00 1969
++++ ospfd2.4/src/tlv.h	Thu Sep 13 16:05:44 2001
+@@ -0,0 +1,58 @@
++/*
++ *   OSPFD routing daemon
++ *   Copyright (C) 2001 by John T. Moy
++ *   
++ *   This program is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU General Public License
++ *   as published by the Free Software Foundation; either version 2
++ *   of the License, or (at your option) any later version.
++ *   
++ *   This program is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *   GNU General Public License for more details.
++ *   
++ *   You should have received a copy of the GNU General Public License
++ *   along with this program; if not, write to the Free Software
++ *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ */
++
++/* This file contains the class used to build and parse
++ * TLVs within the body of OSPF LSAs.
++ */
++
++class TLVbuf {
++    byte *buf;
++    int blen;
++    TLV *current;
++
++    int tlen(int vlen);
++    TLV *reserve(int vlen);
++  public:
++    // Parse routines
++    TLVbuf(byte *body, int blen);
++    bool next_tlv(int & type);
++    bool get_int(int32 & val);
++    bool get_short(uns16 & val);
++    bool get_byte(byte & val);
++    char *get_string(int & len);
++    // Build routines
++    TLVbuf();
++    void reset();
++    void put_int(int type, int32 val);
++    void put_short(int type, uns16 val);
++    void put_byte(int type, byte val);
++    void put_string(int type, char *str, int len);
++    inline byte *start();
++    inline int length();
++};
++
++inline byte *TLVbuf::start()
++{
++    return(buf);
++}
++inline int TLVbuf::length()
++{
++    return(((byte *) current) - buf);
++}
++

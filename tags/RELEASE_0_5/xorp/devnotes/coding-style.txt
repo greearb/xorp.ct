@@ -1,0 +1,243 @@
+#
+# $XORP: xorp/devnotes/coding-style.txt,v 1.3 2003/04/22 23:23:37 hodson Exp $
+#
+
+	Provisional XORP C++ coding style
+
+This is a *provisional* attempt to lay down some rules that we can
+adhere to and moan about. The style is only intended to apply to new
+code, not code that we import.  Hopefully, the style is equidistant
+from our default coding styles that all are equally peturbed.
+
+- DOCTRINE
+
+  Ignore any section of this document when doing so would enhance
+  readability.  Feel free to edit someone else's code into agreement
+  with these principles, or into agreement with your own variant of
+  these principles.  Expect that your code may be likewise edited.
+
+- FILE PROLOGUES
+
+  Files should have a prologue containing the copyright, a description
+  of what the file does, an RCS version id, and an RCS
+  string/identifier in implementation files that ident(1) can use.
+
+  We have a standard templates to work from:
+     devnotes/template.hh
+     devnotes/template.cc
+     devnotes/template.h
+     devnotes/template.c
+
+- INDENTATION
+
+  Use 4 spaces per indent level.  Indentation should generally follow
+  "gnu".  The default emacs c/c++ style is gnu, can be set with
+  M-x c-set-style gnu).
+
+- BRACES
+
+  Try to avoid gratuitous newlines between statements opening a brace
+  and the opening brace. E.g., prefer:
+
+	if (abc == 3) {
+		/* XXX */
+	}
+
+  to:
+	if (abc == 3)
+	{
+		/* XXX */
+	}
+
+  For the sake of readability, try to place white space either side of
+  braces. E.g., prefer:
+	inline bool foo() { return _some_value; }
+  to:
+	inline bool foo() {return some_value;}
+
+- REFERENCE AND POINTER ANNOTATIONS
+
+  Prefer:
+	foo(int& x) and bar(int* y)
+  to:
+	foo(int &x) and bar(int *y)
+
+  The former appears to be more widely used in C++ literature and so we go
+  with this for the sake of consistency.
+
+- TEMPORARY REFERENCES
+
+  Temporary references can help make code more readable.  When used
+  with containers to pointer types the resulting code can be more
+  readable and efficient.
+
+	static void process(const string& s);	    // Forward declaration
+
+	static void
+	process_long_names1(list<string*> names)
+	{
+	    list<string*>::const_iterator ci;
+	    for (ci = names.begin(); ci != names.end(); ++ci) {
+	        if ((*ci)->size() > 10) {	    // Direct use of iterator
+		    process(*(*ci));
+		}
+	    }
+	}
+
+	static void
+	process_long_names2(list<string*> names)
+	{
+	    list<string*>::const_iterator ci;
+	    for (ci = names.begin(); ci != names.end(); ++ci) {
+		const string& s = *(*ci);	    // Use of temporary ref
+		if (s.size() > 10) {
+		    process(s);
+		}
+	    }
+	}
+
+- COMMENTS
+
+  Use // for comments.
+
+  Avoid obvious comments inside routines. Any comments inside routines
+  should be short -- one line, when possible. Prefer single blank
+  lines for separating sections of code.
+
+- API DOCUMENTATION (kdoc)
+
+  All major routines should have a comment briefly describing what
+  they do.  We use kdoc comments (similar to javadoc) to generate API
+  overviews and programming documentation.
+
+- TERMINAL WIDTH
+
+  Assume the terminal is 80 characters wide.  Sure there'll be odd
+  times when wraps cannot be avoided, but gratuitous wrapping will
+  give you a "wide boy" reputation.
+
+- CAPITALIZATION
+
+	class Wrench {
+	public:
+	    Wrench() { ... };
+	    ~Wrench() { ... };
+	    apply_force();
+	    ...
+	private:
+	    double _weight;
+	};
+
+  Note that the class's public interface comes first.
+
+- UNDERSCORING
+
+  Member variables should begin with an underscore.  Regular variables
+  and function names should separate words with underscores.
+
+  Double underscores should never be used, they are often used by the
+  compiler during name munging.
+
+- NAMES FOR MODIFIERS AND ACCESSORS.
+
+  Often, a private member variable will have associated public member
+  functions that get and/or set its value. If the variable is named
+  "_xxx", name the getter function "xxx()" and the setter function
+  "set_xxx()". The getter function should generally be const.
+
+- STRING METHODS
+
+  When necesary to have a string method, call it str().  In general, try
+  to avoid adding operator string().
+
+- BOOL METHODS
+
+  In general, always avoid adding operator bool(), unless there is a
+  strong reason for adding it.
+
+- METHOD DEFINITIONS
+
+  When defining C++ in implementation files place the return value
+  and class/method declarations on separate lines. E.g.,
+
+	const char*
+	LuckyEightBall::speak() const
+	{
+	// blah blah
+	}
+
+- ABBREVIATIONS
+
+  Should be avoided, especially in method names.
+
+- INTEGER TYPES
+
+  Use integer types defined in inttypes.h, these are POSIX compatible
+  and portable.
+
+- USE OF CONST
+
+  Decorate member functions with "const" whenever appropriate for
+  purposes of documentation. Member functions that do not alter an
+  object's value should be "const". Sometimes, a member variable is
+  altered by a function that does not conceptually change the object's
+  value. Mark such member variables as "mutable" to enhance the
+  applicability of "const".
+
+- USE OF EXCEPTIONS AND STANDARD TEMPLATE LIBRARY
+
+  Non-kernel modules should use exceptions and the standard template
+  library where appropriate.
+
+- USE OF AUTOCONF
+
+  We will use Gnu autoconf to improve portability. The "config.h"
+  header file will define symbols specifying system properties that
+  may differ between reasonable Unices. The first file included by any
+  Xorp source file should be `<config.h>' (or, perhaps,
+  `<xorp/config.h>').
+
+- INCLUDE FILES
+
+  Include files should be sorted into domain, each domain separated by
+  a blank line:
+
+	kernel includes
+	sys includes
+	net includes
+	default include path includes
+	local includes
+
+  Don't sweat it too hard, however.
+
+- SPACES AND PARENTHESES
+
+  Binary operators should have spaces around them to ease
+  decipherment.  Parentheses have to used when precedence dictates and
+  can be used to reduce confusion, particularly with long
+  expressions. Do not put spaces around parentheses.
+
+  Keywords should likewise have spaces around them.  For example,
+  `if (x)', not `if(x)'; and `return x', not `return(x)'.
+
+- VARIABLE DECLARATIONS
+
+  Place variable declarations at the beginning of the relevant
+  scope. This includes placing declarations in the middle of
+  functions, close to their first uses, when appropriate. Declare
+  iteration variables inside the `for' statement when possible; this
+  is most of the time. Declare a test variable inside the `if' test
+  when possible; this happens comparatively rarely. Prefer multiple
+  declarations when defining several variables that require
+  initializers.
+
+- PORTABILITY
+
+  All IPv6-specific code should be "#ifdef HAVE_IPV6" :
+  #ifdef HAVE_IPV6
+	 ....
+  #endif // HAVE_IPV6
+
+  If there is only one line of code between #ifdef and #endif, then
+  do not add the comment after "#endif".
+

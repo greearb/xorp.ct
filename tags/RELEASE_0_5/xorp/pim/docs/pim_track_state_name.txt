@@ -1,0 +1,396 @@
+Input = INPUT_STATE_RP_CHANGED
+        OUTPUT_STATE_MRIB_RP_RP                                    (*,*,RP)
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP                              (*,*,RP)
+        OUTPUT_STATE_RP_WC                                            (*,G)
+        OUTPUT_STATE_MRIB_RP_WC                                       (*,G)
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP_G                               (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_WC                              (*,G)
+        OUTPUT_STATE_RP_SG                                            (S,G)
+        OUTPUT_STATE_RP_SG_RPT                                    (S,G,rpt)
+        OUTPUT_STATE_MRIB_RP_SG                                       (S,G)
+        OUTPUT_STATE_MRIB_RP_SG_RPT                               (S,G,rpt)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+        OUTPUT_STATE_RP_MFC                                           (MFC)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_MRIB_RP_CHANGED
+        OUTPUT_STATE_MRIB_RP_RP                                    (*,*,RP)
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP                              (*,*,RP)
+        OUTPUT_STATE_MRIB_RP_WC                                       (*,G)
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP_G                               (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_WC                              (*,G)
+        OUTPUT_STATE_MRIB_RP_SG                                       (S,G)
+        OUTPUT_STATE_MRIB_RP_SG_RPT                               (S,G,rpt)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_MRIB_S_CHANGED
+        OUTPUT_STATE_MRIB_S_SG                                        (S,G)
+        OUTPUT_STATE_MRIB_S_SG_RPT                                (S,G,rpt)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_MRIB_NEXT_HOP_S                                  (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_IS_DIRECTLY_CONNECTED_SG                         (S,G)
+        OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP                              (*,*,RP)
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP_G                               (*,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+
+Input = INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID                       (*,*,RP)
+
+Input = INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED
+        OUTPUT_STATE_MRIB_NEXT_HOP_RP_G                               (*,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+
+Input = INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED
+        OUTPUT_STATE_MRIB_NEXT_HOP_S                                  (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+
+Input = INPUT_STATE_RPFP_NBR_WC_CHANGED
+        OUTPUT_STATE_RPFP_NBR_WC                                      (*,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+
+Input = INPUT_STATE_RPFP_NBR_WC_GEN_ID_CHANGED
+        OUTPUT_STATE_RPFP_NBR_WC_GEN_ID                               (*,G)
+
+Input = INPUT_STATE_RPFP_NBR_SG_CHANGED
+        OUTPUT_STATE_RPFP_NBR_SG                                      (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+
+Input = INPUT_STATE_RPFP_NBR_SG_GEN_ID_CHANGED
+        OUTPUT_STATE_RPFP_NBR_SG_GEN_ID                               (S,G)
+
+Input = INPUT_STATE_RPFP_NBR_SG_RPT_CHANGED
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+
+Input = INPUT_STATE_RECEIVE_JOIN_RP
+        OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC                           (*,G)
+
+Input = INPUT_STATE_RECEIVE_JOIN_WC
+        OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC                           (*,G)
+        OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT                    (S,G,rpt)
+
+Input = INPUT_STATE_RECEIVE_JOIN_SG
+        OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG                           (S,G)
+
+Input = INPUT_STATE_RECEIVE_JOIN_SG_RPT
+
+Input = INPUT_STATE_RECEIVE_PRUNE_RP
+
+Input = INPUT_STATE_RECEIVE_PRUNE_WC
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_RECEIVE_PRUNE_SG
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_RECEIVE_PRUNE_SG_RPT
+
+Input = INPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT
+        OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT                (S,G,rpt)
+
+Input = INPUT_STATE_SEE_PRUNE_WC
+        OUTPUT_STATE_SG_SEE_PRUNE_WC                                  (S,G)
+
+Input = INPUT_STATE_DOWNSTREAM_JP_STATE_RP
+        OUTPUT_STATE_IS_JOIN_DESIRED_RP                            (*,*,RP)
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_DOWNSTREAM_JP_STATE_WC
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_DOWNSTREAM_JP_STATE_SG
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_DOWNSTREAM_JP_STATE_SG_RPT
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_UPSTREAM_JP_STATE_SG
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+
+Input = INPUT_STATE_LOCAL_RECEIVER_INCLUDE_WC
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_LOCAL_RECEIVER_INCLUDE_SG
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_LOCAL_RECEIVER_EXCLUDE_SG
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_ASSERT_STATE_WC
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_RPFP_NBR_WC                                      (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_ASSERT_STATE_SG
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG                                      (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
+        OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED
+        OUTPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID                      (*,G)
+
+Input = INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED
+        OUTPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID                      (S,G)
+
+Input = INPUT_STATE_ASSERT_RPF_INTERFACE_WC_CHANGED
+        OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC                          (*,G)
+
+Input = INPUT_STATE_ASSERT_RPF_INTERFACE_SG_CHANGED
+        OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG                          (S,G)
+
+Input = INPUT_STATE_I_AM_DR
+        OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
+        OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_MY_IP_ADDRESS
+        OUTPUT_STATE_MY_ASSERT_METRIC_WC                              (*,G)
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_IS_DIRECTLY_CONNECTED_SG                         (S,G)
+        OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_MY_IP_SUBNET_ADDRESS
+        OUTPUT_STATE_IS_DIRECTLY_CONNECTED_SG                         (S,G)
+        OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
+
+Input = INPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC
+        OUTPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC                 (MFC)
+
+Input = INPUT_STATE_KEEPALIVE_TIMER_SG
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+
+Input = INPUT_STATE_SPTBIT_SG
+        OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
+        OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
+        OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
+        OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
+
+Input = INPUT_STATE_IN_START_VIF
+        OUTPUT_STATE_OUT_START_VIF_RP                              (*,*,RP)
+        OUTPUT_STATE_OUT_START_VIF_WC                                 (*,G)
+        OUTPUT_STATE_OUT_START_VIF_SG                                 (S,G)
+        OUTPUT_STATE_OUT_START_VIF_SG_RPT                         (S,G,rpt)
+
+Input = INPUT_STATE_IN_STOP_VIF
+        OUTPUT_STATE_OUT_STOP_VIF_RP                               (*,*,RP)
+        OUTPUT_STATE_OUT_STOP_VIF_WC                                  (*,G)
+        OUTPUT_STATE_OUT_STOP_VIF_SG                                  (S,G)
+        OUTPUT_STATE_OUT_STOP_VIF_SG_RPT                          (S,G,rpt)
+
+Input = INPUT_STATE_IN_ADD_PIM_MRE_RP
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP                   (*,*,RP)
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC                      (*,G)
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG                      (S,G)
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT              (S,G,rpt)
+
+Input = INPUT_STATE_IN_ADD_PIM_MRE_WC
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC                      (*,G)
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG                      (S,G)
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT              (S,G,rpt)
+
+Input = INPUT_STATE_IN_ADD_PIM_MRE_SG
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG                      (S,G)
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT              (S,G,rpt)
+
+Input = INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG                  (S,G)
+        OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT          (S,G,rpt)
+
+Input = INPUT_STATE_IN_REMOVE_PIM_MRE_RP
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP                (*,*,RP)
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC                   (*,G)
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG                   (S,G)
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT           (S,G,rpt)
+
+Input = INPUT_STATE_IN_REMOVE_PIM_MRE_WC
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC                   (*,G)
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG                   (S,G)
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT           (S,G,rpt)
+
+Input = INPUT_STATE_IN_REMOVE_PIM_MRE_SG
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG                   (S,G)
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT           (S,G,rpt)
+
+Input = INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG               (S,G)
+        OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT       (S,G,rpt)
+
+Input = INPUT_STATE_IN_REMOVE_PIM_MFC
+        OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC                     (MFC)
+

@@ -1,0 +1,2539 @@
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+Network Working Group                                     S. Hares
+Internet Draft                                             NextHop
+                                                           J. Haas
+                                                           NextHop
+                                                      W. Tackabury				                         
+                                              Gold Wire Technology
+								  
+                                                                                                    
+
+                     Definitions of Managed Objects
+       for the Fourth Version of Border Gateway Protocol (BGP-4), 
+                             Second Version
+                    <draft-ietf-idr-bgp4-mibv2-00.txt>
+
+
+Status of this Memo
+
+
+   This document is an Internet-Draft and is in full conformance
+   with all provisions of Section 10 of RFC2026.
+
+
+   Internet-Drafts are working documents of the Internet
+   Engineering Task Force (IETF), its areas, and its working
+   groups.  Note that other groups may also distribute working
+   documents as Internet-Drafts.
+
+
+   Internet-Drafts are draft documents valid for a maximum of six
+   months and may be updated, replaced, or obsoleted by other
+   documents at any time.  It is inappropriate to use Internet-
+   Drafts as reference material or to cite them other than as
+   "work in progress."
+
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt
+
+
+   The list of Internet-Draft Shadow Directories can be accessed
+   at http://www.ietf.org/shadow.html.
+
+
+Copyright Notice
+
+
+  Copyright (C) The Internet Society (2001).  All Rights Reserved.
+
+
+
+
+
+
+
+
+Various Authors      Expires July  13, 2002             [Page 1]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+
+
+1.  Abstract
+
+
+   This memo defines a portion of the Management Information Base
+   (MIB) for use with network management protocols in TCP/IP-
+   based internets.  In particular, this MIB defines objects that
+   facilitate the management of the Border Gateway Protocol Version 
+   4 (BGP4).
+
+   Distribution of this memo is unlimited.  
+
+
+
+2. Introduction
+
+   This memo defines a portion of the Management Information Base (MIB)
+   for use with network management protocols in the Internet community.
+   In particular, it describes managed objects used for managing the
+   Border Gateway Protocol Version 4.
+
+   The SNMP Management Framework presently consists of five
+   major components:
+
+
+    o   An overall architecture, described in RFC 2571 [1].
+
+
+    o   Mechanisms for describing and naming objects and
+        events for the purpose of management. The first
+        version of this Structure of Management Information
+        (SMI) is called SMIv1 and described in STD 16, RFC
+        1155 [2], STD 16, RFC 1212 [3] and RFC 1215 [4]. The
+        second version, called SMIv2, is described in STD 58,
+        RFC 2578 [5], RFC 2579 [6] and RFC 2580 [7].
+
+
+    o   Message protocols for transferring management
+        information. The first version of the SNMP message
+        protocol is called SNMPv1 and described in STD 15, RFC
+        1157 [8]. A second version of the SNMP message
+        protocol, which is not an Internet standards track
+        protocol, is called SNMPv2c and described in RFC 1901
+        [9] and RFC 1906 [10]. The third version of the
+        message protocol is called SNMPv3 and described in RFC
+        1906 [10], RFC 2572 [11] and RFC 2574 [12].
+
+
+    o   Protocol operations for accessing management
+        information. The first set of protocol operations and
+        associated PDU formats is described in STD 15, RFC
+        1157 [8]. A second set of protocol operations and
+        associated PDU formats is described in RFC 1905 [13].
+
+
+Various Authors      Expires July  13, 2002             [Page 2]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+    
+	o   A set of fundamental applications described in RFC
+        2573 [14] and the view-based access control mechanism
+        described in RFC 2575 [15].
+
+
+   A more detailed introduction to the current SNMP Management
+   Framework can be found in RFC 2570 [18].
+
+
+   Managed objects are accessed via a virtual information
+   store, termed the Management Information Base or MIB.
+   Objects in the MIB are defined using the mechanisms defined
+   in the SMI.
+
+
+3. Objectives
+
+   This MIB Module is meant to broadly update and replace a prior MIB 
+   Module defined in RFC 1657 [12].  Additionally, there is another 
+   effort underway to address very specific limited objectives in
+   updating points in the RFC 1657 object definition and managed object     
+   attributes [13].  The MIB Module described herein is intended 
+   to fully serve the functions and scope of RFC 1657 and these RFC 1657 
+   updates.
+
+   Additionally, however, there are a number of ways in which the BGP
+   Protocol has been enhanced through its ability for added capabilities,
+   where those capabilities have not been able to have any management
+   capabilities present in RFC 1657-compliant MIB module agents, since the
+   capabilities themselves postdated the adoption of RFC 1657.  For
+   several significant capabilities of BGP Communities [17], Autonomous 
+   System Confederation [16] , BGP Multiprotocol Extensions [18], and 
+   Route Reflection [19], the MIB Module defines herein objects to manage 
+   those extended capabilities and their operation.
+
+   One of these extensions in particular (the multiprotocol extensions) 
+   requires a thorough redefinition of MIB objects from the RFC 1657 
+   state, so as to allow transport-independent address exposure consistent
+   with the Address Family Identifier (AFI) and Subsequent Address Family 
+   Identifier (SAFI) mechanisms of that extension.
+  
+   Moreover, the requirement for the incremental update of support for 
+   capabilities such as these begs the issue of placing modular 
+   extensibility for protocol extensions within the framework of the MIB
+   itself.  Going forward, it would be very desirable to have attributes
+   of the MIB structure, and administrative procedures, to allow the 
+   incremental update of the MIB scope to cover any such new protocol 
+   extensions, without requiring a reissue of the entire MIB.  In this 
+   sense, we seek to structure the MIB much like the underlying BGP4 
+   itself, allowing capability-by-capability update.
+
+   Finally, the definition and adoption of Version 3 of the SNMP has 
+   occurred since the adoption of the RFC 1657 MIB.  As a result, the
+   ability to deploy secure configuration of managed elements via SNMP 
+   in a standardized way has become a reality for managed networks.  In 
+   this MIB definition effort, we seek to expose a more thorough 
+   capacity for configuration of BGP4 and its capabilities than was 
+
+Various Authors      Expires July  13, 2002             [Page 3]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+   
+   present in RFC 1657 or than was common practice at the time of its
+   adoption.
+
+4. MIB Organization
+
+   The MIB is broken down into several top level sections.  This 
+   sectionalization is important to create an organization for 
+   extensibility:
+
+   * The bgpBaseScalars section (and corresponding OBJECT IDENTIFIER) 
+     is used to delineate objects used for basic management and 
+	 monitoring of the protocol implementation.   These are core 
+	 parameters for the local configuration.
+
+   * The bgpPeerData section is per-peer object definitions. The
+     predominant table in that section (bgpPeerTable) describes the
+     session, negotiation state, and authentication state on a 
+     per peer basis.  A second table (bgpPrefixCountersTable) exposes 
+	 information about individual route prefixes received 
+     over each peer session.
+
+  * bgpCapabilitiesData has objects and tables to describe  BGP 
+    capabilities locally supported, and those reported and negotiated
+	over each peer session.
+
+  * bgpPathAttributesData contains objects describing destination
+    networks and paths to those networks, independent of the peer
+    from which the information on each network was received.
+
+   Each section is further given an OBJECT IDENTIFIER allowing a section
+   of containment for the per-capability extensions of the scope of the
+   section.  
+
+4.1  Preliminary State of Work
+
+   The MIB herein is the first, very rough, step in the refinement of
+   the managed object definition this effort seeks to define.  It is being
+   offered to the community at this moment to get a read as to the 
+   general directions and ideas being pursued.  Reviewers are urged not 
+   to focus too much on certain details, or the inevitable roughness
+   of their specification.  Attention to those details is promised
+   with the next revision or two of this internet-draft.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Various Authors      Expires July  13, 2002             [Page 4]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+5. Definitions
+
+    BGP4-V2-MIB DEFINITIONS ::= BEGIN
+
+        IMPORTS
+            MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+            IpAddress, Integer32, Counter32, Gauge32, mib-2, 
+        experimental, Unsigned32
+                FROM SNMPv2-SMI
+        InetAddressType, InetAddress
+        FROM INET-ADDRESS-MIB
+        TEXTUAL-CONVENTION, TruthValue
+            FROM SNMPv2-TC
+            MODULE-COMPLIANCE, OBJECT-GROUP, NOTIFICATION-GROUP
+                FROM SNMPv2-CONF;
+
+
+        bgp MODULE-IDENTITY
+            LAST-UPDATED "200107060000Z"
+            ORGANIZATION "IETF IDR Working Group"
+            CONTACT-INFO "E-mail:  idr@merit.net
+
+                          Jeff Haas  (Editor)
+                          517 W. William Street
+                          Ann Arbor, MI 48103-4943
+                          Tel: +1 734 973-2200 
+                          Fax: +1 734 615-3241
+                          E-mail: jhaas@nexthop.com"
+
+            DESCRIPTION
+           "This MIB module defines management objects for
+           the Border Gateway Protocol, Version 4."
+            ::= { mib-2 ??? }
+
+
+    BgpIdentifier ::= TEXTUAL-CONVENTION
+        DISPLAY-HINT "1d:"
+        -- jmh - is this right?
+        STATUS     current
+        DESCRIPTION
+        "The representation of a BGP Identifier."
+        SYNTAX OCTET STRING(SIZE (4))
+
+
+    BgpSafi ::= TEXTUAL-CONVENTION
+        DISPLAY-HINT "d"
+        STATUS current
+        DESCRIPTION
+        "The representation of a BGP Safi"
+        SYNTAX Integer32(0..255)
+
+
+    
+	
+	
+Various Authors      Expires July  13, 2002             [Page 5]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+	
+	BgpAutonomousSystemNumber ::= TEXTUAL-CONVENTION
+        DISPLAY-HINT "d"
+        STATUS current
+        DESCRIPTION
+        "An autonomous System Number.  If bgpAsSize is 
+         two-octet, the range is 0..65535.  If it is
+         four-octet, it is the full range of Unsigned32."
+        SYNTAX Unsigned32
+
+
+     bgpBaseScalars          OBJECT IDENTIFIER ::= { bgp 1 }
+
+    -- notifications and derivations from the SNMPv1 'trap' in general
+    -- must be rooted at suboid 0
+    
+    bgpBaseTraps        OBJECT IDENTIFIER ::= { bgpBaseScalars 0 }
+
+        bgpEstablished NOTIFICATION-TYPE
+            OBJECTS { 
+        bgpPeerRemoteAddrType,
+        bgpPeerRemoteAddr,
+        bgpPeerLastError,
+                bgpPeerState
+        }
+            STATUS  current
+            DESCRIPTION
+                "The BGP Established event is generated when
+                 the BGP FSM enters the ESTABLISHED state."
+            ::= { bgpBaseTraps 1 }
+
+
+        bgpBackwardTransition NOTIFICATION-TYPE
+            OBJECTS { 
+        bgpPeerRemoteAddrType,
+        bgpPeerRemoteAddr,
+                bgpPeerLastError,
+                bgpPeerState      
+        }
+            STATUS  current
+            DESCRIPTION
+                "The BGPBackwardTransition Event is generated
+                 when the BGP FSM moves from a higher numbered
+                 state to a lower numbered state."
+            ::= { bgpBaseTraps 2 }
+
+
+--
+--
+--
+
+        
+		
+		
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 6]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgpVersion OBJECT-TYPE
+            SYNTAX     OCTET STRING (SIZE (1..32))
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "Vector of supported BGP protocol version
+                    numbers.  Each peer negotiates the version
+                    from this vector.  Versions are identified
+                    via the string of bits contained within this
+                    object.  The first octet contains bits 0 to
+                    7, the second octet contains bits 8 to 15,
+                    and so on, with the most significant bit
+                    referring to the lowest bit number in the
+                    octet (e.g., the MSB of the first octet
+                    refers to bit 0).  If a bit, i, is present
+                    and set, then the version (i+1) of the BGP
+                    is supported."
+            ::= { bgpBaseScalars 1 }
+
+
+--
+--
+--
+
+    bgpAsSize OBJECT-TYPE
+        SYNTAX     INTEGER {
+            twoOctet(1),
+            fourOctet(2)
+        }
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The size of the AS value in this implementation.
+        The semantics of this are determined as per the 
+        as-4bytes draft."
+        ::= { bgpBaseScalars 2 }
+        
+
+
+--
+--
+--
+
+        bgpLocalAs OBJECT-TYPE
+            SYNTAX     Unsigned32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "The local autonomous system number.
+            If the bgpAsSize is twoOctet, then the
+            range is constrained to be 0-65535."
+            ::= { bgpBaseScalars 3 }
+
+
+--
+--
+--
+
+Various Authors      Expires July  13, 2002             [Page 7]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+        bgpLocalIdentifier OBJECT-TYPE
+            SYNTAX     BgpIdentifier
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "The BGP Identifier of local system.
+            Current practice is trending away from this
+            value being treated as an IP address and more
+            as a generic identifier."
+            ::= { bgpBaseScalars 4 }
+
+        bgpBaseScalarExtensions     OBJECT IDENTIFIER ::=  
+		                { bgpBaseScalars 5 }
+
+        bgpBaseScalarRouteReflectionExtensions ::= 
+		    { bgpBaseScalarExtensions 1 }
+        
+        bgp4ClusterId OBJECT-TYPE
+            SYNTAX      BgpIdentifier
+            MAX-ACCESS  read-only
+            STATUS      current
+            DESCRIPTION
+                    "The configured Cluster-ID of the local router. A value
+                     of 0.0.0.0 indicates the absence of this value."
+-- jmh calling it a value of "0.0.0.0" doesn't quite make sense if its
+-- an octet string rather than an ip address?
+            REFERENCE
+                    "RFC 2796 - BGP Route Reflection"
+            ::= { bgpBaseScalarRouteReflectionExtensions 5 }
+
+
+        bgpBaseScalarASConfederationExtensions ::= 
+		     { bgpBaseScalarExtensions 2 }
+        
+        bgp4ConfederationId OBJECT-TYPE
+            SYNTAX     BgpAutonomousSystemNumber
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "The local Confederation Identification Number.  A value
+                     of zero (0) indicates the absence of this value."
+            REFERENCE
+                    "RFC 3065 - Autonomous System Confederations for BGP"
+            ::= { bgpBaseScalarASConfederationExtensions 6 }
+
+
+
+        
+		
+		
+		
+		
+		
+		
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 8]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		-- BGP Peer table.  This table contains, one entry per 
+        -- BGP peer, information about the BGP peer.
+
+        bgpPeerData   OBJECT IDENTIFIER ::= { bgp 2 }
+
+        bgpPeerTable OBJECT-TYPE
+            SYNTAX     SEQUENCE OF BgpPeerEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+                    "BGP peer table.  This table contains,
+                    one entry per BGP peer, information about the
+                    connections with BGP peers."
+            ::= { bgpPeerData  1 }
+
+
+        bgpPeerEntry OBJECT-TYPE
+            SYNTAX     BgpPeerEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+                    "Entry containing information about the
+                    connection with a BGP peer."
+            INDEX { 
+        bgpPeerRemoteAddrType,
+        bgpPeerRemoteAddr 
+        }
+            ::= { bgpPeerTable 1 }
+
+
+        BgpPeerEntry ::= SEQUENCE {
+                bgpPeerIdentifier
+                    OCTET STRING,
+                bgpPeerState
+                    INTEGER,
+                bgpPeerAdminStatus
+                    INTEGER,
+                bgpPeerNegotiatedVersion
+                    Integer32,
+                bgpPeerLocalAddrType
+                    InetAddressType,
+                bgpPeerLocalAddr
+                    InetAddress,
+                bgpPeerLocalPort
+                    Integer32,
+        bgpPeerLocalAs
+            BgpAutonomousSystemNumber,
+                bgpPeerRemoteAddrType
+                    InetAddressType,
+                bgpPeerRemoteAddr
+                    InetAddress,
+                bgpPeerRemotePort
+                    Integer32,
+                bgpPeerRemoteAs
+                    BgpAutonomousSystemNumber,
+        bgpPeerReflectorClient
+            INTEGER,
+        
+Various Authors      Expires July  13, 2002             [Page 9]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		
+		bgpPeerConfederationMember
+            TruthValue,
+-- jmh add in a spot for unrecognized optional parameters?
+                bgpPeerInUpdates
+                    Counter32,
+                bgpPeerOutUpdates
+                    Counter32,
+                bgpPeerInTotalMessages
+                    Counter32,
+                bgpPeerOutTotalMessages
+                    Counter32,
+                bgpPeerLastError
+                    OCTET STRING,
+                bgpPeerFsmEstablishedTransitions
+                    Counter32,
+                bgpPeerFsmEstablishedTime
+                    Gauge32,
+                bgpPeerConnectRetryInterval
+                    Integer32,
+                bgpPeerHoldTime
+                    Integer32,
+                bgpPeerKeepAlive
+                    Integer32,
+                bgpPeerHoldTimeConfigured
+                    Integer32,
+                bgpPeerKeepAliveConfigured
+                    Integer32,
+                bgpPeerMinASOriginationInterval
+                    Integer32,
+                bgpPeerMinRouteAdvertisementInterval
+                    Integer32,
+                bgpPeerInUpdateElapsedTime
+                    Gauge32,
+                bgpPeerAuthenticationSent
+                    TruthValue,
+                bgpPeerAuthenticationSentCode
+                    Integer32,
+                bgpPeerAuthenticationSentValue
+                    OCTET STRING,
+                bgpPeerAuthenticationReceived
+                    TruthValue,
+                bgpPeerAuthenticationReceivedCode
+                    Integer32,
+                bgpPeerAuthenticationReceivedValue
+                    OCTET STRING
+                }
+
+
+        
+		
+		
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 10]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		
+		bgpPeerIdentifier OBJECT-TYPE
+            SYNTAX     BgpIdentifier
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "The BGP Identifier of this entry's BGP peer.
+                     This entry should be 0.0.0.0 unless the
+                     bgpPeerState is in the openconfirm or the
+                     established state."
+            ::= { bgpPeerEntry 1 }
+
+
+        bgpPeerState OBJECT-TYPE
+            SYNTAX     INTEGER {
+                idle(1),
+                connect(2),
+                active(3),
+                opensent(4),
+                openconfirm(5),
+                established(6)
+        }
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The BGP peer connection state."
+            ::= { bgpPeerEntry 2 }
+
+
+        bgpPeerAdminStatus OBJECT-TYPE
+            SYNTAX     INTEGER {
+                stop(1),
+                start(2)
+        }
+            MAX-ACCESS read-write
+            STATUS     current
+            DESCRIPTION
+                    "The desired state of the BGP connection.
+                    A transition from 'stop' to 'start' will 
+                    cause the BGP Start Event to be generated.
+                    A transition from 'start' to 'stop' will 
+                    cause the BGP Stop Event to be generated.
+                    This parameter can be used to restart BGP 
+                    peer connections.  Care should be used in 
+                    providing write access to this object 
+                    without adequate authentication."
+            ::= { bgpPeerEntry 3 }
+
+
+        
+		
+		
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 11]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		
+		bgpPeerNegotiatedVersion OBJECT-TYPE
+            SYNTAX     Integer32 (1..255) 
+        -- jmh we may want this r/w
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The negotiated version of BGP running between
+         the two peers."
+            ::= { bgpPeerEntry 4 }
+
+
+        bgpPeerLocalAddrType OBJECT-TYPE
+            SYNTAX     InetAddressType
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The address family of the local end of the peering
+         session."
+            ::= { bgpPeerEntry 5 }
+
+        bgpPeerLocalAddr OBJECT-TYPE
+            SYNTAX     InetAddress
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The address of the local end of the peering session."
+            ::= { bgpPeerEntry 6 }
+
+
+        bgpPeerLocalPort OBJECT-TYPE
+            SYNTAX     Integer32 (0..65535)
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The local port for the TCP connection between
+        the BGP peers.
+        If we're not running IP, could this be some generic
+        value?  What size is the OSI NSAP?"
+            ::= { bgpPeerEntry 7 }
+
+
+        bgpPeerLocalAs OBJECT-TYPE
+            SYNTAX     BgpAutonomousSystemNumber
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "Some implementations of BGP can represent themselves
+        as multiple ASs.  This is the AS that this peering
+        session is representing itself as to the remote peer."
+            ::= { bgpPeerEntry 8 }
+
+        
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 12]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		
+		bgpPeerRemoteAddrType OBJECT-TYPE
+            SYNTAX     InetAddressType
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The address family of the remote end of the peering
+        session."
+            ::= { bgpPeerEntry 9 }
+
+        bgpPeerRemoteAddr OBJECT-TYPE
+            SYNTAX     IpAddress
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The address of the remote end of the peering session."
+            ::= { bgpPeerEntry 10 }
+
+
+        bgpPeerRemotePort OBJECT-TYPE
+            SYNTAX     Integer32 (0..65535)
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The remote port for the TCP connection 
+        between the BGP peers.  
+        If we're not running IP, this should be a generic
+        transport endpoint.
+        Note that the 
+        objects bgpPeerLocalAddr,
+        bgpPeerLocalPort, bgpPeerRemoteAddr and 
+        bgpPeerRemotePort provide the appropriate 
+        reference to the standard MIB TCP 
+        connection table. or even the ipv6 tcp MIB
+        as in rfc2452.
+        Is there an analog for non IP technologies?"
+            ::= { bgpPeerEntry 11 }
+
+
+        bgpPeerRemoteAs OBJECT-TYPE
+            SYNTAX     BgpAutonomousSystemNumber
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The remote autonomous system number."
+            ::= { bgpPeerEntry 12 }
+
+
+    
+	
+	
+	
+	
+	
+Various Authors      Expires July  13, 2002             [Page 13]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+	
+	
+	bgpPeerReflectorClient OBJECT-TYPE
+        SYNTAX    INTEGER {
+        nonClient(0),
+        client(1),
+        meshedClient(2)
+        }
+            MAX-ACCESS  read-only
+            STATUS      current
+            DESCRIPTION
+        "This value indicates whether the given peer is a reflector
+         client of this router, or not.  A value of nonClient
+         indicates that this peer is not a reflector client.  A
+         value of client indicates that this peer is a reflector
+         client that is not fully meshed with other reflector
+         clients.  A value of meshedClient indicates that the
+         peer is a reflector client and is fully meshed with all
+         other reflector clients."
+            REFERENCE
+        "RFC 2796 - BGP Route Reflection"
+            ::= { bgpPeerEntry 13 }
+
+
+        bgpPeerConfederationMember OBJECT-TYPE
+            SYNTAX      TruthValue
+            MAX-ACCESS  read-only
+            STATUS      current
+            DESCRIPTION
+        "This value indicates whether the given peer is in our
+         confederation or not."
+        REFERENCE
+        "RFC 3065 - BGP Confederations"
+            ::= { bgpPeerEntry 14 }
+
+
+        bgpPeerInUpdates OBJECT-TYPE
+            SYNTAX     Counter32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The number of BGP UPDATE messages 
+        received on this connection.  This object 
+        should be initialized to zero (0) when the 
+        connection is established."
+            ::= { bgpPeerEntry 15 }
+
+
+        bgpPeerOutUpdates OBJECT-TYPE
+            SYNTAX     Counter32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The number of BGP UPDATE messages 
+        transmitted on this connection.  This 
+        object should be initialized to zero (0)
+        when the connection is established."
+            ::= { bgpPeerEntry 16 }
+
+Various Authors      Expires July  13, 2002             [Page 14]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+
+        bgpPeerInTotalMessages OBJECT-TYPE
+            SYNTAX     Counter32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The total number of messages received 
+        from the remote peer on this connection.
+        This object should be initialized to zero
+        when the connection is established."
+            ::= { bgpPeerEntry 17 }
+
+
+    bgpPeerOutTotalMessages OBJECT-TYPE
+            SYNTAX     Counter32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The total number of messages transmitted to
+        the remote peer on this connection.  This 
+        object should be initialized to zero when 
+        the connection is established."
+            ::= { bgpPeerEntry 18 }
+
+
+        bgpPeerLastError OBJECT-TYPE
+            SYNTAX     OCTET STRING (SIZE (2))
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The last error code and subcode seen by this
+        peer on this connection.  If no error has
+        occurred, this field is zero.  Otherwise, the
+        first byte of this two byte OCTET STRING
+        contains the error code, and the second byte
+        contains the subcode."
+            ::= { bgpPeerEntry 19 }
+
+
+        bgpPeerFsmEstablishedTransitions OBJECT-TYPE
+            SYNTAX     Counter32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The total number of times the BGP FSM
+        transitioned into the established state
+        for this peer."
+            ::= { bgpPeerEntry 20 }
+
+
+        
+		
+		
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 15]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgpPeerFsmEstablishedTime OBJECT-TYPE
+            SYNTAX     Gauge32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "This timer indicates how long (in 
+        seconds) this peer has been in the 
+        Established state or how long
+        since this peer was last in the 
+        Established state.  It is set to zero when 
+        a new peer is configured or the router is 
+        booted."
+            ::= { bgpPeerEntry 21 }
+
+
+        bgpPeerConnectRetryInterval OBJECT-TYPE
+            SYNTAX     Integer32 (1..65535)
+            MAX-ACCESS read-write
+            STATUS     current
+            DESCRIPTION
+        "Time interval in seconds for the 
+        ConnectRetry timer.  The suggested value 
+        for this timer is 120 seconds."
+            ::= { bgpPeerEntry 22 }
+
+
+        bgpPeerHoldTime OBJECT-TYPE
+            SYNTAX     Integer32  ( 0 | 3..65535 )
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "Time interval in seconds for the Hold 
+        Timer established with the peer.  The 
+        value of this object is calculated by this 
+        BGP speaker by using the smaller of the 
+        value in bgpPeerHoldTimeConfigured and the 
+        Hold Time received in the OPEN message.
+        This value must be at lease three seconds 
+        if it is not zero (0) in which case the 
+        Hold Timer has not been established with the 
+        peer, or, the value of 
+        bgpPeerHoldTimeConfigured is zero (0)."
+            ::= { bgpPeerEntry 23 }
+
+
+        
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 16]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgpPeerKeepAlive OBJECT-TYPE
+            SYNTAX     Integer32 ( 0 | 1..21845 )
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "Time interval in seconds for the KeepAlive
+        timer established with the peer.  The value of
+        this object is calculated by this BGP 
+        speaker such that, when compared with 
+        bgpPeerHoldTime, it has the same 
+        proportion as what
+        bgpPeerKeepAliveConfigured has when 
+        compared with bgpPeerHoldTimeConfigured.
+        If the value of this object is zero (0),
+        it indicates that the KeepAlive timer has 
+        not been established with the peer, or,
+        the value of bgpPeerKeepAliveConfigured is 
+        zero (0)."
+            ::= { bgpPeerEntry 24 }
+
+
+        bgpPeerHoldTimeConfigured OBJECT-TYPE
+            SYNTAX     Integer32 ( 0 | 3..65535 )
+            MAX-ACCESS read-write
+            STATUS     current
+            DESCRIPTION
+        "Time interval in seconds for the Hold Time
+        configured for this BGP speaker with this
+        peer.  This value is placed in an OPEN 
+        message sent to this peer by this BGP 
+        speaker, and is compared with the Hold 
+        Time field in an OPEN message received 
+        from the peer when determining the Hold
+        Time (bgpPeerHoldTime) with the peer.
+        This value must not be less than three 
+        seconds if it is not zero (0) in which 
+        case the Hold Time is NOT to be
+        established with the peer.  The suggested 
+        value for this timer is 90 seconds."
+            ::= { bgpPeerEntry 25 }
+
+		bgpPeerKeepAliveConfigured OBJECT-TYPE
+            SYNTAX     Integer32 ( 0 | 1..21845 )
+            MAX-ACCESS read-write
+            STATUS     current
+            DESCRIPTION
+        "Time interval in seconds for the 
+        KeepAlive timer configured for this BGP 
+        speaker with this peer.  The value of this 
+        object will only determine the
+        KEEPALIVE messages' frequency relative to 
+        the value specified in 
+        bgpPeerHoldTimeConfigured; the actual
+        time interval for the KEEPALIVE messages is
+        indicated by bgpPeerKeepAlive.  A 
+        reasonable maximum value for this timer 
+        would be configured to be one 
+        
+Various Authors      Expires July  13, 2002             [Page 17]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		third of that of 
+        bgpPeerHoldTimeConfigured.
+        If the value of this object is zero (0),
+        no periodical KEEPALIVE messages are sent
+        to the peer after the BGP connection has 
+        been established.  The suggested value for 
+        this timer is 30 seconds."
+            ::= { bgpPeerEntry 26 }
+
+
+        bgpPeerMinASOriginationInterval OBJECT-TYPE
+            SYNTAX     Integer32 (1..65535)
+            MAX-ACCESS read-write
+            STATUS     current
+            DESCRIPTION
+        "Time interval in seconds for the
+        MinASOriginationInterval timer.
+        The suggested value for this timer is 15 
+        seconds."
+            ::= { bgpPeerEntry 27 }
+
+
+        bgpPeerMinRouteAdvertisementInterval OBJECT-TYPE
+            SYNTAX     Integer32 (1..65535)
+            MAX-ACCESS read-write
+            STATUS     current
+            DESCRIPTION
+        "Time interval in seconds for the
+        MinRouteAdvertisementInterval timer.
+        The suggested value for this timer is 30 
+        seconds."
+            ::= { bgpPeerEntry 28 }
+
+
+        bgpPeerInUpdateElapsedTime OBJECT-TYPE
+            SYNTAX     Gauge32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "Elapsed time in seconds since the last BGP
+        UPDATE message was received from the peer.
+        Each time bgpPeerInUpdates is incremented,
+        the value of this object is set to zero 
+        (0)."
+            ::= { bgpPeerEntry 29 }
+
+
+        bgpPeerAuthenticationSent OBJECT-TYPE
+            SYNTAX TruthValue
+            MAX-ACCESS read-write
+            STATUS current
+            DESCRIPTION
+            "The local peer has sent authentication information
+             to the remote peer in the BGP Authentication field."
+            ::= { bgpPeerEntry 30  }
+
+        
+Various Authors      Expires July  13, 2002             [Page 19]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgpPeerAuthenticationSentCode OBJECT-TYPE
+            SYNTAX  Integer32 (0..255)
+            MAX-ACCESS read-write
+            STATUS current
+            DESCRIPTION
+            "The code of the authentication information sent to
+             the remote peer."
+            ::= { bgpPeerEntry 31 }
+            
+        bgpPeerAuthenticationSentValue OBJECT-TYPE
+            SYNTAX  OCTET STRING (SIZE (0..255))
+        -- jmh length is too much
+            MAX-ACCESS read-write
+            STATUS current
+            DESCRIPTION
+            "The payload of the authentication information received 
+            from the remote peer."
+            ::= { bgpPeerEntry 32 }
+            
+        bgpPeerAuthenticationReceived OBJECT-TYPE
+            SYNTAX TruthValue
+            MAX-ACCESS read-write
+            STATUS current
+            DESCRIPTION
+            "The local peer has received authentication information
+             from the remote peer in the BGP Authentication field."
+            ::= { bgpPeerEntry 33 }
+            
+        bgpPeerAuthenticationReceivedCode OBJECT-TYPE
+            SYNTAX  Integer32 (0..255)
+            MAX-ACCESS read-write
+            STATUS current
+            DESCRIPTION
+            "The code of the authentication information received from
+             the remote peer."
+            ::= { bgpPeerEntry 34  }
+            
+        bgpPeerAuthenticationReceivedValue OBJECT-TYPE
+            SYNTAX  OCTET STRING (SIZE (0..255))
+        -- jmh length is too much
+            MAX-ACCESS read-write
+            STATUS current
+            DESCRIPTION
+            "The payload of the authentication information received from
+            the remote peer."
+            ::= { bgpPeerEntry 35 } 
+
+--
+-- new counters
+--
+    bgpPrefixCountersTable OBJECT-TYPE
+        SYNTAX     SEQUENCE OF BgpPrefixCountersEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+        "Additional per-peer, per AFI/SAFI counters for prefixes"
+        ::= { bgpPeerData 2 }
+
+Various Authors      Expires July  13, 2002             [Page 20]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+    bgpPrefixCountersEntry OBJECT-TYPE
+        SYNTAX     BgpPrefixCountersEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+        "Entry containing information about a bgp-peer's prefix
+        counters."
+        INDEX {
+        bgpPeerRemoteAddrType,
+        bgpPeerRemoteAddr,
+        bgpPrefixCountersAfi,
+        bgpPrefixCountersSafi
+            }
+        ::= { bgpPrefixCountersTable 1 }
+
+    BgpPrefixCountersEntry ::= SEQUENCE {
+        bgpPrefixCountersAfi
+            InetAddressType,
+        bgpPrefixCountersSafi
+            BgpSafi,
+        bgpPrefixCountersPrefixesReceived
+            Counter32,
+        bgpPrefixCountersPrefixesSent
+            Counter32,
+        bgpPrefixCountersWithdrawsReceived
+            Counter32,
+        bgpPrefixCountersWithdrawsSent
+            Counter32,
+        bgpPrefixCountersInPrefixes
+            Gauge32,
+        bgpPrefixCountersInPrefixesAccepted
+            Gauge32,
+        bgpPrefixCountersInPrefixesRejected
+            Gauge32,
+        bgpPrefixCountersOutPrefixes
+            Gauge32
+        }
+
+    bgpPrefixCountersAfi OBJECT-TYPE
+        SYNTAX     InetAddressType
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The AFI index of the per-peer, per prefix counters"
+        ::= { bgpPrefixCountersEntry 1 }
+
+    bgpPrefixCountersSafi OBJECT-TYPE
+        SYNTAX     BgpSafi
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The SAFI index of the per-peer, per prefix counters"
+        ::= { bgpPrefixCountersEntry 2 }
+
+Various Authors      Expires July  13, 2002             [Page 20]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+--  +++wayne the following two showed up in the table, but not in the
+--  enumerated table columns.  Is this the idea of what they were 
+--  supposed to be about?  This sounds like a *lot* of state for the 
+--  router to be maintaining (withdrawn local and peer prefixes...
+
+    bgpPrefixCountersPrefixesReceived OBJECT-TYPE
+        SYNTAX     Counter32
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "Total number of discrete prefixes received from this peer. The
+        value in bgpPrefixCountersPrefixesReceived will be greater
+        than or equal to what is in bgpPrefixCountersInPrefixes, 
+        since it will reflect prefixes received from this peer which
+        may have been subsquently withdrawn, and hence will no longer
+        be stored in the Adj-Ribs-In for that peer."
+        ::= { bgpPrefixCountersEntry 3 }
+
+    bgpPrefixCountersPrefixesSent OBJECT-TYPE
+        SYNTAX     Counter32
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "Total number of prefixes which the local BGP speaker
+        has announced to this peer.  The value for 
+        bgpPrefixCountersPrefixesSent will be greater than or equal to 
+        bgpPrefixCountersOutPrefixes, since it reflects prefixes 
+        which have been subsequently withdrawn after their announcement
+        (assuming any such withdrawn prefixes exist)."
+        ::= { bgpPrefixCountersEntry 4 }
+
+    bgpPrefixCountersWithdrawsReceived OBJECT-TYPE
+        SYNTAX     Counter32
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "Total number of prefixes withdrawn by this peer.  Specifically,
+        this is the total number of withdrawn-routes which have
+        been received in UPDATE messages from this peer."
+        ::= { bgpPrefixCountersEntry 5 }
+
+    bgpPrefixCountersWithdrawsSent  OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Total number of prefixes which have been reported as 
+        withdrawn by the local BGP speaker to the peer in 
+        locally generated UPDATE messages to the peer."
+        ::= { bgpPrefixCountersEntry 6 }
+
+    
+	
+	
+	
+Various Authors      Expires July  13, 2002             [Page 21]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+	
+	
+	bgpPrefixCountersInPrefixes OBJECT-TYPE
+        SYNTAX     Gauge32
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The number of prefixes received from a peer and are
+         stored in the Adj-Ribs-In for that peer."
+        -- jmh - note that we're allowing stuff to be discarded
+        ::= { bgpPrefixCountersEntry 7 }
+
+
+    bgpPrefixCountersInPrefixesAccepted OBJECT-TYPE
+        SYNTAX     Gauge32
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The number of prefixes for a peer that are installed
+         in the Adj-Ribs-In and are eligible to become active
+         in the Loc-Rib."
+        ::= { bgpPrefixCountersEntry 8 }
+
+
+    bgpPrefixCountersInPrefixesRejected OBJECT-TYPE
+        SYNTAX     Gauge32
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The number of prefixes for a peer that are installed
+         in the Adj-Ribs-In and are NOT eligible to become active
+         in the Loc-Rib."
+        ::= { bgpPrefixCountersEntry 9 }
+
+    bgpPrefixCountersOutPrefixes OBJECT-TYPE
+        SYNTAX     Gauge32
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The number of prefixes for a peer that are installed
+         in that peer's Adj-Ribs-Out."
+        ::= { bgpPrefixCountersEntry 10 }
+
+--      This is the point at which per-protocol extension subsections 
+--      would root their branches off of to define per-extension-based 
+--      tables, scalar management objects.
+
+        bgpPerPeerExtensions    OBJECT IDENTIFIER ::= { bgpPeerData 3 }
+
+
+
+
+
+
+
+
+
+
+Various Authors      Expires July  13, 2002             [Page 22]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+
+--
+-- capabilities 
+-- 
+-- Mount this in its own subtree
+--
+ 
+        bgpCapabilitiesData   OBJECT IDENTIFIER ::= { bgp 3 }
+    
+        --
+        --
+        --
+    
+        bgp4SupportedCapabilitiesTable OBJECT-TYPE
+            SYNTAX     SEQUENCE OF Bgp4SupportedCapabilityEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+            "Table of supported BGP-4 capabilities."
+            ::= { bgpCapabilitiesData 1 }
+    
+
+        bgp4SupportedCapabilitiesEntry OBJECT-TYPE
+            SYNTAX     Bgp4SupportedCapabilityEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+            "Information about supported capabilities indexed
+            by capability number.""
+            INDEX {
+            bgp4SupportedCapabilityIndex
+            }
+            ::= { bgp4SupportedCapabilitiesTable 1 }
+
+
+            Bgp4SupportedCapabilityEntry ::= SEQUENCE {
+                bgp4SupportedCapabilityIndex
+                Integer32,
+                bgp4SupportedCapability
+                TruthValue
+                }
+        
+        
+            bgp4SupportedCapabilityIndex OBJECT-TYPE
+                SYNTAX     Integer32 (0..255)
+                MAX-ACCESS read-only
+                STATUS     current
+                DESCRIPTION
+                "Index of supported capability.  The index directly
+                corresponds with the BGP-4 Capability Advertisement
+                Capability Code."
+                ::= { bgp4SupportedCapabilitiesEntry 1 }
+    
+            
+			
+			
+Various Authors      Expires July  13, 2002             [Page 23]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+			
+			bgp4SupportedCapability OBJECT-TYPE
+                SYNTAX     TruthValue
+                MAX-ACCESS read-only
+                STATUS     current
+                DESCRIPTION
+                "This value is True if this capability is supported,
+                otherwise."
+                ::= { bgp4SupportedCapabilitiesEntry 2 }
+        
+            --
+            --
+            --
+
+            bgp4PeerCapsAnnouncedTable OBJECT-TYPE
+                SYNTAX     SEQUENCE OF Bgp4PeerCapsAnnouncedEntry
+                MAX-ACCESS not-accessible
+                STATUS     current
+                DESCRIPTION
+                "This table contains contains the capabilities
+                that are supported for a given peer."
+                ::= { bgpCapabilitiesData 3 }
+    
+        bgp4PeerCapsAnnouncedEntry OBJECT-TYPE
+            SYNTAX     Bgp4PeerCapsAnnouncedEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+            "These entries are keyed by a BGP-4 peer remote
+            address and the BGP Capability Code"
+            INDEX {
+            bgpPeerRemoteAddrType,
+            bgpPeerRemoteAddr,
+            bgp4PeerCapAnnouncedCode,
+            bgp4PeerCapAnnouncedIndex
+            }
+            ::= { bgp4PeerCapsAnnouncedTable 1 }
+    
+        Bgp4PeerCapsAnnouncedEntry ::= SEQUENCE {
+            bgp4PeerCapAnnouncedCode
+            Integer32,
+            bgp4PeerCapAnnouncedIndex
+            Integer32,
+            bgp4PeerCapAnnouncedLength
+            Integer32,
+            bgp4PeerCapAnnouncedValue
+            OCTET STRING
+            }
+    
+        bgp4PeerCapAnnouncedCode OBJECT-TYPE
+            SYNTAX     Integer32 (0..255)
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "The BGP Capability Advertisement Capability Code."
+            ::= { bgp4PeerCapsAnnouncedEntry 1 }
+    
+Various Authors      Expires July  13, 2002             [Page 24]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+        
+		bgp4PeerCapAnnouncedIndex OBJECT-TYPE
+            SYNTAX     Integer32 (1..128)
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "Multiple instances of a given capability may be sent
+            bgp a BGP speaker.  This variable is used to index them."
+            ::= { bgp4PeerCapsAnnouncedEntry 2 }
+    
+        bgp4PeerCapAnnouncedLength OBJECT-TYPE
+            SYNTAX     Integer32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "The length of the announced capability."
+            ::= { bgp4PeerCapsAnnouncedEntry 3 }
+    
+        bgp4PeerCapAnnouncedValue OBJECT-TYPE
+            SYNTAX     OCTET STRING (SIZE(0..255))
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "The value of the announced capability."
+            ::= { bgp4PeerCapsAnnouncedEntry 4 }
+    
+    --
+    --
+    --
+
+        bgp4PeerCapsReceivedTable OBJECT-TYPE
+            SYNTAX     SEQUENCE OF Bgp4PeerCapsReceivedEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+            "This table contains contains the capabilities
+            that are supported for a given peer."
+            ::= { bgpCapabilitiesData 3 }
+
+        bgp4PeerCapsReceivedEntry OBJECT-TYPE
+            SYNTAX     Bgp4PeerCapsReceivedEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+            "These entries are keyed by a BGP-4 peer remote
+            address and the BGP Capability Code"
+            INDEX {
+            bgpPeerRemoteAddrType,
+            bgpPeerRemoteAddr,
+            bgp4PeerCapReceivedCode,
+            bgp4PeerCapReceivedIndex
+            }
+            ::= { bgp4PeerCapsReceivedTable 1 }
+
+        
+		
+		
+Various Authors      Expires July  13, 2002             [Page 25]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		Bgp4PeerCapsReceivedEntry ::= SEQUENCE {
+            bgp4PeerCapReceivedCode
+            Integer32,
+            bgp4PeerCapReceivedIndex
+            Integer32,
+            bgp4PeerCapReceivedLength
+            Integer32,
+            bgp4PeerCapReceivedValue
+            OCTET STRING
+        }
+    
+        bgp4PeerCapReceivedCode OBJECT-TYPE
+            SYNTAX     Integer32 (0..255)
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "The BGP Capability Advertisement Capability Code."
+            ::= { bgp4PeerCapsReceivedEntry 1 }
+    
+        bgp4PeerCapReceivedIndex OBJECT-TYPE
+            SYNTAX     Integer32 (1..128)
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "Multiple instances of a given capability may be sent
+            bgp a BGP speaker.  This variable is used to index them."
+            ::= { bgp4PeerCapsReceivedEntry 2 }
+    
+        bgp4PeerCapReceivedLength OBJECT-TYPE
+            SYNTAX     Integer32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "The length of the announced capability."
+            ::= { bgp4PeerCapsReceivedEntry 3 }
+    
+        bgp4PeerCapReceivedValue OBJECT-TYPE
+            SYNTAX     OCTET STRING (SIZE(0..255))
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+            "The value of the announced capability."
+            ::= { bgp4PeerCapsReceivedEntry 4 }
+
+        bgp4CapabilitySupportAvailable OBJECT-TYPE
+            SYNTAX     TruthValue
+            MAX-ACCESS read-write
+            STATUS     current
+            DESCRIPTION
+            "This variable determines whether BGP-4
+            capabilities are supported in this
+            implementation.  This variable may be set to
+            false to disable capability support."
+            ::= { bgpCapabilitiesData 4 }
+
+
+
+
+Various Authors      Expires July  13, 2002             [Page 26]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+--      This is the point at which per-protocol extension subsections 
+--      would root their branches off of to define per-extension-
+--      based tables, scalar management objects.
+        
+        bgpCapabilitiesExtensions   OBJECT IDENTIFIER ::= 
+                                  { bgpCapabilitiesData 5 }
+
+
+--
+--
+--
+        bgpPathAttributesData   OBJECT IDENTIFIER ::= { bgp 4 }
+
+        -- BGP-4 Received Path Attribute Table.  This table 
+        -- contains, one entry per path to a network, path 
+        -- attributes received from all peers running BGP-4.
+
+
+        bgp4PathAttrTable OBJECT-TYPE
+            SYNTAX     SEQUENCE OF Bgp4PathAttrEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+        "The BGP-4 Received Path Attribute Table 
+        contains information about paths to 
+        destination networks received from all 
+        BGP4 peers."
+            ::= { bgpPathAttributesData  1 }
+
+
+        bgp4PathAttrEntry OBJECT-TYPE
+            SYNTAX     Bgp4PathAttrEntry
+            MAX-ACCESS not-accessible
+            STATUS     current
+            DESCRIPTION
+        "Information about a path to a network."
+            INDEX { 
+        bgp4PathAttrAddrPrefixType,
+        bgp4PathAttrAddrPrefixSafi,
+        bgp4PathAttrAddrPrefix,
+        bgp4PathAttrAddrPrefixLen,
+        bgp4PathAttrPeerType,
+        bgp4PathAttrPeer            
+        }
+            ::= { bgp4PathAttrTable 1 }
+
+
+        Bgp4PathAttrEntry ::= SEQUENCE {
+        bgp4PathAttrPeerType
+        InetAddressType,
+            bgp4PathAttrPeer
+                InetAddress,
+        bgp4PathAttrAddrPrefixType
+            InetAddressType,
+        bgp4PathAttrAddrPrefixSafi
+        BgpSafi,
+        
+Various Authors      Expires July  13, 2002             [Page 27]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgp4PathAttrAddrPrefixType
+        InetAddressType,
+            bgp4PathAttrAddrPrefix
+                InetAddress,
+            bgp4PathAttrAddrPrefixLen
+                Integer32,
+            bgp4PathAttrOrigin
+                INTEGER,
+            bgp4PathAttrASPathSegment
+                OCTET STRING,
+            bgp4PathAttrNextHop
+                InetAddress,
+        bgp4PathAttrMultiExitDiscPresent
+        TruthValue,
+            bgp4PathAttrMultiExitDisc
+                Unsigned32,
+        bgp4PathAttrLocalPrefPresent
+        TruthValue,
+            bgp4PathAttrLocalPref
+                Unsigned32,   
+            bgp4PathAttrAtomicAggregate
+                INTEGER,
+            bgp4PathAttrAggregatorAS
+                Integer32,
+            bgp4PathAttrAggregatorAddr
+                BgpIdentifer,
+        bgp4PathAttrCalcLocalPrefPresent
+        TruthValue,
+            bgp4PathAttrCalcLocalPref
+                Unsigned32,       
+        bgp4PathAttrOriginatorId
+        OCTET STRING,
+        bgp4PathAttrClusterList
+        OCTET STRING,
+        bgp4PathAttrCommunity
+        OCTET STRING,
+        bgp4PathAttrExtCommunity
+        OCTET STRING,
+            bgp4PathAttrBest
+                TruthValue,
+            bgp4PathAttrUnknown
+                OCTET STRING
+        }
+
+
+        bgp4PathAttrPeerType OBJECT-TYPE
+            SYNTAX     InetAddressType
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The AFI of the address of the peer from which the
+        path information was learned."
+            ::= { bgp4PathAttrEntry 1 }
+
+
+        
+Various Authors      Expires July  13, 2002             [Page 28]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgp4PathAttrPeer OBJECT-TYPE
+            SYNTAX     InetAddress
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The address of the peer where the path
+        information was learned."
+            ::= { bgp4PathAttrEntry 2 }
+
+        bgp4PathAttrIpAddrPrefixType OBJECT-TYPE
+            SYNTAX     InetAddressType
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The address family of the prefix for this NLRI."
+            ::= { bgp4PathAttrEntry 3 }
+
+    bgp4PathAttrIpAddrPrefixSafi OBJECT-TYPE
+        SYNTAX     BgpSafi
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "The subsequent address family of the prefix for
+        this NLRI"
+        REFERENCE
+        "RFC 2858 - Multiprotocol Extensions for BGP-4"
+        ::= { bgp4PathAttrEntry 4 }
+
+        bgp4PathAttrIpAddrPrefix OBJECT-TYPE
+            SYNTAX     InetAddress
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "An IP address prefix in the Network Layer
+        Reachability Information field.  This object
+        is an IP address containing the prefix with
+        length specified by 
+        bgp4PathAttrIpAddrPrefixLen.
+        Any bits beyond the length specified by
+        bgp4PathAttrIpAddrPrefixLen are zeroed."
+-- jmh this doesn't encode very small on the wire?  
+            ::= { bgp4PathAttrEntry 5 }
+
+
+    bgp4PathAttrIpAddrPrefixLen OBJECT-TYPE
+            SYNTAX     Integer32 
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "Length in bits of the IP address prefix in 
+        the Network Layer Reachability 
+        Information field."
+            ::= { bgp4PathAttrEntry 6 }
+
+
+    
+Various Authors      Expires July  13, 2002             [Page 29]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+	
+	bgp4PathAttrOrigin OBJECT-TYPE
+            SYNTAX     INTEGER {
+        igp(1),-- networks are interior
+                egp(2),-- networks learned 
+                       -- via EGP
+                incomplete(3) -- undetermined
+        }
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The ultimate origin of the path 
+        information."
+            ::= { bgp4PathAttrEntry 7 }
+
+
+        bgp4PathAttrASPathSegment OBJECT-TYPE
+            SYNTAX     OCTET STRING (SIZE (2..4096))
+-- jmh could be shorter - find a reasonable ceiling
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "The sequence of AS path segments.  Each AS
+                    path segment is represented by a triple:
+                    type, length, value.
+
+                    The type is a 1-octet field which has two
+                    possible values:
+                         1      AS_SET: unordered set of ASs a
+                                     route in the UPDATE message
+                                     has traversed
+
+                         2      AS_SEQUENCE: ordered set of ASs
+                                     a route in the UPDATE message
+                                     has traversed.
+
+             3      CONFED_SEQUENCE: ordered set of ASs
+                     a route has traversed within
+                     a confederation.  These MUST
+                     occur before AS_SETs and
+                     AS_SEQUENCES
+
+             4      CONFED_SET: unordered set of ASs
+                     a route has traversed within
+                     a confederation.  These MUST
+                     occur before AS_SETs and
+                     AS_SEQUENCES
+
+            Other types may be defined in the future and will
+            be displayed in this variable.
+
+                    The length is a 1-octet field containing the
+                    number of ASs in the value field.
+-- jmh - this is a spec error
+
+                    
+					
+Various Authors      Expires July  13, 2002             [Page 29]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+					
+					
+					The value field contains one or more AS
+                    numbers, each AS is represented in the octet
+                    string as a pair of octets according to the
+                    following algorithm:
+
+            If the bgpAsSize is twoOctet:
+                        first-byte-of-pair = ASNumber / 256;
+                        second-byte-of-pair = ASNumber & 255;
+            If the bgpAsSize is fourOctet:
+                        first-byte-of-quad = (ASNumber / 16777216);
+                        second-byte-of-quad = (ASNumber / 65536) & 255;
+            third-byte-of-quad = (ASNumber / 256) & 255;
+            fourth-byte-of-quad = ASNumber & 255;"
+            ::= { bgp4PathAttrEntry 8 }
+
+-- jmh we need the new_as_path here now
+
+
+        bgp4PathAttrNextHop OBJECT-TYPE
+            SYNTAX     InetAddress
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The address of the border router that 
+        should be used for the destination 
+        network.  This address is the nexthop 
+        address received in the UPDATE packet.
+        The address family of this object will be the
+        same as that of the prefix in this row."
+            ::= { bgp4PathAttrEntry 9 }
+
+
+        bgp4PathAttrMultiExitDiscPresent OBJECT-TYPE
+        SYNTAX     TruthValue
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "Whether or not the MED value is present.
+        If it is not present, the bgp4PathAttrMultiExitDisc
+        object has no useful value and should be set to 0."
+        ::= { bgp4PathAttrEntry 10 }
+
+
+        bgp4PathAttrMultiExitDisc OBJECT-TYPE
+            SYNTAX     Unsigned32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "This metric is used to discriminate
+        between multiple exit points to an 
+        adjacent autonomous system."
+            ::= { bgp4PathAttrEntry 11 }
+
+        
+		
+Various Authors      Expires July  13, 2002             [Page 30]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgp4PathAttrLocalPrefPresent OBJECT-TYPE
+        SYNTAX     TruthValue
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "Whether or not the LOCAL_PREF value is present.
+        If it is not present, the bgp4PathAttrLocalPref 
+        object has no useful value and should be set to 0."
+        ::= { bgp4PathAttrEntry 12 }
+
+        bgp4PathAttrLocalPref OBJECT-TYPE        
+            SYNTAX     Unsigned32
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The originating BGP4 speaker's degree of
+        preference for an advertised route."
+            ::= { bgp4PathAttrEntry 13 }
+
+        bgp4PathAttrAtomicAggregate OBJECT-TYPE
+            SYNTAX     INTEGER {
+        lessSpecificRouteNotSelected(1),
+        lessSpecificRouteSelected(2)
+        }
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "Whether or not a system has selected 
+        a less specific route without 
+        selecting a more specific route."
+            ::= { bgp4PathAttrEntry 14 }
+
+
+        bgp4PathAttrAggregatorAS OBJECT-TYPE
+            SYNTAX     BgpAutonomousSystemNumber
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The AS number of the last BGP4 speaker that
+        performed route aggregation.  A value of 
+        zero (0) indicates the absence of this 
+        attribute."
+            ::= { bgp4PathAttrEntry 15 }
+
+        bgp4PathAttrAggregatorAddr OBJECT-TYPE
+            SYNTAX     BgpIdentifier
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+        "The IP address of the last BGP4 speaker 
+        that performed route aggregation.  A 
+        value of 0.0.0.0 indicates the absence 
+        of this attribute.
+
+        Note propagation of AS of zero is illegal in 
+        the Internet."
+            ::= { bgp4PathAttrEntry 16 }
+
+Various Authors      Expires July  13, 2002             [Page 31]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+
+        bgp4PathAttrCalcLocalPrefPresent OBJECT-TYPE
+        SYNTAX     TruthValue
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "Whether or not the bgp4PathAttrCalcLocalPref is present."
+        ::= { bgp4PathAttrEntry 17 }
+
+        bgp4PathAttrCalcLocalPref OBJECT-TYPE
+            SYNTAX     Unsigned32
+            MAX-ACCESS read-only                 
+            STATUS     current
+            DESCRIPTION
+        "The degree of preference calculated by the
+        receiving BGP4 speaker for an advertised 
+        route."
+            ::= { bgp4PathAttrEntry 18 }
+
+
+        bgp4PathAttrOriginatorId OBJECT-TYPE
+            SYNTAX      BgpIdentifier
+            MAX-ACCESS  read-only
+            STATUS      current
+            DESCRIPTION
+                    "The Originator-ID identifying the router that initially
+                     advertised this destination to a Route Reflector.  A
+                     value of 0.0.0.0 indicates the absence of this attribute."
+        REFERENCE
+         "This attribute is defined in [RFC2796]."
+            ::= { bgp4PathAttrEntry 19 }
+
+        bgp4PathAttrClusterList OBJECT-TYPE
+            SYNTAX      OCTET STRING (SIZE(0..4096))
+            MAX-ACCESS  read-only
+            STATUS      current
+            DESCRIPTION
+        "A sequence of four octet long values representing the
+         reflection path that the route has passed.  Each four
+         octet long value represents the ID of a cluster that
+         the route has traversed.  A length of zero (0) indicates
+         the absence of this attribute."
+        REFERENCE
+         "This attribute is defined in [RFC2796]."
+            ::= { bgp4PathAttrEntry 20 }
+
+
+        
+		
+		
+		
+		
+		
+		
+Various Authors      Expires July  13, 2002             [Page 32]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		
+		bgp4PathAttrCommunity OBJECT-TYPE
+            SYNTAX      OCTET STRING (SIZE(0..4096))
+            MAX-ACCESS  read-only
+            STATUS      current
+            DESCRIPTION
+        "A list of 4-octet long values, each representing a
+         community.  Size zero (0) indicates the absence of
+         such attributes.  Octets beyond the maximum size, if
+         any, are not recorded by this object.  There are certain
+         4-octet long values that carry additional semantics."
+            REFERENCE
+        "RFC 1997 - BGP Communities Attribute"
+            ::= { bgp4PathAttrEntry 21 }
+
+       bgp4PathAttrExtCommunity OBJECT-TYPE
+            SYNTAX      OCTET STRING (SIZE(0..4096))
+            MAX-ACCESS  read-only
+            STATUS      current
+            DESCRIPTION
+        "A sequence of values each eight octets long, and each
+         representing an extended community that was received
+         with the route.  The values of each of the individual
+         octets may have semantic meaning.  A length of zero (0)
+         indicates the absence of this attribute."
+            REFERENCE
+        "BGP-EXTCOMM - BGP Extended Communities Attribute"
+            ::= { bgp4PathAttrEntry 22 }
+
+
+        bgp4PathAttrBest OBJECT-TYPE
+            SYNTAX     TruthValue
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "An indication of whether or not this route
+                    was chosen as the best BGP4 route."
+-- jmh - this changes the original semantics
+            ::= { bgp4PathAttrEntry 23 }
+
+
+        bgp4PathAttrUnknown OBJECT-TYPE
+            SYNTAX     OCTET STRING (SIZE(0..4096))
+            MAX-ACCESS read-only
+            STATUS     current
+            DESCRIPTION
+                    "One or more path attributes not understood
+                     by the base BGP-4 document.
+
+                     Path attributes are recorded in the Update
+                     Path attribute format of type, length, value.
+                     Size zero (0) indicates the absence of such
+                     attribute(s).  Octets beyond the maximum size,
+                     if any, are not recorded by this object. "
+            ::= { bgp4PathAttrEntry 24 }
+
+
+Various Authors      Expires July  13, 2002             [Page 33]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+           
+		   
+		   -- conformance information
+
+
+           bgpMIBConformance OBJECT IDENTIFIER
+               ::= { bgp 5 }
+           bgpMIBCompliances OBJECT IDENTIFIER
+               ::= { bgpMIBConformance 1 }
+           bgpMIBGroups      OBJECT IDENTIFIER
+               ::= { bgpMIBConformance 2 }
+
+
+           bgpMIBCompliance MODULE-COMPLIANCE
+               STATUS  current
+               DESCRIPTION
+                       "The compliance statement for entities which
+                        implement the BGP4 mib."
+               MODULE  -- this module
+                   MANDATORY-GROUPS { bgp4MIBBasicConfigGroup,
+                             }
+               ::= { bgpMIBCompliances 1 }
+
+           bgp4MIBBasicConfigGroup OBJECT-GROUP
+               OBJECTS { bgpVersion,
+                 bgpAsSize,
+                         bgpLocalAs,
+                         bgpLocalIdentifier,
+             bgp4ClusterId,
+             bgp4ConfederationID,
+                         bgp4CapabilitySupportAvailable }
+               STATUS  current
+               DESCRIPTION
+             "A collection of objects providing information on
+         the basic overall BGP configuration."             
+               ::= { bgpMIBGroups 1 }
+
+
+           bgp4MIBPeerGroup OBJECT-GROUP
+               OBJECTS { bgpPeerIdentifier,
+                         bgpPeerState,
+                         bgpPeerAdminStatus,
+                         bgpPeerNegotiatedVersion,
+                         bgpPeerLocalAddrType,
+                         bgpPeerLocalAddr,
+                         bgpPeerLocalPort,
+                         bgpPeerLocalAs,
+                         bgpPeerRemoteAddrType,
+                         bgpPeerRemoteAddr,
+                         bgpPeerRemotePort,
+                         bgpPeerRemoteAs,
+                         bgpPeerReflectorClient,
+                         bgpPeerConfederationMember,
+                         bgpPeerInUpdates,
+                         bgpPeerOutUpdates,
+                         bgpPeerInTotalMessages,
+                         bgpPeerOutTotalMessages,
+                         bgpPeerLastError,
+
+Various Authors      Expires July  13, 2002             [Page 34]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+                         
+						 bgpPeerFsmEstablishedTransitions,
+                         bgpPeerFsmEstablishedTime,
+                         bgpPeerConnectRetryInterval,
+                    bgpPeerHoldTime,
+                         bgpPeerKeepAlive,
+                         bgpPeerMinASOriginationInterval,
+                         bgpPeerMinRouteAdvertisementInterval,
+                         bgpPeerInUpdateElapsedTime,
+                         bgpPrefixCountersAfi,
+                         bgpPrefixCountersSafi,
+                         bgpPrefixCountersPrefixesReceived,
+                         bgpPrefixCountersPrefixesSent,
+                         bgpPrefixCountersWithdrawsReceived,
+                         bgpPrefixCountersWithdrawsSent,
+                         bgpPrefixCountersWithdrawsSent,
+                         bgpPrefixCountersInPrefixes,
+                         bgpPrefixCountersInPrefixesAccepted,
+                         bgpPrefixCountersInPrefixesRejected,
+                         bgpPrefixCountersOutPrefixes }
+                STATUS   current
+                DESCRIPTION
+                "All objects reflecting management information by
+                BGP peer and sessions to BGP peers."
+                ::= { bgpMIBGroups 2}
+
+          bgp4MIBPeerConfigManagementGroup OBJECT-GROUP
+                OBJECTS { bgpPeerHoldTimeConfigured,
+                          bgpPeerKeepAliveConfigured }
+                STATUS  current
+                DESCRIPTION
+              DESCRIPTION
+                "All objects reflecting controls capable of
+                being set on BGP peer sessions."
+            ::= { bgpMIBGroups 3}
+    
+         bgp4MIBPeerAuthenticationGroup OBJECT-GROUP
+                OBJECTS {  bgpPeerAuthenticationSent,
+                           bgpPeerAuthenticationSentCode,
+                           bgpPeerAuthenticationSentValue,
+                           bgpPeerAuthenticationReceived,
+                           bgpPeerAuthenticationReceivedCode,
+                           bgpPeerAuthenticationReceivedValue }
+                STATUS  current
+                DESCRIPTION
+    
+            DESCRIPTION
+                "This group contains objects reflecting the
+                state of authentication negotiations and other
+                per-peer authentication data."
+                ::= { bgpMIBGroups 4}
+
+           
+		   
+		   
+		   
+		   
+Various Authors      Expires July  13, 2002             [Page 35]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+		   
+		   bgp4MIBCapabilitiesGroup OBJECT-GROUP
+                OBJECTS {   bgp4SupportedCapabilityIndex,
+                            bgp4SupportedCapability,
+                            bgp4PeerCapAnnouncedCode,
+                            bgp4PeerCapAnnouncedIndex,
+                            bgp4PeerCapAnnouncedLength,
+                            bgp4PeerCapAnnouncedValue,
+                            bgp4PeerCapReceivedCode,
+                            bgp4PeerCapReceivedIndex,
+                            bgp4PeerCapReceivedLength,
+                            bgp4PeerCapReceivedValue }
+                STATUS  current
+                DESCRIPTION
+               "This group contains per BGP-4 capability
+                management information objects."
+                ::= { bgpMIBGroups 5}
+
+           bgp4MIBReceivedPathAttributesGroup OBJECT-GROUP
+                OBJECTS { bgp4PathAttrPeerType,
+                          bgp4PathAttrPeer,
+                          bgp4PathAttrIpAddrPrefixType,
+                          bgp4PathAttrIpAddrPrefixSafi,
+                          bgp4PathAttrIpAddrPrefix
+                          bgp4PathAttrIpAddrPrefixLen,
+                          bgp4PathAttrOrigin,
+                          bgp4PathAttrASPathSegment,
+                          bgp4PathAttrNextHop,
+                          bgp4PathAttrMultiExitDiscPresent,
+                          bgp4PathAttrMultiExitDisc,
+                          bgp4PathAttrLocalPrefPresent,
+                          bgp4PathAttrLocalPref,
+                          bgp4PathAttrAtomicAggregate,
+                          bgp4PathAttrAggregatorAS,
+                          bgp4PathAttrAggregatorAddr,
+                          bgp4PathAttrCalcLocalPrefPresent,
+                          bgp4PathAttrCalcLocalPref,
+                          bgp4PathAttrOriginatorId,
+                          bgp4PathAttrClusterList,
+                          bgp4PathAttrCommunity,
+                          bgp4PathAttrExtCommunity,
+                          bgp4PathAttrBest,
+                          bgp4PathAttrUnknown   }
+                STATUS  current
+                DESCRIPTION
+                "This group contains objects with information about
+                destination network paths as received from peers."
+                ::= { bgpMIBGroups 6 }
+
+           bgp4MIBNotificationsGroup NOTIFICATION-GROUP
+                OBJECTS {   bgpEstablished,
+                            bgpBackwardTransition   }
+                STATUS  current
+                DESCRIPTION
+                "This group contains objects for notifications
+                supported by this MIB module."
+                ::= { bgpMIBGroups 7}
+    END
+
+Various Authors      Expires July  13, 2002             [Page 36]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+6. Example on Extending the MIB For BGP Protocol Extensions
+
+TBD
+
+7. Security Considerations
+
+TBD
+
+8. Intellectual Property
+
+   The IETF takes no position regarding the validity or scope of any
+   intellectual property or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; neither does it represent that it
+   has made any effort to identify any such rights.  Information on the
+   IETF's procedures with respect to rights in standards-track and
+   standards-related documentation can be found in BCP-11.  Copies of
+   claims of rights made available for publication and any assurances of
+   licenses to be made available, or the result of an attempt made to
+   obtain a general license or permission for the use of such
+   proprietary rights by implementors or users of this specification can
+   be obtained from the IETF Secretariat.
+
+
+9. Acknowledgements
+
+   Tom Nadeau, Cisco Systems, Inc.
+   Jon Saperia, JDS Consulting, Inc.
+   Bill Fenner, AT&T Research
+   Mike McFadden, Riverstone Networks, Inc.
+   Joel Krauska, Exodus Networks, Inc.
+   Carl W. Kalbfleisch, Verio Networks, Inc.
+
+
+	others TBD...
+	
+10. References
+
+[1]  Harrington, D., Presuhn, R., and B. Wijnen, "An
+     Architecture for Describing SNMP Management Frameworks",
+     RFC 2571, April 1999.
+
+
+[2]  Rose, M., and K. McCloghrie, "Structure and
+     Identification of Management Information for TCP/IP-based
+     Internets", STD 16, RFC 1155, May 1990.
+
+
+[3]  Rose, M., and K. McCloghrie, "Concise MIB Definitions",
+     STD 16, RFC 1212, March 1991.
+
+
+[4]  Rose, M., "A Convention for Defining Traps for use with
+     the SNMP", RFC 1215, March 1991.
+
+
+Various Authors      Expires July  13, 2002             [Page 37]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+[5]  McCloghrie, K., Perkins, D., Schoenwaelder, J., Case, J.,
+     Rose, M., and S. Waldbusser, "Structure of Management
+     Information Version 2 (SMIv2)", STD 58, RFC 2578, April
+     1999.
+
+[6]  McCloghrie, K., Perkins, D., Schoenwaelder, J., Case, J.,
+     Rose, M., and S. Waldbusser, "Textual Conventions for
+     SMIv2", STD 58, RFC 2579, April 1999.
+
+[7]  McCloghrie, K., Perkins, D., Schoenwaelder, J., Case, J.,
+     Rose, M., and S. Waldbusser, "Conformance Statements for
+     SMIv2", STD 58, RFC 2580, April 1999.
+
+
+[8]  Case, J., Fedor, M., Schoffstall, M., and J. Davin,
+     "Simple Network Management Protocol", STD 15, RFC 1157,
+     May 1990.
+
+
+[9]  Case, J., McCloghrie, K., Rose, M., and S. Waldbusser,
+     "Introduction to Community-based SNMPv2", RFC 1901,
+     January 1996.
+
+
+[10] Case, J., McCloghrie, K., Rose, M., and S. Waldbusser,
+     "Transport Mappings for Version 2 of the Simple Network
+     Management Protocol (SNMPv2)", RFC 1906, January 1996.
+
+
+[11] Case, J., Harrington D., Presuhn R., and B. Wijnen,
+     "Message Processing and Dispatching for the Simple
+     Network Management Protocol (SNMP)", RFC 2572, April
+     1999.
+ 
+[12] Blumenthal, U., and B. Wijnen, "User-based Security Model
+     (USM) for version 3 of the Simple Network Management
+     Protocol (SNMPv3)", RFC 2574, April 1999.
+
+
+[13] Case, J., McCloghrie, K., Rose, M., and S. Waldbusser,
+     "Protocol Operations for Version 2 of the Simple Network
+     Management Protocol (SNMPv2)", RFC 1905, January 1996.
+
+
+[14] Levi, D., Meyer, P., and B. Stewart, "SNMPv3
+     Applications", RFC 2573, April 1999.
+
+
+[15] Wijnen, B., Presuhn, R., and K. McCloghrie, "View-based
+     Access Control Model (VACM) for the Simple Network
+     Management Protocol (SNMP)", RFC 2575, April 1999.
+
+
+[16] McCloghrie, K. and M. Rose, Editors, "Management
+     Information Base for Network Management of TCP/IP-based
+     internets: MIB-II", STD 17, RFC 1213, Hughes LAN Systems,
+     Performance Systems International, March 1991.
+
+Various Authors      Expires July  13, 2002             [Page 38]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+
+
+[7]  McCloghrie, K., Perkins, D., Schoenwaelder, J., Case, J.,
+     Rose, M., and S. Waldbusser, "Conformance Statements for
+     SMIv2", STD 58, RFC 2580, April 1999.
+
+
+[8]  Case, J., Fedor, M., Schoffstall, M., and J. Davin,
+     "Simple Network Management Protocol", STD 15, RFC 1157,
+     May 1990.
+
+
+[9]  Case, J., McCloghrie, K., Rose, M., and S. Waldbusser,
+     "Introduction to Community-based SNMPv2", RFC 1901,
+     January 1996.
+
+
+[10] Case, J., McCloghrie, K., Rose, M., and S. Waldbusser,
+     "Transport Mappings for Version 2 of the Simple Network
+     Management Protocol (SNMPv2)", RFC 1906, January 1996.
+
+
+[11] Case, J., Harrington D., Presuhn R., and B. Wijnen,
+     "Message Processing and Dispatching for the Simple
+     Network Management Protocol (SNMP)", RFC 2572, April
+     1999.
+
+[12] Willis, S., Burruss, J., and Chu, J., "Definitions of Managed 
+     Objects for the Fourth Version of the Border Gateway Protocol 
+     (BGP-4) using SMIv2", RFC 1657, July 1994.
+
+[13] Hares, S., Haas, J., Willis, S., Burruss, J., and Chu, J., 
+     "Definitions of Managed Objects for the Fourth Version of 
+     Border Gateway Protocol (BGP-4)", draft-ietf-idr-bgp4-mib-
+     06.txt, Work-in-progress.
+
+[14] Rekhter, Y., Li, T., "A Border Gateway Protocol 4 (BGP-4)", RFC
+        1771, March 1995.
+
+
+[15]  Rekhter, Y., Gross, P., "Application of the Border Gateway
+        Protocol in the Internet", RFC 1772, March 1995.
+
+[16]  Traina, P., McPherson, D., and Scudder, J., "Autonomous System 
+      Confederations for BGP", RFC 3065, February, 2001.
+
+[17]  Chandra, R., Traina, P., and Li, T., "BGP Communities Attribute", 
+      RFC 1997, August, 1996.
+
+[18]  Bates, T., Rekhter, Y., Chandra, R., and Katz, D., "Multiprotocol 
+      Extensions for BGP-4", June, 2000.
+
+[19]  Bates, T., Chandra, R., and Chen, E., "BGP Route Reflection -
+      An Alternative to Full Mesh IBGP", RFC 2796, April 2000.
+
+
+
+
+Various Authors      Expires July  13, 2002             [Page 39]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+
+10. Authors' Address
+
+   Susan Hares
+   NextHop Technologies
+   517 Williams
+   Ann Arbor, MI 48103-4943
+   Phone: +1 734 936 2095
+   Fax:   +1 734 615-3241
+   Email: skh@nexthop.com
+
+   Jeff Johnson
+   RedBack Networks, Inc.
+   1389 Moffett Park Drive
+   Sunnyvale, CA  94089
+   Phone: +1 408 548 3516
+   Email: jeff@redback.com
+
+   Steve Willis
+   Argon Networks
+   25 Porter Road
+   Littleton, MA 01450
+   Phone: +1 508 486 0665
+   Fax:   +1 508 486 9379
+   Email: swills@argon.com
+
+   John Burruss
+   Windata Inc.
+   543 Great Road
+   Littleton MA 01460
+   Phone: +1 508 952 0170
+   Email: jburruss@windata.com
+
+   John Chu
+   Cosine Communications
+   1200 Bridge Parkway
+   Redwood City, CA 94065
+   Phone: 650-637-4780
+   Email: jchu@cosinecom.com
+
+11. Full Copyright Statement
+
+   Copyright (C) The Internet Society (1999).  All Rights Reserved.
+
+   This document and translations of it may be copied and furnished to
+   others, and derivative works that comment on or otherwise explain it
+   or assist in its implementation may be prepared, copied, published
+   and distributed, in whole or in part, without restriction of any
+   kind, provided that the above copyright notice and this paragraph are
+   included on all such copies and derivative works.  However, this
+   document itself may not be modified in any way, such as by removing
+   the copyright notice or references to the Internet Society or other
+   Internet organizations, except as needed for the purpose of
+   developing Internet standards in which case the procedures for
+   copyrights defined in the Internet Standards process must be
+   followed, or as required to translate it into languages other than
+   English.
+
+Various Authors      Expires July  13, 2002             [Page 40]
+
+Internet Draft              BGP-MIB v2              July 13, 2001
+
+   The limited permissions granted above are perpetual and will not be
+   revoked by the Internet Society or its successors or assigns.
+
+   This document and the information contained herein is provided on an
+   "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+   TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+   BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+   HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Various Authors      Expires July  13, 2002             [Page 41]
+

@@ -1,0 +1,53 @@
+Contained herein you'll find some reading materials that have proved
+useful or insightful to the Xorp developers with regard to getting to
+grips with C++.
+
+ * The C++ Programming Language (3rd Edition), Bjarne Stroustrup,
+   Addison-Wesley.
+
+     The definitive C++ book.  Like the language, it's rather large,
+     and as reading matter it's not terribly entertaining.  It's a
+     useful reference book, though tough to read cover to cover.
+
+ * The ANSI/ISO C++ Professional Programmer's Handbook, Danny Kalev,
+   Que (ISBN 0789720221).
+
+     An excellent alternative to Stroustrup.  Clearly and concisely
+     written.  Only 350 some pages.  Punchy and to the point.  Assumes
+     rudimentary knowledge of C++ at the start and builds around the
+     ANSI C++ standard.
+
+ * Effective C++: 50 Specific Ways to Improve Your Programs and Designs,
+   Scott Meyers, Addison-Wesley (ISBN 0201924889).
+
+   More Effective C++: 35 New Ways to Improve Your Programs and Designs,
+   Scott Meyers, Addison-Wesley (ISBN 020163371X).
+
+     Exceptionally readable and valuable.  If you've not programmed
+     in C++ before, or have not programmed in C++ recently, then
+     these are both well worth reading.
+
+ * SGI STL documentation (http://www.sgi.com/tech/stl/).
+
+     Hypertext documentation covering the C++ Standard Template
+     Library.  Essential at hand reference.  Includes design
+     documents and has many examples of the STL in action.
+
+ * The C++ Standard Library: A Tutorial and Reference, Nicolai M. Josuttis,
+   Addison-Wesley (ISBN 0201379260).
+
+     More extensive STL documentation.  Handy reference (i++ or ++i :-).
+
+ * Design Patterns, Erich Gamma, Richard Helm, Ralph Johnson, John
+   Vlissides, Addison-Wesley (ISBN 0201633612).
+
+     Presents a catalog of design patterns.  A little dry to read, but
+     a good intro and reference.
+
+ * Modern C++ Design: Generic Programming and Design Patterns Applied,
+   Andrei Alexandrescu, Addison-Wesley (ISBN 0201704315).
+
+     This is a hard C++ book.  It presents a bedazzling array of
+     template specialization magic.  There's not too much in the
+     project that stems directly from this book, but it's mind blowing
+     material.

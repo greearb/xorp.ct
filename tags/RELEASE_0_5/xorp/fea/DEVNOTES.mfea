@@ -1,0 +1,10 @@
+#
+# $XORP: xorp/mfea/DEVNOTES,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+#
+
+* All ProtoComm entries are explicitly enabled by default inside
+  ProtoComm::start()
+
+* MfeaVif::start_protocol() would not start the MfeaVif if it was
+  not running before. Not sure it is the right thing to do.
+  The alternative is to require the MFEA client to send start_vif() XRL.

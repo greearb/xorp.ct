@@ -1,0 +1,248 @@
+#! /usr/bin/env python
+
+"""Program to generate Xrl Interface Client related files"""
+
+import os, sys
+
+# This is a bit of mess as this code was split into separate files
+import Xif.util
+
+from Xif.util import							      \
+     joining_csv, csv, cpp_name, cpp_classname, caps_cpp_classname,	      \
+     cpp_version, xorp_indent_string, xorp_indent
+
+from Xif.xiftypes import \
+     XrlArg, XrlMethod, XrlInterface, XrlTarget
+
+from Xif.parse import \
+     XifParser
+
+from Xif.kdoc import XifKdocThing
+
+# -----------------------------------------------------------------------------
+# Client Interface file output related
+# -----------------------------------------------------------------------------
+
+def kdoc_comment(method):
+    kdoc_source = method.annotation()
+    if kdoc_source == "":
+        return ""
+    kdt = Xif.kdoc.parse_kdoc_comment(kdoc_source)
+    kdt.add_kdoc_param("tgt_name", "Xrl Target name")
+    params = ["tgt_name"]
+    for a in method.args():
+        params.append(a.name())
+
+    comment = "Send Xrl intended to:"
+
+    return kdt.output_kdoc("    ", params, comment)
+
+def declare_send_xrl(method_no, method):
+    rtypes = []
+    for r in method.rargs():
+        rtypes.append("const " + r.cpp_type() + "*")
+    cb_name = "%sCB" % (caps_cpp_classname(method.name()))
+    s = "    typedef XorpCallback%s<void, const XrlError&%s>::RefPtr %s;\n" \
+        % (1 + len(rtypes), joining_csv(rtypes), cb_name)
+
+    s += kdoc_comment(method) + "\n"
+    atypes = ["\n\tconst char*\ttarget_name"]
+    for a in method.args():
+        atypes.append("\n\tconst %s&\t%s" % (a.cpp_type(), a.name()))
+    atypes.append("\n\tconst %s&\tcb" % cb_name)
+    s += "    bool send_%s(%s\n    );\n\n" \
+        % (cpp_name(method.name()), csv(atypes))
+    return s;
+
+def implement_send_xrl(cls, method_no, method, ifqname):
+    cb_name = "%sCB" % (caps_cpp_classname(method.name()))
+    atypes = ["\n\tconst char*\tthe_tgt"]
+    for a in method.args():
+        atypes.append("\n\tconst %s&\t%s" % (a.cpp_type(), a.name()))
+    atypes.append("\n\tconst %s&\tcb" % cb_name)
+    s = "\nbool\n%s::send_%s(%s\n)\n{\n" \
+        % (cls, cpp_name(method.name()), csv(atypes))
+
+    s += "    Xrl x(the_tgt, \"%s\");\n" % ifqname
+    for a in method.args():
+        s += "    x.args().add(\"%s\", %s);\n" % (a.name(), a.name())
+    s += "    return _sender->send(x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
+    s += "}\n\n"
+
+    return s
+
+def declare_unmarshall_common(cls, indent, method_name):
+    s = xorp_indent_string(indent , "void")
+    s += "%sunmarshall_%s(" % (cls, method_name)
+    cb_name = "%sCB" % (caps_cpp_classname(method_name))
+    args = [ "const XrlError&\te", "XrlArgs*\ta", "%s\t\tcb" % cb_name]
+    for i in range(0, len(args)):
+        args[i] = "\n\t" + args[i]
+    s += csv(args)
+    s += "\n%s)" % xorp_indent(indent)
+    return s
+
+def declare_unmarshall(method_name):
+    return declare_unmarshall_common(" ", 1, method_name) + ";\n\n"
+
+def implement_unmarshall(cls, method_no, method):
+
+    nargs = []
+    for r in method.rargs():
+        nargs.append("0")
+    fail_args = joining_csv(nargs)
+
+    s = "\n/* Unmarshall %s */\n" % method.name()
+    s += declare_unmarshall_common("\n%s::" % cls, 0, method.name()) + "\n{\n"
+    s += "    if (e != XrlError::OKAY()) {\n"
+    s += "\tcb->dispatch(e%s);\n" % fail_args
+    s += "\treturn;\n"
+    s += "    } else if (a && a->size() != %d) {\n" % len(method.rargs())
+    s += "\tXLOG_ERROR(\"Wrong number of arguments (%%u != %d)\", (uint32_t)a->size());\n" % len(method.rargs())
+    s += "\tcb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
+    s += "\treturn;\n"
+    s += "    }\n"
+
+    if len(method.rargs()):
+        for r in method.rargs():
+            s += "    %s %s;\n" % (r.cpp_type(), cpp_name(r.name()))
+
+        s += "    try {\n"
+        for r in method.rargs():
+            s += "\ta->get(\"%s\", %s);\n" % (r.name(), cpp_name(r.name()))
+
+        s += "    } catch (const XrlArgs::XrlAtomNotFound&) {\n"
+        s += "\tXLOG_ERROR(\"Atom not found\");\n"
+        s += "\tcb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
+        s += "\treturn;\n"
+        s += "    }\n"
+
+    v = []
+    for r in method.rargs():
+        v.append("&%s" % cpp_name(r.name()))
+    s += "    cb->dispatch(e%s);\n" % joining_csv(v)
+    s += "}\n"
+    return s
+
+def protect(file):
+    # remove direcory component
+    r = file.rfind("/") + 1
+    return "__XRL_INTERFACES_%s__" % file[r:].upper().replace(".", "_")
+
+def prepare_client_if_hh(modulename, hh_file):
+
+    s = Xif.util.standard_preamble(1, hh_file)
+    s += \
+"""#ifndef %s
+#define %s
+
+#undef XORP_LIBRARY_NAME
+#define XORP_LIBRARY_NAME "%s"
+
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+
+#include "libxipc/xrl.hh"
+#include "libxipc/xrl_error.hh"
+#include "libxipc/xrl_sender.hh"
+
+""" % (protect(hh_file), protect(hh_file), modulename)
+    return s
+
+def client_if_hh(cls, methods):
+    s = """
+class %s {
+public:
+    %s(XrlSender* s) : _sender(s) {}
+    virtual ~%s() {}
+
+""" % (cls, cls, cls)
+    for i in range(0, len(methods)):
+        s += declare_send_xrl(i, methods[i])
+
+    s += """protected:
+    XrlSender* _sender;
+
+private:
+"""
+    for i in range(0, len(methods)):
+        s += declare_unmarshall(methods[i].name())
+    s += "};\n"
+
+    return s
+
+def finish_client_if_hh(hh_file):
+    return "\n#endif /* %s */\n" % protect(hh_file)
+
+def prepare_client_if_cc(hh_file, cc_file):
+    s = Xif.util.standard_preamble(0, cc_file)
+    s += "#include \"%s\"\n" % hh_file
+    return s
+
+def client_if_cc(cls, ifname, ifversion, methods):
+    s = ""
+    for i in range(0, len(methods)):
+        # Interface qualified name
+        ifqname = "%s/%s/%s" % (ifname, ifversion, methods[i].name())
+
+        s += implement_send_xrl(cls, i, methods[i], ifqname)
+        s += implement_unmarshall(cls, i, methods[i])
+    return s
+
+def main():
+
+    # Command line arguments passed on to cpp
+    pipe_string = "cpp -C "
+    for a in sys.argv[1:]:
+	pipe_string += "%s " % a
+
+    cpp_pipe = os.popen(pipe_string, 'r')
+
+    xp = XifParser(cpp_pipe)
+
+    if len(xp.targets()):
+        print "Found targets (used a .ent rather than .xif input?)"
+        sys.exit(1)
+
+    xifs = xp.interfaces()
+    if len(xifs) == 0:
+        print "No interface definitions provided"
+        sys.exit(1)
+
+    # Check all interface definitions come from same source file.
+    # Although we've done the hard part (parsing), generating from
+    # here is still painful if we have to output multiple interface files.
+    sourcefile = xifs[0].sourcefile()
+    for xif in xifs:
+        if (xif.sourcefile() != sourcefile):
+            print "Multiple .xif files presented, expected one."
+            sys.exit(1)
+
+    # basename transformation - this is a lame test
+    if sourcefile[-4:] != ".xif":
+        print "Source file does not end in .xif suffix - basename transform failure."
+        sys.exit(1)
+
+    basename = sourcefile[:-4]
+
+    modulename = "Xif%s" % cpp_classname(basename[basename.rfind("/") + 1:])
+    hh_file = "%s_xif.hh" % basename
+    cc_file = "%s_xif.cc" % basename
+    
+    # Generate header file
+    hh_txt = prepare_client_if_hh(modulename, hh_file)
+    for xif in xifs:
+        cls = "Xrl%s%sClient" % (cpp_classname(xif.name()), \
+                                  cpp_version(xif.version()))
+        hh_txt += client_if_hh(cls, xif.methods())
+    hh_txt += finish_client_if_hh(hh_file)
+    Xif.util.file_write_string(hh_file, hh_txt)
+
+    # Generate implementation file
+    cc_txt = prepare_client_if_cc(hh_file[hh_file.rfind("/") + 1 : ], cc_file)
+    for xif in xifs:
+        cc_txt += client_if_cc(cls, xif.name(), xif.version(), xif.methods())
+    Xif.util.file_write_string(cc_file, cc_txt)
+
+if __name__ == '__main__':
+    main()

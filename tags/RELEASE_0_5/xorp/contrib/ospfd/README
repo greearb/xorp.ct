@@ -1,0 +1,15 @@
+#
+# $XORP: xorp/ospfd/README,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
+#
+
+ospfd:  This in John Moy's OSPFd.  Origin site is http://www.ospf.org/
+
+src subdir is the basic OSPF code
+ospf_sim is Moy's build environment to run ospf as a simulator.
+linux is Moy's support code to run ospfd directly under Linux.
+
+On XORP, when porting for different platforms you will need to create
+a directory for the target platform and a machdep.h there with
+platform specific dependencies.  Look at {linux,freebsd}/machdep.h for
+starting points.  The other files in the linux and freebsd directories
+are redundant.

@@ -1,0 +1,56 @@
+The Lucent Wireless Wavelan card (and friends such as its follow-up Orinoco),
+appears that it cannot support ALLMULTI mode (when all multicast packets
+are received; required by multicast routers).
+It is quite likely to be a limitation in the "Hermes" wireless MAC controller
+which is used in the Lucent Orinoco and Cabletron RoamAbout cards.
+The work-around is to put the interface in promiscuous mode (i.e.,
+receive all packets), and then let the upper layer (the IP stack)
+drop the unwanted packets.
+
+Unfortunately, it appears that all *BSD Wavelan drivers and most Linux
+drivers have overlooked that, hence ALLMULTI mode doesn't work
+('wavelan' in linux-2.5.7 and 'orinoco' version 0.11 seem OK,
+but 'orinoco-0.08a in linux-2.5.7 probably doesn't work).
+
+Below is a patch for FreeBSD-4.3 (apply from directory 'sys') that applies
+the work-around. For other *BSD flavors the fix is very similar.
+
+Related URLs:
+
+http://www.fasta.fh-dortmund.de/users/andy/wvlan/
+ftp://ftp.orinocowireless.com//pub/software/ORiNOCO/PC_Card/linux/
+
+
+Pavlin Radoslavov
+pavlin@icsi.berkeley.edu
+Tue Apr  9 22:31:07 PDT 2002
+
+--- i386/isa/if_wi.c.org	Mon Mar 12 03:03:45 2001
++++ i386/isa/if_wi.c	Tue Apr  9 21:01:48 2002
+@@ -851,7 +851,16 @@
+ 	mcast.wi_len = (3 * 16) + 1;
+ 
+ 	if (ifp->if_flags & IFF_ALLMULTI || ifp->if_flags & IFF_PROMISC) {
++		WI_SETVAL(WI_RID_PROMISC, 1);
++#if 0
++		/*
++		 * XXX: it seems that the 'allmulti' receiving mode
++		 * doesn't work, hence we put the card in promiscuous
++		 * mode and let the upper layer deal with the unwanted
++		 * packets.
++		 */
+ 		wi_write_record(sc, (struct wi_ltv_gen *)&mcast);
++#endif /* 0 */
+ 		return;
+ 	}
+ 
+@@ -986,7 +995,8 @@
+ 			    !(sc->wi_if_flags & IFF_PROMISC)) {
+ 				WI_SETVAL(WI_RID_PROMISC, 1);
+ 			} else if (ifp->if_flags & IFF_RUNNING &&
+-			    !(ifp->if_flags & IFF_PROMISC) &&
++				/* XXX: a hack to take care of ALLMULTI too */
++			    !(ifp->if_flags & (IFF_PROMISC | IFF_ALLMULTI)) &&
+ 			    sc->wi_if_flags & IFF_PROMISC) {
+ 				WI_SETVAL(WI_RID_PROMISC, 0);
+ 			} else

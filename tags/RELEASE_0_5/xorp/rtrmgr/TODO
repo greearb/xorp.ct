@@ -1,0 +1,79 @@
+#
+# $XORP: xorp/rtrmgr/TODO,v 1.8 2003/10/02 16:49:51 pavlin Exp $
+#
+
+Urgent
+======
+
+Configure Mode
+
+ - Implement node locking in MasterConfigTree
+ - Use node locking to prevent two users editing the same node.
+ - Templates need %delete commands adding.
+ - Can't delete leaf nodes.
+    - Can delete some leaf nodes, but the xorpsh thinks there are still
+      uncommitted changes.
+ - Implement $(@.DEFAULT) varname.
+ - In xorpsh, variable expansion can fail (for example with FEA
+   transation IDs).  Currently the xorpsh-side checks are disabled in
+   slave_config_tree.cc, but this is the wrong solution to the
+   problem.
+ - Implement the "help" and "quit" commands in the top-level xorpsh
+   command tree.
+
+Operational Mode
+
+ - Ensure commands only appear when modules are loaded.
+
+Other
+ - Fix test_router_manager, because even if the path to the xorp_finder
+   binary is incorrect, it doesn't report an error.
+
+ - Assuming the following paragraph refers to the xorpsh this may be fixed.
+
+   Restart code is broken, currently exits because of an Xrl failure
+   when xorp_rtrmgr goes away.  Want to stick around, announce absence
+   of xorp_rtrmgr and gracefully re-connect when it restarts.
+
+Non-Urgent
+==========
+
+General
+
+ - user database needs proper implementation of capabilities
+ - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
+   and list all *.cc files there in alphabetical order
+ - When the rtrmgr is running in no-exec mode do not instantiate a
+   finder and XrlRouter.
+ - Audit the number of symbols copied by strncpy in the lex/yacc
+   files, and write '\0' at the end of the array. E.g., always
+   do something like:
+	char buf[1024];
+	strncpy(buf, input, sizeof(buf) - 1);
+	buf[sizeof(buf) - 1] = '\0';
+
+Configure Mode
+
+ - Rollback when a commit fails.
+ - Allow more flexible syntax in text_entry_mode.
+ - Add support for "%setting" command.
+
+Operational Mode
+
+Done
+====
+
+ - Remove 5 second timeout.
+ - Interruption of commands in progress.
+   RESOLVED: Use Ctrl-C to interrupt xorpsh waiting for command completion.
+ - If rtrmgr restarts, xorpsh will talk to the new rtrmgr, but will
+   fail all authentication checks.  Handle this more gracefully.
+
+RESOLVED: restart is detected and user is advised to logout and login again.
+
+ - TemplateTree destructor doesn't clean up properly.
+
+RESOLVED: actually it was correct, the comment was wrong.
+
+ - Module unloading when relevant config is deleted. (Done)
+

@@ -1,0 +1,107 @@
+/* $XORP: xorp/etc/templates/ospf.tp,v 1.4 2003/07/17 00:28:33 pavlin Exp $ */
+
+protocols {
+  ospf {
+    router-id: ipv4;
+    lsdb_limit: int;
+    mospf: toggle = false;
+    interarea_mc: toggle = false;
+    overflow_interval: int;
+    flood_rate: int;
+    max_rxmt_window: uint;
+    max_dds: uint;
+    lsa_refresh_rate: uint;
+    p2p_adj_limit: uint = 0;
+    random_refresh: toggle = false;
+    area @: ipv4 {
+      stub: toggle = false;
+      stub_metric: uint = 0;
+      stub_summaries: bool = false;
+      interface @: text {
+        disable: toggle = false;
+        hello-interval: uint = 30;
+        dead-interval: uint = 95;
+        poll-interval: uint;
+        retransmit-interval: uint;
+        transit-delay: uint;
+        priority: uint;
+        passive: toggle = false;
+	cost: uint = 0;
+	mtu: uint = 1500;
+	on_demand: toggle = false;
+	type: text = "broadcast";
+	if_index: uint = 0;
+      }
+    }
+  }
+}
+
+protocols ospf {
+  %modinfo: provides ospf; 
+  %modinfo: depends rib;
+  %modinfo: path "ospfd/xorp/xorp_ospf";
+  %modinfo: statusmethod xrl;
+  router-id {
+    %set: xrl "ospf/ospf/0.1/set_router_id?id:u32=$(@)";
+    %get: xrl "ospf/ospf/0.1/get_router_id->id:u32";
+  }
+  lsdb_limit {
+    %set: xrl "ospf/ospf/0.1/set_lsdb_limit?limit:i32=$(@)";
+    %get: xrl "ospf/ospf/0.1/get_lsdb_limit->limit:i32=$(@)";
+  }
+  mospf {
+    %set: xrl "ospf/ospf/0.1/set_mospf?enabled:bool=$(@)";
+    %delete: xrl "ospf/ospf/0.1/set_mospf?enabled:bool=$(DEFAULT)";
+    %get: xrl "ospf/ospf/0.1/get_mospf->enabled:bool=$(@)";
+  }
+  interarea_mc {
+    %set: xrl "ospf/ospf/0.1/set_interarea_mc?enabled:bool=$(@)";
+    %delete: xrl "ospf/ospf/0.1/set_interarea_mc?enabled:bool=$(DEFAULT)";
+    %get: xrl "ospf/ospf/0.1/get_interarea_mc->enabled:bool=$(@)";
+  }
+  overflow_interval {
+    %set: xrl "ospf/ospf/0.1/set_overflow_interval?ovfl_int:i32=$(@)";
+    %get: xrl "ospf/ospf/0.1/get_overflow_interval->ovfl_int:i32=$(@)";
+  }
+  flood_rate {
+    %set: xrl "ospf/ospf/0.1/set_flood_rate?rate:i32=$(@)";
+    %get: xrl "ospf/ospf/0.1/get_flood_rate->rate:i32=$(@)";
+  }
+  max_rxmt_window {
+    %set: xrl "ospf/ospf/0.1/set_max_rxmt_window?window:u32=$(@)";
+    %get: xrl "ospf/ospf/0.1/get_max_rxmt_window->window:u32=$(@)";
+  } 
+  max_dds {
+    %set: xrl "ospf/ospf/0.1/set_max_dds?max_dds:u32=$(@)";
+    %get: xrl "ospf/ospf/0.1/get_max_dds->max_dds:u32=$(@)";
+  }
+  lsa_refresh_rate {
+    %set: xrl "ospf/ospf/0.1/set_lsa_refresh_rate?rate:u32=$(@)";
+    %get: xrl "ospf/ospf/0.1/get_lsa_refresh_rate->rate:u32=$(@)";
+  }
+  p2p_adj_limit {
+    %set: xrl "ospf/ospf/0.1/set_p2p_adj_limit?max_adj:u32=$(@)";
+    %delete: xrl "ospf/ospf/0.1/set_p2p_adj_limit?max_adj:u32=$(DEFAULT)";
+    %get: xrl "ospf/ospf/0.1/get_p2p_adj_limit->max_adj:u32=$(@)";
+  } 
+  random_refresh {
+    %set: xrl "ospf/ospf/0.1/set_random_refresh?enabled:bool=$(@)";
+    %delete: xrl "ospf/ospf/0.1/set_random_refresh?enabled:bool=$(DEFAULT)";
+    %get: xrl "ospf/ospf/0.1/get_random_refresh->enabled:bool=$(@)";
+  }
+  
+  area @ {
+    %create: xrl "ospf/ospf/0.1/add_or_configure_area?area_id:u32=$(area.@)&is_stub:bool=$(@.stub)&default_cost:u32=$(@.stub_metric)&import_summary_routes:bool=$(@.stub_summaries)";
+    %delete: xrl "ospf/ospf/0.1/delete_area?area_id:u32=$(area.@)";
+    /*%setting: xrl "ospf/ospf/0.1/add_or_configure_area?area_id:u32=$(area.@)&is_stub:bool=$(stub)&default_cost:u32=$(stub_metric)&import_summary_routes:bool=$(stub_summaries)";
+    %getting: xrl "ospf/ospf/0.1/query_area?area_id:u32=$(area.@)->is_stub:bool=$(stub)&default_cost:u32=$(stub_metric)&import_summary_routes:bool=$(stub_summaries)";*/
+    interface @ {
+	%create: xrl "ospf/ospf/0.1/add_interface?identifier:txt=$(@)&if_index:u32=$(@.if_index)&area_id:u32=$(area.@)&cost:u32=$(@.cost)&mtu:u32=$(@.mtu)&type:txt=$(@.type)&on_demand:bool=$(@.on_demand)&passive:bool=$(@.passive)";
+      dead-interval { 
+        %set: xrl "ospf/ospf/0.1/interface_set_router_dead_interval?identifier:txt=$(interface.@)&interval_secs:u32=$(@)";
+      }
+    }
+  }
+}
+
+

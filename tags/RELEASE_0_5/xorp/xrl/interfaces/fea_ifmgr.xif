@@ -1,0 +1,269 @@
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.11 2003/10/24 20:51:06 pavlin Exp $ */
+
+/*
+ * Forwarding Engine Abstraction Interface Management XRL interface.
+ */
+
+interface ifmgr/0.1 {
+	get_configured_interface_names -> ifnames:list
+
+	get_configured_vif_names ? ifname:txt -> vifs:list
+
+	get_configured_vif_flags ? ifname:txt				\
+				& vif:txt				\
+				-> enabled:bool				\
+				& broadcast:bool			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_configured_vif_pif_index	? ifname:txt			\
+					& vif:txt			\
+					-> pif_index:u32
+
+	get_configured_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
+
+	get_configured_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
+
+	get_configured_address_flags4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool			\
+					& broadcast:bool		\
+					& loopback:bool			\
+					& point_to_point:bool		\
+					& multicast:bool
+
+	get_configured_address_flags6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool			\
+					& loopback:bool			\
+					& point_to_point:bool		\
+					& multicast:bool
+
+	get_configured_interface_enabled ? ifname:txt -> enabled:bool
+
+	get_configured_mac ? ifname:txt -> mac:mac
+
+	get_configured_mtu ? ifname:txt -> mtu:u32
+
+	get_configured_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+
+
+	get_configured_prefix4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> prefix_len:u32
+
+	get_configured_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> broadcast:ipv4
+
+	get_configured_endpoint4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> endpoint:ipv4
+
+	get_configured_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> prefix_len:u32
+
+	get_configured_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> endpoint:ipv6
+
+	start_transaction -> tid:u32
+
+	commit_transaction ? tid:u32
+
+	abort_transaction ? tid:u32
+
+	create_interface ? tid:u32 & ifname:txt
+
+	delete_interface ? tid:u32 & ifname:txt
+
+	set_interface_enabled ? tid:u32 & ifname:txt & enabled:bool
+
+	set_mac ? tid:u32 & ifname:txt & mac:mac
+
+	set_mtu ? tid:u32 & ifname:txt & mtu:u32
+
+	/**
+	 * Create a vif
+	 *
+	 * @param ifname the name of the physical interface associated with
+	 *               the new vif.
+	 * @param vif name for new vif, must be unique across all the
+	 *               vifs in the system.
+	 */
+	create_vif ? tid:u32 & ifname:txt & vif:txt
+
+	delete_vif ? tid:u32 & ifname:txt & vif:txt
+
+	set_vif_enabled ? tid:u32 & ifname:txt & vif:txt & enabled:bool
+
+	create_address4 ? tid:u32 & ifname:txt & vif:txt & address:ipv4
+
+	delete_address4 ? tid:u32 & ifname:txt & vif:txt & address:ipv4
+
+	set_address_enabled4	? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& enabled:bool
+
+	get_configured_address_enabled4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool
+
+	set_prefix4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& prefix_len:u32
+
+	set_broadcast4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& broadcast:ipv4
+
+	set_endpoint4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& endpoint:ipv4
+
+	create_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6
+
+	delete_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6
+
+	set_address_enabled6	? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& enabled:bool
+
+	get_configured_address_enabled6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool
+
+	set_prefix6		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& prefix_len:u32
+
+	set_endpoint6		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& endpoint:ipv6
+
+	/**
+	 * Register network interface observer for configured interfaces.
+	 *  @param clientname name of xrl entity supporting
+	 * fea_ifmgr_client.xif methods.
+	 */
+	register_client ? clientname:txt
+
+	/**
+	 * Unregister network interface observer for configured interfaces.
+	 * This method is not strictly necessary, the fea will remove the
+	 * interface observer from its list of known observers if interface
+	 * update XRLs fail.
+	 */
+	unregister_client ? clientname:txt
+
+	/*
+	 * get_system methods
+	 *
+	 * The get_configured methods return the configured interface state
+	 * of the FEA.  The get_system methods return the interface state
+	 * from the underlying system.
+	 * These are primarily intended as debugging methods, the FEA will
+	 * often be aware of more interfaces than the rtrmgr has configured.
+	 *
+	 * USE OF THESE METHODS IS STRONLY DISCOURAGED.
+	 */
+	get_system_interface_names -> ifnames:list
+
+	get_system_vif_names ? ifname:txt -> vifs:list
+
+	get_system_vif_flags	? ifname:txt				\
+				& vif:txt				\
+				-> enabled:bool				\
+				& broadcast:bool			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_system_vif_pif_index ? ifname:txt				\
+				& vif:txt				\
+				-> pif_index:u32
+
+	get_system_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
+
+	get_system_address_flags4 ? ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				-> enabled:bool				\
+				& broadcast:bool			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_system_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
+
+	get_system_address_flags6 ? ifname:txt				\
+				& vif:txt 				\
+				& address:ipv6				\
+				-> enabled:bool 			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_system_interface_enabled ? ifname:txt -> enabled:bool
+
+	get_system_mac ? ifname:txt -> mac:mac
+
+	get_system_mtu ? ifname:txt -> mtu:u32
+
+	get_system_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+
+	get_system_prefix4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> prefix_len:u32
+
+	get_system_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> broadcast:ipv4
+
+	get_system_endpoint4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> endpoint:ipv4
+
+	get_system_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> prefix_len:u32
+
+	get_system_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> endpoint:ipv6
+
+	get_system_address_enabled4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool
+
+	get_system_address_enabled6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool
+
+	/**
+	 * Register network interface observer for all system interfaces.
+	 *  @param clientname name of xrl entity supporting
+	 * fea_ifmgr_client.xif methods.
+	 */
+	register_system_interfaces_client ? clientname:txt
+
+	/**
+	 * Unregister network interface observer for all system interfaces.
+	 * This method is not strictly necessary, the fea will remove the
+	 * interface observer from its list of known observers if interface
+	 * update XRLs fail.
+	 */
+	unregister_system_interfaces_client ? clientname:txt
+}
