@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.1 2004/12/17 04:45:21 bms Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -494,10 +494,10 @@ PaIpfw2Backend::read_ruleset4(const int ruleset_index, RulesetDB& rulesetdb)
     XLOG_ASSERT(rulesetdb.empty());
 
     vector<uint8_t> chainbuf;
-    size_t nbytes, nalloc;
+    size_t nbytes = 0;
+    size_t nalloc = 1024;
 
     // Play elastic buffer games to get a snapshot of the entire rule chain.
-    nalloc = 1024;
     chainbuf.reserve(nalloc);
     while (nbytes >= nalloc) {
 	nbytes = nalloc = nalloc * 2 + 200;
