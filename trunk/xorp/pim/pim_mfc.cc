@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.11 2003/06/13 01:32:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.12 2003/07/12 01:14:37 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -71,6 +71,16 @@ PimMfc::~PimMfc()
     // Remove this entry from the PimMrt table.
     //
     pim_mrt().remove_pim_mfc(this);
+    
+    //
+    // Cancel the (S,G) Keepalive Timer
+    //
+    PimMre *pim_mre_sg = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+						PIM_MRE_SG, 0);
+    if ((pim_mre_sg != NULL) && pim_mre_sg->is_keepalive_timer_running()) {
+	pim_mre_sg->cancel_keepalive_timer();
+	pim_mre_sg->entry_try_remove();
+    }
 }
 
 PimNode&
@@ -138,8 +148,9 @@ PimMfc::recompute_iif_olist_mfc()
 	// No matching multicast routing entry. Remove the PimMfc entry.
 	// TODO: XXX: PAVPAVPAV: do we really want to remove the entry?
 	// E.g., just reset the olist, and leave the entry itself to timeout?
-	delete this;	// XXX: this will remove it from the kernel
 	
+	set_has_forced_deletion(true);
+	entry_try_remove();
 	return;
     }
     
@@ -157,17 +168,18 @@ PimMfc::recompute_iif_olist_mfc()
 	break;
     } while (false);
     
-    // Compute the iif and the olist
-    if (pim_mre->is_sg()
-	&& ((pim_mre->is_spt() && pim_mre->is_joined_state())
-	    || (pim_mre->is_directly_connected_s()))) {
-	new_iif_vif_index = pim_mre->rpf_interface_s();
+    // Compute the new iif and the olist
+    if ((pim_mre_sg != NULL)
+	&& ((pim_mre_sg->is_spt() && pim_mre_sg->is_joined_state())
+	    || (pim_mre_sg->is_directly_connected_s()))) {
+	new_iif_vif_index = pim_mre_sg->rpf_interface_s();
     } else {
 	new_iif_vif_index = pim_mre->rpf_interface_rp();
     }
-    
     new_olist = pim_mre->inherited_olist_sg();
     
+    // XXX: this check should be even if the iif and oifs didn't change
+    // TODO: track the reason and explain it.
     if (new_iif_vif_index == Vif::VIF_INDEX_INVALID) {
 	// TODO: XXX: PAVPAVPAV: completely remove the olist check and comments
 	// || new_olist.none()) {
@@ -176,19 +188,12 @@ PimMfc::recompute_iif_olist_mfc()
 	// TODO: XXX: PAVPAVPAV: do we really want to remove the entry?
 	// E.g., just reset the olist, and leave the entry itself to timeout?
 	
-	// Cancel the (S,G) Keepalive Timer
-	if ((pim_mre_sg != NULL) && pim_mre_sg->is_keepalive_timer_running()) {
-	    pim_mre_sg->cancel_keepalive_timer();
-	    pim_mre_sg->entry_try_remove();
-	}
-	
-	delete this;	// XXX: this will remove it from the kernel
-	
+	set_has_forced_deletion(true);
+	entry_try_remove();
 	return;
     }
     
-    if ((new_iif_vif_index == old_iif_vif_index)
-	&& (new_olist == old_olist)) {
+    if ((new_iif_vif_index == old_iif_vif_index) && (new_olist == old_olist)) {
 	return;			// Nothing changed
     }
     
@@ -197,22 +202,18 @@ PimMfc::recompute_iif_olist_mfc()
 	// XXX: probably an entry that was installed to stop NOCACHE upcalls,
 	// or that was left around until the (S,G) NotJoined routing state
 	// expires. Just delete the PimMfc entry, and then later when we are
-	// forced to install a new PimMfc entry because of NOCACHE upcall,
+	// forced to install a new PimMfc entry because of a NOCACHE upcall,
 	// we will set appropriately the SPT bit, etc.
 	
-	// Cancel the (S,G) Keepalive Timer
-	if ((pim_mre_sg != NULL) && pim_mre_sg->is_keepalive_timer_running()) {
-	    pim_mre_sg->cancel_keepalive_timer();
-	    pim_mre_sg->entry_try_remove();
-	}
-	
-	delete this;
-	
+	set_has_forced_deletion(true);
+	entry_try_remove();
 	return;
     }
     
+    // Set the new iif and the olist
     set_iif_vif_index(new_iif_vif_index);
     set_olist(new_olist);
+    
     add_mfc_to_kernel();
     // XXX: we just recompute the state, hence no need to add
     // a dataflow monitor.
@@ -265,8 +266,7 @@ PimMfc::recompute_monitoring_switch_to_spt_desired_mfc()
 	break;
     } while (false);
     
-    is_spt_switch_desired
-	= pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg);
+    is_spt_switch_desired = pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg);
     if ((pim_mre_sg != NULL) && (pim_mre_sg->is_keepalive_timer_running()))
 	is_spt_switch_desired = false;
     
@@ -501,4 +501,59 @@ PimMfc::delete_all_dataflow_monitor()
     }
     
     return (XORP_OK);
+}
+
+// Try to remove PimMfc entry if not needed anymore.
+// Return true if entry is scheduled to be removed, othewise false.
+bool
+PimMfc::entry_try_remove()
+{
+    bool ret_value;
+    
+    if (is_task_delete_pending())
+	return (true);		// The entry is already pending deletion
+    
+    ret_value = entry_can_remove();
+    if (ret_value)
+	pim_mrt().add_task_delete_pim_mfc(this);
+    
+    return (ret_value);
+}
+
+bool
+PimMfc::entry_can_remove() const
+{
+    uint32_t lookup_flags;
+    PimMre *pim_mre;
+    
+    if (has_forced_deletion())
+	return (true);
+    
+    if (iif_vif_index() == Vif::VIF_INDEX_INVALID)
+	return (true);
+    
+    lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
+    
+    pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+				     lookup_flags, 0);
+    if (pim_mre == NULL)
+	return (true);
+    
+    return (false);
+}
+
+void
+PimMfc::remove_pim_mfc_entry_mfc()
+{
+    if (is_task_delete_pending() && entry_can_remove()) {
+	//
+	// Remove the entry from the PimMrt, and mark it as deletion done
+	//
+	pim_mrt().remove_pim_mfc(this);
+	set_is_task_delete_done(true);
+    } else {
+	set_is_task_delete_pending(false);
+	set_is_task_delete_done(false);
+	return;
+    }
 }

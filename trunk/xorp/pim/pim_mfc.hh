@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mfc.hh,v 1.3 2003/03/10 23:20:47 hodson Exp $
+// $XORP: xorp/pim/pim_mfc.hh,v 1.4 2003/07/12 01:14:37 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MFC_HH__
@@ -104,6 +104,10 @@ public:
 					bool is_leq_upcall);
     int		delete_all_dataflow_monitor();
     
+    bool	entry_try_remove();
+    bool	entry_can_remove() const;
+    void	remove_pim_mfc_entry_mfc();
+    
     bool	is_task_delete_pending() const { return (_flags & PIM_MFC_TASK_DELETE_PENDING); }
     void	set_is_task_delete_pending(bool v) {
 	if (v)
@@ -135,6 +139,14 @@ public:
 	    _flags &= ~PIM_MFC_HAS_SPT_SWITCH_DATAFLOW_MONITOR;
     }
     
+    bool	has_forced_deletion() const { return (_flags & PIM_MFC_HAS_FORCED_DELETION); }
+    void	set_has_forced_deletion(bool v) {
+	if (v)
+	    _flags |= PIM_MFC_HAS_FORCED_DELETION;
+	else
+	    _flags &= ~PIM_MFC_HAS_FORCED_DELETION;
+    }
+    
 private:
     PimMrt&	_pim_mrt;		// The PIM MRT (yuck!)
     IPvX	_rp_addr;		// The RP address
@@ -149,7 +161,8 @@ private:
 	PIM_MFC_TASK_DELETE_PENDING = 1 << 0,	// Entry is pending deletion
 	PIM_MFC_TASK_DELETE_DONE    = 1 << 1,	// Entry is ready to be deleted
 	PIM_MFC_HAS_IDLE_DATAFLOW_MONITOR = 1 << 2, // Entry has an idle dataflow monitor
-	PIM_MFC_HAS_SPT_SWITCH_DATAFLOW_MONITOR = 1 << 3 // Entry has a SPT-switch dataflow monitor
+	PIM_MFC_HAS_SPT_SWITCH_DATAFLOW_MONITOR = 1 << 3, // Entry has a SPT-switch dataflow monitor
+	PIM_MFC_HAS_FORCED_DELETION = 1 << 4	// Entry is forced to be deleted
     };
     
     uint32_t	_flags;			// Various flags (see PIM_MFC_* above)
