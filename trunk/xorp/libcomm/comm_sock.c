@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.7 2004/03/21 03:14:08 hodson Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.8 2004/08/03 23:16:44 bms Exp $"
 
 
 /*
@@ -647,14 +647,7 @@ comm_set_nodelay(int sock, int val)
 int
 comm_set_reuseaddr(int sock, int val)
 {
-#ifndef SO_REUSEADDR
-    UNUSED(sock);
-    UNUSED(val);
-    XLOG_WARNING("SO_REUSEADDR Undefined!");
-
-    return (XORP_ERROR);
-
-#else
+#ifdef SO_REUSEADDR
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&val, sizeof(val))
 	< 0) {
 	XLOG_ERROR("Error %s SO_REUSEADDR on socket %d: %s",
@@ -663,7 +656,13 @@ comm_set_reuseaddr(int sock, int val)
     }
 
     return (XORP_OK);
-#endif /* SO_REUSEADDR */
+#else
+    UNUSED(sock);
+    UNUSED(val);
+    XLOG_WARNING("SO_REUSEADDR Undefined!");
+
+    return (XORP_ERROR);
+#endif /* !SO_REUSEADDR */
 }
 
 /**
@@ -679,13 +678,7 @@ comm_set_reuseaddr(int sock, int val)
 int
 comm_set_reuseport(int sock, int val)
 {
-#ifndef SO_REUSEPORT
-    UNUSED(sock);
-    UNUSED(val);
-    XLOG_WARNING("SO_REUSEPORT Undefined!");
-
-    return (XORP_OK);
-#else
+#ifdef SO_REUSEPORT
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (void *)&val, sizeof(val))
 	< 0) {
 	XLOG_ERROR("Error %s SO_REUSEPORT on socket %d: %s",
@@ -694,7 +687,13 @@ comm_set_reuseport(int sock, int val)
     }
 
     return (XORP_OK);
-#endif /* SO_REUSEPORT */
+#else
+    UNUSED(sock);
+    UNUSED(val);
+    XLOG_WARNING("SO_REUSEPORT Undefined!");
+
+    return (XORP_OK);
+#endif /* !SO_REUSEPORT */
 }
 
 /**
@@ -761,7 +760,7 @@ comm_set_loopback(int sock, int val)
 int
 comm_set_tcpmd5(int sock, int val)
 {
-#ifdef TCP_MD5SIG /* XXX: Defined in tcp.h across Free/Net/OpenBSD */
+#ifdef TCP_MD5SIG /* XXX: Defined in <netinet/tcp.h> across Free/Net/OpenBSD */
     if (setsockopt(sock, IPPROTO_TCP, TCP_MD5SIG, (void *)&val, sizeof(val))
 	< 0) {
 	XLOG_ERROR("Error %s TCP_MD5SIG on socket %d: %s",
@@ -771,6 +770,10 @@ comm_set_tcpmd5(int sock, int val)
 
     return (XORP_OK);
 #else
+    UNUSED(sock);
+    UNUSED(val);
+    XLOG_WARNING("TCP_MD5SIG Undefined!");
+
     return (XORP_ERROR);
 #endif
 }
