@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.5 2003/09/30 03:07:59 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.6 2004/06/10 22:41:19 hodson Exp $"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -62,23 +62,24 @@ v4_serialization_test()
 	IPv4Net n(srep[i].net);
 	if (n.prefix_len() != srep[i].prefix_len) {
 	    verbose_log("item %u bad prefix_len %u\n", (uint32_t)i,
-			(uint32_t)n.prefix_len());
+			XORP_UINT_CAST(n.prefix_len()));
 	    return false;
 	} else if (n.masked_addr() != srep[i].v4) {
 	    verbose_log("item %u bad addr %s != %s\n", 
-			(uint32_t)i, n.masked_addr().str().c_str(),
+			XORP_UINT_CAST(i), n.masked_addr().str().c_str(),
 			srep[i].v4.str().c_str());
 	    return false;
 	} else if (n.netmask() != IPv4::make_prefix(n.prefix_len())) {
 	    verbose_log("item %u bad netmask %s != %s\n",
-			(uint32_t)i, n.netmask().str().c_str(),
+			XORP_UINT_CAST(i), n.netmask().str().c_str(),
 			IPv4::make_prefix(n.prefix_len()).str().c_str());
 	    return false;
 	}
 
 	IPv4Net u (n.str().c_str());
 	if (u != n) {
-	    verbose_log("item %u to string and back failed.", (uint32_t)i);
+	    verbose_log("item %u to string and back failed.",
+			XORP_UINT_CAST(i));
 	    return false;
 	}
     }
@@ -126,7 +127,7 @@ v4_overlap_test()
 	    IPv4Net u(a, p);
 	    IPv4Net v(b, p);
 	    if (u.is_overlap(v) != (p <= data[i].overlap)) {
-		verbose_log("bad overlap %u\n", (uint32_t)p);
+		verbose_log("bad overlap %u\n", XORP_UINT_CAST(p));
 		return -1;
 	    }
 	}

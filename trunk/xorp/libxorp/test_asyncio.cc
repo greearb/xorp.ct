@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.4 2003/04/18 22:25:50 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.5 2004/06/10 22:41:18 hodson Exp $"
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -152,7 +152,7 @@ run_test()
 	e.run();
 
     printf("\nTransfered %u bytes between AsyncFileWriter and "
-	   "AsyncFileReader.\n", bytes_transferred);
+	   "AsyncFileReader.\n", XORP_UINT_CAST(bytes_transferred));
 }
 
 int

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_ptr.cc,v 1.2 2003/08/06 19:28:48 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_ptr.cc,v 1.3 2004/06/10 22:41:20 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -224,7 +224,7 @@ main(int argc, char * const argv[])
 	    if (ret_value == 0) {
 		if (ref_counter_pool::instance().balance() != 0) {
 		    verbose_log("Ref count balance (%d != 0) non-zero at end",
-				ref_counter_pool::instance().balance());
+				XORP_INT_CAST(ref_counter_pool::instance().balance()));
 		    ret_value = 1;
 		}
 	    }
