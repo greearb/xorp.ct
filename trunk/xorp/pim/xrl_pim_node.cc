@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.36 2003/08/13 07:34:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.37 2003/08/14 01:21:04 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2462,6 +2462,46 @@ XrlPimNode::fti_0_2_lookup_entry6(
     // Success
     //
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::fti_0_2_get_unicast_forwarding_enabled4(
+    // Output values, 
+    bool&	enabled)
+{
+    enabled = false;
+    
+    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
+}
+
+XrlCmdError
+XrlPimNode::fti_0_2_get_unicast_forwarding_enabled6(
+    // Output values, 
+    bool&	enabled)
+{
+    enabled = false;
+    
+    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
+}
+
+XrlCmdError
+XrlPimNode::fti_0_2_set_unicast_forwarding_enabled4(
+    // Input values, 
+    const bool&	enabled)
+{
+    UNUSED(enabled);
+    
+    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
+}
+
+XrlCmdError
+XrlPimNode::fti_0_2_set_unicast_forwarding_enabled6(
+    // Input values, 
+    const bool&	enabled)
+{
+    UNUSED(enabled);
+    
+    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
 }
 
 XrlCmdError

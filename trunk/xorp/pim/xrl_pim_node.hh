@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.27 2003/08/12 15:50:13 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.28 2003/08/13 07:34:47 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -843,6 +843,60 @@ protected:
 	uint32_t&	metric, 
 	uint32_t&	admin_distance, 
 	string&		protocol_origin);
+
+    /**
+     *  Test whether the IPv4 unicast forwarding engine is enabled or disabled
+     *  to forward packets.
+     *  
+     *  Note: this is a dummy method that doesn't apply to this target.
+     *  
+     *  @param enabled if true, then the IPv4 unicast forwarding is enabled,
+     *  otherwise is disabled.
+     */
+    XrlCmdError fti_0_2_get_unicast_forwarding_enabled4(
+	// Output values, 
+	bool&	enabled);
+
+    /**
+     *  Test whether the IPv6 unicast forwarding engine is enabled or disabled
+     *  to forward packets.
+     *  
+     *  Note: this is a dummy method that doesn't apply to this target.
+     *  
+     *  @param enabled if true, then the IPv6 unicast forwarding is enabled,
+     *  otherwise is disabled.
+     */
+    XrlCmdError fti_0_2_get_unicast_forwarding_enabled6(
+	// Output values, 
+	bool&	enabled);
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *  
+     *  Set the IPv4 unicast forwarding engine to enable or disable forwarding
+     *  of packets.
+     *  
+     *  Note: this is a dummy method that doesn't apply to this target.
+     *  
+     *  @param enabled if true, then enable IPv4 unicast forwarding, otherwise
+     *  disable it.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_enabled4(
+	// Input values, 
+	const bool&	enabled);
+
+    /**
+     *  Set the IPv6 unicast forwarding engine to enable or disable forwarding
+     *  of packets.
+     *  
+     *  Note: this is a dummy method that doesn't apply to this target.
+     *  
+     *  @param enabled if true, then enable IPv6 unicast forwarding, otherwise
+     *  disable it.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
+	// Input values, 
+	const bool&	enabled);
 
     /**
      *  Add/delete membership information.
