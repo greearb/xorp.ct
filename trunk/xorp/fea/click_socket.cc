@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.15 2004/12/17 00:19:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.16 2004/12/17 05:47:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -272,7 +272,8 @@ ClickSocket::stop(string& error_msg)
     //
     // XXX: First we should stop user-level Click, and then kernel-level Click.
     // Otherwise, the user-level Click process may block the unmounting
-    // of the kernel-level Click file system.
+    // of the kernel-level Click file system. The reason for this blocking
+    // is unknown...
     //
     if (is_user_click()) {
 	terminate_user_click_command();
