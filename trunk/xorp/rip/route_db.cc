@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.5 2003/07/12 16:19:16 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.6 2003/07/16 05:03:33 hodson Exp $"
 
 #include "config.h"
 #include <map>
@@ -100,13 +100,12 @@ template <typename A>
 void
 RouteDB<A>::set_expiry_timer(Route* r)
 {
-    RouteOrigin* o = r->origin();
-
     XorpTimer t;
-    uint32_t expire_ms = o->expiry_secs() * 1000;
+    RouteOrigin* o = r->origin();
+    uint32_t expiry_secs = o->expiry_secs();
 
-    if (expire_ms) {
-	t = _eventloop.new_oneoff_after_ms(expire_ms,
+    if (expiry_secs) {
+	t = _eventloop.new_oneoff_after_ms(expiry_secs * 1000,
 			   callback(this, &RouteDB<A>::expire_route, r));
     }
     r->set_timer(t);
@@ -133,54 +132,60 @@ RouteDB<A>::update_route(const Net&	net,
     //
     // Update steps, based on RFC2453 pp. 26-28
     //
+    bool updated = false;
+
+    Route* r = 0;
     typename RouteContainer::iterator i = _routes.find(net);
     if (_routes.end() == i) {
+
+	// Route does not appear in table so it needs to be
+	// created if peer does not have an entry for it or
+	// resurrected if it does.  But first this...
 	if (cost == RIP_INFINITY) {
 	    // Don't bother adding a route for unreachable net
 	    return false;
 	}
 
-	// Route may exist with origin, ie still has entry in update
-	// queue but has expired from db.
+	// Create route if necessary
 	Route* r = o->find_route(net);
 	if (r == 0) {
 	    r = new Route(net, nexthop, cost, o, tag);
+	    set_expiry_timer(r);
+	    bool ok(_routes.insert(RouteContainer::value_type(net, r)).second);
+	    XLOG_ASSERT(ok);
+	    _uq->push_back(r);
+	    return true;
 	}
-	DBRouteEntry dre(r);
-	set_expiry_timer(dre.get());
-	bool ok = _routes.insert(RouteContainer::value_type(net, dre)).second;
+
+	// Resurrect route
+	updated = true;
+	bool ok(_routes.insert(RouteContainer::value_type(net, r)).second);
 	XLOG_ASSERT(ok);
-	_uq->push_back(dre);
-	return true;
     } else {
-	XLOG_ASSERT(i->first == net);
-	bool updated = false;
-	DBRouteEntry& dre = i->second;
-	if (dre->origin() == o) {
-	    updated |= dre->set_nexthop(nexthop);
-	    updated |= dre->set_tag(tag);
-	    bool updated_cost = dre->set_cost(cost);
-	    if (cost == RIP_INFINITY) {
-		set_deletion_timer(dre.get());
-	    } else {
-		set_expiry_timer(dre.get());
-	    }
-	    updated |= updated_cost;
-	} else if (dre->cost() > cost) {
-	    dre->set_nexthop(nexthop);
-	    dre->set_tag(tag);
-	    dre->set_cost(cost);
-	    dre->set_origin(o);
-	    set_expiry_timer(dre.get());
-	    updated = true;
-	}
-	if (updated) {
-	    _uq->push_back(dre);
-	}
-	return updated;
+	r = i->second.get();
     }
 
-    return false;
+    if (r->origin() == o) {
+	updated |= r->set_nexthop(nexthop);
+	updated |= r->set_tag(tag);
+	updated |= r->set_cost(cost);
+	if (cost == RIP_INFINITY) {
+	    set_deletion_timer(r);
+	} else {
+	    set_expiry_timer(r);
+	}
+    } else if (r->cost() > cost) {
+	r->set_nexthop(nexthop);
+	r->set_tag(tag);
+	r->set_cost(cost);
+	r->set_origin(o);
+	set_expiry_timer(r);
+	updated = true;
+    }
+    if (updated) {
+	_uq->push_back(r);
+    }
+    return updated;
 }
 
 template <typename A>
