@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.13 2004/03/30 17:40:59 hodson Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.14 2004/06/10 22:41:41 hodson Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -43,7 +43,7 @@ public:
     /**
      * OriginTable constructor.
      *
-     * @param tablename typically the name of the routing protcol that
+     * @param tablename typically the name of the routing protocol that
      * supplies routes to this origin table, or "connected" for the
      * OriginTable that holds directly connected routes, or "static"
      * for the OriginTable that holds locally configured static

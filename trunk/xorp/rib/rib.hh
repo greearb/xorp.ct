@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.28 2004/11/02 22:47:54 bms Exp $
+// $XORP: xorp/rib/rib.hh,v 1.29 2004/11/03 22:18:01 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -343,7 +343,7 @@ public:
     virtual int route_deregister(const IPNet<A>& subnet, const string& module);
 
     /**
-     * Find a routing protcol, given its protocol name
+     * Find a routing protocol, given its protocol name.
      *
      * @param protocol the name of the table to search for.
      * @return pointer to table if exists, NULL otherwise.
