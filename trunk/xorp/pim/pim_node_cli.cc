@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.28 2004/06/10 22:41:32 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.29 2004/07/26 22:12:40 pavlin Exp $"
 
 
 //
@@ -236,7 +236,11 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
 	    }
 	} catch (InvalidString) {
-	    cli_print(c_format("ERROR: Invalid zone ID: %s\n",
+	    cli_print(c_format("ERROR: Invalid zone ID address: %s\n",
+			       argv[0].c_str()));
+	    return (XORP_ERROR);
+	} catch (InvalidNetmaskLength) {
+	    cli_print(c_format("ERROR: Invalid zone ID netmask length: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
 	}
@@ -451,7 +455,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
 	    }
 	} catch (InvalidString) {
-	    cli_print(c_format("ERROR: Invalid zone ID: %s\n",
+	    cli_print(c_format("ERROR: Invalid zone ID address: %s\n",
+			       argv[0].c_str()));
+	    return (XORP_ERROR);
+	} catch (InvalidNetmaskLength) {
+	    cli_print(c_format("ERROR: Invalid zone ID netmask length: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
 	}
@@ -738,7 +746,11 @@ PimNodeCli::cli_show_pim_join(const vector<string>& argv)
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
 	    } catch (InvalidString) {
-		cli_print(c_format("ERROR: Invalid group range: %s\n",
+		cli_print(c_format("ERROR: Invalid group range address: %s\n",
+				   argv[0].c_str()));
+		return (XORP_ERROR);
+	    } catch (InvalidNetmaskLength) {
+		cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
 	    }
@@ -775,10 +787,17 @@ PimNodeCli::cli_show_pim_join_all(const vector<string>& argv)
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
 	    } catch (InvalidString) {
-		cli_print(c_format("ERROR: Invalid group range: %s\n",
+		cli_print(c_format("ERROR: Invalid group range address: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
+	    } catch (InvalidNetmaskLength) {
+		XLOG_UNREACHABLE();
+		return (XORP_ERROR);
 	    }
+	} catch (InvalidNetmaskLength) {
+	    cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
+			       argv[0].c_str()));
+	    return (XORP_ERROR);
 	}
 	if (! group_range.is_multicast()) {
 	    cli_print(c_format("ERROR: Group range is not multicast: %s\n",
@@ -812,10 +831,17 @@ PimNodeCli::cli_show_pim_mfc(const vector<string>& argv)
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
 	    } catch (InvalidString) {
-		cli_print(c_format("ERROR: Invalid group range: %s\n",
+		cli_print(c_format("ERROR: Invalid group range address: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
+	    } catch (InvalidNetmaskLength) {
+		XLOG_UNREACHABLE();
+		return (XORP_ERROR);
 	    }
+	} catch (InvalidNetmaskLength) {
+	    cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
+			       argv[0].c_str()));
+	    return (XORP_ERROR);
 	}
 	if (! group_range.is_multicast()) {
 	    cli_print(c_format("ERROR: Group range is not multicast: %s\n",
