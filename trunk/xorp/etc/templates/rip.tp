@@ -9,7 +9,7 @@ protocols {
 	    vif @: txt {
 		address @: ipv4 {
 		    metric:			u32	=   1;
-		    horizon:			txt    = "split-horizon-poison-reverse" ;
+		    horizon:			txt	= "split-horizon-poison-reverse" ;
 		    enabled:			bool	= false ;
 		    passive:			bool	= false ;
 		    accept-non-rip-requests:	bool	= true ;
@@ -49,7 +49,10 @@ protocols {
 	%modinfo:	default_targetname	"rip" ;
 	%modinfo:	status_method xrl	"$(rip.targetname)/common/0.1/get_status->status:u32&reason:txt" ;
 	%modinfo:	shutdown_method xrl	"$(rip.targetname)/common/0.1/shutdown" ;
-	%help: short "Configure RIP intra-domain routing." ;
+	%help:		short "Configure RIP intra-domain routing." ;
+
+	%mandatory:	targetname;
+
 	interface @ {
 	    vif @ {
 		address @ {

@@ -9,7 +9,7 @@ protocols {
 	    vif @: txt {
 		address @: ipv6 {
 		    metric:			u32	=   1;
-		    horizon:			txt    = "split-horizon-poison-reverse" ;
+		    horizon:			txt	= "split-horizon-poison-reverse" ;
 		    enabled:			bool	= false ;
 		    passive:			bool	= false ;
 		    accept-non-rip-requests:	bool	= true ;
@@ -45,7 +45,10 @@ protocols {
 	%modinfo:	default_targetname	"ripng";
 	%modinfo:	status_method xrl	"$(ripng.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method xrl	"$(ripng.targetname)/common/0.1/shutdown";
-	%help: short "Configure RIPng intra-domain routing." ;
+	%help:		short "Configure RIPng intra-domain routing." ;
+
+	%mandatory:	targetname;
+
 	interface @ {
 	    vif @ {
 		address @ {
