@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/libxipc/README,v 1.6 2004/06/15 00:36:40 pavlin Exp $
 #
 
 	LIBXIPC: Xrl Inter-Process Communication Library
@@ -27,6 +27,3 @@ Status
 
 This code is functional and widely used in the project.  Comments,
 feedback, modification proposals, and submissions are welcome.
-
-
-
