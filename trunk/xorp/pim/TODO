@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.47 2003/06/27 22:28:20 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.48 2003/06/28 02:38:00 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -1066,13 +1066,6 @@ for the kernel patches as well.
 
 * If PIM vif interface added/changed/deleted,
   recompute is_directly_connected_s();
-
-* "RX %s from %s" should always be "RX %s from %s to %s"
-
-* Standartize the "on vif ..." error messages format.
-
-* The very prefix of each log message should contain the node ID (e.g. its
-  IP address)
 
 * IMPL: When "wrong iif" signal arrives, if it is not on one of
   our oifs, and if we don't care about it,
