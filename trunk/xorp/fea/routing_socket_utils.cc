@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.5 2003/05/21 00:47:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.6 2003/05/21 09:53:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -196,7 +196,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
     case AF_INET:
     {
 	// XXX: sock->sa_family is undefined
-	const struct sockaddr_in *sin = (const struct sockaddr_in *)sock;
+	const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
 	IPv4 netmask(sin->sin_addr);
 	return (netmask.prefix_length());
     }
@@ -204,7 +204,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
     case AF_INET:
     {
 	// XXX: sock->sa_family is undefined
-	const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sock;
+	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
 	IPv6 netmask(sin6->sin6_addr);
 	return (netmask.prefix_length());
     }
@@ -220,7 +220,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
     {
 	uint8_t buf[4];
 	buf[0] = buf[1] = buf[2] = buf[3] = 0;
-	const uint8_t *ptr = (const uint8_t *)&sock->sa_data[2];
+	const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&sock->sa_data[2]);
 	
 	switch (sock->sa_len) {
 	case 0:
@@ -247,7 +247,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 		// XXX: a poor attempt to return something meaningful
 		
 		// XXX: sock->sa_family is undefined
-		const struct sockaddr_in *sin = (const struct sockaddr_in *)sock;
+		const struct sockaddr_in* sin = reintepret_cast<const struct sockaddr_in*>(sock);
 		IPv4 netmask(sin->sin_addr);
 		return (netmask.prefix_length());
 	    }
@@ -264,7 +264,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	    return (0);
 	}
 	// XXX: sock->sa_family is undefined
-	const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sock;
+	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
 	IPv6 netmask(sin6->sin6_addr);
 	return (netmask.prefix_length());
     }
@@ -293,7 +293,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     fte.zero();
     
     // Get the pointers to the corresponding data structures    
-    sa = reinterpret_cast<const struct sockaddr *>(rtm + 1);
+    sa = reinterpret_cast<const struct sockaddr*>(rtm + 1);
     RtmUtils::get_rta_sockaddr(rtm->rtm_addrs, sa, rti_info);
     
     IPvX dst_addr(family);
@@ -362,7 +362,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	    XLOG_ERROR("Ignoring RTM_GET with sa_family = %d", sa->sa_family);
 	    return false;
 	}
-	const struct sockaddr_dl *sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
+	const struct sockaddr_dl* sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
 	
 	if (sdl->sdl_nlen > 0) {
 	    if_name = string(sdl->sdl_data, sdl->sdl_nlen);
