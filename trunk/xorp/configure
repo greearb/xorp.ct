@@ -852,10 +852,10 @@ Optional Features:
                                    (requires GCC)
   --enable-optimize                enable compiler optimizations
   --enable-profile                 turn on profiling
-  --enable-callback-debug       enable callback debugging
+  --enable-callback-debug          enable callback debugging
   --disable-ipv6                   disable IPv6 support
   --enable-sim                     enable simulator (not implemented yet)
-  --enable-advanced-mcast-api      enable advanced multicast API
+  --disable-advanced-multicast-api disable advanced multicast API (if supported)
   --with-openssl=DIR               specify root of OpenSSL installation
   --with-path-to-snmpd=DIR         specify path to the snmpd executable
   --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree
@@ -1833,15 +1833,17 @@ else
   TRY_USE_SIM_FALSE=
 fi
 
-# Check whether --enable-advanced-mcast-api or --disable-advanced-mcast-api was given.
-if test "${enable_advanced_mcast_api+set}" = set; then
-  enableval="$enable_advanced_mcast_api"
+# Check whether --enable-advanced-multicast-api or --disable-advanced-multicast-api was given.
+if test "${enable_advanced_multicast_api+set}" = set; then
+  enableval="$enable_advanced_multicast_api"
 
+else
+  enable_advanced_multicast_api=yes;
 fi;
-if test "${enable_advanced_mcast_api}" = "yes" ; then
+if test "${enable_advanced_multicast_api}" = "yes" ; then
 
 cat >>confdefs.h <<\_ACEOF
-#define ENABLE_ADVANCED_MCAST_API 1
+#define ENABLE_ADVANCED_MULTICAST_API 1
 _ACEOF
 
 fi

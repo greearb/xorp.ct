@@ -46,8 +46,8 @@
 /* Define to 1 to enable printing function name in debug messages */
 #undef DEBUG_PRINT_FUNCTION_NAME
 
-/* Define to 1 to enable advanced multicast API */
-#undef ENABLE_ADVANCED_MCAST_API
+/* Define to 1 to enable advanced multicast API (if supported) */
+#undef ENABLE_ADVANCED_MULTICAST_API
 
 /* Define to 1 if netinet6/nd6.h is not C++ friendly */
 #undef HAVE_BROKEN_CXX_NETINET6_ND6_H

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.3 2003/04/15 18:55:37 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.5 2004/06/10 22:41:29 hodson Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -23,7 +23,7 @@
 
 #include "config.h"
 
-#if defined(ENABLE_ADVANCED_MCAST_API) && defined(HOST_OS_FREEBSD)
+#if defined(ENABLE_ADVANCED_MULTICAST_API) && defined(HOST_OS_FREEBSD)
 /* XXX: for now we use same header file for all FreeBSD versions */
 #include "mrt/include/netinet/ip_mroute_adv_api_freebsd_4_5.h"
 #else
@@ -47,7 +47,7 @@
 #undef _KERNEL
 #endif
 
-#endif /* ! (ENABLE_ADVANCED_MCAST_API && HOST_OS_FREEBSD) */
+#endif /* ! (ENABLE_ADVANCED_MULTICAST_API && HOST_OS_FREEBSD) */
 
 
 #ifdef HAVE_IPV6

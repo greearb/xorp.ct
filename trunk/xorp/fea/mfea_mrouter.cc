@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.19 2004/06/09 19:11:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.20 2004/06/10 22:40:55 hodson Exp $"
 
 
 //
@@ -557,7 +557,7 @@ MfeaMrouter::start_mrt()
     //
     // Configure advanced multicast API
     //
-#if defined(MRT_API_CONFIG) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT_API_CONFIG) && defined(ENABLE_ADVANCED_MULTICAST_API)
     if (family() == AF_INET) {
 	uint32_t mrt_api = 0;
 	
@@ -616,9 +616,9 @@ MfeaMrouter::start_mrt()
 #endif
 	
     }
-#endif // MRT_API_CONFIG && ENABLE_ADVANCED_MCAST_API
+#endif // MRT_API_CONFIG && ENABLE_ADVANCED_MULTICAST_API
     
-#if defined(MRT6_API_CONFIG) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6_API_CONFIG) && defined(ENABLE_ADVANCED_MULTICAST_API)
 #ifdef HAVE_IPV6
     if (family == AF_INET6) {
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -686,7 +686,7 @@ MfeaMrouter::start_mrt()
 #endif // HAVE_IPV6_MULTICAST_ROUTING	
     }
 #endif // HAVE_IPV6
-#endif // MRT6_API_CONFIG && ENABLE_ADVANCED_MCAST_API
+#endif // MRT6_API_CONFIG && ENABLE_ADVANCED_MULTICAST_API
     
     return (XORP_OK);
 }
@@ -1061,7 +1061,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
     switch (family()) {
     case AF_INET:
     {
-#if defined(HAVE_MFCCTL2) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(HAVE_MFCCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct mfcctl2 mc;
 #else
 	struct mfcctl mc;
@@ -1073,11 +1073,11 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	mc.mfcc_parent = iif_vif_index;
 	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	    mc.mfcc_ttls[i] = oifs_ttl[i];
-#if defined(HAVE_MFCC_FLAGS) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(HAVE_MFCC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	    mc.mfcc_flags[i] = oifs_flags[i];
 #endif
 	}
-#if defined(HAVE_MFCC_RP) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(HAVE_MFCC_RP) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	if (_mrt_api_mrt_mfc_rp)
 	    rp_addr.copy_out(mc.mfcc_rp);
 #endif
@@ -1100,7 +1100,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
 #else
 	
-#if defined(HAVE_MF6CCTL2) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(HAVE_MF6CCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct mf6cctl2 mc;
 #else
 	struct mf6cctl mc;
@@ -1114,11 +1114,11 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	    if (oifs_ttl[i] > 0)
 		IF_SET(i, &mc.mf6cc_ifset);
-#if defined(HAVE_MF6CC_FLAGS) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(HAVE_MF6CC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	    mc.mf6cc_flags[i] = oifs_flags[i];
 #endif
 	}
-#if defined(HAVE_MF6CC_RP) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(HAVE_MF6CC_RP) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	if (_mrt_api_mrt_mfc_rp)
 	    rp_addr.copy_out(mc.mf6cc_rp);
 #endif
@@ -1281,7 +1281,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
     switch (family()) {
     case AF_INET:
     {
-#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct bw_upcall bw_upcall;
 	
 	//
@@ -1318,7 +1318,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
     }
     break;
     
@@ -1332,7 +1332,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
 #else
 	
-#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct bw6_upcall bw_upcall;
 	
 	//
@@ -1369,7 +1369,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 	    XLOG_ERROR(("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
     break;
@@ -1464,7 +1464,7 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
     switch (family()) {
     case AF_INET:
     {
-#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct bw_upcall bw_upcall;
 	
 	//
@@ -1501,7 +1501,7 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
     }
     break;
     
@@ -1515,7 +1515,7 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
 #else
 	
-#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct bw6_upcall bw_upcall;
 	
 	//
@@ -1552,7 +1552,7 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
     break;
@@ -1607,7 +1607,7 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
     switch (family()) {
     case AF_INET:
     {
-#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct bw_upcall bw_upcall;
 	
 	//
@@ -1626,7 +1626,7 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
     }
     break;
     
@@ -1640,7 +1640,7 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
 #else
 	
-#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct bw6_upcall bw_upcall;
 	
 	//
@@ -1659,7 +1659,7 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
     break;
@@ -2031,7 +2031,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	    }
 	}
 	break;
-#if defined(IGMPMSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(IGMPMSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	case IGMPMSG_BW_UPCALL:
 	    break;
 #endif
@@ -2053,7 +2053,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 		return (XORP_ERROR);
 	    }
 	    break;
-#if defined(IGMPMSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(IGMPMSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	case IGMPMSG_BW_UPCALL:
 	    break;
 #endif
@@ -2121,7 +2121,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	    }
 	}
 	break;
-#if defined(MRT6MSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6MSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	case MRT6MSG_BW_UPCALL:
 	    break;
 #endif
@@ -2143,7 +2143,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 		return (XORP_ERROR);
 	    }
 	    break;
-#if defined(MRT6MSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6MSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	case MRT6MSG_BW_UPCALL:
 	    break;
 #endif

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.36 2004/06/10 22:40:55 hodson Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.37 2004/06/17 23:22:29 pavlin Exp $"
 
 
 //
@@ -1693,7 +1693,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 	switch (family()) {
 	case AF_INET:
 	{
-#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	    size_t from = 0;
 	    struct bw_upcall bw_upcall;
 	    IPvX src(family()), dst(family());
@@ -1727,7 +1727,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 		    is_geq_upcall,
 		    is_leq_upcall);
 	    }
-#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
 	}
 	break;
 	
@@ -1740,7 +1740,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 	return (XORP_ERROR);
 #else
 	
-#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	    size_t from = 0;
 	    struct bw6_upcall bw_upcall;
 	    IPvX src(family()), dst(family());
@@ -1774,7 +1774,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 		    is_geq_upcall,
 		    is_leq_upcall);
 	    }
-#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
+#endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 	}
 	break;
@@ -2046,7 +2046,7 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
 	if (oiflist_disable_wrongvif.test(i)) {
 	    switch (family()) {
 	    case AF_INET:
-#if defined(MRT_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MULTICAST_API)
 		oifs_flags[i] |= MRT_MFC_FLAGS_DISABLE_WRONGVIF;
 #endif
 		break;
@@ -2059,7 +2059,7 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
 			   "IPv6 multicast routing not supported");
 		return (XORP_ERROR);
 #else
-#if defined(MRT6_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MCAST_API)
+#if defined(MRT6_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MULTICAST_API)
 		oifs_flags[i] |= MRT6_MFC_FLAGS_DISABLE_WRONGVIF;
 #endif
 #endif // HAVE_IPV6_MULTICAST_ROUTING
