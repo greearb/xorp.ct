@@ -1,10 +1,58 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.42 2003/11/06 21:28:22 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.43 2003/11/07 00:49:45 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
+
+Release ?.?? (200?/??/??)
+========================
+  ALL:
+    - 
+
+  LIBXORP:
+    - 
+
+  LIBXIPC:
+    - 
+
+  LIBFEACLIENT:
+    - 
+
+  XRL:
+    - 
+
+  RTRMGR:
+    - Add support for explicit configuration of the XRL target name of
+      a module.
+
+  XORPSH:
+    - 
+
+  FEA/MFEA:
+    - 
+
+  RIB: 
+    - 
+
+  BGP:
+    - 
+
+  MLD/IGMP:
+    - 
+
+  PIM-SM:
+    - 
+
+  CLI:
+    - 
+
+  SNMP:
+    - 
+
+  RIP:
+    - 
 
 Release 0.5 (2003/11/06)
 ========================
