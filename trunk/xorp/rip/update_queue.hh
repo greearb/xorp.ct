@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.1 2003/04/10 00:27:44 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -66,15 +66,24 @@ public:
     /**
      * Increment iterator and return pointer to entry if available.
      *
-     * @return RouteEntry if available, 0 otherwise.
+     * @return A pointer to a RouteEntry if available, 0 otherwise.
      */
     const RouteEntry<A>* next(ReadIterator& r) const;
 
     /**
      * Get the RouteEntry associated with the read iterator.
+     *
+     * @return A pointer to a RouteEntry if available, 0 otherwise.
      */
     const RouteEntry<A>* get(ReadIterator& r) const;
 
+    /**
+     * Advance read iterator to end of update queue.  Calls to
+     * @ref next and @ref get will return 0 until further
+     * updates occur.
+     */
+    void ffwd(ReadIterator& r) const;
+    
 protected:
     struct ReaderPool* _pool;
     Queue   _queue;

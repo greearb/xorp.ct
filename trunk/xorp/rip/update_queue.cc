@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.2 2003/04/18 19:45:38 hodson Exp $"
 
 #include <vector>
 
@@ -34,13 +34,13 @@ public:
 	: _icnt (0)
     {
     }
-    
+
     ~ReaderPool()
     {
 	for (uint32_t i = 0; i < _pos.size(); i++)
 	    assert(_pos[i] == npos);
     }
-    
+
     inline uint32_t make_reader()
     {
 	// Claim an empty slot if available
@@ -62,7 +62,7 @@ public:
 	XLOG_ASSERT(reader < _pos.size() && _pos[reader] != npos);
 	_pos[reader] = npos;
 	_icnt--;
-	
+
 	// Clean up tail entries
 	reader = _pos.size();
 	while (reader > 1 && _pos[reader - 1] == npos) {
@@ -149,12 +149,12 @@ class UpdateQueue<A>::Reader {
     {
 	_pool->incr_reader(_reader_no);
     }
-    
+
     inline uint32_t position() const
     {
 	return (uint32_t)_pool->reader_position(_reader_no);
     }
-    
+
 protected:
     UpdateQueue<A>::ReaderPool* _pool;
     uint32_t _reader_no;
@@ -197,7 +197,7 @@ const RouteEntry<A>*
 UpdateQueue<A>::get(ReadIterator& r) const
 {
     uint32_t pos = r->position();
-    if (r->position() < _queue.size()) {
+    if (pos < _queue.size()) {
 	return _queue[pos].get();
     }
     return 0;
@@ -207,8 +207,11 @@ template <typename A>
 const RouteEntry<A>*
 UpdateQueue<A>::next(ReadIterator& r) const
 {
-    r->incr();
-    return get(r);
+    if (r->position() < _queue.size()) {
+	r->incr();
+	return get(r);
+    }
+    return 0;
 }
 
 template <typename A>
