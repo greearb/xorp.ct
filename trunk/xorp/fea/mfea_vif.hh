@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_vif.hh,v 1.3 2003/03/18 02:44:35 pavlin Exp $
+// $XORP: xorp/fea/mfea_vif.hh,v 1.1 2003/05/15 23:10:31 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_VIF_HH__
@@ -182,17 +182,6 @@ public:
     ProtoRegister& proto_register() { return (_proto_register); }
     
     /**
-     * Get the set of protocol instances that are registered to receive
-     * kernel signals on this vif.
-     * 
-     * @return the set of protocol instances that are registered to receive
-     * kernel signals on thsi vif.
-     */
-    ProtoRegister& kernel_signal_messages_register() {
-	return (_kernel_signal_messages_register);
-    }
-    
-    /**
      * Add a multicast group to the set of groups joined on this virtual
      * interface.
      * 
@@ -252,8 +241,6 @@ private:
     
     // State to keep track of which protocols have started on this vif.
     ProtoRegister _proto_register;
-    // The set of module instances to receive kernel signal messages
-    ProtoRegister _kernel_signal_messages_register;
     
     // Class to keep track of joined groups per vif
     class JoinedGroups {
