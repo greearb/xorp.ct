@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.19 2004/02/24 03:16:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.20 2004/06/10 22:40:38 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -52,6 +52,7 @@ test_ribout(TestInfo& /*info*/)
 	 = new DebugTable<IPv4>("D1", NULL);
     RibOutTable<IPv4> *ribout_table
 	= new RibOutTable<IPv4>("RibOut", SAFI_UNICAST, debug_table, &handler);
+    ribout_table->ribout_peering_came_up();
 
     debug_table->set_output_file(filename);
     debug_table->set_canned_response(ADD_USED);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.10 2004/06/10 22:40:36 hodson Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.11 2005/03/18 08:15:04 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -74,6 +74,7 @@ public:
 			   BGPRouteTable<A> *caller);
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
+    void ribout_peering_came_up();
 private:
     //the queue that builds, prior to receiving a push, so we can
     //send updates to our peers atomically
@@ -81,6 +82,7 @@ private:
 
     PeerHandler *_peer;
     bool _peer_busy;
+    bool _peer_is_up;
     XorpTimer _wakeup_timer;
 };
 

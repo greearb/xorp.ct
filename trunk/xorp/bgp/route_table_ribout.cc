@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.23 2005/03/03 07:29:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.24 2005/03/18 08:15:04 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,6 +30,7 @@ RibOutTable<A>::RibOutTable(string table_name,
     this->_parent = init_parent;
     _peer = peer;
     _peer_busy = false;
+    _peer_is_up = false;
 }
 
 template<class A>
@@ -361,6 +362,10 @@ RibOutTable<A>::wakeup()
     if (_peer_busy == true)
 	return;
 
+    /* we're down, so ignore this wakeup */
+    if (_peer_is_up == false)
+	return;
+
     for (int msgs = 0; msgs < MAX_MSGS_IN_BATCH; msgs++) {
 	/* only request a limited about of messages, so we don't hog
 	   the eventloop for too long */
@@ -421,7 +426,10 @@ RibOutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 {
     XLOG_ASSERT(this->_parent == caller);
     UNUSED(genid);
-    UNUSED(peer);
+
+    if (peer == _peer) {
+	_peer_is_up = false;
+    }
 }
 
 template<class A>
@@ -433,6 +441,14 @@ RibOutTable<A>::peering_down_complete(const PeerHandler *peer,
     XLOG_ASSERT(this->_parent == caller);
     UNUSED(genid);
     UNUSED(peer);
+}
+
+template<class A>
+void
+RibOutTable<A>::ribout_peering_came_up() 
+{
+    _peer_is_up = true;
+    _peer_busy = false;
 }
 
 template<class A>

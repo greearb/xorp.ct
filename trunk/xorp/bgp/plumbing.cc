@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.61 2005/03/03 07:29:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.62 2005/03/19 20:49:57 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -609,7 +609,10 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     /* 9. load up damping filters */
     /* TBD */
 
-    /* 10. cause the routing table to be dumped to the new peer */
+    /* 10 inform ribout that it's up */
+    rib_out->ribout_peering_came_up();
+
+    /* 11. cause the routing table to be dumped to the new peer */
     dump_entire_table(filter_out, _ribname);
     if (_awaits_push)
 	push(peer_handler);
@@ -703,12 +706,15 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
 
     //plumb the output branch back into the fanout table
     BGPRouteTable<A> *rt, *prevrt;
+    RibOutTable<A>* rib_out;
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_came_up: peer %p not found",
 		   peer_handler);
-    rt = iter->second;
+    rib_out = iter->second;
+    rib_out->ribout_peering_came_up();
+    rt = rib_out;
     prevrt = rt;
     while (rt != NULL) {
 	debug_msg("rt=%p (%s), _fanout_table=%p\n", 
