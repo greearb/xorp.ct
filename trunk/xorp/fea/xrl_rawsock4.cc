@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.3 2003/01/26 04:06:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.4 2003/03/10 23:20:18 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -196,7 +196,7 @@ XrlRawSocket4Manager::send(const string& vifname, const vector<uint8_t>& pkt)
 	return XrlCmdError::OKAY();
     }
     if (errno != 0) {
-	return XrlCmdError::COMMAND_FAILED(c_format("Send failed: %s\n",
+	return XrlCmdError::COMMAND_FAILED(c_format("Send failed: %s",
 						    strerror(errno)));
     }
     return XrlCmdError::COMMAND_FAILED("Send failed, consult FEA xlog to "
