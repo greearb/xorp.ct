@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.11 2003/08/28 15:03:34 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.12 2003/08/28 15:07:01 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -102,6 +102,13 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 	MISC: - If there are no changes to a module, then just add
 		"No changes." or "No significant changes."
+
+========================================================================
+1250.	TASK: Update xorp/BUILD_NOTES
+	WHO:  Everyone
+	WHEN: 1 day before the release date
+	MISC: - Add/update the information about building XORP on
+                various platforms.
 
 ========================================================================
 1300.	TASK: Modify the date on the front page on all documents in
@@ -248,9 +255,9 @@ the login shell is csh or tcsh):
  ssh www.xorp.org
  setenv ReleaseVersion `cat _XORP_VERSION`
  rm _XORP_VERSION
- cd /home/www/u1/www/data/xorp
- mkdir release-$ReleaseVersion
- cd release-$ReleaseVersion
+ cd /home/www/u1/www/data/xorp/releases
+ mkdir $ReleaseVersion
+ cd $ReleaseVersion
  mv ~/xorp-$ReleaseVersion.tar.gz .
  mv ~/docs-$ReleaseVersion.tar.gz .
  tar zxvf docs-$ReleaseVersion.tar.gz
@@ -263,8 +270,9 @@ the login shell is csh or tcsh):
 	COMMANDS:
  # Commands continue from the previous task
  cd ..
+ rm current; ln -s $ReleaseVersion current
+ cd ..
  cvs update
- rm current-release; ln -s release-$ReleaseVersion current-release
  exit
  unsetenv ReleaseTag
  unsetenv ReleaseVersion
