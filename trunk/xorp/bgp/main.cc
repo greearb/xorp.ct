@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.23 2003/05/08 21:27:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.24 2003/05/08 23:45:10 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -65,7 +65,7 @@ BGPMain::~BGPMain()
     debug_msg("-------------------------------------------\n");
     debug_msg("Waiting for all peers to go to idle\n");
     while (_peerlist->not_all_idle()
-	   || eventloop().timers_pending() > 1) {
+	   || eventloop().timers_pending() == true) {
 	    eventloop().run();
 	    XLOG_INFO("EVENT: peerlist %d timers %d", 
 		      _peerlist->not_all_idle(),
