@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.20 2004/06/10 22:40:54 hodson Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.21 2004/09/15 19:27:18 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -142,20 +142,20 @@ public:
     /**
      * Get iterator of corresponding to named interface.
      *
-     * @param ifn interface name to find iterator for.
+     * @param ifname interface name to find iterator for.
      *
      * @return iterator, will be equal to ifs().end() if invalid.
      */
-    inline IfMap::iterator get_if(const string& ifn);
+    inline IfMap::iterator get_if(const string& ifname);
 
     /**
      * Get iterator of corresponding to named interface.
      *
-     * @param ifn interface name to find iterator for.
+     * @param ifname interface name to find iterator for.
      *
      * @return iterator, will be equal to ifs().end() if invalid.
      */
-    inline IfMap::const_iterator get_if(const string& ifn) const;
+    inline IfMap::const_iterator get_if(const string& ifname) const;
 
     inline const IfMap& ifs() const { return _ifs; }
 
@@ -648,15 +648,15 @@ protected:
 //
 
 inline IfTree::IfMap::iterator
-IfTree::get_if(const string& ifn)
+IfTree::get_if(const string& ifname)
 {
-    return _ifs.find(ifn);
+    return _ifs.find(ifname);
 }
 
 inline IfTree::IfMap::const_iterator
-IfTree::get_if(const string& ifn) const
+IfTree::get_if(const string& ifname) const
 {
-    return _ifs.find(ifn);
+    return _ifs.find(ifname);
 }
 
 //
