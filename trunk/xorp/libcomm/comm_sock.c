@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.3 2003/06/09 23:32:16 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.4 2004/01/16 19:57:25 hodson Exp $"
 
 
 /*
@@ -616,7 +616,7 @@ comm_set_loopback(int sock, int val)
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	uint loop6 = val;
+	u_int loop6 = val;
 
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       (void *)&loop6, sizeof(loop6)) < 0) {
