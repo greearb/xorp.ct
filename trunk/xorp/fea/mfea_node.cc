@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.16 2003/09/16 01:15:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.17 2003/10/14 22:39:46 pavlin Exp $"
 
 
 //
@@ -1950,29 +1950,11 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
 	    mrib.set_metric(mrib_table_default_metric().get());
 	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
-	    
-	    // Get the vif index
-	    do {
-		mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
-		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
-		    break;
-		
-		// Try again in case it is a LAN address.
-		mfea_vif = vif_find_same_subnet(mrib.dest_prefix());
-		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
-		    break;
-		
-		// Try again in case it is a P2P entry
-		if (mrib.dest_prefix().prefix_len()
-		    == IPvX::addr_bitlen(family())) {
-		    mfea_vif = vif_find_same_subnet_or_p2p(mrib.dest_prefix().masked_addr());
-		}
-		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
-		    break;
-	    } while (false);
-	    if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up()) {
+
+	    // Set the vif index
+	    mfea_vif = vif_find_by_name(fte.vifname());
+	    if (mfea_vif != NULL)
 		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-	    }
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
 			     "cannot find interface toward next-hop "
@@ -2001,29 +1983,11 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
 	    mrib.set_metric(mrib_table_default_metric().get());
 	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
-	    
-	    // Get the vif index
-	    do {
-		mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
-		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
-		    break;
-		
-		// Try again in case it is a LAN address.
-		mfea_vif = vif_find_same_subnet(mrib.dest_prefix());
-		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
-		    break;
-		
-		// Try again in case it is a P2P entry
-		if (mrib.dest_prefix().prefix_len()
-		    == IPvX::addr_bitlen(family())) {
-		    mfea_vif = vif_find_same_subnet_or_p2p(mrib.dest_prefix().masked_addr());
-		}
-		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
-		    break;
-	    } while (false);
-	    if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up()) {
+
+	    // Set the vif index
+	    mfea_vif = vif_find_by_name(fte.vifname());
+	    if (mfea_vif != NULL)
 		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-	    }
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
 			     "cannot find interface toward next-hop "
