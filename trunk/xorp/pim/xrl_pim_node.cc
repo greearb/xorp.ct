@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.66 2005/02/28 19:53:09 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.67 2005/03/10 01:13:44 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -85,8 +85,7 @@ XrlPimNode::XrlPimNode(int		family,
 
 XrlPimNode::~XrlPimNode()
 {
-    PimNodeCli::stop();
-    PimNode::stop();
+    shutdown();
 }
 
 bool
@@ -101,10 +100,15 @@ XrlPimNode::startup()
 bool
 XrlPimNode::shutdown()
 {
-    if (stop_pim() < 0)
-	return false;
+    bool ret_value = true;
 
-    return true;
+    if (stop_cli() < 0)
+	ret_value = false;
+
+    if (stop_pim() < 0)
+	ret_value = false;
+
+    return (ret_value);
 }
 
 int
@@ -2776,9 +2780,9 @@ XrlPimNode::common_0_1_shutdown()
     bool is_error = false;
     string error_msg;
 
-    if (stop_pim() != XORP_OK) {
+    if (shutdown() != true) {
 	if (! is_error)
-	    error_msg = c_format("Failed to stop PIM");
+	    error_msg = c_format("Failed to shutdown PIM");
 	is_error = true;
     }
 
