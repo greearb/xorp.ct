@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.7 2003/03/28 12:34:20 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.8 2003/03/30 03:50:43 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -88,7 +88,12 @@ public:
      * Set the time value to zero.
      */
     void clear() { _sec = 0; _usec = 0; }
-
+    
+    /**
+     * Set the time value to its maximum possible value.
+     */
+    void set_max() { _sec = ~0, _usec = ONE_MILLION - 1; }
+    
     /**
      * Copy the time value from a timeval structure.
      * 
