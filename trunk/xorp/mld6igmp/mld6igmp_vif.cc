@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.18 2004/02/22 03:15:46 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.19 2004/02/24 21:02:00 pavlin Exp $"
 
 
 //
@@ -184,6 +184,10 @@ Mld6igmpVif::start()
     //
     IPvX primary_a(IPvX::ZERO(family()));
     IPvX domain_wide_a(IPvX::ZERO(family()));
+
+    // Reset the primary address
+    set_primary_addr(IPvX::ZERO(family()));
+
     list<VifAddr>::const_iterator iter;
     for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
 	const VifAddr& vif_addr = *iter;
