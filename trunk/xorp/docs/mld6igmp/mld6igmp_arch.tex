@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.6 2003/06/09 20:02:21 pavlin Exp $
+% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.7 2003/08/28 00:13:21 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP MLD/IGMP Daemon \\
 \vspace{1ex}
-Version 0.4}
+Version 0.5}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{August 28, 2003}
+\date{November 6, 2003}
 
 \maketitle
 
@@ -75,7 +75,7 @@ optimize the implementation. Only if it turns out that there are
 performance issues with MLD/IGMP, we would try to optimize those parts of the
 implementation that should prove to be a bottleneck.
 
-Currently (August 2003), the MLD and IGMP implementation is based
+Currently (November 2003), the MLD and IGMP implementation is based
 on the specification in the following documents:
 
 \begin{itemize}
@@ -203,7 +203,7 @@ routing.
 
 Typically, from developer's point of view, all interaction with Mld6igmpNode
 would be through Mld6igmpNode~\footnote{For simplicity, currently
-(August 2003) there are few occasions when XrlMld6igmpNode uses
+(November 2003) there are few occasions when XrlMld6igmpNode uses
 direct access to Mld6igmpVif.}.
 
 The public interface for Mld6igmpVif contains the methods to manipulate a
@@ -234,7 +234,7 @@ be enabled explicitly.
 \subsection{Mld6igmpConfig Description}
 
 Mld6igmpConfig handles the MLD/IGMP-specific
-configuration~\footnote{Currently (August 2003), Mld6igmpConfig is not
+configuration~\footnote{Currently (November 2003), Mld6igmpConfig is not
 implemented; rather, all state is kept inside Mld6igmpNode instead.}. This
 configuration is used to configure the following units:
 
@@ -262,6 +262,8 @@ configuration is used to configure the following units:
   \item June 9, 2003: Bump-up the version to 0.3, and the date.
 
   \item August 28, 2003: Bump-up the version to 0.4, and the date.
+
+  \item November 6, 2003: Bump-up the version to 0.5, and the date.
 
 \end{itemize}
 
