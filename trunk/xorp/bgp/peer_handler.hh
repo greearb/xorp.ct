@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.12 2004/04/14 19:11:01 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.13 2004/06/10 22:40:32 hodson Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -131,7 +131,7 @@ public:
 	return _peer->peerdata()->get_v6_local_addr();
     }
 
-    EventLoop& eventloop() const;
+    virtual EventLoop& eventloop() const;
 protected:
     BGPPlumbing *_plumbing_unicast;
     BGPPlumbing *_plumbing_multicast;

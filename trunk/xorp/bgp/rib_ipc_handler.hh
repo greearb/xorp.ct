@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.30 2004/06/10 22:40:33 hodson Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.31 2004/08/14 05:24:51 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -201,6 +201,11 @@ public:
      * @return true
      */
     virtual bool originate_route_handler() const {return true;}
+
+    /**
+     * @return the main eventloop
+     */
+    virtual EventLoop& eventloop() const { return _xrl_router.eventloop();}
 private:
     bool unregister_rib();
 
