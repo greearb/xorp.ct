@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.56 2004/09/22 01:41:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.57 2004/09/23 00:22:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -474,6 +474,10 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
 {
     Queued q;
 
+    if (_bgp.profile().enabled(profile_route_rpc_in))
+	_bgp.profile().log(profile_route_rpc_in,
+			   c_format("add %s", net.str().c_str()));
+
     q.add = true;
     q.ribname = ribname;
     q.ibgp = ibgp;
@@ -500,6 +504,10 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
 				const IPNet<A>& net)
 {
     Queued q;
+
+    if (_bgp.profile().enabled(profile_route_rpc_in))
+	_bgp.profile().log(profile_route_rpc_in,
+			   c_format("delete %s", net.str().c_str()));
 
     q.add = false;
     q.ribname = ribname;
