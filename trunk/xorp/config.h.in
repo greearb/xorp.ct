@@ -246,6 +246,12 @@
 /* Define if you have the crypto library (-lcrypto).  */
 #undef HAVE_LIBCRYPTO
 
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+
 /* Define if using the dmalloc debugging malloc package */
 #undef WITH_DMALLOC
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.5 2003/04/21 04:30:46 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.6 2003/04/21 04:34:21 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -70,12 +70,17 @@ check_necessary $0
 #
 run rm -f config.cache
 run rm -f aclocal.m4
+run rm -f config/aclocal.m4
 
 #
 # If necessary, use "-I DIR" again to add more directories to search list
 # for .m4 files.
 #
-run aclocal -I config --output=config/aclocal.m4
+# XXX: note that the output file (aclocal.m4) should be generated
+# in the local directory (the default behavior), otherwise newer
+# versions of automake (e.g., automake-1.5) won't work anymore.
+#
+run aclocal -I config
 
 #
 # XXX: we don't use flag --force because with it libtoolize always
@@ -89,15 +94,6 @@ run libtoolize --automake --copy
 # add the new flag "--include=config".
 #
 run autoheader
-
-#
-# Copy aclocal.m4 to the local directory.
-# The reason for that is because automake does not provide a command-line
-# option to specify where to look for that file. Indeed, automake
-# recognizes AC_CONFIG_AUX_DIR in configure.in, but that directory is
-# not scanned for aclocal.m4.
-#
-run cp -p config/aclocal.m4 .
 
 #
 # XXX: in case of non-GNU 'make', we must use flag "-i".
