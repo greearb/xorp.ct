@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.17 2004/03/19 01:30:10 pavlin Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.18 2004/03/19 11:45:58 mjh Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -23,12 +23,13 @@
 //#define VALIDATE_XORP_TRIE
 //#define DEBUG_LOGGING
 
-#define trie_debug_msg(x...) /* debug_msg(x) */
-
 #include "xlog.h"
 #include "debug.h"
 #include "minitraits.hh"
 #include "stack"
+
+#define trie_debug_msg(x...) /* debug_msg(x) */
+#define trie_debug_msg_indent(x)
 
 /*
  * This module implements a trie to support route lookups.
