@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.24 2003/06/27 22:28:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.25 2003/06/28 00:27:33 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -278,6 +278,7 @@ PimMre::lost_assert_wc() const
 	return (mifs);
     }
     
+    // XXX: AssertWinner(*,G,I) != NULL AND AssertWinner(*,G,I) != me
     mifs = i_am_assert_loser_wc();
     vif_index = rpf_interface_rp();
     if (vif_index != Vif::VIF_INDEX_INVALID)
@@ -298,6 +299,7 @@ PimMre::lost_assert_sg() const
 	return (mifs);
     }
     
+    // XXX: AssertWinner(S,G,I) != NULL AND AssertWinner(S,G,I) != me
     mifs = i_am_assert_loser_sg();
     mifs &= assert_winner_metric_is_better_than_spt_assert_metric_sg();	// XXX
     vif_index = rpf_interface_s();
@@ -334,6 +336,7 @@ PimMre::lost_assert_sg_rpt() const
 	XLOG_UNREACHABLE();
     } while (false);
     
+    // XXX: AssertWinner(S,G,I) != NULL AND AssertWinner(S,G,I) != me
     if (pim_mre_sg != NULL)
 	mifs = pim_mre_sg->i_am_assert_loser_sg();
     
