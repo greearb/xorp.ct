@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.16 2003/11/19 01:03:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.17 2003/11/19 01:32:46 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -887,9 +887,8 @@ XrlMfeaNode::common_0_1_get_status(
     uint32_t& status,
     string&		reason)
 {
-    //XXX This is just a placeholder
-    status = PROC_READY;
-    reason = "Ready";
+    status = MfeaNode::node_status(reason);
+
     return XrlCmdError::OKAY();
 }
 
