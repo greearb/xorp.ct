@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.24 2004/04/01 19:31:20 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.25 2004/04/01 19:54:11 mjh Exp $"
 
 #include "rib_module.h"
 
@@ -828,6 +828,9 @@ int
 RIB<A>::redist_enable(const string& src_tablename,
 		      const string& dst_tablename)
 {
+    UNUSED(src_tablename);
+    UNUSED(dst_tablename);
+#if 0
     //
     // In theory we can redistribute from any RouteTable<A>, in practice,
     // we practice it has to be an OriginTable for the time being.
@@ -882,6 +885,7 @@ RIB<A>::redist_enable(const string& src_tablename,
 	delete redist_table;
 	return XORP_ERROR;
     }
+#endif /* 0 */
     return XORP_OK;
 }
 
@@ -889,6 +893,9 @@ template<class A>
 int
 RIB<A>::redist_disable(const string& from_table, const string& to_table)
 {
+    UNUSED(from_table);
+    UNUSED(to_table);
+#if 0
     string tname = redist_tablename(from_table, to_table);
 
     // TODO: XXX: This routine currently trawls tables map twice.
@@ -901,6 +908,7 @@ RIB<A>::redist_disable(const string& from_table, const string& to_table)
     if (remove_table(tname) != XORP_OK) {
 	return XORP_ERROR;
     }
+#endif /* 0 */
     return XORP_OK;
 }
 
