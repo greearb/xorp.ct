@@ -7,7 +7,7 @@ default: $(OBJDIR) $(TARGETS) $(DEMOS) $(PROGRAMS)
 # Create the directory in which the object files will be created.
 
 $(OBJDIR):
-	mkdir $(OBJDIR)
+	mkdir -p $(OBJDIR)
 
 # Construct the compilation command.
 
