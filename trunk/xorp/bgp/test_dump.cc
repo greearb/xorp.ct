@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.38 2004/05/15 16:05:22 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.39 2004/05/15 23:10:45 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -240,6 +240,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("ADD AND DELETE");
     debug_table1->write_comment("SENDING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -250,6 +251,7 @@ test_dump(TestInfo& /*info*/)
 
     //delete the route
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1,  0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -270,6 +272,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -279,6 +282,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -303,6 +307,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -312,6 +317,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -333,6 +339,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -342,6 +349,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -351,6 +359,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -360,6 +369,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -384,6 +394,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -393,6 +404,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -402,6 +414,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -411,6 +424,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -433,6 +447,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -442,6 +457,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -451,6 +467,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -460,6 +477,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -489,6 +507,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -498,6 +517,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -530,6 +550,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -540,6 +561,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -550,6 +572,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -594,6 +617,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -628,6 +652,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -638,6 +663,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -672,6 +698,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -707,6 +734,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -717,6 +745,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -727,6 +756,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -764,6 +794,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -799,6 +830,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -809,6 +841,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -819,6 +852,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -852,6 +886,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -886,6 +921,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -896,6 +932,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -906,6 +943,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -977,6 +1015,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -987,6 +1026,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -997,6 +1037,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1015,6 +1056,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1042,6 +1084,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 3 WHEN EVENTLOOP RUNS");
     sr1 = new SubnetRoute<IPv4>(net0, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1052,6 +1095,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1072,6 +1116,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1084,6 +1129,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1096,6 +1142,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1108,6 +1155,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1120,6 +1168,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.0.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.0.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net0, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1132,6 +1181,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1154,6 +1204,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1164,6 +1215,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1174,6 +1226,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1192,6 +1245,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT REPLACE AT PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1214,6 +1268,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT REPLACE AT PEER 1");
     debug_table1->write_comment("EXPECT REPLACE AT PEER 3 WHEN EVENTLOOP RUNS");
     sr1 = new SubnetRoute<IPv4>(net3, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1224,6 +1279,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT REPLACE AT PEER 1");
     sr1 = new SubnetRoute<IPv4>(net4, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1244,6 +1300,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1256,6 +1313,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1268,6 +1326,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1292,6 +1351,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1302,6 +1362,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1312,6 +1373,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1347,6 +1409,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1381,6 +1444,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1391,6 +1455,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1410,6 +1475,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1 BUT NOT PEER 3");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1435,6 +1501,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1446,6 +1513,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1457,6 +1525,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1481,6 +1550,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1491,6 +1561,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1501,6 +1572,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1538,6 +1610,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 2 - PEER NOT YET DUMPED");
     sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1563,6 +1636,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1574,6 +1648,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1597,6 +1672,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1607,6 +1683,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1634,6 +1711,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1654,6 +1732,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1665,6 +1744,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1676,6 +1756,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1700,6 +1781,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1725,6 +1807,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1745,6 +1828,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1756,6 +1840,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1785,6 +1870,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY NOONE");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1813,6 +1899,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1833,6 +1920,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1844,6 +1932,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1871,6 +1960,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1881,6 +1971,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY NOONE");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1928,6 +2019,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1954,6 +2046,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1964,6 +2057,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1974,6 +2068,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -2023,6 +2118,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -2049,6 +2145,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2059,6 +2156,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2069,6 +2167,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2079,6 +2178,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -2105,6 +2205,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2141,6 +2242,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -2151,6 +2253,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -2178,6 +2281,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2188,6 +2292,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2198,6 +2303,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -2237,6 +2343,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2259,6 +2366,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -2269,6 +2377,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 2 & 3");
     sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -2294,6 +2403,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -2304,6 +2414,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT NO CHANGE");
     sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -2329,6 +2440,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT REP 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -2340,6 +2452,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY P1 & 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.19 2004/02/24 03:16:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.20 2004/05/15 11:06:57 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -133,6 +133,7 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_comment("ADD AND DELETE");
     debug_table1->write_comment("SENDING FROM PEER 1");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     fanout_table->add_route(*msg, NULL);
     fanout_table->push(NULL);
@@ -173,6 +174,7 @@ test_fanout(TestInfo& /*info*/)
     fanout_table->output_state(true, debug_table2);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     fanout_table->add_route(*msg, NULL);
     fanout_table->push(NULL);
@@ -205,6 +207,7 @@ test_fanout(TestInfo& /*info*/)
     fanout_table->output_state(true, debug_table2);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     //use the implicit push bit rather than an explicit push
     msg->set_push();
@@ -239,6 +242,7 @@ test_fanout(TestInfo& /*info*/)
     fanout_table->output_state(true, debug_table2);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     fanout_table->add_route(*msg, NULL);
     fanout_table->delete_route(*msg, NULL);
@@ -247,6 +251,7 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr2->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
     fanout_table->add_route(*msg, NULL);
     fanout_table->delete_route(*msg, NULL);
@@ -293,6 +298,7 @@ test_fanout(TestInfo& /*info*/)
     fanout_table->output_state(true, debug_table2);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     fanout_table->add_route(*msg, NULL);
@@ -301,6 +307,7 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr2->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
     msg->set_push();
     fanout_table->add_route(*msg, NULL);
@@ -361,6 +368,7 @@ test_fanout(TestInfo& /*info*/)
     fanout_table->output_state(true, debug_table3);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     fanout_table->add_route(*msg, NULL);
@@ -369,6 +377,7 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr2->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
     msg->set_push();
     fanout_table->add_route(*msg, NULL);

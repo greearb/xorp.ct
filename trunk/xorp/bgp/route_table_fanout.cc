@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.33 2004/05/15 15:12:16 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.34 2004/05/15 16:05:21 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -201,6 +201,7 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	      rtmsg.str().c_str());
 
     XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -265,6 +266,8 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      new_rtmsg.str().c_str());
 
     XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(old_rtmsg.route()->nexthop_resolved());
+    XLOG_ASSERT(new_rtmsg.route()->nexthop_resolved());
 
     const PeerHandler *origin_peer = old_rtmsg.origin_peer();
     XLOG_ASSERT(origin_peer == new_rtmsg.origin_peer());
@@ -317,6 +320,7 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	      rtmsg.str().c_str());
     
     XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -352,6 +356,8 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			   const PeerHandler *dump_peer) 
 {
     XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
+
     BGPRouteTable<A> *dump_child = 0;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
