@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.22 2004/02/29 22:58:01 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.23 2004/03/01 10:02:41 pavlin Exp $"
 
 
 //
@@ -177,6 +177,11 @@ Mld6igmpVif::start(string& error_msg)
 	error_msg = "underlying vif is not UP";
 	return (XORP_ERROR);
     }
+
+    //
+    // Start the vif only if it is of the appropriate type:
+    // multicast-capable (loopback excluded).
+    //
     if (! (is_multicast_capable() && (! is_loopback()))) {
 	error_msg = "the interface is not multicast capable";
 	return (XORP_ERROR);
