@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.7 2004/09/14 16:47:26 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.8 2004/09/14 17:04:03 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -44,8 +44,8 @@ public:
 	FwRule() { zero(); }
 	FwRule(const string&	ifname,
 	    const string&	vifname,
-	    const N&		src,
-	    const N&		dst,
+	    const IPNet<N>&	src,
+	    const IPNet<N>&	dst,
 	    uint8_t		proto,
 	    uint16_t		sport,
 	    uint16_t		dport,
@@ -59,8 +59,8 @@ public:
 	// accessors
 	const string&	ifname() const		{ return _ifname; }
 	const string&	vifname() const		{ return _vifname; }
-	const N&	src() const		{ return _src; }
-	const N&	dst() const		{ return _dst; }
+	const IPNet<N>&	src() const		{ return _src; }
+	const IPNet<N>&	dst() const		{ return _dst; }
 	uint8_t		proto() const		{ return _proto; }
 	uint16_t	sport() const		{ return _sport; }
 	uint16_t	dport() const		{ return _dport; }
@@ -75,8 +75,8 @@ public:
 	 */
 	void zero() {
 		_ifname.erase();
-		_src = N(N::ZERO(_src.af()), 0);
-		_dst = N(N::ZERO(_dst.af()), 0);
+		_src = IPNet<N>(N::ZERO(_src.af()), 0);
+		_dst = IPNet<N>(N::ZERO(_dst.af()), 0);
 		_proto = IP_PROTO_ANY;
 		_sport = PORT_ANY;
 		_dport = PORT_ANY;
@@ -123,8 +123,8 @@ protected:
 protected:
 	string		_ifname;	// Interface where applied
 	string		_vifname;	// Interface where applied
-	N		_src;		// Source address (with mask)
-	N		_dst;		// Destination address (with mask)
+	IPNet<N>	_src;		// Source address (with mask)
+	IPNet<N>	_dst;		// Destination address (with mask)
 	uint8_t		_proto;		// Protocol to match, or IP_PROTO_ANY
 	uint16_t	_sport;		// Source port match, or PORT_ANY
 	uint16_t	_dport;		// Destination port match, or PORT_ANY
@@ -132,9 +132,9 @@ protected:
 	bool		_is_deleted;	// True if the entry was deleted
 };
 
-typedef FwRule<IPv4Net> FwRule4;
-typedef FwRule<IPv6Net> FwRule6;
-typedef FwRule<IPvXNet> FwRuleX;
+typedef FwRule<IPv4> FwRule4;
+typedef FwRule<IPv6> FwRule6;
+typedef FwRule<IPvX> FwRuleX;
 
 /**************************************************************************/
 
@@ -144,6 +144,12 @@ typedef vector<FwRule6*> FwTable6;
 class FwProvider;
 class XrlFirewallTarget;
 
+// I thought derived classes of friends ended up being friends too?
+class IpfwFwProvider;
+class IpfFwProvider;
+class IptablesFwProvider;
+class PfFwProvider;
+
 /**
  * @short Firewall manager.
  *
@@ -152,6 +158,11 @@ class XrlFirewallTarget;
 class FirewallManager {
 	friend class FwProvider;
 	friend class XrlFirewallTarget;
+	// FwProvider derived classes which need to see things here
+	friend class IpfwFwProvider;
+	friend class IpfFwProvider;
+	friend class IptablesFwProvider;
+	friend class PfFwProvider;
 public:
 	FirewallManager() : _fwp(0) {}
 	virtual ~FirewallManager() {}
