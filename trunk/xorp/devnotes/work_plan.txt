@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.9 2003/04/01 22:01:00 mjh Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.10 2003/04/01 23:47:22 pavlin Exp $
 #
 
 Priority:
@@ -29,6 +29,8 @@ For 0.x:
 
 Longer Term tasks
 -----------------
+* TCP connection relay.
+* UDP send/receive interface.
 
 ================================ RIB =========================================
 
@@ -121,6 +123,7 @@ For 0.x:
 
 Longer Term tasks
 -----------------
+* Proper authentication/ACL framework.
 
 ================================ XORPSH =====================================
 
@@ -131,6 +134,10 @@ For 0.3:
 * Protocol-specific user tutorial			H	Everyone
 
 For 0.x:
+* Task interruption.
+* More graceful mechanism than current for task timeout.
+* Notification of rtrmgr restart.
+
 Longer Term tasks
 -----------------
 
