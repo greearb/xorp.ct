@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.8 2003/03/16 08:35:03 pavlin Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.9 2003/05/15 16:37:54 hodson Exp $
 
 #ifndef __BGP_BGP_TRIE_HH__
 #define __BGP_BGP_TRIE_HH__
@@ -81,16 +81,14 @@ private:
  */
 template<>
 inline void
-RefTrieNode<IPv4, const ChainedSubnetRoute<IPv4> >::
-delete_payload(const ChainedSubnetRoute<IPv4>* p)
+RefTrieNode<IPv4, const ChainedSubnetRoute<IPv4> >::delete_payload(const ChainedSubnetRoute<IPv4>* p)
 {
     p->unref();
 }
 
 template<>
 inline void
-RefTrieNode<IPv6, const ChainedSubnetRoute<IPv6> >::
-delete_payload(const ChainedSubnetRoute<IPv6>* p)
+RefTrieNode<IPv6, const ChainedSubnetRoute<IPv6> >::delete_payload(const ChainedSubnetRoute<IPv6>* p)
 {
     p->unref();
 }
