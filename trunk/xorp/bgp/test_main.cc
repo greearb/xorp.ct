@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.5 2003/03/10 23:20:07 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.6 2003/07/03 02:03:17 atanu Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
@@ -81,7 +81,7 @@ main(int argc, char** argv)
 	    {"nhr.test4", callback(nhr_test4<IPv4>, nh4, rnh4, nlri4)},
 	    {"nhr.test4.ipv6", callback(nhr_test4<IPv6>, nh6, rnh6, nlri6)},
 
-	    {"nhr.test5", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
+	    {"nhr.test5", callback(nhr_test5<IPv4>, nh4, rnh4, nlri4)},
 	    {"nhr.test5.ipv6", callback(nhr_test5<IPv6>, nh6, rnh6, nlri6)},
 
 	    {"nhr.test6", callback(nhr_test6<IPv4>, nh4, rnh4, nlri4)},

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.13 2003/07/03 02:03:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.14 2003/09/16 21:00:27 hodson Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,7 +100,6 @@ public:
 	register_ribname("bogus");	
     }
 };
-
 
 /**
  * Register interest in a nexthop 
@@ -1121,81 +1120,36 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     return true;
 }
 
-/* XXX
-** This function is no longer used, but if it is removed the
-** templateised test functions will not be instantiated.
+/* 
+** This function is never called it exists to instantiate the
+** templatised functions.
 */
-bool
-test_next_hop_resolver(int argc, char **argv)
+void
+dummy()
 {
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
+    XLOG_FATAL("Not to be called");
 
-    TestMain t(argc, argv);
+    callback(nhr_test1<IPv4>);
+    callback(nhr_test1<IPv6>);
 
-    string test_name =
-	t.get_optional_args("-t", "--test", "run only the specified test");
-    t.complete_args_parsing();
+    callback(nhr_test2<IPv4>);
+    callback(nhr_test2<IPv6>);
 
-    try {
-	IPv4 nh4("128.16.64.1");
-	IPv4 rnh4("1.1.1.1");
-	IPv4Net nlri4("22.0.0.0/8");
-	IPv6 nh6("::128.16.64.1");
-	IPv6 rnh6("::1.1.1.1");
-	IPv6Net nlri6("::22.0.0.0/8");
-	const int iter = 1000;
+    callback(nhr_test3<IPv4>);
+    callback(nhr_test3<IPv6>);
 
-	struct test {
-	    string test_name;
-	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
-	} tests[] = {
-	    {"test1", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
-	    {"test1.ipv6", callback(nhr_test1<IPv6>, nh6, rnh6, nlri6)},
+    callback(nhr_test4<IPv4>);
+    callback(nhr_test4<IPv6>);
 
-	    {"test2", callback(nhr_test2<IPv4>, nh4, rnh4, nlri4, iter)},
-	    {"test2.ipv6", callback(nhr_test2<IPv6>, nh6, rnh6, nlri6, iter)},
+    callback(nhr_test5<IPv4>);
+    callback(nhr_test5<IPv6>);
 
-	    {"test3", callback(nhr_test3<IPv4>, nh4, rnh4, nlri4, iter)},
-	    {"test3.ipv6", callback(nhr_test3<IPv6>, nh6, rnh6, nlri6, iter)},
+    callback(nhr_test6<IPv4>);
+    callback(nhr_test6<IPv6>);
 
-	    {"test4", callback(nhr_test4<IPv4>, nh4, rnh4, nlri4)},
-	    {"test4.ipv6", callback(nhr_test4<IPv6>, nh6, rnh6, nlri6)},
+    callback(nhr_test7<IPv4>);
+    callback(nhr_test7<IPv6>);
 
-	    {"test5", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
-	    {"test5.ipv6", callback(nhr_test5<IPv6>, nh6, rnh6, nlri6)},
-
-	    {"test6", callback(nhr_test6<IPv4>, nh4, rnh4, nlri4)},
-	    {"test6.ipv6", callback(nhr_test6<IPv6>, nh6, rnh6, nlri6)},
-
-	    {"test7", callback(nhr_test7<IPv4>, nh4, rnh4, nlri4)},
-	    {"test7.ipv6", callback(nhr_test7<IPv6>, nh6, rnh6, nlri6)},
-
-	    {"test8", callback(nhr_test8<IPv4>, nh4, rnh4, nlri4)},
-	    {"test8.ipv6", callback(nhr_test8<IPv6>, nh6, rnh6, nlri6)},
-	};
-
-	if("" == test_name) {
-	    for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); 
-		i++)
-		t.run(tests[i].test_name, tests[i].cb);
-	} else {
-	    for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); 
-		i++)
-		if(test_name == tests[i].test_name) {
-		    t.run(tests[i].test_name, tests[i].cb);
-		    if (t.exit() == true)
-			return true;
-		    else
-			return false;
-		}
-	    t.failed("No test with name " + test_name + " found\n");
-	}
-    } catch(...) {
-	xorp_catch_standard_exceptions();
-    }
-
-    if (t.exit() == true)
-	return true;
-    else
-	return false;
+    callback(nhr_test8<IPv4>);
+    callback(nhr_test8<IPv6>);
 }
