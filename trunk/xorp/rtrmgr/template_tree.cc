@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.5 2003/08/01 23:07:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.6 2003/09/24 16:16:07 hodson Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -31,8 +31,8 @@ extern int parse_template();
 extern void tplterror(const char* s);
 
 TemplateTree::TemplateTree(const string& xorp_root_dir,
-			   const string& config_template_dir, 
-			   const string& xrl_dir) 
+			   const string& config_template_dir,
+			   const string& xrl_dir)
     : _xrldb(xrl_dir),
       _xorp_root_dir(xorp_root_dir)
 {
@@ -45,7 +45,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     if (stat(config_template_dir.c_str(), &dirdata) < 0) {
 	string errstr = "rtrmgr: error reading config directory "
 	    + config_template_dir + "\n";
-	errstr += strerror(errno); 
+	errstr += strerror(errno);
 	errstr += "\n";
 	fprintf(stderr, "%s", errstr.c_str());
 	exit(1);
@@ -58,7 +58,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	fprintf(stderr, "%s", errstr.c_str());
 	exit(1);
     }
-    
+
     string globname = config_template_dir + "/*.tp";
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {
@@ -69,16 +69,16 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     }
 
     if (pglob.gl_pathc == 0) {
-	fprintf(stderr, "rtrmgr failed to find any template files in %s\n", 
+	fprintf(stderr, "rtrmgr failed to find any template files in %s\n",
 		config_template_dir.c_str());
 	globfree(&pglob);
 	exit(1);
     }
-    
+
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	printf("Loading template file %s\n", pglob.gl_pathv[i]);
 	if (init_template_parser(pglob.gl_pathv[i], this) < 0) {
-	    fprintf(stderr, "Failed to open template file: %s\n", 
+	    fprintf(stderr, "Failed to open template file: %s\n",
 		    config_template_dir.c_str());
 	    globfree(&pglob);
 	    exit(-1);
@@ -86,18 +86,18 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	try {
 	    parse_template();
 	} catch (ParseError &pe) {
-	    tplterror(pe.err.c_str());
+	    tplterror(pe.why().c_str());
 	    globfree(&pglob);
 	    exit(1);
 	}
 	if (_path_segs.size() != 0) {
-	    fprintf(stderr, "Error: file %s is not terminated properly\n", 
+	    fprintf(stderr, "Error: file %s is not terminated properly\n",
 		    pglob.gl_pathv[i]);
 	    globfree(&pglob);
 	    exit(1);
 	}
     }
-    
+
     globfree(&pglob);
 }
 
@@ -105,7 +105,7 @@ TemplateTree::~TemplateTree() {
     delete _root;
 }
 
-void 
+void
 TemplateTree::display_tree() {
     _root->print();
 }
@@ -117,10 +117,10 @@ void TemplateTree::extend_path(string segment, bool is_tag) {
     _path_segs.push_back(PathSegment(segment,is_tag));
 }
 
-void 
+void
 TemplateTree::pop_path() {
     if (_seg_lengths.size()==0) {
-	throw ParseError("Mismatched braces");
+	xorp_throw(ParseError, "Mismatched braces");
     }
     int segs_to_pop = _seg_lengths.front();
 #ifdef DEBUG_TEMPLATE_PARSER
@@ -151,7 +151,7 @@ TemplateTree::path_as_string() {
     return path;
 }
 
-TemplateTreeNode* 
+TemplateTreeNode*
 TemplateTree::new_node(TemplateTreeNode* parent,
 		       const string& path, const string& varname,
 		       int type, const string& initializer) {
@@ -193,7 +193,7 @@ TemplateTree::new_node(TemplateTreeNode* parent,
     return t;
 }
 
-void 
+void
 TemplateTree::push_path(int type, char* cinit) {
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("push_path\n");
@@ -214,7 +214,7 @@ TemplateTree::push_path(int type, char* cinit) {
 	_path_segs.pop_front();
 }
 
-void 
+void
 TemplateTree::add_untyped_node(string segment, bool is_tag) {
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("add_untyped_node: segment=%s\n", segment.c_str());
@@ -235,7 +235,7 @@ TemplateTree::add_untyped_node(string segment, bool is_tag) {
 		 * through a call to add_node .
 		 */
 		string err = "Need to qualify type of " + segment + "\n";
-		throw ParseError(err);
+		xorp_throw(ParseError, err);
 	    }
 	    found = *i;
 	}
@@ -251,7 +251,7 @@ TemplateTree::add_untyped_node(string segment, bool is_tag) {
     }
 }
 
-void 
+void
 TemplateTree::add_node(const string& segment, int type, char* cinit) {
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("add_node: segment=%s type: %d\n", segment.c_str(), type);
@@ -309,7 +309,7 @@ TemplateTree::add_node(const string& segment, int type, char* cinit) {
     }
 }
 
-TemplateTreeNode* 
+TemplateTreeNode*
 TemplateTree::find_node(const list<string>& segs) {
     TemplateTreeNode* ttn = _root;
     list <string>::const_iterator i;
@@ -323,7 +323,7 @@ TemplateTree::find_node(const list<string>& segs) {
 	    if ((*ti)->segname() == *i) {
 		matches.push_back(*ti);
 #ifdef DEBUG_TEMPLATE_PARSER
-		printf("matched: %s type %d\n", (*ti)->path().c_str(), 
+		printf("matched: %s type %d\n", (*ti)->path().c_str(),
 		       (*ti)->type());
 #endif
 	    }
@@ -338,7 +338,7 @@ TemplateTree::find_node(const list<string>& segs) {
 	    fprintf(stderr, "Multiple match at node %s\n", (*i).c_str());
 	    XLOG_UNREACHABLE();
 	}
-	
+
 	//there's no exact name match, so we're probably looking for a
 	//match of a value against a typed variable
 	ti = ttn->children().begin();
@@ -352,9 +352,9 @@ TemplateTree::find_node(const list<string>& segs) {
 	if (matches.size()==0)
 	    return NULL;
 	if (matches.size()>1) {
-	    string err = "Ambiguous value for node " + (*i) + 
+	    string err = "Ambiguous value for node " + (*i) +
 		" - I can't tell which type this is.\n";
-	    throw ParseError(err);
+	    xorp_throw(ParseError, err);
 	}
 	ttn = matches.front();
 #ifdef DEBUG_TEMPLATE_PARSER
@@ -370,27 +370,27 @@ TemplateTree::add_cmd(char* cmd) {
     _current_node->add_cmd(string(cmd), *this);
 }
 
-void 
+void
 TemplateTree::add_cmd_action(string cmd, const list<string>& action) {
     _current_node->add_action(cmd, action, _xrldb);
 }
 
-void 
+void
 TemplateTree::register_module(const string& name, ModuleCommand* mc) {
     _registered_modules[name] = mc;
 }
- 
-ModuleCommand* 
+
+ModuleCommand*
 TemplateTree::find_module(const string& name) {
     typedef map<string, ModuleCommand*>::const_iterator CI;
     CI rpair = _registered_modules.find(name);
     if (rpair == _registered_modules.end())
 	return NULL;
-    else 
+    else
 	return rpair->second;
 }
 
-bool 
+bool
 TemplateTree::check_variable_name(const string& s) const {
     //trim $( and )
     string trimmed = s.substr(2, s.size()-3);
@@ -405,6 +405,6 @@ TemplateTree::check_variable_name(const string& s) const {
 	v[i] = sl.front();
 	sl.pop_front();
     }
-    
+
     return _root->check_variable_name(v, 0);
 }

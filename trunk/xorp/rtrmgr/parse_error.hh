@@ -12,15 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/parse_error.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/parse_error.hh,v 1.2 2003/03/10 23:21:00 hodson Exp $
 
 #ifndef __RTRMGR_PARSE_ERROR_HH__
 #define __RTRMGR_PARSE_ERROR_HH__
 
-class ParseError {
+#include "libxorp/exceptions.hh"
+
+class ParseError : public XorpReasonedException {
 public:
-    ParseError(const string &reason) {err = reason;}
-    string err;
+    ParseError(const char* file, size_t line, const string& reason)
+	: XorpReasonedException("ParseError", file, line, reason)
+    {}
 };
 
 #endif // __RTRMGR_PARSE_ERROR_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.6 2003/05/04 06:25:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.7 2003/09/24 16:16:07 hodson Exp $"
 
 #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -27,28 +27,28 @@
 extern int booterror(const char *s);
 
 /*************************************************************************
- * Slave Config Tree class 
+ * Slave Config Tree class
  *************************************************************************/
 
 SlaveConfigTree::SlaveConfigTree(XorpClient &xclient)
     : ConfigTree(NULL), _xclient(xclient) {
 }
 
-SlaveConfigTree::SlaveConfigTree(const string& configuration, 
-				 TemplateTree *tt, 
-				 XorpClient &xclient) 
+SlaveConfigTree::SlaveConfigTree(const string& configuration,
+				 TemplateTree *tt,
+				 XorpClient &xclient)
     : ConfigTree(tt), _xclient(xclient)
 {
     parse(configuration, "");
     _root_node.mark_subtree_as_committed();
 }
 
-int SlaveConfigTree::parse(const string& configuration, 
+int SlaveConfigTree::parse(const string& configuration,
 			   const string& conffile) {
     try {
 	((ConfigTree*)this)->parse(configuration, conffile);
     } catch (ParseError &pe) {
-	booterror(pe.err.c_str());
+	booterror(pe.why().c_str());
 	exit(1);
     }
     return 0;
@@ -74,9 +74,9 @@ SlaveConfigTree::commit_changes(string &result,
     uint tid = 0;
     tid = _xclient.begin_transaction();
     _root_node.initialize_commit();
-    if (_root_node.commit_changes(NULL, "", _xclient, tid, 
-				  /*do_exec = */false, 
-				  /*do_commit = */false, 
+    if (_root_node.commit_changes(NULL, "", _xclient, tid,
+				  /*do_exec = */false,
+				  /*do_commit = */false,
 				  0, 0, result) == false) {
 	//something went wrong - return the error message.
 	return false;
@@ -89,17 +89,17 @@ SlaveConfigTree::commit_changes(string &result,
     }
 #else
     UNUSED(result);
-#endif    
-    _stage2_cb = callback(this, 
+#endif
+    _stage2_cb = callback(this,
 			  &SlaveConfigTree::commit_phase2,
-			  cb, 
+			  cb,
 			  &xorpsh);
     xorpsh.lock_config(_stage2_cb);
     return success;
 }
 
-void SlaveConfigTree::commit_phase2(const XrlError& e, 
-				    const bool* locked, 
+void SlaveConfigTree::commit_phase2(const XrlError& e,
+				    const bool* locked,
 				    const uint32_t* /*lock_holder*/,
 				    CallBack cb,
 				    XorpShell* xorpsh) {
@@ -119,13 +119,13 @@ void SlaveConfigTree::commit_phase2(const XrlError& e,
     printf("deletions = >>>\n%s<<<\n", deletions.c_str());
 #endif
     _root_node.initialize_commit();
-    xorpsh->commit_changes(deltas, deletions, 
+    xorpsh->commit_changes(deltas, deletions,
 			   callback(this, &SlaveConfigTree::commit_phase3, cb,
 				    xorpsh),
 			   cb);
 }
 
-void SlaveConfigTree::commit_phase3(const XrlError& e, 
+void SlaveConfigTree::commit_phase3(const XrlError& e,
 				    CallBack cb,
 				    XorpShell* xorpsh) {
 #ifdef DEBUG_COMMIT
@@ -137,7 +137,7 @@ void SlaveConfigTree::commit_phase3(const XrlError& e,
     //until we get called back with the final results of the commit.
     if (e != XrlError::OKAY()) {
 	_commit_errmsg = e.note();
-	xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5, 
+	xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
 				       false, cb, xorpsh));
     }
     xorpsh->set_mode(XorpShell::MODE_COMMITTING);
@@ -152,11 +152,11 @@ void SlaveConfigTree::commit_phase4(bool success, const string& errmsg,
     printf("commit_phase4\n");
 #endif
     _commit_errmsg = errmsg;
-    xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5, 
+    xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
 				   success, cb, xorpsh));
 }
 
-void SlaveConfigTree::commit_phase5(const XrlError& /*e*/, 
+void SlaveConfigTree::commit_phase5(const XrlError& /*e*/,
 				    bool success,
 				    CallBack cb,
 				    XorpShell* /*xorpsh*/) {
@@ -226,7 +226,7 @@ SlaveConfigTree::mark_subtree_for_deletion(const list <string>& pathsegs,
 	&& found->parent()->children().size()==1) {
 	found = found->parent();
     }
-    
+
     found->mark_subtree_for_deletion(user_id);
     return string("OK");
 }

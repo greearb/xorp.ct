@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.5 2003/05/23 00:02:08 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.6 2003/09/24 16:16:07 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -28,7 +28,7 @@ extern int parse_bootfile();
 extern int booterror(const char *s);
 
 /*************************************************************************
- * Config File class 
+ * Config File class
  *************************************************************************/
 
 ConfigTree::ConfigTree(TemplateTree *tt) {
@@ -55,20 +55,20 @@ void ConfigTree::add_default_children() {
     _root_node.recursive_add_default_children();
 }
 
-TemplateTreeNode *ConfigTree::find_template(const list <string>& pathsegs) 
-    throw (ParseError) 
+TemplateTreeNode *ConfigTree::find_template(const list <string>& pathsegs)
+    throw (ParseError)
 {
     debug_msg("----------------------------------------------------------\n");
-    debug_msg("looking for template for \"%s\"\n", 
+    debug_msg("looking for template for \"%s\"\n",
 	   path_as_string(pathsegs).c_str());
     TemplateTreeNode *ttn;
 
     ttn = _template_tree->find_node(pathsegs);
     return ttn;
-	
+
 }
 
-list<string> 
+list<string>
 ConfigTree::path_as_segs() const {
     list <string> path_segs;
     ConfigTreeNode* ctn = _current_node;
@@ -106,12 +106,12 @@ ConfigTree::path_as_string(const list <string>& pathsegs) const {
     return path;
 }
 
-void 
+void
 ConfigTree::extend_path(const string &segment) {
     _path_segs.push_back(segment);
 }
 
-void 
+void
 ConfigTree::pop_path() {
     int segs_to_pop = _seg_lengths.front();
     _seg_lengths.pop_front();
@@ -120,7 +120,7 @@ ConfigTree::pop_path() {
     }
 }
 
-void 
+void
 ConfigTree::push_path() {
     string path = current_path_as_string();
     string nodename = _path_segs.back();
@@ -157,7 +157,7 @@ ConfigTree::add_node(const string& segment) {
 		 * through a call to add_node .
 		 */
 		string err = "Need to qualify type of " + segment + "\n";
-		throw ParseError(err);
+		xorp_throw(ParseError, err);
 	    }
 	    found = *i;
 	}
@@ -177,20 +177,20 @@ ConfigTree::add_node(const string& segment) {
 	string path = current_path_as_string();
 	if (path.empty())
 	    path = segment;
-	else 
+	else
 	    path += " " + segment;
 	found = new ConfigTreeNode(segment, path, ttn, _current_node, /*user_id*/0);
 	_current_node = found;
     }
 }
 
-void 
+void
 ConfigTree::terminal_value(char *value, int type) {
     string path(current_path_as_string());
     string svalue(value);
     ConfigTreeNode *ctn = _current_node;
     XLOG_ASSERT(ctn != NULL);
-    
+
     /*special case for bool types to avoid needing to type "true"*/
     if (svalue == "" && (type == NODE_VOID)) {
 	if (ctn->type() == NODE_BOOL)
@@ -259,13 +259,13 @@ ConfigTree::terminal_value(char *value, int type) {
 		goto parse_error;
 	    }
 	    break;
-	default: 
+	default:
 	    //Did we forget to add a new type?
 	    XLOG_FATAL("Unexpected type %d received\n", ctn->type());
 	}
     } else if (ctn->type() != type) {
-	string err = "\"" + path + "\" has type " + ctn->typestr() + 
-	    ", and value " + svalue + " is not a valid " + 
+	string err = "\"" + path + "\" has type " + ctn->typestr() +
+	    ", and value " + svalue + " is not a valid " +
 	    ctn->typestr();
 	booterror(err.c_str());
 	exit(1);
@@ -274,14 +274,14 @@ ConfigTree::terminal_value(char *value, int type) {
     return;
 
     parse_error:
-    string err = "\"" + path + "\" has type " + ctn->typestr() + 
-	", and value " + svalue + " is not a valid " + 
+    string err = "\"" + path + "\" has type " + ctn->typestr() +
+	", and value " + svalue + " is not a valid " +
 	ctn->typestr();
     booterror(err.c_str());
     exit(1);
 }
 
-const ConfigTreeNode* 
+const ConfigTreeNode*
 ConfigTree::find_config_node(const list <string>& pathsegs) const {
     const ConfigTreeNode *found = &_root_node;
     const ConfigTreeNode *found2 = found;
@@ -306,30 +306,30 @@ ConfigTree::find_config_node(const list <string>& pathsegs) const {
 }
 
 
-string 
+string
 ConfigTree::show_subtree(const list <string>& pathsegs) const {
     const ConfigTreeNode *found = find_config_node(pathsegs);
     if (found == NULL)
 	return "ERROR";
-    
+
     string s= found->show_subtree(/*depth*/0, /*indent*/ 0, /*do_indent*/true,
 				  /*annotate*/true);
     return s;
 }
 
-string 
+string
 ConfigTree::show_tree() const {
-    return _root_node.show_subtree(/*depth*/0, /*indent*/ 0, 
+    return _root_node.show_subtree(/*depth*/0, /*indent*/ 0,
 				   /*do_indent*/true, /*annotate*/true);
 }
 
-string 
+string
 ConfigTree::show_unannotated_tree() const {
-    return _root_node.show_subtree(/*depth*/0, /*indent*/ 0, 
+    return _root_node.show_subtree(/*depth*/0, /*indent*/ 0,
 				   /*do_indent*/true, /*annotate*/false);
 }
 
-ConfigTreeNode* 
+ConfigTreeNode*
 ConfigTree::find_node(const list <string>& path) {
     /* copy the path so we can modify it while searching... */
     list <string> path_copy;
@@ -340,13 +340,13 @@ ConfigTree::find_node(const list <string>& path) {
     return _root_node.find_node(path_copy);
 }
 
-void 
+void
 ConfigTree::print() const {
     _root_node.print_tree();
 }
 
-bool 
-ConfigTree::apply_deltas(uid_t user_id, const string& deltas, 
+bool
+ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
 			 bool provisional_change, string& response) {
 #ifdef DEBUG_CONFIG_CHANGE
     printf("CT apply_deltas %d %s\n",
@@ -356,7 +356,7 @@ ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
     try {
 	 ((ConfigTree*)(&delta_tree))->parse(deltas, "");
     } catch (ParseError &pe) {
-	response = pe.err;
+	response = pe.why();
 #ifdef DEBUG_CONFIG_CHANGE
 	printf("apply deltas failed, response = %s\n", response.c_str());
 #endif
@@ -368,12 +368,12 @@ ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
     printf("end delta tree.\n");
 #endif
     response = "";
-    return root().merge_deltas(user_id, delta_tree.const_root(), 
+    return root().merge_deltas(user_id, delta_tree.const_root(),
 				provisional_change, response);
 }
 
-bool 
-ConfigTree::apply_deletions(uid_t user_id, const string& deletions, 
+bool
+ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
 			    bool provisional_change, string& response) {
 #ifdef DEBUG_CONFIG_CHANGE
     printf("CT apply_deletions %d %s\n",
@@ -383,7 +383,7 @@ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
     try {
 	((ConfigTree*)(&deletion_tree))->parse(deletions, "");
     } catch (ParseError &pe) {
-	response = pe.err;
+	response = pe.why();
 	return false;
     }
 #ifdef DEBUG_CONFIG_CHANGE
@@ -392,12 +392,12 @@ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
     printf("end deletion tree.\n");
 #endif
     response = "";
-    return root().merge_deletions(user_id, deletion_tree.const_root(), 
+    return root().merge_deletions(user_id, deletion_tree.const_root(),
 				   provisional_change, response);
 }
 
-void 
-ConfigTree::expand_varname_to_matchlist(const string& varname, 
+void
+ConfigTree::expand_varname_to_matchlist(const string& varname,
 				      list <string>& matches) const {
     //trim $( and )
     string trimmed = varname.substr(2, varname.size()-3);
@@ -412,7 +412,7 @@ ConfigTree::expand_varname_to_matchlist(const string& varname,
 	v[i] = sl.front();
 	sl.pop_front();
     }
-    
+
     _root_node.expand_varname_to_matchlist(v, 0, matches);
 }
 

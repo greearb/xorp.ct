@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.24 2003/05/30 04:42:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.25 2003/05/31 06:13:15 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -23,8 +23,8 @@
 #include "template_tree.hh"
 #include "task.hh"
 
-Action::Action(const list<string>& action) 
-    throw (ParseError) 
+Action::Action(const list<string>& action)
+    throw (ParseError)
 {
 
     //we need to split the command into variable names and the rest so
@@ -111,13 +111,13 @@ Action::str() const {
 
 /***********************************************************************/
 
-XrlAction::XrlAction(const list<string>& action, const XRLdb& xrldb) 
+XrlAction::XrlAction(const list<string>& action, const XRLdb& xrldb)
      throw (ParseError) : Action(action)
 {
     debug_msg("XrlAction constructor\n");
     assert(action.front()=="xrl");
     check_xrl_is_valid(action, xrldb);
-    
+
     list <string> xrlparts = _split_cmd;
     list <string>::const_iterator si;
     int j=0;
@@ -128,7 +128,7 @@ XrlAction::XrlAction(const list<string>& action, const XRLdb& xrldb)
     //trim off the "xrl" command part.
     xrlparts.pop_front();
     if (xrlparts.empty())
-	throw ParseError("bad XrlAction syntax\n");
+	xorp_throw(ParseError, "bad XrlAction syntax\n");
 
     bool request_done = false;
     int segcount = 0;
@@ -149,13 +149,13 @@ XrlAction::XrlAction(const list<string>& action, const XRLdb& xrldb)
 	    debug_msg("found return spec\n");
 	    string::size_type origstart = origsegment.find("->");
 	    if (request_done)
-		throw ParseError("Two responses in one XRL\n");
+		xorp_throw(ParseError, "Two responses in one XRL\n");
 	    request_done = true;
 	    _request += segment.substr(0, start);
 	    if (origstart != 0)
 		_split_request.push_back(origsegment.substr(0, origstart));
 	    segment = segment.substr(start+2, segment.size()-(start+2));
-	    origsegment = origsegment.substr(origstart+2, 
+	    origsegment = origsegment.substr(origstart+2,
 					     origsegment.size()-(origstart+2));
 	}
 	if (request_done) {
@@ -184,8 +184,8 @@ XrlAction::XrlAction(const list<string>& action, const XRLdb& xrldb)
     debug_msg("\n");
 }
 
-void 
-XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb) 
+void
+XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
     const throw (ParseError)
 {
     XLOG_ASSERT(action.front() == "xrl");
@@ -197,7 +197,7 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
      * we need to go through the XRL template, and remove the
      * "=$(VARNAME)" instances to produce a generic version of the
      * XRL.  Then we can check it is a valid XRL as known by the
-     * XRLdb.  
+     * XRLdb.
      */
     enum char_type {VAR, NON_VAR, QUOTE, ASSIGN};
     char_type mode = NON_VAR;
@@ -220,7 +220,7 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
 		string err;
 		err = "Syntax error in XRL variable expansion;\n" +
 		    xrlstr + " contains bad variable definition.\n";
-		throw ParseError(err);
+		xorp_throw(ParseError, err);
 	    }
 	    if (xrlstr[i]==')')
 		mode = NON_VAR;
@@ -233,7 +233,7 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
 	    *cp = xrlstr[i];
 	    cp++;
 	case QUOTE:
-	    if (xrlstr[i]=='`') 
+	    if (xrlstr[i]=='`')
 		mode = NON_VAR;
 	    break;
 	case ASSIGN:
@@ -258,29 +258,29 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
     *cp = '\0';
     if (xrldb.check_xrl_syntax(cleaned_xrl) == false) {
 	string err;
-	err = "Syntax error in XRL;\n" + string(cleaned_xrl) + 
+	err = "Syntax error in XRL;\n" + string(cleaned_xrl) +
 	    " is not valid XRL syntax.\n";
 	delete[] cleaned_xrl;
-	throw ParseError(err);
+	xorp_throw(ParseError, err);
     }
     XRLMatchType match = xrldb.check_xrl_exists(cleaned_xrl);
-    switch (match) 
+    switch (match)
 	{
 	case MATCH_FAIL:
 	case MATCH_RSPEC: {
 	    string err;
-	    err = "Error in XRL spec;\n" + string(cleaned_xrl) + 
+	    err = "Error in XRL spec;\n" + string(cleaned_xrl) +
 		" is not specified in the XRL targets directory.\n";
 	    delete[] cleaned_xrl;
-	    throw ParseError(err);
+	    xorp_throw(ParseError, err);
 	}
 	case MATCH_XRL: {
 	    string err;
-	    err = "Error in XRL spec;\n" + string(cleaned_xrl) + 
+	    err = "Error in XRL spec;\n" + string(cleaned_xrl) +
 		" has different return specification from that in the " +
 		"XRL targets directory.\n";
 	    delete[] cleaned_xrl;
-	    throw ParseError(err);
+	    xorp_throw(ParseError, err);
 	}
 	case MATCH_ALL: {
 	    delete[] cleaned_xrl;
@@ -290,7 +290,7 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
 
 int
 XrlAction::execute(const ConfigTreeNode& ctn,
-		   TaskManager& task_manager, 
+		   TaskManager& task_manager,
 		   XrlRouter::XrlCallback cb) const {
 
     //first, go back through and merge all the separate words in the
@@ -313,7 +313,7 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 	word += segment;
     }
     //store the last word
-    if (word != "") 
+    if (word != "")
 	expanded_cmd.push_back(word);
 
 
@@ -327,12 +327,12 @@ XrlAction::execute(const ConfigTreeNode& ctn,
     if (words==0)
 	return (XORP_ERROR);
 
-    
+
     //now we're ready to begin...
     int result;
     if (args[0] == "xrl") {
 	if (words<2) {
-	    string err = "XRL command is missing the XRL on node " 
+	    string err = "XRL command is missing the XRL on node "
 		+ ctn.path() + "\n";
 	    XLOG_WARNING(err.c_str());
 	}
@@ -409,7 +409,7 @@ string XrlAction::expand_xrl_variables(const ConfigTreeNode& ctn) const {
 	++ptr;
     }
     //store the last word
-    if (word != "") 
+    if (word != "")
 	expanded_cmd.push_back(word);
 
     assert(expanded_cmd.size() >= 1);
@@ -440,7 +440,7 @@ Command::~Command() {
     }
 }
 
-void 
+void
 Command::add_action(const list <string>& action, const XRLdb& xrldb) {
     if (action.front()=="xrl") {
 	_actions.push_back(new XrlAction(action, xrldb));
@@ -459,7 +459,7 @@ Command::execute(ConfigTreeNode& ctn,
 	const XrlAction *xa = dynamic_cast<const XrlAction*>(*i);
 	if (xa!=NULL) {
 	    result = xa->execute(ctn, task_manager,
-				 callback(const_cast<Command*>(this), 
+				 callback(const_cast<Command*>(this),
 					  &Command::action_complete, &ctn));
 	} else {
 	    //current we only implement XRL commands
@@ -471,24 +471,24 @@ Command::execute(ConfigTreeNode& ctn,
 	    //return result;
 	}
 	actions++;
-    } 
+    }
     debug_msg("command execute returning XORP_OK\n");
     return actions;
 }
 
-void 
-Command::action_complete(const XrlError& err, 
+void
+Command::action_complete(const XrlError& err,
 			 XrlArgs*,
 			 ConfigTreeNode *ctn) {
     printf("Command::action_complete\n");
     if (err == XrlError::OKAY()) {
 	ctn->command_status_callback(this, true);
-    } else {	
+    } else {
 	ctn->command_status_callback(this, false);
     }
 }
 
-set <string> 
+set <string>
 Command::affected_xrl_modules() const {
     set <string> affected_modules;
     list <Action*>::const_iterator i;
@@ -502,7 +502,7 @@ Command::affected_xrl_modules() const {
     return affected_modules;
 }
 
-bool 
+bool
 Command::affects_module(const string& module) const {
     //if we don't specify a module, we mean any module.
     if (module=="")
@@ -515,7 +515,7 @@ Command::affects_module(const string& module) const {
     return true;
 }
 
-string 
+string
 Command::str() const {
     string tmp = _cmd_name + ": ";
     list <Action*>::const_iterator i;
@@ -531,18 +531,18 @@ AllowCommand::AllowCommand(const string& cmd_name)
 {
 }
 
-void 
-AllowCommand::add_action(const list <string>& action) 
+void
+AllowCommand::add_action(const list <string>& action)
     throw (ParseError)
 {
     debug_msg("AllowCommand::add_action\n");
     if (action.size() < 2) {
-	throw ParseError("Allow command with less than two parameters");
+	xorp_throw(ParseError, "Allow command with less than two parameters");
     }
     list<string>::const_iterator i;
     i = action.begin();
     if ((_varname.size()!=0) && (_varname != *i)) {
-	throw ParseError("Currently only one variable per node can be specified using allow commands");
+	xorp_throw(ParseError, "Currently only one variable per node can be specified using allow commands");
     }
     _varname = *i;
     ++i;
@@ -554,15 +554,15 @@ AllowCommand::add_action(const list <string>& action)
     }
 }
 
-int 
-AllowCommand::execute(const ConfigTreeNode& ctn) const 
+int
+AllowCommand::execute(const ConfigTreeNode& ctn) const
     throw (ParseError)
 {
     string found;
     if (ctn.expand_variable(_varname, found)== false) {
-	string tmp = "\n AllowCommand: variable " + _varname + 
+	string tmp = "\n AllowCommand: variable " + _varname +
 	    " is not defined.\n";
-	throw ParseError(tmp);
+	xorp_throw(ParseError, tmp);
     }
 
     list<string>::const_iterator i;
@@ -571,10 +571,10 @@ AllowCommand::execute(const ConfigTreeNode& ctn) const
 	    return 0;
     }
     string tmp = "value " + found + " is not a valid value for " + _varname + "\n";
-    throw ParseError(tmp);
+    xorp_throw(ParseError, tmp);
 }
 
-string 
+string
 AllowCommand::str() const {
     string tmp;
     tmp = "AllowCommand: varname = " + _varname + " \n       Allowed values: ";

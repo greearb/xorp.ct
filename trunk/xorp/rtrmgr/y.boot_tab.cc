@@ -232,7 +232,7 @@ string booterrormsg(const char *s) {
 }
 
 void booterror(const char *s) {
-  throw ParseError(booterrormsg(s));
+  xorp_throw(ParseError, booterrormsg(s));
 }
 
 

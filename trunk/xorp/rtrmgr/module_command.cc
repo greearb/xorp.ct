@@ -12,23 +12,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.13 2003/05/31 22:33:27 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.14 2003/06/09 23:38:40 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
+
+#include "libxipc/xrl_router.hh"
+
 #include "module_command.hh"
 #include "xrldb.hh"
 #include "template_tree.hh"
-#include "libxipc/xrl_router.hh"
 #include "task.hh"
+#include "parse_error.hh"
 
 ModuleCommand::ModuleCommand(const string& cmd_name, TemplateTree& tt)
     : Command(cmd_name),
-      _tt(tt), 
-      _startcommit(NULL), _endcommit(NULL), 
-      _status_method(NO_STATUS_METHOD), 
-      _shutdown_method(NO_SHUTDOWN_METHOD), 
+      _tt(tt),
+      _startcommit(NULL), _endcommit(NULL),
+      _status_method(NO_STATUS_METHOD),
+      _shutdown_method(NO_SHUTDOWN_METHOD),
       _execute_done(false)
 {
     assert(cmd_name == "%modinfo");
@@ -42,14 +45,14 @@ ModuleCommand::~ModuleCommand()
 	delete _endcommit;
 }
 
-void 
-ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb) 
+void
+ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     throw (ParseError)
 {
-    if ((action.size() == 3) 
+    if ((action.size() == 3)
 	&& ((action.front() == "startcommit")
 	    || (action.front() == "endcommit"))) {
-	//it's OK 
+	//it's OK
     } else if (action.size() != 2) {
 	fprintf(stderr, "Error in modinfo command:\n");
 	list <string>::const_iterator i = action.begin();
@@ -58,10 +61,11 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	    ++i;
 	}
 	fprintf(stderr, "\n");
-	if (action.size() > 2)
-	    throw ParseError("too many parameters to %modinfo");
-	else
-	    throw ParseError("too few parameters to %modinfo");
+	if (action.size() > 2) {
+	    xorp_throw(ParseError, "too many parameters to %modinfo");
+	} else {
+	    xorp_throw(ParseError, "too few parameters to %modinfo");
+	}
     }
     typedef list<string>::const_iterator CI;
     CI ptr = action.begin();
@@ -73,17 +77,17 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	_tt.register_module(_modname, this);
     } else if (cmd == "depends") {
 	if (_modname.empty()) {
-	    throw ParseError("\"depends\" must be preceded by \"provides\"");
+	    xorp_throw(ParseError, "\"depends\" must be preceded by \"provides\"");
 	}
 	_depends.push_back(value);
     } else if (cmd == "path") {
 	if (_modname == "") {
-	    throw ParseError("\"path\" must be preceded by \"provides\"");
+	    xorp_throw(ParseError, "\"path\" must be preceded by \"provides\"");
 	}
 	if (_modpath != "") {
-	    throw ParseError("duplicate \"path\" subcommand");
+	    xorp_throw(ParseError, "duplicate \"path\" subcommand");
 	}
-	if (value[0]=='"') 
+	if (value[0]=='"')
 	    _modpath = value.substr(1,value.length()-2);
 	else
 	    _modpath = value;
@@ -112,7 +116,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	if (newaction.front() == "xrl") {
 	    _status_method = STATUS_BY_XRL;
 	} else {
-	    throw ParseError("Unknown statusmethod " + newaction.front());
+	    xorp_throw(ParseError, "Unknown statusmethod " + newaction.front());
 	}
     } else if (cmd == "shutdownmethod") {
 	list <string> newaction = action;
@@ -120,17 +124,17 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	if (newaction.front() == "xrl") {
 	    _shutdown_method = SHUTDOWN_BY_XRL;
 	} else {
-	    throw ParseError("Unknown shutdownmethod " + newaction.front());
+	    xorp_throw(ParseError, "Unknown shutdownmethod " + newaction.front());
 	}
     } else {
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
-	throw ParseError(err);
+	xorp_throw(ParseError, err);
     }
 }
 
 #ifdef NOTDEF
-int 
-ModuleCommand::execute(TaskManager& taskmgr) const 
+int
+ModuleCommand::execute(TaskManager& taskmgr) const
 {
     return taskmgr.add_module(*this);
 }
@@ -177,13 +181,13 @@ ModuleCommand::shutdown_method(TaskManager &taskmgr) const
     }
 }
 
-int 
+int
 ModuleCommand::start_transaction(ConfigTreeNode& ctn,
-				 TaskManager& task_manager) const 
+				 TaskManager& task_manager) const
 {
     if (_startcommit == NULL)
 	return XORP_OK;
-    XrlRouter::XrlCallback cb 
+    XrlRouter::XrlCallback cb
 	= callback(const_cast<ModuleCommand*>(this),
 		   &ModuleCommand::action_complete,
 		   &ctn, _startcommit,
@@ -194,13 +198,13 @@ ModuleCommand::start_transaction(ConfigTreeNode& ctn,
     return xa->execute(ctn, task_manager, cb);
 }
 
-int 
+int
 ModuleCommand::end_transaction(ConfigTreeNode& ctn,
-			       TaskManager& task_manager) const 
+			       TaskManager& task_manager) const
 {
     if (_endcommit == NULL)
 	return XORP_OK;
-    XrlRouter::XrlCallback cb 
+    XrlRouter::XrlCallback cb
 	= callback(const_cast<ModuleCommand*>(this),
 		   &ModuleCommand::action_complete,
 		   &ctn, _endcommit,
@@ -212,7 +216,7 @@ ModuleCommand::end_transaction(ConfigTreeNode& ctn,
 }
 
 string
-ModuleCommand::str() const 
+ModuleCommand::str() const
 {
     string tmp;
     tmp= "ModuleCommand: provides: " + _modname + "\n";
@@ -233,21 +237,21 @@ ModuleCommand::execute_completed() const
     return _execute_done;
 }
 
-void 
-ModuleCommand::exec_complete(const XrlError& /*err*/, 
-			     XrlArgs*) 
+void
+ModuleCommand::exec_complete(const XrlError& /*err*/,
+			     XrlArgs*)
 {
     debug_msg("ModuleCommand::exec_complete\n");
     _execute_done = true;
 }
 #endif
 
-void 
-ModuleCommand::action_complete(const XrlError& err, 
+void
+ModuleCommand::action_complete(const XrlError& err,
 			       XrlArgs* args,
 			       ConfigTreeNode *ctn,
 			       Action* action,
-			       string cmd) 
+			       string cmd)
 {
     debug_msg("ModuleCommand::action_complete\n");
     if (err == XrlError::OKAY()) {

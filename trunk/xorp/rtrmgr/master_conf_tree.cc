@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.15 2003/05/31 22:33:27 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.16 2003/09/24 16:16:07 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,11 +34,11 @@
 extern string booterrormsg(const char *s);
 
 /*************************************************************************
- * Master Config Tree class 
+ * Master Config Tree class
  *************************************************************************/
 
-MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt, 
-				   TaskManager &task_manager) 
+MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt,
+				   TaskManager &task_manager)
     : ConfigTree(tt), _task_manager(task_manager), _commit_in_progress(false)
 {
     string configuration;
@@ -69,7 +69,7 @@ MasterConfigTree::read_file(string& configuration, const string& conffile,
     FILE *file;
     file = fopen(conffile.c_str(), "r");
     if (file == NULL) {
-	errmsg = c_format("Failed to open config file: %s\n", 
+	errmsg = c_format("Failed to open config file: %s\n",
 			  conffile.c_str());
 	return false;
     }
@@ -89,13 +89,13 @@ MasterConfigTree::read_file(string& configuration, const string& conffile,
     return true;
 }
 
-bool MasterConfigTree::parse(const string& configuration, 
+bool MasterConfigTree::parse(const string& configuration,
 			    const string& conffile) {
     try {
 	((ConfigTree*)this)->parse(configuration, conffile);
     } catch (ParseError &pe) {
-	printf("caught ParseError: %s\n", pe.err.c_str());
-	booterrormsg(pe.err.c_str());
+	printf("caught ParseError: %s\n", pe.why().c_str());
+	booterrormsg(pe.why().c_str());
 	printf("caught ParseError 2\n");
 	return false;
     }
@@ -175,8 +175,8 @@ MasterConfigTree::find_inactive_modules() const {
     //remove things that are common to both lists
     list <string>::iterator i;
     while (!ordered_active_modules.empty()) {
-	for (i = ordered_all_modules.begin(); 
-	     i != ordered_all_modules.end(); 
+	for (i = ordered_all_modules.begin();
+	     i != ordered_all_modules.end();
 	     i++) {
 	    if (*i == ordered_active_modules.front()) {
 		ordered_all_modules.erase(i);
@@ -210,7 +210,7 @@ MasterConfigTree::order_module_list(const set <string>& module_set,
     //handle the degenerate cases simply
     if (module_set.empty())
 	return;
-	
+
     multimap <string, string> depends; //first depends on second
     set <string> no_info; //modules we found no info about
     set <string> satisfied; //modules we found no info about
@@ -287,7 +287,7 @@ MasterConfigTree::order_module_list(const set <string>& module_set,
     multimap<string,string>::iterator cur, next;
     while (!depends.empty()) {
 	bool progress_made = false;
-	cur = depends.begin(); 
+	cur = depends.begin();
 	while (cur!= depends.end()) {
 	    next = cur;
 	    next++;
@@ -314,7 +314,7 @@ MasterConfigTree::order_module_list(const set <string>& module_set,
 	    XLOG_FATAL("Module dependencies cannot be satisfied\n");
 	}
     }
-    
+
     //finally add the modules for which we have no information
     for (i = no_info.begin(); i!=no_info.end(); i++) {
 	ordered_modules.push_back(*i);
@@ -368,8 +368,8 @@ MasterConfigTree::commit_changes_pass1(CallBack cb) {
     }
 
     if (_root_node.commit_changes(_task_manager,
-				  /*do_commit = */false, 
-				  0, 0, 
+				  /*do_commit = */false,
+				  0, 0,
 				  result) == false) {
 	//something went wrong - return the error message.
 	cb->dispatch(false, result);
@@ -379,9 +379,9 @@ MasterConfigTree::commit_changes_pass1(CallBack cb) {
     for (i=inactive_modules.begin(); i!=inactive_modules.end(); i++) {
 	_task_manager.shutdown_module(*i);
     }
-    
+
     try {
-	_task_manager.run(callback(this, 
+	_task_manager.run(callback(this,
 				   &MasterConfigTree::commit_pass1_done));
     } catch (UnexpandedVariable& uvar) {
 	//ignore this?
@@ -389,7 +389,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb) {
     }
 }
 
-void 
+void
 MasterConfigTree::commit_pass1_done(bool success, string result) {
     printf("##############################################################\n");
     printf("## commit_pass1_done\n");
@@ -428,10 +428,10 @@ MasterConfigTree::commit_changes_pass2() {
 	    return;
 	}
     }
-	
+
 
     if (!_root_node.commit_changes(_task_manager,
-				   /*do_commit = */true, 
+				   /*do_commit = */true,
 				   0, 0, result)) {
 	//abort the commit
 	XLOG_ERROR("Commit failed in config tree\n");
@@ -444,7 +444,7 @@ MasterConfigTree::commit_changes_pass2() {
     }
 
     try {
-	_task_manager.run(callback(this, 
+	_task_manager.run(callback(this,
 				   &MasterConfigTree::commit_pass2_done));
     } catch (UnexpandedVariable& uvar) {
 	result = uvar.str();
@@ -455,11 +455,11 @@ MasterConfigTree::commit_changes_pass2() {
     return;
 }
 
-void 
+void
 MasterConfigTree::commit_pass2_done(bool success, string result) {
     printf("##############################################################\n");
     printf("## commit_pass2_done\n");
-    if (success) 
+    if (success)
 	printf("## commit seems successful\n");
     else
 	printf("## commit failed: %s\n", result.c_str());
@@ -481,7 +481,7 @@ bool MasterConfigTree::check_commit_status(string &result) {
 
 
 string
-MasterConfigTree::discard_changes() 
+MasterConfigTree::discard_changes()
 {
     printf("##############################################################\n");
     printf("MasterConfigTree::discard_changes\n");
@@ -493,7 +493,7 @@ MasterConfigTree::discard_changes()
 
 string
 MasterConfigTree::mark_subtree_for_deletion(const list <string>& pathsegs,
-					    uid_t user_id) 
+					    uid_t user_id)
 {
     ConfigTreeNode *found = find_node(pathsegs);
     if (found == NULL)
@@ -504,12 +504,12 @@ MasterConfigTree::mark_subtree_for_deletion(const list <string>& pathsegs,
 	&& found->parent()->children().size()==1) {
 	found = found->parent();
     }
-    
+
     found->mark_subtree_for_deletion(user_id);
     return string("OK");
 }
 
-void 
+void
 MasterConfigTree::delete_entire_config()
 {
     _root_node.mark_subtree_for_deletion(0);
@@ -519,25 +519,25 @@ MasterConfigTree::delete_entire_config()
     commit_changes_pass2();
 }
 
-bool 
-MasterConfigTree::lock_node(const string& /*node*/, uid_t /*user_id*/, 
-			    uint32_t /*timeout*/, 
-			    uint32_t& /*holder*/) 
+bool
+MasterConfigTree::lock_node(const string& /*node*/, uid_t /*user_id*/,
+			    uint32_t /*timeout*/,
+			    uint32_t& /*holder*/)
 {
     //XXXX
     return true;
 }
 
-bool 
-MasterConfigTree::unlock_node(const string& /*node*/, uid_t /*user_id*/) 
+bool
+MasterConfigTree::unlock_node(const string& /*node*/, uid_t /*user_id*/)
 {
     //XXXX
     return true;
 }
 
-bool 
-MasterConfigTree::save_to_file(const string& filename, 
-			       uid_t user_id, 
+bool
+MasterConfigTree::save_to_file(const string& filename,
+			       uid_t user_id,
 			       string& errmsg) {
     errmsg = "";
 
@@ -569,20 +569,20 @@ MasterConfigTree::save_to_file(const string& filename,
     //set a umask of 664, to allow sharing of config files between
     //users in group xorp
     mode_t orig_mask = umask(S_IWOTH);
-    
+
     FILE *file;
     struct stat sb;
     if (stat(filename.c_str(), &sb)==0) {
 	if (sb.st_mode & S_IFREG == 0) {
 	    if (((sb.st_mode & S_IFMT) == S_IFCHR) ||
 		((sb.st_mode & S_IFMT) == S_IFBLK)) {
-		errmsg = c_format("File %s is a special device.\n", 
+		errmsg = c_format("File %s is a special device.\n",
 				  filename.c_str());
 	    } else if ((sb.st_mode & S_IFMT) == S_IFIFO) {
-		errmsg = c_format("File %s is a named pipe.\n", 
+		errmsg = c_format("File %s is a named pipe.\n",
 				  filename.c_str());
 	    } else if ((sb.st_mode & S_IFMT) == S_IFDIR) {
-		errmsg = c_format("File %s is a directory.\n", 
+		errmsg = c_format("File %s is a directory.\n",
 				  filename.c_str());
 	    }
 	    seteuid(orig_uid);
@@ -590,7 +590,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	    umask(orig_mask);
 	    return false;
 	    }
-    
+
 	file = fopen(filename.c_str(), "r");
 	if (file != NULL) {
 	    //we've been asked to overwrite a file
@@ -626,7 +626,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	    return false;
 	}
     }
-    
+
     file = fopen(filename.c_str(), "w");
     if (file == NULL) {
 	errmsg = "Could not create file \"" + filename + "\"";
@@ -655,7 +655,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	umask(orig_mask);
 	return false;
     }
-    
+
     //write the config to the file
     string config = show_unannotated_tree();
     bytes = fwrite(config.c_str(), 1, config.size(), file);
@@ -700,7 +700,7 @@ MasterConfigTree::save_to_file(const string& filename,
     return true;
 }
 
-bool 
+bool
 MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 				 string& errmsg,
 				 string& deltas, string& deletions) {
@@ -710,7 +710,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     //permission to read.  Otherwise it's possible that they could
     //load configs they shouldn't have access to, or get parts of
     //protected files reported to them in error messages.
-    
+
     //set the effective group to "xorp"
     struct group *grp = getgrnam("xorp");
     if (grp == NULL) {
@@ -742,7 +742,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 	setegid(orig_gid);
 	return false;
     }
-    
+
     //revert UID and GID now we've done reading the file
     seteuid(orig_uid);
     setegid(orig_gid);
@@ -754,7 +754,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 	new_tree.parse(configuration, filename);
     } catch (ParseError &pe) {
 	printf("caught ParseError\n");
-	errmsg = booterrormsg(pe.err.c_str());
+	errmsg = booterrormsg(pe.why().c_str());
 	return false;
     }
 
@@ -766,13 +766,13 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     diff_configs(new_tree, delta_tree, deletion_tree);
 
     string response;
-    if (!root()->merge_deltas(user_id, delta_tree.const_root(), 
+    if (!root()->merge_deltas(user_id, delta_tree.const_root(),
 			      /*provisional change*/true, response)) {
 	discard_changes();
 	errmsg = response;
 	return false;
     }
-    if (!root()->merge_deletions(user_id, deletion_tree.const_root(), 
+    if (!root()->merge_deletions(user_id, deletion_tree.const_root(),
 				 /*provisional change*/true, response)) {
 	discard_changes();
 	errmsg = response;
@@ -788,8 +788,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     return true;
 }
 
-void 
-MasterConfigTree::diff_configs(const ConfigTree& new_tree, 
+void
+MasterConfigTree::diff_configs(const ConfigTree& new_tree,
 			       ConfigTree& delta_tree,
 			       ConfigTree& deletion_tree) {
     //clone the existing config tree into the delta tree.
