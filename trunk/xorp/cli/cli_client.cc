@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.3 2003/03/28 12:41:28 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.4 2003/03/30 03:50:43 pavlin Exp $"
 
 
 //
@@ -831,7 +831,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	_page_buffer_last_line = &_output_buffer_last_line;
 	goto redisplay_screen_label;
     }
-    /* FALLTHROUGH */
+    // FALLTHROUGH
     
  redisplay_line_label:
     cli_flush();
@@ -867,7 +867,6 @@ CliClient::post_process_command(bool timer_timeout)
 	// TODO: print information about which command and which server
 	cli_print("Timeout waiting for result!\n");
 	set_is_waiting_for_data(false);
-	// FALLTHROUGH
     } else {
 	// the timer was scheduled, but we're no longer waiting for data.
 	if (_waiting_for_result_timer.scheduled())
