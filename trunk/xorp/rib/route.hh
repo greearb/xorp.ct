@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.14 2004/09/17 14:00:04 abittau Exp $
+// $XORP: xorp/rib/route.hh,v 1.15 2004/09/18 02:05:52 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -242,9 +242,10 @@ public:
 	string dst = (_net.is_valid()) ? _net.str() : string("NULL");
 	string vif = (_vif) ? string(_vif->name()) : string("NULL");
 	return string("Dst: ") + dst + string(" Vif: ") + vif +
-	    string(" NextHop: ") + _nexthop->str() + string(" Metric: ") +
-	    c_format("%d", _metric) + string(" PolicyTags: ") +
-	    _policytags.str();
+	    string(" NextHop: ") + _nexthop->str() +
+	    string(" Metric: ") + c_format("%d", _metric) +
+	    string(" Protocol: ") + _protocol.name() +
+	    string(" PolicyTags: ") + _policytags.str();
     }
 
 protected:
