@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.6 2004/06/10 22:41:10 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.7 2004/09/07 20:41:58 pavlin Exp $"
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -79,17 +79,27 @@ is_a_quote(char c)
     return (c == '%' || c == '+');
 }
 
-inline string
-escape_encode(char c)
+inline void
+escape_encode(char c, char*& buf)
 {
     if (c == ' ') {
-	return "+";
+	*buf++ = '+';
     } else {
-	char e[4];
-	snprintf(e, sizeof(e) / sizeof(e[0]), "%%%02X", (unsigned char)c);
-	return e;
+	*buf++ = '\%';
+	int v = (c & 0xf0) >> 4;
+	if (v < 10) 
+	    *buf++ = v + '0';
+	else
+	    *buf++ = (v - 10) + 'A';
+	v = c & 0x0f;
+	if (v < 10)
+	    *buf++ = v + '0';
+	else
+	    *buf++ = (v - 10) + 'A';
     }
 }
+
+
 
 inline static char
 hex_digit(char c)
@@ -143,9 +153,18 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
 
 	// Do escapes one at a time.
 	reg_start = reg_end;
+	char encoded_data[val_bytes * 4 + 1];
+	char *next_code = &encoded_data[0];
+	bool escaped = false;
 	while (reg_start != val_end && fast_needs_escape(*reg_start) == true) {
-	    out.append(escape_encode(*reg_start));
+	    //out.append(escape_encode(*reg_start));
+	    escape_encode(*reg_start, next_code);
 	    reg_start++;
+	    escaped = true;
+	}
+	if (escaped) {
+	    *next_code='\0';
+	    out.append(encoded_data);
 	}
     }
     return out;
