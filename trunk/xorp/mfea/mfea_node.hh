@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node.hh,v 1.7 2003/04/22 23:27:20 hodson Exp $
+// $XORP: xorp/mfea/mfea_node.hh,v 1.8 2003/05/15 23:40:37 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_HH__
@@ -91,18 +91,20 @@ public:
     /**
      * Install a new MFEA vif.
      * 
-     * @param mfea_vif information about new MfeaVif to install.
+     * @param vif information about new MfeaVif to install.
+     * @param err the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif(const MfeaVif& mfea_vif);
+    int		add_vif(const Vif& vif, string& err);
     
     /**
      *  Delete an existing MFEA vif.
      * 
      * @param vif_name the name of the vif to delete.
+     * @param err the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_vif(const char *vif_name);
+    int		delete_vif(const string& vif_name, string& err);
     
     /**
      * Start MFEA on all enabled interfaces.

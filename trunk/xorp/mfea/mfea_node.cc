@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.10 2003/04/23 09:39:18 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.11 2003/05/15 23:40:37 pavlin Exp $"
 
 
 //
@@ -181,22 +181,27 @@ MfeaNode::stop(void)
 
 /**
  * MfeaNode::add_vif:
- * @mfea_vif: Information about new MfeaVif to install.
+ * @vif: Vif information about new MfeaVif to install.
+ * @err: The error message (if error).
  * 
  * Install a new MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::add_vif(const MfeaVif& org_mfea_vif)
+MfeaNode::add_vif(const Vif& vif, string& err)
 {
     //
     // Create a new MfeaVif
     //
-    MfeaVif *mfea_vif = new MfeaVif(*this, org_mfea_vif);
+    MfeaVif *mfea_vif = new MfeaVif(*this, vif);
     
     if (ProtoNode<MfeaVif>::add_vif(mfea_vif) != XORP_OK) {
 	// Cannot add this new vif
+	err = c_format("Cannot add vif %s: internal error",
+		       vif.name().c_str());
+	XLOG_ERROR(err.c_str());
+	
 	delete mfea_vif;
 	return (XORP_ERROR);
     }
@@ -209,36 +214,34 @@ MfeaNode::add_vif(const MfeaVif& org_mfea_vif)
 /**
  * MfeaNode::delete_vif:
  * @vif_name: The name of the vif to delete.
+ * @err: The error message (if error).
  * 
  * Delete an existing MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::delete_vif(const char *vif_name)
+MfeaNode::delete_vif(const string& vif_name, string& err)
 {
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot delete vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	XLOG_ERROR("Cannot delete vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot delete vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
     if (ProtoNode<MfeaVif>::delete_vif(mfea_vif) != XORP_OK) {
-	XLOG_ERROR("Cannot delete vif %s: internal error",
-		   mfea_vif->name().c_str());
+	err = c_format("Cannot delete vif %s: internal error",
+		       mfea_vif->name().c_str());
+	XLOG_ERROR(err.c_str());
 	delete mfea_vif;
 	return (XORP_ERROR);
     }
     
     delete mfea_vif;
     
-    XLOG_INFO("Deleted vif: %s", vif_name);
+    XLOG_INFO("Deleted vif: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
@@ -361,9 +364,11 @@ MfeaNode::delete_all_vifs(void)
 	
 	string vif_name = mfea_vif->name();
 	
-	if (delete_vif(mfea_vif->name().c_str()) != XORP_OK) {
-	    XLOG_ERROR("Cannot delete vif %s: internal error",
-		       vif_name.c_str());
+	string err;
+	if (delete_vif(mfea_vif->name(), err) != XORP_OK) {
+	    err = c_format("Cannot delete vif %s: internal error",
+			   vif_name.c_str());
+	    XLOG_ERROR(err.c_str());
 	}
     }
 }

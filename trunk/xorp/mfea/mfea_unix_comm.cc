@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.14 2003/04/23 00:52:50 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.15 2003/04/23 09:39:18 pavlin Exp $"
 
 
 //
@@ -189,7 +189,9 @@ UnixComm::start(void)
 		 mfea_vifs_iter != mfea_vifs_array.end();
 		 ++mfea_vifs_iter) {
 		MfeaVif *mfea_vif = *mfea_vifs_iter;
-		mfea_node().add_vif(*mfea_vif);
+		string err;
+		mfea_node().add_vif(*mfea_vif, err);
+		// TODO: shall we check for error adding the vif?
 	    }
 	    
 	    //
@@ -235,7 +237,9 @@ UnixComm::start(void)
 						 pim_register_vif_addr.addr_bitlen()),
 						 pim_register_vif_addr,
 						 IPvX::ZERO(family()));
-		mfea_node().add_vif(register_vif);
+		string err;
+		mfea_node().add_vif(register_vif, err);
+		// TODO: shall we check for error adding the vif?
 	    }
 	    
 	    // Delete the old MfeaVif storage
