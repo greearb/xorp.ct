@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.4 2003/05/30 18:13:19 jcardona Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.5 2003/06/03 10:54:21 pavlin Exp $
 #
 
 #
@@ -362,6 +362,17 @@ xref="libxorp libxorp-callback libcomm libxipc libproto"
 kdocify
 
 #
+# fea
+#
+lib="fea"
+desc="Forwarding Engine Abstraction daemon"
+html_start_page="index.html"
+files="fea/*.hh"
+excludes="fea/*click*hh"
+xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
+kdocify
+
+#
 # mld6igmp
 #
 lib="mld6igmp"
@@ -369,7 +380,7 @@ desc="Multicast Listener Discovery daemon"
 html_start_page="index.html"
 files="mld6igmp/*.h mld6igmp/*.hh"
 excludes=""
-xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli mfea"
+xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea"
 kdocify
 
 #
@@ -380,18 +391,7 @@ desc="Protocol Independent Multicast (PIM) daemon"
 html_start_page="index.html"
 files="pim/*.h pim/*.hh"
 excludes=""
-xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli mfea mld6igmp"
-kdocify
-
-#
-# fea
-#
-lib="fea"
-desc="Forwarding Engine Abstraction daemon"
-html_start_page="index.html"
-files="fea/*.hh"
-excludes="fea/*click*hh"
-xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
+xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea mld6igmp"
 kdocify
 
 #
