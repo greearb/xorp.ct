@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.7 2004/02/28 21:14:48 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.8 2004/06/10 22:40:42 hodson Exp $"
 
 
 //
@@ -281,7 +281,8 @@ CliNode::cli_set_log_output_cli(const string&	, // server_name
 	}
     }
     
-    cli_client->cli_print(c_format("Added %u CLI terminal(s)\n", cli_n));
+    cli_client->cli_print(c_format("Added %u CLI terminal(s)\n",
+				   XORP_UINT_CAST(cli_n)));
     
     return (XORP_OK);
 }
@@ -352,7 +353,8 @@ CliNode::cli_set_log_output_remove_cli(const string&	, // server_name
 	}
     }
     
-    cli_client->cli_print(c_format("Removed %u CLI terminal(s)\n", cli_n));
+    cli_client->cli_print(c_format("Removed %u CLI terminal(s)\n",
+				   XORP_UINT_CAST(cli_n)));
     
     return (XORP_OK);
 }
