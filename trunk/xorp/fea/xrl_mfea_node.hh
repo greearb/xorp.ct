@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.17 2005/01/28 03:34:18 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.18 2005/02/14 20:35:47 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -22,34 +22,35 @@
 // MFEA (Multicast Forwarding Engine Abstraction) XRL-aware node definition.
 //
 
-#include <string>
+#include "libxipc/xrl_std_router.hh"
 
-#include "libxorp/xlog.h"
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 
-#include "libxipc/xrl_router.hh"
-
-#include "xrl/targets/mfea_base.hh"
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/mfea_client_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
+#include "xrl/targets/mfea_base.hh"
 
 #include "mfea_node.hh"
 #include "mfea_node_cli.hh"
 
 
-class EventLoop;
-
 //
 // The top-level class that wraps-up everything together under one roof
 //
 class XrlMfeaNode : public MfeaNode,
+		    public XrlStdRouter,
 		    public XrlMfeaTargetBase,
 		    public MfeaNodeCli {
 public:
-    XrlMfeaNode(int family,
-		xorp_module_id module_id,
-		EventLoop& eventloop,
-		XrlRouter* xrl_router,
-		const string& fea_target);
+    XrlMfeaNode(int		family,
+		xorp_module_id	module_id,
+		EventLoop&	eventloop,
+		const string&	class_name,
+		const string&	finder_hostname,
+		uint16_t	finder_port,
+		const string&	finder_target,
+		const string&	fea_target);
     virtual ~XrlMfeaNode();
 
     /**
@@ -65,7 +66,14 @@ public:
      * @return true on success, false on failure.
      */
     bool	shutdown();
-    
+
+    /**
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    XrlRouter&	xrl_router() { return *this; }
+
     //
     // XrlMfeaNode front-end interface
     //
@@ -109,6 +117,30 @@ protected:
      *  shutdown cleanly
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Announce target birth to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
+
+    /**
+     *  Announce target death to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
 
     /**
      *  Process a CLI command.
@@ -601,12 +633,22 @@ protected:
 	const bool&	enable);
 
 private:
-
-    bool ifmgr_startup();
-    bool ifmgr_shutdown();
-
-    const ServiceBase* ifmgr_mirror_service_base() const { return dynamic_cast<const ServiceBase*>(&_ifmgr); }
+    const ServiceBase* ifmgr_mirror_service_base() const {
+	return dynamic_cast<const ServiceBase*>(&_ifmgr);
+    }
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
+
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_disconnect_event();
+
+    void fea_register_startup();
+    void finder_register_interest_fea_cb(const XrlError& xrl_error);
+    void fea_register_shutdown();
+    void finder_deregister_interest_fea_cb(const XrlError& xrl_error);
 
     //
     // Protocol node methods
@@ -798,12 +840,23 @@ private:
 
     const string		_class_name;
     const string		_instance_name;
+    const string		_finder_target;
     const string		_fea_target;
 
     IfMgrXrlMirror		_ifmgr;
 
     XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+    XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
+
+    static const TimeVal	RETRY_TIMEVAL;
+
+    bool			_is_fea_alive;
+    bool			_is_fea_registered;
+    bool			_is_fea_registering;
+    bool			_is_fea_deregistering;
+    XorpTimer			_fea_register_startup_timer;
+    XorpTimer			_fea_register_shutdown_timer;
 };
 
 #endif // __FEA_XRL_MFEA_NODE_HH__

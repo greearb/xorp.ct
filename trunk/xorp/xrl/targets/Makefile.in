@@ -861,6 +861,7 @@ $(srcdir)/packet_acl_base.hh $(srcdir)/packet_acl_base.cc:		\
 $(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/mfea.xif
 $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/common.xif 				\

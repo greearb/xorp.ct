@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.44 2005/02/12 04:50:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.45 2005/02/14 20:35:46 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -213,26 +213,26 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     //  MFEA node
     //
     // XXX: for now we don't have dummy MFEA
-    XrlStdRouter xrl_std_router_mfea4(eventloop,
-				      xorp_module_name(AF_INET,
-						       XORP_MODULE_MFEA),
-				      finder_hostname.c_str(),
-				      finder_port);
-    XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, eventloop,
-			       &xrl_std_router_mfea4,
+    XrlMfeaNode xrl_mfea_node4(AF_INET,
+			       XORP_MODULE_MFEA,
+			       eventloop,
+			       xorp_module_name(AF_INET, XORP_MODULE_MFEA),
+			       finder_hostname,
+			       finder_port,
+			       "finder",
 			       xorp_module_name(AF_INET, XORP_MODULE_FEA));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea4);
+    wait_until_xrl_router_is_ready(eventloop, xrl_mfea_node4.xrl_router());
 
 #ifdef HAVE_IPV6_MULTICAST
-    XrlStdRouter xrl_std_router_mfea6(eventloop,
-				      xorp_module_name(AF_INET6,
-						       XORP_MODULE_MFEA),
-				      finder_hostname.c_str(),
-				      finder_port);
-    XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
-			       &xrl_std_router_mfea6,
-			       xorp_module_name(AF_INET6, XORP_MODULE_FEA));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
+    XrlMfeaNode xrl_mfea_node6(AF_INET6,
+			       XORP_MODULE_MFEA,
+			       eventloop,
+			       xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
+			       finder_hostname,
+			       finder_port,
+			       "finder",
+			       xorp_module_name(AF_INET6, XORP_MODULE_MFEA));
+    wait_until_xrl_router_is_ready(eventloop, xrl_mfea_node6.xrl_router());
 #endif // HAVE_IPV6_MULTICAST
 
     //
@@ -297,9 +297,9 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     while (xrl_std_router_fea.pending()
 #ifndef FEA_DUMMY
 	   || xrl_cli_node.xrl_router().pending()
-	   || xrl_std_router_mfea4.pending()
+	   || xrl_mfea_node4.xrl_router().pending()
 #ifdef HAVE_IPV6_MULTICAST
-	   || xrl_std_router_mfea6.pending()
+	   || xrl_mfea_node6.xrl_router().pending()
 #endif
 #endif // ! FEA_DUMMY
 	) {

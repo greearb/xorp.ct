@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.23 2005/01/28 03:34:18 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.24 2005/02/14 20:35:47 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -48,12 +48,12 @@
 // Structures/classes, typedefs and macros
 //
 
+class EventLoop;
 class MfeaVif;
 class ProtoComm;
 class SgCount;
 class VifCount;
 
-// The MFEA node
 /**
  * @short The MFEA node class.
  * 
@@ -1146,25 +1146,20 @@ private:
     virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
 
     /**
-     * Initiate startup of the interface manager.
+     * Initiate registration with the FEA.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
-     *
-     * @return true on success, false on failure.
      */
-    virtual bool ifmgr_startup() = 0;
+    virtual void fea_register_startup() = 0;
 
     /**
-     * Initiate shutdown of the interface manager.
+     * Initiate de-registration with the FEA.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
-     *
-     * @return true on success, false on failure.
      */
-    virtual bool ifmgr_shutdown() = 0;
-
+    virtual void fea_register_shutdown() = 0;
 
     int add_pim_register_vif();
     
