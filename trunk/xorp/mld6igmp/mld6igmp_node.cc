@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.21 2004/02/29 22:58:01 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.22 2004/03/01 10:02:41 pavlin Exp $"
 
 
 //
@@ -889,10 +889,8 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     // Find the vif for that packet
     //
     mld6igmp_vif = vif_find_by_vif_index(vif_index);
-    if (mld6igmp_vif == NULL) {
-	XLOG_UNREACHABLE();
+    if (mld6igmp_vif == NULL)
 	return (XORP_ERROR);
-    }
     
     // Copy the data to the receiving #buffer_t
     BUFFER_RESET(_buffer_recv);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.38 2004/03/02 00:32:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.39 2004/03/04 01:46:38 pavlin Exp $"
 
 
 //
@@ -1037,10 +1037,8 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
     // Find the vif for that packet
     //
     pim_vif = vif_find_by_vif_index(vif_index);
-    if (pim_vif == NULL) {
-	XLOG_UNREACHABLE();
+    if (pim_vif == NULL)
 	return (XORP_ERROR);
-    }
     
     // Copy the data to the receiving #buffer_t
     BUFFER_RESET(_buffer_recv);
