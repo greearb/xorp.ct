@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.8 2003/05/10 23:29:22 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.9 2003/05/23 00:02:08 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -1240,7 +1240,7 @@ void RouterCLI::idle_ui() {
 
 void RouterCLI::reenable_ui() {
     _cli_client.set_is_waiting_for_data(false);
-    _cli_client.post_process_command(false);
+    _cli_client.post_process_command();
 }
 
 void RouterCLI::commit_done(bool success, string errmsg) {
