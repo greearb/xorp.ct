@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.7 2004/06/02 22:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.8 2004/06/10 22:40:54 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -67,13 +67,18 @@ IfConfigSetNetlink::~IfConfigSetNetlink()
 int
 IfConfigSetNetlink::start()
 {
-    if (NetlinkSocket4::start() < 0)
-	return (XORP_ERROR);
+    if (ifc().have_ipv4()) {
+	if (NetlinkSocket4::start() < 0)
+	    return (XORP_ERROR);
+    }
     
 #ifdef HAVE_IPV6
-    if (NetlinkSocket6::start() < 0) {
-	NetlinkSocket4::stop();
-	return (XORP_ERROR);
+    if (ifc().have_ipv6()) {
+	if (NetlinkSocket6::start() < 0) {
+	    if (ifc().have_ipv4())
+		NetlinkSocket4::stop();
+	    return (XORP_ERROR);
+	}
     }
 #endif
 
@@ -91,10 +96,12 @@ IfConfigSetNetlink::stop()
     if (! _is_running)
 	return (XORP_OK);
 
-    ret_value4 = NetlinkSocket4::stop();
+    if (ifc().have_ipv4())
+	ret_value4 = NetlinkSocket4::stop();
     
 #ifdef HAVE_IPV6
-    ret_value6 = NetlinkSocket6::stop();
+    if (ifc().have_ipv6())
+	ret_value6 = NetlinkSocket6::stop();
 #endif
     
     if ((ret_value4 < 0) || (ret_value6 < 0))
@@ -547,6 +554,29 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
 
     UNUSED(ifname);
 
+    // Check that the family is supported
+    switch (addr.af()) {
+    case AF_INET:
+	if (! ifc().have_ipv4()) {
+	    reason = "IPv4 is not supported";
+	    return (XORP_ERROR);
+	}
+	break;
+
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	if (! ifc().have_ipv6()) {
+	    reason = "IPv6 is not supported";
+	    return (XORP_ERROR);
+	}
+	break;
+#endif // HAVE_IPV6
+
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+
     memset(buffer, 0, sizeof(buffer));
 
     // Set the socket
@@ -662,6 +692,29 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 	      ifname.c_str(), if_index, addr.str().c_str(), prefix_len);
 
     UNUSED(ifname);
+
+    // Check that the family is supported
+    switch (addr.af()) {
+    case AF_INET:
+	if (! ifc().have_ipv4()) {
+	    reason = "IPv4 is not supported";
+	    return (XORP_ERROR);
+	}
+	break;
+
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	if (! ifc().have_ipv6()) {
+	    reason = "IPv6 is not supported";
+	    return (XORP_ERROR);
+	}
+	break;
+#endif // HAVE_IPV6
+
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
 
     memset(buffer, 0, sizeof(buffer));
 

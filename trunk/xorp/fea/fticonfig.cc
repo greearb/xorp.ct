@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.19 2004/06/10 22:40:47 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.20 2004/08/03 05:02:54 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -59,25 +59,37 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
       _accept_rtadv_enabled6(false),
+      _have_ipv4(false),
+      _have_ipv6(false),
       _is_dummy(false),
       _is_running(false)
 {
     string error_msg;
-    
+
+    //
+    // Test if the system supports IPv4 and IPv6 respectively
+    //
+    _have_ipv4 = test_have_ipv4();
+    _have_ipv6 = test_have_ipv6();
+
     //
     // Get the old state from the underlying system
     //
-    if (unicast_forwarding_enabled4(_unicast_forwarding_enabled4, error_msg)
-	< 0) {
-	XLOG_FATAL(error_msg.c_str());
+    if (_have_ipv4) {
+	if (unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
+					error_msg) < 0) {
+	    XLOG_FATAL(error_msg.c_str());
+	}
     }
 #ifdef HAVE_IPV6
-    if (unicast_forwarding_enabled6(_unicast_forwarding_enabled6, error_msg)
-	< 0) {
-	XLOG_FATAL(error_msg.c_str());
-    }
-    if (accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
-	XLOG_FATAL(error_msg.c_str());
+    if (_have_ipv6) {
+	if (unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
+					error_msg) < 0) {
+	    XLOG_FATAL(error_msg.c_str());
+	}
+	if (accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
+	    XLOG_FATAL(error_msg.c_str());
+	}
     }
 #endif // HAVE_IPV6
 }
@@ -220,17 +232,21 @@ FtiConfig::stop()
     //
     // Restore the old state in the underlying system
     //
-    if (set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
-					error_msg) < 0) {
-	ret_value = XORP_ERROR;
+    if (_have_ipv4) {
+	if (set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
+					    error_msg) < 0) {
+	    ret_value = XORP_ERROR;
+	}
     }
 #ifdef HAVE_IPV6
-    if (set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
-					error_msg) < 0) {
-	ret_value = XORP_ERROR;
-    }
-    if (set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
-	ret_value = XORP_ERROR;
+    if (_have_ipv6) {
+	if (set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
+					    error_msg) < 0) {
+	    ret_value = XORP_ERROR;
+	}
+	if (set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
+	    ret_value = XORP_ERROR;
+	}
     }
 #endif // HAVE_IPV6
 
@@ -258,7 +274,7 @@ FtiConfig::start_configuration()
 	    ret_value = true;
     }
     
-    return ret_value;
+    return (ret_value);
 }
 
 bool
@@ -280,14 +296,14 @@ FtiConfig::end_configuration()
 	    ret_value = true;
     }
     
-    return ret_value;
+    return (ret_value);
 }
 
 bool
 FtiConfig::add_entry4(const Fte4& fte)
 {
     if (_ftic_entry_set == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_set->add_entry4(fte));
 }
 
@@ -295,7 +311,7 @@ bool
 FtiConfig::delete_entry4(const Fte4& fte)
 {
     if (_ftic_entry_set == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_set->delete_entry4(fte));
 }
 
@@ -303,7 +319,7 @@ bool
 FtiConfig::set_table4(const list<Fte4>& fte_list)
 {
     if (_ftic_table_set == NULL)
-	return false;
+	return (false);
     return (_ftic_table_set->set_table4(fte_list));
 }
 
@@ -311,7 +327,7 @@ bool
 FtiConfig::delete_all_entries4()
 {
     if (_ftic_table_set == NULL)
-	return false;
+	return (false);
     return (_ftic_table_set->delete_all_entries4());
 }
 
@@ -319,7 +335,7 @@ bool
 FtiConfig::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     if (_ftic_entry_get == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_get->lookup_route_by_dest4(dst, fte));
 }
 
@@ -327,7 +343,7 @@ bool
 FtiConfig::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
     if (_ftic_entry_get == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_get->lookup_route_by_network4(dst, fte));
 }
 
@@ -335,7 +351,7 @@ bool
 FtiConfig::get_table4(list<Fte4>& fte_list)
 {
     if (_ftic_table_get == NULL)
-	return false;
+	return (false);
     return (_ftic_table_get->get_table4(fte_list));
 }
 
@@ -343,7 +359,7 @@ bool
 FtiConfig::add_entry6(const Fte6& fte)
 {
     if (_ftic_entry_set == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_set->add_entry6(fte));
 }
 
@@ -351,7 +367,7 @@ bool
 FtiConfig::delete_entry6(const Fte6& fte)
 {
     if (_ftic_entry_set == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_set->delete_entry6(fte));
 }
 
@@ -359,7 +375,7 @@ bool
 FtiConfig::set_table6(const list<Fte6>& fte_list)
 {
     if (_ftic_table_set == NULL)
-	return false;
+	return (false);
     return (_ftic_table_set->set_table6(fte_list));
 }
 
@@ -367,7 +383,7 @@ bool
 FtiConfig::delete_all_entries6()
 {
     if (_ftic_table_set == NULL)
-	return false;
+	return (false);
     return (_ftic_table_set->delete_all_entries6());
 }
 
@@ -375,7 +391,7 @@ bool
 FtiConfig::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     if (_ftic_entry_get == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_get->lookup_route_by_dest6(dst, fte));
 }
 
@@ -383,7 +399,7 @@ bool
 FtiConfig::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 {
     if (_ftic_entry_get == NULL)
-	return false;
+	return (false);
     return (_ftic_entry_get->lookup_route_by_network6(dst, fte));
 }
 
@@ -391,7 +407,7 @@ bool
 FtiConfig::get_table6(list<Fte6>& fte_list)
 {
     if (_ftic_table_get == NULL)
-	return false;
+	return (false);
     return (_ftic_table_get->get_table6(fte_list));
 }
 
@@ -401,11 +417,11 @@ FtiConfig::get_table6(list<Fte6>& fte_list)
  * @return true if the underlying system supports IPv4, otherwise false.
  */
 bool
-FtiConfig::have_ipv4() const
+FtiConfig::test_have_ipv4() const
 {
     // XXX: always return true if running in dummy mode
     if (is_dummy())
-	return true;
+	return (true);
 
     int s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s < 0)
@@ -421,11 +437,11 @@ FtiConfig::have_ipv4() const
  * @return true if the underlying system supports IPv6, otherwise false.
  */
 bool
-FtiConfig::have_ipv6() const
+FtiConfig::test_have_ipv6() const
 {
     // XXX: always return true if running in dummy mode
     if (is_dummy())
-	return true;
+	return (true);
 
 #ifndef HAVE_IPV6
     return (false);
@@ -451,9 +467,19 @@ FtiConfig::have_ipv6() const
 int
 FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 {
-    // XXX: don't do anything if running in dummy mode
-    if (is_dummy())
-	return XORP_OK;
+    // XXX: always return true if running in dummy mode
+    if (is_dummy()) {
+	ret_value = true;
+	return (XORP_OK);
+    }
+
+    if (! have_ipv4()) {
+	ret_value = false;
+	error_msg = c_format("Cannot test whether IPv4 unicast forwarding "
+			     "is enabled: IPv4 is not supported");
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
 
     int enabled = 0;
     
@@ -521,9 +547,11 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 int
 FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 {
-    // XXX: don't do anything if running in dummy mode
-    if (is_dummy())
-	return XORP_OK;
+    // XXX: always return true if running in dummy mode
+    if (is_dummy()) {
+	ret_value = true;
+	return (XORP_OK);
+    }
 
 #ifndef HAVE_IPV6
     ret_value = false;
@@ -533,6 +561,14 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
+
+    if (! have_ipv6()) {
+	ret_value = false;
+	error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
+			     "is enabled: IPv6 is not supported");
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
     
     int enabled = 0;
     
@@ -601,9 +637,11 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 int
 FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 {
-    // XXX: don't do anything if running in dummy mode
-    if (is_dummy())
-	return XORP_OK;
+    // XXX: always return true if running in dummy mode
+    if (is_dummy()) {
+	ret_value = true;
+	return (XORP_OK);
+    }
 
 #ifndef HAVE_IPV6
     ret_value = false;
@@ -614,6 +652,15 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
+
+    if (! have_ipv6()) {
+	ret_value = false;
+	error_msg = c_format("Cannot test whether the acceptance of IPv6 "
+			     "Router Advertisement messages is enabled: "
+			     "IPv6 is not supported");
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
     
     int enabled = 0;
     
@@ -667,7 +714,21 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
     if (is_dummy())
-	return XORP_OK;
+	return (XORP_OK);
+
+    if (! have_ipv4()) {
+	if (! v) {
+	    //
+	    // XXX: we assume that "not supported" == "disable", hence
+	    // return OK.
+	    //
+	    return (XORP_OK);
+	}
+	error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: "
+			     "IPv4 is not supported", (v) ? "true": "false");
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
 
     int enable = (v) ? 1 : 0;
     bool old_value;
@@ -740,16 +801,39 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
     if (is_dummy())
-	return XORP_OK;
+	return (XORP_OK);
 
 #ifndef HAVE_IPV6
+    if (! v) {
+	//
+	// XXX: we assume that "not supported" == "disable", hence
+	// return OK.
+	//
+	return (XORP_OK);
+    }
+
     error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
 			 "IPv6 is not supported", (v) ? "true": "false");
     XLOG_ERROR(error_msg.c_str());
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
-    
+
+    if (! have_ipv6()) {
+	if (! v) {
+	    //
+	    // XXX: we assume that "not supported" == "disable", hence
+	    // return OK.
+	    //
+	    return (XORP_OK);
+	}
+
+	error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
+			     "IPv6 is not supported", (v) ? "true": "false");
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
     int enable = (v) ? 1 : 0;
     bool old_value, old_value_accept_rtadv;
     
@@ -840,9 +924,17 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
     if (is_dummy())
-	return XORP_OK;
+	return (XORP_OK);
 
 #ifndef HAVE_IPV6
+    if (! v) {
+	//
+	// XXX: we assume that "not supported" == "disable", hence
+	// return OK.
+	//
+	return (XORP_OK);
+    }
+
     error_msg = c_format("Cannot set the acceptance of IPv6 "
 			 "Router Advertisement messages to %s: "
 			 "IPv6 is not supported",
@@ -851,6 +943,23 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
+
+    if (! have_ipv6()) {
+	if (! v) {
+	    //
+	    // XXX: we assume that "not supported" == "disable", hence
+	    // return OK.
+	    //
+	    return (XORP_OK);
+	}
+
+	error_msg = c_format("Cannot set the acceptance of IPv6 "
+			     "Router Advertisement messages to %s: "
+			     "IPv6 is not supported",
+			     (v) ? "true": "false");
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
 
     int enable = (v) ? 1 : 0;
     bool old_value;

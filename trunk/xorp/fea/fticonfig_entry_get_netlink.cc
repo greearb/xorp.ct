@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.17 2004/08/03 03:51:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.18 2004/08/03 05:02:55 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -60,13 +60,18 @@ FtiConfigEntryGetNetlink::~FtiConfigEntryGetNetlink()
 int
 FtiConfigEntryGetNetlink::start()
 {
-    if (NetlinkSocket4::start() < 0)
-	return (XORP_ERROR);
+    if (ftic().have_ipv4()) {
+	if (NetlinkSocket4::start() < 0)
+	    return (XORP_ERROR);
+    }
     
 #ifdef HAVE_IPV6
-    if (NetlinkSocket6::start() < 0) {
-	NetlinkSocket4::stop();
-	return (XORP_ERROR);
+    if (ftic().have_ipv6()) {
+	if (NetlinkSocket6::start() < 0) {
+	    if (ftic().have_ipv4())
+		NetlinkSocket4::stop();
+	    return (XORP_ERROR);
+	}
     }
 #endif
 
@@ -84,10 +89,12 @@ FtiConfigEntryGetNetlink::stop()
     if (! _is_running)
 	return (XORP_OK);
 
-    ret_value4 = NetlinkSocket4::stop();
+    if (ftic().have_ipv4())
+	ret_value4 = NetlinkSocket4::stop();
     
 #ifdef HAVE_IPV6
-    ret_value6 = NetlinkSocket6::stop();
+    if (ftic().have_ipv6())
+	ret_value6 = NetlinkSocket6::stop();
 #endif
     
     if ((ret_value4 < 0) || (ret_value6 < 0))
@@ -111,7 +118,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
-    
+
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.nexthop().get_ipv4(),
@@ -163,7 +170,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
-    
+
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.nexthop().get_ipv6(),
@@ -235,7 +242,22 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     
     // Zero the return information
     fte.zero();
-    
+
+    // Check that the family is supported
+    do {
+	if (dst.is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return false;
+	    break;
+	}
+	if (dst.is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return false;
+	    break;
+	}
+	break;
+    } while (false);
+
     // Check that the destination address is valid
     if (! dst.is_unicast()) {
 	return false;

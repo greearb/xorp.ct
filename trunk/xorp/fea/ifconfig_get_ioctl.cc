@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.6 2004/06/02 22:52:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.7 2004/06/10 22:40:52 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -52,18 +52,22 @@ IfConfigGetIoctl::~IfConfigGetIoctl()
 int
 IfConfigGetIoctl::start()
 {
-    if (_s4 < 0) {
-	_s4 = socket(AF_INET, SOCK_DGRAM, 0);
+    if (ifc().have_ipv4()) {
 	if (_s4 < 0) {
-	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    _s4 = socket(AF_INET, SOCK_DGRAM, 0);
+	    if (_s4 < 0) {
+		XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    }
 	}
     }
     
 #ifdef HAVE_IPV6
-    if (_s6 < 0) {
-	_s6 = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (ifc().have_ipv6()) {
 	if (_s6 < 0) {
-	    XLOG_FATAL("Could not initialize IPv6 ioctl() socket");
+	    _s6 = socket(AF_INET6, SOCK_DGRAM, 0);
+	    if (_s6 < 0) {
+		XLOG_FATAL("Could not initialize IPv6 ioctl() socket");
+	    }
 	}
     }
 #endif // HAVE_IPV6
@@ -118,21 +122,25 @@ IfConfigGetIoctl::read_config(IfTree& it)
     //
     // The IPv4 information
     //
-    if (ioctl_read_ifconf(AF_INET, &ifconf) != true)
-	return false;
-    parse_buffer_ifreq(it, AF_INET, (uint8_t *)ifconf.ifc_buf,
-		       ifconf.ifc_len);
-    delete[] ifconf.ifc_buf;
+    if (ifc().have_ipv4()) {
+	if (ioctl_read_ifconf(AF_INET, &ifconf) != true)
+	    return false;
+	parse_buffer_ifreq(it, AF_INET, (uint8_t *)ifconf.ifc_buf,
+			   ifconf.ifc_len);
+	delete[] ifconf.ifc_buf;
+    }
     
 #ifdef HAVE_IPV6
     //
     // The IPv6 information
     //
-    if (ioctl_read_ifconf(AF_INET6, &ifconf) != true)
-	return false;
-    parse_buffer_ifreq(it, AF_INET6, (uint8_t *)ifconf.ifc_buf,
-		       ifconf.ifc_len);
-    delete[] ifconf.ifc_buf;
+    if (ifc().have_ipv6()) {
+	if (ioctl_read_ifconf(AF_INET6, &ifconf) != true)
+	    return false;
+	parse_buffer_ifreq(it, AF_INET6, (uint8_t *)ifconf.ifc_buf,
+			   ifconf.ifc_len);
+	delete[] ifconf.ifc_buf;
+    }
 #endif // HAVE_IPV6
     
     return true;

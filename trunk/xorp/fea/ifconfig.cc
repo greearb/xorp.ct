@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.24 2004/06/02 22:52:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.25 2004/06/10 22:40:51 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -68,10 +68,16 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _ifc_observer_dummy(*this),
       _ifc_observer_rtsock(*this),
       _ifc_observer_netlink(*this),
+      _have_ipv4(false),
+      _have_ipv6(false),
       _is_dummy(false),
       _is_running(false)
 {
-
+    //
+    // Test if the system supports IPv4 and IPv6 respectively
+    //
+    _have_ipv4 = test_have_ipv4();
+    _have_ipv6 = test_have_ipv6();
 }
 
 int
@@ -161,6 +167,50 @@ IfConfig::stop()
     _is_running = false;
 
     return (ret_value);
+}
+
+/**
+ * Test if the underlying system supports IPv4.
+ * 
+ * @return true if the underlying system supports IPv4, otherwise false.
+ */
+bool
+IfConfig::test_have_ipv4() const
+{
+    // XXX: always return true if running in dummy mode
+    if (is_dummy())
+	return true;
+
+    int s = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s < 0)
+	return (false);
+    
+    close(s);
+    return (true);
+}
+
+/**
+ * Test if the underlying system supports IPv6.
+ * 
+ * @return true if the underlying system supports IPv6, otherwise false.
+ */
+bool
+IfConfig::test_have_ipv6() const
+{
+    // XXX: always return true if running in dummy mode
+    if (is_dummy())
+	return true;
+
+#ifndef HAVE_IPV6
+    return (false);
+#else
+    int s = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (s < 0)
+	return (false);
+    
+    close(s);
+    return (true);
+#endif // HAVE_IPV6
 }
 
 bool

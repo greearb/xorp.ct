@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.7 2004/06/10 22:40:49 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.8 2004/08/03 03:51:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -61,13 +61,18 @@ FtiConfigEntrySetNetlink::~FtiConfigEntrySetNetlink()
 int
 FtiConfigEntrySetNetlink::start()
 {
-    if (NetlinkSocket4::start() < 0)
-	return (XORP_ERROR);
+    if (ftic().have_ipv4()) {
+	if (NetlinkSocket4::start() < 0)
+	    return (XORP_ERROR);
+    }
     
 #ifdef HAVE_IPV6
-    if (NetlinkSocket6::start() < 0) {
-	NetlinkSocket4::stop();
-	return (XORP_ERROR);
+    if (ftic().have_ipv6()) {
+	if (NetlinkSocket6::start() < 0) {
+	    if (ftic().have_ipv4())
+		NetlinkSocket4::stop();
+	    return (XORP_ERROR);
+	}
     }
 #endif
 
@@ -85,10 +90,12 @@ FtiConfigEntrySetNetlink::stop()
     if (! _is_running)
 	return (XORP_OK);
 
-    ret_value4 = NetlinkSocket4::stop();
+    if (ftic().have_ipv4())
+	ret_value4 = NetlinkSocket4::stop();
     
 #ifdef HAVE_IPV6
-    ret_value6 = NetlinkSocket6::stop();
+    if (ftic().have_ipv6())
+	ret_value6 = NetlinkSocket6::stop();
 #endif
     
     if ((ret_value4 < 0) || (ret_value6 < 0))
@@ -172,6 +179,21 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     debug_msg("add_entry "
 	      "(network = %s nexthop = %s)",
 	      fte.net().str().c_str(), fte.nexthop().str().c_str());
+
+    // Check that the family is supported
+    do {
+	if (fte.nexthop().is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return false;
+	    break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return false;
+	    break;
+	}
+	break;
+    } while (false);
 
     memset(buffer, 0, sizeof(buffer));
 
@@ -329,6 +351,21 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     debug_msg("delete_entry "
 	      "(network = %s nexthop = %s)",
 	      fte.net().str().c_str(), fte.nexthop().str().c_str());
+
+    // Check that the family is supported
+    do {
+	if (fte.nexthop().is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return false;
+	    break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return false;
+	    break;
+	}
+	break;
+    } while (false);
 
     memset(buffer, 0, sizeof(buffer));
 

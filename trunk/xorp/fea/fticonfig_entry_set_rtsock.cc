@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.14 2004/06/10 22:40:49 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.15 2004/08/03 03:51:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -133,6 +133,25 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     struct sockaddr_in	*sin_dst, *sin_nexthop, *sin_netmask;
     RoutingSocket&	rs = *this;
     int			family = fte.net().af();
+
+    debug_msg("add_entry "
+	      "(network = %s nexthop = %s)",
+	      fte.net().str().c_str(), fte.nexthop().str().c_str());
+
+    // Check that the family is supported
+    do {
+	if (fte.nexthop().is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return false;
+	    break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return false;
+	    break;
+	}
+	break;
+    } while (false);
     
     //
     // Set the request
@@ -208,6 +227,25 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     struct sockaddr_in	*sin_dst, *sin_netmask = NULL;
     RoutingSocket&	rs = *this;
     int			family = fte.net().af();
+
+    debug_msg("delete_entry "
+	      "(network = %s nexthop = %s)",
+	      fte.net().str().c_str(), fte.nexthop().str().c_str());
+
+    // Check that the family is supported
+    do {
+	if (fte.nexthop().is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return false;
+	    break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return false;
+	    break;
+	}
+	break;
+    } while (false);
     
     //
     // Set the request

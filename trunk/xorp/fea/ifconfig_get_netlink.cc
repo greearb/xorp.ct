@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.6 2004/06/02 22:52:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.7 2004/06/10 22:40:52 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -59,13 +59,18 @@ IfConfigGetNetlink::~IfConfigGetNetlink()
 int
 IfConfigGetNetlink::start()
 {
-    if (NetlinkSocket4::start() < 0)
-	return (XORP_ERROR);
+    if (ifc().have_ipv4()) {
+	if (NetlinkSocket4::start() < 0)
+	    return (XORP_ERROR);
+    }
     
 #ifdef HAVE_IPV6
-    if (NetlinkSocket6::start() < 0) {
-	NetlinkSocket4::stop();
-	return (XORP_ERROR);
+    if (ifc().have_ipv6()) {
+	if (NetlinkSocket6::start() < 0) {
+	    if (ifc().have_ipv4())
+		NetlinkSocket4::stop();
+	    return (XORP_ERROR);
+	}
     }
 #endif
 
@@ -83,10 +88,12 @@ IfConfigGetNetlink::stop()
     if (! _is_running)
 	return (XORP_OK);
 
-    ret_value4 = NetlinkSocket4::stop();
+    if (ifc().have_ipv4())
+	ret_value4 = NetlinkSocket4::stop();
     
 #ifdef HAVE_IPV6
-    ret_value6 = NetlinkSocket6::stop();
+    if (ifc().have_ipv6())
+	ret_value6 = NetlinkSocket6::stop();
 #endif
     
     if ((ret_value4 < 0) || (ret_value6 < 0))
@@ -215,88 +222,96 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	//
 	// Set the request for IPv4 addresses
 	//
-	memset(buffer, 0, sizeof(buffer));
-	nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
-	nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
-	nlh->nlmsg_type = RTM_GETADDR;
-	nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
-	nlh->nlmsg_seq = ns4.seqno();
-	nlh->nlmsg_pid = ns4.pid();
-	ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
-	ifaddrmsg->ifa_family = AF_INET;
-	ifaddrmsg->ifa_prefixlen = 0;
-	ifaddrmsg->ifa_flags = 0;
-	ifaddrmsg->ifa_scope = 0;
-	ifaddrmsg->ifa_index = if_index;
+	if (ifc().have_ipv4()) {
+	    memset(buffer, 0, sizeof(buffer));
+	    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
+	    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
+	    nlh->nlmsg_type = RTM_GETADDR;
+	    // Get the whole table
+	    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
+	    nlh->nlmsg_seq = ns4.seqno();
+	    nlh->nlmsg_pid = ns4.pid();
+	    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
+	    ifaddrmsg->ifa_family = AF_INET;
+	    ifaddrmsg->ifa_prefixlen = 0;
+	    ifaddrmsg->ifa_flags = 0;
+	    ifaddrmsg->ifa_scope = 0;
+	    ifaddrmsg->ifa_index = if_index;
 	
-	if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
-		       reinterpret_cast<struct sockaddr*>(&snl),
-		       sizeof(snl))
-	    != (ssize_t)nlh->nlmsg_len) {
-	    XLOG_ERROR("error writing to netlink socket: %s",
-		       strerror(errno));
-	    return false;
-	}
+	    if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
+			   reinterpret_cast<struct sockaddr*>(&snl),
+			   sizeof(snl))
+		!= (ssize_t)nlh->nlmsg_len) {
+		XLOG_ERROR("error writing to netlink socket: %s",
+			   strerror(errno));
+		return false;
+	    }
 
-	//
-	// Force to receive data from the kernel, and then parse it
-	//
-	//
-	// XXX: setting the flag below is a work-around hack because of a
-	// Linux kernel bug: when we read the whole table the kernel
-	// may not set the NLM_F_MULTI flag for the multipart messages.
-	//
-	ns4.set_multipart_message_read(true);
-	_ns_reader.receive_data4(nlh->nlmsg_seq);
-	// XXX: reset the multipart message read hackish flag
-	ns4.set_multipart_message_read(false);
-	if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
-	    != true) {
-	    return (false);
+	    //
+	    // Force to receive data from the kernel, and then parse it
+	    //
+	    //
+	    // XXX: setting the flag below is a work-around hack because of a
+	    // Linux kernel bug: when we read the whole table the kernel
+	    // may not set the NLM_F_MULTI flag for the multipart messages.
+	    //
+	    ns4.set_multipart_message_read(true);
+	    _ns_reader.receive_data4(nlh->nlmsg_seq);
+	    // XXX: reset the multipart message read hackish flag
+	    ns4.set_multipart_message_read(false);
+	    if (parse_buffer_nlm(it, _ns_reader.buffer(),
+				 _ns_reader.buffer_size())
+		!= true) {
+		return (false);
+	    }
 	}
 
 #ifdef HAVE_IPV6
 	//
 	// Set the request for IPv6 addresses
 	//
-	memset(buffer, 0, sizeof(buffer));
-	nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
-	nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
-	nlh->nlmsg_type = RTM_GETADDR;
-	nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
-	nlh->nlmsg_seq = ns6.seqno();
-	nlh->nlmsg_pid = ns6.pid();
-	ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
-	ifaddrmsg->ifa_family = AF_INET6;
-	ifaddrmsg->ifa_prefixlen = 0;
-	ifaddrmsg->ifa_flags = 0;
-	ifaddrmsg->ifa_scope = 0;
-	ifaddrmsg->ifa_index = if_index;
+	if (ifc().have_ipv6()) {
+	    memset(buffer, 0, sizeof(buffer));
+	    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
+	    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
+	    nlh->nlmsg_type = RTM_GETADDR;
+	    // Get the whole table
+	    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
+	    nlh->nlmsg_seq = ns6.seqno();
+	    nlh->nlmsg_pid = ns6.pid();
+	    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
+	    ifaddrmsg->ifa_family = AF_INET6;
+	    ifaddrmsg->ifa_prefixlen = 0;
+	    ifaddrmsg->ifa_flags = 0;
+	    ifaddrmsg->ifa_scope = 0;
+	    ifaddrmsg->ifa_index = if_index;
 	
-	if (ns6.sendto(buffer, nlh->nlmsg_len, 0,
-		       reinterpret_cast<struct sockaddr*>(&snl),
-		       sizeof(snl))
-	    != (ssize_t)nlh->nlmsg_len) {
-	    XLOG_ERROR("error writing to netlink socket: %s",
-		       strerror(errno));
-	    return false;
-	}
+	    if (ns6.sendto(buffer, nlh->nlmsg_len, 0,
+			   reinterpret_cast<struct sockaddr*>(&snl),
+			   sizeof(snl))
+		!= (ssize_t)nlh->nlmsg_len) {
+		XLOG_ERROR("error writing to netlink socket: %s",
+			   strerror(errno));
+		return false;
+	    }
 
-	//
-	// Force to receive data from the kernel, and then parse it
-	//
-	//
-	// XXX: setting the flag below is a work-around hack because of a
-	// Linux kernel bug: when we read the whole table the kernel
-	// may not set the NLM_F_MULTI flag for the multipart messages.
-	//
-	ns6.set_multipart_message_read(true);
-	_ns_reader.receive_data6(nlh->nlmsg_seq);
-	// XXX: reset the multipart message read hackish flag
-	ns6.set_multipart_message_read(false);
-	if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
-	    != true) {
-	    return (false);
+	    //
+	    // Force to receive data from the kernel, and then parse it
+	    //
+	    //
+	    // XXX: setting the flag below is a work-around hack because of a
+	    // Linux kernel bug: when we read the whole table the kernel
+	    // may not set the NLM_F_MULTI flag for the multipart messages.
+	    //
+	    ns6.set_multipart_message_read(true);
+	    _ns_reader.receive_data6(nlh->nlmsg_seq);
+	    // XXX: reset the multipart message read hackish flag
+	    ns6.set_multipart_message_read(false);
+	    if (parse_buffer_nlm(it, _ns_reader.buffer(),
+				 _ns_reader.buffer_size())
+		!= true) {
+		return (false);
+	    }
 	}
 #endif // HAVE_IPV6
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.9 2004/06/10 22:40:50 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.10 2004/08/03 03:51:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -133,6 +133,23 @@ bool
 FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 {
     int mib[6];
+
+    // Check that the family is supported
+    switch(family) {
+    case AF_INET:
+	if (! ftic().have_ipv4())
+	    return false;
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	if (! ftic().have_ipv6())
+	    return false;
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
     
     mib[0] = CTL_NET;
     mib[1] = AF_ROUTE;
@@ -173,4 +190,3 @@ FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 }
 
 #endif // HAVE_SYSCTL_NET_RT_DUMP
-

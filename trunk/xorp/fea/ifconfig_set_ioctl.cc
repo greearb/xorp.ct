@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.21 2004/06/10 22:40:53 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.22 2004/06/17 03:59:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -92,18 +92,22 @@ IfConfigSetIoctl::~IfConfigSetIoctl()
 int
 IfConfigSetIoctl::start()
 {
-    if (_s4 < 0) {
-	_s4 = socket(AF_INET, SOCK_DGRAM, 0);
+    if (ifc().have_ipv4()) {
 	if (_s4 < 0) {
-	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    _s4 = socket(AF_INET, SOCK_DGRAM, 0);
+	    if (_s4 < 0) {
+		XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    }
 	}
     }
     
 #ifdef HAVE_IPV6
-    if (_s6 < 0) {
-	_s6 = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (ifc().have_ipv6()) {
 	if (_s6 < 0) {
-	    XLOG_FATAL("Could not initialize IPv6 ioctl() socket");
+	    _s6 = socket(AF_INET6, SOCK_DGRAM, 0);
+	    if (_s6 < 0) {
+		XLOG_FATAL("Could not initialize IPv6 ioctl() socket");
+	    }
 	}
     }
 #endif // HAVE_IPV6
@@ -417,6 +421,12 @@ IfConfigSetIoctl::set_vif_address4(const string& ifname,
 
     UNUSED(if_index);
     UNUSED(is_broadcast);
+
+    if (! ifc().have_ipv4()) {
+	reason = "IPv4 is not supported";
+	return (XORP_ERROR);
+    }
+
 #ifdef SIOCAIFADDR
     //
     // Add an alias address
@@ -510,6 +520,11 @@ IfConfigSetIoctl::set_vif_address6(const string& ifname,
 
 #else // HAVE_IPV6
 
+    if (! ifc().have_ipv6()) {
+	reason = "IPv6 is not supported";
+	return (XORP_ERROR);
+    }
+
 #ifdef SIOCAIFADDR_IN6
     //
     // Add an alias address
@@ -584,6 +599,29 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
     debug_msg("delete_vif_address "
 	      "(ifname = %s if_index = %u addr = %s prefix_len = %u)\n",
 	      ifname.c_str(), if_index, addr.str().c_str(), prefix_len);
+
+    // Check that the family is supported
+    switch (addr.af()) {
+    case AF_INET:
+	if (! ifc().have_ipv4()) {
+	    reason = "IPv4 is not supported";
+	    return (XORP_ERROR);
+	}
+	break;
+
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	if (! ifc().have_ipv6()) {
+	    reason = "IPv6 is not supported";
+	    return (XORP_ERROR);
+	}
+	break;
+#endif // HAVE_IPV6
+
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
 
     switch (addr.af()) {
     case AF_INET:

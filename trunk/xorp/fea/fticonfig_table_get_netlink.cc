@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.16 2004/06/10 22:40:50 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.17 2004/08/03 03:51:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -58,13 +58,18 @@ FtiConfigTableGetNetlink::~FtiConfigTableGetNetlink()
 int
 FtiConfigTableGetNetlink::start()
 {
-    if (NetlinkSocket4::start() < 0)
-	return (XORP_ERROR);
+    if (ftic().have_ipv4()) {
+	if (NetlinkSocket4::start() < 0)
+	    return (XORP_ERROR);
+    }
     
 #ifdef HAVE_IPV6
-    if (NetlinkSocket6::start() < 0) {
-	NetlinkSocket4::stop();
-	return (XORP_ERROR);
+    if (ftic().have_ipv6()) {
+	if (NetlinkSocket6::start() < 0) {
+	    if (ftic().have_ipv4())
+		NetlinkSocket4::stop();
+	    return (XORP_ERROR);
+	}
     }
 #endif
 
@@ -82,10 +87,12 @@ FtiConfigTableGetNetlink::stop()
     if (! _is_running)
 	return (XORP_OK);
 
-    ret_value4 = NetlinkSocket4::stop();
+    if (ftic().have_ipv4())
+	ret_value4 = NetlinkSocket4::stop();
     
 #ifdef HAVE_IPV6
-    ret_value6 = NetlinkSocket6::stop();
+    if (ftic().have_ipv6())
+	ret_value6 = NetlinkSocket6::stop();
 #endif
     
     if ((ret_value4 < 0) || (ret_value6 < 0))
@@ -100,7 +107,7 @@ bool
 FtiConfigTableGetNetlink::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
-    
+
     // Get the table
     if (get_table(AF_INET, ftex_list) != true)
 	return false;
@@ -167,7 +174,24 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     struct sockaddr_nl	snl;
     struct rtgenmsg	*rtgenmsg;
     NetlinkSocket	*ns_ptr = NULL;
-    
+
+    // Check that the family is supported
+    switch(family) {
+    case AF_INET:
+	if (! ftic().have_ipv4())
+	    return false;
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	if (! ftic().have_ipv6())
+	    return false;
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+
     // Get the pointer to the NetlinkSocket
     switch(family) {
     case AF_INET:

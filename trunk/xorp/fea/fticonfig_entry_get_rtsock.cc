@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.15 2004/08/03 03:51:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.16 2004/08/03 05:02:55 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -90,7 +90,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
-    
+
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.nexthop().get_ipv4(),
@@ -114,7 +114,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
 {
     FteX ftex(dst.af());
     bool ret_value = false;
-    
+
     ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.nexthop().get_ipv4(),
@@ -137,7 +137,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
-    
+
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.nexthop().get_ipv6(),
@@ -161,7 +161,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_network6(const IPv6Net& dst,
 { 
     FteX ftex(dst.af());
     bool ret_value = false;
-    
+
     ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.nexthop().get_ipv6(),
@@ -205,6 +205,21 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     
     // Zero the return information
     fte.zero();
+
+    // Check that the family is supported
+    do {
+	if (dst.is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return false;
+	    break;
+	}
+	if (dst.is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return false;
+	    break;
+	}
+	break;
+    } while (false);
     
     // Check that the destination address is valid
     if (! dst.is_unicast()) {
@@ -308,6 +323,21 @@ FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
     
     // Zero the return information
     fte.zero();
+
+    // Check that the family is supported
+    do {
+	if (dst.is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return false;
+	    break;
+	}
+	if (dst.is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return false;
+	    break;
+	}
+	break;
+    } while (false);
 
     // Check that the destination address is valid    
     if (! (dst.masked_addr().is_unicast()

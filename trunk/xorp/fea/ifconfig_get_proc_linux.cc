@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.13 2004/06/02 22:52:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.14 2004/06/10 22:40:52 hodson Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -104,7 +104,7 @@ static bool if_fetch_linux_v4(IfConfig& ifc, IfTree& it);
 
 #ifdef HAVE_IPV6
 static bool if_fetch_linux_v6(IfConfig& ifc, IfTree& it);
-#endif // HAVE_IPV6
+#endif
 
 bool
 IfConfigGetProcLinux::read_config(IfTree& iftree)
@@ -115,15 +115,19 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     //
     // The IPv4 information
     //
-    if (proc_read_ifconf_linux(ifc(), iftree, AF_INET) != true)
-	return false;
+    if (ifc().have_ipv4()) {
+	if (proc_read_ifconf_linux(ifc(), iftree, AF_INET) != true)
+	    return false;
+    }
     
 #ifdef HAVE_IPV6
     //
     // The IPv6 information
     //
-    if (proc_read_ifconf_linux(ifc(), iftree, AF_INET6) != true)
-	return false;
+    if (ifc().have_ipv6()) {
+	if (proc_read_ifconf_linux(ifc(), iftree, AF_INET6) != true)
+	    return false;
+    }
 #endif // HAVE_IPV6
     
     return true;
@@ -161,7 +165,8 @@ proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family)
     return true;
 }
 
-static char *get_name(char *name, char *p)
+static char *
+get_name(char *name, char *p)
 {
     while (xorp_isspace(*p))
 	p++;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer_rtsock.cc,v 1.6 2004/06/02 22:52:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_rtsock.cc,v 1.7 2004/06/10 22:40:50 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -88,22 +88,26 @@ FtiConfigTableObserverRtsock::receive_data(const uint8_t* data, size_t nbytes)
     //
     // Get the IPv4 routes
     //
-    ftic().ftic_table_get().parse_buffer_rtm(AF_INET, fte_list, data, nbytes,
-					     false);
-    if (! fte_list.empty()) {
-	propagate_fib_changes(fte_list);
-	fte_list.clear();
+    if (ftic().have_ipv4()) {
+	ftic().ftic_table_get().parse_buffer_rtm(AF_INET, fte_list, data,
+						 nbytes, false);
+	if (! fte_list.empty()) {
+	    propagate_fib_changes(fte_list);
+	    fte_list.clear();
+	}
     }
 
 #ifdef HAVE_IPV6
     //
     // Get the IPv6 routes
     //
-    ftic().ftic_table_get().parse_buffer_rtm(AF_INET6, fte_list, data, nbytes,
-					     false);
-    if (! fte_list.empty()) {
-	propagate_fib_changes(fte_list);
-	fte_list.clear();
+    if (ftic().have_ipv6()) {
+	ftic().ftic_table_get().parse_buffer_rtm(AF_INET6, fte_list, data,
+						 nbytes, false);
+	if (! fte_list.empty()) {
+	    propagate_fib_changes(fte_list);
+	    fte_list.clear();
+	}
     }
 #endif // HAVE_IPV6
 }

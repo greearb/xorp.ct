@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.5 2004/06/02 22:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.6 2004/06/10 22:40:52 hodson Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -68,21 +68,26 @@ IfConfigObserverNetlink::start()
     // Listen to the netlink multicast group for network interfaces status
     // and IPv4 addresses.
     //
-    NetlinkSocket4::set_nl_groups(RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
+    if (ifc().have_ipv4()) {
+	NetlinkSocket4::set_nl_groups(RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
 
-    if (NetlinkSocket4::start() < 0)
-	return (XORP_ERROR);
+	if (NetlinkSocket4::start() < 0)
+	    return (XORP_ERROR);
+    }
 
 #ifdef HAVE_IPV6
     //
     // Listen to the netlink multicast group for network interfaces status
     // and IPv6 addresses.
     //
-    NetlinkSocket6::set_nl_groups(RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
+    if (ifc().have_ipv6()) {
+	NetlinkSocket6::set_nl_groups(RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
 
-    if (NetlinkSocket6::start() < 0) {
-	NetlinkSocket4::stop();
-	return (XORP_ERROR);
+	if (NetlinkSocket6::start() < 0) {
+	    if (ifc().have_ipv4())
+		NetlinkSocket4::stop();
+	    return (XORP_ERROR);
+	}
     }
 #endif // HAVE_IPV6
 
@@ -101,10 +106,12 @@ IfConfigObserverNetlink::stop()
     if (! _is_running)
 	return (XORP_OK);
 
-    ret_value4 = NetlinkSocket4::stop();
+    if (ifc().have_ipv4())
+	ret_value4 = NetlinkSocket4::stop();
     
 #ifdef HAVE_IPV6
-    ret_value6 = NetlinkSocket6::stop();
+    if (ifc().have_ipv6())
+	ret_value6 = NetlinkSocket6::stop();
 #endif
     
     if ((ret_value4 < 0) || (ret_value6 < 0))
