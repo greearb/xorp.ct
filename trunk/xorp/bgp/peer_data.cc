@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.9 2003/09/27 08:40:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.10 2003/10/06 22:41:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -170,9 +170,8 @@ BGPPeerData::open_negotiation()
  	ParameterNode& pn = *iter_negotiated;
 	if(const BGPMultiProtocolCapability *multi = 
 	   dynamic_cast<const BGPMultiProtocolCapability *>(pn.get())) {
-	    AddressFamily afi = multi->get_address_family();
-	    SubsequentAddressFamily safi = 
-		multi->get_subsequent_address_family_id();
+	    Afi afi = multi->get_address_family();
+	    Safi safi = multi->get_subsequent_address_family_id();
 	    switch(afi) {
 	    case AFI_IPV4:
 		switch(safi) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.8 2003/09/27 03:42:20 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.9 2003/10/06 22:41:08 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -24,7 +24,7 @@
 #define	AFI_IPV4_VAL 1
 #define	AFI_IPV6_VAL 2
 
-enum AddressFamily {
+enum Afi {
     AFI_IPV4 = AFI_IPV4_VAL,
     AFI_IPV6 = AFI_IPV6_VAL
 };
@@ -35,7 +35,8 @@ enum AddressFamily {
 // Only use the following two defines in packet decode routines.
 #define	SAFI_NLRI_UNICAST_VAL 1
 #define	SAFI_NLRI_MULTICAST_VAL 2
-enum  SubsequentAddressFamily {
+
+enum  Safi {
     SAFI_NLRI_UNICAST = SAFI_NLRI_UNICAST_VAL,
     SAFI_NLRI_MULTICAST = SAFI_NLRI_MULTICAST_VAL,
 };
@@ -222,18 +223,17 @@ private:
 
 class BGPMultiProtocolCapability : public BGPCapParameter {
 public:
-    BGPMultiProtocolCapability(AddressFamily afi,
-			       SubsequentAddressFamily safi);
+    BGPMultiProtocolCapability(Afi afi, Safi safi);
     BGPMultiProtocolCapability(uint8_t l, const uint8_t* d);
     BGPMultiProtocolCapability(const BGPMultiProtocolCapability& cap);
     void decode();
     void encode() const;
-    void set_address_family(AddressFamily f) { _address_family = f; }
-    AddressFamily get_address_family() const { return _address_family; }
-    void set_subsequent_address_family_id(SubsequentAddressFamily f) { 
+    void set_address_family(Afi f) { _address_family = f; }
+    Afi get_address_family() const { return _address_family; }
+    void set_subsequent_address_family_id(Safi f) { 
 	_subsequent_address_family = f;
     }
-    SubsequentAddressFamily get_subsequent_address_family_id() const {
+    Safi get_subsequent_address_family_id() const {
 	return _subsequent_address_family; 
     }
     bool compare(const BGPParameter& rhs) const;
@@ -241,8 +241,8 @@ public:
     string str() const;
 protected:
 private:
-    AddressFamily _address_family;
-    SubsequentAddressFamily _subsequent_address_family;
+    Afi _address_family;
+    Safi _subsequent_address_family;
 };
 
 class BGPMultiRouteCapability : public BGPCapParameter {
