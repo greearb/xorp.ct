@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_client.cc,v 1.2 2003/03/20 04:29:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.3 2003/03/29 19:03:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -379,7 +379,7 @@ RibClient::delete_route(const IPv6Net& dest)
 void
 RibClient::add_route(const IPv4RouteEntry& re)
 {
-    add_route(dest(re), gw(re), ifname(re), vifname(re), re.global_metric(),
+    add_route(dest(re), gw(re), ifname(re), vifname(re), re.metric(),
 	      re.admin_distance(), re.protocol().name());
 }
 
@@ -392,7 +392,7 @@ RibClient::delete_route(const IPv4RouteEntry& re)
 void
 RibClient::add_route(const IPv6RouteEntry& re)
 {
-    add_route(dest(re), gw(re), ifname(re), vifname(re), re.global_metric(),
+    add_route(dest(re), gw(re), ifname(re), vifname(re), re.metric(),
 	      re.admin_distance(), re.protocol().name());
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.7 2003/03/16 07:19:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.8 2003/03/29 19:03:11 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -428,7 +428,7 @@ RegisterTable<A>::notify_route_changed(
     if (resolves == false) {
 	notify_invalidated(iter);
     } else {
-	uint32_t metric = changed_route.global_metric();
+	uint32_t metric = changed_route.metric();
 	uint32_t admin_distance = changed_route.admin_distance();
 	const string& protocol_origin = changed_route.protocol().name();
 	for (i = module_names.begin(); i != module_names.end(); ++i) {
