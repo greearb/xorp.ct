@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.18 2003/12/06 00:11:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.19 2003/12/10 22:14:08 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -2521,18 +2521,12 @@ XrlMfeaNode::mfea_0_1_stop_cli()
 }
 
 XrlCmdError
-XrlMfeaNode::mfea_0_1_enable_log_trace()
+XrlMfeaNode::mfea_0_1_log_trace_all(
+    // Input values,
+    const bool&	enable)
 {
-    MfeaNode::set_log_trace(true);
-    
-    return XrlCmdError::OKAY();
-}
+    MfeaNode::set_log_trace(enable);
 
-XrlCmdError
-XrlMfeaNode::mfea_0_1_disable_log_trace()
-{
-    MfeaNode::set_log_trace(false);
-    
     return XrlCmdError::OKAY();
 }
 

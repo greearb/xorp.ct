@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.7 2003/06/01 02:17:01 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.8 2003/09/23 03:35:38 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -798,11 +798,13 @@ protected:
     XrlCmdError mfea_0_1_stop_cli();
 
     /**
-     *  Enable/disable the MFEA trace log.
+     *  Enable/disable the MFEA trace log for all operations.
+     *
+     *  @param enable if true, then enable the trace log, otherwise disable it.
      */
-    XrlCmdError mfea_0_1_enable_log_trace();
-
-    XrlCmdError mfea_0_1_disable_log_trace();
+    XrlCmdError mfea_0_1_log_trace_all(
+	// Input values,
+	const bool&	enable);
 
     /**
      *  Configure MFEA MRIB-related parameters. The 'set_foo' XRLs set the

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.5 2003/10/15 18:54:28 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.6 2003/10/16 18:23:06 pavlin Exp $
 #
 
 #
@@ -208,19 +208,18 @@ mfea_stop_cli()
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
-mfea_enable_log_trace()
+mfea_log_trace_all()
 {
-    echo "mfea_enable_log_trace" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/enable_log_trace"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mfea_log_trace_all <enable:bool>"
+	exit 1
+    fi
+    enable=$1
 
-mfea_disable_log_trace()
-{
-    echo "mfea_disable_log_trace" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/disable_log_trace"
-    XRL_ARGS=""
+    echo "mfea_log_trace_all" $*
+
+    XRL="finder://$MFEA_TARGET/mfea/0.1/log_trace_all"
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 

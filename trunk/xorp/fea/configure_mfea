@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/configure_mfea,v 1.3 2003/10/15 18:54:28 pavlin Exp $
+# $XORP: xorp/fea/configure_mfea,v 1.4 2003/10/24 22:47:52 pavlin Exp $
 #
 
 #
@@ -81,7 +81,7 @@ fi
 #
 # Comment-out to disable log trace
 #
-MFEA_ENABLE_LOG_TRACE=yes
+MFEA_LOG_TRACE_ALL_ENABLE=yes
 
 #
 # The subnets to enable/disable CLI access
@@ -99,10 +99,12 @@ CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
 MFEA_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
 
 #
-# Disable log trace
+# Enable/disable log trace
 #
-if [ "${MFEA_ENABLE_LOG_TRACE}" != "yes" ] ; then
-	mfea_disable_log_trace
+if [ "${MFEA_LOG_TRACE_ALL_ENABLE}" = "yes" ] ; then
+	mfea_log_trace_all true
+else
+	mfea_log_trace_all false
 fi
 
 #
