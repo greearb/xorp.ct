@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.38 2004/10/02 19:49:51 atanu Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.39 2004/10/25 23:27:57 pavlin Exp $"
 
 
 //
@@ -159,14 +159,6 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     NexthopPortMapper nexthop_port_mapper;
 
     //
-    // FtiConfig
-    //
-    FtiConfig fticonfig(eventloop, profile, nexthop_port_mapper);
-    if (is_dummy)
-	fticonfig.set_dummy();
-    fticonfig.start();
-
-    //
     // Interface Configurator and reporters
     //
     XrlIfConfigUpdateReporter xrl_ifc_reporter(xrl_std_router_fea);
@@ -194,6 +186,14 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     //
     const IfTree& iftree = ifm.iftree();
     lfc_bridge.set_iftree(&iftree);
+
+    //
+    // FtiConfig
+    //
+    FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
+    if (is_dummy)
+	fticonfig.set_dummy();
+    fticonfig.start();
 
     //
     // Raw Socket TODO

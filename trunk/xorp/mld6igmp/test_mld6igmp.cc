@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.33 2004/10/02 19:49:51 atanu Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.34 2004/10/25 23:27:56 pavlin Exp $"
 
 
 //
@@ -154,14 +154,6 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
     NexthopPortMapper nexthop_port_mapper;
 
     //
-    // FtiConfig
-    //
-    FtiConfig fticonfig(eventloop, profile, nexthop_port_mapper);
-    if (is_dummy)
-	fticonfig.set_dummy();
-    fticonfig.start();
-
-    //
     // Interface Configurator and reporters
     //
     XrlIfConfigUpdateReporter xrl_ifc_reporter(xrl_std_router_fea);
@@ -189,6 +181,14 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
     //
     const IfTree& iftree = ifm.iftree();
     lfc_bridge.set_iftree(&iftree);
+
+    //
+    // FtiConfig
+    //
+    FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
+    if (is_dummy)
+	fticonfig.set_dummy();
+    fticonfig.start();
 
     //
     // Raw Socket TODO
