@@ -5,14 +5,14 @@
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
 // to deal in the Software without restriction, subject to the conditions
-// listed in the Xorp LICENSE file. These conditions include: you must
+// listed in the XORP LICENSE file. These conditions include: you must
 // preserve this copyright notice, and you cannot mention the copyright
 // holders in advertising related to the Software without their permission.
 // The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
-// notice is a summary of the Xorp LICENSE file; the license in that file is
+// notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.10 2003/05/15 19:21:36 pavlin Exp $"
+#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
