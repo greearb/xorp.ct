@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.47 2004/06/09 03:14:13 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.48 2004/06/10 22:41:51 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -670,7 +670,9 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		// Note that if there is no "create" command, then we run
 		// the "set" command instead.
 		//
-		cmd = _template_tree_node->const_command("%create");
+		cmd = NULL;
+		if (_existence_committed == false)
+		    cmd = _template_tree_node->const_command("%create");
 		if (cmd == NULL)
 		    cmd = _template_tree_node->const_command("%set");
 		if (cmd == NULL) {
@@ -1080,6 +1082,7 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id)
     TimerList::system_gettimeofday(&_modification_time);
     _deleted = true;
     _value_committed = false;
+    _actions_succeeded = true;
 }
 
 void
