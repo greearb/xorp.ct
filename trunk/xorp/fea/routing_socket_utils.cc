@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.4 2003/05/20 23:25:14 atanu Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.5 2003/05/21 00:47:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -296,8 +296,8 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     sa = reinterpret_cast<const struct sockaddr *>(rtm + 1);
     RtmUtils::get_rta_sockaddr(rtm->rtm_addrs, sa, rti_info);
     
-    IPvX gateway_addr(family);
     IPvX dst_addr(family);
+    IPvX gateway_addr(family);
     int dst_masklen = 0;
     
     //
@@ -318,6 +318,17 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	    gateway_addr.copy_in(*rti_info[RTAX_GATEWAY]);
 	    gateway_addr = kernel_ipvx_adjust(gateway_addr);
 	}
+    }
+    if ((rtm->rtm_flags & RTF_LLINFO)
+	&& (gateway_addr == IPvX::ZERO(family))) {
+	// Link-local entry (could be the broadcast address as well)
+	bool not_bcast_addr = true;
+#ifdef RTF_BROADCAST
+	if (rtm->rtm_flags & RTF_BROADCAST)
+	    not_bcast_addr = false;
+#endif
+	if (not_bcast_addr)
+	    gateway_addr = dst_addr;
     }
     
     //
