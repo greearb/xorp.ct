@@ -14,16 +14,18 @@
 #
 
 host_fbsd462_gcc32="xorpc.icir.org"
-env_fbsd462_gcc32="CC=gcc32 CXX=g++32"
+env_fbsd462_gcc32="CC=gcc32 CXX=g++32 MALLOC_OPTIONS=AJ"
 home_fbsd462_gcc32="/home/xorpc/u1/hodson/build/tinderbox_gcc32"
 buildflags_fbsd462_gcc32="-j 2"
 
 host_fbsd462_gcc295="xorpc.icir.org"
 home_fbsd462_gcc295="/home/xorpc/u1/hodson/build/tinderbox_gcc295"
+env_fbsd462_gcc295="MALLOC_OPTIONS=AJ"
 buildflags_fbsd462_gcc295="-j 2"
 
 host_linux24_gcc296="koala.icir.org"
 home_linux24_gcc296="tinderbox"
+env_linux24_gcc296="MALLOC_CHECK_=2"
 buildflags_linux24_gcc296="-j 4"
 
 TINDERBOX_CONFIGS="fbsd462_gcc32 fbsd462_gcc295 linux24_gcc296"
@@ -58,5 +60,5 @@ FROMADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
 POST="/usr/local/libexec/nmh/post"
 
 # make and make check timeout and timeout check interval, both in seconds
-TIMEOUT=3600
+TIMEOUT=6000
 TIMEOUT_CHECK=10
