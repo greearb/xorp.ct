@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_routes.hh,v 1.5 2003/03/10 23:20:10 hodson Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.6 2003/07/25 02:12:24 atanu Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -46,7 +46,9 @@ public:
 				     const vector<uint8_t>* aggregator, 
 				     const int32_t* calc_localpref, 
 				     const vector<uint8_t>* attr_unknown,
-				     const bool* valid);
+				     const bool* valid,
+				     const bool* unicast,
+				     const bool* multicast);
 private:
     void timer_expired() { _done = true;}
     EventLoop _eventloop;

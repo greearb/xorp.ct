@@ -5,7 +5,7 @@
  * This file is PROGRAMMATICALLY GENERATED.
  *
  * This instance was generated with:
- *      callback-gen.py -b 6 -l 13
+ *      callback-gen.py -b 6 -l 15
  */
 
 /**
@@ -30516,6 +30516,4336 @@ template <class R, class O, class A1, class A2, class A3, class A4, class A5, cl
 callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
     return XorpConstMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Code relating to callbacks with 14 late args
+//
+
+/**
+ * @short Base class for callbacks with 14 dispatch time args.
+ */
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpCallback14 {
+    typedef ref_ptr<XorpCallback14> RefPtr;
+
+    virtual ~XorpCallback14() {}
+    virtual R dispatch(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) = 0;
+};
+
+/**
+ * @short Callback object for functions with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpFunctionCallback14B0 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14);
+    XorpFunctionCallback14B0(F f)
+	: XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	return r;
+    }
+protected:
+    F   _f;
+};
+
+
+/**
+ * @short Callback object for void functions with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpFunctionCallback14B0<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> : public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14);
+    XorpFunctionCallback14B0(F f)
+	: XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+    }
+protected:
+    F   _f;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 14 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14)) {
+    return typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr(new XorpFunctionCallback14B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(f));
+}
+
+/**
+ * @short Callback object for member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpMemberCallback14B0 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) ;
+    XorpMemberCallback14B0(O* o, M m)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for void member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) ;
+    XorpMemberCallback14B0(O* o, M m)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for safe member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpSafeMemberCallback14B0
+    : public XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::M M;
+    XorpSafeMemberCallback14B0(O* o, M m)
+	 : XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B0() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpSafeMemberCallback14B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>
+    : public XorpMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::M M;
+    XorpSafeMemberCallback14B0(O* o, M m)
+	 : XorpMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B0() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, bool B=true>
+struct XorpMemberCallbackFactory14B0
+{
+    inline static XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
+    {
+	return new XorpSafeMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, false>
+{
+    inline static XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
+    {
+	return new XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
+{
+    return XorpMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
+{
+    return XorpMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p);
+}
+
+
+/**
+ * @short Callback object for const member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpConstMemberCallback14B0 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14)  const;
+    XorpConstMemberCallback14B0(O* o, M m)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for void const member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpConstMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14)  const;
+    XorpConstMemberCallback14B0(O* o, M m)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for const safe member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpConstSafeMemberCallback14B0
+    : public XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::M M;
+    XorpConstSafeMemberCallback14B0(O* o, M m)
+	 : XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B0() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 14 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpConstSafeMemberCallback14B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>
+    : public XorpConstMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::M M;
+    XorpConstSafeMemberCallback14B0(O* o, M m)
+	 : XorpConstMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B0() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpConstMemberCallback14B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, bool B=true>
+struct XorpConstMemberCallbackFactory14B0
+{
+    inline static XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
+    {
+	return new XorpConstSafeMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+struct XorpConstMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, false>
+{
+    inline static XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
+    {
+	return new XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
+{
+    return XorpConstMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
+{
+    return XorpConstMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p);
+}
+
+
+/**
+ * @short Callback object for functions with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpFunctionCallback14B1 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1);
+    XorpFunctionCallback14B1(F f, BA1 ba1)
+	: XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+};
+
+
+/**
+ * @short Callback object for void functions with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpFunctionCallback14B1<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1> : public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1);
+    XorpFunctionCallback14B1(F f, BA1 ba1)
+	: XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 14 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1) {
+    return typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr(new XorpFunctionCallback14B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(f, ba1));
+}
+
+/**
+ * @short Callback object for member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpMemberCallback14B1 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) ;
+    XorpMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) ;
+    XorpMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpSafeMemberCallback14B1
+    : public XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::M M;
+    XorpSafeMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B1() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpSafeMemberCallback14B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>
+    : public XorpMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::M M;
+    XorpSafeMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B1() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, bool B=true>
+struct XorpMemberCallbackFactory14B1
+{
+    inline static XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
+    {
+	return new XorpSafeMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, false>
+{
+    inline static XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
+    {
+	return new XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
+{
+    return XorpMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
+{
+    return XorpMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1);
+}
+
+
+/**
+ * @short Callback object for const member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpConstMemberCallback14B1 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1)  const;
+    XorpConstMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpConstMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1)  const;
+    XorpConstMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpConstSafeMemberCallback14B1
+    : public XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::M M;
+    XorpConstSafeMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B1() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 14 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpConstSafeMemberCallback14B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>
+    : public XorpConstMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::M M;
+    XorpConstSafeMemberCallback14B1(O* o, M m, BA1 ba1)
+	 : XorpConstMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B1() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpConstMemberCallback14B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, bool B=true>
+struct XorpConstMemberCallbackFactory14B1
+{
+    inline static XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
+    {
+	return new XorpConstSafeMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
+struct XorpConstMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, false>
+{
+    inline static XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
+    {
+	return new XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
+{
+    return XorpConstMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
+{
+    return XorpConstMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1);
+}
+
+
+/**
+ * @short Callback object for functions with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpFunctionCallback14B2 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2);
+    XorpFunctionCallback14B2(F f, BA1 ba1, BA2 ba2)
+	: XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+};
+
+
+/**
+ * @short Callback object for void functions with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpFunctionCallback14B2<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2> : public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2);
+    XorpFunctionCallback14B2(F f, BA1 ba1, BA2 ba2)
+	: XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 14 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2) {
+    return typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr(new XorpFunctionCallback14B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(f, ba1, ba2));
+}
+
+/**
+ * @short Callback object for member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpMemberCallback14B2 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) ;
+    XorpMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) ;
+    XorpMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpSafeMemberCallback14B2
+    : public XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::M M;
+    XorpSafeMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B2() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpSafeMemberCallback14B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>
+    : public XorpMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::M M;
+    XorpSafeMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B2() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, bool B=true>
+struct XorpMemberCallbackFactory14B2
+{
+    inline static XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
+    {
+	return new XorpSafeMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, false>
+{
+    inline static XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
+    {
+	return new XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
+{
+    return XorpMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
+{
+    return XorpMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2);
+}
+
+
+/**
+ * @short Callback object for const member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpConstMemberCallback14B2 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2)  const;
+    XorpConstMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpConstMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2)  const;
+    XorpConstMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpConstSafeMemberCallback14B2
+    : public XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::M M;
+    XorpConstSafeMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B2() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 14 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpConstSafeMemberCallback14B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>
+    : public XorpConstMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::M M;
+    XorpConstSafeMemberCallback14B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpConstMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B2() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpConstMemberCallback14B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, bool B=true>
+struct XorpConstMemberCallbackFactory14B2
+{
+    inline static XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
+    {
+	return new XorpConstSafeMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
+struct XorpConstMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, false>
+{
+    inline static XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
+    {
+	return new XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
+{
+    return XorpConstMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
+{
+    return XorpConstMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2);
+}
+
+
+/**
+ * @short Callback object for functions with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpFunctionCallback14B3 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3);
+    XorpFunctionCallback14B3(F f, BA1 ba1, BA2 ba2, BA3 ba3)
+	: XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+};
+
+
+/**
+ * @short Callback object for void functions with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpFunctionCallback14B3<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3> : public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3);
+    XorpFunctionCallback14B3(F f, BA1 ba1, BA2 ba2, BA3 ba3)
+	: XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 14 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
+    return typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr(new XorpFunctionCallback14B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+}
+
+/**
+ * @short Callback object for member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpMemberCallback14B3 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) ;
+    XorpMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) ;
+    XorpMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpSafeMemberCallback14B3
+    : public XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::M M;
+    XorpSafeMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B3() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpSafeMemberCallback14B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>
+    : public XorpMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::M M;
+    XorpSafeMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B3() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, bool B=true>
+struct XorpMemberCallbackFactory14B3
+{
+    inline static XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpSafeMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, false>
+{
+    inline static XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3);
+}
+
+
+/**
+ * @short Callback object for const member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpConstMemberCallback14B3 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3)  const;
+    XorpConstMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpConstMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3)  const;
+    XorpConstMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpConstSafeMemberCallback14B3
+    : public XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::M M;
+    XorpConstSafeMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B3() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 14 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpConstSafeMemberCallback14B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>
+    : public XorpConstMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::M M;
+    XorpConstSafeMemberCallback14B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpConstMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B3() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpConstMemberCallback14B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, bool B=true>
+struct XorpConstMemberCallbackFactory14B3
+{
+    inline static XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpConstSafeMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
+struct XorpConstMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, false>
+{
+    inline static XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpConstMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpConstMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3);
+}
+
+
+/**
+ * @short Callback object for functions with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpFunctionCallback14B4 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4);
+    XorpFunctionCallback14B4(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	: XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+};
+
+
+/**
+ * @short Callback object for void functions with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpFunctionCallback14B4<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4> : public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4);
+    XorpFunctionCallback14B4(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	: XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 14 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
+    return typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr(new XorpFunctionCallback14B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+}
+
+/**
+ * @short Callback object for member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpMemberCallback14B4 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) ;
+    XorpMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) ;
+    XorpMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpSafeMemberCallback14B4
+    : public XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::M M;
+    XorpSafeMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B4() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpSafeMemberCallback14B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>
+    : public XorpMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::M M;
+    XorpSafeMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B4() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, bool B=true>
+struct XorpMemberCallbackFactory14B4
+{
+    inline static XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpSafeMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, false>
+{
+    inline static XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4);
+}
+
+
+/**
+ * @short Callback object for const member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstMemberCallback14B4 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4)  const;
+    XorpConstMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4)  const;
+    XorpConstMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstSafeMemberCallback14B4
+    : public XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::M M;
+    XorpConstSafeMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B4() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 14 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstSafeMemberCallback14B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>
+    : public XorpConstMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::M M;
+    XorpConstSafeMemberCallback14B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpConstMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B4() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpConstMemberCallback14B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, bool B=true>
+struct XorpConstMemberCallbackFactory14B4
+{
+    inline static XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpConstSafeMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, false>
+{
+    inline static XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpConstMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpConstMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4);
+}
+
+
+/**
+ * @short Callback object for functions with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpFunctionCallback14B5 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5);
+    XorpFunctionCallback14B5(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	: XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+};
+
+
+/**
+ * @short Callback object for void functions with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpFunctionCallback14B5<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5> : public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5);
+    XorpFunctionCallback14B5(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	: XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 14 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
+    return typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr(new XorpFunctionCallback14B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+}
+
+/**
+ * @short Callback object for member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpMemberCallback14B5 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) ;
+    XorpMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) ;
+    XorpMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpSafeMemberCallback14B5
+    : public XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpSafeMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B5() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpSafeMemberCallback14B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>
+    : public XorpMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpSafeMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B5() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
+struct XorpMemberCallbackFactory14B5
+{
+    inline static XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpSafeMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, false>
+{
+    inline static XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+
+/**
+ * @short Callback object for const member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstMemberCallback14B5 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5)  const;
+    XorpConstMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5)  const;
+    XorpConstMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstSafeMemberCallback14B5
+    : public XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpConstSafeMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B5() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 14 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstSafeMemberCallback14B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>
+    : public XorpConstMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpConstSafeMemberCallback14B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpConstMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B5() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpConstMemberCallback14B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
+struct XorpConstMemberCallbackFactory14B5
+{
+    inline static XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpConstSafeMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, false>
+{
+    inline static XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpConstMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpConstMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+
+/**
+ * @short Callback object for functions with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpFunctionCallback14B6 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6);
+    XorpFunctionCallback14B6(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	: XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+    BA6 _ba6;
+};
+
+
+/**
+ * @short Callback object for void functions with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpFunctionCallback14B6<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6> : public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6);
+    XorpFunctionCallback14B6(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	: XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+    BA6 _ba6;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 14 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
+    return typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr(new XorpFunctionCallback14B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+}
+
+/**
+ * @short Callback object for member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpMemberCallback14B6 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) ;
+    XorpMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) ;
+    XorpMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpSafeMemberCallback14B6
+    : public XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpSafeMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B6() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpSafeMemberCallback14B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>
+    : public XorpMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpSafeMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback14B6() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
+struct XorpMemberCallbackFactory14B6
+{
+    inline static XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpSafeMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, false>
+{
+    inline static XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 14 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+
+/**
+ * @short Callback object for const member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstMemberCallback14B6 : public XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6)  const;
+    XorpConstMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>
+: public XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6)  const;
+    XorpConstMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback14<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstSafeMemberCallback14B6
+    : public XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpConstSafeMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B6() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 14 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstSafeMemberCallback14B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>
+    : public XorpConstMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpConstSafeMemberCallback14B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpConstMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback14B6() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) {
+	if (valid()) {
+	    XorpConstMemberCallback14B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
+struct XorpConstMemberCallbackFactory14B6
+{
+    inline static XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpConstSafeMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, false>
+{
+    inline static XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpConstMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 14 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpConstMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Code relating to callbacks with 15 late args
+//
+
+/**
+ * @short Base class for callbacks with 15 dispatch time args.
+ */
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpCallback15 {
+    typedef ref_ptr<XorpCallback15> RefPtr;
+
+    virtual ~XorpCallback15() {}
+    virtual R dispatch(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) = 0;
+};
+
+/**
+ * @short Callback object for functions with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpFunctionCallback15B0 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15);
+    XorpFunctionCallback15B0(F f)
+	: XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	return r;
+    }
+protected:
+    F   _f;
+};
+
+
+/**
+ * @short Callback object for void functions with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpFunctionCallback15B0<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> : public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15);
+    XorpFunctionCallback15B0(F f)
+	: XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+    }
+protected:
+    F   _f;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 15 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15)) {
+    return typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr(new XorpFunctionCallback15B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(f));
+}
+
+/**
+ * @short Callback object for member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpMemberCallback15B0 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) ;
+    XorpMemberCallback15B0(O* o, M m)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for void member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) ;
+    XorpMemberCallback15B0(O* o, M m)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for safe member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpSafeMemberCallback15B0
+    : public XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::M M;
+    XorpSafeMemberCallback15B0(O* o, M m)
+	 : XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B0() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpSafeMemberCallback15B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>
+    : public XorpMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::M M;
+    XorpSafeMemberCallback15B0(O* o, M m)
+	 : XorpMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B0() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, bool B=true>
+struct XorpMemberCallbackFactory15B0
+{
+    inline static XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
+    {
+	return new XorpSafeMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, false>
+{
+    inline static XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
+    {
+	return new XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
+{
+    return XorpMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
+{
+    return XorpMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p);
+}
+
+
+/**
+ * @short Callback object for const member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpConstMemberCallback15B0 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15)  const;
+    XorpConstMemberCallback15B0(O* o, M m)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for void const member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpConstMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15)  const;
+    XorpConstMemberCallback15B0(O* o, M m)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+};
+
+/**
+ * @short Callback object for const safe member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpConstSafeMemberCallback15B0
+    : public XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::M M;
+    XorpConstSafeMemberCallback15B0(O* o, M m)
+	 : XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B0() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 15 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpConstSafeMemberCallback15B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>
+    : public XorpConstMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::M M;
+    XorpConstSafeMemberCallback15B0(O* o, M m)
+	 : XorpConstMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, m),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B0() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpConstMemberCallback15B0<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, bool B=true>
+struct XorpConstMemberCallbackFactory15B0
+{
+    inline static XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
+    {
+	return new XorpConstSafeMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+struct XorpConstMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, false>
+{
+    inline static XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
+    {
+	return new XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
+{
+    return XorpConstMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
+{
+    return XorpConstMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p);
+}
+
+
+/**
+ * @short Callback object for functions with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpFunctionCallback15B1 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1);
+    XorpFunctionCallback15B1(F f, BA1 ba1)
+	: XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+};
+
+
+/**
+ * @short Callback object for void functions with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpFunctionCallback15B1<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1> : public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1);
+    XorpFunctionCallback15B1(F f, BA1 ba1)
+	: XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 15 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1) {
+    return typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr(new XorpFunctionCallback15B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(f, ba1));
+}
+
+/**
+ * @short Callback object for member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpMemberCallback15B1 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) ;
+    XorpMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) ;
+    XorpMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpSafeMemberCallback15B1
+    : public XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::M M;
+    XorpSafeMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B1() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpSafeMemberCallback15B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>
+    : public XorpMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::M M;
+    XorpSafeMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B1() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, bool B=true>
+struct XorpMemberCallbackFactory15B1
+{
+    inline static XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
+    {
+	return new XorpSafeMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, false>
+{
+    inline static XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
+    {
+	return new XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
+{
+    return XorpMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
+{
+    return XorpMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1);
+}
+
+
+/**
+ * @short Callback object for const member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpConstMemberCallback15B1 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1)  const;
+    XorpConstMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpConstMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1)  const;
+    XorpConstMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpConstSafeMemberCallback15B1
+    : public XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::M M;
+    XorpConstSafeMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B1() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 15 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpConstSafeMemberCallback15B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>
+    : public XorpConstMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::M M;
+    XorpConstSafeMemberCallback15B1(O* o, M m, BA1 ba1)
+	 : XorpConstMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, m, ba1),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B1() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpConstMemberCallback15B1<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, bool B=true>
+struct XorpConstMemberCallbackFactory15B1
+{
+    inline static XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
+    {
+	return new XorpConstSafeMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
+struct XorpConstMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, false>
+{
+    inline static XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
+    {
+	return new XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
+{
+    return XorpConstMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
+{
+    return XorpConstMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1);
+}
+
+
+/**
+ * @short Callback object for functions with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpFunctionCallback15B2 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2);
+    XorpFunctionCallback15B2(F f, BA1 ba1, BA2 ba2)
+	: XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+};
+
+
+/**
+ * @short Callback object for void functions with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpFunctionCallback15B2<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2> : public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2);
+    XorpFunctionCallback15B2(F f, BA1 ba1, BA2 ba2)
+	: XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 15 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2) {
+    return typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr(new XorpFunctionCallback15B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(f, ba1, ba2));
+}
+
+/**
+ * @short Callback object for member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpMemberCallback15B2 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) ;
+    XorpMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) ;
+    XorpMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpSafeMemberCallback15B2
+    : public XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::M M;
+    XorpSafeMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B2() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpSafeMemberCallback15B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>
+    : public XorpMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::M M;
+    XorpSafeMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B2() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, bool B=true>
+struct XorpMemberCallbackFactory15B2
+{
+    inline static XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
+    {
+	return new XorpSafeMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, false>
+{
+    inline static XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
+    {
+	return new XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
+{
+    return XorpMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
+{
+    return XorpMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2);
+}
+
+
+/**
+ * @short Callback object for const member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpConstMemberCallback15B2 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2)  const;
+    XorpConstMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpConstMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2)  const;
+    XorpConstMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpConstSafeMemberCallback15B2
+    : public XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::M M;
+    XorpConstSafeMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B2() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 15 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpConstSafeMemberCallback15B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>
+    : public XorpConstMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::M M;
+    XorpConstSafeMemberCallback15B2(O* o, M m, BA1 ba1, BA2 ba2)
+	 : XorpConstMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, m, ba1, ba2),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B2() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpConstMemberCallback15B2<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, bool B=true>
+struct XorpConstMemberCallbackFactory15B2
+{
+    inline static XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
+    {
+	return new XorpConstSafeMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
+struct XorpConstMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, false>
+{
+    inline static XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
+    {
+	return new XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
+{
+    return XorpConstMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
+{
+    return XorpConstMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2);
+}
+
+
+/**
+ * @short Callback object for functions with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpFunctionCallback15B3 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3);
+    XorpFunctionCallback15B3(F f, BA1 ba1, BA2 ba2, BA3 ba3)
+	: XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+};
+
+
+/**
+ * @short Callback object for void functions with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpFunctionCallback15B3<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3> : public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3);
+    XorpFunctionCallback15B3(F f, BA1 ba1, BA2 ba2, BA3 ba3)
+	: XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 15 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
+    return typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr(new XorpFunctionCallback15B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+}
+
+/**
+ * @short Callback object for member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpMemberCallback15B3 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) ;
+    XorpMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) ;
+    XorpMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpSafeMemberCallback15B3
+    : public XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::M M;
+    XorpSafeMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B3() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpSafeMemberCallback15B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>
+    : public XorpMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::M M;
+    XorpSafeMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B3() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, bool B=true>
+struct XorpMemberCallbackFactory15B3
+{
+    inline static XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpSafeMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, false>
+{
+    inline static XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3);
+}
+
+
+/**
+ * @short Callback object for const member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpConstMemberCallback15B3 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3)  const;
+    XorpConstMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpConstMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3)  const;
+    XorpConstMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpConstSafeMemberCallback15B3
+    : public XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::M M;
+    XorpConstSafeMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B3() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 15 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpConstSafeMemberCallback15B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>
+    : public XorpConstMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::M M;
+    XorpConstSafeMemberCallback15B3(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpConstMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, m, ba1, ba2, ba3),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B3() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpConstMemberCallback15B3<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, bool B=true>
+struct XorpConstMemberCallbackFactory15B3
+{
+    inline static XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpConstSafeMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
+struct XorpConstMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, false>
+{
+    inline static XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+    {
+	return new XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpConstMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpConstMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3);
+}
+
+
+/**
+ * @short Callback object for functions with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpFunctionCallback15B4 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4);
+    XorpFunctionCallback15B4(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	: XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+};
+
+
+/**
+ * @short Callback object for void functions with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpFunctionCallback15B4<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4> : public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4);
+    XorpFunctionCallback15B4(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	: XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 15 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
+    return typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr(new XorpFunctionCallback15B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+}
+
+/**
+ * @short Callback object for member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpMemberCallback15B4 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) ;
+    XorpMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) ;
+    XorpMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpSafeMemberCallback15B4
+    : public XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::M M;
+    XorpSafeMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B4() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpSafeMemberCallback15B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>
+    : public XorpMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::M M;
+    XorpSafeMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B4() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, bool B=true>
+struct XorpMemberCallbackFactory15B4
+{
+    inline static XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpSafeMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, false>
+{
+    inline static XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4);
+}
+
+
+/**
+ * @short Callback object for const member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstMemberCallback15B4 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4)  const;
+    XorpConstMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4)  const;
+    XorpConstMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstSafeMemberCallback15B4
+    : public XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::M M;
+    XorpConstSafeMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B4() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 15 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstSafeMemberCallback15B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>
+    : public XorpConstMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::M M;
+    XorpConstSafeMemberCallback15B4(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpConstMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, m, ba1, ba2, ba3, ba4),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B4() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpConstMemberCallback15B4<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, bool B=true>
+struct XorpConstMemberCallbackFactory15B4
+{
+    inline static XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpConstSafeMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, false>
+{
+    inline static XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+    {
+	return new XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpConstMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpConstMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4);
+}
+
+
+/**
+ * @short Callback object for functions with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpFunctionCallback15B5 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5);
+    XorpFunctionCallback15B5(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	: XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+};
+
+
+/**
+ * @short Callback object for void functions with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpFunctionCallback15B5<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5> : public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5);
+    XorpFunctionCallback15B5(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	: XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 15 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
+    return typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr(new XorpFunctionCallback15B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+}
+
+/**
+ * @short Callback object for member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpMemberCallback15B5 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) ;
+    XorpMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) ;
+    XorpMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpSafeMemberCallback15B5
+    : public XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpSafeMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B5() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpSafeMemberCallback15B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>
+    : public XorpMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpSafeMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B5() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
+struct XorpMemberCallbackFactory15B5
+{
+    inline static XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpSafeMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, false>
+{
+    inline static XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+
+/**
+ * @short Callback object for const member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstMemberCallback15B5 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5)  const;
+    XorpConstMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5)  const;
+    XorpConstMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstSafeMemberCallback15B5
+    : public XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpConstSafeMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B5() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 15 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstSafeMemberCallback15B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>
+    : public XorpConstMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::M M;
+    XorpConstSafeMemberCallback15B5(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpConstMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, m, ba1, ba2, ba3, ba4, ba5),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B5() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpConstMemberCallback15B5<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
+struct XorpConstMemberCallbackFactory15B5
+{
+    inline static XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpConstSafeMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, false>
+{
+    inline static XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+    {
+	return new XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpConstMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpConstMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5);
+}
+
+
+/**
+ * @short Callback object for functions with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpFunctionCallback15B6 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6);
+    XorpFunctionCallback15B6(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	: XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6)
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+	return r;
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+    BA6 _ba6;
+};
+
+
+/**
+ * @short Callback object for void functions with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpFunctionCallback15B6<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6> : public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6);
+    XorpFunctionCallback15B6(F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	: XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6)
+    {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	(*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+    }
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+    BA6 _ba6;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 15 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
+    return typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr(new XorpFunctionCallback15B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+}
+
+/**
+ * @short Callback object for member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpMemberCallback15B6 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) ;
+    XorpMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for void member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) ;
+    XorpMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for safe member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpSafeMemberCallback15B6
+    : public XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpSafeMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B6() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void safe member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpSafeMemberCallback15B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>
+    : public XorpMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpSafeMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpSafeMemberCallback15B6() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
+struct XorpMemberCallbackFactory15B6
+{
+    inline static XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpSafeMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, false>
+{
+    inline static XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * member function with 15 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+
+/**
+ * @short Callback object for const member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstMemberCallback15B6 : public XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6)  const;
+    XorpConstMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	R r = ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+	return r;
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for void const member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>
+: public XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15> {
+    typedef void (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6)  const;
+    XorpConstMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback15<void, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(),
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6);
+    }
+protected:
+    O*	_o;	// Callback's target object
+    M	_m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+/**
+ * @short Callback object for const safe member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstSafeMemberCallback15B6
+    : public XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpConstSafeMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B6() {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    R r = XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	    return r;
+	}
+    }
+};
+
+/**
+ * @short Callback object for void const safe member methods with 15 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstSafeMemberCallback15B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>
+    : public XorpConstMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>,
+      public SafeCallbackBase {
+    typedef typename XorpConstMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::M M;
+    XorpConstSafeMemberCallback15B6(O* o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpConstMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, m, ba1, ba2, ba3, ba4, ba5, ba6),
+	   SafeCallbackBase(o) {}
+    ~XorpConstSafeMemberCallback15B6() {}
+    void dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) {
+	if (valid()) {
+	    XorpConstMemberCallback15B6<void, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>::dispatch(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+	}
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
+struct XorpConstMemberCallbackFactory15B6
+{
+    inline static XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpConstSafeMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    }
+};
+
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, false>
+{
+    inline static XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+    {
+	return new XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    };
+};
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpConstMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+}
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * const member function with 15 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
+callback(O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpConstMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(&o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 

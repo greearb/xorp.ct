@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.6 2003/07/25 02:12:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.7 2003/10/01 02:29:12 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -67,7 +67,7 @@ PrintRoutes::get_v4_route_list_start() {
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
     cb = callback(this, &PrintRoutes::get_v4_route_list_start_done);
     _active_requests = 0;
-    send_get_v4_route_list_start("bgp", cb);
+    send_get_v4_route_list_start("bgp", true, false, cb);
 }
 
 void
@@ -97,10 +97,11 @@ PrintRoutes::get_v4_route_list_start_done(const XrlError& e,
 
 void
 PrintRoutes::get_v4_route_list_next() {
-    XorpCallback13<void, const XrlError&, const IPv4*, const IPv4Net*, 
+    XorpCallback15<void, const XrlError&, const IPv4*, const IPv4Net*, 
 	const uint32_t*, const vector<uint8_t>*, const IPv4*, const int32_t*, 
 	const int32_t*, const int32_t*, const vector<uint8_t>*, 
-	const int32_t*, const vector<uint8_t>*, const bool*>::RefPtr cb;
+	const int32_t*, const vector<uint8_t>*, const bool*, const bool *,
+	const bool *>::RefPtr cb;
     cb = callback(this, &PrintRoutes::get_v4_route_list_next_done);
     send_get_v4_route_list_next("bgp", _token, cb);
 }
@@ -118,7 +119,9 @@ PrintRoutes::get_v4_route_list_next_done(const XrlError& e,
 					 const vector<uint8_t>* aggregator, 
 					 const int32_t* calc_localpref, 
 					 const vector<uint8_t>* attr_unknown,
-					 const bool* valid) 
+					 const bool* valid,
+					 const bool* /*unicast*/,
+					 const bool* /*multicast*/)
 {
     UNUSED(med);
     UNUSED(localpref);

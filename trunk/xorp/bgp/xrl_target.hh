@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.19 2004/03/24 19:34:31 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.20 2004/05/11 00:44:35 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -243,10 +243,16 @@ public:
 	const string&	name);
 
     XrlCmdError bgp_0_2_get_v4_route_list_start(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
 	// Output values,
 	uint32_t& token);
 
     XrlCmdError bgp_0_2_get_v6_route_list_start(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
 	// Output values,
 	uint32_t& token);
 
@@ -265,7 +271,9 @@ public:
 	vector<uint8_t>& aggregator,
 	int32_t& calc_localpref,
 	vector<uint8_t>& attr_unknown,
-	bool& valid);
+	bool& valid,
+	bool& unicast,
+	bool& multicast);
 
     XrlCmdError bgp_0_2_get_v6_route_list_next(
 	// Input values,
@@ -282,7 +290,9 @@ public:
 	vector<uint8_t>& aggregator,
 	int32_t& calc_localpref,
 	vector<uint8_t>& attr_unknown,
-	bool& valid);
+	bool& valid,
+	bool& unicast,
+	bool& multicast);
 
     XrlCmdError rib_client_0_1_route_info_changed4(
 	// Input values,

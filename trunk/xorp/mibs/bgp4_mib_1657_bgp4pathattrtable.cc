@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.13 2004/03/27 20:46:21 pavlin Exp $"
 
 
 #include <stack>
@@ -80,7 +80,8 @@ static void  get_v4_route_list_start_done(const XrlError&, const uint32_t*);
 static void get_v4_route_list_next_done(const XrlError& e, const IPv4* peer_id,
     const IPv4Net*, const uint32_t *, const vector<uint8_t>*, const IPv4*,
     const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*,
-    const int32_t*, const vector<uint8_t>*, const bool* valid);
+    const int32_t*, const vector<uint8_t>*, const bool* valid,
+    const bool *unicast, const bool *multicast);
 static void find_old_routes (void *, void *); 
 static uint32_t rows_are_equal(bgp4PathAttrTable_context * lr, 
     bgp4PathAttrTable_context * rr);
@@ -134,7 +135,7 @@ static void local_route_table_update()
 		"updating local bgp4PathAttrTable...\n"));
 	    DEBUGMSGTL((BgpMib::the_instance().name(),
 		"local table size: %d\n", CONTAINER_SIZE(cb.container)));
-	    bgp_mib.send_get_v4_route_list_start("bgp",
+	    bgp_mib.send_get_v4_route_list_start("bgp", true, false,
 			     callback(get_v4_route_list_start_done));
 	    break;
 	}
@@ -567,7 +568,9 @@ get_v4_route_list_next_done(const XrlError& e,
                             const vector<uint8_t>* aggregator,
                             const int32_t* calc_localpref,
                             const vector<uint8_t>* attr_unknown,
-			    const bool* valid)
+			    const bool* valid,
+			    const bool* /*unicast*/,
+			    const bool* /*multicast*/)
 {
     if (e != XrlError::OKAY() || false == (*valid)) {
 	// Done updating the local table.  Time to remove old routes 

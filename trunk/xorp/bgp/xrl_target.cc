@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.23 2004/04/15 16:13:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.24 2004/05/11 00:44:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -577,12 +577,15 @@ XrlBgpTarget::bgp_0_2_register_rib(
 
 XrlCmdError
 XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
 	// Output values, 
 	uint32_t& token)
 {
     debug_msg("\n");
 
-    if (_bgp.get_route_list_start4(token)) {
+    if (_bgp.get_route_list_start<IPv4>(token, unicast, multicast)) {
 	return XrlCmdError::OKAY();
     } else {
 	return XrlCmdError::COMMAND_FAILED();
@@ -591,10 +594,13 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 
 XrlCmdError
 XrlBgpTarget::bgp_0_2_get_v6_route_list_start(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
 	// Output values, 
 	uint32_t& token)
 {
-    if (_bgp.get_route_list_start4(token)) {
+    if (_bgp.get_route_list_start<IPv6>(token, unicast, multicast)) {
 	return XrlCmdError::OKAY();
     } else {
 	return XrlCmdError::COMMAND_FAILED();
@@ -617,16 +623,19 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_next(
 	vector<uint8_t>& aggregator, 
 	int32_t& calc_localpref, 
 	vector<uint8_t>& attr_unknown,
-	bool& valid)
+	bool& valid,
+	bool& unicast,
+	bool& multicast)
 {
     debug_msg("\n");
 
     uint32_t origin;
     bool best = false;
-    if (_bgp.get_route_list_next4(token, peer_id, net, origin, aspath,
-				  nexthop, med, localpref, atomic_agg,
-				  aggregator, calc_localpref, attr_unknown,
-				  best)) {
+    if (_bgp.get_route_list_next<IPv4>(token, peer_id, net, origin, aspath,
+				       nexthop, med, localpref, atomic_agg,
+				       aggregator, calc_localpref,
+				       attr_unknown, best, unicast,
+				       multicast)) {
 	//trivial encoding to keep XRL arg count small enough
 	if (best) {
 	    best_and_origin = (2 << 16) | origin;
@@ -657,16 +666,19 @@ XrlBgpTarget::bgp_0_2_get_v6_route_list_next(
 	vector<uint8_t>& aggregator, 
 	int32_t& calc_localpref, 
 	vector<uint8_t>& attr_unknown,
-	bool& valid)
+	bool& valid,
+	bool& unicast,
+	bool& multicast)
 {
     debug_msg("\n");
 
     uint32_t origin;
     bool best;
-    if (_bgp.get_route_list_next6(token, peer_id, net, origin, aspath,
-				  nexthop, med, localpref, atomic_agg,
-				  aggregator, calc_localpref, attr_unknown,
-				  best)) {
+    if (_bgp.get_route_list_next<IPv6>(token, peer_id, net, origin, aspath,
+				       nexthop, med, localpref, atomic_agg,
+				       aggregator, calc_localpref,
+				       attr_unknown, best, unicast,
+				       multicast)) {
 	//trivial encoding to keep XRL arg count small enough
 	if (best) {
 	    best_and_origin = (2 << 16) & origin;

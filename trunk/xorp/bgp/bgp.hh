@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.23 2004/03/24 19:34:30 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.24 2004/05/11 00:44:35 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -249,41 +249,30 @@ public:
 			const bool& unicast,
 			const bool& multicast) const;
 
-    bool get_route_list_start4(uint32_t& token);
-    bool get_route_list_start6(uint32_t& token);
-    
-    bool get_route_list_next4(
+    template <typename A>
+    bool get_route_list_start(uint32_t& token,
+			       const bool& unicast,
+			       const bool& multicast);
+
+    template <typename A>
+    bool get_route_list_next(
 			      // Input values, 
 			      const uint32_t&	token, 
 			      // Output values, 
-			      IPv4&	peer_id, 
-			      IPv4Net& net, 
+			      IPv4&  peer_id, 
+			      IPNet<A>& net, 
 			      uint32_t& origin, 
 			      vector<uint8_t>& aspath, 
-			      IPv4& nexthop, 
+			      A& nexthop, 
 			      int32_t& med, 
 			      int32_t& localpref, 
 			      int32_t& atomic_agg, 
 			      vector<uint8_t>& aggregator, 
 			      int32_t& calc_localpref, 
 			      vector<uint8_t>& attr_unknown,
-			      bool& best);
-    bool get_route_list_next6(
-			      // Input values, 
-			      const uint32_t&	token, 
-			      // Output values, 
-			      IPv4&	peer_id, 
-			      IPv6Net& net, 
-			      uint32_t& origin, 
-			      vector<uint8_t>& aspath, 
-			      IPv6& nexthop, 
-			      int32_t& med, 
-			      int32_t& localpref, 
-			      int32_t& atomic_agg, 
-			      vector<uint8_t>& aggregator, 
-			      int32_t& calc_localpref, 
-			      vector<uint8_t>& attr_unknown,
-			      bool& best);
+			      bool& best,
+			      bool& unicast,
+			      bool& multicast);
 
     bool rib_client_route_info_changed4(
 					// Input values,
@@ -450,6 +439,64 @@ private:
     BGPPlumbing *_plumbing_multicast;
     NextHopResolver<IPv6> *_next_hop_resolver_ipv6;
 
+    /**
+     * Token generator to map between unicast and multicast.
+     *
+     */
+    struct RoutingTableToken {
+	RoutingTableToken() : _last(0)
+	{}
+
+	uint32_t create(uint32_t& internal_token, const bool& unicast,
+			const bool& multicast) {
+
+	    while(_tokens.find(_last) != _tokens.end())
+		_last++;
+		
+	    _tokens[_last] = WhichTable(internal_token, unicast, multicast);
+
+	    return _last;
+	}
+	
+	bool lookup(uint32_t& token, bool& unicast, bool& multicast) {
+	    map <uint32_t, WhichTable>::iterator i;
+
+	    i = _tokens.find(token);
+	    if (i == _tokens.end())
+		return false;
+
+	    WhichTable t = i->second;
+
+	    token = t._token;
+	    unicast = t._unicast;
+	    multicast = t._multicast;
+
+	    return true;
+	}
+
+	void erase(uint32_t& token) {
+	    _tokens.erase(token);
+	}
+    private:
+	struct WhichTable {
+	    WhichTable() {}
+	    WhichTable(uint32_t token, bool unicast, bool multicast)
+		: _token(token), _unicast(unicast), _multicast(multicast)
+							       {}
+	    uint32_t _token;
+	    bool _unicast;
+	    bool _multicast;
+	};
+
+	map <uint32_t, WhichTable> _tokens;
+	uint32_t _last;
+    };
+
+    template <typename A> RoutingTableToken& get_token_table();
+
+    RoutingTableToken _table_ipv4;
+    RoutingTableToken _table_ipv6;
+
     XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;
     LocalData _local_data;
@@ -457,6 +504,162 @@ private:
     static EventLoop _eventloop;
     ProcessWatch *_process_watch;
 };
+
+template <typename A>
+bool
+BGPMain::get_route_list_start(uint32_t& token,
+				 const bool& unicast,
+				 const bool& multicast)
+{
+    if (unicast) {
+	token = _plumbing_unicast->create_route_table_reader<A>();
+    } else if (multicast) {
+	token = _plumbing_multicast->create_route_table_reader<A>();
+    } else {
+	XLOG_ERROR("Must specify at least one of unicast or multicast");
+	return false;
+    }
+
+    token = get_token_table<A>().create(token, unicast, multicast);
+
+    return true;
+}
+
+template <class A>
+void
+BGPMain::extract_attributes(// Input values,
+			    const PathAttributeList<A>& attributes,
+			    // Output values,
+			    uint32_t& origin,
+			    vector<uint8_t>& aspath,
+			    A& nexthop,
+			    int32_t& med,
+			    int32_t& localpref,
+			    int32_t& atomic_agg,
+			    vector<uint8_t>& aggregator,
+			    int32_t& calc_localpref,
+			    vector<uint8_t>& attr_unknown)
+{
+    origin = attributes.origin();
+    attributes.aspath().encode_for_mib(aspath);
+    nexthop = attributes.nexthop();
+
+    const MEDAttribute* med_att = attributes.med_att();
+    if (med_att) {
+	med = (int32_t)med_att->med();
+	if (med < 0) {
+	    med = 0x7ffffff;
+	    XLOG_WARNING("MED truncated in MIB from %u to %u\n",
+			 med_att->med(), med);
+	}
+    } else {
+	med = -1;
+    }
+
+    const LocalPrefAttribute* local_pref_att
+	= attributes.local_pref_att();
+    if (local_pref_att) {
+	localpref = (int32_t)local_pref_att->localpref();
+	if (localpref < 0) {
+	    localpref = 0x7ffffff;
+	    XLOG_WARNING("LOCAL_PREF truncated in MIB from %u to %u\n",
+			 local_pref_att->localpref(), localpref);
+	}
+    } else {
+	localpref = -1;
+    }
+
+    if (attributes.atomic_aggregate_att())
+	atomic_agg = 2;
+    else
+	atomic_agg = 1;
+
+    const AggregatorAttribute* agg_att
+	= attributes.aggregator_att();
+    if (agg_att) {
+	aggregator.resize(6);
+	agg_att->route_aggregator().copy_out(&aggregator[0]);
+	agg_att->aggregator_as().copy_out(&aggregator[4]);
+    } else {
+	assert(aggregator.size()==0);
+    }
+
+    calc_localpref = 0;
+    attr_unknown.resize(0);
+}
+
+template <typename A>
+bool
+BGPMain::get_route_list_next(
+			      // Input values,
+			      const uint32_t& token,
+			      // Output values,
+			      IPv4& peer_id,
+			      IPNet<A>& net,
+			      uint32_t& origin,
+			      vector<uint8_t>& aspath,
+			      A& nexthop,
+			      int32_t& med,
+			      int32_t& localpref,
+			      int32_t& atomic_agg,
+			      vector<uint8_t>& aggregator,
+			      int32_t& calc_localpref,
+			      vector<uint8_t>& attr_unknown,
+			      bool& best,
+			      bool& unicast_global,
+			      bool& multicast_global)
+{
+    bool unicast, multicast;
+    uint32_t internal_token, global_token;
+    internal_token = global_token = token;
+
+    if (!get_token_table<A>().lookup(internal_token, unicast, multicast))
+	return false;
+
+    const SubnetRoute<A>* route;
+    if (unicast) {
+	if (_plumbing_unicast->read_next_route(internal_token, route,
+					       peer_id)) {
+	    net = route->net();
+	    extract_attributes(*route->attributes(),
+			       origin, aspath, nexthop, med, localpref,
+			       atomic_agg, aggregator, calc_localpref,
+			       attr_unknown);
+	    best = route->is_winner();
+	    unicast_global = true;
+	    multicast_global = false;
+	    return true;
+	}
+
+	// We may have been asked for the unicast and multicast
+	// routing tables. In which case once we have completed the
+	// unicast routing table move onto providing the multicast
+	// table.
+	get_token_table<A>().erase(global_token);
+	if (multicast) {
+	    internal_token =
+		_plumbing_multicast->create_route_table_reader<A>();
+	    global_token = get_token_table<A>().
+		create(internal_token, false, true);
+	}
+    }
+    if (multicast) {
+	if (_plumbing_multicast->read_next_route(internal_token, route,
+						 peer_id)) {
+	    net = route->net();
+	    extract_attributes(*route->attributes(),
+			       origin, aspath, nexthop, med, localpref,
+			       atomic_agg, aggregator, calc_localpref,
+			       attr_unknown);
+	    best = route->is_winner();
+	    unicast_global = false;
+	    multicast_global = true;
+	    return true;
+	}
+	get_token_table<A>().erase(global_token);
+    }
+    return false;
+}
 
 // template <typename A>
 // struct NameOf {

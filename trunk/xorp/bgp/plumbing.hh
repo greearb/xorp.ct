@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.23 2004/03/24 19:34:30 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.24 2004/05/07 03:09:12 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -159,8 +159,8 @@ public:
 	return _plumbing_ipv6;
     }
 
-    uint32_t create_ipv4_route_table_reader();
-    uint32_t create_ipv6_route_table_reader();
+    template <typename A> uint32_t create_route_table_reader();
+
     bool read_next_route(uint32_t token, 
 			 const SubnetRoute<IPv4>*& route, 
 			 IPv4& peer_id);
