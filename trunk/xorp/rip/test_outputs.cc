@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.4 2003/09/04 05:26:53 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.5 2004/01/09 00:13:51 hodson Exp $"
 
 #include <set>
 
@@ -417,10 +417,6 @@ public:
 	_pm.other_port()->constants().set_expiry_secs(10);
 	_pm.other_port()->constants().set_deletion_secs(5);
 
-	// IPv4 specific despite being in a template
-	_pm.test_port()->af_state().set_auth_handler(new NullAuthHandler());
-	_pm.other_port()->af_state().set_auth_handler(new NullAuthHandler());
-
 	_pm.test_port()->set_io_handler(new BlockedPortIO<A>(*_pm.test_port()),
 					true);
 	_pm.other_port()->set_io_handler(
@@ -431,8 +427,6 @@ public:
     {
 	RouteDB<A>& rdb = _rip_system.route_db();
 	rdb.flush_routes();
-	delete _pm.test_port()->af_state().auth_handler();
-	delete _pm.other_port()->af_state().auth_handler();
     }
 
     int run_test(RipHorizon horizon, HorizonValidatorBase<A>& validator)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.4 2003/09/04 05:26:53 hodson Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.5 2004/01/09 00:13:51 hodson Exp $"
 
 #include <set>
 
@@ -235,12 +235,9 @@ public:
     static const uint32_t REQUESTED_ROUTES = 25;
 
 public:
-
     RequestPacketTester() : _e(), _rip_system(_e), _pm(_rip_system)
     {
 	_portio	= new SpoofPortIO<IPv4>(*_pm.the_port());
-	_ah	= new NullAuthHandler();
-	_pm.the_port()->af_state().set_auth_handler(_ah);
 	_pm.the_port()->set_io_handler(_portio, false);
 	_portio->set_enabled(true);
     }
@@ -249,7 +246,6 @@ public:
     {
 	_portio->set_enabled(false);
 	delete _portio;
-	delete _ah;
 	RouteDB<IPv4>& rdb = _rip_system.route_db();
 	rdb.flush_routes();
     }
@@ -411,7 +407,6 @@ protected:
     System<IPv4>		_rip_system;
     SpoofPortManager<IPv4>	_pm;
     SpoofPortIO<IPv4>*		_portio;
-    AuthHandlerBase*		_ah;
     set<IPv4Net>		_testnets;
 };
 
