@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.10 2004/10/15 18:23:37 bms Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.11 2005/02/01 08:53:26 pavlin Exp $"
 
 #include <set>
 
@@ -96,7 +96,7 @@ public:
     ~SpoofPort()
     {
 	verbose_log("Destructing SpoofPort<IPv%u> instance\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
 	while (this->_peers.empty() == false) {
 	    delete this->_peers.front();
 	    this->_peers.pop_front();
