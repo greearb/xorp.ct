@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.30 2004/01/05 23:38:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.31 2004/01/06 02:56:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -31,7 +31,7 @@
 extern int booterror(const char *s) throw (ParseError);
 
 ConfigTreeNode::ConfigTreeNode()
-    : _template(NULL),
+    : _template_tree_node(NULL),
       _deleted(false),
       _has_value(false),
       _parent(NULL),
@@ -54,7 +54,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 			       const TemplateTreeNode* ttn,
 			       ConfigTreeNode* parent,
 			       uid_t user_id)
-    : _template(ttn),
+    : _template_tree_node(ttn),
       _deleted(false),
       _has_value(false),
       _segname(nodename),
@@ -76,7 +76,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 }
 
 ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
-    : _template(ctn._template),
+    : _template_tree_node(ctn._template_tree_node),
       _deleted(ctn._deleted),
       _has_value(ctn._has_value),
       _value(ctn._value),
@@ -106,7 +106,7 @@ ConfigTreeNode::~ConfigTreeNode()
     }
 
     // Detect accidental reuse
-    _template = reinterpret_cast<TemplateTreeNode *>(0xbad);
+    _template_tree_node = reinterpret_cast<TemplateTreeNode *>(0xbad);
     _parent = reinterpret_cast<ConfigTreeNode *>(0xbad);
 }
 
@@ -129,7 +129,7 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
     }
     if (is_leaf() != them.is_leaf())
 	return false;
-    if (_template != them.template_node())
+    if (_template_tree_node != them.template_tree_node())
 	return false;
 #ifdef DEBUG_EQUALS
     printf("Equal nodes:\n");
@@ -166,14 +166,14 @@ ConfigTreeNode::remove_child(ConfigTreeNode* child)
 void
 ConfigTreeNode::add_default_children()
 {
-    if (_template == NULL)
+    if (_template_tree_node == NULL)
 	return;
 
     // Find all the template nodes for our children
     set<const TemplateTreeNode*> childrens_templates;
     list<ConfigTreeNode *>::const_iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	childrens_templates.insert((*iter)->template_node());
+	childrens_templates.insert((*iter)->template_tree_node());
     }
 
     //
@@ -182,8 +182,8 @@ ConfigTreeNode::add_default_children()
     // don't already have an instance of among our children.
     //
     list<TemplateTreeNode*>::const_iterator tci;
-    for (tci = _template->children().begin();
-	 tci != _template->children().end();
+    for (tci = _template_tree_node->children().begin();
+	 tci != _template_tree_node->children().end();
 	 ++tci) {
 	if ((*tci)->has_default()) {
 	    if (childrens_templates.find(*tci) == childrens_templates.end()) {
@@ -219,7 +219,7 @@ ConfigTreeNode::set_value(const string &value, uid_t user_id)
 }
 
 void
-ConfigTreeNode::command_status_callback(Command *cmd, bool success)
+ConfigTreeNode::command_status_callback(const Command* cmd, bool success)
 {
     debug_msg("command_status_callback node %s cmd %s\n",
 	      _segname.c_str(), cmd->str().c_str());
@@ -242,7 +242,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 {
     XLOG_ASSERT(_segname == delta_node.segname());
 
-    if (_template != NULL) {
+    if (_template_tree_node != NULL) {
 	XLOG_ASSERT(type() == delta_node.type());
 
 	if ((type() != NODE_VOID) && delta_node.is_leaf()) {
@@ -299,7 +299,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 	    ConfigTreeNode* new_node;
 	    new_node = new ConfigTreeNode(delta_child->segname(),
 					  delta_child->path(),
-					  delta_child->template_node(),
+					  delta_child->template_tree_node(),
 					  this,
 					  user_id);
 	    if (!provisional_change)
@@ -319,7 +319,7 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 {
     XLOG_ASSERT(_segname == deletion_node.segname());
 
-    if (_template != NULL) {
+    if (_template_tree_node != NULL) {
 	XLOG_ASSERT(type() == deletion_node.type());
 	if (deletion_node.const_children().empty()) {
 	    if (provisional_change) {
@@ -367,18 +367,19 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 void
 ConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 {
-    if ((_template != NULL) && (!_existence_committed || !_value_committed)) {
+    if ((_template_tree_node != NULL)
+	&& (!_existence_committed || !_value_committed)) {
 	const Command *cmd = NULL;
 	set<string> modules;
 	set<string>::const_iterator iter;
 
 	if (_deleted) {
-	    cmd = _template->const_command("%delete");
+	    cmd = _template_tree_node->const_command("%delete");
 	    if (cmd == NULL) {
 		// No need to go to children
 		return;
 	    }
-	    modules = cmd->affected_xrl_modules(*this);
+	    modules = cmd->affected_xrl_modules();
 
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		changed_modules.insert(*iter);
@@ -386,24 +387,24 @@ ConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 	}
 
 	if (!_existence_committed) {
-	    if (! _template->module_name().empty())
-		changed_modules.insert(_template->module_name());
-	    cmd = _template->const_command("%create");
+	    if (! _template_tree_node->module_name().empty())
+		changed_modules.insert(_template_tree_node->module_name());
+	    cmd = _template_tree_node->const_command("%create");
 	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules(*this);
+		modules = cmd->affected_xrl_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
-	    cmd = _template->const_command("%activate");
+	    cmd = _template_tree_node->const_command("%activate");
 	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules(*this);
+		modules = cmd->affected_xrl_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
 	} else if (!_value_committed) {
-	    cmd = _template->const_command("%set");
+	    cmd = _template_tree_node->const_command("%set");
 	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules(*this);
+		modules = cmd->affected_xrl_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
@@ -419,26 +420,26 @@ ConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 void
 ConfigTreeNode::find_active_modules(set<string>& active_modules) const
 {
-    if ((_template != NULL) && (!_deleted)) {
+    if ((_template_tree_node != NULL) && (!_deleted)) {
 	const Command *cmd;
 	set<string> modules;
 	set<string>::const_iterator iter;
 
-	cmd = _template->const_command("%create");
+	cmd = _template_tree_node->const_command("%create");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules(*this);
+	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
-	cmd = _template->const_command("%activate");
+	cmd = _template_tree_node->const_command("%activate");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules(*this);
+	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
-	cmd = _template->const_command("%set");
+	cmd = _template_tree_node->const_command("%set");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules(*this);
+	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
@@ -454,26 +455,26 @@ ConfigTreeNode::find_active_modules(set<string>& active_modules) const
 void
 ConfigTreeNode::find_all_modules(set<string>& all_modules) const
 {
-    if (_template != NULL) {
+    if (_template_tree_node != NULL) {
 	const Command *cmd;
 	set<string> modules;
 	set<string>::const_iterator iter;
 
-	cmd = _template->const_command("%create");
+	cmd = _template_tree_node->const_command("%create");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules(*this);
+	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
-	cmd = _template->const_command("%activate");
+	cmd = _template_tree_node->const_command("%activate");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules(*this);
+	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
-	cmd = _template->const_command("%set");
+	cmd = _template_tree_node->const_command("%set");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules(*this);
+	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
@@ -491,8 +492,8 @@ ConfigTreeNode::find_config_module(const string& module_name) const
 	return (NULL);
 
     // Check if this node matches
-    if (_template != NULL) {
-	if (_template->module_name() == module_name)
+    if (_template_tree_node != NULL) {
+	if (_template_tree_node->module_name() == module_name)
 	    return (this);
     }
 
@@ -513,12 +514,12 @@ ConfigTreeNode::check_config_tree(string& result) const
     list<ConfigTreeNode *>::const_iterator iter;
 
     //
-    // Verify that all mandatory child nodes are configured in place
+    // Check that all mandatory child nodes are configured in place
     //
-    if (_template != NULL) {
+    if (_template_tree_node != NULL) {
 	list<string>::const_iterator li;
-	for (li = _template->mandatory_children().begin();
-	     li != _template->mandatory_children().end();
+	for (li = _template_tree_node->mandatory_children().begin();
+	     li != _template_tree_node->mandatory_children().end();
 	     ++li) {
 	    const string& mandatory_child = *li;
 	    bool found = false;
@@ -537,7 +538,7 @@ ConfigTreeNode::check_config_tree(string& result) const
     }
 
     //
-    // Recursively verify all child nodes
+    // Recursively check all child nodes
     //
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	ConfigTreeNode* ctn = *iter;
@@ -585,9 +586,9 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 #endif
 
     // The root node has a NULL template
-    if (_template != NULL) {
+    if (_template_tree_node != NULL) {
 	// Do we have to start any modules to implement this functionality
-	cmd = _template->const_command("%modinfo");
+	cmd = _template_tree_node->const_command("%modinfo");
 	const ModuleCommand* modcmd = dynamic_cast<const ModuleCommand*>(cmd);
 	if (modcmd != NULL) {
 	    if (modcmd->start_transaction(*this, task_manager) != XORP_OK) {
@@ -615,7 +616,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    //
 		    XLOG_ASSERT(_existence_committed);
 		    XLOG_ASSERT(!_value_committed);  
-		    cmd = _template->const_command("%delete");
+		    cmd = _template_tree_node->const_command("%delete");
 		    if (cmd != NULL) {
 			int actions = cmd->execute(*this, task_manager);
 			if (actions < 0) {
@@ -637,7 +638,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    } else {
 		// Check any allow commands that might prevent us
 		// going any further
-		cmd = _template->const_command("%allow");
+		cmd = _template_tree_node->const_command("%allow");
 		if (cmd != NULL) {
 		    const AllowCommand* allow_cmd;
 #ifdef DEBUG_COMMIT
@@ -645,18 +646,19 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 #endif
 		    allow_cmd = dynamic_cast<const AllowCommand*>(cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
-		    try {
-			allow_cmd->execute(*this);
-		    } catch (ParseError(&pe)) {
+		    string errmsg;
+		    if (allow_cmd->verify_variable_value(*this, errmsg)
+			!= true) {
 			//
 			// Commit_changes should always be run first
 			// with do_commit not set, so there can be no
 			// Allow command errors.
 			//
 			// XLOG_ASSERT(do_commit == false);
-			result = "Bad value for \"" + path() + "\"\n";
-			result += "No changes have been committed.\n";
-			result += "Correct this error and try again.\n";
+			result = c_format("Bad value for \"%s\": %s; ",
+					  path().c_str(), errmsg.c_str());
+			result += "No changes have been committed. ";
+			result += "Correct this error and try again.";
 #ifdef DEBUG_COMMIT
 			printf("%s\n", result.c_str());
 #endif
@@ -665,9 +667,9 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		}
 
 		// Next, we run any "create" or "set" commands
-		cmd = _template->const_command("%create");
+		cmd = _template_tree_node->const_command("%create");
 		if (cmd == NULL)
-		    cmd = _template->const_command("%set");
+		    cmd = _template_tree_node->const_command("%set");
 		if (cmd == NULL) {
 #ifdef DEBUG_COMMIT
 		    printf("no appropriate command found\n");
@@ -714,9 +716,9 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 
     if (!_deleted
 	&& (_existence_committed == false || _value_committed == false)) {
-	if (_template != NULL) {
+	if (_template_tree_node != NULL) {
 	    // Finally, on the way back out, we run the %activate commands
-	    cmd = _template->const_command("%activate");
+	    cmd = _template_tree_node->const_command("%activate");
 	    if (cmd != NULL) {
 #ifdef DEBUG_COMMIT
 		printf("found commands: %s\n", cmd->str().c_str());
@@ -735,8 +737,8 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    }
 	}
     }
-    if (_template != NULL) {
-	cmd = _template->const_command("%modinfo");
+    if (_template_tree_node != NULL) {
+	cmd = _template_tree_node->const_command("%modinfo");
 	if (cmd != NULL) {
 	    const ModuleCommand* modcmd
 		= dynamic_cast<const ModuleCommand*>(cmd);
@@ -776,7 +778,7 @@ ConfigTreeNode::check_commit_status(string &response) const
 	    return false;
 	}
 	if (_deleted) {
-	    const Command* cmd = _template->const_command("%delete");
+	    const Command* cmd = _template_tree_node->const_command("%delete");
 	    if (cmd != NULL) {
 		//
 		// No need to check the children if we succeeded in
@@ -862,7 +864,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 #endif
 
     // The root node has a NULL template
-    if (_template != NULL) {
+    if (_template_tree_node != NULL) {
 	if (_existence_committed == false) {
 	    result =  show_subtree(depth, /* XXX */ depth * 2, true, false);
 	    delete_subtree_silently();
@@ -905,13 +907,13 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 int 
 ConfigTreeNode::type() const
 {
-    return _template->type();
+    return _template_tree_node->type();
 }
 
 bool 
 ConfigTreeNode::is_tag() const
 {
-    return _template->is_tag();
+    return _template_tree_node->is_tag();
 }
 
 bool 
@@ -948,7 +950,7 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
     if (_deleted)
 	return string("");
 
-    if (_template != NULL)
+    if (_template_tree_node != NULL)
 	is_a_tag = is_tag();
 
     for (int i = 0; i < indent; i++) 
@@ -1107,7 +1109,7 @@ ConfigTreeNode::clone_subtree(const ConfigTreeNode& orig_node)
 string 
 ConfigTreeNode::typestr() const
 {
-    return _template->typestr();
+    return _template_tree_node->typestr();
 }
 
 string 
@@ -1115,7 +1117,7 @@ ConfigTreeNode::node_str() const
 {
     string tmp;
 
-    if (_template == NULL) {
+    if (_template_tree_node == NULL) {
 	tmp = "ROOT";
     } else {
 	tmp = _path + " " + typestr();
@@ -1160,7 +1162,7 @@ ConfigTreeNode::find_node(list<string>& path)
     if (path.empty())
 	return this;
 
-    if (_template != NULL) {
+    if (_template_tree_node != NULL) {
 	if (path.front() == _segname) {
 	    if (path.size() == 1) {
 		return this;
@@ -1220,31 +1222,6 @@ ConfigTreeNode::named_value(const string& varname) const
     return iter->second;
 }
 
-string
-ConfigTreeNode::get_module_name_by_variable(const string& varname) const
-{
-    VarType type = NONE;
-    const ConfigTreeNode* varname_node;
-    const TemplateTreeNode* template_tree_node;
-
-    varname_node = find_const_varname_node(varname, type);
-    if (varname_node != NULL) {
-	//
-	// Search all template tree nodes toward the root
-	// to find the module name.
-	//
-	for (template_tree_node = varname_node->template_node();
-	     template_tree_node != NULL;
-	     template_tree_node = template_tree_node->parent()) {
-	    string module_name = template_tree_node->module_name();
-	    if (module_name.length() > 0)
-		return (module_name);
-	}
-    }
-
-    return "";		// XXX: nothing found
-}
-
 bool
 ConfigTreeNode::expand_variable(const string& varname, string& value) const
 {
@@ -1258,45 +1235,31 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 #endif
 
     varname_node = find_const_varname_node(varname, type);
-    if (varname_node == NULL)
-	return false;
 
     switch (type) {
     case NONE:
-	// This can't happen
-	XLOG_UNREACHABLE();
-	break;
+	return false;
     case NODE_VALUE:
+	XLOG_ASSERT(varname_node != NULL);
 	value = varname_node->value();
 	return true;
     case NAMED:
     {
 	list<string> var_parts;
 
+	XLOG_ASSERT(varname_node != NULL);
 	split_up_varname(varname, var_parts);
 	value = varname_node->named_value(var_parts.back());
 	return true;
     }
     case TEMPLATE_DEFAULT:
     {
-	list<string> var_parts;
-
-	split_up_varname(varname, var_parts);
-	string nodename = var_parts.back();
-	const TemplateTreeNode* ttn = varname_node->template_node();
-	list<TemplateTreeNode *>::const_iterator iter;
-	for (iter = ttn->children().begin();
-	     iter != ttn->children().end(); ++iter) {
-	    if ((*iter)->segname() == nodename) {
-		if (! (*iter)->has_default())
-		    return false;
-		XLOG_ASSERT((*iter)->has_default());
-		value = (*iter)->default_str();
-		return true;
-	    }
-	}
-	// This can't happen
-	XLOG_UNREACHABLE();
+	const TemplateTreeNode* ttn;
+	ttn = _template_tree_node->find_varname_node(varname);
+	XLOG_ASSERT(ttn != NULL);
+	XLOG_ASSERT(ttn->has_default());
+	value = ttn->default_str();
+	return true;
     }
     }
     XLOG_UNREACHABLE();
@@ -1322,8 +1285,8 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 	   _segname.c_str(), varname.c_str());
 #endif
 
-    if (varname == "$(@)" || (varname == "$("+_segname+")") ) {
-	XLOG_ASSERT(!_template->is_tag());
+    if (varname == "$(@)" || (varname == "$(" + _segname + ")") ) {
+	XLOG_ASSERT(!_template_tree_node->is_tag());
 	type = NODE_VALUE;
 #ifdef DEBUG_VARIABLES
 	printf("varname node is >%s<\n", _segname.c_str());
@@ -1333,20 +1296,42 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 
     list<string> var_parts;
     split_up_varname(varname, var_parts);
-    if (var_parts.front() == "@") {
-	_on_parent_path = true;
-	ConfigTreeNode* found_node = find_child_varname_node(var_parts, type);
-	_on_parent_path = false;
-	return found_node;
-    } else if (var_parts.size() > 1) {
-	// It's a parent node, or a child of a parent node
-	return find_parent_varname_node(var_parts, type);
+
+    if (var_parts.back() == "DEFAULT") {
+	// XXX: use the template tree to get the default value
+	if (_template_tree_node->has_default()) {
+	    type = TEMPLATE_DEFAULT;
+	    return NULL;
+	}
+	type = NONE;
+	return NULL;
     }
 
-    // Size of 0 or 1, and not $(@) is not valid syntax
-#ifdef DEBUG_VARIABLES
-    printf("expand failed\n");
-#endif
+    ConfigTreeNode* found_node = NULL;
+    if (var_parts.front() == "@") {
+	_on_parent_path = true;
+	found_node = find_child_varname_node(var_parts, type);
+	_on_parent_path = false;
+    } else if (var_parts.size() > 1) {
+	// It's a parent node, or a child of a parent node
+	found_node = find_parent_varname_node(var_parts, type);
+    }
+    if (found_node != NULL)
+	return (found_node);
+
+    // Test if we can match a template node
+    const TemplateTreeNode* ttn;
+    ttn = _template_tree_node->find_varname_node(varname);
+    if ((ttn != NULL) && ttn->has_default()) {
+	    type = TEMPLATE_DEFAULT;
+	    return NULL;
+    }
+
+    //
+    // XXX: if not referring to this node, then size of 0 or 1
+    // is not valid syntax.
+    //
+    type = NONE;
     return NULL;
 }
 
@@ -1442,24 +1427,6 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 	    return found_child;
     }
 
-    debug_msg("it's not a child\n");
-    if (var_parts.size() == 2) {
-	// The name might refer to a child of our template node;
-	list<TemplateTreeNode *>::const_iterator ti;
-	for (ti = _template->children().begin();
-	     ti != _template->children().end(); 
-	     ++ti) {
-	    if ((*ti)->segname() == var_parts.back()) {
-		// It refers to a child of a template
-		type = TEMPLATE_DEFAULT;
-#ifdef DEBUG_VARIABLES
-		printf("varname TD node is >%s<\n", _segname.c_str());
-#endif
-		return this;
-	    }
-	}
-    }
-    debug_msg("it can't be a template either\n");
     type = NONE;
     return NULL;
 }
@@ -1565,7 +1532,7 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
     // First search for an existing variable to set
     VarType type;
     ConfigTreeNode* node = find_varname_node(varname, type);
-    string err;
+    string errmsg;
     if (node != NULL) {
 	switch (type) {
 	case NONE:
@@ -1573,9 +1540,10 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	    XLOG_UNREACHABLE();
 	    break;
 	case NODE_VALUE: 
-	    err = "Attempt to set variable \"" + varname 
-		+ "\" which is the name of a configuration node\n";
-	    XLOG_ERROR(err.c_str());
+	    errmsg = c_format("Attempt to set variable \"%s\" "
+			      "which is the name of a configuration node",
+			      varname.c_str());
+	    XLOG_ERROR(errmsg.c_str());
 	    return false;
 	case NAMED:
 	{
@@ -1586,10 +1554,8 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	    return true;
 	}
 	case TEMPLATE_DEFAULT: 
-	    err = "Attempt to set variable \"" + varname 
-		+ "\" which is the name of a configuration node\n";
-	    XLOG_ERROR(err.c_str());
-	    return false;
+	    // XXX: Ignore, and attempt to set a named variable below.
+	    break;
 	}
     }
 
@@ -1604,8 +1570,9 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	debug_msg("VP: %s\n", iter->c_str());
     }
     if (var_parts.size() < 2) {
-	string err = "Attempt to set unknown variable \"" + varname + "\"\n";
-	XLOG_ERROR(err.c_str());
+	errmsg = c_format("Attempt to set incomplete variable \"%s\"",
+			  varname.c_str());
+	XLOG_ERROR(errmsg.c_str());
 	return false;
     }
     var_parts.pop_back();
@@ -1621,20 +1588,24 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	    split_up_varname(varname, var_parts);
 	    node->set_named_value(var_parts.back(), value);
 	    return true;
-	case NAMED: 
-	    err = "Attempt to set variable \"" + varname 
-		+ "\" which is the child of a named variable\n";
-	    XLOG_ERROR(err.c_str());
+	case NAMED:
+	    errmsg = c_format("Attempt to set variable \"%s\" "
+			      "which is the child of a named variable",
+			      varname.c_str());
+	    XLOG_ERROR(errmsg.c_str());
 	    return false;
 	case TEMPLATE_DEFAULT:
-	    err = "Attempt to set variable \"" + varname 
-		+ "\" which is on a non-existent node\n";
-	    XLOG_ERROR(err.c_str());
+	    errmsg = c_format("Attempt to set variable \"%s\" "
+			      "which is on a non-existent node",
+			      varname.c_str());
+	    XLOG_ERROR(errmsg.c_str());
 	    return false;
 	}
     }
-    err = "Attempt to set unknown variable \"" + varname + "\"\n";
-    XLOG_ERROR(err.c_str());
+
+    errmsg = c_format("Attempt to set unknown variable \"%s\"",
+		      varname.c_str());
+    XLOG_ERROR(errmsg.c_str());
     return false;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.14 2003/12/19 20:30:20 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.15 2004/01/06 02:56:24 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -48,7 +48,7 @@ public:
     void recursive_add_default_children();
     void set_value(const string& value, uid_t user_id);
     void mark_subtree_as_committed();
-    void command_status_callback(Command* cmd, bool success);
+    void command_status_callback(const Command* cmd, bool success);
 
     bool merge_deltas(uid_t user_id,
 		      const ConfigTreeNode& delta_node, 
@@ -74,7 +74,7 @@ public:
     bool is_root_node() const { return (_parent == NULL); }
     bool is_tag() const;
     bool is_leaf() const;
-    const TemplateTreeNode* template_node() const { return _template; }
+    const TemplateTreeNode* template_tree_node() const { return _template_tree_node; }
     string str() const;
     string node_str() const;
     string typestr() const;
@@ -104,7 +104,6 @@ public:
     void retain_common_nodes(const ConfigTreeNode& them);
     ConfigTreeNode* find_node(list<string>& path);
     void print_tree() const;
-    string get_module_name_by_variable(const string& varname) const;
     bool expand_expression(const string& varname, string& value) const;
     bool expand_variable(const string& varname, string& value) const;
     void expand_varname_to_matchlist(const vector<string>& v, size_t depth,
@@ -124,7 +123,7 @@ protected:
     ConfigTreeNode* find_child_varname_node(const list<string>& var_parts,
 					    VarType& type);
 
-    const TemplateTreeNode* _template;
+    const TemplateTreeNode* _template_tree_node;
     bool _deleted;	// Indicates node has been deleted, but commit has not 
 			// yet happened
     bool _has_value;
@@ -148,7 +147,7 @@ protected:
     int _actions_pending;	// Needed to track how many response callbacks
 				// callbacks we expect during a commit
     bool _actions_succeeded;	// Did any action fail during the commit?
-    Command *_cmd_that_failed;
+    const Command* _cmd_that_failed;
 
     // Variables contains the explicit variables set on this node
     map<string, string> _variables;
