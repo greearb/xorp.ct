@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.3 2004/02/20 06:48:00 atanu Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.4 2004/03/18 13:17:21 pavlin Exp $"
 
 
 //
@@ -190,12 +190,167 @@ void
 Fib2mribNode::tree_complete()
 {
     decr_startup_requests_n();
+
+    //
+    // XXX: we use same actions when the tree is completed and updates are made
+    //
+    updates_made();
 }
 
 void
 Fib2mribNode::updates_made()
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
+    list<Fib2mribRoute>::const_iterator route_iter;
+
+    for (route_iter = _fib2mrib_routes.begin();
+	 route_iter != _fib2mrib_routes.end();
+	 ++route_iter) {
+	const Fib2mribRoute& fib2mrib_route = *route_iter;
+	bool is_old_interface_up = false;
+	bool is_new_interface_up = false;
+
+	if (fib2mrib_route.is_interface_route()) {
+	    //
+	    // Calculate whether the interface was UP before and now.
+	    //
+	    const IfMgrVifAtom* vif_atom;
+	    vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
+					fib2mrib_route.vifname());
+	    if ((vif_atom != NULL) && (vif_atom->enabled()))
+		is_old_interface_up = true;
+	    vif_atom = ifmgr_iftree().find_vif(fib2mrib_route.ifname(),
+					       fib2mrib_route.vifname());
+	    if ((vif_atom != NULL) && (vif_atom->enabled()))
+		is_new_interface_up = true;
+	} else {
+	    //
+	    // Calculate whether the next-hop router was directly connected
+	    // before and now.
+	    //
+	    if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
+		is_old_interface_up = true;
+	    if (is_directly_connected(ifmgr_iftree(), fib2mrib_route.nexthop()))
+		is_new_interface_up = true;
+	}
+
+	if (is_old_interface_up == is_new_interface_up)
+	    continue;			// Nothing changed
+
+	if (is_new_interface_up) {
+	    //
+	    // The interface is now up, hence add the route
+	    //
+	    inform_rib_route_change(fib2mrib_route);
+	}
+	if (! is_new_interface_up) {
+	    //
+	    // The interface went down, hence cancel all pending requests,
+	    // and withdraw the route.
+	    //
+	    cancel_rib_route_change(fib2mrib_route);
+
+	    Fib2mribRoute tmp_route(fib2mrib_route);
+	    tmp_route.set_delete_route();	// XXX: mark as deleted route
+	    inform_rib_route_change(tmp_route);
+	}
+    }
+
+    //
+    // Update the local copy of the interface tree
+    //
+    _iftree = ifmgr_iftree();
+}
+
+bool
+Fib2mribNode::is_directly_connected(const IfMgrIfTree& if_tree,
+				    const IPvX& addr) const
+{
+    IfMgrIfTree::IfMap::const_iterator if_iter;
+
+    for (if_iter = if_tree.ifs().begin();
+	 if_iter != if_tree.ifs().end();
+	 ++if_iter) {
+	const IfMgrIfAtom& iface = if_iter->second;
+
+	// Test if interface is enabled
+	if (! iface.enabled())
+	    continue;
+
+	IfMgrIfAtom::VifMap::const_iterator vif_iter;
+	for (vif_iter = iface.vifs().begin();
+	     vif_iter != iface.vifs().end();
+	     ++vif_iter) {
+	    const IfMgrVifAtom& vif = vif_iter->second;
+
+	    // Test if vif is enabled
+	    if (! vif.enabled())
+		continue;
+
+	    // Test if there is matching IPv4 address
+	    if (addr.is_ipv4()) {
+		IPv4 addr4 = addr.get_ipv4();
+		IfMgrVifAtom::V4Map::const_iterator a4_iter;
+
+		for (a4_iter = vif.ipv4addrs().begin();
+		     a4_iter != vif.ipv4addrs().end();
+		     ++a4_iter) {
+		    const IfMgrIPv4Atom& a4 = a4_iter->second;
+
+		    if (! a4.enabled())
+			continue;
+
+		    // Test if my own address
+		    if (a4.addr() == addr4)
+			return (true);
+
+		    // Test if p2p address
+		    if (a4.has_endpoint()) {
+			if (a4.endpoint_addr() == addr4)
+			    return (true);
+		    }
+
+		    // Test if same subnet
+		    if (IPv4Net(addr4, a4.prefix_len())
+			== IPv4Net(a4.addr(), a4.prefix_len())) {
+			return (true);
+		    }
+		}
+	    }
+
+	    // Test if there is matching IPv6 address
+	    if (addr.is_ipv6()) {
+		IPv6 addr6 = addr.get_ipv6();
+		IfMgrVifAtom::V6Map::const_iterator a6_iter;
+
+		for (a6_iter = vif.ipv6addrs().begin();
+		     a6_iter != vif.ipv6addrs().end();
+		     ++a6_iter) {
+		    const IfMgrIPv6Atom& a6 = a6_iter->second;
+
+		    if (! a6.enabled())
+			continue;
+
+		    // Test if my own address
+		    if (a6.addr() == addr6)
+			return (true);
+
+		    // Test if p2p address
+		    if (a6.has_endpoint()) {
+			if (a6.endpoint_addr() == addr6)
+			    return (true);
+		    }
+
+		    // Test if same subnet
+		    if (IPv6Net(addr6, a6.prefix_len())
+			== IPv6Net(a6.addr(), a6.prefix_len())) {
+			return (true);
+		    }
+		}
+	    }
+	}
+    }
+
+    return (false);
 }
 
 ProcessStatus
@@ -475,9 +630,18 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Inform the RIB about the change
     //
-    inform_rib_route_change(fib2mrib_route);
+    if (fib2mrib_route.is_interface_route()) {
+	const IfMgrVifAtom* vif_atom;
+	vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
+				    fib2mrib_route.vifname());
+	if ((vif_atom != NULL) && (vif_atom->enabled()))
+	    inform_rib_route_change(fib2mrib_route);
+    } else {
+	if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
+	    inform_rib_route_change(fib2mrib_route);
+    }
 
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
@@ -526,7 +690,16 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 	//
 	// Inform the RIB about the change
 	//
-	inform_rib_route_change(fib2mrib_route);
+	if (fib2mrib_route.is_interface_route()) {
+	    const IfMgrVifAtom* vif_atom;
+	    vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
+					fib2mrib_route.vifname());
+	    if ((vif_atom != NULL) && (vif_atom->enabled()))
+		inform_rib_route_change(fib2mrib_route);
+	} else {
+	    if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
+		inform_rib_route_change(fib2mrib_route);
+	}
 
 	return XORP_OK;
     }
@@ -585,7 +758,17 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 	//
 	// Inform the RIB about the change
 	//
-	inform_rib_route_change(fib2mrib_route);
+	if (fib2mrib_route.is_interface_route()) {
+	    const IfMgrVifAtom* vif_atom;
+	    vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
+					fib2mrib_route.vifname());
+	    if ((vif_atom != NULL) && (vif_atom->enabled()))
+		inform_rib_route_change(fib2mrib_route);
+	} else {
+	    if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
+		inform_rib_route_change(fib2mrib_route);
+	}
+
 	return XORP_OK;
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.2 2004/03/18 13:17:21 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.3 2004/04/05 09:31:11 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -62,7 +62,8 @@ public:
 	: _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
 	  _metric(metric), _admin_distance(admin_distance),
-	  _protocol_origin(protocol_origin), _xorp_route(xorp_route) {}
+	  _protocol_origin(protocol_origin), _xorp_route(xorp_route),
+	  _route_type(IDLE_ROUTE), _is_ignored(false) {}
 
     /**
      * Constructor for a given IPv6 route.
@@ -87,7 +88,24 @@ public:
 	: _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
 	  _metric(metric), _admin_distance(admin_distance),
-	  _protocol_origin(protocol_origin), _xorp_route(xorp_route) {}
+	  _protocol_origin(protocol_origin), _xorp_route(xorp_route),
+	  _route_type(IDLE_ROUTE), _is_ignored(false) {}
+
+    /**
+     * Equality Operator
+     * 
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is numerically same as the
+     * right-hand operand.
+     */
+    bool operator==(const Fib2mribRoute& other) {
+	return ((_network == other.network())
+		&& (_nexthop == other.nexthop())
+		&& (_ifname == other.ifname())
+		&& (_vifname == other.vifname())
+		&& (_metric == other.metric())
+		&& (_route_type == other._route_type));
+    }
 
     /**
      * Test if this is an IPv4 route.
@@ -212,6 +230,26 @@ public:
      */
     bool is_valid_entry(string& error_msg) const;
 
+    /**
+     * Test if the route is to be ignored.
+     * 
+     * This method is used only for internal purpose when passing the route
+     * around.
+     * 
+     * @return true if the route is to be ignored, otherwise false.
+     */
+    bool is_ignored() const { return _is_ignored; }
+
+    /**
+     * Set whether the route is to be ignored.
+     * 
+     * This method is used only for internal purpose when passing the route
+     * around.
+     * 
+     * @param v true if the route is to be ignored, otherwise false.
+     */
+    void set_ignored(bool v) { _is_ignored = v; }
+
 private:
     IPvXNet	_network;
     IPvX	_nexthop;
@@ -221,8 +259,9 @@ private:
     uint32_t	_admin_distance;
     string	_protocol_origin;
     bool	_xorp_route;
-    enum RouteType { ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
+    enum RouteType { IDLE_ROUTE, ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
     RouteType	_route_type;
+    bool	_is_ignored;	// True if the route is to be ignored
 };
 
 
@@ -533,7 +572,31 @@ private:
      */
     virtual void inform_rib_route_change(const Fib2mribRoute& fib2mrib_route) = 0;
 
-    virtual const IfMgrIfTree&	iftree() const = 0;
+    /**
+     * Cancel a pending request to inform the RIB about a route change.
+     *
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @param fib2mrib_route the route with the request that would be canceled.
+     */
+    virtual void cancel_rib_route_change(const Fib2mribRoute& fib2mrib_route) = 0;
+
+    virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
+
+    /**
+     * Test if an address is directly connected to an interface.
+     * 
+     * If an interface toward an address is down, then the address is not
+     * considered as directly connected.
+     * 
+     * @param if_tree the tree with the interface state.
+     * @param addr the address to test.
+     * @return true if @ref addr is directly connected to an interface
+     * contained inside @ref if_tree, otherwise false.
+     */
+    bool is_directly_connected(const IfMgrIfTree& if_tree,
+			       const IPvX& addr) const;
 
     EventLoop&		_eventloop;		// The event loop
     ProcessStatus	_node_status;		// The node/process status
@@ -543,6 +606,8 @@ private:
 
     size_t		_startup_requests_n;
     size_t		_shutdown_requests_n;
+
+    IfMgrIfTree		_iftree;
 
     //
     // Debug and test-related state
