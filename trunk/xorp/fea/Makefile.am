@@ -1,7 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.15 2003/07/17 00:28:33 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.16 2003/07/30 23:43:28 pavlin Exp $
 ##
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS		 = xorp_fea xorp_fea_dummy

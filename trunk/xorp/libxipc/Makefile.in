@@ -13,7 +13,7 @@
 
 @SET_MAKE@
 
-# - The library
+# Redefine the bin installation directory
 
 SHELL = @SHELL@
 
@@ -22,9 +22,6 @@ top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
-
-bindir = @bindir@
-sbindir = @sbindir@
 libexecdir = @libexecdir@
 datadir = @datadir@
 sysconfdir = @sysconfdir@
@@ -91,10 +88,19 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-noinst_LIBRARIES = libxipc.a libfinder.a
+bindir = $(prefix)/$(subdir)
 
-# -- Programs
-bin_PROGRAMS = call_xrl xorp_finder
+# Redefine the sbin installation directory
+# XXX: the trailing "bin" is not a mistake, but a hack to install
+# "call_xrl" into a different directory. Sigh...
+sbindir = $(prefix)/bin
+
+# -- Real Programs
+bin_PROGRAMS = xorp_finder
+sbin_PROGRAMS = call_xrl
+
+# -- No-install Libraries
+noinst_LIBRARIES = libxipc.a libfinder.a
 
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header test_inproc test_sudp test_stcp test_lemming test_xrl_router test_finder_tcp test_finder_messenger test_finder_msgs test_finder test_finder_events
@@ -105,6 +111,7 @@ test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 
 TESTS = $(test_programs) $(test_scripts)
 
+# -- No-install Programs
 noinst_PROGRAMS = $(test_programs) $(test_extra_programs)
 noinst_SCRIPTS = $(test_scripts)
 
@@ -199,7 +206,7 @@ am_libxipc_a_OBJECTS = hmac_md5.$(OBJEXT) finder_messenger.$(OBJEXT) \
 	xrl_error.$(OBJEXT) xuid.$(OBJEXT) common_xif.$(OBJEXT) \
 	finder_client_base.$(OBJEXT) finder_xif.$(OBJEXT)
 libxipc_a_OBJECTS = $(am_libxipc_a_OBJECTS)
-bin_PROGRAMS = call_xrl$(EXEEXT) xorp_finder$(EXEEXT)
+bin_PROGRAMS = xorp_finder$(EXEEXT)
 noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_xrl_atom$(EXEEXT) test_xrl_args$(EXEEXT) \
 	test_header$(EXEEXT) test_inproc$(EXEEXT) test_sudp$(EXEEXT) \
@@ -208,7 +215,8 @@ noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_finder_messenger$(EXEEXT) test_finder_msgs$(EXEEXT) \
 	test_finder$(EXEEXT) test_finder_events$(EXEEXT) \
 	test_xrl_parser$(EXEEXT) test_finder_to$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+sbin_PROGRAMS = call_xrl$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS) $(sbin_PROGRAMS)
 
 am_call_xrl_OBJECTS = call_xrl.$(OBJEXT)
 call_xrl_OBJECTS = $(am_call_xrl_OBJECTS)
@@ -470,6 +478,29 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(sbindir)
+	@list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(sbindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(sbindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-sbinPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(sbindir)/$$f"; \
+	  rm -f $(DESTDIR)$(sbindir)/$$f; \
+	done
+
+clean-sbinPROGRAMS:
+	-test -z "$(sbin_PROGRAMS)" || rm -f $(sbin_PROGRAMS)
 call_xrl$(EXEEXT): $(call_xrl_OBJECTS) $(call_xrl_DEPENDENCIES) 
 	@rm -f call_xrl$(EXEEXT)
 	$(CXXLINK) $(call_xrl_LDFLAGS) $(call_xrl_OBJECTS) $(call_xrl_LDADD) $(LIBS)
@@ -741,7 +772,7 @@ check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS) $(SCRIPTS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(sbindir)
 
 install: install-am
 install-exec: install-exec-am
@@ -771,7 +802,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+	clean-noinstPROGRAMS clean-sbinPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
@@ -788,7 +819,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-sbinPROGRAMS
 
 install-info: install-info-am
 
@@ -804,19 +835,21 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-sbinPROGRAMS
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
 	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	clean-noinstPROGRAMS clean-sbinPROGRAMS distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-tags distdir dvi dvi-am info info-am install \
+	install-am install-binPROGRAMS install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
+	install-man install-sbinPROGRAMS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	uninstall-binPROGRAMS uninstall-info-am uninstall-sbinPROGRAMS
 
 
 ###############################################################################

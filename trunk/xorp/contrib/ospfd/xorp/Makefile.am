@@ -1,7 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.5 2003/07/17 00:28:34 pavlin Exp $
+## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.6 2003/07/30 23:43:30 pavlin Exp $
 ##
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_ospf

@@ -22,8 +22,6 @@ top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
-
-bindir = @bindir@
 sbindir = @sbindir@
 libexecdir = @libexecdir@
 datadir = @datadir@
@@ -90,6 +88,10 @@ install_sh = @install_sh@
 net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
+
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 SUBDIRS = . harness tools
 

@@ -1,13 +1,22 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.27 2003/06/19 19:20:07 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.28 2003/07/17 00:28:33 pavlin Exp $
 ##
 
-# - The library
-noinst_LIBRARIES = libxipc.a libfinder.a
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
-# -- Programs
-bin_PROGRAMS  =	call_xrl xorp_finder
+# Redefine the sbin installation directory
+# XXX: the trailing "bin" is not a mistake, but a hack to install
+# "call_xrl" into a different directory. Sigh...
+sbindir = $(prefix)/bin
+
+# -- Real Programs
+bin_PROGRAMS	= xorp_finder
+sbin_PROGRAMS	= call_xrl
+
+# -- No-install Libraries
+noinst_LIBRARIES = libxipc.a libfinder.a
 
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs  = test_xrl_error test_xrl test_xrl_atom test_xrl_args
@@ -22,6 +31,7 @@ test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 
 TESTS = $(test_programs) $(test_scripts)
 
+# -- No-install Programs
 noinst_PROGRAMS = $(test_programs) $(test_extra_programs)
 noinst_SCRIPTS = $(test_scripts)
 

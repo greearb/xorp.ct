@@ -1,10 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.18 2003/07/17 00:28:31 pavlin Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.19 2003/07/30 23:43:26 pavlin Exp $
 ##
 
 # -- Subdirectories
 SUBDIRS = . harness tools
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_bgp
