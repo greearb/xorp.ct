@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.13 2004/05/19 10:27:01 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.14 2004/06/10 22:40:35 hodson Exp $"
 
 #include "bgp_module.h"
 #include "route_table_nhlookup.hh"
@@ -261,8 +261,9 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	// there was an entry for this net in our queue awaiting
 	// resolution of it's nexthop
 
-	bool dont_send_delete;
-	if (mqe->type() == MessageQueueEntry<A>::REPLACE) {
+	bool dont_send_delete = true;
+	switch (mqe->type()) {
+	case MessageQueueEntry<A>::REPLACE: {
 	    // preserve the old delete message
 	    InternalMessage<A>* preserve_msg
 		= new InternalMessage<A>(mqe->delete_msg()->route(),
@@ -272,8 +273,12 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 		preserve_msg->set_changed();
 	    real_msg = preserve_msg;
 	    dont_send_delete = false;
-	} else if (mqe->type() == MessageQueueEntry<A>::ADD) {
+	    break;
+	    }
+
+	case MessageQueueEntry<A>::ADD:
 	    dont_send_delete = true;
+	    break;
 	}
 
 	// we can now remove the old queue entry, because it's no longer
