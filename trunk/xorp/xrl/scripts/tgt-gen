@@ -33,7 +33,7 @@ def output_xrls(tgt_name, methods):
         kdoc_note = kdoc_comment(m, "")
         if len(kdoc_note):
             s += kdoc_note + "\n"
-            
+
         s += "finder://%s/%s" % (tgt_name, m.name())
         if len(m.args()):
             s += "?"
@@ -44,7 +44,7 @@ def output_xrls(tgt_name, methods):
         s += "\n\n"
 
     return s
-    
+
 # -----------------------------------------------------------------------------
 # Target file output related
 # -----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ def target_virtual_fns(methods):
             cpa = "\n%sconst %s&\t%s" % \
                   (xorp_indent(2), a.cpp_type(), cpp_name(a.name()))
             args.append(cpa)
-        
+
         # output args
 
         if len(x.rargs()):
@@ -120,7 +120,7 @@ def target_handler_hooks(cls, name, methods):
     for m in methods:
         s += "\t_cmds->remove_handler(\"%s\");\n" % m.name()
     s += "    }\n"
-    
+
     return s;
 
 def target_handler_methods(cls, name, methods):
@@ -130,12 +130,12 @@ def target_handler_methods(cls, name, methods):
         if len(m.rargs()):
             argarg = "args"
         else:
-            argarg = "/* args */"	
+            argarg = "/* args */"
         s += "%s::handle_%s(const Xrl& xrl, XrlArgs* %s)\n" % \
              (cls, cpp_name(m.name()), argarg)
         s += "{"
         s += """
-    if (xrl.const_args().size() != %d) { 
+    if (xrl.const_args().size() != %d) {
 	XLOG_ERROR(\"Wrong number of arguments (%%u != %d) handling %s\", (uint32_t)xrl.const_args().size());
 	return XrlCmdError::BAD_ARGS();
     }
@@ -150,23 +150,24 @@ def target_handler_methods(cls, name, methods):
 """
     	s += "\n    /* Return value declarations */\n"
     	for r in m.rargs():
-            s += "    %s %s; \n" % (r.cpp_type(), cpp_name(r.name()))
+            s += "    %s %s;\n" % (r.cpp_type(), cpp_name(r.name()))
 
         s += xorp_indent(1) + "try {\n"
         s += xorp_indent(2) + "XrlCmdError e = %s(" % cpp_name(m.name())
         get_reqs = []
         for a in m.args():
-            get_reqs.append("\n" + xorp_indent(3) + "xrl.const_args().%s(\"%s\")" % \
-                            (a.accessor(), a.name()))
+            get_reqs.append("\n" + xorp_indent(3) + \
+                            "xrl.const_args().%s(\"%s\")" \
+                            % (a.accessor(), a.name()))
         ret_vals = []
         for r in m.rargs():
             ret_vals.append("\n" + xorp_indent(3) + "%s" % cpp_name(r.name()))
-        s += csv(get_reqs + ret_vals) + ");\n"
+        s += csv(get_reqs + ret_vals, ",") + ");\n"
 
         s += \
 """	if (e != XrlCmdError::OKAY()) {
-	    XLOG_WARNING(\"Handling method for %s failed: %%s \\\"%%s\\\"\",
-            		 e.str().c_str(), e.note().c_str());
+	    XLOG_WARNING(\"Handling method for %s failed: %%s\",
+            		 e.str().c_str());
 	    return e;
         }
 """ % m.name()
@@ -187,7 +188,7 @@ def target_handler_methods(cls, name, methods):
 """    } catch (const XrlArgs::XrlAtomFound& ) {
 	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
     }
-"""        
+"""
 
         s += "    return XrlCmdError::OKAY();\n}\n\n"
     return s
@@ -217,7 +218,7 @@ def output_target_hh(cls, tgt_name, tgt_version, methods):
 class %s {
 protected:
     XrlCmdMap* _cmds;
-    
+
 public:
     %s(XrlCmdMap* cmds) : _cmds(cmds) { add_handlers(); }
     virtual ~%s() { remove_handlers(); }
@@ -313,7 +314,7 @@ def main():
         tgt_methods = generate_target_methods(tgt, xp.interfaces())
         cls = "Xrl%sTargetBase" % cpp_classname(tgt.name())
         hh_txt += output_target_hh(cls, tgt.name(), tgt.version(), tgt_methods)
-        hh_txt += finish_target_hh(hh_file) 
+        hh_txt += finish_target_hh(hh_file)
         cc_txt += output_target_cc(cls, tgt.name(), tgt_methods)
         xrl_txt += output_xrls(tgt.name(), tgt_methods)
 
@@ -323,10 +324,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
