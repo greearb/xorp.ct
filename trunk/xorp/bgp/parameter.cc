@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.10 2003/08/27 22:32:33 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.11 2003/08/28 02:33:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -69,26 +69,27 @@ BGPParameter::clone() const
     BGPParameter *clone = NULL;
     switch (_type) {
     case PARAMTYPEAUTH:
-	clone = new BGPAuthParameter((const BGPAuthParameter&)
+	clone = new BGPAuthParameter(static_cast<const BGPAuthParameter&>
 				     (*this));
 	break;
     case PARAMTYPECAP: {
-	const BGPCapParameter* cparam = (const BGPCapParameter*)this;
+	const BGPCapParameter* cparam = static_cast<const BGPCapParameter*>
+	    (this);
 	switch (cparam->cap_code()) {
 	case CAPABILITYMULTIPROTOCOL:
-	    clone = new BGPMultiProtocolCapability\
-		((const BGPMultiProtocolCapability&)(*this));
+	    clone = new BGPMultiProtocolCapability
+		(static_cast<const BGPMultiProtocolCapability&>(*this));
 	    break;
 	case CAPABILITYREFRESHOLD:
 	    XLOG_UNFINISHED();
 	    break;
 	case CAPABILITYREFRESH:
-	    clone = new BGPRefreshCapability\
-		((const BGPRefreshCapability&)(*this));
+	    clone = new BGPRefreshCapability
+		(static_cast<const BGPRefreshCapability&>(*this));
 	    break;
 	case CAPABILITYMULTIROUTE:
-	    clone = new BGPMultiRouteCapability\
-		((const BGPMultiRouteCapability&)(*this));
+	    clone = new BGPMultiRouteCapability
+		(static_cast<const BGPMultiRouteCapability&>(*this));
 	    break;
 	default:
 	    XLOG_UNREACHABLE();
@@ -171,7 +172,7 @@ string
 BGPAuthParameter::str() const
 {
     string s;
-    s = "BGP Authenitication Parameter\n";
+    s = "BGP Authentication Parameter\n";
     return s;
 }
 /* **************** BGPCapParameter *********************** */
@@ -210,7 +211,7 @@ BGPRefreshCapability::BGPRefreshCapability(uint8_t l, const uint8_t* d)
     : BGPCapParameter(l, d)
 {
     debug_msg("BGPRefreshCapability(uint8_t, uint8_t*) constructor called\n");
-    debug_msg("_type %d _length %d (total length %d) \n",
+    debug_msg("_type %d _length %d (total length %d)\n",
 	      _type, _length, _length+2);
     decode();
 }
@@ -235,13 +236,13 @@ BGPRefreshCapability(const BGPRefreshCapability& param)
 void
 BGPRefreshCapability::decode()
 {
-    _type = (ParamType)*(_data);
+    _type = static_cast<ParamType>(*_data);
     assert(_type == PARAMTYPECAP);
 
-    _length = (uint8_t)*(_data+1) + 2; // includes 2 byte header
+    _length = *(_data+1) + 2; // includes 2 byte header
     assert(_length == 4);
 
-    _cap_code = (CapType)*(_data+2);
+    _cap_code = static_cast<CapType>(*(_data+2));
     if (_cap_code == CAPABILITYREFRESHOLD) {
 	_old_type_code = true;
 	_cap_code = CAPABILITYREFRESH;
@@ -250,12 +251,13 @@ BGPRefreshCapability::decode()
     }
     assert(_cap_code == CAPABILITYREFRESH);
 
-    _cap_length = (uint8_t)*(_data+3);
+    _cap_length = *(_data+3);
     if (_cap_length > 0) {
 	debug_msg("Throw exception\n");
-	xorp_throw(CorruptMessage, c_format("Refresh Capability length %d is greater than zero.", _cap_length), OPENMSGERROR, UNSPECIFIED);
+	xorp_throw(CorruptMessage, 
+		c_format("Refresh Capability length %d is greater than zero.", 
+			 _cap_length), OPENMSGERROR, UNSPECIFIED);
     }
-
 }
 
 void
@@ -300,9 +302,10 @@ BGPMultiProtocolCapability::
 BGPMultiProtocolCapability(uint8_t l, const uint8_t* d)
     : BGPCapParameter(l, d)
 {
-    debug_msg("BGPMultiProtocolCapability(uint8_t, uint8_t*) constructor called\n");
+    debug_msg("BGPMultiProtocolCapability(uint8_t, uint8_t*)\n");
     decode();
-    debug_msg("_type %d _length %d (total length %d) \n", _type, _length, _length+2);
+    debug_msg("_type %d _length %d (total length %d) \n",
+	      _type, _length, _length+2);
 }
 
 BGPMultiProtocolCapability::
@@ -310,8 +313,7 @@ BGPMultiProtocolCapability(const BGPMultiProtocolCapability& param)
     : BGPCapParameter(param)
 {
     _address_family = param._address_family;
-    _subsequent_address_family =
-	param._subsequent_address_family;
+    _subsequent_address_family = param._subsequent_address_family;
 
     if (param._data != NULL) {
         _length = param._length;
@@ -327,17 +329,17 @@ BGPMultiProtocolCapability(const BGPMultiProtocolCapability& param)
 void
 BGPMultiProtocolCapability::decode()
 {
-    _type = (ParamType)*(_data);
+    _type = static_cast<ParamType>(*_data);
     assert(_type == PARAMTYPECAP);
 
-    _length = (uint8_t)*(_data+1) + 2; // includes 2 byte header
-    _cap_code = (CapType)*(_data+2);
+    _length = *(_data+1) + 2; // includes 2 byte header
+    _cap_code = static_cast<CapType>(*(_data+2));
     assert(_cap_code == CAPABILITYMULTIPROTOCOL);
 
-    _cap_length = (uint8_t)*(_data+3);
-    _address_family = ntohs(*(uint16_t *)(_data+4));
+    _cap_length = *(_data+3);
+    _address_family = ntohs(*reinterpret_cast<uint16_t *>(_data+4));
     debug_msg("address family %d\n", _address_family);
-    _subsequent_address_family = (uint8_t)*(_data+7);
+    _subsequent_address_family = *(_data+7);
 }
 
 void
@@ -348,7 +350,7 @@ BGPMultiProtocolCapability::encode() const
     _data[1] = 6; // parameter length
     _data[2] = CAPABILITYMULTIPROTOCOL;
     _data[3] = 4; // capability length
-    uint16_t k = htons((uint16_t)_address_family) ; // address family
+    uint16_t k = htons(static_cast<uint16_t>(_address_family)); // AFI
     memcpy(&_data[4],&k, 2);
     _data[6] = 0 ; // Reserved
     _data[7] = _subsequent_address_family ; // SAFI
@@ -386,9 +388,10 @@ BGPMultiRouteCapability::
 BGPMultiRouteCapability(uint8_t l, const uint8_t* d)
     : BGPCapParameter(l, d)
 {
-    debug_msg("BGPMultiRouteCapability(uint8_t, uint8_t*) constructor called\n");
+    debug_msg("BGPMultiRouteCapability(uint8_t, uint8_t*)\n");
     decode();
-    debug_msg("_type %d _length %d (total length %d) \n", _type, _length, _length+2);
+    debug_msg("_type %d _length %d (total length %d) \n", 
+	      _type, _length, _length+2);
 }
 
 BGPMultiRouteCapability::
@@ -412,15 +415,15 @@ BGPMultiRouteCapability(const BGPMultiRouteCapability& param)
 void
 BGPMultiRouteCapability::decode()
 {
-    _type = (ParamType)*(_data);
+    _type = static_cast<ParamType>(*_data);
     assert(_type == PARAMTYPECAP);
 
-    _length = (uint8_t)*(_data+1) + 2; // includes 2 byte header
+    _length = *(_data+1) + 2; // includes 2 byte header
 
-    _cap_code = (CapType)*(_data+2);
+    _cap_code = static_cast<CapType>(*(_data+2));
     assert(_cap_code == CAPABILITYMULTIROUTE);
 
-    _cap_length = (uint8_t)*(_data+3);
+    _cap_length = *(_data+3);
     // _address_family = ntohs((uint16_t &)*(_data+4));
     // _subsequent_address_family = (uint8_t &)*(_data+7);
 }
@@ -455,9 +458,10 @@ BGPUnknownCapability::
 BGPUnknownCapability(uint8_t l, const uint8_t* d)
     : BGPCapParameter(l, d)
 {
-    debug_msg("BGPUnkownCapability(uint8_t, uint8_t*) constructor called\n");
+    debug_msg("BGPUnkownCapability(uint8_t, uint8_t*)\n");
     decode();
-    debug_msg("_type %d _length %d (total length %d) \n", _type, _length, _length+2);
+    debug_msg("_type %d _length %d (total length %d) \n",
+	      _type, _length, _length+2);
 }
 
 BGPUnknownCapability::
@@ -479,19 +483,21 @@ void
 BGPUnknownCapability::decode()
 {
     debug_msg("decoding unknown capability\n");
-    _type = (ParamType)*(_data);
+    _type = static_cast<ParamType>(*_data);
     assert(_type == PARAMTYPECAP);
 
     _length = (uint8_t)*(_data+1) + 2; // includes 2 byte header
 
-    _unknown_cap_code = (CapType)*(_data+2); // the original capability code
+    // the original capability code
+    _unknown_cap_code = static_cast<CapType>(*(_data+2)); 
+
     _cap_code = CAPABILITYUNKNOWN; // hard code capability to be UNKNOWN.
 
     // don't check the capability type, since we already know we
     // don't know what it is.
     // assert(_cap_code == CAPABILITYUNKNOWN);
 
-    _cap_length = (uint8_t)*(_data+3);
+    _cap_length = *(_data+3);
     // _data pointer holds pointer to the rest of the information
     // can't decode it further since we don't know what it means.
 }
@@ -520,7 +526,7 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	xorp_throw(CorruptMessage, "Short block to BGPParameter::create\n",
                        OPENMSGERROR, 0);
 
-    ParamType param_type = (ParamType)d[0];
+    ParamType param_type = static_cast<ParamType>(d[0]);
     len = d[1] + 2;	// count the header too
 
     if (len == 2 || len > max_len ) {
@@ -531,7 +537,8 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	xorp_throw(CorruptMessage, "Badly constructed Parameters\n",
 		   OPENMSGERROR, 0);
     }
-    debug_msg("param type %d len+header %u\n", param_type, (uint32_t)len);
+    debug_msg("param type %d len+header %u\n", param_type,
+	      static_cast<uint32_t>(len));
 
     BGPParameter *p = NULL;
     switch (param_type) {
@@ -540,7 +547,7 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	break;
 
     case PARAMTYPECAP: {
-	CapType cap_type = (CapType)d[2];
+	CapType cap_type = static_cast<CapType>(d[2]);
 	switch (cap_type) { // This is the capability type
 	case CAPABILITYMULTIPROTOCOL:
 	    p = new BGPMultiProtocolCapability(len, d);
