@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.23 2004/06/15 19:20:37 pavlin Exp $
+# $XORP: xorp/README,v 1.24 2004/06/15 20:35:05 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -74,7 +74,9 @@ See ${XORP}/ERRATA for the list of known problems.
 Currently, XORP implements the following protocols:
 
   * RIP and RIPng:
-    - 
+    - RFC 2453 (RIP version 2)
+    - RFC 2082 (RIP-2 MD5 Authentication)
+    - RFC 2080 (RIPng for IPv6)
 
   * BGP4:
    - draft-ietf-idr-bgp4-23.txt (A Border Gateway Protocol 4 (BGP-4))
