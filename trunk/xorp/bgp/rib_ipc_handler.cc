@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.54 2004/08/14 05:24:51 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.55 2004/09/17 13:50:54 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,6 +25,7 @@
 
 #include "bgp.hh"
 #include "rib_ipc_handler.hh"
+#include "profile_vars.hh"
 
 RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp) 
     : PeerHandler("RIBIpcHandler", NULL, NULL, NULL), 
@@ -603,6 +604,9 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
     XrlRibV0p1Client rib(&_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("add %s", q.net.str().c_str()));
 	sent = rib.send_add_route4(q.ribname.c_str(),
 			    bgp,
 			    unicast, multicast,
@@ -612,6 +616,9 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
 				     q.comment));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("delete %s", q.net.str().c_str()));
 	sent = rib.send_delete_route4(q.ribname.c_str(),
 				      bgp,
 				      unicast, multicast,
@@ -644,6 +651,9 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
     XrlRibV0p1Client rib(&_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("add %s", q.net.str().c_str()));
 	sent = rib.send_add_route6(q.ribname.c_str(),
 			    bgp,
 			    unicast, multicast,
@@ -653,6 +663,9 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 				     q.comment));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("delete %s", q.net.str().c_str()));
 	sent = rib.send_delete_route6(q.ribname.c_str(),
 			       bgp,
 			       unicast, multicast,
