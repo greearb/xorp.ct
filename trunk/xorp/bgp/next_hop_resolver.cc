@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.32 2004/08/31 01:25:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.33 2005/01/31 19:16:39 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1029,8 +1029,8 @@ void
 NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
 					 bool resolvable, uint32_t metric)
 {
-    debug_msg(" nexthop %s ref_cnf %d resolvable %d metric %u\n",
-	      nexthop.str().c_str(), ref_cnt, resolvable,
+    debug_msg(" nexthop %s ref_cnf %u resolvable %d metric %u\n",
+	      nexthop.str().c_str(), XORP_UINT_CAST(ref_cnt), resolvable,
 	      XORP_UINT_CAST(metric));
 
     /*
