@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.7 2003/01/21 18:54:27 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.8 2003/01/22 02:46:35 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -638,7 +638,8 @@ BGPPeer::state_machine(FSMEvent ConnectionEvent, const BGPPacket *p)
 
 		// Clear ConnectRetry Timer
 		clear_connect_retry_timer();
-		// Start Holdtimer
+		// Start Holdtimer - four minutes recommended in spec.
+		_peerdata->set_hold_duration(4 * 60 * 1000);
 		start_hold_timer();
 		// Change state to OpenSent
 		set_state(STATEOPENSENT);
