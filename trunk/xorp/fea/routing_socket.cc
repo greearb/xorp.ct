@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rtsock.cc,v 1.2 2003/03/10 23:20:16 hodson Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -157,10 +157,22 @@ RoutingSocket::force_read()
 	    shutdown();
 	    return;
 	}
-	if (got < (ssize_t)sizeof(struct if_msghdr)) {
+	//
+	// XXX: all messages received on routing sockets must start
+	// with the the following three fields:
+	//    {
+	//        u_short foo_msglen;
+	//        u_char  foo_version;
+	//        u_char  foo_type;
+	//        ...
+	//
+	// Hence, the minimum length of a received message is:
+	//  sizeof(u_short) + 2 * sizeof(u_char)
+	//
+	if (got < (ssize_t)(sizeof(u_short) + 2 * sizeof(u_char))) {
 	    XLOG_ERROR("Routing socket read failed: message truncated : "
 		       "received %d bytes instead of (at least) %u bytes",
-		       got, (uint32_t)sizeof(struct if_msghdr));
+		       got, (uint32_t)(sizeof(u_short) + 2 * sizeof(u_char)));
 	    shutdown();
 	    return;
 	}
