@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.45 2004/12/23 16:38:26 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.46 2004/12/23 17:33:13 mjh Exp $
 ##
 
 # -- Real Programs
@@ -9,12 +9,12 @@ bin_PROGRAMS	 = xorp_rtrmgr xorpsh xorp_profiler
 # -- Test Programs
 TESTS		 = test_templates
 TESTS		+= test_sample_config
-#TESTS		+= test_module_manager
+TESTS		+= test_module_manager
 
 # -- No-install Programs
 check_PROGRAMS	 = test_templates
 check_PROGRAMS	+= test_sample_config
-#check_PROGRAMS	+= test_module_manager
+check_PROGRAMS	+= test_module_manager
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(top_builddir)/libxipc/libfinder.la
@@ -238,49 +238,53 @@ test_sample_config_LDADD 	 = $(LDADD)
 # #
 # # test_module_manager
 # #
-# test_module_manager_SOURCES	 = rtrmgr_module.h
-# test_module_manager_SOURCES	+= y.boot_tab.h
-# test_module_manager_SOURCES	+= y.tplt_tab.h
-
+test_module_manager_SOURCES	 = rtrmgr_module.h
+test_module_manager_SOURCES	+= y.boot_tab.h
+test_module_manager_SOURCES	+= y.tplt_tab.h
 # test_module_manager_SOURCES	+= command_tree.hh
-# test_module_manager_SOURCES	+= conf_tree.hh
-# test_module_manager_SOURCES	+= conf_tree_node.hh
-# test_module_manager_SOURCES	+= generic_module_manager.hh
-# test_module_manager_SOURCES	+= master_conf_tree.hh
-# test_module_manager_SOURCES	+= module_commands.hh
-# test_module_manager_SOURCES	+= module_manager.hh
-# test_module_manager_SOURCES	+= path_segment.hh
-# test_module_manager_SOURCES	+= rtrmgr_error.hh
-# test_module_manager_SOURCES	+= task.hh
-# test_module_manager_SOURCES	+= template_commands.hh
-# test_module_manager_SOURCES	+= template_tree.hh
-# test_module_manager_SOURCES	+= template_tree_node.hh
-# test_module_manager_SOURCES	+= unexpanded_xrl.hh
-# test_module_manager_SOURCES	+= util.hh
-# test_module_manager_SOURCES	+= xorp_client.hh
-# test_module_manager_SOURCES	+= xrldb.hh
+test_module_manager_SOURCES	+= conf_tree.hh
+test_module_manager_SOURCES	+= conf_tree_node.hh
+test_module_manager_SOURCES	+= master_conf_tree.hh
+test_module_manager_SOURCES	+= master_conf_tree_node.hh
+test_module_manager_SOURCES	+= generic_module_manager.hh
+test_module_manager_SOURCES	+= module_manager.hh
+test_module_manager_SOURCES	+= path_segment.hh
+test_module_manager_SOURCES	+= rtrmgr_error.hh
+test_module_manager_SOURCES	+= task.hh
+test_module_manager_SOURCES	+= template_base_command.hh
+test_module_manager_SOURCES	+= template_commands.hh
+test_module_manager_SOURCES	+= module_command.hh
+test_module_manager_SOURCES	+= template_tree.hh
+test_module_manager_SOURCES	+= template_tree_node.hh
+test_module_manager_SOURCES	+= unexpanded_xrl.hh
+test_module_manager_SOURCES	+= util.hh
+test_module_manager_SOURCES	+= xorp_client.hh
+test_module_manager_SOURCES	+= xrldb.hh
+test_module_manager_SOURCES	+= test_module_manager.hh
 
-# test_module_manager_SOURCES	+= conf_tree.cc
-# test_module_manager_SOURCES	+= conf_tree_node.cc
-# test_module_manager_SOURCES	+= generic_module_manager.cc
-# test_module_manager_SOURCES	+= lex.boot.cc
-# test_module_manager_SOURCES	+= lex.tplt.cc
-# test_module_manager_SOURCES	+= master_conf_tree.cc
-# test_module_manager_SOURCES	+= module_command.cc
-# test_module_manager_SOURCES	+= module_manager.cc
-# test_module_manager_SOURCES	+= task.cc
-# test_module_manager_SOURCES	+= template_commands.cc
-# test_module_manager_SOURCES	+= template_tree.cc
-# test_module_manager_SOURCES	+= template_tree_node.cc
-# test_module_manager_SOURCES	+= test_module_manager.cc
-# test_module_manager_SOURCES	+= unexpanded_xrl.cc
-# test_module_manager_SOURCES	+= util.cc
-# test_module_manager_SOURCES	+= xorp_client.cc
-# test_module_manager_SOURCES	+= xrldb.cc
-# test_module_manager_SOURCES	+= y.boot_tab.cc
-# test_module_manager_SOURCES	+= y.tplt_tab.cc
+test_module_manager_SOURCES	+= y.boot_tab.cc
+test_module_manager_SOURCES	+= y.tplt_tab.cc
+test_module_manager_SOURCES	+= conf_tree.cc
+test_module_manager_SOURCES	+= conf_tree_node.cc
+test_module_manager_SOURCES	+= master_conf_tree.cc
+test_module_manager_SOURCES	+= master_conf_tree_node.cc
+test_module_manager_SOURCES	+= lex.boot.cc
+test_module_manager_SOURCES	+= lex.tplt.cc
+test_module_manager_SOURCES	+= generic_module_manager.cc
+test_module_manager_SOURCES	+= module_manager.cc
+test_module_manager_SOURCES	+= task.cc
+test_module_manager_SOURCES	+= template_base_command.cc
+test_module_manager_SOURCES	+= template_commands.cc
+test_module_manager_SOURCES	+= module_command.cc
+test_module_manager_SOURCES	+= template_tree.cc
+test_module_manager_SOURCES	+= template_tree_node.cc
+test_module_manager_SOURCES	+= unexpanded_xrl.cc
+test_module_manager_SOURCES	+= util.cc
+test_module_manager_SOURCES	+= xorp_client.cc
+test_module_manager_SOURCES	+= xrldb.cc
+test_module_manager_SOURCES	+= test_module_manager.cc
 
-# test_module_manager_LDADD 	 = $(LDADD)
+test_module_manager_LDADD 	 = $(LDADD)
 
 # -- Library Sources
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.12 2004/08/19 02:00:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.13 2004/10/06 20:39:32 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -22,8 +22,9 @@
 #include "libxorp/debug.h"
 
 #include "module_manager.hh"
-#include "template_tree.hh"
+#include "master_template_tree.hh"
 #include "util.hh"
+#include "test_module_manager.hh"
 
 
 static bool waiting = false;
@@ -36,22 +37,39 @@ module_run_done(bool success)
     waiting = false;
 }
 
-int
-main(int argc, char* const argv[])
+// the following two functions are an ugly hack to cause the C code in
+// the parser to call methods on the right version of the TemplateTree
+
+void add_cmd_adaptor(char *cmd, TemplateTree* tt)
 {
-    UNUSED(argc);
+    //    ((MasterTemplateTree*)tt)->add_cmd(cmd);
+    UNUSED(cmd);
+    UNUSED(tt);
+}
 
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);	
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
 
+void add_cmd_action_adaptor(const string& cmd, 
+			    const list<string>& action, TemplateTree* tt)
+{
+    //((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
+    UNUSED(cmd);
+    UNUSED(action);
+    UNUSED(tt);
+}
+
+
+Rtrmgr::Rtrmgr()
+{
+}
+
+int
+Rtrmgr::run()
+{
     // Initialize the event loop
     EventLoop eventloop; 
 
     // Start the module manager
-    ModuleManager mmgr(eventloop,
+    ModuleManager mmgr(eventloop, this,
 		       false,	/* do_restart */
 		       true,	/* verbose = */ 
 		       ".");
@@ -90,6 +108,32 @@ main(int argc, char* const argv[])
 	eventloop.run();
     }
     printf("module manager has shut down\n");
+    
+    printf("bye\n");
+    return 0;
+}
+
+void 
+Rtrmgr::module_status_changed(const string& module_name,
+			      GenericModule::ModuleStatus status)
+{
+    UNUSED(module_name);
+    UNUSED(status);
+}
+
+int
+main(int argc, char* const argv[])
+{
+    UNUSED(argc);
+
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);	
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    Rtrmgr rtrmgr;
+    rtrmgr.run();
     
     printf("bye\n");
     return 0;
