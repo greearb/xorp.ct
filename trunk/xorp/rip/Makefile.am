@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.13 2003/08/01 02:11:50 pavlin Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.14 2003/08/01 04:08:11 hodson Exp $
 ##
 
 # -- Real Programs
@@ -13,6 +13,7 @@ TESTS		+= test_request
 TESTS		+= test_route_walk
 TESTS		+= test_timers
 TESTS		+= test_update_queue
+TESTS		+= test_outputs
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_auth
@@ -21,6 +22,7 @@ noinst_PROGRAMS	+= test_request
 noinst_PROGRAMS	+= test_route_walk
 noinst_PROGRAMS	+= test_timers
 noinst_PROGRAMS	+= test_update_queue
+noinst_PROGRAMS	+= test_outputs
 
 # -- No-install Libraries
 noinst_LIBRARIES		 = librip.a
@@ -37,6 +39,7 @@ test_request_SOURCES		 = test_request.cc
 test_route_walk_SOURCES		 = test_route_walk.cc
 test_timers_SOURCES		 = test_timers.cc
 test_update_queue_SOURCES	 = test_update_queue.cc
+test_outputs_SOURCES		 = test_outputs.cc
 
 # -- Library Sources
 librip_a_SOURCES		 = rip_module.h
