@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.8 2003/02/07 05:16:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.9 2003/02/09 00:25:29 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -3427,59 +3427,32 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG:		// 27
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_receive_join_sg(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_receive_join_sg(i);
-	}
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	pim_mre.recompute_assert_receive_join_sg(vif_index);
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC:		// 28
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_receive_join_wc(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_receive_join_wc(i);
-	}
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	pim_mre.recompute_assert_receive_join_wc(vif_index);
 	break;
 
     case PimMreTrackState::OUTPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID:	// 29
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_winner_nbr_sg_gen_id_changed(vif_index,
-								  addr_arg);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_winner_nbr_sg_gen_id_changed(i,
-								      addr_arg);
-	}
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	pim_mre.recompute_assert_winner_nbr_sg_gen_id_changed(vif_index,
+							      addr_arg);
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID:	// 30
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_winner_nbr_wc_gen_id_changed(vif_index,
-								  addr_arg);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_winner_nbr_wc_gen_id_changed(i,
-								      addr_arg);
-	}
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	pim_mre.recompute_assert_winner_nbr_wc_gen_id_changed(vif_index,
+							      addr_arg);
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT:	// 31
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.receive_join_wc_by_sg_rpt(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.receive_join_wc_by_sg_rpt(i);
-	}
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	pim_mre.receive_join_wc_by_sg_rpt(vif_index);
 	break;
-
+	
     case PimMreTrackState::OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT:	// 32
 	pim_mre.receive_end_of_message_sg_rpt(vif_index);
 	break;
