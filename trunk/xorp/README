@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.8 2003/05/16 21:39:40 pavlin Exp $
+# $XORP: xorp/README,v 1.9 2003/06/06 06:54:04 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -68,17 +68,17 @@ This release of XORP compiles or may work on:
      - earlier XORP releases have been developed and tested on
        those platforms
    * Linux RedHat-7.2 (kernel 2.4.18):
-     - the code compiles and passes all internal tests
+     - the code compiles, but some of the internal tests fail
      - IGMP and PIM-SM appear to work
    * MacOS X 10.2.x:
-     - the code compiles, but the internal tests fail
+     - the code compiles, but some of the internal tests fail
      - there is no FEA support
 
 
 Currently, XORP implements the following protocols:
 
   * BGP4:
-   - draft-ietf-idr-bgp4-18.txt
+   - draft-ietf-idr-bgp4-20.txt
 
   * PIM-SM:
     - draft-ietf-pim-sm-v2-new-05.{ps,txt} (without SSM).
@@ -114,8 +114,9 @@ and then the documentation of the individual modules.
 ===================================
 
 The code is split into several directories, each containing libraries,
-components or implementation of the various XORP modules. Documentation
-for each of them is available in one or more of the following places:
+components or implementation of the various XORP modules.  Typically,
+documentation for each of them is available in one or more of the
+following places:
 
   * the README file in each directory
 
