@@ -1,13 +1,14 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.9 2003/08/01 02:11:48 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.10 2003/09/30 03:07:59 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS	 = xorp_mld6igmp
+bin_PROGRAMS	 =
+# xorp_mld6igmp
 
 # -- Test Programs
-TESTS		 = 
+TESTS		 =
 
 # -- No-install Programs
 noinst_PROGRAMS  = test_mld6igmp
@@ -52,7 +53,7 @@ LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-xorp_mld6igmp_SOURCES = xorp_mld6igmp.cc
+#xorp_mld6igmp_SOURCES = xorp_mld6igmp.cc
 test_mld6igmp_SOURCES = test_mld6igmp.cc
 
 # -- Library Sources
