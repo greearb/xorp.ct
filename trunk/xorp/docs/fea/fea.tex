@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/fea/fea.tex,v 1.10 2004/06/24 04:34:07 pavlin Exp $
+% $XORP: xorp/docs/fea/fea.tex,v 1.11 2004/07/09 04:40:26 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Forwarding Engine Abstraction \\
 \vspace{1ex}
-Version 1.0}
+Version 1.1}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{July 8, 2004}
+\date{April 7, 2005}
 
 \maketitle
 
@@ -198,7 +198,7 @@ Role & XRL Interface file & Client XRL Interface\\ \hline\hline
 Interface Management 		& {\tt fea\_ifmgr.xif}	& {\tt
   fea\_ifmgr\_client.xif} \\
 Forwarding Table Management	& {\tt redist\_transaction\{4,6\}.xif}	& {\tt fea\_fib.xif} \\
-Raw Packet I/O	& {\tt fea\_rawpkt.xif} & {\tt fea\_rawpkt\_client.xif} \\
+Raw Packet I/O	& {\tt fea\_rawpkt\{4,6\}.xif} & {\tt fea\_rawpkt\{4,6\}\_client.xif} \\
 TCP/UDP Socket I/O & {\tt socket\{4,6\}.xif} & {\tt socket\{4,6\}\_user.xif} \\
 \hline
 \end{tabular}
@@ -376,10 +376,13 @@ XORP processes to send and receive raw packets on particular interfaces.
 This is an essential function since in a XORP router the forwarding
 plane may reside on a different machine to the routing processes, it
 may be distributed across several machines, or may have custom network
-interfaces that require special programming.  Currently (July 2004),
-only the sending and receiving of raw IPv4 packets is implemented.
-Support for IPv6 will be available in future and should follow a
-similar design pattern to the raw IPv4 packet handling.
+interfaces that require special programming.  Currently (April 2005),
+the FEA raw packets I/O is not well tested and is not used yet.
+
+The FEA supports both IPv4 and IPv6 raw packets.
+The text below describes the IPv4 implementation and the IPv4-specific
+classes; the IPv6 implementation is similar except the class names
+contain {\tt 6} instead of {\tt 4}.
 
 The raw packet interface is managed by the {\tt XrlRawSocket4Manager}
 class.  This manages a single instance of a {\tt
@@ -391,7 +394,7 @@ and filters attached to parse raw packets as they are received.  The
 associated with the active raw socket.  The filters are each notified
 when a raw packet is received on the raw socket.  The
 XrlRawSocket4Manager allows other XORP processes to receive packets
-via XRL on the basis on filter conditions.  Currently (July 2004),
+via XRL on the basis on filter conditions.  Currently (April 2005),
 the only implemented filter is the {\tt XrlVifInputFilter} which
 allows processes to receive raw packets on the basis of the receiving
 VIF.  In principle, filters could be written to match on any field
@@ -456,9 +459,14 @@ using the following mechanisms:
 
 \end{itemize}
 
-In other words, currently (July 2004) the {\tt fea} supports FreeBSD,
-NetBSD, OpenBSD, and Linux (see file {\tt \$XORP/BUILD\_NOTES}
+In other words, currently (April 2005) the {\tt fea} supports FreeBSD,
+NetBSD, OpenBSD, MacOS X and Linux (see file {\tt \$XORP/BUILD\_NOTES}
 about the specific OS versions the FEA has been tested on).
+In addition, there is also support for the Click forwarding plane
+(both kernel-space and user-space). The Click support utilizes the
+above plug-in based architecture by providing the appropriate support
+to add or delete routes for example to kernel or user-level Click.
+
 The {\tt fea\_dummy} is a substitute FEA and may be
 used for development testing purposes.  The {\tt fea\_dummy}
 represents an idealized form of FEA, other FEA's may differ in their
@@ -467,10 +475,7 @@ interact with the FEA should regard {\tt fea\_dummy} interactions as
 indicative, but not definitive.
 
 The FEA's are still a work in progress and no doubt have some bugs.
-Any contributions or bug fixes are welcome. FEA support for Click is
-yet to be written, and FEA's for any other architecture would
-be welcomed.  There is a now defunct Click FEA in the {\tt \$XORP/fea}
-directory that should be possible to resurrect.
+Any contributions or bug fixes are welcome.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
