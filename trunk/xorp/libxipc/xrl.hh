@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.4 2003/03/04 23:41:24 hodson Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.5 2003/03/10 23:20:26 hodson Exp $
 
-#ifndef __XRL_H__
-#define __XRL_H__
+#ifndef __LIBXIPC_XRL_HH__
+#define __LIBXIPC_XRL_HH__
 
 #include <string>
 
@@ -128,4 +128,4 @@ private:
 
 typedef Xrl XrlTemplate;
 
-#endif // __XRL_H__
+#endif // __LIBXIPC_XRL_HH__

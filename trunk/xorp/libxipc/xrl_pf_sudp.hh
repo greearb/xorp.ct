@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.6 2003/03/07 02:07:53 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.7 2003/03/10 23:20:29 hodson Exp $
 
-#ifndef __XRLPF_SUDP_HH__
-#define __XRLPF_SUDP_HH__
+#ifndef __LIBXIPC_XRL_PF_SUDP_HH__
+#define __LIBXIPC_XRL_PF_SUDP_HH__
 
 #include "xrl_pf.hh"
 
@@ -67,4 +67,4 @@ private:
     static map<const XUID, Request> requests_pending; // demux help
 };
 
-#endif // __XRLPF_SUDP_HH__
+#endif // __LIBXIPC_XRL_PF_SUDP_HH__

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xuid.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xuid.hh,v 1.2 2003/03/10 23:20:30 hodson Exp $
 
-#ifndef __XUID_HH__
-#define __XUID_HH__
+#ifndef __LIBXIPC_XUID_HH__
+#define __LIBXIPC_XUID_HH__
 
 #include <string>
 
@@ -38,4 +38,4 @@ private:
     uint32_t _data[4];		// Internal representation is network ordered
 };
 
-#endif /* __XUID_H__ */
+#endif // __LIBXIPC_XUID_HH__

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.4 2003/01/17 00:49:11 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.5 2003/03/10 23:20:22 hodson Exp $
 
-#ifndef __FINDER_CLIENT_HH__
-#define __FINDER_CLIENT_HH__
+#ifndef __LIBXIPC_FINDER_CLIENT_HH__
+#define __LIBXIPC_FINDER_CLIENT_HH__
 
 #include <map>
 #include <string>
@@ -116,5 +116,4 @@ private:
     XorpTimer _reaper_timer;  // If connection quiet too long, reaper kills it.
 };
 
-#endif // __FINDER_CLIENT_H__
-
+#endif // __LIBXIPC_FINDER_CLIENT_HH__

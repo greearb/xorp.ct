@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.9 2003/03/04 23:41:24 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.10 2003/03/10 23:20:28 hodson Exp $
 
 // XRL Protocol Family Header
 
-#ifndef __XRLPF_HH__
-#define __XRLPF_HH__
+#ifndef __LIBXIPC_XRL_PF_HH__
+#define __LIBXIPC_XRL_PF_HH__
 
 #include <string>
 #include "xrl.hh"
@@ -114,4 +114,4 @@ XrlPFListener::set_dispatcher(XrlCmdDispatcher* d)
     return false;
 }
 
-#endif // __XRLPF_HH__
+#endif // __LIBXIPC_XRL_PF_HH__

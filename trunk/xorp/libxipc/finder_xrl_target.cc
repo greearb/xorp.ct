@@ -1,4 +1,4 @@
-// -*- C-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
 // Copyright (c) 2001-2003 International Computer Science Institute
 //
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.7 2003/03/06 01:18:57 hodson Exp $"
+#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
 
 #include "libxorp/debug.h"
 

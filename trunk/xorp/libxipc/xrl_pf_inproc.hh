@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.4 2003/02/26 00:12:14 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.5 2003/03/10 23:20:28 hodson Exp $
 
-#ifndef __XRLPF_INPROC_HH__
-#define __XRLPF_INPROC_HH__
+#ifndef __LIBXIPC_XRL_PF_INPROC_HH__
+#define __LIBXIPC_XRL_PF_INPROC_HH__
 
 #include "xrl_pf.hh"
 
@@ -56,4 +56,4 @@ private:
     uint32_t _listener_no;
 };
 
-#endif // __XRLPF_INPROC_HH__
+#endif // __LIBXIPC_XRL_PF_INPROC_HH__

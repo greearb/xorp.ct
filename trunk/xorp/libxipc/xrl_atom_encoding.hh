@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.5 2003/03/10 23:20:27 hodson Exp $
+// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.6 2003/03/15 02:37:59 pavlin Exp $
 
-#ifndef __XRLATOM_ENCODING_HH__
-#define __XRLATOM_ENCODING_HH__
+#ifndef __LIBXIPC_XRL_ATOM_ENCODING_HH__
+#define __LIBXIPC_XRL_ATOM_ENCODING_HH__
 
 #include <string>
 #include <vector>
@@ -73,4 +73,4 @@ xrlatom_decode_value(const char* in, size_t in_bytes, string& out);
 ssize_t
 xrlatom_decode_value(const char* in, size_t in_bytes, vector<uint8_t>& out);
 
-#endif // __XRLATOM_ENCODING_HH__
+#endif // __LIBXIPC_XRL_ATOM_ENCODING_HH__

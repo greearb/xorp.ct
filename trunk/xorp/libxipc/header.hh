@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/header.hh,v 1.2 2002/12/19 01:29:09 hodson Exp $
+// $XORP: xorp/libxipc/header.hh,v 1.3 2003/03/10 23:20:24 hodson Exp $
 
-#ifndef __XORP_IPC_HEADER_HELPER__
-#define __XORP_IPC_HEADER_HELPER__
+#ifndef __LIBXIPC_HEADER_HH__
+#define __LIBXIPC_HEADER_HH__
 
 #include <string>
 #include <list>
@@ -62,4 +62,4 @@ private:
     typedef map<string, string>::iterator CMI;
 };
 
-#endif // __XORP_IPC_HEADER_HELPER__
+#endif // __LIBXIPC_HEADER_HH__

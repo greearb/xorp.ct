@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/sockutil.hh,v 1.3 2003/01/17 00:49:11 hodson Exp $
+// $XORP: xorp/libxipc/sockutil.hh,v 1.4 2003/03/10 23:20:24 hodson Exp $
 
 /* Some helper functions for sockets */
 
-#ifndef __XORPIPC_SOCKUTIL_HH__
-#define __XORPIPC_SOCKUTIL_HH__
+#ifndef __LIBXIPC_SOCKUTIL_HH__
+#define __LIBXIPC_SOCKUTIL_HH__
 
 #include <string>
 
@@ -141,4 +141,4 @@ bool if_set_preferred(in_addr addr);
  */
 in_addr if_get_preferred();
 
-#endif // __XORPIPC_SOCKUTIL_HH__
+#endif // __LIBXIPC_SOCKUTIL_HH__

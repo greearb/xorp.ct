@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_transport.hh,v 1.3 2003/01/28 00:42:24 hodson Exp $
+// $XORP: xorp/libxipc/finder_transport.hh,v 1.4 2003/03/10 23:20:24 hodson Exp $
 
-#ifndef __LIBXORP_FINDER_TRANSPORT_HH__
-#define __LIBXORP_FINDER_TRANSPORT_HH__
+#ifndef __LIBXIPC_FINDER_TRANSPORT_HH__
+#define __LIBXIPC_FINDER_TRANSPORT_HH__
 
 #include <list>
 
@@ -372,5 +372,4 @@ private:
     bool connect();
 };
 
-#endif // __LIBXORP_FINDER_TRANSPORT_HH__
-
+#endif // __LIBXIPC_FINDER_TRANSPORT_HH__

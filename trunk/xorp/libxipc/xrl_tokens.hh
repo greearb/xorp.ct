@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_tokens.hh,v 1.3 2003/03/10 22:36:00 hodson Exp $
+// $XORP: xorp/libxipc/xrl_tokens.hh,v 1.4 2003/03/10 23:20:30 hodson Exp $
 
-#ifndef __LIBXIPC_XRL_CHARS_HH__
-#define __LIBXIPC_XRL_CHARS_HH__
+#ifndef __LIBXIPC_XRL_TOKENS_HH__
+#define __LIBXIPC_XRL_TOKENS_HH__
 
 struct XrlToken {
     // Protocol - Target separator
@@ -48,4 +48,4 @@ struct XrlToken {
 
 #define TOKEN_BYTES(x) (strlen(x) + 1)
 
-#endif // __LIBXIPC_XRL_CHARS_HH__
+#endif // __LIBXIPC_XRL_TOKENS_HH__

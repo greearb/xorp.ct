@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng_xrl_target.hh,v 1.3 2003/02/26 18:33:38 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng_xrl_target.hh,v 1.4 2003/03/06 01:18:57 hodson Exp $
 
-#ifndef __LIBXIPC_FINDER_XRL_TGT_HH__
-#define __LIBXIPC_FINDER_XRL_TGT_HH__
+#ifndef __LIBXIPC_FINDER_XRL_TARGET_HH__
+#define __LIBXIPC_FINDER_XRL_TARGET_HH__
 
 #include "finder_base.hh"
 
@@ -94,4 +94,4 @@ protected:
     FinderNG& _finder;
 };
 
-#endif // __LIBXIPC_FINDER_XRL_TGT_HH__
+#endif // __LIBXIPC_FINDER_XRL_TARGET_HH__

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/hmac.hh,v 1.2 2002/12/19 01:29:09 hodson Exp $
+// $XORP: xorp/libxipc/hmac.hh,v 1.3 2003/03/10 23:20:24 hodson Exp $
 
-#ifndef __LIBXORP_HMAC_HH_HH__
-#define __LIBXORP_HMAC_HH_HH__
+#ifndef __LIBXIPC_HMAC_HH__
+#define __LIBXIPC_HMAC_HH__
 
 #include <string>
 #include "hmac_md5.h"
@@ -52,6 +52,4 @@ protected:
     static const size_t SIG_SZ;
 };
 
-#endif // __LIBXORP_HMAC_HH_HH__
-
-
+#endif // __LIBXIPC_HMAC_HH__

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.2 2002/12/19 01:29:14 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.3 2003/03/10 23:20:29 hodson Exp $
 
-#ifndef __XRLPF_STCP_PH_HH__
-#define __XRLPF_STCP_PH_HH__
+#ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
+#define __LIBXIPC_XRL_PF_STCP_PH_HH__
 
 /* major and minor maybe defined on system, undefine them */
 #ifdef major
@@ -77,4 +77,4 @@ private:
     uint8_t _xrl_data_bytes[4];	  // Xrl return args data bytes
 };
 
-#endif // __XRLPF_STCP_PH_HH__
+#endif // __LIBXIPC_XRL_PF_STCP_PH_HH__
