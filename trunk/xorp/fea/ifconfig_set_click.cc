@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.9 2004/11/30 13:02:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.10 2004/12/01 03:28:11 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -912,13 +912,14 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     return (xorp_rt_port);
 }
 
+// TODO: this method will go away in the future
 string
 IfConfigSetClick::generate_config()
 {
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
     IfTreeVif::V4Map::const_iterator ai4;
-    IfTreeVif::V6Map::const_iterator ai6;
+    // IfTreeVif::V6Map::const_iterator ai6;
     int xorp_rt_port, max_xorp_rt_port, max_vifs;
 
     string config;
