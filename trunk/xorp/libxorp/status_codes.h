@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/status_codes.h,v 1.1 2003/05/07 23:40:15 mjh Exp $
+ * $XORP: xorp/libxorp/status_codes.h,v 1.2 2003/05/07 23:49:59 pavlin Exp $
  */
 
 #ifndef __LIBXORP_STATUS_CODES_H__
@@ -27,8 +27,7 @@ typedef enum {
     PROC_NOT_READY	= 2,
     PROC_READY		= 3,
     PROC_SHUTDOWN	= 4,
-    PROC_FAILED		= 5,
-    PROC_MAX
+    PROC_FAILED		= 5
 } ProcessStatus;
 
 #endif /* __LIBXORP_STATUS_CODES_H__ */
