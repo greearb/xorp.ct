@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.5 2003/05/22 01:05:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.6 2003/05/28 21:50:53 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -204,7 +204,7 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
     // Set the request
     //
     memset(rtmbuf, 0, sizeof(rtmbuf));
-    rtm = (struct rt_msghdr *)rtmbuf;
+    rtm = reinterpret_cast<struct rt_msghdr*>(rtmbuf);
     
     switch (dst.af()) {
     case AF_INET:
@@ -228,7 +228,7 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
     rtm->rtm_seq = rs.seqno();
     
     // Copy the destination address
-    sin = (struct sockaddr_in *)(rtm + 1);
+    sin = reinterpret_cast<struct sockaddr_in*>(rtm + 1);
     dst.copy_out(*sin);
     
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
@@ -246,7 +246,7 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
     while (_cache_valid == false) {
 	rs.force_read();
     }
-    rtm_answer = (struct rt_msghdr *)(&_cache_data[0]);
+    rtm_answer = reinterpret_cast<struct rt_msghdr*>(&_cache_data[0]);
     XLOG_ASSERT(rtm_answer->rtm_type == RTM_GET);
     
     return (parse_buffer_rtm(fte, &_cache_data[0], _cache_data.size()));
@@ -282,7 +282,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     // Set the request
     //
     memset(rtmbuf, 0, sizeof(rtmbuf));
-    rtm = (struct rt_msghdr *)rtmbuf;
+    rtm = reinterptet_cast<struct rt_msghdr*>(rtmbuf);
     
     switch (dst.af()) {
     case AF_INET:
@@ -306,19 +306,19 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     rtm->rtm_seq = rs.seqno();
 
     // Copy the destination address    
-    sin = (struct sockaddr_in *)(rtm + 1);
+    sin = reinterpret_cast<struct sockaddr_in*>(rtm + 1);
     dst.masked_addr().copy_out(*sin);
     
     // Copy the network mask
     switch (dst.af()) {
     case AF_INET:
 	sin = ADD_POINTER(sin, sizeof(struct sockaddr_in),
-			  struct sockaddr_in *);
+			  struct sockaddr_in*);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	sin = ADD_POINTER(sin, sizeof(struct sockaddr_in6),
-			  struct sockaddr_in *);
+			  struct sockaddr_in*);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -343,7 +343,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     while (_cache_valid == false) {
 	rs.force_read();
     }
-    rtm_answer = (struct rt_msghdr *)(&_cache_data[0]);
+    rtm_answer = reinterpret_cast<struct rt_msghdr*>(&_cache_data[0]);
     XLOG_ASSERT(rtm_answer->rtm_type == RTM_GET);
     
     return (parse_buffer_rtm(fte, &_cache_data[0], _cache_data.size()));
@@ -371,7 +371,7 @@ FtiConfigEntryGetRtsock::rtsock_data(const uint8_t* data, size_t nbytes)
     pid_t my_pid = rs.pid();
     
     while (d < nbytes) {
-	const rt_msghdr* rh = reinterpret_cast<const rt_msghdr*>(data + d);
+	const struct rt_msghdr* rh = reinterpret_cast<const struct rt_msghdr*>(data + d);
 	if ((rh->rtm_pid == my_pid)
 	    && (rh->rtm_seq == (signed)_cache_seqno)) {
 #if 0	    // TODO: XXX: PAVPAVPAV: remove this assert?
