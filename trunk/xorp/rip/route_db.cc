@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.4 2003/07/11 22:10:59 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.5 2003/07/12 16:19:16 hodson Exp $"
 
 #include "config.h"
 #include <map>
@@ -139,7 +139,14 @@ RouteDB<A>::update_route(const Net&	net,
 	    // Don't bother adding a route for unreachable net
 	    return false;
 	}
-	DBRouteEntry dre(new Route(net, nexthop, cost, o, tag));
+
+	// Route may exist with origin, ie still has entry in update
+	// queue but has expired from db.
+	Route* r = o->find_route(net);
+	if (r == 0) {
+	    r = new Route(net, nexthop, cost, o, tag);
+	}
+	DBRouteEntry dre(r);
 	set_expiry_timer(dre.get());
 	bool ok = _routes.insert(RouteContainer::value_type(net, dre)).second;
 	XLOG_ASSERT(ok);

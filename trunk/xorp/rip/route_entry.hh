@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.2 2003/07/09 00:11:02 hodson Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.3 2003/07/11 17:53:16 hodson Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -22,6 +22,8 @@
 #include "libxorp/timer.hh"
 
 template<typename A> class RouteEntryOrigin;
+
+template<typename A> class RouteEntryRef;
 
 /**
  * RIP Route Entry Class.
@@ -47,9 +49,9 @@ public:
      */
     RouteEntry(const Net&  n,
 	       const Addr& nh,
-	       uint32_t	   cost,
+	       uint16_t	   cost,
 	       Origin*&	   o,
-	       uint32_t    tag);
+	       uint16_t    tag);
 
     /**
      * Destructor.
@@ -63,7 +65,7 @@ public:
     /**
      * Get network.
      */
-    inline const IPNet<A>& net() const { return _net; }
+    inline const IPNet<A>& net() const		{ return _net; }
 
     /**
      * Set next hop.
@@ -79,7 +81,7 @@ public:
      *
      * @return nexthop address associated with the route entry.
      */
-    inline const A& nexthop() const { return _nh; }
+    inline const A& nexthop() const		{ return _nh; }
 
     /**
      * Set the cost metric.
@@ -88,14 +90,14 @@ public:
      *
      * @return true if stored cost changed, false otherwise.
      */
-    bool set_cost(uint32_t cost);
+    bool set_cost(uint16_t cost);
 
     /**
      * Get the cost metric.
      *
      * @return the cost associated with the route entry.
      */
-    uint32_t cost() const { return _cost; }
+    uint16_t cost() const			{ return _cost; }
 
     /**
      * Set the origin.  If the origin is different from the stored origin,
@@ -113,14 +115,14 @@ public:
      *
      * @return a pointer to the origin associated with the route entry.
      */
-    inline const Origin* origin() const { return _origin; }
+    inline const Origin* origin() const 	{ return _origin; }
 
     /**
      * Get the origin.
      *
      * @return a pointer to the origin associated with the route entry.
      */
-    inline Origin* origin() { return _origin; }
+    inline Origin* origin()			{ return _origin; }
 
     /**
      * Set the tag value.
@@ -136,17 +138,23 @@ public:
      *
      * @return tag value associated with the route entry.
      */
-    inline uint16_t tag() const { return _tag; }
+    inline uint16_t tag() const 		{ return _tag; }
 
     /**
      * Set a Timer Event associated with this route.
      */
-    inline void set_timer(const XorpTimer& t) { _timer = t; }
+    inline void set_timer(const XorpTimer& t) 	{ _timer = t; }
 
     /**
      * Get Timer associated with route.
      */
-    inline const XorpTimer& timer() const { return _timer; }
+    inline const XorpTimer& timer() const 	{ return _timer; }
+
+private:
+    friend class RouteEntryRef<A>;
+    inline void ref()				{ _ref_cnt++; }
+    inline uint16_t unref()			{ return --_ref_cnt; }
+    inline uint16_t ref_cnt() const		{ return _ref_cnt; }
 
 protected:
     RouteEntry(const RouteEntry&);			// Not implemented.
@@ -158,11 +166,68 @@ protected:
 protected:
     Net		_net;
     Addr	_nh;
-    uint32_t	_cost;
+    uint16_t	_cost;
     Origin*	_origin;
     uint16_t	_tag;
+    uint16_t	_ref_cnt;
 
     XorpTimer	_timer;
+};
+
+
+/**
+ * @short RouteEntry reference class.
+ *
+ * A reference pointer that manipulates a counter embedded within
+ * RouteEntry objects and deletes them when the counter goes to zero.  Having
+ * the counter embedded in the object makes it easier to reference count
+ * than using ref_ptr.
+ */
+template <typename A>
+class RouteEntryRef {
+private:
+    RouteEntry<A>* _rt;
+
+protected:
+    inline void release()
+    {
+	if (_rt && _rt->unref() == 0) delete _rt;
+    }
+
+public:
+    RouteEntryRef(RouteEntry<A>* r) : _rt(r)		{ _rt->ref(); }
+
+    RouteEntryRef() : _rt(0) 				{}
+
+    ~RouteEntryRef()					{ release(); }
+
+    RouteEntryRef(const RouteEntryRef& o) : _rt(o._rt)
+    {
+	if (_rt) _rt->ref();
+    }
+
+    inline RouteEntryRef& operator=(const RouteEntryRef& o)
+    {
+	release();
+	_rt = o._rt;
+	if (_rt) _rt->ref();
+	return *this;
+    }
+
+    inline RouteEntry<A>* get() const
+    {
+        return _rt;
+    }
+
+    inline RouteEntry<A>* operator->() const
+    {
+        return _rt;
+    }
+
+    inline bool operator==(const RouteEntryRef& o) const
+    {
+	return _rt == o._rt;
+    }
 };
 
 
@@ -177,6 +242,7 @@ template <typename A>
 class RouteEntryOrigin {
 public:
     typedef RouteEntry<A> Route;
+    typedef IPNet<A>	  Net;
     struct RouteEntryStore;
 
 public:
@@ -188,14 +254,21 @@ public:
      * @param r route to be stored.
      * @return true on success, false if route is already associated.
      */
-    bool associate(const Route* r);
+    bool associate(Route* r);
 
     /**
      * Dissociate route from this RouteEntryOrigin.
      * @param r route to be dissociated.
      * @return true on success, false if route is not associated.
      */
-    bool dissociate(const Route* r);
+    bool dissociate(Route* r);
+
+    /**
+     * Find route if RouteOrigin has a route for given network.
+     * @param n network.
+     * @return true if entry exists in store, false otherwise.
+     */
+    Route* find_route(const Net& n) const;
 
     /**
      * @return number of routes associated with this RouteEntryOrigin.
@@ -229,29 +302,5 @@ protected:
 };
 
 
-/**
- * A comparitor for the purposes of sorting containers of RouteEntry objects.
- * It examines the data rather than using the address of pointers.  The
- * latter approach makes testing difficult on different platforms since the
- * tests may inadvertantly make assumptions about the memory layout.  The
- * comparison is arbitrary, it just has to be consistent and reversible.
- *
- * IFF speed proves to be an issue, RouteEntry can be changed to be an element
- * in an intrusive linked list that has a sentinel embedded in the
- * RouteEntryOrigin.
- */
-template <typename A>
-struct RtPtrComparitor {
-    bool operator() (const RouteEntry<A>* a, const RouteEntry<A>* b) const
-    {
-	const IPNet<A>& l = a->net();
-	const IPNet<A>& r = b->net();
-	if (l.prefix_len() < r.prefix_len())
-	    return true;
-	if (l.prefix_len() > r.prefix_len())
-	    return false;
-	return l.masked_addr() < r.masked_addr();
-    }
-};
 
 #endif // __RIP_ROUTE_ENTRY_HH__

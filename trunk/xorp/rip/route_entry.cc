@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.2 2003/04/10 16:20:13 hodson Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.3 2003/07/09 00:11:02 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -45,10 +45,10 @@ RouteEntry<A>::associate(Origin* o)
 template <typename A>
 RouteEntry<A>::RouteEntry(const Net&	n,
 			  const Addr&	nh,
-			  uint32_t	cost,
+			  uint16_t	cost,
 			  Origin*&	o,
-			  uint32_t	tag)
-    : _net(n), _nh(nh), _cost(cost), _tag(tag)
+			  uint16_t	tag)
+    : _net(n), _nh(nh), _cost(cost), _tag(tag), _ref_cnt(0)
 {
     associate(o);
 }
@@ -76,7 +76,7 @@ RouteEntry<A>::set_nexthop(const A& nh)
 
 template <typename A>
 bool
-RouteEntry<A>::set_cost(uint32_t cost)
+RouteEntry<A>::set_cost(uint16_t cost)
 {
     if (cost != _cost) {
 	_cost = cost;
@@ -109,6 +109,29 @@ RouteEntry<A>::set_tag(uint16_t tag)
 }
 
 
+/**
+ * A comparitor for the purposes of sorting containers of RouteEntry objects.
+ * It examines the data rather than using the address of pointers.  The
+ * latter approach makes testing difficult on different platforms since the
+ * tests may inadvertantly make assumptions about the memory layout.  The
+ * comparison is arbitrary, it just has to be consistent and reversible.
+ *
+ * IFF speed proves to be an issue, RouteEntry can be changed to be an element
+ * in an intrusive linked list that has a sentinel embedded in the
+ * RouteEntryOrigin.
+ */
+template <typename A>
+struct NetCmp {
+    bool operator() (const IPNet<A>& l, const IPNet<A>& r) const
+    {
+	if (l.prefix_len() < r.prefix_len())
+	    return true;
+	if (l.prefix_len() > r.prefix_len())
+	    return false;
+	return l.masked_addr() < r.masked_addr();
+    }
+};
+
 // ----------------------------------------------------------------------------
 // RouteEntryOrigin<A>::RouteEntryStore and related
 //
@@ -116,12 +139,12 @@ RouteEntry<A>::set_tag(uint16_t tag)
 // their associated routes.
 //
 
-#include <set>
+#include <map>
 
 template <typename A>
 struct RouteEntryOrigin<A>::RouteEntryStore {
 public:
-    typedef set<const RouteEntry<A>*, RtPtrComparitor<A> > Container;
+    typedef map<IPNet<A>, RouteEntry<A>*, NetCmp<A> > Container;
     Container routes;
 };
 
@@ -145,22 +168,24 @@ RouteEntryOrigin<A>::~RouteEntryOrigin()
 
 template <typename A>
 bool
-RouteEntryOrigin<A>::associate(const Route* r)
+RouteEntryOrigin<A>::associate(Route* r)
 {
     XLOG_ASSERT(r != 0);
-    if (_rtstore->routes.find(r) != _rtstore->routes.end()) {
+    if (_rtstore->routes.find(r->net()) != _rtstore->routes.end()) {
 	XLOG_FATAL("entry already exists");
 	return false;
     }
-    _rtstore->routes.insert(r);
+    _rtstore->routes.insert(RouteEntryStore::Container::value_type(r->net(), r));
     return true;
 }
 
 template <typename A>
 bool
-RouteEntryOrigin<A>::dissociate(const Route* r)
+RouteEntryOrigin<A>::dissociate(Route* r)
 {
-    typename RouteEntryStore::Container::iterator i = _rtstore->routes.find(r);
+    typename RouteEntryStore::Container::iterator
+	i = _rtstore->routes.find(r->net());
+
     if (i == _rtstore->routes.end()) {
 	XLOG_FATAL("entry does not exist");
 	return false;
@@ -186,9 +211,20 @@ RouteEntryOrigin<A>::dump_routes(vector<const Route*>& routes) const
 	end = _rtstore->routes.end();
 
     while (i != end) {
-	routes.push_back(*i);
+	routes.push_back(i->second);
 	++i;
     }
+}
+
+template <typename A>
+RouteEntry<A>*
+RouteEntryOrigin<A>::find_route(const Net& n) const
+{
+    typename RouteEntryStore::Container::const_iterator
+	i = _rtstore->routes.find(n);
+    if (i == _rtstore->routes.end())
+	return 0;
+    return i->second;
 }
 
 template class RouteEntryOrigin<IPv4>;

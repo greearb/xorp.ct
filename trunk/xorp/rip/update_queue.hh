@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.5 2003/07/15 17:40:43 hodson Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.6 2003/07/15 18:49:08 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -59,7 +59,7 @@ protected:
 
 public:
     typedef ref_ptr<Reader>		ReadIterator;
-    typedef ref_ptr<RouteEntry<A> >	RouteUpdate;
+    typedef RouteEntryRef<A>		RouteUpdate;
 
 public:
     UpdateQueue();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.5 2003/07/11 22:10:59 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.6 2003/07/12 16:19:37 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -58,8 +58,8 @@ public:
     typedef IPNet<A> 				Net;
     typedef RouteEntry<A>			Route;
     typedef RouteEntryOrigin<A>			RouteOrigin;
-    typedef ref_ptr<RouteEntry<A> >		DBRouteEntry;
-    typedef ref_ptr<const RouteEntry<A> >	ConstDBRouteEntry;
+    typedef RouteEntryRef<A>			DBRouteEntry;
+    typedef RouteEntryRef<A>			ConstDBRouteEntry;
     typedef PacketRouteEntry<A>			PacketizedRoute;
     typedef map<Net, DBRouteEntry, NetCmp<A> >	RouteContainer;
 
