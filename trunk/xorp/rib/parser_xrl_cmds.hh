@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.7 2004/02/11 08:48:46 pavlin Exp $
+// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.8 2004/04/01 19:31:20 hodson Exp $
 
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
@@ -99,62 +99,6 @@ private:
     EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&     _completion;
-};
-
-class XrlRedistEnableCommand : public RedistEnableCommand {
-public:
-    XrlRedistEnableCommand(EventLoop&		e,
-			   XrlRibV0p1Client&	xrl_client,
-			   XrlCompletion&	completion)
-	: RedistEnableCommand(),
-	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
-
-    int execute() {
-	cout << "RedistEnableCommand::execute " << _from_table << " ";
-	cout << _to_table << endl;
-
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
-
-	_xrl_client.send_redist_enable4(
-	    "rib", "target", _from_table, _to_table, unicast, multicast,
-	    "cookie", callback(&pass_fail_handler, &_completion));
-
-	return _completion;
-    }
-
-private:
-    EventLoop&	      _eventloop;
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
-};
-
-class XrlRedistDisableCommand : public RedistDisableCommand {
-public:
-    XrlRedistDisableCommand(EventLoop&		e,
-			    XrlRibV0p1Client&	xrl_client,
-			    XrlCompletion&	completion)
-	: RedistDisableCommand(),
-	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
-
-    int execute() {
-	cout << "RedistDisableCommand::execute " << _from_table << " ";
-	cout << _to_table << endl;
-
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
-
-	_xrl_client.send_redist_disable4(
-	    "rib", "target", _from_table, _to_table, unicast, multicast,
-	    callback(&pass_fail_handler, &_completion));
-
-	return _completion;
-    }
-
-private:
-    EventLoop&	      _eventloop;
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
 };
 
 class XrlAddIGPTableCommand : public AddIGPTableCommand {

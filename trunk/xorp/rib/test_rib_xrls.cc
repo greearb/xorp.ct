@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.27 2004/02/11 08:48:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.28 2004/04/28 15:44:48 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -43,8 +43,6 @@ public:
 		 XrlCompletion&    cv) {
 	add_command(new XrlRouteAddCommand(e, xrl_client, cv));
 	add_command(new XrlRouteDeleteCommand(e, xrl_client, cv));
-	add_command(new XrlRedistEnableCommand(e, xrl_client, cv));
-	add_command(new XrlRedistDisableCommand(e, xrl_client, cv));
 	add_command(new XrlAddIGPTableCommand(e, xrl_client, cv));
 	add_command(new XrlDeleteIGPTableCommand(e, xrl_client, cv));
 	add_command(new XrlAddEGPTableCommand(e, xrl_client, cv));

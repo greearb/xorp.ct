@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.9 2004/03/23 11:24:25 pavlin Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.10 2004/04/28 15:44:48 hodson Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -100,34 +100,6 @@ public:
 	cout << "**** Vif: " << vif.str() << endl;
 
 	return _rib.new_vif(_ifname, vif);
-    }
-private:
-    RIB<IPv4>& _rib;
-};
-
-class DirectRedistEnableCommand : public RedistEnableCommand {
-public:
-    DirectRedistEnableCommand(RIB<IPv4>& rib)
-	: RedistEnableCommand(), _rib(rib) {}
-    int execute() {
-	cout << "RedistEnableCommand::execute " << _from_table << " ";
-	cout << _to_table << "\n";
-	int dummy = _rib.redist_enable(_from_table, _to_table);
-	return dummy;
-    }
-private:
-    RIB<IPv4>& _rib;
-};
-
-class DirectRedistDisableCommand : public RedistDisableCommand {
-public:
-    DirectRedistDisableCommand(RIB<IPv4>& rib) :
-	RedistDisableCommand(), _rib(rib) {}
-    int execute() {
-	cout << "RedistDisableCommand::execute " << _from_table << " ";
-	cout << _to_table << "\n";
-	int dummy = _rib.redist_disable(_from_table, _to_table);
-	return dummy;
     }
 private:
     RIB<IPv4>& _rib;
