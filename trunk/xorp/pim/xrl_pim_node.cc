@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.73 2005/03/18 00:04:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.74 2005/03/18 00:14:05 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -245,6 +245,54 @@ XrlPimNode::finder_disconnect_event()
 }
 
 //
+// Task-related methods
+//
+void
+XrlPimNode::add_task(XrlTaskBase* xrl_task)
+{
+    _xrl_tasks_queue.push_back(xrl_task);
+
+    // If the queue was empty before, start sending the changes
+    if (_xrl_tasks_queue.size() == 1)
+	send_xrl_task();
+}
+
+void
+XrlPimNode::send_xrl_task()
+{
+    if (_xrl_tasks_queue.empty())
+	return;
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    XLOG_ASSERT(xrl_task_base != NULL);
+
+    xrl_task_base->dispatch();
+}
+
+void
+XrlPimNode::pop_xrl_task()
+{
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    XLOG_ASSERT(xrl_task_base != NULL);
+
+    delete xrl_task_base;
+    _xrl_tasks_queue.pop_front();
+}
+
+void
+XrlPimNode::retry_xrl_task()
+{
+    if (_xrl_tasks_queue_timer.scheduled())
+	return;		// XXX: already scheduled
+
+    _xrl_tasks_queue_timer = _eventloop.new_oneoff_after(
+	RETRY_TIMEVAL,
+	callback(this, &XrlPimNode::send_xrl_task));
+}
+
+//
 // Register with the MFEA
 //
 void
@@ -340,8 +388,7 @@ XrlPimNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _mfea_register_startup_timer.scheduled()) {
 	    XLOG_ERROR("Failed to register interest in finder events: %s. "
@@ -449,8 +496,7 @@ XrlPimNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _mfea_register_shutdown_timer.scheduled()) {
 	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
@@ -633,8 +679,7 @@ XrlPimNode::mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	XLOG_ERROR("Failed to %s protocol with the MFEA: %s. "
 		   "Will try again.",
@@ -745,8 +790,7 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	XLOG_ERROR("Failed to allow signal messages with the MFEA: %s. "
 		   "Will try again.",
@@ -846,8 +890,7 @@ XrlPimNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _rib_register_startup_timer.scheduled()) {
 	    XLOG_ERROR("Failed to register interest in finder events: %s. "
@@ -956,8 +999,7 @@ XrlPimNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _rib_register_shutdown_timer.scheduled()) {
 	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
@@ -1072,8 +1114,7 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _rib_redist_transaction_enable_timer.scheduled()) {
 	    XLOG_ERROR("Failed to enable receiving MRIB information from the RIB: %s. "
@@ -1185,8 +1226,7 @@ XrlPimNode::rib_client_send_redist_transaction_disable_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _rib_register_shutdown_timer.scheduled()) {
 	    XLOG_ERROR("Failed to disable receiving MRIB information from the RIB: %s. "
@@ -1198,51 +1238,6 @@ XrlPimNode::rib_client_send_redist_transaction_disable_cb(
 	}
 	break;
     }
-}
-
-void
-XrlPimNode::add_task(XrlTaskBase* xrl_task)
-{
-    _xrl_tasks_queue.push_back(xrl_task);
-
-    // If the queue was empty before, start sending the changes
-    if (_xrl_tasks_queue.size() == 1)
-	send_xrl_task();
-}
-
-void
-XrlPimNode::send_xrl_task()
-{
-    if (_xrl_tasks_queue.empty())
-	return;
-
-    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
-    XLOG_ASSERT(xrl_task_base != NULL);
-
-    xrl_task_base->dispatch();
-}
-
-void
-XrlPimNode::pop_xrl_task()
-{
-    XLOG_ASSERT(! _xrl_tasks_queue.empty());
-
-    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
-    XLOG_ASSERT(xrl_task_base != NULL);
-
-    delete xrl_task_base;
-    _xrl_tasks_queue.pop_front();
-}
-
-void
-XrlPimNode::retry_xrl_task()
-{
-    if (_xrl_tasks_queue_timer.scheduled())
-	return;		// XXX: already scheduled
-
-    _xrl_tasks_queue_timer = _eventloop.new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlPimNode::send_xrl_task));
 }
 
 int
@@ -1454,8 +1449,7 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	XLOG_ERROR("Failed to %s protocol vif with the MFEA: %s. "
 		   "Will try again.",
@@ -1688,8 +1682,7 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	XLOG_ERROR("Failed to %s group %s on vif with vif_index %d "
 		   "with the MFEA: %s. "
@@ -1886,8 +1879,7 @@ XrlPimNode::mfea_client_send_add_delete_mfc_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	XLOG_ERROR("Failed to add/delete a multicast forwarding entry "
 		   "with the MFEA: %s. "
@@ -2166,8 +2158,7 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	XLOG_ERROR("Failed to add/delete a dataflow monitor with the MFEA: %s. "
 		   "Will try again.",
@@ -2388,8 +2379,7 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _add_delete_protocol_mld6igmp_queue_timer.scheduled()) {
 	    XLOG_ERROR("Failed to %s with the MLD6IGMP: %s. "
@@ -2689,8 +2679,7 @@ XrlPimNode::cli_manager_client_send_add_cli_command_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	//
 	// TODO: if the command failed, then we should retransmit it
@@ -2771,8 +2760,7 @@ XrlPimNode::cli_manager_client_send_delete_cli_command_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	//
 	// TODO: if the command failed, then we should retransmit it

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.50 2005/03/17 19:44:53 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.51 2005/03/18 00:04:38 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2220,7 +2220,6 @@ private:
 				       const char *command_cd_prompt,
 				       bool is_command_processor);
     void cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error);
-    void xrl_result_add_cli_command(const XrlError& xrl_error);
     int delete_cli_command_from_cli_manager(const char *command_name);
     void cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error);
     
