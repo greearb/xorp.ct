@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrib_table.hh,v 1.4 2003/03/10 23:20:45 hodson Exp $
+// $XORP: xorp/mrt/mrib_table.hh,v 1.5 2003/03/22 03:26:41 pavlin Exp $
 
 #ifndef __MRT_MRIB_TABLE_HH__
 #define __MRT_MRIB_TABLE_HH__
@@ -312,7 +312,17 @@ public:
      * @return the iterator for the last element.
      */
     iterator	end() const { return (NULL); }
-    
+
+    /**
+     * Update the vif index of a @ref Mrib entry.
+     * 
+     * @param dest_prefix the destination prefix of the @ref Mrib entry
+     * to update.
+     * @param vif_index the new vif index of the @ref Mrib entry.
+     */
+    void update_entry_vif_index(const IPvXNet& dest_prefix,
+				uint16_t vif_index);
+
     //
     // Pending transactions related methods
     //
@@ -410,6 +420,9 @@ private:
 	uint32_t	tid() const { return (_tid); }
 	const Mrib&	mrib() const { return (_mrib); }
 	bool		is_insert() const { return (_is_insert); }
+	void		update_entry_vif_index(uint16_t vif_index) {
+	    _mrib.set_next_hop_vif_index(vif_index);
+	}
 	
     private:
 	uint32_t	_tid;		// The transaction ID

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.5 2003/03/22 03:26:41 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.6 2003/09/30 00:22:25 pavlin Exp $"
 
 
 //
@@ -401,6 +401,40 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
 	       addr_prefix.str().c_str());
     
     return (NULL);
+}
+
+/**
+ * Update the vif index of a @ref Mrib entry.
+ * 
+ * @param dest_prefix the destination prefix of the @ref Mrib entry
+ * to update.
+ * @param vif_index the new vif index of the @ref Mrib entry.
+ */
+void
+MribTable::update_entry_vif_index(const IPvXNet& dest_prefix,
+				  uint16_t vif_index)
+{
+    Mrib* mrib;
+
+    //
+    // Update the entry already installed in the table
+    //
+    mrib = find_exact(dest_prefix);
+    if (mrib != NULL)
+	mrib->set_next_hop_vif_index(vif_index);
+
+    //
+    // Update all entries in pending transactions
+    //
+    list<PendingTransaction>::iterator iter;
+    for (iter = _mrib_pending_transactions.begin();
+	 iter != _mrib_pending_transactions.end();
+	 ++iter) {
+	PendingTransaction& pending_transaction = *iter;
+	if (pending_transaction.mrib().dest_prefix() == dest_prefix) {
+	    pending_transaction.update_entry_vif_index(vif_index);
+	}
+    }
 }
 
 void
