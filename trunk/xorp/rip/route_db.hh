@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.6 2003/07/12 16:19:37 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.7 2003/07/16 05:03:33 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -104,18 +104,6 @@ public:
      * @return count of routes in database.
      */
     uint32_t route_count() const;
-
-    /**
-     * Resolve a route and take a reference to it.  While the reference
-     * exists the route will not be deleted from memory, though may be
-     * remove from table.
-     *
-     * @param net network to be resolved.
-     * @param cdbe reference pointer to route entry.
-     *
-     * @return true if route resolves, false otherwise.
-     */
-    bool resolve_and_reference(const Net& net, ConstDBRouteEntry& cdbe);
 
     /**
      * Accessor.
