@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.22 2003/08/12 16:02:26 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.23 2003/08/27 23:21:36 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -73,7 +73,7 @@ Release 0.4 (2003/??/??)
       'j' scroll down one line, while 'k' scroll up one line.
 
   SNMP:
-    - 
+    - Full implementation of BGP4-MIB module (RFC 1657) including traps
 
   RIP:
     - 
