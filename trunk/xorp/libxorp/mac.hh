@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.2 2003/03/10 23:20:33 hodson Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -20,9 +20,8 @@
 #include <string>
 
 #include "config.h"
+#include "ether_compat.h"
 #include "exceptions.hh"
-
-struct ether_addr;
 
 /**
  * @short MAC exceptions.
@@ -128,10 +127,21 @@ public:
 };
 
 inline bool
-operator==(const Mac& m1, const Mac& m2) {
+operator==(const Mac& m1, const Mac& m2)
+{
     return m1.str() == m2.str();
 }
 
+inline bool
+operator==(const EtherMac& m1, const EtherMac& m2)
+{
+    struct ether_addr ea1, ea2;
+
+    if (m1.get_ether_addr(ea1) != true)
+	return false;
+    if (m2.get_ether_addr(ea2) != true)
+	return false;
+    return (memcmp(&ea1, &ea2, sizeof(ea1)) == 0);
+}
+
 #endif // __LIBXORP_MAC_HH__
-
-
