@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.16 2002/12/09 12:47:47 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
 #
 
 Urgent
@@ -37,7 +37,6 @@ General
  - user database needs proper implementation of capabilities
  - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
    and list all *.cc files there in alphabetical order
- - Remove rtrmgr/md6.c ??
 
 Configure Mode
 
