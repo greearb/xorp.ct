@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.32 2003/05/21 03:59:26 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.33 2003/05/21 23:09:18 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -25,6 +25,13 @@ dnl Boilerplate
 dnl ---------------------------------------------------------------------------
 
 AC_PREREQ(2.13)
+
+dnl
+dnl To disable config.cache loading and saving, redefine the following two
+dnl macros _before_ calling AC_INIT, but make sure to keep the trailing dnl.
+dnl
+dnl define([AC_CACHE_LOAD], )dnl
+dnl define([AC_CACHE_SAVE], )dnl
 
 AC_INIT(libxorp/xorp.h)
 AC_CONFIG_AUX_DIR(config)
