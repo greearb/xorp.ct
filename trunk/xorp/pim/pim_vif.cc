@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.31 2004/02/29 22:59:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.32 2004/03/01 09:17:18 pavlin Exp $"
 
 
 //
@@ -272,11 +272,13 @@ PimVif::start(string& error_msg)
 	error_msg = "underlying vif is not UP";
 	return (XORP_ERROR);
     }
-    if (is_loopback()) {
-	error_msg = "cannot start a loopback interface";
-	return (XORP_ERROR);
-    }
-    if (! (is_multicast_capable() || is_pim_register())) {
+
+    //
+    // Start the vif only if it is of the appropriate type:
+    // multicast-capable (loopback excluded), or PIM Register vif.
+    //
+    if (! ((is_multicast_capable() && (! is_loopback()))
+           || is_pim_register())) {
 	error_msg = "the interface is not multicast capable";
 	return (XORP_ERROR);
     }
