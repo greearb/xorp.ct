@@ -284,10 +284,15 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   localpref $<$num$>$
   nlri $<$net$>$
   withdraw $<$net$>$
-  med $<$value$>$}
+  med $<$value$>$
+  pathattr $<$num,num,num,...$>$}
 
   Send a BGP update packet to the BGP test target with the specified
-  withdrawn routes, NLRI, and path attributes.
+  withdrawn routes, NLRI, and path attributes. The ``pathattr''
+  argument takes a list of commma separated byte values in decimal or
+  hex. The ``patthattr'' exists to test optional path attributes. It
+  should be noted that at this time it is not possible to create an
+  illegal path attribute.
 
 \item {\sf send dump mrtd update filename $<$packet count$>$}
   

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.9 2003/07/02 02:08:17 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.10 2003/07/03 23:52:23 atanu Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
 
 #include "trie.hh"
 #include "libxorp/callback.hh"
+#include "tokenize.hh"
 
 class EventLoop;
 class TimeVal;
@@ -95,9 +96,9 @@ public:
     void datain_error(const string& reason);
     void datain_closed();
 
+    PathAttribute *path_attribute(const char *)	const throw(InvalidString);
     const BGPPacket *packet(const string& line, const vector<string>& words,
-			    int index)
-	const throw(InvalidString);
+			    int index) const throw(InvalidString);
 protected:
     typedef XorpCallback1<void, const XrlError&>::RefPtr SMCB;
     SMCB _smcb;

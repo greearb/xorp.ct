@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.27 2003/07/02 02:08:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.28 2003/07/03 23:52:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1213,6 +1213,57 @@ Peer::send_open()
 }
 
 /*
+** The standard BGP code that deals with path attributes contains
+** fairly stringent checking. For testing we want to be able to create
+** arbitary path attributes.
+*/
+class AnyAttribute : public PathAttribute {
+public:
+
+    /*
+    ** The attr string should be a comma separated list of numbers.
+    */
+
+    AnyAttribute(const char *attr) throw(InvalidString)
+	// In order to protect against accidents in the BGP code,
+	// PathAttribute does not have a default constructor. However,
+	// we need to manipulate a PathAttribute so pass in a valid
+	// constructor argument.
+	: PathAttribute(&_valid[0]) {
+
+	string line = attr;
+	vector<string> v;
+	tokenize(line, v, ",");
+
+	_data = new uint8_t [v.size()];
+	for(size_t i = 0; i < v.size(); i++) {
+	    _data[i] = strtol(v[i].c_str(), 0, 0);
+// 	    fprintf(stderr, "%#x ", _data[i]);
+	}
+// 	fprintf(stderr, "\n");
+
+    };
+private:
+    static const uint8_t _valid[] = {0x80|0x40, 255, 1, 1};
+};
+
+const uint8_t AnyAttribute::_valid[];
+
+/*
+** The input is a comma separated list of numbers that are turned into
+** an array.
+*/
+PathAttribute *
+Peer::path_attribute(const char *) const throw(InvalidString)
+{
+    const uint8_t path[] = {0x80|0x40, 255, 1, 1};
+    uint16_t max_len = sizeof(path);
+    size_t actual_length;
+
+    return PathAttribute::create(&path[0], max_len, actual_length);
+}
+
+/*
 ** Generate a BGP message from the textual description.
 ** Note: It is up to the caller of this method to delete the packet
 ** that has been created.
@@ -1291,6 +1342,8 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	    } else if("med" == words[i]) {
 		bgpupdate->add_pathatt(MEDAttribute(atoi(
 						      words[i+1].c_str())));
+	    } else if("pathattr" == words[i]) {
+		bgpupdate->add_pathatt(AnyAttribute(words[i+1].c_str()));
 	    } else
 		xorp_throw(InvalidString, 
 		       c_format("Illegal argument to update: <%s>\n[%s]",

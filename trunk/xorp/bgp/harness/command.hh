@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.8 2003/06/26 19:41:47 atanu Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.9 2003/07/02 02:08:16 atanu Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
 
 #include "libxorp/ref_ptr.hh"
+#include "tokenize.hh"
 #include "peer.hh"
 
 class TimeVal;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.12 2003/06/26 19:41:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.13 2003/07/02 02:08:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,22 +29,6 @@
 #include "xrl/interfaces/test_peer_xif.hh"
 #include "coord.hh"
 #include "command.hh"
-
-inline
-void 
-tokenize(const string& str,
-	      vector<string>& tokens,
-	      const string& delimiters = " ")
-{
-    string::size_type begin = str.find_first_not_of(delimiters, 0);
-    string::size_type end = str.find_first_of(delimiters, begin);
-
-    while(string::npos != begin || string::npos != end) {
-        tokens.push_back(str.substr(begin, end - begin));
-        begin = str.find_first_not_of(delimiters, end);
-        end = str.find_first_of(delimiters, begin);
-    }
-}
 
 Command::Command(EventLoop& eventloop, XrlStdRouter& xrlrouter)
     : _eventloop(eventloop),
