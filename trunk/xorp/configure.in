@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.97 2004/06/17 05:33:01 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.98 2004/06/21 06:22:04 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -492,6 +492,9 @@ else
             echo "If you are running Linux and Net-SNMP v 5.0.8 you may have   "
 	    echo -n "to apply this patch: "
 	    echo "http://sf.net/tracker/index.php?func=detail&aid=708409&group_id=12694&atid=112694"
+	    echo ""
+            echo "For Linux and Net-SNMP v 5.0.9 the patch is:"
+	    echo "http://sourceforge.net/tracker/index.php?func=detail&aid=905573&group_id=12694&atid=456380"
 	    echo ""
 	    echo "If you don't know how to resolve the problem and do not want to "
 	    echo "see this message again, run ./configure --without-snmp          "
