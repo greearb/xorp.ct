@@ -35,25 +35,35 @@ input:		/* empty */
 		| syntax_error
 		;
 
-definition:	nodename nodegroup
+definition:	long_nodename nodegroup
+		| short_nodename long_nodegroup
 		;
 
-nodename:	literals { push_path(); }
+short_nodename:	literal { push_path(); }
 		;
 
-literals:	LITERAL { extend_path($1); }
-		| literals LITERAL { extend_path($2); }
-		| literals BOOL_VALUE { extend_path($2); }
-		| literals UINT_VALUE { extend_path($2); }
-		| literals IPV4_VALUE { extend_path($2); }
-		| literals IPV4NET_VALUE { extend_path($2); }
-		| literals IPV6_VALUE { extend_path($2); }
-		| literals IPV6NET_VALUE { extend_path($2); }
-		| literals MACADDR_VALUE { extend_path($2); }
+long_nodename:	literals { push_path(); }
 		;
 
-nodegroup:	UPLEVEL statements DOWNLEVEL { pop_path(); }
+literal:	LITERAL { extend_path($1); }
+		;
+
+literals:	literals literal
+		| literal LITERAL { extend_path($2); }
+		| literal BOOL_VALUE { extend_path($2); }
+		| literal UINT_VALUE { extend_path($2); }
+		| literal IPV4_VALUE { extend_path($2); }
+		| literal IPV4NET_VALUE { extend_path($2); }
+		| literal IPV6_VALUE { extend_path($2); }
+		| literal IPV6NET_VALUE { extend_path($2); }
+		| literal MACADDR_VALUE { extend_path($2); }
+		;
+
+nodegroup:	long_nodegroup
 		| END { pop_path(); }
+		;
+
+long_nodegroup:	UPLEVEL statements DOWNLEVEL { pop_path(); }
 		;
 
 statements:	/* empty string */
