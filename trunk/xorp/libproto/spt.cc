@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libproto/spt.cc,v 1.1 2004/11/02 23:15:22 atanu Exp $"
 
 // #define INCREMENTAL_SPT
 
@@ -422,6 +422,8 @@ Node<A>::garbage_collect()
     for(ni = _adjacencies.begin(); ni != _adjacencies.end();) {
 	NodeRef node = ni->second._dst;
 	if (!node->valid()) {
+	    // Clear any references that this node may have to itself.
+	    node->clear();
 	    _adjacencies.erase(ni++);
 	} else {
 	    ni++;
