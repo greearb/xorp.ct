@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.16 2003/09/12 17:28:13 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.17 2003/09/15 18:17:58 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -827,8 +827,8 @@ main(int argc, char **argv)
 	while (router.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	if (timed_out) {
-	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?\n");
+	if (router.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	    return -1;
 	}
 
