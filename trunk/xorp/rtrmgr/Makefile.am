@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.18 2003/09/24 16:16:06 hodson Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.19 2003/09/30 20:41:21 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -29,69 +29,126 @@ LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
+
+#
+# xorp_rtrmgr
+#
 xorp_rtrmgr_SOURCES	 = rtrmgr_module.h
 xorp_rtrmgr_SOURCES	+= version.h
+xorp_rtrmgr_SOURCES	+= y.boot_tab.h
+xorp_rtrmgr_SOURCES	+= y.tplt_tab.h
+
+xorp_rtrmgr_SOURCES	+= command_tree.hh
+xorp_rtrmgr_SOURCES	+= conf_tree.hh
+xorp_rtrmgr_SOURCES	+= conf_tree_node.hh
+xorp_rtrmgr_SOURCES	+= main_rtrmgr.hh
+xorp_rtrmgr_SOURCES	+= master_conf_tree.hh
+xorp_rtrmgr_SOURCES	+= master_conf_tree_node.hh
+xorp_rtrmgr_SOURCES	+= module_commands.hh
+xorp_rtrmgr_SOURCES	+= module_manager.hh
+xorp_rtrmgr_SOURCES	+= parse_error.hh
+xorp_rtrmgr_SOURCES	+= path_segment.hh
+xorp_rtrmgr_SOURCES	+= randomness.hh
+xorp_rtrmgr_SOURCES	+= task.hh
+xorp_rtrmgr_SOURCES	+= template_commands.hh
+xorp_rtrmgr_SOURCES	+= template_tree.hh
+xorp_rtrmgr_SOURCES	+= template_tree_node.hh
+xorp_rtrmgr_SOURCES	+= unexpanded_xrl.hh
+xorp_rtrmgr_SOURCES	+= userdb.hh
 xorp_rtrmgr_SOURCES	+= util.hh
-xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
-xorp_rtrmgr_SOURCES	+= lex.tplt.cc
-xorp_rtrmgr_SOURCES	+= y.boot_tab.cc
+xorp_rtrmgr_SOURCES	+= xorp_client.hh
+xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.hh
+xorp_rtrmgr_SOURCES	+= xrldb.hh
+
+xorp_rtrmgr_SOURCES	+= conf_tree.cc
+xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
 xorp_rtrmgr_SOURCES	+= lex.boot.cc
+xorp_rtrmgr_SOURCES	+= lex.tplt.cc
 xorp_rtrmgr_SOURCES	+= main_rtrmgr.cc
+xorp_rtrmgr_SOURCES	+= master_conf_tree.cc
+xorp_rtrmgr_SOURCES	+= master_conf_tree_node.cc
+xorp_rtrmgr_SOURCES	+= module_command.cc
+xorp_rtrmgr_SOURCES	+= module_manager.cc
+xorp_rtrmgr_SOURCES	+= randomness.cc
+xorp_rtrmgr_SOURCES	+= task.cc
+xorp_rtrmgr_SOURCES	+= template_commands.cc
 xorp_rtrmgr_SOURCES	+= template_tree.cc
 xorp_rtrmgr_SOURCES	+= template_tree_node.cc
-xorp_rtrmgr_SOURCES	+= template_commands.cc
-xorp_rtrmgr_SOURCES	+= module_command.cc
-xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
-xorp_rtrmgr_SOURCES	+= conf_tree.cc
-xorp_rtrmgr_SOURCES	+= master_conf_tree_node.cc
-xorp_rtrmgr_SOURCES	+= master_conf_tree.cc
-xorp_rtrmgr_SOURCES	+= module_manager.cc
-xorp_rtrmgr_SOURCES	+= xorp_client.cc
-xorp_rtrmgr_SOURCES	+= xrldb.cc
+xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
 xorp_rtrmgr_SOURCES	+= userdb.cc
 xorp_rtrmgr_SOURCES	+= util.cc
+xorp_rtrmgr_SOURCES	+= xorp_client.cc
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
-xorp_rtrmgr_SOURCES	+= randomness.cc
-xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
-xorp_rtrmgr_SOURCES	+= task.cc
+xorp_rtrmgr_SOURCES	+= xrldb.cc
+xorp_rtrmgr_SOURCES	+= y.boot_tab.cc
+xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
 
 xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a
 xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a
 xorp_rtrmgr_LDADD	+= $(LDADD)
 
+#
+# xorpsh
+#
 xorpsh_SOURCES	 = rtrmgr_module.h
 xorpsh_SOURCES	+= version.h
+xorpsh_SOURCES	+= y.boot_tab.h
+xorpsh_SOURCES	+= y.opcmd_tab.h
+xorpsh_SOURCES	+= y.tplt_tab.h
+
+xorpsh_SOURCES	+= cli.hh
+xorpsh_SOURCES	+= command_tree.hh
+xorpsh_SOURCES	+= conf_tree.hh
+xorpsh_SOURCES	+= conf_tree_node.hh
+xorpsh_SOURCES	+= module_command.hh
+xorpsh_SOURCES	+= module_manager.hh
+xorpsh_SOURCES	+= op_commands.hh
+xorpsh_SOURCES	+= parse_error.hh
+xorpsh_SOURCES	+= path_segment.hh
+xorpsh_SOURCES	+= popen.hh
+xorpsh_SOURCES	+= slave_conf_tree.hh
+xorpsh_SOURCES	+= slave_conf_tree_node.hh
+xorpsh_SOURCES	+= slave_module_manager.hh
+xorpsh_SOURCES	+= task.hh
+xorpsh_SOURCES	+= template_commands.hh
+xorpsh_SOURCES	+= template_tree.hh
+xorpsh_SOURCES	+= template_tree_node.hh
+xorpsh_SOURCES	+= unexpanded_xrl.hh
 xorpsh_SOURCES	+= util.hh
-xorpsh_SOURCES	+= xorpsh_main.cc
-xorpsh_SOURCES	+= y.tplt_tab.cc
-xorpsh_SOURCES	+= lex.tplt.cc
-xorpsh_SOURCES	+= y.boot_tab.cc
-xorpsh_SOURCES	+= lex.boot.cc
-xorpsh_SOURCES	+= y.opcmd_tab.cc
-xorpsh_SOURCES	+= lex.opcmd.cc
-xorpsh_SOURCES	+= template_tree.cc
-xorpsh_SOURCES	+= template_tree_node.cc
-xorpsh_SOURCES	+= template_commands.cc
-xorpsh_SOURCES	+= module_command.cc
-xorpsh_SOURCES	+= conf_tree_node.cc
-xorpsh_SOURCES	+= slave_conf_tree_node.cc
-xorpsh_SOURCES	+= conf_tree.cc
-#slave_module_manager really shouldn't be needed
-xorpsh_SOURCES	+= slave_module_manager.cc
-xorpsh_SOURCES	+= slave_conf_tree.cc
-xorpsh_SOURCES	+= xorp_client.cc
-xorpsh_SOURCES	+= xrldb.cc
+xorpsh_SOURCES	+= xorp_client.hh
+xorpsh_SOURCES	+= xorpsh_main.hh
+xorpsh_SOURCES	+= xrl_xorpsh_interface.hh
+xorpsh_SOURCES	+= xrldb.hh
+
 xorpsh_SOURCES	+= cli.cc
 xorpsh_SOURCES	+= command_tree.cc
+xorpsh_SOURCES	+= conf_tree.cc
+xorpsh_SOURCES	+= conf_tree_node.cc
+xorpsh_SOURCES	+= lex.boot.cc
+xorpsh_SOURCES	+= lex.opcmd.cc
+xorpsh_SOURCES	+= lex.tplt.cc
+xorpsh_SOURCES	+= module_command.cc
 xorpsh_SOURCES	+= op_commands.cc
 xorpsh_SOURCES	+= popen.cc
-#task.cc shouldn't really be needed
+xorpsh_SOURCES	+= slave_conf_tree.cc
+xorpsh_SOURCES	+= slave_conf_tree_node.cc
+# XXX: slave_module_manager shouldn't really be needed
+xorpsh_SOURCES	+= slave_module_manager.cc
+# XXX: task.cc shouldn't really be needed
 xorpsh_SOURCES  += task.cc
-#unexpanded_xrl shouldn't really be needed
+xorpsh_SOURCES	+= template_commands.cc
+xorpsh_SOURCES	+= template_tree.cc
+xorpsh_SOURCES	+= template_tree_node.cc
+# XXX: unexpanded_xrl shouldn't really be needed
 xorpsh_SOURCES	+= unexpanded_xrl.cc
 xorpsh_SOURCES	+= util.cc
-
+xorpsh_SOURCES	+= xorp_client.cc
+xorpsh_SOURCES	+= xorpsh_main.cc
 xorpsh_SOURCES	+= xrl_xorpsh_interface.cc
+xorpsh_SOURCES	+= xrldb.cc
+xorpsh_SOURCES	+= y.boot_tab.cc
+xorpsh_SOURCES	+= y.opcmd_tab.cc
+xorpsh_SOURCES	+= y.tplt_tab.cc
 
 xorpsh_LDADD	= $(top_builddir)/cli/libcli.a
 xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.a
@@ -101,69 +158,151 @@ xorpsh_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgrxif.a
 xorpsh_LDADD	+= $(top_builddir)/xrl/targets/libxorpshbase.a
 xorpsh_LDADD	+= $(LDADD)
 
-test_templates_SOURCES	 = test_templates.cc
-test_templates_SOURCES	+= y.tplt_tab.cc
+#
+# test_templates
+#
+test_templates_SOURCES	 = rtrmgr_module.h
+test_templates_SOURCES	+= y.tplt_tab.h
+
+test_templates_SOURCES	+= command_tree.hh
+test_templates_SOURCES	+= conf_tree.hh
+test_templates_SOURCES	+= conf_tree_node.hh
+test_templates_SOURCES	+= main_rtrmgr.hh
+test_templates_SOURCES	+= module_commands.hh
+test_templates_SOURCES	+= module_manager.hh
+test_templates_SOURCES	+= parse_error.hh
+test_templates_SOURCES	+= path_segment.hh
+test_templates_SOURCES	+= task.hh
+test_templates_SOURCES	+= template_commands.hh
+test_templates_SOURCES	+= template_tree.hh
+test_templates_SOURCES	+= template_tree_node.hh
+test_templates_SOURCES	+= unexpanded_xrl.hh
+test_templates_SOURCES	+= userdb.hh
+test_templates_SOURCES	+= util.hh
+test_templates_SOURCES	+= xorp_client.hh
+test_templates_SOURCES	+= xrl_rtrmgr_interface.hh
+test_templates_SOURCES	+= xrldb.hh
+
+test_templates_SOURCES	+= command_tree.cc
+test_templates_SOURCES	+= conf_tree_node.cc
 test_templates_SOURCES	+= lex.tplt.cc
+test_templates_SOURCES	+= module_command.cc
+test_templates_SOURCES	+= module_manager.cc
+test_templates_SOURCES	+= task.cc
+test_templates_SOURCES	+= template_commands.cc
 test_templates_SOURCES	+= template_tree.cc
 test_templates_SOURCES	+= template_tree_node.cc
-test_templates_SOURCES	+= template_commands.cc
-test_templates_SOURCES	+= module_command.cc
-test_templates_SOURCES	+= xrldb.cc
+test_templates_SOURCES	+= test_templates.cc
 test_templates_SOURCES	+= unexpanded_xrl.cc
-test_templates_SOURCES	+= conf_tree_node.cc
-test_templates_SOURCES	+= command_tree.cc
-test_templates_SOURCES	+= xorp_client.cc
-test_templates_SOURCES	+= module_manager.cc
 test_templates_SOURCES	+= util.cc
-test_templates_SOURCES	+= task.cc
+test_templates_SOURCES	+= xorp_client.cc
+test_templates_SOURCES	+= xrldb.cc
+test_templates_SOURCES	+= y.tplt_tab.cc
+
 test_templates_LDADD 	 = $(LDADD)
 
-test_sample_config_SOURCES	 = test_sample_config.cc
-test_sample_config_SOURCES	+= y.tplt_tab.cc
-test_sample_config_SOURCES	+= lex.tplt.cc
-test_sample_config_SOURCES	+= y.boot_tab.cc
+#
+# test_sample_config
+#
+test_sample_config_SOURCES	 = rtrmgr_module.h
+test_sample_config_SOURCES	+= y.boot_tab.h
+test_sample_config_SOURCES	+= y.tplt_tab.h
+
+test_sample_config_SOURCES	+= command_tree.hh
+test_sample_config_SOURCES	+= conf_tree.hh
+test_sample_config_SOURCES	+= conf_tree_node.hh
+test_sample_config_SOURCES	+= main_rtrmgr.hh
+test_sample_config_SOURCES	+= master_conf_tree.hh
+test_sample_config_SOURCES	+= master_conf_tree_node.hh
+test_sample_config_SOURCES	+= module_commands.hh
+test_sample_config_SOURCES	+= module_manager.hh
+test_sample_config_SOURCES	+= parse_error.hh
+test_sample_config_SOURCES	+= path_segment.hh
+test_sample_config_SOURCES	+= task.hh
+test_sample_config_SOURCES	+= template_commands.hh
+test_sample_config_SOURCES	+= template_tree.hh
+test_sample_config_SOURCES	+= template_tree_node.hh
+test_sample_config_SOURCES	+= unexpanded_xrl.hh
+test_sample_config_SOURCES	+= util.hh
+test_sample_config_SOURCES	+= xorp_client.hh
+test_sample_config_SOURCES	+= xrldb.hh
+
+test_sample_config_SOURCES	+= command_tree.cc
+test_sample_config_SOURCES	+= conf_tree.cc
+test_sample_config_SOURCES	+= conf_tree_node.cc
 test_sample_config_SOURCES	+= lex.boot.cc
+test_sample_config_SOURCES	+= lex.tplt.cc
+test_sample_config_SOURCES	+= master_conf_tree.cc
+test_sample_config_SOURCES	+= master_conf_tree_node.cc
+test_sample_config_SOURCES	+= module_command.cc
+test_sample_config_SOURCES	+= module_manager.cc
+test_sample_config_SOURCES	+= task.cc
+test_sample_config_SOURCES	+= template_commands.cc
 test_sample_config_SOURCES	+= template_tree.cc
 test_sample_config_SOURCES	+= template_tree_node.cc
-test_sample_config_SOURCES	+= template_commands.cc
-test_sample_config_SOURCES	+= module_command.cc
-test_sample_config_SOURCES	+= xrldb.cc
+test_sample_config_SOURCES	+= test_sample_config.cc
 test_sample_config_SOURCES	+= unexpanded_xrl.cc
-test_sample_config_SOURCES	+= conf_tree_node.cc
-test_sample_config_SOURCES	+= conf_tree.cc
-test_sample_config_SOURCES	+= master_conf_tree_node.cc
-test_sample_config_SOURCES	+= master_conf_tree.cc
-test_sample_config_SOURCES	+= command_tree.cc
-test_sample_config_SOURCES	+= xorp_client.cc
-test_sample_config_SOURCES	+= module_manager.cc
 test_sample_config_SOURCES	+= util.cc
-test_sample_config_SOURCES	+= task.cc
+test_sample_config_SOURCES	+= xorp_client.cc
+test_sample_config_SOURCES	+= xrldb.cc
+test_sample_config_SOURCES	+= y.boot_tab.cc
+test_sample_config_SOURCES	+= y.tplt_tab.cc
+
 test_sample_config_LDADD 	 = $(LDADD)
 
-test_module_manager_SOURCES	 = test_module_manager.cc
-test_module_manager_SOURCES	+= y.tplt_tab.cc
+#
+# test_module_manager
+#
+test_module_manager_SOURCES	 = rtrmgr_module.h
+test_module_manager_SOURCES	+= y.tplt_tab.h
+
+test_module_manager_SOURCES	+= command_tree.hh
+test_module_manager_SOURCES	+= conf_tree.hh
+test_module_manager_SOURCES	+= conf_tree_node.hh
+test_module_manager_SOURCES	+= module_commands.hh
+test_module_manager_SOURCES	+= module_manager.hh
+test_module_manager_SOURCES	+= parse_error.hh
+test_module_manager_SOURCES	+= path_segment.hh
+test_module_manager_SOURCES	+= task.hh
+test_module_manager_SOURCES	+= template_commands.hh
+test_module_manager_SOURCES	+= template_tree.hh
+test_module_manager_SOURCES	+= template_tree_node.hh
+test_module_manager_SOURCES	+= unexpanded_xrl.hh
+test_module_manager_SOURCES	+= util.hh
+test_module_manager_SOURCES	+= xorp_client.hh
+test_module_manager_SOURCES	+= xrldb.hh
+
+#test_module_manager_SOURCES	+= conf_tree.cc
+test_module_manager_SOURCES	+= conf_tree_node.cc
 test_module_manager_SOURCES	+= lex.tplt.cc
+test_module_manager_SOURCES	+= module_command.cc
+test_module_manager_SOURCES	+= module_manager.cc
+test_module_manager_SOURCES	+= task.cc
+test_module_manager_SOURCES	+= template_commands.cc
 test_module_manager_SOURCES	+= template_tree.cc
 test_module_manager_SOURCES	+= template_tree_node.cc
-test_module_manager_SOURCES	+= template_commands.cc
-test_module_manager_SOURCES	+= module_command.cc
-test_module_manager_SOURCES	+= xrldb.cc
+test_module_manager_SOURCES	+= test_module_manager.cc
 test_module_manager_SOURCES	+= unexpanded_xrl.cc
-test_module_manager_SOURCES	+= conf_tree_node.cc
-#test_module_manager_SOURCES	+= conf_tree.cc
-test_module_manager_SOURCES	+= xorp_client.cc
-test_module_manager_SOURCES	+= module_manager.cc
 test_module_manager_SOURCES	+= util.cc
-test_module_manager_SOURCES	+= task.cc
+test_module_manager_SOURCES	+= xorp_client.cc
+test_module_manager_SOURCES	+= xrldb.cc
+test_module_manager_SOURCES	+= y.tplt_tab.cc
+
 test_module_manager_LDADD 	 = $(LDADD)
 
 # -- Library Sources
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST	  = Notes
-EXTRA_DIST	 += config.boot
-EXTRA_DIST	 += config.template
-EXTRA_DIST	 += fea.boot
+EXTRA_DIST	 = Notes
+EXTRA_DIST	+= boot.ll
+EXTRA_DIST	+= boot.yy
+EXTRA_DIST	+= config.boot
+EXTRA_DIST	+= config.boot.sample
+EXTRA_DIST	+= config.boot.xorp0
+EXTRA_DIST	+= op_commands.ll
+EXTRA_DIST	+= op_commands.yy
+EXTRA_DIST	+= template.ll
+EXTRA_DIST	+= templatey.yy
 
 
 ################################################################
