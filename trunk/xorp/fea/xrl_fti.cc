@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.9 2004/06/10 22:40:57 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.10 2004/08/03 03:51:48 pavlin Exp $"
 
 #include "xrl_fti.hh"
 
@@ -291,6 +291,44 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
 	return XORP_ERROR;
 }
 
+int
+XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_name,
+						       const Fte4& fte)
+{
+    bool success;
+
+    success = _xrl_fea_fib_client.send_resolve_route4(
+	target_name.c_str(),
+	fte.net(),
+	callback(this,
+		 &XrlFtiTransactionManager::send_fib_client_resolve_route4_cb,
+		 target_name));
+
+    if (success)
+	return XORP_OK;
+    else
+	return XORP_ERROR;
+}
+
+int
+XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_name,
+						       const Fte6& fte)
+{
+    bool success;
+
+    success = _xrl_fea_fib_client.send_resolve_route6(
+	target_name.c_str(),
+	fte.net(),
+	callback(this,
+		 &XrlFtiTransactionManager::send_fib_client_resolve_route6_cb,
+		 target_name));
+
+    if (success)
+	return XORP_OK;
+    else
+	return XORP_ERROR;
+}
+
 void
 XrlFtiTransactionManager::send_fib_client_add_route4_cb(
     const XrlError& xrl_error,
@@ -359,6 +397,40 @@ XrlFtiTransactionManager::send_fib_client_delete_route6_cb(
     fib_client.send_fib_client_route_change_cb(xrl_error);
 }
 
+void
+XrlFtiTransactionManager::send_fib_client_resolve_route4_cb(
+    const XrlError& xrl_error,
+    string target_name)
+{
+    map<string, FibClient4>::iterator iter;
+
+    iter = _fib_clients4.find(target_name);
+    if (iter == _fib_clients4.end()) {
+	// The client has probably gone. Silently ignore.
+	return;
+    }
+
+    FibClient4& fib_client = iter->second;
+    fib_client.send_fib_client_route_change_cb(xrl_error);
+}
+
+void
+XrlFtiTransactionManager::send_fib_client_resolve_route6_cb(
+    const XrlError& xrl_error,
+    string target_name)
+{
+    map<string, FibClient6>::iterator iter;
+
+    iter = _fib_clients6.find(target_name);
+    if (iter == _fib_clients6.end()) {
+	// The client has probably gone. Silently ignore.
+	return;
+    }
+
+    FibClient6& fib_client = iter->second;
+    fib_client.send_fib_client_route_change_cb(xrl_error);
+}
+
 template<class F>
 void
 XrlFtiTransactionManager::FibClient<F>::activate(const list<F>& fte_list)
@@ -394,11 +466,14 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
     //
     // Send the appropriate XRLs
     //
-    if (! fte.is_deleted()) {
-	// Add a route
+    if (fte.is_unresolved()) {
+	// Send notification of a route miss or resolve request
+	success = _xftm.send_fib_client_resolve_route(_target_name, fte);
+    } if (! fte.is_deleted()) {
+	// Send notification of a route being added
 	success = _xftm.send_fib_client_add_route(_target_name, fte);
     } else {
-	// Delete a route
+	// Send notification of a route being deleted
 	success = _xftm.send_fib_client_delete_route(_target_name, fte);
     }
 

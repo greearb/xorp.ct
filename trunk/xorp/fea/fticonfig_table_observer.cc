@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer.cc,v 1.6 2004/08/17 02:20:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer.cc,v 1.7 2004/10/21 00:10:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -126,6 +126,8 @@ FtiConfigTableObserver::propagate_fib_changes(const list<FteX>& fte_list)
 			     ftex.xorp_route());
 	    if (ftex.is_deleted())
 		fte4.mark_deleted();
+	    if (ftex.is_unresolved())
+		fte4.mark_unresolved();
 	    fte_list4.push_back(fte4);
 	}
 
@@ -140,6 +142,8 @@ FtiConfigTableObserver::propagate_fib_changes(const list<FteX>& fte_list)
 			     ftex.xorp_route());
 	    if (ftex.is_deleted())
 		fte6.mark_deleted();
+	    if (ftex.is_unresolved())
+		fte6.mark_unresolved();
 	    fte_list6.push_back(fte6);
 	}
     }

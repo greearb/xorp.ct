@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.13 2004/10/21 00:10:25 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.14 2004/10/26 23:58:29 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -91,12 +91,12 @@ public:
      * @param fte_list the list with the Fte entries to store the result.
      * @param buf the buffer with the data to parse.
      * @param buf_bytes the size of the data in the buffer.
-     * @param is_rtm_get_only if true, consider only the RTM_GET entries.
+     * @param filter the set of messages that caller is interested in.
      * @return true on success, otherwise false.
      * @see FteX.
      */
     bool parse_buffer_rtm(int family, list<FteX>& fte_list, const uint8_t *buf,
-			  size_t buf_bytes, bool is_rtm_get_only);
+			  size_t buf_bytes, FtiFibMsgSet filter);
 
     /**
      * Parse information about routing table information received from

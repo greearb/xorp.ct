@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.20 2004/09/09 18:58:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.21 2004/10/26 23:55:16 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -303,7 +303,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	return (false);
     }
     if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size(),
-			 true)
+			 FtiFibMsg::GETS)
 	!= true) {
 	return (false);
     }
@@ -445,11 +445,10 @@ FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
 	XLOG_ERROR("Error reading from routing socket: %s", errmsg.c_str());
 	return (false);
     }
+
     if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size(),
-			 true)
-	!= true) {
+			 FtiFibMsg::GETS) != true)
 	return (false);
-    }
 
     return (true);
 }

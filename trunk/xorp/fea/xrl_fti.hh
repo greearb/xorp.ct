@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.8 2004/06/10 22:40:57 hodson Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.9 2004/08/17 02:20:11 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -189,6 +189,28 @@ public:
     int send_fib_client_delete_route(const string& target_name,
 				     const Fte6& fte);
 
+    /**
+     * Send an XRL to a FIB client to inform it of an IPv4 route miss.
+     *
+     * @param target_name the target name of the FIB client.
+     * @param fte the Fte with the destination to resolve.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @see Fte4.
+     */
+    int send_fib_client_resolve_route(const string& target_name,
+				     const Fte4& fte);
+
+    /**
+     * Send an XRL to a FIB client to inform it of an IPv6 route miss.
+     *
+     * @param target_name the target name of the FIB client.
+     * @param fte the Fte with the destination to resolve.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @see Fte6.
+     */
+    int send_fib_client_resolve_route(const string& target_name,
+				     const Fte6& fte);
+
 protected:
     FtiTransactionManager  _ftm;
     uint32_t		   _max_ops;	// Maximum operations in a transaction
@@ -202,6 +224,10 @@ private:
     void send_fib_client_delete_route4_cb(const XrlError& xrl_error,
 					  string target_name);
     void send_fib_client_delete_route6_cb(const XrlError& xrl_error,
+					  string target_name);
+    void send_fib_client_resolve_route4_cb(const XrlError& xrl_error,
+					  string target_name);
+    void send_fib_client_resolve_route6_cb(const XrlError& xrl_error,
 					  string target_name);
 
     /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.23 2004/11/05 00:47:43 bms Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.24 2004/11/10 00:39:47 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -25,6 +25,9 @@
 #include "libxorp/trie.hh"
 
 #include "fte.hh"
+
+typedef unsigned long FtiFibMsgSet;
+
 #include "fticonfig_entry_get.hh"
 #include "fticonfig_entry_set.hh"
 #include "fticonfig_entry_observer.hh"
@@ -639,6 +642,14 @@ private:
     bool	_have_ipv6;
     bool	_is_dummy;
     bool	_is_running;
+};
+
+//
+// Flag values for FtiFibMsgSet, used to tell underlying FIB message
+// parsing routines which messages the caller is interested in.
+//
+namespace FtiFibMsg {
+	const unsigned long	UPDATES = 0x1, GETS = 0x2, RESOLVES = 0x4;
 };
 
 #endif	// __FEA_FTICONFIG_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.9 2004/10/25 16:14:38 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.10 2004/11/05 01:27:53 bms Exp $"
 
 
 #include "fea_module.h"
@@ -40,7 +40,7 @@
 #ifndef HAVE_ROUTING_SOCKETS
 bool
 FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
-				    size_t , bool )
+				    size_t , FtiFibMsgSet)
 {
     return false;
 }
@@ -50,13 +50,17 @@ FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
 bool
 FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 				    const uint8_t* buf, size_t buf_bytes,
-				    bool is_rtm_get_only)
+				    FtiFibMsgSet filter)
 {
-    const struct rt_msghdr* rtm = reinterpret_cast<const struct rt_msghdr *>(buf);
+    const struct rt_msghdr* rtm =
+	reinterpret_cast<const struct rt_msghdr *>(buf);
     const uint8_t* last = buf + buf_bytes;
-    
+
     for (const uint8_t* ptr = buf; ptr < last; ptr += rtm->rtm_msglen) {
-    	rtm = reinterpret_cast<const struct rt_msghdr *>(ptr);
+	bool filter_match = false;
+	bool mark_as_unresolved = false;
+
+	rtm = reinterpret_cast<const struct rt_msghdr *>(ptr);
 	if (RTM_VERSION != rtm->rtm_version) {
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,
@@ -64,25 +68,40 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 	    continue;
 	}
 
-	if (is_rtm_get_only) {
-	    //
-	    // Consider only the RTM_GET entries.
-	    //
-	    if (rtm->rtm_type != RTM_GET)
-		continue;
-	    if (! (rtm->rtm_flags & RTF_UP))
-		continue;
-	}
-
-	if ((rtm->rtm_type != RTM_ADD)
-	    && (rtm->rtm_type != RTM_DELETE)
-	    && (rtm->rtm_type != RTM_CHANGE)
-	    && (rtm->rtm_type != RTM_GET)) {
-	    continue;
-	}
-
+	// XXX: ignore entries with an error
 	if (rtm->rtm_errno != 0)
-	    continue;		// XXX: ignore entries with an error
+	    continue;
+
+	if (filter & FtiFibMsg::GETS) {
+	    if ((rtm->rtm_type == RTM_GET) && (rtm->rtm_flags & RTF_UP))
+		filter_match = true;
+	}
+
+	// Upcalls may not be supported in some BSD derived implementations.
+	if (filter & FtiFibMsg::RESOLVES) {
+#ifdef RTM_MISS
+	    if (rtm->rtm_type == RTM_MISS) {
+		filter_match = true;
+		mark_as_unresolved = true;
+	    }
+#endif
+#ifdef RTM_RESOLVE
+	    if (rtm->rtm_type == RTM_RESOLVE) {
+		filter_match = true;
+		mark_as_unresolved = true;
+	    }
+#endif
+	}
+
+	if (filter & FtiFibMsg::UPDATES) {
+	    if ((rtm->rtm_type == RTM_ADD) ||
+		(rtm->rtm_type == RTM_DELETE) ||
+		(rtm->rtm_type == RTM_CHANGE))
+		    filter_match = true;
+	}
+
+	if (!filter_match)
+	    continue;
 
 #ifdef RTF_LLINFO
 	if (rtm->rtm_flags & RTF_LLINFO)
@@ -104,12 +123,15 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 	if (rtm->rtm_flags & RTF_BROADCAST)
 	    continue;		// XXX: ignore broadcast entries
 #endif
-	
+
 	FteX fte(family);
-	if (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm) == true)
+	if (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm) == true) {
+	    if (mark_as_unresolved)
+		fte.mark_unresolved();
 	    fte_list.push_back(fte);
+	}
     }
-    
+
     return true;
 }
 

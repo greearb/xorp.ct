@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer_rtsock.cc,v 1.9 2004/08/17 02:20:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_rtsock.cc,v 1.10 2004/09/01 18:12:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -24,7 +24,6 @@
 
 #include "fticonfig_table_get.hh"
 #include "fticonfig_table_observer.hh"
-
 
 //
 // Observe whole-table information change about the unicast forwarding table.
@@ -83,6 +82,7 @@ FtiConfigTableObserverRtsock::stop()
 void
 FtiConfigTableObserverRtsock::receive_data(const uint8_t* data, size_t nbytes)
 {
+    using namespace FtiFibMsg;
     list<FteX> fte_list;
 
     if (_fib_table_observers.empty())
@@ -93,7 +93,8 @@ FtiConfigTableObserverRtsock::receive_data(const uint8_t* data, size_t nbytes)
     //
     if (ftic().have_ipv4()) {
 	ftic().ftic_table_get_primary().parse_buffer_rtm(AF_INET, fte_list,
-							 data, nbytes, false);
+				 data, nbytes,
+				 UPDATES | GETS | RESOLVES);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -106,7 +107,8 @@ FtiConfigTableObserverRtsock::receive_data(const uint8_t* data, size_t nbytes)
     //
     if (ftic().have_ipv6()) {
 	ftic().ftic_table_get_primary().parse_buffer_rtm(AF_INET6, fte_list,
-							 data, nbytes, false);
+				 data, nbytes,
+				 UPDATES | GETS | RESOLVES);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
