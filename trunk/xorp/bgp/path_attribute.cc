@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.39 2003/10/13 23:42:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.40 2003/10/17 03:36:50 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -550,12 +550,11 @@ MPReachNLRIAttribute<IPv6>::encode()
 }
 
 template <>
-MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
-    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI)
+MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(Safi safi)
+    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI),
+      _afi(AFI_IPV6),
+      _safi(safi)
 {
-    _afi = AFI_IPV6;
-    _safi = SAFI_UNICAST;
-
     encode();
 }
 
@@ -563,10 +562,9 @@ template <class A>
 PathAttribute *
 MPReachNLRIAttribute<A>::clone() const
 {
-    MPReachNLRIAttribute<A> *mp = new MPReachNLRIAttribute();
+    MPReachNLRIAttribute<A> *mp = new MPReachNLRIAttribute(_safi);
 
     mp->_afi = _afi;
-    mp->_safi = _safi;
     mp->_nexthop = _nexthop;
     for(const_iterator i = _nlri.begin(); i != _nlri.end(); i++)
 	mp->_nlri.push_back(*i);
@@ -589,17 +587,35 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     const uint8_t *data = payload(d);
     const uint8_t *end = payload(d) + length(d);
 
-    _afi = *data++;
-    _afi <<= 8;
-    _afi |= *data++;
+    uint16_t afi;
+    afi = *data++;
+    afi <<= 8;
+    afi |= *data++;
 
-    _safi = *data++;
-
-    if (_afi != AFI_IPV6 || _safi != SAFI_UNICAST)
+    /*
+    ** This is method is specialized for dealing with IPv6.
+    */
+    if (AFI_IPV6_VAL != afi)
 	xorp_throw(CorruptMessage,
-		   c_format("Expected AFI/SAFI to be %d/%d not %d/%d",
-			    AFI_IPV6, SAFI_UNICAST, _afi, _safi),
+		   c_format("Expected AFI to be %d not %d",
+			    AFI_IPV6, afi),
 		   UPDATEMSGERR, OPTATTR);
+    _afi = AFI_IPV6;
+
+    uint8_t safi = *data++;
+    switch(safi) {
+    case SAFI_UNICAST_VAL:
+	_safi = SAFI_UNICAST;
+	break;
+    case SAFI_MULTICAST_VAL:
+	_safi = SAFI_MULTICAST;
+	break;
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("Expected SAFI to %d or %d not %d",
+			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		   UPDATEMSGERR, OPTATTR);
+    }
 
     /*
     ** Next Hop
@@ -735,12 +751,11 @@ MPUNReachNLRIAttribute<IPv6>::encode()
 }
 
 template <>
-MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute()
-	: PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI)
+MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(Safi safi)
+    : PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI),
+      _afi(AFI_IPV6),
+      _safi(safi)
 {
-    _afi = AFI_IPV6;
-    _safi = SAFI_UNICAST;
-
     encode();
 }
 
@@ -748,10 +763,9 @@ template <class A>
 PathAttribute *
 MPUNReachNLRIAttribute<A>::clone() const
 {
-    MPUNReachNLRIAttribute<A> *mp = new MPUNReachNLRIAttribute();
+    MPUNReachNLRIAttribute<A> *mp = new MPUNReachNLRIAttribute(_safi);
 
     mp->_afi = _afi;
-    mp->_safi = _safi;
     for(const_iterator i = _withdrawn.begin(); i != _withdrawn.end(); i++)
 	mp->_withdrawn.push_back(*i);
 
@@ -773,17 +787,35 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
     const uint8_t *data = payload(d);
     const uint8_t *end = payload(d) + length(d);
 
-    _afi = *data++;
-    _afi <<= 8;
-    _afi |= *data++;
+    uint16_t afi;
+    afi = *data++;
+    afi <<= 8;
+    afi |= *data++;
 
-    _safi = *data++;
-
-    if (_afi != AFI_IPV6 || _safi != SAFI_UNICAST)
+    /*
+    ** This is method is specialized for dealing with IPv6.
+    */
+    if (AFI_IPV6_VAL != afi)
 	xorp_throw(CorruptMessage,
-		   c_format("Expected AFI/SAFI to be %d/%d not %d/%d",
-			    AFI_IPV6, SAFI_UNICAST, _afi, _safi),
+		   c_format("Expected AFI to be %d not %d",
+			    AFI_IPV6, afi),
 		   UPDATEMSGERR, OPTATTR);
+    _afi = AFI_IPV6;
+
+    uint8_t safi = *data++;
+    switch(safi) {
+    case SAFI_UNICAST_VAL:
+	_safi = SAFI_UNICAST;
+	break;
+    case SAFI_MULTICAST_VAL:
+	_safi = SAFI_MULTICAST;
+	break;
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("Expected SAFI to %d or %d not %d",
+			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		   UPDATEMSGERR, OPTATTR);
+    }
 
     /*
     ** NLRI

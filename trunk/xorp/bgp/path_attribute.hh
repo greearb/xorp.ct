@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.25 2003/09/05 01:02:25 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.26 2003/09/19 21:06:49 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -28,12 +28,14 @@
 #include <set>
 
 #include "libxorp/debug.h"
+#include "libxorp/xlog.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
 #include "exceptions.hh"	// for CorruptMessage exception
 
 #include "aspath.hh"
+#include "parameter.hh"
 
 /**
  * PathAttribute
@@ -415,9 +417,9 @@ public:
     typedef typename list<IPNet<A> >::const_iterator const_iterator;
 
     /**
-     * Specialise these constructors for each AFI/SAFI pairing.
+     * Specialise these constructors for each AFI.
      */
-    MPReachNLRIAttribute();
+    MPReachNLRIAttribute(Safi safi);
     MPReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
     PathAttribute *clone() const;
 
@@ -439,8 +441,8 @@ public:
 protected:
 private:
 
-    uint16_t _afi;		// Address Family Identifier.
-    uint8_t _safi;		// Subsequent Address Family Identifier.
+    Afi _afi;			// Address Family Identifier.
+    Safi _safi;			// Subsequent Address Family Identifier.
     
     A _nexthop;			// Next Hop.
 //     list<A> _snpa;		// Subnetwork point of attachment.
@@ -456,9 +458,9 @@ public:
     typedef typename list<IPNet<A> >::const_iterator const_iterator;
 
     /**
-     * Specialise these constructors for each AFI/SAFI pairing.
+     * Specialise these constructors for each AFI.
      */
-    MPUNReachNLRIAttribute();
+    MPUNReachNLRIAttribute(Safi safi);
     MPUNReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
     PathAttribute *clone() const;
 
@@ -472,8 +474,8 @@ public:
 protected:
 private:
 
-    uint16_t _afi;		// Address Family Identifier.
-    uint8_t _safi;		// Subsequent Address Family Identifier.
+    Afi _afi;			// Address Family Identifier.
+    Safi _safi;			// Subsequent Address Family Identifier.
     
     list<IPNet<A> > _withdrawn;	// Withdrawn routes.
 };

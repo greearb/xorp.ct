@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.48 2003/09/25 02:57:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.49 2003/10/13 23:42:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1482,8 +1482,8 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 				line.c_str()));
 
 	UpdatePacket *bgpupdate = new UpdatePacket();
-	MPReachNLRIAttribute<IPv6> mpipv6_nlri;
-	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw;
+	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
+	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw(SAFI_UNICAST);
 
 	for(size_t i = index + 1; i < size; i += 2) {
 	    debug_msg("name: %s value: <%s>\n",

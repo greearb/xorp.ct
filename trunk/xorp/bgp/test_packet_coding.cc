@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.6 2003/10/03 00:26:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.7 2003/10/13 23:42:26 atanu Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -42,7 +42,7 @@ test_multprotocol(TestInfo& /*info*/)
 bool
 test_multiprotocol_unreach(TestInfo& /*info*/)
 {
-    MPUNReachNLRIAttribute<IPv6> mpunreach;
+    MPUNReachNLRIAttribute<IPv6> mpunreach(SAFI_UNICAST);
 
     mpunreach.encode();
     assert(6 == mpunreach.wire_size());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.4 2003/09/26 23:58:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.5 2003/09/27 03:17:53 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -331,7 +331,7 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     bup->add_nlri(nlr_0);
     bup->add_nlri(nlr_1);
 
-    MPReachNLRIAttribute<IPv6> mpreach;
+    MPReachNLRIAttribute<IPv6> mpreach(SAFI_UNICAST);
     mpreach.set_nexthop("20:20:20:20:20:20:20:20");
     mpreach.add_nlri("2000::/3");
     mpreach.encode();
@@ -339,7 +339,7 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     bup->add_pathatt(mpreach);
     debug_msg("%s\n", bup->str().c_str());
 
-    MPUNReachNLRIAttribute<IPv6> mpunreach;
+    MPUNReachNLRIAttribute<IPv6> mpunreach(SAFI_UNICAST);
     mpunreach.add_withdrawn("2000::/3");
     mpunreach.encode();
     bup->add_pathatt(mpunreach);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.9 2003/09/11 11:56:18 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.10 2003/10/17 03:36:51 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -161,7 +161,7 @@ add_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
     }
 
     if(0 == mpreach) {
-	MPReachNLRIAttribute<IPv6> mp;
+	MPReachNLRIAttribute<IPv6> mp(SAFI_UNICAST);
 	p->add_pathatt(mp);
 	goto top;
     }
@@ -197,7 +197,7 @@ withdraw_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
     }
 
     if(0 == mpunreach) {
-	MPUNReachNLRIAttribute<IPv6> mp;
+	MPUNReachNLRIAttribute<IPv6> mp(SAFI_UNICAST);
 	p->add_pathatt(mp);
 	goto top;
     }
@@ -231,7 +231,7 @@ add_nexthop<IPv6>(UpdatePacket *p, IPv6 nexthop)
     }
 
     if(0 == mpreach) {
-	MPReachNLRIAttribute<IPv6> mp;
+	MPReachNLRIAttribute<IPv6> mp(SAFI_UNICAST);
 	p->add_pathatt(mp);
 	goto top;
     }
