@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/coord.hh,v 1.4 2003/05/29 22:18:29 mjh Exp $
+// $XORP: xorp/bgp/harness/coord.hh,v 1.5 2003/06/26 02:17:42 atanu Exp $
 
 #ifndef __BGP_HARNESS_COORD_HH__
 #define __BGP_HARNESS_COORD_HH__
@@ -26,10 +26,12 @@ public:
     void command(const string& command);
     void status(const string&	peer, string& status);
     bool pending();
-    void datain(const string&  peer, const bool& status, const uint32_t& secs,
-		 const uint32_t& micro, const vector<uint8_t>&  data);
-    void datain_error(const string&  peer, const string& reason);
-    void datain_closed(const string&  peer);
+    void datain(const string&  peer, const uint32_t& genid,
+		const bool& status, const uint32_t& secs,
+		const uint32_t& micro, const vector<uint8_t>&  data);
+    void datain_error(const string&  peer, const uint32_t& genid,
+		      const string& reason);
+    void datain_closed(const string&  peer, const uint32_t& genid);
     bool done();
 private:
     bool _done;
@@ -85,6 +87,7 @@ public:
     XrlCmdError datain_0_1_receive(
 	// Input values, 
 	const string&	peer, 
+	const uint32_t&	genid, 
 	const bool&	status, 
 	const uint32_t&	secs, 
 	const uint32_t&	micro, 
@@ -93,11 +96,13 @@ public:
     XrlCmdError datain_0_1_error(
 	// Input values, 
 	const string&	peer, 
+	const uint32_t&	genid, 
 	const string&	reason);
 
     XrlCmdError datain_0_1_closed(
 	// Input values, 
-        const string&	peer);
+    const string&	peer,
+    const uint32_t&	genid);
 private:
     Coord& _coord;
     int _incommand;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.6 2003/06/19 00:46:09 hodson Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.7 2003/06/20 18:55:57 hodson Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -28,6 +28,7 @@ public:
     ~TestPeer();
     bool done();
     void register_coordinator(const string& name);
+    void register_genid(const uint32_t& genid);
     bool packetisation(const string& protocol);
     bool connect(const string& host, const uint32_t& port, 
 		 string& error_string);
@@ -70,6 +71,8 @@ private:
     AsyncFileWriter *_async_writer;
     int _listen;
     string _coordinator;
+    uint32_t _genid;
+
     bool _bgp;	// Perform BGP packetisation
 
     struct Queued {
@@ -125,7 +128,8 @@ public:
      */
     XrlCmdError test_peer_0_1_register(
 	// Input values, 
-	const string&	coordinator);
+       const string&	coordinator,
+       const uint32_t&	genid);
 
     /**
      *  Packetisation style.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.6 2003/06/23 23:39:04 atanu Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.7 2003/06/26 02:17:42 atanu Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
@@ -54,10 +54,12 @@ public:
     /*
     ** Data from the test peers.
     */
-    void datain(const string&  peer, const bool& status, const TimeVal& tv,
+    void datain(const string&  peer,  const uint32_t& genid,
+		const bool& status, const TimeVal& tv,
 		const vector<uint8_t>&  data);
-    void datain_error(const string&  peer, const string& reason);
-    void datain_closed(const string&  peer);
+    void datain_error(const string&  peer,  const uint32_t& genid,
+		      const string& reason);
+    void datain_closed(const string&  peer,  const uint32_t& genid);
    
     /*
     ** All commands to peers sent through here.
@@ -74,6 +76,7 @@ public:
 private:
     EventLoop& _eventloop;
     XrlRouter& _xrlrouter;
+    uint32_t _genid;
 
     uint32_t _init_count;	// Number of initialisations with
 				// test_peers currently in progress.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.10 2003/06/23 23:39:04 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.11 2003/06/26 02:17:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -49,6 +49,7 @@ tokenize(const string& str,
 Command::Command(EventLoop& eventloop, XrlRouter& xrlrouter)
     : _eventloop(eventloop),
       _xrlrouter(xrlrouter),
+      _genid(0),
       _init_count(0)
     
 {
@@ -141,11 +142,12 @@ Command::pending()
 ** destined for.
 */
 void
-Command::datain(const string&  peer, const bool& status, const TimeVal& tv,
+Command::datain(const string&  peer,  const uint32_t& genid,
+		const bool& status, const TimeVal& tv,
 		const vector<uint8_t>&  data)
 {
-    debug_msg("peer: %s status: %d secs: %lu micro: %lu data length: %u\n",
-	      peer.c_str(), status,
+    debug_msg("peer: %s genid: %u status: %d secs: %lu micro: %lu data length: %u\n",
+	      peer.c_str(), genid, status,
 	      (unsigned long)tv.sec(), (unsigned long)tv.usec(),
 	      (uint32_t)data.size());
 
@@ -163,9 +165,11 @@ Command::datain(const string&  peer, const bool& status, const TimeVal& tv,
 }
 
 void 
-Command::datain_error(const string&  peer, const string& reason)
+Command::datain_error(const string&  peer, const uint32_t& genid,
+		      const string& reason)
 {
-    debug_msg("peer: %s reason: %s\n", peer.c_str(), reason.c_str());
+    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(), genid,
+	      reason.c_str());
     /*
     ** Are we in the peer table.
     */
@@ -180,9 +184,9 @@ Command::datain_error(const string&  peer, const string& reason)
 }
 
 void
-Command::datain_closed(const string&  peer)
+Command::datain_closed(const string&  peer, const uint32_t& genid)
 {
-    debug_msg("peer: %s \n", peer.c_str());
+    debug_msg("peer: %s genid: %u \n", peer.c_str(), genid);
     /*
     ** Are we in the peer table.
     */
@@ -372,6 +376,7 @@ Command::initialise_callback(const XrlError& error, string peername)
 		       _xrlrouter.finder_port(),
 		       _xrlrouter.name(),
 		       peername,
+		       _genid++,
 		       _target_hostname,
 		       _target_port);
     _peers.insert(NamePeerMap::value_type(peername, p));

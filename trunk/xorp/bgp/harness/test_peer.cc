@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.12 2003/06/19 00:46:09 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.13 2003/06/20 18:55:57 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -90,11 +90,13 @@ XrlTestPeerTarget::common_0_1_shutdown()
 
 
 XrlCmdError 
-XrlTestPeerTarget::test_peer_0_1_register(const string& coordinator)
+XrlTestPeerTarget::test_peer_0_1_register(const string& coordinator,
+					  const uint32_t& genid)
 {
     debug_msg("\n");
 
     _test_peer.register_coordinator(coordinator);
+    _test_peer.register_genid(genid);
 
     return XrlCmdError::OKAY();
 }
@@ -220,6 +222,14 @@ TestPeer::register_coordinator(const string& name)
     debug_msg("Test Peer: coordinator name = \"%s\"\n", name.c_str());
 
     _coordinator = name;
+}
+
+void
+TestPeer::register_genid(const uint32_t& genid)
+{
+    debug_msg("Test Peer: genid = %u\n", genid);
+
+    _genid = genid;
 }
 
 bool 
@@ -701,15 +711,15 @@ TestPeer::sendit()
 
     switch(q.len) {
     case 0:
-	datain.send_closed(_coordinator.c_str(), _server,
+	datain.send_closed(_coordinator.c_str(), _server, _genid,
 			   callback(this, &TestPeer::xrl_callback));
 	break;
     case -1:
-	datain.send_error(_coordinator.c_str(), _server, q.error,
+	datain.send_error(_coordinator.c_str(), _server, _genid, q.error,
 			  callback(this, &TestPeer::xrl_callback));
 	break;
     default:
-	datain.send_receive(_coordinator.c_str(), _server,
+	datain.send_receive(_coordinator.c_str(), _server, _genid,
 			    GOOD == q.st ? true : false,
 			    q.secs, q.micro,
 			    q.v,

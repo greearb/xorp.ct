@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.24 2003/06/23 19:32:31 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.25 2003/06/26 02:17:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,6 +40,18 @@
 Peer::~Peer()
 {
     debug_msg("XXX Deleting peer %p\n", this);
+//     printf("XXX Deleting peer %p\n", this);
+
+//     /*
+//     ** The corresponding test peer may have a tcp connection with a
+//     ** bgp process. Unconditionally attempt a disconnect.
+//     */
+//     XrlTestPeerV0p1Client test_peer(&_xrlrouter);
+//     test_peer.send_disconnect(_peername.c_str(),
+// 	callback(this, &Peer::xrl_callback, "disconnect"));
+
+//     for(int i = 0; i < 10; i++)
+// 	_eventloop.run();
 }
 
 Peer::Peer(EventLoop&    eventloop,
@@ -47,12 +59,14 @@ Peer::Peer(EventLoop&    eventloop,
 	   uint16_t	 finder_port,
 	   const string& coordinator_name,
 	   const string& peername,
+	   const uint32_t genid,
 	   const string& target_hostname,
 	   const string& target_port)
     : _eventloop(eventloop),
       _xrlrouter(eventloop, "bgp_harness_peer", finder_address, finder_port),
       _coordinator(coordinator_name),
       _peername(peername),
+      _genid(genid),
       _target_hostname(target_hostname),
       _target_port(target_port),
       _session(false),
@@ -108,7 +122,7 @@ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
     /* Connect the test peer to the target BGP */
     debug_msg("About to listen on: %s\n", _peername.c_str());
     XrlTestPeerV0p1Client test_peer(&_xrlrouter);
-    test_peer.send_register(_peername.c_str(), _coordinator,
+    test_peer.send_register(_peername.c_str(), _coordinator, _genid,
 			    callback(this, &Peer::xrl_callback, "register"));
     test_peer.send_packetisation(_peername.c_str(), "bgp",
 			   callback(this, &Peer::xrl_callback,
@@ -125,7 +139,7 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
     /* Connect the test peer to the target BGP */
     debug_msg("About to connect to: %s\n", _peername.c_str());
     XrlTestPeerV0p1Client test_peer(&_xrlrouter);
-    test_peer.send_register(_peername.c_str(), _coordinator,
+    test_peer.send_register(_peername.c_str(), _coordinator, _genid,
 			    callback(this, &Peer::xrl_callback, "register"));
     test_peer.send_packetisation(_peername.c_str(), "bgp",
 	callback(this, &Peer::xrl_callback, "packetisation"));

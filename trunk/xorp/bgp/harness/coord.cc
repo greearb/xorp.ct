@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.8 2003/05/29 22:18:29 mjh Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.9 2003/06/26 02:17:42 atanu Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -128,34 +128,37 @@ XrlCoordTarget::coord_0_1_pending(bool& pending)
 }
 
 XrlCmdError
-XrlCoordTarget::datain_0_1_receive(const string&  peer, const bool& status, 
-				   const uint32_t& secs,const uint32_t& micro,
+XrlCoordTarget::datain_0_1_receive(const string&  peer, const uint32_t& genid,
+				   const bool& status, const uint32_t& secs,
+				   const uint32_t& micro,
 				   const vector<uint8_t>&  data)
 {
-    debug_msg("peer: %s status: %d secs: %d micro: %d data length: %u\n",
-	      peer.c_str(), status, secs, micro, (uint32_t)data.size());
+    debug_msg("peer: %s genid: %u status: %d secs: %d micro: %d data length: %u\n",
+	      peer.c_str(), genid, status, secs, micro, (uint32_t)data.size());
 
-    _coord.datain(peer, status, secs, micro, data);
+    _coord.datain(peer, genid, status, secs, micro, data);
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlCoordTarget::datain_0_1_error(const string&  peer, const string& reason)
+XrlCoordTarget::datain_0_1_error(const string&  peer, const uint32_t& genid,
+				 const string& reason)
 {
-    debug_msg("peer: %s reason: %s\n", peer.c_str(), reason.c_str());
+    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(), genid, 
+	      reason.c_str());
 
-    _coord.datain_error(peer, reason);
+    _coord.datain_error(peer, genid, reason);
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlCoordTarget::datain_0_1_closed(const string&  peer)
+XrlCoordTarget::datain_0_1_closed(const string&  peer, const uint32_t& genid)
 {
     debug_msg("peer: %s\n", peer.c_str());
 
-    _coord.datain_closed(peer);
+    _coord.datain_closed(peer, genid);
 
     return XrlCmdError::OKAY();
 }
@@ -187,23 +190,25 @@ Coord::pending()
 }
 
 void
-Coord::datain(const string&  peer, const bool& status, const uint32_t& secs,
-	      const uint32_t& micro, const vector<uint8_t>&  data)
+Coord::datain(const string&  peer, const uint32_t& genid, const bool& status,
+	      const uint32_t& secs, const uint32_t& micro,
+	      const vector<uint8_t>&  data)
 {
     TimeVal tv(secs, micro);
-    _command.datain(peer, status, tv, data);
+    _command.datain(peer, genid, status, tv, data);
 }
 
 void
-Coord::datain_error(const string& peer, const string& reason)
+Coord::datain_error(const string& peer, const uint32_t& genid,
+		    const string& reason)
 {
-    _command.datain_error(peer, reason);
+    _command.datain_error(peer, genid, reason);
 }
 
 void
-Coord::datain_closed(const string& peer)
+Coord::datain_closed(const string& peer, const uint32_t& genid)
 {
-    _command.datain_closed(peer);
+    _command.datain_closed(peer, genid);
 }
 
 bool 

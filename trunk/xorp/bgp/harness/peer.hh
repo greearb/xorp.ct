@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.6 2003/06/20 18:55:57 hodson Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.7 2003/06/26 02:17:42 atanu Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -31,6 +31,7 @@ public:
 	 uint16_t      finder_port,
 	 const string& coordinator_name,
 	 const string& peer_name,
+	 const uint32_t genid,
 	 const string& target_hostname,
 	 const string& target_port);
 
@@ -104,6 +105,7 @@ private:
 
     string _coordinator;
     string _peername;
+    uint32_t _genid;
     string _target_hostname;
     string _target_port;
 

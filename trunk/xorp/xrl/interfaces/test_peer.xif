@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/test_peer.xif,v 1.2 2002/06/20 22:29:47 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/test_peer.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
 
 /*
  * Test Peer Interface. Simple endpoint to interact to with protocols under
@@ -10,8 +10,9 @@ interface test_peer/0.1 {
 	 * Register for receiving packets and events.
 	 *
 	 * @param Coordinator. Coordinator's name.
+	 * @param genid Generation id.
 	 */ 
-	register ? coordinator:txt
+	register ? coordinator:txt & genid:u32
 
 	/**
          * Packetisation style.
