@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/header.hh,v 1.4 2003/03/16 08:20:29 pavlin Exp $
+// $XORP: xorp/libxipc/header.hh,v 1.5 2004/06/10 22:41:07 hodson Exp $
 
 #ifndef __LIBXIPC_HEADER_HH__
 #define __LIBXIPC_HEADER_HH__
@@ -55,9 +55,9 @@ public:
     HeaderReader& get(const string& name, int32_t& val) throw (NotFound);
     HeaderReader& get(const string& name, uint32_t& val) throw (NotFound);
     HeaderReader& get(const string& name, double& val) throw (NotFound);
-    const size_t bytes_consumed() const { return _bytes_consumed; }
+    uint32_t bytes_consumed() const { return _bytes_consumed; }
 private:
-    size_t _bytes_consumed;
+    uint32_t _bytes_consumed;
     map<string, string> _map;
     typedef map<string, string>::iterator CMI;
 };

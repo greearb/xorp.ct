@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.35 2004/12/18 03:48:52 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.36 2005/03/03 07:32:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -81,24 +81,24 @@ struct Request {
 // Utility Functions
 
 static string
-render_dispatch_header(const XUID& id, size_t content_bytes)
+render_dispatch_header(const XUID& id, uint32_t content_bytes)
 {
     HeaderWriter h;
     h.add("Protocol", SUDP_PROTOCOL);
     h.add("XUID", id.str());
-    h.add("Content-Length", (uint32_t)content_bytes);
+    h.add("Content-Length", content_bytes);
     return h.str();
 }
 
 static bool
-parse_dispatch_header(string hdr, XUID& id, size_t& content_bytes)
+parse_dispatch_header(string hdr, XUID& id, uint32_t& content_bytes)
 {
     try {
 	HeaderReader h(hdr);
 	string protocol, sid;
 	h.get("Protocol", protocol);
 	h.get("XUID", sid);
-	h.get("Content-Length", (uint32_t&)content_bytes);
+	h.get("Content-Length", content_bytes);
 	id = XUID(sid);
 	return (protocol == SUDP_PROTOCOL);
     } catch (const HeaderReader::InvalidString&) {
@@ -146,13 +146,13 @@ status_to_xrlerror(const string& status)
 }
 
 static string
-render_response(const XrlError& e, const XUID& id, size_t content_bytes)
+render_response(const XrlError& e, const XUID& id, uint32_t content_bytes)
 {
     HeaderWriter h;
     h.add("Protocol", SUDP_PROTOCOL);
     h.add("XUID", id.str());
     h.add("Status", xrlerror_to_status(e));
-    h.add("Content-Length", (uint32_t)content_bytes);
+    h.add("Content-Length", content_bytes);
     return h.str();
 }
 
@@ -160,8 +160,8 @@ static bool
 parse_response(const char* buf,
 	       XrlError& e,
 	       XUID& xuid,
-	       size_t& header_bytes,
-	       size_t& content_bytes) {
+	       uint32_t& header_bytes,
+	       uint32_t& content_bytes) {
     try {
 	HeaderReader h(buf);
 
@@ -176,7 +176,7 @@ parse_response(const char* buf,
 	string xuid_str;
 	h.get("XUID", xuid_str);
 	xuid = XUID(xuid_str);
-	h.get("Content-Length", (uint32_t&)content_bytes);
+	h.get("Content-Length", content_bytes);
 	header_bytes = h.bytes_consumed();
 
 	return true;
@@ -289,7 +289,8 @@ XrlPFSUDPSender::send(const Xrl& 			x,
 
     // Prepare data
     string xrl = x.str();
-    string header = render_dispatch_header(request.xuid, xrl.size());
+    string header = render_dispatch_header(request.xuid,
+					   static_cast<uint32_t>(xrl.size()));
     string msg = header + xrl;
 
     ssize_t msg_bytes = msg.size();
@@ -381,12 +382,12 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 
     XrlError	err;
     XUID 	xuid;
-    size_t 	content_bytes, header_bytes;
+    uint32_t 	content_bytes, header_bytes;
 
     if (parse_response(buf, err, xuid, header_bytes, content_bytes) != true) {
 	debug_msg("response header parsing failed\n");
 	return;
-    } else if (content_bytes + header_bytes != (size_t)read_bytes) {
+    } else if (content_bytes + header_bytes != (uint32_t)read_bytes) {
 	debug_msg("header and data bytes != read_bytes (%u + %u != %d\n",
 		  XORP_UINT_CAST(header_bytes),
 		  XORP_UINT_CAST(content_bytes),
@@ -492,7 +493,7 @@ XrlPFSUDPListener::recv(int fd, SelectorMask m)
 
     debug_msg("XXX %s\n", rbuf);
 
-    size_t content_bytes;
+    uint32_t content_bytes;
     XrlArgs response;
     XrlError	e;
     XUID	xuid;
@@ -539,7 +540,8 @@ XrlPFSUDPListener::send_reply(sockaddr*			sa,
     if (reply_args != 0) {
 	reply = reply_args->str();
     }
-    const string header = render_response(e, xuid, reply.size());
+    const string header = render_response(e, xuid,
+					  static_cast<uint32_t>(reply.size()));
 
     struct iovec v[2];
     v[0].iov_base = const_cast<char*>(header.c_str());
