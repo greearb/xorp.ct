@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.25 2003/11/21 20:11:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.26 2003/12/02 09:38:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -207,6 +207,7 @@ StatusReadyValidation::handle_status_response(ProcessStatus status,
 	return;
     case PROC_FAILED:
     case PROC_SHUTDOWN:
+    case PROC_DONE:
 	_cb->dispatch(false);
 	return;
     case PROC_STARTUP:
@@ -214,7 +215,7 @@ StatusReadyValidation::handle_status_response(ProcessStatus status,
 	// Got a valid response saying we should wait.
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
-				 &XrlStatusValidation::validate,_cb));
+				 &XrlStatusValidation::validate, _cb));
 	return;
     case PROC_READY:
 	// The process is ready
@@ -247,13 +248,14 @@ StatusConfigMeValidation::handle_status_response(ProcessStatus status,
 	return;
     case PROC_FAILED:
     case PROC_SHUTDOWN:
+    case PROC_DONE:
 	_cb->dispatch(false);
 	return;
     case PROC_STARTUP:
 	// Got a valid response saying we should wait.
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
-				 &XrlStatusValidation::validate,_cb));
+				 &XrlStatusValidation::validate, _cb));
 	return;
     case PROC_NOT_READY:
     case PROC_READY:
@@ -292,11 +294,15 @@ StatusShutdownValidation::handle_status_response(ProcessStatus status,
 	// be able to respond to Xrls because it's in NULL state.
 	_cb->dispatch(false);
 	return;
+    case PROC_DONE:
+	// The process has completed operation
+	_cb->dispatch(true);
+	return;
     case PROC_SHUTDOWN:
 	// Got a valid response saying we should wait.
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
-				 &XrlStatusValidation::validate,_cb));
+				 &XrlStatusValidation::validate, _cb));
 	return;
     }
     XLOG_UNREACHABLE();
@@ -848,6 +854,8 @@ Task::step6_done(bool success)
     printf("step6_done (%s)\n", _module_name.c_str());
 
     if (success) {
+	_taskmgr.module_manager().module_shutdown_completed(_module_name,
+							    true);
 	step7_report();
     } else {
 	string msg = "Can't validate stop of process " + _module_name;
@@ -1112,12 +1120,18 @@ TaskManager::kill_process(const string& module_name)
 {
     // XXX We really should try to restart the failed process, but for
     // now we'll just kill it.
-    XorpCallback0<void>::RefPtr null_cb;
-    _module_manager.kill_module(module_name, null_cb);
+    _module_manager.kill_module(module_name,
+				callback(this, &TaskManager::null_callback));
 }
 
 EventLoop&
 TaskManager::eventloop() const
 {
     return _module_manager.eventloop();
+}
+
+void
+TaskManager::null_callback()
+{
+
 }

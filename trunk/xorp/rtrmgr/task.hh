@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.19 2003/11/21 20:11:33 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.20 2003/12/02 09:38:57 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -264,6 +264,7 @@ private:
     void task_done(bool success, string errmsg);
     void fail_tasklist_initialization(const string& errmsg);
     Task& find_task(const string& module_name);
+    void null_callback();
 
     ConfigTree&		_config_tree;
     ModuleManager&	_module_manager;
