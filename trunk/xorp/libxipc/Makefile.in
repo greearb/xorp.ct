@@ -101,7 +101,7 @@ test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header 
 
 test_extra_programs = test_xrl_parser test_finder_to
 
-test_scripts = test_xrl_parser.sh
+test_scripts = test_xrl_parser.sh test_finder_deaths.sh
 
 TESTS = $(test_programs) $(test_scripts)
 
