@@ -1,0 +1,68 @@
+/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+
+plumbing {
+    mfea6 {
+	targetname: text = "MFEA_6";
+	disable: bool = false;
+
+	traceoptions {
+	    flag {
+		all {
+		    enable: bool = false;
+		}
+	    }
+	}
+
+	interface @: text {
+	    vif @: text {
+		enable: bool = true;
+	    }
+	}
+    }
+}
+
+plumbing {
+    mfea6 {
+	%modinfo: provides		mfea6;
+	%modinfo: depends		fea;
+	%modinfo: path			"fea/xorp_fea";
+	%modinfo: default_targetname	"mfea";
+	%modinfo: statusmethod		xrl "$(mfea6.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdownmethod	xrl "$(mfea6.targetname)/common/0.1/shutdown";
+
+	%mandatory: targetname;
+
+	%activate: xrl "$(mfea6.targetname)/mfea/0.1/start_mfea";
+
+	targetname {
+	    %set:;
+	}
+
+	disable {
+	    %create:;
+	    %set: xrl "$(mfea6.targetname)/mfea/0.1/enable_mfea?enable:bool=`~$(@)`";
+	    %delete: xrl "$(mfea6.targetname)/mfea/0.1/enable_mfea?enable:bool=`~$(DEFAULT)`";
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    enable {
+			%set: xrl "$(mfea6.targetname)/mfea/0.1/log_trace_all?enable:bool=$(@)";
+		    }
+		}
+	    }
+	}
+
+	interface @ {
+	    vif @ {
+		%activate: xrl "$(mfea6.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
+
+		enable {
+		    %set: xrl "$(mfea6.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete: xrl "$(mfea6.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+	    }
+	}
+    }
+}

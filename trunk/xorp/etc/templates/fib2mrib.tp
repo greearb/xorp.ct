@@ -1,0 +1,33 @@
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.1 2004/02/14 00:14:59 pavlin Exp $ */
+
+protocols {
+    fib2mrib {
+	targetname: text = "fib2mrib";
+	disable: bool = true;
+    }
+}
+
+protocols {
+    fib2mrib {
+	%modinfo: provides		fib2mrib;
+	%modinfo: depends		rib;
+	%modinfo: path			"fib2mrib/xorp_fib2mrib";
+	%modinfo: default_targetname	"fib2mrib";
+	%modinfo: statusmethod		xrl "$(fib2mrib.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdownmethod	xrl "$(fib2mrib.targetname)/common/0.1/shutdown";
+
+	%mandatory: targetname;
+
+	%activate: xrl "$(fib2mrib.targetname)/fib2mrib/0.1/start_fib2mrib";
+
+	targetname {
+	    %set:;
+	}
+
+	disable {
+	    %create:;
+	    %set: xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=`~$(@)`";
+	    %delete: xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=`~$(DEFAULT)`";
+	}
+    }
+}

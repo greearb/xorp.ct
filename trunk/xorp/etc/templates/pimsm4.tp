@@ -1,0 +1,189 @@
+/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+
+protocols {
+    pimsm4 {
+	targetname: text = "PIMSM_4";
+	disable: bool = false;
+
+	interface @: text {
+	    vif @: text {
+		enable: bool = true;
+		alternative_subnet @: ipv4_prefix {
+		}
+	    }
+	}
+
+	static_rps {
+	    rp @: ipv4 {
+		group_prefix @: ipv4_prefix {
+		    rp_priority: uint = 192;
+		    hash_mask_len: uint = 30;
+		}
+	    }
+	}
+
+	bootstrap {
+	    disable: bool = false;
+	    cand_bsr {
+		scope_zone @: ipv4_prefix {
+		    is_scope_zone: bool = false;
+		    cand_bsr_by_vif_name: text;
+		    bsr_priority: uint = 1;
+		    hash_mask_len: uint = 30;
+		}
+	    }
+
+	    cand_rp {
+		group_prefix @: ipv4_prefix {
+		    is_scope_zone: bool = false;
+		    cand_rp_by_vif_name: text;
+		    rp_priority: uint = 192;
+		    rp_holdtime: uint = 150;
+		}
+	    }
+	}
+
+	switch_to_spt_threshold {
+	    enable: bool = false;
+	    interval_sec: uint = 0;
+	    bytes: uint = 0;
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    enable: bool = false;
+		}
+	    }
+	}
+    }
+}
+
+protocols {
+    pimsm4 {
+	%modinfo: provides		pimsm4;
+	%modinfo: depends		mfea4;
+	%modinfo: depends		igmp;
+	%modinfo: depends		rib;
+	%modinfo: path			"pim/xorp_pimsm4";
+	%modinfo: default_targetname	"pim";
+	%modinfo: statusmethod		xrl "$(pimsm4.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdownmethod	xrl "$(pimsm4.targetname)/common/0.1/shutdown";
+
+	%mandatory: targetname;
+
+	targetname {
+	    %set:;
+	}
+
+	disable {
+	    %create:;
+	    %set: xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=`~$(@)`";
+	    %delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=`~$(DEFAULT)`";
+	}
+
+	interface @ {
+	    vif @ {
+		%activate: xrl "$(pimsm4.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
+
+		enable {
+		    %set: xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+
+		alternative_subnet @ {
+		    %set: xrl "$(pimsm4.targetname)/pim/0.1/add_alternative_subnet4?vif_name:txt=$(vif.@)&subnet:ipv4net=$(alternative_subnet.@)";
+		    %delete: xrl "$(pimsm4.targetname)/pim/0.1/delete_alternative_subnet4?vif_name:txt=$(vif.@)&subnet:ipv4net=$(alternative_subnet.@)";
+		}
+	    }
+	}
+
+	static_rps {
+	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/config_static_rp_done";
+	    rp @ {
+		group_prefix @ {
+		    %activate: xrl "$(pimsm4.targetname)/pim/0.1/add_config_static_rp4?group_prefix:ipv4net=$(group_prefix.@)&rp_addr:ipv4=$(rp.@)&rp_priority:u32=$(@.rp_priority)&hash_mask_len:u32=$(@.hash_mask_len)";
+		    rp_priority {
+			%set:;
+		    }
+		    hash_mask_len {
+			%set:;
+		    }
+		}
+	    }
+	}
+
+	bootstrap {
+	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/start_bsr";
+
+	    disable {
+		%create: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(@)`";
+		%set: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(@)`";
+		%delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(DEFAULT)`";
+	    }
+
+	    cand_bsr {
+		scope_zone @ {
+		    %mandatory: cand_bsr_by_vif_name;
+		    %activate: xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr_by_vif_name4?scope_zone_id:ipv4net=$(scope_zone.@)&is_scope_zone:bool=$(@.is_scope_zone)&vif_name:txt=$(@.cand_bsr_by_vif_name)&bsr_priority:u32=$(@.bsr_priority)&hash_mask_len:u32=$(@.hash_mask_len)";
+		    is_scope_zone {
+			%set:;
+		    }
+		    cand_bsr_by_vif_name {
+			%set:;
+		    }
+		    bsr_priority {
+			%set:;
+		    }
+		    hash_mask_len {
+			%set:;
+		    }
+		}
+	    }
+
+	    cand_rp {
+		group_prefix @ {
+		    %mandatory: cand_rp_by_vif_name;
+		    %activate: xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp_by_vif_name4?group_prefix:ipv4net=$(group_prefix.@)&is_scope_zone:bool=$(@.is_scope_zone)&vif_name:txt=$(@.cand_rp_by_vif_name)&rp_priority:u32=$(@.rp_priority)&rp_holdtime:u32=$(@.rp_holdtime)";
+
+		    is_scope_zone {
+			%set:;
+		    }
+		    cand_rp_by_vif_name {
+			%set:;
+		    }
+		    rp_priority {
+			%set:;
+		    }
+		    rp_holdtime {
+			%set:;
+		    }
+		}
+	    }
+	}
+
+	switch_to_spt_threshold {
+	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=$(@.enable)&interval_sec:u32=$(@.interval_sec)&bytes:u32=$(@.bytes)";
+	    %delete: xrl "$(pimsm4.targetname)/pim/0.1/reset_switch_to_spt_threshold";
+	    enable {
+		%set:;
+	    }
+	    interval_sec {
+		%set:;
+	    }
+	    bytes {
+		%set:;
+	    }
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    enable {
+			%set: xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=$(@)";
+		    }
+		}
+	    }
+	}
+    }
+}
