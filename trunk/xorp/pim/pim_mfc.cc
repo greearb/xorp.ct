@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.6 2003/02/05 05:22:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.7 2003/02/06 01:39:19 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -51,7 +51,8 @@ PimMfc::PimMfc(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
     : Mre<PimMfc>(source, group),
     _pim_mrt(pim_mrt),
     _rp_addr(IPvX::ZERO(family())),
-    _iif_vif_index(Vif::VIF_INDEX_INVALID)
+    _iif_vif_index(Vif::VIF_INDEX_INVALID),
+    _flags(0)
 {
     
 }
