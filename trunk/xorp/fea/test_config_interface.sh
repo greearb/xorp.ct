@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.12 2004/05/21 19:34:12 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.13 2004/06/10 13:35:05 pavlin Exp $
 #
 
 #
@@ -73,6 +73,18 @@ case ${HOSTNAME} in
     MAC="00:04:5A:49:5D:11"
     TEST_MAC="0:4:5a:49:5d:12"
     PIF_INDEX="5"
+    VIF_FLAG_BROADCAST="true"
+    VIF_FLAG_LOOPBACK="false"
+    VIF_FLAG_POINT_TO_POINT="false"
+    VIF_FLAG_MULTICAST="true"
+    ;;
+
+    uakari | uakari.cs.ucl.ac.uk)
+    HAVE_IPV6="false"
+    IFNAME="eth1"
+    PIF_INDEX="5"
+    MAC="00:A0:C9:1C:E7:D4"
+    TEST_MAC="0:a0:c9:1c:e7:d5"
     VIF_FLAG_BROADCAST="true"
     VIF_FLAG_LOOPBACK="false"
     VIF_FLAG_POINT_TO_POINT="false"
