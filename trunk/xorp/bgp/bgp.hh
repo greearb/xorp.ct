@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.37 2004/12/17 01:31:01 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.38 2004/12/17 09:49:13 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -625,7 +625,8 @@ BGPMain::extract_attributes(// Input values,
 	if (med < 0) {
 	    med = 0x7ffffff;
 	    XLOG_WARNING("MED truncated in MIB from %u to %u\n",
-			 med_att->med(), med);
+			 XORP_UINT_CAST(med_att->med()),
+			 XORP_UINT_CAST(med));
 	}
     } else {
 	med = -1;
@@ -638,7 +639,8 @@ BGPMain::extract_attributes(// Input values,
 	if (localpref < 0) {
 	    localpref = 0x7ffffff;
 	    XLOG_WARNING("LOCAL_PREF truncated in MIB from %u to %u\n",
-			 local_pref_att->localpref(), localpref);
+			 XORP_UINT_CAST(local_pref_att->localpref()),
+			 XORP_UINT_CAST(localpref));
 	}
     } else {
 	localpref = -1;

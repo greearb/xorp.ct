@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.34 2004/12/17 09:49:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.35 2004/12/30 23:04:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -97,7 +97,7 @@ XrlBgpTarget::bgp_0_2_local_config(
 				   const uint32_t&	as, 
 				   const IPv4&		id)
 {
-    debug_msg("as %d id %s\n", as, id.str().c_str());
+    debug_msg("as %u id %s\n", XORP_UINT_CAST(as), id.str().c_str());
 
     /*
     ** We may already be configured so don't allow a reconfiguration.
@@ -117,7 +117,7 @@ XrlBgpTarget::bgp_0_2_set_local_as(
 				   // Input values, 
 				   const uint32_t&	as)
 {
-    debug_msg("as %d\n", as);
+    debug_msg("as %u\n", XORP_UINT_CAST(as));
 
     /*
     ** We may already be configured so don't allow a reconfiguration.
@@ -191,10 +191,12 @@ XrlBgpTarget::bgp_0_2_add_peer(
 	const IPv4&	next_hop,
 	const uint32_t&	holdtime)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d as %d"
-	      " next_hop %s holdtime %d\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
-	      as, next_hop.str().c_str(), holdtime);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u as %u"
+	      " next_hop %s holdtime %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+	      XORP_UINT_CAST(as), next_hop.str().c_str(),
+	      XORP_UINT_CAST(holdtime));
 
     if(_awaiting_config)
 	return XrlCmdError::COMMAND_FAILED("BGP Not configured!!!");
@@ -230,8 +232,9 @@ XrlBgpTarget::bgp_0_2_delete_peer(
 	const string&	peer_ip, 
 	const uint32_t&	peer_port)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     XLOG_WARNING("Not currently implemented\n");
 
@@ -246,8 +249,9 @@ XrlBgpTarget::bgp_0_2_enable_peer(
 	const string&	peer_ip, 
 	const uint32_t&	peer_port)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -270,8 +274,9 @@ XrlBgpTarget::bgp_0_2_disable_peer(
 	const string&	peer_ip, 
 	const uint32_t&	peer_port)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -295,9 +300,10 @@ XrlBgpTarget::bgp_0_2_set_nexthop6(
 	const uint32_t&	peer_port,
 	const IPv6&	next_hop)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d "
+    debug_msg("local ip %s local port %u peer ip %s peer port %u "
 	      "next-hop %s\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      cstring(next_hop));
 
     try {
@@ -322,8 +328,9 @@ XrlBgpTarget::bgp_0_2_get_nexthop6(
 	const uint32_t&	peer_port,
 	IPv6&	next_hop)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -347,8 +354,9 @@ XrlBgpTarget::bgp_0_2_set_peer_state(
 	const uint32_t&	peer_port, 
 	const bool& toggle)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d toggle %d\n",
-	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port, toggle);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u toggle %d\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port), toggle);
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -372,9 +380,10 @@ XrlBgpTarget::bgp_0_2_set_peer_md5_password(
 	const uint32_t&	peer_port, 
 	const string& password)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d password %s\n",
-	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
-	  password.c_str());
+    debug_msg("local ip %s local port %u peer ip %s peer port %u password %s\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+	      password.c_str());
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -397,8 +406,9 @@ XrlBgpTarget::bgp_0_2_activate(
 	const string&	peer_ip, 
 	const uint32_t&	peer_port)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
-	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -422,9 +432,10 @@ XrlBgpTarget::bgp_0_2_next_hop_rewrite_filter(
 	const uint32_t&	peer_port,
 	const IPv4& 	next_hop)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d "
+    debug_msg("local ip %s local port %u peer ip %s peer port %u "
 	      "next hop %s\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      next_hop.str().c_str());
 
     try {
@@ -530,10 +541,11 @@ XrlBgpTarget::bgp_0_2_get_peer_list_next(
     more = _bgp.get_peer_list_next(token, local_ip, local_port, peer_ip, 
 				   peer_port);
 
-    debug_msg("local ip %s local port %d peer ip %s peer port %d "
+    debug_msg("local ip %s local port %u peer ip %s peer port %u "
 	      "token %#x %s\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
-	      token,
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+	      XORP_UINT_CAST(token),
 	      more ? "more" : "");
 
     return  XrlCmdError::OKAY();
@@ -549,8 +561,9 @@ XrlBgpTarget::bgp_0_2_get_peer_id(
 				  // Output values, 
 				  IPv4&	peer_id)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    debug_msg("local ip %s local port %u peer ip %s peer port %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -874,9 +887,9 @@ XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_changed4(
 {
     IPNet<IPv4> net(addr, prefix_len);
     debug_msg("IGP route into changed for net %s\n", net.str().c_str());
-    debug_msg("Nexthop: %s Metric: %d AdminDistance: %d ProtocolOrigin: %s\n",
-	      nexthop.str().c_str(), metric, admin_distance,
-	      protocol_origin.c_str());
+    debug_msg("Nexthop: %s Metric: %u AdminDistance: %u ProtocolOrigin: %s\n",
+	      nexthop.str().c_str(), XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance), protocol_origin.c_str());
     
     // TODO: admin_distance and protocol_origin are not used
     if(!_bgp.rib_client_route_info_changed4(addr, prefix_len, nexthop, metric))
@@ -896,9 +909,9 @@ XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_changed6(
 {
     IPNet<IPv6> net(addr, prefix_len);
     debug_msg("IGP route into changed for net %s\n", net.str().c_str());
-    debug_msg("Nexthop: %s Metric: %d AdminDistance: %d ProtocolOrigin: %s\n",
-	      nexthop.str().c_str(), metric, admin_distance,
-	      protocol_origin.c_str());
+    debug_msg("Nexthop: %s Metric: %u AdminDistance: %u ProtocolOrigin: %s\n",
+	      nexthop.str().c_str(), XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance), protocol_origin.c_str());
     
     // TODO: admin_distance and protocol_origin are not used
     if(!_bgp.rib_client_route_info_changed6(addr, prefix_len, nexthop, metric))
@@ -944,9 +957,10 @@ XrlCmdError XrlBgpTarget::bgp_0_2_set_parameter(
 				  const string& parameter,
 				  const bool&	toggle)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d"
+    debug_msg("local ip %s local port %u peer ip %s peer port %u"
 	      " parameter %s state %s\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      parameter.c_str(), toggle ? "set" : "unset");
 
     try {
