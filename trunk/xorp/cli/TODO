@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/cli/TODO,v 1.27 2002/12/09 07:16:49 pavlin Exp $
+# $XORP: xorp/cli/TODO,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 * If SPACE is pressed on empty line at the bottom of the terminal xterm
@@ -11,10 +11,6 @@
 
 * Implement CliCommand::create_default_cli_commands() and use
   it as appropriate.
-
-* Implement Ctrl-C to stop a command in progress and get rid of the 5
-  seconds timer: it is working for telnet, so make it working for xorpsh
-  as well.
 
 * Assign an unuqie session ID per each CLI client, and use that
   session ID to match XRL responses with a waiting client.
