@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/nexthop_port_mapper.cc,v 1.2 2004/10/23 00:14:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/nexthop_port_mapper.cc,v 1.3 2004/10/25 23:29:28 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -157,13 +157,15 @@ NexthopPortMapper::add_interface(const string& ifname, const string& vifname,
     iter = _interface_map.find(make_pair(ifname, vifname));
     if (iter != _interface_map.end()) {
 	// Update the port
-	iter->second = port;
+	if (iter->second != port) {
+	    iter->second = port;
+	    notify_observers();
+	}
     } else {
 	// Add a new entry
 	_interface_map.insert(make_pair(make_pair(ifname, vifname), port));
+	notify_observers();
     }
-
-    notify_observers();
 
     return (XORP_OK);
 }
@@ -182,7 +184,6 @@ NexthopPortMapper::delete_interface(const string& ifname,
 	return (XORP_ERROR);		// No such entry
 
     _interface_map.erase(iter);
-
     notify_observers();
 
     return (XORP_OK);
@@ -196,13 +197,15 @@ NexthopPortMapper::add_ipv4(const IPv4& ipv4, int port)
     iter = _ipv4_map.find(ipv4);
     if (iter != _ipv4_map.end()) {
 	// Update the port
-	iter->second = port;
+	if (iter->second != port) {
+	    iter->second = port;
+	    notify_observers();
+	}
     } else {
 	// Add a new entry
 	_ipv4_map.insert(make_pair(ipv4, port));
+	notify_observers();
     }
-
-    notify_observers();
 
     return (XORP_OK);
 }
@@ -217,7 +220,6 @@ NexthopPortMapper::delete_ipv4(const IPv4& ipv4)
 	return (XORP_ERROR);		// No such entry
 
     _ipv4_map.erase(iter);
-
     notify_observers();
 
     return (XORP_OK);
@@ -231,13 +233,15 @@ NexthopPortMapper::add_ipv6(const IPv6& ipv6, int port)
     iter = _ipv6_map.find(ipv6);
     if (iter != _ipv6_map.end()) {
 	// Update the port
-	iter->second = port;
+	if (iter->second != port) {
+	    iter->second = port;
+	    notify_observers();
+	}
     } else {
 	// Add a new entry
 	_ipv6_map.insert(make_pair(ipv6, port));
+	notify_observers();
     }
-
-    notify_observers();
 
     return (XORP_OK);
 }
@@ -252,7 +256,6 @@ NexthopPortMapper::delete_ipv6(const IPv6& ipv6)
 	return (XORP_ERROR);		// No such entry
 
     _ipv6_map.erase(iter);
-
     notify_observers();
 
     return (XORP_OK);
@@ -266,13 +269,15 @@ NexthopPortMapper::add_ipv4net(const IPv4Net& ipv4net, int port)
     iter = _ipv4net_map.find(ipv4net);
     if (iter != _ipv4net_map.end()) {
 	// Update the port
-	iter->second = port;
+	if (iter->second != port) {
+	    iter->second = port;
+	    notify_observers();
+	}
     } else {
 	// Add a new entry
 	_ipv4net_map.insert(make_pair(ipv4net, port));
+	notify_observers();
     }
-
-    notify_observers();
 
     return (XORP_OK);
 }
@@ -287,7 +292,6 @@ NexthopPortMapper::delete_ipv4net(const IPv4Net& ipv4net)
 	return (XORP_ERROR);		// No such entry
 
     _ipv4net_map.erase(iter);
-
     notify_observers();
 
     return (XORP_OK);
@@ -301,13 +305,15 @@ NexthopPortMapper::add_ipv6net(const IPv6Net& ipv6net, int port)
     iter = _ipv6net_map.find(ipv6net);
     if (iter != _ipv6net_map.end()) {
 	// Update the port
-	iter->second = port;
+	if (iter->second != port) {
+	    iter->second = port;
+	    notify_observers();
+	}
     } else {
 	// Add a new entry
 	_ipv6net_map.insert(make_pair(ipv6net, port));
+	notify_observers();
     }
-
-    notify_observers();
 
     return (XORP_OK);
 }
@@ -322,7 +328,6 @@ NexthopPortMapper::delete_ipv6net(const IPv6Net& ipv6net)
 	return (XORP_ERROR);		// No such entry
 
     _ipv6net_map.erase(iter);
-
     notify_observers();
 
     return (XORP_OK);
