@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/service.hh,v 1.1 2003/10/10 18:50:34 hodson Exp $
+// $XORP: xorp/libxorp/service.hh,v 1.2 2004/01/09 23:18:25 hodson Exp $
 
 #ifndef __LIBXORP_SERVICE_HH__
 #define __LIBXORP_SERVICE_HH__
@@ -67,7 +67,7 @@ class ServiceChangeObserverBase;
  */
 class ServiceBase {
 public:
-    ServiceBase(const string& name = "");
+    ServiceBase(const string& name = "Unknown");
 
     virtual ~ServiceBase() = 0;
 
