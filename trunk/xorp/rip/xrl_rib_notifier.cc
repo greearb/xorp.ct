@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.2 2004/01/13 20:38:33 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.3 2004/02/20 01:22:04 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -128,7 +128,7 @@ Send<IPv6>::replace_route = &XrlRibV0p1Client::send_replace_route6;
 template <>
 Send<IPv6>::DeleteRoute
 Send<IPv6>::delete_route = &XrlRibV0p1Client::send_delete_route6;
-#endif INSTANTIATE_IPV6
+#endif // INSTANTIATE_IPV6
 
 
 // ----------------------------------------------------------------------------
