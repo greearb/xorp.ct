@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.11 2004/02/24 23:57:36 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.12 2004/06/10 22:41:20 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -607,6 +607,9 @@ test_ipv6_address_const()
     verbose_assert(IPv6::ALL_ONES() ==
 		   IPv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "ALL_ONES()");
+
+    verbose_assert(IPv6::LOOPBACK() == IPv6("::1"),
+		   "LOOPBACK()");
 
     verbose_assert(IPv6::MULTICAST_BASE() == IPv6("ff00::"),
 		   "MULTICAST_BASE()");

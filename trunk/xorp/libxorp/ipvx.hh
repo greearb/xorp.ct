@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.15 2004/02/24 23:50:52 hodson Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.16 2004/06/10 22:41:16 hodson Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -614,6 +614,8 @@ public:
     static const IPvX& ANY(int family)
 	throw (InvalidFamily);
     static const IPvX& ALL_ONES(int family)
+	throw (InvalidFamily);
+    static const IPvX& LOOPBACK(int family)
 	throw (InvalidFamily);
     static const IPvX& MULTICAST_BASE(int family)
 	throw (InvalidFamily);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.19 2004/03/10 22:54:55 hodson Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.20 2004/06/10 22:41:16 hodson Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -479,6 +479,7 @@ public:
     inline static const IPv4& ZERO(int af = AF_INET);
     inline static const IPv4& ANY(int af = AF_INET);
     inline static const IPv4& ALL_ONES(int af = AF_INET);
+    inline static const IPv4& LOOPBACK(int af = AF_INET);
     inline static const IPv4& MULTICAST_BASE(int af = AF_INET);
     inline static const IPv4& MULTICAST_ALL_SYSTEMS(int af = AF_INET);
     inline static const IPv4& MULTICAST_ALL_ROUTERS(int af = AF_INET);
@@ -508,7 +509,7 @@ IPv4::bits(uint32_t lsb, uint32_t len) const
 }
 
 struct IPv4Constants {
-    static const IPv4 zero, any, all_ones, multicast_base,
+    static const IPv4 zero, any, all_ones, loopback, multicast_base,
 	multicast_all_systems, multicast_all_routers,
 	dvmrp_routers, rip2_routers, pim_routers,
 	ospfigp_routers, ospfigp_designated_routers;
@@ -524,6 +525,10 @@ inline const IPv4& IPv4::ANY(int) {
 
 inline const IPv4& IPv4::ALL_ONES(int) {
     return IPv4Constants::all_ones;
+}
+
+inline const IPv4& IPv4::LOOPBACK(int) {
+    return IPv4Constants::loopback;
 }
 
 inline const IPv4& IPv4::MULTICAST_BASE(int) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.18 2004/03/10 22:54:55 hodson Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.19 2004/06/10 22:41:16 hodson Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -469,6 +469,7 @@ public:
     inline static const IPv6& ZERO(int af = AF_INET6);
     inline static const IPv6& ANY(int af = AF_INET6);
     inline static const IPv6& ALL_ONES(int af = AF_INET6);
+    inline static const IPv6& LOOPBACK(int af = AF_INET6);
     inline static const IPv6& MULTICAST_BASE(int af = AF_INET6);
     inline static const IPv6& MULTICAST_ALL_SYSTEMS(int af = AF_INET6);
     inline static const IPv6& MULTICAST_ALL_ROUTERS(int af = AF_INET6);
@@ -499,7 +500,7 @@ IPv6::bits(uint32_t lsb, uint32_t len) const
 }
 
 struct IPv6Constants {
-    static const IPv6 zero, any, all_ones, multicast_base,
+    static const IPv6 zero, any, all_ones, loopback, multicast_base,
 	multicast_all_systems, multicast_all_routers,
 	dvmrp_routers, rip2_routers, pim_routers,
 	ospfigp_routers, ospfigp_designated_routers;
@@ -515,6 +516,10 @@ inline const IPv6& IPv6::ANY(int) {
 
 inline const IPv6& IPv6::ALL_ONES(int) {
     return IPv6Constants::all_ones;
+}
+
+inline const IPv6& IPv6::LOOPBACK(int) {
+    return IPv6Constants::loopback;
 }
 
 inline const IPv6& IPv6::MULTICAST_BASE(int) {

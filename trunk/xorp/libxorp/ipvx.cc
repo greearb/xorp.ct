@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.13 2004/02/24 23:50:52 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.14 2004/06/10 22:41:16 hodson Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -582,6 +582,7 @@ const IPvX& IPvX::name(int family) throw (InvalidFamily)		      \
 IPVX_CONSTANT_ACCESSOR(ZERO);
 IPVX_CONSTANT_ACCESSOR(ANY);
 IPVX_CONSTANT_ACCESSOR(ALL_ONES);
+IPVX_CONSTANT_ACCESSOR(LOOPBACK);
 IPVX_CONSTANT_ACCESSOR(MULTICAST_BASE);
 IPVX_CONSTANT_ACCESSOR(MULTICAST_ALL_SYSTEMS);
 IPVX_CONSTANT_ACCESSOR(MULTICAST_ALL_ROUTERS);

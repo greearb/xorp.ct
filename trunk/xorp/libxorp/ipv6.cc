@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.14 2004/06/10 22:41:16 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.15 2004/09/29 08:54:24 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -445,6 +445,7 @@ IPv6::ip_version_str()
 const IPv6 IPv6Constants::zero("::");
 const IPv6 IPv6Constants::any(IPv6Constants::zero);
 const IPv6 IPv6Constants::all_ones(~IPv6Constants::zero);
+const IPv6 IPv6Constants::loopback("::1");
 const IPv6 IPv6Constants::multicast_base("FF00::");
 const IPv6 IPv6Constants::multicast_all_systems("FF02::1");
 const IPv6 IPv6Constants::multicast_all_routers("FF02::2");

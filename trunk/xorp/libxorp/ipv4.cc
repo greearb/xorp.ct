@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.13 2004/02/24 23:50:52 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.14 2004/06/10 22:41:16 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -289,6 +289,7 @@ IPv4::ip_version_str()
 const IPv4 IPv4Constants::zero(IPv4(0x0U));
 const IPv4 IPv4Constants::any(IPv4Constants::zero);
 const IPv4 IPv4Constants::all_ones(IPv4(0xffffffffU));
+const IPv4 IPv4Constants::loopback(IPv4(htonl_literal(0x7f000001U)));
 const IPv4 IPv4Constants::multicast_base(IPv4(htonl_literal(0xe0000000U)));
 const IPv4 IPv4Constants::multicast_all_systems(IPv4(htonl_literal(0xe0000001U)));
 const IPv4 IPv4Constants::multicast_all_routers(IPv4(htonl_literal(0xe0000002U)));
