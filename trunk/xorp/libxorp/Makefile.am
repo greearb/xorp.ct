@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.20 2004/05/06 18:00:09 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.21 2004/05/17 02:07:54 atanu Exp $
 ##
 
 # -- Real Programs
@@ -10,6 +10,7 @@ bin_PROGRAMS	 =
 TESTS		 = test_asyncio
 TESTS		+= test_callback
 TESTS		+= test_config_param
+TESTS		+= test_heap
 TESTS		+= test_ipnet
 TESTS		+= test_ipv4
 TESTS		+= test_ipv4net
@@ -34,6 +35,7 @@ TESTS		+= test_vif
 noinst_PROGRAMS	 = test_asyncio
 noinst_PROGRAMS	+= test_callback
 noinst_PROGRAMS	+= test_config_param
+noinst_PROGRAMS	+= test_heap
 noinst_PROGRAMS	+= test_ipnet
 noinst_PROGRAMS	+= test_ipv4
 noinst_PROGRAMS	+= test_ipv4net
@@ -64,6 +66,7 @@ LDADD		 = $(noinst_LIBRARIES)
 test_asyncio_SOURCES	= test_asyncio.cc
 test_callback_SOURCES	= test_callback.cc
 test_config_param_SOURCES = test_config_param.cc
+test_heap_SOURCES	= test_heap.cc
 test_ipnet_SOURCES	= test_ipnet.cc
 test_ipv4_SOURCES	= test_ipv4.cc
 test_ipv4net_SOURCES	= test_ipv4net.cc

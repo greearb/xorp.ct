@@ -95,10 +95,10 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
+TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
 
 # -- No-install Programs
-noinst_PROGRAMS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
+noinst_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
 
 # -- No-install Libraries
 noinst_LIBRARIES = libxorp.a
@@ -110,6 +110,7 @@ LDADD = $(noinst_LIBRARIES)
 test_asyncio_SOURCES = test_asyncio.cc
 test_callback_SOURCES = test_callback.cc
 test_config_param_SOURCES = test_config_param.cc
+test_heap_SOURCES = test_heap.cc
 test_ipnet_SOURCES = test_ipnet.cc
 test_ipv4_SOURCES = test_ipv4.cc
 test_ipv4net_SOURCES = test_ipv4net.cc
@@ -160,14 +161,15 @@ am_libxorp_a_OBJECTS = debug.$(OBJEXT) utility.$(OBJEXT) xlog.$(OBJEXT) \
 libxorp_a_OBJECTS = $(am_libxorp_a_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
-	test_config_param$(EXEEXT) test_ipnet$(EXEEXT) \
-	test_ipv4$(EXEEXT) test_ipv4net$(EXEEXT) test_ipv6$(EXEEXT) \
-	test_ipv6net$(EXEEXT) test_ipvx$(EXEEXT) test_ipvxnet$(EXEEXT) \
-	test_mac$(EXEEXT) test_observers$(EXEEXT) test_ref_ptr$(EXEEXT) \
-	test_ref_trie$(EXEEXT) test_service$(EXEEXT) \
-	test_test_main$(EXEEXT) test_time_slice$(EXEEXT) \
-	test_timer$(EXEEXT) test_timeval$(EXEEXT) test_trie$(EXEEXT) \
-	test_types$(EXEEXT) test_vif$(EXEEXT)
+	test_config_param$(EXEEXT) test_heap$(EXEEXT) \
+	test_ipnet$(EXEEXT) test_ipv4$(EXEEXT) test_ipv4net$(EXEEXT) \
+	test_ipv6$(EXEEXT) test_ipv6net$(EXEEXT) test_ipvx$(EXEEXT) \
+	test_ipvxnet$(EXEEXT) test_mac$(EXEEXT) test_observers$(EXEEXT) \
+	test_ref_ptr$(EXEEXT) test_ref_trie$(EXEEXT) \
+	test_service$(EXEEXT) test_test_main$(EXEEXT) \
+	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
+	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
+	test_vif$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
@@ -185,6 +187,11 @@ test_config_param_OBJECTS = $(am_test_config_param_OBJECTS)
 test_config_param_LDADD = $(LDADD)
 test_config_param_DEPENDENCIES = libxorp.a
 test_config_param_LDFLAGS =
+am_test_heap_OBJECTS = test_heap.$(OBJEXT)
+test_heap_OBJECTS = $(am_test_heap_OBJECTS)
+test_heap_LDADD = $(LDADD)
+test_heap_DEPENDENCIES = libxorp.a
+test_heap_LDFLAGS =
 am_test_ipnet_OBJECTS = test_ipnet.$(OBJEXT)
 test_ipnet_OBJECTS = $(am_test_ipnet_OBJECTS)
 test_ipnet_LDADD = $(LDADD)
@@ -298,11 +305,11 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_asyncio.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_callback.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_config_param.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_ipnet.Po $(DEPDIR)/test_ipv4.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_ipv4net.Po $(DEPDIR)/test_ipv6.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_ipv6net.Po $(DEPDIR)/test_ipvx.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_ipvxnet.Po $(DEPDIR)/test_mac.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_observers.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_heap.Po $(DEPDIR)/test_ipnet.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_ipv4.Po $(DEPDIR)/test_ipv4net.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_ipv6.Po $(DEPDIR)/test_ipv6net.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_ipvx.Po $(DEPDIR)/test_ipvxnet.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_mac.Po $(DEPDIR)/test_observers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ref_ptr.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ref_trie.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_service.Po \
@@ -327,7 +334,7 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 CXXFLAGS = @CXXFLAGS@
 DIST_SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_callback_SOURCES) $(test_config_param_SOURCES) \
-	$(test_ipnet_SOURCES) $(test_ipv4_SOURCES) \
+	$(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) \
 	$(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) \
 	$(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) \
 	$(test_ipvxnet_SOURCES) $(test_mac_SOURCES) \
@@ -337,7 +344,7 @@ DIST_SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_timer_SOURCES) $(test_timeval_SOURCES) \
 	$(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -395,6 +402,9 @@ test_callback$(EXEEXT): $(test_callback_OBJECTS) $(test_callback_DEPENDENCIES)
 test_config_param$(EXEEXT): $(test_config_param_OBJECTS) $(test_config_param_DEPENDENCIES) 
 	@rm -f test_config_param$(EXEEXT)
 	$(CXXLINK) $(test_config_param_LDFLAGS) $(test_config_param_OBJECTS) $(test_config_param_LDADD) $(LIBS)
+test_heap$(EXEEXT): $(test_heap_OBJECTS) $(test_heap_DEPENDENCIES) 
+	@rm -f test_heap$(EXEEXT)
+	$(CXXLINK) $(test_heap_LDFLAGS) $(test_heap_OBJECTS) $(test_heap_LDADD) $(LIBS)
 test_ipnet$(EXEEXT): $(test_ipnet_OBJECTS) $(test_ipnet_DEPENDENCIES) 
 	@rm -f test_ipnet$(EXEEXT)
 	$(CXXLINK) $(test_ipnet_LDFLAGS) $(test_ipnet_OBJECTS) $(test_ipnet_LDADD) $(LIBS)
@@ -478,6 +488,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_asyncio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_callback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_config_param.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ipnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ipv4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ipv4net.Po@am__quote@
