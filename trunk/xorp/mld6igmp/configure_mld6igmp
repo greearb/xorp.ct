@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.6 2003/03/31 03:46:47 pavlin Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.7 2003/03/31 04:26:16 pavlin Exp $
 #
 
 #
@@ -50,7 +50,7 @@ case $HOSTNAME in
 	;;
 
 	possum.icir.org)
-	ENABLE_VIFS="fxp0"
+	ENABLE_VIFS="rl0"
 	;;
 
 	oreo.icir.org)
