@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.32 2004/06/07 22:59:13 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.33 2004/06/10 22:41:38 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -1186,6 +1186,8 @@ RIB<A>::target_death(const string& target_class,
 	 ++iter) {
 	if (iter->first.find(s) != string::npos) {
 	    // We've found the target.
+	    XLOG_INFO("Received death event for protocol %s shutting down %s",
+		      target_class.c_str(), iter->second->str().c_str());
 	    iter->second->routing_protocol_shutdown();
 	    _routing_protocol_instances.erase(iter);
 
