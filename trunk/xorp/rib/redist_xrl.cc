@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.14 2004/08/03 18:09:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.15 2004/10/01 22:47:35 atanu Exp $"
 
 #include <list>
 #include <string>
@@ -649,7 +649,7 @@ public:
 
 template <>
 bool
-AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
+AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
@@ -660,6 +660,14 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 	this->signal_complete_ok();
 	return true;	// XXX: we return true to avoid retransmission
     }
+
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		     c_format("add %s %s %s %u", 
+			      p->xrl_target_name().c_str(),
+			      _net.str().c_str(),
+			      _nexthop.str().c_str(),
+			      _metric));
 
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_add_route(p->xrl_target_name().c_str(),
@@ -674,7 +682,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 
 template <>
 bool
-AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
+AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
@@ -685,6 +693,14 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 	this->signal_complete_ok();
 	return true;	// XXX: we return true to avoid retransmission
     }
+
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		     c_format("add %s %s %s %u", 
+			      p->xrl_target_name().c_str(),
+			      _net.str().c_str(),
+			      _nexthop.str().c_str(),
+			      _metric));
 
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_add_route(p->xrl_target_name().c_str(),
@@ -703,7 +719,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 
 template <>
 bool
-DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
+DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
@@ -714,6 +730,12 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 	this->signal_complete_ok();
 	return true;	// XXX: we return true to avoid retransmission
     }
+
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		     c_format("delete %s %s", 
+			      p->xrl_target_name().c_str(),
+			      _net.str().c_str()));
 
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_delete_route(
@@ -728,7 +750,7 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 
 template <>
 bool
-DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
+DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
@@ -739,6 +761,12 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 	this->signal_complete_ok();
 	return true;	// XXX: we return true to avoid retransmission
     }
+
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		     c_format("delete %s %s", 
+			      p->xrl_target_name().c_str(),
+			      _net.str().c_str()));
 
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_delete_route(
@@ -965,6 +993,10 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 {
+    if (this->_profile.enabled(profile_route_rpc_in))
+	this->_profile.log(profile_route_rpc_in,
+			   c_format("add %s", ipr.net().str().c_str()));
+
     bool no_running_tasks = (this->task_count() == 0);
 
     if (this->transaction_size() == 0)
@@ -988,6 +1020,10 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 {
+    if (this->_profile.enabled(profile_route_rpc_in))
+	this->_profile.log(profile_route_rpc_in,
+			   c_format("delete %s", ipr.net().str().c_str()));
+
     bool no_running_tasks = (this->task_count() == 0);
 
     if (this->transaction_size() == 0)
