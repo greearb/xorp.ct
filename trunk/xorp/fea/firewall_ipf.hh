@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall_ipf.hh,v 1.1 2004/08/31 17:47:28 bms Exp $
 
 #ifndef __FEA_FIREWALL_IPF_HH__
 #define __FEA_FIREWALL_IPF_HH__
@@ -28,7 +28,7 @@
 class IpfFwProvider;
 
 template <typename N>
-class IpfwFwRule : public FwRule<N> {
+class IpfFwRule : public FwRule<N> {
 	friend class IpfFwProvider;
 #ifdef HAVE_FIREWALL_IPF
 protected:
@@ -36,9 +36,9 @@ protected:
 #endif
 };
 
-typedef IpfwFwRule<IPv4Net> IpfwFwRule4;
-typedef IpfwFwRule<IPv6Net> IpfwFwRule6;
-typedef IpfwFwRule<IPvXNet> IpfwFwRuleX;
+typedef IpfFwRule<IPv4Net> IpfFwRule4;
+typedef IpfFwRule<IPv6Net> IpfFwRule6;
+typedef IpfFwRule<IPvXNet> IpfFwRuleX;
 
 /****************************************************************************/
 
@@ -53,7 +53,9 @@ typedef IpfwFwRule<IPvXNet> IpfwFwRuleX;
  */
 class IpfFwProvider : public FwProvider {
 public:
-	IpfFwProvider(FirewallManager& m) throw(InvalidFwProvider);
+	IpfFwProvider(FirewallManager& m)
+	    throw(InvalidFwProvider);
+
 	virtual ~IpfFwProvider();
 
 	//---------------------------------
@@ -64,19 +66,19 @@ public:
 	int set_enabled(bool enabled);
 
 	inline const string& get_provider_name() const {
-		return ("iptables");
+		return (_providername);
 	}
 
 	inline const string& get_provider_version() const {
-		return ("0.1");
+		return (_providerversion);
 	}
 
 	//---------------------------------
 	// IPv4 firewall provider interface
 	//---------------------------------
 
-	int add_rule4(FwRule& rule);
-	int delete_rule4(FwRule& rule);
+	int add_rule4(FwRule4& rule);
+	int delete_rule4(FwRule4& rule);
 	uint32_t get_num_xorp_rules4() const;
 	uint32_t get_num_system_rules4() const;
 
@@ -84,12 +86,12 @@ public:
 	// IPv6 firewall provider interface
 	//---------------------------------
 
-	inline int add_rule6(FwRule& rule) {
+	inline int add_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		return (XORP_ERROR);
 	}
 
-	inline int delete_rule6(FwRule& rule) {
+	inline int delete_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		return (XORP_ERROR);
 	}
@@ -104,6 +106,8 @@ public:
 
 #ifdef HAVE_FIREWALL_IPF
 private:
+	string	_providername;
+	string	_providerversion;
 	string	_ipfname;	// Full pathname of platform IPF device node
 	int	_fd;		// Private file descriptor for IPF device
 #endif // HAVE_FIREWALL_IPF

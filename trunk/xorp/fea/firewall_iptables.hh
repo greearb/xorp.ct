@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall_iptables.hh,v 1.1 2004/08/31 17:47:28 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPTABLES_HH__
 #define	__FEA_FIREWALL_IPTABLES_HH__
@@ -31,8 +31,8 @@ class IptablesFwProvider;
 template <typename N>
 class IptablesFwRule : public FwRule<N> {
 	friend class IptablesFwProvider;
-#ifdef HAVE_FIREWALL_IPTABLES
 protected:
+#ifdef HAVE_FIREWALL_IPTABLES
 	iptc_entry_t	_entry;		// libiptc rule entry handle.
 #endif
 };
@@ -51,7 +51,9 @@ typedef IptablesFwRule<IPvXNet> IptablesFwRuleX;
  */
 class IptablesFwProvider : public FwProvider {
 public:
-	IptablesFwProvider(FirewallManager& m) throw(InvalidFwProvider);
+	IptablesFwProvider(FirewallManager& m)
+	    throw(InvalidFwProvider);
+
 	virtual ~IptablesFwProvider();
 
 	//---------------------------------
@@ -62,19 +64,20 @@ public:
 	int set_enabled(bool enabled);
 
 	inline const string& get_provider_name() const {
-		return ("iptables");
+		return (_providername);
 	}
 
 	inline const string& get_provider_version() const {
-		return ("0.1");
+		return (_providerversion);
 	}
 
 	//---------------------------------
 	// IPv4 firewall provider interface
 	//---------------------------------
 
-	int add_rule4(FwRule& rule);
-	int delete_rule4(FwRule& rule);
+	int add_rule4(FwRule4& rule);
+	int delete_rule4(FwRule4& rule);
+
 	uint32_t get_num_xorp_rules4() const;
 	uint32_t get_num_system_rules4() const;
 
@@ -82,12 +85,12 @@ public:
 	// IPv6 firewall provider interface
 	//---------------------------------
 
-	inline int add_rule6(FwRule& rule) {
+	inline int add_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		return (XORP_ERROR);
 	}
 
-	inline int delete_rule6(FwRule& rule) {
+	inline int delete_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		return (XORP_ERROR);
 	}
@@ -100,8 +103,10 @@ public:
 		return (0);
 	}
 
-#ifdef HAVE_FIREWALL_IPTABLES
 protected:
+	string		_providername;
+	string		_providerversion;
+#ifdef HAVE_FIREWALL_IPTABLES
 	string		_tablename;	// Name of the XORP-managed table.
 	iptc_handle_t	_handle;	// Handle to libiptc library.
 #endif

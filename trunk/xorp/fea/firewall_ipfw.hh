@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.1 2004/08/31 17:47:28 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -62,7 +62,8 @@ typedef IpfwFwRule<IPvXNet> IpfwFwRuleX;
  */
 class IpfwFwProvider : FwProvider {
 public:
-	IpfwFwProvider(FirewallManager& m) throw(InvalidFwProvider);
+	IpfwFwProvider(FirewallManager& m)
+	    throw(InvalidFwProvider);
 	virtual ~IpfwFwProvider();
 
 	//---------------------------------
@@ -73,19 +74,19 @@ public:
 	int set_enabled(bool enabled);
 
 	inline const string& get_provider_name() const {
-		return ("ipfw");
+		return (_providername);
 	}
 
 	inline const string& get_provider_version() const {
-		return ("0.1");
+		return (_providerversion);
 	}
 
 	//---------------------------------
 	// IPv4 firewall provider interface
 	//---------------------------------
 
-	int add_rule4(FwRule& rule);
-	int delete_rule4(FwRule& rule);
+	int add_rule4(FwRule4& rule);
+	int delete_rule4(FwRule4& rule);
 	uint32_t get_num_xorp_rules4() const;
 	uint32_t get_num_system_rules4() const;
 
@@ -93,12 +94,12 @@ public:
 	// IPv6 firewall provider interface
 	//---------------------------------
 
-	inline int add_rule6(FwRule& rule) {
+	inline int add_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		return (XORP_ERROR);
 	}
 
-	inline int delete_rule6(FwRule& rule) {
+	inline int delete_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		return (XORP_ERROR);
 	}
@@ -114,12 +115,11 @@ public:
 #ifdef HAVE_FIREWALL_IPFW
 	// Private but common to IPFW1 and IPFW2.
 protected:
-	FirewallManager&	_m;	// The firewall manager.
 	int	_s;	// Private raw socket for communicating with IPFW.
 
 	// Helper function to retrieve IPFW static rule count.
 	// This is a class method; it doesn't per-instance need state.
-	static int get_ipfw_static_rule_count() const;
+	static int get_ipfw_static_rule_count();
 
 	// Index of the first XORP-managed rule in the global ipfw list.
 	static const int IPFW_FIRST_XORP_IDX = 30000;
@@ -129,13 +129,15 @@ protected:
 
 	// Specific to IPFW1.
 private:
+	string	_providername;
+	string	_providerversion;
 	int	_ipfw_next_free_idx;	// Next free rule index in IPFW table.
 	int	_ipfw_xorp_start_idx;	// Beginning of XORP-managed range.
 	int	_ipfw_xorp_end_idx;	// End of XORP-managed range;
 
 	// Helper function to convert a XORP rule representation into an
 	// IPFW one, in preparation for adding it to IPFW's table.
-	int xorp_rule4_to_ipfw1(FwRule& rule, struct ip_fw& ipfwrule) const;
+	int xorp_rule4_to_ipfw1(FwRule4& rule, struct ip_fw& ipfwrule) const;
 
 	// Helper function to allocate a slot in the IPWF table.
 	int alloc_ipfw_rule(struct ip_fw& ipfwrule);
