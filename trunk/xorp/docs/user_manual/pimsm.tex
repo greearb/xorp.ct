@@ -390,44 +390,66 @@ protocols \{\\
 \vspace{0.1in}
 
 \begin{description}
-protocols \{\\
-\>pimsm4 \{\\
-\>\>targetname: {\it text}\\
-\>\>enabled: {\it bool}\\
-\>\>interface {\it text} \{\\
-\>\>\>vif {\it text} \{\\
-\>\>\>\>enabled: {\it bool}\\
-\>\>\>\>dr-priority: {\it uint}\\
-\>\>\>\>alternative-subnet {\it IPv4}/{\it int(1..32)}\\
-\>\>interface register\_vif \{\\
-\>\>\>vif register\_vif \{\\
-\>\>\>\>enabled: {\it bool}\\
-\>\>static-rps \{\\
-\>\>\>rp {\it IPv4} \{\\
-\>\>\>\>group-prefix {\it IPv4Mcast}/{\it int(4..32)} \{\\
-\>\>\>\>\>rp-priority: {\it uint}\\
-\>\>\>\>\>hash-mask-len: {\it uint}\\
-\>\>bootstrap \{\\
-\>\>\>enabled: {\it bool}\\
-\>\>\>cand-bsr \{\\
-\>\>\>\>scope-zone  {\it IPv4Mcast}/{\it int(4..32)} \{\\
-\>\>\>\>\>is-scope-zone: {\it bool}\\
-\>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
-\>\>\>\>\>bsr-priority: {\it uint}\\
-\>\>\>\>\>hash-mask-len: {\it uint}\\
-\>\>\>cand-rp \{\\
-\>\>\>\>group-prefix  {\it IPv4Mcast}/{\it int(4..32)} \{\\
-\>\>\>\>\>is-scope-zone: {\it bool}\\
-\>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
-\>\>\>\>\>rp-priority: {\it uint}\\
-\>\>\>\>\>rp-holdtime: {\it uint}\\
-\>\>switch-to-spt-threshold \{\\
-\>\>\>enabled: {\it bool}\\
-\>\>\>interval-sec: {\it uint}\\
-\>\>\>bytes: {\it uint}\\
-\>\>traceoptions \{\\
-\>\>\>flag all \{\\
-\>\>\>\>enabled: {\it bool}\\
+\item{\tt protocols}:
+\item{\tt pimsm4}:
+\item{\tt targetname}:
+\item{\tt enabled}:
+\item{\tt interface}:
+\item{\tt vif}:
+\begin{description}
+\item{\tt enabled}:
+\item{\tt dr-priority}:
+\item{\tt alternative-subnet}:
+\end{description}
+\item{\tt interface register\_vif}:
+\item{\tt vif register\_vif}:
+\item{\tt enabled}:
+\item{\tt static-rps}:
+\begin{description}
+\item{\tt rp}:
+\begin{description}
+\item{\tt group-prefix}:
+\begin{description}
+\item{\tt rp-priority}:
+\item{\tt hash-mask-len}:
+\end{description}
+\end{description}
+\end{description}
+\item{\tt bootstrap}:
+\begin{description}
+\item{\tt enabled}:
+\item{\tt cand-bsr}:
+\begin{description}
+\item{\tt scope-zone}:
+\item{\tt is-scope-zone}:
+\item{\tt cand-bsr-by-vif-name}:
+\item{\tt bsr-priority}:
+\item{\tt hash-mask-len}:
+\end{description}
+\end{description}
+\item{\tt cand-rp}:
+\begin{description}
+\item{\tt group-prefix}:
+\begin{description}
+\item{\tt is-scope-zone}:
+\item{\tt cand-rp-by-vif-name}:
+\item{\tt rp-priority}:
+\item{\tt rp-holdtime}:
+\end{description}
+\end{description}
+\item{\tt switch-to-spt-threshold}:
+\begin{description}
+\item{\tt enabled}:
+\item{\tt interval-sec}:
+\item{\tt bytes}:
+\end{description}
+\item{\tt traceoptions}:
+\begin{description}
+\item{\tt flag all}:
+\begin{description}
+\item{\tt enabled}:
+\end{description}
+\end{description}
 \end{description}
 \subsection{Example Configurations}
 
