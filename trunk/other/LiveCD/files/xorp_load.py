@@ -25,6 +25,9 @@ class FileEntry:
     self.md5 = md5
   def print_fields(self):
     return "source : " + self.source + " destination : " + self.destination + " permission : " + self.permission + " owner : " + self.owner + " group : " + self.group + " md5 : " + self.md5;
+  def str(self):
+    return self.source + " " + self.destination + " " + self.permission + " "\
+           + self.owner + " " + self.group + " " + self.md5
   
 # Load manifest
 def loadManifest(filename):
@@ -35,9 +38,19 @@ def loadManifest(filename):
 
   for j in lines:
     i = j.split();
-    x = FileEntry(i[0],i[1],i[2],i[3],i[4],i[5])
-    manifest.append(x);
+    if len(i) == 6:
+      x = FileEntry(i[0],i[1],i[2],i[3],i[4],i[5])
+      manifest.append(x);
+    else:
+      print "Ignoring bad manifest entry: " + j
   return manifest
+
+def saveManifest(filename, manifest):
+  manifest_file = open(filename, 'w')
+  for i in manifest:
+    s = i.str() + "\n"
+    manifest_file.write(s)
+    
 
 # Copy file in
 def copyFileIn(fe):
@@ -70,12 +83,27 @@ def copyAllFilesOut(manifest):
 # Save file from os to disk, only called by router manager
 
 def singleFileSaveToFloppy(filename):
-  manifest_file_location = "manifest.dat";
-  manifest_files = loadManifest(manifest_file_location)
-  for f in manifest_files:
+  manifest_file_dir = "/mnt/floppy";
+  manifest_file_location = manifest_file_dir + "/manifest.dat";
+  manifest = loadManifest(manifest_file_location)
+  ctr = 0
+  for f in manifest:
+    ctr+=1
     if filename == f.destination:
 	copyFileOut(f)
 	return
+  #the file isn't already listed in the manifest
+  #we need to add a manifest entry.
+  srcname = manifest_file_dir + ("/auto%d.cfg" % ctr)
+  fstats = os.stat(filename)
+  pwentry = pwd.getpwuid(fstats.st_uid)
+  grpentry = grp.getgrgid(fstats.st_gid)
+  permission = "%3o" % (fstats.st_mode % 01000)
+  fileentry = FileEntry(srcname,filename, permission,
+	                pwentry.pw_name, grpentry.gr_name, "0")
+  copyFileOut(fileentry)
+  manifest.append(fileentry)
+  saveManifest(manifest_file_location, manifest)
 	
 
 def helpMsg(arguments):
