@@ -1,9 +1,9 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.3 2004/05/18 07:11:07 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.4 2004/05/18 07:45:20 pavlin Exp $ */
 
 protocols {
     mld {
 	targetname: txt = "MLD";
-	disable: bool = false;
+	enabled: bool = true;
 
 	traceoptions {
 	    flag {
@@ -37,10 +37,10 @@ protocols {
 	    %set:;
 	}
 
-	disable {
+	enabled {
 	    %create:;
-	    %set: xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=`~$(@)`";
-	    %delete: xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=`~$(DEFAULT)`";
+	    %set: xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(@)";
+	    %delete: xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(DEFAULT)";
 	}
 
 	traceoptions {

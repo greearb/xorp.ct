@@ -1,9 +1,9 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.4 2004/05/18 01:06:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.5 2004/05/18 07:11:08 pavlin Exp $ */
 
 protocols {
     static {
 	targetname: txt = "static_routes";
-	disable: bool = false;
+	enabled: bool = true;
 
 	route4 @: ipv4net {
 	    nexthop:ipv4;
@@ -44,10 +44,10 @@ protocols {
 	    %set:;
 	}
 
-	disable {
+	enabled {
 	    %create:;
-	    %set: xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=`~$(@)`";
-	    %delete: xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=`~$(DEFAULT)`";
+	    %set: xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(@)";
+	    %delete: xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(DEFAULT)";
 	}
 
 	route4 @: ipv4net {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.27 2004/05/22 23:37:25 mjh Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.28 2004/05/22 23:46:15 mjh Exp $ */
 
 protocols {
     bgp {
@@ -13,7 +13,7 @@ protocols {
 	    as: u32;
 	    next-hop: ipv4;
 	    holdtime: u32 = 120;
-	    disable: bool = false;
+	    enabled: bool = true;
 	}
 
 	/*
@@ -96,8 +96,8 @@ protocols {
 		%set:;
 	    }
 
-	    disable {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
+	    enabled {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=$(@)";
 	    }
 
 	    set-parameter {
@@ -202,8 +202,8 @@ protocols {
 		%set:;
 	    }
 
-	    disable {
-		%help: short "Disable this peering";
+	    enabled {
+		%help: short "Enable this peering.";
 	    }
 
 	    set-parameter {

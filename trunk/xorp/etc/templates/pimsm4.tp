@@ -1,9 +1,9 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.4 2004/05/18 07:11:07 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.5 2004/05/18 07:45:20 pavlin Exp $ */
 
 protocols {
     pimsm4 {
 	targetname: txt = "PIMSM_4";
-	disable: bool = false;
+	enabled: bool = true;
 
 	interface @: txt {
 	    vif @: txt {
@@ -23,7 +23,7 @@ protocols {
 	}
 
 	bootstrap {
-	    disable: bool = false;
+	    enabled: bool = true;
 
 	    cand-bsr {
 		scope-zone @: ipv4net {
@@ -78,10 +78,10 @@ protocols {
 	    %set:;
 	}
 
-	disable {
+	enabled {
 	    %create:;
-	    %set: xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=`~$(@)`";
-	    %delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=`~$(DEFAULT)`";
+	    %set: xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=$(@)";
+	    %delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=$(DEFAULT)";
 	}
 
 	interface @ {
@@ -120,10 +120,10 @@ protocols {
 	bootstrap {
 	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/start_bsr";
 
-	    disable {
-		%create: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(@)`";
-		%set: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(@)`";
-		%delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(DEFAULT)`";
+	    enabled {
+		%create: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
+		%set: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
+		%delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(DEFAULT)";
 	    }
 
 	    cand-bsr {
