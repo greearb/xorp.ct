@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.25 2005/02/15 02:08:37 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.26 2005/02/24 02:47:40 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -442,7 +442,14 @@ public:
      * Delete all MFEA vifs.
      */
     void	delete_all_vifs();
-    
+
+    /**
+     * A method called when a vif has completed its shutdown.
+     * 
+     * @param vif_name the name of the vif that has completed its shutdown.
+     */
+    void	vif_shutdown_completed(const string& vif_name);
+
     /**
      * Start operation for a given protocol.
      * 

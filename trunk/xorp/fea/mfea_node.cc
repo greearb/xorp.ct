@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.46 2005/02/27 21:32:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.47 2005/03/05 01:41:27 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -257,11 +257,6 @@ MfeaNode::stop()
 
     if (ProtoNode<MfeaVif>::pending_stop() < 0)
 	return (XORP_ERROR);
-
-    //
-    // De-register with the FEA
-    //
-    fea_register_shutdown();
 
     //
     // Set the node status
@@ -1051,6 +1046,36 @@ MfeaNode::delete_all_vifs()
 	    XLOG_ERROR(err.c_str());
 	}
     }
+}
+
+/**
+ * A method called when a vif has completed its shutdown.
+ * 
+ * @param vif_name the name of the vif that has completed its shutdown.
+ */
+void
+MfeaNode::vif_shutdown_completed(const string& vif_name)
+{
+    vector<MfeaVif *>::iterator iter;
+
+    //
+    // If all vifs have completed the shutdown, then de-register with
+    // the MFEA.
+    //
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	MfeaVif *mfea_vif = *iter;
+	if (mfea_vif == NULL)
+	    continue;
+	if (! mfea_vif->is_down())
+	    return;
+    }
+
+    //
+    // De-register with the FEA
+    //
+    fea_register_shutdown();
+
+    UNUSED(vif_name);
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.9 2005/02/24 02:43:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.10 2005/03/05 01:41:27 pavlin Exp $"
 
 //
 // MFEA virtual interfaces implementation.
@@ -179,6 +179,11 @@ MfeaVif::stop(string& error_msg)
 
     XLOG_INFO("STOPPED %s%s",
 	      this->str().c_str(), flags_string().c_str());
+
+    //
+    // Inform the node that the vif has completed the shutdown
+    //
+    mfea_node().vif_shutdown_completed(name());
 
     return (ret_value);
 }
