@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.3 2004/12/11 02:20:33 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.4 2004/12/11 02:33:00 pavlin Exp $
 #
 
 #
@@ -20,6 +20,10 @@
 #
 
 BEGIN {
+    # Various constants
+    ipv4_addr_bitlen = 32;	# IPv4 address bitmask length
+    ipv6_addr_bitlen = 128;	# IPv6 address bitmask length
+
     iftree_interfaces_max = 0;
     iftree_vifs_max = 0;
     is_click_enabled = 0;
@@ -148,6 +152,7 @@ function generate_click_input_output_paths()
 	    }
 
 	    arp_responder = "ARPResponder(";
+	    mac = iftree_interfaces_mac[ii];
 	    is_begin = 1;
 	    for (ai4 = 0; ai4 < iftree_interfaces_vifs_addresses4_max[ii,vi]; ai4++) {
 		addr4 = iftree_interfaces_vifs_addresses4_addr[ii,vi,ai4];
@@ -157,7 +162,6 @@ function generate_click_input_output_paths()
 		    arp_responder = arp_responder " " addr4;
 		is_begin = 0;
 	    }
-	    mac = iftree_interfaces_mac[ii];
 	    arp_responder = arp_responder " " mac ")";
 
 	    first_addr4 = "0.0.0.0";
@@ -250,14 +254,10 @@ function generate_click_forwarding_paths()
 	    is_begin = 1;
 	    for (ai4 = 0; ai4 < iftree_interfaces_vifs_addresses4_max[ii,vi]; ai4++) {
 		addr4 = iftree_interfaces_vifs_addresses4_addr[ii,vi,ai4];
-		#
-		# TODO: XXX: PAVPAVPAV: check whether the syntax is to use
-		# spaces or commas.
-		#
 		if (is_begin)
 		    ipgw_options = ipgw_options addr4;
 		else
-		    ipgw_options = ipgw_options " " addr4;
+		    ipgw_options = ipgw_options ", " addr4;
 		is_begin = 0;
 	    }
 	    ipgw_options = ipgw_options ")";
