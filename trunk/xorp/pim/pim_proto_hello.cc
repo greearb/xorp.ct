@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.11 2003/08/07 01:09:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.12 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -79,7 +79,7 @@ PimVif::pim_hello_stop_dr()
 {
     uint32_t save_dr_priority = dr_priority().get();
     
-    dr_priority().set(PIM_HELLO_DR_ELECTION_PRIORITY_LOWEST);	// XXX: lowest
+    dr_priority().set(PIM_HELLO_DR_PRIORITY_LOWEST);		// XXX: lowest
     pim_hello_send();
     dr_priority().set(save_dr_priority);
 }
@@ -105,7 +105,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 {
     bool	holdtime_rcvd = false;
     bool	lan_prune_delay_rcvd = false;
-    bool	dr_election_priority_rcvd = false;
+    bool	dr_priority_rcvd = false;
     bool	genid_rcvd = false;
     bool	is_genid_changed = false;
     uint16_t	option_type, option_length, option_length_spec;
@@ -116,6 +116,9 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
     uint32_t	dr_priority;
     uint32_t	genid;
     bool	new_nbr_flag = false;
+    list<IPvX>	secondary_addr_list;
+    list<IPvX>::iterator addr_list_iter;
+    int		rcvd_family;
     
     //
     // Parse the message
@@ -156,16 +159,16 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	    lan_prune_delay_rcvd = true;
 	    break;
 	    
-	case PIM_HELLO_DR_ELECTION_PRIORITY_OPTION:
+	case PIM_HELLO_DR_PRIORITY_OPTION:
 	    // DR priority option
-	    option_length_spec = PIM_HELLO_DR_ELECTION_PRIORITY_LENGTH;
+	    option_length_spec = PIM_HELLO_DR_PRIORITY_LENGTH;
 	    if (option_length < option_length_spec) {
 		BUFFER_GET_SKIP(option_length, buffer);
 		continue;
 	    }
 	    BUFFER_GET_HOST_32(dr_priority, buffer);
 	    BUFFER_GET_SKIP(option_length - option_length_spec, buffer);
-	    dr_election_priority_rcvd = true;
+	    dr_priority_rcvd = true;
 	    break;
 	    
 	case PIM_HELLO_GENID_OPTION:
@@ -179,6 +182,20 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	    BUFFER_GET_SKIP(option_length - option_length_spec, buffer);
 	    genid_rcvd = true;
 	    break;
+
+	case PIM_HELLO_ADDRESS_LIST_OPTION:
+	case PIM_HELLO_ADDRESS_LIST_PRIVATE_OPTION:
+	    // Address List option
+	    while (option_length >= ENCODED_UNICAST_ADDR_SIZE(family())) {
+		IPvX secondary_addr(family());
+		GET_ENCODED_UNICAST_ADDR(rcvd_family, secondary_addr, buffer);
+		secondary_addr_list.push_back(secondary_addr);
+		option_length -= ENCODED_UNICAST_ADDR_SIZE(family());
+	    }
+	    if (option_length > 0)
+		BUFFER_GET_SKIP(option_length, buffer);
+	    break;
+
 	default:
 	    // XXX: skip unrecognized options
 	    BUFFER_GET_SKIP(option_length, buffer);
@@ -209,7 +226,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	new_nbr_flag = true;
 	XLOG_TRACE(pim_node().is_log_trace(),
 		   "Added new neighbor %s on vif %s",
-		   cstring(pim_nbr->addr()), name().c_str());
+		   cstring(pim_nbr->primary_addr()), name().c_str());
     }
     
     // Set the protocol version for this neighbor
@@ -228,11 +245,57 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 						   lan_delay,
 						   override_interval);
     
-    if (dr_election_priority_rcvd)
-	pim_nbr->pim_hello_dr_election_priority_process(dr_priority);
+    if (dr_priority_rcvd)
+	pim_nbr->pim_hello_dr_priority_process(dr_priority);
     
     if (genid_rcvd)
 	pim_nbr->pim_hello_genid_process(genid);
+    
+    //
+    // Add the secondary addresses
+    //
+    pim_nbr->clear_secondary_addr_list();    // First clear the old addresses
+    for (addr_list_iter = secondary_addr_list.begin();
+	 addr_list_iter != secondary_addr_list.end();
+	 ++addr_list_iter) {
+	IPvX& secondary_addr = *addr_list_iter;
+	if (pim_nbr->primary_addr() == secondary_addr) {
+	    // The primary address is in the secondary addresses list. Ignore.
+	    continue;
+	}
+	if (pim_nbr->has_secondary_addr(secondary_addr)) {
+	    XLOG_WARNING("RX %s from %s to %s: "
+			 "duplicated secondary address %s",
+			 PIMTYPE2ASCII(PIM_HELLO),
+			 cstring(src), cstring(dst),
+			 cstring(secondary_addr));
+	    continue;
+	}
+	pim_nbr->add_secondary_addr(secondary_addr);
+
+	//
+	// Check if the same secondary address was advertised
+	// by other neighbors.
+	//
+	list<PimNbr *>::iterator nbr_iter;
+	for (nbr_iter = pim_nbrs().begin();
+	     nbr_iter != pim_nbrs().end();
+	     ++nbr_iter) {
+	    PimNbr *tmp_pim_nbr = *nbr_iter;
+	    if (tmp_pim_nbr == pim_nbr)
+		continue;
+	    if (tmp_pim_nbr->has_secondary_addr(secondary_addr)) {
+		XLOG_WARNING("RX %s from %s to %s: "
+			     "overriding secondary address %s that was "
+			     "advertised previously by neighbor %s",
+			     PIMTYPE2ASCII(PIM_HELLO),
+			     cstring(src), cstring(dst),
+			     cstring(secondary_addr),
+			     cstring(tmp_pim_nbr->primary_addr()));
+		tmp_pim_nbr->delete_secondary_addr(secondary_addr);
+	    }
+	}
+    }
     
     if (new_nbr_flag || is_genid_changed) {
 	if (i_am_dr() || (is_genid_changed && i_may_become_dr(src))) {
@@ -273,7 +336,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	if (is_genid_changed) {
 	    pim_node().pim_mrt().add_task_pim_nbr_gen_id_changed(
 		vif_index(),
-		pim_nbr->addr());
+		pim_nbr->primary_addr());
 	}
     }
     
@@ -288,6 +351,13 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 		 PIMTYPE2ASCII(PIM_HELLO),
 		 cstring(src), cstring(dst));
     ++_pimstat_rx_malformed_packet;
+    return (XORP_ERROR);
+
+ rcvd_family_error:
+    XLOG_WARNING("RX %s from %s to %s: "
+		 "invalid address family inside = %d",
+		 PIMTYPE2ASCII(PIM_HELLO),
+		 cstring(src), cstring(dst), rcvd_family);
     return (XORP_ERROR);
     
     // UNUSED(dst);
@@ -333,7 +403,7 @@ PimNbr::pim_hello_lan_prune_delay_process(bool lan_prune_delay_tbit,
 }
 
 void
-PimNbr::pim_hello_dr_election_priority_process(uint32_t dr_priority)
+PimNbr::pim_hello_dr_priority_process(uint32_t dr_priority)
 {
     _is_dr_priority_present = true;
     _dr_priority = dr_priority;
@@ -371,10 +441,10 @@ PimVif::pim_dr_elect()
 	XLOG_FATAL("Cannot elect a DR on interface %s", name().c_str());
 	return;
     }
-    _dr_addr = dr->addr();
+    _dr_addr = dr->primary_addr();
     
     // Set a flag if I am the DR
-    if (dr_addr() == addr()) {
+    if (dr_addr() == primary_addr()) {
 	if (! i_am_dr()) {
 	    set_i_am_dr(true);
 	    // TODO: take the appropriate action
@@ -411,13 +481,13 @@ PimVif::i_may_become_dr(const IPvX& exclude_addr)
     
     for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() == exclude_addr)
+	if (pim_nbr->primary_addr() == exclude_addr)
 	    continue;
 	if (! pim_dr_is_better(dr, pim_nbr, consider_dr_priority))
 	    dr = pim_nbr;
     }
     
-    if ((dr != NULL) && (dr->addr() == addr()))
+    if ((dr != NULL) && (dr->primary_addr() == primary_addr()))
 	return (true);
     
     return (false);
@@ -452,7 +522,7 @@ pim_dr_is_better(PimNbr *pim_nbr1, PimNbr *pim_nbr2, bool consider_dr_priority)
     }
     
     // Either the DR priority is same, or we have to ignore it
-    if (pim_nbr1->addr() > pim_nbr2->addr())
+    if (pim_nbr1->primary_addr() > pim_nbr2->primary_addr())
 	return (true);
     
     return (false);
@@ -530,9 +600,13 @@ PimVif::pim_hello_first_send()
 int
 PimVif::pim_hello_send()
 {
+    list<IPvX> address_list;
+
+    //
     // XXX: note that for PIM Hello messages only we use a separate
     // buffer for sending the data, because the sending of a Hello message
     // can be triggered during the sending of another control message.
+    //
     buffer_t *buffer = buffer_send_prepare(_buffer_send_hello);
     uint16_t lan_delay_tbit;
     
@@ -557,8 +631,8 @@ PimVif::pim_hello_send()
     BUFFER_PUT_HOST_16(override_interval().get(), buffer);
     
     // DR priority option    
-    BUFFER_PUT_HOST_16(PIM_HELLO_DR_ELECTION_PRIORITY_OPTION, buffer);
-    BUFFER_PUT_HOST_16(PIM_HELLO_DR_ELECTION_PRIORITY_LENGTH, buffer);
+    BUFFER_PUT_HOST_16(PIM_HELLO_DR_PRIORITY_OPTION, buffer);
+    BUFFER_PUT_HOST_16(PIM_HELLO_DR_PRIORITY_LENGTH, buffer);
     BUFFER_PUT_HOST_32(dr_priority().get(), buffer);
     
     // GenID option
@@ -566,13 +640,50 @@ PimVif::pim_hello_send()
     BUFFER_PUT_HOST_16(PIM_HELLO_GENID_LENGTH, buffer);
     BUFFER_PUT_HOST_32(genid().get(), buffer);
     
+    // Address List option
+    do {
+	// Get the list of secondary addresses
+	list<VifAddr>::const_iterator iter;
+	for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
+	    const VifAddr& vif_addr = *iter;
+	    if (vif_addr.addr() == primary_addr()) {
+		// Ignore the primary address
+		continue;
+	    }
+	    address_list.push_back(vif_addr.addr());
+	}
+    } while (false);
+    if (address_list.size() > 0) {
+	size_t length;
+	list<IPvX>::iterator iter;
+
+	BUFFER_PUT_HOST_16(PIM_HELLO_ADDRESS_LIST_OPTION, buffer);
+	length = address_list.size() * ENCODED_UNICAST_ADDR_SIZE(family());
+	BUFFER_PUT_HOST_16(length, buffer);
+	for (iter = address_list.begin(); iter != address_list.end(); ++iter) {
+	    IPvX& addr = *iter;
+	    PUT_ENCODED_UNICAST_ADDR(family(), addr, buffer);
+	}
+    }
+    
     return (pim_send(IPvX::PIM_ROUTERS(family()), PIM_HELLO, buffer));
+    
+ invalid_addr_family_error:
+    XLOG_UNREACHABLE();
+    XLOG_ERROR("TX %s from %s to %s: "
+	       "invalid address family error = %d",
+	       PIMTYPE2ASCII(PIM_HELLO),
+	       cstring(primary_addr()),
+	       cstring(IPvX::PIM_ROUTERS(family())),
+	       family());
+    return (XORP_ERROR);
     
  buflen_error:
     XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_HELLO),
-	       cstring(addr()), cstring(IPvX::PIM_ROUTERS(family())));
+	       cstring(primary_addr()),
+	       cstring(IPvX::PIM_ROUTERS(family())));
     return (XORP_ERROR);
 }
