@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.8 2003/05/21 21:29:53 hodson Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.9 2003/08/06 19:28:48 hodson Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -279,8 +279,7 @@ protected:
 
 #if 0
 template <typename _Tp>
-ref_ptr<const _Tp>::
-ref_ptr(const ref_ptr<_Tp>& __r)
+ref_ptr<const _Tp>::ref_ptr(const ref_ptr<_Tp>& __r)
 	: _M_ptr(0), _M_counter(_r->_M_counter)
 {
     ref_counter_pool::instance().incr_counter(_M_counter);
