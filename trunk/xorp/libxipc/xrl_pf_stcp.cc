@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.24 2003/09/16 19:06:36 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.25 2003/09/16 23:04:43 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -43,7 +43,7 @@ static const uint32_t DEFAULT_SENDER_KEEPALIVE_MS = 10000;
 
 RequestState::~RequestState()
 {
-    debug_msg("Destructing RequestState with seqno = %d\n", seqno);
+    debug_msg("~RequestState (%p - seqno %d)\n", this, seqno);
 }
 
 
@@ -74,7 +74,7 @@ public:
 	_reader.stop();
 	_writer.stop();
 	close(_fd);
-	debug_msg("~STCPRequestHandler (%p)\n", this);
+	debug_msg("~STCPRequestHandler (%p) fd = %d\n", this, _fd);
     }
 
     void dispatch_request(uint32_t seqno, const char* xrl_c_str);
@@ -459,7 +459,10 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
 XrlPFSTCPSender::~XrlPFSTCPSender()
 {
     delete _reader;
+    _reader = 0;
     delete _writer;
+    _writer = 0;
+    debug_msg("~XrlPFSTCPSender (%p)\n", this);
 }
 
 void
@@ -480,17 +483,19 @@ XrlPFSTCPSender::die(const char* reason)
     close(_fd);
     _fd = -1;
 
-    for (list<RequestState>::iterator i = _requests_pending.begin();
+    for (list<ref_ptr<RequestState> >::iterator i = _requests_pending.begin();
 	i != _requests_pending.end(); i++) {
-	if (i->cb.is_empty() == false)
-	    i->cb->dispatch(XrlError::SEND_FAILED(), 0);
+	ref_ptr<RequestState> rp = *i;
+	if (rp->cb.is_empty() == false)
+	    rp->cb->dispatch(XrlError::SEND_FAILED(), 0);
     }
     _requests_pending.clear();
 
-    for (list<RequestState>::iterator i = _requests_sent.begin();
+    for (list<ref_ptr<RequestState> >::iterator i = _requests_sent.begin();
 	i != _requests_sent.end(); i++) {
-	if (i->cb.is_empty() == false)
-	    i->cb->dispatch(XrlError::SEND_FAILED(), 0);
+	ref_ptr<RequestState> rp = *i;
+	if (rp->cb.is_empty() == false)
+	    rp->cb->dispatch(XrlError::SEND_FAILED(), 0);
     }
     _requests_sent.clear();
 }
@@ -506,14 +511,14 @@ XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 
     if (_requests_pending.empty() == true &&
 	_keepalive_in_progress == false) {
-	_requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
+	_requests_pending.push_back(new RequestState(this, _current_seqno++, x, cb));
 
 	send_first_request();
     } else {
 	// Already sending a request or doing keepalive
 	assert(_writer->running() == true);
 
-	_requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
+	_requests_pending.push_back(new RequestState(this, _current_seqno++, x, cb));
     }
 }
 
@@ -527,16 +532,17 @@ XrlPFSTCPSender::sends_pending() const
 RequestState*
 XrlPFSTCPSender::find_request(uint32_t seqno)
 {
-    list<RequestState>::iterator rs;
-    rs = find_if(_requests_sent.begin(), _requests_sent.end(),
-		 bind2nd(mem_fun_ref(&RequestState::has_seqno), seqno));
-    if (rs != _requests_sent.end()) {
-	return &(*rs);
+    list<ref_ptr<RequestState> >::iterator i;
+    for (i = _requests_sent.begin(); i != _requests_sent.end(); ++i) {
+	ref_ptr<RequestState>& rp = *i;
+	if (rp->has_seqno(seqno))
+	    return rp.get();
     }
-    rs = find_if(_requests_pending.begin(), _requests_pending.end(),
-		 bind2nd(mem_fun_ref(&RequestState::has_seqno), seqno));
-    if (rs != _requests_pending.end()) {
-	return &(*rs);
+
+    for (i = _requests_pending.begin(); i != _requests_pending.end(); ++i) {
+	ref_ptr<RequestState>& rp = *i;
+	if (rp->has_seqno(seqno))
+	    return rp.get();
     }
 
     abort();
@@ -551,7 +557,8 @@ XrlPFSTCPSender::send_first_request()
 
     debug_msg("%s\n", __PRETTY_FUNCTION__);
     // Render data as ascii
-    list<RequestState>::iterator r = _requests_pending.begin();
+    list< ref_ptr<RequestState> >::iterator i = _requests_pending.begin();
+    ref_ptr<RequestState>& r = *i;
     string xrl_ascii = r->xrl.str();
 
     // Size outgoing packet accordingly
@@ -596,7 +603,7 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 	return;
     }
 
-    list<RequestState>::iterator rs = _requests_pending.begin();
+    list<ref_ptr<RequestState> >::iterator rs = _requests_pending.begin();
     // Request has been sent. Move request from head of pend queue
     // to tail of sent queue where it will wait for a reply
     _requests_sent.splice(_requests_sent.end(), _requests_pending, rs);
@@ -608,7 +615,6 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 void
 XrlPFSTCPSender::dispatch_reply()
 {
-    list<RequestState>::iterator rs;
     uint32_t seqno = _sph->seqno();
     assert(_sph->is_valid());
 
@@ -633,9 +639,14 @@ XrlPFSTCPSender::dispatch_reply()
     if (_sph->xrl_data_bytes()) {
 	xrl_data = data;
     }
+ 
+    list<ref_ptr<RequestState> >::iterator rs;
+    for (rs = _requests_sent.begin(); rs != _requests_sent.end(); ++rs) {
+	ref_ptr<RequestState>& rp = *rs;
+	if (rp->has_seqno(seqno))
+	    break;
+    }
 
-    rs = find_if(_requests_sent.begin(), _requests_sent.end(),
-		 bind2nd(mem_fun_ref(&RequestState::has_seqno), seqno));
     if (rs == _requests_sent.end()) {
 	RequestState* r = find_request(seqno);
 	if (r != 0)
@@ -645,11 +656,11 @@ XrlPFSTCPSender::dispatch_reply()
 
     try {
 	XrlArgs response(xrl_data);
-	rs->cb->dispatch(rcv_err, &response);
+	rs->get()->cb->dispatch(rcv_err, &response);
     } catch (InvalidString& ) {
 	XrlError xe (XrlError::INTERNAL_ERROR().error_code(),
 		    "corrupt xrl response");
-	rs->cb->dispatch(xe, 0);
+	rs->get()->cb->dispatch(xe, 0);
 	debug_msg("Corrupt response: %s\n", xrl_data);
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.29 2003/09/12 00:50:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.30 2003/09/16 19:06:36 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -298,15 +298,9 @@ XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
 void
 XrlRouter::send_callback(const XrlError& e,
 			 XrlArgs*	 reply,
-			 XrlPFSender*	 s,
+			 XrlPFSender*	 /* s */,
 			 XrlCallback	 user_callback)
 {
-    list<XrlPFSender*>::iterator i = find(_senders.begin(), _senders.end(), s);
-    XLOG_ASSERT(i != _senders.end());
-    _senders.erase(i);
-
-    XrlPFSenderFactory::destroy_sender(s);
-
     user_callback->dispatch(e, reply);
 }
 
@@ -317,14 +311,41 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 {
     try {
 	Xrl x(dbe->values().front().c_str());
-	XrlPFSender* s = XrlPFSenderFactory::create_sender(
-				_e, x.protocol().c_str(), x.target().c_str()
-				);
+
+	XrlPFSender* s = 0;
+	list<XrlPFSender*>::iterator i;
+	for (i = _senders.begin(); i != _senders.end(); ++i) {
+	    s = *i;
+	    if (s->protocol() != x.protocol() || s->address()  != x.target()) {
+		continue;
+	    }
+	    if (s->alive()) {
+		goto __got_sender;
+	    }
+	    XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\"",
+		      s->protocol(), s->address().c_str());
+	    XrlPFSenderFactory::destroy_sender(s);
+	    _senders.erase(i);
+	    break;
+	}
+
+	s = XrlPFSenderFactory::create_sender(_e, x.protocol().c_str(),
+					      x.target().c_str());
+	if (s == 0) {
+	    XLOG_ERROR("Could not create XrlPFSender for protocol = \"%s\" "
+		       "address = \"%s\" ",
+		       x.protocol().c_str(), x.target().c_str());
+	    return false;
+	}
+	XLOG_ASSERT(s->protocol() == x.protocol());
+	XLOG_ASSERT(s->address()  == x.target());
+	_senders.push_back(s);
+
+    __got_sender:
 	Xrl tmp(xrl);
 	x.args().swap(tmp.args());
 	if (s) {
 	    trace_xrl("Sending ", x);
-	    _senders.push_back(s);
 	    s->send(x, callback(this, &XrlRouter::send_callback, s, cb));
 	    return true;
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.26 2003/09/11 19:25:58 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.27 2003/09/16 19:06:36 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -308,7 +308,19 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 bool
 XrlPFSUDPSender::sends_pending() const
 {
+    XuidRequestMap::const_iterator i = requests_pending.begin();
+    while (i != requests_pending.end()) {
+	if (i->second.parent == this)
+	    return true;
+	++i;
+    }
     return false;
+}
+
+bool
+XrlPFSUDPSender::alive() const
+{
+    return true;
 }
 
 const char*

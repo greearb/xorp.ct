@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.14 2003/09/15 23:45:41 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.15 2003/09/16 19:06:36 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -72,6 +72,10 @@ struct RequestState {
     ~RequestState();
 
     bool has_seqno(uint32_t n) const { return seqno == n; }
+
+private:
+    RequestState(const RequestState&);
+    RequestState& operator=(const RequestState&);
 };
 
 /**
@@ -106,8 +110,8 @@ private:
     // Transmission related
     AsyncFileWriter* _writer;
 
-    list<RequestState> _requests_pending;	// All requests pending
-    list<RequestState> _requests_sent;		// All requests sent
+    list<ref_ptr<RequestState> > _requests_pending;	// All requests pending
+    list<ref_ptr<RequestState> > _requests_sent;	// All requests sent
 
     vector<uint8_t>	_request_packet;
     uint32_t		_current_seqno;

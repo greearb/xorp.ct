@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.7 2003/09/11 19:24:40 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.8 2003/09/15 23:41:19 hodson Exp $"
 
 #include "config.h"
 
@@ -29,58 +29,22 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
-static bool s_running = false;
-
 // STCP senders are a special case.  Constructing an STCP sender has
 // real cost, unlike InProc and SUDP, so we maintain a cache of
 // STCP senders with one per sender destination address.
-
-static list<XrlPFSTCPSender*> stcps;
-
-static XrlPFSTCPSender*
-stcp_find_or_create(EventLoop& e, const char* address)
-{
-    list<XrlPFSTCPSender*>::iterator i = stcps.begin();
-    while (i != stcps.end()) {
-	XrlPFSTCPSender* s = *i;
-	if (s->alive() == false) {
-	    XLOG_INFO("Pruned dead XrlPFSTCPSender.");
-	    delete s;
-	    stcps.erase(i++);
-	    continue;
-	}
-	if (s->address() == address) {
-	    return s;
-	}
-	++i;
-    }
-
-    stcps.push_back(new XrlPFSTCPSender(e, address));
-    return stcps.back();
-}
-
-static void
-stcp_cleanup()
-{
-    while (stcps.empty() == false) {
-	delete stcps.front();
-	stcps.pop_front();
-    }
-}
 
 XrlPFSender*
 XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 				  const char*	protocol,
 				  const char*	address)
 {
-    XLOG_ASSERT(s_running);
     debug_msg("instantiating sender pf = \"%s\", addr = \"%s\"\n",
 	      protocol, address);
     try {
 	if (strcmp(XrlPFSUDPSender::protocol_name(), protocol) == 0) {
 	    return new XrlPFSUDPSender(eventloop, address);
 	} else if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) {
-	    return stcp_find_or_create(eventloop, address);
+	    return new XrlPFSTCPSender(eventloop, address);
 	} else if (strcmp(XrlPFInProcSender::protocol_name(), protocol) == 0) {
 	    return new XrlPFInProcSender(eventloop, address);
 	}
@@ -94,7 +58,6 @@ XrlPFSender*
 XrlPFSenderFactory::create_sender(EventLoop& eventloop,
 				  const char* protocol_colon_address)
 {
-    XLOG_ASSERT(s_running);
     char *colon = strstr(protocol_colon_address, ":");
     if (colon == 0) {
 	debug_msg("No colon in supposedly colon separated <protocol><address>"
@@ -109,12 +72,8 @@ XrlPFSenderFactory::create_sender(EventLoop& eventloop,
 void
 XrlPFSenderFactory::destroy_sender(XrlPFSender* s)
 {
-    XLOG_ASSERT(s_running);
     debug_msg("destroying sender pf = \"%s\", addr = \"%s\"\n",
 	      s->protocol(), s->address().c_str());
-
-    if (strcmp(s->protocol(), XrlPFSTCPSender::protocol_name()) == 0)
-	return;
 
     delete s;
 }
@@ -122,12 +81,9 @@ XrlPFSenderFactory::destroy_sender(XrlPFSender* s)
 void
 XrlPFSenderFactory::startup()
 {
-    s_running = true;
 }
 
 void
 XrlPFSenderFactory::shutdown()
 {
-    s_running = false;
-    stcp_cleanup();
 }

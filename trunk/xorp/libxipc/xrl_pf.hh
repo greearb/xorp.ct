@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.18 2003/09/11 19:25:58 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.19 2003/09/16 19:06:36 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -46,6 +46,7 @@ public:
     virtual ~XrlPFListener() {}
 
     virtual const char*	address() const = 0;
+
     virtual const char*	protocol() const = 0;
 
     inline bool set_dispatcher(const XrlDispatcher* d);
@@ -67,21 +68,22 @@ protected:
 class XrlPFSender
 {
 public:
+    typedef
+    XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr SendCallback;
+
+public:
     XrlPFSender(EventLoop& e, const char* address = "")
 	: _eventloop(e), _address(address) {}
 
     virtual ~XrlPFSender() {}
 
-    typedef
-    XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr
-    SendCallback;
-
     virtual void send(const Xrl& x, const SendCallback& cb) = 0;
     virtual bool sends_pending() const = 0;
     virtual const char* protocol() const = 0;
-    inline const string& address() const { return _address; }
+    virtual bool alive() const = 0;
 
-    EventLoop& eventloop() const { return _eventloop; }
+    inline const string& address() const		{ return _address; }
+    inline EventLoop& eventloop() const			{ return _eventloop; }
 
 protected:
     EventLoop& _eventloop;
