@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.9 2003/03/15 02:37:59 pavlin Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.10 2003/06/26 21:38:53 jcardona Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -712,10 +712,6 @@ public:
 	    do {
 		_cur = _stack.top();
 		_stack.pop();
-		if (_root.contains(_cur->k()) == false) {
-		    _cur = NULL;
-		    break;
-		}
 		if( _cur->get_right( ) != NULL )
 		    _stack.push(_cur->get_right());
 		if( _cur->get_left() != NULL )

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.12 2003/04/03 19:04:33 hodson Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.13 2003/06/26 21:38:54 jcardona Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -990,10 +990,6 @@ TriePreOrderIterator<A,Payload>::next()
     do {
 	_cur = _stack.top();
 	_stack.pop();
-	if (_root.contains(_cur->k()) == false) {
-	    _cur = NULL;
-	    return;
-	}
 	if( _cur->get_right( ) != NULL )
 	    _stack.push(_cur->get_right());
 	if( _cur->get_left() != NULL )
