@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.17 2004/06/15 20:50:07 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.18 2004/06/15 21:27:57 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -48,16 +48,6 @@ the login shell is csh or tcsh):
 	      front-page to correspond to the new release version.
 
 ========================================================================
-0600.	TASK: Stop cron job on www.xorp.org that automatically updates
-	      the XORP web pages from the CVS repository.
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	COMMANDS:
- ssh www.xorp.org
- sudo crontab -u pavlin -e
- # Comment-out the line with update-www.xorp.org
-
-========================================================================
 0700.	TASK: Send email to xorp-dev@xorp.org to remain everyone about
 	      TODO items before the release
 	WHO:  Release manager
@@ -77,22 +67,58 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 
 ========================================================================
-1000.	TASK: Edit the Web pages in www/
-	WHO:  Release manager
+1000.	TASK: Update the status Web page in www/html_src/status.html
+	WHO:  Everyone
 	WHEN: 1 day before the release date
-	MISC: - Add an entry for the new release to www/downloads.html
-		(set the definition for Release tag to $ReleaseTag as
-		defined later)
-	      - Edit/update www/index.html
-		Modify all references to the most recent version and
-		its release date, add an item to "Project News", etc.
-		If necessary, remove short-cuts for old news items.
-	      - Add a news item to news.html
-	      - If necessary, update www/license.html to add a new
-		copyright year
 
 ========================================================================
-1100.	TASK: Update the status Web page in xorp/docs/status.html
+1100.	TASK: Edit the Web pages in www/html_src/
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: - Update the documentation index Web page in
+		www/html_src/design_docs.html
+		by modifying the documents version and date.
+	      - Add an entry for the new release to
+                www/html_src/downloads.html
+		(set the definition for Release tag to $ReleaseTag as
+		defined later)
+	      - Update www/html_src/getting_started.html with information
+		about supported operating systems, compilers, and XORP
+		configuration.
+	      - Update www/html_src/index.html
+		Modify all references to the most recent version and
+		its release date, etc.
+	      - If necessary, update www/html_src/license.html with a new
+		copyright year
+	      - If necessary, update www/html_src/livecd.html
+	      - Add a news item to news.html
+	      - If necessary, update www/html_src/porting.html
+	      - If necessary, update www/html_src/snmp.html
+	      - Update the date and release version in
+		www/html_src/status.html
+
+========================================================================
+1150.	TASK: Regenerate the Web pages in www
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	COMMANDS:
+ cd www
+ gmake -f GNUmakefile
+ gmake -f GNUmakefile check
+
+========================================================================
+1170.	TASK: Update the Web pages in the XORP test web server
+	http://test.xorp.org/
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	COMMANDS:
+ ssh www.xorp.org
+ cd /home/www/u1/www/data/xorp-test
+ cvs update
+
+========================================================================
+1180.	TASK: Verify that the web pages on the test web server
+	http://test.xorp.org/ are OK.
 	WHO:  Everyone
 	WHEN: 1 day before the release date
 
@@ -122,19 +148,6 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: 1 day before the release date
 	MISC: All files in xorp/
-
-========================================================================
-1500.	TASK: Update the documentation index Web page in
-	      xorp/docs/index.html
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: Modify the document version and date
-
-========================================================================
-1550.	TASK: Update the date and release version in
-	      xorp/docs/status.html
-	WHO:  Release manager
-	WHEN: 1 day before the release date
 
 ========================================================================
 1600.	TASK: Update xorp/README
@@ -211,6 +224,7 @@ the login shell is csh or tcsh):
  cd xorp
  cvs update VERSION
  setenv ReleaseTag RELEASE_`cat VERSION | sed 'y/./_/' | sed 'y/-/_/'`
+ echo $ReleaseTag
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag xorp
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag other
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag www
@@ -226,6 +240,7 @@ the login shell is csh or tcsh):
  # The release version defined in the first line below:
  # Commands continue from the previous task
  setenv ReleaseVersion `cat VERSION`
+ echo $ReleaseVersion
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs export -r $ReleaseTag xorp
  mv xorp xorp-$ReleaseVersion
  tar zcvf xorp-$ReleaseVersion.tar.gz xorp-$ReleaseVersion
@@ -260,6 +275,7 @@ the login shell is csh or tcsh):
  # Wait for the previous command to return
  ssh www.xorp.org
  setenv ReleaseVersion `cat _XORP_VERSION`
+ echo ReleaseVersion
  rm _XORP_VERSION
  cd /home/www/u1/www/data/xorp/releases
  mkdir $ReleaseVersion
@@ -284,14 +300,14 @@ the login shell is csh or tcsh):
  unsetenv ReleaseVersion
 
 ========================================================================
-2700.	TASK: Start cron job on www.xorp.org that automatically updates
-	      the XORP web pages from the CVS repository
+2700.	TASK: Update the XORP web page on the main Web server www.xorp.org
+	      from the CVS repository
 	WHO:  Release manager
 	WHEN: Right after the release
 	COMMANDS:
  ssh www.xorp.org
- sudo crontab -u pavlin -e
- # Uncomment the line with update-www.xorp.org
+ cd /home/www/u1/www/data/xorp
+ cvs update
 
 ========================================================================
 2800.	TASK: Send email to xorp-dev@xorp.org that the release process has
@@ -300,8 +316,8 @@ the login shell is csh or tcsh):
 	WHEN: Right after the release
 
 ========================================================================
-2900.	TASK: Send an anouncement email to xorp-users@xorp.org about the
-	      new release 
+2900.	TASK: Send an anouncement email to xorp-announce@xorp.org
+	      and/or xorp-users@xorp.org about the new release 
 	WHO:  XORP project leader
 	WHEN: Right after the release
 
