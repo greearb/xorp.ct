@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/config9.xt,v 1.3 2004/05/10 21:58:45 atanu Exp $
+# $XORP: other/testbed/config/config10.xt,v 1.1 2004/05/14 22:21:19 pavlin Exp $
 #
 # - Surround a XORP (xorp12) router with a bunch of testbed hosts. 
 # - Add a chain of routers between xorp6 and xorp7
@@ -28,11 +28,7 @@
 #
 
 # Kernel to install
-kernel[/home/xorpc/u2/freebsd.kernels/kernel] = xorp0, xorp1, xorp6, xorp7
-
-#
-# Pavlin's FreeBSD multicast kernel
-kernel[/home/xorpc/u2/homes/pavlin/kernel] = xorp2, xorp3
+kernel[/home/xorpc/u2/freebsd.kernels/kernel] = xorp0, xorp1, xorp2, xorp3, xorp6, xorp7
 
 # xorp12 is the router. This will create default routes that point at xorp12.
 router = xorp12
