@@ -96,7 +96,7 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-SUBDIRS = tests
+SUBDIRS = snmpdscripts tests
 
 #
 # This is the only shared object that needs to be installed.

@@ -10,7 +10,7 @@
 # default settings.
 #
 
-SUBDIRS = tests
+SUBDIRS = snmpdscripts tests
 
 #
 # This is the only shared object that needs to be installed.
