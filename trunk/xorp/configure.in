@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.77 2003/11/07 07:05:54 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.79 2004/02/12 20:18:11 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1342,6 +1342,7 @@ AC_OUTPUT(
 	etc/templates/Makefile
 	fea/Makefile
 	fea/MakefileRootCheck
+	fib2mrib/Makefile
 	libcomm/Makefile
 	libfeaclient/Makefile
 	libproto/Makefile
