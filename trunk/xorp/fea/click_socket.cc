@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.14 2004/12/09 20:52:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.15 2004/12/17 00:19:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -269,6 +269,23 @@ ClickSocket::start(string& error_msg)
 int
 ClickSocket::stop(string& error_msg)
 {
+    //
+    // XXX: First we should stop user-level Click, and then kernel-level Click.
+    // Otherwise, the user-level Click process may block the unmounting
+    // of the kernel-level Click file system.
+    //
+    if (is_user_click()) {
+	terminate_user_click_command();
+	if (_user_fd >= 0) {
+	    //
+	    // Remove the socket from the event loop and close it
+	    //
+	    _eventloop.remove_selector(_user_fd, SEL_ALL);
+	    comm_close(_user_fd);
+	    _user_fd = -1;
+	}
+    }
+
     if (is_kernel_click()) {
 	//
 	// Close the Click error file (for reading error messages)
@@ -284,18 +301,6 @@ ClickSocket::stop(string& error_msg)
 	}
 	if (unload_kernel_click_modules(error_msg) != XORP_OK) {
 	    return (XORP_ERROR);
-	}
-    }
-
-    if (is_user_click()) {
-	terminate_user_click_command();
-	if (_user_fd >= 0) {
-	    //
-	    // Remove the socket from the event loop and close it
-	    //
-	    _eventloop.remove_selector(_user_fd, SEL_ALL);
-	    comm_close(_user_fd);
-	    _user_fd = -1;
 	}
     }
 
@@ -814,11 +819,11 @@ ClickSocket::user_click_command_done_cb(RunCommand* run_command, bool success,
 
 int
 ClickSocket::write_config(const string& element, const string& handler,
-			  bool is_kernel_config, const string& kernel_config,
-			  bool is_user_config, const string& user_config,
+			  bool has_kernel_config, const string& kernel_config,
+			  bool has_user_config, const string& user_config,
 			  string& error_msg)
 {
-    if (is_kernel_click() && is_kernel_config) {
+    if (is_kernel_click() && has_kernel_config) {
 	//
 	// Prepare the output handler name
 	//
@@ -886,7 +891,7 @@ ClickSocket::write_config(const string& element, const string& handler,
 	}
     }
 
-    if (is_user_click() && is_user_config) {
+    if (is_user_click() && has_user_config) {
 	//
 	// Prepare the output handler name
 	//

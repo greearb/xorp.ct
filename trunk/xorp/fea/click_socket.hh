@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.13 2004/12/09 07:39:26 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.14 2004/12/17 00:19:35 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -242,18 +242,18 @@ public:
      * is an empty string, then we use only the @see handler to write the
      * configuration.
      * @param handler the Click handler to write the configuration to.
-     * @param is_kernel_config true if we wish to write the kernel-level Click
+     * @param has_kernel_config true if we wish to write the kernel-level Click
      * configuration (if kernel-level Click is enabled).
      * @param kernel_config the kernel-level Click configuration to write.
-     * @param is_user_config true if we wish to write the user-level Click
+     * @param has_user_config true if we wish to write the user-level Click
      * configuration (if user-level Click is enabled).
      * @param user_config the user-level Click configuration to write.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int write_config(const string& element, const string& handler,
-		     bool is_kernel_config, const string& kernel_config,
-		     bool is_user_config, const string& user_config,
+		     bool has_kernel_config, const string& kernel_config,
+		     bool has_user_config, const string& user_config,
 		     string& error_msg);
 
     /**
