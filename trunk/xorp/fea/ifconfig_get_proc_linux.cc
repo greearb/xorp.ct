@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.5 2003/05/28 21:50:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.1 2003/08/21 23:50:04 fred Exp $"
 
 #define DEBUG_LOGGING true
 
@@ -43,9 +43,15 @@
 IfConfigGetProcLinux::IfConfigGetProcLinux(IfConfig& ifc)
     : IfConfigGet(ifc)
 {
+//
+// TODO: XXX: this mechanism is temporary disabled, until the implementation
+// is completed and tested.
+//
+#if 0
 #ifdef HAVE_PROC_LINUX
     register_ifc();
 #endif
+#endif // 0
 }
 
 IfConfigGetProcLinux::~IfConfigGetProcLinux()
