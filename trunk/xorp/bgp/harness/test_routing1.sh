@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.3 2002/12/16 22:39:20 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.4 2002/12/19 22:28:44 atanu Exp $
 #
 
 #
@@ -64,6 +64,8 @@ NH1=172.16.1.1
 NH2=172.16.2.1
 NH3=172.16.3.1
 
+NEXT_HOP=192.150.187.78
+
 configure_bgp()
 {
     LOCALHOST=$HOST
@@ -74,21 +76,18 @@ configure_bgp()
     register_rib ""
 
     PEER=$HOST
-    NEXT_HOP=192.150.187.78
     PORT=$PORT1;PEER_PORT=$PEER_PORT1;PEER_AS=$PEER1_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
 
     PEER=$HOST
-    NEXT_HOP=192.150.187.78
     PORT=$PORT2;PEER_PORT=$PEER_PORT2;PEER_AS=$PEER2_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
 
     PEER=$HOST
-    NEXT_HOP=192.150.187.78
     PORT=$PORT3;PEER_PORT=$PEER_PORT3;PEER_AS=$PEER3_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE  $PEER_AS $NEXT_HOP $HOLDTIME
