@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot,v 1.15 2004/04/06 07:16:50 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot,v 1.16 2004/05/13 00:01:55 pavlin Exp $ */
 
 /* router config file for tinderbox test on xorp8 */ 
 
@@ -21,8 +21,8 @@ interfaces {
 }
 
 fea {
-    enable_unicast_forwarding4: true;
-    /* enable_unicast_forwarding6: true; */
+    enable_unicast_forwarding4: true
+    /* enable_unicast_forwarding6: true */
 }
 
 /*

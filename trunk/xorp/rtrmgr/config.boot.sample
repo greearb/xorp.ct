@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.4 2004/04/16 01:27:22 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.5 2004/05/13 00:01:55 pavlin Exp $ */
 
 
 interfaces {
@@ -15,8 +15,8 @@ interfaces {
 }
 
 fea {
-    enable_unicast_forwarding4: true;
-    /* enable_unicast_forwarding6: true; */
+    enable_unicast_forwarding4: true
+    /* enable_unicast_forwarding6: true */
 }
 
 /*
