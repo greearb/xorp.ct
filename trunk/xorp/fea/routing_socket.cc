@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.17 2004/12/01 03:28:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.18 2004/12/08 01:41:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -76,8 +76,14 @@ RoutingSocket::start(int af, string& error_msg)
 int
 RoutingSocket::stop(string& error_msg)
 {
-    error_msg = c_format("The system does not support routing sockets");
-    return (XORP_ERROR);
+    //
+    // XXX: Even if the system doesn not support routing sockets, we
+    // still allow to call the no-op stop() method and return success.
+    // This is needed to cover the case when a RoutingSocket is allocated
+    // but not used.
+    //
+    return (XORP_OK);
+    UNUSED(error_msg);
 }
 
 int
