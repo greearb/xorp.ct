@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.15 2004/01/13 01:15:09 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.16 2004/01/14 03:00:35 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -306,8 +306,8 @@ TemplateTree::add_node(const string& segment, int type, char* cinit)
     }
 }
 
-TemplateTreeNode*
-TemplateTree::find_node(const list<string>& path_segments)
+const TemplateTreeNode*
+TemplateTree::find_node(const list<string>& path_segments) const
 {
     TemplateTreeNode* ttn = _root_node;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.36 2004/02/26 15:28:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.37 2004/02/27 12:12:48 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -243,7 +243,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
     if (_template_tree_node != NULL) {
 	XLOG_ASSERT(type() == delta_node.type());
 
-	if ((type() != NODE_VOID) && delta_node.is_leaf()) {
+	if (delta_node.is_leaf()) {
 	    if (_value != delta_node.value()) {
 		_has_value = true;
 		if (provisional_change) {
@@ -926,13 +926,29 @@ ConfigTreeNode::is_tag() const
 bool 
 ConfigTreeNode::is_leaf() const
 {
-    return _has_value;
+    if (_has_value) return true;
+    if (_template_tree_node == NULL)
+	return false;
+    if ((_template_tree_node->type() != NODE_VOID)
+	&& (_parent != NULL)
+	&& (!_parent->is_tag()))
+	return true;
+    return false;
+}
+
+unsigned int 
+ConfigTreeNode::depth() const
+{
+    if (is_root_node())
+	return 0;
+    else
+	return 1+_parent->depth();
 }
 
 const string& 
 ConfigTreeNode::value() const
 {
-    if (is_leaf())
+    if (_has_value)
 	return _value;
 
     if (is_tag()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.13 2004/01/05 23:37:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.14 2004/01/13 00:40:07 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -72,10 +72,10 @@ void ConfigTree::add_default_children()
     _root_node.recursive_add_default_children();
 }
 
-TemplateTreeNode*
-ConfigTree::find_template(const list<string>& path_segments)
+const TemplateTreeNode*
+ConfigTree::find_template(const list<string>& path_segments) const
 {
-    TemplateTreeNode *ttn;
+    const TemplateTreeNode *ttn;
 
     debug_msg("----------------------------------------------------------\n");
     debug_msg("looking for template for \"%s\"\n",
@@ -199,7 +199,7 @@ ConfigTree::add_node(const string& segment) throw (ParseError)
     } else {
 	list<string> path_segments = path_as_segments();
 	path_segments.push_back(segment);
-	TemplateTreeNode* ttn = find_template(path_segments);
+	const TemplateTreeNode* ttn = find_template(path_segments);
 	if (ttn == NULL) {
 	    booterror("No template found in template map");
 	}

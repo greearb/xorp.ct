@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.11 2004/02/27 18:32:45 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.12 2004/02/27 21:21:03 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -85,6 +85,8 @@ public:
 		  uint32_t ,
 		  const string& command_global_name,
 		  const vector<string>& argv);
+    map <string, string> text_entry_children_func(const string& path,
+						  bool& is_executable) const;
     int text_entry_func(const string& ,
 			const string& ,
 			uint32_t ,
@@ -164,7 +166,8 @@ private:
 			     const CommandTreeNode& current_ctn,
 			     const CLI_PROCESS_CALLBACK& cli_process_callback,
 			     string path, size_t depth);
-    
+
+#ifdef NOTDEF    
     /**
      * @short add commands for direct configuration of new nodes
      *
@@ -199,6 +202,9 @@ private:
 				bool include_intermediates,
 				const CLI_PROCESS_CALLBACK& cb,
 				const string& path);
+#endif
+    void add_text_entry_commands();
+
     void add_edit_subtree();
     void add_delete_subtree();
     void add_set_subtree();
@@ -215,13 +221,16 @@ private:
     string get_help_o(const string& s) const;
     string get_help_c(const string& s) const;
 
-    TemplateTree*	template_tree();
+    string makepath(const list<string>& parts) const;
+    list <string> splitpath(const string& path) const;
+
+    const TemplateTree*	template_tree() const;
     SlaveConfigTree*	config_tree();
     OpCommandList*	op_cmd_list() const;
 
     XorpShell&		_xorpsh;
 
-    SlaveConfigTreeNode* _current_config_node;
+    //    SlaveConfigTreeNode* _current_config_node;
 
     CliNode&		_cli_node;
     CliClient&		_cli_client;
@@ -232,11 +241,13 @@ private:
     CliCommand*		_delete_node;
     CliCommand*		_run_node;
     list<string>	_path;
+    list<uint32_t>      _braces; //keep trace of the indent depth of
+				 //braces in text_entry mode
     list<uint32_t>	_config_mode_users;
     list<string>	_alerts;
-    size_t		_nesting_depth;	// for text_entry mode: number of
+    //    size_t		_nesting_depth;	// for text_entry mode: number of
 					// brackets deep
-    list<size_t>	_nesting_lengths; // for text_entry mode: number of
+    //    list<size_t>	_nesting_lengths; // for text_entry mode: number of
 					// nodes for each backet nested
     bool		_changes_made;	// true if there are uncommitted
 					// changes

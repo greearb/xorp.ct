@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.10 2004/01/05 23:45:04 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.11 2004/01/13 01:15:09 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -46,7 +46,7 @@ public:
     void push_path(int type, char* initializer);
     void add_untyped_node(const string& segment, bool is_tag) throw (ParseError);
     void add_node(const string& segment, int type, char* initializer);
-    TemplateTreeNode* find_node(const list<string>& path_segments);
+    const TemplateTreeNode* find_node(const list<string>& path_segments) const;
     string path_as_string();
     void add_cmd(char* cmd);
     void add_cmd_action(const string& cmd, const list<string>& action);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.17 2004/01/14 22:50:06 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.18 2004/01/15 08:51:58 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -74,6 +74,7 @@ public:
     bool is_root_node() const { return (_parent == NULL); }
     bool is_tag() const;
     bool is_leaf() const;
+    unsigned int depth() const;
     const TemplateTreeNode* template_tree_node() const { return _template_tree_node; }
     string str() const;
     string node_str() const;

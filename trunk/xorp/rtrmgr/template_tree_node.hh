@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.11 2004/01/14 22:50:06 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.12 2004/02/27 12:12:49 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -94,11 +94,16 @@ public:
 
     const list<string>& mandatory_children() const { return _mandatory_children; }
     const string& help() const {
-	if (_help == "") return _help_long;
+	//if the node is a tag, the help is held on the child.
+	if (is_tag()) 
+	    return children().front()->help();
 	return _help;
     }
     const string& help_long() const {
-	if (_help_long == "") return _help;
+	if (is_tag()) 
+	    return children().front()->help_long();
+	if (_help_long == "") 
+	    return help();
 	return _help_long;
     }
 
