@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.6 2004/02/20 01:22:04 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.7 2004/02/20 06:36:15 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -41,16 +41,28 @@ address_enabled(const IfMgrIfTree&	iftree,
 		const string&		vifname,
 		const A&		addr)
 {
+    debug_msg("Looking for %s/%s/%s\n",
+	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+
     const IfMgrIfAtom* ia = iftree.find_if(ifname);
-    if (ia == 0 || ia->enabled() == false)
+    if (ia == 0 || ia->enabled() == false) {
+	debug_msg("if %s exists ? %d ?\n", ifname.c_str(), (ia ? 1 : 0));
 	return false;
+    }
 
     const IfMgrVifAtom* va = ia->find_vif(vifname);
-    if (va == 0 || va->enabled() == false)
+    if (va == 0 || va->enabled() == false) {
+	debug_msg("vif %s exists ? %d?\n", vifname.c_str(), (va ? 1: 0));
 	return false;
+    }
 
     const typename IfMgrIP<A>::Atom* aa = va->find_addr(addr);
-    return (aa != 0 && aa->enabled());
+    if (aa == 0 || aa->enabled() == false) {
+	debug_msg("addr %s exists ? %d?\n", addr.str().c_str(), (aa ? 1: 0));
+	return false;
+    }
+    debug_msg("Found\n");
+    return true;
 }
 
 /**
