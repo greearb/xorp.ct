@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.15 2004/06/21 08:32:25 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.16 2004/07/14 13:24:32 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -80,7 +80,7 @@ gmake check
     - The default gcc/g++ compiler (version 2.95.x) has a bug, hence
       you must install a new compiler (e.g., gcc-3.3.2 and g++-3.3.2 from
       packages). Then, you must set environmental variables CC and CXX
-      to point to the new compiler before running "./configure --disable-ipv6"
+      to point to the new compiler before running "./configure"
       (e.g., "setenv CC egcc; setenv CXX eg++").
     - The code compiles with the new compiler, but some of the the internal
       tests fail.
