@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.9 2003/10/02 03:51:53 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.10 2003/11/05 20:24:27 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -269,3 +269,15 @@ IPv4::ip_version_str()
     static const string IP_VERSION_STR("IPv4");
     return IP_VERSION_STR;
 }
+
+const IPv4 IPv4Constants::zero(IPv4(0x0U));
+const IPv4 IPv4Constants::any(IPv4Constants::zero);
+const IPv4 IPv4Constants::all_ones(IPv4(0xffffffffU));
+const IPv4 IPv4Constants::multicast_base(IPv4(htonl_literal(0xe0000000U)));
+const IPv4 IPv4Constants::multicast_all_systems(IPv4(htonl_literal(0xe0000001U)));
+const IPv4 IPv4Constants::multicast_all_routers(IPv4(htonl_literal(0xe0000002U)));
+const IPv4 IPv4Constants::dvmrp_routers(IPv4(htonl_literal(0xe0000004U)));
+const IPv4 IPv4Constants::ospfigp_routers(IPv4(htonl_literal(0xe0000005U)));
+const IPv4 IPv4Constants::ospfigp_designated_routers(IPv4(htonl_literal(0xe0000006U)));
+const IPv4 IPv4Constants::rip2_routers(IPv4(htonl_literal(0xe0000009U)));
+const IPv4 IPv4Constants::pim_routers(IPv4(htonl_literal(0xe000000dU)));

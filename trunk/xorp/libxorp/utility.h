@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.5 2003/11/06 01:35:15 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.6 2003/11/06 03:55:46 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -44,6 +44,21 @@
 
 #define ADD_POINTER(pointer, size, type)				\
 	((type)(((uint8_t *)(pointer)) + (size)))
+
+/*
+ * Micro-optimization: byte ordering fix for constants.  htonl uses
+ * CPU instructions, whereas the macro below can be handled by the
+ * compiler front-end for literal values.
+ */
+#if defined(WORDS_BIGENDIAN)
+#  define htonl_literal(x) (x)
+#elif defined(WORDS_SMALLENDIAN)
+#  define htonl_literal(x) 						      \
+		((((x) & 0x000000ffU) << 24) | (((x) & 0x0000ff00U) << 8) |   \
+		 (((x) & 0x00ff0000U) >> 8) | (((x) & 0xff000000U) >> 24))
+#else
+#  error "Missing endian definition from config.h"
+#endif
 
 /*
  * Various ctype(3) wrappers that work properly even if the value of the int

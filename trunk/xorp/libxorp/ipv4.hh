@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.14 2003/11/05 20:24:27 hodson Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.15 2004/02/11 20:18:28 hodson Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -457,17 +457,17 @@ public:
     /**
      * Pre-defined IPv4 address constants.
      */
-    inline static IPv4 ZERO(int af = AF_INET);
-    inline static IPv4 ANY(int af = AF_INET);
-    inline static IPv4 ALL_ONES(int af = AF_INET);
-    inline static IPv4 MULTICAST_BASE(int af = AF_INET);
-    inline static IPv4 MULTICAST_ALL_SYSTEMS(int af = AF_INET);
-    inline static IPv4 MULTICAST_ALL_ROUTERS(int af = AF_INET);
-    inline static IPv4 DVMRP_ROUTERS(int af = AF_INET);
-    inline static IPv4 OSPFIGP_ROUTERS(int af = AF_INET);
-    inline static IPv4 OSPFIGP_DESIGNATED_ROUTERS(int af = AF_INET);
-    inline static IPv4 RIP2_ROUTERS(int af = AF_INET);
-    inline static IPv4 PIM_ROUTERS(int af = AF_INET);
+    inline static const IPv4& ZERO(int af = AF_INET);
+    inline static const IPv4& ANY(int af = AF_INET);
+    inline static const IPv4& ALL_ONES(int af = AF_INET);
+    inline static const IPv4& MULTICAST_BASE(int af = AF_INET);
+    inline static const IPv4& MULTICAST_ALL_SYSTEMS(int af = AF_INET);
+    inline static const IPv4& MULTICAST_ALL_ROUTERS(int af = AF_INET);
+    inline static const IPv4& DVMRP_ROUTERS(int af = AF_INET);
+    inline static const IPv4& OSPFIGP_ROUTERS(int af = AF_INET);
+    inline static const IPv4& OSPFIGP_DESIGNATED_ROUTERS(int af = AF_INET);
+    inline static const IPv4& RIP2_ROUTERS(int af = AF_INET);
+    inline static const IPv4& PIM_ROUTERS(int af = AF_INET);
 
     /**
      * Number of bits in address as a constant.
@@ -477,21 +477,6 @@ public:
 private:
     uint32_t _addr;		// The address value (in network-order)
 };
-
-//
-// Micro-optimization: byte ordering fix for constants.  htonl uses
-// CPU instructions, whereas the macro below can be handled by the
-// compiler front-end for literal values.
-//
-#if defined(WORDS_BIGENDIAN)
-#  define htonl_literal(x) (x)
-#elif defined(WORDS_SMALLENDIAN)
-#  define htonl_literal(x) 						      \
-		((((x) & 0x000000ffU) << 24) | (((x) & 0x0000ff00U) << 8) |   \
-		 (((x) & 0x00ff0000U) >> 8) | (((x) & 0xff000000U) >> 24))
-#else
-#  error "Missing endian definition from config.h"
-#endif
 
 inline uint32_t
 IPv4::bits(uint32_t lsb, uint32_t len) const
@@ -503,48 +488,55 @@ IPv4::bits(uint32_t lsb, uint32_t len) const
     return (ntohl(_addr) >> lsb) & mask;
 }
 
-IPv4 IPv4::ZERO(int) {
-    return IPv4(0x0U);
+struct IPv4Constants {
+    static const IPv4 zero, any, all_ones, multicast_base,
+	multicast_all_systems, multicast_all_routers,
+	dvmrp_routers, rip2_routers, pim_routers,
+	ospfigp_routers, ospfigp_designated_routers;
+};
+
+inline const IPv4& IPv4::ZERO(int) {
+    return IPv4Constants::zero;
 }
 
-IPv4 IPv4::ANY(int) {
-    return ZERO();
+inline const IPv4& IPv4::ANY(int) {
+    return IPv4Constants::any;
 }
 
-IPv4 IPv4::ALL_ONES(int) {
-    return IPv4(0xffffffffU);
+inline const IPv4& IPv4::ALL_ONES(int) {
+    return IPv4Constants::all_ones;
 }
 
-IPv4 IPv4::MULTICAST_BASE(int) {
-    return IPv4(htonl_literal(0xe0000000U));
+inline const IPv4& IPv4::MULTICAST_BASE(int) {
+    return IPv4Constants::multicast_base;
 }
 
-IPv4 IPv4::MULTICAST_ALL_SYSTEMS(int) {
-    return IPv4(htonl_literal(0xe0000001U));
+inline const IPv4& IPv4::MULTICAST_ALL_SYSTEMS(int) {
+    return IPv4Constants::multicast_all_systems;
 }
 
-IPv4 IPv4::MULTICAST_ALL_ROUTERS(int) {
-    return IPv4(htonl_literal(0xe0000002U));
+inline const IPv4& IPv4::MULTICAST_ALL_ROUTERS(int) {
+    return IPv4Constants::multicast_all_routers;
 }
 
-IPv4 IPv4::DVMRP_ROUTERS(int) {
-    return IPv4(htonl_literal(0xe0000004U));
+inline const IPv4& IPv4::DVMRP_ROUTERS(int) {
+    return IPv4Constants::dvmrp_routers;
 }
 
-IPv4 IPv4::OSPFIGP_ROUTERS(int) {
-    return IPv4(htonl_literal(0xe0000005U));
+inline const IPv4& IPv4::OSPFIGP_ROUTERS(int) {
+    return IPv4Constants::ospfigp_routers;
 }
 
-IPv4 IPv4::OSPFIGP_DESIGNATED_ROUTERS(int) {
-    return IPv4(htonl_literal(0xe0000006U));
+inline const IPv4& IPv4::OSPFIGP_DESIGNATED_ROUTERS(int) {
+    return IPv4Constants::ospfigp_designated_routers;
 }
 
-IPv4 IPv4::RIP2_ROUTERS(int) {
-    return IPv4(htonl_literal(0xe0000009U));
+inline const IPv4& IPv4::RIP2_ROUTERS(int) {
+    return IPv4Constants::rip2_routers;
 }
 
-IPv4 IPv4::PIM_ROUTERS(int) {
-    return IPv4(htonl_literal(0xe000000dU));
+inline const IPv4& IPv4::PIM_ROUTERS(int) {
+    return IPv4Constants::pim_routers;
 }
 
 #endif // __LIBXORP_IPV4_HH__
