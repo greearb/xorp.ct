@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/utils/bogon-be-gone.sed,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+# $XORP: xorp/utils/bogon-be-gone.sed,v 1.2 2002/12/19 01:13:17 hodson Exp $
 #
 
 #
@@ -31,14 +31,16 @@ s/[ 	]*$//
 # Dont futz with const assignments since aligned values are okay
 /const[^=]*=.*;/ b
 
-# Attempt to fix missing spaces around operators with parenthetical expressions, ie if (), for(), etc... 
+# Attempt to fix missing spaces around operators with parenthetical expressions, ie if (), for(), etc...
 # The list of operators is incomplete
 /^[^/]/ s/\([{(;]\{0,\}\)\([A-Za-z0-9_.()]\{1,\}\)[ 	]*\([-=*&^!+<>]\{0,2\}=\)[ 	]*\([A-Za-z0-9_.()]\{1,\}\)\([});]\)/\1\2 \3 \4\5/g
 /^[^/]/ s/\([{(;]\{1,\}\)\([A-Za-z0-9_.()]\{1,\}\)[ 	]*\([<>]\)[ 	]*\([A-Za-z0-9_.()]\{1,\}\)\([});]\)/\1\2 \3 \4\5/g
 
-# Fix things that look like assignments from start of line, eg "s+= x;" -> "s += x;", 
+# Fix things that look like assignments from start of line, eg "s+= x;" -> "s += x;",
 # The list of operators is incomplete
 s/^\([ 	]*\)\([A-Za-z0-9_.()]\{1,\}\)[ 	]*\([-=*&^!+<>]\{0,2\}=\)[ 	]*/\1\2 \3 /g
+
+s/\([A-z0-9)]\)==\([A-z0-9]\)/\1 == \2/g
 
 # Put space between semi-colon/comman and the following character
 s/\([;,]\)\([-+_A-Za-z0-9]\)/\1 \2/g
@@ -49,7 +51,7 @@ s/{\([A-Za-z_0-9]\)/{ \1/g
 # Map "a}" -> "a }"
 s/\([A-Za-z_0-9]\)}/\1 }/g
 
-# Map ";}" -> "; }" 
+# Map ";}" -> "; }"
 s/;}/; }/g
 
 # Map ";i" -> "; i"
