@@ -413,7 +413,8 @@ protected:
 	int32_t&	atomic_agg, 
 	vector<uint8_t>&	aggregator, 
 	int32_t&	calc_localpref, 
-	vector<uint8_t>&	attr_unknown) = 0;
+	vector<uint8_t>&	attr_unknown, 
+	bool&	valid) = 0;
 
     /**
      *  Pure-virtual function that needs to be implemented to:
@@ -435,7 +436,8 @@ protected:
 	int32_t&	atomic_agg, 
 	vector<uint8_t>&	aggregator, 
 	int32_t&	calc_localpref, 
-	vector<uint8_t>&	attr_unknown) = 0;
+	vector<uint8_t>&	attr_unknown, 
+	bool&	valid) = 0;
 
     /**
      *  Pure-virtual function that needs to be implemented to:

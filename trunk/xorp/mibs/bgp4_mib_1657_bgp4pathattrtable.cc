@@ -66,7 +66,7 @@ static void  get_v4_route_list_start_done(const XrlError&, const uint32_t*);
 static void get_v4_route_list_next_done(const XrlError& e, const IPv4* peer_id,
     const IPv4Net*, const uint32_t *, const vector<uint8_t>*, const IPv4*,
     const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*,
-    const int32_t*, const vector<uint8_t>*);
+    const int32_t*, const vector<uint8_t>*, const bool* valid);
 static void rm_old_routes (void *, void *); 
 static uint32_t rows_are_equal(bgp4PathAttrTable_context * lr, 
     bgp4PathAttrTable_context * rr);
@@ -495,9 +495,10 @@ get_v4_route_list_next_done(const XrlError& e,
                             const int32_t* atomic_agg,
                             const vector<uint8_t>* aggregator,
                             const int32_t* calc_localpref,
-                            const vector<uint8_t>* attr_unknown)
+                            const vector<uint8_t>* attr_unknown,
+			    const bool* valid)
 {
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY() || false == valid) {
 	// Done updating the local table.  Time to remove old routes 
         DEBUGMSGTL((BgpMib::the_instance().name(),
 	    "received last route of bgp4PathAttrTable... %ud\n",

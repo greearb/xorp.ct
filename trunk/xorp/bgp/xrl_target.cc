@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.16 2003/06/17 06:44:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.17 2003/06/20 21:44:26 atanu Exp $"
+
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
 #include "bgp_module.h"
@@ -537,6 +540,8 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 	// Output values, 
 	uint32_t& token)
 {
+    debug_msg("\n");
+
     if (_bgp.get_route_list_start4(token)) {
 	return XrlCmdError::OKAY();
     } else {
@@ -571,8 +576,11 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_next(
 	int32_t& atomic_agg, 
 	vector<uint8_t>& aggregator, 
 	int32_t& calc_localpref, 
-	vector<uint8_t>& attr_unknown)
+	vector<uint8_t>& attr_unknown,
+	bool& valid)
 {
+    debug_msg("\n");
+
     uint32_t origin;
     bool best = false;
     if (_bgp.get_route_list_next4(token, peer_id, net, origin, aspath,
@@ -585,10 +593,12 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_next(
 	} else {
 	    best_and_origin = (1 << 16) | origin;
 	}
-	return XrlCmdError::OKAY();
+	valid = true;
     } else {
-	return XrlCmdError::COMMAND_FAILED("No more routes");
+	valid = false;
     }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -606,8 +616,11 @@ XrlBgpTarget::bgp_0_2_get_v6_route_list_next(
 	int32_t& atomic_agg, 
 	vector<uint8_t>& aggregator, 
 	int32_t& calc_localpref, 
-	vector<uint8_t>& attr_unknown)
+	vector<uint8_t>& attr_unknown,
+	bool& valid)
 {
+    debug_msg("\n");
+
     uint32_t origin;
     bool best;
     if (_bgp.get_route_list_next6(token, peer_id, net, origin, aspath,
@@ -620,11 +633,11 @@ XrlBgpTarget::bgp_0_2_get_v6_route_list_next(
 	} else {
 	    best_and_origin = (1 << 16) & origin;
 	}
-
-	return XrlCmdError::OKAY();
+	valid = true;
     } else {
-	return XrlCmdError::COMMAND_FAILED("No more routes");
+	valid = false;
     }
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_changed4(

@@ -12,17 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.4 2003/02/24 12:53:47 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.5 2003/03/10 23:20:10 hodson Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
 #include "bgp/path_attribute.hh"
 
-#define MAX_REQUESTS 4
+#define MAX_REQUESTS 100
 
 PrintRoutes::PrintRoutes(detail_t verbose, int interval) 
     : XrlBgpV0p2Client(&_xrl_rtr), 
-    _eventloop(), _xrl_rtr(_eventloop, "print_peers"), _verbose(verbose)
+    _eventloop(), _xrl_rtr(_eventloop, "print_routes"), _verbose(verbose)
 {
     _prev_no_bgp = false;
     _prev_no_routes = false;
@@ -83,10 +83,10 @@ PrintRoutes::get_v4_route_list_start_done(const XrlError& e,
 
 void
 PrintRoutes::get_v4_route_list_next() {
-    XorpCallback12<void, const XrlError&, const IPv4*, const IPv4Net*, 
+    XorpCallback13<void, const XrlError&, const IPv4*, const IPv4Net*, 
 	const uint32_t*, const vector<uint8_t>*, const IPv4*, const int32_t*, 
 	const int32_t*, const int32_t*, const vector<uint8_t>*, 
-	const int32_t*, const vector<uint8_t>*>::RefPtr cb;
+	const int32_t*, const vector<uint8_t>*, const bool*>::RefPtr cb;
     cb = callback(this, &PrintRoutes::get_v4_route_list_next_done);
     send_get_v4_route_list_next("bgp", _token, cb);
 }
@@ -103,7 +103,8 @@ PrintRoutes::get_v4_route_list_next_done(const XrlError& e,
 					 const int32_t* atomic_agg, 
 					 const vector<uint8_t>* aggregator, 
 					 const int32_t* calc_localpref, 
-					 const vector<uint8_t>* attr_unknown) 
+					 const vector<uint8_t>* attr_unknown,
+					 const bool* valid) 
 {
     UNUSED(med);
     UNUSED(localpref);
@@ -113,7 +114,7 @@ PrintRoutes::get_v4_route_list_next_done(const XrlError& e,
     UNUSED(attr_unknown);
     UNUSED(aspath);
 
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY() || false == *valid) {
 	_active_requests--;
 	_done = true;
 	return;
@@ -156,6 +157,6 @@ PrintRoutes::get_v4_route_list_next_done(const XrlError& e,
 	printf ("BAD ORIGIN\n");
 	break;
     }
-	
+
     get_v4_route_list_next();
 }

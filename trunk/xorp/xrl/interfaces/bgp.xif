@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.8 2003/05/06 02:20:02 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.9 2003/05/29 23:34:03 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -336,7 +336,8 @@ interface bgp/0.2 {
 		& atomic_agg:i32 \
 		& aggregator:binary \
 		& calc_localpref:i32 \
-		& attr_unknown:binary
+		& attr_unknown:binary \
+		& valid:bool
 
 	/**
          * Get the next route in the list
@@ -356,7 +357,8 @@ interface bgp/0.2 {
 		& atomic_agg:i32 \
 		& aggregator:binary \
 		& calc_localpref:i32 \
-		& attr_unknown:binary
+		& attr_unknown:binary \
+		& valid:bool
 
 	/**
 	 * Set which parameters we support per peer

@@ -1121,6 +1121,7 @@ XrlBgpTargetBase::handle_bgp_0_2_get_v4_route_list_next(const XrlArgs& xa_inputs
     vector<uint8_t> aggregator;
     int32_t calc_localpref;
     vector<uint8_t> attr_unknown;
+    bool valid;
     try {
 	XrlCmdError e = bgp_0_2_get_v4_route_list_next(
 	    xa_inputs.get_uint32("token"),
@@ -1134,7 +1135,8 @@ XrlBgpTargetBase::handle_bgp_0_2_get_v4_route_list_next(const XrlArgs& xa_inputs
 	    atomic_agg,
 	    aggregator,
 	    calc_localpref,
-	    attr_unknown);
+	    attr_unknown,
+	    valid);
 	if (e != XrlCmdError::OKAY()) {
 	    XLOG_WARNING("Handling method for bgp/0.2/get_v4_route_list_next failed: %s",
             		 e.str().c_str());
@@ -1158,6 +1160,7 @@ XrlBgpTargetBase::handle_bgp_0_2_get_v4_route_list_next(const XrlArgs& xa_inputs
 	pxa_outputs->add("aggregator", aggregator);
 	pxa_outputs->add("calc_localpref", calc_localpref);
 	pxa_outputs->add("attr_unknown", attr_unknown);
+	pxa_outputs->add("valid", valid);
     } catch (const XrlArgs::XrlAtomFound& ) {
 	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
     }
@@ -1190,6 +1193,7 @@ XrlBgpTargetBase::handle_bgp_0_2_get_v6_route_list_next(const XrlArgs& xa_inputs
     vector<uint8_t> aggregator;
     int32_t calc_localpref;
     vector<uint8_t> attr_unknown;
+    bool valid;
     try {
 	XrlCmdError e = bgp_0_2_get_v6_route_list_next(
 	    xa_inputs.get_uint32("token"),
@@ -1203,7 +1207,8 @@ XrlBgpTargetBase::handle_bgp_0_2_get_v6_route_list_next(const XrlArgs& xa_inputs
 	    atomic_agg,
 	    aggregator,
 	    calc_localpref,
-	    attr_unknown);
+	    attr_unknown,
+	    valid);
 	if (e != XrlCmdError::OKAY()) {
 	    XLOG_WARNING("Handling method for bgp/0.2/get_v6_route_list_next failed: %s",
             		 e.str().c_str());
@@ -1227,6 +1232,7 @@ XrlBgpTargetBase::handle_bgp_0_2_get_v6_route_list_next(const XrlArgs& xa_inputs
 	pxa_outputs->add("aggregator", aggregator);
 	pxa_outputs->add("calc_localpref", calc_localpref);
 	pxa_outputs->add("attr_unknown", attr_unknown);
+	pxa_outputs->add("valid", valid);
     } catch (const XrlArgs::XrlAtomFound& ) {
 	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
     }
