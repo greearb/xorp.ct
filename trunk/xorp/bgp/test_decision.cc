@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.23 2003/10/25 13:23:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.24 2004/02/24 03:16:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -134,19 +134,22 @@ test_decision(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
+    LocalPrefAttribute lpa1(100);
+    LocalPrefAttribute lpa2(200);
+    LocalPrefAttribute lpa3(300);
     PathAttributeList<IPv4>* palist1 =
 	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist1->add_path_attribute(LocalPrefAttribute(100));
+    palist1->add_path_attribute(lpa1);
     palist1->rehash();
 
     PathAttributeList<IPv4>* palist2 =
 	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
-    palist2->add_path_attribute(LocalPrefAttribute(100));
+    palist2->add_path_attribute(lpa1);
     palist2->rehash();
 
     PathAttributeList<IPv4>* palist3 =
 	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
-    palist3->add_path_attribute(LocalPrefAttribute(100));
+    palist3->add_path_attribute(lpa1);
     palist3->rehash();
 
     PathAttributeList<IPv4>* palist4;
@@ -488,7 +491,7 @@ test_decision(TestInfo& /*info*/)
     // ================================================================
     palist4 =
 	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(200));
+    palist4->add_path_attribute(lpa2);
     palist4->rehash();
 
     debug_table->write_comment("******************************************");
@@ -579,13 +582,15 @@ test_decision(TestInfo& /*info*/)
     // Test5: decision by MED
     // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
-    palist4->add_path_attribute(MEDAttribute(100));
+    palist4->add_path_attribute(lpa1);
+    MEDAttribute med1(100);
+    palist4->add_path_attribute(med1);
     palist4->rehash();
 
     palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(100));
-    palist5->add_path_attribute(MEDAttribute(200));
+    palist5->add_path_attribute(lpa1);
+    MEDAttribute med2(200);
+    palist5->add_path_attribute(med2);
     palist5->rehash();
 
     debug_table->write_comment("******************************************");
@@ -776,13 +781,13 @@ test_decision(TestInfo& /*info*/)
     peer_data1->set_id("101.0.0.0");
     peer_data2->set_id("100.0.0.0");
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
-    palist4->add_path_attribute(MEDAttribute(100));
+    palist4->add_path_attribute(lpa1);
+    palist4->add_path_attribute(med1);
     palist4->rehash();
 
     palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt3, igp_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(100));
-    palist5->add_path_attribute(MEDAttribute(200));
+    palist5->add_path_attribute(lpa1);
+    palist5->add_path_attribute(med2);
     palist5->rehash();
 
     debug_table->write_comment("******************************************");
@@ -835,18 +840,19 @@ test_decision(TestInfo& /*info*/)
     peer_data2->set_id("100.0.0.0");
     peer_data3->set_id("102.0.0.0");
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
-    palist4->add_path_attribute(MEDAttribute(100));
+    palist4->add_path_attribute(lpa1);
+    palist4->add_path_attribute(med1);
     palist4->rehash();
 
     palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt3, igp_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(100));
-    palist5->add_path_attribute(MEDAttribute(200));
+    palist5->add_path_attribute(lpa1);
+    palist5->add_path_attribute(med2);
     palist5->rehash();
 
     palist6 = new PathAttributeList<IPv4>(nhatt1, aspathatt3, igp_origin_att);
-    palist6->add_path_attribute(LocalPrefAttribute(100));
-    palist6->add_path_attribute(MEDAttribute(50));
+    palist6->add_path_attribute(lpa1);
+    MEDAttribute med50(50);
+    palist6->add_path_attribute(med50);
     palist6->rehash();
 
     debug_table->write_comment("******************************************");
@@ -1242,12 +1248,12 @@ test_decision(TestInfo& /*info*/)
     // Test6: decision by Origin
     // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, egp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
+    palist4->add_path_attribute(lpa1);
     palist4->rehash();
 
     palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1,
 					  incomplete_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(100));
+    palist5->add_path_attribute(lpa1);
     palist5->rehash();
 
     debug_table->write_comment("******************************************");
@@ -1320,12 +1326,12 @@ test_decision(TestInfo& /*info*/)
     // Test6B: decision by Origin
     // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, egp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
+    palist4->add_path_attribute(lpa1);
     palist4->rehash();
 
     palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1,
 					  incomplete_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(100));
+    palist5->add_path_attribute(lpa1);
     palist5->rehash();
 
     debug_table->write_comment("******************************************");
@@ -1784,13 +1790,13 @@ test_decision(TestInfo& /*info*/)
     next_hop_resolver.set_nexthop_metric(nexthop2, 27);
     next_hop_resolver.set_nexthop_metric(nexthop3, 27);
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
+    palist4->add_path_attribute(lpa1);
     palist4->rehash();
     palist5 = new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(200));
+    palist5->add_path_attribute(lpa2);
     palist5->rehash();
     palist6 = new PathAttributeList<IPv4>(nhatt3, aspathatt1, igp_origin_att);
-    palist6->add_path_attribute(LocalPrefAttribute(300));
+    palist6->add_path_attribute(lpa3);
     palist6->rehash();
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 9A");
@@ -2240,13 +2246,13 @@ test_decision(TestInfo& /*info*/)
     // Test 11A: test of routes becoming resolvable
     // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
+    palist4->add_path_attribute(lpa1);
     palist4->rehash();
     palist5 = new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(200));
+    palist5->add_path_attribute(lpa2);
     palist5->rehash();
     palist6 = new PathAttributeList<IPv4>(nhatt3, aspathatt1, igp_origin_att);
-    palist6->add_path_attribute(LocalPrefAttribute(300));
+    palist6->add_path_attribute(lpa3);
     palist6->rehash();
     next_hop_resolver.unset_nexthop_metric(nexthop2);
     next_hop_resolver.unset_nexthop_metric(nexthop3);
@@ -2310,13 +2316,13 @@ test_decision(TestInfo& /*info*/)
     // Test 11B: test of routes becoming resolvable
     // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
+    palist4->add_path_attribute(lpa1);
     palist4->rehash();
     palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(200));
+    palist5->add_path_attribute(lpa2);
     palist5->rehash();
     palist6 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist6->add_path_attribute(LocalPrefAttribute(300));
+    palist6->add_path_attribute(lpa3);
     palist6->rehash();
     next_hop_resolver.unset_nexthop_metric(nexthop1);
     next_hop_resolver.unset_nexthop_metric(nexthop2);

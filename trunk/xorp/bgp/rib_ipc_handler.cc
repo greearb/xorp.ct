@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.46 2004/03/24 19:14:04 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.47 2004/03/24 19:34:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -440,6 +440,13 @@ XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
 }
 
 template<class A>
+EventLoop& 
+XrlQueue<A>::eventloop() const 
+{ 
+    return _rib_ipc_handler->eventloop(); 
+}
+
+template<class A>
 void
 XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
 			     const IPNet<A>& net, const A& nexthop)
@@ -518,7 +525,7 @@ XrlQueue<A>::start()
 	    return;
 	}
 
-	typename deque <XrlQueue<A>::Queued>::const_iterator qi;
+	typename deque<typename XrlQueue<A>::Queued>::const_iterator qi;
 
 	qi = _xrl_queue.begin();
 
@@ -666,3 +673,4 @@ XrlQueue<A>::route_command_done(const XrlError& error,
     // Fire of more requests.
     start();
 }
+

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.8 2003/05/23 00:02:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.9 2004/02/25 05:03:06 atanu Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -21,7 +21,7 @@
 template<class A> AttributeManager<A> SubnetRoute<A>::_att_mgr;
 
 template<class A>
-SubnetRoute<A>::SubnetRoute<A>(const SubnetRoute<A>& route_to_clone) 
+SubnetRoute<A>::SubnetRoute(const SubnetRoute<A>& route_to_clone) 
 {
     debug_msg("SubnetRoute constructor1 giving %x\n", (uint)this);
     //note that we need an explicit constructor here, rather than
@@ -48,7 +48,7 @@ SubnetRoute<A>::SubnetRoute<A>(const SubnetRoute<A>& route_to_clone)
 }
 
 template<class A>
-SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n, 
+SubnetRoute<A>::SubnetRoute(const IPNet<A> &n, 
 			       const PathAttributeList<A>* atts,
 			       const SubnetRoute<A>* parent_route)
     : _net(n), _parent_route(parent_route) {
@@ -72,7 +72,7 @@ SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n,
 }
 
 template<class A>
-SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n, 
+SubnetRoute<A>::SubnetRoute(const IPNet<A> &n, 
 			       const PathAttributeList<A>* atts,
 			       const SubnetRoute<A>* parent_route,
 			       uint32_t igp_metric)
@@ -108,7 +108,7 @@ SubnetRoute<A>::operator==(const SubnetRoute<A>& them) const {
 }
 
 template<class A>
-SubnetRoute<A>::~SubnetRoute<A>() {
+SubnetRoute<A>::~SubnetRoute() {
     debug_msg("SubnetRoute destructor called for %x\n", (uint)this);
     _att_mgr.delete_attribute_list(_attributes);
 

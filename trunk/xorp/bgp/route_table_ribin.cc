@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.22 2004/03/04 03:41:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.23 2004/03/24 19:14:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,7 +35,7 @@ RibInTable<A>::RibInTable(string table_name,
     _peer_is_up = true;
     _genid = 1; /*zero is not a valid genid*/
     _table_version = 1;
-    _parent = NULL;
+    this->_parent = NULL;
 
     _nexthop_push_active = false;
 }
@@ -62,20 +62,20 @@ RibInTable<A>::ribin_peering_went_down()
        back up before we've finished the background deletion process -
        credits to Atanu Ghosh for this neat idea */
 
-    string tablename = "Deleted" + _tablename;
+    string tablename = "Deleted" + this->tablename();
 
     DeletionTable<A>* deletion_table =
-	new DeletionTable<A>(tablename, safi(), _route_table, _peer, _genid,
-			     this);
+	new DeletionTable<A>(tablename, this->safi(), _route_table, _peer, 
+			     _genid, this);
 
     _route_table = new BgpTrie<A>;
 
-    deletion_table->set_next_table(_next_table);
-    _next_table->set_parent(deletion_table);
-    _next_table = deletion_table;
+    deletion_table->set_next_table(this->_next_table);
+    this->_next_table->set_parent(deletion_table);
+    this->_next_table = deletion_table;
 
     deletion_table->initiate_background_deletion();
-    _next_table->peering_went_down(_peer, _genid, this);
+    this->_next_table->peering_went_down(_peer, _genid, this);
 }
 
 template<class A>
@@ -99,7 +99,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			 BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
@@ -109,7 +109,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == NULL);
     XLOG_ASSERT(rtmsg.origin_peer() == _peer);
     XLOG_ASSERT(_peer_is_up);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     existing_route = lookup_route(rtmsg.net());
     int response;
@@ -143,7 +143,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	InternalMessage<A> new_rt_msg(new_route, _peer, _genid);
 	if (rtmsg.push()) new_rt_msg.set_push();
 
-	response = _next_table->replace_route(old_rt_msg, new_rt_msg,
+	response = this->_next_table->replace_route(old_rt_msg, new_rt_msg,
 					      (BGPRouteTable<A>*)this);
     } else {
 	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
@@ -154,7 +154,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	// progogate downstream
 	InternalMessage<A> new_rt_msg(new_route, _peer, _genid);
 	if (rtmsg.push()) new_rt_msg.set_push();
-	response = _next_table->add_route(new_rt_msg, (BGPRouteTable<A>*)this);
+	response = this->_next_table->add_route(new_rt_msg, (BGPRouteTable<A>*)this);
     }
 
     switch (response) {
@@ -184,7 +184,7 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
@@ -210,8 +210,8 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	// propogate downstream
 	InternalMessage<A> old_rt_msg(existing_route, _peer, _genid);
 	if (rtmsg.push()) old_rt_msg.set_push();
-	if (_next_table != NULL)
-	    _next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
+	if (this->_next_table != NULL)
+	    this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
     } else {
 	// we received a delete, but didn't have anything to delete.
 	// It's debatable whether we should silently ignore this, or
@@ -235,9 +235,9 @@ RibInTable<A>::push(BGPRouteTable<A> *caller)
     debug_msg("RibInTable<A>::push\n");
     XLOG_ASSERT(caller == NULL);
     XLOG_ASSERT(_peer_is_up);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(this->_next_table != NULL);
 
-    return _next_table->push((BGPRouteTable<A>*)this);
+    return this->_next_table->push((BGPRouteTable<A>*)this);
 }
 
 template<class A>
@@ -275,7 +275,7 @@ template<class A>
 string
 RibInTable<A>::str() const
 {
-    string s = "RibInTable<A>" + tablename();
+    string s = "RibInTable<A>" + this->tablename();
     return s;
 }
 
@@ -313,7 +313,7 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 	    // route is not filtered
 	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
 	    rt_msg.set_push();
-	    _next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
+	    this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
 				    dump_iter.peer_to_dump_to());
 	    break;
 	}
@@ -333,7 +333,7 @@ void
 RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
     debug_msg("igp_nexthop_changed for bgp_nexthop %s on table %s\n",
-	   bgp_nexthop.str().c_str(), _tablename.c_str());
+	   bgp_nexthop.str().c_str(), this->tablename().c_str());
 
     typename set <A>::const_iterator i;
     i = _changed_nexthops.find(bgp_nexthop);
@@ -401,7 +401,7 @@ RibInTable<A>::push_next_changed_nexthop()
 	InternalMessage<A> old_rt_msg(chained_rt, _peer, _genid);
 	InternalMessage<A> new_rt_msg(chained_rt, _peer, _genid);
 
-	_next_table->replace_route(old_rt_msg,
+	this->_next_table->replace_route(old_rt_msg,
 				   new_rt_msg, (BGPRouteTable<A>*)this);
 
 	if (chained_rt->next() == first_rt) {
@@ -413,7 +413,7 @@ RibInTable<A>::push_next_changed_nexthop()
 	chained_rt = chained_rt->next();
     }
     debug_msg("****RibIn Sending push***\n");
-    _next_table->push((BGPRouteTable<A>*)this);
+    this->_next_table->push((BGPRouteTable<A>*)this);
 
     next_chain();
 
@@ -488,6 +488,14 @@ RibInTable<A>::next_chain()
 
     _current_chain = pmi;
 }
+
+template<class A>
+EventLoop& 
+RibInTable<A>::eventloop() const 
+{
+    return _peer->eventloop();
+}
+
 
 template class RibInTable<IPv4>;
 template class RibInTable<IPv6>;

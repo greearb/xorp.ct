@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrt.hh,v 1.3 2003/03/10 23:20:45 hodson Exp $
+// $XORP: xorp/mrt/mrt.hh,v 1.4 2004/02/26 04:20:14 pavlin Exp $
 
 #ifndef __MRT_MRT_HH__
 #define __MRT_MRT_HH__
@@ -673,7 +673,7 @@ public:
      * prefix @ref prefix_s, otherwise false.
      */
     bool	is_same_prefix_s(const IPvXNet& prefix_s) const {
-	return (prefix_s.contains(_source_addr));
+	return (prefix_s.contains(this->_source_addr));
     }
     
     /**
@@ -684,7 +684,7 @@ public:
      * prefix @ref prefix_g, otherwise false.
      */
     bool	is_same_prefix_g(const IPvXNet& prefix_g) const {
-	return (prefix_g.contains(_group_addr));
+	return (prefix_g.contains(this->_group_addr));
     }
     
     /**

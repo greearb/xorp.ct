@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.9 2004/03/04 03:29:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.10 2004/03/04 03:35:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,7 +23,7 @@
 #include "internal_message.hh"
 
 template <class A>
-DownedPeer<A>::DownedPeer<A>(const PeerHandler* peer,
+DownedPeer<A>::DownedPeer(const PeerHandler* peer,
 			     bool routes_dumped,
 			     const IPNet<A>& last_net,
 			     uint32_t genid) 
@@ -49,12 +49,12 @@ DownedPeer<A>::str() const
 }
 
 template <class A>
-DownedPeer<A>::~DownedPeer<A>()
+DownedPeer<A>::~DownedPeer()
 {
 }
 
 template <class A>
-DumpIterator<A>::DumpIterator<A>(const PeerHandler* peer,
+DumpIterator<A>::DumpIterator(const PeerHandler* peer,
 			 const list <const PeerHandler*>& peers_to_dump)
 {
     debug_msg("peer: %p\n", peer);

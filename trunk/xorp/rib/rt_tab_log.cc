@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_log.cc,v 1.3 2004/02/11 08:48:48 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_log.cc,v 1.4 2004/03/25 01:45:09 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -36,12 +36,19 @@ LogTable<A>::~LogTable()
 }
 
 template<typename A>
+uint32_t 
+LogTable<A>::update_number() const 
+{ 
+    return _update_number; 
+}
+
+template<typename A>
 int
 LogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 		       RouteTable<A>* 		caller)
 {
     _update_number++;
-    RouteTable<A>* n = next_table();
+    RouteTable<A>* n = this->next_table();
     if (n != NULL) {
 	return n->add_route(route, caller);
     }
@@ -53,7 +60,7 @@ int
 LogTable<A>::delete_route(const IPRouteEntry<A>* route,
 			  RouteTable<A>* 	 caller)
 {
-    RouteTable<A>* n = next_table();
+    RouteTable<A>* n = this->next_table();
     if (n != NULL) {
 	return n->delete_route(route, caller);
     }
@@ -97,7 +104,7 @@ template<typename A> string
 LogTable<A>::str() const
 {
     string s;
-    s = "-------\nLogTable: " + tablename() + "\n";
+    s = "-------\nLogTable: " + this->tablename() + "\n";
     s += "parent = " + _parent->tablename() + "\n";
     return s;
 }
@@ -118,7 +125,7 @@ int
 OstreamLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			      RouteTable<A>* 		caller)
 {
-    _o << update_number() << " Add: " << route.str() << " Return: ";
+    _o << this->update_number() << " Add: " << route.str() << " Return: ";
     int s = LogTable<A>::add_route(route, caller);
     _o << s << std::endl;
     return s;
@@ -130,7 +137,7 @@ OstreamLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 				 RouteTable<A>* 		caller)
 {
     if (route != NULL) {
-	_o << update_number() << " Delete: " << route->str() << " Return: ";
+	_o << this->update_number() << " Delete: " << route->str() << " Return: ";
     }
 
     int s = LogTable<A>::delete_route(route, caller);
@@ -170,7 +177,7 @@ XLogTraceTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			      RouteTable<A>* 		caller)
 {
     string msg = c_format("%u Add: %s Return: ",
-			  update_number(), route.str().c_str());
+			  this->update_number(), route.str().c_str());
     int s = LogTable<A>::add_route(route, caller);
     msg += c_format("%d\n", s);
     XLOG_TRACE(true, msg.c_str());
@@ -187,7 +194,7 @@ XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 
     if (route != NULL) {
 	msg = c_format("%u Delete: %s Return: ",
-		       update_number(), route->str().c_str());
+		       this->update_number(), route->str().c_str());
     }
 
     int s = LogTable<A>::delete_route(route, caller);
@@ -229,7 +236,7 @@ DebugMsgLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			      RouteTable<A>* 		caller)
 {
     string msg = c_format("%u Add: %s Return: ",
-			  update_number(), route.str().c_str());
+			  this->update_number(), route.str().c_str());
     int s = LogTable<A>::add_route(route, caller);
     msg += c_format("%d\n", s);
     debug_msg(msg.c_str());
@@ -246,7 +253,7 @@ DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 
     if (route != NULL) {
 	msg = c_format("%u Delete: %s Return: ",
-		       update_number(), route->str().c_str());
+		       this->update_number(), route->str().c_str());
     }
 
     int s = LogTable<A>::delete_route(route, caller);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.8 2004/02/06 22:44:12 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.9 2004/02/11 08:48:50 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -410,7 +410,7 @@ public:
      * Cause the register server to push out queued changes to the
      * routing protocols.  
      */
-    void flush() { _register_server->flush(); }
+    void flush();
     
 private:
     RouteRegister<A>* add_registration(const IPNet<A>& net,

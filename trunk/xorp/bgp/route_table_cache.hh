@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.7 2003/07/31 23:37:13 jcardona Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.8 2004/02/24 03:16:55 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -29,6 +29,7 @@ inline void
 RefTrieNode<IPv4, const SubnetRoute<IPv4> >
 ::delete_payload(const SubnetRoute<IPv4>* p) 
 {
+    printf("delete_payload %p\n", p);
     p->unref();
 }
 
@@ -44,6 +45,7 @@ template<class A>
 class CacheTable : public BGPRouteTable<A>  {
 public:
     CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent);
+    ~CacheTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,

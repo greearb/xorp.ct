@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.12 2003/08/04 21:58:58 pavlin Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.13 2004/02/24 03:16:56 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -88,9 +88,7 @@ public:
 	return _peer;
     }
 private:
-    EventLoop& eventloop() const {
-	return _peer->eventloop();
-    }
+    inline EventLoop& eventloop() const;
 
     BgpTrie<A>* _route_table;
     const PeerHandler *_peer;

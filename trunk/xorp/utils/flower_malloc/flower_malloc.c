@@ -358,7 +358,7 @@ init_flower_malloc()
  *        ptr           returned ptr 
  */
 static void *
-track_alloc (void *ptr, size_t req_size)
+track_alloc (uint8_t *ptr, size_t req_size)
 {
     uint32_t trk_idx; 
     void * ret_addr[BACKTRACE_DEPTH];
@@ -383,9 +383,9 @@ track_alloc (void *ptr, size_t req_size)
     }
 
     * (uint32_t*) ptr = trk_idx; 
-    (uint32_t) ptr += sizeof(uint32_t);
+    ptr += sizeof(uint32_t);
     * (uint32_t*) ptr = req_size;
-    (uint32_t) ptr += sizeof(uint32_t);
+    ptr += sizeof(uint32_t);
     return ptr;
 }
 
@@ -405,15 +405,15 @@ track_alloc (void *ptr, size_t req_size)
  *    returned ptr            ptr
  */
 static void *
-track_free (void *ptr)
+track_free (uint8_t *ptr)
 {
     uint32_t trk_idx, req_size; 
 
     if (no_tracking) return ptr;
 
-    (uint32_t) ptr -= sizeof(uint32_t);
+    ptr -= sizeof(uint32_t);
     req_size = * (uint32_t*) ptr;
-    (uint32_t) ptr -= sizeof(uint32_t);
+    ptr -= sizeof(uint32_t);
     trk_idx = * (uint32_t*) ptr;
 
     if (tracker_table[trk_idx].count) tracker_table[trk_idx].count--; 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.12 2004/02/24 21:04:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.13 2004/02/26 11:30:19 pavlin Exp $"
 
 
 //
@@ -697,8 +697,8 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	ip6_header.ip6_vfc	|= IPV6_VERSION;
 	ip6_header.ip6_hlim	= 0;
 	ip6_header.ip6_nxt	= IPPROTO_PIM;
-	source_addr.copy_out(ip6_header.ip6_src);
-	group_addr.copy_out(ip6_header.ip6_dst);
+	source_addr.copy_out((uint8_t*)&(ip6_header.ip6_src));
+	group_addr.copy_out((uint8_t*)&(ip6_header.ip6_dst));
 	
 	BUFFER_PUT_DATA(cp, buffer, sizeof(ip6_header));
 	

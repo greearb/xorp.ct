@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.3 2003/03/16 07:19:00 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_log.hh,v 1.2 2004/02/11 08:48:48 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_LOG_HH__
 #define __RIB_RT_TAB_LOG_HH__
@@ -50,7 +50,7 @@ public:
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;
 
-    inline uint32_t update_number() const { return _update_number; }
+    uint32_t update_number() const;
 
 private:
     RouteTable<A>* _parent;

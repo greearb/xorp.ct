@@ -271,7 +271,7 @@ protected:
 template <class R>
 typename XorpCallback0<R>::RefPtr
 callback(R (*f)()) {
-    return XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B0<R>(f));
+    return typename XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B0<R>(f));
 }
 
 /**
@@ -562,7 +562,7 @@ protected:
 template <class R, class BA1>
 typename XorpCallback0<R>::RefPtr
 callback(R (*f)(BA1), BA1 ba1) {
-    return XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B1<R, BA1>(f, ba1));
+    return typename XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B1<R, BA1>(f, ba1));
 }
 
 /**
@@ -859,7 +859,7 @@ protected:
 template <class R, class BA1, class BA2>
 typename XorpCallback0<R>::RefPtr
 callback(R (*f)(BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B2<R, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B2<R, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -1162,7 +1162,7 @@ protected:
 template <class R, class BA1, class BA2, class BA3>
 typename XorpCallback0<R>::RefPtr
 callback(R (*f)(BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B3<R, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B3<R, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -1471,7 +1471,7 @@ protected:
 template <class R, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback0<R>::RefPtr
 callback(R (*f)(BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B4<R, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B4<R, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -1786,7 +1786,7 @@ protected:
 template <class R, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback0<R>::RefPtr
 callback(R (*f)(BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B5<R, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B5<R, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -2107,7 +2107,7 @@ protected:
 template <class R, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback0<R>::RefPtr
 callback(R (*f)(BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B6<R, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback0<R>::RefPtr(new XorpFunctionCallback0B6<R, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -2436,7 +2436,7 @@ protected:
 template <class R, class A1>
 typename XorpCallback1<R, A1>::RefPtr
 callback(R (*f)(A1)) {
-    return XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B0<R, A1>(f));
+    return typename XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B0<R, A1>(f));
 }
 
 /**
@@ -2727,7 +2727,7 @@ protected:
 template <class R, class A1, class BA1>
 typename XorpCallback1<R, A1>::RefPtr
 callback(R (*f)(A1, BA1), BA1 ba1) {
-    return XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B1<R, A1, BA1>(f, ba1));
+    return typename XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B1<R, A1, BA1>(f, ba1));
 }
 
 /**
@@ -3024,7 +3024,7 @@ protected:
 template <class R, class A1, class BA1, class BA2>
 typename XorpCallback1<R, A1>::RefPtr
 callback(R (*f)(A1, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B2<R, A1, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B2<R, A1, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -3327,7 +3327,7 @@ protected:
 template <class R, class A1, class BA1, class BA2, class BA3>
 typename XorpCallback1<R, A1>::RefPtr
 callback(R (*f)(A1, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B3<R, A1, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B3<R, A1, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -3636,7 +3636,7 @@ protected:
 template <class R, class A1, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback1<R, A1>::RefPtr
 callback(R (*f)(A1, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B4<R, A1, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B4<R, A1, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -3951,7 +3951,7 @@ protected:
 template <class R, class A1, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback1<R, A1>::RefPtr
 callback(R (*f)(A1, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B5<R, A1, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B5<R, A1, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -4272,7 +4272,7 @@ protected:
 template <class R, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback1<R, A1>::RefPtr
 callback(R (*f)(A1, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B6<R, A1, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback1<R, A1>::RefPtr(new XorpFunctionCallback1B6<R, A1, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -4601,7 +4601,7 @@ protected:
 template <class R, class A1, class A2>
 typename XorpCallback2<R, A1, A2>::RefPtr
 callback(R (*f)(A1, A2)) {
-    return XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B0<R, A1, A2>(f));
+    return typename XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B0<R, A1, A2>(f));
 }
 
 /**
@@ -4892,7 +4892,7 @@ protected:
 template <class R, class A1, class A2, class BA1>
 typename XorpCallback2<R, A1, A2>::RefPtr
 callback(R (*f)(A1, A2, BA1), BA1 ba1) {
-    return XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B1<R, A1, A2, BA1>(f, ba1));
+    return typename XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B1<R, A1, A2, BA1>(f, ba1));
 }
 
 /**
@@ -5189,7 +5189,7 @@ protected:
 template <class R, class A1, class A2, class BA1, class BA2>
 typename XorpCallback2<R, A1, A2>::RefPtr
 callback(R (*f)(A1, A2, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B2<R, A1, A2, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B2<R, A1, A2, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -5492,7 +5492,7 @@ protected:
 template <class R, class A1, class A2, class BA1, class BA2, class BA3>
 typename XorpCallback2<R, A1, A2>::RefPtr
 callback(R (*f)(A1, A2, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B3<R, A1, A2, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B3<R, A1, A2, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -5801,7 +5801,7 @@ protected:
 template <class R, class A1, class A2, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback2<R, A1, A2>::RefPtr
 callback(R (*f)(A1, A2, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B4<R, A1, A2, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B4<R, A1, A2, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -6116,7 +6116,7 @@ protected:
 template <class R, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback2<R, A1, A2>::RefPtr
 callback(R (*f)(A1, A2, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B5<R, A1, A2, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B5<R, A1, A2, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -6437,7 +6437,7 @@ protected:
 template <class R, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback2<R, A1, A2>::RefPtr
 callback(R (*f)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B6<R, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback2<R, A1, A2>::RefPtr(new XorpFunctionCallback2B6<R, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -6766,7 +6766,7 @@ protected:
 template <class R, class A1, class A2, class A3>
 typename XorpCallback3<R, A1, A2, A3>::RefPtr
 callback(R (*f)(A1, A2, A3)) {
-    return XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B0<R, A1, A2, A3>(f));
+    return typename XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B0<R, A1, A2, A3>(f));
 }
 
 /**
@@ -7057,7 +7057,7 @@ protected:
 template <class R, class A1, class A2, class A3, class BA1>
 typename XorpCallback3<R, A1, A2, A3>::RefPtr
 callback(R (*f)(A1, A2, A3, BA1), BA1 ba1) {
-    return XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B1<R, A1, A2, A3, BA1>(f, ba1));
+    return typename XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B1<R, A1, A2, A3, BA1>(f, ba1));
 }
 
 /**
@@ -7354,7 +7354,7 @@ protected:
 template <class R, class A1, class A2, class A3, class BA1, class BA2>
 typename XorpCallback3<R, A1, A2, A3>::RefPtr
 callback(R (*f)(A1, A2, A3, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B2<R, A1, A2, A3, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B2<R, A1, A2, A3, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -7657,7 +7657,7 @@ protected:
 template <class R, class A1, class A2, class A3, class BA1, class BA2, class BA3>
 typename XorpCallback3<R, A1, A2, A3>::RefPtr
 callback(R (*f)(A1, A2, A3, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B3<R, A1, A2, A3, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B3<R, A1, A2, A3, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -7966,7 +7966,7 @@ protected:
 template <class R, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback3<R, A1, A2, A3>::RefPtr
 callback(R (*f)(A1, A2, A3, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B4<R, A1, A2, A3, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B4<R, A1, A2, A3, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -8281,7 +8281,7 @@ protected:
 template <class R, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback3<R, A1, A2, A3>::RefPtr
 callback(R (*f)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B5<R, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B5<R, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -8602,7 +8602,7 @@ protected:
 template <class R, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback3<R, A1, A2, A3>::RefPtr
 callback(R (*f)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B6<R, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback3<R, A1, A2, A3>::RefPtr(new XorpFunctionCallback3B6<R, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -8931,7 +8931,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4>
 typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
 callback(R (*f)(A1, A2, A3, A4)) {
-    return XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B0<R, A1, A2, A3, A4>(f));
+    return typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B0<R, A1, A2, A3, A4>(f));
 }
 
 /**
@@ -9222,7 +9222,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class BA1>
 typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, BA1), BA1 ba1) {
-    return XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B1<R, A1, A2, A3, A4, BA1>(f, ba1));
+    return typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B1<R, A1, A2, A3, A4, BA1>(f, ba1));
 }
 
 /**
@@ -9519,7 +9519,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class BA1, class BA2>
 typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B2<R, A1, A2, A3, A4, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B2<R, A1, A2, A3, A4, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -9822,7 +9822,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3>
 typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B3<R, A1, A2, A3, A4, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B3<R, A1, A2, A3, A4, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -10131,7 +10131,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B4<R, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B4<R, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -10446,7 +10446,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B5<R, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B5<R, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -10767,7 +10767,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B6<R, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr(new XorpFunctionCallback4B6<R, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -11096,7 +11096,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5>
 typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5)) {
-    return XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B0<R, A1, A2, A3, A4, A5>(f));
+    return typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B0<R, A1, A2, A3, A4, A5>(f));
 }
 
 /**
@@ -11387,7 +11387,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class BA1>
 typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, BA1), BA1 ba1) {
-    return XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B1<R, A1, A2, A3, A4, A5, BA1>(f, ba1));
+    return typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B1<R, A1, A2, A3, A4, A5, BA1>(f, ba1));
 }
 
 /**
@@ -11684,7 +11684,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2>
 typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B2<R, A1, A2, A3, A4, A5, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B2<R, A1, A2, A3, A4, A5, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -11987,7 +11987,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3>
 typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B3<R, A1, A2, A3, A4, A5, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B3<R, A1, A2, A3, A4, A5, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -12296,7 +12296,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B4<R, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B4<R, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -12611,7 +12611,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B5<R, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B5<R, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -12932,7 +12932,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B6<R, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr(new XorpFunctionCallback5B6<R, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -13261,7 +13261,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6>
 typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6)) {
-    return XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B0<R, A1, A2, A3, A4, A5, A6>(f));
+    return typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B0<R, A1, A2, A3, A4, A5, A6>(f));
 }
 
 /**
@@ -13552,7 +13552,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class BA1>
 typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, BA1), BA1 ba1) {
-    return XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B1<R, A1, A2, A3, A4, A5, A6, BA1>(f, ba1));
+    return typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B1<R, A1, A2, A3, A4, A5, A6, BA1>(f, ba1));
 }
 
 /**
@@ -13849,7 +13849,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2>
 typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B2<R, A1, A2, A3, A4, A5, A6, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B2<R, A1, A2, A3, A4, A5, A6, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -14152,7 +14152,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3>
 typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B3<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B3<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -14461,7 +14461,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B4<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B4<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -14776,7 +14776,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B5<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B5<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -15097,7 +15097,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B6<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr(new XorpFunctionCallback6B6<R, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -15426,7 +15426,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
 typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7)) {
-    return XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B0<R, A1, A2, A3, A4, A5, A6, A7>(f));
+    return typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B0<R, A1, A2, A3, A4, A5, A6, A7>(f));
 }
 
 /**
@@ -15717,7 +15717,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1>
 typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, BA1), BA1 ba1) {
-    return XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B1<R, A1, A2, A3, A4, A5, A6, A7, BA1>(f, ba1));
+    return typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B1<R, A1, A2, A3, A4, A5, A6, A7, BA1>(f, ba1));
 }
 
 /**
@@ -16014,7 +16014,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2>
 typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B2<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B2<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -16317,7 +16317,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3>
 typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B3<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B3<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -16626,7 +16626,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B4<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B4<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -16941,7 +16941,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B5<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B5<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -17262,7 +17262,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B6<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr(new XorpFunctionCallback7B6<R, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -17591,7 +17591,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
 typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8)) {
-    return XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B0<R, A1, A2, A3, A4, A5, A6, A7, A8>(f));
+    return typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B0<R, A1, A2, A3, A4, A5, A6, A7, A8>(f));
 }
 
 /**
@@ -17882,7 +17882,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1>
 typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, BA1), BA1 ba1) {
-    return XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B1<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(f, ba1));
+    return typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B1<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(f, ba1));
 }
 
 /**
@@ -18179,7 +18179,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2>
 typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B2<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B2<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -18482,7 +18482,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3>
 typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B3<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B3<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -18791,7 +18791,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B4<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B4<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -19106,7 +19106,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B5<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B5<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -19427,7 +19427,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B6<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr(new XorpFunctionCallback8B6<R, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -19756,7 +19756,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
 typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9)) {
-    return XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>(f));
+    return typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>(f));
 }
 
 /**
@@ -20047,7 +20047,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1>
 typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1), BA1 ba1) {
-    return XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(f, ba1));
+    return typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(f, ba1));
 }
 
 /**
@@ -20344,7 +20344,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2>
 typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -20647,7 +20647,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3>
 typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -20956,7 +20956,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -21271,7 +21271,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -21592,7 +21592,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr(new XorpFunctionCallback9B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -21921,7 +21921,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
 typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)) {
-    return XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(f));
+    return typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(f));
 }
 
 /**
@@ -22212,7 +22212,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1>
 typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1), BA1 ba1) {
-    return XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(f, ba1));
+    return typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(f, ba1));
 }
 
 /**
@@ -22509,7 +22509,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2>
 typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -22812,7 +22812,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3>
 typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -23121,7 +23121,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -23436,7 +23436,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -23757,7 +23757,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr(new XorpFunctionCallback10B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -24086,7 +24086,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
 typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)) {
-    return XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(f));
+    return typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(f));
 }
 
 /**
@@ -24377,7 +24377,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1>
 typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1), BA1 ba1) {
-    return XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(f, ba1));
+    return typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(f, ba1));
 }
 
 /**
@@ -24674,7 +24674,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2>
 typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -24977,7 +24977,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3>
 typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -25286,7 +25286,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -25601,7 +25601,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -25922,7 +25922,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr(new XorpFunctionCallback11B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -26251,7 +26251,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
 typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)) {
-    return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(f));
+    return typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(f));
 }
 
 /**
@@ -26542,7 +26542,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1>
 typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1), BA1 ba1) {
-    return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(f, ba1));
+    return typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(f, ba1));
 }
 
 /**
@@ -26839,7 +26839,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2>
 typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -27142,7 +27142,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3>
 typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -27451,7 +27451,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -27766,7 +27766,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -28087,7 +28087,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpFunctionCallback12B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**
@@ -28416,7 +28416,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
 typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13)) {
-    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(f));
+    return typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(f));
 }
 
 /**
@@ -28707,7 +28707,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1>
 typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1) {
-    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(f, ba1));
+    return typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(f, ba1));
 }
 
 /**
@@ -29004,7 +29004,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2>
 typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2) {
-    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(f, ba1, ba2));
+    return typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(f, ba1, ba2));
 }
 
 /**
@@ -29307,7 +29307,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3>
 typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
-    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(f, ba1, ba2, ba3));
+    return typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(f, ba1, ba2, ba3));
 }
 
 /**
@@ -29616,7 +29616,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4>
 typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
-    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
+    return typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(f, ba1, ba2, ba3, ba4));
 }
 
 /**
@@ -29931,7 +29931,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5>
 typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
-    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
+    return typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(f, ba1, ba2, ba3, ba4, ba5));
 }
 
 /**
@@ -30252,7 +30252,7 @@ protected:
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
 callback(R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
-    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
+    return typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(f, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 /**

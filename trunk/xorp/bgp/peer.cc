@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.59 2004/03/05 02:39:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.60 2004/03/24 19:14:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -273,7 +273,7 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 }
 
 void
-BGPPeer::send_notification(const NotificationPacket *p, bool error)
+BGPPeer::send_notification(const NotificationPacket& p, bool error)
 {
     /*
     ** We need to deal with NOTIFICATION differently from other packets -
@@ -298,7 +298,7 @@ BGPPeer::send_notification(const NotificationPacket *p, bool error)
     /*
      * This buffer is dynamically allocated and should be freed.
      */
-    const uint8_t *buf = (const uint8_t *)p->encode(ccnt);
+    const uint8_t *buf = (const uint8_t *)p.encode(ccnt);
     debug_msg("Buffer for sent packet is %x\n", (uint)buf);
 
     /*
@@ -418,12 +418,13 @@ BGPPeer::event_stop()			// EVENTBGPSTOP
 
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
+    case STATEESTABLISHED: {
 	// Send Notification Message with error code of CEASE.
-	send_notification(NotificationPacket(CEASE), false);
+	NotificationPacket np(CEASE);
+	send_notification(np, false);
 	set_state(STATESTOPPED);
 	break;
-
+    }
     case STATESTOPPED:
 	// a second stop will cause us to give up on sending the CEASE
 	flush_transmit_queue();		// ensure callback can't happen
@@ -597,14 +598,16 @@ BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
      */
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
+    case STATEESTABLISHED: {
 	// Send Notification Message with error code of FSM error.
 	// XXX this needs to be revised.
 	XLOG_WARNING("FSM received EVENTCONNTIMEEXP in state %s",
 	    pretty_print_state(_state));
-	send_notification(NotificationPacket(FSMERROR));
+	NotificationPacket np(FSMERROR);
+	send_notification(np);
 	set_state(STATESTOPPED, true);
 	break;
+    }
     }
 }
 
@@ -628,11 +631,13 @@ BGPPeer::event_holdexp()			// EVENTHOLDTIMEEXP
 
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
+    case STATEESTABLISHED: {
 	// Send Notification Message with error code of Hold Timer expired.
-	send_notification(NotificationPacket(HOLDTIMEEXP));
+	NotificationPacket np(HOLDTIMEEXP);
+	send_notification(np);
 	set_state(STATESTOPPED, true);
 	break;
+    }
     }
 }
 
@@ -656,7 +661,8 @@ BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
     case STATEOPENCONFIRM:
     case STATEESTABLISHED:
 	start_keepalive_timer();
-	send_message(KeepAlivePacket());
+	KeepAlivePacket kp;
+	send_message(kp);
 	break;
     }
 }
@@ -681,7 +687,8 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
 	try {
 	    check_open_packet(p);
 	    // We liked the open packet continue, trying to setup session.
-	    send_message(KeepAlivePacket());
+	    KeepAlivePacket kp;
+	    send_message(kp);
 
 	    // start timers
 	    debug_msg("Starting timers\n");
@@ -704,21 +711,22 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
 
 	    set_state(STATEOPENCONFIRM);
 	} catch(CorruptMessage& mess) {
-	    send_notification(
-		NotificationPacket(mess.error(), mess.subcode()));
+	    NotificationPacket np(mess.error(), mess.subcode());
+	    send_notification(np);
 	    set_state(STATESTOPPED, true);
 	}
 	break;
 
     case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
+    case STATEESTABLISHED: {
 	// Send Notification - FSM error
 	XLOG_WARNING("FSM received EVENTRECOPENMESS in state %s",
 	    pretty_print_state(_state));
-	send_notification(NotificationPacket(FSMERROR));
+	NotificationPacket np(FSMERROR);
+	send_notification(np);
 	set_state(STATESTOPPED, true);
 	break;
-
+    }
     case STATESTOPPED:
 	break;
     }
@@ -742,14 +750,15 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
     case STATESTOPPED:
 	break;
 
-    case STATEOPENSENT:
+    case STATEOPENSENT: {
 	// Send Notification Message with error code of FSM error.
 	XLOG_WARNING("FSM received EVENTRECKEEPALIVEMESS in state %s",
 	    pretty_print_state(_state));
-	send_notification(NotificationPacket(FSMERROR));
+	NotificationPacket np(FSMERROR);
+	send_notification(np);
 	set_state(STATESTOPPED, true);
 	break;
-
+    }
     case STATEOPENCONFIRM:	// this is what we were waiting for.
 	set_state(STATEESTABLISHED);
 	/* FALLTHROUGH */
@@ -777,19 +786,20 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
 	break;
 
     case STATEOPENSENT:
-    case STATEOPENCONFIRM:
+    case STATEOPENCONFIRM: {
 	// Send Notification Message with error code of FSM error.
 	XLOG_WARNING("FSM received EVENTRECUPDATEMESS in state %s",
 	    pretty_print_state(_state));
-	send_notification(NotificationPacket(FSMERROR));
+	NotificationPacket np(FSMERROR);
+	send_notification(np);
 	set_state(STATESTOPPED, true);
 	break;
-
+    }
     case STATEESTABLISHED: {
 	NotificationPacket *notification = check_update_packet(p);
 	if ( notification != 0 ) {	// bad message
 	    // Send Notification Message
-	    send_notification(notification);
+	    send_notification(*notification);
 	    delete notification;
 	    set_state(STATESTOPPED, true);
 	    break;
@@ -843,13 +853,14 @@ BGPPeer::event_recvnotify()			// EVENTRECNOTMESS
 	set_state(STATEIDLE, true);
 	break;
 
-    case STATEOPENSENT:
+    case STATEOPENSENT: {
 	// Send Notification Message with error code of FSM error.
 	XLOG_WARNING("FSM Error 1 event EVENTRECUPDATEMESS");
-	send_notification(NotificationPacket(FSMERROR));
+	NotificationPacket np(FSMERROR);
+	send_notification(np);
 	set_state(STATESTOPPED, true);
 	break;
-
+    }
     case STATESTOPPED:
 	break;
     }
@@ -872,7 +883,8 @@ BGPPeer::notify_peer_of_error(const int error, const int subcode,
      * peer send a notification of the error.
      */
     if (is_connected()) {
-	send_notification(NotificationPacket(error, subcode, data, len));
+	NotificationPacket np(error, subcode, data, len);
+	send_notification(np);
 	set_state(STATESTOPPED, true);
 	return;
     }

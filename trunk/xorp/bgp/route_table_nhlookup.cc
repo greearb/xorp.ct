@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.9 2003/10/23 04:10:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.10 2004/02/24 03:16:56 atanu Exp $"
 
 #include "bgp_module.h"
 #include "route_table_nhlookup.hh"
@@ -90,7 +90,7 @@ NhLookupTable<A>::NhLookupTable(string tablename,
 				BGPRouteTable<A> *parent)
     : BGPRouteTable<A>(tablename, safi)
 {
-    _parent = parent;
+    this->_parent = parent;
     _next_hop_resolver = next_hop_resolver;
 }
 
@@ -99,11 +99,11 @@ int
 NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller) 
 {
-    assert(caller == _parent);
+    assert(caller == this->_parent);
 
     if (_next_hop_resolver->register_nexthop(rtmsg.route()->nexthop(),
 					     rtmsg.net(), this)) {
-	return _next_table->add_route(rtmsg, this);
+	return this->_next_table->add_route(rtmsg, this);
     }
 
     // we need to queue the add, pending nexthop resolution
@@ -124,7 +124,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 				const InternalMessage<A> &new_rtmsg,
 				BGPRouteTable<A> *caller) 
 {
-    assert(caller == _parent);
+    assert(caller == this->_parent);
     debug_msg("NhLookupTable::replace_route\n");
 
     IPNet<A> net = new_rtmsg.net();
@@ -210,9 +210,9 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     } else {
 	bool success;
 	if (propagate_as_add) {
-	    success = _next_table->add_route(new_rtmsg, this);
+	    success = this->_next_table->add_route(new_rtmsg, this);
 	} else {
-	    success = _next_table->replace_route(*real_old_msg,
+	    success = this->_next_table->replace_route(*real_old_msg,
 						 new_rtmsg, this);
 	}
 	if (real_old_msg != &old_rtmsg) {
@@ -227,7 +227,7 @@ int
 NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			       BGPRouteTable<A> *caller) 
 {
-    assert(caller == _parent);
+    assert(caller == this->_parent);
     IPNet<A> net = rtmsg.net();
 
     // Are we still waiting for the old_rtmsg to resolve?
@@ -285,7 +285,7 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	}
     }
 
-    bool success = _next_table->delete_route(*real_msg, this);
+    bool success = this->_next_table->delete_route(*real_msg, this);
     if (real_msg != &rtmsg)
 	delete real_msg;
     return success;
@@ -295,11 +295,11 @@ template <class A>
 int
 NhLookupTable<A>::push(BGPRouteTable<A> *caller) 
 {
-    assert(caller == _parent);
+    assert(caller == this->_parent);
 
     // Always propagate a push - we'll add new pushes each time a
     // nexthop resolves.
-    return _next_table->push(this);
+    return this->_next_table->push(this);
 }
 
 template <class A>
@@ -311,7 +311,7 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net) const
     typename RefTrie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
-	return _parent->lookup_route(net);
+	return this->_parent->lookup_route(net);
     } else {
 	// we found an entry in the lookup pool
 	mqe = &(i.payload());
@@ -334,7 +334,7 @@ template <class A>
 void
 NhLookupTable<A>::route_used(const SubnetRoute<A>* route, bool in_use) 
 {
-    _parent->route_used(route, in_use);
+    this->_parent->route_used(route, in_use);
 }
 
 template <class A>
@@ -350,10 +350,10 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 	const MessageQueueEntry<A>* mqe = nh_iter->second;
 	switch (mqe->type()) {
 	case MessageQueueEntry<A>::ADD:
-	    _next_table->add_route(*(mqe->add_msg()), this);
+	    this->_next_table->add_route(*(mqe->add_msg()), this);
 	    break;
 	case MessageQueueEntry<A>::REPLACE:
-	    _next_table->replace_route(*(mqe->delete_msg()),
+	    this->_next_table->replace_route(*(mqe->delete_msg()),
 				       *(mqe->add_msg()), this);
 	    break;
 	}
@@ -368,14 +368,14 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
     }
 
     // force a push because the original push may be long gone
-    _next_table->push(this);
+    this->_next_table->push(this);
 }
 
 template <class A>
 string
 NhLookupTable<A>::str() const 
 {
-    string s = "NhLookupTable<A>" + tablename();
+    string s = "NhLookupTable<A>" + this->tablename();
     return s;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.23 2004/03/23 11:24:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.24 2004/04/01 19:31:20 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -255,7 +255,7 @@ RIB<A>::initialize_export(list<RibClient* >* rib_clients_list)
 }
 
 template<class A>
-RIB<A>::~RIB<A>()
+RIB<A>::~RIB()
 {
     while (_tables.size() != 0) {
 	delete _tables.begin()->second;

@@ -479,7 +479,7 @@ def output_rest(l_types, b_types, dbg):
     o += "callback("
     o += starting_csv(flatten_pair_list(debug_args))
     o += "R (*f)(%s)%s) {\n" % (csv(l_types + b_types), joining_csv(decl_args(b_types)))
-    o += "    return XorpCallback%d<R%s>::RefPtr(new XorpFunctionCallback%dB%d<R%s>(%sf%s));\n" \
+    o += "    return typename XorpCallback%d<R%s>::RefPtr(new XorpFunctionCallback%dB%d<R%s>(%sf%s));\n" \
           % (nl, joining_csv(l_types), nl, nb, joining_csv(l_types + b_types),
              starting_csv(second_args(debug_args)),
              joining_csv(call_args(b_types)))

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.14 2004/02/24 03:16:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.15 2004/02/25 05:03:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,7 +27,7 @@ RibOutTable<A>::RibOutTable(string table_name,
 			    PeerHandler *peer)
     : BGPRouteTable<A>("RibOutTable-" + table_name, safi)
 {
-    _parent = init_parent;
+    this->_parent = init_parent;
     _peer = peer;
     _peer_busy = false;
     _upstream_queue_exists = false;
@@ -87,14 +87,14 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
     
     print_queue(_queue);
-    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(caller == this->_parent);
 
     // check the queue to see if there's a matching delete - if so we
     // can replace the delete with an add.
@@ -146,7 +146,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     // handle push
     if (rtmsg.push())
-	push(_parent);
+	push(this->_parent);
     debug_msg("After-->:\n");
     print_queue(_queue);
     debug_msg("<--After\n");
@@ -159,7 +159,7 @@ RibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 			      const InternalMessage<A> &new_rtmsg,
 			      BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s::replace_route %x %x\n", tablename().c_str(),
+    debug_msg("%s::replace_route %x %x\n", this->tablename().c_str(),
 	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
     XLOG_ASSERT(old_rtmsg.push() == false);
 
@@ -173,14 +173,14 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
     print_queue(_queue);
-    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(caller == this->_parent);
 
     // check the queue to see if there's a matching entry.
 
@@ -230,7 +230,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     // handle push
     if (rtmsg.push())
-	push(_parent);
+	push(this->_parent);
     return 0;
 }
 
@@ -238,8 +238,8 @@ template<class A>
 int
 RibOutTable<A>::push(BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s\n", tablename().c_str());
-    XLOG_ASSERT(caller == _parent);
+    debug_msg("%s\n", this->tablename().c_str());
+    XLOG_ASSERT(caller == this->_parent);
 
     // In push, we need to collect together all the SubnetRoutes that
     // have the same Path Attributes, and send them together in an
@@ -308,12 +308,12 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	    if ((*i)->op() == RTQUEUE_OP_ADD ) {
 		debug_msg("* Announce\n");
 		// the sanity checking was done in add_route...
-		_peer->add_route(*((*i)->route()), safi());
+		_peer->add_route(*((*i)->route()), this->safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {
 		// the sanity checking was done in delete_route...
 		debug_msg("* Withdraw\n");
-		_peer->delete_route(*((*i)->route()), safi());
+		_peer->delete_route(*((*i)->route()), this->safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {
 		debug_msg("* Replace\n");
@@ -323,7 +323,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		XLOG_ASSERT(i != tmp_queue.end());
 		XLOG_ASSERT((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 		const SubnetRoute<A> *new_route = (*i)->route();
-		_peer->replace_route(*old_route, *new_route, safi());
+		_peer->replace_route(*old_route, *new_route, this->safi());
 		delete old_queue_entry;
 		delete (*i);
 	    } else {
@@ -348,7 +348,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
     /* signal our state back upstream */
     if ((peer_busy == true) && (_peer_busy == false)) {
 	debug_msg("RibOut signalling peer busy upstream\n");
-	_parent->output_state(true, this);
+	this->_parent->output_state(true, this);
 
 	// we now have to assume that a queue will build upstream
 	_upstream_queue_exists = true;
@@ -363,9 +363,9 @@ template<class A>
 void
 RibOutTable<A>::output_no_longer_busy() 
 {
-    debug_msg("%s: output_no_longer_busy\n", tablename().c_str());
+    debug_msg("%s: output_no_longer_busy\n", this->tablename().c_str());
     if (_peer_busy == false) return;
-    debug_msg("%s: _peer_busy true->false\n", tablename().c_str());
+    debug_msg("%s: _peer_busy true->false\n", this->tablename().c_str());
 
     _peer_busy = false;
     while (1) {
@@ -373,7 +373,7 @@ RibOutTable<A>::output_no_longer_busy()
            another update (add, delete, replace or push) through the
            normal RouteTable interfaces*/
 
-	bool upstream_queue_exists = _parent->get_next_message(this);
+	bool upstream_queue_exists = this->_parent->get_next_message(this);
 
 	if (upstream_queue_exists == false) {
 	    /*the queue upstream has now drained*/
@@ -381,7 +381,7 @@ RibOutTable<A>::output_no_longer_busy()
 		/*if the queue downstream is no longer busy then go
                   back to normal operation*/
 		_upstream_queue_exists = false;
-		_parent->output_state(false, this);
+		this->_parent->output_state(false, this);
 	    }
 	    /*there's nothing left to do here*/
 	    return;
@@ -399,7 +399,7 @@ template<class A>
 const SubnetRoute<A>*
 RibOutTable<A>::lookup_route(const IPNet<A> &net) const 
 {
-    return _parent->lookup_route(net);
+    return this->_parent->lookup_route(net);
 }
 
 template<class A>
@@ -407,7 +407,7 @@ void
 RibOutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 				  BGPRouteTable<A> *caller) 
 {
-    XLOG_ASSERT(_parent == caller);
+    XLOG_ASSERT(this->_parent == caller);
     UNUSED(genid);
     UNUSED(peer);
 }
@@ -418,7 +418,7 @@ RibOutTable<A>::peering_down_complete(const PeerHandler *peer,
 				      uint32_t genid,
 				      BGPRouteTable<A> *caller) 
 {
-    XLOG_ASSERT(_parent == caller);
+    XLOG_ASSERT(this->_parent == caller);
     UNUSED(genid);
     UNUSED(peer);
 }
@@ -427,7 +427,7 @@ template<class A>
 string
 RibOutTable<A>::str() const 
 {
-    string s = "RibOutTable<A>" + tablename();
+    string s = "RibOutTable<A>" + this->tablename();
     return s;
 }
 

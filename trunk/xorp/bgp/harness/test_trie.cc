@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.10 2003/10/17 03:36:51 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.11 2003/10/23 04:10:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -114,21 +114,24 @@ template <>
 void
 add_nlri<IPv4>(UpdatePacket *p, IPNet<IPv4> net)
 {
-    p->add_nlri(BGPUpdateAttrib(net));
+    BGPUpdateAttrib upa(net);
+    p->add_nlri(upa);
 }
 
 template <>
 void
 withdraw_nlri<IPv4>(UpdatePacket *p, IPNet<IPv4> net)
 {
-    p->add_withdrawn(BGPUpdateAttrib(net));
+    BGPUpdateAttrib upa(net);
+    p->add_withdrawn(upa);
 }
 
 template <>
 void
 add_nexthop<IPv4>(UpdatePacket *p, IPv4 nexthop)
 {
-    p->add_pathatt(IPv4NextHopAttribute(nexthop));
+    IPv4NextHopAttribute nha(nexthop);
+    p->add_pathatt(nha);
 }
 
 template <>
@@ -268,8 +271,12 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Add an origin, aspath and next hop to keep it legal.
     */
-    bgpupdate->add_pathatt(OriginAttribute(IGP));
-    bgpupdate->add_pathatt(ASPathAttribute(AsPath("1,2,3")));
+    OriginAttribute oa(IGP);
+    bgpupdate->add_pathatt(oa);
+
+    ASPathAttribute aspa(AsPath("1,2,3"));
+    bgpupdate->add_pathatt(aspa);
+
     add_nexthop<A>(bgpupdate, nexthop);
 
     /*
@@ -371,8 +378,12 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Add an origin, aspath and next hop to keep it legal.
     */
-    packet_nlri->add_pathatt(OriginAttribute(IGP));
-    packet_nlri->add_pathatt(ASPathAttribute(AsPath("1,2,3")));
+    OriginAttribute oa(IGP);
+    packet_nlri->add_pathatt(oa);
+
+    ASPathAttribute aspa(AsPath("1,2,3"));
+    packet_nlri->add_pathatt(aspa);
+
     add_nexthop<A>(packet_nlri, nexthop);
 
     /*

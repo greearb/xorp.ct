@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.17 2004/02/20 23:26:34 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.18 2004/02/24 03:16:58 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -97,7 +97,7 @@ public:
 	NextHopResolver<A>(0, eventloop, bgp)
     {
 	// Must set a ribname to force RIB interactions.
-	register_ribname("bogus");
+	this->register_ribname("bogus");
     }
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.26 2004/03/03 02:24:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.27 2004/03/04 03:41:38 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -194,29 +194,31 @@ test_dump(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
+    LocalPrefAttribute lpa1(100);
+
     PathAttributeList<IPv4>* palist1 =
 	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-    palist1->add_path_attribute(LocalPrefAttribute(100));
+    palist1->add_path_attribute(lpa1);
     palist1->rehash();
 
     PathAttributeList<IPv4>* palist2 =
 	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
-    palist2->add_path_attribute(LocalPrefAttribute(100));
+    palist2->add_path_attribute(lpa1);
     palist2->rehash();
 
     PathAttributeList<IPv4>* palist3 =
 	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
-    palist3->add_path_attribute(LocalPrefAttribute(100));
+    palist3->add_path_attribute(lpa1);
     palist3->rehash();
 
     PathAttributeList<IPv4>* palist4 =
 	new PathAttributeList<IPv4>(nhatt4, aspathatt3, igp_origin_att);
-    palist4->add_path_attribute(LocalPrefAttribute(100));
+    palist4->add_path_attribute(lpa1);
     palist4->rehash();
 
     PathAttributeList<IPv4>* palist5 =
 	new PathAttributeList<IPv4>(nhatt5, aspathatt3, igp_origin_att);
-    palist5->add_path_attribute(LocalPrefAttribute(100));
+    palist5->add_path_attribute(lpa1);
     palist5->rehash();
 
     //create a subnet route

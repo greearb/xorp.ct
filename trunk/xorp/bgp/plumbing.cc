@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.41 2004/03/24 19:34:30 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.42 2004/03/26 19:44:04 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -225,9 +225,9 @@ BGPPlumbing::status(string& reason) const
 /***********************************************************************/
 
 template <class A>
-BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
-				    BGPPlumbing& master,
-				    NextHopResolver<A>& next_hop_resolver)
+BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
+				BGPPlumbing& master,
+				NextHopResolver<A>& next_hop_resolver)
     : _ribname(ribname), _master(master), _next_hop_resolver(next_hop_resolver)
 {
     debug_msg("BGPPlumbingAF constructor called for RIB %s\n", 
@@ -326,7 +326,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
 }
 
 template <class A>
-BGPPlumbingAF<A>::~BGPPlumbingAF<A>() 
+BGPPlumbingAF<A>::~BGPPlumbingAF() 
 {
     typename set <BGPRouteTable<A>*>::iterator i;
     for(i = _tables.begin(); i != _tables.end(); i++) {
@@ -466,7 +466,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 	  Remove it on transmission to EBGP peers. */
     if (ibgp == false) {
 	filter_in->add_localpref_insertion_filter(
-           LocalPrefAttribute::default_value() );
+	  LocalPrefAttribute::default_value() );
 
 	filter_out->add_localpref_removal_filter();
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.13 2004/02/11 08:48:48 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.14 2004/03/25 01:45:09 hodson Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -36,7 +36,7 @@ ExportTable<A>::ExportTable<A>(const string&		tablename,
 }
 
 template<class A>
-ExportTable<A>::~ExportTable<A>()
+ExportTable<A>::~ExportTable()
 {
 }
 
@@ -62,7 +62,8 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 	rib_client->add_route(route);
     }
 
-    debug_msg("Add route called on export table %s\n", + tablename().c_str());
+    debug_msg("Add route called on export table %s\n", 
+	      this->tablename().c_str());
     return XORP_OK;
 }
 
@@ -139,12 +140,12 @@ template<class A> string
 ExportTable<A>::str() const
 {
     string s;
-    s = "-------\nExportTable: " + tablename() + "\n";
+    s = "-------\nExportTable: " + this->tablename() + "\n";
     s += "parent = " + _parent->tablename() + "\n";
-    if (next_table() == NULL)
+    if (this->next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + next_table()->tablename() + "\n";
+	s += "next table = " + this->next_table()->tablename() + "\n";
     return s;
 }
 

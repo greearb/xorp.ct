@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.31 2004/02/20 04:08:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.32 2004/03/24 19:34:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -286,14 +286,16 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
   	    MPReachNLRIAttribute<IPv6>* mpreach =
 		dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
 	    switch(mpreach->safi()) {
-	    case SAFI_UNICAST:
-		pa_ipv6_unicast.
-		  add_path_attribute(IPv6NextHopAttribute(mpreach->nexthop()));
-	    break;
-	    case SAFI_MULTICAST:
-		pa_ipv6_multicast.
-		  add_path_attribute(IPv6NextHopAttribute(mpreach->nexthop()));
-	    break;
+	    case SAFI_UNICAST: {
+		IPv6NextHopAttribute nha(mpreach->nexthop());
+		pa_ipv6_unicast.add_path_attribute(nha);
+		break;
+	    }
+	    case SAFI_MULTICAST: {
+		IPv6NextHopAttribute nha(mpreach->nexthop());
+		pa_ipv6_multicast.add_path_attribute(nha);
+		break;
+	    }
 	    }
 	    continue;
 	}
@@ -311,10 +313,11 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 // 		pa_ipv4_unicast.
 // 		  add_path_attribute(IPv4NextHopAttribute(mpreach->nexthop()));
 	    break;
-	    case SAFI_MULTICAST:
-		pa_ipv4_multicast.
-		  add_path_attribute(IPv4NextHopAttribute(mpreach->nexthop()));
-	    break;
+	    case SAFI_MULTICAST: {
+		IPv4NextHopAttribute nha(mpreach->nexthop());
+		pa_ipv4_multicast.add_path_attribute(nha);
+		break;
+	    }
 	    }
 	    continue;
 	}

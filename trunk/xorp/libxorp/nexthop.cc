@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/nexthop.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/nexthop.cc,v 1.2 2003/03/10 23:20:34 hodson Exp $"
 
 #include "xorp.h"
 #include "nexthop.hh"
@@ -30,7 +30,7 @@ IPPeerNextHop<A>::IPPeerNextHop<A>(const A &from_ipaddr)
 template<class A> string
 IPPeerNextHop<A>::str() const {
     string nh = "NH:";
-    return nh + _addr.str();
+    return nh + this->_addr.str();
 }
 
 template<class A>
@@ -41,7 +41,7 @@ IPEncapsNextHop<A>::IPEncapsNextHop<A>(const A &from_ipaddr)
 template<class A> string
 IPEncapsNextHop<A>::str() const {
     string enh = string("NH->");
-    return enh + _addr.str();
+    return enh + this->_addr.str();
 }
 
 template<class A>
@@ -52,7 +52,7 @@ IPExternalNextHop<A>::IPExternalNextHop<A>(const A &from_ipaddr)
 
 template<class A> string
 IPExternalNextHop<A>::str() const {
-    return string("Ext>") + _addr.str();
+    return string("Ext>") + this->_addr.str();
 }
 
 DiscardNextHop::DiscardNextHop() : NextHop() {

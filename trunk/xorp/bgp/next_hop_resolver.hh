@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.21 2003/10/13 20:43:18 atanu Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.23 2004/02/05 09:22:24 atanu Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -441,16 +441,17 @@ protected:
 template <class A>
 class RibRegisterQueueEntry : public RibRequestQueueEntry<A> {
 public:
+    typedef RibRequestQueueEntry<A> QE;
     RibRegisterQueueEntry(A nexthop, IPNet<A> net_from_route, 
 			 NhLookupTable<A> *requester)
-	: RibRequestQueueEntry<A>(REGISTER),
+	: RibRequestQueueEntry<A>(QE::REGISTER),
 	  _nexthop(nexthop), _new_register(true), 
 	  _requests(net_from_route, requester),
 	  _reregister(false), _ref_cnt(0)
     {}
     RibRegisterQueueEntry(A nexthop, uint32_t ref_cnt, bool resolvable, 
 			   uint32_t metric)
-	: RibRequestQueueEntry<A>(REGISTER),
+	: RibRequestQueueEntry<A>(QE::REGISTER),
 	  _nexthop(nexthop), _new_register(false), _reregister(true),
 	  _ref_cnt(ref_cnt), _resolvable(resolvable), _metric(metric)
     {}
@@ -458,7 +459,7 @@ public:
     void register_nexthop(IPNet<A> net_from_route, 
 			  NhLookupTable<A> *requester) {
 	XLOG_ASSERT(true == _reregister || true == _new_register);
-	XLOG_ASSERT(_register_mode == REGISTER);
+	XLOG_ASSERT(QE::_register_mode == QE::REGISTER);
 	_new_register = true;
 	_requests.add_request(net_from_route, requester);
     }
@@ -466,7 +467,7 @@ public:
     bool deregister_nexthop(IPNet<A> net_from_route, 
 			    NhLookupTable<A> *requester) {
 	XLOG_ASSERT(true == _reregister || true == _new_register);
-	XLOG_ASSERT(_register_mode == REGISTER);
+	XLOG_ASSERT(QE::_register_mode == QE::REGISTER);
 	if (_new_register && _requests.remove_request(net_from_route, 
 						      requester)) {
 	    return true;
@@ -483,7 +484,7 @@ public:
 			    uint32_t metric) {
 	XLOG_ASSERT(false == _reregister);
 	XLOG_ASSERT(0 == _ref_cnt);
-	XLOG_ASSERT(_register_mode == REGISTER);
+	XLOG_ASSERT(QE::_register_mode == QE::REGISTER);
 	_reregister = true;
 	_ref_cnt = ref_cnt;
 	_resolvable = resolvable;
@@ -491,20 +492,20 @@ public:
     }
 
     bool resolvable() const {
-	assert(_register_mode == REGISTER);
+	assert(QE::_register_mode == QE::REGISTER);
 	return _resolvable;
     }
     bool reregister() const {
-	assert(_register_mode == REGISTER);
+	assert(QE::_register_mode == QE::REGISTER);
 	return _reregister;
     }
 
     bool new_register() const {
-	assert(_register_mode == REGISTER);
+	assert(QE::_register_mode == QE::REGISTER);
 	return _new_register;
     }
     bool metric() const {
-	assert(_register_mode == REGISTER);
+	assert(QE::_register_mode == QE::REGISTER);
 	return _metric;
     }
     const A& nexthop() const {
@@ -540,8 +541,9 @@ private:
 template <class A>
 class RibDeregisterQueueEntry : public RibRequestQueueEntry<A> {
 public:
+    typedef RibRequestQueueEntry<A> QE;
     RibDeregisterQueueEntry(A base_addr, uint32_t prefix_len)
-	: RibRequestQueueEntry<A>(DEREGISTER), 
+	: RibRequestQueueEntry<A>(QE::DEREGISTER), 
 	_base_addr(base_addr), _prefix_len(prefix_len)
 
     {}

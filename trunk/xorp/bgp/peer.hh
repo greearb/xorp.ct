@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.9 2003/04/28 22:05:08 jcardona Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.10 2003/12/11 03:04:36 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -154,10 +154,13 @@ private:
 	    event_openfail();		// Event = EVENTBGPCONNOPENFAIL
     }
 
+#if 0
     void send_notification(const NotificationPacket& p, bool error = true) {
 	send_notification(&p, error);
     }
     void send_notification(const NotificationPacket *p, bool error = true);
+#endif
+    void send_notification(const NotificationPacket& p, bool error = true);
     void send_notification_complete(SocketClient::Event, const uint8_t *buf,
 				    bool error);
     void flush_transmit_queue()		{ _SocketClient->flush_transmit_queue(); }

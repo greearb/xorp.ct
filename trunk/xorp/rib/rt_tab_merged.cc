@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.11 2004/02/18 00:15:19 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.12 2004/03/25 01:45:09 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -40,10 +40,10 @@ template <class A>
 int
 MergedTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 {
-    debug_msg("MT[%s]: Adding route %s\n", tablename().c_str(),
+    debug_msg("MT[%s]: Adding route %s\n", this->tablename().c_str(),
 	   route.str().c_str());
 
-    if (next_table() == NULL)
+    if (this->next_table() == NULL)
 	return XORP_ERROR;
     RouteTable<A>* other_table;
     if (caller == _table_b) {
@@ -58,12 +58,12 @@ MergedTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
     if (found != NULL) {
 	if (found->admin_distance() > route.admin_distance()) {
 	    // The admin distance of the existing route is worse
-	    next_table()->delete_route(found, this);
+	    this->next_table()->delete_route(found, this);
 	} else {
 	    return XORP_ERROR;
 	}
     }
-    next_table()->add_route(route, this);
+    this->next_table()->add_route(route, this);
 
     return XORP_OK;
 }
@@ -73,7 +73,7 @@ int
 MergedTable<A>::delete_route(const IPRouteEntry<A>* route,
 			     RouteTable<A>* caller) 
 {
-    if (next_table() == NULL)
+    if (this->next_table() == NULL)
 	return XORP_ERROR;
     RouteTable<A>* other_table;
     if (caller == _table_b) {
@@ -88,8 +88,8 @@ MergedTable<A>::delete_route(const IPRouteEntry<A>* route,
     if (found != NULL) {
 	if (found->admin_distance() > route->admin_distance()) {
 	    // The admin distance of the existing route is worse
-	    next_table()->delete_route(route, this);
-	    next_table()->add_route(*found, this);
+	    this->next_table()->delete_route(route, this);
+	    this->next_table()->add_route(*found, this);
 	    return XORP_OK;
 	} else {
 	    // The admin distance of the existing route is better, so
@@ -98,7 +98,7 @@ MergedTable<A>::delete_route(const IPRouteEntry<A>* route,
 	    return XORP_ERROR;
 	}
     }
-    next_table()->delete_route(route, this);
+    this->next_table()->delete_route(route, this);
     return XORP_OK;
 }
 
@@ -201,13 +201,13 @@ MergedTable<A>::str() const
 {
     string s;
 
-    s = "-------\nMergedTable: " + tablename() + "\n";
+    s = "-------\nMergedTable: " + this->tablename() + "\n";
     s += "_table_a = " + _table_a->tablename() + "\n";
     s += "_table_b = " + _table_b->tablename() + "\n";
-    if (next_table() == NULL)
+    if (this->next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + next_table()->tablename() + "\n";
+	s += "next table = " + this->next_table()->tablename() + "\n";
     return s;
 }
 

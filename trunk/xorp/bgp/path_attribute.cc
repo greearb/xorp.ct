@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.49 2004/02/25 05:03:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.50 2004/02/25 15:20:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1414,7 +1414,7 @@ PathAttributeList<A>::
 }
 
 template<class A>
-PathAttributeList<A>::PathAttributeList<A>(const PathAttributeList<A>& palist)
+PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
 	:  list <PathAttribute *>(),
 	   _nexthop_att(0), _aspath_att(0), _origin_att(0)
 {
@@ -1426,7 +1426,7 @@ PathAttributeList<A>::PathAttributeList<A>(const PathAttributeList<A>& palist)
 }
 
 template<class A>
-PathAttributeList<A>::~PathAttributeList<A>()
+PathAttributeList<A>::~PathAttributeList()
 {
     debug_msg("%p %s\n", this, str().c_str());
     for (const_iterator i = begin(); i != end() ; ++i)

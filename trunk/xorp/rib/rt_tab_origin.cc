@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.14 2004/03/25 01:45:09 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.15 2004/03/30 17:40:59 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -26,7 +26,7 @@
 // A = Address Type. E.g., IPv4 or IPv6
 //
 template<class A>
-OriginTable<A>::OriginTable<A>(const string& tablename,
+OriginTable<A>::OriginTable(const string& tablename,
 			       int admin_distance,
 			       ProtocolType protocol_type,
 			       EventLoop& eventloop)
@@ -44,7 +44,7 @@ OriginTable<A>::OriginTable<A>(const string& tablename,
 }
 
 template<class A>
-OriginTable<A>::~OriginTable<A>()
+OriginTable<A>::~OriginTable()
 {
     // Delete all the routes in the trie
     delete_all_routes();
@@ -55,7 +55,7 @@ template<class A>
 int
 OriginTable<A>::add_route(const IPRouteEntry<A>& route)
 {
-    debug_msg("OT[%s]: Adding route %s\n", tablename().c_str(),
+    debug_msg("OT[%s]: Adding route %s\n", this->tablename().c_str(),
 	      route.str().c_str());
 
     //
@@ -93,8 +93,8 @@ OriginTable<A>::add_route(const IPRouteEntry<A>& route)
 #endif
 
     // Propagate to next table
-    if (next_table() != NULL) {
-	next_table()->add_route(*routecopy,
+    if (this->next_table() != NULL) {
+	this->next_table()->add_route(*routecopy,
 			       reinterpret_cast<RouteTable<A>* >(this));
     }
 
@@ -113,7 +113,7 @@ template<class A>
 int
 OriginTable<A>::delete_route(const IPNet<A>& net)
 {
-    debug_msg("OT[%s]: Deleting route %s\n", tablename().c_str(),
+    debug_msg("OT[%s]: Deleting route %s\n", this->tablename().c_str(),
 	   net.str().c_str());
 #ifdef DEBUG_LOGGING
     _ip_route_table->print();
@@ -125,8 +125,8 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
 	const IPRouteEntry<A>* found = iter.payload();
 	_ip_route_table->erase(net);
 	// Propagate to next table
-	if (next_table() != NULL)
-	    next_table()->delete_route(found, this);
+	if (this->next_table() != NULL)
+	    this->next_table()->delete_route(found, this);
 
 	// Finally we're done, and can cleanup
 	delete found;
@@ -177,7 +177,7 @@ OriginTable<A>::routing_protocol_shutdown()
     // plumb itself in.
     //
     DeletionTable<A>* dt;
-    dt = new DeletionTable<A>("Delete(" + tablename() + ")",
+    dt = new DeletionTable<A>("Delete(" + this->tablename() + ")",
 			      this, old_ip_route_table, _eventloop);
 }
 
@@ -186,7 +186,7 @@ const IPRouteEntry<A>*
 OriginTable<A>::lookup_route(const IPNet<A>& net) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
-	tablename().c_str());
+	this->tablename().c_str());
     debug_msg("OriginTable: Looking up route %s\n", net.str().c_str());
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(net);
@@ -198,7 +198,7 @@ const IPRouteEntry<A>*
 OriginTable<A>::lookup_route(const A& addr) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
-	tablename().c_str());
+	this->tablename().c_str());
     debug_msg("OriginTable (%d): Looking up route for addr %s\n",
 	   _admin_distance, addr.str().c_str());
 
@@ -224,10 +224,11 @@ OriginTable<A>::lookup_route_range(const A& addr) const
     _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
     RouteRange<A>* rr = new RouteRange<A>(addr, route, top_addr, bottom_addr);
     debug_msg("Origin Table: %s returning lower bound for %s of %s\n",
-	      tablename().c_str(), addr.str().c_str(),
+	      this->tablename().c_str(), addr.str().c_str(),
 	      bottom_addr.str().c_str());
     debug_msg("Origin Table: %s returning upper bound for %s of %s\n",
-	      tablename().c_str(), addr.str().c_str(), top_addr.str().c_str());
+	      this->tablename().c_str(), addr.str().c_str(), 
+	      top_addr.str().c_str());
     return rr;
 }
 
@@ -237,12 +238,12 @@ OriginTable<A>::str() const
 {
     string s;
 
-    s = "-------\nOriginTable: " + tablename() + "\n" +
+    s = "-------\nOriginTable: " + this->tablename() + "\n" +
     	( _protocol_type == IGP ? "IGP\n" : "EGP\n" ) ;
-    if (next_table() == NULL)
+    if (this->next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + next_table()->tablename() + "\n";
+	s += "next table = " + this->next_table()->tablename() + "\n";
     return s;
 }
 

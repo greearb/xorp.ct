@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_route.cc,v 1.2 2003/02/13 04:27:48 mjh Exp $"
+#ident "$XORP: xorp/policy/policy_route.cc,v 1.3 2003/10/23 05:24:35 atanu Exp $"
 
 #include "policy_module.h"
 #include "policy_route.hh"
@@ -31,7 +31,7 @@ BGPPolicyRoute<A>::BGPPolicyRoute(const IPNet<A> &net,
 				  const A& nexthop, 
 				  const AsPath& as_path, 
 				  OriginType origin,
-				  bool _ibgp)
+				  bool ibgp)
     : PolicyRoute<A>(net, nexthop, "bgp"),
       _as_path(as_path), _origin(origin), _ibgp(ibgp),
       _has_med(false), _has_localpref(false)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.18 2004/03/04 17:49:56 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.19 2004/03/25 01:45:09 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -237,12 +237,13 @@ RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
     print();
     XLOG_ASSERT(caller == _parent);
 
-    if (next_table() != NULL)
-	next_table()->add_route(route, this);
+    if (this->next_table() != NULL)
+	this->next_table()->add_route(route, this);
 
     notify_relevant_modules(true /* it's an add */, route);
 
-    debug_msg("Add route called on register table %s\n", tablename().c_str());
+    debug_msg("Add route called on register table %s\n", 
+	      this->tablename().c_str());
     return XORP_OK;
 }
 
@@ -256,8 +257,8 @@ RegisterTable<A>::delete_route(const IPRouteEntry<A>* route,
     print();
     XLOG_ASSERT(caller == _parent);
 
-    if (next_table() != NULL)
-	next_table()->delete_route(route, this);
+    if (this->next_table() != NULL)
+	this->next_table()->delete_route(route, this);
 
     notify_relevant_modules(false /* it's a delete */, *route);
     debug_msg("Delete route called on register table\n");
@@ -437,12 +438,12 @@ RegisterTable<A>::str() const
 {
     string s;
 
-    s = "-------\nRegisterTable: " + tablename() + "\n";
+    s = "-------\nRegisterTable: " + this->tablename() + "\n";
     s += "parent = " + _parent->tablename() + "\n";
-    if (next_table() == NULL)
+    if (this->next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + next_table()->tablename() + "\n";
+	s += "next table = " + this->next_table()->tablename() + "\n";
     return s;
 }
 
@@ -519,6 +520,14 @@ RegisterTable<A>::notify_invalidated(typename Trie<A, RouteRegister<A>* >::itera
     delete trie_iter.payload();
     _ipregistry.erase(trie_iter);
 }
+
+template<class A>
+void
+RegisterTable<A>::flush() 
+{ 
+    _register_server->flush(); 
+}
+
 
 template class RouteRegister<IPv4>;
 template class RouteRegister<IPv6>;

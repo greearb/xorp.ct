@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.16 2004/02/24 03:16:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.17 2004/02/25 05:03:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -422,7 +422,7 @@ FilterTable<A>::FilterTable(string table_name,
     : BGPRouteTable<A>("FilterTable-" + table_name, safi),
     _next_hop_resolver(next_hop_resolver)
 {
-    _parent = parent_table;
+    this->_parent = parent_table;
 }
 
 template<class A>
@@ -441,14 +441,14 @@ FilterTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     XLOG_ASSERT(!rtmsg.changed());
     const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
@@ -466,7 +466,7 @@ FilterTable<A>::add_route(const InternalMessage<A> &rtmsg,
     //should return ADD_UNUSED, so there's no need for us to
     //explicitly force this.
     int result;
-    result = _next_table->add_route(*filtered_msg, (BGPRouteTable<A>*)this);
+    result = this->_next_table->add_route(*filtered_msg, (BGPRouteTable<A>*)this);
 
     if (filtered_msg != &rtmsg) {
 	//We created a modified message, so now we need to free it.
@@ -488,7 +488,7 @@ FilterTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      "old route: %p"
 	      "new route: %p"
 	      "old: %s\n new: %s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
 	      &old_rtmsg,
 	      &new_rtmsg,
@@ -497,8 +497,8 @@ FilterTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      old_rtmsg.str().c_str(),
 	      new_rtmsg.str().c_str());
 
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     const InternalMessage<A> *filtered_old_msg = apply_filters(&old_rtmsg);
     const InternalMessage<A> *filtered_new_msg = apply_filters(&new_rtmsg);
@@ -511,16 +511,16 @@ FilterTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     } else if (filtered_old_msg != NULL && filtered_new_msg == NULL) {
 	//the new route failed to pass the filter
 	//the replace becomes a delete
-	_next_table->delete_route(*filtered_old_msg,
+	this->_next_table->delete_route(*filtered_old_msg,
 				  (BGPRouteTable<A>*)this); 
 	result = ADD_FILTERED;
 
     } else if (filtered_old_msg == NULL && filtered_new_msg != NULL) {
 	//the replace becomes an add
-	result = _next_table->add_route(*filtered_new_msg,
+	result = this->_next_table->add_route(*filtered_new_msg,
 					(BGPRouteTable<A>*)this);
     } else {
-	result = _next_table->replace_route(*filtered_old_msg, 
+	result = this->_next_table->replace_route(*filtered_old_msg, 
 					    *filtered_new_msg,
 					    (BGPRouteTable<A>*)this);
     }
@@ -544,15 +544,15 @@ FilterTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			   BGPRouteTable<A> *caller,
 			   const PeerHandler *dump_peer)
 {
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
     if (filtered_msg == NULL)
 	return ADD_FILTERED;
 
     int result;
-    result = _next_table->route_dump(*filtered_msg, 
+    result = this->_next_table->route_dump(*filtered_msg, 
 				     (BGPRouteTable<A>*)this, dump_peer);
 
     if (filtered_msg != &rtmsg) {
@@ -568,14 +568,14 @@ FilterTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
     if (filtered_msg == NULL)
@@ -588,7 +588,7 @@ FilterTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     }
 
     int result;
-    result = _next_table->delete_route(*filtered_msg, 
+    result = this->_next_table->delete_route(*filtered_msg, 
 				       (BGPRouteTable<A>*)this);
     if (filtered_msg != &rtmsg) {
 	//We created a modified message, so now we need to free it.
@@ -601,9 +601,9 @@ template<class A>
 int
 FilterTable<A>::push(BGPRouteTable<A> *caller)
 {
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
-    return _next_table->push((BGPRouteTable<A>*)this);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
+    return this->_next_table->push((BGPRouteTable<A>*)this);
 }
 
 template<class A>
@@ -615,7 +615,7 @@ FilterTable<A>::lookup_route(const IPNet<A> &net) const
     //the result.  But we can get called with a route that gets
     //dropped by our filters.
     const SubnetRoute<A> *found_route;
-    found_route = _parent->lookup_route(net);
+    found_route = this->_parent->lookup_route(net);
 
     if (found_route == NULL)
 	return NULL;
@@ -637,14 +637,14 @@ template<class A>
 void
 FilterTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
-    _parent->route_used(rt, in_use);
+    this->_parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
 FilterTable<A>::str() const
 {
-    string s = "FilterTable<A>" + tablename();
+    string s = "FilterTable<A>" + this->tablename();
     return s;
 }
 
@@ -777,18 +777,18 @@ template<class A>
 void 
 FilterTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
 {
-    XLOG_ASSERT(_next_table == next_table);
+    XLOG_ASSERT(this->_next_table == next_table);
 
-    _parent->output_state(busy, this);
+    this->_parent->output_state(busy, this);
 }
 
 template<class A>
 bool 
 FilterTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 {
-    XLOG_ASSERT(_next_table == next_table);
+    XLOG_ASSERT(this->_next_table == next_table);
 
-    return _parent->get_next_message(this);
+    return this->_parent->get_next_message(this);
 }
 
 template class FilterTable<IPv4>;

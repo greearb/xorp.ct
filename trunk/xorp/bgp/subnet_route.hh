@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.8 2003/03/10 23:20:06 hodson Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.9 2003/05/15 16:10:42 hodson Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -69,6 +69,8 @@ public:
 
     bool is_filtered() const {return (_flags & SRF_FILTERED) != 0;}
     void set_filtered(bool filtered) const;
+
+    bool is_deleted() const {return (_flags & SRF_DELETED) != 0;}
     string str() const;
 
     int number_of_managed_atts() const {

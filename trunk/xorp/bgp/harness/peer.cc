@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.49 2003/10/13 23:42:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.50 2003/10/23 04:10:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1490,37 +1490,39 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		      words[i].c_str(),
 		      words[i + 1].c_str());
 	    if("origin" == words[i]) {
-		bgpupdate->add_pathatt(OriginAttribute(static_cast<OriginType>
-				     (atoi(words[i + 1].c_str()))));
+		OriginAttribute oa(static_cast<OriginType>
+				   (atoi(words[i + 1].c_str())));
+		bgpupdate->add_pathatt(oa);
 	    } else if("aspath" == words[i]) {
 		string aspath = words[i+1];
-		bgpupdate->add_pathatt(ASPathAttribute(AsPath(
-						       aspath.c_str())));
+		ASPathAttribute aspa(AsPath(aspath.c_str()));
+		bgpupdate->add_pathatt(aspa);
 		debug_msg("aspath: %s\n", 
 			  AsPath(aspath.c_str()).str().c_str());
 	    } else if("nexthop" == words[i]) {
-		bgpupdate->add_pathatt(IPv4NextHopAttribute(IPv4(
-						      words[i+1].c_str())));
+		IPv4NextHopAttribute nha(IPv4(words[i+1].c_str()));
+		bgpupdate->add_pathatt(nha);
 	    } else if("nexthop6" == words[i]) {
 		mpipv6_nlri.set_nexthop(IPv6(words[i+1].c_str()));
 	    } else if("localpref" == words[i]) {
-		bgpupdate->add_pathatt(LocalPrefAttribute(atoi(
-						      words[i+1].c_str())));
+		LocalPrefAttribute lpa(atoi(words[i+1].c_str()));
+		bgpupdate->add_pathatt(lpa);
 	    } else if("nlri" == words[i]) {
-		bgpupdate->add_nlri(BGPUpdateAttrib(IPv4Net(
-						      words[i+1].c_str())));
+		BGPUpdateAttrib upa(IPv4Net(words[i+1].c_str()));
+		bgpupdate->add_nlri(upa);
 	    } else if("nlri6" == words[i]) {
 		mpipv6_nlri.add_nlri(words[i+1].c_str());
 	    } else if("withdraw" == words[i]) {
-		bgpupdate->add_withdrawn(BGPUpdateAttrib(IPv4Net(
-						      words[i+1].c_str())));
+		BGPUpdateAttrib upa(IPv4Net(words[i+1].c_str()));
+		bgpupdate->add_withdrawn(upa);
 	    } else if("withdraw6" == words[i]) {
 		mpipv6_withdraw.add_withdrawn(IPv6Net(words[i+1].c_str()));
 	    } else if("med" == words[i]) {
-		bgpupdate->add_pathatt(MEDAttribute(atoi(
-						      words[i+1].c_str())));
+		MEDAttribute ma(atoi(words[i+1].c_str()));
+		bgpupdate->add_pathatt(ma);
 	    } else if("pathattr" == words[i]) {
-		bgpupdate->add_pathatt(AnyAttribute(words[i+1].c_str()));
+		AnyAttribute aa(words[i+1].c_str());
+		bgpupdate->add_pathatt(aa);
 	    } else
 		xorp_throw(InvalidString, 
 		       c_format("Illegal argument to update: <%s>\n[%s]",

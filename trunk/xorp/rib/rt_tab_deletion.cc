@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.4 2004/02/11 08:48:48 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.5 2004/03/25 01:45:09 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -37,7 +37,7 @@ DeletionTable<A>::DeletionTable<A>(const string& tablename,
 {
     XLOG_ASSERT(_parent != NULL);
     set_next_table(_parent->next_table());
-    next_table()->replumb(parent, this);
+    this->next_table()->replumb(parent, this);
     parent->set_next_table(this);
 
     // Callback immediately, but after network events or expired timers
@@ -47,7 +47,7 @@ DeletionTable<A>::DeletionTable<A>(const string& tablename,
 }
 
 template<class A>
-DeletionTable<A>::~DeletionTable<A>()
+DeletionTable<A>::~DeletionTable()
 {
     // Delete all the routes in the trie.
     delete_all_routes();
@@ -72,11 +72,11 @@ DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
 	//
 	const IPRouteEntry<A>* our_route = iter.payload();
 	_ip_route_table->erase(route.net());
-	next_table()->delete_route(our_route, this);
+	this->next_table()->delete_route(our_route, this);
 	delete our_route;
     }
 
-    return next_table()->add_route(route, this);
+    return this->next_table()->add_route(route, this);
 }
 
 template<class A>
@@ -91,7 +91,7 @@ DeletionTable<A>::delete_route(const IPRouteEntry<A>* route,
     iter = _ip_route_table->lookup_node(route->net());
     XLOG_ASSERT(iter == _ip_route_table->end());
 
-    return next_table()->delete_route(route, this);
+    return this->next_table()->delete_route(route, this);
 }
 
 template<class A>
@@ -190,10 +190,11 @@ DeletionTable<A>::lookup_route_range(const A& addr) const
     _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
     RouteRange<A>* rr = new RouteRange<A>(addr, route, top_addr, bottom_addr);
     debug_msg("Deletion Table: %s returning lower bound for %s of %s\n",
-	      tablename().c_str(), addr.str().c_str(),
+	      this->tablename().c_str(), addr.str().c_str(),
 	      bottom_addr.str().c_str());
     debug_msg("Deletion Table: %s returning upper bound for %s of %s\n",
-	      tablename().c_str(), addr.str().c_str(), top_addr.str().c_str());
+	      this->tablename().c_str(), addr.str().c_str(), 
+	      top_addr.str().c_str());
 
     // Merge our own route range with that of our parent.
     RouteRange<A>* parent_rr = _parent->lookup_route_range(addr);
@@ -215,7 +216,7 @@ DeletionTable<A>::background_deletion_pass()
     iter = _ip_route_table->begin();
     const IPRouteEntry<A>* our_route = iter.payload();
     _ip_route_table->erase(our_route->net());
-    next_table()->delete_route(our_route, this);
+    this->next_table()->delete_route(our_route, this);
     delete our_route;
 
     // Callback immediately, but after network events or expired timers
@@ -228,8 +229,8 @@ template<class A>
 void
 DeletionTable<A>::unplumb_self()
 {
-    _parent->set_next_table(next_table());
-    next_table()->replumb(this, _parent);
+    _parent->set_next_table(this->next_table());
+    this->next_table()->replumb(this, _parent);
     delete this;
 }
 
@@ -247,11 +248,11 @@ DeletionTable<A>::str() const
 {
     string s;
 
-    s = "-------\nDeletionTable: " + tablename() + "\n";
-    if (next_table() == NULL)
+    s = "-------\nDeletionTable: " + this->tablename() + "\n";
+    if (this->next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + next_table()->tablename() + "\n";
+	s += "next table = " + this->next_table()->tablename() + "\n";
     return s;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.9 2003/05/15 16:37:54 hodson Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.10 2003/08/28 16:23:56 pavlin Exp $
 
 #ifndef __BGP_BGP_TRIE_HH__
 #define __BGP_BGP_TRIE_HH__
@@ -113,6 +113,7 @@ public:
     typedef typename RouteTrie::iterator iterator;
 
     BgpTrie()	{}
+    ~BgpTrie();
 
     iterator insert(const IPNet& net, const SubnetRoute<A>& route);
 

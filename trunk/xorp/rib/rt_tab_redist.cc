@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.9 2004/03/25 01:45:09 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.10 2004/04/01 19:31:21 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -67,11 +67,11 @@ const IPNet<A> RedistDumpState<A>::NO_LAST_NET(A::ALL_ONES(), A::ADDR_BITLEN);
 
 
 template<class A>
-RedistTable<A>::RedistTable<A>(const string&	tablename,
-			       OriginTable<A>*	from_table,
-			       OriginTable<A>*	to_table,
-			       EventLoop&	eventloop,
-			       RedistOutputBase<A>* output)
+RedistTable<A>::RedistTable(const string&	tablename,
+			    OriginTable<A>*	from_table,
+			    OriginTable<A>*	to_table,
+			    EventLoop&	eventloop,
+			    RedistOutputBase<A>* output)
     : RouteTable<A>(tablename),
       _e(eventloop), _from_table(from_table), _parent(from_table),
       _to_table_name(to_table->tablename()),
@@ -81,8 +81,8 @@ RedistTable<A>::RedistTable<A>(const string&	tablename,
     set_next_table(_parent->next_table());
     _parent->set_next_table(this);
 
-    if (next_table() != 0) {
-	next_table()->replumb(_parent, this);
+    if (this->next_table() != 0) {
+	this->next_table()->replumb(_parent, this);
     }
 
     if (_output) {
@@ -91,10 +91,10 @@ RedistTable<A>::RedistTable<A>(const string&	tablename,
 }
 
 template<class A>
-RedistTable<A>::~RedistTable<A>()
+RedistTable<A>::~RedistTable()
 {
     // Unplumb ourselves from the table graph
-    _parent->set_next_table(next_table());
+    _parent->set_next_table(this->next_table());
 
     // Delete output carefully, deleting it may cause an event or two.
     if (_output) {
@@ -197,14 +197,14 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& 	route,
 {
     XLOG_ASSERT(caller == _parent);
     debug_msg("RT[%s]: Adding route %s\n",
-	      tablename().c_str(), route.str().c_str());
+	      this->tablename().c_str(), route.str().c_str());
 
     if (dumping()) {
 	add_route_in_dump(route);
     } else {
 	_output->add_route(route);
     }
-    next_table()->add_route(route, this);
+    this->next_table()->add_route(route, this);
 
     return XORP_OK;
 }
@@ -216,14 +216,14 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* route,
 {
     XLOG_ASSERT(caller == _parent);
     debug_msg("RT[%s]: Delete route %s\n",
-	      tablename().c_str(), route->str().c_str());
+	      this->tablename().c_str(), route->str().c_str());
 
     if (dumping()) {
 	delete_route_in_dump(*route);
     } else {
 	_output->delete_route(*route);
     }
-    next_table()->delete_route(route, this);
+    this->next_table()->delete_route(route, this);
 
     return XORP_OK;
 }
@@ -448,13 +448,13 @@ RedistTable<A>::str() const
 {
     string s;
 
-    s = "-------\nRedistTable: " + tablename() + "\n";
+    s = "-------\nRedistTable: " + this->tablename() + "\n";
     s += "_from_table = " + _from_table->tablename() + "\n";
     s += "_to_table = " + _to_table_name + "\n";
-    if (next_table() == NULL)
+    if (this->next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + next_table()->tablename() + "\n";
+	s += "next table = " + this->next_table()->tablename() + "\n";
     return s;
 }
 

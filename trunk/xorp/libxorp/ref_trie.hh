@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.16 2004/03/19 01:30:10 pavlin Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.17 2004/03/19 11:45:58 mjh Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -1336,7 +1336,7 @@ RefTrieNode<A, Payload>::str() const
 	s += "PL";
     else
 	s += "[]";
-    if ((_references & DELETE_NODE) != 0)
+    if ((_references & NODE_DELETED) != 0)
 	s += " *DEL*";
     s += c_format("\n    U: %s\n", _up ? _up->_k.str().c_str() : "NULL");
     return s;

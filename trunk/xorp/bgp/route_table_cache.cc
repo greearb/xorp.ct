@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.19 2004/03/26 19:33:41 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.20 2004/03/26 19:44:04 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,14 +28,23 @@ CacheTable<A>::CacheTable(string table_name,
 			  BGPRouteTable<A> *parent_table)
     : BGPRouteTable<A>("CacheTable-" + table_name, safi)
 {
-    _parent = parent_table;
+    this->_parent = parent_table;
 }
+
+template<class A>
+CacheTable<A>::~CacheTable()
+{
+    if (_route_table.begin() != _route_table.end()) {
+	XLOG_WARNING("CacheTable trie was not empty on deletion\n");
+    }
+}
+
 
 template<class A>
 void
 CacheTable<A>::flush_cache()
 {
-    debug_msg("%s\n", tablename().c_str());
+    debug_msg("%s\n", this->tablename().c_str());
     _route_table.delete_all_nodes();
 }
 
@@ -45,14 +54,14 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			 BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     //a cache table is never going to be the last table
     IPNet<A> net = rtmsg.net();
@@ -61,7 +70,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
     assert(_route_table.lookup_node(net) == _route_table.end());
 
     if (rtmsg.changed()==false) {
-	return _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
+	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
     } else {
 	//The route was changed.  
 
@@ -72,7 +81,8 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//store it locally
 	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
 	ti = _route_table.insert(msg_route->net(), *msg_route);
-	debug_msg("Caching route: %p net: %s atts: %p  %s\n", msg_route,
+	printf("Cache Table: %s\n", this->tablename().c_str());
+	printf("Caching route: %p net: %s atts: %p  %s\n", msg_route,
 	       msg_route->net().str().c_str(), 
 	       (msg_route->attributes()), 
 	       msg_route->str().c_str());
@@ -81,7 +91,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	InternalMessage<A> new_rt_msg(&(ti.payload()), rtmsg.origin_peer(),
 				      rtmsg.genid());
 	if (rtmsg.push()) new_rt_msg.set_push();
-	int result = _next_table->add_route(new_rt_msg, 
+	int result = this->_next_table->add_route(new_rt_msg, 
 					    (BGPRouteTable<A>*)this);
 
 	rtmsg.inactivate();
@@ -123,7 +133,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      "old route: %p"
 	      "new route: %p"
 	      "old: %s\n new: %s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller ? caller->tablename().c_str() : "NULL",
 	      &old_rtmsg,
 	      &new_rtmsg,
@@ -132,8 +142,8 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      old_rtmsg.str().c_str(),
 	      new_rtmsg.str().c_str());
 
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     IPNet<A> net = old_rtmsg.net();
     XLOG_ASSERT(net == new_rtmsg.net());
@@ -173,7 +183,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     //do we need to cache the new route?
     if (new_rtmsg.changed()==false) {
-	result = _next_table->replace_route(*old_rtmsg_ptr, 
+	result = this->_next_table->replace_route(*old_rtmsg_ptr, 
 					    new_rtmsg, 
 					    (BGPRouteTable<A>*)this);
     } else {
@@ -186,13 +196,18 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//store it locally
 	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
 	ti = _route_table.insert(net, *new_route);
+	printf("Caching route2: %p net: %s atts: %p  %s\n", new_route,
+	       new_route->net().str().c_str(), 
+	       (new_route->attributes()), 
+	       new_route->str().c_str());
+
 
 	//progogate downstream
 	InternalMessage<A> new_rtmsg_copy(&(ti.payload()),
 					  new_rtmsg.origin_peer(),
 					  new_rtmsg.genid());
 	if (new_rtmsg.push()) new_rtmsg_copy.set_push();
-	result = _next_table->replace_route(*old_rtmsg_ptr,
+	result = this->_next_table->replace_route(*old_rtmsg_ptr,
 					    new_rtmsg_copy, 
 					    (BGPRouteTable<A>*)this);
 	new_rtmsg.inactivate();
@@ -226,16 +241,16 @@ int
 CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
 			    BGPRouteTable<A> *caller)
 {
-
+    int result = 0;
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
     IPNet<A> net = rtmsg.net();
 
     //do we already have this cached?
@@ -255,8 +270,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 				      rtmsg.genid());
 	if (rtmsg.push()) old_rt_msg.set_push();
 
-	int result = 0;
-	result = _next_table->delete_route(old_rt_msg, 
+	result = this->_next_table->delete_route(old_rt_msg, 
 					   (BGPRouteTable<A>*)this);
 
 	if (rtmsg.changed()) {
@@ -265,21 +279,22 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    //Free the route from the message.
 	    rtmsg.inactivate();
 	}
-	return result;
+    } else {
+
+	//we don't flush the cache, so this should simply never happen.
+	XLOG_ASSERT(!rtmsg.changed());
+
+	//If we get here, route was not cached and was not modified.
+	result = this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
     }
-
-    //we don't flush the cache, so this should simply never happen.
-    XLOG_ASSERT(!rtmsg.changed());
-
-    //If we get here, route was not cached and was not modified.
-    return _next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
+    return result;
 }
 
 template<class A>
 int
 CacheTable<A>::push(BGPRouteTable<A> *caller) {
-    assert(caller == _parent);
-    return _next_table->push((BGPRouteTable<A>*)this);
+    assert(caller == this->_parent);
+    return this->_next_table->push((BGPRouteTable<A>*)this);
 }
 
 template<class A>
@@ -287,7 +302,7 @@ int
 CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller,
 			  const PeerHandler *dump_peer) {
-    assert(caller == _parent);
+    assert(caller == this->_parent);
     if (rtmsg.changed()) {
 	//Check we've got it cached.  Clear the changed bit so we
 	//don't confuse anyone downstream.
@@ -306,10 +321,14 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	//version of the route.
 	InternalMessage<A> new_msg(&(iter.payload()), rtmsg.origin_peer(),
 				   rtmsg.genid());
-	return _next_table->route_dump(new_msg, (BGPRouteTable<A>*)this, 
+	return this->_next_table->route_dump(new_msg, (BGPRouteTable<A>*)this, 
 				       dump_peer);
     } else {
-	return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, 
+	//We must not have this cached
+	IPNet<A> net = rtmsg.route()->net();
+	assert(_route_table.lookup_node(net) == _route_table.end());
+
+	return this->_next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, 
 				       dump_peer);
     }
 }
@@ -323,19 +342,19 @@ CacheTable<A>::lookup_route(const IPNet<A> &net) const {
     if (iter != _route_table.end())
 	return &(iter.payload());
     else
-	return _parent->lookup_route(net);
+	return this->_parent->lookup_route(net);
 }
 
 template<class A>
 void
 CacheTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
-    _parent->route_used(rt, in_use);
+    this->_parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
 CacheTable<A>::str() const {
-    string s = "CacheTable<A>" + tablename();
+    string s = "CacheTable<A>" + this->tablename();
     return s;
 }
 
@@ -343,17 +362,17 @@ CacheTable<A>::str() const {
 template<class A>
 void 
 CacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
-    XLOG_ASSERT(_next_table == next_table);
+    XLOG_ASSERT(this->_next_table == next_table);
 
-    _parent->output_state(busy, this);
+    this->_parent->output_state(busy, this);
 }
 
 template<class A>
 bool 
 CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
-    XLOG_ASSERT(_next_table == next_table);
+    XLOG_ASSERT(this->_next_table == next_table);
 
-    return _parent->get_next_message(this);
+    return this->_parent->get_next_message(this);
 }
 
 template class CacheTable<IPv4>;

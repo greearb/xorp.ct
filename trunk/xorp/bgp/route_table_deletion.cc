@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.11 2004/02/24 03:16:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.12 2004/02/25 16:43:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,11 +31,11 @@ DeletionTable<A>::DeletionTable(string table_name,
 				BGPRouteTable<A> *parent_table)
     : BGPRouteTable<A>("DeletionTable-" + table_name, safi)
 {
-    _parent = parent_table;
+    this->_parent = parent_table;
     _genid = genid;
     _route_table = route_table;
     _peer = peer;
-    _next_table = 0;
+    this->_next_table = 0;
 }
 
 template<class A>
@@ -50,9 +50,9 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller)
 {
     debug_msg("DeletionTable<A>::add_route %x on %s\n",
-	      (u_int)(&rtmsg), tablename().c_str());
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+	      (u_int)(&rtmsg), this->tablename().c_str());
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     IPNet<A> net = rtmsg.net();
 
@@ -61,7 +61,7 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     iter = _route_table->lookup_node(net);
 
     if (iter == _route_table->end()) {
-	return _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
+	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
     } else {
 	const SubnetRoute<A> *existing_route = &(iter.payload());
 	// We have a copy of this route in our deletion cache.
@@ -85,7 +85,7 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	// propogate downstream
 	InternalMessage<A> old_rt_msg(existing_route, _peer, _genid);
 	old_rt_msg.set_from_previous_peering();
-	return _next_table->replace_route(old_rt_msg, rtmsg,
+	return this->_next_table->replace_route(old_rt_msg, rtmsg,
 					  (BGPRouteTable<A>*)this);
     }
     XLOG_UNREACHABLE();
@@ -98,15 +98,15 @@ DeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 				BGPRouteTable<A> *caller)
 {
     debug_msg("DeletionTable<A>::replace_route %x -> %x on %s\n",
-	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), this->tablename().c_str());
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(old_rtmsg.net() == new_rtmsg.net());
     // we should never see a replace for a net that's in the deletion cache
     XLOG_ASSERT(_route_table->lookup_node(old_rtmsg.net()) ==
 	   _route_table->end());
 
-    return _next_table->replace_route(old_rtmsg, new_rtmsg,
+    return this->_next_table->replace_route(old_rtmsg, new_rtmsg,
 				      (BGPRouteTable<A>*)this);
 }
 
@@ -116,8 +116,8 @@ DeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller,
 			     const PeerHandler *dump_peer)
 {
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
 
     /* A route dump must have been initiated after this table was
        created (because the creation of this table would terminate any
@@ -126,7 +126,7 @@ DeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(_route_table->lookup_node(rtmsg.net()) ==
 	   _route_table->end());
 
-    return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, dump_peer);
+    return this->_next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, dump_peer);
 }
 
 template<class A>
@@ -135,22 +135,22 @@ DeletionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			       BGPRouteTable<A> *caller)
 {
     debug_msg("DeletionTable<A>::delete_route %x on %s\n",
-	      (u_int)(&rtmsg), tablename().c_str());
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+	      (u_int)(&rtmsg), this->tablename().c_str());
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
     // we should never see a delete for a net that's in the deletion cache
     XLOG_ASSERT(_route_table->lookup_node(rtmsg.net()) ==
 	   _route_table->end());
 
-    return _next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
+    return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 }
 
 template<class A>
 int
 DeletionTable<A>::push(BGPRouteTable<A> *caller)
 {
-    XLOG_ASSERT(caller == _parent);
-    return _next_table->push((BGPRouteTable<A>*)this);
+    XLOG_ASSERT(caller == this->_parent);
+    return this->_next_table->push((BGPRouteTable<A>*)this);
 }
 
 template<class A>
@@ -165,21 +165,21 @@ DeletionTable<A>::lookup_route(const IPNet<A> &net) const
     if (iter != _route_table->end()) {
 	return &(iter.payload());
     } else
-	return _parent->lookup_route(net);
+	return this->_parent->lookup_route(net);
 }
 
 template<class A>
 void
 DeletionTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
-    _parent->route_used(rt, in_use);
+    this->_parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
 DeletionTable<A>::str() const
 {
-    string s = "DeletionTable<A>" + tablename();
+    string s = "DeletionTable<A>" + this->tablename();
     return s;
 }
 
@@ -187,14 +187,14 @@ template<class A>
 void
 DeletionTable<A>::initiate_background_deletion()
 {
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(this->_next_table != NULL);
     _del_sweep = _route_table->pathmap().begin();
     _deleted = 0;
     _chains = 0;
 
     // Make sure that anything previously sent by this peer has been
     // pushed from the output queue in the RibOut tables.
-    _next_table->push(this);
+    this->_next_table->push(this);
 
     _deletion_timer = eventloop().
 	new_oneoff_after_ms(0 /*call back immediately, but after
@@ -238,8 +238,8 @@ DeletionTable<A>::delete_next_chain()
 	// propagate downstream
 	InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
 	rt_msg.set_from_previous_peering();
-	if (_next_table != NULL)
-	    _next_table->delete_route(rt_msg, (BGPRouteTable<A>*)this);
+	if (this->_next_table != NULL)
+	    this->_next_table->delete_route(rt_msg, (BGPRouteTable<A>*)this);
 	_deleted++;
 	if (chained_rt == first_rt) {
 	    debug_msg("end of chain\n");
@@ -249,8 +249,8 @@ DeletionTable<A>::delete_next_chain()
 	}
 	chained_rt = next_rt;
     }
-    if (_next_table != NULL)
-	_next_table->push((BGPRouteTable<A>*)this);
+    if (this->_next_table != NULL)
+	this->_next_table->push((BGPRouteTable<A>*)this);
     _chains++;
 
     _deletion_timer = eventloop().
@@ -265,20 +265,20 @@ void
 DeletionTable<A>::unplumb_self()
 {
     debug_msg("unplumbing self\n");
-    XLOG_ASSERT(_next_table != NULL);
-    XLOG_ASSERT(_parent != NULL);
+    XLOG_ASSERT(this->_next_table != NULL);
+    XLOG_ASSERT(this->_parent != NULL);
     XLOG_ASSERT(0 == _route_table->route_count());
 
     // signal downstream that we finished deleting routes from this
     // version of this RibIn.
-    _next_table->peering_down_complete(_peer, _genid, this);
+    this->_next_table->peering_down_complete(_peer, _genid, this);
 
-    _parent->set_next_table(_next_table);
-    _next_table->set_parent(_parent);
+    this->_parent->set_next_table(this->_next_table);
+    this->_next_table->set_parent(this->_parent);
 
     // ensure we can't continue to operate
-    _next_table = (BGPRouteTable<A>*)0xd0d0;
-    _parent = (BGPRouteTable<A>*)0xd0d0;
+    this->_next_table = (BGPRouteTable<A>*)0xd0d0;
+    this->_parent = (BGPRouteTable<A>*)0xd0d0;
 }
 
 template class DeletionTable<IPv4>;

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.30 2004/02/12 19:34:33 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.31 2004/03/26 06:17:14 atanu Exp $
 #
 
 #
@@ -453,6 +453,8 @@ test7()
 	nexthop 10.10.10.10 \
 	nlri 10.10.10.0/24
 
+    sleep 1
+
     # Bring up a second peering
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
@@ -495,11 +497,44 @@ test8()
     reset
 }
 
+test9()
+{
+    echo "TEST9 (Simple route propogation test - searching for memory leak):"
+    echo "	1) Bring up peering (peer1)"
+    echo "	2) Bring up a second peering (peer2) and introduce a route"
+    echo "	3) Tear down both peerings"
+
+    reset
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+    coord peer1 assert established
+
+    # Inject a route
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "$PEER2_AS" \
+	nexthop 10.10.10.10 \
+	nlri 10.10.10.0/24
+
+
+    sleep 1
+
+    coord peer1 assert established
+    coord peer2 assert established
+
+    reset
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3 test4 test5 test6 test7 test8'
+TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9'
 
 # Include command line
 . ${srcdir}/args.sh
+
+START_PROGRAMS="no"
 
 if [ $START_PROGRAMS = "yes" ]
 then
