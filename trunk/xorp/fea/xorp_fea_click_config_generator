@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.5 2004/12/11 03:20:47 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.6 2004/12/11 10:35:31 pavlin Exp $
 #
 
 #
@@ -27,9 +27,8 @@ BEGIN {
     iftree_interfaces_max = 0;
     iftree_vifs_max = 0;
     is_click_enabled = 0;
-    # XXX: default to user-level click
     is_kernel_click = 0;
-    is_user_click = 1;
+    is_user_click = 0;
     is_debug = 0;
 
     xorp_ip = "_xorp_ip";
@@ -42,6 +41,7 @@ BEGIN {
     statement = "";
     in_comment = 0;
     is_syntax_error = 0;
+    is_internal_error = 0;
     config_level = 0;
     ignore_level[0] = 1;
     is_level0_interfaces = 0;
@@ -92,8 +92,7 @@ function calculate_state()
 	    }
 	}
 	if (best_ii < 0) {
-	    printf("Internal error: cannot sort the interface names\n");
-	    exit(1);
+	    internal_error("Internal error: cannot sort the interface names\n");
 	}
 	ifaces_chosen[best_ii] = 1;
 
@@ -112,8 +111,7 @@ function calculate_state()
 		}
 	    }
 	    if (best_vi < 0) {
-		printf("Internal error: cannot sort the vif names\n");
-		exit(1);
+		internal_error("Internal error: cannot sort the vif names\n");
 	    }
 	    ifaces_vifs_chosen[best_ii,best_vi] = 1;
 
@@ -810,7 +808,8 @@ function process_statement(statement)
 		v = tokens[i];
 		if (v == "true") {
 		    is_kernel_click = 1;
-		    is_user_click = 0;
+		    if (is_user_click)
+			syntax_error("Kernel Click and user-level Click are mutually exclusive\n");
 		} else {
 		    is_kernel_click = 0;
 		}
@@ -830,8 +829,9 @@ function process_statement(statement)
 		i++;
 		v = tokens[i];
 		if (v == "true") {
-		    is_kernel_click = 0;
 		    is_user_click = 1;
+		    if (is_kernel_click)
+			syntax_error("Kernel Click and user-level Click are mutually exclusive\n");
 		} else {
 		    is_user_click = 0;
 		}
@@ -848,6 +848,13 @@ function syntax_error(message)
 {
     is_syntax_error = 1;
     printf("Syntax error (file %s line %d): %s\n", FILENAME, FNR, message);
+    exit(1);
+}
+
+function internal_error(message)
+{
+    is_internal_error = 1;
+    printf("Internal error (file %s): %s\n", FILENAME, message);
     exit(1);
 }
 
@@ -880,8 +887,25 @@ function syntax_error(message)
 }
 
 END {
+    #
+    # Initialize internal state
+    #
     calculate_state();
     check_state();
+
+    #
+    # Check for syntax and internal errors
+    #
+    if (is_syntax_error || is_internal_error)
+	exit(1);
+
+    #
+    # Check if Click is enabled and whether it is user-level or kernel Click
+    #
+    if (! is_click_enabled)
+	exit(0);		# XXX: don't print any Click configuration
+    if ((! is_user_click) && (! is_kernel_click))
+	exit(0);		# XXX: don't print any Click configuration
 
     generate_click_config_header();
     generate_click_shared_ip_input();
@@ -890,10 +914,13 @@ END {
     generate_click_send_packets_to_host();
     generate_click_forwarding_paths();
 
-    if (is_syntax_error)
+    #
+    # Check again for syntax and internal errors
+    #
+    if (is_syntax_error || is_internal_error)
 	exit(1);
-    else
-	exit(0);
+
+    exit(0);
 }
 
 # Local Variables:
