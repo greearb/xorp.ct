@@ -1,0 +1,97 @@
+#
+# $XORP$
+#
+
+This file contains a strawman plan for merging the MFEA functionalities
+with the FEA. The plan is to perform the merging incrementally,
+without breaking existing code.
+
+Everyone should be free to edit this file and/or discuss the issues.
+
+
+Timescale:
+Start: March 26, 2003
+Finish: ??
+
+The FEA and the MFEA implement (with few exceptions) the
+following functionalities:
+
+* FEA:
+  (a) Network interface manager
+  (b) Forwarding table manager
+  (c) Raw packets, TCP, UDP send/recv
+
+* MFEA:
+  (a) Network interface observer
+  (b) Forwarding table observer
+  (c) Raw packets send/recv
+  (d) Join/leave multicast groups
+  (e) Multicast forwarding table handling
+  (f) Multicast data notifications (and dataflow bandwidth monitoring)
+
+
+Some of the functionalities provided by the MFEA are a subset of the
+functionalities provided by the FEA (e.g., MFEA(a), MFEA(b) and MFEA(c)
+are subset of FEA(a), FEA(b), and FEA(c) respectively).
+Other functionalities are multicast-specific and are required only for
+multicast (e.g., MFEA(d), MFEA(e), MFEA(f)), though MFEA(d) for example
+might be needed by unicast routing protocols such as OSPF and RIP.
+
+
+The current plan for incremental merging is:
+
+1. Make the FEA and MFEA run as same process on the same event loop.
+
+2. Merge the FEA(a) and MFEA(a) network interface specific code such
+   that the FEA supports Linux for example.
+
+3. Modify the MFEA(a) network interface observer such that it receives
+   the information about network interfaces from the FEA rather than the
+   kernel. Internally, the MFEA may keep the current vif organization,
+   and may continue to use the existing XRL interface to provide that
+   information to PIM and IGMP for example.
+
+4. Pull-out the MFEA(b) forwarding table observer and make it a separate
+   box (process?). It will behave similar to a routing process, except
+   that it will be started explicitly by the router manager in the only
+   case when a subset of XORP is run as a multicast router only (e.g.,
+   if the unicast routes are not installed by the XORP router).
+
+5. Move the MFEA(d) join/leave multicast groups to the FEA. Note that
+   this task may have to happen earlier if RIP for example needs it
+   before the merging is completed.
+
+6. Move the MFEA(e) multicast forwarding table handling, and the MFEA(f)
+   multicast data notification to the FEA. Note that those two are
+   coupled (e.g., if a multicast forwarding entry is removed from the
+   kernel, then the associated multicast dataflow state should be
+   deleted as well), hence they should be moved together to the FEA.
+
+7. Merge the FEA(c) and MFEA(c) raw packets send/recv code.
+
+
+In the process, the following things need to be added (subject to
+further discussion):
+
+ * When the FEA creates internally the set of interfaces (and virtual
+   interfaces) it knows about, it should assign an unique vif_index to
+   each virtual interface. This vif_index has internal meaning only for
+   each XORP process that obtains the set of interfaces from the FEA;
+   i.e., the vif_index is not used in the XORP configuration. For
+   example, when the FEA instructs PIM to add an interface with
+   ifname="foo", vif_name="bar", vif_index=5, then if PIM sends an XRL
+   to FEA with one of the fields in that XRL having vif_index=5, for the
+   FEA it should mean same thing as (ifname="foo", vif_name="bar").
+   A side note: if the kernel supports unique vif_index (per vif), the
+   FEA may choose to use those vif_index as assigned by the kernel;
+   otherwise the FEA should assign them by itself.
+   Open question: can vif_index be used by third party? E.g., if IGMP
+   sends an XRL to PIM, can it use vif_index instead of (ifname="foo",
+   vif_name="bar")?
+
+ * When the FEA sends notifications about interface-related changes
+   (flags, addresses, etc), each notification should carry a flag
+   "last_notification" (or something like that) that is set to true
+   only for the last notification. Thus, applying the notification
+   events can be atomic at the receiving side.
+
