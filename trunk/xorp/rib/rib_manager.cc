@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.29 2004/05/07 23:31:27 hodson Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.30 2004/05/12 08:28:50 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -40,6 +40,11 @@ initialize_rib(RIB<A>& 			rib,
     }
     if (rib.initialize_register(&register_server) != XORP_OK) {
 	XLOG_FATAL("Could not initialize register table for %s",
+		   rib.name().c_str());
+    }
+    if (rib.initialize_redist_all("all") != XORP_OK) {
+	XLOG_FATAL("Could not initialize all-protocol redistribution "
+		   "table for %s",
 		   rib.name().c_str());
     }
     if (rib.add_igp_table("connected", "", "") != XORP_OK) {

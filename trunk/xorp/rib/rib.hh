@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.18 2004/04/28 15:56:47 hodson Exp $
+// $XORP: xorp/rib/rib.hh,v 1.19 2004/05/06 23:07:02 hodson Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -92,6 +92,19 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int initialize_export(list<RibClient* >* rib_clients_list);
+
+    /**
+     * Initialize the RIB's RedistTable at the end so that the
+     * winning routes are exported to the RIB clients (e.g., the FEA).
+     * Note that it is an error to initialize the table twice.
+     *
+     * @see RedistTable
+     * @param all a keyword string which can be used by RIB clients
+     * to register with the RIB to receive the winning routes from
+     * the RedistTable.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int initialize_redist_all(const string& all);
 
     /**
      * Initialize the RIB's RegisterTable.  The RegisterTable allows

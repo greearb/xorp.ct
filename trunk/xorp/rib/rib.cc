@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.28 2004/05/06 23:07:02 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.29 2004/05/07 23:29:09 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -275,6 +275,29 @@ RIB<A>::initialize_export(list<RibClient* >* rib_clients_list)
 	//return XORP_ERROR;
     }
     _final_table = et;
+    return XORP_OK;
+}
+
+template <typename A>
+int
+RIB<A>::initialize_redist_all(const string& all)
+{
+    if (_register_table == NULL) {
+	XLOG_ERROR("Register table is not yet initialized");
+	return XORP_ERROR;
+    }
+
+    if (find_table(redist_tablename(all)) != NULL) {
+	return XORP_OK;		// RedistTable already exists, no sweat
+    }
+
+    RedistTable<A>* r;
+    r = new RedistTable<A>(redist_tablename(all), _register_table);
+    if (add_table(r) != XORP_OK) {
+	delete r;
+	return XORP_ERROR;
+    }
+
     return XORP_OK;
 }
 
@@ -755,7 +778,7 @@ template <typename A>
 RouteRange<A>*
 RIB<A>::route_range_lookup(const A& lookupaddr)
 {
-    return _final_table->lookup_route_range( lookupaddr );
+    return _final_table->lookup_route_range(lookupaddr);
 }
 
 template <typename A>
@@ -985,7 +1008,9 @@ RIB<A>::add_origin_table(const string& tablename,
 	    // first of them.
 	    //
 	    RouteTable<A>* rt = track_back(_final_table,
-					   EXPORT_TABLE | REGISTER_TABLE);
+					   EXPORT_TABLE
+					   | REDIST_TABLE
+					   | REGISTER_TABLE);
 
 	    //
 	    // Plumb our new table in ahead of the first single-parent
@@ -1003,7 +1028,9 @@ RIB<A>::add_origin_table(const string& tablename,
 	// of the ExtIntTable.
 	//
 	RouteTable<A>* next_table = track_back(_final_table,
-					       EXPORT_TABLE | REGISTER_TABLE);
+					       EXPORT_TABLE
+					       | REDIST_TABLE
+					       | REGISTER_TABLE);
 	RouteTable<A>* existing_table = next_table->parent();
 	if (protocol_type == IGP) {
 	    ei_table = new ExtIntTable<A>(existing_table, new_table);
