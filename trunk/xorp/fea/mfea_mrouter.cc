@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.13 2003/09/26 16:01:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.14 2004/02/21 06:21:35 pavlin Exp $"
 
 
 //
@@ -1873,19 +1873,30 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
     switch (family()) {
     case AF_INET:
     {
-	struct in_addr src_addr, dst_addr;
 	struct igmpmsg *igmpmsg = (struct igmpmsg *)databuf;
 	
 	//
-	// Get the source and destination address, the iif, and message type
+	// Get the message type, the iif, and source and destination address
 	//
-	src_addr.s_addr = htonl(igmpmsg->im_src.s_addr);
-	dst_addr.s_addr = htonl(igmpmsg->im_dst.s_addr);
-	src.copy_in(igmpmsg->im_src);
-	dst.copy_in(igmpmsg->im_dst);
-	iif_vif_index = igmpmsg->im_vif;
 	message_type = igmpmsg->im_msgtype;
-	
+	iif_vif_index = igmpmsg->im_vif;
+	if (message_type == IGMPMSG_WHOLEPKT) {
+	    //
+	    // If a WHOLEPKT message, then get the inner source and
+	    // destination addresses
+	    //
+	    const struct ip *ip4 = (const struct ip *)(igmpmsg + 1);
+	    if (datalen - sizeof(*igmpmsg) < sizeof(*ip4)) {
+		// The inner packet is too small
+		return (XORP_ERROR);
+	    }
+	    src.copy_in(ip4->ip_src);
+	    dst.copy_in(ip4->ip_dst);
+	} else {
+	    src.copy_in(igmpmsg->im_src);
+	    dst.copy_in(igmpmsg->im_dst);
+	}
+
 	//
 	// Check if the iif is valid and UP
 	//
@@ -1915,15 +1926,13 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	switch (message_type) {
 	case IGMPMSG_NOCACHE:
 	case IGMPMSG_WRONGVIF:
+	case IGMPMSG_WHOLEPKT:
 	    if ((! src.is_unicast())
 		|| (! dst.is_multicast())
-		|| (dst_addr.s_addr <= INADDR_MAX_LOCAL_GROUP)) {
+		|| (dst.is_linklocal_multicast())) {
 		// XXX: LAN-scoped addresses are not routed
 		return (XORP_ERROR);
 	    }
-	    break;
-	case IGMPMSG_WHOLEPKT:
-	    // XXX: 'src' and 'dst' are not used, hence we don't check them
 	    break;
 #if defined(IGMPMSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
 	case IGMPMSG_BW_UPCALL:
@@ -1956,12 +1965,26 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	struct mrt6msg *mrt6msg = (struct mrt6msg *)databuf;
 	
 	//
-	// Get the source and destination address, the iif, and message type
+	// Get the message type, the iif, and source and destination address
 	//
-	src.copy_in(mrt6msg->im6_src);
-	dst.copy_in(mrt6msg->im6_dst);
-	iif_vif_index = mrt6msg->im6_mif;
 	message_type = mrt6msg->im6_msgtype;
+	iif_vif_index = mrt6msg->im6_mif;
+	if (message_type == MRT6MSG_WHOLEPKT) {
+	    //
+	    // If a WHOLEPKT message, then get the inner source and
+	    // destination addresses
+	    //
+	    const struct ip6_hdr *ip6 = (const struct ip6_hdr *)(mrt6msg + 1);
+	    if (datalen - sizeof(*mrt6msg) < sizeof(*ip6)) {
+		// The inner packet is too small
+		return (XORP_ERROR);
+	    }
+	    src.copy_in(ip6->ip6_src);
+	    dst.copy_in(ip6->ip6_dst);
+	} else {
+	    src.copy_in(mrt6msg->im6_src);
+	    dst.copy_in(mrt6msg->im6_dst);
+	}
 	
 	//
 	// Check if the iif is valid and UP
@@ -1993,15 +2016,13 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	switch (message_type) {
 	case MRT6MSG_NOCACHE:
 	case MRT6MSG_WRONGMIF:
+	case MRT6MSG_WHOLEPKT:
 	    if ((! src.is_unicast())
 		|| (! dst.is_multicast())
 		|| dst.is_linklocal_multicast()) {
 		// XXX: LAN-scoped addresses are not routed
 		return (XORP_ERROR);
 	    }
-	    break;
-	case MRT6MSG_WHOLEPKT:
-	    // XXX: 'src' and 'dst' are not used, hence we don't check them
 	    break;
 #if defined(MRT6MSG_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
 	case MRT6MSG_BW_UPCALL:
