@@ -7037,7 +7037,7 @@ cat >conftest.$ac_ext <<_ACEOF
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include "mrt/include/netinet/ip_mroute_adv_api_freebsd_4_5.h"
+#include <netinet/ip_mroute.h>
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
@@ -7093,7 +7093,7 @@ cat >conftest.$ac_ext <<_ACEOF
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include "mrt/include/netinet/ip_mroute_adv_api_freebsd_4_5.h"
+#include <netinet/ip_mroute.h>
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
@@ -7150,7 +7150,7 @@ cat >conftest.$ac_ext <<_ACEOF
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include "mrt/include/netinet/ip_mroute_adv_api_freebsd_4_5.h"
+#include <netinet/ip_mroute.h>
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
@@ -7207,7 +7207,7 @@ cat >conftest.$ac_ext <<_ACEOF
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include "mrt/include/netinet/ip6_mroute_adv_api_freebsd_4_5.h"
+#include <netinet6/ip6_mroute.h>
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
@@ -7263,7 +7263,7 @@ cat >conftest.$ac_ext <<_ACEOF
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include "mrt/include/netinet/ip6_mroute_adv_api_freebsd_4_5.h"
+#include <netinet6/ip6_mroute.h>
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
@@ -7320,7 +7320,7 @@ cat >conftest.$ac_ext <<_ACEOF
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include "mrt/include/netinet/ip6_mroute_adv_api_freebsd_4_5.h"
+#include <netinet6/ip6_mroute.h>
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
