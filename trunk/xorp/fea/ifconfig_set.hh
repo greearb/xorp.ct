@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.5 2003/10/11 19:47:37 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.6 2003/10/12 02:30:29 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -49,24 +49,70 @@ public:
      */
     virtual int stop() = 0;
 
+    /**
+     * Push the network interface configuration into the underlying system.
+     *
+     * @param config the interface tree configuration to push.
+     * @return true on success, otherwise false.
+     */
     virtual bool push_config(const IfTree& config);
 
 protected:
+    /**
+     * Set the interface MAC address.
+     *
+     * @param ifname the interface name.
+     * @param if_index the interface index.
+     * @param ether_addr the Ethernet MAC address to set.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
 					  string& reason) = 0;
 
+    /**
+     * Set the interface MTU address.
+     *
+     * @param ifname the interface name.
+     * @param if_index the interface index.
+     * @param mtu the MTU to set.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
 				  string& reason) = 0;
 
+    /**
+     * Set the interface flags.
+     *
+     * @param ifname the interface name.
+     * @param if_index the interface index.
+     * @param flags the flags to set.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
 				    string& reason) = 0;
 
+    /**
+     * Set an address on an interface.
+     *
+     * @param ifname the interface name.
+     * @param if_index the interface index.
+     * @param is_broadcast true if @param dst_or_bcast is a broadcast address.
+     * @param is_p2p true if @param dst_or_bcast is a destination/peer address.
+     * @param addr the address to set.
+     * @param dst_or_bcast the broadcast or the destination/peer address.
+     * @param prefix_len the prefix length of the subnet mask.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     virtual int set_vif_address(const string& ifname,
 				uint16_t if_index,
 				bool is_broadcast,
@@ -76,6 +122,16 @@ protected:
 				uint32_t prefix_len,
 				string& reason) = 0;
 
+    /**
+     * Delete an address from an interface. 
+     * 
+     * @param ifname the interface name.
+     * @param if_index the interface index.
+     * @param addr the address to delete.
+     * @param prefix_len the prefix length of the subnet mask.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     virtual int delete_vif_address(const string& ifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
@@ -112,6 +168,12 @@ public:
      */
     virtual int stop();
 
+    /**
+     * Push the network interface configuration into the underlying system.
+     *
+     * @param config the interface tree configuration to push.
+     * @return true on success, otherwise false.
+     */
     virtual bool push_config(const IfTree& config);
 
 private:
@@ -278,8 +340,16 @@ private:
 				   uint32_t prefix_len,
 				   string& reason);
 
-    int		check_request(NetlinkSocket& ns, uint32_t seqno,
-			      string& reason);
+    /**
+     * Check that a previous netlink request has succeeded.
+     * 
+     * @param ns the NetlinkSocket to use for reading data.
+     * @param seqno the sequence nomer of the netlink request to check for.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		check_netlink_request(NetlinkSocket& ns, uint32_t seqno,
+				      string& reason);
 
     bool	    _cache_valid;	// Cache data arrived.
     uint32_t	    _cache_seqno;	// Seqno of netlink socket data to

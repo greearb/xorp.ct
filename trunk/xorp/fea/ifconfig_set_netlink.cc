@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.2 2003/10/11 19:47:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.3 2003/10/12 02:30:29 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -285,7 +285,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_request(ns4, nlh->nlmsg_seq, reason) < 0) {
+    if (check_netlink_request(ns4, nlh->nlmsg_seq, reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -393,7 +393,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_request(ns4, nlh->nlmsg_seq, reason) < 0) {
+    if (check_netlink_request(ns4, nlh->nlmsg_seq, reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -485,7 +485,7 @@ IfConfigSetNetlink::set_interface_flags(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_request(ns4, nlh->nlmsg_seq, reason) < 0) {
+    if (check_netlink_request(ns4, nlh->nlmsg_seq, reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -632,7 +632,7 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_request(*ns_ptr, nlh->nlmsg_seq, reason) < 0) {
+    if (check_netlink_request(*ns_ptr, nlh->nlmsg_seq, reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -727,15 +727,23 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_request(*ns_ptr, nlh->nlmsg_seq, reason) < 0) {
+    if (check_netlink_request(*ns_ptr, nlh->nlmsg_seq, reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
 }
 
+/**
+ * Check that a previous netlink request has succeeded.
+ * 
+ * @param ns the NetlinkSocket to use for reading data.
+ * @param seqno the sequence nomer of the netlink request to check for.
+ * @param reason the human-readable reason for any failure.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
 int
-IfConfigSetNetlink::check_request(NetlinkSocket& ns, uint32_t seqno,
-				  string& reason)
+IfConfigSetNetlink::check_netlink_request(NetlinkSocket& ns, uint32_t seqno,
+					  string& reason)
 {
     struct sockaddr_nl		snl;
     socklen_t			snl_len;
