@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.2 2003/09/20 00:32:11 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.3 2003/10/13 23:32:41 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -97,9 +97,9 @@ public:
      */
     void force_read();
 
+private:
     typedef list<RoutingSocketObserver*> ObserverList;
 
-private:
     /**
      * Read data available for RoutingSocket and invoke
      * RoutingSocketObserver::rtsock_data() on all observers of routing
