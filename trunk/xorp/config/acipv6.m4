@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.11 2003/10/01 19:10:30 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.12 2003/11/06 03:59:48 pavlin Exp $
 dnl
 
 dnl
@@ -156,7 +156,7 @@ dnl ------------------------------------
 dnl Check the IPv6 stack type
 dnl ------------------------------------
 pv6type=unknown
-AC_MSG_CHECKING([IPv6 stack type])
+AC_MSG_CHECKING(IPv6 stack type)
 for i in KAME; do
   case $i in
   KAME)
