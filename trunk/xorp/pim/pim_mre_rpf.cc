@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.17 2003/05/21 05:32:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.18 2003/07/03 07:13:42 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -1345,4 +1345,14 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
     // it is not needed).
     //
     pim_mre_sg_rpt->entry_try_remove();
+}
+
+//
+// Note: applies only for (S,G)
+//
+void
+PimMre::recompute_is_directly_connected_sg()
+{
+    bool v = pim_node().is_directly_connected(source_addr());
+    set_directly_connected_s(v);
 }
