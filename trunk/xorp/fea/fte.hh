@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.5 2003/05/29 17:59:09 pavlin Exp $
+// $XORP: xorp/fea/fte.hh,v 1.6 2004/03/15 23:31:46 pavlin Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -42,12 +42,13 @@ public:
 	const string&	vifname,
 	uint32_t	metric,
 	uint32_t	admin_distance,
-	bool		xorp_route) :
-	_net(net), _gateway(gateway), _ifname(ifname), _vifname(vifname),
-	_metric(metric), _admin_distance(admin_distance),
-	_xorp_route(xorp_route) {}
-    Fte(const N& net) : _net(net), _gateway(A::ZERO(net.af())),
-	_metric(0), _admin_distance(0), _xorp_route(false) {}
+	bool		xorp_route)
+	: _net(net), _gateway(gateway), _ifname(ifname), _vifname(vifname),
+	  _metric(metric), _admin_distance(admin_distance),
+	  _xorp_route(xorp_route) {}
+    Fte(const N& net)
+	: _net(net), _gateway(A::ZERO(net.af())),
+	  _metric(0), _admin_distance(0), _xorp_route(false) {}
 
     const N&	net() const		{ return _net; }
     const A&	gateway() const 	{ return _gateway; }
@@ -56,6 +57,8 @@ public:
     uint32_t	metric() const		{ return _metric; }
     uint32_t	admin_distance() const	{ return _admin_distance; }
     bool	xorp_route() const 	{ return _xorp_route; }
+    bool	is_deleted() const	{ return _is_deleted; }
+    void	mark_deleted()		{ _is_deleted = true; }
 
     /**
      * Reset all members
@@ -68,6 +71,7 @@ public:
 	_metric = 0;
 	_admin_distance = 0;
 	_xorp_route = false;
+	_is_deleted = false;
     }
 
     /**
@@ -85,11 +89,13 @@ public:
      */
     string str() const {
 	return c_format("net = %s gateway = %s ifname = %s vifname = %s "
-			"metric = %u admin_distance = %u xorp_route = %s",
+			"metric = %u admin_distance = %u xorp_route = %s "
+			"is_deleted = %s",
 			_net.str().c_str(), _gateway.str().c_str(),
 			_ifname.c_str(), _vifname.c_str(),
 			_metric, _admin_distance,
-			_xorp_route ? "true" : "false");
+			_xorp_route ? "true" : "false",
+			_is_deleted ? "true" : "false");
     }
 
 private:
@@ -100,6 +106,7 @@ private:
     uint32_t	_metric;		// Route metric
     uint32_t	_admin_distance;	// Route admin distance
     bool	_xorp_route;		// This route was installed by XORP
+    bool	_is_deleted;		// True if the entry was deleted
 };
 
 typedef Fte<IPv4, IPv4Net> Fte4;
