@@ -69,10 +69,8 @@ void
 RegisterTable<A>::replumb(RouteTable<A> *old_parent, 
 			  RouteTable<A> *new_parent) {
     
-    if (_parent == old_parent)
-	_parent = new_parent;
-    else	// shouldn't be possible
-	abort();
+    XLOG_ASSERT(_parent == old_parent);
+    _parent = new_parent;
 }
 
 template<class A>
