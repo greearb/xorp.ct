@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.5 2004/05/18 03:35:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.6 2004/05/18 06:16:40 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -21,7 +21,7 @@
 void usage()
 {
     fprintf(stderr,
-	    "Usage: xorpsh_print_routes show bgp routes "
+	    "Usage: [ -l <lines> ] xorpsh_print_routes show bgp routes "
 	    "[ipv4|ipv6] [unicast|multicast] [summary|detail]\n"
 	    "where summary enables brief output.\n");
 }
@@ -46,59 +46,65 @@ int main(int argc, char **argv)
     PrintRoutes<IPv4>::detail_t verbose_ipv4 = PrintRoutes<IPv4>::NORMAL;
     PrintRoutes<IPv6>::detail_t verbose_ipv6 = PrintRoutes<IPv6>::NORMAL;
     int interval = -1;
+    int lines = -1;
 
-    while (argc > 1) {
-	bool match = false;
-	if (strcmp(argv[1], "-4") == 0) {
+    int c;
+    while ((c = getopt(argc, argv, "46uml:")) != -1) {
+	switch (c) {
+	case '4':
 	    ipv4 = true;
-	    match = true;
-	}
-	if (strcmp(argv[1], "-6") == 0) {
-	    ipv6 = true;
-	    match = true;
-	}
-	if (strcmp(argv[1], "-u") == 0) {
-	    unicast = true;
-	    match = true;
-	}
-	if (strcmp(argv[1], "-m") == 0) {
-	    multicast = true;
-	    match = true;
-	}
-	if (match)
-	    argc--,argv++;
-	else
 	    break;
+	case '6':
+	    ipv6 = true;
+	    break;
+	case 'u':
+	    unicast = true;
+	    break;
+	case 'm':
+	    multicast = true;
+	    break;
+	case 'l':
+	    lines = atoi(optarg);
+	    break;
+	default:
+	    printf("hello\n");
+	    usage();
+	    return -1;
+	}
     }
 
-    if ((argc < 4) || (argc > 7)) {
+    argc -= optind;
+    argv += optind;
+
+    if ((argc < 3) || (argc > 6)) {
 	usage();
 	return -1;
     }
-    if (strcmp(argv[1], "show") != 0) {
+
+    if (strcmp(argv[0], "show") != 0) {
 	usage();
 	return -1;
     }
-    if (strcmp(argv[2], "bgp") != 0) {
+    if (strcmp(argv[1], "bgp") != 0) {
 	usage();
 	return -1;
     }
-    if (strcmp(argv[3], "routes") != 0) {
+    if (strcmp(argv[2], "routes") != 0) {
 	usage();
 	return -1;
     }
-    int counter = 5;
-    if (argc > 4) {
-	if (strcmp(argv[4], "ipv4") == 0)
+    int counter = 4;
+    if (argc > 3) {
+	if (strcmp(argv[3], "ipv4") == 0)
 	    ipv4 = true;
-	if (strcmp(argv[4], "ipv6") == 0)
+	if (strcmp(argv[3], "ipv6") == 0)
 	    ipv6 = true;
 	counter++;
     }
-    if (argc > 5) {
-	if (strcmp(argv[5], "unicast") == 0)
+    if (argc > 4) {
+	if (strcmp(argv[4], "unicast") == 0)
 	    unicast = true;
-	if (strcmp(argv[5], "multicast") == 0)
+	if (strcmp(argv[4], "multicast") == 0)
 	    multicast = true;
 	counter++;
     }
@@ -124,10 +130,10 @@ int main(int argc, char **argv)
     try {
 	if (ipv4)
 	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval,
-					    unicast, multicast);
+					    unicast, multicast, lines);
 	if (ipv6)
 	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval,
-					    unicast, multicast);
+					    unicast, multicast, lines);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.9 2003/03/10 23:20:10 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.10 2003/10/01 02:29:12 atanu Exp $"
 
 #include "print_peer.hh"
 
@@ -79,7 +79,6 @@ PrintPeers::get_peer_list_start_done(const XrlError& e,
 	_done = true;
 	return;
     }
-    printf("\n\n");
     _prev_no_peers = false;
 
     _token = *token;

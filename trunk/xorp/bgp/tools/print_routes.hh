@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_routes.hh,v 1.9 2004/05/18 06:16:40 atanu Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.10 2004/05/20 15:53:53 hodson Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -33,7 +33,8 @@ template <typename A>
 class PrintRoutes : public XrlBgpV0p2Client {
 public:
     enum detail_t {SUMMARY, NORMAL, DETAIL};
-    PrintRoutes(detail_t verbose, int interval, bool unicast, bool multicast);
+    PrintRoutes(detail_t verbose, int interval, bool unicast, bool multicast,
+		int lines = -1);
     void get_route_list_start(bool unicast, bool multicast);
     void get_route_list_start_done(const XrlError& e,
 				   const uint32_t* token);
@@ -69,6 +70,7 @@ private:
     int 		_active_requests;
     bool 		_unicast;
     bool 		_multicast;
+    int			_lines;
 };
 
 #endif // __BGP_TOOLS_PRINT_PEER_HH__

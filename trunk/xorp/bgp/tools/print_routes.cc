@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.10 2004/05/20 15:53:53 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.11 2004/05/21 04:56:49 hodson Exp $"
 
 #include "print_routes.hh"
 
@@ -58,10 +58,10 @@ PrintRoutes<IPv6>::get_route_list_next()
 
 template <typename A>
 PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, bool unicast,
-			    bool multicast)
+			    bool multicast, int lines)
     : XrlBgpV0p2Client(&_xrl_rtr),
       _xrl_rtr(_eventloop, "print_routes"), _verbose(verbose),
-      _unicast(unicast), _multicast(multicast)
+      _unicast(unicast), _multicast(multicast), _lines(lines)
 {
     _prev_no_bgp = false;
     _prev_no_routes = false;
@@ -86,6 +86,10 @@ PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, bool unicast,
 	get_route_list_start(_unicast, _multicast);
 	while (_done == false || _active_requests > 0) {
 	    _eventloop.run();
+	    if (_lines == static_cast<int>(_count)) {
+		printf("Output truncated at %d lines\n", _count);
+		break;
+	    }
 	}
 	if (interval <= 0)
 	    break;
@@ -115,7 +119,7 @@ PrintRoutes<A>::get_route_list_start_done(const XrlError& e,
 	return;
     }
     _prev_no_bgp = false;
-    printf("\n\nStatus Codes: * valid route, > best route\n");
+    printf("Status Codes: * valid route, > best route\n");
     printf("Origin Codes: i IGP, e EGP, ? incomplete\n\n");
     printf(
 "   Prefix                Nexthop                    Peer            AS Path\n"

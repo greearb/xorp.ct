@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes_main.cc,v 1.2 2003/03/10 23:20:10 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes_main.cc,v 1.3 2004/05/18 01:26:32 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -21,8 +21,16 @@
 void usage()
 {
     fprintf(stderr,
-	    "Usage: print_routes [-v] [-i <repeat_interval>]\n"
-	    "where -v enables verbose output.\n");
+	    "Usage: print_routes [-4 -6 -u -m -s -v]"
+	    " [-l <lines>]" 
+	    " [-i <repeat_interval>]\n"
+	    "-4 IPv4\n"
+	    "-6 IPv6\n"
+	    "-u Unicast\n"
+	    "-m Multicast\n"
+	    "-s summary output\n"
+	    "-v enables verbose output\n"
+	    );
 }
 
 int main(int argc, char **argv)
@@ -40,12 +48,13 @@ int main(int argc, char **argv)
 
     bool ipv4, ipv6, unicast, multicast;
     ipv4 = ipv6 = unicast = multicast = false;
+    int lines = -1;
 
     PrintRoutes<IPv4>::detail_t verbose_ipv4 = PrintRoutes<IPv4>::NORMAL;
     PrintRoutes<IPv6>::detail_t verbose_ipv6 = PrintRoutes<IPv6>::NORMAL;
     int c;
     int interval = -1;
-    while ((c = getopt(argc, argv, "46umvi:")) != -1) {
+    while ((c = getopt(argc, argv, "46umvi:l:")) != -1) {
 	switch (c) {
 	case '4':
 	    ipv4 = true;
@@ -58,6 +67,13 @@ int main(int argc, char **argv)
 	    break;
 	case 'm':
 	    multicast = true;
+	    break;
+	case 'l':
+	    lines = atoi(optarg);
+	    break;
+	case 's':
+	    verbose_ipv4 = PrintRoutes<IPv4>::SUMMARY;
+	    verbose_ipv6 = PrintRoutes<IPv6>::SUMMARY;
 	    break;
 	case 'v':
 	    verbose_ipv4 = PrintRoutes<IPv4>::DETAIL;
@@ -81,10 +97,10 @@ int main(int argc, char **argv)
     try {
 	if (ipv4)
 	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval, unicast,
-					    multicast);
+					    multicast, lines);
 	if (ipv6)
 	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval, unicast,
-					    multicast);
+					    multicast, lines);
 	    
     } catch(...) {
 	xorp_catch_standard_exceptions();
