@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.20 2003/06/01 01:55:57 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.21 2003/06/01 02:46:44 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -822,15 +822,7 @@ VifManager::xrl_result_get_configured_address_flags4(const XrlError& e,
 	    update_state();
 	    return;
 	}
-	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("setting flags for address %s to interface %s vif %s\n",
-		  addr.str().c_str(), ifname.c_str(), vifname.c_str());
-	vif->set_underlying_vif_up(*enabled);
-	vif->set_broadcast_capable(*broadcast);
-	vif->set_loopback(*loopback);
-	vif->set_p2p(*point_to_point);
-	vif->set_multicast_capable(*multicast);
-
+	
 	if (*broadcast) {
 	    // Get the broadcast address
 	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
@@ -865,6 +857,10 @@ VifManager::xrl_result_get_configured_address_flags4(const XrlError& e,
     _state = FAILED;
     XLOG_ERROR("Failed to get flags for address %s: Permanent Error",
 	       addr.str().c_str());
+    
+    UNUSED(enabled);
+    UNUSED(loopback);
+    UNUSED(multicast);
 }
 
 void
@@ -894,13 +890,6 @@ VifManager::xrl_result_get_configured_address_flags6(const XrlError& e,
 	    update_state();
 	    return;
 	}
-	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("setting flags for address %s to interface %s vif %s\n",
-		  addr.str().c_str(), ifname.c_str(), vifname.c_str());
-	vif->set_underlying_vif_up(*enabled);
-	vif->set_loopback(*loopback);
-	vif->set_p2p(*point_to_point);
-	vif->set_multicast_capable(*multicast);
 	
 	{
 	    // Get the broadcast address
@@ -931,6 +920,10 @@ VifManager::xrl_result_get_configured_address_flags6(const XrlError& e,
     _state = FAILED;
     XLOG_ERROR("Failed to get flags for address %s: Permanent Error",
 	       addr.str().c_str());
+    
+    UNUSED(enabled);
+    UNUSED(loopback);
+    UNUSED(multicast);
 }
 
 void
