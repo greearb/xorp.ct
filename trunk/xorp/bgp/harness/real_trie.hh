@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/real_trie.hh,v 1.1 2003/09/10 03:19:26 atanu Exp $
+// $XORP: xorp/bgp/harness/real_trie.hh,v 1.2 2003/09/10 10:17:17 atanu Exp $
 
 #ifndef __BGP_HARNESS_REAL_TRIE_HH_
 #define __BGP_HARNESS_REAL_TRIE_HH_
@@ -87,7 +87,8 @@ void
 RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
 			     A address, size_t prefix_length, A orbit) const
 {
-    debug_msg("Enter: %s/%d\n", address.str().c_str(), prefix_length);
+    debug_msg("Enter: %s/%d\n", address.str().c_str(),
+	      static_cast<uint32_t>(prefix_length));
 
     if(0 == ptr) {
 	return;
@@ -96,7 +97,8 @@ RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
     TimeVal tv;
     const UpdatePacket *update = ptr->p.get(tv);
     if(0 != update) {
- 	debug_msg("Found %s/%d\n", address.str().c_str(), prefix_length);
+ 	debug_msg("Found %s/%d\n", address.str().c_str(),
+		  static_cast<uint32_t>(prefix_length));
 	tw->dispatch(update, IPNet<A>(address, prefix_length), tv);
     }
 
@@ -121,7 +123,8 @@ template <class A>
 bool
 RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
 {
-    debug_msg("%s/%d\n", address.str().c_str(), mask_length);
+    debug_msg("%s/%d\n", address.str().c_str(),
+	      static_cast<uint32_t>(mask_length));
 #ifdef	PARANOIA
     if(0 == p.get()) {
 	debug_msg("insert: Attempt to store an invalid entry\n");
@@ -138,7 +141,8 @@ RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
 	address = address << 1;
 
 	debug_msg("address %s prefix %d depth %d index %d\n",
-		  address.str().c_str(), mask_length, i, index);
+		  address.str().c_str(), static_cast<uint32_t>(mask_length), 
+		  static_cast<uint32_t>(i), index);
 
 	
 	if(0 == ptr->ptrs[index]) {
@@ -261,7 +265,8 @@ RealTrie<A>::find(A address, size_t mask_length) const
     const Tree *ptr = &_head;
     Tree *next;
 
-    debug_msg("find: %s/%d\n", address.str().c_str(), mask_length);
+    debug_msg("find: %s/%d\n", address.str().c_str(), 
+	      static_cast<uint32_t>(mask_length));
 
     // The loop should not require bounding. Defensive
     for(size_t i = 0; i <= A::addr_bitlen(); i++) {
