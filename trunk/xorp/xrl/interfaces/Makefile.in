@@ -149,6 +149,10 @@ snmpd2 = @snmpd2@
 
 # RIB Client Interface supported by BGP
 
+# RIP Interface
+
+# RIPng Interface
+
 # RTRMGR Interface
 
 # RTRMGR Client Interface
@@ -174,7 +178,7 @@ snmpd2 = @snmpd2@
 #
 # Sample Test Client Interface
 #
-noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libsocket6xif.a libsocket6locatorxif.a libsocket6userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a libripxif.a libripngxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libsocket6xif.a libsocket6locatorxif.a libsocket6userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
 libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -202,6 +206,8 @@ libospfxif_a_SOURCES = ospf_xif.hh ospf_xif.cc
 libpimxif_a_SOURCES = pim_xif.hh pim_xif.cc
 libribxif_a_SOURCES = rib_xif.hh rib_xif.cc
 libribclientxif_a_SOURCES = rib_client_xif.hh rib_client_xif.cc
+libripxif_a_SOURCES = rip_xif.hh rip_xif.cc
+libripngxif_a_SOURCES = ripng_xif.hh ripng_xif.cc
 librtrmgrxif_a_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
 librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
 libsocket4xif_a_SOURCES = socket4_xif.hh socket4_xif.cc
@@ -345,6 +351,14 @@ libribxif_a_AR = $(AR) cru
 libribxif_a_LIBADD =
 am_libribxif_a_OBJECTS = rib_xif.$(OBJEXT)
 libribxif_a_OBJECTS = $(am_libribxif_a_OBJECTS)
+libripngxif_a_AR = $(AR) cru
+libripngxif_a_LIBADD =
+am_libripngxif_a_OBJECTS = ripng_xif.$(OBJEXT)
+libripngxif_a_OBJECTS = $(am_libripngxif_a_OBJECTS)
+libripxif_a_AR = $(AR) cru
+libripxif_a_LIBADD =
+am_libripxif_a_OBJECTS = rip_xif.$(OBJEXT)
+libripxif_a_OBJECTS = $(am_libripxif_a_OBJECTS)
 librtrmgr_clientxif_a_AR = $(AR) cru
 librtrmgr_clientxif_a_LIBADD =
 am_librtrmgr_clientxif_a_OBJECTS = rtrmgr_client_xif.$(OBJEXT)
@@ -420,7 +434,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_client_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_xif.Po $(DEPDIR)/ospf_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/pim_xif.Po $(DEPDIR)/rib_client_xif.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rib_xif.Po $(DEPDIR)/rtrmgr_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_xif.Po $(DEPDIR)/rip_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ripng_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_client_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rtrmgr_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/socket4_locator_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/socket4_user_xif.Po \
@@ -458,6 +474,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) \
 	$(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) \
 	$(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) \
+	$(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) \
 	$(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) \
 	$(libsocket4locatorxif_a_SOURCES) \
 	$(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) \
@@ -466,7 +483,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) \
 	$(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libsocket6locatorxif_a_SOURCES) $(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libsocket6locatorxif_a_SOURCES) $(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 
 all: all-am
 
@@ -592,6 +609,14 @@ libribxif.a: $(libribxif_a_OBJECTS) $(libribxif_a_DEPENDENCIES)
 	-rm -f libribxif.a
 	$(libribxif_a_AR) libribxif.a $(libribxif_a_OBJECTS) $(libribxif_a_LIBADD)
 	$(RANLIB) libribxif.a
+libripngxif.a: $(libripngxif_a_OBJECTS) $(libripngxif_a_DEPENDENCIES) 
+	-rm -f libripngxif.a
+	$(libripngxif_a_AR) libripngxif.a $(libripngxif_a_OBJECTS) $(libripngxif_a_LIBADD)
+	$(RANLIB) libripngxif.a
+libripxif.a: $(libripxif_a_OBJECTS) $(libripxif_a_DEPENDENCIES) 
+	-rm -f libripxif.a
+	$(libripxif_a_AR) libripxif.a $(libripxif_a_OBJECTS) $(libripxif_a_LIBADD)
+	$(RANLIB) libripxif.a
 librtrmgr_clientxif.a: $(librtrmgr_clientxif_a_OBJECTS) $(librtrmgr_clientxif_a_DEPENDENCIES) 
 	-rm -f librtrmgr_clientxif.a
 	$(librtrmgr_clientxif_a_AR) librtrmgr_clientxif.a $(librtrmgr_clientxif_a_OBJECTS) $(librtrmgr_clientxif_a_LIBADD)
@@ -674,6 +699,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_client_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rip_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ripng_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_client_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket4_locator_xif.Po@am__quote@

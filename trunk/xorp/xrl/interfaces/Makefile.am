@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.14 2004/02/17 23:25:10 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.15 2004/02/19 04:33:12 hodson Exp $
 ##
 
 ###############################################################################
@@ -121,6 +121,14 @@ libribxif_a_SOURCES = rib_xif.hh rib_xif.cc
 # RIB Client Interface supported by BGP
 noinst_LIBRARIES += libribclientxif.a
 libribclientxif_a_SOURCES = rib_client_xif.hh rib_client_xif.cc
+
+# RIP Interface
+noinst_LIBRARIES += libripxif.a
+libripxif_a_SOURCES = rip_xif.hh rip_xif.cc
+
+# RIPng Interface
+noinst_LIBRARIES += libripngxif.a
+libripngxif_a_SOURCES = ripng_xif.hh ripng_xif.cc
 
 # RTRMGR Interface
 noinst_LIBRARIES += librtrmgrxif.a
