@@ -17,7 +17,7 @@
 
 if test "$1" = "" -o "$2" = "" ; then
     echo 'usage example:  '
-    echo '    $ dbg_loadbgp.sh bgp4_mib_1657 2' 
+    echo '    $ ./dbg_loadmib.sh bgp4_mib_1657 2' 
     exit 1
 fi
 
