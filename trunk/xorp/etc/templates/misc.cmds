@@ -1,0 +1,18 @@
+/* $XORP$ */
+
+ping {
+    %command: "" %help: "Ping a hostname or IP address";
+}
+
+ping <host> {
+    %command: "ping $2" %help: "Give a hostname or IP address to ping.";
+}
+
+traceroute {
+    %command: "" %help: "Trace the IP route to a hostname or IP address";
+}
+
+traceroute <host> {
+    %command: "ping $2" %help: "Give a hostname or IP address to traceroute to.";
+}
+
