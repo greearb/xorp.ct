@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.4 2003/09/24 02:16:07 atanu Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.5 2003/12/11 03:04:36 atanu Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -43,7 +43,6 @@
 
 class Socket {
 public:
-    Socket(int s, EventLoop& e);// For testing
     Socket(const Iptuple& iptuple, EventLoop& e);
 
     static void init_sockaddr(struct sockaddr_in *name, struct in_addr addr,
@@ -91,21 +90,73 @@ private:
 
 class SocketClient : public Socket {
 public:
+    /**
+     * @param iptuple specification of the connection endpoints.
+     */
     SocketClient(const Iptuple& iptuple, EventLoop& e);
-    SocketClient(int s, EventLoop& e);
     ~SocketClient();
 
+    /**
+     * Callback for connection attempts.
+     */
     typedef XorpCallback1<void, bool>::RefPtr ConnectCallback;
 
+    /**
+     * Asynchronously connect.
+     *
+     * @param cb is called when connection suceeds or fails.
+     */
     void connect(ConnectCallback cb);
+
+    /**
+     * Break asynchronous connect attempt.
+     *
+     * Each instance of the this class has a single connection
+     * associated with it. If while we are attemping to connect to a
+     * peer (using connect()), the peer connects to us. It is
+     * necessary to stop the outgoing connect.
+     */
+    void connect_break();
+
+    /**
+     * The peer has initiated the connection so form an association.
+     *
+     * @param s incoming socket file descriptor
+     */
     void connected(int s);
+
+    /**
+     * Throw away all the data that is queued to be sent on this socket.
+     */
     void flush_transmit_queue();
+
+    /**
+     * Stop reading data on this socket.
+     */
     void stop_reader() {async_remove_reader();}
+
+    /**
+     * Disconnect this socket.
+     */
     void disconnect();
+
+    /**
+     * @return Are we currrent disconecting.
+     */
     bool disconnecting() {return _disconnecting;}
 
+    /**
+     * Callback for incoming data.
+     *
+     * @param const uint8_t* pointer to data.
+     * @param size_t length of data.
+     */
     typedef XorpCallback3<bool,BGPPacket::Status,const uint8_t*,size_t>::RefPtr
     MessageCallback;
+
+    /**
+     * Set the callback for incoming data.
+     */
     void set_callback(const MessageCallback& cb) {_callback = cb;}
 
     enum Event {
@@ -113,35 +164,63 @@ public:
 	FLUSHING = AsyncFileWriter::FLUSHING,
 	ERROR = AsyncFileWriter::ERROR_CHECK_ERRNO
     };
+
+    /**
+     * Callback for data transmission.
+     *
+     * @param Event status of the send.
+     * @param const uint8_t* pointer to the transmitted data. Allows
+     * caller to free the data.
+     */
     typedef XorpCallback2<void,Event,const uint8_t*>::RefPtr
     SendCompleteCallback;
-
-    void send_message_complete(AsyncFileWriter::Event e,
-			      const uint8_t* buf,
-			      const size_t buf_bytes,
-			      const size_t offset,
-			      SendCompleteCallback cb);
 			      
-    bool send_message(const uint8_t*	  buf,
-		     size_t		  cnt, 
-		     SendCompleteCallback cb);
+    /**
+     * Asynchronously Send a message.
+     *
+     * @param buf pointer to data buffer.
+     * @param cnt length of data buffer.
+     * @param cb notification of success or failure.
+     *
+     * @return true if the message is accepted.
+     *
+     */
+    bool send_message(const uint8_t* buf,
+		      size_t cnt, 
+		      SendCompleteCallback cb);
 
+    /**
+     * Flow control signal. 
+     *
+     * Data will be queued for transmission until a resource such as
+     * memory is exceeded. A correctly written client should stop
+     * sending messages if the output queue is not draining.
+     *
+     * @return true if its time to stop sending messages.
+     */
     bool output_queue_busy() const;
+
+    /**
+     * @return number of messages in the output queue.
+     */
     int output_queue_size() const;
 
-    void async_read_start(size_t cnt = BGP_COMMON_HEADER_LEN,size_t ofset = 0);
-    void async_read_message(AsyncFileWriter::Event ev,
-			   const uint8_t *buf,
-			   const size_t buf_bytes,
-			   const size_t offset);
-
+    /**
+     * @return true if a session exists.
+     */
     bool is_connected();
+
+    /**
+     * @return true if we are still reading.
+     */
     bool still_reading();
 protected:
 private:
     void connect_socket(int sock, struct in_addr raddr, uint16_t port,
 			struct in_addr laddr, ConnectCallback cb);
     void connect_socket_complete(int fd, SelectorMask m, ConnectCallback cb);
+    void connect_socket_break();
+
     void async_add(int sock);
     void async_remove();
     void async_remove_reader();
@@ -149,11 +228,24 @@ private:
     void read_from_server(int sock);
     void write_to_server(int sock);
 
+    void send_message_complete(AsyncFileWriter::Event e,
+			      const uint8_t* buf,
+			      const size_t buf_bytes,
+			      const size_t offset,
+			      SendCompleteCallback cb);
+
+    void async_read_start(size_t cnt = BGP_COMMON_HEADER_LEN,size_t ofset = 0);
+    void async_read_message(AsyncFileWriter::Event ev,
+			   const uint8_t *buf,
+			   const size_t buf_bytes,
+			   const size_t offset);
+
     MessageCallback _callback;
     AsyncFileWriter *_async_writer;
     AsyncFileReader *_async_reader;
 
     bool _disconnecting;
+    bool _connecting;
 
     uint8_t _read_buf[MAXPACKETSIZE]; // Maximum allowed BGP message
 };

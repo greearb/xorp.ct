@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.9 2003/12/10 19:03:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.10 2003/12/11 03:04:36 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -46,11 +46,6 @@ Socket::Socket(const Iptuple& iptuple, EventLoop& e)
 #ifdef	DEBUG_PEERNAME
     _remote_host = "unconnected socket";
 #endif
-}
-
-Socket::Socket(int s, EventLoop& e) : _s(s), _eventloop(e)
-{
-    //    _eventloop = 0;
 }
 
 void
@@ -123,18 +118,14 @@ SocketClient::SocketClient(const Iptuple& iptuple, EventLoop& e)
     _async_writer = 0;
     _async_reader = 0;
     _disconnecting = false;
-}
-
-SocketClient::SocketClient(int s, EventLoop& e) : Socket(s, e)
-{
-    _async_writer = 0;
-    _async_reader = 0;
-    _disconnecting = false;
+    _connecting = false;
 }
 
 SocketClient::~SocketClient()
 {
     async_remove();
+    if( _connecting)
+	connect_break();
 }
 
 void
@@ -182,6 +173,14 @@ SocketClient::connect(ConnectCallback cb)
 }
 
 void
+SocketClient::connect_break()
+{
+    XLOG_ASSERT(UNCONNECTED == get_sock());
+
+    connect_socket_break();
+}
+
+void
 SocketClient::connected(int s)
 {
 #ifdef	DEBUG_PEERNAME
@@ -195,6 +194,7 @@ SocketClient::connected(int s)
     debug_msg("Connected to remote Peer %s\n", get_remote_host());
 
     XLOG_ASSERT(UNCONNECTED == get_sock());
+    XLOG_ASSERT(!_connecting);
     set_sock(s);
     async_add(s);
 }
@@ -426,6 +426,8 @@ SocketClient::connect_socket(int sock, struct in_addr raddr, uint16_t port,
     // Given the file descriptor is now non-blocking we would expect a
     // in progress error.
 
+    XLOG_ASSERT(!_connecting);
+    _connecting = true;
     if (-1 == ::connect(sock,
 			reinterpret_cast<struct sockaddr *>(&servername), 
 			sizeof(servername))) {
@@ -450,6 +452,11 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 {
     debug_msg("connect socket complete %d %d\n", sock, m);
 
+    XLOG_ASSERT(_connecting);
+    _connecting = false;
+
+    XLOG_ASSERT(get_sock() == sock);
+
     eventloop().remove_selector(sock);
 
     struct sockaddr_in sin;
@@ -458,7 +465,7 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 
     /*
     ** Try a number of different methods to discover if the connection
-    ** has suceeded.
+    ** has succeeded.
     */
 
     // Did the connection succeed?
@@ -507,6 +514,16 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 	cb->dispatch(false);
 }
 
+void
+SocketClient::connect_socket_break()
+{
+    XLOG_ASSERT(_connecting);
+    _connecting = false;
+
+    eventloop().remove_selector(get_sock());
+    close_socket();
+}
+
 void 
 SocketClient::async_add(int sock)
 {
@@ -538,7 +555,7 @@ SocketClient::async_remove()
 void 
 SocketClient::async_remove_reader()
 {
-    if(_async_reader) {
+    if (_async_reader) {
 	_async_reader->stop();
 	_async_reader->flush_buffers();
 	delete _async_reader;
@@ -549,6 +566,9 @@ SocketClient::async_remove_reader()
 bool 
 SocketClient::is_connected()
 {
+    if (_connecting)
+	return UNCONNECTED;
+
     return get_sock() != UNCONNECTED;
 }	
 
