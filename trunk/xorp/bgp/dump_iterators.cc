@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.20 2004/05/15 23:10:45 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.21 2004/05/18 16:21:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -74,8 +74,28 @@ PeerDumpState<A>::set_delete_complete(uint32_t genid)
     debug_msg("set_delete_complete: Peer: %p genid: %d\n", _peer, genid);
     typename set <uint32_t>::iterator i;
     i = _deleting_genids.find(genid);
-    XLOG_ASSERT(i != _deleting_genids.end());
-    _deleting_genids.erase(i);
+    if (i != _deleting_genids.end()) {
+	_deleting_genids.erase(i);
+	return;
+    } else {
+	switch(_status) {
+	case STILL_TO_DUMP:
+	case CURRENTLY_DUMPING:
+	    // this should never happen because we'd have recorded the
+	    // genid when the peering went down, or at DumpTable
+	    // startup.
+	    XLOG_UNREACHABLE();
+	    break;
+	case DOWN_DURING_DUMP:
+	case DOWN_BEFORE_DUMP:
+	case COMPLETELY_DUMPED:
+	case NEW_PEER:
+	case FIRST_SEEN_DURING_DUMP:
+	    // this can happen, because in these states we don't
+	    // bother to record when the peering goes down again.
+	    return;
+	}
+    }
 }
 
 
