@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.13 2003/10/26 21:15:06 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.14 2003/10/27 00:36:34 pavlin Exp $
 #
 
 #
@@ -63,11 +63,16 @@ case ${HOSTNAME} in
     GATEWAY6="fe80:aaaa::1111"
     ;;
 
-    carp.icir.org)
+    carp | carp.icir.org)
     case ${OS} in
 	Linux)
 	HAVE_IPV6="false"
 	IFNAME="eth0"
+	;;
+
+	NetBSD)
+	HAVE_IPV6="false"
+	IFNAME="ex0"
 	;;
 
 	OpenBSD)
