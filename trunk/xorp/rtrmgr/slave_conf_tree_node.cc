@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.6 2003/12/02 09:38:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.7 2004/01/13 00:55:00 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -178,13 +178,17 @@ SlaveConfigTreeNode::get_deltas(const SlaveConfigTreeNode& master_node)
 {
     int deltas = 0;
 
+#ifdef DEBUG
     printf("get_deltas >%s<\n", _path.c_str());
+#endif
 
     if (!_deleted) {
 	if ((!_existence_committed || !_value_committed)
 	    && (_parent != NULL)) {
 	    deltas++;
+#ifdef DEBUG
 	    printf(">%s< CHANGED\n", _path.c_str());
+#endif
 	}
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = master_node.const_children().begin();
@@ -200,10 +204,14 @@ SlaveConfigTreeNode::get_deltas(const SlaveConfigTreeNode& master_node)
 		get_deltas(*(const SlaveConfigTreeNode*)my_child);
 	}
     } else {
+#ifdef DEBUG
 	printf(">%s< was deleted\n", _path.c_str());
+#endif
     }
     if ((deltas == 0) && (_parent != NULL)) {
+#ifdef DEBUG
 	printf("removing >%s<\n", _path.c_str());
+#endif
 	_parent->remove_child(this);
 	delete this;
     }
@@ -215,7 +223,9 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 {
     int deletions = 0;
 
+#ifdef DEBUG
     printf("get_deletions >%s<\n", _path.c_str());
+#endif
 
     if ((! master_node.deleted())
 	|| (_template_tree_node != NULL && is_tag())) {
@@ -234,14 +244,20 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 	}
     } else {
 	if (_existence_committed) {
+#ifdef DEBUG
 	    printf("%s deleted\n", _path.c_str());
+#endif
 	    deletions = 1;
 	} else {
+#ifdef DEBUG
 	    printf("%s deleted but not committed\n", _path.c_str());
+#endif
 	}
     }
     if ((deletions == 0) && (_parent != NULL)) {
+#ifdef DEBUG
 	printf("removing >%s<\n", _path.c_str());
+#endif
 	_parent->remove_child(this);
 	delete this;
     }
