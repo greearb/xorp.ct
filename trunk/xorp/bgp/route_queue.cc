@@ -12,8 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_queue.cc,v 1.4 2003/02/08 01:32:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_queue.cc,v 1.5 2003/03/10 23:20:03 hodson Exp $"
 
+#include "config.h"
+#include "bgp_module.h"
+#include "libxorp/xlog.h"
 #include "route_queue.hh"
 #include "peer_handler.hh"
 

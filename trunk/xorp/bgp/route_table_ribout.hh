@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.4 2003/05/29 17:59:09 pavlin Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.5 2003/08/04 21:58:58 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
 
 #include <set>
 #include <list>
+
+#include "bgp_module.h"
+#include "libxorp/xlog.h"
 #include "route_table_base.hh"
 #include "route_queue.hh"
 

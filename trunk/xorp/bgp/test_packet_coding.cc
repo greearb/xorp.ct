@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.4 2003/08/28 21:22:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.5 2003/09/11 03:18:49 atanu Exp $"
 
-#include "libxorp/xorp.h"
-#include "packet.hh"
-#include "path_attribute.hh"
+#include "bgp_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/test_main.hh"
+#include "packet.hh"
+#include "path_attribute.hh"
 
 bool
 test_multprotocol(TestInfo& /*info*/)

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.20 2003/09/16 21:00:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.21 2003/09/19 21:31:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
+#include "libxorp/xlog.h"
 #include "peer_handler.hh"
 #include "plumbing.hh"
 #include "packet.hh"

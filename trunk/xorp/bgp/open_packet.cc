@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.14 2003/09/27 03:42:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.15 2003/09/27 08:34:05 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
 #include "libxorp/debug.h"
+#include "libxorp/xlog.h"
 #include "packet.hh"
 
 extern void dump_bytes(const uint8_t *d, size_t l);

@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_reader.cc,v 1.3 2003/01/25 02:10:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_reader.cc,v 1.4 2003/01/31 00:08:15 rizzo Exp $"
 
 #include "bgp_module.h"
+#include "libxorp/xlog.h"
 #include "route_table_reader.hh"
 #include "route_table_ribin.hh"
 #include "peer_handler.hh"
