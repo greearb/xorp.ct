@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.12 2003/12/02 09:38:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.13 2004/01/05 23:40:48 pavlin Exp $"
 
 // #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -42,23 +42,26 @@ SlaveConfigTree::SlaveConfigTree(XorpClient& xclient)
 
 SlaveConfigTree::SlaveConfigTree(const string& configuration,
 				 TemplateTree* tt,
-				 XorpClient &xclient)
+				 XorpClient &xclient) throw (InitError)
     : ConfigTree(tt),
       _xclient(xclient)
 {
-    parse(configuration, "");
+    string errmsg;
+
+    if (parse(configuration, "", errmsg) != true) {
+	xorp_throw(InitError, errmsg);
+    }
+
     _root_node.mark_subtree_as_committed();
 }
 
 bool
-SlaveConfigTree::parse(const string& configuration, const string& config_file)
+SlaveConfigTree::parse(const string& configuration, const string& config_file,
+		       string& errmsg)
 {
-    try {
-	ConfigTree::parse(configuration, config_file);
-    } catch (ParseError& pe) {
-	booterror(pe.why().c_str());
-	exit(1);
-    }
+    if (ConfigTree::parse(configuration, config_file, errmsg) != true)
+	return false;
+
     return true;
 }
 
@@ -72,7 +75,7 @@ SlaveConfigTree::commit_changes(string &result, XorpShell& xorpsh, CallBack cb)
     printf("SlaveConfigTree::commit_changes\n");
 #endif
 
-#if 0
+#if 0	// TODO: XXX: FIX IT!!
     // XXX: we really should do this check, but we need to deal with
     // unexpanded variables more gracefully.
 
@@ -91,11 +94,7 @@ SlaveConfigTree::commit_changes(string &result, XorpShell& xorpsh, CallBack cb)
 	return false;
     }
     CallBack empty_cb;
-    try {
-	_xclient.end_transaction(tid, empty_cb);
-    } catch (UnexpandedVariable& uvar) {
-	printf("%s\n", uvar.str().c_str());
-    }
+    _xclient.end_transaction(tid, empty_cb);
 #else
     UNUSED(result);
 #endif

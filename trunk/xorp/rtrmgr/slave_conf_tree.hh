@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.7 2003/11/20 06:37:38 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.8 2003/12/02 09:38:56 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -24,7 +24,7 @@
 #include "conf_tree_node.hh"
 #include "module_manager.hh"
 #include "xorp_client.hh"
-#include "parse_error.hh"
+#include "rtrmgr_error.hh"
 #include "conf_tree.hh"
 #include "xorpsh_main.hh"
 
@@ -39,9 +39,10 @@ class SlaveConfigTree : public ConfigTree {
 public:
     SlaveConfigTree(XorpClient& xclient);
     SlaveConfigTree(const string& configuration, TemplateTree *tt,
-		    XorpClient& xclient);
+		    XorpClient& xclient) throw (InitError);
 
-    bool parse(const string& configuration, const string& config_file);
+    bool parse(const string& configuration, const string& config_file,
+	       string& errmsg);
     bool commit_changes(string &response, XorpShell& xorpsh, CallBack cb);
     void commit_phase2(const XrlError& e, const bool* locked,
 		       const uint32_t* lock_holder, CallBack cb,
