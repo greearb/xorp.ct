@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.7 2003/01/26 01:22:35 mjh Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.8 2003/01/26 06:15:53 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -382,8 +382,6 @@ BGPMain::next_hop_rewrite_filter(const Iptuple& iptuple, const IPv4& next_hop)
 
     BGPPeerData* pd = const_cast<BGPPeerData*>(peer->peerdata());
     pd->set_next_hop_rewrite(next_hop);
-
-    printf("next hop rewrite %s\n", next_hop.str().c_str());
 
     return true;
 }
