@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.2 2003/12/17 00:56:17 atanu Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.3 2003/12/17 07:59:57 hodson Exp $"
 
 #include <sysexits.h>
 
@@ -70,6 +70,9 @@ public:
     void add_address(const IPv6& addr);
     void remove_address(const IPv6& addr);
     bool address_valid(const IPv4& addr) const;
+
+    uint32_t address_pif_index(const IPv4&) const { return 0; }
+    uint32_t address_pif_index(const IPv6&) const { return 0; }
 
 protected:
     set<IPv4> _v4s;
