@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.25 2002/12/09 18:29:17 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -295,26 +295,26 @@ MfeaNodeCli::cli_show_mfea_mrib(const vector<string>& argv)
 			       dest_address_name.c_str()));
 	    return (XORP_ERROR);
 	}
-	cli_print(c_format("%-19s%-16s%-8s%-9s%8s%17s\n",
+	cli_print(c_format("%-19s%-16s%-8s%-9s%17s%7s\n",
 			   "DestPrefix", "NextHopRouter", "VifName", 
-			   "VifIndex", "Metric", "MetricPreference"));
+			   "VifIndex", "MetricPreference", "Metric"));
 	string vif_name = "UNKNOWN";
 	Vif *vif = mfea_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
 	if (vif != NULL)
 	    vif_name = vif->name();
-	cli_print(c_format("%-19s%-16s%-8s%-9d%8d%17d\n",
+	cli_print(c_format("%-19s%-16s%-8s%-9d%17d%7d\n",
 			   cstring(mrib->dest_prefix()),
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),
 			   mrib->next_hop_vif_index(),
-			   mrib->metric(),
-			   mrib->metric_preference()));
+			   mrib->metric_preference(),
+			   mrib->metric()));
 	return (XORP_OK);
     }
     
-    cli_print(c_format("%-19s%-16s%-8s%-9s%8s%17s\n",
+    cli_print(c_format("%-19s%-16s%-8s%-9s%17s%7s\n",
 		       "DestPrefix", "NextHopRouter", "VifName", "VifIndex",
-		       "Metric", "MetricPreference"));
+		       "MetricPreference", "Metric"));
     MribTable::iterator iter;
     for (iter = mfea_node().mrib_table().begin();
 	 iter != mfea_node().mrib_table().end();
@@ -327,13 +327,13 @@ MfeaNodeCli::cli_show_mfea_mrib(const vector<string>& argv)
 	Vif *vif = mfea_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
 	if (vif != NULL)
 	    vif_name = vif->name();
-	cli_print(c_format("%-19s%-16s%-8s%-9d%8d%17d\n",
+	cli_print(c_format("%-19s%-16s%-8s%-9d%17d%7d\n",
 			   cstring(mrib->dest_prefix()),
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),
 			   mrib->next_hop_vif_index(),
-			   mrib->metric(),
-			   mrib->metric_preference()));
+			   mrib->metric_preference(),
+			   mrib->metric()));
     }
     
     return (XORP_OK);

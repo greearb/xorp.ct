@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.24 2002/11/02 03:46:55 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
@@ -195,9 +195,8 @@ interface mfea_client/0.1 {
 	 * destination prefix.
 	 * @param next_hop_vif_index the index of the vif toward the
 	 * destination prefix.
-	 * @param metric the routing metric for this entry.
-	 * @param metric_preference the routing metric preference for this
-	 * entry.
+	 * @param metric_preference the metric preference for this entry.
+	 * @param metric the metric for this entry.
 	 * @param fail true if failure has occured.
 	 * @param reason contains failure reason if it occured.
 	 */
@@ -205,15 +204,15 @@ interface mfea_client/0.1 {
 			& dest_prefix:ipv4net				\
 			& next_hop_router_addr:ipv4			\
 			& next_hop_vif_name:txt & next_hop_vif_index:u32 \
-			& metric:u32					\
 			& metric_preference:u32				\
+			& metric:u32					\
 			-> fail:bool & reason:txt
 	add_mrib6	? xrl_sender_name:txt				\
 			& dest_prefix:ipv6net				\
 			& next_hop_router_addr:ipv6			\
 			& next_hop_vif_name:txt & next_hop_vif_index:u32 \
-			& metric:u32					\
 			& metric_preference:u32				\
+			& metric:u32					\
 			-> fail:bool & reason:txt
 	
 	/**

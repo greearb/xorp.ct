@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_assert.hh,v 1.5 2002/12/09 18:29:28 hodson Exp $
+// $XORP: xorp/pim/pim_proto_assert.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 
 
 #ifndef __PIM_PIM_PROTO_ASSERT_HH__
@@ -43,8 +43,8 @@ public:
     void	set_rpt_bit_flag(bool v) { _rpt_bit_flag = v; }
     uint32_t	metric_preference() { return (_metric_preference); }
     void	set_metric_preference(uint32_t v) { _metric_preference = v; }
-    uint32_t	route_metric() { return (_route_metric); }
-    void	set_route_metric(uint32_t v) { _route_metric = v; }
+    uint32_t	metric() { return (_metric); }
+    void	set_metric(uint32_t v) { _metric = v; }
     const IPvX&	addr() { return (_addr); }
     void	set_addr(const IPvX& v) { _addr = v; }
     bool	is_better(AssertMetric *a);
@@ -52,7 +52,7 @@ public:
 private:
     bool	_rpt_bit_flag;		// The SPT/RPT bit
     uint32_t	_metric_preference;	// The metric preference
-    uint32_t	_route_metric;		// The route metric
+    uint32_t	_metric;		// The metric
     IPvX	_addr;			// The address of the Assert origin
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.2 2003/01/13 05:51:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.3 2003/01/13 19:38:20 pavlin Exp $"
 
 
 //
@@ -93,7 +93,7 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
     // The assert metrics
     assert_metric.set_rpt_bit_flag(rpt_bit);
     assert_metric.set_metric_preference(metric_preference);
-    assert_metric.set_route_metric(metric);
+    assert_metric.set_metric(metric);
     assert_metric.set_addr(src);
     
     //
@@ -182,7 +182,7 @@ int
 PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
 {
     IPvX	assert_group_addr(family());
-    uint32_t	metric_preference, route_metric;
+    uint32_t	metric_preference, metric;
     bool	rpt_bit = true;
     int		ret_value;
     
@@ -195,15 +195,15 @@ PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
     if (pim_mre->is_spt()) {
 	rpt_bit = false;
 	metric_preference = pim_mre->metric_preference_s();
-	route_metric = pim_mre->route_metric_s();
+	metric = pim_mre->metric_s();
     } else {
 	rpt_bit = true;
 	metric_preference = pim_mre->metric_preference_rp();
-	route_metric = pim_mre->route_metric_rp();
+	metric = pim_mre->metric_rp();
     }
     
     ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
-				metric_preference, route_metric);
+				metric_preference, metric);
     return (ret_value);
 }
 
@@ -214,7 +214,7 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
     IPvX	assert_source_addr(family());
     IPvX	assert_group_addr(family());
     const IPvX	*rp_addr_ptr;
-    uint32_t	metric_preference, route_metric;
+    uint32_t	metric_preference, metric;
     int		ret_value;
     bool	rpt_bit = false;
     
@@ -235,10 +235,10 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
     else
 	rpt_bit = true;
     metric_preference = PIM_ASSERT_MAX_METRIC_PREFERENCE;
-    route_metric = PIM_ASSERT_MAX_METRIC;
+    metric = PIM_ASSERT_MAX_METRIC;
     
     ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
-				metric_preference, route_metric);
+				metric_preference, metric);
     return (ret_value);
 }
 
@@ -247,7 +247,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
 			const IPvX& assert_group_addr,
 			bool rpt_bit,
 			uint32_t metric_preference,
-			uint32_t route_metric)
+			uint32_t metric)
 {
     buffer_t *buffer = buffer_send_prepare();
     uint8_t group_addr_reserved_flags = 0;
@@ -263,7 +263,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
 			   group_addr_reserved_flags, buffer);
     PUT_ENCODED_UNICAST_ADDR(family(), assert_source_addr, buffer);
     BUFFER_PUT_HOST_32(metric_preference, buffer);
-    BUFFER_PUT_HOST_32(route_metric, buffer);
+    BUFFER_PUT_HOST_32(metric, buffer);
     
     return (pim_send(IPvX::PIM_ROUTERS(family()), PIM_ASSERT, buffer));
     
@@ -304,9 +304,9 @@ AssertMetric::is_better(AssertMetric *a)
 	return (false);
     
     // The route metric: smaller is better
-    if (route_metric() < a->route_metric())
+    if (metric() < a->metric())
 	return (true);
-    if (route_metric() > a->route_metric())
+    if (metric() > a->metric())
 	return (false);
     
     // The IP address: bigger is better

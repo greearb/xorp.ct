@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.46 2002/12/09 18:29:21 hodson Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -582,8 +582,8 @@ protected:
 	const IPv4&		, // next_hop_router_addr, 
 	const string&		, // next_hop_vif_name, 
 	const uint32_t&		, // next_hop_vif_index, 
-	const uint32_t&		, // metric, 
 	const uint32_t&		, // metric_preference, 
+	const uint32_t&		, // metric, 
 	// Output values, 
 	bool&			fail, 
 	string&			reason) {
@@ -600,8 +600,8 @@ protected:
 	const IPv6&		, // next_hop_router_addr, 
 	const string&		, // next_hop_vif_name, 
 	const uint32_t&		, // next_hop_vif_index, 
-	const uint32_t&		, // metric, 
 	const uint32_t&		, // metric_preference, 
+	const uint32_t&		, // metric, 
 	// Output values, 
 	bool&			fail, 
 	string&			reason) {

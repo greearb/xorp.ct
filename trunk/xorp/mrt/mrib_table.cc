@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.15 2002/12/09 18:29:22 hodson Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $"
 
 
 //
@@ -478,8 +478,8 @@ Mrib::Mrib(int family)
       _next_hop_router_addr(family)
 {
     _next_hop_vif_index = Vif::VIF_INDEX_INVALID;
-    _metric = ~0;
     _metric_preference = ~0;
+    _metric = ~0;
 }
 
 Mrib::Mrib(const IPvXNet& dest_prefix)
@@ -487,15 +487,15 @@ Mrib::Mrib(const IPvXNet& dest_prefix)
       _next_hop_router_addr(dest_prefix.af())
 {
     _next_hop_vif_index = Vif::VIF_INDEX_INVALID;
-    _metric = ~0;
     _metric_preference = ~0;
+    _metric = ~0;
 }
 Mrib::Mrib(const Mrib& mrib)
     : _dest_prefix(mrib.dest_prefix()),
       _next_hop_router_addr(mrib.next_hop_router_addr()),
       _next_hop_vif_index(mrib.next_hop_vif_index()),
-      _metric(mrib.metric()),
-      _metric_preference(mrib.metric_preference())
+      _metric_preference(mrib.metric_preference()),
+      _metric(mrib.metric())
 {
     
 }
@@ -506,8 +506,8 @@ Mrib::operator==(const Mrib& other) const
     return ((_dest_prefix == other.dest_prefix())
 	    && (_next_hop_router_addr == other.next_hop_router_addr())
 	    && (_next_hop_vif_index == other.next_hop_vif_index())
-	    && (_metric == other.metric())
-	    && (_metric_preference == other.metric_preference()));
+	    && (_metric_preference == other.metric_preference())
+	    && (_metric == other.metric()));
 }
 
 string
@@ -518,8 +518,8 @@ Mrib::str() const
     s += "dest_prefix: " + _dest_prefix.str();
     s += " next_hop_router: " + _next_hop_router_addr.str();
     s += " next_hop_vif_index: " + c_format("%d", _next_hop_vif_index);
-    s += " metric: " + c_format("%d", _metric);
     s += " metric_preference: " + c_format("%d", _metric_preference);
+    s += " metric: " + c_format("%d", _metric);
     
     return s;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.2 2002/12/17 10:03:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1569,7 +1569,7 @@ PimMre::spt_assert_metric(uint16_t vif_index) const
     assert_metric.set_addr(pim_vif->addr());
     assert_metric.set_rpt_bit_flag(false);
     assert_metric.set_metric_preference(metric_preference_s());
-    assert_metric.set_route_metric(route_metric_s());
+    assert_metric.set_metric(metric_s());
     
     return (&assert_metric);
 }
@@ -1599,7 +1599,7 @@ PimMre::rpt_assert_metric(uint16_t vif_index) const
     assert_metric.set_addr(pim_vif->addr());
     assert_metric.set_rpt_bit_flag(true);
     assert_metric.set_metric_preference(pim_mre_wc->metric_preference_rp());
-    assert_metric.set_route_metric(pim_mre_wc->route_metric_rp());
+    assert_metric.set_metric(pim_mre_wc->metric_rp());
     
     return (&assert_metric);
 }
@@ -1613,33 +1613,9 @@ PimMre::infinite_assert_metric() const
     assert_metric.set_addr(IPvX::ZERO(family()));
     assert_metric.set_rpt_bit_flag(true);
     assert_metric.set_metric_preference(PIM_ASSERT_MAX_METRIC_PREFERENCE);
-    assert_metric.set_route_metric(PIM_ASSERT_MAX_METRIC);
+    assert_metric.set_metric(PIM_ASSERT_MAX_METRIC);
     
     return (&assert_metric);
-}
-
-// Note: applies only for (S,G) and (S,G,rpt)
-uint32_t
-PimMre::route_metric_s() const
-{
-    Mrib *mrib = mrib_s();
-    
-    if (mrib != NULL)
-	return (mrib->metric());
-    
-    return (PIM_ASSERT_MAX_METRIC);
-}
-
-// Note: applies for all entries
-uint32_t
-PimMre::route_metric_rp() const
-{
-    Mrib *mrib = mrib_rp();
-    
-    if (mrib != NULL)
-	return (mrib->metric());
-    
-    return (PIM_ASSERT_MAX_METRIC);
 }
 
 // Note: applies only for (S,G) and (S,G,rpt)
@@ -1664,6 +1640,30 @@ PimMre::metric_preference_rp() const
 	return (mrib->metric_preference());
     
     return (PIM_ASSERT_MAX_METRIC_PREFERENCE);
+}
+
+// Note: applies only for (S,G) and (S,G,rpt)
+uint32_t
+PimMre::metric_s() const
+{
+    Mrib *mrib = mrib_s();
+    
+    if (mrib != NULL)
+	return (mrib->metric());
+    
+    return (PIM_ASSERT_MAX_METRIC);
+}
+
+// Note: applies for all entries
+uint32_t
+PimMre::metric_rp() const
+{
+    Mrib *mrib = mrib_rp();
+    
+    if (mrib != NULL)
+	return (mrib->metric());
+    
+    return (PIM_ASSERT_MAX_METRIC);
 }
 
 // Try to remove PimMre entry if not needed anymore.

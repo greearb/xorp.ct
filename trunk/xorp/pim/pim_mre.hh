@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.2 2002/12/17 10:03:46 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.3 2003/01/07 02:36:00 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -260,13 +260,13 @@ public:
     // ASSERT-related route metric and metric preference
     //
     // Note: applies only for (S,G) and (S,G,rpt)
-    uint32_t	route_metric_s() const;
-    // Note: applies for all entries
-    uint32_t	route_metric_rp() const;
-    // Note: applies only for (S,G) and (S,G,rpt)
     uint32_t	metric_preference_s() const;
     // Note: applies for all entries
     uint32_t	metric_preference_rp() const;
+    // Note: applies only for (S,G) and (S,G,rpt)
+    uint32_t	metric_s() const;
+    // Note: applies for all entries
+    uint32_t	metric_rp() const;
     
     //
     // Local receivers info

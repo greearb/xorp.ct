@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.2 2003/01/07 01:43:03 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.3 2003/01/13 20:11:22 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -554,9 +554,9 @@ protected:
      *  @param next_hop_vif_index the index of the vif toward the destination
      *  prefix.
      *  
-     *  @param metric the routing metric for this entry.
+     *  @param metric_preference the metric preference for this entry.
      *  
-     *  @param metric_preference the routing metric preference for this entry.
+     *  @param metric the metric for this entry.
      *  
      *  @param fail true if failure has occured.
      *  
@@ -569,8 +569,8 @@ protected:
 	const IPv4&	next_hop_router_addr, 
 	const string&	next_hop_vif_name, 
 	const uint32_t&	next_hop_vif_index, 
-	const uint32_t&	metric, 
 	const uint32_t&	metric_preference, 
+	const uint32_t&	metric, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
@@ -582,8 +582,8 @@ protected:
 	const IPv6&	next_hop_router_addr, 
 	const string&	next_hop_vif_name, 
 	const uint32_t&	next_hop_vif_index, 
-	const uint32_t&	metric, 
 	const uint32_t&	metric_preference, 
+	const uint32_t&	metric, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);

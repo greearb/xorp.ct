@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_mrib_netlink.cc,v 1.25 2002/12/09 18:29:18 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_mrib_netlink.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -183,8 +183,8 @@ UnixComm::get_mrib_osdep(const IPvX& dest_addr, Mrib& mrib)
     mrib.set_next_hop_router_addr(IPvX::ZERO(family()));
     mrib.set_next_hop_vif_index(Vif::VIF_INDEX_INVALID);
     // XXX: the UNIX kernel doesn't provide reasonable metrics
-    mrib.set_metric(MRIB_DEFAULT_METRIC);
     mrib.set_metric_preference(MRIB_DEFAULT_METRIC_PREFERENCE);
+    mrib.set_metric(MRIB_DEFAULT_METRIC);
     
     if (! dest_addr.is_unicast())
 	return (XORP_ERROR);

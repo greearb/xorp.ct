@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrib_table.hh,v 1.10 2002/12/09 18:29:22 hodson Exp $
+// $XORP: xorp/mrt/mrib_table.hh,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
 
 #ifndef __MRT_MRIB_TABLE_HH__
 #define __MRT_MRIB_TABLE_HH__
@@ -345,6 +345,20 @@ public:
     void	set_next_hop_vif_index(uint16_t v) { _next_hop_vif_index = v; }
     
     /**
+     * Get the metric preference value.
+     * 
+     * @return the metric preference value.
+     */
+    uint32_t	metric_preference() const { return (_metric_preference); }
+    
+    /**
+     * Set the metric preference value.
+     * 
+     * @param v the value of the metric preference to set.
+     */
+    void	set_metric_preference(uint32_t v) { _metric_preference = v; }
+
+    /**
      * Get the metric value.
      * 
      * @return the metric value.
@@ -359,20 +373,6 @@ public:
     void	set_metric(uint32_t v) { _metric = v; }
     
     /**
-     * Get the metric preference value.
-     * 
-     * @return the metric preference value.
-     */
-    uint32_t	metric_preference() const { return (_metric_preference); }
-    
-    /**
-     * Set the metric preference value.
-     * 
-     * @param v the value of the metric preference to set.
-     */
-    void	set_metric_preference(uint32_t v) { _metric_preference = v; }
-    
-    /**
      * Convert this entry from binary form to presentation format.
      * 
      * @return C++ string with the human-readable ASCII representation
@@ -385,10 +385,9 @@ private:
     IPvXNet	_dest_prefix;		// The destination prefix address
     IPvX	_next_hop_router_addr;	// The address of the next-hop router
     uint16_t	_next_hop_vif_index;	// The vif index to the next-hop router
-    uint32_t	_metric;		// The routing metric to the
+    uint32_t	_metric_preference;	// The metric preference to the
 					// destination
-    uint32_t	_metric_preference;	// The routing metric preference to the
-					// destination
+    uint32_t	_metric;		// The metric to the destination
 };
 
 /**

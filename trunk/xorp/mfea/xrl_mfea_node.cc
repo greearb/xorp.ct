@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.49 2002/12/09 18:29:19 hodson Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -343,8 +343,8 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	    mrib.next_hop_router_addr().get_ipv4(),
 	    vif_name,
 	    mrib.next_hop_vif_index(),
-	    mrib.metric(),
 	    mrib.metric_preference(),
+	    mrib.metric(),
 	    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 	break;
 #ifdef HAVE_IPV6
@@ -355,8 +355,8 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	    mrib.next_hop_router_addr().get_ipv6(),
 	    vif_name,
 	    mrib.next_hop_vif_index(),
-	    mrib.metric(),
 	    mrib.metric_preference(),
+	    mrib.metric(),
 	    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 	break;
 #endif // HAVE_IPV6
@@ -1461,8 +1461,8 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		    mrib->next_hop_router_addr().get_ipv4(),
 		    vif_name,
 		    mrib->next_hop_vif_index(),
-		    mrib->metric(),
 		    mrib->metric_preference(),
+		    mrib->metric(),
 		    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 		break;
 #ifdef HAVE_IPV6
@@ -1473,8 +1473,8 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		    mrib->next_hop_router_addr().get_ipv6(),
 		    vif_name,
 		    mrib->next_hop_vif_index(),
-		    mrib->metric(),
 		    mrib->metric_preference(),
+		    mrib->metric(),
 		    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 		break;
 #endif // HAVE_IPV6

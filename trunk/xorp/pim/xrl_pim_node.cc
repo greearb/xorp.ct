@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.2 2003/01/07 01:43:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.3 2003/01/13 20:11:22 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -1664,8 +1664,8 @@ XrlPimNode::mfea_client_0_1_add_mrib4(
     const IPv4&		next_hop_router_addr, 
     const string&	, // next_hop_vif_name, 
     const uint32_t&	next_hop_vif_index, 
-    const uint32_t&	metric, 
     const uint32_t&	metric_preference, 
+    const uint32_t&	metric, 
     // Output values, 
     bool&		fail, 
     string&		reason)
@@ -1694,8 +1694,8 @@ XrlPimNode::mfea_client_0_1_add_mrib4(
     Mrib mrib = Mrib(IPvXNet(dest_prefix));
     mrib.set_next_hop_router_addr(IPvX(next_hop_router_addr));
     mrib.set_next_hop_vif_index(next_hop_vif_index);
-    mrib.set_metric(metric);
     mrib.set_metric_preference(metric_preference);
+    mrib.set_metric(metric);
     
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
@@ -1716,8 +1716,8 @@ XrlPimNode::mfea_client_0_1_add_mrib6(
     const IPv6&		next_hop_router_addr, 
     const string&	, // next_hop_vif_name, 
     const uint32_t&	next_hop_vif_index, 
-    const uint32_t&	metric, 
     const uint32_t&	metric_preference, 
+    const uint32_t&	metric, 
     // Output values, 
     bool&		fail, 
     string&		reason)
@@ -1750,8 +1750,8 @@ XrlPimNode::mfea_client_0_1_add_mrib6(
     Mrib mrib = Mrib(IPvXNet(dest_prefix));
     mrib.set_next_hop_router_addr(IPvX(next_hop_router_addr));
     mrib.set_next_hop_vif_index(next_hop_vif_index);
-    mrib.set_metric(metric);
     mrib.set_metric_preference(metric_preference);
+    mrib.set_metric(metric);
     
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.45 2002/12/09 18:29:25 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -205,9 +205,9 @@ PimMre::assert_process(PimVif *pim_vif, const IPvX& assert_source_addr,
     my_metric.set_metric_preference(is_spt()?
 				    metric_preference_s()
 				    : metric_preference_rp());
-    my_metric.set_route_metric(is_spt()?
-			       route_metric_s()
-			       : route_metric_rp());
+    my_metric.set_metric(is_spt()?
+			 metric_s()
+			 : metric_rp());
     
     i_am_assert_winner_bool = my_metric.is_better(assert_metric);
     
