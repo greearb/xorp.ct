@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.3 2003/10/11 22:14:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.4 2003/10/12 02:26:51 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -121,6 +121,42 @@ IfConfigSet::push_interface(const IfTreeInterface& i)
     XLOG_ASSERT(if_index > 0);
 
     //
+    // Set the flags
+    //
+    do {
+	uint32_t curflags = 0;
+	uint32_t newflags;
+	bool up, deleted, enabled;
+
+	deleted = i.is_marked(IfTreeItem::DELETED);
+	enabled = i.enabled();
+
+	// Get the current flags
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	if (ii != ifc().pulled_config().ifs().end())
+	    curflags = ii->second.if_flags();
+	newflags = curflags;
+
+	up = curflags & IFF_UP;
+	if (up && (deleted || !enabled))
+	    newflags &= ~IFF_UP;
+	if ( (!up) && enabled)
+	    newflags |= IFF_UP;
+	if (curflags == newflags)
+	    break;		// XXX: nothing changed
+
+	string reason;
+	if (set_interface_flags(i.ifname(), if_index, newflags, reason) < 0) {
+	    ifc().er().interface_error(i.ifname(),
+				       c_format("Failed to set interface flags to 0x%08x (%s)",
+						newflags, reason.c_str()));
+	    XLOG_ERROR(ifc().er().last_error().c_str());
+	    return;
+	}
+	break;
+    } while (false);
+
+    //
     // Set the MTU
     //
     do {
@@ -206,36 +242,43 @@ IfConfigSet::push_vif(const IfTreeInterface&	i,
 {
     uint16_t if_index = ifc().get_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
-    uint32_t curflags = 0;
-    uint32_t newflags;
-    bool up, deleted, enabled;
 
-    deleted = (i.is_marked(IfTreeItem::DELETED) |
-	       v.is_marked(IfTreeItem::DELETED));
-    enabled = i.enabled() & v.enabled();
+    //
+    // Set the flags
+    //
+    do {
+	uint32_t curflags = 0;
+	uint32_t newflags;
+	bool up, deleted, enabled;
 
-    // Get the current flags
-    IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
-    if (ii != ifc().pulled_config().ifs().end())
-	curflags = ii->second.if_flags();
-    newflags = curflags;
+	deleted = (i.is_marked(IfTreeItem::DELETED) |
+		   v.is_marked(IfTreeItem::DELETED));
+	enabled = i.enabled() & v.enabled();
 
-    up = curflags & IFF_UP;
-    if (up && (deleted || !enabled))
-	newflags &= ~IFF_UP;
-    if ( (!up) && enabled)
-	newflags |= IFF_UP;
-    if (curflags == newflags)
-	return;		// XXX: nothing changed
+	// Get the current flags
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	if (ii != ifc().pulled_config().ifs().end())
+	    curflags = ii->second.if_flags();
+	newflags = curflags;
 
-    string reason;
-    if (set_interface_flags(i.ifname(), if_index, newflags, reason) < 0) {
-	ifc().er().vif_error(i.ifname(), v.vifname(),
-			     c_format("Failed to set interface flags to 0x%08x (%s)",
-				      newflags, reason.c_str()));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-	return;
-    }
+	up = curflags & IFF_UP;
+	if (up && (deleted || !enabled))
+	    newflags &= ~IFF_UP;
+	if ( (!up) && enabled)
+	    newflags |= IFF_UP;
+	if (curflags == newflags)
+	    break;		// XXX: nothing changed
+
+	string reason;
+	if (set_interface_flags(i.ifname(), if_index, newflags, reason) < 0) {
+	    ifc().er().vif_error(i.ifname(), v.vifname(),
+				 c_format("Failed to set interface flags to 0x%08x (%s)",
+					  newflags, reason.c_str()));
+	    XLOG_ERROR(ifc().er().last_error().c_str());
+	    return;
+	}
+	break;
+    } while (false);
 }
 
 void
