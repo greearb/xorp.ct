@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.20 2004/06/10 22:40:36 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.21 2004/09/24 23:10:30 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -59,7 +59,7 @@ test_cache(TestInfo& /*info*/)
 
     // create a load of attributes
     IPNet<IPv4> net1("1.0.1.0/24");
-    //    IPNet<IPv4> net2("1.0.2.0/24");
+    IPNet<IPv4> net2("1.0.2.0/24");
 
     IPv4 nexthop1("2.0.0.1");
     NextHopAttribute<IPv4> nhatt1(nexthop1);
@@ -313,8 +313,18 @@ test_cache(TestInfo& /*info*/)
     assert(msg->route() == NULL);
     delete msg;
 
-    assert(cache_table->route_count() == 1);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_changed();
+    cache_table->add_route(*msg, NULL);
+    assert(msg->route() == NULL);
+    delete msg;
+
+    assert(cache_table->route_count() == 2);
     cache_table->flush_cache();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
     assert(cache_table->route_count() == 0);
 
 
