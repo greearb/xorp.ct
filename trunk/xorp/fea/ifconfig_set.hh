@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.8 2003/10/12 22:05:53 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.9 2003/10/13 23:32:41 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -105,8 +105,8 @@ protected:
      *
      * @param ifname the interface name.
      * @param if_index the interface index.
-     * @param is_broadcast true if @param dst_or_bcast is a broadcast address.
-     * @param is_p2p true if @param dst_or_bcast is a destination/peer address.
+     * @param is_broadcast true if @ref dst_or_bcast is a broadcast address.
+     * @param is_p2p true if dst_or_bcast is a destination/peer address.
      * @param addr the address to set.
      * @param dst_or_bcast the broadcast or the destination/peer address.
      * @param prefix_len the prefix length of the subnet mask.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.5 2003/10/13 23:32:41 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.6 2003/10/14 01:34:08 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -219,7 +219,7 @@ public:
      * anything else except the netlink socket facility itself.
      *
      * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the @param data buffer.
+     * @param nbytes the number of bytes in the data buffer.
      */
     virtual void nlsock_data(const uint8_t* data, size_t nbytes) = 0;
 
@@ -291,7 +291,7 @@ public:
      * anything else except the netlink socket facility itself.
      *
      * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the @param data buffer.
+     * @param nbytes the number of bytes in the data buffer.
      */
     virtual void nlsock_data(const uint8_t* data, size_t nbytes);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.3 2003/10/13 23:32:41 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.4 2003/10/14 01:32:18 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -143,7 +143,7 @@ public:
      * anything else except the routing socket facility itself.
      *
      * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the @param data buffer.
+     * @param nbytes the number of bytes in the data buffer.
      */
     virtual void rtsock_data(const uint8_t* data, size_t nbytes) = 0;
 
@@ -193,7 +193,7 @@ public:
      * anything else except the routing socket facility itself.
      *
      * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the @param data buffer.
+     * @param nbytes the number of bytes in the data buffer.
      */
     virtual void rtsock_data(const uint8_t* data, size_t nbytes);
 

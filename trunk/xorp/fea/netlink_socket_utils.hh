@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.5 2003/10/12 22:13:47 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.6 2003/10/13 23:32:41 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -52,8 +52,8 @@ public:
      * @param rtattr the pointer to the first rtattr entry.
      * @param rta_len the length of all rtattr entries.
      * @param rta_array the array with the pointers to store the result.
-     * @param rta_array_n the maximum entry number to store
-     * in the @param rta_array[] array.
+     * @param rta_array_n the maximum number of entries to store
+     * in the array.
      */
     static void get_rtattr(const struct rtattr* rtattr, int rta_len,
 			   const struct rtattr* rta_array[],
