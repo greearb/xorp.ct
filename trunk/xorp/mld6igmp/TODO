@@ -1,6 +1,11 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.10 2003/07/12 01:02:05 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.11 2003/08/28 14:22:32 pavlin Exp $
 #
+
+* Implement an MLD/IGMP "proxy" where the Join/Leave messages
+  from one interface are forwarded on another interface.
+  This may be useful with satellite routers which do support
+  IGMP, but do NOT support PIM-SM for example.
 
 * Implement graceful stopping of node and/or a vif. I.e., perform
   protocol-related operations to inform other nodes that
