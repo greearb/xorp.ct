@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim/pim_arch.tex,v 1.11 2004/07/09 04:42:24 pavlin Exp $
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.12 2005/01/28 03:34:25 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP PIM-SM Routing Daemon \\
 \vspace{1ex}
-Version 1.0}
+Version 1.1}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{July 8, 2004}
+\date{April 7, 2005}
 
 \maketitle
 
@@ -77,7 +77,7 @@ implementation is well tested, we would
 try to optimize those parts of the implementation that should prove
 to be a bottleneck.
 
-Currently (July 2004), the PIM-SM implementation is based
+Currently (April 2005), the PIM-SM implementation is based
 on the specification in the following documents:
 
 \begin{itemize}
@@ -229,7 +229,7 @@ capable, and the loopback interface are ignored for multicast
 routing.
 
 Typically, from developer's point of view, all interaction with PimVif
-would be through PimNode~\footnote{For simplicity, currently (July 2004)
+would be through PimNode~\footnote{For simplicity, currently (April 2005)
 there are few occasions when XrlPimNode uses direct access to PimVif.}.
 
 The public interface for PimVif contains the methods to manipulate a
@@ -264,7 +264,7 @@ PimScopeZoneTable is a table that contains information about scoped
 zones. There is one such table per PimNode. This table is used to check
 whether various control messages are allowed to be sent or accepted a
 specific network interface~\footnote{Note that in the current implementation
-(July 2004) the PimScopeZoneTable is used only for PIM
+(April 2005) the PimScopeZoneTable is used only for PIM
 Bootstrap messages. In the future, the scope zone information would be
 used for other control messages as well.}.
 
@@ -324,12 +324,12 @@ contains PimMre entries (described in file \verb=pim/pim_mre.hh=):
 
 \end{itemize}
 
-For simplicity of implementation, currently (July 2004) PimMrt
+For simplicity of implementation, currently (April 2005) PimMrt
 contains one more table: PimMrtMfc PIM-specific table with Multicast
 Forwarding Cache (PimMfc) entries (in the future, this table may be
 moved out of PimMrt to PimNode). This table contains all
 entries that have been installed in the multicast forwarding table in
-the multicast forwarding engine. Currently (July 2004), those
+the multicast forwarding engine. Currently (April 2005), those
 entries are source-group-specific, and are installed ``on-demand'' (\ie
 only if there is an active source for some multicast group). In the future,
 group-specific entries may be supported as well (assuming that that
@@ -662,7 +662,7 @@ them.
 \subsection{PimConfig Description}
 
 PimConfig handles the PIM-specific configuration~\footnote{Currently
-(July 2004), PimConfig is not implemented; rather, all state is
+(April 2005), PimConfig is not implemented; rather, all state is
 kept inside PimNode instead.}. This configuration is used to configure the
 following units:
 
@@ -689,23 +689,25 @@ following units:
 
 \begin{itemize}
 
-  \item December 11, 2002: Version 0.1 completed.
+  \item April 7, 2005: Bump-up the version to 1.1, and the date.
 
-  \item March 10, 2003: Updated to match XORP version 0.2 release code;
-  cleanup.
-
-  \item June 9, 2003: Bump-up the version to 0.3, and the date.
-
-  \item August 28, 2003: Bump-up the version to 0.4, and the date.
-
-  \item November 6, 2003: Bump-up the version to 0.5, and the date;
-  add brief info about retrieving protocol-related statistics; minor edits.
+  \item January 27, 2005: Remove MFEA+MRIB-related text, because the MFEA
+  does not deal with the MRIB information anymore.
 
   \item July 8, 2004: Updated to match release 1.0. Bump-up the version to
   1.0, and the date.
 
-  \item January 27, 2005: Remove MFEA+MRIB-related text, because the MFEA
-  does not deal with the MRIB information anymore.
+  \item November 6, 2003: Bump-up the version to 0.5, and the date;
+  add brief info about retrieving protocol-related statistics; minor edits.
+
+  \item August 28, 2003: Bump-up the version to 0.4, and the date.
+
+  \item June 9, 2003: Bump-up the version to 0.3, and the date.
+
+  \item March 10, 2003: Updated to match XORP version 0.2 release code;
+  cleanup.
+
+  \item December 11, 2002: Version 0.1 completed.
 
 \end{itemize}
 
