@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.22 2003/05/31 07:03:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.23 2003/05/31 16:16:00 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3309,8 +3309,6 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name4(
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
-    // XXX: config_rp_done() will complete the configuration
-    
     return XrlCmdError::OKAY();
 }
 
@@ -3388,7 +3386,7 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr6(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_rp4(
+XrlPimNode::pim_0_1_add_config_static_rp4(
     // Input values, 
     const IPv4Net&	group_prefix, 
     const IPv4&		rp_addr, 
@@ -3397,13 +3395,13 @@ XrlPimNode::pim_0_1_add_config_rp4(
 {
     string err;
     
-    if (PimNode::add_config_rp(IPvXNet(group_prefix),
-			       IPvX(rp_addr),
-			       rp_priority,
-			       hash_masklen,
-			       err)
+    if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
+				      IPvX(rp_addr),
+				      rp_priority,
+				      hash_masklen,
+				      err)
 	< 0) {
-	string msg = c_format("Failed to add %s to RP-Set for prefix %s: %s",
+	string msg = c_format("Failed to add %s to RP-Set as static RP for prefix %s: %s",
 			      cstring(rp_addr),
 			      cstring(group_prefix),
 			      err.c_str());
@@ -3414,7 +3412,7 @@ XrlPimNode::pim_0_1_add_config_rp4(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_rp6(
+XrlPimNode::pim_0_1_add_config_static_rp6(
     // Input values, 
     const IPv6Net&	group_prefix, 
     const IPv6&		rp_addr, 
@@ -3423,13 +3421,13 @@ XrlPimNode::pim_0_1_add_config_rp6(
 {
     string err;
     
-    if (PimNode::add_config_rp(IPvXNet(group_prefix),
-			       IPvX(rp_addr),
-			       rp_priority,
-			       hash_masklen,
-			       err)
+    if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
+				      IPvX(rp_addr),
+				      rp_priority,
+				      hash_masklen,
+				      err)
 	< 0) {
-	string msg = c_format("Failed to add %s to RP-Set for prefix %s: %s",
+	string msg = c_format("Failed to add %s to RP-Set as static RP for prefix %s: %s",
 			      cstring(rp_addr),
 			      cstring(group_prefix),
 			      err.c_str());
@@ -3440,18 +3438,18 @@ XrlPimNode::pim_0_1_add_config_rp6(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_delete_config_rp4(
+XrlPimNode::pim_0_1_delete_config_static_rp4(
     // Input values, 
     const IPv4Net&	group_prefix, 
     const IPv4&		rp_addr)
 {
     string err;
     
-    if (PimNode::delete_config_rp(IPvXNet(group_prefix),
-				  IPvX(rp_addr),
-				  err)
+    if (PimNode::delete_config_static_rp(IPvXNet(group_prefix),
+					 IPvX(rp_addr),
+					 err)
 	< 0) {
-	string msg = c_format("Failed to delete %s from RP-Set for prefix %s: %s",
+	string msg = c_format("Failed to delete %s from RP-Set as static RP for prefix %s: %s",
 			      cstring(rp_addr),
 			      cstring(group_prefix),
 			      err.c_str());
@@ -3462,17 +3460,17 @@ XrlPimNode::pim_0_1_delete_config_rp4(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_delete_config_rp6(
+XrlPimNode::pim_0_1_delete_config_static_rp6(
     // Input values, 
     const IPv6Net&	group_prefix, 
     const IPv6&		rp_addr)
 {
     string err;
     
-    if (PimNode::delete_config_rp(IPvXNet(group_prefix),
-				  IPvX(rp_addr), err)
+    if (PimNode::delete_config_static_rp(IPvXNet(group_prefix),
+					 IPvX(rp_addr), err)
 	< 0) {
-	string msg = c_format("Failed to delete %s from RP-Set for prefix %s: %s",
+	string msg = c_format("Failed to delete %s from RP-Set as static RP for prefix %s: %s",
 			      cstring(rp_addr),
 			      cstring(group_prefix),
 			      err.c_str());
@@ -3483,12 +3481,12 @@ XrlPimNode::pim_0_1_delete_config_rp6(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_config_rp_done()
+XrlPimNode::pim_0_1_config_static_rp_done()
 {
     string err;
     
-    if (PimNode::config_rp_done(err) < 0) {
-	string msg = c_format("Failed to complete the RP-Set configuration: %s",
+    if (PimNode::config_static_rp_done(err) < 0) {
+	string msg = c_format("Failed to complete the RP-Set configuration with static RPs: %s",
 			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }

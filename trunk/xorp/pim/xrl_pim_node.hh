@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.21 2003/05/29 21:17:16 mjh Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.22 2003/05/31 07:03:33 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1148,31 +1148,31 @@ protected:
      *  group. It should be same across all RPs. If set to zero, the default
      *  one will be used.
      */
-    XrlCmdError pim_0_1_add_config_rp4(
+    XrlCmdError pim_0_1_add_config_static_rp4(
 	// Input values, 
 	const IPv4Net&	group_prefix, 
 	const IPv4&	rp_addr, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	hash_masklen);
 
-    XrlCmdError pim_0_1_add_config_rp6(
+    XrlCmdError pim_0_1_add_config_static_rp6(
 	// Input values, 
 	const IPv6Net&	group_prefix, 
 	const IPv6&	rp_addr, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	hash_masklen);
 
-    XrlCmdError pim_0_1_delete_config_rp4(
+    XrlCmdError pim_0_1_delete_config_static_rp4(
 	// Input values, 
 	const IPv4Net&	group_prefix, 
 	const IPv4&	rp_addr);
 
-    XrlCmdError pim_0_1_delete_config_rp6(
+    XrlCmdError pim_0_1_delete_config_static_rp6(
 	// Input values, 
 	const IPv6Net&	group_prefix, 
 	const IPv6&	rp_addr);
 
-    XrlCmdError pim_0_1_config_rp_done();
+    XrlCmdError pim_0_1_config_static_rp_done();
 
     /**
      *  Configure PIM Hello-related metrics. The 'set_foo' XRLs set the

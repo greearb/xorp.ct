@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.10 2003/04/01 00:56:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.11 2003/05/31 07:03:32 pavlin Exp $"
 
 
 //
@@ -1242,9 +1242,6 @@ PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
 //
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
-// XXX: we don't call end_config(), because config_rp_done() will
-// do it when the RP configuration is completed.
-//
 int
 PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 					bool is_scope_zone,
@@ -1259,7 +1256,7 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot add configure Cand-RP with vif %s: "
 			  "no such vif",
 			  vif_name.c_str());
@@ -1268,7 +1265,7 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
     }
     
     if (pim_vif->addr_ptr() == NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot add configure Cand-RP with vif %s: "
 			  "the vif has no configured address",
 			  vif_name.c_str());
@@ -1287,9 +1284,6 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 // Add myself as a Cand-RP
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
-// XXX: we don't call end_config(), because config_rp_done() will
-// do it when the RP configuration is completed.
-//
 int
 PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 				    bool is_scope_zone,
@@ -1306,7 +1300,7 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     
     if (! is_my_addr(my_cand_rp_addr)) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot add configure Cand-RP with address %s: "
 			  "not my address",
 			  cstring(my_cand_rp_addr));
@@ -1328,7 +1322,7 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 	config_bsr_zone = pim_bsr().add_config_bsr_zone(new_bsr_zone,
 							error_msg);
 	if (config_bsr_zone == NULL) {
-	    // XXX: don't call end_config(reason);
+	    end_config(reason);
 	    reason = c_format("Cannot add configure Cand-RP for "
 			      "zone group prefix %s (%s): %s",
 			      cstring(group_prefix),
@@ -1344,7 +1338,7 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 				my_cand_rp_addr, rp_priority,
 				rp_holdtime, error_msg)
 	== NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot add configure Cand-RP address %s for "
 			  "zone group prefix %s (%s): %s",
 			  cstring(my_cand_rp_addr),
@@ -1357,7 +1351,8 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     }
     
-    // XXX: config_rp_done() will complete the configuration setup
+    if (end_config(reason) != XORP_OK)
+	return (XORP_ERROR);
     
     return (XORP_OK);
 }
@@ -1365,9 +1360,6 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 //
 // Delete myself as a Cand-RP
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
-//
-// XXX: we don't call end_config(), because config_rp_done() will
-// do it when the RP configuration is completed.
 //
 int
 PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
@@ -1381,7 +1373,7 @@ PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot delete configure Cand-RP with vif %s: "
 			  "no such vif",
 			  vif_name.c_str());
@@ -1390,7 +1382,7 @@ PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
     }
     
     if (pim_vif->addr_ptr() == NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot delete configure Cand-RP with vif %s: "
 			  "the vif has no configured address",
 			  vif_name.c_str());
@@ -1407,9 +1399,6 @@ PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 //
 // Delete myself as a Cand-RP
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
-//
-// XXX: we don't call end_config(), because config_rp_done() will
-// do it when the RP configuration is completed.
 //
 int
 PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
@@ -1431,7 +1420,7 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     bsr_zone = pim_bsr().find_config_bsr_zone_by_prefix(group_prefix,
 							is_scope_zone);
     if (bsr_zone == NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot delete configure Cand-RP for zone for "
 			  "group prefix %s (%s): zone not found",
 			  cstring(group_prefix),
@@ -1445,7 +1434,7 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     //
     bsr_group_prefix = bsr_zone->find_bsr_group_prefix(group_prefix);
     if (bsr_group_prefix == NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot delete configure Cand-RP for zone for "
 			  "group prefix %s (%s): prefix not found",
 			  cstring(group_prefix),
@@ -1459,7 +1448,7 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     //
     bsr_rp = bsr_group_prefix->find_rp(my_cand_rp_addr);
     if (bsr_rp == NULL) {
-	// XXX: don't call end_config(reason);
+	end_config(reason);
 	reason = c_format("Cannot delete configure Cand-RP for zone for "
 			  "group prefix %s (%s) and RP %s: RP not found",
 			  cstring(group_prefix),
@@ -1492,7 +1481,8 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     if (is_up)
 	pim_bsr().start();	// XXX: restart the BSR
     
-    // XXX: config_rp_done() will complete the configuration setup
+    if (end_config(reason) != XORP_OK)
+	return (XORP_ERROR);
     
     return (XORP_OK);
 }
@@ -1502,22 +1492,22 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 //
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
-// XXX: we don't call end_config(), because config_rp_done() will
+// XXX: we don't call end_config(), because config_static_rp_done() will
 // do it when the RP configuration is completed.
 //
 int
-PimNode::add_config_rp(const IPvXNet& group_prefix,
-		       const IPvX& rp_addr,
-		       uint8_t rp_priority,
-		       uint8_t hash_masklen,
-		       string& reason)
+PimNode::add_config_static_rp(const IPvXNet& group_prefix,
+			      const IPvX& rp_addr,
+			      uint8_t rp_priority,
+			      uint8_t hash_masklen,
+			      string& reason)
 {
     if (start_config(reason) != XORP_OK)
 	return (XORP_ERROR);
     
     if (! group_prefix.is_multicast()) {
 	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot add configure RP with address %s "
+	reason = c_format("Cannot add configure static RP with address %s "
 			  "for group prefix %s: "
 			  "not a multicast address",
 			  cstring(rp_addr),
@@ -1528,7 +1518,7 @@ PimNode::add_config_rp(const IPvXNet& group_prefix,
     
     if (! rp_addr.is_unicast()) {
 	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot add configure RP with address %s: "
+	reason = c_format("Cannot add configure static RP with address %s: "
 			  "not an unicast address",
 			  cstring(rp_addr));
 	XLOG_ERROR(reason.c_str());
@@ -1538,12 +1528,12 @@ PimNode::add_config_rp(const IPvXNet& group_prefix,
     // XXX: if hash_masklen is 0, then set its value to default
     if (hash_masklen == 0)
 	hash_masklen = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
-
+    
     if (rp_table().add_rp(rp_addr, rp_priority, group_prefix, hash_masklen,
 			  PimRp::RP_LEARNED_METHOD_STATIC)
 	== NULL) {
 	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot add configure RP with address %s "
+	reason = c_format("Cannot add configure static RP with address %s "
 			  "and priority %d for group prefix %s",
 			  cstring(rp_addr),
 			  rp_priority,
@@ -1552,7 +1542,7 @@ PimNode::add_config_rp(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     }
     
-    // XXX: config_rp_done() will complete the configuration setup
+    // XXX: config_static_rp_done() will complete the configuration setup
     
     return (XORP_OK);
 }
@@ -1562,13 +1552,13 @@ PimNode::add_config_rp(const IPvXNet& group_prefix,
 //
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
-// XXX: we don't call end_config(), because config_rp_done() will
+// XXX: we don't call end_config(), because config_static_rp_done() will
 // do it when the RP configuration is completed.
 //
 int
-PimNode::delete_config_rp(const IPvXNet& group_prefix,
-			  const IPvX& rp_addr,
-			  string& reason)
+PimNode::delete_config_static_rp(const IPvXNet& group_prefix,
+				 const IPvX& rp_addr,
+				 string& reason)
 {
     if (start_config(reason) != XORP_OK)
 	return (XORP_ERROR);
@@ -1577,7 +1567,7 @@ PimNode::delete_config_rp(const IPvXNet& group_prefix,
 			     PimRp::RP_LEARNED_METHOD_STATIC)
 	!= XORP_OK) {
 	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot delete configure RP with address %s "
+	reason = c_format("Cannot delete configure static RP with address %s "
 			  "for group prefix %s",
 			  cstring(rp_addr),
 			  cstring(group_prefix));
@@ -1585,7 +1575,7 @@ PimNode::delete_config_rp(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     }
     
-    // XXX: config_rp_done() will complete the configuration setup
+    // XXX: config_static_rp_done() will complete the configuration setup
     
     return (XORP_OK);
 }
@@ -1596,7 +1586,7 @@ PimNode::delete_config_rp(const IPvXNet& group_prefix,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::config_rp_done(string& reason)
+PimNode::config_static_rp_done(string& reason)
 {
     rp_table().apply_rp_changes();
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.14 2003/05/21 05:32:54 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.15 2003/05/31 07:03:32 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -928,15 +928,15 @@ public:
 					      bool is_scope_zone,
 					      const IPvX& my_cand_rp_addr,
 					      string& reason);
-    int		add_config_rp(const IPvXNet& group_prefix,
-			      const IPvX& rp_addr,
-			      uint8_t rp_priority,
-			      uint8_t hash_masklen,
-			      string& reason);
-    int		delete_config_rp(const IPvXNet& group_prefix,
-				 const IPvX& rp_addr,
-				 string& reason);
-    int		config_rp_done(string& reason);
+    int		add_config_static_rp(const IPvXNet& group_prefix,
+				     const IPvX& rp_addr,
+				     uint8_t rp_priority,
+				     uint8_t hash_masklen,
+				     string& reason);
+    int		delete_config_static_rp(const IPvXNet& group_prefix,
+					const IPvX& rp_addr,
+					string& reason);
+    int		config_static_rp_done(string& reason);
     
     //
     // Debug-related methods
