@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.6 2003/09/27 10:42:40 mjh Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.7 2003/09/28 13:10:41 mjh Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -87,11 +87,11 @@ public:
 	    if (_route == NULL)
 		_route = rrr;
 	    else if (rrr != NULL) {
-		int my_prefix = net().prefix_len();
-		int his_prefix = his_rr->net().prefix_len();
-		if (his_prefix > my_prefix) // his route beats mine
+		int my_prefix_len = net().prefix_len();
+		int his_prefix_len = his_rr->net().prefix_len();
+		if (his_prefix_len > my_prefix_len) // his route beats mine
 		    _route = rrr;
-		else if (his_prefix == my_prefix) {
+		else if (his_prefix_len == my_prefix_len) {
 		    // routes are equivalent, compare distance
 		    if (_route->admin_distance() >
 			    rrr->admin_distance()) // his is better

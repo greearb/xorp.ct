@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.4 2003/09/03 23:20:17 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.5 2003/09/10 19:21:33 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -651,7 +651,7 @@ IfMgrIPv4SetPrefix::execute(IfMgrIfTree& tree) const
     if (a == 0)
 	return false;
 
-    a->set_prefix(prefix());
+    a->set_prefix_len(prefix_len());
     return true;
 }
 
@@ -664,14 +664,14 @@ IfMgrIPv4SetPrefix::forward(XrlSender&		  sender,
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
-    return c.send_ipv4_set_prefix(xt, ifn, vifn, addr(), prefix(), xcb);
+    return c.send_ipv4_set_prefix(xt, ifn, vifn, addr(), prefix_len(), xcb);
 }
 
 string
 IfMgrIPv4SetPrefix::str() const
 {
     return ipv4_str_begin(this, "SetPrefix") + ", "
-	+ c_format("%u", prefix()) + ipv4_str_end();
+	+ c_format("%u", prefix_len()) + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -922,7 +922,7 @@ IfMgrIPv6SetPrefix::execute(IfMgrIfTree& tree) const
     if (a == 0)
 	return false;
 
-    a->set_prefix(prefix());
+    a->set_prefix_len(prefix_len());
     return true;
 }
 
@@ -935,14 +935,14 @@ IfMgrIPv6SetPrefix::forward(XrlSender&			sender,
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
-    return c.send_ipv6_set_prefix(xt, ifn, vifn, addr(), prefix(), xcb);
+    return c.send_ipv6_set_prefix(xt, ifn, vifn, addr(), prefix_len(), xcb);
 }
 
 string
 IfMgrIPv6SetPrefix::str() const
 {
     return ipv6_str_begin(this, "SetPrefix") + ", "
-	+ c_format("%u", prefix()) + ipv6_str_end();
+	+ c_format("%u", prefix_len()) + ipv6_str_end();
 }
 
 // ----------------------------------------------------------------------------

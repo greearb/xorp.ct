@@ -25,7 +25,7 @@ interface fea_ifmgr_mirror/0.1 {
 
 	ipv4_add ? ifname:txt & vifname:txt & addr:ipv4
 	ipv4_remove ? ifname:txt & vifname:txt & addr:ipv4
-	ipv4_set_prefix ? ifname:txt & vifname:txt & addr:ipv4 & prefix:u32
+	ipv4_set_prefix ? ifname:txt & vifname:txt & addr:ipv4 & prefix_len:u32
 	ipv4_set_enabled ? ifname:txt & vifname:txt & addr:ipv4 & enabled:bool
 	ipv4_set_multicast_capable ? ifname:txt & vifname:txt & addr:ipv4     \
 				   & capable:bool
@@ -38,7 +38,7 @@ interface fea_ifmgr_mirror/0.1 {
 
 	ipv6_add ? ifname:txt & vifname:txt & addr:ipv6
 	ipv6_remove ? ifname:txt & vifname:txt & addr:ipv6
-	ipv6_set_prefix ? ifname:txt & vifname:txt & addr:ipv6 & prefix:u32
+	ipv6_set_prefix ? ifname:txt & vifname:txt & addr:ipv6 & prefix_len:u32
 	ipv6_set_enabled ? ifname:txt & vifname:txt & addr:ipv6 & enabled:bool
 	ipv6_set_loopback ? ifname:txt & vifname:txt & addr:ipv6	      \
 			  & loopback:bool

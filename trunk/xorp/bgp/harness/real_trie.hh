@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/real_trie.hh,v 1.3 2003/09/10 10:28:21 atanu Exp $
+// $XORP: xorp/bgp/harness/real_trie.hh,v 1.4 2003/09/11 03:20:06 atanu Exp $
 
 #ifndef __BGP_HARNESS_REAL_TRIE_HH_
 #define __BGP_HARNESS_REAL_TRIE_HH_
@@ -59,7 +59,7 @@ private:
     };
 
     void tree_walk_table(const TreeWalker&, const Tree *ptr, 
-			 A address, size_t prefix_length, A orbit) const;
+			 A address, size_t prefix_len, A orbit) const;
     void del(Tree *ptr);
     bool del(Tree *ptr, A address, size_t mask_length);
     
@@ -85,10 +85,10 @@ RealTrie<A>::empty() const
 template <class A>
 void
 RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
-			     A address, size_t prefix_length, A orbit) const
+			     A address, size_t prefix_len, A orbit) const
 {
     debug_msg("Enter: %s/%d\n", address.str().c_str(),
-	      static_cast<uint32_t>(prefix_length));
+	      static_cast<uint32_t>(prefix_len));
 
     if(0 == ptr) {
 	return;
@@ -98,18 +98,18 @@ RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
     const UpdatePacket *update = ptr->p.get(tv);
     if(0 != update) {
  	debug_msg("Found %s/%d\n", address.str().c_str(),
-		  static_cast<uint32_t>(prefix_length));
-	tw->dispatch(update, IPNet<A>(address, prefix_length), tv);
+		  static_cast<uint32_t>(prefix_len));
+	tw->dispatch(update, IPNet<A>(address, prefix_len), tv);
     }
 
-    ++prefix_length;
+    ++prefix_len;
     A save_orbit = orbit;
     orbit = orbit >> 1;
 
-    tree_walk_table(tw, ptr->ptrs[0], address, prefix_length, orbit);
+    tree_walk_table(tw, ptr->ptrs[0], address, prefix_len, orbit);
 
     address = address | save_orbit;
-    tree_walk_table(tw, ptr->ptrs[1], address, prefix_length, orbit);
+    tree_walk_table(tw, ptr->ptrs[1], address, prefix_len, orbit);
 }
 
 template <class A>
@@ -140,7 +140,7 @@ RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
 	    index = 0;
 	address = address << 1;
 
-	debug_msg("address %s prefix %d depth %d index %d\n",
+	debug_msg("address %s prefix_len %d depth %d index %d\n",
 		  address.str().c_str(), static_cast<uint32_t>(mask_length), 
 		  static_cast<uint32_t>(i), index);
 

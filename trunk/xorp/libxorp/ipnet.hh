@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.6 2003/04/26 06:01:51 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.7 2003/04/26 06:15:04 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -40,15 +40,15 @@ public:
      * Constructor from a given base address and a prefix length.
      *
      * @param a base address for the subnet.
-     * @param preflen length of subnet mask (e.g., class C nets would have 
-     * preflen=24).
+     * @param prefix_len length of subnet mask (e.g., class C nets would have 
+     * prefix_len=24).
      */
-    IPNet(const A& a, size_t preflen) throw (InvalidNetmaskLength)
-	: _masked_addr(a), _prefix_len(preflen)
+    IPNet(const A& a, size_t prefix_len) throw (InvalidNetmaskLength)
+	: _masked_addr(a), _prefix_len(prefix_len)
     {
-	if (preflen > A::addr_bitlen())
-	    xorp_throw(InvalidNetmaskLength, preflen);
-	_masked_addr = a.mask_by_prefix(preflen);
+	if (prefix_len > A::addr_bitlen())
+	    xorp_throw(InvalidNetmaskLength, prefix_len);
+	_masked_addr = a.mask_by_prefix_len(prefix_len);
     }
     
     /**
@@ -170,7 +170,7 @@ public:
      * @return true if @ref addr is within this subnet.
      */
     inline bool contains(const A& addr) const {
-	return addr.mask_by_prefix(_prefix_len) == _masked_addr;
+	return addr.mask_by_prefix_len(_prefix_len) == _masked_addr;
     }
 
     /**
@@ -295,24 +295,24 @@ IPNet<A>::operator<(const IPNet& other) const
 
 #else	// old code
     const A& maddr_him = other.masked_addr();
-    size_t his_prefix = other.prefix_len();
+    size_t his_prefix_len = other.prefix_len();
 
     //the ordering is important because we want the longest match to
     //be first.  For example, we want the following:
     //  128.16.0.0/24 < 128.16.64.0/24 <  128.16.0.0/16 < 128.17.0.0/24
 
-    if (_prefix_len == his_prefix) return _masked_addr < maddr_him; 
+    if (_prefix_len == his_prefix_len) return _masked_addr < maddr_him; 
 
     // we need to check the case when one subnet is a subset of
     // the other
-    if (_prefix_len < his_prefix) {
-	A test_addr(maddr_him.mask_by_prefix(_prefix_len));
+    if (_prefix_len < his_prefix_len) {
+	A test_addr(maddr_him.mask_by_prefix_len(_prefix_len));
 	if (_masked_addr == test_addr) {
 	    //his subnet is a subset of mine, so he goes first.
 	    return (false);
 	}
-    } else if (_prefix_len > his_prefix) {
-	A test_addr(_masked_addr.mask_by_prefix(his_prefix));
+    } else if (_prefix_len > his_prefix_len) {
+	A test_addr(_masked_addr.mask_by_prefix_len(his_prefix_len));
 	if (maddr_him == test_addr) {
 	    //my subnet is a subset of his, so I go first.
 	    return (true);
@@ -373,7 +373,7 @@ IPNet<A>::initialize_from_string(const char *cp)
     
     string addr = string(cp, slash - cp);
     
-    _masked_addr = A(addr.c_str()).mask_by_prefix(_prefix_len);
+    _masked_addr = A(addr.c_str()).mask_by_prefix_len(_prefix_len);
 }
 
 template <class A> IPNet<A>&

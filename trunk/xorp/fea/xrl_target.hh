@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.18 2003/08/28 00:08:54 hodson Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.19 2003/09/12 23:44:45 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -334,7 +334,7 @@ public:
 	const string&	ifname,
 	const string&	vif,
 	const IPv4&	address,
-	const uint32_t&	prefix);
+	const uint32_t&	prefix_len);
 
     XrlCmdError ifmgr_0_1_get_all_prefix4(
 	// Input values,
@@ -342,7 +342,7 @@ public:
 	const string&	vif,
 	const IPv4&	address,
 	// Output values,
-	uint32_t&	prefix);
+	uint32_t&	prefix_len);
 
     XrlCmdError ifmgr_0_1_get_configured_prefix4(
 	// Input values,
@@ -350,7 +350,7 @@ public:
 	const string&	vif,
 	const IPv4&	address,
 	// Output values,
-	uint32_t&	prefix);
+	uint32_t&	prefix_len);
 
     XrlCmdError ifmgr_0_1_set_broadcast4(
 	// Input values,
@@ -456,7 +456,7 @@ public:
 	const string&	ifname,
 	const string&	vif,
 	const IPv6&	address,
-	const uint32_t&	prefix);
+	const uint32_t&	prefix_len);
 
     XrlCmdError ifmgr_0_1_get_all_prefix6(
 	// Input values,
@@ -464,7 +464,7 @@ public:
 	const string&	vif,
 	const IPv6&	address,
 	// Output values,
-	uint32_t&	prefix);
+	uint32_t&	prefix_len);
 
     XrlCmdError ifmgr_0_1_get_configured_prefix6(
 	// Input values,
@@ -472,7 +472,7 @@ public:
 	const string&	vif,
 	const IPv6&	address,
 	// Output values,
-	uint32_t&	prefix);
+	uint32_t&	prefix_len);
 
     XrlCmdError ifmgr_0_1_set_endpoint6(
 	// Input values,

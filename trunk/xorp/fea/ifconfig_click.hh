@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_click.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/ifconfig_click.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_CLICK_HH__
 #define __FEA_IFCONFIG_CLICK_HH__
@@ -91,12 +91,14 @@ public:
     /*
     ** set netmask prefix.
     */
-    bool set_prefix(const string& interface_name, const IPvX& addr, int prefix);
+    bool set_prefix(const string& interface_name, const IPvX& addr,
+		    int prefix_len);
 
     /*
     ** get netmask prefix.
     */
-    bool get_prefix(const string& interface_name, const IPvX& addr, int& prefix);
+    bool get_prefix(const string& interface_name, const IPvX& addr,
+		    int& prefix_len);
 
     /*
     ** set the broadcast address.

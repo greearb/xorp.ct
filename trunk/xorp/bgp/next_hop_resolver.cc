@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.21 2003/09/20 23:40:09 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.22 2003/09/21 00:14:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -301,7 +301,7 @@ NextHopCache<A>::add_entry(A addr, A nexthop, int prefix_len, int real_prefix_le
     debug_msg("addr %s prefix_len %d real prefix_len %d\n",
 	      addr.str().c_str(), prefix_len, real_prefix_len);
 
-    XLOG_ASSERT(addr == nexthop.mask_by_prefix(prefix_len));
+    XLOG_ASSERT(addr == nexthop.mask_by_prefix_len(prefix_len));
 
     PrefixEntry *entry = new PrefixEntry;
     entry->_address = addr;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.18 2003/06/26 21:38:53 jcardona Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.19 2003/07/31 23:37:13 jcardona Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -306,7 +306,7 @@ public:
      * Lookup by base address
      *
      * @param addr Base address.
-     * @param prefix_len Prefix_Len.
+     * @param prefix_len The prefix length.
      * @param resolvable Is this route resolvable.
      * @param metric If this route is resolvable the metric of this route.
      * @return True if this next hop is found.
@@ -398,7 +398,7 @@ private:
 
     /**
      * The NextHopEntry is indexed in two ways either by prefix_len or by
-     * real prefix_len.
+     * real_prefix_len.
      *
      * Both of these data structures need to be kept in sync.
      */

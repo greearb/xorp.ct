@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.8 2003/09/26 22:07:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.9 2003/09/27 06:17:17 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -238,19 +238,19 @@ private:
 class IfSetAddr4 : public IfIoctl {
 public:
     IfSetAddr4(int fd, const string& ifname, uint16_t if_index, bool is_p2p,
-	       const IPv4& addr, const IPv4& dst_or_bcast, size_t prefix)
+	       const IPv4& addr, const IPv4& dst_or_bcast, size_t prefix_len)
 	: IfIoctl(fd),
 	  _ifname(ifname),
 	  _if_index(if_index),
 	  _is_p2p(is_p2p),
 	  _addr(addr),
 	  _dst_or_bcast(dst_or_bcast),
-	  _prefix(prefix) {
+	  _prefix_len(prefix_len) {
 	debug_msg("IfSetAddr4 "
-		  "(fd = %d, ifname = %s addr = %s dst/bcast = %s prefix = %u)\n",
+		  "(fd = %d, ifname = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 		  fd, ifname.c_str(),
 		  addr.str().c_str(), dst_or_bcast.str().c_str(),
-		  (uint32_t)prefix);
+		  (uint32_t)prefix_len);
     }
 
     int execute() const {
@@ -267,7 +267,7 @@ public:
 	    _dst_or_bcast.copy_out(ifra.ifra_dstaddr);
 	else
 	    _dst_or_bcast.copy_out(ifra.ifra_broadaddr);
-	IPv4::make_prefix(_prefix).copy_out(ifra.ifra_mask);
+	IPv4::make_prefix(_prefix_len).copy_out(ifra.ifra_mask);
 
 	return ioctl(fd(), SIOCAIFADDR, &ifra);
 #endif // SIOCAIFADDR
@@ -288,7 +288,7 @@ public:
 	    return ret_value;
 
 	// Set the netmask
-	IPv4::make_prefix(_prefix).copy_out(ifreq.ifr_addr);
+	IPv4::make_prefix(_prefix_len).copy_out(ifreq.ifr_addr);
 	ret_value = ioctl(fd(), SIOCSIFNETMASK, &ifreq);
 	if (ret_value < 0)
 	    return ret_value;
@@ -310,7 +310,7 @@ private:
     bool	_is_p2p;		// True if point-to-point interface
     IPv4	_addr;			// The local address
     IPv4	_dst_or_bcast;		// The p2p dest addr or the bcast addr
-    size_t	_prefix;		// The prefix length
+    size_t	_prefix_len;		// The prefix length
 };
 
 /**
@@ -320,18 +320,18 @@ private:
 class IfSetAddr6 : public IfIoctl {
 public:
     IfSetAddr6(int fd, const string& ifname, uint16_t if_index, bool is_p2p,
-	       const IPv6& addr, const IPv6& endpoint, size_t prefix)
+	       const IPv6& addr, const IPv6& endpoint, size_t prefix_len)
 	: IfIoctl(fd),
 	  _ifname(ifname),
 	  _if_index(if_index),
 	  _is_p2p(is_p2p),
 	  _addr(addr),
 	  _endpoint(endpoint),
-	  _prefix(prefix) {
+	  _prefix_len(prefix_len) {
 	debug_msg("IfSetAddr6 "
-		  "(fd = %d, ifname = %s, addr = %s, dst %s, prefix %u)\n",
+		  "(fd = %d, ifname = %s, addr = %s, dst %s, prefix_len %u)\n",
 		  fd, ifname.c_str(), addr.str().c_str(),
-		  endpoint.str().c_str(), (uint32_t)prefix);
+		  endpoint.str().c_str(), (uint32_t)prefix_len);
     }
 
     int execute() const {
@@ -346,7 +346,7 @@ public:
 	_addr.copy_out(ifra.ifra_addr);
 	if (_is_p2p)
 	    _endpoint.copy_out(ifra.ifra_dstaddr);
-	IPv6::make_prefix(_prefix).copy_out(ifra.ifra_prefixmask);
+	IPv6::make_prefix(_prefix_len).copy_out(ifra.ifra_prefixmask);
 	ifra.ifra_lifetime.ia6t_vltime = ND6_INFINITE_LIFETIME;
 	ifra.ifra_lifetime.ia6t_pltime = ND6_INFINITE_LIFETIME;
 
@@ -370,7 +370,7 @@ public:
 
 	// Set the address and the prefix length
 	_addr.copy_out(in6_ifreq.ifr6_addr);
-	in6_ifreq.ifr6_prefixlen = _prefix;
+	in6_ifreq.ifr6_prefixlen = _prefix_len;
 	ret_value = ioctl(fd(), SIOCSIFADDR, &in6_ifreq);
 	if (ret_value < 0)
 	    return ret_value;
@@ -390,7 +390,7 @@ private:
     bool	_is_p2p;		// True if point-to-point interface
     IPv6	_addr;			// The local address
     IPv6	_endpoint;		// The p2p dest addr
-    size_t	_prefix;		// The prefix length
+    size_t	_prefix_len;		// The prefix length
 };
 #endif // HAVE_IPV6
 
@@ -400,13 +400,13 @@ private:
 class IfDelAddr4 : public IfReq {
 public:
     IfDelAddr4(int fd, const string& ifname, uint16_t if_index,
-	       const IPv4& addr, size_t prefix)
+	       const IPv4& addr, size_t prefix_len)
 	: IfReq(fd, ifname) {
 	addr.copy_out(_ifreq.ifr_addr);
-	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s)\n",
-		  fd, ifname.c_str(), addr.str().c_str());
+	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s prefix_len = %d)\n",
+		  fd, ifname.c_str(), addr.str().c_str(), prefix_len);
 	UNUSED(if_index);
-	UNUSED(prefix);
+	UNUSED(prefix_len);
     }
 
     int execute() const { return ioctl(fd(), SIOCDIFADDR, &_ifreq); }
@@ -421,14 +421,14 @@ private:
 class IfDelAddr6 : public IfIoctl {
 public:
     IfDelAddr6(int fd, const string& ifname, uint16_t if_index,
-	       const IPv6& addr, size_t prefix)
+	       const IPv6& addr, size_t prefix_len)
 	: IfIoctl(fd),
 	  _ifname(ifname),
 	  _if_index(if_index),
 	  _addr(addr),
-	  _prefix(prefix) {
-	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s prefix = %d)\n",
-		  fd, ifname.c_str(), addr.str().c_str(), prefix);
+	  _prefix_len(prefix_len) {
+	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s prefix_len = %d)\n",
+		  fd, ifname.c_str(), addr.str().c_str(), prefix_len);
     }
 
     int execute() const {
@@ -454,7 +454,7 @@ public:
 	memset(&in6_ifreq, 0, sizeof(in6_ifreq));
 	in6_ifreq.ifr6_ifindex = _if_index;
 	_addr.copy_out(in6_ifreq.ifr6_addr);
-	in6_ifreq.ifr6_prefixlen = _prefix;
+	in6_ifreq.ifr6_prefixlen = _prefix_len;
 
 	return ioctl(fd(), SIOCDIFADDR, &in6_ifreq);
 #endif // !SIOCDIFADDR_IN6
@@ -464,7 +464,7 @@ private:
     string	_ifname;		// The interface name
     uint16_t	_if_index;		// The interface index
     IPv6	_addr;			// The local address
-    size_t	_prefix;		// The prefix length
+    size_t	_prefix_len;		// The prefix length
 };
 #endif // HAVE_IPV6
 
@@ -661,7 +661,7 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 		    a.is_marked(IfTreeItem::DELETED));
 
     if (deleted || !enabled) {
-	IfDelAddr4 del_addr(_s4, i.ifname(), v.pif_index(), a.addr(), a.prefix());
+	IfDelAddr4 del_addr(_s4, i.ifname(), v.pif_index(), a.addr(), a.prefix_len());
 	if (del_addr.execute() < 0) {
 	    string reason = c_format("Failed to delete address (%s): %s",
 				     (deleted) ? "deleted" : "not enabled",
@@ -682,7 +682,7 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	else if (a.point_to_point())
 	    oaddr = a.endpoint();
 	
-	uint32_t prefix = a.prefix();
+	uint32_t prefix_len = a.prefix_len();
 	
 	const IfTreeAddr4* ap = NULL;
 	do {
@@ -703,12 +703,12 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	    && (ap->addr() == a.addr())
 	    && ((a.broadcast() && (ap->bcast() == a.bcast()))
 		|| (a.point_to_point() && (ap->endpoint() == a.endpoint())))
-	    && (ap->prefix() == prefix)) {
+	    && (ap->prefix_len() == prefix_len)) {
 	    break;		// Ignore: the address hasn't changed
 	}
 	
 	IfSetAddr4 set_addr(_s4, i.ifname(), v.pif_index(), a.point_to_point(),
-			    a.addr(), oaddr, prefix);
+			    a.addr(), oaddr, prefix_len);
 	if (set_addr.execute() < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
 				     c_format("Address configuration failed (%s)",
@@ -750,7 +750,7 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 		    a.is_marked(IfTreeItem::DELETED));
 
     if (deleted || !enabled) {
-	IfDelAddr6 del_addr(_s6, i.ifname(), v.pif_index(), a.addr(), a.prefix());
+	IfDelAddr6 del_addr(_s6, i.ifname(), v.pif_index(), a.addr(), a.prefix_len());
 	if (del_addr.execute() < 0) {
 	    string reason = c_format("Failed to delete address (%s): %s",
 				     (deleted) ? "deleted" : "not enabled",
@@ -771,9 +771,9 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	
 	// XXX: for whatever reason a prefix length of zero does not cut it, so
 	// initialize prefix to 64.  This is exactly as ifconfig does.
-	uint32_t prefix = a.prefix();
-	if (0 == prefix)
-	    prefix = 64;
+	uint32_t prefix_len = a.prefix_len();
+	if (0 == prefix_len)
+	    prefix_len = 64;
 
 	const IfTreeAddr6* ap = NULL;
 	do {
@@ -793,12 +793,12 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	if ((ap != NULL)
 	    && (ap->addr() == a.addr())
 	    && ((a.point_to_point() && (ap->endpoint() == a.endpoint())))
-	    && (ap->prefix() == prefix)) {
+	    && (ap->prefix_len() == prefix_len)) {
 	    break;		// Ignore: the address hasn't changed
 	}
 	
 	IfSetAddr6 set_addr(_s6, i.ifname(), v.pif_index(), a.point_to_point(),
-			    a.addr(), oaddr, prefix);
+			    a.addr(), oaddr, prefix_len);
 	if (set_addr.execute() < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
 				     c_format("Address configuration failed (%s)",

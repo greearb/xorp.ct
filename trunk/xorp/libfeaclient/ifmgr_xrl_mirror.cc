@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.4 2003/09/10 19:21:33 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.1 2003/09/20 00:15:46 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -155,7 +155,7 @@ protected:
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
-	const uint32_t&	prefix);
+	const uint32_t&	prefix_len);
 
     XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_enabled(
 	// Input values,
@@ -209,7 +209,7 @@ protected:
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
-	const uint32_t&	prefix);
+	const uint32_t&	prefix_len);
 
     XrlCmdError fea_ifmgr_mirror_0_1_ipv6_set_enabled(
 	// Input values,
@@ -505,10 +505,10 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_prefix(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
-	const uint32_t& prefix
+	const uint32_t& prefix_len
 )
 {
-    _dispatcher.push(new IfMgrIPv4SetPrefix(ifname, vifname, addr, prefix));
+    _dispatcher.push(new IfMgrIPv4SetPrefix(ifname, vifname, addr, prefix_len));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }
@@ -623,10 +623,10 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_prefix(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
-	const uint32_t& prefix
+	const uint32_t& prefix_len
 )
 {
-    _dispatcher.push(new IfMgrIPv6SetPrefix(ifname, vifname, addr, prefix));
+    _dispatcher.push(new IfMgrIPv6SetPrefix(ifname, vifname, addr, prefix_len));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

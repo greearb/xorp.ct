@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.14 2003/09/16 21:00:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.15 2003/09/27 01:21:09 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -132,17 +132,17 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = true;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -223,17 +223,17 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = true;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -315,17 +315,17 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = true;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -419,17 +419,17 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = true;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -506,17 +506,17 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = true;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -534,7 +534,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Simulate the RIB calling us back and telling us this sucker is
     ** invalid.
     */
-    if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
+    if(!nhr.rib_client_route_info_invalid(addr, prefix_len)) {
 	DOUT(info) << "Marking address as invalid failed\n";
 	return false;
     }
@@ -565,8 +565,8 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -651,17 +651,17 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = true;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -729,17 +729,17 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = true;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -776,7 +776,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Simulate the RIB calling us back and telling us this sucker is
     ** invalid.
     */
-    if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
+    if(!nhr.rib_client_route_info_invalid(addr, prefix_len)) {
 	DOUT(info) << "Marking address as invalid failed\n";
 	return false;
     }
@@ -793,8 +793,8 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -859,17 +859,17 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** This is the response that would typically come from the RIB.
     */
     bool resolves = false;
-    uint32_t prefix = 16;
-    uint32_t real_prefix = 16;
-    A addr = nexthop.mask_by_prefix(prefix);
+    uint32_t prefix_len = 16;
+    uint32_t real_prefix_len = 16;
+    A addr = nexthop.mask_by_prefix_len(prefix_len);
     uint32_t metric = 1;
     string comment = "testing";
 
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -893,7 +893,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Simulate the RIB calling us back and telling us this sucker is
     ** invalid.
     */
-    if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
+    if(!nhr.rib_client_route_info_invalid(addr, prefix_len)) {
 	DOUT(info) << "Marking address as invalid failed\n";
 	return false;
     }
@@ -904,8 +904,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -950,7 +950,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Simulate the RIB calling us back and telling us this sucker is
     ** invalid.
     */
-    if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
+    if(!nhr.rib_client_route_info_invalid(addr, prefix_len)) {
 	DOUT(info) << "Marking address as invalid failed\n";
 	return false;
     }
@@ -962,8 +962,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -1005,7 +1005,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Simulate the RIB calling us back and telling us this sucker is
     ** invalid.
     */
-    if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
+    if(!nhr.rib_client_route_info_invalid(addr, prefix_len)) {
 	DOUT(info) << "Marking address as invalid failed\n";
 	return false;
     }
@@ -1017,8 +1017,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,
@@ -1059,7 +1059,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Simulate the RIB calling us back and telling us this sucker is
     ** invalid.
     */
-    if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
+    if(!nhr.rib_client_route_info_invalid(addr, prefix_len)) {
 	DOUT(info) << "Marking address as invalid failed\n";
 	return false;
     }
@@ -1072,8 +1072,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     next_hop_rib_request->register_interest_response(XrlError::OKAY(),
 						     &resolves,
 						     &addr,
-						     &prefix,
-						     &real_prefix,
+						     &prefix_len,
+						     &real_prefix_len,
 						     &real_nexthop,
 						     &metric,
 						     nexthop,

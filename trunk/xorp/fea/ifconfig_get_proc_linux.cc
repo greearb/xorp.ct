@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.4 2003/09/12 22:39:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.5 2003/09/20 00:21:47 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -460,7 +460,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
 	fa.set_point_to_point(fv.point_to_point() && (flags & IFF_POINTOPOINT));
 	fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
 	
-	fa.set_prefix(subnet_mask.prefix_length());
+	fa.set_prefix_len(subnet_mask.masklen());
 	if (fa.point_to_point())
 	    fa.set_endpoint(peer_addr);
     }

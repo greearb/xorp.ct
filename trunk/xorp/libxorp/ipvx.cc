@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.5 2003/09/09 00:40:05 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.6 2003/09/19 23:28:56 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -236,13 +236,13 @@ IPvX::make_prefix(int family, int masklen)
     return IPvX(0);	/* Not Reached */
 }
 
-IPvX 
-IPvX::mask_by_prefix(int masklen) const throw (InvalidNetmaskLength)
+IPvX
+IPvX::mask_by_prefix_len(int prefix_len) const throw (InvalidNetmaskLength)
 {
     if (_af == AF_INET)
-	return get_ipv4().mask_by_prefix(masklen);
+	return get_ipv4().mask_by_prefix_len(prefix_len);
     else
-	return get_ipv6().mask_by_prefix(masklen);
+	return get_ipv6().mask_by_prefix_len(prefix_len);
 }
 
 string
@@ -255,12 +255,12 @@ IPvX::str() const
 }
 
 int
-IPvX::prefix_length() const
+IPvX::masklen() const
 {
     if (is_ipv4())
-	return get_ipv4().prefix_length();
+	return get_ipv4().masklen();
     else
-	return get_ipv6().prefix_length();
+	return get_ipv6().masklen();
 }
 
 /**

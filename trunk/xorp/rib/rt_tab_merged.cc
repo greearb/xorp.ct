@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.6 2003/05/29 17:59:09 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.7 2003/09/27 22:32:46 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -174,14 +174,14 @@ MergedTable<A>::lookup_route(const A& addr) const
     // unless the prefixes are the same, when we take the route with the
     // lowest admin distance
     //
-    int hi_prefix, lo_prefix;
-    hi_prefix = found_b->net().prefix_len();
-    lo_prefix = found_a->net().prefix_len();
+    int hi_prefix_len, lo_prefix_len;
+    hi_prefix_len = found_b->net().prefix_len();
+    lo_prefix_len = found_a->net().prefix_len();
 
-    if (hi_prefix > lo_prefix) {
+    if (hi_prefix_len > lo_prefix_len) {
 	cp(22);
 	return found_b;
-    } else if (hi_prefix < lo_prefix) {
+    } else if (hi_prefix_len < lo_prefix_len) {
 	cp(23);
 	return found_a;
     } else if (found_b->admin_distance() <= found_a->admin_distance()) {

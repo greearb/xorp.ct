@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.21 2003/09/21 00:18:16 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.22 2003/09/27 22:32:47 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -679,8 +679,8 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 					 // Output values,
 					 bool& resolves,
 					 IPv4&	base_addr,
-					 uint32_t& prefix,
-					 uint32_t& realprefix,
+					 uint32_t& prefix_len,
+					 uint32_t& real_prefix_len,
 					 IPv4&	nexthop,
 					 uint32_t& metric)
 {
@@ -689,14 +689,14 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
     RouteRegister<IPv4>* rt_reg = _urib4.route_register(addr, target);
     if (rt_reg->route() == NULL) {
 	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix = realprefix = rt_reg->valid_subnet().prefix_len();
+	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
 	resolves = false;
 	debug_msg("#### XRL -> REGISTER INTEREST UNRESOLVABLE %s\n",
 	       rt_reg->valid_subnet().str().c_str());
     } else {
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix = rt_reg->valid_subnet().prefix_len();
+	prefix_len = rt_reg->valid_subnet().prefix_len();
 	NextHop *nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
@@ -706,7 +706,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 	case ENCAPS_NEXTHOP:
 	    resolves = true;
 	    nexthop = ((IPNextHop<IPv4>*)nh)->addr();
-	    realprefix = rt_reg->route()->prefix_len();
+	    real_prefix_len = rt_reg->route()->prefix_len();
 	    break;
 	case EXTERNAL_NEXTHOP:
 	case DISCARD_NEXTHOP:
@@ -721,9 +721,9 @@ XrlCmdError
 XrlRibTarget::rib_0_1_deregister_interest4(// Input values,
 					   const string& target,
 					   const IPv4& addr,
-					   const uint32_t& prefix)
+					   const uint32_t& prefix_len)
 {
-    _urib4.route_deregister(IPNet<IPv4>(addr, prefix), target);
+    _urib4.route_deregister(IPNet<IPv4>(addr, prefix_len), target);
     return XrlCmdError::OKAY();
 }
 
@@ -734,20 +734,20 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 					 // Output values,
 					 bool& resolves,
 					 IPv6& base_addr,
-					 uint32_t& prefix,
-					 uint32_t& realprefix,
+					 uint32_t& prefix_len,
+					 uint32_t& real_prefix_len,
 					 IPv6&	nexthop,
 					 uint32_t& metric)
 {
     RouteRegister<IPv6>* rt_reg = _urib6.route_register(addr, target);
     if (rt_reg->route() == NULL) {
 	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix = realprefix = rt_reg->valid_subnet().prefix_len();
+	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
 	resolves = false;
     } else {
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix = rt_reg->valid_subnet().prefix_len();
+	prefix_len = rt_reg->valid_subnet().prefix_len();
 	NextHop *nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
@@ -757,7 +757,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 	case ENCAPS_NEXTHOP:
 	    resolves = true;
 	    nexthop = ((IPNextHop<IPv6>*)nh)->addr();
-	    realprefix = rt_reg->route()->prefix_len();
+	    real_prefix_len = rt_reg->route()->prefix_len();
 	    break;
 	case EXTERNAL_NEXTHOP:
 	case DISCARD_NEXTHOP:
@@ -772,9 +772,9 @@ XrlCmdError
 XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
 					   const string& target,
 					   const IPv6&	addr,
-					   const uint32_t& prefix)
+					   const uint32_t& prefix_len)
 {
-    _urib6.route_deregister(IPNet<IPv6>(addr, prefix), target);
+    _urib6.route_deregister(IPNet<IPv6>(addr, prefix_len), target);
     return XrlCmdError::OKAY();
 }
 

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.7 2003/05/24 23:35:27 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.8 2003/09/27 22:32:47 mjh Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -157,15 +157,16 @@ interface rib/0.1 {
          * to a route that can be used for forwarding.
 	 *
 	 * @param base_addr returns the address of interest (actually
-         * the base address of the subnet covered by addr/prefix).
+         * the base address of the subnet covered by addr/prefix_len).
 	 *
-	 * @param prefix prefix returns the prefix that the registration
-         * covers.  This response applies to all addresses in addr/prefix.
+	 * @param prefix_len returns the prefix length that the
+	 * registration covers.  This response applies to all addresses
+	 * in addr/prefix_len.
 	 *
-	 * @param realprefix realprefix returns the actual prefix of the
-         * route that will be used to route addr.  If realprefix is
-         * not the same as prefix, this is because there are some more
-         * specific routes that overlap addr/realprefix.  realprefix
+	 * @param real_prefix_len returns the actual prefix length of the
+         * route that will be used to route addr.  If real_prefix_len is
+         * not the same as prefix_len, this is because there are some more
+         * specific routes that overlap addr/real_prefix_len.  real_prefix_len
          * is primarily given for debugging reasons.
 	 * 
 	 * @param nexthop returns the address of the next hop for packets sent
@@ -174,8 +175,8 @@ interface rib/0.1 {
 	 * @param metric returns the IGP metric for this route
          */
 	register_interest4 ? target:txt & addr:ipv4 \
-		-> resolves:bool & base_addr:ipv4 & prefix:u32 & \
-                   realprefix:u32 & nexthop:ipv4 & metric:u32
+		-> resolves:bool & base_addr:ipv4 & prefix_len:u32 & \
+                   real_prefix_len:u32 & nexthop:ipv4 & metric:u32
 
 	/**
 	 * De-register an interest in a route
@@ -185,12 +186,12 @@ interface rib/0.1 {
 	 *
 	 * @param addr the address of the previous registered
          * interest.  addr should be the base address of the
-         * add/prefix subnet.
+         * add/prefix_len subnet.
 	 * 
-	 * @param prefix the prefix length of the registered interest,
+	 * @param prefix_len the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */
-	deregister_interest4 ?  target:txt & addr:ipv4 & prefix:u32
+	deregister_interest4 ?  target:txt & addr:ipv4 & prefix_len:u32
 
 	/**
  	 * Register an interest in a route
@@ -204,15 +205,15 @@ interface rib/0.1 {
          * to a route that can be used for forwarding.
 	 *
 	 * @param base_addr returns the address of interest (actually
-         * the base address of the subnet covered by addr/prefix).
+         * the base address of the subnet covered by addr/prefix_len).
 	 *
-	 * @param prefix prefix returns the prefix that the registration
-         * covers.  This response applies to all addresses in addr/prefix.
+	 * @param prefix_len returns the prefix length that the registration
+         * covers.  This response applies to all addresses in addr/prefix_len.
 	 *
-	 * @param realprefix realprefix returns the actual prefix of the
-         * route that will be used to route addr.  If realprefix is
-         * not the same as prefix, this is because there are some more
-         * specific routes that overlap addr/realprefix.  realprefix
+	 * @param real_prefix_len returns the actual prefix length of the
+         * route that will be used to route addr.  If real_prefix_len is
+         * not the same as prefix_len, this is because there are some more
+         * specific routes that overlap addr/real_prefix_len.  real_prefix_len
          * is primarily given for debugging reasons.
 	 * 
 	 * @param nexthop returns the address of the next hop for packets sent
@@ -221,8 +222,8 @@ interface rib/0.1 {
 	 * @param metric returns the IGP metric for this route
          */
 	register_interest6 ? target:txt & addr:ipv6 \
-		-> resolves:bool & base_addr:ipv6 & prefix:u32 & \
-                   realprefix:u32 & nexthop:ipv6 & metric:u32
+		-> resolves:bool & base_addr:ipv6 & prefix_len:u32 & \
+                   real_prefix_len:u32 & nexthop:ipv6 & metric:u32
 
 	/**
 	 * De-register an interest in a route
@@ -232,11 +233,11 @@ interface rib/0.1 {
 	 *
 	 * @param addr the address of the previous registered
          * interest.  addr should be the base address of the
-         * add/prefix subnet.
+         * add/prefix_len subnet.
 	 * 
-	 * @param prefix the prefix length of the registered interest,
+	 * @param prefix_len the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */
-	deregister_interest6 ?  target:txt & addr:ipv6 & prefix:u32
+	deregister_interest6 ?  target:txt & addr:ipv6 & prefix_len:u32
 }
 

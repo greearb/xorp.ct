@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.5 2003/08/27 22:44:19 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.6 2003/09/20 00:15:46 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -266,8 +266,8 @@ public:
 
     inline IPv4		addr() const			{ return _addr; }
 
-    inline uint32_t	prefix() const			{ return _prefix; }
-    inline void		set_prefix(uint32_t p)		{ _prefix = p; }
+    inline uint32_t	prefix_len() const		{ return _prefix_len; }
+    inline void		set_prefix_len(uint32_t p)	{ _prefix_len = p; }
 
     inline bool		enabled() const			{ return _en; }
     inline void		set_enabled(bool en)		{ _en = en; }
@@ -295,7 +295,7 @@ private:
 
 protected:
     IPv4	  _addr;
-    uint32_t	  _prefix;	// network prefix
+    uint32_t	  _prefix_len;	// network prefix length
     bool	  _en;		// enabled
     bool	  _mcap;	// multicast capable
     bool	  _loop;	// Is a loopback address
@@ -324,8 +324,8 @@ public:
     inline bool		enabled() const			{ return _en; }
     inline void		set_enabled(bool en)		{ _en = en; }
 
-    inline uint32_t	prefix() const			{ return _prefix; }
-    inline void		set_prefix(uint32_t p)		{ _prefix = p; }
+    inline uint32_t	prefix_len() const		{ return _prefix_len; }
+    inline void		set_prefix_len(uint32_t p)	{ _prefix_len = p; }
 
     inline bool		multicast_capable() const 	{ return _mcap; }
     inline void		set_multicast_capable(bool cap)	{ _mcap = cap; }
@@ -345,7 +345,7 @@ private:
 
 protected:
     IPv6	_addr;
-    uint32_t	_prefix;	// network prefix
+    uint32_t	_prefix_len;	// network prefix length
     bool	_en;		// enabled
     bool	_mcap;		// multicast capable
     bool	_loop;		// Is a loopback address

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.4 2003/04/02 00:44:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.5 2003/04/18 04:52:08 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -189,7 +189,7 @@ IPv4::make_prefix(size_t len) throw (InvalidNetmaskLength)
 }
 
 size_t
-IPv4::prefix_length() const
+IPv4::masklen() const
 {
     size_t ctr = 0;
     uint32_t shift = ntohl(_addr);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.3 2003/08/12 21:51:10 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.4 2003/09/20 00:18:39 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -526,27 +526,28 @@ public:
 		   const string&	ifname,
 		   const string&	vifname,
 		   const IPv4&		addr,
-		   uint32_t		prefix)
-	: Addr4Modifier(it, ifname, vifname, addr), _prefix(prefix) {}
+		   uint32_t		prefix_len)
+	: Addr4Modifier(it, ifname, vifname, addr), _prefix_len(prefix_len) {}
 
-    static const uint32_t MAX_PREFIX = 32;
+    static const uint32_t MAX_PREFIX_LEN = 32;
     
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
-	if (fa == 0 || _prefix > MAX_PREFIX)
+	if (fa == 0 || _prefix_len > MAX_PREFIX_LEN)
 	    return false;
-	return fa->set_prefix(_prefix);
+	return fa->set_prefix_len(_prefix_len);
     }
 
     string str() const {
-	string s = c_format("SetAddr4Prefix: %s %d", path().c_str(), _prefix);
-	if (_prefix > MAX_PREFIX)
-	    s += c_format(" (valid range 0--%d)", MAX_PREFIX);
+	string s = c_format("SetAddr4Prefix: %s %d", path().c_str(),
+			    _prefix_len);
+	if (_prefix_len > MAX_PREFIX_LEN)
+	    s += c_format(" (valid range 0--%d)", MAX_PREFIX_LEN);
 	return s;
     }
 
 protected:
-    uint32_t _prefix;
+    uint32_t _prefix_len;
 };
 
 /**
@@ -686,27 +687,28 @@ public:
 		   const string&	ifname,
 		   const string&	vifname,
 		   const IPv6&		addr,
-		   uint32_t		prefix)
-	: Addr6Modifier(it, ifname, vifname, addr), _prefix(prefix) {}
+		   uint32_t		prefix_len)
+	: Addr6Modifier(it, ifname, vifname, addr), _prefix_len(prefix_len) {}
 
-    static const uint32_t MAX_PREFIX = 128;
+    static const uint32_t MAX_PREFIX_LEN = 128;
     
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
-	if (fa == 0 || _prefix > MAX_PREFIX)
+	if (fa == 0 || _prefix_len > MAX_PREFIX_LEN)
 	    return false;
-	return fa->set_prefix(_prefix);
+	return fa->set_prefix_len(_prefix_len);
     }
 
     string str() const {
-	string s = c_format("SetAddr6Prefix: %s %d", path().c_str(), _prefix);
-	if (_prefix > MAX_PREFIX)
-	    s += c_format(" (valid range 0--%d)", MAX_PREFIX);
+	string s = c_format("SetAddr6Prefix: %s %d", path().c_str(),
+			    _prefix_len);
+	if (_prefix_len > MAX_PREFIX_LEN)
+	    s += c_format(" (valid range 0--%d)", MAX_PREFIX_LEN);
 	return s;
     }
 
 protected:
-    uint32_t _prefix;
+    uint32_t _prefix_len;
 };
 
 /**

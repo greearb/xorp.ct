@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifmanager.cc,v 1.2 2003/03/10 23:20:17 hodson Exp $"
+#ident "$XORP: xorp/fea/test_ifmanager.cc,v 1.3 2003/05/02 07:50:49 pavlin Exp $"
 
 #include <algorithm>
 #include <functional>
@@ -111,12 +111,12 @@ test1_actual(const char *interface_name, IfConfig& ifconfig)
     IfTreeVifAddress *va = v->find_address(IPvX(IPv4("128.64.16.64")));
     va->set_enabled(true);
 
-    const int* prefix =  va->prefix();
-    if (prefix == 0)
-	FAIL("Could not get prefix");
+    const int* prefix_len =  va->prefix_len();
+    if (prefix_len == 0)
+	FAIL("Could not get prefix length");
 
-    va->set_prefix(*prefix);
-    cout << "prefix: " << *prefix << endl;
+    va->set_prefix_len(*prefix_len);
+    cout << "prefix_len: " << *prefix_len << endl;
 
     cout << "address admin enabled? " << va->admin_enabled() << endl;
 
@@ -128,12 +128,12 @@ test1_actual(const char *interface_name, IfConfig& ifconfig)
     cout << "broadcast: " << broadcast->str() << endl;
 
     va = v->find_address(IPvX(IPv6(ipv6_address)));
-    prefix = va->prefix();
-    if (prefix == 0)
-	FAIL("Could not get prefix");
+    prefix_len = va->prefix_len();
+    if (prefix_len == 0)
+	FAIL("Could not get prefix length");
 
-    va->set_prefix(*prefix);
-    cout << "prefix: " << *prefix << endl;
+    va->set_prefix_len(*prefix_len);
+    cout << "prefix_len: " << *prefix_len << endl;
 
     v->create_address(IPv4("10.10.10.1"));
     v->create_address(IPv4("198.0.0.1"));

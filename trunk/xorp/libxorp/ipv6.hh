@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.8 2003/04/26 05:58:38 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.9 2003/09/09 00:40:05 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -371,13 +371,13 @@ public:
     /**
      * Make an IPv6 address prefix.
      * 
-     * @param masklen the length of the mask of the prefix to create.
+     * @param prefix_len the length of the mask of the prefix to create.
      * @return a new IPv6 address created by masking this address with a mask
-     * of length @ref masklen.
+     * of length @ref prefix_len.
      */
-    inline IPv6 mask_by_prefix(size_t masklen) const
+    inline IPv6 mask_by_prefix_len(size_t prefix_len) const
 	throw (InvalidNetmaskLength) { 
-	return (*this) & make_prefix(masklen); 
+	return (*this) & make_prefix(prefix_len); 
     }
     
     /**
@@ -386,7 +386,7 @@ public:
      * @return the prefix length of the contiguous mask presumably stored
      * as an IPv6 address.
      */
-    size_t prefix_length() const;
+    size_t masklen() const;
     
     /**
      * Get the uint32_t raw value of this address.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.4 2003/04/02 00:44:22 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.5 2003/04/18 04:52:08 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -402,7 +402,7 @@ IPv6::is_linklocal_multicast() const
 }
 
 size_t
-IPv6::prefix_length() const
+IPv6::masklen() const
 {
     size_t ctr = 0;
     

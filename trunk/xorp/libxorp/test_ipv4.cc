@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.5 2003/04/25 23:32:25 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.6 2003/09/09 00:40:05 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -601,15 +601,15 @@ test_ipv4_manipulate_address()
     // Test making an IPv4 address prefix.
     //
     verbose_assert(
-	IPv4("12.34.56.78").mask_by_prefix(24) == IPv4("12.34.56.0"),
-	"mask_by_prefix()"
+	IPv4("12.34.56.78").mask_by_prefix_len(24) == IPv4("12.34.56.0"),
+	"mask_by_prefix_len()"
 	);
 
     //
     // Test getting the prefix length of the contiguous mask.
     //
-    verbose_assert(IPv4("255.255.255.0").prefix_length() == 24,
-		   "prefix_length()");
+    verbose_assert(IPv4("255.255.255.0").masklen() == 24,
+		   "masklen()");
     
     //
     // Test getting the raw value of the address.
@@ -659,7 +659,7 @@ test_ipv4_invalid_manipulate_address()
     try {
 	// Invalid mask prefix
 	IPv4 ip(addr_string4);
-	ip.mask_by_prefix(IPv4::addr_bitlen() + 1);
+	ip.mask_by_prefix_len(IPv4::addr_bitlen() + 1);
 	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %u : FAIL\n",
 		    (uint32_t)IPv4::addr_bitlen() + 1);
 	incr_failures();

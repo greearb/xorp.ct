@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.5 2003/05/15 14:54:26 hodson Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.6 2003/09/30 00:05:22 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -34,13 +34,13 @@ typedef IPNet<IPvX> BaseIPvXNet;
 
 template<>
 inline
-IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t preflen)
+IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t prefix_len)
     throw (InvalidNetmaskLength)
-    : _prefix_len(preflen)
+    : _prefix_len(prefix_len)
 {
-    if (preflen > ipvx.addr_bitlen())
-	xorp_throw(InvalidNetmaskLength, preflen);
-    _masked_addr = ipvx.mask_by_prefix(preflen);
+    if (prefix_len > ipvx.addr_bitlen())
+	xorp_throw(InvalidNetmaskLength, prefix_len);
+    _masked_addr = ipvx.mask_by_prefix_len(prefix_len);
 }
 
 template <> 
@@ -57,7 +57,7 @@ IPNet<IPvX>::initialize_from_string(const char *cp)
 
     string addr = string(cp, slash - cp);
     
-    _masked_addr = IPvX(addr.c_str()).mask_by_prefix(_prefix_len);
+    _masked_addr = IPvX(addr.c_str()).mask_by_prefix_len(_prefix_len);
 }
 
 /**
@@ -127,10 +127,10 @@ public:
      * Constructor from a given base address and a prefix length.
      *
      * @param a base address for the subnet.
-     * @param preflen length of subnet mask.
+     * @param prefix_len length of subnet mask.
      */
-    IPvXNet(const IPvX& a, int preflen) throw (InvalidNetmaskLength)
-	: BaseIPvXNet(a, preflen) {}
+    IPvXNet(const IPvX& a, int prefix_len) throw (InvalidNetmaskLength)
+	: BaseIPvXNet(a, prefix_len) {}
 
     // The following methods are specific to IPvXNet
 

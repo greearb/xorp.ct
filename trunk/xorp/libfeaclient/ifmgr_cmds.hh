@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.3 2003/09/10 19:21:33 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.4 2003/09/19 18:41:18 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -415,11 +415,11 @@ public:
     inline IfMgrIPv4SetPrefix(const string& ifname,
 			      const string& vifname,
 			      IPv4	    addr,
-			      uint32_t	    prefix)
-	: IfMgrIPv4CommandBase(ifname, vifname, addr), _prefix(prefix)
+			      uint32_t	    prefix_len)
+	: IfMgrIPv4CommandBase(ifname, vifname, addr), _prefix_len(prefix_len)
     {}
 
-    inline uint32_t prefix() const			{ return _prefix; }
+    inline uint32_t prefix_len() const			{ return _prefix_len; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -430,7 +430,7 @@ public:
     string str() const;
 
 protected:
-    uint32_t _prefix;
+    uint32_t _prefix_len;
 };
 
 /**
@@ -634,11 +634,11 @@ public:
     inline IfMgrIPv6SetPrefix(const string& ifname,
 			      const string& vifname,
 			      IPv6	    addr,
-			      uint32_t	    prefix)
-	: IfMgrIPv6CommandBase(ifname, vifname, addr), _prefix(prefix)
+			      uint32_t	    prefix_len)
+	: IfMgrIPv6CommandBase(ifname, vifname, addr), _prefix_len(prefix_len)
     {}
 
-    inline uint32_t prefix() const			{ return _prefix; }
+    inline uint32_t prefix_len() const			{ return _prefix_len; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -649,7 +649,7 @@ public:
     string str() const;
 
 protected:
-    uint32_t _prefix;
+    uint32_t _prefix_len;
 };
 
 /**

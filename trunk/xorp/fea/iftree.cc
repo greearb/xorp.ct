@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.13 2003/08/12 21:55:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.14 2003/08/22 04:23:03 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -437,12 +437,12 @@ IfTreeVif::str() const
 /* IfTreeAddr4 code */
 
 bool
-IfTreeAddr4::set_prefix(uint32_t prefix)
+IfTreeAddr4::set_prefix_len(uint32_t prefix_len)
 {
-    if (prefix > IPv4::addr_bitlen())
+    if (prefix_len > IPv4::addr_bitlen())
 	return false;
 
-    _prefix = prefix;
+    _prefix_len = prefix_len;
     mark(CHANGED);
     return true;
 }
@@ -489,11 +489,11 @@ IfTreeAddr4::str() const
     string r = c_format("V4Addr %s { enabled := %s } { broadcast := %s } "
 			"{ loopback := %s } { point_to_point := %s } "
 			"{ multicast := %s } "
-			"{ prefix := %d }",
+			"{ prefix_len := %d }",
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_broadcast), true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),
-			_prefix);
+			_prefix_len);
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
     if (_broadcast)
@@ -506,12 +506,12 @@ IfTreeAddr4::str() const
 /* IfTreeAddr6 code */
 
 bool
-IfTreeAddr6::set_prefix(uint32_t prefix)
+IfTreeAddr6::set_prefix_len(uint32_t prefix_len)
 {
-    if (prefix > IPv6::addr_bitlen())
+    if (prefix_len > IPv6::addr_bitlen())
 	return false;
 
-    _prefix = prefix;
+    _prefix_len = prefix_len;
     mark(CHANGED);
     return true;
 }
@@ -543,11 +543,11 @@ IfTreeAddr6::str() const
     string r = c_format("V6Addr %s { enabled := %s } "
 			"{ loopback := %s } { point_to_point := %s } "
 			"{ multicast := %s } "
-			"{ prefix := %d }",
+			"{ prefix_len := %d }",
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),
-			_prefix);
+			_prefix_len);
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
     r += string(" ") + IfTreeItem::str();

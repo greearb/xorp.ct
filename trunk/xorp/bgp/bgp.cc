@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.35 2003/09/16 18:13:45 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.11 2003/09/16 21:00:25 hodson Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -871,7 +871,7 @@ BGPMain::rib_client_route_info_changed4(const IPv4& addr,
 					const uint32_t& metric)
 {
     debug_msg("rib_client_route_info_changed4:"
-	      " addr %s prefix %d nexthop %s metric %d\n",
+	      " addr %s prefix_len %d nexthop %s metric %d\n",
 	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
 
     return plumbing()->plumbing4().
@@ -886,7 +886,7 @@ BGPMain::rib_client_route_info_changed6(const IPv6& addr,
 					const uint32_t& metric)
 {
     debug_msg("rib_client_route_info_changed6:"
-	      " addr %s prefix %d nexthop %s metric %d\n",
+	      " addr %s prefix_len %d nexthop %s metric %d\n",
 	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
 
     return plumbing()->plumbing6().
@@ -899,7 +899,7 @@ BGPMain::rib_client_route_info_invalid4(const IPv4& addr,
 					const uint32_t& prefix_len)
 {
     debug_msg("rib_client_route_info_invalid4:"
-	      " addr %s prefix %d\n", addr.str().c_str(), prefix_len);
+	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
     return plumbing()->plumbing4().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
@@ -910,7 +910,7 @@ BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
 					const uint32_t& prefix_len)
 {
     debug_msg("rib_client_route_info_invalid6:"
-	      " addr %s prefix %d\n", addr.str().c_str(), prefix_len);
+	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
     return plumbing()->plumbing6().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.1 2003/09/22 05:45:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -478,7 +478,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 			      && has_peer_addr);
 	fa.set_multicast(fv->multicast());
 	
-	fa.set_prefix(subnet_mask.prefix_length());
+	fa.set_prefix_len(subnet_mask.masklen());
 	if (fa.broadcast())
 	    fa.set_bcast(broadcast_addr.get_ipv4());
 	if (fa.point_to_point())
@@ -500,7 +500,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 	fa.set_point_to_point(fv->point_to_point());
 	fa.set_multicast(fv->multicast());
 	
-	fa.set_prefix(subnet_mask.prefix_length());
+	fa.set_prefix_len(subnet_mask.masklen());
 	if (fa.point_to_point())
 	    fa.set_endpoint(peer_addr.get_ipv6());
 	

@@ -362,7 +362,7 @@ void XorpOspfd::rtadd(InAddr net, InMask mask, MPath *mpp,
 
     IPv4 dst(htonl(net));
     IPv4 maskaddr(htonl(mask));
-    int prefix_len = maskaddr.prefix_length();
+    int prefix_len = maskaddr.masklen();
     IPv4 gateway;
 
     if (mpp) {
@@ -399,7 +399,7 @@ void XorpOspfd::rtdel(InAddr net, InMask mask, MPath *)
 
     IPv4 dst(htonl(net));
     IPv4 maskaddr(htonl(mask));
-    int prefix_len = maskaddr.prefix_length();
+    int prefix_len = maskaddr.masklen();
     IPv4Net subnet(dst, prefix_len); 
     _rib_client.send_delete_route4("rib", "ospf",
 				   /* unicast */ true,

@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.template,v 1.21 2002/04/17 18:22:06 mjh Exp $ */
+/* $XORP: xorp/rtrmgr/config.template,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $ */
 
 interfaces {
   interface . IFNAME: text {
@@ -59,7 +59,7 @@ interfaces {
             address . ADDR {
 	      %create: xrl "fea/add_address?vif:txt=VIFNAME&address:ipv4=ADDR";
 	      netmask {
-                %set: xrl "fea/set_prefix?vif:txt=VIFNAME&address:ipv4=ADDR&prefix:i32=VALUE"; 
+                %set: xrl "fea/set_prefix?vif:txt=VIFNAME&address:ipv4=ADDR&prefix_len:i32=VALUE"; 
               }
 	      broadcast {
               %set: xrl "fea/set_broadcast?vif:txt=VIFNAME&address:ipv4=ADDR&broadcast:ipv4=VALUE";
@@ -109,5 +109,3 @@ interfaces {
   %modinfo: depends finder;
   %modinfo: path "../fea/fea";
 }
-
-  

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.10 2003/08/12 21:54:11 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.11 2003/08/22 04:23:03 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -410,7 +410,7 @@ public:
     IfTreeAddr4(const IPv4& addr)
 	: IfTreeItem(), _addr(addr), _enabled(false), _broadcast(false),
 	  _loopback(false), _point_to_point(false), _multicast(false),
-	  _prefix(0)
+	  _prefix_len(0)
     {}
 
     inline const IPv4& addr() const	{ return _addr; }
@@ -428,15 +428,15 @@ public:
     inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
 
     /**
-     * Get prefix associates with interface.
+     * Get prefix length associates with address.
      */
-    inline uint32_t prefix() const	{ return _prefix; }
+    inline uint32_t prefix_len() const	{ return _prefix_len; }
 
     /**
-     * Set prefix associate with interface.
-     * @return true on success, false if prefix is invalid
+     * Set prefix length associate with address.
+     * @return true on success, false if prefix length is invalid.
      */
-    bool set_prefix(uint32_t prefix);
+    bool set_prefix_len(uint32_t prefix_len);
 
     /**
      * Get the broadcast address.
@@ -478,7 +478,7 @@ public:
 	    set_bcast(o.bcast());
 	if (o.point_to_point())
 	    set_endpoint(o.endpoint());
-	set_prefix(o.prefix());
+	set_prefix_len(o.prefix_len());
     }
 
     /**
@@ -496,7 +496,7 @@ public:
 		&& (multicast() == o.multicast())
 		&& (bcast() == o.bcast())
 		&& (endpoint() == o.endpoint())
-		&& (prefix() == o.prefix()));
+		&& (prefix_len() == o.prefix_len()));
     }
 
     void finalize_state();
@@ -513,7 +513,7 @@ protected:
     bool	_multicast;
 
     IPv4	_oaddr;		// Other address - p2p endpoint or bcast addr
-    uint32_t	_prefix;
+    uint32_t	_prefix_len;	// The prefix length
 };
 
 
@@ -526,7 +526,7 @@ public:
     IfTreeAddr6(const IPv6& addr)
 	: IfTreeItem(), _addr(addr), _enabled(false),
 	  _loopback(false), _point_to_point(false), _multicast(false),
-	  _prefix(0)
+	  _prefix_len(0)
     {}
 
     const IPv6& addr() const		{ return _addr; }
@@ -542,15 +542,15 @@ public:
     inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
 
     /**
-     * Get prefix associated with address.
+     * Get prefix length associated with address.
      */
-    inline uint32_t prefix() const	{ return _prefix; }
+    inline uint32_t prefix_len() const	{ return _prefix_len; }
 
     /**
-     * Set prefix associate with interface.
-     * @return true on success, false if prefix is invalid
+     * Set prefix length associate with address.
+     * @return true on success, false if prefix length is invalid.
      */
-    bool set_prefix(uint32_t prefix);
+    bool set_prefix_len(uint32_t prefix_len);
 
     IPv6 endpoint() const;
 
@@ -567,7 +567,7 @@ public:
 	set_multicast(o.multicast());
 	if (o.point_to_point())
 	    set_endpoint(o.endpoint());
-	set_prefix(o.prefix());
+	set_prefix_len(o.prefix_len());
     }
 
     /**
@@ -583,7 +583,7 @@ public:
 		&& (point_to_point() == o.point_to_point())
 		&& (multicast() == o.multicast())
 		&& (endpoint() == o.endpoint())
-		&& (prefix() == o.prefix()));
+		&& (prefix_len() == o.prefix_len()));
     }
 
     void finalize_state();
@@ -599,7 +599,7 @@ protected:
     bool	_multicast;
 
     IPv6	_oaddr;		// Other address - p2p endpoint
-    uint32_t	_prefix;
+    uint32_t	_prefix_len;	// The prefix length
 };
 
 

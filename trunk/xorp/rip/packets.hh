@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.8 2003/08/04 23:45:32 hodson Exp $
+// $XORP: xorp/rip/packets.hh,v 1.9 2003/08/07 00:46:04 hodson Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -163,7 +163,7 @@ PacketRouteEntry<IPv4>::initialize(uint16_t	  tag,
 inline IPv4Net
 PacketRouteEntry<IPv4>::net() const
 {
-    return IPv4Net(IPv4(_addr), IPv4(_mask).prefix_length());
+    return IPv4Net(IPv4(_addr), IPv4(_mask).masklen());
 }
 
 inline bool

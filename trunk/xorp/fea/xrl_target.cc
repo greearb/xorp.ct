@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.25 2003/09/12 23:44:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.26 2003/09/24 01:13:51 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -392,13 +392,13 @@ XrlFeaTarget::ifmgr_0_1_get_all_prefix4(
 				    const string&	vifname,
 				    const IPv4&	addr,
 				    // Output values,
-				    uint32_t&	prefix)
+				    uint32_t&	prefix_len)
 {
     const IfTreeAddr4* fa = 0;
     XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
 
     if (e == XrlCmdError::OKAY())
-	prefix = fa->prefix();
+	prefix_len = fa->prefix_len();
 
     return e;
 }
@@ -410,13 +410,13 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
 				    const string&	vifname,
 				    const IPv4&	addr,
 				    // Output values,
-				    uint32_t&	prefix)
+				    uint32_t&	prefix_len)
 {
     const IfTreeAddr4* fa = 0;
     XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
 
     if (e == XrlCmdError::OKAY())
-	prefix = fa->prefix();
+	prefix_len = fa->prefix_len();
 
     return e;
 }
@@ -504,13 +504,13 @@ XrlFeaTarget::ifmgr_0_1_get_all_prefix6(
 				    const string&	vifname,
 				    const IPv6&	addr,
 				    // Output values,
-				    uint32_t&	prefix)
+				    uint32_t&	prefix_len)
 {
     const IfTreeAddr6* fa = 0;
     XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
 
     if (e == XrlCmdError::OKAY())
-	prefix = fa->prefix();
+	prefix_len = fa->prefix_len();
 
     return e;
 }
@@ -522,13 +522,13 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
 				    const string&	vifname,
 				    const IPv6&	addr,
 				    // Output values,
-				    uint32_t&	prefix)
+				    uint32_t&	prefix_len)
 {
     const IfTreeAddr6* fa = 0;
     XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
 
     if (e == XrlCmdError::OKAY())
-	prefix = fa->prefix();
+	prefix_len = fa->prefix_len();
 
     return e;
 }
@@ -949,11 +949,11 @@ XrlFeaTarget::ifmgr_0_1_set_prefix4(
 				    const string&	ifname,
 				    const string&	vifname,
 				    const IPv4&		address,
-				    const uint32_t&	prefix)
+				    const uint32_t&	prefix_len)
 {
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid, new SetAddr4Prefix(it, ifname, vifname, address,
-					       prefix));
+					       prefix_len));
 }
 
 XrlCmdError
@@ -1062,12 +1062,12 @@ XrlFeaTarget::ifmgr_0_1_set_prefix6(
 				    const string&	ifname,
 				    const string&	vifname,
 				    const IPv6&	  	address,
-				    const uint32_t&	prefix)
+				    const uint32_t&	prefix_len)
 {
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid,
 		       new SetAddr6Prefix(it, ifname, vifname, address,
-					  prefix));
+					  prefix_len));
 }
 
 XrlCmdError

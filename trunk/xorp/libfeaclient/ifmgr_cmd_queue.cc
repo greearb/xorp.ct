@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.4 2003/09/03 23:20:17 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.5 2003/09/10 19:21:33 hodson Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -274,7 +274,7 @@ IfMgrIPv4AtomToCommands::convert(IfMgrCommandSinkBase& s) const
     IPv4 addr = _a.addr();
 
     s.push(new IfMgrIPv4Add(ifn, vifn, addr));
-    s.push(new IfMgrIPv4SetPrefix(ifn, vifn, addr, _a.prefix()));
+    s.push(new IfMgrIPv4SetPrefix(ifn, vifn, addr, _a.prefix_len()));
     s.push(new IfMgrIPv4SetEnabled(ifn, vifn, addr, _a.enabled()));
     s.push(new IfMgrIPv4SetMulticastCapable(ifn, vifn, addr,
 					    _a.multicast_capable()));
@@ -291,7 +291,7 @@ IfMgrIPv6AtomToCommands::convert(IfMgrCommandSinkBase& s) const
     const IPv6& addr = _a.addr();
 
     s.push(new IfMgrIPv6Add(ifn, vifn, addr));
-    s.push(new IfMgrIPv6SetPrefix(ifn, vifn, addr, _a.prefix()));
+    s.push(new IfMgrIPv6SetPrefix(ifn, vifn, addr, _a.prefix_len()));
     s.push(new IfMgrIPv6SetEnabled(ifn, vifn, addr, _a.enabled()));
     s.push(new IfMgrIPv6SetMulticastCapable(ifn, vifn, addr,
 					    _a.multicast_capable()));

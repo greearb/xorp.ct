@@ -194,7 +194,7 @@ disable_address4()
 set_prefix4()
 {
     echo -n "set_prefix4" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/set_prefix4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&prefix:u32=$5"
+    $CALLXRL "finder://fea/ifmgr/0.1/set_prefix4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&prefix_len:u32=$5"
 }
 
 get_all_prefix4()
@@ -266,7 +266,7 @@ disable_address6()
 set_prefix6()
 {
     echo -n "set_prefix6" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/set_prefix6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&prefix:u32=$5"
+    $CALLXRL "finder://fea/ifmgr/0.1/set_prefix6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&prefix_len:u32=$5"
 }
 
 get_all_prefix6()

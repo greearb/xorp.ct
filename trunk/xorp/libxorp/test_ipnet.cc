@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.3 2003/02/26 00:14:14 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.4 2003/03/10 23:20:35 hodson Exp $"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -50,7 +50,7 @@ v4_serialization_test()
     struct s_data {
 	const char* 	net;
 	IPv4		v4;
-	uint32_t	prefix;
+	uint32_t	prefix_len;
     } srep[] = {
 	{ "128.16.92.160/27", IPv4(htonl_literal(0x80105ca0U)), 27 },
 	{ "128.16.0.0/16", IPv4(htonl_literal(0x80100000U)), 16 },
@@ -60,8 +60,8 @@ v4_serialization_test()
 
     for (size_t i = 0; i < sizeof(srep) / sizeof(srep[0]); i++) {
 	IPv4Net n(srep[i].net);
-	if (n.prefix_len() != srep[i].prefix) {
-	    verbose_log("item %u bad prefix %u\n", (uint32_t)i,
+	if (n.prefix_len() != srep[i].prefix_len) {
+	    verbose_log("item %u bad prefix_len %u\n", (uint32_t)i,
 			(uint32_t)n.prefix_len());
 	    return false;
 	} else if (n.masked_addr() != srep[i].v4) {

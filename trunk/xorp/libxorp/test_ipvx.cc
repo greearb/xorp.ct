@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.4 2003/04/25 23:32:25 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.5 2003/09/09 00:40:05 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -1102,24 +1102,24 @@ test_ipvx_manipulate_address()
     // Test making an IPvX address prefix.
     //
     verbose_assert(
-	IPvX("12.34.56.78").mask_by_prefix(24) == IPvX("12.34.56.0"),
-	"mask_by_prefix()"
+	IPvX("12.34.56.78").mask_by_prefix_len(24) == IPvX("12.34.56.0"),
+	"mask_by_prefix_len()"
 	);
 
     verbose_assert(
-	IPvX("1234:5678:9abc:def0:fed:cba9:8765:4321").mask_by_prefix(24) ==
+	IPvX("1234:5678:9abc:def0:fed:cba9:8765:4321").mask_by_prefix_len(24) ==
 	IPvX("1234:5600::"),
-	"mask_by_prefix()"
+	"mask_by_prefix_len()"
 	);
     
     //
     // Test getting the prefix length of the contiguous mask.
     //
-    verbose_assert(IPvX("255.255.255.0").prefix_length() == 24,
-		   "prefix_length()");
+    verbose_assert(IPvX("255.255.255.0").masklen() == 24,
+		   "masklen()");
 
-    verbose_assert(IPvX("ffff:ff00::").prefix_length() == 24,
-		   "prefix_length()");
+    verbose_assert(IPvX("ffff:ff00::").masklen() == 24,
+		   "masklen()");
     
     // XXX: for IPvX we don't have addr() and set_addr() methods, hence
     // we don't test them.
@@ -1284,7 +1284,7 @@ test_ipvx_invalid_manipulate_address()
     try {
 	// Invalid mask prefix: IPv4
 	IPvX ip(addr_string4);
-	ip.mask_by_prefix(IPvX::addr_bitlen(AF_INET) + 1);
+	ip.mask_by_prefix_len(IPvX::addr_bitlen(AF_INET) + 1);
 	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %u : FAIL\n",
 		    (uint32_t)IPvX::addr_bitlen(AF_INET) + 1);
 	incr_failures();
@@ -1295,7 +1295,7 @@ test_ipvx_invalid_manipulate_address()
     try {
 	// Invalid mask prefix: IPv6
 	IPvX ip(addr_string6);
-	ip.mask_by_prefix(IPvX::addr_bitlen(AF_INET6) + 1);
+	ip.mask_by_prefix_len(IPvX::addr_bitlen(AF_INET6) + 1);
 	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %u : FAIL\n",
 		    (uint32_t)IPvX::addr_bitlen(AF_INET6) + 1);
 	incr_failures();

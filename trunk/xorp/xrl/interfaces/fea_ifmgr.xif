@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.8 2003/07/30 19:07:25 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.9 2003/08/11 21:14:09 hodson Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -52,7 +52,7 @@ interface ifmgr/0.1 {
 
 
 	get_configured_prefix4 ? ifname:txt & vif:txt & address:ipv4	\
-			-> prefix:u32
+			-> prefix_len:u32
 
 	get_configured_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> broadcast:ipv4
@@ -61,7 +61,7 @@ interface ifmgr/0.1 {
 			-> endpoint:ipv4
 
 	get_configured_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
-			-> prefix:u32
+			-> prefix_len:u32
 
 	get_configured_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
 			-> endpoint:ipv6
@@ -115,7 +115,7 @@ interface ifmgr/0.1 {
 				& ifname:txt				\
 				& vif:txt				\
 				& address:ipv4				\
-				& prefix:u32
+				& prefix_len:u32
 
 	set_broadcast4		? tid:u32				\
 				& ifname:txt				\
@@ -148,7 +148,7 @@ interface ifmgr/0.1 {
 				& ifname:txt				\
 				& vif:txt				\
 				& address:ipv6				\
-				& prefix:u32
+				& prefix_len:u32
 
 	set_endpoint6		? tid:u32				\
 				& ifname:txt				\
@@ -227,7 +227,7 @@ interface ifmgr/0.1 {
 	get_all_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
 
 	get_all_prefix4 ? ifname:txt & vif:txt & address:ipv4		\
-			-> prefix:u32
+			-> prefix_len:u32
 
 	get_all_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> broadcast:ipv4
@@ -236,7 +236,7 @@ interface ifmgr/0.1 {
 			-> endpoint:ipv4
 
 	get_all_prefix6 ? ifname:txt & vif:txt & address:ipv6		\
-			-> prefix:u32
+			-> prefix_len:u32
 
 	get_all_endpoint6 ? ifname:txt & vif:txt & address:ipv6		\
 			-> endpoint:ipv6

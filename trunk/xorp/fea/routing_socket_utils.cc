@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.7 2003/09/20 06:26:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.8 2003/09/20 07:01:53 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -198,7 +198,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	// XXX: sock->sa_family is undefined
 	const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
 	IPv4 netmask(sin->sin_addr);
-	return (netmask.prefix_length());
+	return (netmask.masklen());
     }
 #ifdef HAVE_IPV6
     case AF_INET:
@@ -206,7 +206,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	// XXX: sock->sa_family is undefined
 	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
 	IPv6 netmask(sin6->sin6_addr);
-	return (netmask.prefix_length());
+	return (netmask.masklen());
     }
 #endif // HAVE_IPV6
     default:
@@ -238,7 +238,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	    buf[0] = *(ptr + 0);
 	    {
 		IPv4 netmask(buf);
-		return (netmask.prefix_length());
+		return (netmask.masklen());
 	    }
 	default:
 	    XLOG_ERROR("Unknown mask: family = %d, sa_len = %d",
@@ -249,7 +249,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 		// XXX: sock->sa_family is undefined
 		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
 		IPv4 netmask(sin->sin_addr);
-		return (netmask.prefix_length());
+		return (netmask.masklen());
 	    }
 	}
     }
@@ -266,7 +266,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	// XXX: sock->sa_family is undefined
 	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
 	IPv6 netmask(sin6->sin6_addr);
-	return (netmask.prefix_length());
+	return (netmask.masklen());
     }
 #endif // HAVE_IPV6
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.9 2003/05/24 23:35:26 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.10 2003/07/03 06:59:38 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -291,7 +291,7 @@ ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nhroute)
     while (rpair != _ip_unresolved_nexthops.end()) {
 	cp(20);
 	unh = rpair->first;
-	if (new_subnet == unh.mask_by_prefix(nhroute.net().prefix_len())) {
+	if (new_subnet == unh.mask_by_prefix_len(nhroute.net().prefix_len())) {
 	    cp(21);
 	    // the unresolved nexthop matches our subnet
 	    debug_msg("resolve_unresolved_nexthops: resolving %s\n",
@@ -316,7 +316,7 @@ ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nhroute)
 
 	    rpair = nextpair;
 	} else {
-	    if (new_subnet < unh.mask_by_prefix(nhroute.net().prefix_len())) {
+	    if (new_subnet < unh.mask_by_prefix_len(nhroute.net().prefix_len())) {
 		cp(22);
 		// we've gone past any routes that we might possibly resolve
 		return;
@@ -555,17 +555,17 @@ ExtIntTable<A>::lookup_route(const A& addr) const
     if (found.empty())
 	return NULL;
 
-    // retain only the routes with the longest prefix
-    uint32_t longest_prefix = 0;
+    // retain only the routes with the longest prefix length
+    uint32_t longest_prefix_len = 0;
     typename list <const IPRouteEntry<A>*>::iterator i, i2;
     for (i = found.begin(); i != found.end(); i++) {
-	if ((*i)->net().prefix_len() > longest_prefix) {
-	    longest_prefix = (*i)->net().prefix_len();
+	if ((*i)->net().prefix_len() > longest_prefix_len) {
+	    longest_prefix_len = (*i)->net().prefix_len();
 	}
     }
     for (i = found.begin(); i != found.end();) {
 	i2 = i; i2++;
-	if ((*i)->net().prefix_len() < longest_prefix) {
+	if ((*i)->net().prefix_len() < longest_prefix_len) {
 	    found.erase(i);
 	}
 	i = i2;

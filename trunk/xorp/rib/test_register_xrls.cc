@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.18 2003/09/27 10:42:40 mjh Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.19 2003/09/27 22:32:47 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -249,8 +249,8 @@ void
 register_done(const XrlError& e, 
 	      const bool* resolves, 
 	      const IPv4* base_addr, 
-	      const uint32_t* prefix, 
-	      const uint32_t* /* realprefix */, 
+	      const uint32_t* prefix_len, 
+	      const uint32_t* /* real_prefix_len */, 
 	      const IPv4* nexthop, 
 	      const uint32_t* metric, 
 	      bool expected_resolves,
@@ -261,7 +261,7 @@ register_done(const XrlError& e,
     assert(e == XrlCmdError::OKAY());
     if (expected_resolves) {
 	assert(*resolves);
-	IPv4Net net(*base_addr, *prefix);
+	IPv4Net net(*base_addr, *prefix_len);
 	assert(net == expected_net);
 	if (*metric != expected_metric) {
 	    fprintf(stderr, "Expected metric %d, got %d\n", 

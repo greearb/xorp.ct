@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_click.cc,v 1.2 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_click.cc,v 1.3 2003/05/02 07:50:46 pavlin Exp $"
 
 #include <fstream>
 #include <string>
@@ -151,12 +151,13 @@ IfconfigClick::delete_address(const string& interface_name, const IPvX& addr)
 ** set netmask prefix.
 */
 bool
-IfconfigClick::set_prefix(const string& interface_name, const IPvX& addr, int prefix)
+IfconfigClick::set_prefix(const string& interface_name, const IPvX& addr,
+			  int prefix_len)
 {
     debug_msg("(%s, %s, %d)\n", interface_name.c_str(), addr.str().c_str(),
-	      prefix);
+	      prefix_len);
 
-    if (!propagate(_next.set_prefix(interface_name, addr, prefix)))
+    if (!propagate(_next.set_prefix(interface_name, addr, prefix_len)))
 	return false;
 
     return interface_changed(interface_name, addr);
@@ -167,12 +168,12 @@ IfconfigClick::set_prefix(const string& interface_name, const IPvX& addr, int pr
 */
 bool
 IfconfigClick::get_prefix(const string& interface_name, const IPvX& addr,
-			   int& prefix)
+			   int& prefix_len)
 {
     debug_msg("(%s, %s, %d)\n", interface_name.c_str(), addr.str().c_str(),
-	      prefix);
+	      prefix_len);
 
-    if (!propagate(_next.get_prefix(interface_name, addr, prefix)))
+    if (!propagate(_next.get_prefix(interface_name, addr, prefix_len)))
 	return false;
 
     return interface_changed(interface_name, addr);
@@ -336,7 +337,8 @@ IfconfigClick::add_interface(const string& interface_name, const IPvX& address)
 ** address. Therefore get the new values build a new config.
 */
 bool
-IfconfigClick::interface_changed(const string& interface_name, const IPvX& address)
+IfconfigClick::interface_changed(const string& interface_name,
+				 const IPvX& address)
 {
     list<Interface>::iterator i;
     for (i = _ifs.begin(); i != _ifs.end(); i++) {
@@ -378,11 +380,11 @@ IfconfigClick::delete_interface(const string& interface_name, const IPvX& addres
 bool
 IfconfigClick::update(Interface& i)
 {
-    int prefix;
-    if (false == _next.get_prefix(i.interface_name, i.address, prefix))
+    int prefix_len;
+    if (false == _next.get_prefix(i.interface_name, i.address, prefix_len))
 	return false;
 
-    i.mask = IPvX::make_prefix(i.address.af(), prefix);
+    i.mask = IPvX::make_prefix(i.address.af(), prefix_len);
 
     if (false == _next.get_mac(i.interface_name, i.mac))
 	return false;
@@ -535,10 +537,10 @@ IfconfigClick::config()
     */
     for (i = _ifs.begin(); i != _ifs.end(); i++) {
 	os += i->address.str() + "/32 0,\n";	// My address.
-	IPvX subnet = i->address.mask_by_prefix(i->mask.prefix_length())
+	IPvX subnet = i->address.mask_by_prefix_len(i->mask.masklen())
 		       | ~i->mask;
 	os += subnet.str() + "/32 0,\n";	// Subnet broadcast correct.
-	subnet = i->address.mask_by_prefix(i->mask.prefix_length());
+	subnet = i->address.mask_by_prefix_len(i->mask.masklen());
 	os += subnet.str() + "/32 0,\n";	// Subnet broadcast old compat.
     }
 
@@ -547,7 +549,7 @@ IfconfigClick::config()
     */
     for (i = _ifs.begin(); i != _ifs.end(); i++) {
 	int port = this->port(*i) - 1;
-	os += i->address.mask_by_prefix(i->mask.prefix_length()).str() +
+	os += i->address.mask_by_prefix_len(i->mask.masklen()).str() +
 	    "/" + i->mask.str() + " " + itos(port + 1) + ",\n";
     }
 
@@ -576,7 +578,7 @@ IfconfigClick::config()
     os += "ip :: Strip(14)\n";
     os += "    -> CheckIPHeader(";
     for (i = _ifs.begin(); i != _ifs.end(); i++) {
-	IPvX subnet = i->address.mask_by_prefix(i->mask.prefix_length())
+	IPvX subnet = i->address.mask_by_prefix_len(i->mask.masklen())
 		       | ~i->mask;
 	os += subnet.str() + " ";	// Subnet broadcast correct.
     }

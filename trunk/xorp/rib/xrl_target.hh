@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.11 2003/05/29 21:17:16 mjh Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.12 2003/09/27 22:32:47 mjh Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -341,8 +341,8 @@ protected:
 	// Output values, 
 	bool& resolves,
 	IPv4&	base_addr, 
-	uint32_t&	prefix, 
-	uint32_t&	realprefix, 
+	uint32_t&	prefix_len, 
+	uint32_t&	real_prefix_len, 
 	IPv4&	nexthop, 
 	uint32_t&	metric);
 
@@ -350,7 +350,7 @@ protected:
 	// Input values,  
         const string&	target,
 	const IPv4&	addr, 
-	const uint32_t&	prefix);
+	const uint32_t&	prefix_len);
 
     XrlCmdError rib_0_1_register_interest6(
 	// Input values, 
@@ -359,8 +359,8 @@ protected:
 	// Output values, 
 	bool& resolves,
 	IPv6&	base_addr, 
-	uint32_t&	prefix, 
-	uint32_t&	realprefix, 
+	uint32_t&	prefix_len, 
+	uint32_t&	real_prefix_len, 
 	IPv6&	nexthop, 
 	uint32_t&	metric);
 
@@ -368,7 +368,7 @@ protected:
 	// Input values,  
         const string&	target,
 	const IPv6&	addr, 
-	const uint32_t&	prefix);
+	const uint32_t&	prefix_len);
 
     XrlCmdError fea_ifmgr_client_0_1_interface_update(
 	// Input values, 

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.12 2003/07/17 00:28:33 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.13 2003/08/01 22:49:15 pavlin Exp $ */
 
 interfaces {
   interface @: text {
@@ -69,8 +69,8 @@ interfaces {
 /*        %get: xrl "fea/ifmgr/0.1/get_configured_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool=`~$(@)`"; */
         }
 	prefix-length {
-	  %set: xrl "fea/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix:u32=$(@)"; 
-	  %get: xrl "fea/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix:u32"; 
+	  %set: xrl "fea/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix_len:u32=$(@)"; 
+	  %get: xrl "fea/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix_len:u32"; 
 	}
 	broadcast {
 	  %set: xrl "fea/ifmgr/0.1/set_broadcast4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&broadcast:ipv4=$(@)";
@@ -99,8 +99,8 @@ interfaces {
 /*        %get: xrl "fea/ifmgr/0.1/get_configured_address_enabled6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool=`~$(@)`"; */
         }
 	prefix-length {
-	  %set: xrl "fea/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix:u32=$(@)"; 
-	  %get: xrl "fea/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix:u32"; 
+	  %set: xrl "fea/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix_len:u32=$(@)"; 
+	  %get: xrl "fea/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix_len:u32"; 
 	}
 	destination {
 	  %set: xrl "fea/ifmgr/0.1/set_endpoint6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&endpoint:ipv6=$(@)";

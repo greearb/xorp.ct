@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.7 2003/09/09 00:40:05 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.8 2003/09/19 23:28:56 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -495,11 +495,11 @@ public:
     /**
      * Make an IPvX address prefix.
      * 
-     * @param masklen the length of the mask of the prefix to create.
+     * @param prefix_len the length of the mask of the prefix to create.
      * @return a new IPvX address created by masking this address with a mask
-     * of length @ref masklen.
+     * of length @ref prefix_len.
      */
-    IPvX mask_by_prefix(int masklen) const throw (InvalidNetmaskLength);
+    IPvX mask_by_prefix_len(int prefix_len) const throw (InvalidNetmaskLength);
     
     /**
      * Get the mask length.
@@ -507,7 +507,7 @@ public:
      * @return the prefix length of the contiguous mask presumably stored
      * as an IPvX address.
      */
-    int prefix_length() const;
+    int masklen() const;
     
     /**
      * Test if this address is IPv4 address.
