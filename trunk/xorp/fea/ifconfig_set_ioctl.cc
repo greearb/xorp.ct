@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.3 2003/06/18 21:51:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.4 2003/08/14 15:29:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -621,19 +621,29 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	
 	uint32_t prefix = a.prefix();
 	
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
-	XLOG_ASSERT(ii != ifc().pulled_config().ifs().end());
-	IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
-	XLOG_ASSERT(vi != ii->second.vifs().end());
-	IfTreeVif::V4Map::const_iterator ai = vi->second.get_addr(a.addr());
+	const IfTreeAddr4* ap = NULL;
+	do {
+	    IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	    if (ii == ifc().pulled_config().ifs().end())
+		break;
+	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
+	    if (vi == ii->second.vifs().end())
+		break;
+	    IfTreeVif::V4Map::const_iterator ai = vi->second.get_addr(a.addr());
+	    if (ai == vi->second.v4addrs().end())
+		break;
+	    ap = &ai->second;
+	    break;
+	} while (false);
 	
-	if ((ai != vi->second.v4addrs().end())
-	    && (ai->second.addr() == a.addr())
-	    && ((a.broadcast() && (ai->second.bcast() == a.bcast()))
-		|| (a.point_to_point() && (ai->second.endpoint() == a.endpoint())))
-	    && (ai->second.prefix() == prefix)) {
+	if ((ap != NULL)
+	    && (ap->addr() == a.addr())
+	    && ((a.broadcast() && (ap->bcast() == a.bcast()))
+		|| (a.point_to_point() && (ap->endpoint() == a.endpoint())))
+	    && (ap->prefix() == prefix)) {
 	    break;		// Ignore: the address hasn't changed
 	}
+	
 	IfSetAddr4 set_addr(_s4, i.ifname(), a.addr(), oaddr, prefix);
 	if (set_addr.execute() < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
@@ -726,19 +736,29 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	uint32_t prefix = a.prefix();
 	if (0 == prefix)
 	    prefix = 64;
+
+	const IfTreeAddr6* ap = NULL;
+	do {
+	    IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	    if (ii == ifc().pulled_config().ifs().end())
+		break;
+	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
+	    if (vi == ii->second.vifs().end())
+		break;
+	    IfTreeVif::V6Map::const_iterator ai = vi->second.get_addr(a.addr());
+	    if (ai == vi->second.v6addrs().end())
+		break;
+	    ap = &ai->second;
+	    break;
+	} while (false);
 	
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
-	XLOG_ASSERT(ii != ifc().pulled_config().ifs().end());
-	IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
-	XLOG_ASSERT(vi != ii->second.vifs().end());
-	IfTreeVif::V6Map::const_iterator ai = vi->second.get_addr(a.addr());
-	
-	if ((ai != vi->second.v6addrs().end())
-	    && (ai->second.addr() == a.addr())
-	    && ((a.point_to_point() && (ai->second.endpoint() == a.endpoint())))
-	    && (ai->second.prefix() == prefix)) {
+	if ((ap != NULL)
+	    && (ap->addr() == a.addr())
+	    && ((a.point_to_point() && (ap->endpoint() == a.endpoint())))
+	    && (ap->prefix() == prefix)) {
 	    break;		// Ignore: the address hasn't changed
 	}
+	
 	IfSetAddr6 set_addr(_s6, i.ifname(), a.addr(), oaddr, prefix);
 	if (set_addr.execute() < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
