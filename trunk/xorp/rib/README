@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/README,v 1.3 2002/12/09 11:13:06 pavlin Exp $
+# $XORP: xorp/rib/README,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 #
 
 		    RIB: Routing Information Base.
@@ -23,10 +23,14 @@ Startup
 The RIB depends on the finder and should be started by the Router
 Manager process.
 
-Structure
-=========
+Documentation
+=============
 
-The RIB is comprised of a series of tables...
+The RIB design architecture and code structure are described in:
+	$(XORP)/docs/rib/
+
+The programming documentation is in:
+	$(XORP)/docs/kdoc/html/rib/
 
 Status
 ======
