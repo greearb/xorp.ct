@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.26 2005/02/24 00:13:51 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.27 2005/02/24 00:50:16 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -660,7 +660,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(
 	// (unless the timer is already running).
 	//
 	if (! _rib_igp_table_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s"
+	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
@@ -724,7 +724,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(
 	// (unless the timer is already running).
 	//
 	if (! _rib_igp_table_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s"
+	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.25 2005/02/24 00:13:30 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.26 2005/02/24 00:50:15 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -839,7 +839,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(
 	// (unless the timer is already running).
 	//
 	if (! _fea_fib_client_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv4 FIB client to the FEA: %s"
+	    XLOG_ERROR("Failed to add IPv4 FIB client to the FEA: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
@@ -903,7 +903,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(
 	// (unless the timer is already running).
 	//
 	if (! _fea_fib_client_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv6 FIB client to the FEA: %s"
+	    XLOG_ERROR("Failed to add IPv6 FIB client to the FEA: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
@@ -1199,7 +1199,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _rib_igp_table_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s"
+	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
@@ -1262,7 +1262,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _rib_igp_table_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s"
+	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(

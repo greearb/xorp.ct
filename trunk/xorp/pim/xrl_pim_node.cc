@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.64 2005/02/24 00:34:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.65 2005/02/24 00:50:16 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -1095,7 +1095,7 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(
 	// (unless the timer is already running).
 	//
 	if (! _rib_redist_transaction_enable_timer.scheduled()) {
-	    XLOG_ERROR("Failed to enable receiving MRIB information from the RIB: %s"
+	    XLOG_ERROR("Failed to enable receiving MRIB information from the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_redist_transaction_enable_timer = _eventloop.new_oneoff_after(
