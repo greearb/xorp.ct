@@ -20,7 +20,7 @@ support their applications.
 Only time will tell if we're right, but in this paper we'll try and
 explain where we hope to go from here.  Of course we'll only get there
 with good luck and a lot of help from all of these communities.  First
-we'll discuss the XORP archiecture, then return to how it helps these
+we'll discuss the XORP architecture, then return to how it helps these
 diverse groups.
 
 \subsection{XORP Overview}
@@ -100,7 +100,7 @@ by the \emph{forwarding engine abstraction} process (FEA).  The FEA
 abstracts the details of how the forwarding path of the router is
 implemented and as a result, the routing processes are agnostic to
 whether the forwarding plane is Click \cite{click} based, a conventional UNIX
-kernel, or an alternative method.  The FEA manages the networking
+kernel, or novel forwarding hardware  The FEA manages the networking
 interfaces and forwarding table in the router, and provides information to routing processes
 about the interface properties and events occurring on interfaces, such as an
 interface being taken down.
@@ -190,18 +190,18 @@ available.
 
 To get more concrete, our configuration manager has a strict hierarchy
 of configuration parameters, which is directly reflected in our
-default CLI.  The configuration manager takes a directory of template
-files, which define the possible configurable parameters for each XORP
-routing protocol, and generates mappings of configuration parameters
-to XRL dispatches.  The designer of a new routing protocol can simply
-add a template file specifying the new functionality provided.  The
-configuration manager can read the template file, discover the new
-functionality, and know how to communicate with the process to use it.
-The new functionality is then immediately available through the CLI.
-
+command line interface (CLI).  The configuration manager takes a
+directory of template files, which define the possible configurable
+parameters for each XORP routing protocol, and generates mappings of
+configuration parameters to XRL dispatches.  The designer of a new
+routing protocol can simply supply a template file specifying the new
+functionality provided.  The configuration manager can read the
+template file, discover the new functionality, and know how to
+communicate with the process.  The new functionality is then
+immediately available through the CLI.
 For example, a fragment of a router configuration file, and the
-corresponding part template file might look like:
-\vspace{-0.1in}
+corresponding part of a template file might look like:
+%\vspace{-0.1in}
 
 \noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
@@ -239,7 +239,7 @@ corresponding part template file might look like:
 \subsection{Robustness}
 
 The routing and coordination processes in XORP run in user space on a
-traditional UNIX operating system.  Routing processes are protected
+regular UNIX operating system.  Routing processes are protected
 from each other and can have their resources constrained according to
 administrative preference.  Furthermore, routing processes can crash
 without affecting the kernel, forwarding plane, or each other.  And if
@@ -256,9 +256,10 @@ being forwarding-path agnostic is that we can abstract
 privileged operations, such as sending on a raw socket, into
 the FEA via XRLs.  This allows us to run many routing protocols
 in a sandbox. They have no interaction with the outside world except
-through XRLs and packets, and so an exploitable vulnerability in a routing
+through XRLs and packets, and so a vulnerability in a routing
 protocol is far more difficult to escalate into full control of the
-router.
+router.  Untrusted code might even be run in a virtual
+machine such as provided by Xen\cite{xen}.
 
 %Robustness in the forwarding path is also important, but solutions
 %such as memory protection that work well in user-space are not
