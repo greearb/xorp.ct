@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.2 2003/02/25 01:38:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.3 2003/03/04 05:24:54 pavlin Exp $"
 
 
 //
@@ -269,10 +269,6 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;
-	    // Don't send the Bootstrap message across scope zone boundries
-	    if (pim_node().pim_scope_zone_table().is_scoped(
-		active_bsr_zone->zone_id(), i))
-		continue;
 	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
 					*active_bsr_zone);
 	}
@@ -291,10 +287,6 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 	    // XXX: always forward-back on the iif, because the 06 I-D is wrong
 	    // if (pim_vif == this)
 	    //	continue;		// Don't forward back on the iif
-	    // Don't forward the Bootstrap message across scope zone boundries
-	    if (pim_node().pim_scope_zone_table().is_scoped(
-		active_bsr_zone->zone_id(), i))
-		continue;
 	    // XXX: use the BSR zone that was received to forward the message
 	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
 					*bsr_zone);
@@ -359,6 +351,11 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
     
     if (pim_nbrs_number() == 0)
 	return (XORP_ERROR);	// No PIM neighbors yet, hence don't send it
+    
+    if (pim_node().pim_scope_zone_table().is_scoped(bsr_zone.zone_id(),
+						    vif_index())) {
+	return (XORP_ERROR);	// Don't across scope zone boundary
+    }
     
     buffer_t *buffer = pim_bootstrap_send_prepare(dst_addr, bsr_zone, true);
     if (buffer == NULL)
