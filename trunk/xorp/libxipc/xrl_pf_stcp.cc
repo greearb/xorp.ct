@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.21 2003/09/11 19:28:59 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.22 2003/09/15 17:46:32 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -62,10 +62,12 @@ public:
 	_life_timer = e.new_oneoff_after_ms(QUIET_LIFE_MS,
 					    callback(this,
 						     &STCPRequestHandler::die,
-						     "life timer expired"));
+						     "life timer expired",
+						     true));
 	prepare_for_request();
 	debug_msg("STCPRequestHandler (%p) fd = %d\n", this, fd);
     }
+
     ~STCPRequestHandler()
     {
 	_parent.remove_request_handler(this);
@@ -90,7 +92,7 @@ public:
 
     // Death related
     void postpone_death();
-    void die(const char* reason);
+    void die(const char* reason, bool verbose = true);
 
 private:
     XrlPFSTCPListener& _parent;
@@ -214,7 +216,7 @@ STCPRequestHandler::update_reader(AsyncFileReader::Event ev,
     }
 
     if (ev == AsyncFileReader::END_OF_FILE) {
-	die("end of file");
+	die("end of file", false);
 	return;
     }
 
@@ -327,10 +329,11 @@ STCPRequestHandler::postpone_death()
 }
 
 void
-STCPRequestHandler::die(const char *reason)
+STCPRequestHandler::die(const char *reason, bool verbose)
 {
     debug_msg(reason);
-    XLOG_ERROR("STCPRequestHandler died: %s", reason);
+    if (verbose)
+	XLOG_ERROR("STCPRequestHandler died: %s", reason);
     delete this;
 }
 
@@ -408,6 +411,9 @@ XrlPFSTCPListener::remove_request_handler(const STCPRequestHandler* rh)
     _request_handlers.erase(i);
 }
 
+
+
+
 // ----------------------------------------------------------------------------
 // Xrl Simple TCP protocol family sender -> -> -> XRLPFSTCPSender
 
@@ -456,6 +462,7 @@ void
 XrlPFSTCPSender::die(const char* reason)
 {
     debug_msg("Sender dying (fd = %d) reason: %s\n", _fd, reason);
+
     XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
 
     delete _reader;
@@ -490,15 +497,25 @@ XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 	cb->dispatch(XrlError(SEND_FAILED, "socket dead"), 0);
 	return;
     }
-    _requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
 
-    if (_requests_pending.empty() == false &&
+    if (_requests_pending.empty() == true &&
 	_keepalive_in_progress == false) {
+	_requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
+
 	send_first_request();
     } else {
 	// Already sending a request or doing keepalive
 	assert(_writer->running() == true);
+
+	_requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
     }
+}
+
+bool
+XrlPFSTCPSender::sends_pending() const
+{
+    bool queues_empty = _requests_sent.empty() && _requests_pending.empty();
+    return !queues_empty;
 }
 
 RequestState*

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.12 2003/06/20 20:56:48 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.13 2003/09/11 19:28:59 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -27,24 +27,9 @@ class STCPRequestHandler;
 class XrlPFSTCPSender;
 class STCPPacketHeader;
 
-struct RequestState {
-    XrlPFSTCPSender*		parent;
-    uint32_t			seqno;
-    Xrl				xrl;
-    XrlPFSender::SendCallback	cb;
-
-    RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x,
-		 const XrlPFSender::SendCallback& scb)
-	: parent(p), seqno(sno), xrl(x), cb(scb)
-    {}
-
-    ~RequestState();
-
-    bool has_seqno(uint32_t n) const { return seqno == n; }
-};
-
-
-
+/**
+ * @short Listener for XRL's transported by TCP.
+ */
 class XrlPFSTCPListener : public XrlPFListener {
 public:
     XrlPFSTCPListener(EventLoop& e, XrlDispatcher* xr = 0, uint16_t port = 0)
@@ -68,8 +53,28 @@ private:
     static const uint32_t _timeout_period;
 };
 
+/**
+ * @short Sender state for tracking Xrl's forwarded by TCP.
+ */
+struct RequestState {
+    XrlPFSTCPSender*		parent;
+    uint32_t			seqno;
+    Xrl				xrl;
+    XrlPFSender::SendCallback	cb;
 
+    RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x,
+		 const XrlPFSender::SendCallback& scb)
+	: parent(p), seqno(sno), xrl(x), cb(scb)
+    {}
 
+    ~RequestState();
+
+    bool has_seqno(uint32_t n) const { return seqno == n; }
+};
+
+/**
+ * @short Sender of Xrls by TCP.
+ */
 class XrlPFSTCPSender : public XrlPFSender {
 public:
     XrlPFSTCPSender(EventLoop& e, const char* address = NULL)
@@ -78,9 +83,9 @@ public:
 
     void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
 
-    inline bool sends_pending() const 			{ return true; }
+    bool sends_pending() const;
 
-    bool alive() const 					{ return _fd > 0; }
+    inline bool alive() const 				{ return _fd > 0; }
 
     const char* protocol() const;
 
