@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.11 2003/08/27 03:18:28 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.12 2003/08/27 23:15:30 pavlin Exp $"
 
 
 //
@@ -586,8 +586,8 @@ CliClient::set_current_cli_prompt(const char *cli_prompt)
     if (cli_prompt == NULL) {
 	_current_cli_prompt[0] = '\0';
     } else {
-	strncpy(_current_cli_prompt, cli_prompt, sizeof(_current_cli_prompt));
-	// XXX: terminate the string (just in case)
+	strncpy(_current_cli_prompt, cli_prompt,
+		sizeof(_current_cli_prompt) -1);
 	_current_cli_prompt[sizeof(_current_cli_prompt) - 1] = '\0';
     }
     gl_replace_prompt(gl(), _current_cli_prompt);
