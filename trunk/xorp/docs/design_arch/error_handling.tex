@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.27 2003/08/28 13:29:49 pavlin Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.28 2003/11/06 21:43:10 atanu Exp $
 %
 
 \documentclass[11pt]{article}
@@ -49,13 +49,13 @@
 
 \title{XORP Error Handling \\
 \vspace{1ex}
-Version 0.5}
+Version 1.0}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{November 6, 2003}
+\date{June 24, 2004}
 
 \maketitle
 
@@ -99,7 +99,7 @@ install a route into the forwarding engine that already exists. Errors
 need to be dealt with in a consistent manner. The types
 of error that may occur are categorized below.
 
-The first type of error is {\em Process failure}.
+The first type of error is {\em Process Failure}.
 
 The second type of error is {\em Communication Error}. At the most
 basic level an attempt to send an \xrl has failed. The process that
