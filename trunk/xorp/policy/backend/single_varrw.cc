@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.1 2004/09/17 13:48:56 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.2 2004/10/04 17:55:06 abittau Exp $"
 
 #include "config.h"
 #include "single_varrw.hh"
@@ -30,16 +30,27 @@ SingleVarRW::~SingleVarRW() {
 const Element&
 SingleVarRW::read(const string& id) {
 
-    // check if its the first one, and inform client
-    if(!_did_first_read) {
-	start_read();
-	_did_first_read = true;
-    }
-	
+    // Maybe there was a write before a read for this variable, if so, just
+    // return the value... no need to bother the client.
     Map::iterator i = _map.find(id);
 
-    if(i == _map.end())
-	throw SingleVarRWErr("Unable to read variable " + id);
+    // nope... no value found.
+    if(i == _map.end()) {
+
+	// if it's the first read, inform the client.
+	if(!_did_first_read) {
+	    start_read();
+	    _did_first_read = true;
+	}
+	
+	// the client may have initialized the variables after the start_read
+	// marker, so try reading again...
+	i = _map.find(id);
+
+	// out of luck...
+	if(i == _map.end())
+	    throw SingleVarRWErr("Unable to read variable " + id);
+    }
 
     const Element* e = (*i).second;
 
@@ -96,10 +107,21 @@ SingleVarRW::sync() {
 
 void
 SingleVarRW::initialize(const string& id, Element* e) {
-    if(_map.find(id) != _map.end())
-	throw SingleVarRWErr("Trying to re-initialize " + id);
 
-    // special case null's [for supported variables, but not present in this
+    // check if we already have a value for a variable.
+    // if so, do nothing.
+    //
+    // Consider clients initializing variables on start_read.
+    // Consider a variable being written to before any reads. In such a case, the
+    // SingleVarRW will already have the correct value for that variable, so we
+    // need to ignore any initialize() called for that variable.
+    if(_map.find(id) != _map.end()) {
+	if(e)
+	    delete e;
+	return;
+    }
+
+    // special case nulls [for supported variables, but not present in this
     // particular case].
     if(!e)
 	e = new ElemNull();
