@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.9 2003/05/14 09:32:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.10 2003/06/17 06:44:17 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,11 +29,6 @@
 #include "route_table_decision.hh"
 #include "main.hh"
 
-#define DOUT(info)	info.out() << __FUNCTION__ << ":"		\
-				   << __LINE__ << ":"			\
-				   << info.test_name() << ": "
-
-
 template<class A>
 class DummyNhLookupTable : public NhLookupTable<A> {
 public:
@@ -48,8 +43,7 @@ public:
 		    const set <IPNet<A> >& /*nets*/,
 		    bool /*lookup_succeeded*/)
     {
-	if(_info.verbose())
-	    DOUT(_info) << "Rib lookup done\n";
+	DOUT(_info) << "Rib lookup done\n";
 	_done = true;
     }
 
@@ -75,8 +69,7 @@ public:
     void
     igp_nexthop_changed(const A& nexthop)
     {
-	if(_info.verbose())
-	    DOUT(_info) << "next hop changed " << nexthop.str() << endl;
+	DOUT(_info) << "next hop changed " << nexthop.str() << endl;
 	_done = true;
     }
 
@@ -115,8 +108,7 @@ template <class A>
 int
 nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -160,8 +152,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** table. This must be true before a lookup will succeed.
     */
     if(!nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to next hop table failed\n";
+	DOUT(info) << "Callback to next hop table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -171,8 +162,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     bool res;
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -181,8 +171,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -195,8 +184,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** A lookup should fail now.
     */
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -210,8 +198,7 @@ template <class A>
 int
 nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -256,8 +243,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** table. This must be true before a lookup will succeed.
     */
     if(!nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to next hop table failed\n";
+	DOUT(info) << "Callback to next hop table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -267,8 +253,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     bool res;
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Address not in table?\n";
+	DOUT(info) << "Address not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -277,8 +262,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -292,8 +276,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** A lookup should fail now.
     */
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -308,8 +291,7 @@ template <class A>
 int
 nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -353,8 +335,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** table. This must be true before a lookup will succeed.
     */
     if(!nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to next hop table failed\n";
+	DOUT(info) << "Callback to next hop table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -364,8 +345,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     bool res;
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Address not in table?\n";
+	DOUT(info) << "Address not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -375,8 +355,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -396,8 +375,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     ** A lookup should fail now.
     */
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -412,8 +390,7 @@ template <class A>
 int
 nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -462,8 +439,7 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** this callback.
     */
     if(nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Call to next hop table should not have occured\n";
+	DOUT(info) << "Call to next hop table should not have occured\n";
 	return TestMain::FAILURE;
     }
 
@@ -473,8 +449,7 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     bool res;
     uint32_t met;
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -501,8 +476,7 @@ template <class A>
 int
 nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -552,8 +526,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** table. This must be true before a lookup will succeed.
     */
     if(!nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to next hop table failed\n";
+	DOUT(info) << "Callback to next hop table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -562,8 +535,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** invalid.
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
-	if(info.verbose())
-	    DOUT(info) << "Marking address as invalid failed\n";
+	DOUT(info) << "Marking address as invalid failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -573,8 +545,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     bool res;
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -583,8 +554,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -607,8 +577,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** metrics.
     */
     if(!dt.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to decision table failed\n";
+	DOUT(info) << "Callback to decision table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -616,8 +585,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** The decision process would perform the lookup again.
     */
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -626,8 +594,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -640,8 +607,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** A lookup should fail now.
     */
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -656,8 +622,7 @@ template <class A>
 int
 nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -705,8 +670,7 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Verify that the callback did not get back to the next hop table.
     */
     if(nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to next hop table?\n";
+	DOUT(info) << "Callback to next hop table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -716,8 +680,7 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     bool res;
     uint32_t met;
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -736,8 +699,7 @@ template <class A>
 int
 nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -787,8 +749,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** table. This must be true before a lookup will succeed.
     */
     if(!nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to next hop table failed\n";
+	DOUT(info) << "Callback to next hop table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -798,8 +759,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     bool res;
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -808,8 +768,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -818,8 +777,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** invalid.
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
-	if(info.verbose())
-	    DOUT(info) << "Marking address as invalid failed\n";
+	DOUT(info) << "Marking address as invalid failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -846,8 +804,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Verify that we don't call back to the decision table.
     */
     if(dt.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to decision table?\n";
+	DOUT(info) << "Callback to decision table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -855,8 +812,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** A lookup should fail now.
     */
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -873,8 +829,7 @@ template <class A>
 int
 nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
-    if(info.verbose())
-	DOUT(info) << "nexthop: " << nexthop.str() << endl;
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
     EventLoop eventloop;
     BGPMain bgp;
@@ -924,8 +879,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** table. This must be true before a lookup will succeed.
     */
     if(!nht.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to next hop table failed\n";
+	DOUT(info) << "Callback to next hop table failed\n";
 	return TestMain::FAILURE;
     }
     
@@ -940,8 +894,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** invalid.
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
-	if(info.verbose())
-	    DOUT(info) << "Marking address as invalid failed\n";
+	DOUT(info) << "Marking address as invalid failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -963,8 +916,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** decision process.
     */
     if(dt.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to decision table?\n";
+	DOUT(info) << "Callback to decision table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -974,8 +926,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     bool res;
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -984,8 +935,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -1001,8 +951,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** invalid.
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
-	if(info.verbose())
-	    DOUT(info) << "Marking address as invalid failed\n";
+	DOUT(info) << "Marking address as invalid failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -1025,8 +974,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** decision process.
     */
     if(dt.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to decision table?\n";
+	DOUT(info) << "Callback to decision table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -1034,8 +982,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Make sure the lookup still works.
     */
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -1044,8 +991,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -1060,8 +1006,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** invalid.
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
-	if(info.verbose())
-	    DOUT(info) << "Marking address as invalid failed\n";
+	DOUT(info) << "Marking address as invalid failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -1083,8 +1028,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** The next hop now resolves we expect a callback to the decison process.
     */
     if(!dt.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to decision table failed\n";
+	DOUT(info) << "Callback to decision table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -1092,8 +1036,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Make sure the lookup still works.
     */
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -1102,8 +1045,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -1118,8 +1060,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** invalid.
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
-	if(info.verbose())
-	    DOUT(info) << "Marking address as invalid failed\n";
+	DOUT(info) << "Marking address as invalid failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -1142,8 +1083,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** The next hop now resolves we expect a callback to the decison process.
     */
     if(!dt.done()) {
-	if(info.verbose())
-	    DOUT(info) << "Callback to decision table failed\n";
+	DOUT(info) << "Callback to decision table failed\n";
 	return TestMain::FAILURE;
     }
 
@@ -1151,8 +1091,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** Make sure the lookup still works.
     */
     if(!nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop not in table?\n";
+	DOUT(info) << "Nexthop not in table?\n";
 	return TestMain::FAILURE;
     }
 
@@ -1161,8 +1100,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** the response function.
     */
     if(resolves != res || metric != met) {
-	if(info.verbose())
-	    DOUT(info) << "Metrics did not match\n";
+	DOUT(info) << "Metrics did not match\n";
 	return TestMain::FAILURE;
     }
 
@@ -1175,8 +1113,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     ** A lookup should fail now.
     */
     if(nhr.lookup(nexthop, res, met)) {
-	if(info.verbose())
-	    DOUT(info) << "Nexthop in table?\n";
+	DOUT(info) << "Nexthop in table?\n";
 	return TestMain::FAILURE;
     }
 

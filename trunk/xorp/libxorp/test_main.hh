@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_main.hh,v 1.2 2003/03/10 23:20:35 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_main.hh,v 1.3 2003/07/02 20:39:28 atanu Exp $"
 
 #include <string>
 #include <list>
@@ -21,6 +21,17 @@
 #include "xorp.h"
 #include "xlog.h"
 #include "callback.hh"
+
+/**
+ * Macro to use to generate debugging output when the verbose flag is
+ * enabled.
+ */
+#define DOUT(info)						\
+		if(info.verbose()) 				\
+			info.out() << __FUNCTION__ << ":"	\
+				   << __LINE__ << ":"		\
+				   << info.test_name() << ": "
+
 
 /**
  * This class is passed as the first argument to each test function/method.
