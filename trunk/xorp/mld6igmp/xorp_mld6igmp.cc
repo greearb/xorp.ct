@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.23 2003/09/16 18:13:47 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xorp_mld6igmp.cc,v 1.1 2003/09/30 16:12:06 pavlin Exp $"
 
 
 //
@@ -100,14 +100,178 @@ usage(const char *argv0, int exit_value)
     // NOTREACHED
 }
 
+static void
+mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
+{
+    EventLoop eventloop;
+
+    //
+    // CLI (for debug purpose)
+    //
+    CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
+    cli_node4.set_cli_port(12000);
+#if 0	// XXX: for now we use only one CLI, and it requires IPv4 access to it
+    CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
+    cli_node6.set_cli_port(12000);
+#endif // 0
+    //
+    // CLI access
+    //
+    // IPvXNet enable_ipvxnet1("127.0.0.1/32");
+    // IPvXNet enable_ipvxnet2("192.150.187.0/25");
+    // IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
+    //
+    // cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet1);
+    // cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet2);
+    // cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
+    //
+    // Create and configure the CLI XRL interface
+    //
+    // IPv4
+    XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
+				     finder_hostname, finder_port);
+    XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_cli4.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+
+	if (xrl_std_router_cli4.ready() == false) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	}
+    }
+#if 0	// XXX: for now we use only one CLI, and it requires IPv4 access to it
+    XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
+				     finder_hostname, finder_port);
+    XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_cli6.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+
+	if (xrl_std_router_cli6.ready() == false) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	}
+    }
+#endif // 0
+
+    //
+    // MLD6IGMP node
+    //
+    // IPv4 node (IGMP)
+    XrlStdRouter xrl_std_router_mld6igmp4(eventloop,
+					  xorp_module_name(AF_INET,
+							   XORP_MODULE_MLD6IGMP),
+					  finder_hostname, finder_port);
+    XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, XORP_MODULE_MLD6IGMP,
+				       eventloop, &xrl_std_router_mld6igmp4);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_mld6igmp4.ready() == false
+	       && timed_out == false) {
+	    eventloop.run();
+	}
+
+	if (xrl_std_router_mld6igmp4.ready() == false) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	}
+    }
+    // IPv6 node (MLD)
+    XrlStdRouter xrl_std_router_mld6igmp6(eventloop,
+					  xorp_module_name(AF_INET6,
+							   XORP_MODULE_MLD6IGMP),
+					  finder_hostname, finder_port);
+    XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, XORP_MODULE_MLD6IGMP,
+				       eventloop, &xrl_std_router_mld6igmp6);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_mld6igmp6.ready() == false
+	       && timed_out == false) {
+	    eventloop.run();
+	}
+
+	if (xrl_std_router_mld6igmp6.ready() == false) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	}
+    }
+
+    //
+    // Start the nodes
+    //
+    // cli_node4.enable();
+    // cli_node4.start();
+    //
+    // cli_node6.enable();
+    // cli_node6.start();
+
+    // xrl_mld6igmp_node4.enable_cli();
+    // xrl_mld6igmp_node4.start_cli();
+    // xrl_mld6igmp_node4.enable_mld6igmp();
+    // xrl_mld6igmp_node4.start_mld6igmp();
+    // xrl_mld6igmp_node4.enable_all_vifs();
+    // xrl_mld6igmp_node4.start_all_vifs();
+    //
+    // xrl_mld6igmp_node6.enable_cli();
+    // xrl_mld6igmp_node6.start_cli();
+    // xrl_mld6igmp_node6.enable_mld6igmp();
+    // xrl_mld6igmp_node6.start_mld6igmp();
+    // xrl_mld6igmp_node6.enable_all_vifs();
+    // xrl_mld6igmp_node6.start_all_vifs();
+
+
+    //
+    // Main loop
+    //
+    string reason;
+    while (xrl_mld6igmp_node4.Mld6igmpNode::node_status(reason)
+	   != PROC_DONE) {
+	eventloop.run();
+    }
+
+    while (xrl_std_router_mld6igmp4.pending()) {
+	eventloop.run();
+    }
+
+    //
+    // Stop the nodes
+    //
+    xrl_mld6igmp_node4.stop_mld6igmp();
+    xrl_mld6igmp_node4.stop_cli();
+    //
+    xrl_mld6igmp_node6.stop_mld6igmp();
+    xrl_mld6igmp_node6.stop_cli();
+
+    cli_node4.stop();
+    //
+    // cli_node6.stop();
+}
+
 int
 main(int argc, char *argv[])
 {
     int ch;
     const char *argv0 = argv[0];
-    char *finder_hostname_port = NULL;
-    IPv4 finder_addr = FINDER_DEFAULT_HOST;
-    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: host order
+    char finder_hostname[MAXHOSTNAMELEN + 1];
+    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: default (in host order)
+
+    // Default finder hostname
+    strncpy(finder_hostname, FINDER_DEFAULT_HOST.str().c_str(),
+	    sizeof(finder_hostname) - 1);
+    finder_hostname[sizeof(finder_hostname) - 1] = '\0';
 
     //
     // Initialize and start xlog
@@ -127,15 +291,32 @@ main(int argc, char *argv[])
 	switch (ch) {
 	case 'F':
 	    // Finder hostname and port
-	    finder_hostname_port = optarg;
+	    char *p;
+	    strncpy(finder_hostname, optarg, sizeof(finder_hostname) - 1);
+	    finder_hostname[sizeof(finder_hostname) - 1] = '\0';
+	    p = strrchr(finder_hostname, ':');
+	    if (p != NULL)
+		*p = '\0';
+	    p = strrchr(optarg, ':');
+	    if (p != NULL) {
+		p++;
+		if (*p == '\0') {
+		    usage(argv0, 1);
+		    // NOTREACHED
+		    break;
+		}
+		finder_port = static_cast<uint16_t>(atoi(p));
+	    }
 	    break;
 	case 'h':
 	case '?':
 	    // Help
 	    usage(argv0, 0);
+	    // NOTREACHED
 	    break;
 	default:
 	    usage(argv0, 1);
+	    // NOTREACHED
 	    break;
 	}
     }
@@ -146,216 +327,8 @@ main(int argc, char *argv[])
 	// NOTREACHED
     }
 
-    //
-    // Get the finder hostname and port
-    //
-    if (finder_hostname_port != NULL) {
-	char buf[1024];
-	char *p;
-	struct hostent *h;
-
-	// Get the finder address
-	strcpy(buf, finder_hostname_port);
-	p = strrchr(buf, ':');
-	if (p != NULL)
-	    *p = '\0';
-	h = gethostbyname(buf);
-	if (h == NULL) {
-	    fprintf(stderr, "Can't resolve IP address for %s: %s\n",
-		    buf, hstrerror(h_errno));
-	    usage(argv0, 1);
-	}
-
-	try {
-	    IPvX addr(h->h_addrtype, (uint8_t *)h->h_addr_list[0]);
-	    finder_addr = addr.get_ipv4();
-	} catch (const InvalidFamily&) {
-	    fprintf(stderr, "Invalid finder address family: %d\n",
-		    h->h_addrtype);
-	    usage(argv0, 1);
-	} catch (const InvalidCast&) {
-	    fprintf(stderr, "Invalid finder address family: %d (expected IPv4)\n",
-		    h->h_addrtype);
-	    usage(argv0, 1);
-	}
-
-	// Get the finder port
-	strcpy(buf, finder_hostname_port);
-	p = strrchr(buf, ':');
-	if (p != NULL) {
-	    p++;
-	    finder_port = static_cast<uint16_t>(atoi(p));
-	    if (finder_port == 0) {
-		fprintf(stderr, "Invalid finder port: %d\n", finder_port);
-		usage(argv0, 1);
-	    }
-	}
-    }
-
-    //
-    // The main body
-    //
     try {
-	//
-	// Init stuff
-	//
-	EventLoop eventloop;
-
-	//
-	// CLI (for debug purpose)
-	//
-	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
-	cli_node4.set_cli_port(12000);
-#if 0	// XXX: for now we use only one CLI, and it requires IPv4 access to it
-	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
-	cli_node6.set_cli_port(12000);
-#endif // 0
-	//
-	// CLI access
-	//
-	// IPvXNet enable_ipvxnet1("127.0.0.1/32");
-	// IPvXNet enable_ipvxnet2("192.150.187.0/25");
-	// IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
-	//
-	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet1);
-	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet2);
-	// cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
-	//
-	// Create and configure the CLI XRL interface
-	//
-	// IPv4
-	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
-					 finder_addr, finder_port);
-	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_cli4.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_cli4.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#if 0	// XXX: for now we use only one CLI, and it requires IPv4 access to it
-	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
-					 finder_addr, finder_port);
-	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_cli6.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_cli6.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#endif // 0
-
-	//
-	// MLD6IGMP node
-	//
-	// IPv4 node (IGMP)
-	XrlStdRouter xrl_std_router_mld6igmp4(eventloop,
-					      xorp_module_name(AF_INET,
-							       XORP_MODULE_MLD6IGMP),
-					      finder_addr, finder_port);
-	XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, XORP_MODULE_MLD6IGMP,
-					   eventloop,
-					   &xrl_std_router_mld6igmp4);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_mld6igmp4.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_mld6igmp4.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-	// IPv6 node (MLD)
-	XrlStdRouter xrl_std_router_mld6igmp6(eventloop,
-					      xorp_module_name(AF_INET6,
-							       XORP_MODULE_MLD6IGMP),
-					      finder_addr, finder_port);
-	XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, XORP_MODULE_MLD6IGMP,
-					   eventloop,
-					   &xrl_std_router_mld6igmp6);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_mld6igmp6.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_mld6igmp6.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-
-	//
-	// Start the nodes
-	//
-	// cli_node4.enable();
-	// cli_node4.start();
-	//
-	// cli_node6.enable();
-	// cli_node6.start();
-
-	// xrl_mld6igmp_node4.enable_cli();
-	// xrl_mld6igmp_node4.start_cli();
-	// xrl_mld6igmp_node4.enable_mld6igmp();
-	// xrl_mld6igmp_node4.start_mld6igmp();
-	// xrl_mld6igmp_node4.enable_all_vifs();
-	// xrl_mld6igmp_node4.start_all_vifs();
-	//
-	// xrl_mld6igmp_node6.enable_cli();
-	// xrl_mld6igmp_node6.start_cli();
-	// xrl_mld6igmp_node6.enable_mld6igmp();
-	// xrl_mld6igmp_node6.start_mld6igmp();
-	// xrl_mld6igmp_node6.enable_all_vifs();
-	// xrl_mld6igmp_node6.start_all_vifs();
-
-
-	//
-	// Main loop
-	//
-	for (;;) {
-	    eventloop.run();
-	}
-
-	//
-	// Stop the nodes
-	//
-
-	// xrl_mld6igmp_node4.stop_all_vifs();
-	// xrl_mld6igmp_node4.stop_mld6igmp();
-	// xrl_mld6igmp_node4.stop_cli();
-	//
-	// xrl_mld6igmp_node6.stop_all_vifs();
-	// xrl_mld6igmp_node6.stop_mld6igmp();
-	// xrl_mld6igmp_node6.stop_cli();
-
-	// cli_node4.stop();
-	//
-	// cli_node6.stop();
-
+	mld6igmp_main(finder_hostname, finder_port);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
