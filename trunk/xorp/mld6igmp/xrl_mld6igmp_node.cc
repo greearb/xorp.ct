@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.25 2004/04/29 23:35:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.26 2004/04/30 23:07:01 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -223,6 +223,14 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 	_is_mfea_add_protocol_registered = true;
 	Mld6igmpNode::decr_startup_requests_n();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register with the MFEA: %s",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -438,9 +446,10 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 void
 XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error)
 {
+    bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
+
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
-	bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
 	_start_stop_protocol_kernel_vif_queue.pop_front();
 	if (is_start)
 	    Mld6igmpNode::decr_startup_requests_n();
@@ -448,6 +457,15 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlErr
 	    Mld6igmpNode::decr_shutdown_requests_n();
 	send_start_stop_protocol_kernel_vif();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot %s protocol vif with the MFEA: %s",
+		   (is_start)? "start" : "stop",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -603,9 +621,10 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 void
 XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error)
 {
+    bool is_join = _join_leave_multicast_group_queue.front().is_join();
+
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
-	bool is_join = _join_leave_multicast_group_queue.front().is_join();
 	_join_leave_multicast_group_queue.pop_front();
 	if (is_join)
 	    Mld6igmpNode::decr_startup_requests_n();
@@ -613,6 +632,15 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& 
 	    Mld6igmpNode::decr_shutdown_requests_n();
 	send_join_leave_multicast_group();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot %s a multicast group with the MFEA: %s",
+		   (is_join)? "join" : "leave",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -790,6 +818,23 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(const XrlError& x
     }
 
     //
+    // If a command failed because the other side rejected it,
+    // then send the next one.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	const SendAddDeleteMembership& membership = _send_add_delete_membership_queue.front();
+	bool is_add = membership.is_add();
+
+	XLOG_ERROR("Cannot %s a multicast group with a client: %s",
+		   (is_add)? "add" : "delete",
+		   xrl_error.str().c_str());
+
+	_send_add_delete_membership_queue.pop_front();
+	send_add_delete_membership();
+	return;
+    }
+
+    //
     // If an error, then start a timer to try again
     // TODO: XXX: the timer value is hardcoded here!!
     //
@@ -893,11 +938,16 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 void
 XrlMld6igmpNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send a protocol message: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // XXX: all protocol messages are soft-state
+    // (i.e., they are retransmitted periodically by the protocol),
+    // hence we don't retransmit them here if there was an error.
+    //
+    XLOG_ERROR("Failed to send a protocol message: %s",
+	       xrl_error.str().c_str());
 }
 
 //
@@ -927,11 +977,14 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 void
 XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to add a command to CLI manager: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to add a command to CLI manager: %s",
+	       xrl_error.str().c_str());
 }
 
 int
@@ -949,11 +1002,14 @@ XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 void
 XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to delete a command from CLI manager: %s",
+	       xrl_error.str().c_str());
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.26 2004/05/06 20:14:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.27 2004/05/20 20:52:21 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -368,6 +368,22 @@ XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb(const XrlError& xrl_erro
     }
 
     //
+    // If a command failed because the other side rejected it,
+    // then send the next one.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	const SendAddDeleteMrib& add_delete_mrib = _send_add_delete_mrib_queue.front();
+	bool is_add = add_delete_mrib.is_add();
+
+	XLOG_ERROR("Cannot %s a MRIB entry with a client: %s",
+		   (is_add)? "add" : "delete",
+		   xrl_error.str().c_str());
+	_send_add_delete_mrib_queue.pop_front();
+	send_add_delete_mrib();
+	return;
+    }
+
+    //
     // If an error, then start a timer to try again
     // TODO: XXX: the timer value is hardcoded here!!
     //
@@ -474,6 +490,12 @@ void
 XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
+	//
+	// XXX: all protocol messages that use the MFEA are soft-state
+	// (i.e., they are retransmitted periodically by the protocol),
+	// hence we don't retransmit them here if there was an error.
+	//
+
 	XLOG_ERROR("Failed to send a data message to a protocol: %s",
 		   xrl_error.str().c_str());
 	return;
@@ -580,6 +602,12 @@ void
 XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
+	//
+	// XXX: all kernel signal messages are soft-state
+	// (i.e., they are retransmitted as appropriate by the kernel),
+	// hence we don't retransmit them here if there was an error.
+	//
+
 	XLOG_ERROR("Failed to send a kernel signal message to a protocol: %s",
 		   xrl_error.str().c_str());
 	return;
@@ -799,57 +827,79 @@ XrlMfeaNode::send_set_config_all_vifs_done(const string& dst_module_instance_nam
 void
 XrlMfeaNode::mfea_client_client_send_new_vif_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send new vif info to a protocol: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to send new vif info to a protocol: %s",
+	       xrl_error.str().c_str());
 }
+
 void
 XrlMfeaNode::mfea_client_client_send_delete_vif_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send delete_vif to a protocol: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to send delete_vif to a protocol: %s",
+	       xrl_error.str().c_str());
 }
+
 void
 XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send new vif address to a protocol: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to send new vif address to a protocol: %s",
+	       xrl_error.str().c_str());
 }
+
 void
 XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send delete vif address to a protocol: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to send delete vif address to a protocol: %s",
+	       xrl_error.str().c_str());
 }
+
 void
 XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send new vif flags to a protocol: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to send new vif flags to a protocol: %s",
+	       xrl_error.str().c_str());
 }
 
 void
 XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send set_all_vifs_done to a protocol: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to send set_all_vifs_done to a protocol: %s",
+	       xrl_error.str().c_str());
 }
 
 int
@@ -925,11 +975,14 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 void
 XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send recv_dataflow_signal to a protocol: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to send recv_dataflow_signal to a protocol: %s",
+	       xrl_error.str().c_str());
 }
 
 //
@@ -959,11 +1012,14 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 void
 XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to add a command to CLI manager: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to add a command to CLI manager: %s",
+	       xrl_error.str().c_str());
 }
 
 int
@@ -981,11 +1037,14 @@ XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 void
 XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error != XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to delete a command from CLI manager: %s",
+	       xrl_error.str().c_str());
 }
 
 

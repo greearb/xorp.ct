@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.50 2004/05/13 06:06:27 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.51 2004/05/18 06:54:55 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -360,6 +360,14 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     }
 
     //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register with the MFEA: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
     // If an error, then start a timer to try again (unless the timer is
     // already running).
     // TODO: XXX: the timer value is hardcoded here!!
@@ -383,6 +391,14 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     }
 
     //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot allow signal messages with the MFEA: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
     // If an error, then start a timer to try again (unless the timer is
     // already running).
     // TODO: XXX: the timer value is hardcoded here!!
@@ -402,6 +418,14 @@ XrlPimNode::mfea_client_send_allow_mrib_messages_cb(const XrlError& xrl_error)
 	_is_mfea_allow_mrib_messages_registered = true;
 	PimNode::decr_startup_requests_n();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot allow MRIB messages with the MFEA: %s",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -547,6 +571,14 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(const XrlError& xrl_err
 	_is_rib_client_registered = true;
 	PimNode::decr_startup_requests_n();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register with the RIB: %s",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -766,9 +798,10 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 void
 XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error)
 {
+    bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
+
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
-	bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
 	_start_stop_protocol_kernel_vif_queue.pop_front();
 	if (is_start)
 	    PimNode::decr_startup_requests_n();
@@ -776,6 +809,15 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& x
 	    PimNode::decr_shutdown_requests_n();
 	send_start_stop_protocol_kernel_vif();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot %s protocol vif with the MFEA: %s",
+		   (is_start)? "start" : "stop",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -931,9 +973,10 @@ XrlPimNode::send_join_leave_multicast_group()
 void
 XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error)
 {
+    bool is_join = _join_leave_multicast_group_queue.front().is_join();
+
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
-	bool is_join = _join_leave_multicast_group_queue.front().is_join();
 	_join_leave_multicast_group_queue.pop_front();
 	if (is_join)
 	    PimNode::decr_startup_requests_n();
@@ -941,6 +984,15 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_e
 	    PimNode::decr_shutdown_requests_n();
 	send_join_leave_multicast_group();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot %s a multicast group with the MFEA: %s",
+		   (is_join)? "join" : "leave",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -1051,9 +1103,6 @@ XrlPimNode::send_add_delete_mfc()
 		mfc.group_addr().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
 	}
-
-
-
     }
     
     if (! success) {
@@ -1079,11 +1128,28 @@ XrlPimNode::mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error)
     }
 
     //
+    // If a command failed because the other side rejected it,
+    // then send the next one.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	const AddDeleteMfc& mfc = _add_delete_mfc_queue.front();
+	bool is_add = mfc.is_add();
+
+	XLOG_ERROR("Cannot %s a multicast group with the MFEA: %s",
+		   (is_add)? "add" : "delete",
+		   xrl_error.str().c_str());
+
+	_add_delete_mfc_queue.pop_front();
+	send_add_delete_mfc();
+	return;
+    }
+
+    //
     // If an error, then start a timer to try again
     // TODO: XXX: the timer value is hardcoded here!!
     //
     _add_delete_mfc_queue_timer = PimNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
+	TimeVal(1, 0),
 	callback(this, &XrlPimNode::send_add_delete_mfc));
 }
 
@@ -1303,6 +1369,26 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_
     }
 
     //
+    // If a command failed because the other side rejected it,
+    // then send the next one.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	const AddDeleteDataflowMonitor& monitor = _add_delete_dataflow_monitor_queue.front();
+	bool is_add = monitor.is_add();
+	bool is_delete_all = monitor.is_delete_all();
+
+	XLOG_ERROR("Cannot %s with the MFEA: %s",
+		   (is_add)? "add a dataflow monitor"
+		   : (is_delete_all)? "delete multiple dataflow monitors"
+		   : "delete a dataflow monitor",
+		   xrl_error.str().c_str());
+
+	_add_delete_dataflow_monitor_queue.pop_front();
+	send_add_delete_dataflow_monitor();
+	return;
+    }
+
+    //
     // If an error, then start a timer to try again
     // TODO: XXX: the timer value is hardcoded here!!
     //
@@ -1449,9 +1535,10 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 void
 XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(const XrlError& xrl_error)
 {
+    bool is_add = _add_delete_protocol_mld6igmp_queue.front().second;
+
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
-	bool is_add = _add_delete_protocol_mld6igmp_queue.front().second;
 	_add_delete_protocol_mld6igmp_queue.pop_front();
 	if (is_add)
 	    PimNode::decr_startup_requests_n();
@@ -1459,6 +1546,15 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(const XrlError&
 	    PimNode::decr_shutdown_requests_n();
 	send_add_delete_protocol_mld6igmp();
 	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot %s with the MFEA: %s",
+		   (is_add)? "register" : "deregister",
+		   xrl_error.str().c_str());
     }
 
     //
@@ -1574,11 +1670,16 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 void
 XrlPimNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send a protocol message: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // XXX: all protocol messages are soft-state
+    // (i.e., they are retransmitted periodically by the protocol),
+    // hence we don't retransmit them here if there was an error.
+    //
+    XLOG_ERROR("Failed to send a protocol message: %s",
+	       xrl_error.str().c_str());
 }
 
 //
@@ -1608,11 +1709,14 @@ XrlPimNode::add_cli_command_to_cli_manager(const char *command_name,
 void
 XrlPimNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to add a command to CLI manager: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to add a command to CLI manager: %s",
+	       xrl_error.str().c_str());
 }
 
 int
@@ -1630,11 +1734,14 @@ XrlPimNode::delete_cli_command_from_cli_manager(const char *command_name)
 void
 XrlPimNode::cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
-		   xrl_error.str().c_str());
+    if (xrl_error == XrlError::OKAY())
 	return;
-    }
+
+    //
+    // TODO: if the command failed, then we should retransmit it
+    //
+    XLOG_ERROR("Failed to delete a command from CLI manager: %s",
+	       xrl_error.str().c_str());
 }
 
 
