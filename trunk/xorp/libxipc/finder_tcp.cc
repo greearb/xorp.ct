@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.6 2003/02/24 19:39:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.7 2003/02/25 18:58:50 hodson Exp $"
 
 #include <functional>
 
@@ -323,7 +323,7 @@ FinderTcpListenerBase::connect_hook(int fd, SelectorMask m)
     }
 
     IPv4 peer(name);
-    if (is_host_permitted(peer)) {
+    if (host_is_permitted(peer)) {
 	int fl = fcntl(fd, F_GETFL);
 	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 	    XLOG_WARNING("Failed to set socket non-blocking.");
