@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.20 2004/05/12 21:55:22 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.21 2004/05/20 22:18:18 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -313,6 +313,14 @@ public:
     virtual int route_deregister(const IPNet<A>& subnet, const string& module);
 
     /**
+     * Find a routing protcol, given its protocol name
+     *
+     * @param protocol the name of the table to search for.
+     * @return pointer to table if exists, NULL otherwise.
+     */
+    inline Protocol* find_protocol(const string& protocol);
+
+    /**
      * Get route redistribution table for specified routing protocol.
      */
     RedistTable<A>* protocol_redist_table(const string& protocol);
@@ -495,14 +503,6 @@ private:
     inline OriginTable<A>* find_table_by_instance(const string& tablename,
 						  const string&	target_class,
 						  const string& target_instance);
-
-    /**
-     * Find a routing protcol, given its protocol name
-     *
-     * @param protocol the name of the table to search for.
-     * @return pointer to table if exists, NULL otherwise.
-     */
-    inline Protocol* find_protocol(const string& protocol);
 
     /**
      * Add table to RIB, but don't do any plumbing.

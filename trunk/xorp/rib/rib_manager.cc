@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.34 2004/05/20 23:45:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.35 2004/06/07 23:01:36 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -27,6 +27,7 @@
 
 #include "rib_manager.hh"
 #include "redist_xrl.hh"
+#include "redist_policy.hh"
 
 template <typename A>
 void
@@ -659,18 +660,43 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 			 XrlRouter&	rtr,
 			 RIB<A>&	rib,
 			 const string&	to_xrl_target,
-			 const string&	protocol,
+			 const string&	proto,
 			 const string&	cookie,
 			 bool		is_xrl_transaction_output)
 {
+    string protocol(proto);
+
+    RedistPolicy<A>* redist_policy = 0;
+    if (protocol.find("all-") == 0) {
+	// XXX Voodoo magic, user requests a name like all-<protocol>
+	// then we attach xrl output to the redist output table (known
+	// internally by the name "all") and set the redist_policy filter
+	// to correspond with the protocol
+	protocol = "all";
+
+	string sub = proto.substr(4, string::npos);
+	if (sub != "all") {
+	    Protocol* p = rib.find_protocol(sub);
+	    if (p != 0) {
+		redist_policy = new IsOfProtocol<A>(*p);
+	    } else {
+		cerr << "Could not find protocol " << sub << endl;
+	    }
+	}
+    }
+
     RedistTable<A>* rt = rib.protocol_redist_table(protocol);
-    if (rt == 0)
+    if (rt == 0) {
+	delete redist_policy;
 	return XORP_ERROR;
+    }
 
     string redist_name = make_redist_name(to_xrl_target, cookie,
 					  is_xrl_transaction_output);
-    if (rt->redistributor(redist_name) != 0)
+    if (rt->redistributor(redist_name) != 0) {
+	delete redist_policy;
 	return XORP_ERROR;
+    }
 
     Redistributor<A>* redist = new Redistributor<A>(eventloop,
 						    redist_name);
@@ -685,6 +711,9 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 	redist->set_output(new RedistXrlOutput<A>(redist, rtr, protocol,
 						  to_xrl_target, cookie));
     }
+
+    redist->set_policy(redist_policy);
+
     return XORP_OK;
 }
 
@@ -692,10 +721,18 @@ template <typename A>
 static int
 redist_disable_xrl_output(RIB<A>& rib,
 			  const string& to_xrl_target,
-			  const string& protocol,
+			  const string& proto,
 			  const string& cookie,
 			  bool is_xrl_transaction_output)
 {
+    string protocol(proto);
+    if (protocol.find("ribout-") == 0) {
+	// XXX Voodoo magic, user requests a name like ribout-<protocol>
+	// then we attach xrl output to the redist output table (known
+	// internally by the name "all"
+	protocol = "all";
+    }
+
     RedistTable<A>* rt = rib.protocol_redist_table(protocol);
     if (rt == 0)
 	return XORP_ERROR;

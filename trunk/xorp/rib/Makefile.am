@@ -1,7 +1,9 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.25 2004/05/12 08:28:49 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.26 2004/05/20 22:18:17 pavlin Exp $
 ##
+
+SUBDIRS = . tools
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)

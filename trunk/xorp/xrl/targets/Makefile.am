@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.33 2004/05/13 08:05:36 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.34 2004/05/20 22:18:19 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -31,6 +31,7 @@ tgt_files		+= ripng.tgt
 tgt_files		+= rib.tgt
 tgt_files		+= ribclient.tgt
 tgt_files		+= rtrmgr.tgt
+tgt_files		+= show_routes.tgt
 tgt_files		+= socket_server.tgt
 tgt_files		+= static_routes.tgt
 tgt_files		+= test.tgt
@@ -71,6 +72,7 @@ noinst_LIBRARIES	+= libribclientbase.a
 noinst_LIBRARIES	+= libripbase.a
 noinst_LIBRARIES	+= libripngbase.a
 noinst_LIBRARIES	+= librtrmgrbase.a
+noinst_LIBRARIES	+= libshowroutesbase.a
 noinst_LIBRARIES	+= libsocketserverbase.a
 noinst_LIBRARIES	+= libstaticroutesbase.a
 noinst_LIBRARIES	+= libtestbase.a
@@ -236,6 +238,13 @@ librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
+
+libshowroutesbase_a_SOURCES = show_routes_base.hh show_routes_base.cc
+$(srcdir)/show_routes_base.hh $(srcdir)/show_routes_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
+		$(INTERFACES_DIR)/redist4.xif				\
+		$(INTERFACES_DIR)/redist6.xif
 
 # SOCKET SERVER
 libsocketserverbase_a_SOURCES  = socket_server_base.hh			\
