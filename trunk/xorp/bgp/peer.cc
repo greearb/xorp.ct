@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.78 2004/06/08 00:21:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.79 2004/06/10 22:40:31 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,6 +28,7 @@
 
 #include "peer.hh"
 #include "bgp.hh"
+#include "profile_vars.hh"
 
 #define DEBUG_BGPPeer
 
@@ -45,6 +46,7 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
     _SocketClient = sock;
     _output_queue_was_busy = false;
     _handler = NULL;
+    _peername = c_format("Peer-%s", peerdata()->iptuple().str().c_str());
 
     _in_updates = 0;
     _out_updates = 0;
@@ -74,8 +76,14 @@ BGPPeer::~BGPPeer()
  */
 bool
 BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
-			 size_t length)
+		     size_t length)
 {
+    if (main()->profile().enabled(profile_message_in))
+	main()->profile().log(profile_message_in,
+			      c_format("message on %s len %d",
+				       str().c_str(),
+				       length));
+	
     TIMESPENT();
 
     switch (status) {
@@ -1528,13 +1536,15 @@ BGPPeer::release_resources()
     return true;
 }
 
+#if	0
 string
-BGPPeer::str()
+BGPPeer::str() const
 {
     return c_format("Peer(%d)-%s",
 		    get_sock(),
 		    peerdata()->iptuple().str().c_str());
 }
+#endif
 
 const char *
 BGPPeer::pretty_print_state(FSMState s)

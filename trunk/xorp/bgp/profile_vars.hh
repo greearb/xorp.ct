@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/profile_vars.hh,v 1.1 2004/09/21 18:02:12 atanu Exp $
 
 #ifndef __BGP_PROFILE_VARS_HH__
 #define __BGP_PROFILE_VARS_HH__
@@ -21,6 +21,7 @@
  * Profile variables
  * See: profile_vars.cc for definitions.
  */
+const string profile_message_in = "message_in";
 const string profile_route_ribin = "route_ribin";
 const string profile_route_rpc_out = "route_rpc_out";
 

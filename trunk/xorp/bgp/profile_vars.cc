@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.2 2004/09/21 21:57:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,6 +30,7 @@ struct profile_vars {
     string var;
     string comment;
 } profile_vars[] = {
+    {profile_message_in, 	"Messages entering BGP"},
     {profile_route_ribin, 	"Routes entering BGP"},
     {profile_route_rpc_out, 	"Routes being sent to the RIB"},
 };

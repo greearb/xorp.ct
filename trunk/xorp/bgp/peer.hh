@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.16 2004/05/29 01:43:04 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.17 2004/06/10 22:40:32 hodson Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -118,7 +118,7 @@ public:
     PeerOutputState send_message(const BGPPacket& p);
     void send_message_complete(SocketClient::Event, const uint8_t *buf);
 
-    string str();
+    inline string str() const		{ return _peername; }
     bool is_connected() const		{ return _SocketClient->is_connected(); }
     bool still_reading() const		{ return _SocketClient->still_reading(); }
     LocalData* _localdata;
@@ -179,6 +179,7 @@ private:
     BGPPeerData* _peerdata;
     BGPMain* _mainprocess;
     PeerHandler *_handler;
+    string _peername;
 
     XorpTimer _timer_connect_retry;
     XorpTimer _timer_hold_time;
