@@ -5,7 +5,7 @@
 A static route is a manually configured route.  Static routes will not
 automatically change if a link or neighboring router fails.  In
 general, static routes should only be used for very simple network
-topologies, or to override the behaviour of a dyanmic routing protocol
+topologies, or to override the behaviour of a dynamic routing protocol
 for a small number of routes.
 
 Static routes can be configured for IPv4 and IPv6.  Each route can be
@@ -25,7 +25,7 @@ such as PIM.  PIM uses this to determine the reverse-path
 information\footnote{the path back to a source} needed to route
 multicast control information that in turn sets up the multicast
 forwarding tree.  The part of the {\it RIB} used to contain multicast
-topology informtaion is called the {\it Multicast RIB} or {\it MRIB}.
+topology information is called the {\it Multicast RIB} or {\it MRIB}.
 
 \newpage
 \section{Configuration of Static Routes}
@@ -77,7 +77,7 @@ protocols \{\\
 
 The configuration parameters are used as follows:
 \begin{description}
-\item{\tt protocols}: this delimits the configuation for all routing
+\item{\tt protocols}: this delimits the configuration for all routing
   protocols in the XORP router configuration.  It is mandatory that
   BGP configuration is under the {\stt protocols} node in the
   configuration.
