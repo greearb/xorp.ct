@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.15 2003/12/16 23:39:39 pavlin Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.16 2003/12/20 01:43:34 pavlin Exp $
 #
 
 #
@@ -10,26 +10,48 @@
 
 MODULE_NAME="PIM-SM"
 HOSTNAME=`hostname`
-
-echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
+IP_VERSION="IPV4"		# XXX: IP version defaults to IPv4
 
 # Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+#
+# The optional first argument should be either -4 or -6 to specify
+# IPv4 or IPv6 mode.
+#
+usage()
+{
+	echo "Usage: $0 [-4 | -6 ]"
+}
+
+#
+# Get the arguments
+#
+if [ $# -gt 0 ] ; then
+	case "${1}" in
+		-4)
+			IP_VERSION="IPV4"
+			shift
+			;;
+		-6)
+			IP_VERSION="IPV6"
+			shift
+			;;
+		-h)
+			usage;
+			exit 0
+			;;
+		*)
+			;;
+	esac
+fi
+
+echo "Configuring ${MODULE_NAME} on ${HOSTNAME} in ${IP_VERSION} mode..."
 
 
 ###############################################################
 # USER CONFIGURATION BEGIN
 ###############################################################
-
-#
-# The IP version. It must be either IPV4 or IPV6
-#
-IP_VERSION=IPV4
-#IP_VERSION=IPV6
-
-. ${srcdir}/../cli/xrl_cli_shell_funcs.sh
-. ${srcdir}/../fea/xrl_mfea_shell_funcs.sh
-. ${srcdir}/../mld6igmp/xrl_mld6igmp_shell_funcs.sh
 
 #
 # Select the vifs to enable
@@ -91,13 +113,20 @@ MLD6IGMP_LOG_TRACE_ALL_ENABLE=yes
 CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
 CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
 
-
 ###############################################################
 # USER CONFIGURATION END
 ###############################################################
 
+#
+# Read-in the files with helper functions
+#
+. ${srcdir}/../cli/xrl_cli_shell_funcs.sh
+. ${srcdir}/../fea/xrl_mfea_shell_funcs.sh
+. ${srcdir}/../mld6igmp/xrl_mld6igmp_shell_funcs.sh
 
+#
 # Add the PIM 'register_vif' to the list of interfaces to enable
+#
 MFEA_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
 MLD6IGMP_ENABLE_VIFS="${ENABLE_VIFS}"
 
@@ -153,7 +182,6 @@ for vif in ${MFEA_ENABLE_VIFS}; do
 	mfea_start_vif ${vif}
 done
 
-
 #
 # Enable and start MLD6IGMP CLI
 #
@@ -178,7 +206,6 @@ for vif in ${MLD6IGMP_ENABLE_VIFS}; do
 	mld6igmp_enable_vif ${vif} true
 	mld6igmp_start_vif ${vif}
 done
-
 
 #
 # Done
