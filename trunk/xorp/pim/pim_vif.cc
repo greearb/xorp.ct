@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.25 2003/08/14 01:16:35 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.26 2003/09/13 02:56:30 pavlin Exp $"
 
 
 //
@@ -62,12 +62,13 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
       _pim_node(pim_node),
       _dr_addr(pim_node.family()),
       _pim_nbr_me(*this, IPvX::ZERO(pim_node.family()), PIM_VERSION_DEFAULT),
+      _domain_wide_addr(IPvX::ZERO(pim_node.family())),
       _hello_triggered_delay(PIM_HELLO_HELLO_TRIGGERED_DELAY_DEFAULT),
       _hello_period(PIM_HELLO_HELLO_PERIOD_DEFAULT,
 		    callback(this, &PimVif::set_hello_period_callback)),
       _hello_holdtime(PIM_HELLO_HELLO_HOLDTIME_DEFAULT,
 		      callback(this, &PimVif::set_hello_holdtime_callback)),
-      _dr_priority(PIM_HELLO_DR_ELECTION_PRIORITY_DEFAULT,
+      _dr_priority(PIM_HELLO_DR_PRIORITY_DEFAULT,
 		   callback(this, &PimVif::set_dr_priority_callback)),
       _lan_delay(LAN_DELAY_MSEC_DEFAULT,
 		 callback(this, &PimVif::set_lan_delay_callback)),
@@ -268,15 +269,52 @@ PimVif::start()
 	return (XORP_ERROR);
     if (! (is_multicast_capable() || is_pim_register()))
 	return (XORP_ERROR);
-    if (addr_ptr() == NULL)
+    
+    //
+    // Get the primary address and the domain-wide reachable address.
+    // The primary address should be a link-local unicast address, and
+    // is used for transmitting the multicast control packets on the LAN.
+    // The domain-wide reachable address is the address that should be
+    // reachable by all PIM-SM routers in the domain
+    // (e.g., the Cand-BSR, or the Cand-RP address).
+    //
+    IPvX primary_a(IPvX::ZERO(family()));
+    IPvX domain_wide_a(IPvX::ZERO(family()));
+    list<VifAddr>::const_iterator iter;
+    for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
+	const VifAddr& vif_addr = *iter;
+	const IPvX& addr = vif_addr.addr();
+	if (! addr.is_unicast())
+	    continue;
+	if (addr.is_linklocal_unicast()) {
+	    primary_a = addr;
+	    continue;
+	}
+	// XXX: assume that everything else can be a domain-wide reachable
+	// address.
+	domain_wide_a = addr;
+    }
+    //
+    // XXX: if there is no link-local address to serve as a primary address,
+    // then use the domain-wide address as a primary address.
+    //
+    if (primary_a == IPvX::ZERO(family()))
+	primary_a = domain_wide_a;
+
+    //
+    // Check that the interface has a primary and a domain-wide reachable
+    // addresses.
+    //
+    if ((primary_a == IPvX::ZERO(family()))
+	|| (domain_wide_a == IPvX::ZERO(family()))) {
 	return (XORP_ERROR);
-    if (! addr_ptr()->is_unicast())
-	return (XORP_ERROR);
+    }
     
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
     
-    pim_nbr_me().set_addr(*addr_ptr());		// Set my PimNbr address
+    pim_nbr_me().set_primary_addr(primary_a);	// Set my PimNbr address
+    set_domain_wide_addr(domain_wide_a);
     
     //
     // Start the vif with the kernel
@@ -466,12 +504,33 @@ PimVif::pim_send(const IPvX& dst,
 {
     uint8_t pim_vt;
     uint16_t cksum;
+    uint16_t cksum2 = 0;
     int ip_tos = -1;
     int ret_value;
     size_t datalen;
-    
+    IPvX src = primary_addr();
+    int ttl = MINTTL;
+    bool router_alert_bool = true;
+
     if (! (is_up() || is_pending_down()))
 	return (XORP_ERROR);
+
+    //
+    // If the destination address is unicast, then modify some of
+    // the sending values.
+    //
+    if (dst.is_unicast()) {
+	//
+	// XXX: if we use LAN-local unicast, the TTL of the unicast packets
+	// probably should be MINTTL instead of DEFTTL. However, this will
+	// complicate things a bit (we would need to check per message type),
+	// and in general it shoudn't hurt even if we use unicast
+	// with TTL > MINTTL
+	//
+	src = domain_wide_addr();
+	ttl = IPDEFTTL;
+	router_alert_bool = false;
+    }
     
     //
     // If necessary, send first a Hello message
@@ -551,61 +610,45 @@ PimVif::pim_send(const IPvX& dst,
     //
     // Compute the checksum
     //
+    if (is_ipv6()) {
+	//
+	// XXX: The checksum for IPv6 includes the IPv6 "pseudo-header"
+	// as described in RFC 2460.
+	//
+	size_t ph_len;
+	if (message_type == PIM_REGISTER)
+	    ph_len = PIM_REGISTER_HEADER_LENGTH;
+	else
+	    ph_len = BUFFER_DATA_SIZE(buffer);
+	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len);
+    }
+    
     // XXX: The checksum for PIM_REGISTER excludes the encapsulated data packet
     switch (message_type) {
     case PIM_REGISTER:
-	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), PIM_MINLEN);
+	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer),
+			   PIM_REGISTER_HEADER_LENGTH);
 	break;
     default:
 	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
 	break;
     }
     
-    if (is_ipv6()) {
-	// XXX: The checksum for IPv6 includes the IPv6 "pseudo-header"
-	// as described in RFC 2460.
-	struct ip6_pseudo_hdr {
-	    struct in6_addr	ip6_src;	// Source address
-	    struct in6_addr	ip6_dst;	// Destination address
-	    uint32_t		ph_len;		// Upper-layer packet length
-	    uint8_t		ph_zero[3];	// Zero
-	    uint8_t		ph_next;	// Upper-layer protocol number
-	} ip6_pseudo_header;	// TODO: may need __attribute__((__packed__))
-	uint16_t cksum2;
-	
-	addr().copy_out(ip6_pseudo_header.ip6_src);
-	dst.copy_out(ip6_pseudo_header.ip6_dst);
-	ip6_pseudo_header.ph_len = htonl(BUFFER_DATA_SIZE(buffer));
-	ip6_pseudo_header.ph_zero[0] = 0;
-	ip6_pseudo_header.ph_zero[1] = 0;
-	ip6_pseudo_header.ph_zero[2] = 0;
-	ip6_pseudo_header.ph_next = IPPROTO_PIM;
-	
-	cksum2 = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
-	cksum = INET_CKSUM_ADD(cksum, cksum2);
-    }
-    
+    cksum = INET_CKSUM_ADD(cksum, cksum2);
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the ckecksum
-    
+
     XLOG_TRACE(pim_node().is_log_trace(),
 	       "TX %s from %s to %s on vif %s",
 	       PIMTYPE2ASCII(message_type),
-	       cstring(addr()),
+	       cstring(src),
 	       cstring(dst),
 	       name().c_str());
     
     //
     // Send the message
     //
-    // XXX: if we use LAN-local unicast, the TTL of the unicast packets
-    // probably should be MINTTL instead of DEFTTL. However, this will
-    // complicate things a bit (we would need to check per message type),
-    // and in general it shoudn't hurt even if we use unicast with TTL > MINTTL
-    ret_value = pim_node().pim_send(vif_index(), addr(), dst,
-				    dst.is_multicast() ? MINTTL : IPDEFTTL,
-				    ip_tos,
-				    dst.is_multicast() ? true : false,
-				    buffer);
+    ret_value = pim_node().pim_send(vif_index(), src, dst, ttl, ip_tos,
+				    router_alert_bool, buffer);
     
     //
     // Actions after the message is sent
@@ -664,8 +707,7 @@ PimVif::pim_send(const IPvX& dst,
     XLOG_ERROR("TX %s from %s to %s on vif %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(message_type),
-	       cstring(addr()),
-	       cstring(dst),
+	       cstring(src), cstring(dst),
 	       name().c_str());
     return (XORP_ERROR);
 
@@ -774,30 +816,22 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     // Checksum verification.
     //
     if (is_ipv6()) {
+	//
 	// XXX: The checksum for IPv6 includes the IPv6 "pseudo-header"
 	// as described in RFC 2460.
-	struct ip6_pseudo_hdr {
-	    struct in6_addr	ip6_src;	// Source address
-	    struct in6_addr	ip6_dst;	// Destination address
-	    uint32_t		ph_len;		// Upper-layer packet length
-	    uint8_t		ph_zero[3];	// Zero
-	    uint8_t		ph_next;	// Upper-layer protocol number
-	} ip6_pseudo_header;	// TODO: may need __attribute__((__packed__))
-	
-	src.copy_out(ip6_pseudo_header.ip6_src);
-	dst.copy_out(ip6_pseudo_header.ip6_dst);
-	ip6_pseudo_header.ph_len = htonl(BUFFER_DATA_SIZE(buffer));
-	ip6_pseudo_header.ph_zero[0] = 0;
-	ip6_pseudo_header.ph_zero[1] = 0;
-	ip6_pseudo_header.ph_zero[2] = 0;
-	ip6_pseudo_header.ph_next = IPPROTO_PIM;
-	
-	cksum2 = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
+	//
+	size_t ph_len;
+	if (message_type == PIM_REGISTER)
+	    ph_len = PIM_REGISTER_HEADER_LENGTH;
+	else
+	    ph_len = BUFFER_DATA_SIZE(buffer);
+	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len);
     }
     
     switch (message_type) {
     case PIM_REGISTER:
-	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), PIM_MINLEN);
+	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer),
+			   PIM_REGISTER_HEADER_LENGTH);
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
 	if (cksum == 0)
 	    break;
@@ -936,24 +970,18 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 	    ret_value = XORP_ERROR;
 	    goto ret_label;
 	}
-#ifdef HAVE_IPV6
 #if 0
 	// TODO: this check has to be fixed in case we use GRE tunnels
-	if (is_ipv6()) {
-	    struct in6_addr in6_addr;
-	    src.copy_out(in6_addr);
-	    if (! IN6_IS_ADDR_LINKLOCAL(&in6_addr)) {
-		XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			     "source is not a link-local address",
-			     PIMTYPE2ASCII(message_type),
-			     cstring(src), cstring(dst),
-			     name().c_str());
-		ret_value = XORP_ERROR;
-		goto ret_label;
-	    }
+	if (! src.is_linklocal_unicast()) {
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
+			 "source is not a link-local address",
+			 PIMTYPE2ASCII(message_type),
+			 cstring(src), cstring(dst),
+			 name().c_str());
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 #endif // 0/1
-#endif  // HAVE_IPV6
 	break;
     case PIM_REGISTER:
     case PIM_REGISTER_STOP:
@@ -1343,6 +1371,43 @@ PimVif::buffer_send_prepare(buffer_t *buffer)
 }
 
 /**
+ * PimVif::calculate_ipv6_pseudo_header_checksum:
+ * @src: the source address of the pseudo-header.
+ * @dst: the destination address of the pseudo-header.
+ * @len: the upper-layer packet length of the pseudo-header
+ * (in host-order).
+ * 
+ * Calculate the checksum of an IPv6 "pseudo-header" as described
+ * in RFC 2460.
+ * 
+ * Return value: the checksum of the IPv6 "pseudo-header".
+ **/
+uint16_t
+PimVif::calculate_ipv6_pseudo_header_checksum(const IPvX& src, const IPvX& dst,
+					      size_t len)
+{
+    struct ip6_pseudo_hdr {
+	struct in6_addr	ip6_src;	// Source address
+	struct in6_addr	ip6_dst;	// Destination address
+	uint32_t	ph_len;		// Upper-layer packet length
+	uint8_t		ph_zero[3];	// Zero
+	uint8_t		ph_next;	// Upper-layer protocol number
+    } ip6_pseudo_header;	// TODO: may need __attribute__((__packed__))
+    
+    src.copy_out(ip6_pseudo_header.ip6_src);
+    dst.copy_out(ip6_pseudo_header.ip6_dst);
+    ip6_pseudo_header.ph_len = htonl(len);
+    ip6_pseudo_header.ph_zero[0] = 0;
+    ip6_pseudo_header.ph_zero[1] = 0;
+    ip6_pseudo_header.ph_zero[2] = 0;
+    ip6_pseudo_header.ph_next = IPPROTO_PIM;
+    
+    uint16_t cksum = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
+    
+    return (cksum);
+}
+
+/**
  * PimVif::pim_nbr_find:
  * @nbr_addr: The address of the neighbor to search for.
  * 
@@ -1356,7 +1421,7 @@ PimVif::pim_nbr_find(const IPvX& nbr_addr)
     list<PimNbr *>::iterator iter;
     for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (nbr_addr == pim_nbr->addr())
+	if (pim_nbr->is_my_addr(nbr_addr))
 	    return (pim_nbr);
     }
     
@@ -1383,7 +1448,7 @@ PimVif::delete_pim_nbr_from_nbr_list(PimNbr *pim_nbr)
     if (iter != _pim_nbrs.end()) {
 	XLOG_TRACE(pim_node().is_log_trace(),
 		   "Delete neighbor %s on vif %s",
-		   cstring(pim_nbr->addr()), name().c_str());
+		   cstring(pim_nbr->primary_addr()), name().c_str());
 	_pim_nbrs.erase(iter);
     }
 }
@@ -1411,7 +1476,7 @@ PimVif::delete_pim_nbr(PimNbr *pim_nbr)
 	} else {
 	    pim_node().processing_pim_nbr_list().push_back(pim_nbr);
 	    pim_node().pim_mrt().add_task_pim_nbr_changed(Vif::VIF_INDEX_INVALID,
-							  pim_nbr->addr());
+							  pim_nbr->primary_addr());
 	}
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.21 2003/08/12 15:50:13 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.22 2003/09/30 18:27:06 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -210,8 +210,22 @@ public:
      * 
      * @return my primary address on this interface.
      */
-    const IPvX&	addr() const		{ return (_pim_nbr_me.addr());	}
-    
+    const IPvX&	primary_addr() const	{ return (_pim_nbr_me.primary_addr()); }
+
+    /**
+     * Get my domain-wide reachable address on this interface.
+     * 
+     * @return my domain-wide reachable address on this interface.
+     */
+    const IPvX&	domain_wide_addr() const	{ return (_domain_wide_addr); }
+
+    /**
+     * Set my domain-wide reachable address on this interface.
+     * 
+     * @param v the value of the domain-wide reachable address.
+     */
+    void	set_domain_wide_addr(const IPvX& v) { _domain_wide_addr = v; }
+
     /**
      * Get the address of the Designated Router on this interface.
      * 
@@ -310,6 +324,19 @@ public:
     void	incr_usage_by_pim_mre_task();
     void	decr_usage_by_pim_mre_task();
     
+    /**
+     * Calculate the checksum of an IPv6 "pseudo-header" as described
+     * in RFC 2460.
+     * 
+     * @param src the source address of the pseudo-header.
+     * @param dst the destination address of the pseudo-header.
+     * @param len the upper-layer packet length of the pseudo-header
+     * (in host-order).
+     * @return the checksum of the IPv6 "pseudo-header".
+     */
+    uint16_t	calculate_ipv6_pseudo_header_checksum(const IPvX& src,
+						      const IPvX& dst,
+						      size_t len);
     buffer_t	*buffer_send_prepare();
     buffer_t	*buffer_send_prepare(buffer_t *buffer);
 
@@ -464,6 +491,8 @@ private:
     XorpTimer	_hello_once_timer;	// Timer to send once a HELLO message
     list<PimNbr *> _pim_nbrs;		// List of all PIM neighbors
     PimNbr	_pim_nbr_me;		// Myself (for misc. purpose)
+    IPvX	_domain_wide_addr;	// The domain-wide reachable address on
+					// this vif
     list<IPvX>	_send_unicast_bootstrap_nbr_list; // List of new nbrs to
 						  // unicast to them the
 						  // Bootstrap message.
