@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_queue.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_queue.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
 
 #include "route_queue.hh"
 #include "peer_handler.hh"
@@ -38,8 +38,8 @@ RouteQueueEntry<A>::str() const {
 	s = "RTQUEUE_OP_PUSH";
 	break;
     }
-    if (_route != NULL)
-	s += "\n" + _route->str();
+    if (_route_ref != NULL)
+	s += "\n" + _route_ref->route().str();
     else
 	s += "\n_route is NULL";
     if (_origin_peer != NULL)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.3 2003/02/06 06:44:34 mjh Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.4 2003/02/07 05:35:37 mjh Exp $"
 
 #include "bgp_module.h"
 #include "subnet_route.hh"
@@ -38,13 +38,11 @@ SubnetRoute<A>::SubnetRoute<A>(const SubnetRoute<A>& route_to_clone)
     _attributes = _att_mgr.add_attribute_list(atts);
 
     _flags = route_to_clone._flags;
-#ifdef SR_PARANOID
     //zero our reference count
     _flags ^= (_flags & SRF_REFCOUNT);
     //update parent refcount
     if (_parent_route)
 	_parent_route->bump_refcount(1);
-#endif
     _igp_metric = route_to_clone._igp_metric;
 }
 
@@ -65,14 +63,9 @@ SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n,
     //not used as this is always safe, if somewhat inefficient.
     _flags |= SRF_IN_USE;
 
-#ifdef SR_PARANOID
     if (_parent_route) {
-	set_token(_parent_route->token());
 	_parent_route->bump_refcount(1);
-    } else {
-	choose_token();
     }
-#endif
 
     _igp_metric = 0xffffffff;
 }
@@ -95,14 +88,9 @@ SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n,
     //not used as this is always safe, if somewhat inefficient.
     _flags |= SRF_IN_USE;
 
-#ifdef SR_PARANOID
     if (parent_route) {
-	set_token(parent_route->token());
 	_parent_route->bump_refcount(1);
-    } else {
-	choose_token();
     }
-#endif
 
     _igp_metric = igp_metric;
 }
@@ -123,11 +111,9 @@ SubnetRoute<A>::~SubnetRoute<A>() {
     debug_msg("SubnetRoute destructor called for %x\n", (uint)this);
     _att_mgr.delete_attribute_list(_attributes);
 
-#ifdef SR_PARANOID
     assert(refcount() == 0);
     if (_parent_route)
 	_parent_route->bump_refcount(-1);
-#endif
 
     //prevent accidental reuse after deletion.
     _net = IPNet<A>();
@@ -142,9 +128,6 @@ SubnetRoute<A>::set_is_winner(uint32_t igp_metric) const {
     _flags |= SRF_WINNER;
     _igp_metric = igp_metric;
     if (_parent_route) {
-#ifdef SR_PARANOID
-	assert(_parent_route->token() == token());
-#endif
 	_parent_route->set_is_winner(igp_metric);
     }
 }
@@ -154,9 +137,6 @@ void
 SubnetRoute<A>::set_is_not_winner() const {
     _flags &= ~SRF_WINNER;
     if (_parent_route) {
-#ifdef SR_PARANOID
-	assert(_parent_route->token() == token());
-#endif
 	_parent_route->set_is_not_winner();
     }
 }
@@ -170,9 +150,6 @@ SubnetRoute<A>::set_in_use(bool used) const {
 	_flags &= ~SRF_IN_USE;
     }
     if (_parent_route) {
-#ifdef SR_PARANOID
-	assert(_parent_route->token() == token());
-#endif
 	_parent_route->set_in_use(used);
     }
 

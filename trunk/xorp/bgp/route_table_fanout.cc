@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.7 2003/01/26 04:06:18 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.8 2003/02/07 06:23:03 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -466,8 +466,8 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     switch ((*queue_ptr)->op()) {
     case RTQUEUE_OP_ADD: {
 	debug_msg("OP_ADD, net=%s\n", 
-		  (*queue_ptr)->route()->net().str().c_str());
-	InternalMessage<A> rtmsg((*queue_ptr)->route(),
+		  (*queue_ptr)->route().net().str().c_str());
+	InternalMessage<A> rtmsg(&((*queue_ptr)->route()),
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -475,7 +475,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     }
     case RTQUEUE_OP_DELETE: {
 	debug_msg("OP_DELETE\n");
-	InternalMessage<A> rtmsg((*queue_ptr)->route(),
+	InternalMessage<A> rtmsg(&((*queue_ptr)->route()),
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -483,14 +483,14 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     }
     case RTQUEUE_OP_REPLACE_OLD: {
 	debug_msg("OP_REPLACE_OLD\n");
-	InternalMessage<A> old_rtmsg((*queue_ptr)->route(),
+	InternalMessage<A> old_rtmsg(&((*queue_ptr)->route()),
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
 	if (queue_ptr == _output_queue.begin())
 	    discard_possible = true;
 	queue_ptr++;
 	assert(queue_ptr != _output_queue.end());
-	InternalMessage<A> new_rtmsg((*queue_ptr)->route(),
+	InternalMessage<A> new_rtmsg(&((*queue_ptr)->route()),
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
 	next_table->replace_route(old_rtmsg, new_rtmsg,

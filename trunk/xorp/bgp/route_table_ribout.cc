@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.4 2003/01/16 23:18:59 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.5 2003/02/07 06:23:04 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -129,7 +129,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	// There was a delete in the queue.  The delete must become a replace.
 	debug_msg("removing delete entry from output queue to become replace\n");
 	_queue.erase(i);
-	entry = new RouteQueueEntry<A>(*(queued_entry->route()),
+	entry = new RouteQueueEntry<A>(queued_entry->route(),
 				       RTQUEUE_OP_REPLACE_OLD);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
@@ -229,7 +229,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	_queue.erase(i);
 	delete *i;
 
-	entry = new RouteQueueEntry<A>(*(queued_entry->route()),
+	entry = new RouteQueueEntry<A>(queued_entry->route(),
 				       RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
@@ -316,21 +316,21 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	    if ((*i)->op() == RTQUEUE_OP_ADD ) {
 		debug_msg("* Announce\n");
 		// the sanity checking was done in add_route...
-		_peer->add_route(*((*i)->route()));
+		_peer->add_route((*i)->route());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {
 		// the sanity checking was done in delete_route...
 		debug_msg("* Withdraw\n");
-		_peer->delete_route(*((*i)->route()));
+		_peer->delete_route((*i)->route());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {
 		debug_msg("* Replace\n");
-		const SubnetRoute<A> *old_route = (*i)->route();
+		const SubnetRoute<A> *old_route = &((*i)->route());
 		const RouteQueueEntry<A> *old_queue_entry = (*i);
 		i++;
 		assert(i != tmp_queue.end());
 		assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
-		const SubnetRoute<A> *new_route = (*i)->route();
+		const SubnetRoute<A> *new_route = &((*i)->route());
 		_peer->replace_route(*old_route, *new_route);
 		delete old_queue_entry;
 		delete (*i);

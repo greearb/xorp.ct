@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.6 2003/02/06 06:44:33 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.7 2003/02/07 05:35:37 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -245,17 +245,17 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	const SubnetRoute<A> *existing_route = &(iter.payload());
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
 	//preserve the information
-	SubnetRoute<A> route_copy(*existing_route);
+	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*existing_route);
 
 	//set the copy's parent route to one that still exists, because
 	//the parent_route pointer of our cached version is
 	//probably now invalid
-	route_copy.set_parent_route(rtmsg.route()->parent_route());
+	route_copy->set_parent_route(rtmsg.route()->parent_route());
 
 	//delete it from our cache trie 
 	_route_table.erase(net);
 
-	InternalMessage<A> old_rt_msg(&route_copy,
+	InternalMessage<A> old_rt_msg(route_copy,
 				      rtmsg.origin_peer(),
 				      rtmsg.genid());
 	if (rtmsg.push()) old_rt_msg.set_push();
@@ -270,7 +270,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    //Free the route from the message.
 	    rtmsg.inactivate();
 	}
-
+	route_copy->unref();
 	return result;
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_queue.hh,v 1.5 2003/02/07 05:35:37 mjh Exp $
+// $XORP: xorp/bgp/route_queue.hh,v 1.6 2003/02/07 06:23:03 mjh Exp $
 
 #ifndef __BGP_ROUTE_QUEUE_HH__
 #define __BGP_ROUTE_QUEUE_HH__
@@ -34,7 +34,7 @@ class RouteQueueEntry {
 public:
     RouteQueueEntry(const SubnetRoute<A>& rt, RouteQueueOp op) {
 	_op = op;
-	_route = new SubnetRoute<A>(rt);
+	_route_ref = new SubnetRouteConstRef<A>(rt);
 	_origin_peer = 0;
     }
 
@@ -42,20 +42,28 @@ public:
     RouteQueueEntry(RouteQueueOp op, const PeerHandler *origin_peer) {
 	assert(op == RTQUEUE_OP_PUSH);
 	_op = op;
-	_route = 0;
-	_origin_peer = origin_peer; // 0 is valid.
+	_route_ref = NULL;
+	_origin_peer = origin_peer; // NULL is valid.
     }
 
-    ~RouteQueueEntry()				
+    ~RouteQueueEntry() {
+	if (_route_ref)
+	    delete _route_ref;
+    }
+
+    const SubnetRoute<A>& route() const		
     { 
-	if (_route)
-	    _route->unref();	
+	return _route_ref->route();	
     }
 
-    const SubnetRoute<A> *route() const		{ return _route;	}
-    const IPNet<A>& net() const			{ return _route->net();	}
-    const PathAttributeList<A> *attributes() const {
-	return _route->attributes();
+    const IPNet<A>& net() const			
+    { 
+	return _route_ref->route().net();	
+    }
+
+    const PathAttributeList<A> *attributes() const 
+    {
+	return _route_ref->route().attributes();
     }
     RouteQueueOp op() const			{ return _op;		}
 
@@ -68,13 +76,7 @@ public:
 private:
     RouteQueueOp _op;
 
-    /**
-     * If _op is delete, we need to clone the route, and we cannot safely
-     * refer to any of the fields of _route because the original route may
-     * have been deleted by the time to access the queue entry.
-     * If _op is add, we can just copy the original pointer.
-     */
-    const SubnetRoute<A> *_route;
+    SubnetRouteConstRef<A> *_route_ref;
     const PeerHandler *_origin_peer;
     uint32_t _genid;
 };

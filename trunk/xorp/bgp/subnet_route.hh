@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.3 2003/02/06 06:44:34 mjh Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.4 2003/02/07 05:35:37 mjh Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -27,17 +27,21 @@
 #define SRF_WINNER 0x0002
 #define SRF_FILTERED 0x0004
 #define SRF_DELETED 0x0008
-#define SRF_TOKEN 0xff000000
-#define SRF_REFCOUNT 0x00ff0000
+#define SRF_REFCOUNT 0xffff0000
 
 //Defining paranoid emables some additional checks to ensure we don't
 //try to reuse deleted data, or follow an obsolete parent_route
 //pointer.
-#define SR_PARANOID
+template<class A>
+class SubnetRouteRef;
+template<class A>
+class SubnetRouteConstRef;
 
 template<class A>
 class SubnetRoute
 {
+    friend class SubnetRouteRef<A>;
+    friend class SubnetRouteConstRef<A>;
 public:
     SubnetRoute(const SubnetRoute<A>& route_to_clone);
     SubnetRoute(const IPNet<A> &net, 
@@ -83,57 +87,35 @@ public:
 	return _parent_route;
     }
 
-#ifdef SR_PARANOID
+
     void unref() const {
 	if (refcount() == 0)
 	    delete this;
 	else {
-	    printf("delaying deletion\n");
 	    _flags |= SRF_DELETED;
 	}
     }
-#else
-    void unref() const {
-	delete this;
-    }
-#endif
 
     void set_parent_route(const SubnetRoute<A> *parent) 
     {
 	assert(parent != this);
-#ifdef SR_PARANOID
 	if (_parent_route)
 	    _parent_route->bump_refcount(-1);
-#endif
 	_parent_route = parent;
-#ifdef SR_PARANOID
 	if (_parent_route)
 	    _parent_route->bump_refcount(1);
-#endif
     }
 
-#ifdef SR_PARANOID
-    inline uint8_t token() const {
-	return _flags >> 24;
-    }
-    inline uint8_t refcount() const {
+    inline uint16_t refcount() const {
 	return (_flags & SRF_REFCOUNT)>>16;
     }
-#endif
 protected:
 private:
-#ifdef SR_PARANOID
-    inline void set_token(uint8_t token) {
-	_flags |= (token << 24);
-    }
-    inline void choose_token() {
-	_flags |= (SRF_TOKEN & rand());
-    }
     inline void bump_refcount(int delta) const {
 	assert(delta == 1 || delta == -1);
 	uint8_t refs = refcount();
 	if (delta == 1) {
-	    assert(refs < 255);
+	    assert(refs < 0xffff);
 	} else {
 	    assert(refs > 0);
 	}
@@ -144,11 +126,9 @@ private:
 
 	//handle delayed deletion
 	if ((refs==0) && ((_flags & SRF_DELETED) != 0)) {
-	    printf("delayed deletion\n");
 	    delete this;
 	}
     }
-#endif
     //prevent accidental use of default assignment operator
     const SubnetRoute<A>& operator=(const SubnetRoute<A>&);
 
@@ -178,6 +158,38 @@ private:
        DecisionTable will fill in the IGP metric that was used in
        deciding the route was a winner */
     mutable uint32_t _igp_metric;
+};
+
+template<class A>
+class SubnetRouteRef
+{
+public:
+    SubnetRouteRef(SubnetRoute<A>& route) : _route(route)
+    {
+	_route.bump_refcount(1);
+    }
+    ~SubnetRouteRef() {
+	_route.bump_refcount(-1);
+    }
+    SubnetRoute<A>& route() const {return _route;}
+private:
+    SubnetRoute<A>& _route;
+};
+
+template<class A>
+class SubnetRouteConstRef 
+{
+public:
+    SubnetRouteConstRef(const SubnetRoute<A>& route) : _route(route)
+    {
+	_route.bump_refcount(1);
+    }
+    ~SubnetRouteConstRef() {
+	_route.bump_refcount(-1);
+    }
+    const SubnetRoute<A>& route() const {return _route;}
+private:
+    const SubnetRoute<A>& _route;
 };
 
 #endif // __BGP_SUBNET_ROUTE_HH__
