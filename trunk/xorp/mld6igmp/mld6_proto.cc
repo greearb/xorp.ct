@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.14 2003/04/22 23:27:21 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.15 2003/05/21 05:32:52 pavlin Exp $"
 
 
 //
@@ -75,10 +75,11 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     // Message length check.
     //
     if (BUFFER_DATA_SIZE(buffer) < MLD_MINLEN) {
-	XLOG_WARNING("RX %s from %s to %s: "
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
 		     "too short data field (%u bytes)",
 		     module_name(),
 		     cstring(src), cstring(dst),
+		     name().c_str(),
 		     (uint32_t)BUFFER_DATA_SIZE(buffer));
 	return (XORP_ERROR);
     }
@@ -107,10 +108,10 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     }
 #endif // HAVE_IPV6
     if (cksum) {
-	XLOG_WARNING("RX %s from %s to %s: "
+	XLOG_WARNING("RX packet from %s to %s on vif %s: "
 		     "checksum error",
-		     module_name(),
-		     cstring(src), cstring(dst));
+		     cstring(src), cstring(dst),
+		     name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -132,10 +133,11 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     BUFFER_GET_SKIP(2, buffer);			// The `Reserved' field
     BUFFER_GET_IPVX(family(), group_address, buffer);
     
-    XLOG_TRACE(mld6igmp_node().is_log_trace(), "RX %s from %s to %s",
+    XLOG_TRACE(mld6igmp_node().is_log_trace(), 
+	       "RX %s from %s to %s on vif %s",
 	       proto_message_type2ascii(message_type),
-	       cstring(src),
-	       cstring(dst));
+	       cstring(src), cstring(dst),
+	       name().c_str());
     
 #if 0	// TODO: do we need the TTL and Router Alert option checks?
     //
@@ -146,10 +148,12 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case MLD_LISTENER_REPORT:
     case MLD_LISTENER_DONE:
 	if (ip_ttl != 1) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "ip_ttl = %d instead of %d",
 			 proto_message_type2ascii(message_type),
-			 cstring(src), cstring(dst), ip_ttl, 1);
+			 cstring(src), cstring(dst),
+			 name().c_str(),
+			 ip_ttl, 1);
 	    return (XORP_ERROR);
 	}
 	//
@@ -175,20 +179,22 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case MLD_LISTENER_DONE:
 	// Destination must be multicast
 	if (! dst.is_multicast()) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "destination must be multicast. "
 			 "Packet ignored.",
 			 proto_message_type2ascii(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 	// Source address check
 	src.copy_out(in6_addr);
 	if (! IN6_IS_ADDR_LINKLOCAL(&in6_addr)) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "source is not a link-local address",
 			 proto_message_type2ascii(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 	//
@@ -214,10 +220,11 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	// Inner multicast address scope check
 	group_address.copy_out(in6_addr);
 	if (IN6_IS_ADDR_MC_NODELOCAL(&in6_addr)) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "invalid scope of inner multicast address: %s",
 			 proto_message_type2ascii(message_type),
 			 cstring(src), cstring(dst),
+			 name().c_str(),
 			 cstring(group_address));
 	    return (XORP_ERROR);
 	}
@@ -266,10 +273,10 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     
  rcvlen_error:
     XLOG_UNREACHABLE();
-    XLOG_WARNING("RX %s packet from %s to %s: "
+    XLOG_WARNING("RX packet from %s to %s on vif %s: "
 		 "some fields are too short",
-		 module_name(),
-		 cstring(src), cstring(dst));
+		 cstring(src), cstring(dst),
+		 name().c_str());
     return (XORP_ERROR);
 }
 
@@ -390,11 +397,12 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
     
     // The group address must be a valid multicast address
     if (! group_address.is_multicast()) {
-	XLOG_WARNING("RX %s from %s to %s: "
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
 		     "the group address %s is not "
 		     "valid multicast address",
 		     proto_message_type2ascii(message_type),
 		     cstring(src), cstring(dst),
+		     name().c_str(),
 		     cstring(group_address));
 	return (XORP_ERROR);
     }
@@ -459,11 +467,12 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 {
     // The group address must be a valid multicast address
     if (! group_address.is_multicast()) {
-	XLOG_WARNING("RX %s from %s to %s: "
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
 		     "the group address %s is not "
 		     "valid multicast address",
 		     proto_message_type2ascii(message_type),
 		     cstring(src), cstring(dst),
+		     name().c_str(),
 		     cstring(group_address));
 	return (XORP_ERROR);
     }

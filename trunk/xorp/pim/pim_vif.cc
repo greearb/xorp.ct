@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.13 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.14 2003/05/31 07:03:32 pavlin Exp $"
 
 
 //
@@ -516,10 +516,12 @@ PimVif::pim_send(const IPvX& dst,
     
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the ckecksum
     
-    XLOG_TRACE(pim_node().is_log_trace(), "TX %s from %s to %s",
+    XLOG_TRACE(pim_node().is_log_trace(),
+	       "TX %s from %s to %s on vif %s",
 	       PIMTYPE2ASCII(message_type),
 	       cstring(addr()),
-	       cstring(dst));
+	       cstring(dst),
+	       name().c_str());
     
     //
     // Send the message
@@ -551,11 +553,12 @@ PimVif::pim_send(const IPvX& dst,
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
+    XLOG_ERROR("TX %s from %s to %s on vif %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(message_type),
 	       cstring(addr()),
-	       cstring(dst));
+	       cstring(dst),
+	       name().c_str());
     return (XORP_ERROR);
     
  rcvlen_error:
@@ -634,9 +637,10 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     // Message length check.
     //
     if (BUFFER_DATA_SIZE(buffer) < PIM_MINLEN) {
-	XLOG_WARNING("RX packet from %s to %s: "
+	XLOG_WARNING("RX packet from %s to %s on vif %s: "
 		     "too short data field (%u bytes)",
 		     cstring(src), cstring(dst),
+		     name().c_str(),
 		     (uint32_t)BUFFER_DATA_SIZE(buffer));
 	return (XORP_ERROR);
     }
@@ -667,9 +671,10 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	// FALLTHROUGH
     default:
 	if (INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer))) {
-	    XLOG_WARNING("RX packet from %s to %s: "
+	    XLOG_WARNING("RX packet from %s to %s on vif %s: "
 			 "checksum error",
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 	break;
@@ -692,10 +697,12 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     if ((proto_version < PIM_VERSION_MIN)
 	|| ((proto_version > PIM_VERSION_MAX)
 	    && (message_type != PIM_HELLO))) {
-	XLOG_WARNING("RX %s from %s to %s: "
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
 		     "invalid PIM version: %d",
 		     PIMTYPE2ASCII(message_type),
-		     cstring(src), cstring(dst), proto_version);
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     proto_version);
 	return (XORP_ERROR);
     }
     
@@ -711,10 +718,12 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_GRAFT_ACK:
     case PIM_BOOTSTRAP:
 	if (ip_ttl != 1) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "ip_ttl is %d instead of %d",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst), ip_ttl, 1);
+			 cstring(src), cstring(dst),
+			 name().c_str(),
+			 ip_ttl, 1);
 	    return (XORP_ERROR);
 	}
 	//
@@ -738,10 +747,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     if (! src.is_unicast()) {
 	// Source address must always be unicast
 	// The kernel should have checked that, but just in case
-	XLOG_WARNING("RX %s from %s to %s: "
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
 		     "source must be unicast",
 		     PIMTYPE2ASCII(message_type),
-		     cstring(src), cstring(dst));
+		     cstring(src), cstring(dst),
+		     name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -754,10 +764,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_BOOTSTRAP:
 	// Source address must be directly connected
 	if (! is_directly_connected(src)) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "source must be directly connected",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 #ifdef HAVE_IPV6
@@ -767,10 +778,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	    struct in6_addr in6_addr;
 	    src.copy_out(in6_addr);
 	    if (! IN6_IS_ADDR_LINKLOCAL(&in6_addr)) {
-		XLOG_WARNING("RX %s from %s to %s: "
+		XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			     "source is not a link-local address",
 			     PIMTYPE2ASCII(message_type),
-			     cstring(src), cstring(dst));
+			     cstring(src), cstring(dst),
+			     name().c_str());
 		return (XORP_ERROR);
 	    }
 	}
@@ -797,10 +809,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_GRAFT:
 	// Destination must be multicast
 	if (! dst.is_multicast()) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "destination must be multicast",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 #ifdef HAVE_IPV6
@@ -811,10 +824,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	}
 #endif  // HAVE_IPV6
 	if (dst != IPvX::PIM_ROUTERS(family())) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "destination must be ALL-PIM-ROUTERS multicast group",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 	break;
@@ -824,10 +838,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_CAND_RP_ADV:
 	// Destination must be unicast
 	if (! dst.is_unicast()) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "destination must be unicast",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 	break;
@@ -835,10 +850,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_BOOTSTRAP:
 	// Destination can be either unicast or multicast
 	if (! (dst.is_unicast() || dst.is_multicast())) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "destination must be either unicast or multicast",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 #ifdef HAVE_IPV6
@@ -847,10 +863,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	}
 	if (dst.is_multicast()) {
 	    if (dst != IPvX::PIM_ROUTERS(family())) {
-		XLOG_WARNING("RX %s from %s to %s: "
+		XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			     "destination must be ALL-PIM-ROUTERS multicast group",
 			     PIMTYPE2ASCII(message_type),
-			     cstring(src), cstring(dst));
+			     cstring(src), cstring(dst),
+			     name().c_str());
 		return (XORP_ERROR);
 	    }
 	    
@@ -881,10 +898,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_CAND_RP_ADV:
 	// PIM-SM only messages
 	if (proto_is_pimdm()) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "message type is PIM-SM specific",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 	break;
@@ -892,18 +910,21 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_GRAFT_ACK:
 	// PIM-DM only messages
 	if (proto_is_pimsm()) {
-	    XLOG_WARNING("RX %s from %s to %s: "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "message type is PIM-DM specific",
 			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst));
+			 cstring(src), cstring(dst),
+			 name().c_str());
 	    return (XORP_ERROR);
 	}
 	break;
     default:
-	XLOG_WARNING("RX %s from %s to %s: "
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
 		     "message type (%d) is unknown",
 		     PIMTYPE2ASCII(message_type),
-		     cstring(src), cstring(dst), message_type);
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     message_type);
 	return (XORP_ERROR);
     }
     
@@ -946,11 +967,10 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 		pim_nbr->set_is_nohello_neighbor(is_nohello_neighbor);
 	}
 	if (pim_nbr == NULL) {
-	    XLOG_WARNING("RX %s from %s to %s on vif%d(%s): "
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "sender is not a PIM-neighbor router",
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
-			 vif_index(),
 			 name().c_str());
 	    return (XORP_ERROR);
 	}
@@ -964,10 +984,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	break;
     }
     
-    XLOG_TRACE(pim_node().is_log_trace(), "RX %s from %s to %s",
+    XLOG_TRACE(pim_node().is_log_trace(),
+	       "RX %s from %s to %s on vif %s",
 	       PIMTYPE2ASCII(message_type),
-	       cstring(src),
-	       cstring(dst));
+	       cstring(src), cstring(dst),
+	       name().c_str());
     
     /*
      * Process each message based on its type.
@@ -1009,18 +1030,18 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     
  rcvlen_error:    
     XLOG_UNREACHABLE();
-    XLOG_WARNING("RX %s packet from %s to %s: "
+    XLOG_WARNING("RX packet from %s to %s on vif %s: "
 		 "some fields are too short",
-		 module_name(),
-		 cstring(src), cstring(dst));
+		 cstring(src), cstring(dst),
+		 name().c_str());
     return (XORP_ERROR);
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_WARNING("RX %s packet from %s to %s: "
+    XLOG_WARNING("RX packet from %s to %s on vif %s: "
 		 "internal error",
-		 module_name(),
-		 cstring(src), cstring(dst));
+		 cstring(src), cstring(dst),
+		 name().c_str());
     return (XORP_ERROR);
 }
 
@@ -1094,7 +1115,8 @@ PimVif::delete_pim_nbr_from_nbr_list(PimNbr *pim_nbr)
     
     iter = find(_pim_nbrs.begin(), _pim_nbrs.end(), pim_nbr);
     if (iter != _pim_nbrs.end()) {
-	XLOG_TRACE(pim_node().is_log_trace(), "Delete neighbor %s on vif %s",
+	XLOG_TRACE(pim_node().is_log_trace(),
+		   "Delete neighbor %s on vif %s",
 		   cstring(pim_nbr->addr()), name().c_str());
 	_pim_nbrs.erase(iter);
     }
