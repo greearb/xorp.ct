@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.37 2005/03/07 21:48:12 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.38 2005/03/10 01:58:58 atanu Exp $
 #
 
 #
@@ -79,6 +79,22 @@ configure_bgp()
     enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
 }
 
+wait_for_peerdown()
+{
+    # Interact with the BGP process itself to find out when the peerings have
+    # gone down. If we are not testing the XORP bgp then replace with the
+    # sleep.
+
+    while ../tools/print_peers -v | grep 'Peer State' | grep ESTABLISHED
+    do
+	sleep 2
+    done
+
+    # SLEEPY=30
+    # echo "sleeping for $SLEEPY seconds"
+    # sleep $SLEEPY
+}
+
 reset()
 {
     coord reset
@@ -102,9 +118,8 @@ reset()
     # see the end of the stream. So add an arbitary delay until the BGP process
     # sees the end of the stream. If we don't do this connection attempts will
     # be rejected by the the BGP process, causing the tests to fail.
-    SLEEPY=30
-    echo "sleeping for $SLEEPY seconds"
-    sleep $SLEEPY
+
+    wait_for_peerdown
 }
 
 bgp_not_established()
@@ -624,7 +639,7 @@ test13()
 
     add_igp_table4 is-is isis isis true false
     add_route4 is-is true false $NH1/24 $GW1 10
-    
+
     # Reset the connection
     reset
     
@@ -633,8 +648,64 @@ test13()
     coord peer2 assert established
 }
 
+test14()
+{
+    echo "TEST14 (Simple route propogation test with RIB resolving next hop):"
+    echo "	1) Bring up peering (peer1)"
+    echo "	2) Bring up a second peering (peer2)"
+    echo "	3) Introduce a route on (peer1) the IBGP peering"
+    echo "	4) Verify that the route appears on (peer2) the EBGP peering"
+    echo "	5) Tear down both peerings"
+
+    reset
+
+    VIF0="vif0"
+    IF1=172.16.1.1
+    GW1=172.16.1.2
+    NH1=192.150.187.2
+
+    register_rib "rib"
+    new_vif $VIF0
+    add_vif_addr4 $VIF0 $IF1 $IF1/24
+
+    IGP_METRIC=10
+
+    add_igp_table4 is-is isis isis true false
+    add_route4 is-is true false $NH1/24 $GW1 $IGP_METRIC
+
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+    coord peer1 assert established
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+
+    coord peer2 expect packet update \
+	origin 2 \
+	aspath 65008,1000 \
+	med $IGP_METRIC \
+	nexthop $NEXT_HOP \
+	nlri 10.10.10.0/24
+
+    # Inject a route
+    coord peer1 send packet update \
+	origin 2 \
+	aspath 1000 \
+	localpref 100 \
+	nexthop $NH1 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer2 assert queue 0
+
+    coord peer1 assert established
+    coord peer2 assert established
+
+    reset
+}
+
 TESTS_NOT_FIXED='test10 test11 test12'
-TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test13'
+TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test13 test14'
 
 # Include command line
 . ${srcdir}/args.sh
