@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.17 2004/08/17 02:20:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.18 2004/09/01 18:12:24 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -209,7 +209,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     fte.net().netmask().copy_out(*sin_netmask);
 
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
-	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
+	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
 	return false;
     }
     
@@ -297,7 +297,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	fte.net().netmask().copy_out(*sin_netmask);
     
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
-	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
+	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
 	return false;
     }
     
