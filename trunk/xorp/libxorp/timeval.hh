@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.17 2004/03/03 23:22:16 hodson Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.18 2004/06/10 22:41:22 hodson Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -94,7 +94,8 @@ public:
     /**
      * @return seconds and microseconds as a string.
      */
-    string str() const { return c_format("%d.%06d", _sec, _usec); }
+    string str() const { return c_format("%d.%06d", XORP_INT_CAST(_sec),
+					 XORP_INT_CAST(_usec)); }
 
 
     /**
