@@ -64,6 +64,28 @@ rip_finder_event_observer_xrl_target_death()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+rip_redist4_add_route()
+{
+    if [ $# -ne 4 ] ; then
+        echo "Usage: rip_redist4_add_route <network:ipv4net> <nexthop:ipv4> <global_metric:u32> <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://rip/redist4/0.1/add_route?network:ipv4net=$1&nexthop:ipv4=$2&global_metric:u32=$3&cookie:txt=$4"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+rip_redist4_delete_route()
+{
+    if [ $# -ne 2 ] ; then
+        echo "Usage: rip_redist4_delete_route <network:ipv4net> <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://rip/redist4/0.1/delete_route?network:ipv4net=$1&cookie:txt=$2"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 rip_rip_add_rip_address()
 {
     if [ $# -ne 3 ] ; then
@@ -493,25 +515,25 @@ rip_rip_get_peer_counters()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_add_static_route()
+rip_rip_import_protocol_routes()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_add_static_route <network:ipv4net> <nexthop:ipv4> <cost:u32>"
+        echo "Usage: rip_rip_import_protocol_routes <protocol_name:txt> <cost:u32> <tag:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/add_static_route?network:ipv4net=$1&nexthop:ipv4=$2&cost:u32=$3"
+    XRL="finder://rip/rip/0.1/import_protocol_routes?protocol_name:txt=$1&cost:u32=$2&tag:u32=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_delete_static_route()
+rip_rip_no_import_protocol_routes()
 {
     if [ $# -ne 1 ] ; then
-        echo "Usage: rip_rip_delete_static_route <network:ipv4net>"
+        echo "Usage: rip_rip_no_import_protocol_routes <protocol_name:txt>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/delete_static_route?network:ipv4net=$1"
+    XRL="finder://rip/rip/0.1/no_import_protocol_routes?protocol_name:txt=$1"
     call_xrl_wrapper -p all "${XRL}"
 }
 

@@ -64,6 +64,28 @@ ripng_finder_event_observer_xrl_target_death()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+ripng_redist6_add_route()
+{
+    if [ $# -ne 4 ] ; then
+        echo "Usage: ripng_redist6_add_route <network:ipv6net> <nexthop:ipv6> <global_metric:u32> <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/redist6/0.1/add_route?network:ipv6net=$1&nexthop:ipv6=$2&global_metric:u32=$3&cookie:txt=$4"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+ripng_redist6_delete_route()
+{
+    if [ $# -ne 2 ] ; then
+        echo "Usage: ripng_redist6_delete_route <network:ipv6net> <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/redist6/0.1/delete_route?network:ipv6net=$1&cookie:txt=$2"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 ripng_ripng_add_rip_address()
 {
     if [ $# -ne 3 ] ; then
@@ -471,25 +493,25 @@ ripng_ripng_get_peer_counters()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_add_static_route()
+ripng_ripng_import_protocol_routes()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_add_static_route <network:ipv6net> <nexthop:ipv6> <cost:u32>"
+        echo "Usage: ripng_ripng_import_protocol_routes <protocol_name:txt> <cost:u32> <tag:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/add_static_route?network:ipv6net=$1&nexthop:ipv6=$2&cost:u32=$3"
+    XRL="finder://ripng/ripng/0.1/import_protocol_routes?protocol_name:txt=$1&cost:u32=$2&tag:u32=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_delete_static_route()
+ripng_ripng_no_import_protocol_routes()
 {
     if [ $# -ne 1 ] ; then
-        echo "Usage: ripng_ripng_delete_static_route <network:ipv6net>"
+        echo "Usage: ripng_ripng_no_import_protocol_routes <protocol_name:txt>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/delete_static_route?network:ipv6net=$1"
+    XRL="finder://ripng/ripng/0.1/no_import_protocol_routes?protocol_name:txt=$1"
     call_xrl_wrapper -p all "${XRL}"
 }
 
