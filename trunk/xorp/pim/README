@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.20 2004/04/26 16:35:01 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.21 2004/06/12 06:25:38 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -19,27 +19,24 @@ Startup
 =======
 
 In normal operation, PIM-SM would be started by the XORP router manager
-process, not directly from the command line.  
+process, not directly from the command line
+(see ${XORP}/docs/rtrmgr/ for information how to configure PIM-SM).
 
-To use PIM-SM, you must have PIM-capable kernel. For information
-about PIM-support in the UNIX kernel, existing patches, and
-configuration, see the README files from the pimd distribution from USC:
+To use PIM-SM, you must have PIM-capable kernel. Currently, the
+following systems are known to have PIM-SM kernel support:
 
-http://netweb.usc.edu/pim/pimd/
-
-Note that FreeBSD-4.9, FreeBSD-5.2 (and later), and DragonFlyBSD
-already do have PIM support in the kernel,
-therefore they do not require to be patched anymore.
-
-For FreeBSD kernel, the following options are required:
+ - IPv4: FreeBSD-4.9, FreeBSD-5.2 (and later), DragonFlyBSD, Linux:
+    For FreeBSD and DragonFlyBSD kernel, the following options are required:
 options		MROUTING		# Multicast routing
 options		PIM			# PIM multicast routing
 
-For Linux kernel, the following options are required:
+    For Linux kernel, the following options are required:
 enable CONFIG_IP_MULTICAST
 enable CONFIG_IP_PIMSM_V2
 enable CONFIG_IP_MROUTE
 
+ - IPv6: FreeBSD, NetBSD, OpenBSD, DragonFlyBSD
+   No kernel options are required.
 
 For testing and debugging purposes, PIM-SM can be manually started.  The
 XORP PIM-SM process assumes that the XRL finder, the MFEA and MLD/IGMP
@@ -172,7 +169,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (November 2003), the PIM-SM implementation is based
+Currently (June 2004), the PIM-SM implementation is based
 on the specification in the following documents:
 
  * draft-ietf-pim-sm-v2-new-09.{ps,txt} (The core PIM-SM specification).
