@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.10 2003/04/03 00:24:02 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.11 2003/04/22 23:27:16 hodson Exp $"
 
 
 //
@@ -171,9 +171,9 @@ main(int argc, char *argv[])
 	//
 	// Finder
 	//
-	FinderNGServer *finder = 0;
+	FinderServer *finder = 0;
 	try {
-	    finder = new FinderNGServer(eventloop);
+	    finder = new FinderServer(eventloop);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
 	}
