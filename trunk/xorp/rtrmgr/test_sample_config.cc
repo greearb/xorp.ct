@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.8 2003/08/02 16:10:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.9 2003/09/16 09:03:37 pavlin Exp $"
 
 #include <signal.h>
 
@@ -39,7 +39,7 @@
 
 static const char* c_srcdir = getenv("srcdir");
 static const string srcdir = c_srcdir ? c_srcdir : ".";
-static const string default_xorp_root_dir = srcdir + "/..";
+static const string default_xorp_root_dir = "..";
 static const string default_config_template_dir = srcdir + "/../etc/templates";
 static const string default_xrl_dir = srcdir + "/../xrl/targets";
 static const string default_config_boot = srcdir + "/config.boot.sample";
