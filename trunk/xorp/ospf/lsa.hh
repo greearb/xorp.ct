@@ -281,6 +281,42 @@ class Lsa {
 };
 
 /**
+ * LSA byte streams are decoded through this class.
+ */
+class LsaDecoder {
+ public:    
+    LsaDecoder(OspfTypes::Version version) : _version(version)
+    {}
+
+    ~LsaDecoder();
+
+    /**
+     * Register the packet/decode routines
+     *
+     * @param packet decoder
+     */
+    void register_decoder(Lsa *lsa);
+
+    /**
+     * Decode byte stream.
+     *
+     * @param ptr to data packet
+     * @param length of data packet
+     *
+     * @return a LsaRef
+     */
+    Lsa::LsaRef decode(uint8_t *ptr, size_t len) throw(BadPacket);
+
+    OspfTypes::Version get_version() const {
+	return _version;
+    }
+ private:
+    const OspfTypes::Version 	_version;
+
+    map<uint16_t, Lsa *> _lsa_decoders;	// OSPF LSA decoders
+};
+
+/**
  * Defines a link/interface, carried in a RouterLsa.
  */
 class RouterLink {

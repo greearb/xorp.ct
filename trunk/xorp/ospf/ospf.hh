@@ -99,7 +99,8 @@ class Ospf {
 				// adding and deleting routes. 
     bool _running;		// Are we running?
 
-    PacketDecoder _packet_decoder;	// Packet decoding.
+    PacketDecoder _packet_decoder;	// Packet decoders.
+    LsaDecoder _lsa_decoder;		// LSA decoders.
     PeerManager<A> _peer_manager;
     LS_database_manager<A> _database;	// Database manager.
 };

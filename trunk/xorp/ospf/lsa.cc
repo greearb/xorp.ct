@@ -232,6 +232,62 @@ Ls_request::str() const
     return output;
 }
 
+/* LsaDecoder */
+
+LsaDecoder::~LsaDecoder()
+{
+    // Free all the stored decoder packets.
+    map<uint16_t, Lsa *>::iterator i;
+
+    for(i = _lsa_decoders.begin(); i != _lsa_decoders.end(); i++)
+	delete i->second;
+}
+
+void
+LsaDecoder::register_decoder(Lsa *lsa)
+{
+    switch(lsa->get_version()) {
+    case OspfTypes::V2:
+	_lsa_decoders[lsa->get_lsa_type()] = lsa;
+	break;
+    case OspfTypes::V3:
+	_lsa_decoders[lsa->get_lsa_type()] = lsa;
+	break;
+    }
+}
+
+Lsa::LsaRef
+LsaDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+    Lsa_header header(version);
+
+    if (len < header.length())
+	xorp_throw(BadPacket,
+		   c_format("LSA too short %u, must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(header.length())));
+
+    // XXX
+    // The LSA header is going to be decoder here and again in the
+    // actual LSA code. Could consider passing in the already decoded header.
+    header.decode_inline(ptr);
+
+    map<uint16_t, Lsa *>::iterator i;
+    uint16_t type = header.get_ls_type();
+    i = _lsa_decoders.find(type);
+    if (i == _lsa_decoders.end())
+	xorp_throw(BadPacket,
+		   c_format("OSPF Version %u Unknown LSA Type %u",
+			    version, type));
+    
+    Lsa *lsa = i->second;
+
+    return lsa->decode(ptr, len);
+}
+
+/* RouterLink */
+
 size_t
 RouterLink::length() const
 {
