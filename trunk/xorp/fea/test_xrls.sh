@@ -1,7 +1,7 @@
 #!/bin/sh # -*- sh-indentation: 4; tab-width: 8; indent-tabs-mode: t -*-
 
 #
-# $XORP: xorp/fea/test_xrls.sh,v 1.2 2002/12/09 11:13:05 pavlin Exp $
+# $XORP: xorp/fea/test_xrls.sh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 #
 
 # This script is used to test all the xrl interfaces of the fea that
@@ -11,71 +11,74 @@
 # thorugh click.
 #
 
-TEST_DEVICE1=dc0
-IPV4=192.168.0.1
-IPV4_PREFIX=16
-IPV4_BROADCAST=192.168.255.255
-#IPV6=fe80::1
-#IPV6="::280:c8ff:feb9:3f5d"
-#IPV6_PREFIX=64
+VIF0=ed0
+ADDR0=10.0.0.1
+ADDR1=10.0.0.3
 
-setup()
+basic_fea_test()
 {
-    set_mac $1 "0xa:0xa:0xa:0xa:0xa:0xa"
-    get_mac $1
+    cat <<EOF
+#
+# Stage 1: Add an interface, vif, and IPv4 address
+# 
+EOF
 
-    set_mtu $1 1500
-    get_mtu $1
+    local tid=`start_fea_transaction`
 
-    create_interface $1
-    enable_interface $1
-    create_vif $1 $1
-    enable_vif $1
+    create_interface $tid $VIF0
+    enable_interface $tid $VIF0
 
-    add_address4 $1 $IPV4
-    set_prefix4 $1 $IPV4 $IPV4_PREFIX
-    get_prefix4 $1 $IPV4
-    set_broadcast4 $1 $IPV4 $IPV4_BROADCAST
-    get_broadcast4 $1 $IPV4
+    create_vif $tid $VIF0 $VIF0
+    enable_vif $tid $VIF0 $VIF0
 
-#    add_address6 $1 $IPV6
-#    set_prefix6 $1 $IPV6 $IPV6_PREFIX
-#    get_prefix6 $1 $IPV6
-}
+    create_address4 $tid $VIF0 $VIF0 $ADDR0
+    enable_address4 $tid $VIF0 $VIF0 $ADDR0
 
-teardown()
-{
-    delete_address4 $1 $IPV4
-#    delete_address6 $1 $IPV6
+    set_prefix4 $tid $VIF0 $VIF0 $ADDR0 25
 
-    disable_vif $1
-    delete_vif $1
-    disable_interface $1
-    delete_interface $1
-}
+    commit_fea_transaction $tid
 
-status()
-{
-    get_all_interface_names
+    get_configured_vif_addresses4 $VIF0 $VIF0
 
-    get_configured_interface_names
-    get_vif_names
-    get_all_vif_addresses4 $1
-    get_configured_vif_addresses4 $1
-    get_all_vif_addresses6 $1
-    get_configured_vif_addresses6 $1
-}
+cat<<EOF
+#
+# Stage 2: Delete existing IP address and add a replacement
+# 
+EOF
+    local tid=`start_fea_transaction`
 
-test1()
-{
-    setup $1
+    delete_address4 $tid $VIF0 $VIF0 $ADDR0
+    create_address4 $tid $VIF0 $VIF0 $ADDR1
+    enable_address4 $tid $VIF0 $VIF0 $ADDR1
 
-    status $1
+    set_prefix4 $tid $VIF0 $VIF0 $ADDR1 16
 
-    teardown $1
+    commit_fea_transaction $tid
+    get_configured_vif_addresses4 $VIF0 $VIF0
+
+cat<<EOF
+#
+# Stage 3: Add back deleted IPv4 address (disabled)
+#
+EOF
+    local tid=`start_fea_transaction`
+    create_address4 $tid $VIF0 $VIF0 $ADDR0
+    commit_fea_transaction $tid
+    get_configured_vif_addresses4 $VIF0 $VIF0
+
+cat<<EOF
+#
+# Stage 4: Enable IPv4 address added back
+#
+EOF
+    local tid=`start_fea_transaction`
+    enable_address4 $tid $VIF0 $VIF0 $ADDR0
+    commit_fea_transaction $tid
+    get_configured_vif_addresses4 $VIF0 $VIF0
+
 }
 
 . ./xrl_shell_funcs.sh
-set -e # Anything goes wrong bail out immediately
-test1 $TEST_DEVICE1
+#set -e # Anything goes wrong bail out immediately
+basic_fea_test
 exit 0
