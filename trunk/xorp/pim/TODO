@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.26 2003/02/25 01:38:48 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.27 2003/02/28 22:52:02 pavlin Exp $
 #
+
+* IMPL+SPEC+TESTSUITE(?):
+  In the bootstrap spec, if we receive and accept an unicast BSM,
+  should we forward it? I guess yes; however, this may create in
+  BSM duplication downstream from a rebooted router. Hence, the
+  spec probably should say something about detecting duplicated
+  messages, and (silently?) ignoring them(?)  
 
 * IMPL+SPEC+TESTSUITE:
   In the Bootstrap spec, if a Cand-BSR is in Candidate BSR state:
