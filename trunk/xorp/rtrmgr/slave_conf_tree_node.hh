@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.7 2004/06/10 22:41:53 hodson Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.8 2004/12/11 21:29:58 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
 #define __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
@@ -37,10 +37,18 @@ class TemplateTreeNode;
 
 class SlaveConfigTreeNode : public ConfigTreeNode {
 public:
+    SlaveConfigTreeNode(bool verbose);
     SlaveConfigTreeNode(const string& node_name, const string& path,
 			const TemplateTreeNode* ttn, 
 			SlaveConfigTreeNode* parent, uid_t user_id,
 			bool verbose);
+
+    virtual ConfigTreeNode* create_node(const string& segment, 
+					const string& path,
+					const TemplateTreeNode* ttn, 
+					ConfigTreeNode* parent_node, 
+					uid_t user_id, bool verbose);
+    virtual ConfigTreeNode* create_node(const ConfigTreeNode& ctn);
 
     void create_command_tree(CommandTree& cmd_tree,
 			     const list<string>& commands,

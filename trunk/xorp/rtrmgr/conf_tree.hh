@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.15 2004/08/19 00:20:19 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.16 2004/12/11 21:29:56 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -35,21 +35,29 @@ class ConfTemplate;
 class ConfigTree {
 public:
     ConfigTree(TemplateTree *tt, bool verbose);
-    ~ConfigTree();
+    virtual ~ConfigTree();
 
+#if 0
     ConfigTree& operator=(const ConfigTree& orig_tree);
+#endif
     bool parse(const string& configuration, const string& config_file,
 	       string& errmsg);
     void push_path();
     void extend_path(const string& segment);
     void pop_path();
     void add_node(const string& nodename) throw (ParseError);
+    virtual ConfigTreeNode* create_node(const string& segment, 
+					const string& path,
+					const TemplateTreeNode* ttn, 
+					ConfigTreeNode* parent_node, 
+					uid_t user_id, bool verbose) = 0;
+    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose) = 0;
     void terminal_value(char* value, int type) throw (ParseError);
     list<string> path_as_segments() const;
     const TemplateTreeNode* 
         find_template(const list<string>& path_segments) const;
-    inline ConfigTreeNode& root_node() { return _root_node; }
-    inline const ConfigTreeNode& const_root_node() const { return _root_node; }
+    virtual ConfigTreeNode& root_node() = 0;
+    virtual const ConfigTreeNode& const_root_node() const = 0;
     ConfigTreeNode* find_node(const list<string>& path);
     ConfigTreeNode* find_config_module(const string& module_name);
     string show_subtree(const list<string>& path_segments) const;
@@ -77,7 +85,7 @@ protected:
 
     string		_config_file;
     TemplateTree*	_template_tree;
-    ConfigTreeNode	_root_node;
+    //ConfigTreeNode	_root_node;
     ConfigTreeNode*	_current_node;
     list<string>	_path_segments;
     list<size_t>	_segment_lengths;

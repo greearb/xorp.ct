@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.14 2004/06/10 22:41:53 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.15 2004/12/11 21:29:58 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -31,6 +31,10 @@
 
 extern int booterror(const char *s);
 
+SlaveConfigTreeNode::SlaveConfigTreeNode(bool verbose)
+    : ConfigTreeNode(verbose)
+{
+}
 
 SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 					 const string &path, 
@@ -42,6 +46,41 @@ SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 {
 
 }
+
+ConfigTreeNode*
+SlaveConfigTreeNode::create_node(const string& segment, const string& path,
+				  const TemplateTreeNode* ttn, 
+				  ConfigTreeNode* parent_node, 
+				  uid_t user_id, bool verbose)
+{
+    SlaveConfigTreeNode *new_node, *parent;
+    parent = dynamic_cast<SlaveConfigTreeNode *>(parent_node);
+
+    // sanity check - all nodes in this tree should be Slave nodes
+    if (parent_node != NULL)
+	XLOG_ASSERT(parent != NULL);
+
+    new_node = new SlaveConfigTreeNode(segment, path, ttn, parent, 
+				   user_id, verbose);
+    return reinterpret_cast<ConfigTreeNode*>(new_node);
+}
+
+ConfigTreeNode*
+SlaveConfigTreeNode::create_node(const ConfigTreeNode& ctn) {
+    printf("SlaveConfigTreeNode::create_node 2\n");
+    SlaveConfigTreeNode *new_node;
+    const SlaveConfigTreeNode *orig;
+
+    // sanity check - all nodes in this tree should be Slave nodes
+    orig = dynamic_cast<const SlaveConfigTreeNode *>(&ctn);
+    XLOG_ASSERT(orig != NULL);
+
+    new_node = new SlaveConfigTreeNode(*orig);
+    return new_node;
+}
+
+
+
 
 void
 SlaveConfigTreeNode::create_command_tree(CommandTree& cmd_tree,
@@ -200,10 +239,12 @@ SlaveConfigTreeNode::get_deltas(const SlaveConfigTreeNode& master_node)
 	for (iter = master_node.const_children().begin();
 	     iter != master_node.const_children().end();
 	     ++iter) {
-	    ConfigTreeNode* new_node;
-	    const ConfigTreeNode* my_child = *iter;
+	    SlaveConfigTreeNode* new_node;
+	    const SlaveConfigTreeNode* my_child
+		= dynamic_cast<SlaveConfigTreeNode*>(*iter);
+	    XLOG_ASSERT(my_child != NULL);
 
-	    new_node = new ConfigTreeNode(*my_child);
+	    new_node = new SlaveConfigTreeNode(*my_child);
 	    new_node->set_parent(this);
 	    add_child(new_node);
 	    deltas += ((SlaveConfigTreeNode*)new_node)->
@@ -233,9 +274,11 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 	for (iter = master_node.const_children().begin();
 	     iter != master_node.const_children().end();
 	     ++iter) {
-	    ConfigTreeNode* new_node;
-	    const ConfigTreeNode* my_child = *iter;
-	    new_node = new ConfigTreeNode(*my_child);
+	    SlaveConfigTreeNode* new_node;
+	    const SlaveConfigTreeNode* my_child  
+		= dynamic_cast<SlaveConfigTreeNode*>(*iter);
+	    XLOG_ASSERT(my_child != NULL);
+	    new_node = new SlaveConfigTreeNode(*my_child);
 	    new_node->set_parent(this);
 	    new_node->undelete();
 	    add_child(new_node);

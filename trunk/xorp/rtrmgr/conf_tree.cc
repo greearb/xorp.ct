@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.22 2004/08/19 00:20:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.23 2004/12/11 21:29:56 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -38,8 +38,6 @@ extern int booterror(const char* s) throw (ParseError);
 
 ConfigTree::ConfigTree(TemplateTree* tt, bool verbose)
     : _template_tree(tt),
-      _root_node(verbose),
-      _current_node(&_root_node),
       _verbose(verbose)
 {
 
@@ -50,12 +48,14 @@ ConfigTree::~ConfigTree()
     // XXX: _root_node will handle the deletion of all the tree nodes
 }
 
+#if 0
 ConfigTree&
 ConfigTree::operator=(const ConfigTree& orig_tree)
 {
-    _root_node.clone_subtree(orig_tree.const_root_node());
+    root_node().clone_subtree(orig_tree.const_root_node());
     return *this;
 }
+#endif
 
 bool
 ConfigTree::parse(const string& configuration, const string& config_file,
@@ -74,7 +74,7 @@ ConfigTree::parse(const string& configuration, const string& config_file,
 
 void ConfigTree::add_default_children()
 {
-    _root_node.recursive_add_default_children();
+    root_node().recursive_add_default_children();
 }
 
 const TemplateTreeNode*
@@ -214,11 +214,26 @@ ConfigTree::add_node(const string& segment) throw (ParseError)
 	    path = segment;
 	else
 	    path += " " + segment;
-	found = new ConfigTreeNode(segment, path, ttn, _current_node,
-				   /* user_id */ 0, _verbose);
+	found = create_node(segment, path, ttn, _current_node,
+			    /* user_id */ 0, _verbose);
 	_current_node = found;
     }
 }
+
+#if 0
+ConfigTreeNode*
+ConfigTree::create_node(const string& segment, const string& path,
+			const TemplateTreeNode* ttn, 
+			ConfigTreeNode* parent_node, 
+			uid_t user_id, bool verbose)
+{
+    printf("ConfigTree::create_node\n");
+    ConfigTreeNode* ctn;
+    ctn = new ConfigTreeNode(segment, path, ttn, parent_node, 
+			     user_id, verbose);
+    return ctn;
+}
+#endif
 
 void
 ConfigTree::terminal_value(char* value, int type) throw (ParseError)
@@ -318,7 +333,7 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 const ConfigTreeNode*
 ConfigTree::find_config_node(const list<string>& path_segments) const
 {
-    const ConfigTreeNode *found = &_root_node;
+    const ConfigTreeNode *found = &const_root_node();
     const ConfigTreeNode *found2 = found;
     list<string>::const_iterator pi;
     list<ConfigTreeNode *>::const_iterator ci;
@@ -356,15 +371,17 @@ ConfigTree::show_subtree(const list<string>& path_segments) const
 string
 ConfigTree::show_tree() const
 {
-    return _root_node.show_subtree(/* depth */ 0, /* indent */ 0,
-				   /* do_indent */ true, /* annotate */ true);
+    return const_root_node().show_subtree(/* depth */ 0, /* indent */ 0,
+					   /* do_indent */ true, 
+					   /* annotate */ true);
 }
 
 string
 ConfigTree::show_unannotated_tree() const
 {
-    return _root_node.show_subtree(/* depth */ 0, /* indent */ 0,
-				   /* do_indent */ true, /* annotate */ false);
+    return const_root_node().show_subtree(/* depth */ 0, /* indent */ 0,
+					   /* do_indent */ true, 
+					   /* annotate */ false);
 }
 
 ConfigTreeNode*
@@ -377,19 +394,19 @@ ConfigTree::find_node(const list<string>& path)
     for (iter = path.begin(); iter != path.end(); ++iter) {
 	path_copy.push_back(*iter);
     }
-    return _root_node.find_node(path_copy);
+    return root_node().find_node(path_copy);
 }
 
 ConfigTreeNode*
 ConfigTree::find_config_module(const string& module_name)
 {
-    return _root_node.find_config_module(module_name);
+    return root_node().find_config_module(module_name);
 }
 
 string
 ConfigTree::tree_str() const
 {
-    return _root_node.subtree_str();
+    return const_root_node().subtree_str();
 }
 
 bool
@@ -398,17 +415,20 @@ ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
 {
     XLOG_TRACE(_verbose, "CT apply_deltas %d %s\n", user_id, deltas.c_str());
 
-    ConfigTree delta_tree(_template_tree, _verbose);
-    if (delta_tree.parse(deltas, "", response) == false)
+    ConfigTree* delta_tree = create_tree(_template_tree, _verbose);
+    if (delta_tree->parse(deltas, "", response) == false)
 	return false;
 
     debug_msg("Delta tree:\n");
-    debug_msg("%s", delta_tree.tree_str().c_str());
+    debug_msg("%s", delta_tree->tree_str().c_str());
     debug_msg("end delta tree.\n");
 
     response = "";
-    return _root_node.merge_deltas(user_id, delta_tree.const_root_node(),
-				   provisional_change, response);
+    bool result;
+    result = root_node().merge_deltas(user_id, delta_tree->const_root_node(),
+				       provisional_change, response);
+    delete delta_tree;
+    return result;
 }
 
 bool
@@ -418,32 +438,35 @@ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
     XLOG_TRACE(_verbose, "CT apply_deletions %d %s\n",
 	       user_id, deletions.c_str());
 
-    ConfigTree deletion_tree(_template_tree, _verbose);
-    if (deletion_tree.parse(deletions, "", response) == false)
+    ConfigTree *deletion_tree = create_tree(_template_tree, _verbose);
+    if (deletion_tree->parse(deletions, "", response) == false)
 	return false;
 
     debug_msg("Deletion tree:\n");
-    debug_msg("%s", deletion_tree.tree_str().c_str());
+    debug_msg("%s", deletion_tree->tree_str().c_str());
     debug_msg("end deletion tree.\n");
 
     response = "";
-    return _root_node.merge_deletions(user_id,
-				      deletion_tree.const_root_node(),
-				      provisional_change, response);
+    bool result;
+    result = root_node().merge_deletions(user_id,
+					  deletion_tree->const_root_node(),
+					  provisional_change, response);
+    delete deletion_tree;
+    return result;
 }
 
 void
 ConfigTree::retain_different_nodes(const ConfigTree& them,
 				   bool retain_changed_values)
 {
-    _root_node.retain_different_nodes(them.const_root_node(),
+    root_node().retain_different_nodes(them.const_root_node(),
 				      retain_changed_values);
 }
 
 void
 ConfigTree::retain_common_nodes(const ConfigTree& them)
 {
-    _root_node.retain_common_nodes(them.const_root_node());
+    root_node().retain_common_nodes(them.const_root_node());
 }
 
 void
@@ -464,6 +487,6 @@ ConfigTree::expand_varname_to_matchlist(const string& varname,
 	sl.pop_front();
     }
 
-    _root_node.expand_varname_to_matchlist(v, 0, matches);
+    const_root_node().expand_varname_to_matchlist(v, 0, matches);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.22 2004/08/12 07:16:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.23 2004/12/11 21:29:58 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -36,11 +36,15 @@ extern int booterror(const char *s) throw (ParseError);
  * Slave Config Tree class
  *************************************************************************/
 
+
+
 SlaveConfigTree::SlaveConfigTree(XorpClient& xclient, bool verbose)
     : ConfigTree(NULL, verbose),
+      _root_node(verbose),
       _xclient(xclient),
       _verbose(verbose)
 {
+   _current_node = &_root_node;
 
 }
 
@@ -49,9 +53,12 @@ SlaveConfigTree::SlaveConfigTree(const string& configuration,
 				 XorpClient& xclient,
 				 bool verbose) throw (InitError)
     : ConfigTree(tt, verbose),
+      _root_node(verbose),
       _xclient(xclient),
       _verbose(verbose)
 {
+    _current_node = &_root_node;
+
     string errmsg;
 
     if (parse(configuration, "", errmsg) != true) {
@@ -59,6 +66,28 @@ SlaveConfigTree::SlaveConfigTree(const string& configuration,
     }
 
     _root_node.mark_subtree_as_committed();
+}
+
+ConfigTree* SlaveConfigTree::create_tree(TemplateTree *tt, bool verbose)
+{
+    SlaveConfigTree *mct;
+    mct = new SlaveConfigTree("", tt, _xclient, verbose);
+    return mct;
+}
+
+ConfigTreeNode*
+SlaveConfigTree::create_node(const string& segment, const string& path,
+			      const TemplateTreeNode* ttn, 
+			      ConfigTreeNode* parent_node, 
+			      uid_t user_id, bool verbose)
+{
+    SlaveConfigTreeNode *ctn, *parent;
+    parent = dynamic_cast<SlaveConfigTreeNode *>(parent_node);
+    if (parent_node != NULL)
+	XLOG_ASSERT(parent != NULL);
+    ctn = new SlaveConfigTreeNode(segment, path, ttn, parent, 
+				   user_id, verbose);
+    return reinterpret_cast<ConfigTreeNode*>(ctn);
 }
 
 bool
@@ -187,7 +216,7 @@ SlaveConfigTree::commit_phase5(const XrlError& /* e */,
     XLOG_TRACE(_verbose, "commit_phase5\n");
 
     if (success) {
-	root_node().finalize_commit();
+	slave_root_node().finalize_commit();
 	cb->dispatch(true, "");
     } else {
 	cb->dispatch(false, _commit_errmsg);
@@ -199,7 +228,7 @@ SlaveConfigTree::get_deltas(const SlaveConfigTree& main_tree)
 {
     XLOG_TRACE(_verbose, "SlaveConfigTree::get_deltas\n");
 
-    if (root_node().get_deltas(main_tree.const_root_node()) > 0) {
+    if (slave_root_node().get_deltas(main_tree.const_slave_root_node()) > 0) {
 	debug_msg("FOUND DELTAS:\n");
 	debug_msg("%s", tree_str().c_str());
 	return true;
@@ -213,7 +242,7 @@ SlaveConfigTree::get_deletions(const SlaveConfigTree& main_tree)
 {
     XLOG_TRACE(_verbose, "SlaveConfigTree::get_deltas\n");
 
-    if (root_node().get_deletions(main_tree.const_root_node()) > 0) {
+    if (slave_root_node().get_deletions(main_tree.const_slave_root_node()) > 0) {
 	debug_msg("FOUND DELETIONS:>>>>\n");
 	debug_msg("%s", tree_str().c_str());
 	debug_msg("<<<<\n");

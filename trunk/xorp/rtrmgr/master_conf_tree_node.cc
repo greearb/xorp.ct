@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.4 2004/12/11 21:29:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.5 2004/12/14 21:58:05 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -32,14 +32,10 @@
 extern int booterror(const char *s) throw (ParseError);
 
 MasterConfigTreeNode::MasterConfigTreeNode(bool verbose)
-    : ConfigTreeNode(verbose)
-#if 0
-    // TODO: temporary commented-out. See the comments at the end
-    // of the MasterConfigTreeNode declaration.
+    : ConfigTreeNode(verbose),
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL)
-#endif
 {
 
 }
@@ -50,27 +46,50 @@ MasterConfigTreeNode::MasterConfigTreeNode(const string& nodename,
 			       MasterConfigTreeNode* parent,
 			       uid_t user_id,
 			       bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, user_id, verbose)
-#if 0
-    // TODO: temporary commented-out. See the comments at the end
-    // of the MasterConfigTreeNode declaration.
+    : ConfigTreeNode(nodename, path, ttn, parent, user_id, verbose),
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL)
-#endif
 {
 }
 
 MasterConfigTreeNode::MasterConfigTreeNode(const MasterConfigTreeNode& ctn)
-    : ConfigTreeNode(ctn)
-#if 0
-    // TODO: temporary commented-out. See the comments at the end
-    // of the MasterConfigTreeNode declaration.
+    : ConfigTreeNode(ctn),
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL)
-#endif
 {
+}
+
+ConfigTreeNode*
+MasterConfigTreeNode::create_node(const string& segment, const string& path,
+				  const TemplateTreeNode* ttn, 
+				  ConfigTreeNode* parent_node, 
+				  uid_t user_id, bool verbose)
+{
+    MasterConfigTreeNode *new_node, *parent;
+    parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
+
+    // sanity check - all nodes in this tree should be Master nodes
+    if (parent_node != NULL)
+	XLOG_ASSERT(parent != NULL);
+
+    new_node = new MasterConfigTreeNode(segment, path, ttn, parent, 
+				   user_id, verbose);
+    return reinterpret_cast<ConfigTreeNode*>(new_node);
+}
+
+ConfigTreeNode*
+MasterConfigTreeNode::create_node(const ConfigTreeNode& ctn) {
+    MasterConfigTreeNode *new_node;
+    const MasterConfigTreeNode *orig;
+
+    // sanity check - all nodes in this tree should be Master nodes
+    orig = dynamic_cast<const MasterConfigTreeNode *>(&ctn);
+    XLOG_ASSERT(orig != NULL);
+
+    new_node = new MasterConfigTreeNode(*orig);
+    return new_node;
 }
 
 

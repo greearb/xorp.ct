@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.55 2004/12/11 21:29:56 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.56 2004/12/14 21:58:05 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -42,14 +42,7 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
       _existence_committed(false),
       _value_committed(false),
       _on_parent_path(false),
-      _verbose(verbose),
-#if 1
-    // TODO: temporary here. See the comments at the end
-    // of the MasterConfigTreeNode declaration.
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL)
-#endif
+      _verbose(verbose)
 {
 }
 
@@ -71,14 +64,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _existence_committed(false),
       _value_committed(false),
       _on_parent_path(false),
-      _verbose(verbose),
-#if 1
-    // TODO: temporary here. See the comments at the end
-    // of the MasterConfigTreeNode declaration.
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL)
-#endif
+      _verbose(verbose)
 {
     TimerList::system_gettimeofday(&_modification_time);
     parent->add_child(this);
@@ -100,14 +86,7 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _existence_committed(ctn._existence_committed),
       _value_committed(ctn._value_committed),
       _on_parent_path(false),
-      _verbose(ctn._verbose),
-#if 1
-    // TODO: temporary here. See the comments at the end
-    // of the MasterConfigTreeNode declaration.
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL)
-#endif
+      _verbose(ctn._verbose)
 {
 }
 
@@ -151,6 +130,7 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 
     return true;
 }
+
 
 void 
 ConfigTreeNode::add_child(ConfigTreeNode* child)
@@ -202,9 +182,9 @@ ConfigTreeNode::add_default_children()
 	    if (childrens_templates.find(*tci) == childrens_templates.end()) {
 		string name = (*tci)->segname();
 		string path = _path + " " + name;
-		ConfigTreeNode *new_node = new ConfigTreeNode(name, path, *tci,
-							      this, _user_id,
-							      _verbose);
+		ConfigTreeNode *new_node = create_node(name, path, *tci,
+						       this, _user_id,
+						       _verbose);
 		new_node->set_value((*tci)->default_str(), _user_id);
 	    }
 	}
@@ -298,12 +278,12 @@ XXXXXXX to be copied to MasterConfigTreeNode
 	}
 	if (delta_child_done == false) {
 	    ConfigTreeNode* new_node;
-	    new_node = new ConfigTreeNode(delta_child->segname(),
-					  delta_child->path(),
-					  delta_child->template_tree_node(),
-					  this,
-					  user_id,
-					  _verbose);
+	    new_node = create_node(delta_child->segname(),
+				   delta_child->path(),
+				   delta_child->template_tree_node(),
+				   this,
+				   user_id,
+				   _verbose);
 	    if (!provisional_change)
 		new_node->set_existence_committed(true);
 	    new_node->merge_deltas(user_id, *delta_child, provisional_change,
@@ -732,7 +712,7 @@ ConfigTreeNode::clone_subtree(const ConfigTreeNode& orig_node)
     for (iter = orig_node.const_children().begin();
 	 iter != orig_node.const_children().end();
 	 ++iter) {
-	ConfigTreeNode* new_node = new ConfigTreeNode(**iter);
+	ConfigTreeNode* new_node = create_node(**iter);
 	new_node->set_parent(this);
 	add_child(new_node);
 	new_node->clone_subtree(**iter);

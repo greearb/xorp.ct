@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.13 2004/06/10 22:41:53 hodson Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.14 2004/12/06 00:31:05 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -23,7 +23,7 @@
 #include <set>
 
 #include "conf_tree.hh"
-#include "conf_tree_node.hh"
+#include "slave_conf_tree_node.hh"
 #include "slave_module_manager.hh"
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"
@@ -33,7 +33,6 @@
 class CommandTree;
 class ConfTemplate;
 class RouterCLI;
-class SlaveConfigTreeNode;
 
 class SlaveConfigTree : public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
@@ -41,6 +40,13 @@ public:
     SlaveConfigTree(XorpClient& xclient, bool verbose);
     SlaveConfigTree(const string& configuration, TemplateTree *tt,
 		    XorpClient& xclient, bool verbose) throw (InitError);
+    virtual ConfigTreeNode* create_node(const string& segment, 
+					const string& path,
+					const TemplateTreeNode* ttn, 
+					ConfigTreeNode* parent_node, 
+					uid_t user_id, bool verbose);
+    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose);
+
 
     bool parse(const string& configuration, const string& config_file,
 	       string& errmsg);
@@ -60,18 +66,25 @@ public:
     bool get_deltas(const SlaveConfigTree& main_tree);
     bool get_deletions(const SlaveConfigTree& main_tree);
 
-    // Adaptors so we don't need to cast elsewhere
-    inline SlaveConfigTreeNode& root_node() {
-	return reinterpret_cast<SlaveConfigTreeNode&>(ConfigTree::root_node());
+    virtual ConfigTreeNode& root_node() {
+	return _root_node;
     }
-    inline const SlaveConfigTreeNode& const_root_node() const {
-	return reinterpret_cast<const SlaveConfigTreeNode&>(ConfigTree::const_root_node());
+    virtual const ConfigTreeNode& const_root_node() const {
+	return _root_node;
+    }
+
+    inline SlaveConfigTreeNode& slave_root_node() {
+	return _root_node;
+    }
+    inline const SlaveConfigTreeNode& const_slave_root_node() const {
+	return _root_node;
     }
     inline SlaveConfigTreeNode* find_node(const list<string>& path) {
 	return reinterpret_cast<SlaveConfigTreeNode*>(ConfigTree::find_node(path));
     }
 
 private:
+    SlaveConfigTreeNode _root_node;
     XorpClient&	_xclient;
 
     XorpShell::LOCK_CALLBACK _stage2_cb;

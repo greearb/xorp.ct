@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.40 2004/11/05 03:30:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.41 2004/12/11 21:29:57 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -44,10 +44,14 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
 				   bool global_do_exec,
 				   bool verbose) throw (InitError)
     : ConfigTree(tt, verbose),
-      _task_manager(*this, mmgr, xclient, global_do_exec, verbose),
+      _root_node(verbose),
       _commit_in_progress(false),
       _config_failed(false)
 {
+    _current_node = &_root_node;
+    _task_manager = new TaskManager(*this, mmgr, xclient, 
+				    global_do_exec, verbose);
+
     string configuration;
     string errmsg;
 
@@ -72,6 +76,34 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     //
     execute();
 }
+
+MasterConfigTree::MasterConfigTree(TemplateTree* tt, bool verbose)
+    : ConfigTree(tt, verbose),
+      _root_node(verbose),
+      _task_manager(NULL)
+{
+    _current_node = &_root_node;
+}
+
+MasterConfigTree::~MasterConfigTree()
+{
+    delete _task_manager;
+}
+
+MasterConfigTree&
+MasterConfigTree::operator=(const MasterConfigTree& orig_tree)
+{
+    master_root_node().clone_subtree(orig_tree.const_master_root_node());
+    return *this;
+}
+
+ConfigTree* MasterConfigTree::create_tree(TemplateTree *tt, bool verbose)
+{
+    MasterConfigTree *mct;
+    mct = new MasterConfigTree(tt, verbose);
+    return mct;
+}
+
 
 bool
 MasterConfigTree::read_file(string& configuration,
@@ -163,13 +195,28 @@ MasterConfigTree::config_done(bool success, string errmsg)
     debug_msg("MasterConfigTree::config_done returning\n");
 }
 
+ConfigTreeNode*
+MasterConfigTree::create_node(const string& segment, const string& path,
+			      const TemplateTreeNode* ttn, 
+			      ConfigTreeNode* parent_node, 
+			      uid_t user_id, bool verbose)
+{
+    MasterConfigTreeNode *ctn, *parent;
+    parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
+    if (parent_node != NULL)
+	XLOG_ASSERT(parent != NULL);
+    ctn = new MasterConfigTreeNode(segment, path, ttn, parent, 
+				   user_id, verbose);
+    return reinterpret_cast<ConfigTreeNode*>(ctn);
+}
+
 list<string>
 MasterConfigTree::find_changed_modules() const
 {
     debug_msg("Find changed modules\n");
 
     set<string> changed_modules;
-    root_node().find_changed_modules(changed_modules);
+    const_master_root_node().find_changed_modules(changed_modules);
 
     list<string> ordered_modules;
     order_module_list(changed_modules, ordered_modules);
@@ -183,7 +230,7 @@ MasterConfigTree::find_active_modules() const
     debug_msg("Find active modules\n");
 
     set<string> active_modules;
-    root_node().find_active_modules(active_modules);
+    const_master_root_node().find_active_modules(active_modules);
 
     list<string> ordered_modules;
     order_module_list(active_modules, ordered_modules);
@@ -200,13 +247,13 @@ MasterConfigTree::find_inactive_modules() const
     list<string> ordered_all_modules;
 
     debug_msg("All modules:\n");
-    root_node().find_all_modules(all_modules);
+    const_master_root_node().find_all_modules(all_modules);
     order_module_list(all_modules, ordered_all_modules);
 
     set<string> active_modules;
     list<string> ordered_active_modules;
     debug_msg("Active modules:\n");
-    root_node().find_active_modules(active_modules);
+    master_root_node().find_active_modules(active_modules);
     order_module_list(active_modules, ordered_active_modules);
 
     // Remove things that are common to both lists
@@ -405,11 +452,11 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     /* Pass 1: check for errors without actually doing anything        */
     /*******************************************************************/
 
-    _task_manager.reset();
-    _task_manager.set_do_exec(false);
+    _task_manager->reset();
+    _task_manager->set_do_exec(false);
     _commit_cb = cb;
 
-    root_node().initialize_commit();
+    master_root_node().initialize_commit();
 
     if (root_node().check_config_tree(result) == false) {
 	// Something went wrong - return the error message.
@@ -430,11 +477,11 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     }
 
     bool needs_update = false;
-    if (root_node().commit_changes(_task_manager,
-				  /* do_commit = */ false,
-				  0, 0,
-				  result,
-				  needs_update)
+    if (master_root_node().commit_changes(*_task_manager,
+					  /* do_commit = */ false,
+					  0, 0,
+					  result,
+					  needs_update)
 	== false) {
 	// Something went wrong - return the error message.
 	_commit_in_progress = false;
@@ -444,10 +491,10 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 
     for (iter = inactive_modules.begin();
 	 iter != inactive_modules.end(); ++iter) {
-	_task_manager.shutdown_module(*iter);
+	_task_manager->shutdown_module(*iter);
     }
 
-    _task_manager.run(callback(this, &MasterConfigTree::commit_pass1_done));
+    _task_manager->run(callback(this, &MasterConfigTree::commit_pass1_done));
 }
 
 void
@@ -490,10 +537,10 @@ MasterConfigTree::commit_changes_pass2()
     list<string> inactive_modules = find_inactive_modules();
     list<string>::const_iterator iter;
 
-    _task_manager.reset();
-    _task_manager.set_do_exec(true);
+    _task_manager->reset();
+    _task_manager->set_do_exec(true);
 
-    root_node().initialize_commit();
+    master_root_node().initialize_commit();
     // Sort the changes in order of module dependencies
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
@@ -507,7 +554,7 @@ MasterConfigTree::commit_changes_pass2()
     }
 
     bool needs_update = false;
-    if (!root_node().commit_changes(_task_manager,
+    if (!master_root_node().commit_changes(*_task_manager,
 				   /* do_commit = */ true,
 				   0, 0,
 				   result,
@@ -522,10 +569,10 @@ MasterConfigTree::commit_changes_pass2()
     for (iter = inactive_modules.begin();
 	 iter != inactive_modules.end();
 	 ++iter) {
-	_task_manager.shutdown_module(*iter);
+	_task_manager->shutdown_module(*iter);
     }
 
-    _task_manager.run(callback(this, &MasterConfigTree::commit_pass2_done));
+    _task_manager->run(callback(this, &MasterConfigTree::commit_pass2_done));
 }
 
 void
@@ -547,12 +594,12 @@ bool
 MasterConfigTree::check_commit_status(string& result)
 {
     debug_msg("check_commit_status\n");
-    bool success = root_node().check_commit_status(result);
+    bool success = master_root_node().check_commit_status(result);
 
     if (success) {
 	// If the commit was successful, clear all the temporary state.
 	debug_msg("commit was successful, finalizing...\n");
-	root_node().finalize_commit();
+	master_root_node().finalize_commit();
 	debug_msg("finalizing done\n");
     }
     return success;
@@ -798,7 +845,7 @@ MasterConfigTree::run_save_hook(uid_t userid, const string& save_hook,
     argv.reserve(2);
     argv.push_back(save_hook);
     argv.push_back(filename);
-    _task_manager.shell_execute(userid, argv, 
+    _task_manager->shell_execute(userid, argv, 
            callback(this, &MasterConfigTree::save_hook_complete));
 }
 
@@ -865,23 +912,25 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // Test out parsing the config on a new config tree to detect any
     // parse errors before we reconfigure ourselves with the new config.
     //
-    ConfigTree new_tree(_template_tree, _verbose);
-    if (new_tree.parse(configuration, filename, errmsg) != true)
+    MasterConfigTree new_tree(_template_tree, _verbose);
+    if (new_tree.parse(configuration, filename, errmsg) != true) {
 	return false;
+    }
 
     //
     // Go through the config tree, and create nodes for any defaults
     // specified in the template tree that aren't already configured.
     //
     new_tree.add_default_children();
+    
 
     //
     // Ok, so the new config parses.  Now we need to figure out how it
     // differs from the existing config so we don't need to modify
     // anything that hasn't changed.
     //
-    ConfigTree delta_tree(_template_tree, _verbose);
-    ConfigTree deletion_tree(_template_tree, _verbose);
+    MasterConfigTree delta_tree(_template_tree, _verbose);
+    MasterConfigTree deletion_tree(_template_tree, _verbose);
     diff_configs(new_tree, delta_tree, deletion_tree);
 
     string response;
@@ -911,15 +960,15 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 }
 
 void
-MasterConfigTree::diff_configs(const ConfigTree& new_tree,
-			       ConfigTree& delta_tree,
-			       ConfigTree& deletion_tree)
+MasterConfigTree::diff_configs(const MasterConfigTree& new_tree,
+			       MasterConfigTree& delta_tree,
+			       MasterConfigTree& deletion_tree)
 {
     //
     // Clone the existing config tree into the delta tree.
     // Clone the new config tree into the delta tree.
     //
-    deletion_tree = *((ConfigTree*)(this));
+    deletion_tree = *((MasterConfigTree*)(this));
     delta_tree = new_tree;
 
     deletion_tree.retain_different_nodes(new_tree, false);
@@ -952,7 +1001,7 @@ MasterConfigTree::module_config_start(const string& module_name,
 	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
 	return false;
     }
-    _task_manager.add_module(*cmd);
+    _task_manager->add_module(*cmd);
     return true;
 }
 
@@ -967,7 +1016,7 @@ MasterConfigTree::module_shutdown(const string& module_name,
 	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
 	return false;
     }
-    _task_manager.shutdown_module(*cmd);
+    _task_manager->shutdown_module(*cmd);
     return true;
 }
 

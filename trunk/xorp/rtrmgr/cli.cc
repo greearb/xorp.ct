@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.57 2004/08/12 07:16:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.58 2004/11/16 21:43:12 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -1951,7 +1951,7 @@ RouterCLI::text_entry_func(const string& ,
 	//
 	if (brace_ctn == NULL) {
 	    _braces.push_front(0);
-	    brace_ctn = &(config_tree()->root_node());
+	    brace_ctn = &(config_tree()->slave_root_node());
 	} else {
 	    _braces.push_front(brace_ctn->depth());
 	}
@@ -1985,7 +1985,7 @@ RouterCLI::text_entry_func(const string& ,
     if (ctn == NULL)
 	ctn = brace_ctn;
     if (ctn == NULL)
-	ctn = &(config_tree()->root_node());
+	ctn = &(config_tree()->slave_root_node());
 
     //
     // At this point, path_segments contains the path of nodes that
@@ -2391,7 +2391,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     list<string> path_parts;
     path_parts = split(path, ' ');
 
-    ConfigTreeNode* ctn = config_tree()->find_node(path_parts);
+    SlaveConfigTreeNode* ctn = config_tree()->find_node(path_parts);
     const TemplateTreeNode* ttn;
     bool create_needed = false;
     string nodename;
@@ -2435,11 +2435,12 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	    else
 		newpath += " " + *iter;
 	}
-	ConfigTreeNode* newnode = new ConfigTreeNode(path_parts.back(),
-						     newpath, ttn,
-						     ctn,
-						     getuid(),
-						     _verbose);
+	SlaveConfigTreeNode* newnode;
+	newnode = new SlaveConfigTreeNode(path_parts.back(),
+					  newpath, ttn,
+					  ctn,
+					  getuid(),
+					  _verbose);
 	ctn = newnode;
 	ctn->set_value(argv[0], getuid());
     } else {

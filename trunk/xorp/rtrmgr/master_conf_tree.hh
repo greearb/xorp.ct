@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.23 2004/12/08 22:47:27 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.24 2004/12/11 21:29:57 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -40,6 +40,10 @@ public:
     MasterConfigTree(const string& config_file, MasterTemplateTree* tt,
 		     ModuleManager& mmgr, XorpClient& xclient,
 		     bool global_do_exec, bool verbose) throw (InitError);
+    MasterConfigTree(TemplateTree* tt, bool verbose);
+    MasterConfigTree& operator=(const MasterConfigTree& orig_tree);
+    ~MasterConfigTree();
+    
 
     bool read_file(string& configuration, const string& config_file,
 		   string& errmsg);
@@ -47,6 +51,13 @@ public:
 	       string& errmsg);
     void execute();
     void config_done(bool success, string errmsg);
+
+    virtual ConfigTreeNode* create_node(const string& segment, 
+					const string& path,
+					const TemplateTreeNode* ttn, 
+					ConfigTreeNode* parent_node, 
+					uid_t user_id, bool verbose);
+    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose);
 
     void commit_changes_pass1(CallBack cb);
     void commit_pass1_done(bool success, string errmsg);
@@ -71,15 +82,23 @@ public:
 			string& deltas, string& deletions);
 
     ModuleManager& module_manager() const {
-	return _task_manager.module_manager();
+	return _task_manager->module_manager();
     }
 
-    inline MasterConfigTreeNode& root_node() const {
+    virtual ConfigTreeNode& root_node() {
+	return _root_node;
+    }
+    virtual const ConfigTreeNode& const_root_node() const {
+	return _root_node;
+    }
+
+    inline MasterConfigTreeNode& master_root_node() const {
 	return (MasterConfigTreeNode&)_root_node;
     }
-    inline const MasterConfigTreeNode& const_root_node() const {
+    inline const MasterConfigTreeNode& const_master_root_node() const {
 	return (const MasterConfigTreeNode&)_root_node;
     }
+
     inline MasterConfigTreeNode* find_node(const list<string>& path) {
 	return (MasterConfigTreeNode*)(ConfigTree::find_node(path));
     }
@@ -89,8 +108,9 @@ public:
     
 
 private:
-    void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,
-		      ConfigTree& deletion_tree);
+    void diff_configs(const MasterConfigTree& new_tree, 
+		      MasterConfigTree& delta_tree,
+		      MasterConfigTree& deletion_tree);
     list<string> find_changed_modules() const;
     list<string> find_active_modules() const;
     list<string> find_inactive_modules() const;
@@ -99,10 +119,10 @@ private:
     bool module_config_start(const string& module_name, string& errmsg);
     bool module_shutdown(const string& module_name, string& errmsg);
 
-    bool do_exec() const { return _task_manager.do_exec(); }
-    bool verbose() const { return _task_manager.verbose(); }
+    bool do_exec() const { return _task_manager->do_exec(); }
+    bool verbose() const { return _task_manager->verbose(); }
 
-    XorpClient& xorp_client() const { return _task_manager.xorp_client(); }
+    XorpClient& xorp_client() const { return _task_manager->xorp_client(); }
 
     /**
      * @short run_save_hook is executed after the config file has been saved.
@@ -121,7 +141,8 @@ private:
      */
     void save_hook_complete(bool success, const string errmsg) const;
 
-    TaskManager		_task_manager;
+    MasterConfigTreeNode _root_node;
+    TaskManager*        _task_manager;
     CallBack		_commit_cb;
     bool		_commit_in_progress;
     bool		_config_failed;

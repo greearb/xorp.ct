@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.27 2004/12/11 21:29:56 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.28 2004/12/14 21:58:05 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -41,9 +41,17 @@ public:
     ConfigTreeNode(const string& node_name, const string& path, 
 		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
 		   uid_t user_id, bool verbose);
-    ~ConfigTreeNode();
+    virtual ~ConfigTreeNode();
 
     bool operator==(const ConfigTreeNode& them) const;
+    
+    virtual ConfigTreeNode* create_node(const string& segment, 
+					const string& path,
+					const TemplateTreeNode* ttn, 
+					ConfigTreeNode* parent_node, 
+					uid_t user_id, bool verbose) = 0;
+    virtual ConfigTreeNode* create_node(const ConfigTreeNode& ctn) = 0;
+
     void add_child(ConfigTreeNode* child);
     void remove_child(ConfigTreeNode* child);
     void add_default_children();
@@ -150,21 +158,6 @@ protected:
 
     bool _verbose;
 
-#if 1
-    //
-    // TODO: all MasterConfigTreeNode local state has been moved
-    // temporary to the base ConfigTreeNode class.
-    // This is a temporary solution of a memory allocation problem:
-    // in number of places, ConfigTreeNode objects are allocated,
-    // but later they are casted (using C-style cast) to the larger
-    // MasterConfigTreeNode, and the extra state (outside of the allocated
-    // memory) is modified.
-    //
-    int _actions_pending;	// Needed to track how many response callbacks
-				// callbacks we expect during a commit
-    bool _actions_succeeded;	// Did any action fail during the commit?
-    const Command* _cmd_that_failed;
-#endif
 
 private:
 };
