@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.13 2004/06/10 22:41:39 hodson Exp $
+// $XORP: xorp/rib/route.hh,v 1.14 2004/09/17 14:00:04 abittau Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -293,7 +293,7 @@ public:
 			 const Protocol& protocol, uint16_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent)
-	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric,PolicyTags()),
+	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric, PolicyTags()),
 	_igp_parent(igp_parent),
 	_egp_parent(egp_parent) { }
 

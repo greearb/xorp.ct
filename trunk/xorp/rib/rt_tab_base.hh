@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.16 2004/07/24 01:01:52 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.17 2004/09/17 14:00:04 abittau Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -25,19 +25,17 @@
 #include "libxorp/trie.hh"
 
 enum TableType {
-    ORIGIN_TABLE	= 1 << 0,
-    MERGED_TABLE	= 1 << 1,
-    EXTINT_TABLE	= 1 << 2,
-    REDIST_TABLE	= 1 << 3,
-    REGISTER_TABLE	= 1 << 4,
-    DELETION_TABLE	= 1 << 5,
-    EXPECT_TABLE	= 1 << 6,
-    LOG_TABLE		= 1 << 7,
-    
-    POLICY_REDIST_TABLE	    = 1 << 8,
-    POLICY_CONNECTED_TABLE  = 1 << 9,
-
-    MAX_TABLE_TYPE	= 1 << 9
+    ORIGIN_TABLE		= 1 << 0,
+    MERGED_TABLE		= 1 << 1,
+    EXTINT_TABLE		= 1 << 2,
+    REDIST_TABLE		= 1 << 3,
+    REGISTER_TABLE		= 1 << 4,
+    DELETION_TABLE		= 1 << 5,
+    EXPECT_TABLE		= 1 << 6,
+    LOG_TABLE			= 1 << 7,
+    POLICY_REDIST_TABLE		= 1 << 8,
+    POLICY_CONNECTED_TABLE	= 1 << 9,
+    MAX_TABLE_TYPE		= 1 << 9
 };
 
 /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.39 2004/07/24 01:01:52 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.40 2004/09/17 14:00:04 abittau Exp $"
 
 #include "rib_module.h"
 
@@ -555,7 +555,8 @@ RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
 }
 
 void
-RibManager::push_routes() {
+RibManager::push_routes()
+{
     _urib4.push_routes();
     _urib6.push_routes();
     
@@ -564,23 +565,26 @@ RibManager::push_routes() {
 }
 
 void
-RibManager::configure_filter(const uint32_t& filter, const string& conf) {
-    _policy_filters.configure(filter,conf);
+RibManager::configure_filter(const uint32_t& filter, const string& conf)
+{
+    _policy_filters.configure(filter, conf);
 }
 
 void
-RibManager::reset_filter(const uint32_t& filter) {
+RibManager::reset_filter(const uint32_t& filter)
+{
     _policy_filters.reset(filter);
 }
 
 void
 RibManager::insert_policy_redist_tags(const string& protocol,
-				      const PolicyTags& tags) {
-    
-    _policy_redist_map.insert(protocol,tags);
+				      const PolicyTags& tags)
+{
+    _policy_redist_map.insert(protocol, tags);
 }				      
 
 void
-RibManager::reset_policy_redist_tags() {
+RibManager::reset_policy_redist_tags()
+{
     _policy_redist_map.reset();
 }

@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,17 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.1 2004/09/17 14:00:04 abittau Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.2 2004/09/17 20:02:26 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "rib_module.h"
-#include "rt_tab_pol_conn.hh"
-#include "rib_varrw.hh"
 
 #include <sstream>
 
+#include "rt_tab_pol_conn.hh"
+#include "rib_varrw.hh"
 
 
 template <class A>
@@ -31,20 +32,21 @@ const string PolicyConnectedTable<A>::table_name = "policy-connected-table";
 
 template <class A>
 PolicyConnectedTable<A>::PolicyConnectedTable (RouteTable<A>* parent,
-					       PolicyFilters& pfs) :
-    RouteTable<A>(table_name), _parent(parent), _policy_filters(pfs)  {
-    
+					       PolicyFilters& pfs)
+    : RouteTable<A>(table_name), _parent(parent), _policy_filters(pfs)
+{
     if (_parent->next_table()) {
-        set_next_table(_parent->next_table());
+	set_next_table(_parent->next_table());
 
-        this->next_table()->replumb(_parent, this);
+	this->next_table()->replumb(_parent, this);
     }
     _parent->set_next_table(this);
 }
 
 template <class A>
-PolicyConnectedTable<A>::~PolicyConnectedTable () {
-    for(typename RouteContainer::iterator i = _route_table.begin();
+PolicyConnectedTable<A>::~PolicyConnectedTable ()
+{
+    for (typename RouteContainer::iterator i = _route_table.begin();
 	i != _route_table.end(); ++i) {
 	delete i.payload();
     }
@@ -55,8 +57,8 @@ PolicyConnectedTable<A>::~PolicyConnectedTable () {
 template <class A>
 int
 PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route, 
-				RouteTable<A>* caller) {
-
+				RouteTable<A>* caller)
+{
     XLOG_ASSERT(caller == _parent);
 
     debug_msg("[RIB] PolicyConnectedTable ADD ROUTE: %s\n", 
@@ -65,7 +67,7 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
 
     // store original
     IPRouteEntry<A>* original = new IPRouteEntry<A>(route);
-    _route_table.insert(original->net(),original);
+    _route_table.insert(original->net(), original);
 
     // make a copy so we may modify it
     IPRouteEntry<A> route_copy(*original);
@@ -75,18 +77,17 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
 
-    // send the possibly modified route down.
-    return next->add_route(route_copy,this);
-
-}				
+    // Send the possibly modified route down
+    return next->add_route(route_copy, this);
+}			
 
 template <class A>
 int 
 PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route, 
-				   RouteTable<A>* caller) {
-    
+				   RouteTable<A>* caller)
+{
     XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(route);
+    XLOG_ASSERT(route != NULL);
 
     debug_msg("[RIB] PolicyConnectedTable DELETE ROUTE: %s\n",
 	      route->str().c_str());
@@ -105,19 +106,20 @@ PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
     XLOG_ASSERT(next);
 
     // propagate the delete
-    return next->delete_route(route,this);
+    return next->delete_route(route, this);
 }
 
 template <class A>
 const IPRouteEntry<A>* 
-PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const {
+PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const
+{
     XLOG_ASSERT(_parent);
 
     typename RouteContainer::iterator i;
     i = _route_table.lookup_node(net);
 
     // check if we have route [we should have same routes as origin table].
-    if(i == _route_table.end());
+    if (i == _route_table.end());
 	return _parent->lookup_route(net); // should return null probably
     
     return i.payload();
@@ -126,14 +128,15 @@ PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const {
 
 template <class A>
 const IPRouteEntry<A>* 
-PolicyConnectedTable<A>::lookup_route(const A& addr) const {
+PolicyConnectedTable<A>::lookup_route(const A& addr) const
+{
     XLOG_ASSERT(_parent);
 
     typename RouteContainer::iterator i;
     i = _route_table.find(addr);
 
     // same as above
-    if(i == _route_table.end())
+    if (i == _route_table.end())
 	return _parent->lookup_route(addr); // return null
 
     return i.payload();
@@ -142,7 +145,8 @@ PolicyConnectedTable<A>::lookup_route(const A& addr) const {
 
 template <class A>
 RouteRange<A>* 
-PolicyConnectedTable<A>::lookup_route_range(const A& addr) const {
+PolicyConnectedTable<A>::lookup_route_range(const A& addr) const
+{
     XLOG_ASSERT(_parent);
 
     // XXX: no policy tags in ranges for now
@@ -153,25 +157,26 @@ PolicyConnectedTable<A>::lookup_route_range(const A& addr) const {
 template <class A>
 void
 PolicyConnectedTable<A>::replumb(RouteTable<A>* old_parent, 
-			      RouteTable<A>* new_parent) {
+			      RouteTable<A>* new_parent)
+{
     XLOG_ASSERT(old_parent == _parent);
 
     _parent = new_parent;
-
 }			      
 
 
 template <class A>
 string
-PolicyConnectedTable<A>::str() const {
+PolicyConnectedTable<A>::str() const
+{
     return "not implement yet";
 }
 
 template <class A>
 void
-PolicyConnectedTable<A>::push_routes() {
+PolicyConnectedTable<A>::push_routes()
+{
     debug_msg("[RIB] PolicyConnectedTable PUSH ROUTES\n");
-
     
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
@@ -180,7 +185,7 @@ PolicyConnectedTable<A>::push_routes() {
 
     // XXX: not a background task
     // go through original routes and refilter them
-    for(typename RouteContainer::iterator i = _route_table.begin();
+    for (typename RouteContainer::iterator i = _route_table.begin();
 	i != _route_table.end(); ++i) {
    
 	const IPRouteEntry<A>* prev = i.payload();
@@ -192,7 +197,7 @@ PolicyConnectedTable<A>::push_routes() {
 	
 	
 	// only policytags may change
-	next->replace_policytags(*copy,prev->policytags(),this);
+	next->replace_policytags(*copy, prev->policytags(), this);
 
 	// delete old route
 	delete prev;
@@ -202,44 +207,40 @@ PolicyConnectedTable<A>::push_routes() {
     }
 
     // store all new routes
-    for(typename vector<IPRouteEntry<A>*>::iterator i = new_routes.begin();
+    for (typename vector<IPRouteEntry<A>*>::iterator i = new_routes.begin();
 	i != new_routes.end(); ++i) {
 
 	// replace route
 	IPRouteEntry<A>* route = *i;
 	_route_table.erase(route->net());
-	_route_table.insert(route->net(),route);
+	_route_table.insert(route->net(), route);
     }	
-
 }
 
 
 template <class A>
 void
-PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route) {
+PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route)
+{
+    try {
+	debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",
+		  route.str().c_str());
 
-try {
-    debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",
-	      route.str().c_str());
-    
-    RIBVarRW<A> varrw(route);
+	RIBVarRW<A> varrw(route);
 
-    // only source match filtering!
-    ostringstream trace;
-    _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
-			       varrw, &trace);
- 
-    debug_msg("[RIB] Filter trace:\n%s\n[RIB] end of trace.\n",
-	      trace.str().c_str());
-  
-} catch(const PolicyException& e) {
-    XLOG_FATAL("PolicyException: %s",e.str().c_str());
-    abort(); // FIXME
+	// only source match filtering!
+	ostringstream trace;
+	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
+				   varrw, &trace);
+
+	debug_msg("[RIB] Filter trace:\n%s\n[RIB] end of trace.\n",
+		  trace.str().c_str());
+
+    } catch(const PolicyException& e) {
+	XLOG_FATAL("PolicyException: %s", e.str().c_str());
+	XLOG_UNFINISHED();
+    }
 }
-
-}
-
-
 
 
 template class PolicyConnectedTable<IPv4>;

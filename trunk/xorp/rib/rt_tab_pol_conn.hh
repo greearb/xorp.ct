@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_pol_conn.hh,v 1.1 2004/09/17 14:00:04 abittau Exp $
+// $XORP: xorp/rib/rt_tab_pol_conn.hh,v 1.2 2004/09/17 20:02:27 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_POL_CONN_HH__
 #define __RIB_RT_TAB_POL_CONN_HH__
@@ -67,7 +68,7 @@ private:
      * No need to check for route being accepted / rejected -- it is always
      * accepted [only source match filtering].
      *
-     * @param r route to filter
+     * @param r route to filter.
      */
     void do_filtering(IPRouteEntry<A>& r);
 
@@ -75,12 +76,12 @@ private:
     typedef Trie<A, const IPRouteEntry<A>*> RouteContainer;
 
     
-    RouteTable<A>*  _parent;
+    RouteTable<A>*	_parent;
 
-    RouteContainer  _route_table;   // copy of routes
-				    // we have this so we may push routes.
+    RouteContainer	_route_table;	// Copy of routes
+					// we have this so we may push routes.
 
-    PolicyFilters& _policy_filters; // reference to connected route filters.
+    PolicyFilters&	_policy_filters; // Reference to connected route filters.
 };
 
 #endif // __RIB_RT_TAB_POL_CONN_HH__

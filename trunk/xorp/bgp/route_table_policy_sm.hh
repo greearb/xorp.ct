@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.1 2004/09/17 13:50:55 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_SM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_SM_HH__
@@ -35,8 +36,8 @@ public:
      * @param parent the parent table.
      * @param pfs a reference to the global policyfilters.
      */
-    PolicyTableSourceMatch(const string& tablename, 
-			   const Safi& safi, 
+    PolicyTableSourceMatch(const string& tablename,
+			   const Safi& safi,
 			   BGPRouteTable<A>* parent,
 			   PolicyFilters& pfs);
     ~PolicyTableSourceMatch();
@@ -49,19 +50,19 @@ public:
     void push_routes(list<const PeerTableInfo<A>*>& peer_list);
 
     /**
-     * Dump the next route
+     * Dump the next route.
      */
     void do_next_route_dump();
 
     /**
-     * stop dumping routes
+     * Stop dumping routes.
      */
     void end_route_dump();
 
 
 private:
-    bool _pushing_routes;
-    DumpIterator<A>* _dump_iter;
+    bool		_pushing_routes;
+    DumpIterator<A>*	_dump_iter;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_SM_HH__

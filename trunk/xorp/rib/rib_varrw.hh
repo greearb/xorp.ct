@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_varrw.hh,v 1.1 2004/09/17 14:00:04 abittau Exp $
+// $XORP: xorp/rib/rib_varrw.hh,v 1.2 2004/09/18 00:59:58 pavlin Exp $
 
 #ifndef __RIB_RIB_VARRW_HH__
 #define __RIB_RIB_VARRW_HH__
 
 #include "policy/backend/single_varrw.hh"
 #include "policy/common/element_factory.hh"
+
 #include "route.hh"
 
 
@@ -32,7 +34,7 @@ template <class A>
 class RIBVarRW : public SingleVarRW {
 public:
     /**
-     * @param route route to filter and possibly modify
+     * @param route route to filter and possibly modify.
      */
     RIBVarRW(IPRouteEntry<A>& route);
 
@@ -42,15 +44,15 @@ public:
     void single_start();
 
     /**
-     * Write a variable
+     * Write a variable.
      *
-     * @param id variablea to write
-     * @param e value of variable
+     * @param id variablea to write.
+     * @param e value of variable.
      */
     void single_write(const string& id, const Element& e);
 
     /**
-     * commit all changes
+     * Commit all changes.
      */
     void single_end();
 
@@ -64,9 +66,9 @@ private:
      */
     void read_route_nexthop(IPRouteEntry<A>& r);
 
-    IPRouteEntry<A>&   _route;
+    IPRouteEntry<A>&	_route;
 
-    ElementFactory _ef;
+    ElementFactory	_ef;
 };
 
 #endif // __RIB_RIB_VARRW_HH__

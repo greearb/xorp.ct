@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/rib/rt_tab_pol_redist.hh,v 1.1 2004/09/17 14:00:04 abittau Exp $
 
 #ifndef __RIB_RT_TAB_POL_REDIST_HH__
 #define __RIB_RT_TAB_POL_REDIST_HH__
@@ -24,9 +25,11 @@
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
 #include "libxorp/eventloop.hh"
+
 #include "libxipc/xrl_std_router.hh"
 
 #include "policy/backend/policy_redist_map.hh"
+
 #include "xrl/interfaces/policy_redist4_xif.hh"
 #include "xrl/interfaces/policy_redist6_xif.hh"
 
@@ -59,8 +62,8 @@ public:
 
     /**
      * If policy-tags of a route changed, this table will need to figure out
-     * which protocol should stop advertising a route, and which protocol should
-     * continue or start.
+     * which protocol should stop advertising a route, and which protocol
+     * should continue or start.
      *
      * @param route the route with its new policy tags.
      * @param prevtags the previous policytags of the route.
@@ -107,17 +110,17 @@ private:
     void del_redist(const IPRouteEntry<A>& route, const string& proto);
 
 
-    RouteTable<A>*  _parent;
+    RouteTable<A>*		_parent;
     
-    XrlRouter&	    _xrl_router;
-    EventLoop&	    _eventloop;
+    XrlRouter&			_xrl_router;
+    EventLoop&			_eventloop;
 
-    PolicyRedistMap&	_redist_map;
+    PolicyRedistMap&		_redist_map;
 
-    XrlPolicyRedist4V0p1Client _redist4_client;
-    XrlPolicyRedist6V0p1Client _redist6_client;
+    XrlPolicyRedist4V0p1Client	_redist4_client;
+    XrlPolicyRedist6V0p1Client	_redist6_client;
 
-    bool _multicast;
+    bool			_multicast;
 };
 
 #endif // __RIB_RT_TAB_POL_REDIST_HH__

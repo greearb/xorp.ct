@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,23 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.1 2004/09/17 13:50:55 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.2 2004/09/17 20:02:26 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
+
 #include "route_table_policy_im.hh"
 
 template <class A>
 PolicyTableImport<A>::PolicyTableImport(const string& tablename, 
 						  const Safi& safi,
 						  BGPRouteTable<A>* parent,
-						  PolicyFilters& pfs) :
-
-		PolicyTable<A>(tablename,safi,parent,pfs,
-			       filter::IMPORT)
-			       
+						  PolicyFilters& pfs)
+    : PolicyTable<A>(tablename, safi, parent, pfs, filter::IMPORT)
 {
     this->_parent = parent;		
 }
@@ -40,13 +39,13 @@ template <class A>
 int
 PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 				      BGPRouteTable<A>* caller,
-				      const PeerHandler* dump_peer) {
-    
+				      const PeerHandler* dump_peer)
+{
     // XXX: policy route dumping IS A HACK!
 
     // it is a "normal dump"
-    if(dump_peer)
-	return PolicyTable<A>::route_dump(rtmsg,caller,dump_peer);
+    if (dump_peer)
+	return PolicyTable<A>::route_dump(rtmsg, caller, dump_peer);
 
     // it is a "policy dump"
     XLOG_ASSERT(caller == this->_parent);
@@ -56,10 +55,10 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     debug_msg("[BGP] Policy route dump: %s\nWas filtered: %d\n",
 	      rtmsg.str().c_str(), was_filtered);
 
-    const InternalMessage<A>* fmsg = do_filtering(rtmsg,false);
+    const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     bool accepted = (fmsg != NULL);
 
-    debug_msg("[BGP] Policy route dump accepted: %d\n",accepted);
+    debug_msg("[BGP] Policy route dump accepted: %d\n", accepted);
 
     BGPRouteTable<A>* next = this->_next_table;
 
@@ -67,52 +66,47 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 
     int res = XORP_OK;
 
-    if(accepted) {
-	if(was_filtered) {
-	    res = next->add_route(*fmsg,this);
-	}
-	else {
-	    // i think it is suicidal to replace the same route, so copy it.
+    if (accepted) {
+	if (was_filtered) {
+	    res = next->add_route(*fmsg, this);
+	} else {
+	    // I think it is suicidal to replace the same route, so copy it.
 	    // but we need to, so it goes down to the other filters...
-	    if(fmsg == &rtmsg) {
+	    if (fmsg == &rtmsg) {
 		SubnetRoute<A>* new_route = new SubnetRoute<A>(*(rtmsg.route()));
 
 		InternalMessage<A>* new_fmsg;
-		new_fmsg = new InternalMessage<A>(new_route, rtmsg.origin_peer(),
+		new_fmsg = new InternalMessage<A>(new_route,
+						  rtmsg.origin_peer(),
 					          rtmsg.genid());
-		
 	
 		// propagate flags
-		if(rtmsg.push())
+		if (rtmsg.push())
 		    new_fmsg->set_push();
-		if(rtmsg.from_previous_peering())
+		if (rtmsg.from_previous_peering())
 		    new_fmsg->set_from_previous_peering();
-		if(rtmsg.changed())
+		if (rtmsg.changed())
 		    new_fmsg->set_changed();
 	    
 		fmsg = new_fmsg;
-
 	    }	
 
-
-	    res = next->replace_route(rtmsg,*fmsg,this);
+	    res = next->replace_route(rtmsg, *fmsg, this);
 	}
-    }
-    // not accepted
-    else {
-	if(was_filtered) {
-	}
-	else {
-	    next->delete_route(rtmsg,this);
+    } else {
+	// not accepted
+	if (was_filtered) {
+	} else {
+	    next->delete_route(rtmsg, this);
 	}
 	res = ADD_FILTERED;
     }
 
-    if(fmsg != &rtmsg)
+    if (fmsg != &rtmsg)
 	delete fmsg;
 
     return res;
-}				  
+}
 
 template class PolicyTableImport<IPv4>;
 template class PolicyTableImport<IPv6>;

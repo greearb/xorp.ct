@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.26 2004/08/03 05:02:56 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.27 2004/09/17 14:00:05 abittau Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -215,7 +215,7 @@ protected:
 	const IPv4Net&	network,
 	const IPv4&     nexthop,
 	const uint32_t& metric,
-	const XrlAtomList&      policytags);
+	const XrlAtomList&	policytags);
 
     XrlCmdError rib_0_1_add_route6(
 	// Input values,
@@ -225,7 +225,7 @@ protected:
 	const IPv6Net&	network,
 	const IPv6&	nexthop,
 	const uint32_t& metric,
-	const XrlAtomList&      policytags);
+	const XrlAtomList&	policytags);
 
     XrlCmdError rib_0_1_replace_route4(
 	// Input values,
@@ -235,7 +235,7 @@ protected:
 	const IPv4Net&	network,
 	const IPv4&     nexthop,
 	const uint32_t& metric,
-	const XrlAtomList&      policytags);
+	const XrlAtomList&	policytags);
 
     XrlCmdError rib_0_1_replace_route6(
 	// Input values,
@@ -245,7 +245,7 @@ protected:
 	const IPv6Net&	network,
 	const IPv6&	nexthop,
 	const uint32_t& metric,
-	const XrlAtomList&      policytags);
+	const XrlAtomList&	policytags);
 
     XrlCmdError rib_0_1_delete_route4(
 	// Input values,
@@ -718,7 +718,7 @@ protected:
 
 
     /**
-     * Configure a policy filter
+     * Configure a policy filter.
      *
      * @param filter id of filter to configure.
      * @param conf configuration of filter.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.38 2004/07/24 01:44:09 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.39 2004/09/17 14:00:03 abittau Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -430,12 +430,12 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 	     ai++) {
 	    if (ai->addr().is_ipv4()) {
 		add_route("connected", ai->subnet_addr().get_ipv4net(),
-			  ai->addr().get_ipv4(), "", "", 0,PolicyTags());
+			  ai->addr().get_ipv4(), "", "", 0, PolicyTags());
 		if (new_vif->is_p2p() && (ai->peer_addr() != IPv4::ZERO())) {
 		    add_route("connected",
 			      IPv4Net(ai->peer_addr().get_ipv4(),
 				      IPv4::addr_bitlen()),
-			      ai->addr().get_ipv4(), "", "", 0,PolicyTags());
+			      ai->addr().get_ipv4(), "", "", 0, PolicyTags());
 		}
 	    }
 	}
@@ -466,12 +466,12 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 	     ai++) {
 	    if (ai->addr().is_ipv6()) {
 		add_route("connected", ai->subnet_addr().get_ipv6net(),
-			  ai->addr().get_ipv6(), "", "", 0,PolicyTags());
+			  ai->addr().get_ipv6(), "", "", 0, PolicyTags());
 		if (new_vif->is_p2p() && (ai->peer_addr() != IPv6::ZERO())) {
 		    add_route("connected",
 			      IPv6Net(ai->peer_addr().get_ipv6(),
 				      IPv6::addr_bitlen()),
-			      ai->addr().get_ipv6(), "", "", 0,PolicyTags());
+			      ai->addr().get_ipv6(), "", "", 0, PolicyTags());
 		}
 	    }
 	}
@@ -559,7 +559,7 @@ RIB<A>::add_vif_address(const string&	vifname,
     if (vi->second.is_p2p() && (peer_addr != A::ZERO())) {
 	add_route("connected",
 		  IPNet<A>(peer_addr, A::addr_bitlen()),
-		  peer_addr, "", "", 0,PolicyTags());
+		  peer_addr, "", "", 0, PolicyTags());
     }
     return XORP_OK;
 }
@@ -608,7 +608,6 @@ RIB<A>::add_route(const string&		tablename,
 		  uint32_t		metric,
 		  const PolicyTags&	policytags)
 {
-
     RouteTable<A>* rt = find_table(tablename);
     if (rt == NULL) {
 	if (_errors_are_fatal) {
@@ -662,7 +661,7 @@ RIB<A>::add_route(const string&		tablename,
 	Vif* vif = &iter->second;
 	IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
 	ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol,
-		      metric,policytags));
+		      metric, policytags));
 	flush();
 	return XORP_OK;
     }
@@ -702,7 +701,7 @@ RIB<A>::add_route(const string&		tablename,
 
 	    IPNextHop<A>* nexthop = find_or_create_external_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nexthop,
-					  *protocol, metric,policytags));
+					  *protocol, metric, policytags));
 	    flush();
 	    return XORP_OK;
 	}
@@ -744,7 +743,7 @@ RIB<A>::add_route(const string&		tablename,
     }
 
     ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol,
-				  metric,policytags));
+				  metric, policytags));
 
     flush();
     return XORP_OK;
@@ -773,7 +772,7 @@ RIB<A>::replace_route(const string&	tablename,
 	return response;
 
     response = add_route(tablename, net, nexthop_addr, ifname, vifname,
-			 metric,policytags);
+			 metric, policytags);
 
     // No need to flush here, as add_route will do it for us.
 
@@ -930,9 +929,9 @@ RIB<A>::add_igp_table(const string& tablename,
 
     const string* redistparent = &tablename;
 
-    if(tablename == "connected") {
+    if (tablename == "connected") {
 	r = add_policy_connected_table(tablename);
-	if(r != XORP_OK) {
+	if (r != XORP_OK) {
 	    delete_origin_table(tablename, target_class, target_instance);
 	    return r;
 	}
@@ -980,7 +979,8 @@ RIB<A>::add_egp_table(const string& tablename,
 
 template <typename A>
 int
-RIB<A>::add_policy_connected_table(const string& parent_tablename) {
+RIB<A>::add_policy_connected_table(const string& parent_tablename)
+{
     RouteTable<A>* parent = find_table(parent_tablename);
     if (parent == NULL) {
 	XLOG_WARNING("add_policy_connected_table: parent table %s does not exist",
@@ -988,7 +988,7 @@ RIB<A>::add_policy_connected_table(const string& parent_tablename) {
 	return XORP_ERROR;
     }
 
-    if(find_table(PolicyConnectedTable<A>::table_name))
+    if (find_table(PolicyConnectedTable<A>::table_name))
 	return XORP_OK;
 
     PolicyConnectedTable<A>* pt = 
@@ -1392,7 +1392,8 @@ RIB<A>::name() const
 
 template <typename A>
 void
-RIB<A>::push_routes() {
+RIB<A>::push_routes()
+{
     RouteTable<A>* rt = find_table(PolicyConnectedTable<A>::table_name);
     XLOG_ASSERT(rt);
 
@@ -1401,9 +1402,6 @@ RIB<A>::push_routes() {
 
     pct->push_routes();
 }
-
-
-
 
 template class RIB<IPv4>;
 template class RIB<IPv6>;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.11 2004/07/24 01:01:51 pavlin Exp $
+// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.12 2004/09/17 14:00:03 abittau Exp $
 
 #ifndef __RIB_DUMMY_RIB_MANAGER_HH__
 #define __RIB_DUMMY_RIB_MANAGER_HH__
@@ -341,6 +341,7 @@ public:
      * @param filter Identifier of filter to reset.
      */
     void reset_filter(const uint32_t& filter);
+
     /**
      * Insert [old ones are kept] policy-tags for a protocol.
      *

@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,15 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_varrw.cc,v 1.1 2004/09/17 14:00:04 abittau Exp $"
+#ident "$XORP: xorp/rib/rib_varrw.cc,v 1.2 2004/09/18 00:59:58 pavlin Exp $"
 
 #include "rib_module.h"
-#include "rib_varrw.hh"
+
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 
+#include "rib_varrw.hh"
+
 template <class A>
-RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route) :
-    _route(route)
+RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route)
+    : _route(route)
 {
     initialize("policytags", _route.policytags().element());
 
@@ -30,42 +34,46 @@ RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route) :
 
     oss << route.metric();
 
-    initialize("metric", _ef.create(ElemU32::id,oss.str().c_str()));
+    initialize("metric", _ef.create(ElemU32::id, oss.str().c_str()));
 }
 
 template <>
 void
-RIBVarRW<IPv4>::read_route_nexthop(IPRouteEntry<IPv4>& route) {
+RIBVarRW<IPv4>::read_route_nexthop(IPRouteEntry<IPv4>& route)
+{
     initialize("network4",
-	       _ef.create(ElemIPv4Net::id,route.net().str().c_str()));
+	       _ef.create(ElemIPv4Net::id, route.net().str().c_str()));
     initialize("nexthop4",
-	       _ef.create(ElemIPv4::id,route.nexthop_addr().str().c_str()));
-    initialize("network6",NULL);
-    initialize("nexthop6",NULL);
+	       _ef.create(ElemIPv4::id, route.nexthop_addr().str().c_str()));
+    initialize("network6", NULL);
+    initialize("nexthop6", NULL);
 }
 
 template <>
 void
-RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route) {
+RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route)
+{
     initialize("network6",
-	       _ef.create(ElemIPv6Net::id,route.net().str().c_str()));
+	       _ef.create(ElemIPv6Net::id, route.net().str().c_str()));
     initialize("nexthop6",
-	       _ef.create(ElemIPv6::id,route.nexthop_addr().str().c_str()));
+	       _ef.create(ElemIPv6::id, route.nexthop_addr().str().c_str()));
 
-    initialize("network4",NULL);
-    initialize("nexthop4",NULL);
+    initialize("network4", NULL);
+    initialize("nexthop4", NULL);
 }
 
 template <class A>
 void
-RIBVarRW<A>::single_start() {
+RIBVarRW<A>::single_start()
+{
 }
 
 template <class A>
 void
-RIBVarRW<A>::single_write(const string& id, const Element& e) {
-    if(id == "policytags") {
-	debug_msg("RIBVarRW writing policytags %s\n",e.str().c_str());
+RIBVarRW<A>::single_write(const string& id, const Element& e)
+{
+    if (id == "policytags") {
+	debug_msg("RIBVarRW writing policytags %s\n", e.str().c_str());
 	_route.set_policytags(e);
     }
 }
@@ -73,7 +81,8 @@ RIBVarRW<A>::single_write(const string& id, const Element& e) {
 
 template <class A>
 void
-RIBVarRW<A>::single_end() {
+RIBVarRW<A>::single_end()
+{
 }
 
 

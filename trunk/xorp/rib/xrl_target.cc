@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.39 2004/08/03 05:02:56 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.40 2004/09/17 14:00:05 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -345,14 +345,16 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 				 const XrlAtomList& policytags)
 {
     if (unicast &&
-	_urib6.add_route(protocol, network, nexthop, "", "", metric,policytags)
+	_urib6.add_route(protocol, network, nexthop, "", "", metric,
+			 policytags)
 	!= XORP_OK) {
 	string err = "Could not add IPv6 route to unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
     if (multicast &&
-	_mrib6.add_route(protocol, network, nexthop, "", "", metric,policytags)
+	_mrib6.add_route(protocol, network, nexthop, "", "", metric,
+			 policytags)
 	!= XORP_OK) {
 	string err = "Could not add IPv6 route to multicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -372,7 +374,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 {
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, "", "",
-					metric,policytags)
+					metric, policytags)
 	!= XORP_OK) {
 	string err = "Could not replace IPv4 route in unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -380,7 +382,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 
     if (multicast &&
 	_mrib4.replace_route(protocol, network, nexthop, "", "",
-					metric,policytags)
+					metric, policytags)
 	!= XORP_OK) {
 	string err = "Could not replace IPv4 route in multicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -508,7 +510,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
 	      ifname.c_str(), vifname.c_str());
     if (unicast &&
 	_urib6.add_route(protocol, network, nexthop, ifname, vifname,
-					metric,policytags)
+					metric, policytags)
 	!= XORP_OK) {
 	string err = "Could not add IPv6 interface route to unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -538,7 +540,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
 {
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, ifname, vifname,
-			     metric,policytags)
+			     metric, policytags)
 	!= XORP_OK) {
 	string err = "Could not replace IPv4 interface route in unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -546,7 +548,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
 
     if (multicast &&
 	_mrib4.replace_route(protocol, network, nexthop, ifname, vifname,
-			     metric,policytags)
+			     metric, policytags)
 	!= XORP_OK) {
 	string err = "Could not replace IPv4 interface route in multicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -996,10 +998,10 @@ XrlRibTarget::finder_event_observer_0_1_xrl_target_death(
 
 XrlCmdError
 XrlRibTarget::policy_backend_0_1_configure(const uint32_t& filter,
-					   const string&   conf) {
-    
+					   const string&   conf)
+{
     try {
-	_rib_manager->configure_filter(filter,conf);
+	_rib_manager->configure_filter(filter, conf);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
 					   e.str());
@@ -1008,8 +1010,8 @@ XrlRibTarget::policy_backend_0_1_configure(const uint32_t& filter,
 }
 
 XrlCmdError
-XrlRibTarget::policy_backend_0_1_reset(const uint32_t& filter) {
-  
+XrlRibTarget::policy_backend_0_1_reset(const uint32_t& filter)
+{
     try {
 	_rib_manager->reset_filter(filter);
     } catch(const PolicyException& e) {
@@ -1020,19 +1022,19 @@ XrlRibTarget::policy_backend_0_1_reset(const uint32_t& filter) {
 }
 
 XrlCmdError
-XrlRibTarget::policy_backend_0_1_push_routes() {
-    
+XrlRibTarget::policy_backend_0_1_push_routes()
+{
     _rib_manager->push_routes();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_insert_policy_redist_tags(const string& protocol,
-						const XrlAtomList& policytags) {
-
+						const XrlAtomList& policytags)
+{
     // doubt these will ever be used
     try {
-	_rib_manager->insert_policy_redist_tags(protocol,policytags);
+	_rib_manager->insert_policy_redist_tags(protocol, policytags);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("Insert policy redist tags failed: "
 					   + e.str());
@@ -1041,7 +1043,8 @@ XrlRibTarget::rib_0_1_insert_policy_redist_tags(const string& protocol,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_reset_policy_redist_tags() {
+XrlRibTarget::rib_0_1_reset_policy_redist_tags()
+{
     // just a guard for the future.
     try {
 	_rib_manager->reset_policy_redist_tags();

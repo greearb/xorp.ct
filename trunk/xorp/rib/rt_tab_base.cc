@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_base.cc,v 1.6 2004/06/10 22:41:39 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_base.cc,v 1.7 2004/09/17 14:00:04 abittau Exp $"
 
 #include "rib_module.h"
 
@@ -35,10 +35,11 @@ template <typename A>
 void
 RouteTable<A>::replace_policytags(const IPRouteEntry<A>& route,
 				  const PolicyTags& prevtags,
-				  RouteTable* caller) {
+				  RouteTable* caller)
+{
     XLOG_ASSERT(_next_table);
     UNUSED(caller);
-    _next_table->replace_policytags(route,prevtags,this);
+    _next_table->replace_policytags(route, prevtags, this);
 }				  
 
 
