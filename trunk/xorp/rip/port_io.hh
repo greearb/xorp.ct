@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_io.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
+// $XORP: xorp/rip/port_io.hh,v 1.2 2003/04/23 17:06:48 hodson Exp $
 
 #ifndef __RIP_PORT_IO_HH__
 #define __RIP_PORT_IO_HH__
@@ -166,14 +166,14 @@ PortIOBase<A>::PortIOBase(PortIOUser&	user,
 {}
 
 template <>
-bool
+inline bool
 PortIOBase<IPv4>::set_max_route_entries_per_packet(size_t)
 {
     return false;
 }
 
 template <>
-bool
+inline bool
 PortIOBase<IPv6>::set_max_route_entries_per_packet(size_t max_entries)
 {
     _max_rte_pp = max_entries;
@@ -181,7 +181,7 @@ PortIOBase<IPv6>::set_max_route_entries_per_packet(size_t max_entries)
 }
 
 template <typename A>
-void
+inline void
 PortIOBase<A>::set_enabled(bool en)
 {
     if (en != _en) {
