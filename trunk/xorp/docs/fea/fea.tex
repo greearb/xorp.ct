@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/fea/fea.tex,v 1.7 2003/08/28 13:55:18 pavlin Exp $
+% $XORP: xorp/docs/fea/fea.tex,v 1.8 2003/11/06 18:31:00 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -75,10 +75,11 @@ Section~\ref{sec:design_and_implementation} presents
 the design and implementation of the FEA components.
 FEA status summary is in Section~\ref{sec:status}.
 
-Note that the multicast-specific tasks are handled by the Multicast
-Forwarding Engine Abstraction (MFEA) which is logically separate from
-the FEA, but typically would be part of the FEA process.
-For information about the MFEA architecture, see \cite{xorp:mfea}.
+In a standard XORP system, the Multicast Forwarding Engine Abstraction
+(MFEA) is part of the FEA.  The MFEA is conceptually distinct from
+FEA, but in practice requires access to similar data as the FEA.
+Combining the MFEA with the FEA reduces the load on system.  For
+information about the MFEA architecture, see \cite{xorp:mfea}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interface Management}
