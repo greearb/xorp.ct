@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.23 2004/08/19 02:00:21 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.24 2004/12/06 00:31:05 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -32,6 +32,7 @@ class ModuleCommand;
 class ModuleManager;
 class XorpClient;
 class XrlAction;
+class XrlRtrmgrInterface;
 
 
 #define NO_SETUID_ON_EXEC 0
@@ -114,6 +115,9 @@ public:
 		      ModuleManager::CallBack cb, bool do_exec);
     MasterConfigTree* master_config_tree() const { return _master_config_tree; }
     void set_master_config_tree(MasterConfigTree* v) { _master_config_tree = v; }
+    void set_xrl_interface(XrlRtrmgrInterface* xrl_interface) {
+	_xrl_interface = xrl_interface;
+    }
 
     /**
      * Test if processes that have failed should be restarted.
@@ -131,6 +135,7 @@ private:
     bool	_verbose;	// Set to true if output is verbose
     string	_xorp_root_dir;	// The root of the XORP tree
     MasterConfigTree*	_master_config_tree;
+    XrlRtrmgrInterface* _xrl_interface;
 };
 
 #endif // __RTRMGR_MODULE_MANAGER_HH__

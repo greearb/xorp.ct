@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.51 2004/08/19 00:44:08 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.52 2004/08/19 02:00:20 pavlin Exp $"
 
 #include <signal.h>
 
@@ -272,6 +272,9 @@ Rtrmgr::run()
 	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen, *this);
 
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+
+	// Let the module manager know how to send XRLs to xorpsh
+	mmgr.set_xrl_interface(&xrt);
 
 	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec,
 				    _verbose);

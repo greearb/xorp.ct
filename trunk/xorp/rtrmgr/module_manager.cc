@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.34 2004/08/19 02:00:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.35 2004/12/06 00:31:05 mjh Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -34,6 +34,7 @@
 #include "conf_tree_node.hh"
 #include "master_conf_tree.hh"
 #include "template_commands.hh"
+#include "xrl_rtrmgr_interface.hh"
 
 
 static map<pid_t, string> module_pids;
@@ -691,10 +692,8 @@ ModuleManager::module_status_changed(const string& module_name,
 				     Module::ModuleStatus old_status,
 				     Module::ModuleStatus new_status)
 {
-    // XXX eventually we'll tell someone that things changed
-    UNUSED(module_name);
     UNUSED(old_status);
-    UNUSED(new_status);
+    _xrl_interface->module_status_changed(module_name, new_status);
 }
 
 void
