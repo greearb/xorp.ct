@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.3 2003/07/03 02:03:18 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.4 2003/07/03 02:48:03 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -47,7 +47,7 @@ test3(TestInfo& info, bool fail)
     DOUT(info) << info.test_name() << " Test will " <<
 	    (fail ? "fail" : "succeed") << endl;
 
-    if(fail)
+    if (fail)
 	return false;
 
     return true;
@@ -68,7 +68,7 @@ test5(TestInfo& info, bool exception)
     DOUT(info) << info.test_name() << " Test will " <<
 	    (exception ? "throw exception" : "succeed") << endl;
 
-    if(exception)
+    if (exception)
 	xorp_throw(InvalidString, "Hello");
 
     return true;
@@ -80,7 +80,7 @@ test6(TestInfo& info, bool exception)
     DOUT(info) << info.test_name() << " Test will " <<
 	    (exception ? "throw exception" : "succeed") << endl;
 
-    if(exception)
+    if (exception)
 	throw("Unexpected exception");
 
     return true;
@@ -121,14 +121,12 @@ main(int argc, char **argv)
     };
 
     try {
-	if("" == test) {
-	    for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); 
-		i++)
+	if ("" == test) {
+	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
 		t.run(tests[i].test_name, tests[i].cb);
 	} else {
-	    for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); 
-		i++)
-		if(test == tests[i].test_name) {
+	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
+		if (test == tests[i].test_name) {
 		    t.run(tests[i].test_name, tests[i].cb);
 		    return t.exit();
 		}
