@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.7 2004/04/22 01:14:11 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.8 2004/04/29 23:27:59 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -47,6 +47,7 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
       _is_rib_igp_table4_registered(false),
       _is_rib_igp_table6_registered(false)
 {
+    _ifmgr.set_observer(dynamic_cast<Fib2mribNode*>(this));
     _ifmgr.attach_hint_observer(dynamic_cast<Fib2mribNode*>(this));
 }
 
@@ -55,6 +56,7 @@ XrlFib2mribNode::~XrlFib2mribNode()
     Fib2mribNode::shutdown();
 
     _ifmgr.detach_hint_observer(dynamic_cast<Fib2mribNode*>(this));
+    _ifmgr.unset_observer(dynamic_cast<Fib2mribNode*>(this));
 }
 
 bool
@@ -96,9 +98,10 @@ XrlFib2mribNode::ifmgr_shutdown()
 
     ret_value = _ifmgr.shutdown();
 
-    // TODO: XXX: PAVPAVPAV: use ServiceChangeObserverBase
-    // to signal when the interface manager shutdown has completed.
-    Fib2mribNode::decr_shutdown_requests_n();
+    //
+    // XXX: when the shutdown is completed, StaticRoutesNode::status_change()
+    // will be called.
+    //
 
     return ret_value;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.4 2004/04/22 01:14:11 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.5 2004/04/29 23:27:59 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -232,6 +232,7 @@ private:
     bool ifmgr_startup();
     bool ifmgr_shutdown();
 
+    const ServiceBase* ifmgr_mirror_service_base() const { return dynamic_cast<const ServiceBase*>(&_ifmgr); }
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
     void fea_fib_client_register_startup();
