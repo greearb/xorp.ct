@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.10 2003/10/05 19:08:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.11 2003/11/06 03:00:31 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -287,7 +287,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
     char devname[IFNAMSIZ+20+1];
     char addr6p[8][5], addr6[40];
     int plen, scope, dad_status, if_idx;
-    struct ifreq;
+    struct ifreq ifreq;
     int sock;
     
     fh = fopen(PROC_LINUX_FILE_V6, "r");
