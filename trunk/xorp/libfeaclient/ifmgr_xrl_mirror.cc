@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.3 2003/08/28 00:08:55 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.4 2003/09/10 19:21:33 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -20,12 +20,12 @@
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/fea_ifmgr_replicator_xif.hh"
 #include "ifmgr_cmds.hh"
-#include "xrl_ifmgr_mirror.hh"
+#include "ifmgr_xrl_mirror.hh"
 
 //----------------------------------------------------------------------------
-// XrlIfMgrMirrorRouterObserver
+// IfMgrXrlMirrorRouterObserver
 
-XrlIfMgrMirrorRouterObserver::~XrlIfMgrMirrorRouterObserver()
+IfMgrXrlMirrorRouterObserver::~IfMgrXrlMirrorRouterObserver()
 {
 }
 
@@ -37,7 +37,7 @@ IfMgrHintObserver::~IfMgrHintObserver()
 }
 
 // ----------------------------------------------------------------------------
-// XrlIfMgrMirrorTarget
+// IfMgrXrlMirrorTarget
 //
 // Class that receives Xrls from Fea IfMgr and converts them into commands
 // to be dispatched on IfMgrIfTree.
@@ -46,9 +46,9 @@ IfMgrHintObserver::~IfMgrHintObserver()
 // we later decide to move the declaration to a header.
 //
 
-class XrlIfMgrMirrorTarget : protected XrlFeaIfmgrMirrorTargetBase {
+class IfMgrXrlMirrorTarget : protected XrlFeaIfmgrMirrorTargetBase {
 public:
-    XrlIfMgrMirrorTarget(XrlRouter& rtr, IfMgrCommandDispatcher& dispatcher);
+    IfMgrXrlMirrorTarget(XrlRouter& rtr, IfMgrCommandDispatcher& dispatcher);
 
     bool attach(IfMgrHintObserver* o);
     bool detach(IfMgrHintObserver* o);
@@ -245,9 +245,9 @@ protected:
 
 protected:
     // Not implemented
-    XrlIfMgrMirrorTarget();
-    XrlIfMgrMirrorTarget(const XrlIfMgrMirrorTarget&);
-    XrlIfMgrMirrorTarget& operator=(const XrlIfMgrMirrorTarget&);
+    IfMgrXrlMirrorTarget();
+    IfMgrXrlMirrorTarget(const IfMgrXrlMirrorTarget&);
+    IfMgrXrlMirrorTarget& operator=(const IfMgrXrlMirrorTarget&);
 
 protected:
     XrlRouter&		    _rtr;
@@ -256,11 +256,11 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
-// XrlIfMgrMirrorTarget implementation
+// IfMgrXrlMirrorTarget implementation
 
 static const char* DISPATCH_FAILED = "Local dispatch error";
 
-XrlIfMgrMirrorTarget::XrlIfMgrMirrorTarget(XrlRouter&		 rtr,
+IfMgrXrlMirrorTarget::IfMgrXrlMirrorTarget(XrlRouter&		 rtr,
 					   IfMgrCommandDispatcher& dispatcher)
     : XrlFeaIfmgrMirrorTargetBase(&rtr), _rtr(rtr), _dispatcher(dispatcher),
       _hint_observer(0)
@@ -268,21 +268,21 @@ XrlIfMgrMirrorTarget::XrlIfMgrMirrorTarget(XrlRouter&		 rtr,
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::common_0_1_get_target_name(string& name)
+IfMgrXrlMirrorTarget::common_0_1_get_target_name(string& name)
 {
     name = _rtr.instance_name();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::common_0_1_get_version(string& version)
+IfMgrXrlMirrorTarget::common_0_1_get_version(string& version)
 {
     version = "IfMgrMirror/0.1";
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::common_0_1_get_status(uint32_t& status,
+IfMgrXrlMirrorTarget::common_0_1_get_status(uint32_t& status,
 					    string&   reason)
 {
     // Nothing to do.  Expect container application will get this call
@@ -294,7 +294,7 @@ XrlIfMgrMirrorTarget::common_0_1_get_status(uint32_t& status,
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::common_0_1_shutdown()
+IfMgrXrlMirrorTarget::common_0_1_shutdown()
 {
     // Nothing to do.  Expect container application will get this call
     // at the appropriate level.
@@ -302,7 +302,7 @@ XrlIfMgrMirrorTarget::common_0_1_shutdown()
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_add(const string& ifname)
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_add(const string& ifname)
 {
     _dispatcher.push(new IfMgrIfAdd(ifname));
     if (_dispatcher.execute() == true) {
@@ -312,7 +312,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_add(const string& ifname)
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_remove(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_remove(
 	const string& ifname
 	)
 {
@@ -324,7 +324,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_enabled(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_enabled(
 	const string&	ifname,
 	const bool&	en
 	)
@@ -337,7 +337,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mtu(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mtu(
 	const string&	ifname,
 	const uint32_t&	mtu_bytes
 	)
@@ -350,7 +350,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mtu(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mac(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mac(
 	const string&	ifname,
 	const Mac&	mac
 	)
@@ -363,7 +363,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mac(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_add(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_add(
 	const string& ifname,
 	const string& vifname
 	)
@@ -376,7 +376,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_add(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_remove(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_remove(
 	const string& ifname,
 	const string& vifname
 	)
@@ -389,7 +389,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_enabled(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_enabled(
 	const string& ifname,
 	const string& vifname,
 	const bool&   en
@@ -403,7 +403,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_multicast_capable(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_multicast_capable(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -417,7 +417,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_multicast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_broadcast_capable(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_broadcast_capable(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -431,7 +431,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_broadcast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_p2p_capable(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_p2p_capable(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -445,7 +445,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_p2p_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_loopback(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_loopback(
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	cap
@@ -459,7 +459,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_loopback(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_pif_index(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_pif_index(
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	pif_index
@@ -473,7 +473,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_pif_index(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_add(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_add(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr
@@ -487,7 +487,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_add(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_remove(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_remove(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr
@@ -501,7 +501,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_prefix(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_prefix(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
@@ -516,7 +516,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_prefix(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_enabled(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_enabled(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
@@ -531,7 +531,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_multicast_capable(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_multicast_capable(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -546,7 +546,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_multicast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_loopback(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_loopback(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -561,7 +561,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_loopback(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_broadcast(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_broadcast(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -576,7 +576,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_broadcast(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
@@ -591,7 +591,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_add(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_add(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr
@@ -605,7 +605,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_add(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_remove(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_remove(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr
@@ -619,7 +619,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_remove(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_prefix(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_prefix(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
@@ -634,7 +634,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_prefix(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_enabled(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_enabled(
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
@@ -649,7 +649,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_enabled(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_multicast_capable(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_multicast_capable(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv6&	addr,
@@ -664,7 +664,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_multicast_capable(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_loopback(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_loopback(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv6&	addr,
@@ -679,7 +679,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_loopback(
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv6&	addr,
@@ -694,7 +694,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
 }
 
 bool
-XrlIfMgrMirrorTarget::attach(IfMgrHintObserver* ho)
+IfMgrXrlMirrorTarget::attach(IfMgrHintObserver* ho)
 {
     if (_hint_observer != 0) {
 	return false;
@@ -704,7 +704,7 @@ XrlIfMgrMirrorTarget::attach(IfMgrHintObserver* ho)
 }
 
 bool
-XrlIfMgrMirrorTarget::detach(IfMgrHintObserver* ho)
+IfMgrXrlMirrorTarget::detach(IfMgrHintObserver* ho)
 {
     if (_hint_observer != ho) {
 	return false;
@@ -714,7 +714,7 @@ XrlIfMgrMirrorTarget::detach(IfMgrHintObserver* ho)
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_hint_tree_complete()
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_hint_tree_complete()
 {
     if (_hint_observer)
 	_hint_observer->tree_complete();
@@ -722,7 +722,7 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_hint_tree_complete()
 }
 
 XrlCmdError
-XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_hint_updates_made()
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_hint_updates_made()
 {
     if (_hint_observer)
 	_hint_observer->updates_made();
@@ -731,26 +731,26 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_hint_updates_made()
 
 
 // ----------------------------------------------------------------------------
-// XrlIfMgrMirrorRouter
+// IfMgrXrlMirrorRouter
 //
-// Class to act as an XrlRouter for XrlIfMgrMirror
+// Class to act as an XrlRouter for IfMgrXrlMirror
 //
 
-class XrlIfMgrMirrorRouter : public XrlStdRouter
+class IfMgrXrlMirrorRouter : public XrlStdRouter
 {
 public:
-    XrlIfMgrMirrorRouter(EventLoop&	e,
+    IfMgrXrlMirrorRouter(EventLoop&	e,
 			 const char*	class_name)
 	: XrlStdRouter(e, class_name), _o(0)
     {}
 
-    XrlIfMgrMirrorRouter(EventLoop&	e,
+    IfMgrXrlMirrorRouter(EventLoop&	e,
 			 const char*	class_name,
 			 IPv4		finder_addr)
 	: XrlStdRouter(e, class_name, finder_addr), _o(0)
     {}
 
-    XrlIfMgrMirrorRouter(EventLoop&	e,
+    IfMgrXrlMirrorRouter(EventLoop&	e,
 			 const char*	class_name,
 			 IPv4		finder_addr,
 			 uint16_t	finder_port)
@@ -763,7 +763,7 @@ public:
      * @param o observer to attach.
      * @return true on success, false if an observer is already registered;
      */
-    bool attach(XrlIfMgrMirrorRouterObserver* o)
+    bool attach(IfMgrXrlMirrorRouterObserver* o)
     {
 	if (_o)
 	    return false;
@@ -777,7 +777,7 @@ public:
      * @param o observer to detach.
      * @return true on success, false if another observer is attached;
      */
-    bool detach(XrlIfMgrMirrorRouterObserver* o)
+    bool detach(IfMgrXrlMirrorRouterObserver* o)
     {
 	if (o != _o)
 	    return false;
@@ -801,53 +801,53 @@ protected:
     }
 
 protected:
-    XrlIfMgrMirrorRouterObserver* _o;
+    IfMgrXrlMirrorRouterObserver* _o;
 };
 
 
 // ----------------------------------------------------------------------------
-// XrlIfMgrMirror
+// IfMgrXrlMirror
 
 static const char* CLSNAME = "ifmgr_mirror";
-const char* XrlIfMgrMirror::DEFAULT_REGISTRATION_TARGET = "XXX tbd";
+const char* IfMgrXrlMirror::DEFAULT_REGISTRATION_TARGET = "XXX tbd";
 
-XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
+IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
 			       const char*	rtarget)
     : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
 {
-    _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME);
-    _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
+    _rtr = new IfMgrXrlMirrorRouter(e, CLSNAME);
+    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
 
     _rtr->attach(this);
     _xrl_tgt->attach(this);
 }
 
-XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
+IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
 			       IPv4		finder_addr,
 			       const char*	rtarget)
     : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
 {
-    _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME, finder_addr);
-    _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
+    _rtr = new IfMgrXrlMirrorRouter(e, CLSNAME, finder_addr);
+    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
 
     _rtr->attach(this);
     _xrl_tgt->attach(this);
 }
 
-XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
+IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
 			       IPv4		finder_addr,
 			       uint16_t		finder_port,
 			       const char*	rtarget)
     : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
 {
-    _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME, finder_addr, finder_port);
-    _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
+    _rtr = new IfMgrXrlMirrorRouter(e, CLSNAME, finder_addr, finder_port);
+    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
 
     _rtr->attach(this);
     _xrl_tgt->attach(this);
 }
 
-XrlIfMgrMirror::~XrlIfMgrMirror()
+IfMgrXrlMirror::~IfMgrXrlMirror()
 {
     _xrl_tgt->detach(this);
     _rtr->detach(this);
@@ -856,20 +856,20 @@ XrlIfMgrMirror::~XrlIfMgrMirror()
 }
 
 void
-XrlIfMgrMirror::finder_disconnect_event()
+IfMgrXrlMirror::finder_disconnect_event()
 {
     set_status(NO_FINDER);
     _iftree.clear();
 }
 
 void
-XrlIfMgrMirror::finder_ready_event()
+IfMgrXrlMirror::finder_ready_event()
 {
     register_with_ifmgr();
 }
 
 void
-XrlIfMgrMirror::tree_complete()
+IfMgrXrlMirror::tree_complete()
 {
     set_status(READY);
     list<IfMgrHintObserver*>::const_iterator ci;
@@ -880,7 +880,7 @@ XrlIfMgrMirror::tree_complete()
 }
 
 void
-XrlIfMgrMirror::updates_made()
+IfMgrXrlMirror::updates_made()
 {
     list<IfMgrHintObserver*>::const_iterator ci;
     for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
@@ -890,7 +890,7 @@ XrlIfMgrMirror::updates_made()
 }
 
 bool
-XrlIfMgrMirror::attach_hint_observer(IfMgrHintObserver* o)
+IfMgrXrlMirror::attach_hint_observer(IfMgrHintObserver* o)
 {
     if (find(_hint_observers.begin(), _hint_observers.end(), o)
 	!= _hint_observers.end()) {
@@ -901,7 +901,7 @@ XrlIfMgrMirror::attach_hint_observer(IfMgrHintObserver* o)
 }
 
 bool
-XrlIfMgrMirror::detach_hint_observer(IfMgrHintObserver* o)
+IfMgrXrlMirror::detach_hint_observer(IfMgrHintObserver* o)
 {
     list<IfMgrHintObserver*>::iterator i;
     i = find(_hint_observers.begin(), _hint_observers.end(), o);
@@ -913,13 +913,13 @@ XrlIfMgrMirror::detach_hint_observer(IfMgrHintObserver* o)
 }
 
 void
-XrlIfMgrMirror::register_with_ifmgr()
+IfMgrXrlMirror::register_with_ifmgr()
 {
     XrlIfmgrReplicatorV0p1Client c(_rtr);
     if (c.send_register_ifmgr_mirror(_rtarget.c_str(),
 				     _rtr->instance_name(),
 				     callback(this,
-					      &XrlIfMgrMirror::register_cb))
+					      &IfMgrXrlMirror::register_cb))
 	== false) {
 	XLOG_FATAL("Failed to send registration to ifmgr");
     }
@@ -927,7 +927,7 @@ XrlIfMgrMirror::register_with_ifmgr()
 }
 
 void
-XrlIfMgrMirror::register_cb(const XrlError& e)
+IfMgrXrlMirror::register_cb(const XrlError& e)
 {
     if (e == XrlError::OKAY()) {
 	set_status(WAITING_FOR_TREE_IMAGE);
@@ -936,14 +936,14 @@ XrlIfMgrMirror::register_cb(const XrlError& e)
     }
 }
 
-XrlIfMgrMirror::Status
-XrlIfMgrMirror::status() const
+IfMgrXrlMirror::Status
+IfMgrXrlMirror::status() const
 {
     return _status;
 }
 
 void
-XrlIfMgrMirror::set_status(Status s)
+IfMgrXrlMirror::set_status(Status s)
 {
     _status = s;
 }

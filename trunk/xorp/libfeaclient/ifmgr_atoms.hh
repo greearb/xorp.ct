@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.4 2003/08/27 22:31:03 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.5 2003/08/27 22:44:19 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -31,6 +31,14 @@ class IfMgrVifAtom;
 class IfMgrIPv4Atom;
 class IfMgrIPv6Atom;
 
+/**
+ * @short Interface configuration tree container.
+ *
+ * The IfMgrIfTree is the top-level container of interface
+ * configuration state.  The tree contains a collection of @ref
+ * IfMgrIfAtom objects, each of which represents the configuration
+ * state of a physical interface.
+ */
 class IfMgrIfTree {
 public:
     typedef map<const string, IfMgrIfAtom> IfMap;
@@ -143,7 +151,10 @@ protected:
 /**
  * @short Interface configuration atom.
  *
- * Represents an interface in XORP's model of forwarding h/w.
+ * Represents a physical interface in XORP's model of forwarding h/w.
+ * The configuration state includes attributes of the interface and a
+ * collection of @ref IfMgrVifAtom objects representing the virtual
+ * interfaces associated with the physical interface.
  */
 class IfMgrIfAtom {
 public:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.1 2003/09/03 23:18:51 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.2 2003/09/10 19:21:33 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
 #define __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
@@ -98,20 +98,20 @@ protected:
 };
 
 
-class IfMgrXrlReplicatorManager;
+class IfMgrXrlReplicationManager;
 
 /**
- * @short An IfMgrXrlReplicator managed by an IfMgrXrlReplicatorManager.
+ * @short An IfMgrXrlReplicator managed by an IfMgrXrlReplicationManager.
  *
  * This class implements the functionality of an IfMgrXrlReplicator,
- * and is used by an IfMgrXrlReplicatorManager.  Instances of
+ * and is used by an IfMgrXrlReplicationManager.  Instances of
  * IfMGrXrlReplicatorManager contain a set of these objects.  When an
  * error occurs with IPC the objects request removal from the manager,
  * which causes their destruction.
  */
 class IfMgrManagedXrlReplicator : public IfMgrXrlReplicator {
 public:
-    IfMgrManagedXrlReplicator(IfMgrXrlReplicatorManager& manager,
+    IfMgrManagedXrlReplicator(IfMgrXrlReplicationManager& manager,
 			      XrlSender&		 sender,
 			      const string&		 target_name);
 
@@ -119,7 +119,7 @@ protected:
     void xrl_error_event(const XrlError& e);
 
 private:
-    IfMgrXrlReplicatorManager&	_mgr;
+    IfMgrXrlReplicationManager&	_mgr;
 };
 
 
@@ -129,14 +129,14 @@ class XrlRouter;
  * @short Class that builds and maintains replicator state for
  * multiple remote targets.
  */
-class IfMgrXrlReplicatorManager : public IfMgrCommandSinkBase {
+class IfMgrXrlReplicationManager : public IfMgrCommandSinkBase {
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
 
 public:
-    IfMgrXrlReplicatorManager(XrlRouter& rtr);
+    IfMgrXrlReplicationManager(XrlRouter& rtr);
 
-    ~IfMgrXrlReplicatorManager();
+    ~IfMgrXrlReplicationManager();
 
     /**
      * Add a remote mirror.  The name of the mirror is added to list

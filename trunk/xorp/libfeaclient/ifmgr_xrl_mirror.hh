@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/xrl_ifmgr_mirror.hh,v 1.2 2003/08/28 00:08:55 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.3 2003/09/10 19:21:33 hodson Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -26,16 +26,16 @@
 class XrlStdRouter;
 class EventLoop;
 class IfMgrCommandBase;
-class XrlIfMgrMirrorRouter;
-class XrlIfMgrMirrorTarget;
+class IfMgrXrlMirrorRouter;
+class IfMgrXrlMirrorTarget;
 
 /**
  * @short Base for classes that watch for Finder events from an
- * XrlIfMgrMirrorRouter.
+ * IfMgrXrlMirrorRouter.
  */
-class XrlIfMgrMirrorRouterObserver {
+class IfMgrXrlMirrorRouterObserver {
 public:
-    virtual ~XrlIfMgrMirrorRouterObserver() = 0;
+    virtual ~IfMgrXrlMirrorRouterObserver() = 0;
     virtual void finder_disconnect_event() = 0;
     virtual void finder_ready_event() = 0;
 };
@@ -54,9 +54,26 @@ public:
 /**
  * @short Maintainer of a local mirror of central IfMgr configuration
  * state via Xrls sent by the IfMgr.
+ *
+ * The IfMgrXrlMirror contains a copy of the central interface
+ * configuration state.  Upon construction it registers itself with
+ * the main configuration state maintainer.  It should then receive the
+ * complete configuration tree and future updates to the tree.
+ *
+ * The local copy of the interface configuration state is accessible
+ * through the @ref iftree() method.  The status of IfMgrXrlMirror
+ * is obtainable through the @ref status() method. Only when the
+ * IfMgrXrlMirror has the @ref READY status should the information
+ * returned by @ref iftree() be relied upon.
+ *
+ * Interested parties can register as hint observers through the
+ * @ref attach_hint_observer() and @ref detach_hint_observer() methods.
+ * They will then receive notification of when the complete
+ * IfMgrIfTree state has been received and told when they should
+ * check the state again.
  */
-class XrlIfMgrMirror
-    : protected XrlIfMgrMirrorRouterObserver, protected IfMgrHintObserver
+class IfMgrXrlMirror
+    : protected IfMgrXrlMirrorRouterObserver, protected IfMgrHintObserver
 {
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
@@ -81,7 +98,7 @@ public:
      * @param reg_tgt name of Xrl class or target to supply interface
      * configuration updates.
      */
-    XrlIfMgrMirror(EventLoop&	eventloop,
+    IfMgrXrlMirror(EventLoop&	eventloop,
 		   const char*	reg_tgt = DEFAULT_REGISTRATION_TARGET);
 
     /**
@@ -92,7 +109,7 @@ public:
      * @param reg_tgt name of Xrl class or target to supply interface
      * configuration updates.
      */
-    XrlIfMgrMirror(EventLoop&	eventloop,
+    IfMgrXrlMirror(EventLoop&	eventloop,
 		   IPv4		finder_addr,
 		   const char*	reg_tgt = DEFAULT_REGISTRATION_TARGET);
 
@@ -105,15 +122,22 @@ public:
      * @param reg_tgt name of Xrl class or target to supply interface
      *                configuration updates.
      */
-    XrlIfMgrMirror(EventLoop&	e,
+    IfMgrXrlMirror(EventLoop&	e,
 		   IPv4		finder_addr,
 		   uint16_t	finder_port,
 		   const char*	reg_tgt = DEFAULT_REGISTRATION_TARGET);
 
-    ~XrlIfMgrMirror();
+    ~IfMgrXrlMirror();
 
+    /**
+     * @return interface configuration tree.  Should only be trusted when
+     * status() is READY.
+     */
     inline const IfMgrIfTree& iftree() const		{ return _iftree; }
 
+    /**
+     * @return state of current IfMgrXrlMirror.
+     */
     Status status() const;
 
     /**
@@ -124,7 +148,7 @@ public:
     bool attach_hint_observer(IfMgrHintObserver* o);
 
     /**
-     * Detach a party interested in receiving IfMgr hints.
+     * Detach an observer interested in receiving IfMgr hints.
      * @param o observer to be detached.
      * @return true on success, false if observer was not registered.
      */
@@ -145,10 +169,10 @@ protected:
 
 protected:
     EventLoop&			_e;
-    XrlIfMgrMirrorRouter*	_rtr;
+    IfMgrXrlMirrorRouter*	_rtr;
     IfMgrIfTree	   		_iftree;
     IfMgrCommandDispatcher	_dispatcher;
-    XrlIfMgrMirrorTarget*	_xrl_tgt;
+    IfMgrXrlMirrorTarget*	_xrl_tgt;
     string			_rtarget;	// registration target (ifmgr)
     Status			_status;
     list<IfMgrHintObserver*>	_hint_observers;

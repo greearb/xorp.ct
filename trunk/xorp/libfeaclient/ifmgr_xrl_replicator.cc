@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.1 2003/09/03 23:18:51 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.2 2003/09/10 19:21:33 hodson Exp $"
 
 #include "config.h"
 
@@ -97,7 +97,7 @@ IfMgrXrlReplicator::xrl_error_event(const XrlError& err)
 
 IfMgrManagedXrlReplicator::IfMgrManagedXrlReplicator
 (
- IfMgrXrlReplicatorManager&	m,
+ IfMgrXrlReplicationManager&	m,
  XrlSender&			s,
  const string&			n
  )
@@ -116,12 +116,12 @@ IfMgrManagedXrlReplicator::xrl_error_event(const XrlError& /* e */)
 
 
 
-IfMgrXrlReplicatorManager::IfMgrXrlReplicatorManager(XrlRouter& r)
+IfMgrXrlReplicationManager::IfMgrXrlReplicationManager(XrlRouter& r)
     : _rtr(r)
 {
 }
 
-IfMgrXrlReplicatorManager::~IfMgrXrlReplicatorManager()
+IfMgrXrlReplicationManager::~IfMgrXrlReplicationManager()
 {
     while (_outputs.empty() == false) {
 	delete _outputs.front();
@@ -130,7 +130,7 @@ IfMgrXrlReplicatorManager::~IfMgrXrlReplicatorManager()
 }
 
 bool
-IfMgrXrlReplicatorManager::add_mirror(const string& target_name)
+IfMgrXrlReplicationManager::add_mirror(const string& target_name)
 {
     Outputs::const_iterator ci = _outputs.begin();
     while (ci != _outputs.end()) {
@@ -147,7 +147,7 @@ IfMgrXrlReplicatorManager::add_mirror(const string& target_name)
 }
 
 bool
-IfMgrXrlReplicatorManager::remove_mirror(const string& target_name)
+IfMgrXrlReplicationManager::remove_mirror(const string& target_name)
 {
     for (Outputs::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 	if ((*i)->xrl_target_name() == target_name) {
@@ -159,7 +159,7 @@ IfMgrXrlReplicatorManager::remove_mirror(const string& target_name)
 }
 
 void
-IfMgrXrlReplicatorManager::push(const Cmd& cmd)
+IfMgrXrlReplicationManager::push(const Cmd& cmd)
 {
     if (cmd->execute(_iftree) == false) {
 	XLOG_ERROR("Apply bad command.");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.5 2003/09/10 19:21:33 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.6 2003/09/19 18:41:18 hodson Exp $
 
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
@@ -40,8 +40,10 @@ public:
 };
 
 /**
- * @short 2-way IfMgr Command Tee class.  Instances push commands
- * pushed into them into two object derived from @ref IfMgrCommandSinkBase.
+ * @short 2-way IfMgr Command Tee.
+ *
+ * Instances push commands pushed into them into two object derived
+ * from @ref IfMgrCommandSinkBase.
  */
 class IfMgrCommandTee : public IfMgrCommandSinkBase {
 public:
@@ -58,8 +60,10 @@ protected:
 
 
 /**
- * @short N-way IfMgr Command Tee class.  Instances push commands
- * pushed into them into two object derived from @ref IfMgrCommandSinkBase.
+ * @short N-way IfMgr Command Tee.
+ *
+ * Instances push commands pushed into them into multiple objects derived
+ * from @ref IfMgrCommandSinkBase.
  */
 template <typename SinkType = IfMgrCommandSinkBase>
 class IfMgrNWayCommandTee : public IfMgrCommandSinkBase {

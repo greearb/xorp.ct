@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.1 2003/09/10 19:21:33 hodson Exp $"
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.2 2003/08/25 16:58:03 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.1 2003/09/10 19:21:33 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -32,7 +32,7 @@
 #include "ifmgr_cmds.hh"
 #include "ifmgr_cmd_queue.hh"
 #include "ifmgr_xrl_replicator.hh"
-#include "xrl_ifmgr_mirror.hh"
+#include "ifmgr_xrl_mirror.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -76,7 +76,7 @@ class XrlTestFeaIfmgrMirrorTarget : public XrlTestFeaIfmgrMirrorTargetBase
 {
 public:
     XrlTestFeaIfmgrMirrorTarget(XrlRouter& rtr,
-				IfMgrXrlReplicatorManager& rep)
+				IfMgrXrlReplicationManager& rep)
 	:     XrlTestFeaIfmgrMirrorTargetBase(&rtr), _rep(rep)
     {
     }
@@ -98,7 +98,7 @@ public:
     }
 
 protected:
-    IfMgrXrlReplicatorManager& _rep;
+    IfMgrXrlReplicationManager& _rep;
 };
 
 
@@ -271,7 +271,7 @@ test_main()
     // Build distribution center
     //
     XrlStdRouter		mrtr(e, "ifmgr", fs->addr(), fs->port());
-    IfMgrXrlReplicatorManager	mgr(mrtr);
+    IfMgrXrlReplicationManager	mgr(mrtr);
     XrlTestFeaIfmgrMirrorTarget	xtf(mrtr, mgr);
 
     while (mrtr.ready() == false) {
@@ -295,11 +295,11 @@ test_main()
     config_commands.convert(mgr);
 
     // Create mirror
-    XrlIfMgrMirror m0(e, fs->addr(), fs->port(), mrtr.class_name().c_str());
+    IfMgrXrlMirror m0(e, fs->addr(), fs->port(), mrtr.class_name().c_str());
 
     expired = false;
     t = e.set_flag_after_ms(3000, &expired);
-    while (expired == false && m0.status() !=  XrlIfMgrMirror::READY) {
+    while (expired == false && m0.status() !=  IfMgrXrlMirror::READY) {
 	e.run();
 	if (expired) {
 	    verbose_log("Did not get complete tree.\n");
