@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/packet_queue.hh,v 1.1 2003/07/21 18:03:04 hodson Exp $
 
 #ifndef __RIP_PACKET_QUEUE_HH__
 #define __RIP_PACKET_QUEUE_HH__
@@ -22,29 +22,7 @@
 #include <list>
 #include <vector>
 
-/**
- * @short Structure to contain outbound packet state.
- */
-template <typename A>
-class RipPacket
-{
-protected:
-    A		    _addr;
-    uint16_t	    _port;
-    vector<uint8_t> _data;
-
-public:
-    RipPacket(const A& addr, uint16_t port)
-	: _addr(addr), _port(port)
-    {}
-    inline const A& 		  address() const   { return _addr; }
-    inline uint16_t 		  port() const	    { return _port; }
-    inline vector<uint8_t>& 	  data()	    { return _data; }
-    inline const vector<uint8_t>& data() const	    { return _data; }
-    inline uint32_t 		  data_size() const { return _data.size(); }
-    inline const uint8_t*	  data_ptr() const  { return &(_data[0]); }
-    inline uint8_t*	  	  data_ptr()	    { return &(_data[0]); }
-};
+#include "packets.hh"
 
 /**
  * @short Outbound packet queue.
@@ -54,33 +32,25 @@ public:
  * head may be in transit.
  */
 template <typename A>
-class RipPacketQueue
+class PacketQueue
 {
 public:
-    typedef list<RipPacket<A> > PacketQueue;
+    typedef list<const RipPacket<A>*> QueueRep;
+
 public:
-    RipPacketQueue();
-    ~RipPacketQueue();
+    PacketQueue();
+    ~PacketQueue();
 
     /**
-     * Create a queued packet for a particular destination.  The packet
-     * is created in the PacketQueue.  This call must be followed by
-     * enqueue_packet() or discard_packet() before being called again.
-     */
-    RipPacket<A>* new_packet(const A& addr, uint16_t port);
-
-    /**
-     * Place packet in ready to sent queue.
+     * Place packet in ready to sent queue.  The supplied packet is
+     * expected to have been allocated with the standard new operator
+     * and will be destructed by the packet queue when it is dropped
+     * or popped from the queue.
      *
      * This may cause older packets in the queue to be dropped to make
      * sufficient space for new packet.
      */
     void enqueue_packet(const RipPacket<A>* pkt);
-
-    /**
-     * Release state associated with packet.
-     */
-    void discard_packet(const RipPacket<A>* pkt);
 
     /**
      * Peek at head packet if it exists.
@@ -133,8 +103,7 @@ public:
     void reset_drop_count();
 
 protected:
-    PacketQueue _ready_packets;
-    PacketQueue _candidate_packet;
+    QueueRep	_ready_packets;
     uint32_t	_buffered_bytes;
     uint32_t	_max_buffered_bytes;
     uint32_t	_drops;

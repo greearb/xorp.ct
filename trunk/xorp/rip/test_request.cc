@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.1 2003/07/21 18:05:55 hodson Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.2 2003/07/21 18:06:56 hodson Exp $"
 
 #include <set>
 
@@ -242,7 +242,7 @@ public:
     {
 	_portio	= new SpoofPortIO<IPv4>(*_pm.the_port());
 	_ah	= new NullAuthHandler();
-	_pm.the_port()->set_auth_handler(_ah);
+	_pm.the_port()->af_state().set_auth_handler(_ah);
 	_pm.the_port()->set_io_handler(_portio, false);
 	_portio->set_enabled(true);
     }

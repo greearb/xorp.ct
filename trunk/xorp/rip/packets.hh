@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.5 2003/07/16 18:27:09 hodson Exp $
+// $XORP: xorp/rip/packet_entries.hh,v 1.6 2003/07/21 18:05:55 hodson Exp $
 
-#ifndef __RIP_PACKETS_HH__
-#define __RIP_PACKETS_HH__
+#ifndef __RIP_PACKET_ENTRIES_HH__
+#define __RIP_PACKET_ENTRIES_HH__
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv4net.hh"
@@ -112,19 +112,38 @@ protected:
     uint32_t _metric;
 
 public:
+    /**
+     * Initialize fields as a regular routing entry.
+     */
     inline void initialize(uint16_t	  tag,
 			   const IPv4Net& net,
 			   IPv4		  nh,
 			   uint32_t	  cost);
+
+    /**
+     * Initialize fields as a route table request.
+     */
+    inline void     initialize_table_request();
+
     inline uint16_t addr_family() const 	{ return ntohs(_af); }
     inline uint16_t tag() const			{ return ntohs(_tag); }
     inline IPv4Net  net() const;
     inline IPv4     nexthop() const		{ return IPv4(_nh); }
     inline uint32_t metric() const		{ return ntohl(_metric); }
 
+    /**
+     * @return true if route entry has properties of a table request.
+     */
+    inline bool     is_table_request() const;
+
+    /**
+     * @return true if route entry has properties of an authentication entry.
+     */
+    inline bool     is_auth_entry() const;
+
     static const uint16_t ADDR_FAMILY = 2;
     static const uint16_t ADDR_FAMILY_DUMP = 0;
-    static const uint16_t AUTH_ADDR_FAMILY = 0xffff;
+    static const uint16_t ADDR_FAMILY_AUTH = 0xffff;
 };
 
 inline void
@@ -145,6 +164,29 @@ inline IPv4Net
 PacketRouteEntry<IPv4>::net() const
 {
     return IPv4Net(IPv4(_addr), IPv4(_mask).prefix_length());
+}
+
+inline bool
+PacketRouteEntry<IPv4>::is_table_request() const
+{
+    return addr_family() == ADDR_FAMILY_DUMP && metric() == RIP_INFINITY;
+}
+
+inline bool
+PacketRouteEntry<IPv4>::is_auth_entry() const
+{
+    return addr_family() == ADDR_FAMILY_AUTH;
+}
+
+inline void
+PacketRouteEntry<IPv4>::initialize_table_request()
+{
+    _af = htons(ADDR_FAMILY_DUMP);
+    _tag = 0;
+    _addr = 0;
+    _mask = 0;
+    _nh = 0;
+    _metric = htonl(RIP_INFINITY);
 }
 
 
@@ -290,10 +332,260 @@ MD5PacketTrailer::valid() const
  * All fields in this structure are stored in network order.
  */
 struct PacketRouteEntry<IPv6> {
-    uint32_t prefix[4];
-    uint16_t route_tag;
-    uint8_t  prefix_length;
-    uint8_t  metric;
+protected:
+    uint8_t  _prefix[16];
+    uint16_t _tag;
+    uint8_t  _prefix_length;
+    uint8_t  _metric;
+
+public:
+    /**
+     * Initialize fields as a route entry.
+     */
+    inline void	    initialize_route(uint16_t		route_tag,
+				     const IPv6Net&	net,
+				     uint8_t		cost);
+
+    /**
+     * Initialize fields as a nexthop entry.
+     */
+    inline void	    initialize_nexthop(const IPv6& nexthop);
+
+    /**
+     * Initialize fields as a route table request.
+     */
+    inline void	    initialize_table_request();
+
+    inline bool	    is_nexthop() const;
+    inline bool	    is_table_request() const;
+
+    inline IPv6	    nexthop() const;
+
+    inline uint16_t tag() const;
+    inline IPv6Net  net() const;
+    inline uint8_t  metric() const;
+
+    static const uint8_t NEXTHOP_METRIC = 0xff;
 };
+
+inline void
+PacketRouteEntry<IPv6>::initialize_route(uint16_t	tag,
+					 const IPv6Net&	net,
+					 uint8_t	cost)
+{
+    _tag	   = htons(tag);
+    _prefix_length = net.prefix_len();
+    _metric	   = cost;
+    net.masked_addr().copy_out(_prefix);
+}
+
+inline void
+PacketRouteEntry<IPv6>::initialize_nexthop(const IPv6& nexthop)
+{
+    _tag = 0;
+    _prefix_length = 0;
+    _metric = NEXTHOP_METRIC;
+    nexthop.copy_out(_prefix);
+}
+
+inline void
+PacketRouteEntry<IPv6>::initialize_table_request()
+{
+    memset(this, 0, sizeof(*this));
+    _metric = RIP_INFINITY;
+}
+
+inline bool
+PacketRouteEntry<IPv6>::is_table_request() const
+{
+    if (_metric != RIP_INFINITY) {
+	return false;
+    }
+    const uint32_t* p = reinterpret_cast<const uint32_t*>(_prefix);
+    return (p[0] == 0) && (p[1] == 0) && (p[2] == 0) && (p[3] == 0);
+}
+
+inline bool
+PacketRouteEntry<IPv6>::is_nexthop() const
+{
+    return _metric == NEXTHOP_METRIC;
+}
+
+inline IPv6
+PacketRouteEntry<IPv6>::nexthop() const
+{
+    return IPv6(_prefix);
+}
+
+inline uint16_t
+PacketRouteEntry<IPv6>::tag() const
+{
+    return ntohs(_tag);
+}
+
+inline IPv6Net
+PacketRouteEntry<IPv6>::net() const
+{
+    return IPv6Net(IPv6(_prefix), _prefix_length);
+}
+
+inline uint8_t
+PacketRouteEntry<IPv6>::metric() const
+{
+    return _metric;
+}
+
+
+/**
+ * @short RIP Packet class.
+ *
+ * A container for RIP packet, provides easy to use accessors and modifiers.
+ */
+template <typename A>
+class RipPacket
+{
+public:
+    typedef A Addr;
+
+protected:
+    Addr	    _addr;	// Src addr on inbound, dst address on outbound
+    uint16_t	    _port;	// Src port on inbound, dst port on outbound
+    vector<uint8_t> _data;	// Data buffer
+    uint32_t _max_entries;	// Maximum number of route entries in packet
+
+protected:
+    const uint8_t* base_ptr() const	{ return &(_data[0]); }
+    uint8_t* base_ptr()			{ return &(_data[0]); }
+
+public:
+    /**
+     * @return destination address of packet.
+     */
+    inline const Addr&	address() const	{ return _addr; }
+
+    /**
+     * @return destination port of packet.
+     */
+    inline uint16_t	port() const	{ return _port; }
+
+    /**
+     * @return the maximum number of route entries packet may have.
+     */
+    inline uint32_t	max_entries() const	{ return _max_entries; }
+
+    /**
+     * Set the maximum number of route entries a packet may have.
+     * This method should be called before using @ref append_data
+     * methods as it resizes the internal storage and will cause
+     * appended data to be lost.
+     */
+    inline void		set_max_entries(uint32_t max_entries);
+
+    RipPacket(const Addr& addr, uint16_t port, uint32_t max_entries = 0)
+	: _addr(addr), _port(port)
+    {
+	set_max_entries(max_entries);
+    }
+
+    /**
+     * @return const pointer to RipPacketHeader.
+     */
+    inline const RipPacketHeader* header() const;
+
+    /**
+     * @return pointer to RipPacketHeader.
+     */
+    inline RipPacketHeader* header();
+
+    /**
+     * Route entry accessor.
+     *
+     * @param entry_no index of route entry to retrive
+     * @return const pointer to route entry, or 0 if entry_no is greater than
+     * the maximum route entries associated with packet.
+     */
+    inline const PacketRouteEntry<A>* route_entry(uint32_t entry_no) const;
+
+    /**
+     * Route entry accessor.
+     *
+     * @param entry_no index of route entry to retrive
+     * @return const pointer to route entry, or 0 if entry_no is greater than
+     * the maximum route entries associated with packet.
+     */
+
+    inline PacketRouteEntry<A>* route_entry(uint32_t entry_no);
+
+    void append_data(const uint8_t* data, uint32_t data_bytes);
+    void append_data(const vector<uint8_t>& data);
+
+    inline vector<uint8_t>& 	  data()	    { return _data; }
+    inline const vector<uint8_t>& data() const	    { return _data; }
+    inline uint32_t 		  data_bytes() const { return _data.size(); }
+    inline const uint8_t*	  data_ptr() const  { return base_ptr(); }
+    inline uint8_t*	  	  data_ptr()	    { return base_ptr(); }
+};
+
+template <typename A>
+const RipPacketHeader*
+RipPacket<A>::header() const
+{
+    return reinterpret_cast<const RipPacketHeader*>(base_ptr());
+}
+
+template <typename A>
+RipPacketHeader*
+RipPacket<A>::header()
+{
+    return reinterpret_cast<RipPacketHeader*>(base_ptr());
+}
+
+template <typename A>
+const PacketRouteEntry<A>*
+RipPacket<A>::route_entry(uint32_t entry_no) const
+{
+    if (entry_no >= _max_entries)
+	return 0;
+
+    const uint8_t* p = base_ptr() + sizeof(RipPacketHeader) +
+	entry_no * sizeof(PacketRouteEntry<A>);
+    return reinterpret_cast<const PacketRouteEntry<A>*>(p);
+}
+
+template <typename A>
+PacketRouteEntry<A>*
+RipPacket<A>::route_entry(uint32_t entry_no)
+{
+    if (entry_no >= _max_entries)
+	return 0;
+
+    uint8_t* p = base_ptr() + sizeof(RipPacketHeader) +
+	entry_no * sizeof(PacketRouteEntry<A>);
+    return reinterpret_cast<PacketRouteEntry<A>*>(p);
+}
+
+template <typename A>
+void
+RipPacket<A>::append_data(const uint8_t* data, uint32_t data_bytes)
+{
+    _data.insert(_data.end(), data, data + data_bytes);
+}
+
+template <typename A>
+void
+RipPacket<A>::append_data(const vector<uint8_t>& data)
+{
+    _data.insert(_data.end(), data.begin(), data.end());
+}
+
+template <typename A>
+void
+RipPacket<A>::set_max_entries(uint32_t max_entries)
+{
+    _data.reserve(sizeof(PacketRouteEntry<A>) * max_entries +
+		  sizeof(RipPacketHeader));
+    _data.resize(max_entries);
+    _max_entries = max_entries;
+}
 
 #endif // __RIP_PACKETS_HH__

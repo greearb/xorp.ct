@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.8 2003/07/21 18:05:55 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.9 2003/07/21 18:06:56 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -29,9 +29,8 @@
 #include "peer.hh"
 #include "port.hh"
 #include "port_manager.hh"
-
+#include "packet_assembly.hh"
 #include "packet_queue.hh"
-#include "update_queue.hh"
 
 // ----------------------------------------------------------------------------
 // PortTimerConstants Implementation
@@ -53,7 +52,6 @@ PortTimerConstants::PortTimerConstants()
 template <typename A>
 Port<A>::Port(PortManagerBase<A>& pm)
     :  _pm(pm),
-       _update_queue(pm.system().route_db().update_queue()),
        _en(false),
        _cost(1),
        _horizon(SPLIT_POISON_REVERSE),
@@ -61,7 +59,7 @@ Port<A>::Port(PortManagerBase<A>& pm)
        _adv_def_rt(false),
        _acc_def_rt(false)
 {
-    _packet_queue = new RipPacketQueue<A>();
+    _packet_queue = new PacketQueue<A>();
 }
 
 template <typename A>
@@ -191,12 +189,53 @@ Port<A>::push_packets()
 	return;
 
     if (io_handler()->send(head->address(), head->port(),
-			   head->data_ptr(), head->data_size())) {
+			   head->data_ptr(), head->data_bytes())) {
 	return;
     }
 
     XLOG_WARNING("Send failed: discarding outbound packets.");
     _packet_queue->flush_packets();
+}
+
+template <typename A>
+pair<A,uint16_t>
+Port<A>::route_policy(const RouteEntry<A>& r) const
+{
+    if (r.net() == RIP_AF_CONSTANTS<A>::DEFAULT_ROUTE() &&
+	advertise_default_route() == false) {
+	return make_pair(A::ZERO(), ~0);
+    }
+
+    uint16_t cost = r.cost();
+
+    const Peer<A>* peer = dynamic_cast<const Peer<A>*>(r.origin());
+    if (peer == 0) {
+	// Route did not come from a peer: it's a static route or a
+	// redist route.  No horizon checking necessary.
+	return make_pair(A::ZERO(), cost);
+    }
+
+    const Port<A>& peer_port = peer->port();
+    if (&peer_port != this) {
+	// Route did not originate from this Port instance. No horizon
+	// checking necessary.
+	return make_pair(A::ZERO(), cost);
+    }
+
+    switch (horizon()) {
+    case NONE:
+	// No processing
+	break;
+    case SPLIT:
+	// Don't advertise route back to source
+	return make_pair(A::ZERO(), ~0);
+    case SPLIT_POISON_REVERSE:
+	// Advertise back at cost of infinity
+	cost = RIP_INFINITY;
+	break;
+    }
+
+    return make_pair(A::ZERO(), ~0);
 }
 
 template <typename A>
@@ -234,48 +273,19 @@ Port<A>::set_accept_default_route(bool en)
     _acc_def_rt = en;
 }
 
-// ----------------------------------------------------------------------------
-// AuthManager<IPv4> Specialized methods
-//
-
-AuthHandlerBase*
-AuthManager<IPv4>::set_auth_handler(AuthHandlerBase* nh)
-{
-    AuthHandlerBase* oh = _ah;
-    _ah = nh;
-    return oh;
-}
-
-const AuthHandlerBase*
-AuthManager<IPv4>::auth_handler() const
-{
-    return _ah;
-}
-
-AuthHandlerBase*
-AuthManager<IPv4>::auth_handler()
-{
-    return _ah;
-}
-
-// ----------------------------------------------------------------------------
-// Port<IPv4> Specialized methods
-//
-
-template <>
+template <typename A>
 void
-Port<IPv4>::parse_request(const Addr&			src_addr,
-			  uint16_t			src_port,
-			  const PacketRouteEntry<IPv4>*	entries,
-			  uint32_t			n_entries)
+Port<A>::parse_request(const Addr&			src_addr,
+		       uint16_t				src_port,
+		       const PacketRouteEntry<A>*	entries,
+		       uint32_t				n_entries)
 {
     if (port_io_enabled() == false) {
 	XLOG_INFO("Discarding RIP request: port io disabled.");
     }
 
-    if (n_entries == 1 &&
-	entries[0].addr_family() == PacketRouteEntry<IPv4>::ADDR_FAMILY_DUMP) {
-	if (src_port == RIP_PORT) {
+    if (n_entries == 1 && entries[0].is_table_request()) {
+	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	    // if already doing unsolicited dump, then ignore
 	    // set unsolicited timer timeout to zero to trigger port
 	    // route dump
@@ -295,61 +305,40 @@ Port<IPv4>::parse_request(const Addr&			src_addr,
     //
     // Answer query
     //
-    RipPacket<IPv4>* p = _packet_queue->new_packet(src_addr, src_port);
-    if (0 == p) {
-	XLOG_INFO("Could not allocate packet for route request response");
-	return;
-    }
+    uint32_t i = 0;
+    ResponsePacketAssembler<A> rpa(*this);
+    RouteDB<A>& rdb = _pm.system().route_db();
 
-    if (n_entries > auth_handler()->max_routing_entries()) {
-	n_entries = auth_handler()->max_routing_entries();
-    }
-
-    size_t rip_packet_bytes = sizeof(RipPacketHeader);
-    rip_packet_bytes += (n_entries + auth_handler()->head_entries()) *
-	sizeof(PacketRouteEntry<IPv4>);
-
-    p->data().resize(rip_packet_bytes);
-
-    // Fill in header
-    RipPacketHeader* rph = new (p->data_ptr()) RipPacketHeader;
-    rph->initialize(RipPacketHeader::RESPONSE, 1);
-
-    uint32_t offset = sizeof(RipPacketHeader) +
-	auth_handler()->head_entries() * sizeof(PacketRouteEntry<IPv4>);
-
-    // Walk nets in supplied route entries and look them up
-    RouteDB<IPv4>& rdb = _pm.system().route_db();
-    for (uint32_t i = 0; i < n_entries; i++) {
-	const RouteEntry<IPv4>* r = rdb.find_route(entries[i].net());
-	PacketRouteEntry<IPv4>* pre =
-	    new (p->data_ptr() + offset) PacketRouteEntry<IPv4>;
-	if (r) {
-	    pre->initialize(r->tag(), r->net(), r->nexthop(), r->cost());
-	} else {
-	    pre->initialize(0, entries[i].net(), IPv4::ZERO(), RIP_INFINITY);
+    while (i != n_entries) {
+	RipPacket<A>* pkt = new RipPacket<A>(src_addr, src_port);
+	rpa.packet_start(pkt);
+	while (rpa.packet_full() == false && i != n_entries) {
+	    const RouteEntry<A>* r = rdb.find_route(entries[i].net());
+	    if (r) {
+		rpa.packet_add_route(r->net(), r->nexthop(),
+				     r->cost(), r->tag());
+	    } else {
+		rpa.packet_add_route(entries[i].net(), A::ZERO(),
+				     RIP_INFINITY, 0);
+	    }
+	    i++;
 	}
-	offset += sizeof(PacketRouteEntry<IPv4>);
+	if (rpa.packet_finish() == true) {
+	    _packet_queue->enqueue_packet(pkt);
+	} else {
+	    delete pkt;
+	    break;
+	}
     }
-    XLOG_ASSERT(offset == rip_packet_bytes);
 
-    // Authenticate packet (this commonly forces a copy, and may force 2,
-    // auth api needs looking at).
-    vector<uint8_t> trailor;
-    PacketRouteEntry<IPv4>* fe =
-	reinterpret_cast<PacketRouteEntry<IPv4>*>(rph + 1);
-
-    if (auth_handler()->authenticate(p->data_ptr(), rip_packet_bytes,
-				     fe, trailor) != 0) {
-	p->data().insert(p->data().end(), trailor.begin(), trailor.end());
-	_packet_queue->enqueue_packet(p);
-	push_packets();
-    }  else {
-	XLOG_WARNING("Response packet authentication failed for query.");
-	_packet_queue->discard_packet(p);
-    }
+    push_packets();
     block_queries();
 }
+
+
+// ----------------------------------------------------------------------------
+// Port<IPv4> Specialized methods
+//
 
 template <>
 void
@@ -382,6 +371,11 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	}
 
 	IPv4Net net = entries[i].net();
+	if (net == RIP_AF_CONSTANTS<IPv4>::DEFAULT_ROUTE() &&
+	    accept_default_route() == false) {
+	    continue;
+	}
+
 	IPv4	masked_net = net.masked_addr() & net_filter;
 	if (masked_net.is_multicast()) {
 	    record_bad_route("multicast route", src_addr, src_port, p);
@@ -484,7 +478,7 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     // Authenticate packet (actually we should check what packet wants
     // before authenticating - we may not care in all cases...)
     //
-    if (auth_handler() == NULL) {
+    if (af_state().auth_handler() == NULL) {
 	XLOG_FATAL("Received packet on interface without an authentication "
 		   "handler.");
     }
@@ -492,13 +486,13 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     const PacketRouteEntry<IPv4>* entries = 0;
     uint32_t n_entries = 0;
 
-    if (auth_handler()->authenticate(rip_packet,
-				     rip_packet_bytes,
-				     entries,
-				     n_entries) == false) {
+    if (af_state().auth_handler()->authenticate(rip_packet,
+						rip_packet_bytes,
+						entries,
+						n_entries) == false) {
 	string cause = c_format("packet failed authentication (%s): %s",
-				auth_handler()->name(),
-				auth_handler()->error().c_str());
+				af_state().auth_handler()->name(),
+				af_state().auth_handler()->error().c_str());
 	record_bad_packet(cause, src_address, src_port, p);
 	return;
     }
@@ -516,6 +510,7 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     }
 }
 
+
 // ----------------------------------------------------------------------------
 // Port<IPv6> Specialized methods
 //
@@ -532,4 +527,3 @@ Port<IPv6>::port_io_receive(const IPv6&		/* address */,
 
 template class Port<IPv4>;
 template class Port<IPv6>;
-

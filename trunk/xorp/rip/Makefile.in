@@ -115,7 +115,7 @@ test_timers_SOURCES = test_timers.cc
 test_update_queue_SOURCES = test_update_queue.cc
 
 # -- Library Sources
-librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh packet_queue.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh route_db.hh route_entry.hh update_queue.hh auth.cc packet_queue.cc peer.cc port.cc redist.cc route_db.cc route_entry.cc update_queue.cc
+librip_a_SOURCES = rip_module.h auth.hh constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh route_db.hh route_entry.hh system.hh update_queue.hh auth.cc output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc route_db.cc route_entry.cc update_queue.cc
 
 
 ################################################################
@@ -128,9 +128,10 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 librip_a_AR = $(AR) cru
 librip_a_LIBADD =
-am_librip_a_OBJECTS = auth.$(OBJEXT) packet_queue.$(OBJEXT) \
-	peer.$(OBJEXT) port.$(OBJEXT) redist.$(OBJEXT) \
-	route_db.$(OBJEXT) route_entry.$(OBJEXT) update_queue.$(OBJEXT)
+am_librip_a_OBJECTS = auth.$(OBJEXT) output_table.$(OBJEXT) \
+	output_updates.$(OBJEXT) packet_queue.$(OBJEXT) peer.$(OBJEXT) \
+	port.$(OBJEXT) redist.$(OBJEXT) route_db.$(OBJEXT) \
+	route_entry.$(OBJEXT) update_queue.$(OBJEXT)
 librip_a_OBJECTS = $(am_librip_a_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
@@ -176,11 +177,13 @@ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/auth.Po $(DEPDIR)/packet_queue.Po \
-@AMDEP_TRUE@	$(DEPDIR)/peer.Po $(DEPDIR)/port.Po \
-@AMDEP_TRUE@	$(DEPDIR)/redist.Po $(DEPDIR)/route_db.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_entry.Po $(DEPDIR)/test_auth.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_packets.Po $(DEPDIR)/test_request.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/auth.Po $(DEPDIR)/output_table.Po \
+@AMDEP_TRUE@	$(DEPDIR)/output_updates.Po \
+@AMDEP_TRUE@	$(DEPDIR)/packet_queue.Po $(DEPDIR)/peer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/port.Po $(DEPDIR)/redist.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_db.Po $(DEPDIR)/route_entry.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_auth.Po $(DEPDIR)/test_packets.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_request.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_route_walk.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
@@ -275,6 +278,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/auth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/output_table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/output_updates.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/port.Po@am__quote@

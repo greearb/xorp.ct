@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.12 2003/07/30 23:43:31 pavlin Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.13 2003/08/01 02:11:50 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS	 = 
+bin_PROGRAMS	 =
 
 # -- Test Programs
 TESTS		 = test_auth
@@ -43,8 +43,12 @@ librip_a_SOURCES		 = rip_module.h
 
 librip_a_SOURCES		+= auth.hh
 librip_a_SOURCES		+= constants.hh
-librip_a_SOURCES		+= packets.hh
+librip_a_SOURCES		+= output.hh
+librip_a_SOURCES		+= output_table.hh
+librip_a_SOURCES		+= output_updates.hh
+librip_a_SOURCES		+= packet_assembly.hh
 librip_a_SOURCES		+= packet_queue.hh
+librip_a_SOURCES		+= packets.hh
 librip_a_SOURCES		+= peer.hh
 librip_a_SOURCES		+= port.hh
 librip_a_SOURCES		+= port_io.hh
@@ -52,9 +56,12 @@ librip_a_SOURCES		+= port_manager.hh
 librip_a_SOURCES		+= redist.hh
 librip_a_SOURCES		+= route_db.hh
 librip_a_SOURCES		+= route_entry.hh
+librip_a_SOURCES		+= system.hh
 librip_a_SOURCES		+= update_queue.hh
 
 librip_a_SOURCES		+= auth.cc
+librip_a_SOURCES		+= output_table.cc
+librip_a_SOURCES		+= output_updates.cc
 librip_a_SOURCES		+= packet_queue.cc
 librip_a_SOURCES		+= peer.cc
 librip_a_SOURCES		+= port.cc

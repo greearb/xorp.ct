@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.9 2003/07/21 18:05:55 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.10 2003/07/21 18:06:55 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -24,7 +24,6 @@
 
 #include "constants.hh"
 #include "port_io.hh"
-#include "update_queue.hh"
 
 /**
  * @short Container of timer constants associated with a RIP port.
@@ -185,26 +184,26 @@ protected:
 
 
 /**
- * @short Authentication Manager.
+ * @short Specializable Address Family state for Port classes.
  *
- * A class completely for specialization for RIP address families that place
- * authentication information within the RIP payload (RIPv2 and not RIPng).
- *
+ * This class exists to be specialized with IPv4 and IPv6 state and
+ * methods.
  */
 template <typename A>
-struct AuthManager
+class PortAFSpecState
 {};
 
 class AuthHandlerBase;
 
 /**
- * @short Authentication Manager for RIPv2.
- *
- * Holds configuration state for RIPv2 Authentication.
+ * @short IPv4 specialized Port state.
  */
-template<>
-struct AuthManager<IPv4>
+template <>
+class PortAFSpecState<IPv4>
 {
+private:
+    AuthHandlerBase* _ah;
+
 public:
     /**
      * Set authentication handler.
@@ -212,21 +211,76 @@ public:
      * @param h handler to be used.
      * @return pointer to former handler.
      */
-    AuthHandlerBase* set_auth_handler(AuthHandlerBase* h);
+    inline AuthHandlerBase* set_auth_handler(AuthHandlerBase* h);
 
     /**
      * Get authentication handler.
      */
-    const AuthHandlerBase* auth_handler() const;
+    inline const AuthHandlerBase* auth_handler() const;
 
     /**
      * Get authentication handler.
      */
-    AuthHandlerBase* auth_handler();
-
-private:
-    AuthHandlerBase* _ah;
+    inline AuthHandlerBase* auth_handler();
 };
+
+inline AuthHandlerBase*
+PortAFSpecState<IPv4>::set_auth_handler(AuthHandlerBase* new_handler)
+{
+    AuthHandlerBase* old_handler = _ah;
+    _ah = new_handler;
+    return old_handler;
+}
+
+const AuthHandlerBase*
+PortAFSpecState<IPv4>::auth_handler() const
+{
+    return _ah;
+}
+
+AuthHandlerBase*
+PortAFSpecState<IPv4>::auth_handler()
+{
+    return _ah;
+}
+
+
+/**
+ * @short IPv6 specialized Port state.
+ */
+template <>
+class PortAFSpecState<IPv6>
+{
+protected:
+    uint32_t _mepp;	// Max route entries per packet
+
+public:
+    PortAFSpecState() : _mepp(50) {}
+
+    /**
+     * Get the maximum number of route entries placed in each RIPng response
+     * packet.
+     */
+    inline uint32_t max_entries_per_packet() const;
+
+    /**
+     * Set the maximum number of route entries placed in each RIPng response
+     * packet.
+     */
+    inline void	    set_max_entries_per_packet(uint32_t n);
+};
+
+uint32_t
+PortAFSpecState<IPv6>::max_entries_per_packet() const
+{
+    return _mepp;
+}
+
+inline void
+PortAFSpecState<IPv6>::set_max_entries_per_packet(uint32_t n)
+{
+    _mepp = n;
+}
 
 
 template <typename A>
@@ -236,7 +290,13 @@ template <typename A>
 class Peer;
 
 template <typename A>
-class RipPacketQueue;
+class PacketQueue;
+
+template <typename A>
+class RouteEntry;
+
+template <typename A>
+class PacketRouteEntry;
 
 /**
  * @short RIP Port
@@ -250,8 +310,7 @@ class RipPacketQueue;
  */
 template <typename A>
 class Port
-    : public AuthManager<A>,
-      public PortIOUserBase<A>
+    : public PortIOUserBase<A>
 {
 public:
     typedef A			Addr;
@@ -271,6 +330,18 @@ public:
      * Get timer constants in use for routes received on this port.
      */
     inline const PortTimerConstants& constants() const	{ return _constants; }
+
+    /**
+     * Get Address Family specific state associated with port.  This is
+     * state that only has meaning within the IP address family.
+     */
+    inline PortAFSpecState<A>& af_state()		{ return _af_state; }
+
+    /**
+     * Get Address Family specific state associated with port.  This is
+     * state that only has meaning within the IP address family.
+     */
+    inline const PortAFSpecState<A>& af_state() const	{ return _af_state; }
 
     /**
      * Set enabled state.
@@ -452,13 +523,21 @@ protected:
      */
     bool queries_blocked() const;
 
+public:
     /**
      * If I/O handler is not already sending a packet, take a packet from
      * packet queue and send it.
      */
     void push_packets();
 
-public:
+    /**
+     * Check policy on route.
+     *
+     * @returns tuple (nexthop,cost).  If route should not be
+     * advertised the cost value will be greater than RIP_INFINITY.
+     */
+    pair<A,uint16_t> route_policy(const RouteEntry<A>& re) const;
+
     /**
      * Send completion notification.  Called by PortIO instance when a
      * send request is completed.
@@ -493,13 +572,13 @@ public:
 
 protected:
     PortManagerBase<A>&	_pm;
+    PortAFSpecState<A>  _af_state;		// Address family specific data
+
     PeerList		_peers;			// Peers on Port
+
     XorpTimer		_us_timer;		// Unsolicited update timer
     XorpTimer		_tu_timer;		// Triggered update timer
     XorpTimer		_query_blocked_timer;	// Rate limiting on queries
-
-    UpdateQueue<A>&		 	  _update_queue;
-    typename UpdateQueue<A>::ReadIterator _uq_iter;
 
     bool		_en;			// Enabled state
     uint32_t		_cost;			// Cost metric of port
@@ -508,7 +587,7 @@ protected:
     bool		_adv_def_rt;		// Advertise default route
     bool		_acc_def_rt;		// Accept default route
 
-    RipPacketQueue<A>*	_packet_queue;		// Outbound packet queue
+    PacketQueue<A>*	_packet_queue;		// Outbound packet queue
     PortTimerConstants	_constants;		// Port related timer constants
     PortCounters	_counters;		// Packet counters
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.9 2003/07/21 18:04:56 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.10 2003/07/21 23:13:32 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -233,8 +233,8 @@ private:
 
 private:
     RouteDB<A>& _route_db;	// RouteDB to be walked.
-    State _state;		// Current state (RUNNING/PAUSED).
-    Net _last_visited;		// Last route output before entering PAUSED.
+    State	_state;		// Current state (RUNNING/PAUSED).
+    Net		_last_visited;	// Last route output before entering PAUSED.
     				// if set to RouteWalker::no_net there was
     				// no valid route when paused.
     typename RouteContainer::iterator _pos;	// Current route when RUNNING.

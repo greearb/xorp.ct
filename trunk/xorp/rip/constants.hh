@@ -12,10 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.5 2003/07/09 22:29:07 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.6 2003/07/21 18:04:20 hodson Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
+
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv4net.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipv6net.hh"
 
 static const uint32_t DEFAULT_UNSOLICITED_RESPONSE_SECS = 30;
 static const uint32_t DEFAULT_VARIATION_UNSOLICITED_RESPONSE_SECS = 5;
@@ -62,6 +67,29 @@ static const uint16_t RIP_PORT = 520;
  * RIPng protocol port
  */
 static const uint16_t RIP_NG_PORT = 521;
+
+static const IPv4Net IPv4_DEFAULT_ROUTE = IPv4Net(IPv4::ZERO(), 0);
+static const IPv6Net IPv6_DEFAULT_ROUTE = IPv6Net(IPv6::ZERO(), 0);
+
+/**
+ * Basis of specialized classes containing RIP constants.
+ */
+template <typename A>
+struct RIP_AF_CONSTANTS;
+
+template <>
+struct RIP_AF_CONSTANTS<IPv4>
+{
+    static const uint16_t IP_PORT = RIP_PORT;
+    static inline const IPv4Net& DEFAULT_ROUTE() { return IPv4_DEFAULT_ROUTE; }
+};
+
+template <>
+struct RIP_AF_CONSTANTS<IPv6>
+{
+    static const uint16_t IP_PORT = RIP_NG_PORT;
+    static inline const IPv6Net& DEFAULT_ROUTE() { return IPv6_DEFAULT_ROUTE; }
+};
 
 /**
  * Enumeration of RIP Horizon types.

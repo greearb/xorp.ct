@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.3 2003/06/05 02:11:21 atanu Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.4 2003/07/21 18:01:11 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -108,7 +108,7 @@ NullAuthHandler::authenticate(const uint8_t*		     packet,
 	(packet + sizeof(RipPacketHeader));
 
     // Reject packet if first entry is authentication data
-    if (entries[0].addr_family() == PacketRouteEntry<IPv4>::AUTH_ADDR_FAMILY) {
+    if (entries[0].is_auth_entry()) {
 	set_error(c_format("unexpected authentication data (type %d)",
 			   entries[0].tag()));
 	entries = 0;
