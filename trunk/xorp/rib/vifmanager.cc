@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.7 2003/03/19 09:05:20 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.8 2003/03/21 01:25:14 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -161,7 +161,7 @@ VifManager::register_if_spy_done(const XrlError& e)
 	return;
     }
     _state = FAILED;
-    XLOG_ERROR("Register Interface Spy: Permanent Error\n");
+    XLOG_ERROR("Register Interface Spy: Permanent Error");
 }
 
 void
@@ -185,7 +185,7 @@ VifManager::interface_names_done(const XrlError& e, const XrlAtomList* alist)
 	return;
     }
     _state = FAILED;
-    XLOG_ERROR("Get Interface Names: Permanent Error\n");
+    XLOG_ERROR("Get Interface Names: Permanent Error");
 }
 
 void
@@ -216,7 +216,7 @@ VifManager::vif_names_done(const XrlError& e, const XrlAtomList* alist,
 	_interfaces_remaining--;
     } else {
 	_state = FAILED;
-	XLOG_ERROR("Get VIF Names: Permanent Error\n");
+	XLOG_ERROR("Get VIF Names: Permanent Error");
 	return;
     }
     if (_interfaces_remaining == 0
@@ -242,7 +242,7 @@ VifManager::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
 	_vifs_remaining--;
     } else {
 	_state = FAILED;
-	XLOG_ERROR("Get VIF Names: Permanent Error\n");
+	XLOG_ERROR("Get VIF Names: Permanent Error");
 	return;
     }
 
@@ -363,7 +363,7 @@ VifManager::vif_deleted(const string& ifname, const string& vifname)
 	string err;
 	_rib_manager->delete_vif(vifname, err);
     } else {
-	XLOG_ERROR(("vif_deleted: vif " + vifname + " not found\n").c_str());
+	XLOG_ERROR("vif_deleted: vif %s not found", vifname.c_str());
     }
 }
 
@@ -372,8 +372,7 @@ VifManager::vif_created(const string& ifname, const string& vifname)
 {
     printf("vif_created: %s\n", vifname.c_str());
     if (_vifs_by_name.find(vifname) != _vifs_by_name.end()) {
-	XLOG_ERROR(("vif_created: vif " + vifname +
-		    " already exists\n").c_str());
+	XLOG_ERROR("vif_created: vif %s already exists", vifname.c_str());
 	return;
     }
     Vif *vif = new Vif(vifname, ifname);
@@ -390,8 +389,7 @@ VifManager::vifaddr4_created(const string& ifname, const string& vifname,
 			     const IPv4& addr) 
 {
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr4_created on unknown vif: " + vifname +
-		    "\n").c_str());
+	XLOG_ERROR("vifaddr4_created on unknown vif: %s", vifname.c_str());
 	return;
     }
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
@@ -423,15 +421,15 @@ VifManager::vifaddr4_done(const XrlError& e, const uint32_t* prefix_len,
 	if (_rib_manager->add_vif_addr(vifname, addr, 
 				       IPv4Net(addr, *prefix_len),
 				       err) != XORP_OK) {
-	    XLOG_ERROR(c_format("failed to add address %s/%d to vif %s\n",
+	    XLOG_ERROR(c_format("failed to add address %s/%d to vif %s",
 				addr.str().c_str(), *prefix_len,
 				vifname.c_str()).c_str());
 	}
     } else if (e != XrlError::COMMAND_FAILED()) {
 	_addrs_remaining--;
     } else {
-	XLOG_ERROR(("Failed to get prefix_len for address "
-		    + addr.str() + "\n").c_str());
+	XLOG_ERROR("Failed to get prefix_len for address %s",
+		   addr.str().c_str());
 	_addrs_remaining--;
     }
 
@@ -450,8 +448,7 @@ VifManager::vifaddr4_deleted(const string& ifname, const string& vifname,
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr4_deleted on unknown vif: " + vifname +
-		    "\n").c_str());
+	XLOG_ERROR("vifaddr4_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
      Vif *vif = _vifs_by_name[vifname];
@@ -459,7 +456,7 @@ VifManager::vifaddr4_deleted(const string& ifname, const string& vifname,
 
      string err;
      if (_rib_manager->delete_vif_addr(vifname, addr, err) != XORP_OK) {
-	 XLOG_ERROR(c_format("failed to delete address %s from vif %s\n",
+	 XLOG_ERROR(c_format("failed to delete address %s from vif %s",
 			     addr.str().c_str(), vifname.c_str()).c_str());
      }
 }
@@ -469,8 +466,7 @@ VifManager::vifaddr6_created(const string& ifname, const string& vifname,
 			     const IPv6& addr) 
 {
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr6_created on unknown vif: " + vifname +
-		    "\n").c_str());
+	XLOG_ERROR("vifaddr6_created on unknown vif: %s", vifname.c_str());
 	return;
     }
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
@@ -502,15 +498,15 @@ VifManager::vifaddr6_done(const XrlError& e, const uint32_t* prefix_len,
 	if (_rib_manager->add_vif_addr(vifname, addr, 
 				       IPv6Net(addr,*prefix_len),
 				       err) != XORP_OK) {
-	    XLOG_ERROR(c_format("failed to add address %s/%d to vif %s\n",
-				addr.str().c_str(), *prefix_len,
-				vifname.c_str()).c_str());
+	    XLOG_ERROR("failed to add address %s/%d to vif %s",
+		       addr.str().c_str(), *prefix_len,
+		       vifname.c_str());
 	}
     } else if (e != XrlError::COMMAND_FAILED()) {
 	_addrs_remaining--;
     } else {
-	XLOG_ERROR(("Failed to get prefix_len for address "
-		    + addr.str() + "\n").c_str());
+	XLOG_ERROR("Failed to get prefix_len for address %s",
+		   addr.str().c_str());
 	_addrs_remaining--;
     }
 
@@ -529,8 +525,7 @@ VifManager::vifaddr6_deleted(const string& ifname, const string& vifname,
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr6_deleted on unknown vif: " + vifname +
-		    "\n").c_str());
+	XLOG_ERROR("vifaddr6_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
      Vif *vif = _vifs_by_name[vifname];
@@ -538,8 +533,8 @@ VifManager::vifaddr6_deleted(const string& ifname, const string& vifname,
 
      string err;
      if (_rib_manager->delete_vif_addr(vifname, addr, err) != XORP_OK) {
-	 XLOG_ERROR(c_format("failed to delete address %s from vif %s\n",
-			     addr.str().c_str(), vifname.c_str()).c_str());
+	 XLOG_ERROR("failed to delete address %s from vif %s",
+		    addr.str().c_str(), vifname.c_str());
      }
 }
 

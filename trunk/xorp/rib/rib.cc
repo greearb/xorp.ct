@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.10 2003/03/20 00:57:52 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.11 2003/03/20 04:29:22 pavlin Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -54,7 +54,7 @@ inline int
 RIB<A>::add_table(const string& tablename, RouteTable<A> *table)
 {
     if (find_table(tablename) != 0) {
-	XLOG_WARNING("add_table: table %s already exists\n", tablename.c_str());
+	XLOG_WARNING("add_table: table %s already exists", tablename.c_str());
 	return -1;
     }
     _tables[tablename] = table;
@@ -67,7 +67,7 @@ RIB<A>::remove_table(const string& tablename)
 {
     typename map<string, RouteTable<A> *>::iterator mi = _tables.find(tablename);
     if (mi == _tables.end()) {
-	XLOG_WARNING("remove_table: table %s doesn't exist\n", 
+	XLOG_WARNING("remove_table: table %s doesn't exist", 
 		     tablename.c_str());
 	return -1;
     }
@@ -486,7 +486,7 @@ RIB<A>::add_route(const string& tablename,
 
     // only accept the least significant 16 bits of metric
     if (metric > 0xffff) {
-	XLOG_WARNING(c_format("IGP metric value %d is greater than 2^16\n", 
+	XLOG_WARNING(c_format("IGP metric value %d is greater than 2^16", 
 			      metric).c_str());
 	metric &= 0xffff;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.7 2003/03/16 07:18:57 pavlin Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.8 2003/03/29 19:03:10 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -72,7 +72,7 @@ void NotifyQueue::xrl_done(const XrlError& e)
 	if (!_queue.empty() && _active)
 	    send_next();
     } else {
-	XLOG_ERROR("Failed to send registration update to RIB client\n");
+	XLOG_ERROR("Failed to send registration update to RIB client");
     }
 }
 

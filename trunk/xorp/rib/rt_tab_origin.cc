@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.5 2003/03/15 02:28:39 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.6 2003/03/16 07:18:59 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -126,8 +126,8 @@ int OriginTable<A>::delete_route(const IPNet<A>& net)
 	delete found;
 	return 0;
     }
-    XLOG_ERROR(("OT: attempt to delete a route that doesn't exist: "
-		+ net.str() + "\n").c_str());
+    XLOG_ERROR("OT: attempt to delete a route that doesn't exist: %s",
+	       net.str().c_str());
     return -1;
 }
 

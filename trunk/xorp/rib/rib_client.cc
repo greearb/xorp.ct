@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_client.cc,v 1.6 2003/04/22 19:20:24 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.7 2003/05/08 05:51:27 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -144,7 +144,7 @@ SyncFtiCommand::start_complete(const XrlError& e, const uint32_t *tid)
 	    || (e == XrlError::SEND_FAILED())
 	    || (e == XrlError::NO_SUCH_METHOD())
 	    || (e == XrlError::RESOLVE_FAILED() && _previously_successful)) {
-	    XLOG_ERROR("Fatal transport error from RIB to %s\n",
+	    XLOG_ERROR("Fatal transport error from RIB to %s",
 		       _target_name.c_str());
 	    fatal_error = true;
 	} else if ((e == XrlError::RESOLVE_FAILED())

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.5 2003/03/15 02:28:39 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.6 2003/03/16 07:18:59 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -593,7 +593,7 @@ ExtIntTable<A>::lookup_route(const A& addr) const
     }
 
     // this shouldn't happen.
-    XLOG_ERROR("ExtIntTable has multiple routes with same prefix_len and same admin_distance\n");
+    XLOG_ERROR("ExtIntTable has multiple routes with same prefix_len and same admin_distance");
     return found.front();
 }
 

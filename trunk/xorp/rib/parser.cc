@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.3 2003/03/15 02:28:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.4 2003/03/16 07:18:57 pavlin Exp $"
 
 #include <stdexcept>
 
@@ -347,7 +347,7 @@ bool Parser::add_argtype(ArgumentParser *arg)
 {
     debug_msg("Parser::add_argtype %s\n", arg->name().c_str());
     if (arg->name()[0] != '~') {
-	XLOG_FATAL("ArgumentParser Type names must begin with ~\n");
+	XLOG_FATAL("ArgumentParser Type names must begin with ~");
     }
     return (_argtypes.insert(pair<string, ArgumentParser*>
 			     (arg->name(), arg)).second);
