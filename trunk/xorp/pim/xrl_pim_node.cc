@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.2 2003/01/07 01:43:03 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3532,6 +3532,34 @@ XrlPimNode::pim_0_1_reset_vif_join_prune_period(
 }
 
 XrlCmdError
+XrlPimNode::pim_0_1_enable_log_trace(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    PimNode::set_log_trace(true);
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_disable_log_trace(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    PimNode::set_log_trace(false);
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlPimNode::pim_0_1_add_test_jp_entry4(
     // Input values, 
     const IPv4&		source_addr, 
@@ -3714,28 +3742,56 @@ XrlPimNode::pim_0_1_send_test_jp_entry6(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_enable_log_trace(
+XrlPimNode::pim_0_1_send_test_assert4(
+    // Input values, 
+    const string&	vif_name, 
+    const IPv4&		source_addr, 
+    const IPv4&		group_addr, 
+    const bool&		rpt_bit, 
+    const uint32_t&	metric_preference, 
+    const uint32_t&	metric, 
     // Output values, 
-    bool&	fail, 
-    string&	reason)
+    bool&		fail, 
+    string&		reason)
 {
-    PimNode::set_log_trace(true);
-    
-    fail = false;
+    if (PimNode::send_test_assert(vif_name,
+				  IPvX(source_addr),
+				  IPvX(group_addr),
+				  rpt_bit,
+				  metric_preference,
+				  metric) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
     reason = "";
     
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_disable_log_trace(
+XrlPimNode::pim_0_1_send_test_assert6(
+    // Input values, 
+    const string&	vif_name, 
+    const IPv6&		source_addr, 
+    const IPv6&		group_addr, 
+    const bool&		rpt_bit, 
+    const uint32_t&	metric_preference, 
+    const uint32_t&	metric, 
     // Output values, 
-    bool&	fail, 
-    string&	reason)
+    bool&		fail, 
+    string&		reason)
 {
-    PimNode::set_log_trace(false);
-    
-    fail = false;
+    if (PimNode::send_test_assert(vif_name,
+				  IPvX(source_addr),
+				  IPvX(group_addr),
+				  rpt_bit,
+				  metric_preference,
+				  metric) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
     reason = "";
     
     return XrlCmdError::OKAY();

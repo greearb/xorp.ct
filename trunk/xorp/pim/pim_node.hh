@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.2 2003/01/07 01:43:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -826,6 +826,12 @@ public:
 				  action_jp_t action_jp, uint16_t holdtime,
 				  bool new_group_bool);
     int		send_test_jp_entry(const IPvX& nbr_addr);
+    int		send_test_assert(const string& vif_name,
+				 const IPvX& source_addr,
+				 const IPvX& group_addr,
+				 bool rpt_bit,
+				 uint32_t metric_preference,
+				 uint32_t metric);
     
     //
     // PimNbr-related methods

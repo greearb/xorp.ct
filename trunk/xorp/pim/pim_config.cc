@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.2 2003/01/07 01:43:02 pavlin Exp $"
 
 
 //
@@ -899,3 +899,30 @@ PimNode::send_test_jp_entry(const IPvX& nbr_addr)
     return (ret_value);
 }
 
+//
+// Send test Assert message on an interface.
+// Return: %XORP_OK on success, otherwise %XORP_ERROR.
+//
+int
+PimNode::send_test_assert(const string& vif_name,
+			  const IPvX& source_addr,
+			  const IPvX& group_addr,
+			  bool rpt_bit,
+			  uint32_t metric_preference,
+			  uint32_t metric)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL)
+	return (XORP_ERROR);
+    
+    if (pim_vif->pim_assert_send(source_addr,
+				 group_addr,
+				 rpt_bit,
+				 metric_preference,
+				 metric) < 0) {
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}

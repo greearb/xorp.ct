@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.2 2003/01/07 01:43:03 pavlin Exp $
 #
 
 #
@@ -1036,5 +1036,43 @@ pim_send_test_jp_entry6()
     echo "pim_send_test_jp_entry6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_jp_entry6"
     XRL_ARGS="?nbr_addr:ipv6=$nbr_addr"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_send_test_assert4()
+{
+    if [ $# -lt 6 ] ; then
+	echo "Usage: pim_send_test_assert4 <vif_name> <source_addr> <group_addr> <rpt_bit> <metric_preference> <metric>"
+	exit 1
+    fi
+    vif_name=$1
+    source_addr=$2
+    group_addr=$3
+    rpt_bit=$4
+    metric_preference=$5
+    metric=$6
+    
+    echo "pim_send_test_assert4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/send_test_assert4"
+    XRL_ARGS="?vif_name:txt=$vif_name&source_addr:ipv4=$source_addr&group_addr:ipv4=$group_addr&rpt_bit:bool=$rpt_bit&metric_preference:u32=$metric_preference&metric:u32=$metric"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_send_test_assert6()
+{
+    if [ $# -lt 6 ] ; then
+	echo "Usage: pim_send_test_assert6 <vif_name> <source_addr> <group_addr> <rpt_bit> <metric_preference> <metric>"
+	exit 1
+    fi
+    vif_name=$1
+    source_addr=$2
+    group_addr=$3
+    rpt_bit=$4
+    metric_preference=$5
+    metric=$6
+    
+    echo "pim_send_test_assert6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/send_test_assert6"
+    XRL_ARGS="?vif_name:txt=$vif_name&source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&rpt_bit:bool=$rpt_bit&metric_preference:u32=$metric_preference&metric:u32=$metric"
     call_xrl $XRL$XRL_ARGS fail:bool = false
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.2 2003/01/07 01:43:03 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1393,6 +1393,23 @@ protected:
 	string&	reason);
 
     /**
+     *  Enable/disable the PIM trace log.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    XrlCmdError pim_0_1_enable_log_trace(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_disable_log_trace(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
      *  Test-related methods: add Join/Prune entries, and send them to a
      *  neighbor.
      *  
@@ -1441,21 +1458,48 @@ protected:
 	string&		reason);
 
     /**
-     *  Enable/disable the PIM trace log.
+     *  Test-related methods: send an Assert message on an interface.
+     *  
+     *  @param vif_name the name of the vif to send the Assert on.
+     *  
+     *  @param source_addr the source address inside the Assert message.
+     *  
+     *  @param group_addr the group address inside the Assert message.
+     *  
+     *  @param rpt_bit the RPT-bit inside the Assert message.
+     *  
+     *  @param metric_preference the metric preference inside the Assert
+     *  message.
+     *  
+     *  @param metric the metric inside the Assert message.
      *  
      *  @param fail true if failure has occured.
      *  
      *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError pim_0_1_enable_log_trace(
+    XrlCmdError pim_0_1_send_test_assert4(
+	// Input values, 
+	const string&	vif_name, 
+	const IPv4&	source_addr, 
+	const IPv4&	group_addr, 
+	const bool&	rpt_bit, 
+	const uint32_t&	metric_preference, 
+	const uint32_t&	metric, 
 	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	bool&		fail, 
+	string&		reason);
 
-    XrlCmdError pim_0_1_disable_log_trace(
+    XrlCmdError pim_0_1_send_test_assert6(
+	// Input values, 
+	const string&	vif_name, 
+	const IPv6&	source_addr, 
+	const IPv6&	group_addr, 
+	const bool&	rpt_bit, 
+	const uint32_t&	metric_preference, 
+	const uint32_t&	metric, 
 	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	bool&		fail, 
+	string&		reason);
 
 private:
     const string& my_xrl_target_name() {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.2 2003/01/07 01:43:03 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -294,6 +294,15 @@ interface pim/0.1 {
 					-> fail:bool & reason:txt
 
 	/**
+	 * Enable/disable the PIM trace log.
+	 * 
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	enable_log_trace		-> fail:bool & reason:txt
+	disable_log_trace		-> fail:bool & reason:txt
+
+	/**
 	 * Test-related methods: add Join/Prune entries, and send them
 	 * to a neighbor.
 	 *
@@ -320,11 +329,28 @@ interface pim/0.1 {
 				-> fail:bool & reason:txt
 
 	/**
-	 * Enable/disable the PIM trace log.
-	 * 
+	 * Test-related methods: send an Assert message on an interface.
+	 *
+	 * @param vif_name the name of the vif to send the Assert on.
+	 * @param source_addr the source address inside the Assert message.
+	 * @param group_addr the group address inside the Assert message.
+	 * @param rpt_bit the RPT-bit inside the Assert message.
+	 * @param metric_preference the metric preference inside the Assert
+	   message.
+	 * @param metric the metric inside the Assert message.
 	 * @param fail true if failure has occured.
 	 * @param reason contains failure reason if it occured.
 	 */
-	enable_log_trace		-> fail:bool & reason:txt
-	disable_log_trace		-> fail:bool & reason:txt
+	send_test_assert4	? vif_name:txt				\
+				& source_addr:ipv4 & group_addr:ipv4	\
+				& rpt_bit:bool				\
+				& metric_preference:u32			\
+				& metric:u32				\
+				-> fail:bool & reason:txt
+	send_test_assert6	? vif_name:txt				\
+				& source_addr:ipv6 & group_addr:ipv6	\
+				& rpt_bit:bool				\
+				& metric_preference:u32			\
+				& metric:u32				\
+				-> fail:bool & reason:txt
 }
