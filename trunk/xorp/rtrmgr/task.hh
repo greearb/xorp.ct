@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.12 2003/05/30 04:42:09 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.13 2003/05/30 18:22:25 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -91,6 +91,16 @@ private:
 				const string& reason);
 };
 
+class StatusShutdownValidation : public XrlStatusValidation {
+public:
+    StatusShutdownValidation(const string& target, 
+			     TaskManager& taskmgr);
+private:
+    void xrl_done(const XrlError& e, XrlArgs* xrlargs);
+    void handle_status_response(ProcessStatus status,
+				const string& reason);
+};
+
 class TaskXrlItem {
 public:
     TaskXrlItem(const UnexpandedXrl& uxrl,
@@ -113,14 +123,17 @@ public:
 
     Task(const string& name, TaskManager& taskmgr);
     ~Task();
-    void add_start_module(const string& mod_name,
-			  Validation* validation);
-    void add_stop_module(const string& mod_name,
+    void start_module(const string& mod_name,
+		      Validation* validation);
+    void shutdown_module(const string& mod_name,
 			 Validation* validation);
     void add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb);
     void set_ready_validation(Validation* validation);
     Validation* ready_validation() const {
 	return _ready_validation;
+    }
+    bool will_shutdown_module() const {
+	return _stop_module;
     }
     void run(CallBack cb);
     void xrl_done(bool success, bool fatal, string errmsg); 
@@ -160,8 +173,8 @@ private:
                                    // start
     Validation* _ready_validation; // the validation mechanism for the module 
                                    // reconfiguration
-    Validation* _stop_validation;  // the validation mechanism for the module 
-                                   // stop
+    Validation* _shutdown_validation;  // the validation mechanism for the 
+                                       // module shutdown
     list <TaskXrlItem> _xrls;
     bool _config_done; //true if we changed the module's config
     CallBack _task_complete_cb; //the task completion callback
@@ -177,6 +190,7 @@ public:
     int add_module(const ModuleCommand& mod_cmd);
     void add_xrl(const string& modname, const UnexpandedXrl& xrl, 
 		 XrlRouter::XrlCallback& cb);
+    void shutdown_module(const string& modname);
     void run(CallBack cb);
     XorpClient& xorp_client() const {return _xorp_client;}
     ModuleManager& module_manager() const {return _module_manager;}
@@ -195,6 +209,7 @@ public:
      */
     void kill_process(const string& modname);
 private:
+    void reorder_tasks();
     void run_task();
     void task_done(bool success, string errmsg);
     void fail_tasklist_initialization(const string& errmsg);

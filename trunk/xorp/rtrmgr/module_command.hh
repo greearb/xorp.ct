@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.5 2003/05/30 04:42:09 mjh Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.6 2003/05/30 18:22:25 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -32,11 +32,12 @@ public:
 		    const XRLdb& xrldb) throw (ParseError);
     //    void set_path(const string &path);
     //    void set_depends(const string &depends);
-    int  execute(TaskManager& taskmgr) const;
+    //int  execute(TaskManager& taskmgr) const;
     Validation* startup_validation(TaskManager &taskmgr) const;
     Validation* ready_validation(TaskManager &taskmgr) const;
+    Validation* shutdown_validation(TaskManager &taskmgr) const;
 
-    bool execute_completed() const;
+    //bool execute_completed() const;
     
     const string& name() const {return _modname;}
     const string& path() const {return _modpath;}
@@ -50,8 +51,8 @@ public:
     string str() const;
 
 protected:
-    void exec_complete(const XrlError& err, 
-		       XrlArgs* xrlargs);
+    //void exec_complete(const XrlError& err, 
+    //		       XrlArgs* xrlargs);
 
     void action_complete(const XrlError& err, 
 			 XrlArgs* args,

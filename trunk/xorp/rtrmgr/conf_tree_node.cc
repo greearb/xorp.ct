@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.16 2003/05/04 06:25:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.17 2003/05/23 00:02:08 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -385,6 +385,70 @@ ConfigTreeNode::find_changed_modules(set <string>& changed_modules) const {
     list <ConfigTreeNode*>::const_iterator i;
     for (i=_children.begin(); i!=_children.end(); i++) {
 	(*i)->find_changed_modules(changed_modules);
+    }
+}
+
+void
+ConfigTreeNode::find_active_modules(set <string>& active_modules) const {
+    if ((_template != NULL) && (!_deleted)) {
+	const Command *cmd;
+	set <string> modules;
+	set <string>::const_iterator i;
+	cmd = _template->const_command("%create");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (i = modules.begin(); i!=modules.end(); i++)
+		active_modules.insert(*i);
+	}
+	cmd = _template->const_command("%activate");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (i = modules.begin(); i!=modules.end(); i++)
+		active_modules.insert(*i);
+	}
+	cmd = _template->const_command("%set");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (i = modules.begin(); i!=modules.end(); i++)
+		active_modules.insert(*i);
+	}
+    }
+    if (!_deleted) {
+	list <ConfigTreeNode*>::const_iterator i;
+	for (i=_children.begin(); i!=_children.end(); i++) {
+	    (*i)->find_active_modules(active_modules);
+	}
+    }
+}
+
+void
+ConfigTreeNode::find_all_modules(set <string>& all_modules) const {
+    if (_template != NULL) {
+	const Command *cmd;
+	set <string> modules;
+	set <string>::const_iterator i;
+	cmd = _template->const_command("%create");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (i = modules.begin(); i!=modules.end(); i++)
+		all_modules.insert(*i);
+	}
+	cmd = _template->const_command("%activate");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (i = modules.begin(); i!=modules.end(); i++)
+		all_modules.insert(*i);
+	}
+	cmd = _template->const_command("%set");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (i = modules.begin(); i!=modules.end(); i++)
+		all_modules.insert(*i);
+	}
+    }
+    list <ConfigTreeNode*>::const_iterator i;
+    for (i=_children.begin(); i!=_children.end(); i++) {
+	(*i)->find_all_modules(all_modules);
     }
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.7 2003/05/02 09:00:01 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.8 2003/05/02 22:33:53 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -41,7 +41,6 @@ public:
     bool parse(const string& configuration, const string& conffile);
     void execute();
     void config_done(bool success, string errmsg);
-    list <string> find_changed_modules() const;
 
     void commit_changes_pass1(CallBack cb);
     void commit_pass1_done(bool success, string errmsg);
@@ -52,6 +51,7 @@ public:
     string discard_changes();
     string mark_subtree_for_deletion(const list <string>& pathsegs, 
 				     uid_t user_id);
+    void delete_entire_config();
     bool lock_node(const string& node, uid_t user_id, uint32_t timeout, 
 		   uint32_t& holder);
     bool unlock_node(const string& node, uid_t user_id);
@@ -59,7 +59,7 @@ public:
     bool save_to_file(const string& filename, uid_t user_id, string& errmsg);
     bool load_from_file(const string& filename, uid_t user_id,
 			string& errmsg, string& deltas, string& deletions);
-
+    
     /*adaptors so we don't need casts elsewhere*/
     MasterConfigTreeNode *root() { 
 	return (MasterConfigTreeNode*)(&_root_node);
@@ -71,11 +71,15 @@ public:
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,
 		      ConfigTree& deletion_tree);
-
+    list <string> find_changed_modules() const;
+    list <string> find_active_modules() const;
+    list <string> find_inactive_modules() const;
+    void order_module_list(const set <string>& module_set,
+			   list <string>& ordered_modules) const;
     bool module_config_start(const string& module_name,
 			     string& errmsg);
-    bool module_config_done(const string& module_name,
-			    string& errmsg);
+    bool module_shutdown(const string& module_name,
+			 string& errmsg);
 
     bool do_exec() const {return _task_manager.do_exec();}
 

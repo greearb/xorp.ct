@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.10 2003/05/30 04:42:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.11 2003/05/30 18:22:25 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -120,11 +120,13 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     }
 }
 
+#ifdef NOTDEF
 int 
 ModuleCommand::execute(TaskManager& taskmgr) const 
 {
     return taskmgr.add_module(*this);
 }
+#endif
 
 Validation*
 ModuleCommand::startup_validation(TaskManager &taskmgr) const
@@ -141,6 +143,16 @@ ModuleCommand::ready_validation(TaskManager &taskmgr) const
 {
     if (_status_method == STATUS_BY_XRL) {
 	return new StatusReadyValidation(_modname, taskmgr);
+    } else {
+	return new DelayValidation(taskmgr.eventloop(), 2000);
+    }
+}
+
+Validation*
+ModuleCommand::shutdown_validation(TaskManager &taskmgr) const
+{
+    if (_status_method == STATUS_BY_XRL) {
+	return new StatusShutdownValidation(_modname, taskmgr);
     } else {
 	return new DelayValidation(taskmgr.eventloop(), 2000);
     }
@@ -195,6 +207,7 @@ ModuleCommand::str() const
     return tmp;
 }
 
+#ifdef NOTDEF
 bool
 ModuleCommand::execute_completed() const
 {
@@ -208,6 +221,7 @@ ModuleCommand::exec_complete(const XrlError& /*err*/,
     debug_msg("ModuleCommand::exec_complete\n");
     _execute_done = true;
 }
+#endif
 
 void 
 ModuleCommand::action_complete(const XrlError& err, 

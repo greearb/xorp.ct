@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.15 2003/05/30 04:42:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.16 2003/05/30 18:22:25 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -213,6 +213,85 @@ StatusConfigMeValidation::handle_status_response(ProcessStatus status,
 }
 
 
+StatusShutdownValidation::StatusShutdownValidation(const string& target, 
+						   TaskManager& taskmgr)
+    : XrlStatusValidation(target, taskmgr)
+{
+}
+
+void 
+StatusShutdownValidation::handle_status_response(ProcessStatus status,
+						 const string& reason) 
+{
+    switch (status) {
+    case PROC_NULL:
+	//this is not a valid responses.
+	XLOG_ERROR(("Bad status response; reason: " 
+		    + reason + "\n").c_str());
+	_cb->dispatch(false);
+	return;
+    case PROC_STARTUP:
+    case PROC_NOT_READY:
+    case PROC_READY:
+    case PROC_FAILED:
+	//the process should be in SHUTDOWN state, or it should not
+	//be able to respond to Xrls because it's in NULL state.
+	_cb->dispatch(false);
+	return;
+    case PROC_SHUTDOWN:
+	//got a valid response saying we should wait.
+	_retry_timer = 
+	    eventloop().new_oneoff_after_ms(1000,
+                callback((XrlStatusValidation*)this, 
+			 &XrlStatusValidation::validate,_cb));
+	return;
+    }
+    XLOG_UNREACHABLE();
+}
+
+void
+StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
+{
+    if (e == XrlError::OKAY()) {
+	try {
+	    ProcessStatus status;
+	    status = (ProcessStatus)(xrlargs->get_uint32("status"));
+	    string reason;
+	    reason = xrlargs->get_string("reason");
+	    handle_status_response(status, reason);
+	    return;
+	} catch (XrlArgs::XrlAtomNotFound) {
+	    //not a valid response
+	    XLOG_ERROR("Bad XRL response to get_status\n");
+	    _cb->dispatch(false);
+	    return;
+	}
+    } else if (e == XrlError::NO_FINDER()) {
+	//We're in trouble now! This shouldn't be able to happen.
+	XLOG_UNREACHABLE();
+    } else if (e == XrlError::NO_SUCH_METHOD()) {
+	//The template file must have been wrong - the target doesn't
+	//support the common interface
+	XLOG_ERROR(("Target " + _target + 
+		    " doesn't support get_status\n").c_str());
+	//return false, and we can shut it down using kill
+	_cb->dispatch(false);
+    } else if (e == XrlError::RESOLVE_FAILED()) {
+	//The process appears to have shutdown correctly.
+	_cb->dispatch(true);
+    } else if (e == XrlError::SEND_FAILED())  {
+	//something bad happened.
+	//return false, and we can shut it down using kill
+	_cb->dispatch(false);
+    } else {
+	XLOG_ERROR(("Error while validating process " 
+		    + _target + "\n").c_str());
+	//return false, and we can shut it down using kill
+	_cb->dispatch(false);
+    }
+}
+
+
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 			 const XrlRouter::XrlCallback& cb, Task& task) 
     : _unexpanded_xrl(uxrl), _xrl_callback(cb), _task(task), _resend_counter(0)
@@ -352,7 +431,7 @@ Task::Task(const string& name, TaskManager& taskmgr)
     : _name(name), _taskmgr(taskmgr),
       _start_module(false), _stop_module(false), 
       _start_validation(NULL), _ready_validation(NULL), 
-      _stop_validation(NULL), _config_done(false)
+      _shutdown_validation(NULL), _config_done(false)
 {
 }
 
@@ -362,13 +441,13 @@ Task::~Task()
 	delete _start_validation;
     if (_ready_validation != NULL)
 	delete _ready_validation;
-    if (_stop_validation != NULL)
-	delete _stop_validation;
+    if (_shutdown_validation != NULL)
+	delete _shutdown_validation;
 }
 
 void 
-Task::add_start_module(const string& modname,
-		       Validation *validation)
+Task::start_module(const string& modname,
+		   Validation *validation)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
@@ -378,20 +457,27 @@ Task::add_start_module(const string& modname,
 }
 
 void 
-Task::add_stop_module(const string& modname,
+Task::shutdown_module(const string& modname,
 		      Validation *validation)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
-    _start_module = true;
+    _stop_module = true;
     _modname = modname;
-    _stop_validation = validation;
+    _shutdown_validation = validation;
+    
+    //we don't call any XRLs on a module if we are going to shut it
+    //down immediately afterwards.
+    while (!_xrls.empty()) {
+	_xrls.pop_front();
+    }
 }
 
 void
 Task::add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb)
 {
-    _xrls.push_back(TaskXrlItem(xrl, cb, *this));
+    if (_stop_module == false)
+	_xrls.push_back(TaskXrlItem(xrl, cb, *this));
 }
 
 void
@@ -527,8 +613,8 @@ void
 Task::step6_wait() 
 {
     printf("step5\n");
-    if (_stop_module && (_stop_validation != NULL)) {
-	_stop_validation->validate(callback(this, &Task::step6_done));
+    if (_stop_module && (_shutdown_validation != NULL)) {
+	_shutdown_validation->validate(callback(this, &Task::step6_done));
     } else {
 	step7_report();
     }
@@ -537,11 +623,13 @@ Task::step6_wait()
 void
 Task::step6_done(bool success) 
 {
-    printf("step5_done\n");
-    if (success)
-	step7_report();
-    else
-	task_fail("Can't validate stop of process " + _modname, false);
+    printf("step6_done\n");
+    if (!success) {
+	//An error here isn't fatal - module manager will simply kill
+	//the process less subtly.
+	XLOG_WARNING(("Can't validate stop of process " + _modname).c_str());
+    }
+    step7_report();
 }
 
 void 
@@ -628,7 +716,7 @@ TaskManager::add_module(const ModuleCommand& module_command)
     }
 
     Validation *validation = module_command.startup_validation(*this);
-    find_task(modname).add_start_module(modname, validation);
+    find_task(modname).start_module(modname, validation);
     
     _module_commands[modname] = &module_command;
     return XORP_OK;
@@ -648,9 +736,19 @@ TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl,
     t.set_ready_validation(_module_commands[modname]->ready_validation(*this));
 }
 
+void 
+TaskManager::shutdown_module(const string& modname) 
+{
+    Task& t(find_task(modname));
+    XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
+    t.shutdown_module(modname, 
+		      _module_commands[modname]->shutdown_validation(*this));
+}
+
 void
 TaskManager::run(CallBack cb) 
 {
+    reorder_tasks();
     printf("TaskManager::run, tasks: ");
     list <Task*>::const_iterator i;
     for (i = _tasklist.begin(); i != _tasklist.end(); i++) {
@@ -659,6 +757,34 @@ TaskManager::run(CallBack cb)
     printf("\n");
     _completion_cb = cb;
     run_task();
+}
+
+void 
+TaskManager::reorder_tasks() 
+{
+    //we re-order the task list so that process shutdowns (which are
+    //irreversable) occur last.
+    list <Task*> configs;
+    list <Task*> shutdowns;
+    while (!_tasklist.empty()) {
+	Task *t = _tasklist.front();
+	if (t->will_shutdown_module()) {
+	    //reverse the order of shutdowns so they're in reverse
+	    //dependency order
+	    shutdowns.push_front(t);
+	} else
+	    configs.push_back(t);
+	_tasklist.pop_front();
+    }
+
+    while (!configs.empty()) {
+	_tasklist.push_back(configs.front());
+	configs.pop_front();
+    }
+    while (!shutdowns.empty()) {
+	_tasklist.push_back(shutdowns.front());
+	shutdowns.pop_front();
+    }
 }
 
 void 
@@ -700,6 +826,20 @@ TaskManager::find_task(const string& modname)
 {
     map<string, Task*>::iterator i;
     i = _tasks.find(modname);
+    if(i == _tasks.end()) {
+	//The task didn't exist, so we create one.  This is only valid
+	//if we've already started the module.
+	XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
+	const ModuleCommand* module_command = _module_commands[modname];
+	string modname = module_command->name();
+	string modpath = module_command->path();
+	if (_tasks.find(modname) == _tasks.end()) {
+	    Task* newtask = new Task(modname, *this);
+	    _tasks[modname] = newtask;
+	    _tasklist.push_back(newtask);
+	}
+	i = _tasks.find(modname);
+    }
     assert(i != _tasks.end());
     assert(i->second != NULL);
     return *(i->second);
@@ -719,3 +859,10 @@ TaskManager::eventloop() const
 {
     return _module_manager.eventloop();
 }
+
+
+
+
+
+
+

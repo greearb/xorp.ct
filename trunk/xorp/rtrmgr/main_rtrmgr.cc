@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.18 2003/05/28 19:02:30 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.19 2003/05/29 00:01:30 mjh Exp $"
 
 #include <signal.h>
 
@@ -246,46 +246,57 @@ main(int argc, char* const argv[])
     UserDB userdb;
     userdb.load_password_file();
 
+    //initialize the IPC mechanism
+    XrlStdRouter xrlrouter(eventloop, "rtrmgr", bind_addr, bind_port);
+    XorpClient xclient(eventloop, xrlrouter);
+
+    //initialize the Task Manager
+    TaskManager taskmgr(mmgr, xclient, do_exec);
+
+    MasterConfigTree* ct;
     try {
-	//initialize the IPC mechanism
-	XrlStdRouter xrlrouter(eventloop, "rtrmgr", bind_addr, bind_port);
-	XorpClient xclient(eventloop, xrlrouter);
-
-	//initialize the Task Manager
-	TaskManager taskmgr(mmgr, xclient, do_exec);
-
 	//read the router startup configuration file,
 	//start the processes required, and initialize them
-	MasterConfigTree ct(config_boot, tt, taskmgr);
-	XrlRtrmgrInterface rtrmgr_target(xrlrouter, userdb,
-					 ct, eventloop, randgen);
-
-	//for testing, rtrmgr can terminate itself after some time.
-	XorpTimer quit_timer;
-	if (quit_time > 0) {
-	    quit_timer = 
-		eventloop.new_oneoff_after_ms(quit_time*1000,
-					      callback(signalhandler, 0));
-	}
-
-	//loop while handling configuration events and signals
-	while (running) {
-	    printf("+");
-	    fflush(stdout);
-	    eventloop.run();
-	}
+	ct = new MasterConfigTree(config_boot, tt, taskmgr);
     } catch (InitError& e) {
 	XLOG_ERROR("rtrmgr shutting down due to error\n");
 	fprintf(stderr, "rtrmgr shutting down due to error\n");
 	errcode = 1;
+	running = false;
     }
 
+    XrlRtrmgrInterface rtrmgr_target(xrlrouter, userdb,
+				     *ct, eventloop, randgen);
+
+    //For testing purposes, rtrmgr can terminate itself after some time.
+    XorpTimer quit_timer;
+    if (quit_time > 0) {
+	quit_timer = 
+	    eventloop.new_oneoff_after_ms(quit_time*1000,
+					  callback(signalhandler, 0));
+    }
+
+    //loop while handling configuration events and signals
+    while (running) {
+	printf("+");
+	fflush(stdout);
+	eventloop.run();
+    }
 
     /***********************************************************************/
     /** shutdown everything                                               **/
     /***********************************************************************/
 
-    //Shut down child processes
+    //Delete the configuration.
+    ct->delete_entire_config();
+
+    //Wait until changes due to deleting config have finished being applied.
+    while (eventloop.timers_pending()) {
+	eventloop.run();
+    }
+    delete ct;
+
+    //Shut down child processes that haven't already been shutdown.
     mmgr.shutdown();
 
     //Wait until child processes have terminated

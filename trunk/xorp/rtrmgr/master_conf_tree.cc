@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.11 2003/05/04 06:25:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.12 2003/05/28 19:02:30 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -112,40 +112,6 @@ void MasterConfigTree::execute() {
 	printf("%s ", (*i).c_str());
     }
     printf("\n");
-#if 0
-
-    uint tid;
-    tid = xorp_client().begin_transaction();
-    string result;
-    //configure the modules in the order of their dependencies
-    _root_node.initialize_commit();
-    for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_start(*i, /*do_commit = */true, result)) {
-	    XLOG_FATAL(result.c_str());
-	}
-    }
-
-    if (!_root_node.commit_changes(_task_manager,
-				   /*_do_commit=*/true,
-				   0, 0, result)) {
-	XLOG_FATAL(("Initialization Failed\n" + result).c_str());
-    }
-
-    for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_done(*i, /*do_commit = */true, result)) {
-	    XLOG_FATAL(result.c_str());
-	}
-    }
-
-    try {
-	xorp_client()
-	    .end_transaction(tid, callback(this, 
-					   &MasterConfigTree::config_done));
-    } catch (UnexpandedVariable& uvar) {
-	XLOG_FATAL(uvar.str().c_str());
-    }
-    printf("##############################################################\n");
-#endif
     _commit_cb = callback(this, &MasterConfigTree::config_done);
     commit_changes_pass2();
 }
@@ -176,24 +142,70 @@ MasterConfigTree::find_changed_modules() const {
     printf("Find changed modules\n");
     set <string> changed_modules;
     _root_node.find_changed_modules(changed_modules);
+    list <string> ordered_modules;
+    order_module_list(changed_modules, ordered_modules);
+    return ordered_modules;
+}
 
+list <string>
+MasterConfigTree::find_active_modules() const {
+    set <string> active_modules;
+    _root_node.find_active_modules(active_modules);
+    list <string> ordered_modules;
+    order_module_list(active_modules, ordered_modules);
+    return ordered_modules;
+}
+
+list <string>
+MasterConfigTree::find_inactive_modules() const {
+    set <string> all_modules;
+    list <string> ordered_all_modules;
+    _root_node.find_all_modules(all_modules);
+    order_module_list(all_modules, ordered_all_modules);
+
+    set <string> active_modules;
+    list <string> ordered_active_modules;
+    _root_node.find_active_modules(active_modules);
+    order_module_list(active_modules, ordered_active_modules);
+
+    //remove things that are common to both lists
+    list <string>::iterator i;
+    while (!ordered_active_modules.empty()) {
+	for (i = ordered_all_modules.begin(); 
+	     i != ordered_all_modules.end(); 
+	     i++) {
+	    if (*i == ordered_active_modules.front()) {
+		ordered_all_modules.erase(i);
+		ordered_active_modules.pop_front();
+		break;
+	    }
+	}
+	XLOG_ASSERT(i != ordered_all_modules.end());
+    }
+    return ordered_all_modules;
+}
+
+
+void
+MasterConfigTree::order_module_list(const set <string>& module_set,
+				    list <string>& ordered_modules) const {
     //we've found the list of modules that have changed that need to
     //be applied.  Now we need to sort them so that the modules to be
     //performed first are at the beginning of the list.
 
     //handle the degenerate cases simply
-    list <string> ordered_modules;
-    if (changed_modules.empty())
-	return ordered_modules;
+    if (module_set.empty())
+	return;
 	
     multimap <string, string> depends; //first depends on second
     set <string> no_info; //modules we found no info about
     set <string> satisfied; //modules we found no info about
     set <string> additional_modules; /*modules that we depend on that
-				       aren't in changed_modules */
+				       aren't in module_set */
     set <string>::const_iterator i;
-    for (i = changed_modules.begin(); i!=changed_modules.end(); i++) {
+    for (i = module_set.begin(); i!=module_set.end(); i++) {
 	ModuleCommand* mc = _template_tree->find_module(*i);
+
 	if (mc == NULL) {
 	    no_info.insert(*i);
 	    printf("%s has no module info\n", (*i).c_str());
@@ -212,7 +224,7 @@ MasterConfigTree::find_changed_modules() const {
 	    printf("%s depends on %s\n", i->c_str(), di->c_str());
 	    depends.insert(pair<string,string>(*i, *di));
 	    //check that the dependency is already in our list of modules.
-	    if (changed_modules.find(*di)==changed_modules.end()) {
+	    if (module_set.find(*di)==module_set.end()) {
 		//if not, add it.
 		additional_modules.insert(*di);
 	    }
@@ -246,7 +258,7 @@ MasterConfigTree::find_changed_modules() const {
 	    depends.insert(pair<string,string>(*i, *di));
 	    printf("%s depends on %s\n", i->c_str(), di->c_str());
 	    //check that the dependency is already in our list of modules.
-	    if (changed_modules.find(*di)==changed_modules.end()
+	    if (module_set.find(*di)==module_set.end()
 		&& additional_modules.find(*di)==additional_modules.end()
 		&& additional_done.find(*di)==additional_done.end()) {
 		//if not, add it.
@@ -293,7 +305,7 @@ MasterConfigTree::find_changed_modules() const {
     for (i = no_info.begin(); i!=no_info.end(); i++) {
 	ordered_modules.push_back(*i);
     }
-    return ordered_modules;
+    return;
 }
 
 void
@@ -302,6 +314,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb) {
     printf("MasterConfigTree::commit_changes_pass1\n");
 
     list <string> changed_modules = find_changed_modules();
+    list <string> inactive_modules = find_inactive_modules();
     list <string>::const_iterator i;
     printf("Changed Modules:\n");
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
@@ -339,11 +352,8 @@ MasterConfigTree::commit_changes_pass1(CallBack cb) {
 	return;
     }
 
-    for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_done(*i, result)) {
-	    cb->dispatch(false, result);
-	    return;
-	}
+    for (i=inactive_modules.begin(); i!=inactive_modules.end(); i++) {
+	_task_manager.shutdown_module(*i);
     }
     
     try {
@@ -376,6 +386,7 @@ MasterConfigTree::commit_changes_pass2() {
     /*******************************************************************/
 
     list <string> changed_modules = find_changed_modules();
+    list <string> inactive_modules = find_inactive_modules();
     list <string>::const_iterator i;
 
     _task_manager.reset();
@@ -402,12 +413,8 @@ MasterConfigTree::commit_changes_pass2() {
 	return;
     }
 
-    for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_done(*i, result)) {
-	    XLOG_ERROR("Commit failed in deciding shutdowns\n");
-	    _commit_cb->dispatch(false, result);
-	    return;
-	}
+    for (i=inactive_modules.begin(); i!=inactive_modules.end(); i++) {
+	_task_manager.shutdown_module(*i);
     }
 
     try {
@@ -447,7 +454,8 @@ bool MasterConfigTree::check_commit_status(string &result) {
 
 
 string
-MasterConfigTree::discard_changes() {
+MasterConfigTree::discard_changes() 
+{
     printf("##############################################################\n");
     printf("MasterConfigTree::discard_changes\n");
     string result =
@@ -458,7 +466,8 @@ MasterConfigTree::discard_changes() {
 
 string
 MasterConfigTree::mark_subtree_for_deletion(const list <string>& pathsegs,
-					    uid_t user_id) {
+					    uid_t user_id) 
+{
     ConfigTreeNode *found = find_node(pathsegs);
     if (found == NULL)
 	return "ERROR";
@@ -473,16 +482,28 @@ MasterConfigTree::mark_subtree_for_deletion(const list <string>& pathsegs,
     return string("OK");
 }
 
+void 
+MasterConfigTree::delete_entire_config()
+{
+    _root_node.mark_subtree_for_deletion(0);
+    _root_node.undelete();
+
+    //we don't need a verification pass - this isn't allowed to fail.
+    commit_changes_pass2();
+}
+
 bool 
 MasterConfigTree::lock_node(const string& /*node*/, uid_t /*user_id*/, 
 			    uint32_t /*timeout*/, 
-			    uint32_t& /*holder*/) {
+			    uint32_t& /*holder*/) 
+{
     //XXXX
     return true;
 }
 
 bool 
-MasterConfigTree::unlock_node(const string& /*node*/, uid_t /*user_id*/) {
+MasterConfigTree::unlock_node(const string& /*node*/, uid_t /*user_id*/) 
+{
     //XXXX
     return true;
 }
@@ -778,12 +799,13 @@ MasterConfigTree::module_config_start(const string& module_name,
 	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
 	return false;
     }
-    cmd->execute(_task_manager);
+    _task_manager.add_module(*cmd);
     return true;
 }
 
+#ifdef NOTDEF
 bool
-MasterConfigTree::module_config_done(const string& module_name,
+MasterConfigTree::module_shutdown(const string& module_name,
 				     string& result)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
@@ -791,8 +813,8 @@ MasterConfigTree::module_config_done(const string& module_name,
 	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
 	return false;
     }
-    //XXX this is where we might stop a module if it were no longer needed.
-    //TBD
+    _task_manager.shutdown_module(*cmd);
     return true;
 }
 
+#endif
