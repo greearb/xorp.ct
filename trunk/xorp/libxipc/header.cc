@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/header.cc,v 1.5 2004/06/10 22:41:07 hodson Exp $"
+#ident "$XORP: xorp/libxipc/header.cc,v 1.6 2005/01/21 01:59:49 atanu Exp $"
 
 #include "libxorp/xorp.h"
 #include <stdio.h>
@@ -29,7 +29,7 @@ static const string HEADER_EOL("\r\n");
 bool
 HeaderWriter::name_valid(const string &name)
 {
-    return (name.find(HEADER_SEP) == ~0U);
+    return (name.find(HEADER_SEP) == string::npos);
 }
 
 HeaderWriter&
@@ -113,7 +113,7 @@ skip(const string& buf, const string& skip, string::size_type pos)
 HeaderReader::HeaderReader(const string& serialized) throw (InvalidString)
     : _bytes_consumed(0)
 {
-    if (serialized.find(HEADER_EOL + HEADER_EOL) == ~0U)
+    if (serialized.find(HEADER_EOL + HEADER_EOL) == string::npos)
 	throw InvalidString();
 
     string::size_type start = 0;
