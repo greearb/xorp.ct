@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.46 2005/02/01 01:18:18 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.47 2005/02/10 03:51:58 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -431,7 +431,8 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 		    add_route("connected",
 			      IPv4Net(ai->peer_addr().get_ipv4(),
 				      IPv4::addr_bitlen()),
-			      ai->addr().get_ipv4(), "", "", 0, PolicyTags());
+			      ai->peer_addr().get_ipv4(), "", "", 0,
+			      PolicyTags());
 		}
 	    }
 	}
@@ -467,7 +468,8 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 		    add_route("connected",
 			      IPv6Net(ai->peer_addr().get_ipv6(),
 				      IPv6::addr_bitlen()),
-			      ai->addr().get_ipv6(), "", "", 0, PolicyTags());
+			      ai->peer_addr().get_ipv6(), "", "", 0,
+			      PolicyTags());
 		}
 	    }
 	}
