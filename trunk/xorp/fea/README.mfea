@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.9 2004/02/26 13:21:39 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.10 2004/03/04 00:09:05 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -26,6 +26,8 @@ processes such as MLD/IGMP and PIM-SM.
     4) It receives from the FEA information about the underlying unicast
        forwarding table, and composes Reverse-Path Forwarding information
        for processes such as PIM-SM.
+       Note that currently (June 2004) this is used only when the MFEA
+       is used as part of ths stand-alone ${XORP}/pim/test_pim binary.
 
     5) It allows protocol-specific packets (e.g., PIM or IGMP) to be
        sent/received to/from network interfaces.
@@ -39,13 +41,15 @@ Configuration
 MFEA like most XORP modules does not take its configuration
 parameters from the command line. Its parameters are provided via
 XRLs. At the very least a MFEA module must be provided with
-the set of network interfaces to enable for multicast.
+the set of network interfaces to enable for multicast forwarding.
 
 Startup
 =======
 
 In normal operation, MFEA would be started by the XORP router manager
-process, not directly from the command line.  
+process, not directly from the command line. In that case, make sure
+that IP forwarding is enabled in the XORP configuration file
+(see ${XORP}/docs/rtrmgr/ about information how to enable it).
 
 For testing and debugging purposes, MFEA can be manually started.  The
 XORP MFEA module (as part of the FEA process) assumes that the XRL finder
@@ -53,7 +57,7 @@ is are already running.  However, the binary program ``test_mfea''
 already contains it as well, therefore it is sufficient to start only
 this program (as a root).
 
-First, make sure that IP forwarding is enabled.
+First, make sure that IP forwarding be enabled before starting XORP:
  - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
       sysctl net.inet.ip.forwarding=1
       sysctl net.inet6.ip6.forwarding=1
@@ -136,7 +140,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (November 2003), the MFEA supports abstraction for
+Currently (June 2004), the MFEA supports abstraction for
 the following systems:
 
  * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).
