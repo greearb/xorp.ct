@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.21 2003/06/12 03:01:06 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.22 2003/06/13 01:32:32 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -584,7 +584,7 @@ public:
     const Mifset& lost_assert_wc() const;
     // Note: applies only for (S,G)
     const Mifset& lost_assert_sg() const;
-    // Note: applies only for (S,G,rpt)
+    // Note: applies only for (S,G) and (S,G,rpt)
     const Mifset& lost_assert_sg_rpt() const;
     
     XorpTimer	_assert_timers[MAX_VIFS];  // The Assert (winner/loser) timers

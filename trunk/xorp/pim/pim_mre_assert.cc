@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.18 2003/05/21 05:32:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.19 2003/06/12 03:01:06 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -273,6 +273,11 @@ PimMre::lost_assert_wc() const
     static Mifset mifs;
     uint16_t vif_index;
     
+    if (! (is_wc() || is_sg() || is_sg_rpt())) {
+	mifs.reset();
+	return (mifs);
+    }
+    
     mifs = i_am_assert_loser_wc();
     vif_index = rpf_interface_rp();
     if (vif_index != Vif::VIF_INDEX_INVALID)
@@ -302,22 +307,33 @@ PimMre::lost_assert_sg() const
     return (mifs);
 }
 
-// Note: applies only for (S,G,rpt)
+// Note: applies only for (S,G) and (S,G,rpt)
 const Mifset&
 PimMre::lost_assert_sg_rpt() const
 {
     static Mifset mifs;
-    PimMre *pim_mre_sg;
+    const PimMre *pim_mre_sg = NULL;
     uint16_t vif_index;
     
-    if (! is_sg_rpt()) {
+    if (! (is_sg() || is_sg_rpt())) {
 	mifs.reset();
 	return (mifs);
     }
     
     mifs.reset();
     
-    pim_mre_sg = sg_entry();
+    do {
+	if (is_sg()) {
+	    pim_mre_sg = this;
+	    break;
+	}
+	if (is_sg_rpt()) {
+	    pim_mre_sg = sg_entry();
+	    break;
+	}
+	XLOG_UNREACHABLE();
+    } while (false);
+    
     if (pim_mre_sg != NULL)
 	mifs = pim_mre_sg->i_am_assert_loser_sg();
     
@@ -797,6 +813,11 @@ PimMre::could_assert_wc() const
 {
     static Mifset mifs;
     uint16_t vif_index;
+    
+    if (! (is_wc() || is_sg())) {
+	mifs.reset();
+	return (mifs);
+    }
     
     mifs = joins_rp();
     mifs |= joins_wc();
