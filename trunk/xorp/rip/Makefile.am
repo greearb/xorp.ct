@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.20 2004/02/17 19:47:07 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.21 2004/02/20 01:22:03 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -96,7 +96,7 @@ test_update_queue_SOURCES	 = test_update_queue.cc
 test_update_queue_LDADD		 = ./librip.a $(LDADD)
 
 test_outputs_SOURCES		 = test_outputs.cc
-test_outputs_LDADD		 = ./librip.a $(LDADD)
+test_outputs_LDADD		 = ./librip.a libripng.a $(LDADD)
 
 # -- RIP Core Library Sources
 librip_a_CXXFLAGS		 = -DINSTANTIATE_IPV4

@@ -137,7 +137,7 @@ test_update_queue_SOURCES = test_update_queue.cc
 test_update_queue_LDADD = ./librip.a $(LDADD)
 
 test_outputs_SOURCES = test_outputs.cc
-test_outputs_LDADD = ./librip.a $(LDADD)
+test_outputs_LDADD = ./librip.a libripng.a $(LDADD)
 
 # -- RIP Core Library Sources
 librip_a_CXXFLAGS = -DINSTANTIATE_IPV4
@@ -216,7 +216,8 @@ test_auth_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
 test_auth_LDFLAGS =
 am_test_outputs_OBJECTS = test_outputs.$(OBJEXT)
 test_outputs_OBJECTS = $(am_test_outputs_OBJECTS)
-test_outputs_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_outputs_DEPENDENCIES = ./librip.a libripng.a \
+	$(top_builddir)/libxorp/libxorp.a
 test_outputs_LDFLAGS =
 am_test_packets_OBJECTS = test_packets.$(OBJEXT)
 test_packets_OBJECTS = $(am_test_packets_OBJECTS)

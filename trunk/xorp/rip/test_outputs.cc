@@ -88,6 +88,32 @@ do {									\
 
 
 // ----------------------------------------------------------------------------
+// Type specific helpers
+
+template <typename A>
+struct DefaultPeer {
+    static A get();
+};
+
+template <typename A>
+struct OtherPeer {
+    static A get();
+};
+
+template <>
+IPv4 DefaultPeer<IPv4>::get() { return IPv4("10.0.0.1"); }
+
+template <>
+IPv4 OtherPeer<IPv4>::get() { return IPv4("192.168.0.1"); }
+
+template <>
+IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
+
+template <>
+IPv6 OtherPeer<IPv6>::get() { return IPv6("1920:1680::1"); }
+
+
+// ----------------------------------------------------------------------------
 // Spoof Port that supports just a single Peer
 //
 
@@ -124,7 +150,7 @@ public:
 
 public:
     BlockedPortIO(PortIOUserBase<A>& user)
-	: PortIOBase<A>(user, "if0", "vif0", IPv4("10.0.0.1"))
+	: PortIOBase<A>(user, "if0", "vif0", A(DefaultPeer<A>::get()))
     {
     }
 
@@ -146,28 +172,6 @@ public:
 
 private:
 };
-
-// ----------------------------------------------------------------------------
-// Type specific helpers
-
-template <typename A>
-struct DefaultPeer {
-    static A get();
-};
-
-template <typename A>
-struct OtherPeer {
-    static A get();
-};
-
-template <>
-IPv4 DefaultPeer<IPv4>::get() { return IPv4("10.0.0.1"); }
-
-template <>
-IPv4 OtherPeer<IPv4>::get() { return IPv4("192.168.0.1"); }
-
-template <>
-IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 
 // ----------------------------------------------------------------------------
 // Spoof Port Manager instance support a single Spoof Port which in turn
@@ -406,7 +410,7 @@ class OutputTester
 {
 public:
     OutputTester(const set<IPNet<A> >& test_peer_nets,
-			const set<IPNet<A> >& other_peer_nets)
+		 const set<IPNet<A> >& other_peer_nets)
 	: _e(), _rip_system(_e), _pm(_rip_system),
 	  _tpn(test_peer_nets), _opn(other_peer_nets)
     {
@@ -429,14 +433,15 @@ public:
 	rdb.flush_routes();
     }
 
-    int run_test(RipHorizon horizon, HorizonValidatorBase<A>& validator)
+    int
+    run_test(RipHorizon horizon, HorizonValidatorBase<A>& validator)
     {
 	_pm.test_port()->set_horizon(horizon);
 
 	RouteDB<A>&    rdb = _rip_system.route_db();
-
 	PacketQueue<A> op_out;				      // Output pkt qu.
 	OutputClass    ou(_e, *_pm.test_port(), op_out, rdb); // Output pkt gen
+
 	ou.start();
 
 	verbose_log("Injecting routes from test peer.\n");
@@ -535,15 +540,81 @@ usage(const char* progname)
 // ----------------------------------------------------------------------------
 // Injected Network state
 
+template <typename A>
 static void
-make_nets(const IPv4Net& base, uint32_t n, set<IPv4Net>& nets)
+make_nets(const IPNet<A>& base, uint32_t n, set<IPNet<A> >& nets)
 {
-    IPv4Net ipn = base;
+    IPNet<A> ipn = base;
     while (n > 0) {
 	nets.insert(ipn);
 	++ipn;
 	--n;
     }
+}
+
+template <typename A>
+int
+run_all_test_cases()
+{
+    int rval = 0;
+
+    static const uint32_t n_routes = 577;
+    set<IPNet<A> > tpn;	// networks associated with peer under test
+    set<IPNet<A> > opn;	// networks associated with other peer.
+
+    make_nets(IPNet<A>(DefaultPeer<A>::get(), 16), n_routes, tpn);
+    make_nets(IPNet<A>(OtherPeer<A>::get(), 16), n_routes, opn);
+
+    //
+    // OutputUpdates class tests
+    //
+    {
+	verbose_log("=== IPv%u No Horizon updates test ===\n",
+		    A::ip_version());
+	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
+	NoHorizonValidator<A> nohv(tpn, opn);
+	rval |= tester.run_test(NONE, nohv);
+    }
+    {
+	verbose_log("=== IPv%u Split Horizon updates test ===\n",
+		    A::ip_version());
+	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
+	SplitHorizonValidator<A> shv(tpn, opn);
+	rval |= tester.run_test(SPLIT, shv);
+    }
+    {
+	verbose_log("=== IPv%u Split Horizon Poison Reverse test ===\n",
+		    A::ip_version());
+	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
+	PoisonReverseValidator<A> prv(tpn, opn);
+	rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
+    }
+
+    //
+    // OutputTable class tests
+    //
+    {
+	verbose_log("=== IPv%u No Horizon table test ===\n",
+		    A::ip_version());
+	OutputTester<A, OutputTable<A> > tester(tpn, opn);
+	NoHorizonValidator<A> nohv(tpn, opn);
+	rval |= tester.run_test(NONE, nohv);
+    }
+    {
+	verbose_log("=== IPv%u Split Horizon table test ===\n",
+		    A::ip_version());
+	OutputTester<A, OutputTable<A> > tester(tpn, opn);
+	SplitHorizonValidator<A> shv(tpn, opn);
+	rval |= tester.run_test(SPLIT, shv);
+    }
+    {
+	verbose_log("=== IPv%u Split Horizon Poison Reverse table test ===\n",
+		    A::ip_version());
+	OutputTester<A, OutputTable<A> > tester(tpn, opn);
+	PoisonReverseValidator<A> prv(tpn, opn);
+	rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
+    }
+    return rval;
 }
 
 int
@@ -583,56 +654,10 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	static const uint32_t n_routes = 577;
-	set<IPNet<IPv4> > tpn;	// networks associated with peer under test
-	set<IPNet<IPv4> > opn;	// networks associated with other peer.
-
-	make_nets(IPNet<IPv4>(DefaultPeer<IPv4>::get(), 16), n_routes, tpn);
-	make_nets(IPNet<IPv4>(OtherPeer<IPv4>::get(), 16), n_routes, opn);
-
-	//
-	// OutputUpdates class tests
-	//
-	{
-	    verbose_log("=== No Horizon updates test ===\n");
-	    OutputTester<IPv4, OutputUpdates<IPv4> > tester(tpn, opn);
-	    NoHorizonValidator<IPv4> nohv(tpn, opn);
-	    rval |= tester.run_test(NONE, nohv);
-	}
-	{
-	    verbose_log("=== Split Horizon updates test ===\n");
-	    OutputTester<IPv4, OutputUpdates<IPv4> > tester(tpn, opn);
-	    SplitHorizonValidator<IPv4> shv(tpn, opn);
-	    rval |= tester.run_test(SPLIT, shv);
-	}
-	{
-	    verbose_log("=== Split Horizon Poison Reverse updates test ===\n");
-	    OutputTester<IPv4, OutputUpdates<IPv4> > tester(tpn, opn);
-	    PoisonReverseValidator<IPv4> prv(tpn, opn);
-	    rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
-	}
-
-	//
-	// OutputTable class tests
-	//
-	{
-	    verbose_log("=== No Horizon table test ===\n");
-	    OutputTester<IPv4, OutputTable<IPv4> > tester(tpn, opn);
-	    NoHorizonValidator<IPv4> nohv(tpn, opn);
-	    rval |= tester.run_test(NONE, nohv);
-	}
-	{
-	    verbose_log("=== Split Horizon table test ===\n");
-	    OutputTester<IPv4, OutputTable<IPv4> > tester(tpn, opn);
-	    SplitHorizonValidator<IPv4> shv(tpn, opn);
-	    rval |= tester.run_test(SPLIT, shv);
-	}
-	{
-	    verbose_log("=== Split Horizon Poison Reverse table test ===\n");
-	    OutputTester<IPv4, OutputTable<IPv4> > tester(tpn, opn);
-	    PoisonReverseValidator<IPv4> prv(tpn, opn);
-	    rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
-	}
+	rval = run_all_test_cases<IPv4>();
+#if 0
+	rval |= run_all_test_cases<IPv6>();
+#endif
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
