@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.9 2003/03/27 02:48:31 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.10 2003/03/30 03:50:44 pavlin Exp $"
 
 
 //
@@ -2649,11 +2649,11 @@ UnixComm::proto_socket_read(int fd, SelectorMask mask)
 	
 	mrt6msg = (struct mrt6msg *)_rcvbuf0;
 	if ((nbytes < (int)sizeof(*mrt6msg))
-	    && (nbytes < (int)sizeof(struct mld6_hdr))) {
+	    && (nbytes < (int)sizeof(struct mld_hdr))) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 nbytes,
-			 min((uint32_t)sizeof(*mrt6msg), (uint32_t)sizeof(struct mld6_hdr)));
+			 min((uint32_t)sizeof(*mrt6msg), (uint32_t)sizeof(struct mld_hdr)));
 	    return;		// Error
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
