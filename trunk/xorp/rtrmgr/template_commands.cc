@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.3 2003/01/10 00:30:25 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.4 2003/01/26 04:06:24 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -749,7 +749,8 @@ ModuleCommand::start_transaction(ConfigTreeNode &ctn,
     printf("\n\n****! start_transaction on %s \n", ctn.segname().c_str());
     XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 				    &ModuleCommand::action_complete,
-				    &ctn, _startcommit);
+				    &ctn, _startcommit,
+				    string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
     if (xa != NULL) {
 	return xa->execute(ctn, xclient, tid, no_execute, cb);
@@ -766,7 +767,8 @@ ModuleCommand::end_transaction(ConfigTreeNode &ctn,
 	return XORP_OK;
     XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 				    &ModuleCommand::action_complete,
-				    &ctn, _endcommit);
+				    &ctn, _endcommit,
+				    string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_endcommit);
     if (xa != NULL) {
 	return xa->execute(ctn, xclient, tid, no_execute, cb);
@@ -806,7 +808,8 @@ void
 ModuleCommand::action_complete(const XrlError& err, 
 			       XrlArgs* args,
 			       ConfigTreeNode *ctn,
-			       Action* action) {
+			       Action* action,
+			       string cmd) {
     printf("ModuleCommand::action_complete\n");
     if (err == XrlError::OKAY()) {
 	//XXX does this make sense?
@@ -850,10 +853,12 @@ ModuleCommand::action_complete(const XrlError& err,
 		}
 	    }
 	}
-    } else {	
+	return;
+    } else if (err == XrlError::BAD_COMMAND()) {	
+	fprintf(stderr, "BAD COMMAND: %s\n", cmd);
 	//XXX 
-	abort();
     }
+    abort();
 }
 
 

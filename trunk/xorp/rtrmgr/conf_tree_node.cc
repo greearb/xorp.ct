@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.2 2003/01/26 04:06:24 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_VARIABLES
@@ -1248,7 +1248,7 @@ ConfigTreeNode::expand_variable(const string& varname,
     printf("ConfigTreeNode::expand_variable at %s: >%s<\n", _segname.c_str(), varname.c_str());
 #endif
 
-    VarType type;
+    VarType type = NONE;
     const ConfigTreeNode *varname_node;
     varname_node = find_const_varname_node(varname, type);
 

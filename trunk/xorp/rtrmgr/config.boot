@@ -7,8 +7,6 @@ interfaces {
         broadcast: 192.150.187.255
       }
     }
-    vif xl1 {
-    }
   }
 }
 
@@ -25,3 +23,17 @@ protocols {
   }
 }
 */
+
+protocols {
+  bgp {
+    bgp-id: 192.150.187.20
+    local-as: 65009
+    peer xorp-c4000 {
+      local-ip: 192.150.187.20
+      peer-ip: 192.150.187.109
+      as: 65000
+      holdtime: 90
+      next-hop: 192.150.187.20
+    }
+  }
+}

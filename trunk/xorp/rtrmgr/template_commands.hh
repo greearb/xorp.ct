@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.2 2003/01/10 00:30:25 hodson Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.3 2003/01/17 18:42:05 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -109,7 +109,8 @@ public:
     void action_complete(const XrlError& err, 
 			 XrlArgs* args,
 			 ConfigTreeNode *ctn,
-			 Action *action);
+			 Action *action,
+			 string cmd);
     const string& name() const {return _modname;}
     const string& path() const {return _modpath;}
     const list <string>& depends() const {return _depends;}
