@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.1.1.1 2002/12/11 23:55:55 hodson Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.2 2003/03/06 05:30:07 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -43,7 +43,7 @@ Version 0.2}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 5, 2003}
+\date{March 10, 2003}
 
 \maketitle
 
@@ -56,7 +56,7 @@ Version 0.2}
 This document provides a brief overview of the XORP (eXtensible Open
 Router Platform) architecture. It is intended both for people who are
 interested in the architecture itself, and as a starting point for developers
-wishing to modify the software.  People who are interested in the XORP
+who wish to modify the software.  People who are interested in the XORP
 multicast routing architecture should read also
 \cite{xorp:multicast_arch}.
 
@@ -67,7 +67,7 @@ A gap exists between network research and Internet practice due to the
 nature of the Internet router software business.  It is really hard
 for researchers to introduce new protocols and mechanisms into
 operational networks, and to study existing protocols in the wild.
-The primary goal of XORP to fill this gap.  To succeed it must be both
+The primary goal of XORP is to fill this gap.  To succeed it must be both
 a research tool and a stable deployment platform that can be used in
 production networks.  It must also place a strong emphasis on
 extensibility, while coping with the impact of this on robustness,
@@ -161,7 +161,7 @@ The XORP design philosophy stresses {\em extensibility},
 For routing and management modules, the primary goals are
 extensibility and robustness.  These goals are achieved by carefully
 separating functionality into independent modules, running in separate
-Unix processes, with well-defined APIs between them.  Clearly there
+Unix processes, with well-defined APIs between them.  Clearly, there
 are performance penalties to pay for such an architecture, but we
 believe that so long as careful attention is paid to computational
 complexity, the costs associated with inter-process communication will
@@ -216,7 +216,7 @@ processes when an interface goes down. These processes are further
 described in Section~\ref{sec:xorp_processes_description}.
 
 We should note that even though our design philosophy is that each
-XORP component in Figure~\ref{fig:process_model} will be run as a
+XORP component in Figure~\ref{fig:process_model} will run as a
 separate process, it would also be possible to compile most of them
 together to run as one single process. Obviously, the robustness of
 such a router would suffer because the crash of a single component
@@ -239,7 +239,7 @@ modify unicast forwarding entries, etc.
 If the router is distributed, in the sense that some
 Forwarding Engines (FEs) are not in the same chassis as the control
 software, then the FEA will also handle control communications with the
-remote FEs.  Note that strictly speaking it is not required that all
+remote FEs.  Note that, strictly speaking, it is not required that all
 communication with the FE must go through the FEA. For example, Click
 modules can communicate directly with a user-space process. However,
 the FEA abstracts all the details about the underlying system
@@ -278,8 +278,8 @@ information.
 Note that for unicast, routing and forwarding tables are practically the
 same. In case of multicast, the RIB provides the RPF information, while
 the forwarding information (the incoming and outgoing interfaces) is
-computed by the particular multicast routing protocol, but this
-information is kept by the multicast routing protocol itself, and
+computed by the particular multicast routing protocol. The multicast
+forwarding information is kept by the multicast routing protocol itself, and
 installed directly through the FEA. In the future, when there is more
 than one multicast routing protocols, XORP may have the multicast
 equivalent of RIB that would be responsible for coordinating among the
@@ -296,7 +296,7 @@ For more information about the RIB see \cite{xorp:rib}.
 
 This is the BGP routing daemon. It implements IPv4 and IPv6 unicast
 routing in a single process, as well as MBGP for both IPv4 and IPv6
-multicast RIBs for multicast routing purpose.  As of version 0.2, only
+multicast RIBs for multicast routing purpose.  As of Release 0.2, only
 IPv4 is working, but most of the support for IPv6 is present.
 
 For more information about the XORP BGP implementation, see \cite{xorp:bgp}.
@@ -320,21 +320,21 @@ daemons will be separate.  Work on our RIP implementation is only just
 beginning.
 
 %%%%%%%%%%%%%%%%%%%%%
-\subsubsection{IGMP/MLD}
+\subsubsection{MLD/IGMP}
 
-This is Internet Group Management Protocol/Multicast Listener Discovery
-handler. It implements the router-side part of IGMP and MLD. Its main
+This is Multicast Listener Discovery/Internet Group Management Protocol
+handler. It implements the router-side part of MLD and IGMP. Its main
 purpose is to discover local multicast members and propagate this
 information to multicast routing daemons such as PIM-SM.
 
-For more information about the XORP IGMP/MLD implementation see
+For more information about the XORP MLD/IGMP implementation see
 \cite{xorp:mld_igmp}.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{PIM-SM}
 
 This is the PIM-SM multicast routing daemon. Similar to OSPF and RIP,
-the IPv4 and IPv6 daemons are separate. The PIM-SM protocol requires
+the PIM-SM IPv4 and IPv6 daemons are separate. The PIM-SM protocol requires
 information about local multicast members, and Reverse-Path Forwarding
 to operate properly. The former is obtained from the IGMP/MLD process;
 the latter is obtained from the RIB.
@@ -399,7 +399,8 @@ using XRLs.  As of March 2003, work on SNMP is only just beginning.
 \begin{itemize}
 
   \item December 11, 2002: Version 0.1 completed.
-  \item March 5, 2003: Updated to match XORP version 0.2 release code.
+  \item March 10, 2003: Updated to match XORP version 0.2 release code;
+  cleanup.
 
 \end{itemize}
 
