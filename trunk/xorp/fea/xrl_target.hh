@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.36 2004/08/03 05:02:55 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.37 2004/08/03 05:21:26 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -710,7 +710,8 @@ public:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv4Net&	network,
-	const string&	cookie);
+	const string&	cookie,
+	const string&	protocol_origin);
 
     /**
      *  Delete all routing entries.
@@ -792,7 +793,8 @@ public:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv6Net&	network,
-	const string&	cookie);
+	const string&	cookie,
+	const string&	protocol_origin);
 
     /**
      *  Delete all routing entries.

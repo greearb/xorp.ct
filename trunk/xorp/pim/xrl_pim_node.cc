@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.56 2004/07/28 05:13:56 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.57 2004/08/03 03:01:07 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2630,7 +2630,8 @@ XrlPimNode::redist_transaction4_0_1_delete_route(
     // Input values, 
     const uint32_t&	tid, 
     const IPv4Net&	network,
-    const string&	cookie)
+    const string&	cookie,
+    const string&	protocol_origin)
 {
     //
     // Verify the address family
@@ -2657,6 +2658,7 @@ XrlPimNode::redist_transaction4_0_1_delete_route(
     return XrlCmdError::OKAY();
 
     UNUSED(cookie);
+    UNUSED(protocol_origin);
 }
 
 XrlCmdError
@@ -2817,7 +2819,8 @@ XrlPimNode::redist_transaction6_0_1_delete_route(
     // Input values, 
     const uint32_t&	tid, 
     const IPv6Net&	network,
-    const string&	cookie)
+    const string&	cookie,
+    const string&	protocol_origin)
 {
     //
     // Verify the address family
@@ -2844,6 +2847,7 @@ XrlPimNode::redist_transaction6_0_1_delete_route(
     return XrlCmdError::OKAY();
 
     UNUSED(cookie);
+    UNUSED(protocol_origin);
 }
 
 XrlCmdError

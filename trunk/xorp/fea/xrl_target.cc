@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.47 2004/08/03 03:51:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.48 2004/08/03 05:02:55 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1582,7 +1582,7 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     //
-    // XXX: don't add routes for directly-connected subnets,
+    // XXX: don't add/delete routes for directly-connected subnets,
     // because that should be managed by the underlying system.
     //
     if (protocol_origin == "connected")
@@ -1604,10 +1604,18 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     // Input values,
     const uint32_t&	tid,
     const IPv4Net&	network,
-    const string&	cookie)
+    const string&	cookie,
+    const string&	protocol_origin)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
+
+    //
+    // XXX: don't add/delete routes for directly-connected subnets,
+    // because that should be managed by the underlying system.
+    //
+    if (protocol_origin == "connected")
+	return XrlCmdError::OKAY();
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
@@ -1680,7 +1688,7 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     //
-    // XXX: don't add routes for directly-connected subnets,
+    // XXX: don't add/delete routes for directly-connected subnets,
     // because that should be managed by the underlying system.
     //
     if (protocol_origin == "connected")
@@ -1702,10 +1710,18 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     // Input values,
     const uint32_t&	tid,
     const IPv6Net&	network,
-    const string&	cookie)
+    const string&	cookie,
+    const string&	protocol_origin)
 {
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    //
+    // XXX: don't add/delete routes for directly-connected subnets,
+    // because that should be managed by the underlying system.
+    //
+    if (protocol_origin == "connected")
+	return XrlCmdError::OKAY();
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.

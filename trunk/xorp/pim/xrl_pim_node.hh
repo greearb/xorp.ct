@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.43 2004/08/03 03:01:07 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.44 2004/08/03 05:21:26 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -571,7 +571,8 @@ protected:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv4Net&	network,
-	const string&	cookie);
+	const string&	cookie,
+	const string&	protocol_origin);
 
     /**
      *  Delete all routing entries.
@@ -653,7 +654,8 @@ protected:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv6Net&	network,
-	const string&	cookie);
+	const string&	cookie,
+	const string&	protocol_origin);
 
     /**
      *  Delete all routing entries.

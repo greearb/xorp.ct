@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist_transaction4.xif,v 1.6 2004/08/03 03:01:09 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist_transaction4.xif,v 1.7 2004/08/03 05:21:27 pavlin Exp $ */
 
 /*
  * RIB routes redistribution transaction-based XRL interface.
@@ -57,7 +57,8 @@ interface redist_transaction4/0.1 {
 
 	delete_route ? tid:u32						\
 		     & network:ipv4net					\
-		     & cookie:txt
+		     & cookie:txt					\
+		     & protocol_origin:txt
 
 	/**
 	 * Delete all routing entries.

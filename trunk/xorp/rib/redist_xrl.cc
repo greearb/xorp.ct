@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.12 2004/06/10 22:41:38 hodson Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.13 2004/08/03 03:01:08 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -99,6 +99,7 @@ public:
     void dispatch_complete(const XrlError& xe);
 protected:
     IPNet<A>	_net;
+    string	_protocol_origin;
 };
 
 template <typename A>
@@ -200,7 +201,9 @@ AddRoute<A>::dispatch_complete(const XrlError& xe)
 template <typename A>
 DeleteRoute<A>::DeleteRoute(RedistXrlOutput<A>* parent,
 			    const IPRouteEntry<A>& ipr)
-    : RedistXrlTask<A>(parent), _net(ipr.net())
+    : RedistXrlTask<A>(parent),
+      _net(ipr.net()),
+      _protocol_origin(ipr.protocol().name())
 {
 }
 
@@ -690,6 +693,7 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 	p->xrl_target_name().c_str(),
 	p->tid(),
 	_net, p->cookie(),
+	_protocol_origin,
 	callback(static_cast<DeleteRoute<IPv4>*>(this),
 		 &DeleteRoute<IPv4>::dispatch_complete)
 	);
@@ -714,6 +718,7 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 	p->xrl_target_name().c_str(),
 	p->tid(),
 	_net, p->cookie(),
+	_protocol_origin,
 	callback(static_cast<DeleteRoute<IPv6>*>(this),
 		 &DeleteRoute<IPv6>::dispatch_complete)
 	);
