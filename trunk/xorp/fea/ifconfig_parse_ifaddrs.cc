@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.10 2003/09/11 15:44:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.11 2003/09/20 00:28:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -60,11 +60,11 @@
 #ifdef HAVE_GETIFADDRS
 
 bool
-IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
+IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 {
     u_short if_index = 0;
     string if_name, alias_if_name;
-    const ifaddrs *ifa;
+    const struct ifaddrs* ifa;
     
     UNUSED(if_index);
     UNUSED(it);
@@ -80,7 +80,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	//
 	char tmp_if_name[IFNAMSIZ+1];
 	strncpy(tmp_if_name, ifa->ifa_name, sizeof(tmp_if_name));
-	char *cptr;
+	char* cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
 	    // Replace colon with null. Needed because in Solaris and Linux
 	    // the interface name changes for aliases.
@@ -100,7 +100,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    if ((ifa->ifa_addr != NULL)
 		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
 		// Link-level address
-		struct sockaddr_dl *sdl = (struct sockaddr_dl *)ifa->ifa_addr;
+		const struct sockaddr_dl* sdl = reinterpret_cast<const struct sockaddr_dl*>(ifa->ifa_addr);
 		if_index = sdl->sdl_index;
 	    }
 	    if (if_index > 0)
@@ -161,7 +161,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    if ((ifa->ifa_addr != NULL)
 		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
 		// Link-level address
-		const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(ifa->ifa_addr);
+		const struct sockaddr_dl* sdl = reinterpret_cast<const struct sockaddr_dl*>(ifa->ifa_addr);
 		if (sdl->sdl_type == IFT_ETHER) {
 		    if (sdl->sdl_alen == sizeof(struct ether_addr)) {
 			struct ether_addr ea;
@@ -216,7 +216,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
 		// Link-level address
 		if (ifa->ifa_data != NULL) {
-		    struct if_data *if_data = (struct if_data *)ifa->ifa_data;
+		    const struct if_data* if_data = reinterpret_cast<const struct if_data*>(ifa->ifa_data);
 		    int mtu = if_data->ifi_mtu;
 		    if (mtu == 0) {
 			XLOG_ERROR("Couldn't get the MTU for interface %s",
@@ -313,14 +313,14 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
-		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_netmask;
+		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_netmask);
 		subnet_mask.copy_in(sin->sin_addr);
 	    }
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	    
 	    // Get the broadcast address
 	    if (fv.broadcast() && (ifa->ifa_broadaddr != NULL)) {
-		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_broadaddr;
+		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_broadaddr);
 		broadcast_addr.copy_in(sin->sin_addr);
 		has_broadcast_addr = true;
 		debug_msg("Broadcast address: %s\n",
@@ -329,7 +329,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    
 	    // Get the p2p address
 	    if (fv.point_to_point() && (ifa->ifa_dstaddr != NULL)) {
-		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_dstaddr;
+		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_dstaddr);
 		peer_addr.copy_in(sin->sin_addr);
 		has_peer_addr = true;
 		debug_msg("Peer address: %s\n", peer_addr.str().c_str());
@@ -376,14 +376,14 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
-		const sockaddr_in6 *sin6 = (sockaddr_in6 *)ifa->ifa_netmask;
+		const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(ifa->ifa_netmask);
 		subnet_mask.copy_in(sin6->sin6_addr);
 	    }
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	    
 	    // Get the p2p address
 	    if (fv.point_to_point() && (ifa->ifa_dstaddr != NULL)) {
-		const sockaddr_in6 *sin6 = (sockaddr_in6 *)ifa->ifa_dstaddr;
+		const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(ifa->ifa_dstaddr);
 		peer_addr.copy_in(sin6->sin6_addr);
 		has_peer_addr = true;
 		debug_msg("Peer address: %s\n", peer_addr.str().c_str());
