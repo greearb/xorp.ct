@@ -1,25 +1,13 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.7 2003/06/17 23:11:13 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.8 2003/07/30 19:07:25 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
  */
 
 interface ifmgr/0.1 {
-	get_all_interface_names -> ifnames:list
-
 	get_configured_interface_names -> ifnames:list
 
-	get_all_vif_names ? ifname:txt -> vifs:list
-
 	get_configured_vif_names ? ifname:txt -> vifs:list
-
-	get_all_vif_flags	? ifname:txt				\
-				& vif:txt				\
-				-> enabled:bool				\
-				& broadcast:bool			\
-				& loopback:bool				\
-				& point_to_point:bool			\
-				& multicast:bool 			      
 
 	get_configured_vif_flags ? ifname:txt				\
 				& vif:txt				\
@@ -27,32 +15,15 @@ interface ifmgr/0.1 {
 				& broadcast:bool			\
 				& loopback:bool				\
 				& point_to_point:bool			\
-				& multicast:bool 			      
-
-	get_all_vif_pif_index	? ifname:txt				\
-				& vif:txt				\
-				-> pif_index:u32
+				& multicast:bool
 
 	get_configured_vif_pif_index	? ifname:txt			\
 					& vif:txt			\
 					-> pif_index:u32
 
-	get_all_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
-
 	get_configured_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
 
-	get_all_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
-
 	get_configured_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
-
-	get_all_address_flags4	? ifname:txt				\
-				& vif:txt				\
-				& address:ipv4				\
-				-> enabled:bool				\
-				& broadcast:bool			\
-				& loopback:bool				\
-				& point_to_point:bool			\
-				& multicast:bool 			      
 
 	get_configured_address_flags4	? ifname:txt			\
 					& vif:txt			\
@@ -63,14 +34,6 @@ interface ifmgr/0.1 {
 					& point_to_point:bool		\
 					& multicast:bool
 
-	get_all_address_flags6	? ifname:txt				\
-				& vif:txt 				\
-				& address:ipv6				\
-				-> enabled:bool 			\
-				& loopback:bool				\
-				& point_to_point:bool			\
-				& multicast:bool
-
 	get_configured_address_flags6	? ifname:txt			\
 					& vif:txt			\
 					& address:ipv6			\
@@ -79,48 +42,26 @@ interface ifmgr/0.1 {
 					& point_to_point:bool		\
 					& multicast:bool
 
-	get_all_interface_enabled ? ifname:txt -> enabled:bool
-
 	get_configured_interface_enabled ? ifname:txt -> enabled:bool
-
-	get_all_mac ? ifname:txt -> mac:mac
 
 	get_configured_mac ? ifname:txt -> mac:mac
 
-	get_all_mtu ? ifname:txt -> mtu:u32
-
 	get_configured_mtu ? ifname:txt -> mtu:u32
-
-	get_all_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
 
 	get_configured_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
 
-	get_all_prefix4 ? ifname:txt & vif:txt & address:ipv4		\
-			-> prefix:u32
 
 	get_configured_prefix4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> prefix:u32
 
-	get_all_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
-			-> broadcast:ipv4
-
 	get_configured_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> broadcast:ipv4
-
-	get_all_endpoint4 ? ifname:txt & vif:txt & address:ipv4		\
-			-> endpoint:ipv4
 
 	get_configured_endpoint4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> endpoint:ipv4
 
-	get_all_prefix6 ? ifname:txt & vif:txt & address:ipv6		\
-			-> prefix:u32
-
 	get_configured_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
 			-> prefix:u32
-
-	get_all_endpoint6 ? ifname:txt & vif:txt & address:ipv6		\
-			-> endpoint:ipv6
 
 	get_configured_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
 			-> endpoint:ipv6
@@ -163,12 +104,7 @@ interface ifmgr/0.1 {
 				& ifname:txt				\
 				& vif:txt				\
 				& address:ipv4				\
-				& enabled:bool 
-
-	get_all_address_enabled4	? ifname:txt			\
-					& vif:txt			\
-					& address:ipv4			\
-					-> enabled:bool
+				& enabled:bool
 
 	get_configured_address_enabled4	? ifname:txt			\
 					& vif:txt			\
@@ -201,12 +137,7 @@ interface ifmgr/0.1 {
 				& ifname:txt				\
 				& vif:txt				\
 				& address:ipv6				\
-				& enabled:bool 
-
-	get_all_address_enabled6	? ifname:txt			\
-					& vif:txt			\
-					& address:ipv6			\
-					-> enabled:bool
+				& enabled:bool
 
 	get_configured_address_enabled6	? ifname:txt			\
 					& vif:txt			\
@@ -227,7 +158,7 @@ interface ifmgr/0.1 {
 
 	/**
 	 * Register network interface observer for configured interfaces.
-	 *  @param clientname name of xrl entity supporting 
+	 *  @param clientname name of xrl entity supporting
 	 * fea_ifmgr_client.xif methods.
 	 */
 	register_client ? clientname:txt
@@ -240,9 +171,89 @@ interface ifmgr/0.1 {
 	 */
 	unregister_client ? clientname:txt
 
+	/*
+	 * get_all methods
+	 *
+	 * The get_configured methods return the configured interface state
+	 * of the FEA.  The get_all methods return the known interface state.
+	 * These are primarily intended as debugging methods, the FEA will
+	 * often be aware of more interfaces than the rtrmgr has configured.
+	 *
+	 * USE OF THESE METHODS IS STRONLY DISCOURAGED.
+	 */
+	get_all_interface_names -> ifnames:list
+
+	get_all_vif_names ? ifname:txt -> vifs:list
+
+	get_all_vif_flags	? ifname:txt				\
+				& vif:txt				\
+				-> enabled:bool				\
+				& broadcast:bool			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_all_vif_pif_index	? ifname:txt				\
+				& vif:txt				\
+				-> pif_index:u32
+
+	get_all_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
+
+	get_all_address_flags4	? ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				-> enabled:bool				\
+				& broadcast:bool			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_all_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
+
+	get_all_address_flags6	? ifname:txt				\
+				& vif:txt 				\
+				& address:ipv6				\
+				-> enabled:bool 			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_all_interface_enabled ? ifname:txt -> enabled:bool
+
+	get_all_mac ? ifname:txt -> mac:mac
+
+	get_all_mtu ? ifname:txt -> mtu:u32
+
+	get_all_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+
+	get_all_prefix4 ? ifname:txt & vif:txt & address:ipv4		\
+			-> prefix:u32
+
+	get_all_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> broadcast:ipv4
+
+	get_all_endpoint4 ? ifname:txt & vif:txt & address:ipv4		\
+			-> endpoint:ipv4
+
+	get_all_prefix6 ? ifname:txt & vif:txt & address:ipv6		\
+			-> prefix:u32
+
+	get_all_endpoint6 ? ifname:txt & vif:txt & address:ipv6		\
+			-> endpoint:ipv6
+
+	get_all_address_enabled4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool
+
+	get_all_address_enabled6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool
+
 	/**
 	 * Register network interface observer for all interfaces.
-	 *  @param clientname name of xrl entity supporting 
+	 *  @param clientname name of xrl entity supporting
 	 * fea_ifmgr_client.xif methods.
 	 */
 	register_all_interfaces_client ? clientname:txt
