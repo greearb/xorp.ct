@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.7 2004/03/21 02:29:14 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.8 2004/05/24 21:45:30 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -39,7 +39,8 @@ gmake check
   * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE:
     - No known issues.
     - The code should compile with the following versions of the
-      gcc/g++ compiler: 2.95.4 (default), 3.2.1, 3.3.1.
+      gcc/g++ compiler: 2.95.4 (default), 3.3.4, and
+      3.4.0 20040310 (prerelease)
 
   * FreeBSD-5.1:
     - The default gcc/g++ compiler (version 3.2.2) has a bug, hence
@@ -69,17 +70,20 @@ gmake check
 3.3. OpenBSD
 ============
 
-  * OpenBSD-3.3:
+  * OpenBSD-3.5:
+    - There is a minor compilation glitch when compiling with IPv6 support,
+      therefore as a temporary work-around solution for now XORP should be
+      compiled without IPv6 support by running "./configure --disable-ipv6".
     - The default gcc/g++ compiler (version 2.95.x) has a bug, hence
-      you must install a new compiler (e.g., gcc-3.2.2 and g++-3.2.2 from
+      you must install a new compiler (e.g., gcc-3.3.2 and g++-3.3.2 from
       packages). Then, you must set environmental variables CC and CXX
-      to point to the new compiler before running "./configure"
+      to point to the new compiler before running "./configure --disable-ipv6"
       (e.g., "setenv CC egcc; setenv CXX eg++").
-    - The code compiles with the new compiler, and the internal tests
-      appear to succeed.
+    - The code compiles with the new compiler, but some of the the internal
+      tests fail.
     - The default datasize limit per user may not be sufficient to compile
       some parts of the code, hence you may need to increase the datasize
-      limit.  If you see the following compilation error:
+      limit.  If you see a similar compilation error:
 	  nm: Cannot allocate memory
 	  collect2: /usr/bin/nm returned 1 exit status
       then you can run "limit datasize 200000" in tcsh
@@ -121,9 +125,4 @@ gmake check
 4. Known problems
 =================
 
-  * Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
-    The simplest work-around is to rerun gmake or not to use the -j flag.
-
-  * net-snmp-5.1.* may have problems with some of its header files, hence
-    the XORP SNMP support won't be compiled if those problems exist.
-    Instead, use an earlier net-snmp version from the 5.0.x branch.
+See file ${XORP}/ERRATA.
