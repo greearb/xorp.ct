@@ -24,7 +24,7 @@
 typedef uint32_t PeerID;
 
 template <typename A> class Ospf;
-template <typename A> class Peer;
+template <typename A> class PeerOut;
 template <typename A> class AreaRouter;
 
 /**
@@ -114,7 +114,7 @@ class PeerManager {
     PeerID _next_peerid;		// Next PeerID to allocate.
     map<string, PeerID> _pmap;		// Map from interface/vif to PeerID.
 
-    map<PeerID, Peer<A> *> _peers;	// All of our peers
+    map<PeerID, PeerOut<A> *> _peers;	// All of our peers
 
     map<OspfTypes::AreaID, AreaRouter<A> *> _areas;	// All the areas
 };

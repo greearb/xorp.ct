@@ -94,7 +94,7 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
     // Notify the peers that this area is being removed. If this is
     // the only area that the peer belonged to the peer can signify
     // this and the peer can be removed.
-    typename map<PeerID, Peer<A> *>::iterator i;
+    typename map<PeerID, PeerOut<A> *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
 	if ((*i).second->remove_area(area))
 	    delete_peer((*i).first);
@@ -173,7 +173,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     // If we got this far create_peerid did not throw an exception so
     // this interface/vif is unique.
 
-    _peers[peerid] = new Peer<A>(_ospf, interface, vif, linktype, area);
+    _peers[peerid] = new PeerOut<A>(_ospf, interface, vif, linktype, area);
 
     area_router->add_peer(peerid);
 

@@ -18,9 +18,8 @@
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
 
-#include <queue>
-
 template <typename A> class Ospf;
+template <typename A> class Peer;
 
 /**
  * In OSPF terms this class represents an interface/link; interface is
@@ -36,16 +35,13 @@ template <typename A> class Ospf;
  */
 
 template <typename A>
-class Peer {
+class PeerOut {
  public:
 
-    Peer(Ospf<A>& ospf, const string interface, const string vif, 
-	 OspfTypes::LinkType linktype, OspfTypes::AreaID area)
-	: _ospf(ospf), _interface(interface), _vif(vif), 
-	  _linktype(linktype), _running(false)
-    {
-	_area.push_back(area);
-    }
+    PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
+	    OspfTypes::LinkType linktype, OspfTypes::AreaID area);
+
+    ~PeerOut();
 
     /**
      * Add another Area for this peer to be in, should only be allowed
@@ -61,10 +57,14 @@ class Peer {
      */
     bool remove_area(OspfTypes::AreaID area);
 
-    void set_state(bool state) {
-	_running = state;
-    }
+    /**
+     * Set the state of this peer.
+     */
+    void set_state(bool state);
 
+    /**
+     * Get the state of this peer.
+     */
     bool get_state() const {
 	return _running;
     }
@@ -87,7 +87,8 @@ class Peer {
 
     OspfTypes::LinkType _linktype;	// Type of this link.
 
-    list<OspfTypes::AreaID> _area;	// Areas we 
+					//  Areas we are serving.
+    map<OspfTypes::AreaID, Peer<A> *>  _areas; 
 
     bool _running;			// True if the peer is up and running
 
@@ -95,6 +96,49 @@ class Peer {
     // all outgoing packets are appended to this queue. Then they are
     // read off the queue and transmitted at the interpacket gap rate.
     queue<TransmitRef>	 _transmit_queue;	
+
+    void bring_up_peering();
+    void take_down_peering();
+};
+
+/**
+ * A peer represents a single area and is bound to a PeerOut.
+ */
+template <typename A>
+class Peer {
+ public:
+    Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area) 
+	: _ospf(ospf), _peerout(peerout), _area(area)
+    {}
+
+    /**
+     * Start the protocol machinery running
+     */
+    void start();
+
+    /**
+     * Stop the protocol machinery running
+     */
+    void stop();
+
+ private:
+    Ospf<A>& _ospf;			// Reference to the controlling class.
+    PeerOut<A>& _peerout;		// Reference to PeerOut class.
+    OspfTypes::AreaID _area;		// Area that we are represent.
+
+    enum PeerState {
+	Down,
+	Attempt,
+	Init,
+	TwoWay,
+	ExStart,
+	Exchange,
+	Loading,
+	Full
+    };
+
+    PeerState _state;
+
 };
 
 #endif // __OSPF_PEER_HH__
