@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.15 2003/05/29 22:31:17 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.16 2003/06/17 23:14:28 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -619,6 +619,22 @@ public:
 	uint32_t&	metric,
 	uint32_t&	admin_distance,
 	string&		protocol_origin);
+
+    XrlCmdError fti_0_2_get_unicast_forwarding_enabled4(
+	// Output values, 
+	bool&	enabled);
+
+    XrlCmdError fti_0_2_get_unicast_forwarding_enabled6(
+	// Output values, 
+	bool&	enabled);
+
+    XrlCmdError fti_0_2_set_unicast_forwarding_enabled4(
+	// Input values, 
+	const bool&	enabled);
+
+    XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
+	// Input values, 
+	const bool&	enabled);
 
     //
     // Raw Socket Server Interface

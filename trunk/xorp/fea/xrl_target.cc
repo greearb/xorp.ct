@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.21 2003/05/29 22:31:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.22 2003/06/17 23:14:28 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1378,6 +1378,58 @@ XrlFeaTarget::fti_0_2_lookup_entry6(
 	return XrlCmdError::OKAY();
     }
     return XrlCmdError::COMMAND_FAILED("No entry for " + dst.str());
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled4(
+	// Output values, 
+	bool&	enabled)
+{
+    string error_msg;
+    
+    if (_xftm.ftic().unicast_forwarding_enabled4(enabled, error_msg) < 0)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
+	// Output values, 
+	bool&	enabled)
+{
+    string error_msg;
+    
+    if (_xftm.ftic().unicast_forwarding_enabled6(enabled, error_msg) < 0)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
+	// Input values, 
+	const bool&	enabled)
+{
+    string error_msg;
+    
+    if (_xftm.ftic().set_unicast_forwarding_enabled4(enabled, error_msg) < 0)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
+	// Input values, 
+	const bool&	enabled)
+{
+    string error_msg;
+    
+    if (_xftm.ftic().set_unicast_forwarding_enabled6(enabled, error_msg) < 0)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
 }
 
 // ----------------------------------------------------------------------------

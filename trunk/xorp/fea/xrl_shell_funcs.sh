@@ -363,6 +363,46 @@ lookup_entry4()
     $CALLXRL "finder://fea/fti/0.2/lookup_entry4?dst:ipv4net=$1"
 }
 
+get_unicast_forwarding_enabled4()
+{
+    echo -n "get_unicast_forwarding_enabled4"
+    $CALLXRL "finder://fea/fti/0.2/get_unicast_forwarding_enabled4"
+}
+
+get_unicast_forwarding_enabled6()
+{
+    echo -n "get_unicast_forwarding_enabled6"
+    $CALLXRL "finder://fea/fti/0.2/get_unicast_forwarding_enabled6"
+}
+
+set_unicast_forwarding_enabled4()
+{
+    echo -n "set_unicast_forwarding_enabled4"
+    if [ $# -eq 1 ] ; then
+	$CALLXRL "finder://fea/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$1"
+	return $?
+    fi
+    cat >&2 <<EOF
+usage: set_unicast_fowarding_enabled4 <enabled>
+       where <enabled> is set to true if we want to enable IPv4 unicast forwarding, otherwise is set to false.
+EOF
+    return 255
+}
+
+set_unicast_forwarding_enabled6()
+{
+    echo -n "set_unicast_forwarding_enabled6"
+    if [ $# -eq 1 ] ; then
+	$CALLXRL "finder://fea/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=$1"
+	return $?
+    fi
+    cat >&2 <<EOF
+usage: set_unicast_fowarding_enabled6 <enabled>
+       where <enabled> is set to true if we want to enable IPv6 unicast forwarding, otherwise is set to false.
+EOF
+    return 255
+}
+
 shutdown()
 {
     echo -n "shutdown" $*
