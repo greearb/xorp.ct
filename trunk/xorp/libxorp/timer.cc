@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.7 2003/04/02 02:53:51 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.8 2003/04/02 17:10:38 hodson Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -330,6 +330,26 @@ TimerList::get_next_delay(TimeVal& tv) const
 	    // next event is already in the past, return 0.0
 	    tv = TimeVal::ZERO();
 	}
+	return true;
+    }
+}
+
+bool
+TimerList::get_next_expire(TimeVal &tv) const
+{
+    acquire_lock();
+    struct heap_entry *t = top();
+    release_lock();
+    if (t == 0) {
+	tv  = TimeVal::MAXIMUM();
+	return false;
+    } else {
+	TimeVal now ;
+	_current_time_proc(&now);
+	if ( t->key > now) // next event is in the future
+	    tv = t->key;
+	else // next event is already in the past, return 0.0
+	    tv = TimeVal::ZERO();
 	return true;
     }
 }
