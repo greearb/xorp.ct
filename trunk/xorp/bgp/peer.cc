@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.20 2003/01/30 02:38:39 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.21 2003/01/31 04:30:46 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -759,7 +759,7 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
 
     case STATEOPENCONFIRM:	// this is what we were waiting for.
 	set_state(STATEESTABLISHED);
-	break;
+	/* FALLTHROUGH */
 
     case STATEESTABLISHED:	// this is a legitimate message.
 	restart_hold_timer();
