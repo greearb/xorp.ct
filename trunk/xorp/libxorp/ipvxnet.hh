@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.2 2003/02/26 00:14:14 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.3 2003/03/10 23:20:33 hodson Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -35,7 +35,7 @@ typedef IPNet<IPvX> BaseIPvXNet;
 template<>
 IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t preflen)
     throw (InvalidNetmaskLength)
-    : _prefix_len(preflen) 
+    : _prefix_len(preflen)
 {
     if (preflen > ipvx.addr_bitlen())
 	xorp_throw(InvalidNetmaskLength, preflen);
@@ -43,12 +43,14 @@ IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t preflen)
 }
 
 template <> void
-IPNet<IPvX>::initialize_from_string(const char *cp) throw (InvalidString) 
+IPNet<IPvX>::initialize_from_string(const char *cp)
+    throw (InvalidString, InvalidNetmaskLength)
 {
     char *slash = strrchr(cp, '/');
     if (slash == 0) xorp_throw(InvalidString, "Missing slash");
 
-    if (*(slash + 1) == 0) xorp_throw(InvalidString, "Missing prefix length");
+    if (*(slash + 1) == 0)
+	xorp_throw(InvalidString, "Missing prefix length");
     _prefix_len = atoi(slash + 1);
 
     string addr = string(cp, slash - cp);
@@ -71,7 +73,7 @@ public:
      * 
      * @param family the address family.
      */
-    explicit IPvXNet(int family)	
+    explicit IPvXNet(int family) throw (InvalidFamily)
 	// : _masked_addr(family), _prefix_len(0)
 	// XXX: G++ 2.95 croaks on this
     {
@@ -98,7 +100,7 @@ public:
      * 
      * @param v4net the subnet to copy from.
      */
-    IPvXNet(const IPv4Net& v4net) 
+    IPvXNet(const IPv4Net& v4net)
 	: BaseIPvXNet(v4net.masked_addr(), v4net.prefix_len()) {}
 
     /**
@@ -106,7 +108,7 @@ public:
      * 
      * @param v6net the subnet to copy from.
      */
-    IPvXNet(const IPv6Net& v6net) 
+    IPvXNet(const IPv6Net& v6net)
 	: BaseIPvXNet(v6net.masked_addr(), v6net.prefix_len()) {}
 
     /**
@@ -116,7 +118,8 @@ public:
      * and prefix length.
      * Examples: "12.34.56/24", "1234:5678/32::"
      */
-    IPvXNet(const char *cp) throw (InvalidString) : BaseIPvXNet(cp) {}
+    IPvXNet(const char *cp) throw (InvalidString, InvalidNetmaskLength)
+	: BaseIPvXNet(cp) {}
 
     /**
      * Constructor from a given base address and a prefix length.
@@ -124,7 +127,7 @@ public:
      * @param a base address for the subnet.
      * @param preflen length of subnet mask.
      */
-    IPvXNet(const IPvX& a, int preflen) 
+    IPvXNet(const IPvX& a, int preflen) throw (InvalidNetmaskLength)
 	: BaseIPvXNet(a, preflen) {}
 
     // The following methods are specific to IPvXNet
@@ -148,7 +151,7 @@ public:
      * 
      * @return IPv4Net subnet contained with IPvXNet structure.
      */
-    inline IPv4Net get_ipv4Net() const
+    inline IPv4Net get_ipv4net() const 	throw (InvalidCast)
     {
     	return IPv4Net(masked_addr().get_ipv4(), prefix_len());
     }
@@ -158,7 +161,7 @@ public:
      * 
      * @return IPv6Net subnet contained with IPvXNet structure.
      */
-    inline IPv6Net get_ipv6Net() const 
+    inline IPv6Net get_ipv6net() const 	throw (InvalidCast)
     {
     	return IPv6Net(masked_addr().get_ipv6(), prefix_len());
     }
@@ -169,7 +172,10 @@ public:
      * @param to_ipv4net IPv4Net subnet to be assigned IPv4Net value contained
      * within this subnet.
      */
-    inline void get(IPv4Net& to_ipv4net) const { to_ipv4net = get_ipv4Net(); }
+    inline void get(IPv4Net& to_ipv4net) const throw (InvalidCast)
+    {
+	to_ipv4net = get_ipv4net();
+    }
 
     /**
      * Assign address value to an IPv6Net subnet.
@@ -177,7 +183,10 @@ public:
      * @param to_ipv6net IPv6Net subnet to be assigned IPv6Net value contained
      * within this subnet.
      */
-    inline void get(IPv6Net& to_ipv6net) const { to_ipv6net = get_ipv6Net(); }
+    inline void get(IPv6Net& to_ipv6net) const throw (InvalidCast)
+    {
+	to_ipv6net = get_ipv6net();
+    }
 
     /**
      * Get the address family.
@@ -197,7 +206,8 @@ public:
      * @return the multicast base prefix address for address
      * family of @ref family.
      */
-    inline static IPvXNet ip_multicast_base_prefix(int family) 
+    inline static IPvXNet ip_multicast_base_prefix(int family)
+	throw (InvalidFamily)
     {
 	return IPvXNet(IPvX::MULTICAST_BASE(family),
 		       IPvX::ip_multicast_base_address_masklen(family));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.2 2003/02/23 06:45:12 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.3 2003/03/10 23:20:35 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -246,6 +246,19 @@ void
 test_ipvxnet_invalid_constructors()
 {
     //
+    // Constructor for invalid address family.
+    //
+    try {
+	IPvXNet ipnet(AF_UNSPEC);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ipnet);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
     // Constructor for invalid prefix length: IPv4.
     //
     try {
@@ -297,6 +310,34 @@ test_ipvxnet_invalid_constructors()
 	incr_failures();
 	UNUSED(ipnet);
     } catch (const InvalidString& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Constructor from an address string with invalid prefix length: IPv4.
+    //
+    try {
+	// Invalid address string: prefix length too long
+	IPvXNet ipnet("12.34.56.78/33");
+	verbose_log("Cannot catch invalid IP network address \"12.34.56.78/33\" : FAIL\n");
+	incr_failures();
+	UNUSED(ipnet);
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Constructor from an address string with invalid prefix length: IPv6
+    //
+    try {
+	// Invalid address string: prefix length too long
+	IPvXNet ipnet("1234:5678::/129");
+	verbose_log("Cannot catch invalid IP network address \"1234:5678::/129\" : FAIL\n");
+	incr_failures();
+	UNUSED(ipnet);
+    } catch (const InvalidNetmaskLength& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
@@ -606,6 +647,85 @@ test_ipvxnet_manipulate_address()
 		  "1234:5678::/32");
 }
 
+/**
+ * Test IPvXNet invalid address manipulation.
+ */
+void
+test_ipvxnet_invalid_manipulate_address()
+{
+    IPvXNet ipnet4_a("12.34.0.0/16");
+    IPvXNet ipnet6_a("1234:5678::/32");
+    
+    //
+    // Get invalid IPv4Net address.
+    //
+    try {
+	IPvXNet ipnet(ipnet6_a);	// Note: initialized with IPv6 address
+	IPv4Net ipnet_ipv4;
+	ipnet_ipv4 = ipnet.get_ipv4net();
+	verbose_log("Cannot catch invalid get_ipv4net() : FAIL\n");
+	incr_failures();
+    } catch (const InvalidCast& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Get invalid IPv6Net address.
+    //
+    try {
+	IPvXNet ipnet(ipnet4_a);	// Note: initialized with IPv4 address
+	IPv6Net ipnet_ipv6;
+	ipnet_ipv6 = ipnet.get_ipv6net();
+	verbose_log("Cannot catch invalid get_ipv6net() : FAIL\n");
+	incr_failures();
+    } catch (const InvalidCast& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
+    // Assign invalid IPv4Net address.
+    //
+    try {
+	IPvXNet ipnet(ipnet6_a);	// Note: initialized with IPv6 address
+	IPv4Net ipnet_ipv4;
+	ipnet.get(ipnet_ipv4);
+	verbose_log("Cannot catch invalid get(IPv4Net& to_ipv4net) : FAIL\n");
+	incr_failures();
+    } catch (const InvalidCast& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Assign invalid IPv6Net address.
+    //
+    try {
+	IPvXNet ipnet(ipnet4_a);	// Note: initialized with IPv4 address
+	IPv6Net ipnet_ipv6;
+	ipnet.get(ipnet_ipv6);
+	verbose_log("Cannot catch invalid get(IPv6Net& to_ipv6net) : FAIL\n");
+	incr_failures();
+    } catch (const InvalidCast& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
+    // Get multicast base subnet for invalid address family.
+    //
+    try {
+	IPvXNet ipnet(IPvXNet::ip_multicast_base_prefix(AF_UNSPEC));
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ipnet);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+}
+
 int
 main(int argc, char * const argv[])
 {
@@ -651,6 +771,7 @@ main(int argc, char * const argv[])
 	test_ipvxnet_address_type();
 	test_ipvxnet_address_const();
 	test_ipvxnet_manipulate_address();
+	test_ipvxnet_invalid_manipulate_address();
 	ret_value = failures() ? 1 : 0;
     } catch (...) {
 	// Internal error

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.2 2003/02/23 06:45:12 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.3 2003/03/10 23:20:35 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -195,7 +195,6 @@ test_ipv4net_invalid_constructors()
     }
     
     //
-    //
     // Constructor from an invalid address string.
     //
     try {
@@ -205,6 +204,20 @@ test_ipv4net_invalid_constructors()
 	incr_failures();
 	UNUSED(ipnet);
     } catch (const InvalidString& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
+    // Constructor from an address string with invalid prefix length.
+    //
+    try {
+	// Invalid address string: prefix length too long
+	IPv4Net ipnet("12.34.56.78/33");
+	verbose_log("Cannot catch invalid IP network address \"12.34.56.78/33\" : FAIL\n");
+	incr_failures();
+	UNUSED(ipnet);
+    } catch (const InvalidNetmaskLength& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }

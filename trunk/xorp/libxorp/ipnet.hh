@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.3 2003/02/23 06:45:12 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.4 2003/03/10 23:20:32 hodson Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -57,7 +57,9 @@ public:
      * @param from_cstring C-style string with slash separated address
      * and prefix length.
      */
-    IPNet(const char *from_cstring) throw (InvalidString) {
+    IPNet(const char *from_cstring)
+	throw (InvalidString, InvalidNetmaskLength)
+    {
 	initialize_from_string(from_cstring);
     }
 
@@ -244,7 +246,8 @@ public:
     }
 
 protected:
-    inline void initialize_from_string(const char *s) throw (InvalidString);
+    inline void initialize_from_string(const char *s)
+	throw (InvalidString, InvalidNetmaskLength);
 
     A		_masked_addr;
     size_t	_prefix_len;
@@ -350,11 +353,15 @@ IPNet<A>::contains(const IPNet<A>& other) const
 }
 
 template <class A> void
-IPNet<A>::initialize_from_string(const char *cp) throw (InvalidString) {
+IPNet<A>::initialize_from_string(const char *cp)
+    throw (InvalidString, InvalidNetmaskLength)
+{
     char *slash = strrchr(cp, '/');
-    if (slash == 0) xorp_throw(InvalidString, "Missing slash");
+    if (slash == 0)
+	xorp_throw(InvalidString, "Missing slash");
     
-    if (*(slash + 1) == 0) xorp_throw(InvalidString, "Missing prefix length");
+    if (*(slash + 1) == 0)
+	xorp_throw(InvalidString, "Missing prefix length");
     _prefix_len = atoi(slash + 1);
     
     string addr = string(cp, slash - cp);

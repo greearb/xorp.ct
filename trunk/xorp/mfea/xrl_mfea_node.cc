@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.10 2003/03/25 06:55:07 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.11 2003/03/30 03:50:45 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -336,7 +336,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	XrlMfeaClientV0p1Client::send_add_mrib4(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv4Net(),
+	    mrib.dest_prefix().get_ipv4net(),
 	    mrib.next_hop_router_addr().get_ipv4(),
 	    vif_name,
 	    mrib.next_hop_vif_index(),
@@ -348,7 +348,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	XrlMfeaClientV0p1Client::send_add_mrib6(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv6Net(),
+	    mrib.dest_prefix().get_ipv6net(),
 	    mrib.next_hop_router_addr().get_ipv6(),
 	    vif_name,
 	    mrib.next_hop_vif_index(),
@@ -387,14 +387,14 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
 	XrlMfeaClientV0p1Client::send_delete_mrib4(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv4Net(),
+	    mrib.dest_prefix().get_ipv4net(),
 	    callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
 	break;
 #ifdef HAVE_IPV6
 	XrlMfeaClientV0p1Client::send_delete_mrib6(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv6Net(),
+	    mrib.dest_prefix().get_ipv6net(),
 	    callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
 	break;
 #endif // HAVE_IPV6
@@ -761,7 +761,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 		mfea_vif->name(),
 		mfea_vif->vif_index(),
 		vif_addr.addr().get_ipv4(),
-		vif_addr.subnet_addr().get_ipv4Net(),
+		vif_addr.subnet_addr().get_ipv4net(),
 		vif_addr.broadcast_addr().get_ipv4(),
 		vif_addr.peer_addr().get_ipv4(),
 		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
@@ -862,7 +862,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 		mfea_vif->name(),
 		mfea_vif->vif_index(),
 		vif_addr.addr().get_ipv6(),
-		vif_addr.subnet_addr().get_ipv6Net(),
+		vif_addr.subnet_addr().get_ipv6net(),
 		vif_addr.broadcast_addr().get_ipv6(),
 		vif_addr.peer_addr().get_ipv6(),
 		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
@@ -1317,7 +1317,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		XrlMfeaClientV0p1Client::send_add_mrib4(
 		    xrl_sender_name.c_str(),
 		    my_xrl_target_name(),
-		    mrib->dest_prefix().get_ipv4Net(),
+		    mrib->dest_prefix().get_ipv4net(),
 		    mrib->next_hop_router_addr().get_ipv4(),
 		    vif_name,
 		    mrib->next_hop_vif_index(),
@@ -1329,7 +1329,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		XrlMfeaClientV0p1Client::send_add_mrib6(
 		    xrl_sender_name.c_str(),
 		    my_xrl_target_name(),
-		    mrib->dest_prefix().get_ipv6Net(),
+		    mrib->dest_prefix().get_ipv6net(),
 		    mrib->next_hop_router_addr().get_ipv6(),
 		    vif_name,
 		    mrib->next_hop_vif_index(),

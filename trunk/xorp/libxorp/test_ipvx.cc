@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -698,7 +698,6 @@ test_ipvx_invalid_copy_in_out()
 	ip.copy_out(in_addr);
 	verbose_log("Cannot catch mismatch copy-out : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -713,7 +712,6 @@ test_ipvx_invalid_copy_in_out()
 	ip.copy_out(in6_addr);
 	verbose_log("Cannot catch mismatch copy-out : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -732,7 +730,6 @@ test_ipvx_invalid_copy_in_out()
 	ip.copy_in(AF_UNSPEC, &ui8[0]);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -747,7 +744,6 @@ test_ipvx_invalid_copy_in_out()
 	ip.copy_in(*sap);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -761,7 +757,6 @@ test_ipvx_invalid_copy_in_out()
 	ip.copy_in(sin);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -775,7 +770,6 @@ test_ipvx_invalid_copy_in_out()
 	ip.copy_in(sin6);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -1079,8 +1073,16 @@ test_ipvx_manipulate_address()
     //
     verbose_assert(IPvX().make_prefix(AF_INET, 24) == IPvX("255.255.255.0"),
 		   "make_prefix()");
+    verbose_assert(IPvX().make_prefix(AF_INET, 0) == IPvX("0.0.0.0"),
+		   "make_prefix()");
+    verbose_assert(IPvX().make_prefix(AF_INET, 32) == IPvX("255.255.255.255"),
+		   "make_prefix()");
 
     verbose_assert(IPvX().make_prefix(AF_INET6, 24) == IPvX("ffff:ff00::"),
+		   "make_prefix()");
+    verbose_assert(IPvX().make_prefix(AF_INET6, 0) == IPvX("::"),
+		   "make_prefix()");
+    verbose_assert(IPvX().make_prefix(AF_INET6, 128) == IPvX("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
 		   "make_prefix()");
     
     //
@@ -1191,7 +1193,6 @@ test_ipvx_invalid_manipulate_address()
 	ip_ipv4 = ip.get_ipv4();
 	verbose_log("Cannot catch invalid get_ipv4() : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidCast& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -1206,7 +1207,6 @@ test_ipvx_invalid_manipulate_address()
 	ip_ipv6 = ip.get_ipv6();
 	verbose_log("Cannot catch invalid get_ipv4() : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidCast& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -1221,7 +1221,6 @@ test_ipvx_invalid_manipulate_address()
 	ip.get(ip_ipv4);
 	verbose_log("Cannot catch invalid get(IPv4& to_ipv4) : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidCast& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -1236,8 +1235,69 @@ test_ipvx_invalid_manipulate_address()
 	ip.get(ip_ipv6);
 	verbose_log("Cannot catch invalid get(IPv6& to_ipv6) : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidCast& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
+    // Test making an invalid IPvX mask prefix.
+    //
+    try {
+	// Invalid prefix length
+	IPvX ip(IPvX::make_prefix(AF_UNSPEC, 0));
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    try {
+	// Invalid prefix length: IPv4
+	IPvX ip(IPvX::make_prefix(AF_INET, IPvX::addr_bitlen(AF_INET) + 1));
+	verbose_log("Cannot catch invalid IPv4 mask prefix with length %d : FAIL\n",
+		    IPvX::addr_bitlen(AF_INET) + 1);
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    try {
+	// Invalid prefix length: IPv6
+	IPvX ip(IPvX::make_prefix(AF_INET6, IPvX::addr_bitlen(AF_INET6) + 1));
+	verbose_log("Cannot catch invalid IPv6 mask prefix with length %d : FAIL\n",
+		    IPvX::addr_bitlen(AF_INET6) + 1);
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Test masking with an invalid IPvX mask prefix.
+    //
+    try {
+	// Invalid mask prefix: IPv4
+	IPvX ip(addr_string4);
+	ip.mask_by_prefix(IPvX::addr_bitlen(AF_INET) + 1);
+	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %d : FAIL\n",
+		    IPvX::addr_bitlen(AF_INET) + 1);
+	incr_failures();
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    try {
+	// Invalid mask prefix: IPv6
+	IPvX ip(addr_string6);
+	ip.mask_by_prefix(IPvX::addr_bitlen(AF_INET6) + 1);
+	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %d : FAIL\n",
+		    IPvX::addr_bitlen(AF_INET6) + 1);
+	incr_failures();
+    } catch (const InvalidNetmaskLength& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.4 2003/03/10 23:20:33 hodson Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.5 2003/04/02 00:43:31 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -479,7 +479,8 @@ public:
      * @param masklen the length of the mask to create.
      * @return a new IPvX address that contains a mask of length @ref masklen.
      */
-    static IPvX make_prefix(int family, int masklen) throw (InvalidFamily);
+    static IPvX make_prefix(int family, int masklen)
+	throw (InvalidFamily, InvalidNetmaskLength);
 
     /**
      * Make an IPvX mask prefix for the address family of this address.
@@ -487,7 +488,7 @@ public:
      * @param masklen the length of the mask to create.
      * @return a new IPvX address that contains a mask of length @ref masklen.
      */
-    IPvX make_prefix(int masklen) const {
+    IPvX make_prefix(int masklen) const throw (InvalidNetmaskLength) {
 	return IPvX::make_prefix(_af, masklen);
     }
     
@@ -498,7 +499,7 @@ public:
      * @return a new IPvX address created by masking this address with a mask
      * of length @ref masklen.
      */
-    IPvX mask_by_prefix(int masklen) const;
+    IPvX mask_by_prefix(int masklen) const throw (InvalidNetmaskLength);
     
     /**
      * Get the mask length.

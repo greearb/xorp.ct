@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.3 2003/04/02 00:44:22 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -401,7 +401,6 @@ test_ipv6_invalid_copy_in_out()
 	ip.copy_in(*sap);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -415,7 +414,6 @@ test_ipv6_invalid_copy_in_out()
 	ip.copy_in(sin6);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -626,6 +624,10 @@ test_ipv6_manipulate_address()
     //
     verbose_assert(IPv6().make_prefix(24) == IPv6("ffff:ff00::"),
 		   "make_prefix()");
+    verbose_assert(IPv6().make_prefix(0) == IPv6("::"),
+		   "make_prefix()");
+    verbose_assert(IPv6().make_prefix(128) == IPv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+		   "make_prefix()");
     
     //
     // Test making an IPv6 address prefix.
@@ -675,6 +677,45 @@ test_ipv6_manipulate_address()
 		   "bits()");
 }
 
+/**
+ * Test IPv6 invalid address manipulation.
+ */
+void
+test_ipv6_invalid_manipulate_address()
+{
+    const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
+    
+    //
+    // Test making an invalid IPv6 mask prefix.
+    //
+    try {
+	// Invalid prefix length
+	IPv6 ip(IPv6::make_prefix(IPv6::addr_bitlen() + 1));
+	verbose_log("Cannot catch invalid IPv6 mask prefix with length %d : FAIL\n",
+		    IPv6::addr_bitlen() + 1);
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
+    // Test masking with an invalid IPv6 mask prefix.
+    //
+    try {
+	// Invalid mask prefix
+	IPv6 ip(addr_string6);
+	ip.mask_by_prefix(IPv6::addr_bitlen() + 1);
+	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %d : FAIL\n",
+		    IPv6::addr_bitlen() + 1);
+	incr_failures();
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+}    
+
 int
 main(int argc, char * const argv[])
 {
@@ -721,6 +762,7 @@ main(int argc, char * const argv[])
 	test_ipv6_address_type();
 	test_ipv6_address_const();
 	test_ipv6_manipulate_address();
+	test_ipv6_invalid_manipulate_address();
 	ret_value = failures() ? 1 : 0;
     } catch (...) {
 	// Internal error

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.4 2003/03/10 23:20:32 hodson Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.5 2003/04/02 00:44:22 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -378,7 +378,7 @@ public:
      * @param masklen the length of the mask to create.
      * @return a new IPv4 address that contains a mask of length @ref masklen.
      */
-    static IPv4 make_prefix(size_t masklen);
+    static IPv4 make_prefix(size_t masklen) throw (InvalidNetmaskLength);
 
     /**
      * Make an IPv4 address prefix.
@@ -387,7 +387,8 @@ public:
      * @return a new IPv4 address created by masking this address with a mask
      * of length @ref masklen.
      */
-    inline IPv4 mask_by_prefix(size_t masklen) const {
+    inline IPv4 mask_by_prefix(size_t masklen) const
+	throw (InvalidNetmaskLength) {
 	return (*this) & make_prefix(masklen);
     }
 

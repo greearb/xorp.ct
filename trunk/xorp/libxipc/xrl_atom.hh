@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.4 2003/03/16 08:20:31 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -240,10 +240,10 @@ public:
 	set_name(name);
 	if (ipvxnet.is_ipv4()) {
 	    _type = xrlatom_ipv4net;
-	    _ipv4net = new IPv4Net(ipvxnet.get_ipv4Net());
+	    _ipv4net = new IPv4Net(ipvxnet.get_ipv4net());
 	} else if (ipvxnet.is_ipv6()) {
 	    _type = xrlatom_ipv6net;
-	    _ipv6net = new IPv6Net(ipvxnet.get_ipv6Net());
+	    _ipv6net = new IPv6Net(ipvxnet.get_ipv6net());
 	} else {
 	    abort();
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.14 2003/03/27 00:19:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.15 2003/03/29 19:03:10 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2136,7 +2136,7 @@ XrlPimNode::fti_0_2_lookup_route4(
     //
     // The return values
     //
-    netmask = mrib->dest_prefix().get_ipv4Net();
+    netmask = mrib->dest_prefix().get_ipv4net();
     gateway = mrib->next_hop_router_addr().get_ipv4();
     ifname = pim_vif->ifname();
     vifname = pim_vif->name();
@@ -2208,7 +2208,7 @@ XrlPimNode::fti_0_2_lookup_route6(
     //
     // The return values
     //
-    netmask = mrib->dest_prefix().get_ipv6Net();
+    netmask = mrib->dest_prefix().get_ipv6net();
     gateway = mrib->next_hop_router_addr().get_ipv6();
     ifname = pim_vif->ifname();
     vifname = pim_vif->name();

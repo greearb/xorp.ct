@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.3 2003/03/10 23:20:32 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.4 2003/04/02 00:44:22 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -342,12 +342,11 @@ init_prefixes()
 static size_t n_inited_prefixes = init_prefixes();
 
 const IPv6&
-IPv6::make_prefix(size_t l)
+IPv6::make_prefix(size_t len) throw (InvalidNetmaskLength)
 {
-    if (l < n_inited_prefixes)
-	return v6prefix[l];
-    assert(l <= n_inited_prefixes);
-    return ALL_ONES();
+    if (len > n_inited_prefixes)
+	xorp_throw(InvalidNetmaskLength, len);
+    return v6prefix[len];
 }
 
 string

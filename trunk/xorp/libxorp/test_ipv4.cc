@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.3 2003/04/02 00:44:22 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -377,7 +377,6 @@ test_ipv4_invalid_copy_in_out()
 	ip.copy_in(*sap);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -391,7 +390,6 @@ test_ipv4_invalid_copy_in_out()
 	ip.copy_in(sin);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
-	UNUSED(ip);
     } catch (const InvalidFamily& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
@@ -593,6 +591,10 @@ test_ipv4_manipulate_address()
     //
     verbose_assert(IPv4().make_prefix(24) == IPv4("255.255.255.0"),
 		   "make_prefix()");
+    verbose_assert(IPv4().make_prefix(0) == IPv4("0.0.0.0"),
+		   "make_prefix()");
+    verbose_assert(IPv4().make_prefix(32) == IPv4("255.255.255.255"),
+		   "make_prefix()");
     
     //
     // Test making an IPv4 address prefix.
@@ -601,7 +603,7 @@ test_ipv4_manipulate_address()
 	IPv4("12.34.56.78").mask_by_prefix(24) == IPv4("12.34.56.0"),
 	"mask_by_prefix()"
 	);
-    
+
     //
     // Test getting the prefix length of the contiguous mask.
     //
@@ -626,6 +628,45 @@ test_ipv4_manipulate_address()
     //
     verbose_assert(IPv4("12.34.56.78").bits(0, 8) == 78, "bits()");
 }
+
+/**
+ * Test IPv4 invalid address manipulation.
+ */
+void
+test_ipv4_invalid_manipulate_address()
+{
+    const char *addr_string4 = "12.34.56.78";
+    
+    //
+    // Test making an invalid IPv4 mask prefix.
+    //
+    try {
+	// Invalid prefix length
+	IPv4 ip(IPv4::make_prefix(IPv4::addr_bitlen() + 1));
+	verbose_log("Cannot catch invalid IPv4 mask prefix with length %d : FAIL\n",
+		    IPv4::addr_bitlen() + 1);
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Test masking with an invalid IPv4 mask prefix.
+    //
+    try {
+	// Invalid mask prefix
+	IPv4 ip(addr_string4);
+	ip.mask_by_prefix(IPv4::addr_bitlen() + 1);
+	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %d : FAIL\n",
+		    IPv4::addr_bitlen() + 1);
+	incr_failures();
+    } catch (const InvalidNetmaskLength& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+}    
 
 int
 main(int argc, char * const argv[])
@@ -673,6 +714,7 @@ main(int argc, char * const argv[])
 	test_ipv4_address_type();
 	test_ipv4_address_const();
 	test_ipv4_manipulate_address();
+	test_ipv4_invalid_manipulate_address();
 	ret_value = failures() ? 1 : 0;
     } catch (...) {
 	// Internal error
