@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.21 2003/11/11 02:03:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.22 2003/11/19 01:05:33 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -109,18 +109,34 @@ BGPMain::~BGPMain()
     */
     _rib_ipc_handler->register_ribname("");
 
+    bool message = false;
     while(_xrl_router->pending()) {
 	eventloop().run();
-	XLOG_INFO("xrl router still has pending operations");
+	if (!message) {
+	    XLOG_INFO("xrl router still has pending operations");
+	    message = true;
+	}
+    }
+
+    if (message) {
+	XLOG_INFO("xrl router no more pending operations");
     }
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting rib_ipc_handler\n");
     delete _rib_ipc_handler;
 
+    message = false;
     while(_xrl_router->pending()) {
 	eventloop().run();
-	XLOG_INFO("xrl router still has pending operations");
+	if (!message) {
+	    XLOG_INFO("xrl router still has pending operations");
+	    message = true;
+	}
+    }
+
+    if (message) {
+	XLOG_INFO("xrl router no more pending operations");
     }
 
     debug_msg("-------------------------------------------\n");
