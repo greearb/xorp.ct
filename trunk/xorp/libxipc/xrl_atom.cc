@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.14 2004/09/07 20:41:03 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.15 2005/01/14 01:35:15 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -477,11 +477,13 @@ XrlAtom::value() const
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
     case xrlatom_int32:
-	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%d", _i32val);
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%d",
+		 XORP_INT_CAST(_i32val));
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
     case xrlatom_uint32:
-	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%u", _u32val);
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%u",
+		 XORP_UINT_CAST(_u32val));
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
     case xrlatom_ipv4:
@@ -968,7 +970,7 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
     size_t pb = packed_bytes();
     if (buffer_bytes < pb) {
 	debug_msg("Buffer too small (%u < %u)\n",
-		  (uint32_t)buffer_bytes, (uint32_t)pb);
+		  XORP_UINT_CAST(buffer_bytes), XORP_UINT_CAST(pb));
 	return 0;
     }
 
@@ -1060,14 +1062,14 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	_have_data = true;
 
 	debug_msg("Unpacked %u remain %u\n",
-		  static_cast<uint32_t>(unpacked),
-		  static_cast<uint32_t>(buffer_bytes));
+		  XORP_UINT_CAST(unpacked),
+		  XORP_UINT_CAST(buffer_bytes));
 
 	// Check size for fixed width packed types.
 	if (packed_bytes_fixed() && buffer_bytes < packed_bytes()) {
 	    debug_msg("Insufficient space (%u < %u) for type %d\n",
-		      static_cast<uint32_t>(buffer_bytes),
-		      static_cast<uint32_t>(packed_bytes()), _type);
+		      XORP_UINT_CAST(buffer_bytes),
+		      XORP_UINT_CAST(packed_bytes()), _type);
 	    _have_data = false;
 	    return 0;
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.18 2003/11/13 19:05:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.19 2004/06/10 22:41:06 hodson Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -85,7 +85,8 @@ make_cookie()
     }
     uint32_t r = random();
     invoked++;
-    return c_format("%08x%08x", invoked, r ^ hash_base);
+    return c_format("%08x%08x", XORP_UINT_CAST(invoked),
+		    XORP_UINT_CAST(r ^ hash_base));
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/header.cc,v 1.4 2004/03/27 18:09:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/header.cc,v 1.5 2004/06/10 22:41:07 hodson Exp $"
 
 #include "libxorp/xorp.h"
 #include <stdio.h>
@@ -48,7 +48,8 @@ HeaderWriter::add(const string& name, int32_t value) throw (InvalidName)
     if (name_valid(name) == false) throw InvalidName();
 
     char buffer[32];
-    snprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), "%d", value);
+    snprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), "%d",
+	     XORP_UINT_CAST(value));
     _list.push_back(Node(name, buffer));
 
     return *this;
@@ -60,7 +61,8 @@ HeaderWriter::add(const string& name, uint32_t value) throw (InvalidName)
     if (name_valid(name) == false) throw InvalidName();
 
     char buffer[32];
-    snprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), "%u", value);
+    snprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), "%u", 
+	     XORP_UINT_CAST(value));
     _list.push_back(Node(name, buffer));
 
     return *this;
