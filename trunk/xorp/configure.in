@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.129 2004/12/15 17:51:49 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.130 2005/01/28 00:35:25 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -116,7 +116,7 @@ dnl ----------------------------
 dnl --disable-debug
 dnl ----------------------------
 AC_ARG_ENABLE(debug,
-	[  --disable-debug                  disable debug messages ],
+	[  --disable-debug                  disable compiler debug information ],
 	[],
 	[enable_debug=yes;]			dnl XXX: enable by default
 )
