@@ -517,7 +517,7 @@ char *_pu_end_of_path(const char *string, int start_from)
   for(i=start_from; (c=string[i]) != '\0'; i++) {
     if(escaped) {
       escaped = 0;
-    } else if(isspace(c)) {
+    } else if(isspace((int)(unsigned char) c)) {
       break;
     } else if(c == '\\') {
       escaped = 1;

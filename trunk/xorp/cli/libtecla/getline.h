@@ -53,7 +53,7 @@
  * Return the character that would be produced by pressing the
  * specified key plus the control key.
  */
-#define MAKE_CTRL(c) ((c)=='?' ? '\177' : ((unsigned char)toupper(c) & ~0x40))
+#define MAKE_CTRL(c) ((c)=='?' ? '\177' : ((unsigned char)toupper((int)(unsigned char)(c)) & ~0x40))
 
 /*
  * Return the character that would be produced by pressing the
@@ -65,7 +65,7 @@
  * Given a binary control character, return the character that
  * had to be pressed at the same time as the control key.
  */
-#define CTRL_TO_CHAR(c) (toupper((unsigned char)(c) | 0x40))
+#define CTRL_TO_CHAR(c) (toupper((int)(unsigned char)(c) | 0x40))
 
 /*
  * Given a meta character, return the character that was pressed

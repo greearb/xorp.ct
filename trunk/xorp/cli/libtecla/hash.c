@@ -517,7 +517,7 @@ static HashNode *_new_HashNode(HashTable *hash, const char *name, int code,
     const char *src = name;
     char *dst = node->symbol.name;
     for( ; *src; src++,dst++)
-      *dst = tolower(*src);
+      *dst = tolower((int)(unsigned char) *src);
     *dst = '\0';
   };
   return node;
@@ -640,8 +640,8 @@ static int _ht_lower_strcmp(const char *node_key, const char *look_key)
   do {
     cn = *node_key++;
     cl = *look_key++;
-  } while(cn && cn==tolower(cl));
-  return cn - tolower(cl);
+  } while(cn && cn==tolower((int)(unsigned char) cl));
+  return cn - tolower((int)(unsigned char) cl);
 }
 
 /*.......................................................................
