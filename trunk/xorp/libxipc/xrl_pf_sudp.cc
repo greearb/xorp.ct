@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.16 2003/05/09 21:00:53 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.17 2003/06/03 19:10:31 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -220,7 +220,8 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 XrlPFSUDPSender::~XrlPFSUDPSender()
 {
     instance_count--;
-    debug_msg("~XrlPFSUDPSender - instance count %d\n", instance_count);
+    debug_msg("~XrlPFSUDPSender %p- instance count %d\n",
+	      this, instance_count);
 
     if (instance_count == 0) {
 	_eventloop.remove_selector(sender_fd, SEL_RD);
@@ -276,15 +277,18 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 void
 XrlPFSUDPSender::timeout_hook(XUID xuid)
 {
-
     map<const XUID, Request>::iterator i = requests_pending.find(xuid);
     assert (i != requests_pending.end());
 
     Request& r = i->second;
-    r.callback->dispatch(XrlError::REPLY_TIMED_OUT(), *r.xrl, 0);
+    SendCallback cb = r.callback;
+    Xrl x = *r.xrl;	// XXX gratuitous copy fix me (fundamentally :-)
 
-    debug_msg("Erasing state for %s (timeout)\n", r.xuid.str().c_str());
+    debug_msg("%p Erasing state for %s (timeout)\n",
+	      this, r.xuid.str().c_str());
+
     requests_pending.erase(i);
+    cb->dispatch(XrlError::REPLY_TIMED_OUT(), x, 0);
 }
 
 // ----------------------------------------------------------------------------
