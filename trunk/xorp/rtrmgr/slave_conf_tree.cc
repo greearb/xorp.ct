@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.3 2003/04/22 23:43:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.4 2003/04/23 04:24:35 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
@@ -56,7 +56,7 @@ int SlaveConfigTree::parse(const string& configuration,
 bool
 SlaveConfigTree::commit_changes(string &result,
 				XorpShell& xorpsh,
-				XorpBatch::CommitCallback cb) {
+				CallBack cb) {
 #ifdef DEBUG_COMMIT
     printf("##############################################################\n");
     printf("SlaveConfigTree::commit_changes\n");
@@ -80,7 +80,7 @@ SlaveConfigTree::commit_changes(string &result,
 	//something went wrong - return the error message.
 	return false;
     }
-    XorpBatch::CommitCallback empty_cb;
+    CallBack empty_cb;
     try {
 	_xclient.end_transaction(tid, empty_cb);
     } catch (UnexpandedVariable& uvar) {
@@ -100,7 +100,7 @@ SlaveConfigTree::commit_changes(string &result,
 void SlaveConfigTree::commit_phase2(const XrlError& e, 
 				    const bool* locked, 
 				    const uint32_t* /*lock_holder*/,
-				    XorpBatch::CommitCallback cb,
+				    CallBack cb,
 				    XorpShell* xorpsh) {
     if (!locked || (e != XrlError::OKAY())) {
 	cb->dispatch(XORP_ERROR, "Failed to get lock");
@@ -125,7 +125,7 @@ void SlaveConfigTree::commit_phase2(const XrlError& e,
 }
 
 void SlaveConfigTree::commit_phase3(const XrlError& e, 
-				    XorpBatch::CommitCallback cb,
+				    CallBack cb,
 				    XorpShell* xorpsh) {
 #ifdef DEBUG_COMMIT
     printf("commit_phase3\n");
@@ -143,7 +143,7 @@ void SlaveConfigTree::commit_phase3(const XrlError& e,
 }
 
 void SlaveConfigTree::commit_phase4(bool success, const string& errmsg,
-				    XorpBatch::CommitCallback cb,
+				    CallBack cb,
 				    XorpShell *xorpsh) {
     //We get here when we're called back by the rtrmgr with the
     //results of our commit.
@@ -157,7 +157,7 @@ void SlaveConfigTree::commit_phase4(bool success, const string& errmsg,
 
 void SlaveConfigTree::commit_phase5(const XrlError& /*e*/, 
 				    bool success,
-				    XorpBatch::CommitCallback cb,
+				    CallBack cb,
 				    XorpShell* /*xorpsh*/) {
 #ifdef DEBUG_COMMIT
     printf("commit_phase5\n");

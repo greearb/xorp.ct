@@ -12,9 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.13 2003/04/25 19:14:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.14 2003/05/01 07:55:28 mjh Exp $"
 
-#include "rtrmgr_module.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h> 
@@ -22,8 +21,14 @@
 #include <sys/param.h>
 #include <sys/wait.h> 
 #include <map>
+
+#include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "module_manager.hh"
 #include "template_commands.hh"
+
 extern "C" int errno;
 
 static map<pid_t, Module*> module_pids;

@@ -12,10 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.4 2003/05/02 09:00:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.5 2003/05/02 22:33:53 mjh Exp $"
 
+#include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
 #include "task.hh"
 #include "module_manager.hh"
+#include "xorp_client.hh"
 
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 			 const XrlRouter::XrlCallback& cb, Task& task) 

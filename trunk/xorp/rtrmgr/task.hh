@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.4 2003/05/02 09:00:01 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.5 2003/05/02 22:33:54 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -22,10 +22,11 @@
 #include "libxorp/xorp.h"
 #include "libxipc/xrl_router.hh"
 #include "unexpanded_xrl.hh"
-#include "xorp_client.hh"
 
 class Task;
 class TaskManager;
+class XorpClient;
+class ModuleManager;
 
 class Validation {
 public:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.6 2003/04/22 23:43:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.7 2003/04/23 21:09:32 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -267,7 +267,7 @@ XorpShell::lock_config(LOCK_CALLBACK cb) {
 void
 XorpShell::commit_changes(const string& deltas, const string& deletions,
 			  GENERIC_CALLBACK cb,
-			  XorpBatch::CommitCallback final_cb) {
+			  CallBack final_cb) {
     _commit_callback = final_cb;
     _rtrmgr_client.send_apply_config_change("rtrmgr", _authtoken, 
 					    _ipc_name,
@@ -313,7 +313,7 @@ XorpShell::save_to_file(const string& filename, GENERIC_CALLBACK cb) {
 
 void 
 XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
-			  XorpBatch::CommitCallback final_cb) {
+			  CallBack final_cb) {
     _commit_callback = final_cb;
     _rtrmgr_client.send_load_config("rtrmgr", _authtoken, _ipc_name,
 				    filename, cb);

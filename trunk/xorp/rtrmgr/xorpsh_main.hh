@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.3 2003/03/10 23:21:03 hodson Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.4 2003/04/22 19:42:18 mjh Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -31,6 +31,7 @@ class TemplateTree;
 
 
 class XorpShell {
+    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
     XorpShell(const string& IPCname, 
 	      const string& config_template_dir, 
@@ -64,7 +65,7 @@ public:
 
     void commit_changes(const string& deltas, const string& deletions,
 			GENERIC_CALLBACK cb,
-			XorpBatch::CommitCallback final_cb);
+			CallBack final_cb);
     void commit_done(bool success, const string& errmsg);
 
     void unlock_config(GENERIC_CALLBACK cb);
@@ -79,7 +80,7 @@ public:
 
     void load_from_file(const string& filename, 
 			GENERIC_CALLBACK cb,
-			XorpBatch::CommitCallback final_cb);
+			CallBack final_cb);
 
     void config_changed(uid_t user_id, const string& deltas, 
 			const string& deletions);
@@ -115,7 +116,7 @@ private:
 
     //used to store the callback during a commit until we get called
     //with the response
-    XorpBatch::CommitCallback _commit_callback;
+    CallBack _commit_callback;
     string _commit_status; /*used for transient storage of error
 			     messages from commit */
 

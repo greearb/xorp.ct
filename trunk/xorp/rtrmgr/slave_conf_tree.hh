@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.3 2003/04/22 23:43:01 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.4 2003/04/23 04:24:35 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -35,6 +35,7 @@ class ConfTemplate;
 class SlaveConfigTreeNode;
 
 class SlaveConfigTree : public ConfigTree {
+    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
     SlaveConfigTree(XorpClient& xclient);
     SlaveConfigTree(const string& configuration, TemplateTree *ct,
@@ -43,21 +44,21 @@ public:
 	      const string& conffile);
     bool commit_changes(string &response,
 			XorpShell& xorpsh,
-			XorpBatch::CommitCallback cb);
+			CallBack cb);
     void commit_phase2(const XrlError& e, 
 		       const bool* locked, 
 		       const uint32_t* lock_holder,
-		       XorpBatch::CommitCallback cb,
+		       CallBack cb,
 		       XorpShell *xorpsh);
     void commit_phase3(const XrlError& e, 
-		       XorpBatch::CommitCallback cb,
+		       CallBack cb,
 		       XorpShell* xorpsh);
     void commit_phase4(bool success, const string& errmsg,
-		       XorpBatch::CommitCallback cb,
+		       CallBack cb,
 		       XorpShell* xorpsh);
     void commit_phase5(const XrlError& e, 
 		       bool success,
-		       XorpBatch::CommitCallback cb,
+		       CallBack cb,
 		       XorpShell* xorpsh);
     string discard_changes();
     string mark_subtree_for_deletion(const list <string>& pathsegs, 

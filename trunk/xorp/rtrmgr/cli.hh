@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.3 2003/03/10 23:20:58 hodson Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.4 2003/04/23 21:09:32 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -96,7 +96,7 @@ public:
 		    uint32_t,		
 		    const char *command_global_name,
 		    const vector<string>& argv);
-    void commit_done(int status, const string& err_msg);
+    void commit_done(bool success, string errmsg);
 
     int show_func(const char *,
 		  const char *,
@@ -120,7 +120,7 @@ public:
 		  const char *command_global_name,
 		  const vector<string>& argv);
     void load_communicated(const XrlError& e);
-    void load_done(int status, const string& response);
+    void load_done(bool success, string errmsg);
 
     typedef XorpCallback2<void, bool, const string&>::RefPtr OpModeCallback;
     void op_mode_cmd_done(bool success, const string& result);

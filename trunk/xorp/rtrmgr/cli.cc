@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.3 2003/04/23 04:24:34 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.4 2003/04/23 21:09:32 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -1239,16 +1239,16 @@ void RouterCLI::reenable_ui() {
     _cli_client.post_process_command(false);
 }
 
-void RouterCLI::commit_done(int status, const string& response) {
+void RouterCLI::commit_done(bool success, string errmsg) {
     //If we get a failure back here, report it.  Otherwise expect an
     //XRL from the rtrmgr to inform us what really happened as the
     //change was applied.
-    if (status != XORP_OK) {
+    if (!success) {
 	_cli_client.cli_print("Commit Failed\n");
-	_cli_client.cli_print(response.c_str());
+	_cli_client.cli_print(errmsg.c_str());
     } else {
 	_cli_client.cli_print("OK\n");
-	_cli_client.cli_print(response.c_str());
+	_cli_client.cli_print(errmsg.c_str());
     }
     _xorpsh.set_mode(XorpShell::MODE_IDLE);
     apply_path_change();
@@ -1453,10 +1453,10 @@ RouterCLI::load_communicated(const XrlError& e) {
 //all the router modules, or when something goes wrong during this
 //process
 void 
-RouterCLI::load_done(int status, const string& response) {
-    if (status != XORP_OK) {
+RouterCLI::load_done(bool success, string errmsg) {
+    if (!success) {
 	_cli_client.cli_print("ERROR: Load failed.\n");
-	_cli_client.cli_print(response);
+	_cli_client.cli_print(errmsg);
     } else {
 	_cli_client.cli_print("Load done.\n");
     }

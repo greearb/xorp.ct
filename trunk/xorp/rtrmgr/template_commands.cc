@@ -12,14 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.19 2003/05/02 09:00:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.20 2003/05/02 22:33:54 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
+#include "libxipc/xrl_router.hh"
 #include "template_commands.hh"
 #include "xrldb.hh"
 #include "template_tree.hh"
-#include "libxipc/xrl_router.hh"
 #include "task.hh"
 
 Action::Action(const list<string>& action) 

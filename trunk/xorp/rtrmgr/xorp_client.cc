@@ -12,250 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.10 2003/04/24 23:43:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.11 2003/05/01 07:55:28 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
-#include "xorp_client.hh"
+#include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
+#include "libxorp/ipv4net.hh"
+#include "libxorp/timer.hh"
 #include "unexpanded_xrl.hh"
 #include "module_manager.hh"
 #include "template_commands.hh"
+#include "xorp_client.hh"
 
-XorpBatch::XorpBatch(XorpClient& xclient, uint tid)
-    : _xclient(xclient)
-{
-    _tid = tid;
-}
-
-EventLoop&
-XorpBatch::eventloop() const 
-{
-    return _xclient.eventloop();
-}
-
-XorpClient&
-XorpBatch::client() const
-{
-    return _xclient;
-}
-
-int
-XorpBatch::start(CommitCallback ending_cb) {
-    debug_msg("Transaction Start: %u Xrls in this transaction\n",
-	   (uint32_t)_batch_items.size());
-    _list_complete_callback = ending_cb;
-    if (_batch_items.empty()) {
-	_xclient.remove_transaction(_tid);
-	if (!_list_complete_callback.is_empty())
-	    _list_complete_callback->dispatch(XORP_OK, "");
-	delete this;
-	return XORP_OK;
-    }
-    string errmsg;
-    try {
-	if (_batch_items.front()->execute(_xclient, this, errmsg) 
-	    == XORP_ERROR) {
-	    abort_transaction(errmsg);
-	    return XORP_ERROR;
-	}
-    } catch (UnexpandedVariable& uvar) {
-	//clean up, then re-throw
-	abort_transaction(uvar.str());
-	throw uvar;
-    }
-    return XORP_OK;
-}
-
-
-int
-XorpBatch::add_xrl(const UnexpandedXrl&   xrl,
-		   XrlRouter::XrlCallback cb,
-		   bool			  do_exec,
-		   uint32_t		  retries,
-		   uint32_t		  retry_ms)
-{
-    debug_msg("XorpBatch::add_xrl\n");
-    XorpBatchXrlItem *batch_item;
-    batch_item = new XorpBatchXrlItem(xrl, cb, do_exec, retries, retry_ms);
-    _batch_items.push_back(batch_item);
-    debug_msg("XorpBatch::add_xrl done\n");
-    return XORP_OK;
-}
-
-int
-XorpBatch::add_module_start(ModuleManager& mmgr, const string& mod_name,
-			    XCCommandCallback cb, 
-			    bool do_exec) {
-    debug_msg("XorpBatch::add_module_start\n");
-    XorpBatchModuleItem *batch_item;
-    batch_item = new XorpBatchModuleItem(mmgr, mod_name, /*start*/true, 
-					 cb, do_exec);
-    _batch_items.push_back(batch_item);
-    return XORP_OK;
-}
-
-
-
-void
-XorpBatch::batch_item_done(XorpBatchItem* batch_item, bool success,
-			   const string& errmsg) {
-    assert(batch_item == _batch_items.front());
-    if (success) {
-	//the action succeeded
-	delete batch_item;
-	_batch_items.pop_front();
-
-	if (_batch_items.empty()) {
-	    _xclient.remove_transaction(_tid);
-	    if (!_list_complete_callback.is_empty())
-		_list_complete_callback->dispatch(XORP_OK, "");
-	    delete this;
-	    return;
-	}
-
-	//Call the next Xrl
-	string errmsg;
-	if (_batch_items.front()->execute(_xclient, this, errmsg) == XORP_ERROR)
-	    abort_transaction(errmsg);
-    } else {
-	abort_transaction(errmsg);
-    }
-}
-
-void XorpBatch::abort_transaction(const string& errmsg) {
-    //something went wrong - terminate the whole transaction set
-    while (!_batch_items.empty()) {
-	delete _batch_items.front();
-	_batch_items.pop_front();
-    }
-    _xclient.remove_transaction(_tid);
-    if (!_list_complete_callback.is_empty())
-	_list_complete_callback->dispatch(XORP_ERROR, errmsg);
-    delete this;
-}
-
-XorpBatchItem::XorpBatchItem(XrlRouter::XrlCallback cb,
-			     bool do_exec) 
-    : _callback(cb), _do_exec(do_exec) 
-{
-}
-
-XorpBatchXrlItem::XorpBatchXrlItem(const UnexpandedXrl&		 uxrl,
-				   const XrlRouter::XrlCallback& cb,
-				   bool				 do_exec,
-				   uint32_t			 retries,
-				   uint32_t 			 retry_ms) 
-    : XorpBatchItem(cb, do_exec), _unexpanded_xrl(uxrl),
-      _retries(retries), _retry_ms(retry_ms)
-{
-}
-
-int
-XorpBatchXrlItem::execute(XorpClient& xclient, 
-			  XorpBatch *batch,
-			  string &errmsg)
-{
-    _batch = batch;
-    Xrl *xrl = _unexpanded_xrl.xrl();
-    if (xrl == NULL) {
-	errmsg = "Failed to expand XRL " + _unexpanded_xrl.str();
-	return XORP_ERROR;
-    }
-
-    string xrl_return_spec = _unexpanded_xrl.xrl_return_spec();
-    return xclient.
-	send_now(*xrl, callback(this,
-				&XorpBatchXrlItem::response_callback),
-		 xrl_return_spec, 
-		 _do_exec);
-}
-
-void
-XorpBatchXrlItem::retry_execution()
-{
-    string tmp_error;
-    debug_msg("Retrying xrl send\n");
-    if (execute(_batch->client(), _batch, tmp_error) != XORP_OK) {
-	abort();
-    }
-}
-
-void
-XorpBatchXrlItem::response_callback(const XrlError& err, 
-				    XrlArgs* xrlargs) {
-
-    if (err != XrlError::OKAY() && _retries > 0) {
-	_retry_timer =
-	    _batch->eventloop().new_oneoff_after_ms(_retry_ms,
-		callback(this, &XorpBatchXrlItem::retry_execution));
-	_retries--;
-	debug_msg("Attempting resend (retries left %d)", _retries);
-	return;
-    }
-
-    if (!_callback.is_empty())
-	_callback->dispatch(err, xrlargs);
-    bool success = true;
-    string errmsg;
-    if (err != XrlError::OKAY()) {
-	success = false;
-	errmsg = err.str();
-    }
-    _batch->batch_item_done(this, success, errmsg);
-}
-
-XorpBatchModuleItem::XorpBatchModuleItem(ModuleManager& mmgr, 
-					 const string& mod_name,
-					 bool start,
-					 XCCommandCallback cb, 
-					 bool do_exec) 
-    :XorpBatchItem(cb, do_exec), _mmgr(mmgr), _mod_name(mod_name), 
-    _start(start)
-{
-    assert(_mmgr.module_exists(mod_name));
-    debug_msg("new XorpBatchModuleItem %s\n", _mod_name.c_str());
-}
-
-int 
-XorpBatchModuleItem::execute(XorpClient& /*xclient*/, XorpBatch *batch, 
-			     string& errmsg) {
-    debug_msg("XorpBatchModuleItem::execute (start %d)", _start);
-    _batch = batch;
-    if (_start) {
-	debug_msg("XorpBatchModuleItem::execute %s\n", _mod_name.c_str());
-	XorpCallback1<void, bool>::RefPtr cb;
-	cb = callback(this, &XorpBatchModuleItem::response_callback,
-		      string(""));
-	if (_mmgr.start_module(_mod_name, _do_exec, cb) == XORP_OK) {
-	    return XORP_OK;
-	} else {
-	    //we failed - trigger the callback immediately
-	    errmsg = "Execution failed\n";
-	    response_callback(false, errmsg);
-	    return XORP_ERROR;
-	}
-    } else {
-	//stop
-	//XXX
-	abort();
-    }
-    return XORP_ERROR;
-}
-
-void 
-XorpBatchModuleItem::response_callback(bool success, string errmsg) {
-    debug_msg("XorpBatchModuleItem::response_callback %s\n", 
-	      _mod_name.c_str());
-    if (_start) {
-	if (!_callback.is_empty())
-	    _callback->dispatch(XrlError::OKAY(), 0);
-    } else {
-	//XXX
-	abort();
-    }
-    _batch->batch_item_done(this, success, errmsg);
-}
 
 /***********************************************************************/
 /* XorpClient                                                          */
@@ -352,59 +122,13 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
 }
 
 int
-XorpClient::send_xrl(uint		  tid,
-		     const UnexpandedXrl& xrl, 
-		     XCCommandCallback	  cb,
-		     bool 		  do_exec,
-		     uint32_t		  retries,
-		     uint32_t		  retry_ms)
+XorpClient::send_xrl(const UnexpandedXrl& xrl, 
+		     XrlRouter::XrlCallback cb,
+		     bool do_exec)
 {
-    XorpBatch* transaction;
-    map<uint, XorpBatch*>::iterator i;
-    i = _transactions.find(tid);
-    assert(i != _transactions.end());
-
-    transaction = i->second;
-    return transaction->add_xrl(xrl, cb, do_exec, retries, retry_ms);
+    UNUSED(xrl);
+    UNUSED(cb);
+    UNUSED(do_exec);
+    return XORP_OK;
 }
 
-int XorpClient::start_module(uint tid, 
-			     ModuleManager& module_manager, 
-			     const string& mod_name,
-			     XCCommandCallback cb,
-			     bool do_exec) {
-    XorpBatch* transaction;
-    map<uint, XorpBatch*>::iterator i;
-    i = _transactions.find(tid);
-    assert(i != _transactions.end());
-
-    transaction = i->second;
-    return transaction->add_module_start(module_manager, mod_name,
-					 cb, do_exec);
-}
-
-uint 
-XorpClient::begin_transaction() {
-    _max_tid++; 
-    _transactions[_max_tid] = new XorpBatch(*this, _max_tid);
-    return _max_tid;
-}
-
-int
-XorpClient::end_transaction(uint tid, 
-			    XorpBatch::CommitCallback ending_cb) {
-    XorpBatch* transaction;
-    map<uint, XorpBatch*>::iterator i;
-    i = _transactions.find(tid);
-    assert(i != _transactions.end());
-    transaction = i->second;
-    return transaction->start(ending_cb);
-}
-
-void
-XorpClient::remove_transaction(uint tid) {
-    map<uint, XorpBatch*>::iterator i;
-    i = _transactions.find(tid);
-    if (i != _transactions.end())
-	_transactions.erase(i);
-}
