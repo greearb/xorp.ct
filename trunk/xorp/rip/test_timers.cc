@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.4 2003/06/09 22:15:33 hodson Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.5 2004/02/20 19:29:15 hodson Exp $"
 
 #include <set>
 
@@ -28,6 +28,8 @@
 #include "peer.hh"
 #include "route_db.hh"
 #include "system.hh"
+
+#include "test_utils.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -157,94 +159,6 @@ public:
 };
 
 
-// ----------------------------------------------------------------------------
-// Network making utilities
-
-static uint32_t
-fake_random()
-{
-    static uint64_t r = 883652921;
-    r = r * 37 + 1;
-    r = r & 0xffffffff;
-    return r & 0xffffffff;
-}
-
-static void
-make_nets(set<IPv4Net>& nets, uint32_t n)
-{
-    uint32_t fails = 0;
-    uint32_t done = 0;
-    uint32_t iter = 0;
-    // attempt at deterministic nets sequence
-    while (done != n) {
-	IPv4 addr(htonl(fake_random()));
-	IPv4Net net = IPv4Net(addr, 1 + (iter % 23) + (fake_random() % 8));
-	if (nets.find(net) == nets.end()) {
-	    nets.insert(net);
-	    fails = 0;
-	    done++;
-	} else {
-	    // Does not occur with test parameters in practice
-	    if (++fails == 5) {
-		verbose_log("Failed to generate nets (size = %u).\n", done);
-	    }
-	}
-	iter++;
-    }
-}
-
-static void
-make_nets(set<IPv6Net>& nets, uint32_t n)
-{
-    uint32_t fails = 0;
-    uint32_t done = 0;
-    uint32_t iter = 0;
-    // attempt at deterministic nets sequence
-    while (done != n) {
-	uint32_t x[4];
-	x[0] = htonl(fake_random());
-	x[1] = x[0];
-	x[2] = x[0];
-	x[3] = x[0];
-	IPv6 addr(x);
-	IPv6Net net = IPv6Net(addr, 1 + fake_random() % IPv6::ADDR_BITLEN);
-	if (nets.find(net) == nets.end()) {
-	    nets.insert(net);
-	    fails = 0;
-	    done++;
-	} else {
-	    // Does not occur with test parameters in practice
-	    if (++fails == 5) {
-		verbose_log("Failed to generate nets (size = %u).\n", done);
-	    }
-	}
-	iter++;
-    }
-}
-
-template <typename A>
-struct RouteInjector : public unary_function<A,void>
-{
-    RouteInjector(RouteDB<A>& r, const A& my_addr, uint32_t cost,
-		  Peer<A>* peer)
-	: _r(r), _m(my_addr), _c(cost), _p(peer), _injected(0) {}
-
-    void operator() (const IPNet<A>& net)
-    {
-	if (_r.update_route(net, _m, _c, 0, _p) == true)
-	    _injected++;
-	else
-	    verbose_log("Failed to update %s\n", net.str().c_str());
-    }
-    uint32_t injected() const { return _injected; }
-
-protected:
-    RouteDB<A>& _r;
-    A		_m;
-    uint32_t	_c;
-    Peer<A>*	_p;
-    uint32_t	_injected;
-};
 
 
 //----------------------------------------------------------------------------

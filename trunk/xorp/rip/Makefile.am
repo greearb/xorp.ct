@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.23 2004/02/20 07:28:40 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.24 2004/02/20 19:29:15 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -87,9 +87,11 @@ test_request_SOURCES		 = test_request.cc
 test_request_LDADD		 = ./librip.a $(LDADD)
 
 test_route_walk_SOURCES		 = test_route_walk.cc
+test_route_walk_SOURCES		+= test_utils.hh
 test_route_walk_LDADD		 = ./librip.a ./libripng.a $(LDADD)
 
 test_timers_SOURCES		 = test_timers.cc
+test_timers_SOURCES		+= test_utils.hh
 test_timers_LDADD		 = ./librip.a ./libripng.a $(LDADD)
 
 test_update_queue_SOURCES	 = test_update_queue.cc

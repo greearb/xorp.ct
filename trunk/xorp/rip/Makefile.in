@@ -134,10 +134,10 @@ test_packets_LDADD = ./librip.a $(LDADD)
 test_request_SOURCES = test_request.cc
 test_request_LDADD = ./librip.a $(LDADD)
 
-test_route_walk_SOURCES = test_route_walk.cc
+test_route_walk_SOURCES = test_route_walk.cc test_utils.hh
 test_route_walk_LDADD = ./librip.a ./libripng.a $(LDADD)
 
-test_timers_SOURCES = test_timers.cc
+test_timers_SOURCES = test_timers.cc test_utils.hh
 test_timers_LDADD = ./librip.a ./libripng.a $(LDADD)
 
 test_update_queue_SOURCES = test_update_queue.cc

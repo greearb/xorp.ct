@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.3 2003/07/15 19:05:47 hodson Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.4 2004/02/20 07:28:40 hodson Exp $"
 
 #include <set>
 
@@ -29,6 +29,8 @@
 #include "peer.hh"
 #include "route_db.hh"
 #include "system.hh"
+
+#include "test_utils.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -84,64 +86,6 @@ public:
 	}
     }
 };
-
-
-// ----------------------------------------------------------------------------
-// Pseudo random number and network generation
-
-static uint32_t
-fake_random()
-{
-    static uint64_t r = 883652921;
-    r = r * 37 + 1;
-    r = r & 0xffffffff;
-    return r & 0xffffffff;
-}
-
-static void
-make_nets(set<IPv4Net>& nets, uint32_t n)
-{
-    uint32_t fails = 0;
-    // attempt at deterministic nets sequence
-    while (nets.size() != n) {
-	IPv4 addr(htonl(fake_random()));
-	IPv4Net net = IPv4Net(addr, 1 + n % 23 + fake_random() % 8);
-	if (nets.find(net) == nets.end()) {
-	    nets.insert(net);
-	    fails = 0;
-	} else {
-	    // Does not occur with test parameters in practice
-	    if (++fails == 5) {
-		verbose_log("Failed to generate nets.\n");
-	    }
-	}
-    }
-}
-
-static void
-make_nets(set<IPv6Net>& nets, uint32_t n)
-{
-    uint32_t fails = 0;
-    // attempt at deterministic nets sequence
-    while (nets.size() != n) {
-	uint32_t x[4];
-	x[0] = htonl(fake_random());
-	x[1] = x[0];
-	x[2] = x[0];
-	x[3] = x[0];
-	IPv6 addr(x);
-	IPv6Net net = IPv6Net(addr, 1 + n % 23 + fake_random() % 8);
-	if (nets.find(net) == nets.end()) {
-	    nets.insert(net);
-	    fails = 0;
-	} else {
-	    // Does not occur with test parameters in practice
-	    if (++fails == 5) {
-		verbose_log("Failed to generate nets.\n");
-	    }
-	}
-    }
-}
 
 
 // ----------------------------------------------------------------------------
@@ -257,23 +201,14 @@ public:
     {
 	const uint32_t n_routes = 20000;
 
-	verbose_log("Testing IPv%u\n", A::ip_version());
-	verbose_log("Generating nets\n");
-	set<IPNet<A> > nets;
-	make_nets(nets, n_routes);
-
 	verbose_log("Creating routes for nets\n");
 	RouteDB<A>& rdb = _rip_system.route_db();
 
-	for (typename set<IPNet<A> >::const_iterator n = nets.begin();
-	     n != nets.end(); ++n) {
-	    if (rdb.update_route(*n, A::ZERO(), 5, 0,
-				 _pm.the_peer()) == false) {
-		verbose_log("Failed to add route for %s\n",
-			    n->str().c_str());
-		return 1;
-	    }
-	}
+	set<IPNet<A> > nets;
+	make_nets(nets, n_routes);
+	for_each(nets.begin(), nets.end(),
+		 RouteInjector<A>(rdb, A::ZERO(), 5, _pm.the_peer()));
+
 	// Walk routes on 1ms timer
 	// We make 2 passes over routes with 97 routes read per 1ms
 	// Total time taken 2 * 20000 / 97 * 0.001 = 407ms
@@ -412,10 +347,14 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	RouteWalkTester<IPv4> rwt4;
-	rval = rwt4.run_test();
-	RouteWalkTester<IPv6> rwt6;
-	rval |= rwt6.run_test();
+	{
+	    RouteWalkTester<IPv4> rwt4;
+	    rval = rwt4.run_test();
+	}
+	{
+	    RouteWalkTester<IPv6> rwt6;
+	    rval |= rwt6.run_test();
+	}
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
