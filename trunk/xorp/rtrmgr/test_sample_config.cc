@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.18 2004/12/09 07:54:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.19 2004/12/23 17:33:14 mjh Exp $"
 
 
 #include <signal.h>
@@ -87,7 +87,7 @@ Rtrmgr::run()
     try {
 	xrldb = new XRLdb(xrl_targets_dir, /*verbose*/ true);
     } catch (const InitError& e) {
-	fprintf(stderr, "Init error in XrlDB: %s", e.why().c_str());
+	fprintf(stderr, "Init error in XrlDB: %s\n", e.why().c_str());
 	fprintf(stderr, "test_sample_config: TEST FAILED\n");
 	return (1);
     }
@@ -111,7 +111,7 @@ Rtrmgr::run()
 
     string errmsg;
     if (tt->load_template_tree(config_template_dir, errmsg) == false) {
-	fprintf(stderr, "%s", errmsg.c_str());
+	fprintf(stderr, "%s\n", errmsg.c_str());
 	fprintf(stderr, "test_sample_config: TEST FAILED\n");
 	exit(1);
     }
