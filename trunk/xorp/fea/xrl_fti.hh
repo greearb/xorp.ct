@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.5 2004/03/15 23:33:42 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.6 2004/03/16 21:43:21 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -33,7 +33,7 @@
  * and does some extra checking not in the FtiTransactionManager
  * class.
  */
-class XrlFtiTransactionManager {
+class XrlFtiTransactionManager : public FibTableObserverBase {
 public:
     /**
      * Constructor
@@ -46,8 +46,13 @@ public:
 			     FtiConfig&	ftic,
 			     XrlRouter* xrl_router,
 			     uint32_t	max_ops = 200)
-	: _ftm(e, ftic), _max_ops(max_ops), _xrl_fea_fib_client(xrl_router)
-    {}
+	: _ftm(e, ftic), _max_ops(max_ops), _xrl_fea_fib_client(xrl_router) {
+	ftic.ftic_table_observer().add_fib_table_observer(this);
+    }
+
+    ~XrlFtiTransactionManager() {
+	ftic().ftic_table_observer().delete_fib_table_observer(this);
+    }
 
     /**
      * Start a Fti transaction.
@@ -89,6 +94,24 @@ public:
      * @see FtiConfig.
      */
     FtiConfig& ftic() { return _ftm.ftic(); }
+
+    /**
+     * Process a list of IPv4 FIB route changes.
+     * 
+     * The FIB route changes come from the underlying system.
+     * 
+     * @param fte_list the list of Fte entries to add or delete.
+     */
+    void process_fib_changes(const list<Fte4>& fte_list);
+
+    /**
+     * Process a list of IPv6 FIB route changes.
+     * 
+     * The FIB route changes come from the underlying system.
+     * 
+     * @param fte_list the list of Fte entries to add or delete.
+     */
+    void process_fib_changes(const list<Fte6>& fte_list);
 
     /**
      * Add an IPv4 FIB client.
@@ -190,7 +213,7 @@ private:
 	FibClient(const string& target_name, XrlFtiTransactionManager& xftm)
 	    : _target_name(target_name), _xftm(xftm) {}
 
-	void activate(const list<F>& fte_list);
+	void	activate(const list<F>& fte_list);
 	void	send_fib_client_route_change_cb(const XrlError& xrl_error);
 
     private:

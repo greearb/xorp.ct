@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.4 2004/03/15 23:33:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.5 2004/03/16 21:43:21 pavlin Exp $"
 
 #include "xrl_fti.hh"
 
@@ -73,6 +73,42 @@ XrlFtiTransactionManager::add(uint32_t tid,
     // here.
     //
     return XrlCmdError::COMMAND_FAILED("Unknown resource shortage");
+}
+
+/**
+ * Process a list of IPv4 FIB route changes.
+ * 
+ * The FIB route changes come from the underlying system.
+ * 
+ * @param fte_list the list of Fte entries to add or delete.
+ */
+void
+XrlFtiTransactionManager::process_fib_changes(const list<Fte4>& fte_list)
+{
+    map<string, FibClient4>::iterator iter;
+
+    for (iter = _fib_clients4.begin(); iter != _fib_clients4.end(); ++iter) {
+	FibClient4& fib_client = iter->second;
+	fib_client.activate(fte_list);
+    }
+}
+
+/**
+ * Process a list of IPv6 FIB route changes.
+ * 
+ * The FIB route changes come from the underlying system.
+ * 
+ * @param fte_list the list of Fte entries to add or delete.
+ */
+void
+XrlFtiTransactionManager::process_fib_changes(const list<Fte6>& fte_list)
+{
+    map<string, FibClient6>::iterator iter;
+
+    for (iter = _fib_clients6.begin(); iter != _fib_clients6.end(); ++iter) {
+	FibClient6& fib_client = iter->second;
+	fib_client.activate(fte_list);
+    }
 }
 
 XrlCmdError
@@ -222,6 +258,8 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
     success = _xrl_fea_fib_client.send_delete_route4(
 	target_name.c_str(),
 	fte.net(),
+	fte.ifname(),
+	fte.vifname(),
 	callback(this,
 		 &XrlFtiTransactionManager::send_fib_client_delete_route6_cb,
 		 target_name));
@@ -241,6 +279,8 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
     success = _xrl_fea_fib_client.send_delete_route6(
 	target_name.c_str(),
 	fte.net(),
+	fte.ifname(),
+	fte.vifname(),
 	callback(this,
 		 &XrlFtiTransactionManager::send_fib_client_delete_route6_cb,
 		 target_name));
@@ -323,6 +363,9 @@ template<class F>
 void
 XrlFtiTransactionManager::FibClient<F>::activate(const list<F>& fte_list)
 {
+    if (fte_list.empty())
+	return;
+
     // Create the queue with the entries to add
     typename list<F>::const_iterator iter;
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
