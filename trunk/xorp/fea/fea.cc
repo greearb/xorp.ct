@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.29 2004/06/10 22:40:46 hodson Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.30 2004/08/24 00:08:32 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -29,11 +29,12 @@
 #include "ifconfig.hh"
 #include "ifconfig_addr_table.hh"
 #include "libfeaclient_bridge.hh"
+#include "firewall.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
-
+#include "xrl_firewall.hh"
 
 static const char* xrl_entity = "fea";
 #ifndef FEA_DUMMY
@@ -158,6 +159,17 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 				fticonfig, ifm, xrl_ifc_reporter,
 				0, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
+
+   //
+   // Firewall manager and XRL target.
+   // Note that the firewall manager is a separate XRL entity.
+   // This is to allow the firewall XRL component to be developed
+   // separately from the FEA XRLs, although it is part of the FEA.
+   //
+   FirewallManager firewall;
+   XrlStdRouter xrl_std_router_firewall(eventloop, "firewall",
+       finder_hostname, finder_port);
+   XrlFirewallTarget xrl_firewall_target(&xrl_std_router_firewall, firewall);
 
 #ifndef FEA_DUMMY
     //
