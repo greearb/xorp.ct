@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.35 2004/01/16 19:06:32 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.36 2004/02/19 04:33:12 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -42,7 +42,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   XrlRawSocket4Manager*	xrsm,
 			   LibFeaClientBridge*		lfcb,
 			   XrlSocketServer*		xss)
-    : XrlFeaTargetBase(&r), _xftm(e, ftic), _xifmgr(e, ifmgr),
+    : XrlFeaTargetBase(&r), _xftm(e, ftic, &r), _xifmgr(e, ifmgr),
       _xifcur(xifcur), _xrsm(xrsm), _lfcb(lfcb), _xss(xss), _done(false)
 {
 }
@@ -115,6 +115,48 @@ XrlFeaTarget::common_0_1_shutdown()
     _done = true;
 
     return XrlCmdError::OKAY();
+}
+
+/**
+ *  Add a FIB client.
+ *
+ *  @param target_name the target name of the FIB client to add.
+ */
+XrlCmdError
+XrlFeaTarget::fea_fib_0_1_add_fib_client4(
+    // Input values,
+    const string&	target_name)
+{
+    return _xftm.add_fib_client4(target_name);
+}
+
+XrlCmdError
+XrlFeaTarget::fea_fib_0_1_add_fib_client6(
+    // Input values,
+    const string&	target_name)
+{
+    return _xftm.add_fib_client6(target_name);
+}
+
+/**
+ *  Delete a FIB client.
+ *
+ *  @param target_name the target name of the FIB client to delete.
+ */
+XrlCmdError
+XrlFeaTarget::fea_fib_0_1_delete_fib_client4(
+    // Input values,
+    const string&	target_name)
+{
+    return _xftm.delete_fib_client4(target_name);
+}
+
+XrlCmdError
+XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
+    // Input values,
+    const string&	target_name)
+{
+    return _xftm.delete_fib_client6(target_name);
 }
 
 XrlCmdError

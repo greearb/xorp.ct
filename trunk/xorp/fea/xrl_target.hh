@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.25 2004/01/16 19:06:32 hodson Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.26 2004/02/19 04:33:12 hodson Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -61,6 +61,32 @@ public:
      * Shutdown FEA cleanly
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Add a FIB client.
+     *
+     *  @param target_name the target name of the FIB client to add.
+     */
+    XrlCmdError fea_fib_0_1_add_fib_client4(
+	// Input values,
+	const string&	target_name);
+
+    XrlCmdError fea_fib_0_1_add_fib_client6(
+	// Input values,
+	const string&	target_name);
+
+    /**
+     *  Delete a FIB client.
+     *
+     *  @param target_name the target name of the FIB client to delete.
+     */
+    XrlCmdError fea_fib_0_1_delete_fib_client4(
+	// Input values,
+	const string&	target_name);
+
+    XrlCmdError fea_fib_0_1_delete_fib_client6(
+	// Input values,
+	const string&	target_name);
 
     //
     // FEA network interface management interface
