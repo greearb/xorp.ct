@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.5 2003/06/26 02:15:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.6 2003/09/09 02:02:03 atanu Exp $"
 
 // #define DEBUG_LOGGING 
-// #define DEBUG_PRINT_FUNCTION_NAME 
+#define DEBUG_PRINT_FUNCTION_NAME 
 #define PARANOIA
 
 #include <string>
@@ -30,17 +30,27 @@
 
 #include "trie.hh"
 
-Trie::~Trie()
-{
-    del(&_head);
-}
-
 const
 UpdatePacket *
 Trie::lookup(const string& net) const
 {
-    IPv4Net n(net.c_str());
-    TriePayload payload = find(n);
+    IPvXNet n(net.c_str());
+
+    if(n.is_ipv4())
+	return lookup(n.get_ipv4net());
+    else if(n.is_ipv6())
+	return lookup(n.get_ipv6net());
+    else
+	XLOG_FATAL("Unknown family: %s", n.str().c_str());
+
+    return 0;
+}
+
+const
+UpdatePacket *
+Trie::lookup(const IPv4Net& n) const
+{
+    TriePayload payload = _head_ipv4.find(n);
     const UpdatePacket *update = payload.get();
 
     if(0 == update)
@@ -54,6 +64,58 @@ Trie::lookup(const string& net) const
     for(; ni != update->nlri_list().end(); ni++)
 	if(ni->net() == n)
 	    return update;
+    
+    XLOG_FATAL("If we found the packet in the trie"
+	       " it should contain the nlri %s %s", n.str().c_str(),
+	       update->str().c_str());
+
+    return 0;
+}
+
+const
+UpdatePacket *
+Trie::lookup(const IPv6Net& n) const
+{
+    TriePayload payload = _head_ipv6.find(n);
+    const UpdatePacket *update = payload.get();
+
+    if(0 == update)
+	return 0;
+
+    /*
+    ** Look for a multiprotocol path attribute.
+    */
+    MPReachNLRIAttribute<IPv6> *mpreach = 0;
+    list <PathAttribute*>::const_iterator pai;
+    for (pai = update->pa_list().begin(); pai != update->pa_list().end();
+	 pai++) {
+	const PathAttribute* pa;
+	pa = *pai;
+	
+	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
+ 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
+	    break;
+	}
+    }
+
+    if(0 == mpreach)
+	XLOG_FATAL("If we found the packet in the trie"
+		   " it should contain the nlri %s %s", n.str().c_str(),
+		   update->str().c_str());
+
+
+    /*
+    ** Look for this net in the matching update packet.
+    */
+    list<IPv6Net>::const_iterator ni;
+    ni = mpreach->nlri_list().begin();
+    for(; ni != update->nlri_list().end(); ni++)
+	if(*ni == n)
+	    return update;
+
+    XLOG_FATAL("If we found the packet in the trie"
+	       " it should contain the nlri %s %s", n.str().c_str(),
+	       update->str().c_str());
 
     return 0;
 }
@@ -72,7 +134,7 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
     list <BGPUpdateAttrib>::const_iterator wi;
     wi = update->wr_list().begin();
     for(; wi != update->wr_list().end(); wi++)
-	del(wi->net());
+	_head_ipv4.del(wi->net());
 
     /*
     ** If there are no nlri's present then there is nothing to save so
@@ -90,316 +152,30 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
 	/* If a previous entry exists remove it */
 	const UpdatePacket *up = lookup(ni->net().str());
 	if(up)
-	    if(!del(ni->net()))
+	    if(!_head_ipv4.del(ni->net()))
 		XLOG_FATAL("Could not remove nlri: %s",
 			   ni->net().str().c_str());
-	if(!insert(ni->net(), payload))
+	if(!_head_ipv4.insert(ni->net(), payload))
 	    XLOG_FATAL("Could not add nlri: %s",
 		       ni->net().str().c_str());
     }
 }
 
 void
-Trie::tree_walk_table(const TreeWalker& tw) const
+Trie::tree_walk_table(const TreeWalker_ipv4& tw) const
 {
-    tree_walk_table(tw, &_head, "");
+    _head_ipv4.tree_walk_table(tw);
 }
 
 void
-Trie::save_routing_table(FILE *fp) const
+Trie::tree_walk_table(const TreeWalker_ipv6& tw) const
 {
-    print(fp);
+    _head_ipv6.tree_walk_table(tw);
 }
 
-/* Private below here */
-const uint32_t topbit = 0x80000000;
-
-#define speak debug_msg
-#define	newline	"\n"
-
-bool
-Trie::empty() const {
-    return (0 ==_head.ptrs[0]) && (0 ==_head.ptrs[1]);
-}
-
-void
-Trie::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
-		      const char *st) const
-{
-    char result[1024];
-
-    if(0 == ptr) {
-	return;
-    }
-
-    TimeVal tv;
-    const UpdatePacket *update = ptr->p.get(tv);
-    if(0 != update) {
-	IPv4 nh;
-	list<PathAttribute*> l = update->pa_list();
-	list<PathAttribute*>::const_iterator i;
-	for(i = l.begin(); i != l.end(); i++) {
-	    if(NEXT_HOP == (*i)->type()) {
- 		IPv4NextHopAttribute *nha = 
- 		    dynamic_cast<IPv4NextHopAttribute *>(*i);
-		nh = nha->nexthop();
-	    }
-	    
-	}
-	const IPNet<IPv4> net = IPNet<IPv4>(bit_string_to_subnet(st).c_str());
-	tw->dispatch(update, net, tv);
-#if	0
-	fprintf(fp, "%ssummary %s %s %s\n",  update->str().c_str(), st,
-		bit_string_to_subnet(st).c_str(), nh.str().c_str());
-#endif
-    }
-
-    sprintf(result, "%s0", st);
-    tree_walk_table(tw, ptr->ptrs[0], result);
-
-    sprintf(result, "%s1", st);
-    tree_walk_table(tw, ptr->ptrs[1], result);
-}
-
-void
-Trie::print(FILE *fp) const
-{
-    prt(fp, &_head, "");
-}
-
-void
-Trie::prt(FILE *fp, const Tree *ptr, const char *st) const
-{
-    char result[1024];
-
-    if(0 == ptr) {
-	return;
-    }
-
-    const UpdatePacket *update = ptr->p.get();
-    if(0 != update) {
-	IPv4 nh;
-	list<PathAttribute*> l = update->pa_list();
-	list<PathAttribute*>::const_iterator i;
-	for(i = l.begin(); i != l.end(); i++) {
-	    if(NEXT_HOP == (*i)->type()) {
- 		IPv4NextHopAttribute *nha = 
- 		    dynamic_cast<IPv4NextHopAttribute *>(*i);
-		nh = nha->nexthop();
-	    }
-	    
-	}
-	fprintf(fp, "%ssummary %s %s %s\n",  update->str().c_str(), st,
-		bit_string_to_subnet(st).c_str(), nh.str().c_str());
-    }
-
-    sprintf(result, "%s0", st);
-    prt(fp, ptr->ptrs[0], result);
-
-    sprintf(result, "%s1", st);
-    prt(fp, ptr->ptrs[1], result);
-}
-
-string
-Trie::bit_string_to_subnet(const char *st) const
-{
-    int len = strlen(st);
-    int val = 0;
-    for(int i = 0; i < len; i++) {
-	val <<= 1;
-	if('1' == st[i])
-	    val |= 1;
-    }
-    val <<= 32 - len;
-    struct in_addr in;
-    in.s_addr = htonl(val);
-
-    return c_format("%s/%d", inet_ntoa(in), len);
-}
-
-bool
-Trie::insert(const IPv4Net& net, TriePayload& p)
-{
-    return insert(ntohl(net.masked_addr().addr()), net.prefix_len(), p);
-}
-
-bool
-Trie::insert(uint32_t address, int mask_length, TriePayload& p)
-{
-#ifdef	PARANOIA
-    if(0 == p.get()) {
-	speak("insert: Attempt to store an invalid entry"
-	      newline);
-	return false;
-    }
-#endif
-    Tree *ptr = &_head;
-    for(int i = 0; i < mask_length; i++) {
-	int index = (address & topbit) == topbit;
-	address <<= 1;
-
-	if(0 == ptr->ptrs[index]) {
-	    ptr->ptrs[index] = new Tree();
-	    if(0 == ptr->ptrs[index]) {
-		if(_debug)
-		    speak("insert: new failed"
-			  newline);
-		return false;
-	    }
-	}
-
-	ptr = ptr->ptrs[index];
-    }
-
-    if(0 != ptr->p.get()) {
-	speak("insert: value already assigned" newline);
-	return false;
-    }
-
-    ptr->p = p;
-
-    return true;
-}
-
-void
-Trie::del(Tree *ptr)
-{
-    if(0 == ptr)
-	return;
-    del(ptr->ptrs[0]);
-    delete ptr->ptrs[0];
-    ptr->ptrs[0] = 0;
-    del(ptr->ptrs[1]);
-    delete ptr->ptrs[1];
-    ptr->ptrs[1] = 0;
-}
-
-bool
-Trie::del(const IPv4Net& net)
-{
-    return del(ntohl(net.masked_addr().addr()), net.prefix_len());
-}
-
-bool
-Trie::del(uint32_t address, int mask_length)
-{
-    return del(&_head, address, mask_length);
-}
-
-bool
-Trie::del(Tree *ptr, uint32_t address, int mask_length)
-{
-    if((0 == ptr) && (0 != mask_length)) {
-	if(_debug)
-	    speak("del:1 not in table" newline);
-	return false;
-    }
-    int index = (address & topbit) == topbit;
-    address <<= 1;
-
-    if(0 == mask_length) {
-	if(0 == ptr) {
-	    if(_debug)
-		speak("del:1 zero pointer" newline);
-	    return false;
-	}
-	if(0 == ptr->p.get()) {
-	    if(_debug)
-		speak("del:2 not in table" newline);
-	    return false;
-	}
-	ptr->p = TriePayload();	// Invalidate this entry.
-	return true;
-    }
-
-    if(0 == ptr) {
-	if(_debug)
-	    speak("del:2 zero pointer" newline);
-	return false;
-    }
-
-    Tree *next = ptr->ptrs[index];
-
-    bool status = del(next, address, --mask_length);
-
-    if(0 == next) {
-	if(_debug)
-	    speak("del: no next pointer" newline);
-	return false;
-    }
-
-    if((0 == next->p.get()) && (0 == next->ptrs[0]) &&
-       (0 == next->ptrs[1])) {
-	delete ptr->ptrs[index];
-	ptr->ptrs[index] = 0;
-    }
-
-    return status;
-}
-
-TriePayload 
-Trie::find(const IPv4Net& net) const
-{
-    return find(ntohl(net.masked_addr().addr()), net.prefix_len());
-}
-
-TriePayload
-Trie::find(uint32_t address, const int mask_length) const
-{
-    const Tree *ptr = &_head;
-    Tree *next;
-
-    struct in_addr in;
-    in.s_addr = htonl(address);
-    debug_msg("find: %#x %s/%d\n", address, inet_ntoa(in), mask_length);
-    speak("find: %#x %s/%d\n", address, inet_ntoa(in), mask_length);
-
-    // The loop should not require bounding. Defensive
-    for(int i = 0; i <= 32; i++) {
-	int index = (address & topbit) == topbit;
-	address <<= 1;
-
-	if(_pretty)
-	    speak("%d", index);
-	TriePayload p = ptr->p;
-	if(mask_length == i)
-	    return p;
-	if(0 == (next = ptr->ptrs[index])) {
-	    if(_pretty)
-		speak("" newline);
-	    return TriePayload();
-	}
-	ptr = next;
-    }
-    speak("find: should never happen" newline);
-    return TriePayload();
-}
-
-TriePayload
-Trie::find(uint32_t address) const
-{
-    const Tree *ptr = &_head;
-    Tree *next;
-
-    struct in_addr in;
-    in.s_addr = htonl(address);
-    debug_msg("find: %#x %s\n", address, inet_ntoa(in));
-
-    // The loop should not require bounding. Defensive
-    for(int i = 0; i <= 32; i++) {
-	int index = (address & topbit) == topbit;
-	address <<= 1;
-
-	if(_pretty)
-	    speak("%d", index);
-	TriePayload p = ptr->p;
-	if(0 == (next = ptr->ptrs[index])) {
-	    if(_pretty)
-		speak("" newline);
-	    return p;
-	}
-	ptr = next;
-    }
-    speak("find: should never happen" newline);
-    return TriePayload();
-}
+// void
+// Trie::save_routing_table(FILE *fp) const
+// {
+//     _head_ipv4.print(fp);
+//     _head_ipv6.print(fp);
+// }

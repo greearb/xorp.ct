@@ -94,10 +94,10 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = test_peering1.sh test_peering2.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_path_attribute1.sh test_terminate.sh
+TESTS = test_trie test_peering1.sh test_peering2.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_path_attribute1.sh test_terminate.sh
 
 # -- No-install Programs
-noinst_PROGRAMS = coord test_peer
+noinst_PROGRAMS = coord test_peer test_trie
 
 # -- No-install Libraries
 noinst_LIBRARIES = 
@@ -107,7 +107,8 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/bgp/libbgp.a $(top_builddir)/libxipc
 
 # -- Program Sources
 test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc test_peer.cc
-coord_SOURCES = bgppp.hh command.hh coord.hh peer.hh trie.hh bgppp.cc command.cc coord.cc peer.cc trie.cc
+coord_SOURCES = bgppp.hh command.hh coord.hh peer.hh trie.hh bgppp.cc command.cc coord.cc peer.cc trie.cc real_trie.hh trie_payload.hh
+test_trie_SOURCES = test_trie.cc trie.cc trie.hh real_trie.hh trie_payload.hh
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(TESTS) NOTES args.sh soak.sh test1.sh test2.sh test_rib_fea1.sh xrl_shell_funcs.sh
@@ -122,7 +123,7 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 bin_PROGRAMS =
-noinst_PROGRAMS = coord$(EXEEXT) test_peer$(EXEEXT)
+noinst_PROGRAMS = coord$(EXEEXT) test_peer$(EXEEXT) test_trie$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_coord_OBJECTS = bgppp.$(OBJEXT) command.$(OBJEXT) coord.$(OBJEXT) \
@@ -150,6 +151,18 @@ test_peer_DEPENDENCIES = $(top_builddir)/bgp/libbgp.a \
 	$(top_builddir)/xrl/interfaces/libtestpeerxif.a \
 	$(top_builddir)/xrl/interfaces/libdatainxif.a
 test_peer_LDFLAGS =
+am_test_trie_OBJECTS = test_trie.$(OBJEXT) trie.$(OBJEXT)
+test_trie_OBJECTS = $(am_test_trie_OBJECTS)
+test_trie_LDADD = $(LDADD)
+test_trie_DEPENDENCIES = $(top_builddir)/bgp/libbgp.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/targets/libtestpeerbase.a \
+	$(top_builddir)/xrl/targets/libcoordbase.a \
+	$(top_builddir)/xrl/interfaces/libtestpeerxif.a \
+	$(top_builddir)/xrl/interfaces/libdatainxif.a
+test_trie_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -159,7 +172,8 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bgppp.Po $(DEPDIR)/command.Po \
 @AMDEP_TRUE@	$(DEPDIR)/coord.Po $(DEPDIR)/peer.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_peer.Po $(DEPDIR)/trie.Po
+@AMDEP_TRUE@	$(DEPDIR)/test_peer.Po $(DEPDIR)/test_trie.Po \
+@AMDEP_TRUE@	$(DEPDIR)/trie.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -171,9 +185,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(coord_SOURCES) $(test_peer_SOURCES)
+DIST_SOURCES = $(coord_SOURCES) $(test_peer_SOURCES) \
+	$(test_trie_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(coord_SOURCES) $(test_peer_SOURCES)
+SOURCES = $(coord_SOURCES) $(test_peer_SOURCES) $(test_trie_SOURCES)
 
 all: all-am
 
@@ -223,6 +238,9 @@ coord$(EXEEXT): $(coord_OBJECTS) $(coord_DEPENDENCIES)
 test_peer$(EXEEXT): $(test_peer_OBJECTS) $(test_peer_DEPENDENCIES) 
 	@rm -f test_peer$(EXEEXT)
 	$(CXXLINK) $(test_peer_LDFLAGS) $(test_peer_OBJECTS) $(test_peer_LDADD) $(LIBS)
+test_trie$(EXEEXT): $(test_trie_OBJECTS) $(test_trie_DEPENDENCIES) 
+	@rm -f test_trie$(EXEEXT)
+	$(CXXLINK) $(test_trie_LDFLAGS) $(test_trie_OBJECTS) $(test_trie_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -235,6 +253,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/coord.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_trie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/trie.Po@am__quote@
 
 distclean-depend:

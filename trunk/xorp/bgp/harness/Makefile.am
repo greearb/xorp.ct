@@ -1,13 +1,14 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.11 2003/08/01 02:11:47 pavlin Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.12 2003/08/05 23:58:21 atanu Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- Test Programs
-TESTS		 = test_peering1.sh
+TESTS		 = test_trie
+TESTS		+= test_peering1.sh
 TESTS		+= test_peering2.sh
 TESTS		+= test_routing1.sh
 TESTS		+= test_rib1.sh
@@ -18,6 +19,7 @@ TESTS		+= test_terminate.sh
 # -- No-install Programs
 noinst_PROGRAMS  = coord
 noinst_PROGRAMS	+= test_peer
+noinst_PROGRAMS	+= test_trie
 
 # -- No-install Libraries
 noinst_LIBRARIES =
@@ -45,6 +47,9 @@ coord_SOURCES	+= command.cc
 coord_SOURCES	+= coord.cc
 coord_SOURCES	+= peer.cc
 coord_SOURCES	+= trie.cc
+coord_SOURCES	+= real_trie.hh
+coord_SOURCES	+= trie_payload.hh
+test_trie_SOURCES = test_trie.cc trie.cc trie.hh real_trie.hh trie_payload.hh
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = $(TESTS)
