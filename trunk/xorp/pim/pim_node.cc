@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.14 2003/07/01 01:00:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.15 2003/07/03 07:17:17 pavlin Exp $"
 
 
 //
@@ -601,10 +601,9 @@ PimNode::add_vif_addr(const string& vif_name,
     
     const VifAddr vif_addr(addr, subnet_addr, broadcast_addr, peer_addr);
     
-    if (pim_vif->is_my_vif_addr(vif_addr)) {
-	return (XORP_OK);		// Already have this address
-    }
-    
+    //
+    // Check the arguments
+    //
     if (! addr.is_unicast()) {
 	err = c_format("Cannot add address on vif %s: "
 		       "invalid unicast address: %s",
@@ -612,7 +611,6 @@ PimNode::add_vif_addr(const string& vif_name,
 	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
-    
     if ((addr.af() != family())
 	|| (subnet_addr.af() != family())
 	|| (broadcast_addr.af() != family())
@@ -624,6 +622,20 @@ PimNode::add_vif_addr(const string& vif_name,
 	return (XORP_ERROR);
     }
     
+    VifAddr* node_vif_addr = pim_vif->find_address(addr);
+    
+    if (node_vif_addr != NULL) {
+	if (*node_vif_addr == vif_addr)
+	    return (XORP_OK);		// Already have this address
+	// Update the address
+	XLOG_INFO("Updated existing address on vif %s: old is %s new is %s",
+		  pim_vif->name().c_str(), node_vif_addr->str().c_str(),
+		  vif_addr.str().c_str());
+	*node_vif_addr = vif_addr;
+	return (XORP_OK);
+    }
+    
+    // Add a new address
     pim_vif->add_address(vif_addr);
     
     XLOG_INFO("Added new address to vif %s: %s",

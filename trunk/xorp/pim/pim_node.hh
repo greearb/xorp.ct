@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.18 2003/06/16 22:48:03 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.19 2003/07/03 07:17:18 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -207,7 +207,7 @@ public:
 			      string& err);
     
     /**
-     * Add an address to a vif.
+     * Add a new address to a vif, or update an existing address.
      * 
      * @param vif_name the name of the vif.
      * @param addr the unicast address to add.
