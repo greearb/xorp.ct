@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.65 2004/05/05 21:13:28 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.66 2004/05/11 01:14:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -212,7 +212,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 PeerOutputState
 BGPPeer::send_message(const BGPPacket& p)
 {
-    debug_msg("Packet sent of type %d\n", p.type());
+    debug_msg(p.str().c_str());
 
     uint8_t packet_type = p.type();
 
