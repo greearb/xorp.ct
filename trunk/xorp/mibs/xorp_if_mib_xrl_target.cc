@@ -104,8 +104,18 @@ XrlCmdError XrlXorpIfMibTarget::xorp_if_mib_0_1_unload_mib(
  
 }
 
-XrlCmdError XrlXorpIfMibTarget::common_0_1_shutdown()
+
+static void slow_death() 
 {
     exit(0);
+}
+
+XrlCmdError XrlXorpIfMibTarget::common_0_1_shutdown()
+{
+    static XorpTimer * xt;
+    xt = new XorpTimer;
+    *xt = SnmpEventLoop::the_instance().new_oneoff_after_ms(1,
+	callback(slow_death));
+    return XrlCmdError::OKAY();
 }
 
