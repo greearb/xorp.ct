@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.24 2004/11/05 04:11:04 bms Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.25 2004/11/11 23:17:42 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -248,8 +248,6 @@ public:
     inline bool discard() const		{ return _discard; }
 
     inline void set_discard(bool discard) {
-	if (discard)
-	    _soft = true;
 	_discard = discard;
 	mark(CHANGED);
     }
