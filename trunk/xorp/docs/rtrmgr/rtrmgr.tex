@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.12 2004/01/13 02:02:36 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.13 2004/01/13 02:05:48 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -676,6 +676,10 @@ Note that configuration tree nodes have been created for {\tt
 dead-interval} and (in the case of fxp1) for {\tt hello-interval} even
 though this was not mentioned in the configuration file.  This is
 because the template tree contains a default value for this leaf node.
+Also, in case of configuring a boolean variable (\eg of type {\tt bool} or
+{\tt toggle}) such as {\tt mospf}, typing the variable name itself
+(\eg \verb=mospf=) is equivalent to assigning it value of {\tt true}
+(\eg \verb=mospf: true=).
 
 \newpage
 
