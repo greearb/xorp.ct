@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.20 2004/02/11 08:48:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.21 2004/02/12 03:22:50 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -234,6 +234,7 @@ RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
     _admin_distances["rip"] =            120;
     _admin_distances["eigrp-external"] = 170;
     _admin_distances["ibgp"] =           200;
+    _admin_distances["fib2mrib"] =	 254;
     _admin_distances["unknown"] =        255;
 }
 
