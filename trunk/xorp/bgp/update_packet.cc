@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.70 2002/12/09 18:28:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -166,12 +166,12 @@ const uint8_t *UpdatePacket::encode(int &len) const
     size_t route_size = 0;
     size_t path_position = 0;
     size_t path_size = 0;
-    size_t total_size = 19; // Base header size	
+    size_t total_size = BGP_COMMON_HEADER_LEN; // Base header size	
 
     struct iovec io[size];
 	
     io[0].iov_base = (char *)_Marker;
-    io[0].iov_len = 16;
+    io[0].iov_len = MARKER_SIZE;
 	
     // 1 is set below, since total size is currently unknown.
 	

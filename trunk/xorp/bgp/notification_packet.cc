@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.37 2002/12/09 18:28:43 hodson Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -27,7 +27,7 @@ NotificationPacket::NotificationPacket(uint8_t ec)
 {
     debug_msg("Error code %d\n", ec);
 
-    _Length = BGP_COMMON_HEADER_LEN + BGP_NOTIFY_HEADER_LEN;
+    _Length = MINNOTIFICATIONPACKET;
     _Type = MESSAGETYPENOTIFICATION;
     _error_code = ec;
     _error_subcode = 0;
@@ -42,7 +42,7 @@ NotificationPacket::NotificationPacket(uint8_t ec, uint8_t esc)
 
     debug_msg("Error code %d sub code %d\n", ec, esc);
 
-    _Length = BGP_COMMON_HEADER_LEN + BGP_NOTIFY_HEADER_LEN;
+    _Length = MINNOTIFICATIONPACKET;
     _Type = MESSAGETYPENOTIFICATION;
     _error_code = ec;
     _error_subcode = esc;
@@ -59,7 +59,7 @@ NotificationPacket::NotificationPacket(const uint8_t *ed, uint8_t ec,
 	      (int)ed, elen);
 
     // elen is the length of the error_data to carry
-    _Length = BGP_COMMON_HEADER_LEN + BGP_NOTIFY_HEADER_LEN + elen;
+    _Length = MINNOTIFICATIONPACKET + elen;
 
     _Type = MESSAGETYPENOTIFICATION;
     _error_code = ec;
@@ -104,8 +104,7 @@ NotificationPacket::decode() throw(InvalidPacket)
 
     _error_code = data[0];
     _error_subcode = data[1];
-    int error_data_len = _Length - (BGP_COMMON_HEADER_LEN +
-				    BGP_NOTIFY_HEADER_LEN);
+    int error_data_len = _Length - MINNOTIFICATIONPACKET;
     if (error_data_len > 0) {
 	uint8_t *ed = new uint8_t[error_data_len];
 	memcpy(ed, data + 2, error_data_len);
@@ -130,7 +129,7 @@ NotificationPacket::encode(int& len) const
     debug_msg("Encode in NotificationPacket called (%d)\n", _Length);
 
     io[0].iov_base = (char *)_Marker;
-    io[0].iov_len = 16;
+    io[0].iov_len = MARKER_SIZE;
     k = htons(_Length);
 
     io[1].iov_base = (char *)&k;
@@ -149,8 +148,7 @@ NotificationPacket::encode(int& len) const
 	return flatten(&io[0], 5, len);
     } else {
 	io[5].iov_base = const_cast<char*>((const char *)_error_data);
-	io[5].iov_len = _Length - (BGP_COMMON_HEADER_LEN +
-				   BGP_NOTIFY_HEADER_LEN);
+	io[5].iov_len = _Length - MINNOTIFICATIONPACKET;
 	return flatten(&io[0], 6, len);
     }
 }
@@ -343,7 +341,7 @@ NotificationPacket::operator==(const NotificationPacket& him ) const
 	return false;
 
     if (0 != memcmp(_error_data, him.error_data(),
-		   _Length - (BGP_COMMON_HEADER_LEN + BGP_NOTIFY_HEADER_LEN)))
+		   _Length - MINNOTIFICATIONPACKET))
 	return false;
 
     return true;

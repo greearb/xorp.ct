@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/keepalive_packet.cc,v 1.20 2002/12/09 18:28:42 hodson Exp $"
+#ident "$XORP: xorp/bgp/keepalive_packet.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -34,7 +34,7 @@ KeepAlivePacket::KeepAlivePacket(const uint8_t *d, uint16_t l)
 KeepAlivePacket::KeepAlivePacket()
 {
     debug_msg("KeepAlivePacket constructor called\n");
-    _Length = 19;
+    _Length = BGP_COMMON_HEADER_LEN;
     _Type = MESSAGETYPEKEEPALIVE;
     _Data = NULL;
 }
@@ -55,7 +55,7 @@ KeepAlivePacket::encode(int &len) const
 	      _Length);
 
     io[0].iov_base = const_cast<char*>((const char *)_Marker);
-    io[0].iov_len = 16;
+    io[0].iov_len = MARKER_SIZE;
     k = htons(_Length);
 
     io[1].iov_base = const_cast<char*>((const char *)&k);

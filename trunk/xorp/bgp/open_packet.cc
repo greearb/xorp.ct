@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.55 2002/12/09 18:28:43 hodson Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -49,7 +49,7 @@ OpenPacket::OpenPacket(const AsNum& as,
 {
     debug_msg("OpenPacket(BGPLocalData *d) constructor called\n");
 
-    _Length = 29;
+    _Length = MINOPENPACKET;
     _Type = MESSAGETYPEOPEN;
     _OptParmLen = 0;
     _num_parameters = 0;
@@ -77,7 +77,7 @@ OpenPacket::encode(int& len) const
     debug_msg("Send in OpenPacket called\n");
 
     io[0].iov_base = const_cast<char*>((const char *)_Marker);
-    io[0].iov_len = 16;
+    io[0].iov_len = MARKER_SIZE;
 
     io[2].iov_base = const_cast<char*>((const char *)&_Type);
     io[2].iov_len = 1;

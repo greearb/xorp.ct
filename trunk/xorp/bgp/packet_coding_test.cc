@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -30,12 +30,12 @@ int test_simple_open_packet() {
     buf = openpacket.encode(len);
 
     //open packets with no parameters have a fixed length of 29 bytes
-    assert(len == 29);
+    assert(len == MINOPENPACKET);
 
     //check the common header
-    const uint8_t *skip = buf+16;
+    const uint8_t *skip = buf+MARKER_SIZE;	// skip marker
     uint16_t plen = htons(*((const uint16_t*)skip));
-    assert(plen == 29);
+    assert(plen == MINOPENPACKET);
     skip+=2;
     uint8_t type = *skip;
     assert(type == MESSAGETYPEOPEN);
@@ -79,12 +79,12 @@ int test_keepalive_packet() {
     buf = keepalivepacket.encode(len);
 
     //keepalive packets with no parameters have a fixed length of 19 bytes
-    assert(len == 19);
+    assert(len == BGP_COMMON_HEADER_LEN);
 
     //check the common header
-    const uint8_t *skip = buf+16;
+    const uint8_t *skip = buf+MARKER_SIZE;	// skip marker
     uint16_t plen = htons(*((const uint16_t*)skip));
-    assert(plen == 19);
+    assert(plen == BGP_COMMON_HEADER_LEN);
     skip+=2;
     uint8_t type = *skip;
     assert(type == MESSAGETYPEKEEPALIVE);
@@ -126,17 +126,17 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
     //notification packets have a length of 21 bytes plus the length
     //of the error data
     if (d==NULL)
-	assert(len == 21);
+	assert(len == MINNOTIFICATIONPACKET);
     else
-	assert(len == 21 + l);
+	assert(len == MINNOTIFICATIONPACKET + l);
 
     //check the common header
-    const uint8_t *skip = buf+16;
+    const uint8_t *skip = buf+MARKER_SIZE;
     uint16_t plen = htons(*((const uint16_t*)skip));
     if (d==NULL)
-	assert(plen == 21);
+	assert(plen == MINNOTIFICATIONPACKET);
     else
-	assert(plen == 21 + l);
+	assert(plen == MINNOTIFICATIONPACKET + l);
 
     skip+=2;
     uint8_t type = *skip;
@@ -185,7 +185,7 @@ int test_withdraw_packet(bool verbose) {
     assert(len == 31);
 
     //check the common header
-    const uint8_t *skip = buf+16;
+    const uint8_t *skip = buf+MARKER_SIZE;
     uint16_t plen = htons(*((const uint16_t*)skip));
     assert(plen == 31);
     skip+=2;
@@ -314,7 +314,7 @@ int test_announce_packet(bool verbose) {
     assert(len == 110);
 
     //check the common header
-    const uint8_t *skip = buf+16;
+    const uint8_t *skip = buf+MARKER_SIZE;
     uint16_t plen = htons(*((const uint16_t*)skip));
     assert(plen == 110);
     skip+=2;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.55 2002/12/09 18:28:43 hodson Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -42,9 +42,9 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/debug.h"
 
-#define MESSAGETYPEOPEN 1
-#define MESSAGETYPEUPDATE 2
-#define MESSAGETYPENOTIFICATION 3
+#define MESSAGETYPEOPEN		1
+#define MESSAGETYPEUPDATE	2
+#define MESSAGETYPENOTIFICATION	3
 #define	MESSAGETYPEKEEPALIVE	4
 
 /**
@@ -80,23 +80,25 @@ enum Notify {
     CEASE = 6			// Cease
 };
 
-#define BGP_COMMON_HEADER_LEN 19
-#define BGP_NOTIFY_HEADER_LEN 2
-#define BGP_UPDATE_WITHDRAWN_ROUTES_LEN 2
-#define BGP_UPDATE_TOTAL_PATH_ATTR_LEN 2
+#define BGP_COMMON_HEADER_LEN			19
+#define BGP_NOTIFY_HEADER_LEN			2
+#define BGP_UPDATE_WITHDRAWN_ROUTES_LEN		2
+#define BGP_UPDATE_TOTAL_PATH_ATTR_LEN		2
 
-#define MINPACKETSIZE BGP_COMMON_HEADER_LEN
-#define MAXPACKETSIZE 4096
-#define MINOPENPACKET 29
-#define MINUPDATEPACKET 23
-#define MINKEEPALIVEPACKET BGP_COMMON_HEADER_LEN
-#define MINNOTIFICATIONPACKET (BGP_COMMON_HEADER_LEN + BGP_NOTIFY_HEADER_LEN)
+#define	MARKER_SIZE		16
+
+#define MINPACKETSIZE		BGP_COMMON_HEADER_LEN
+#define MAXPACKETSIZE		4096
+#define MINOPENPACKET		29
+#define MINUPDATEPACKET		23
+#define MINKEEPALIVEPACKET	BGP_COMMON_HEADER_LEN
+#define MINNOTIFICATIONPACKET	(BGP_COMMON_HEADER_LEN + BGP_NOTIFY_HEADER_LEN)
 
 /**
  * Overlay for the BGP common header.
  */
 struct fixed_header {
-    uint8_t _marker[16];
+    uint8_t _marker[MARKER_SIZE];
     uint16_t _length;
     uint8_t _type;
 };

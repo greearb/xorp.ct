@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet.cc,v 1.17 2002/12/09 18:28:43 hodson Exp $"
+#ident "$XORP: xorp/bgp/packet.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,8 +25,9 @@
 BGPPacket::BGPPacket()
 {
     debug_msg("BGPPacket constructor called\n");
-    _Marker = new uint8_t[16] = { 255, 255, 255, 255, 255, 255, 255, 255,
-				  255, 255, 255, 255, 255, 255, 255, 255 };
+    _Marker = new uint8_t[MARKER_SIZE] = {
+		255, 255, 255, 255, 255, 255, 255, 255,
+		255, 255, 255, 255, 255, 255, 255, 255 };
 }
 
 BGPPacket::~BGPPacket()
@@ -46,7 +47,7 @@ void
 BGPPacket::set_marker(uint8_t * m)
 {
     debug_msg("Packet marker set\n");
-    memcpy(_Marker, m, 16);
+    memcpy(_Marker, m, MARKER_SIZE);
 }
 
 const uint8_t *
