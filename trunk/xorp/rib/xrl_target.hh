@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.4 2003/03/19 09:05:21 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.5 2003/03/21 03:01:46 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -106,52 +106,86 @@ protected:
      *  
      *  @param target_name the target name of the RIB client.
      *  
-     *  @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
-     *  respectively).
+     *  @param unicast true if a client for the unicast RIB.
      *  
-     *  @param is_unicast true if a client for the unicast RIB.
+     *  @param multicast true if a client for the multicast RIB.
      *  
-     *  @param is_multicast true if a client for the multicast RIB.
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
      */
-    virtual XrlCmdError rib_0_1_add_rib_client(
+    virtual XrlCmdError rib_0_1_add_rib_client4(
 	// Input values, 
 	const string&	target_name, 
-	const uint32_t&	family, 
-	const bool&	is_unicast, 
-	const bool&	is_multicast, 
+	const bool&	unicast, 
+	const bool&	multicast, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
 
-    virtual XrlCmdError rib_0_1_delete_rib_client(
+    virtual XrlCmdError rib_0_1_add_rib_client6(
 	// Input values, 
 	const string&	target_name, 
-	const uint32_t&	family, 
-	const bool&	is_unicast, 
-	const bool&	is_multicast, 
+	const bool&	unicast, 
+	const bool&	multicast, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
 
-    virtual XrlCmdError rib_0_1_enable_rib_client(
+    virtual XrlCmdError rib_0_1_delete_rib_client4(
 	// Input values, 
 	const string&	target_name, 
-	const uint32_t&	family, 
-	const bool&	is_unicast, 
-	const bool&	is_multicast, 
+	const bool&	unicast, 
+	const bool&	multicast, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
 
-    virtual XrlCmdError rib_0_1_disable_rib_client(
+    virtual XrlCmdError rib_0_1_delete_rib_client6(
 	// Input values, 
 	const string&	target_name, 
-	const uint32_t&	family, 
-	const bool&	is_unicast, 
-	const bool&	is_multicast, 
+	const bool&	unicast, 
+	const bool&	multicast, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
+
+    virtual XrlCmdError rib_0_1_enable_rib_client4(
+	// Input values, 
+	const string&	target_name, 
+	const bool&	unicast, 
+	const bool&	multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_enable_rib_client6(
+	// Input values, 
+	const string&	target_name, 
+	const bool&	unicast, 
+	const bool&	multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_disable_rib_client4(
+	// Input values, 
+	const string&	target_name, 
+	const bool&	unicast, 
+	const bool&	multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_disable_rib_client6(
+	// Input values, 
+	const string&	target_name, 
+	const bool&	unicast, 
+	const bool&	multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
 
     virtual XrlCmdError rib_0_1_no_fea();
 

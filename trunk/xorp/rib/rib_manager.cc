@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.11 2003/03/21 01:25:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.12 2003/03/21 03:01:46 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -247,10 +247,9 @@ RibManager::delete_vif_addr(const string& vifname,
 // Select the appropriate list of RIB clients
 //
 list<RibClient *> *
-RibManager::select_rib_clients_list(int family, bool is_unicast,
-				    bool is_multicast)
+RibManager::select_rib_clients_list(int family, bool unicast, bool multicast)
 {
-    if (! (is_unicast ^ is_unicast))
+    if (! (unicast ^ multicast))
 	return (NULL);	// Only one of the flags must be set
     
     //
@@ -258,16 +257,16 @@ RibManager::select_rib_clients_list(int family, bool is_unicast,
     //
     switch (family) {
     case AF_INET:
-	if (is_unicast)
+	if (unicast)
 	    return (&_urib4_clients_list);
-	if (is_multicast)
+	if (multicast)
 	    return (&_mrib4_clients_list);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (is_unicast)
+	if (unicast)
 	    return (&_urib6_clients_list);
-	if (is_multicast)
+	if (multicast)
 	    return (&_mrib6_clients_list);
 	break;
 #endif // HAVE_IPV6
@@ -288,12 +287,11 @@ RibManager::select_rib_clients_list(int family, bool is_unicast,
 //
 RibClient *
 RibManager::find_rib_client(const string& target_name, int family,
-			    bool is_unicast, bool is_multicast)
+			    bool unicast, bool multicast)
 {
     list<RibClient *> *rib_clients_list;
     
-    rib_clients_list = select_rib_clients_list(family, is_unicast,
-					       is_multicast);
+    rib_clients_list = select_rib_clients_list(family, unicast, multicast);
     if (rib_clients_list == NULL)
 	return (NULL);
     
@@ -323,21 +321,20 @@ RibManager::find_rib_client(const string& target_name, int family,
 //
 int
 RibManager::add_rib_client(const string& target_name, int family,
-			   bool is_unicast, bool is_multicast)
+			   bool unicast, bool multicast)
 {
     list<RibClient *> *rib_clients_list;
     
     //
     // Check if this RIB client has been added already
     //
-    if (find_rib_client(target_name, family, is_unicast, is_multicast) != NULL)
+    if (find_rib_client(target_name, family, unicast, multicast) != NULL)
 	return (XORP_OK);
     
     //
     // Find the list of RIB clients to add the new client to.
     //
-    rib_clients_list = select_rib_clients_list(family, is_unicast,
-					       is_multicast);
+    rib_clients_list = select_rib_clients_list(family, unicast, multicast);
     if (rib_clients_list == NULL)
 	return (XORP_ERROR);
     
@@ -358,7 +355,7 @@ RibManager::add_rib_client(const string& target_name, int family,
 //
 int
 RibManager::delete_rib_client(const string& target_name, int family,
-			      bool is_unicast, bool is_multicast)
+			      bool unicast, bool multicast)
 {
     RibClient *rib_client;
     list<RibClient *> *rib_clients_list;
@@ -366,16 +363,14 @@ RibManager::delete_rib_client(const string& target_name, int family,
     //
     // Find the RIB client
     //
-    rib_client = find_rib_client(target_name, family, is_unicast,
-				 is_multicast);
+    rib_client = find_rib_client(target_name, family, unicast, multicast);
     if (rib_client == NULL)
 	return (XORP_ERROR);
 
     //
     // Find the list of RIB clients
     //
-    rib_clients_list = select_rib_clients_list(family, is_unicast,
-					       is_multicast);
+    rib_clients_list = select_rib_clients_list(family, unicast, multicast);
     if (rib_clients_list == NULL)
 	return (XORP_ERROR);
     
@@ -399,15 +394,14 @@ RibManager::delete_rib_client(const string& target_name, int family,
 //
 int
 RibManager::enable_rib_client(const string& target_name, int family,
-			      bool is_unicast, bool is_multicast)
+			      bool unicast, bool multicast)
 {
     RibClient *rib_client;
     
     //
     // Find the RIB client
     //
-    rib_client = find_rib_client(target_name, family, is_unicast,
-				 is_multicast);
+    rib_client = find_rib_client(target_name, family, unicast, multicast);
     if (rib_client == NULL)
 	return (XORP_ERROR);
     
@@ -424,15 +418,14 @@ RibManager::enable_rib_client(const string& target_name, int family,
 //
 int
 RibManager::disable_rib_client(const string& target_name, int family,
-			       bool is_unicast, bool is_multicast)
+			       bool unicast, bool multicast)
 {
     RibClient *rib_client;
     
     //
     // Find the RIB client
     //
-    rib_client = find_rib_client(target_name, family, is_unicast,
-				 is_multicast);
+    rib_client = find_rib_client(target_name, family, unicast, multicast);
     if (rib_client == NULL)
 	return (XORP_ERROR);
     

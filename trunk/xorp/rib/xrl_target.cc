@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.9 2003/03/21 01:25:15 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.10 2003/03/21 03:01:46 pavlin Exp $"
 
 #include "version.h"
 #include "rib_module.h"
@@ -96,18 +96,17 @@ XrlRibTarget::rib_0_1_stop_rib(
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_add_rib_client(
+XrlRibTarget::rib_0_1_add_rib_client4(
     // Input values, 
     const string&	target_name, 
-    const uint32_t&	family, 
-    const bool&		is_unicast, 
-    const bool&		is_multicast, 
+    const bool&		unicast, 
+    const bool&		multicast, 
     // Output values, 
     bool&	fail, 
     string&	reason)
 {
-    if (_rib_manager->add_rib_client(target_name, family, is_unicast,
-				     is_multicast)
+    if (_rib_manager->add_rib_client(target_name, AF_INET, unicast,
+				     multicast)
 	!= XORP_OK) {
 	fail = true;
     } else {
@@ -119,18 +118,155 @@ XrlRibTarget::rib_0_1_add_rib_client(
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_delete_rib_client(
+XrlRibTarget::rib_0_1_add_rib_client6(
     // Input values, 
     const string&	target_name, 
-    const uint32_t&	family, 
-    const bool&		is_unicast, 
-    const bool&		is_multicast, 
+    const bool&		unicast, 
+    const bool&		multicast, 
     // Output values, 
     bool&	fail, 
     string&	reason)
 {
-    if (_rib_manager->delete_rib_client(target_name, family, is_unicast,
-					is_multicast)
+#ifndef HAVE_IPV6
+    fail = true;
+    reason = "IPv6 not supported";
+    
+    return XrlCmdError::OKAY();
+    
+#else
+    if (_rib_manager->add_rib_client(target_name, AF_INET6, unicast,
+				     multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+#endif // HAVE_IPV6
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_rib_client4(
+    // Input values, 
+    const string&	target_name, 
+    const bool&		unicast, 
+    const bool&		multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->delete_rib_client(target_name, AF_INET, unicast,
+					multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_rib_client6(
+    // Input values, 
+    const string&	target_name, 
+    const bool&		unicast, 
+    const bool&		multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+#ifndef HAVE_IPV6
+    fail = true;
+    reason = "IPv6 not supported";
+    
+    return XrlCmdError::OKAY();
+    
+#else
+    if (_rib_manager->delete_rib_client(target_name, AF_INET6, unicast,
+					multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+#endif // HAVE_IPV6
+
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_enable_rib_client4(
+    // Input values, 
+    const string&	target_name, 
+    const bool&		unicast, 
+    const bool&		multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->enable_rib_client(target_name, AF_INET, unicast,
+					multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_enable_rib_client6(
+    // Input values, 
+    const string&	target_name, 
+    const bool&		unicast, 
+    const bool&		multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+#ifndef HAVE_IPV6
+    fail = true;
+    reason = "IPv6 not supported";
+    
+    return XrlCmdError::OKAY();
+    
+#else
+    if (_rib_manager->enable_rib_client(target_name, AF_INET6, unicast,
+					multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+#endif // HAVE_IPV6
+
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_disable_rib_client4(
+    // Input values, 
+    const string&	target_name, 
+    const bool&		unicast, 
+    const bool&		multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->disable_rib_client(target_name, AF_INET, unicast,
+					 multicast)
 	!= XORP_OK) {
 	fail = true;
     } else {
@@ -142,18 +278,24 @@ XrlRibTarget::rib_0_1_delete_rib_client(
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_enable_rib_client(
+XrlRibTarget::rib_0_1_disable_rib_client6(
     // Input values, 
     const string&	target_name, 
-    const uint32_t&	family, 
-    const bool&		is_unicast, 
-    const bool&		is_multicast, 
+    const bool&		unicast, 
+    const bool&		multicast, 
     // Output values, 
     bool&	fail, 
     string&	reason)
 {
-    if (_rib_manager->enable_rib_client(target_name, family, is_unicast,
-					is_multicast)
+#ifndef HAVE_IPV6
+    fail = true;
+    reason = "IPv6 not supported";
+    
+    return XrlCmdError::OKAY();
+    
+#else
+    if (_rib_manager->disable_rib_client(target_name, AF_INET6, unicast,
+					 multicast)
 	!= XORP_OK) {
 	fail = true;
     } else {
@@ -162,29 +304,7 @@ XrlRibTarget::rib_0_1_enable_rib_client(
     reason = "";
     
     return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_disable_rib_client(
-    // Input values, 
-    const string&	target_name, 
-    const uint32_t&	family, 
-    const bool&		is_unicast, 
-    const bool&		is_multicast, 
-    // Output values, 
-    bool&	fail, 
-    string&	reason)
-{
-    if (_rib_manager->disable_rib_client(target_name, family, is_unicast,
-					 is_multicast)
-	!= XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
+#endif // HAVE_IPV6
 }
 
 XrlCmdError 
