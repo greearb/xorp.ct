@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.7 2004/06/10 22:40:36 hodson Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.8 2004/08/06 01:41:17 bms Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -39,14 +39,27 @@
 
 /* **************** BGPSocket *********************** */
 
-#define MAX_LISTEN_QUEUE 5
-
 class Socket {
 public:
+#ifdef	SOCK_MAXADDRLEN
+    static const int SOCKET_BUFFER_SIZE = SOCK_MAXADDRLEN;
+#else
+    static const int SOCKET_BUFFER_SIZE = 1024;
+#endif
+    static const int MAX_LISTEN_QUEUE = 5;
+
     Socket(const Iptuple& iptuple, EventLoop& e);
 
-    static void init_sockaddr(struct sockaddr_in *name, struct in_addr addr,
-			      uint16_t port);
+    /**
+     * Given an address (IPv4 or IPv6) symbolic or numeric fill in the
+     * provided structure.
+     *
+     * Note: This method is provided as a service to other code and is
+     * no longer used by this class. Don't remove it as the test code
+     * uses it.
+     */
+    static void init_sockaddr(string addr, uint16_t local_port,
+			      struct sockaddr *sin, size_t& len);
 
     //    void set_eventloop(EventLoop *evt) {_eventloop = evt;}
     EventLoop& eventloop() {return _eventloop;}
@@ -65,12 +78,22 @@ protected:
     void set_sock(int s) {_s = s;}
 
     void close_socket();
-    void create_socket();
+    void create_socket(const struct sockaddr *sin);
 
-    struct in_addr get_local_addr() {return _iptuple.get_local_addr();}
+    const struct sockaddr *get_local_socket(size_t& len) {
+	return _iptuple.get_local_socket(len);
+    }
+    string get_local_addr() {return _iptuple.get_local_addr();}
     uint16_t get_local_port() {return _iptuple.get_local_port();}
 
-    struct in_addr get_remote_addr() {return _iptuple.get_peer_addr();}
+    const struct sockaddr *get_bind_socket(size_t& len) {
+	return _iptuple.get_bind_socket(len);
+    }
+
+    const struct sockaddr *get_remote_socket(size_t& len) {
+	return _iptuple.get_peer_socket(len);
+    }
+    string get_remote_addr() {return _iptuple.get_peer_addr();}
     uint16_t get_remote_port() {return _iptuple.get_peer_port();}
 private:
     int _s;
@@ -216,8 +239,8 @@ public:
     bool still_reading();
 protected:
 private:
-    void connect_socket(int sock, struct in_addr raddr, uint16_t port,
-			struct in_addr laddr, ConnectCallback cb);
+    void connect_socket(int sock, string raddr, uint16_t port,
+			string laddr, ConnectCallback cb);
     void connect_socket_complete(int fd, SelectorMask m, ConnectCallback cb);
     void connect_socket_break();
 

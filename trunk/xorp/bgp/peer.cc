@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.80 2004/09/21 23:13:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.81 2004/09/24 07:25:11 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1708,7 +1708,7 @@ BGPPeer::get_msg_stats(uint32_t& in_updates,
 bool 
 BGPPeer::remote_ip_ge_than(const BGPPeer& peer)
 {
-    const IPv4& this_remote_ip = peerdata()->iptuple().get_peer_addr();
-    const IPv4& other_remote_ip = peer.peerdata()->iptuple().get_peer_addr();
+    string this_remote_ip = peerdata()->iptuple().get_peer_addr();
+    string other_remote_ip = peer.peerdata()->iptuple().get_peer_addr();
     return (this_remote_ip >= other_remote_ip);     
 }

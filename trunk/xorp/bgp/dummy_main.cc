@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.7 2004/03/24 19:34:30 atanu Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.8 2004/06/10 22:40:29 hodson Exp $"
 
 #include <sys/time.h>
 
@@ -59,7 +59,7 @@ BGPMain::local_config(const uint32_t&, const IPv4&)
 */
 void 
 BGPMain::connect_attempt(int, SelectorMask,
-			 struct in_addr, uint16_t)
+			 string, uint16_t)
 {
 }
 

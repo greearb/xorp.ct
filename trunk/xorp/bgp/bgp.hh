@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.33 2004/09/28 01:17:28 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.34 2004/11/24 07:27:02 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -455,8 +455,7 @@ private:
     /**
      * Callback method called when a connection attempt is made.
      */
-    void connect_attempt(int fd, SelectorMask m,
-			 struct in_addr laddr, uint16_t lport);
+    void connect_attempt(int fd, SelectorMask m, string laddr, uint16_t lport);
 
     template <typename A>
     void extract_attributes(// Input values, 

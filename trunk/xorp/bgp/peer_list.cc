@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.12 2004/06/10 22:40:32 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.13 2004/11/10 22:55:37 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -143,6 +143,8 @@ BGPPeerList::get_peer_list_next(const uint32_t& token,
     if (mi == _readers.end())
 	return false;
     list<BGPPeer *>::iterator i = mi->second;
+
+ again:
     if (i == _peers.end()) {
 	//this can happen only if the iterator pointed to the last
 	//peer, and it was deleted since we were last here.
@@ -152,9 +154,24 @@ BGPPeerList::get_peer_list_next(const uint32_t& token,
 	peer_port = 0;
     } else {
 	BGPPeer *peer = *i;
-	local_ip = peer->peerdata()->iptuple().get_local_addr();
+
+	/* XXX
+	** This interface only allows IPv4 so if a peering is IPv6 we
+	** can't cope.
+	*/
+	size_t len;
+	Iptuple tuple = peer->peerdata()->iptuple();
+	if (tuple.get_bind_socket(len)->sa_family != AF_INET) {
+	    XLOG_WARNING("Can only deal with IPv4 peerings not: %s %s",
+			 tuple.get_local_addr().c_str(),
+			 tuple.get_peer_addr().c_str());
+	    i++;
+	    goto again;
+	}
+
+	local_ip = IPv4(peer->peerdata()->iptuple().get_local_addr().c_str());
 	local_port = htons(peer->peerdata()->iptuple().get_local_port());
-	peer_ip = peer->peerdata()->iptuple().get_peer_addr();
+	peer_ip = IPv4(peer->peerdata()->iptuple().get_peer_addr().c_str());
 	peer_port = htons(peer->peerdata()->iptuple().get_peer_port());
 	i++;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.25 2004/06/01 19:37:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.26 2004/06/10 22:40:40 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -314,25 +314,23 @@ TestPeer::connect(const string& host, const uint32_t& port,
 	return false;
     }
 
-    int s = ::socket(PF_INET, SOCK_STREAM, 0);
+    char buf[Socket::SOCKET_BUFFER_SIZE];
+    struct sockaddr *peer = reinterpret_cast<struct sockaddr *>(buf);
+    size_t len = sizeof(buf);
+    try {
+	Socket::init_sockaddr(host, port, peer, len);
+    } catch(UnresolvableHost e) {
+	error_string = e.why();
+	return false;
+    }
+
+    int s = ::socket(peer->sa_family, SOCK_STREAM, 0);
     if(-1 == s) {
 	error_string = c_format("socket call failed: %s", strerror(errno));
 	return false;
     }
 
-    struct sockaddr_in peer;
-    try {
-	Socket::init_sockaddr(&peer,
-			      Iptuple::get_addr(host.c_str()),
-			      htons(port));
-    } catch(UnresolvableHost e) {
-	::close(s);
-	error_string = e.why();
-	return false;
-    }
-
-    if(-1 == ::connect(s, reinterpret_cast<struct sockaddr *>(&peer),
-		       sizeof(peer))) {
+    if(-1 == ::connect(s, peer, len)) {
 	::close(s);
 	return false;
     }
@@ -383,20 +381,20 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
-    int s = ::socket(PF_INET, SOCK_STREAM, 0);
-    if(-1 == s) {
-	error_string = c_format("socket call failed: %s", strerror(errno));
+
+    char buf[Socket::SOCKET_BUFFER_SIZE];
+    struct sockaddr *local = reinterpret_cast<struct sockaddr *>(buf);
+    size_t len = sizeof(buf);
+    try {
+	Socket::init_sockaddr(host, port, local, len);
+    } catch(UnresolvableHost e) {
+	error_string = e.why();
 	return false;
     }
 
-    struct sockaddr_in local;
-    try {
-	Socket::init_sockaddr(&local,
-			      Iptuple::get_addr(host.c_str()),
-			      htons(port));
-    } catch(UnresolvableHost e) {
-	::close(s);
-	error_string = e.why();
+    int s = ::socket(local->sa_family, SOCK_STREAM, 0);
+    if(-1 == s) {
+	error_string = c_format("socket call failed: %s", strerror(errno));
 	return false;
     }
 
@@ -406,8 +404,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
-    if(-1 == ::bind(s, reinterpret_cast<struct sockaddr *>(&local),
-		  sizeof(local))) {
+    if(-1 == ::bind(s, local, len)) {
 	::close(s);
 	error_string = c_format("Bind failed: %s", strerror(errno));
 	return false;
@@ -452,20 +449,19 @@ TestPeer::bind(const string& host, const uint32_t& port,
 	return false;
     }
 
-    int s = ::socket(PF_INET, SOCK_STREAM, 0);
-    if(-1 == s) {
-	error_string = c_format("socket call failed: %s", strerror(errno));
+    char buf[Socket::SOCKET_BUFFER_SIZE];
+    struct sockaddr *local = reinterpret_cast<struct sockaddr *>(buf);
+    size_t len = sizeof(buf);
+    try {
+	Socket::init_sockaddr(host, port, local, len);
+    } catch(UnresolvableHost e) {
+	error_string = e.why();
 	return false;
     }
 
-    struct sockaddr_in local;
-    try {
-	Socket::init_sockaddr(&local,
-			      Iptuple::get_addr(host.c_str()),
-			      htons(port));
-    } catch(UnresolvableHost e) {
-	::close(s);
-	error_string = e.why();
+    int s = ::socket(local->sa_family, SOCK_STREAM, 0);
+    if(-1 == s) {
+	error_string = c_format("socket call failed: %s", strerror(errno));
 	return false;
     }
 
@@ -475,8 +471,7 @@ TestPeer::bind(const string& host, const uint32_t& port,
 	return false;
     }
 
-    if(-1 == ::bind(s, reinterpret_cast<struct sockaddr *>(&local),
-		  sizeof(local))) {
+    if(-1 == ::bind(s, local, len)) {
 	::close(s);
 	error_string = c_format("Bind failed: %s", strerror(errno));
 	return false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.16 2004/08/06 01:41:17 bms Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.17 2004/08/06 07:30:33 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -52,18 +52,19 @@ Socket::Socket(const Iptuple& iptuple, EventLoop& e)
 void
 Socket::create_listener()
 {
-    struct sockaddr_in servername;
     debug_msg("create_listener called");
-    create_socket();
-    init_sockaddr(&servername, get_local_addr(), get_local_port());
+
+    size_t len;
+    const struct sockaddr *sin = get_local_socket(len);
+
+    create_socket(sin);
 
     int opt = 1;
     if(-1 == setsockopt(get_sock(),
 			SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
 	XLOG_FATAL("setsockopt failed: %s", strerror(errno));
     
-    if(-1 == bind(get_sock(), (struct sockaddr *)&servername,
-		  sizeof(servername)))
+    if(-1 == bind(get_sock(), sin, len))
 	XLOG_FATAL("Bind failed: %s", strerror(errno));
 }
 
@@ -79,33 +80,44 @@ Socket::close_socket()
 }
 
 void
-Socket::create_socket()
+Socket::create_socket(const struct sockaddr *sin)
 {
     debug_msg("create_socket called\n");
 
     XLOG_ASSERT(UNCONNECTED == _s);
 
-    if(UNCONNECTED == (_s = ::socket (PF_INET, SOCK_STREAM, 0)))
+    if(UNCONNECTED == (_s = ::socket (sin->sa_family, SOCK_STREAM, 0)))
 	XLOG_FATAL("Socket call failed: %s", strerror(errno));
 
     debug_msg("BGPSocket socket created (sock - %d)\n", _s);
 }
 
 void
-Socket::init_sockaddr(struct sockaddr_in *name, 
-		      struct in_addr addr,
-		      uint16_t port)
+Socket::init_sockaddr(string addr, uint16_t local_port,
+		      struct sockaddr *sin, size_t& len)
 {
-    debug_msg("addr %s port %d len = %u\n", inet_ntoa(addr), ntohs(port),
-	      (uint32_t)sizeof(*name));
+    debug_msg("addr %s port %d len = %u\n", addr.c_str(), local_port, len);
 
-    memset(name, 0, sizeof(*name));
-#ifdef	HAVE_SIN_LEN
-    name->sin_len = sizeof(*name);
-#endif
-    name->sin_family = AF_INET;
-    name->sin_addr = addr;
-    name->sin_port = port;
+    string port = c_format("%d", local_port);
+
+    int error;
+    struct addrinfo hints, *res0;
+    // Need to provide a hint because we are providing a numeric port number.
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    // addr must be numeric so this can't fail.
+    if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0)))
+	XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
+		   port.c_str(),
+		   gai_strerror(error));
+
+    XLOG_ASSERT(res0->ai_addrlen <= len);
+    memcpy(sin,res0->ai_addr, res0->ai_addrlen);
+
+    len = res0->ai_addrlen;
+
+    freeaddrinfo(res0);
 }	
 
 /* **************** BGPSocket - PRIVATE METHODS *********************** */
@@ -168,7 +180,8 @@ SocketClient::connect(ConnectCallback cb)
 
     XLOG_ASSERT(UNCONNECTED == get_sock());
 
-    create_socket();
+    size_t len;
+    create_socket(get_local_socket(len));
 
     if (_md5sig)
 	comm_set_tcpmd5(get_sock(), _md5sig);
@@ -346,7 +359,7 @@ SocketClient::send_message(const uint8_t* buf,
 		   get_remote_host());
 #else
 	XLOG_WARNING("sending message to %s, not connected!!!",
-		     inet_ntoa(get_remote_addr()));
+		     get_remote_addr().c_str());
 #endif
 	return false;
     }
@@ -387,16 +400,16 @@ SocketClient::output_queue_size() const {
 /* **************** BGPSocketClient - PRIVATE METHODS *********************** */
 
 void
-SocketClient::connect_socket(int sock, struct in_addr raddr, uint16_t port,
-			     struct in_addr laddr, ConnectCallback cb)
+SocketClient::connect_socket(int sock, string raddr, uint16_t port,
+			     string laddr, ConnectCallback cb)
 {
-    struct sockaddr_in local;
-    debug_msg("laddr %s\n", inet_ntoa(laddr));
-    init_sockaddr(&local, laddr, 0);
+    debug_msg("laddr %s\n", laddr.c_str());
+
+    size_t len;
+    const struct sockaddr *local = get_bind_socket(len);
 
     /* Bind the local endpoint to the supplied address */
-    if(-1 == ::bind(sock, reinterpret_cast<struct sockaddr *>(&local),
-		   sizeof(local))) {
+    if(-1 == ::bind(sock, local, len)) {
 	XLOG_ERROR("Bind failed: %s", strerror(errno));
 
 	/*
@@ -409,16 +422,14 @@ SocketClient::connect_socket(int sock, struct in_addr raddr, uint16_t port,
 	return;
     }
 
-    struct sockaddr_in servername;
-    debug_msg("raddr %s port %d\n", inet_ntoa(raddr), ntohs(port));
-    init_sockaddr(&servername, raddr, port);
+    const struct sockaddr *servername = get_remote_socket(len);
 
     if (!eventloop().
-       add_selector(sock,
+	add_selector(sock,
 		    SEL_ALL,
-		    callback(this,
-			     &SocketClient::connect_socket_complete,
-			     cb))) {
+		     callback(this,
+			      &SocketClient::connect_socket_complete,
+			      cb))) {
 	XLOG_ERROR("Failed to add socket %d to eventloop", sock);
     }
 
@@ -431,15 +442,12 @@ SocketClient::connect_socket(int sock, struct in_addr raddr, uint16_t port,
 
     XLOG_ASSERT(!_connecting);
     _connecting = true;
-    if (-1 == ::connect(sock,
-			reinterpret_cast<struct sockaddr *>(&servername), 
-			sizeof(servername))) {
-
+    if (-1 == ::connect(sock, servername, len)) {
 	if (EINPROGRESS == errno)
 	    return;
 
 	debug_msg("Connect failed: %s raddr %s port %d\n",
-		  strerror(errno), inet_ntoa(raddr), ntohs(port));
+		  strerror(errno), raddr.c_str(), port);
 //  	XLOG_ERROR("Connect failed: %s raddr %s port %d",
 // 		   strerror(errno), inet_ntoa(raddr), ntohs(port));
     }
@@ -464,7 +472,7 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 
     eventloop().remove_selector(sock);
 
-    struct sockaddr_in sin;
+    struct sockaddr sin;
     socklen_t len = sizeof(sin);
     int error;
 
@@ -480,14 +488,14 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
     }
 
     // Did the connection succeed?
-    memset(reinterpret_cast<void *>(&sin), 0, sizeof(sin));
+    memset(&sin, 0, sizeof(sin));
     len = sizeof(sin);
-    if (1 == getpeername(sock,
-			 reinterpret_cast<struct sockaddr *>(&sin), &len)) {
+    if (1 == getpeername(sock, &sin, &len)) {
 	debug_msg("connect failed (geetpeername) %d\n", sock);
 	goto failed;
     }
     
+#if	0
     if (0 == sin.sin_port) {
 	debug_msg("connect failed (sin_port) %d\n", sock);
 	goto failed;
@@ -497,6 +505,7 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 	debug_msg("connect failed (sin_addr) %d\n", sock);
 	goto failed;
     }
+#endif
 
     // Did the connection succeed?
     len = sizeof(error);

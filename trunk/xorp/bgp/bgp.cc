@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.41 2004/09/21 18:05:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.42 2004/11/24 07:27:02 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -264,16 +264,18 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
 */
 void
 BGPMain::connect_attempt(int fd, SelectorMask m,
-			 struct in_addr laddr, uint16_t lport)
+			 string laddr, uint16_t lport)
 {
     if (SEL_RD != m) {
 	XLOG_WARNING("Unexpected SelectorMask %#x", m);
 	return;
     }
 
-    struct sockaddr_in cliaddr;
-    socklen_t clilen = sizeof(cliaddr);
-    int connfd = accept(fd,(struct sockaddr *) &cliaddr, &clilen);
+    char buf[Socket::SOCKET_BUFFER_SIZE];
+    struct sockaddr *cliaddr = reinterpret_cast<struct sockaddr *>(buf);
+    socklen_t clilen = sizeof(buf);
+
+    int connfd = accept(fd, cliaddr, &clilen);
 
     debug_msg("Incoming connection attempt %d\n", connfd);
 
@@ -281,6 +283,13 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
 	XLOG_WARNING("Accept failed %s", strerror(errno));
 	return;
     }
+
+    // Extract the peers IP address.
+    char peername[1024];
+    int error;
+    if ((error = getnameinfo(cliaddr, clilen , peername, sizeof(peername),
+			     0, 0, NI_NUMERICHOST)))
+	XLOG_FATAL("getnameinfo() failed: %s", gai_strerror(error));
 
     /*
     ** Loop through our peer list and see if we are configured for
@@ -296,8 +305,8 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
 	debug_msg("Trying: %s ", iptuple.str().c_str());
 
 	if (iptuple.get_local_port() == lport &&
-	   iptuple.get_local_addr().s_addr == laddr.s_addr &&
-	   iptuple.get_peer_addr().s_addr == cliaddr.sin_addr.s_addr) {
+	   iptuple.get_local_addr() == laddr &&
+	   iptuple.get_peer_addr() == peername) {
 	    debug_msg(" Succeeded\n");
 	    (*i)->connected(connfd);
 	    return;
@@ -305,7 +314,7 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
 	debug_msg(" Failed\n");
     }
 
-    XLOG_WARNING("Connection by %s denied", inet_ntoa(cliaddr.sin_addr));
+    XLOG_WARNING("Connection by %s denied", peername);
     if (-1 == close(connfd))
 	XLOG_WARNING("Close failed %s", strerror(errno));
 
@@ -324,9 +333,6 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
     ** drop the peering.
     */
 #if	0
-    string peername = "Peer-";
-    peername += inet_ntoa(cliaddr.sin_addr);
-
     // create new peer
     debug_msg("Creating new peer after socket connection\n");
     BGPPeer *peer = new BGPPeer(_localdata, new BGPPeerData, this, connfd);
@@ -718,8 +724,8 @@ BGPMain::start_server(const Iptuple& iptuple)
 	for (j = i->_tuples.begin(); j != i->_tuples.end(); j++) {
 	    if (*j == iptuple)	// This tuple already in list.
 		return;
-	    if ((j->get_local_addr().s_addr ==
-		iptuple.get_local_addr().s_addr &&
+	    if ((j->get_local_addr() ==
+		iptuple.get_local_addr() &&
 		j->get_local_port() == iptuple.get_local_port()))
 		match = true;
 	}
