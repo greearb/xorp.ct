@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.3 2003/11/20 05:52:01 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.4 2003/11/20 06:37:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -120,7 +120,7 @@ CommandTree::push(const string& str)
 void 
 CommandTree::pop()
 {
-    if (_temp_path.size() == 0) {
+    if (_temp_path.empty()) {
 	_current_node = _current_node->parent();
     } else {
 	_temp_path.pop_back();
@@ -128,12 +128,13 @@ CommandTree::pop()
 }
 
 void 
-CommandTree::instantiate(const ConfigTreeNode *ctn, 
-			 const TemplateTreeNode *ttn)
+CommandTree::instantiate(const ConfigTreeNode* ctn, 
+			 const TemplateTreeNode* ttn)
 {
     XLOG_ASSERT(! _temp_path.empty());
 
     list<string>::const_iterator iter;
+
     for (iter = _temp_path.begin(); iter != _temp_path.end(); ++iter) {
 	debug_msg("Instantiating node >%s<\n", iter->c_str());
 	CommandTreeNode* new_ctn = new CommandTreeNode(*iter, ctn, ttn);
