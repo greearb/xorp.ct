@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.3 2003/05/10 00:06:41 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.4 2003/05/14 01:13:42 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -143,7 +143,6 @@ public:
     virtual int stop();
     
     virtual bool pull_config(IfTree& config);
-    
     virtual bool read_config(IfTree& it);
     
     virtual void receive_data(const uint8_t* data, size_t n_bytes);
