@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.3 2003/01/26 04:06:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.4 2003/02/25 01:38:48 pavlin Exp $"
 
 
 //
@@ -1654,7 +1654,7 @@ BsrZone::randomized_override_interval(const IPvX& my_addr,
 	addr_delay = log(addr_diff) / log((double)2.0);		// log2()
 	addr_delay /= (addr_bitlen / 2);			// 16 for IPv4
     } else {
-	addr_delay = 2 - (my_addr_double / pow((double)2.0, (addr_bitlen - 1)));
+	addr_delay = 2 - (my_addr_double / pow((double)2.0, (double)(addr_bitlen - 1)));
     }
     XLOG_ASSERT((addr_delay >= 0.0) && (addr_delay <= 2.0));
     
