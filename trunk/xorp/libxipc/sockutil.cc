@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.5 2003/06/01 21:37:28 hodson Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.6 2003/06/10 19:13:17 hodson Exp $"
 
 #include "config.h"
 
@@ -23,6 +23,11 @@
 #include <sys/socket.h>
 #include <sys/sockio.h>
 #include <sys/ioctl.h>
+
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif /* HAVE_SYS_SOCKIO_H */
+
 #include <net/if.h>
 
 #include <errno.h>
