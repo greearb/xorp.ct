@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.28 2004/09/17 14:00:04 abittau Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.29 2004/09/28 03:52:33 atanu Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -398,6 +398,31 @@ public:
      * @return a reference to the profiler.
      */
     Profile& profile() {return _profile;}
+
+    /**
+     * @return a reference to the IPv4 unicast RIB.
+     */
+    RIB<IPv4>& urib4() { return _urib4; }
+
+    /**
+     * @return a reference to the IPv4 multicast RIB.
+     */
+    RIB<IPv4>& mrib4() { return _mrib4; }
+
+    /**
+     * @return a reference to the IPv6 unicast RIB.
+     */
+    RIB<IPv6>& urib6() { return _urib6; }
+
+    /**
+     * @return a reference to the IPv6 multicast RIB.
+     */
+    RIB<IPv6>& mrib6() { return _mrib6; }
+
+    /**
+     * @return a reference to the XRL RIB target.
+     */
+    XrlRibTarget& xrl_rib_target() { return _xrl_rib_target; }
 
 private:
     ProcessStatus       _status_code;
