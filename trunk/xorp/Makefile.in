@@ -84,7 +84,7 @@ AUTOMAKE_OPTIONS = foreign
 ETAGS_ARGS = --c++
 
 # --- Conditional applications
-SUBDIRS = libxorp libcomm libxipc libproto mrt xrl cli mfea utils fea bgp mld6igmp pim rtrmgr rib @OSPFD@ @RIP@
+SUBDIRS = libxorp libcomm libxipc libproto mrt xrl cli policy mfea utils fea bgp mld6igmp pim rtrmgr rib @OSPFD@ @RIP@
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = 

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.4 2003/01/26 03:13:51 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.5 2003/01/29 03:04:33 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1069,6 +1069,7 @@ AC_OUTPUT(
 	rip/routed/Makefile
 	rip/route6d/Makefile
 	rtrmgr/Makefile
+	policy/Makefile
 	utils/Makefile
 	xrl/Makefile
 	xrl/interfaces/Makefile
