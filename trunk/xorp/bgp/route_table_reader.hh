@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_reader.hh,v 1.2 2003/01/24 18:52:25 mjh Exp $
+// $XORP: xorp/bgp/route_table_reader.hh,v 1.3 2003/01/25 02:10:07 mjh Exp $
 
-#ifndef __ROUTE_TABLE_READER_HH__
-#define __ROUTE_TABLE_READER_HH__
+#ifndef __BGP_ROUTE_TABLE_READER_HH__
+#define __BGP_ROUTE_TABLE_READER_HH__
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -61,4 +61,4 @@ private:
     set <ReaderIxTuple<A>*> _peer_readers;
 };
 
-#endif // __ROUTE_TABLE_READER_HH__
+#endif // __BGP_ROUTE_TABLE_READER_HH__

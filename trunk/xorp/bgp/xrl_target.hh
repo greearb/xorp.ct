@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.7 2003/02/22 02:12:00 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.8 2003/03/10 23:20:08 hodson Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -321,4 +321,4 @@ private:
     bool _done;
 };
 
-#endif //  __BGP_XRL_TARGET_HH__
+#endif // __BGP_XRL_TARGET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.7 2003/03/07 02:07:27 pavlin Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.8 2003/03/10 23:19:59 hodson Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -39,44 +39,44 @@ template<class A> class DecisionTable;
 template<class A> class NHRequest;
 
 /**
-* Next hop resolvability and IGP distances are accessed through this class.
-*
-* Next hop resolvability and IGP distances are retrieved from the RIB
-* and cached here in BGP. This retrieval process implicitly registers
-* interest with the RIB regarding these next hops. Thus any changes in
-* these next hops is signalled by the RIB to BGP via callbacks.
-*
-* If the state of a next hop changes (resolvable/unresolvable), or an
-* IGP distance changes, then it is possible that a new route may now
-* win the decision process. The decision process must therefore be
-* re-run for all routes that are affected by a next hop change. This
-* re-run of the decision process is achieved calling
-* "igp_nexthop_changed" on the decision process.
-*
-* What questions can be asked about next hops? Is a next hop
-* resolvable and if it is, what is the IGP distance.
-*
-* To answer questions about next hops three interfaces are supported:
-* 1) An asynchronous interface that registers a callback which will be
-* called when a response becomes available. For use by the (next
-* hop) route table before decision. By the time a route gets to
-* decision it *must* be known if the route is resolvable.
-* 2) A synchronous interface for use by decision. It is a fatal error
-* if this interface is called and the next hop is not in the
-* cache. As by the time decision is called the cache should have been
-* populated by use of the asynchronous interface.
-* 3) A synchronous debugging interface.
-*
-* Cache maintainance:
-* Every stored SubnetRoute in every rib in has a next hop. Every
-* unique next hop has an entry in the cache. If a next hop lookup
-* through the asynchronous interface causes a cache miss then an entry
-* is created with a reference count of 1. Subsequent lookups through
-* the next hop interface will cause the reference count to be
-* incremented by 1. An interface to increase the reference count by
-* more than one also exists. All route deletions should explicitly
-* call a routine in here to decrement the reference count.
-*/
+ * Next hop resolvability and IGP distances are accessed through this class.
+ *
+ * Next hop resolvability and IGP distances are retrieved from the RIB
+ * and cached here in BGP. This retrieval process implicitly registers
+ * interest with the RIB regarding these next hops. Thus any changes in
+ * these next hops is signalled by the RIB to BGP via callbacks.
+ *
+ * If the state of a next hop changes (resolvable/unresolvable), or an
+ * IGP distance changes, then it is possible that a new route may now
+ * win the decision process. The decision process must therefore be
+ * re-run for all routes that are affected by a next hop change. This
+ * re-run of the decision process is achieved calling
+ * "igp_nexthop_changed" on the decision process.
+ *
+ * What questions can be asked about next hops? Is a next hop
+ * resolvable and if it is, what is the IGP distance.
+ *
+ * To answer questions about next hops three interfaces are supported:
+ * 1) An asynchronous interface that registers a callback which will be
+ * called when a response becomes available. For use by the (next
+ * hop) route table before decision. By the time a route gets to
+ * decision it *must* be known if the route is resolvable.
+ * 2) A synchronous interface for use by decision. It is a fatal error
+ * if this interface is called and the next hop is not in the
+ * cache. As by the time decision is called the cache should have been
+ * populated by use of the asynchronous interface.
+ * 3) A synchronous debugging interface.
+ *
+ * Cache maintainance:
+ * Every stored SubnetRoute in every rib in has a next hop. Every
+ * unique next hop has an entry in the cache. If a next hop lookup
+ * through the asynchronous interface causes a cache miss then an entry
+ * is created with a reference count of 1. Subsequent lookups through
+ * the next hop interface will cause the reference count to be
+ * incremented by 1. An interface to increase the reference count by
+ * more than one also exists. All route deletions should explicitly
+ * call a routine in here to decrement the reference count.
+ */
 template<class A>
 class NextHopResolver {
 public:

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.6 2003/02/08 01:32:58 mjh Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.7 2003/03/10 23:19:57 hodson Exp $
 
-#ifndef __BGP_TRIE_HH__
-#define __BGP_TRIE_HH__
+#ifndef __BGP_BGP_TRIE_HH__
+#define __BGP_BGP_TRIE_HH__
 
 #include "subnet_route.hh"
 #include <map>
@@ -163,4 +163,4 @@ private:
     PathmapType	_pathmap;
 };
 
-#endif // __BGP_TRIE_HH__
+#endif // __BGP_BGP_TRIE_HH__
