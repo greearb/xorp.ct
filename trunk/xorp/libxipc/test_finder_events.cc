@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.4 2003/06/02 17:12:33 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.5 2003/06/05 02:11:21 atanu Exp $"
 
 #include <list>
 #include <vector>
@@ -424,7 +424,10 @@ assert_xrl_target_count(list<AnXrlTarget*>* store,
 //
 
 static int
-test_main(IPv4 finder_addr, uint16_t finder_port, bool use_internal_finder)
+test_main(IPv4		 finder_addr,
+	  uint16_t	 finder_port,
+	  const uint32_t burst_cnt,
+	  bool		 use_internal_finder)
 {
     EventLoop e;
 
@@ -441,8 +444,7 @@ test_main(IPv4 finder_addr, uint16_t finder_port, bool use_internal_finder)
 
     uint32_t t0 = 1000;
 
-    static uint32_t tstep = 500;
-    static const uint32_t burst_cnt = 50;
+    static uint32_t tstep = 250;
 
     vector<XorpTimer> timers;
 
@@ -641,10 +643,16 @@ static void
 usage(const char* progname)
 {
     print_program_info(stderr);
-    fprintf(stderr, "usage: %s [-F <host>[:port]] [-v] [-h]\n", progname);
-    fprintf(stderr, "       -F          : specify arguments for an external Finder instance\n");
-    fprintf(stderr, "       -h          : usage (this message)\n");
-    fprintf(stderr, "       -v          : verbose output\n");
+    fprintf(stderr, "Usage: %s [options]\n", progname);
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -F <host>[:<port>]     "
+	    "Specify arguments for an external Finder instance\n");
+    fprintf(stderr, "  -b <n>                 "
+	    "Set the number of simulated clients\n");
+    fprintf(stderr, "  -r <n>                 "
+	    "Set the number of test runs\n");
+    fprintf(stderr, "  -h                     Display this information\n");
+    fprintf(stderr, "  -v                     Verbose output\n");
 }
 
 
@@ -690,12 +698,30 @@ main(int argc, char * const argv[])
     int ret_value = 0;
     const char* const argv0 = argv[0];
 
-    IPv4 finder_addr = FINDER_DEFAULT_HOST;
-    uint16_t finder_port = 16600;	// over-ridden for external finder
-    bool use_internal_finder = true;
+    //
+    // Defaults
+    //
+    IPv4	finder_addr = FINDER_DEFAULT_HOST;
+    uint16_t	finder_port = 16600;	// over-ridden for external finder
+    bool	use_internal_finder = true;
+    int		reps = 1;
+    uint32_t	burst_cnt = 50;
+    uint32_t 	dtablesize = getdtablesize();
+
+    //
+    // For systems with small default dtable sizes.
+    //
+    if (burst_cnt > dtablesize / 20) {
+	burst_cnt = dtablesize / 20;
+	verbose_log("Cropped maximum burst count to %d "
+		    "(descriptor table constraint).\n",
+		    burst_cnt);
+    }
 
     int ch;
-    while ((ch = getopt(argc, argv, "F:hv")) != -1) {
+    char* bp = NULL;
+
+    while ((ch = getopt(argc, argv, "F:b:r:hv")) != -1) {
         switch (ch) {
 	case 'F':
 	    if (parse_finder_arg(optarg, finder_addr, finder_port) == false) {
@@ -703,6 +729,20 @@ main(int argc, char * const argv[])
 		return 1;
 	    }
 	    use_internal_finder = false;
+	    break;
+	case 'b':
+	    burst_cnt = (uint32_t)strtoul(optarg, &bp, 10);
+	    if (bp != NULL && *bp != '\0') {
+		usage(argv[0]);
+		return 1;
+	    }
+	    break;
+	case 'r':
+	    reps = atoi(optarg);
+	    if (reps < 0) {
+		usage(argv[0]);
+		return 1;
+	    }
 	    break;
         case 'v':
             set_verbose(true);
@@ -732,7 +772,18 @@ main(int argc, char * const argv[])
 
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	ret_value = test_main(finder_addr, finder_port, use_internal_finder);
+	int iter = 0;
+	while (iter < reps) {
+	    verbose_log("============================\n");
+	    verbose_log("Iteration %d\n", iter);
+	    verbose_log("============================\n");
+	    ret_value = test_main(finder_addr, finder_port,
+				  burst_cnt,
+				  use_internal_finder);
+	    if (ret_value != 0)
+		break;
+	    iter++;
+	}
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
