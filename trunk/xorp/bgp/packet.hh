@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.16 2003/08/27 02:08:14 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.17 2003/09/19 20:54:35 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -173,7 +173,7 @@ public:
     bool operator==(const OpenPacket& him) const;
     void add_parameter(const BGPParameter *p);
 
-    const list <BGPParameter*>& parameter_list() const {
+    const ParameterList& parameter_list() const {
 	return _parameter_list;
     }
 
@@ -190,8 +190,8 @@ private:
     uint8_t	_OptParmLen;
     uint8_t	_Version;
 
-    list <BGPParameter*> _parameter_list;
-    uint8_t _num_parameters;
+    ParameterList _parameter_list;
+//     uint8_t _num_parameters;
 };
 
 /* **************** UpdatePacket *********************** */

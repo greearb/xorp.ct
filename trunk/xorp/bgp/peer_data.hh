@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.5 2003/09/25 01:27:09 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.6 2003/09/25 04:06:57 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -34,7 +34,6 @@ const size_t BGPVERSION = 4;
  */
 class BGPPeerData {
 public:
-    BGPPeerData();
     BGPPeerData(const Iptuple& iptuple,	AsNum as,
 		const IPv4& next_hop, const uint16_t holdtime);
     ~BGPPeerData();
@@ -80,18 +79,47 @@ public:
 	remove_parameter(p, _negotiated_parameters);
     };
 
-    bool unsupported_parameters() const ;
-
-    const list<const BGPParameter*>& parameter_recv_list() const {
+    const ParameterList& parameter_recv_list() const {
 	return _recv_parameters;
     }
-    const list<const BGPParameter*>& parameter_sent_list() const {
+
+    const ParameterList& parameter_sent_list() const {
 	return _sent_parameters;
     }
-    const list<const BGPParameter*>& parameter_negotiated_list() const {
+
+    const ParameterList& parameter_negotiated_list() const {
 	return _negotiated_parameters;
     }
-    void clone_parameters(const list< BGPParameter*>& parameter_list);
+
+    /**
+     * Take the optional parameters out of an open packet and save
+     * them in _recv_parameters. The list is accessible through the
+     * parameter_recv_list method.
+     */
+    void save_parameters(const ParameterList& parameter_list);
+
+    /**
+     * Go through the parameters that we have sent and the ones that
+     * our peer has sent us and drop state into the
+     * _negotiated_parameters list.
+     */
+    void open_negotiation();
+
+    bool unicast_ipv4() {
+	return _unicast_ipv4;
+    }
+
+    bool unicast_ipv6() {
+	return _unicast_ipv6;
+    } 
+
+    bool multicast_ipv4() {
+	return _multicast_ipv4;
+    }
+
+    bool multicast_ipv6() {
+	return _multicast_ipv6;
+    }
 
     void dump_peer_data() const;
     void set_v4_local_addr(const IPv4& addr) { _local_v4_addr = addr; }
@@ -118,9 +146,9 @@ public:
 protected:
 private:
     void add_parameter(const BGPParameter *,
-	 list<const BGPParameter*>& p_list);
+	 ParameterList& p_list);
     void remove_parameter(const BGPParameter *p,
-	 list<const BGPParameter*>& p_list);
+	 ParameterList& p_list);
 
     /*
      * Local Interface, Local Server Port, Peer Interface and
@@ -153,12 +181,27 @@ private:
     IPv6 _local_v6_addr; /* this is the address we advertise to
 			    external peers as the nexthop */
 
-    list <const BGPParameter*> _recv_parameters;
-    list <const BGPParameter*> _sent_parameters;
-    list <const BGPParameter*> _negotiated_parameters;
-    bool _unsupported_parameters;
-    uint8_t _num_parameters;
-    uint8_t _param_length;
+    
+    /**
+     * Parameters received by our peer.
+     */
+    ParameterList _recv_parameters;
+
+    /**
+     * Parameters that we have sent.
+     */
+    ParameterList _sent_parameters;
+
+    /**
+     * The options that we have both agreed on.
+     */
+    ParameterList _negotiated_parameters;
+
+    /**
+     * The set of different topologies that we support.
+     */
+    bool _unicast_ipv4, _unicast_ipv6, _multicast_ipv4,  _multicast_ipv6;
+     
 
     /* XXX
     ** Eventually we will have totally programmable filters. As a

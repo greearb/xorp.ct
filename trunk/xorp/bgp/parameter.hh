@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.6 2003/08/28 02:33:41 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.7 2003/09/25 02:54:43 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -33,7 +33,9 @@ const size_t SAFI_NLRI_MULTICAST = 2;
 
 #include <sys/types.h>
 #include "libxorp/debug.h"
+#include "libxorp/ref_ptr.hh"
 #include <string>
+#include <list>
 #include "exceptions.hh"
 
 enum ParamType {
@@ -97,7 +99,7 @@ public:
 	return _data;
     }
 
-    BGPParameter* clone() const;
+    //    BGPParameter* clone() const;
     virtual string str() const = 0;
 protected:
     uint8_t* _data;
@@ -219,5 +221,10 @@ protected:
 private:
    CapType _unknown_cap_code;
 };
+
+/**
+ * List of parameters
+ */
+typedef list <ref_ptr<const BGPParameter> > ParameterList;
 
 #endif // __BGP_PARAMETER_HH__

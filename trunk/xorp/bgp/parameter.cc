@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.14 2003/09/19 03:07:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.15 2003/09/25 02:56:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -62,48 +62,6 @@ BGPParameter::set_length(int l)
     _data = new uint8_t[_length];
     _data[1] = _length-2;
 }
-
-BGPParameter*
-BGPParameter::clone() const
-{
-    BGPParameter *clone = NULL;
-    switch (_type) {
-    case PARAMTYPEAUTH:
-	clone = new BGPAuthParameter(dynamic_cast<const BGPAuthParameter&>
-				     (*this));
-	break;
-    case PARAMTYPECAP: {
-	const BGPCapParameter* cparam = dynamic_cast<const BGPCapParameter*>
-	    (this);
-	switch (cparam->cap_code()) {
-	case CAPABILITYMULTIPROTOCOL:
-	    clone = new BGPMultiProtocolCapability
-		(dynamic_cast<const BGPMultiProtocolCapability&>(*this));
-	    break;
-	case CAPABILITYREFRESHOLD:
-	    XLOG_UNFINISHED();
-	    break;
-	case CAPABILITYREFRESH:
-	    clone = new BGPRefreshCapability
-		(dynamic_cast<const BGPRefreshCapability&>(*this));
-	    break;
-	case CAPABILITYMULTIROUTE:
-	    clone = new BGPMultiRouteCapability
-		(dynamic_cast<const BGPMultiRouteCapability&>(*this));
-	    break;
-	default:
-	    XLOG_UNREACHABLE();
-	}
-	break;
-    }
-    default:
-	XLOG_UNREACHABLE();
-    }
-
-    XLOG_ASSERT(clone);
-    return clone;
-}
-
 
 /* **************** BGPAuthParameter *********************** */
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.12 2003/05/23 00:02:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.13 2003/09/25 04:06:26 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -32,7 +32,6 @@ OpenPacket::OpenPacket(const AsNum& as, const IPv4& id,
 
     _Type = MESSAGETYPEOPEN;
     _OptParmLen = 0;
-    _num_parameters = 0;
 }
 
 const uint8_t *
@@ -53,9 +52,9 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
     _id.copy_out(d + BGP_COMMON_HEADER_LEN + 5);
     d[BGP_COMMON_HEADER_LEN + 9] = _OptParmLen;
 
-    if (_num_parameters > 0)  {
+    if (!_parameter_list.empty())  {
 	size_t i = MINOPENPACKET;
-	list <BGPParameter*>::const_iterator pi = _parameter_list.begin();
+	ParameterList::const_iterator pi = _parameter_list.begin();
 	while(pi != _parameter_list.end()) {
 	    memcpy(d + i, (*pi)->data(), (*pi)->length());
 	    i += (*pi)->length();
@@ -74,7 +73,6 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
     _Type = MESSAGETYPEOPEN;
 
     _OptParmLen = 0;
-    _num_parameters = 0;
 
     size_t i, myOptParmLen;
 
@@ -132,11 +130,11 @@ OpenPacket::str() const
 		  _HoldTime,
 		  _id.str().c_str());
 
-    list <BGPParameter*>::const_iterator pi = parameter_list().begin();
+    ParameterList::const_iterator pi = parameter_list().begin();
     while (pi != parameter_list().end()) {
 	s = s + " - " + (*pi)->str() + "\n";
 	++pi;
-	}
+    }
     return s;
 }
 
@@ -210,9 +208,8 @@ OpenPacket::add_parameter(const BGPParameter *p)
 	XLOG_UNREACHABLE();
     }
 
-    _parameter_list.push_back(parameter);
+    _parameter_list.push_back(ref_ptr<const BGPParameter>(parameter));
     // p.dump_contents();
-    _num_parameters++;
     // TODO add bounds checking
 
     _OptParmLen = _OptParmLen + p->length();

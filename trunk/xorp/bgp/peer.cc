@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.46 2003/09/16 21:00:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.47 2003/09/26 17:11:45 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -168,7 +168,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	}
     } catch(CorruptMessage c) {
 	/*
-	** This peer had sent us a bad message. Send a notification
+	** This peer has sent us a bad message. Send a notification
 	** and drop the the peering.
 	*/
 	XLOG_WARNING("From peer %s: %s", peerdata()->iptuple().str().c_str(),
@@ -460,10 +460,11 @@ BGPPeer::event_open()			// EVENTBGPTRANOPEN
 		    _localdata->id(),
 		    _peerdata->get_configured_hold_time());
 
-	list <const BGPParameter*>::const_iterator
+	ParameterList::const_iterator
 	    pi = _peerdata->parameter_sent_list().begin();
 	while(pi != _peerdata->parameter_sent_list().end()) {
-	    open_packet->add_parameter(*pi);
+	    const BGPParameter *par = pi->get();
+	    open_packet->add_parameter(par);
 	    pi++;
 	}
 
@@ -686,7 +687,7 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
 	// Process OPEN MESSAGE
 	try {
 	    check_open_packet(p);
-	    // extract open msg data into peerdata.
+	    // We liked the open packet continue, trying to setup session.
 	    send_message(KeepAlivePacket());
 
 	    // start timers
@@ -702,14 +703,12 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
 	    else
 		_peerdata->set_internal_peer(false);
 
-	    // add in parameters and capabilities
+	    // Save the parameters from the open packet.
+	    _peerdata->save_parameters(p->parameter_list());
 
-	    list <BGPParameter*>::const_iterator pi =
-		p->parameter_list().begin();
-	    while (pi != p->parameter_list().end()) {
-		_peerdata->add_recv_parameter( (BGPParameter *)*pi );
-		pi++;
-	    }
+	    // Compare 
+	    _peerdata->open_negotiation();
+
 	    set_state(STATEOPENCONFIRM);
 	} catch(CorruptMessage& mess) {
 	    send_notification(
@@ -916,10 +915,13 @@ BGPPeer::event_open(const int sock)
 void
 BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 {
-    if (p->Version() != BGPVERSION)
+    if (p->Version() != BGPVERSION) {
+	uint8_t data[2];
+	*reinterpret_cast<uint16_t *>(&data[0]) = htons(BGPVERSION);
 	xorp_throw(CorruptMessage,
 		   c_format("Unsupported BGPVERSION %d", p->Version()),
-		   OPENMSGERROR, UNSUPVERNUM);
+		   OPENMSGERROR, UNSUPVERNUM, &data[0], sizeof(data));
+    }
     if (p->as() != _peerdata->as()) {
 	debug_msg("**** Peer has %s, should have %s ****\n",
 		  p->as().str().c_str(),
@@ -931,19 +933,18 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 		   OPENMSGERROR, BADASPEER);
     }
 
-    // XXX What do we check for a bad BGP ID?
+    // This has to be a valid IPv4 address.
     _peerdata->set_id(p->id());
 
     // put received parameters into the peer data.
-    _peerdata->clone_parameters(  p->parameter_list() );
+//     _peerdata->clone_parameters(  p->parameter_list() );
     // check the received parameters
+#if	0
     if (_peerdata->unsupported_parameters() == true)
 	xorp_throw(CorruptMessage,
 		   c_format("Unsupported parameters"),
 		   OPENMSGERROR, UNSUPOPTPAR);
-
-    // XXX Need to add auth check here
-
+#endif
     /*
      * Set the holdtime and keepalive times.
      *
@@ -968,6 +969,11 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
     uint32_t hold_ms = hold_secs * 1000;
     _peerdata->set_hold_duration(hold_ms);
     _peerdata->set_keepalive_duration(hold_ms / 3);
+
+    /*
+    ** Any unrecognised optional parameters would already have caused
+    ** any exception to be thrown in the open packet decoder.
+    */
 
     _peerdata->dump_peer_data();
     debug_msg("check_open_packet says it's OK with us\n");
@@ -1264,8 +1270,8 @@ void
 BGPPeer::start_keepalive_timer()
 {
     uint32_t duration = _peerdata->get_keepalive_duration();
-    debug_msg("KeepAlive timer started with duration %d %ld\n",
-	      duration, (long int)time(0));
+    debug_msg("KeepAlive timer started with duration %d\n",
+	      duration);
 
     if (duration > 0)
 	_timer_keep_alive = _mainprocess->eventloop().
@@ -1286,8 +1292,7 @@ BGPPeer::start_stopped_timer()
 {
     /* XXX - Only allow 10 seconds in the stopped state */
     const int delay = 10 * 1000;
-    debug_msg("Stopped timer started with duration %d ms %ld\n", delay,
-	      (long int)time(0));
+    debug_msg("Stopped timer started with duration %d ms\n", delay);
 
     _timer_stopped = _mainprocess->eventloop().
 	new_oneoff_after_ms(delay, callback(this, &BGPPeer::hook_stopped));

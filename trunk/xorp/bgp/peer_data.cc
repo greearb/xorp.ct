@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.6 2003/01/29 23:38:12 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.7 2003/03/10 23:20:01 hodson Exp $"
+
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "config.h"
@@ -20,27 +23,20 @@
 
 #include "peer_data.hh"
 
-BGPPeerData::BGPPeerData()
-    // XXX assigning a default value here is bad
-    : _as(AsNum::AS_INVALID)
-{
-    _unsupported_parameters = false;
-    //    add_sent_parameter( new BGPMultiProtocolCapability( AFI_IPV4 , SAFI_NLRI_UNICAST ) );
-}
-
 BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 			 const IPv4& next_hop, const uint16_t holdtime)
     : _iptuple(iptuple), _as(as)
 {
+    _unicast_ipv4 = _unicast_ipv6 = _multicast_ipv4 = _multicast_ipv6 = false;
+
     set_v4_local_addr(next_hop);
     set_configured_hold_time(holdtime);
 
     set_retry_duration(2 * 60 * 1000);	// Connect retry time.
 
-    assert(_negotiated_parameters.begin() == _negotiated_parameters.end());
-
     // we support routing of IPv4 unicast
-    // add_sent_parameter( new BGPMultiProtocolCapability( AFI_IPV4 , SAFI_NLRI_UNICAST ) );
+//     add_sent_parameter(
+// 	    new BGPMultiProtocolCapability(AFI_IPV4, SAFI_NLRI_UNICAST));
     // we support route refresh
     // add_sent_parameter( new BGPRefreshCapability() );
     // add_sent_parameter( new BGPMultiRouteCapability() );
@@ -48,22 +44,6 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 
 BGPPeerData::~BGPPeerData()
 {
-    list <const BGPParameter*>::iterator iter;
-    iter = _negotiated_parameters.begin();
-    while (iter != _negotiated_parameters.end()) {
-	delete *iter;
-	++iter;
-    }
-    iter = _sent_parameters.begin();
-    while (iter != _sent_parameters.end()) {
-	delete *iter;
-	++iter;
-    }
-    iter = _recv_parameters.begin();
-    while (iter != _recv_parameters.end()) {
-	delete *iter;
-	++iter;
-    }
 }
 
 
@@ -122,23 +102,18 @@ BGPPeerData::set_keepalive_duration(uint32_t d)
 
 void
 BGPPeerData::add_parameter(const BGPParameter* p,
-			   list<const BGPParameter*>& p_list)
+			   ParameterList& p_list)
 {
     debug_msg("add_parameter %s\n", p->str().c_str());
-    debug_msg("%x\n", (uint)p);
+    debug_msg("%p\n", p);
     p_list.push_back(p);
-    // p->dump_contents();
-    _num_parameters++;
-    // TODO add bounds checking
-    // XXX not sure here.
-    _param_length += p->paramlength();
 }
 
 void
 BGPPeerData::remove_parameter(const BGPParameter* p,
-			      list<const BGPParameter*>& p_list)
+			      ParameterList& p_list)
 {
-    list <const BGPParameter*>::iterator iter;
+    ParameterList::iterator iter;
     iter = p_list.begin();
     while (iter != p_list.end()) {
 	if (*iter == p) {
@@ -154,29 +129,21 @@ BGPPeerData::remove_parameter(const BGPParameter* p,
     }
 }
 
-bool
-BGPPeerData::unsupported_parameters() const
+void
+BGPPeerData::save_parameters(const ParameterList& parameter_list)
 {
-    /* Currently we accept all parameters and capabilities sent */
-    /* later we should put the negogiation code in here */
-    debug_msg("BGPPeerData unsupported parameters called\n");
-
-    return false;
+    ParameterList::const_iterator iter;
+    iter = parameter_list.begin();
+    while (iter != parameter_list.end()) {
+	add_recv_parameter(iter->get());
+	++iter;
+    }
 }
 
 void
-BGPPeerData::clone_parameters(const list< BGPParameter*>&
-			      parameter_list)
+BGPPeerData::open_negotiation()
 {
-    list < BGPParameter*>::const_iterator iter;
-    iter = parameter_list.begin();
-    while (iter != parameter_list.end()) {
-	BGPParameter *clone;
-	clone = (*iter)->clone();
-	if (clone != NULL)
-	    add_recv_parameter(clone);
-	++iter;
-    }
+    XLOG_WARNING("Need to complete negotiation code");
 }
 
 void
