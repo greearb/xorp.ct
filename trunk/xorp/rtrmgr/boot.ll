@@ -1,6 +1,5 @@
 %{
-#include <string.h>
-#include <string>
+#include "libxorp/xorp.h"
 #include "y.boot_tab.h"
 %}
 	int boot_linenum = 1;
