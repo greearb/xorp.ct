@@ -1,9 +1,28 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.23 2004/06/04 04:47:04 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.24 2004/06/07 18:15:06 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
-    enable-unicast-forwarding4: bool;
-    enable-unicast-forwarding6: bool;
+    enable-unicast-forwarding4:	bool;
+    enable-unicast-forwarding6:	bool;
+
+    click {
+	enabled:			bool = false;
+	click-config-generator:		txt = "/usr/local/xorp/fea/make_xorp_fea_conf.sh";
+
+	kernel-click {
+	    enabled:			bool = false;
+	}
+
+	user-click {
+	    enabled:			bool = false;
+	    command-file:		txt = "/usr/local/bin/click";
+	    command-extra-arguments:	txt = "-R";
+	    command-execute-on-startup:	bool = true;
+	    control-address:		ipv4 = 127.0.0.1;
+	    control-socket-port:	u32 = 13000;
+	    startup-config-file:	txt = "/dev/null";
+	}
+    }
 }
 
 fea {
@@ -30,5 +49,68 @@ fea {
 	%help:		short "Enable IPv6 unicast forwarding";
 	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=$(@)";
 	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
+    }
+
+    click {
+	%help:		short "Configure Click FEA support";
+	%activate:	xrl "$(fea.targetname)/fea_click/0.1/start_click";
+
+	enabled {
+	    %help:	short "Enable Click FEA support";
+	    %set:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(@)";
+	    %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(DEFAULT)";
+	}
+
+	click-config-generator-file {
+	    %help:	short "Specify the external program to generate the Click configuration";
+	    %set:	xrl "$(fea.targetname)/fea_click/0.1/set_click_config_generator_file?click_config_generator_file:txt=$(@)";
+	}
+
+	kernel-click {
+	    enabled {
+		%help:	short "Enable kernel-level Click FEA support";
+		%set:		xrl "$(fea.targetname)/fea_click/0.1/enable_kernel_click?enable:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_kernel_click?enable:bool=$(DEFAULT)";
+	    }
+	}
+
+	user-click {
+	    enabled {
+		%help:	short "Enable user-level Click FEA support";
+		%set:		xrl "$(fea.targetname)/fea_click/0.1/enable_user_click?enable:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_user_click?enable:bool=$(DEFAULT)";
+	    }
+
+	    command-file {
+		%help:	short "Specify the user-level Click command file";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_command_file?user_click_command_file:txt=$(@)";
+	    }
+
+	    command-extra-arguments {
+		%help:	short "Specify the extra arguments to the user-level Click command";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_command_extra_arguments?user_click_command_extra_arguments:txt=$(@)";
+	    }
+
+	    command-execute-on-startup {
+		%help:	short "Specify whether to execute on startup the user-level Click command";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_command_execute_on_startup?user_click_command_execute_on_startup:bool=$(@)";
+	    }
+
+	    control-address {
+		%help:	short "Specify the address to use for control access to the user-level Click";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_control_address?user_click_control_address:ipv4=$(@)";
+	    }
+
+	    control-socket-port {
+		%help:	short "Specify the socket port to use for control access to the user-level Click";
+		%allow-range: $(@) "1" "65535";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_control_socket_port?user_click_control_socket_port:u32=$(@)";
+	    }
+
+	    startup-config-file {
+		%help:	short "Specify the configuration file to be used by user-level Click on startup";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_startup_config_file?user_click_startup_config_file:txt=$(@)";
+	    }
+	}
     }
 }
