@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.9 2002/12/09 18:28:56 hodson Exp $"
+#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -36,13 +36,14 @@ FtiTransactionManager::post_commit(uint32_t /* tid */)
 }
 
 void
-FtiTransactionManager::operation_result(bool success, TransactionOperation& op)
+FtiTransactionManager::operation_result(bool success,
+					const TransactionOperation& op)
 {
     if (success) {
 	return;
     }
 
-    FtiTransactionOperation* fto = dynamic_cast<FtiTransactionOperation*>(&op);
+    const FtiTransactionOperation* fto = dynamic_cast<const FtiTransactionOperation*>(&op);
     if (fto == 0) {
 	//
 	// Getting here is programmer error.

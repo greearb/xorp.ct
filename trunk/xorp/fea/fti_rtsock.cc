@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_rtsock.cc,v 1.74 2002/12/09 18:28:56 hodson Exp $"
+#ident "$XORP: xorp/fea/fti_rtsock.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
 
 #include "fea_module.h"
 #include "config.h"
@@ -293,7 +293,7 @@ RoutingSocketFti::lookup_route4(IPv4 addr, Fte4& fte)
 
     rtp rtp;
     init_table(rtp, rtp::DONT_CALL_DELETE,
-	       reinterpret_cast<caddr_t>(_cache_rtdata.begin()),
+	       reinterpret_cast<caddr_t>(&_cache_rtdata[0]),
 	       _cache_rtdata.size());
 
     struct rt_msghdr *hdr;
@@ -349,7 +349,7 @@ RoutingSocketFti::lookup_entry4(const IPv4Net& net, Fte4& fte)
 
     rtp rtp;
     init_table(rtp, rtp::DONT_CALL_DELETE,
-	       reinterpret_cast<caddr_t>(_cache_rtdata.begin()),
+	       reinterpret_cast<caddr_t>(&_cache_rtdata[0]),
 	       _cache_rtdata.size());
 
     struct rt_msghdr *hdr;
@@ -755,7 +755,7 @@ RoutingSocketFti::rtsock_data(const uint8_t* data, size_t nbytes)
 	    assert(_cache_valid == false); /* Do not overwrite cache data. */
 #endif
 	    _cache_rtdata.resize(rh->rtm_msglen);
-	    memcpy(_cache_rtdata.begin(), rh, rh->rtm_msglen);
+	    memcpy(&_cache_rtdata[0], rh, rh->rtm_msglen);
 	    _cache_valid = true;
 	    return;
 	}

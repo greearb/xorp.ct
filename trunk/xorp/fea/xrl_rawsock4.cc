@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.7 2002/12/09 18:29:00 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -72,7 +72,7 @@ public:
 
 	assert(data.size() >= MIN_IP_PKT_BYTES);
 
-	const ip* hdr = reinterpret_cast<const ip*>(data.begin());
+	const ip* hdr = reinterpret_cast<const ip*>(&data[0]);
 	if (hdr->ip_p != protocol()) {
 	    debug_msg("Ignore packet with proto %d (watching for %d)\n",
 		      hdr->ip_p, protocol());
@@ -189,7 +189,7 @@ XrlRawSocket4Manager::send(const string& vifname, const vector<uint8_t>& pkt)
     }
 
     errno = 0;
-    ssize_t bytes_out = _rs.write(pkt.begin(), pkt.size());
+    ssize_t bytes_out = _rs.write(&pkt[0], pkt.size());
 
     if (bytes_out > 0) {
 	return XrlCmdError::OKAY();
@@ -240,7 +240,7 @@ XrlRawSocket4Manager::send(const IPv4&		  src,
     vector<uint8_t> pkt(0, sizeof(struct ip) + osz + payload.size());
 
     // Fill in header fields
-    struct ip* hdr = reinterpret_cast<struct ip*>(pkt.begin());
+    struct ip* hdr = reinterpret_cast<struct ip*>(&pkt[0]);
     hdr->ip_v = IPVERSION;
     hdr->ip_hl	= osz + sizeof(struct ip) / 4;
     hdr->ip_tos = (uint8_t)tos;
@@ -253,11 +253,11 @@ XrlRawSocket4Manager::send(const IPv4&		  src,
 
     // Copy options into packet
     if (osz > 0)
-	memcpy(hdr + 1, options.begin(), options.size());
+	memcpy(hdr + 1, &options[0], options.size());
 
     // Copy payload into packet
     if (payload.size() > 0)
-	memcpy(pkt.begin() + hdr->ip_hl * 4, payload.begin(), payload.size());
+	memcpy(&pkt[hdr->ip_hl * 4], &payload[0], payload.size());
 
     return send(vifname, pkt);
 }

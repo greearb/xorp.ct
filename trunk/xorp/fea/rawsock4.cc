@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.5 2002/12/09 18:28:58 hodson Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -155,7 +155,7 @@ IoRawSocket4::recv(int /* fd */, SelectorMask /* m */)
 {
     struct sockaddr from;
     socklen_t from_len = sizeof(from);
-    ssize_t n = recvfrom(_fd, _recvbuf.begin(), RECVBUF_BYTES, 0,
+    ssize_t n = recvfrom(_fd, &_recvbuf[0], RECVBUF_BYTES, 0,
 			 &from, &from_len);
     debug_msg("Read fd %d, %d bytes, from_len %d\n", _fd, n, from_len);
     if (n <= 0) {
@@ -164,7 +164,7 @@ IoRawSocket4::recv(int /* fd */, SelectorMask /* m */)
     _recvbuf.resize(n);
 
 #ifndef IPV4_RAW_INPUT_IS_RAW
-    struct ip* hdr = reinterpret_cast<struct ip*>(_recvbuf.begin());
+    struct ip* hdr = reinterpret_cast<struct ip*>(&_recvbuf[0]);
     hdr->ip_len = htons(hdr->ip_len);
 #endif
 

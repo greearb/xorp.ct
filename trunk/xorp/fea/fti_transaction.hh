@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.12 2002/12/09 18:28:56 hodson Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -186,7 +186,7 @@ protected:
     /* Overriding methods */
     void pre_commit(uint32_t tid);
     void post_commit(uint32_t tid);
-    void operation_result(bool success, TransactionOperation& op);
+    void operation_result(bool success, const TransactionOperation& op);
 
 protected:
     Fti& _fti;

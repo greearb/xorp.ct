@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rtsock.hh,v 1.8 2002/12/09 18:28:58 hodson Exp $
+// $XORP: xorp/fea/rtsock.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
 
 #ifndef __FEA_RTSOCK_HH__
 #define __FEA_RTSOCK_HH__
@@ -97,7 +97,7 @@ private:
     static uint16_t _instance_cnt;
     static pid_t    _pid;
 
-    friend RoutingSocketPlumber; // class that hooks observers in and out.
+    friend class RoutingSocketPlumber; // class that hooks observers in and out
 };
 
 class RoutingSocketObserver {
