@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.17 2004/02/20 06:33:10 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.18 2004/02/27 12:12:48 mjh Exp $ */
 
 protocols {
   bgp {
@@ -19,7 +19,6 @@ protocols {
 }
 
 protocols {
-  %help: short "Configure routing protocols";
   bgp {
     %modinfo: provides bgp;
     %modinfo: depends rib;
@@ -27,52 +26,41 @@ protocols {
     %modinfo: default_targetname "bgp";
     %modinfo: statusmethod xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
     %modinfo: shutdownmethod xrl "$(bgp.targetname)/common/0.1/shutdown";
-    %help: short "Configure BGP inter-domain routing";
     targetname {
       %set:;
     }
     bgp-id {
       %set: xrl "$(bgp.targetname)/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
       %get: xrl "$(bgp.targetname)/bgp/0.2/get_bgp_id->id:ipv4";
-      %help: short "Set the BGP identifier (must be an IPv4 address)";
     }
     local-as {
       %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
       %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
-      %help: short "Set the Autonomous System (AS) number for this domain";
     }
     peer @ {
       %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
       %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
       %activate: xrl "$(bgp.targetname)/bgp/0.2/enable_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
-      %help: short "Configure a peering session with another router.";
       peer-port {
 	%set:; /*the no-op set is to indicate that this node can be set, but 	           not changed*/
-	%help: short "Set the TCP port used by on the remote router.";
       }
       local-port {
 	%set:;
-	%help: short "Set the TCP port used by BGP on this router.";
       }
       local-ip {
 	%set:;
-	%help: short "Set the IP address on this router to use for this peering.";
       }
       as {
-        %help: short "Set the AS number of this peer.";
 	%set:;
       }
       holdtime {
 	%set:;
-	%help: short "Set the length of time before idle timeout.";
       }
       next-hop {
-        %help: short "Set the next-hop IP address for routes we advertise to this peer.";
 	%set:;
       }
       disable {
 	%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
-	%help: short "Disable this peering";
       }
       set-parameter {
 	%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)";
@@ -85,6 +73,54 @@ protocols {
       }
       enable-ipv6-multicast {
         %set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast";
+      }
+    }
+  }
+}
+
+protocols {
+  %help: short "Configure routing protocols";
+  %help: long "The protocols grouping in the router configuration groups together all the \n configuration information for routing protocols.\nTyping protocols { as a command will start direct entry mode, whereby the \nrouter configuration can be entered.";
+  bgp {
+    %help: short "Configure BGP inter-domain routing";
+    targetname {
+    }
+    bgp-id {
+      %help: short "Set the BGP identifier (must be an IPv4 address)";
+    }
+    local-as {
+      %help: short "Set the Autonomous System (AS) number for this domain";
+    }
+    peer @ {
+      %help: short "Configure a peering session with another router.";
+      peer-port {
+	%help: short "Set the TCP port used by on the remote router.";
+      }
+      local-port {
+	%help: short "Set the TCP port used by BGP on this router.";
+      }
+      local-ip {
+	%help: short "Set the IP address on this router to use for this peering.";
+      }
+      as {
+        %help: short "Set the AS number of this peer.";
+      }
+      holdtime {
+	%help: short "Set the length of time before idle timeout.";
+      }
+      next-hop {
+	%set:;
+      }
+      disable {
+	%help: short "Disable this peering";
+      }
+      set-parameter {
+      }
+      enable-ipv4-multicast {
+      }
+      enable-ipv6-unicast {
+      }
+      enable-ipv6-multicast {
       }
     }
   }
