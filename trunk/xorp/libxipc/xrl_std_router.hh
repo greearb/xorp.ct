@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.10 2003/05/30 18:16:54 hodson Exp $
+// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.11 2003/06/01 21:37:29 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_STD_ROUTER_HH__
 #define __LIBXIPC_XRL_STD_ROUTER_HH__
 
 #include "xrl_router.hh"
-#include "xrl_pf_sudp.hh"
+#include "xrl_pf.hh"
 
 /**
  * @short Standard XRL transmission and reception point.
@@ -30,58 +30,30 @@
  */
 class XrlStdRouter : public XrlRouter {
 public:
-    XrlStdRouter(EventLoop&	eventloop,
-		 const char*	class_name)
-	: XrlRouter(eventloop, class_name), _sudp(eventloop, this)
-    {
-	add_listener(&_sudp);
-    }
+    XrlStdRouter(EventLoop& eventloop, const char* class_name);
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
-		 IPv4		finder_address)
-	: XrlRouter(eventloop, class_name, finder_address),
-	  _sudp(eventloop, this)
-    {
-	add_listener(&_sudp);
-    }
+		 IPv4		finder_address);
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 IPv4		finder_address,
-		 uint16_t	finder_port)
-	: XrlRouter(eventloop, class_name, finder_address, finder_port),
-	  _sudp(eventloop, this)
-    {
-	add_listener(&_sudp);
-    }
+		 uint16_t	finder_port);
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
-		 const char*	finder_address)
-	: XrlRouter(eventloop, class_name, finder_address),
-	  _sudp(eventloop, this)
-    {
-	add_listener(&_sudp);
-    }
+		 const char*	finder_address);
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 const char*	finder_address,
-		 uint16_t	finder_port)
-	: XrlRouter(eventloop, class_name, finder_address, finder_port),
-	  _sudp(eventloop, this)
-    {
-	add_listener(&_sudp);
-    }
+		 uint16_t	finder_port);
 
-    ~XrlStdRouter()
-    {
-	// remove_listener(&_sudp);
-    }
+    ~XrlStdRouter();
 
 private:
-    XrlPFSUDPListener _sudp;
+    XrlPFListener* _l;
 };
 
 #endif // __LIBXIPC_XRL_STD_ROUTER_HH__

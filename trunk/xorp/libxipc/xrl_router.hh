@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.21 2003/06/19 00:44:44 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.22 2003/06/26 00:26:17 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -74,7 +74,7 @@ public:
     bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 
     inline EventLoop& eventloop()		{ return _e; }
-    
+
     inline const string& instance_name() const	{ return _instance_name; }
 
     inline const string& class_name() const	{ return XrlCmdMap::name(); }
@@ -82,7 +82,7 @@ public:
     IPv4     finder_address() const;
 
     uint16_t finder_port() const;
-    
+
 protected:
     /**
      * Called when Finder connection is established.
@@ -115,7 +115,7 @@ protected:
     XrlError dispatch_xrl(const string&	 method_name,
 			  const XrlArgs& inputs,
 			  XrlArgs&	 outputs) const;
-    
+
 protected:
     /**
      * Resolve callback (slow path).
@@ -142,7 +142,7 @@ protected:
     bool send_resolved(const Xrl&		xrl,
 		       const FinderDBEntry*	dbe,
 		       const XrlCallback&	dispatch_cb);
-    
+
     void initialize(const char* class_name,
 		    IPv4	finder_addr,
 		    uint16_t	finder_port);

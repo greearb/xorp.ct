@@ -12,8 +12,80 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.1 2002/12/14 23:43:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.2 2003/03/10 23:20:29 hodson Exp $"
 
-// There is no code here.  This is just to check syntax of xrl_std_router.hh
 #include "xrl_std_router.hh"
+#include "xrl_pf_sudp.hh"
+
+// ----------------------------------------------------------------------------
+// Helper methods
+
+static XrlPFListener*
+create_listener(EventLoop& e, XrlDispatcher* d)
+{
+    // Change type here for your protocol family of choice
+    return new XrlPFSUDPListener(e, d);
+}
+
+static void
+destroy_listener(XrlPFListener*& l)
+{
+    delete l;
+    l = 0;
+}
+
+// ----------------------------------------------------------------------------
+// XrlStdRouter implementation
+
+XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
+			   const char*	class_name)
+    : XrlRouter(eventloop, class_name)
+{
+    _l = create_listener(eventloop, this);
+    add_listener(_l);
+}
+
+XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
+			   const char*	class_name,
+			   IPv4		finder_address)
+    : XrlRouter(eventloop, class_name, finder_address)
+{
+    _l = create_listener(eventloop, this);
+    add_listener(_l);
+}
+
+XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
+			   const char*	class_name,
+			   IPv4		finder_address,
+			   uint16_t	finder_port)
+    : XrlRouter(eventloop, class_name, finder_address, finder_port)
+{
+    _l = create_listener(eventloop, this);
+    add_listener(_l);
+}
+
+XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
+			   const char*	class_name,
+			   const char*	finder_address)
+    : XrlRouter(eventloop, class_name, finder_address)
+{
+    _l = create_listener(eventloop, this);
+    add_listener(_l);
+}
+
+XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
+			   const char*	class_name,
+			   const char*	finder_address,
+			   uint16_t	finder_port)
+    : XrlRouter(eventloop, class_name, finder_address, finder_port)
+{
+    _l = create_listener(eventloop, this);
+    add_listener(_l);
+}
+
+XrlStdRouter::~XrlStdRouter()
+{
+    // remove_listener(&_l);
+    destroy_listener(_l);
+}
 
