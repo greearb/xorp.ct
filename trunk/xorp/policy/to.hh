@@ -12,19 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/policy/to.hh,v 1.1 2003/01/30 19:21:11 mjh Exp $
 
 #ifndef __POLICY_TO_HH__
 #define __POLICY_TO_HH__
 
-#include "xorp.h"
 #include <list>
+#include "libxorp/xorp.h"
 #include "policy_route.hh"
 
+template <class A>
 class PolicyTo {
 public:
     PolicyTo();
-    bool matches(const PolicyRoute& in_route);
+    bool matches(const PolicyRoute<A>& in_route);
 private:
 };
 

@@ -12,21 +12,34 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/from.hh,v 1.1 2003/01/30 19:21:10 mjh Exp $
+#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
 
-#ifndef __POLICY_FROM_HH__
-#define __POLICY_FROM_HH__
 
-#include <list>
-#include "libxorp/xorp.h"
-#include "policy_route.hh"
+#include "then.hh"
 
 template <class A>
-class PolicyFrom {
-public:
-    PolicyFrom();
-    bool matches(const PolicyRoute<A>& in_route);
-private:
-};
+PolicyThen<A>::PolicyThen<A>(bool reject)
+{
+    UNUSED(reject);
+}
 
-#endif // __POLICY_FROM_HH__
+template <class A>
+PolicyThen<A>::~PolicyThen()
+{
+}
+
+template <class A>
+void 
+PolicyThen<A>::add_policy_action(const PolicyAction<A>& action)
+{
+    _actions.push_back(action);
+}
+
+template <class A>
+bool 
+PolicyThen<A>::apply_actions(const PolicyRoute<A>& in_route, 
+			     PolicyRoute<A>*& out_route) const
+{
+    out_route = &in_route;
+    return true;
+}

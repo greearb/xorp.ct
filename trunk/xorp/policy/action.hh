@@ -12,33 +12,36 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/policy/action.hh,v 1.1 2003/01/30 19:21:10 mjh Exp $
 
 #ifndef __POLICY_ACTION_HH__
 #define __POLICY_ACTION_HH__
 
-#include "xorp.h"
 #include <list>
+#include "libxorp/xorp.h"
 #include "policy_route.hh"
 
+template <class A>
 class PolicyAction {
 public:
     PolicyAction();
-    virtual bool apply_actions(const PolicyRoute& in_route, 
-			       PolicyRoute*& out_route) const = 0;
+    virtual bool apply_actions(const PolicyRoute<A>& in_route, 
+			       PolicyRoute<A>*& out_route) const = 0;
 private:
 };
 
-class AcceptAction : public PolicyAction {
+template <class A>
+class AcceptAction : public PolicyAction<A> {
     AcceptAction();
-    bool apply_actions(const PolicyRoute& in_route, 
-		       PolicyRoute*& out_route) const;
-}
+    bool apply_actions(const PolicyRoute<A>& in_route, 
+		       PolicyRoute<A>*& out_route) const;
+};
 
-class RejectAction : public PolicyAction {
+template <class A>
+class RejectAction : public PolicyAction<A> {
     RejectAction();
-    bool apply_actions(const PolicyRoute& in_route, 
-		       PolicyRoute*& out_route) const;
-}
+    bool apply_actions(const PolicyRoute<A>& in_route, 
+		       PolicyRoute<A>*& out_route) const;
+};
 
 #endif // __POLICY_ACTION_HH__
