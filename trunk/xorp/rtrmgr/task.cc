@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.27 2003/12/10 22:36:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.28 2003/12/13 00:16:39 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -444,7 +444,8 @@ XrlShutdown::shutdown_done(const XrlError& err, XrlArgs* xrl_args)
     UNUSED(xrl_args);
 
     if ((err == XrlError::OKAY())
-	|| (err == XrlError::RESOLVE_FAILED())) {
+	|| (err == XrlError::RESOLVE_FAILED())
+	|| (err == XrlError::SEND_FAILED())) {
 	// Success - either it said it would shutdown, or it's already gone.
 	_cb->dispatch(true);
     } else {
