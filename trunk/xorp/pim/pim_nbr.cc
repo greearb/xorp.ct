@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.5 2003/04/22 23:27:24 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.6 2003/06/16 22:48:03 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -67,11 +67,11 @@ PimNbr::PimNbr(PimVif& pim_vif, const IPvX& addr, int proto_version)
 
 /**
  * PimNbr::~PimNbr:
- * @void: 
+ * @: 
  * 
  * PIM neighbor destructor.
  **/
-PimNbr::~PimNbr(void)
+PimNbr::~PimNbr()
 {
     // TODO: do we need to do anything special about _jp_list ??
 }

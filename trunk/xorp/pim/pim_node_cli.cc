@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.14 2003/06/13 01:28:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.15 2003/06/24 18:32:26 pavlin Exp $"
 
 
 //
@@ -90,7 +90,7 @@ PimNodeCli::stop()
 }
 
 int
-PimNodeCli::add_all_cli_commands(void)
+PimNodeCli::add_all_cli_commands()
 {
     // XXX: command "show" must have been installed by the CLI itself.
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.12 2003/08/06 18:51:17 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.13 2003/08/07 00:30:11 pavlin Exp $"
 
 
 //
@@ -83,12 +83,12 @@ Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
 
 /**
  * Mld6igmpNode::~Mld6igmpNode:
- * @void: 
+ * @: 
  * 
  * MLD6IGMP node destructor.
  * 
  **/
-Mld6igmpNode::~Mld6igmpNode(void)
+Mld6igmpNode::~Mld6igmpNode()
 {
     stop();
     
@@ -99,7 +99,7 @@ Mld6igmpNode::~Mld6igmpNode(void)
 
 /**
  * Mld6igmpNode::start:
- * @void: 
+ * @: 
  * 
  * Start the MLD or IGMP protocol.
  * TODO: This function should not start the protocol operation on the
@@ -108,7 +108,7 @@ Mld6igmpNode::~Mld6igmpNode(void)
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-Mld6igmpNode::start(void)
+Mld6igmpNode::start()
 {
     if (ProtoNode<Mld6igmpVif>::start() < 0)
 	return (XORP_ERROR);
@@ -137,7 +137,7 @@ Mld6igmpNode::start(void)
 
 /**
  * Mld6igmpNode::stop:
- * @void: 
+ * @: 
  * 
  * Stop the MLD or IGMP protocol.
  * XXX: This function, unlike start(), will stop the protocol
@@ -146,7 +146,7 @@ Mld6igmpNode::start(void)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::stop(void)
+Mld6igmpNode::stop()
 {
     if (! is_up())
 	return (XORP_ERROR);
@@ -664,7 +664,7 @@ Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
 
 /**
  * Mld6igmpNode::start_all_vifs:
- * @void: 
+ * @: 
  * 
  * Start MLD/IGMP on all enabled interfaces.
  * 
@@ -672,7 +672,7 @@ Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
  * or %XORP_ERROR if error occured.
  **/
 int
-Mld6igmpNode::start_all_vifs(void)
+Mld6igmpNode::start_all_vifs()
 {
     int n = 0;
     vector<Mld6igmpVif *>::iterator iter;
@@ -690,7 +690,7 @@ Mld6igmpNode::start_all_vifs(void)
 
 /**
  * Mld6igmpNode::stop_all_vifs:
- * @void: 
+ * @: 
  * 
  * Stop MLD/IGMP on all interfaces it was running on.
  * 
@@ -698,7 +698,7 @@ Mld6igmpNode::start_all_vifs(void)
  * or %XORP_ERROR if error occured.
  **/
 int
-Mld6igmpNode::stop_all_vifs(void)
+Mld6igmpNode::stop_all_vifs()
 {
     int n = 0;
     vector<Mld6igmpVif *>::iterator iter;
@@ -716,14 +716,14 @@ Mld6igmpNode::stop_all_vifs(void)
 
 /**
  * Mld6igmpNode::enable_all_vifs:
- * @void: 
+ * @: 
  * 
  * Enable MLD/IGMP on all interfaces.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::enable_all_vifs(void)
+Mld6igmpNode::enable_all_vifs()
 {
     vector<Mld6igmpVif *>::iterator iter;
     
@@ -739,7 +739,7 @@ Mld6igmpNode::enable_all_vifs(void)
 
 /**
  * Mld6igmpNode::disable_all_vifs:
- * @void: 
+ * @: 
  * 
  * Disable MLD/IGMP on all interfaces. All running interfaces are stopped
  * first.
@@ -747,7 +747,7 @@ Mld6igmpNode::enable_all_vifs(void)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::disable_all_vifs(void)
+Mld6igmpNode::disable_all_vifs()
 {
     vector<Mld6igmpVif *>::iterator iter;
     
@@ -765,12 +765,12 @@ Mld6igmpNode::disable_all_vifs(void)
 
 /**
  * Mld6igmpNode::delete_all_vifs:
- * @void: 
+ * @: 
  * 
  * Delete all MLD/IGMP vifs.
  **/
 void
-Mld6igmpNode::delete_all_vifs(void)
+Mld6igmpNode::delete_all_vifs()
 {
     // XXX: here we must use proto_vifs().size() to end the iteration,
     // because the proto_vifs() array may be modified when a vif

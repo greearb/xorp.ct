@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.18 2003/05/31 23:08:30 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.19 2003/05/31 23:14:15 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -78,14 +78,14 @@ RibManager::~RibManager()
 
 /**
  * RibManager::start:
- * @void: 
+ * @: 
  * 
  * Start operation.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-RibManager::start(void)
+RibManager::start()
 {
     if (ProtoState::start() < 0)
 	return (XORP_ERROR);
@@ -97,14 +97,14 @@ RibManager::start(void)
 
 /**
  * RibManager::stop:
- * @void: 
+ * @: 
  * 
  * Gracefully stop the RIB.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-RibManager::stop(void)
+RibManager::stop()
 {
     if (! is_up())
 	return (XORP_ERROR);

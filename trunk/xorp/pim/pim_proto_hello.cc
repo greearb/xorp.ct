@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.9 2003/04/22 23:27:24 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.10 2003/05/21 05:32:55 pavlin Exp $"
 
 
 //
@@ -51,7 +51,7 @@ static bool	pim_dr_is_better(PimNbr *pim_nbr1, PimNbr *pim_nbr2,
 
 
 void
-PimVif::pim_hello_start(void)
+PimVif::pim_hello_start()
 {
     // Generate a new Gen-ID
     genid().set(RANDOM(0xffffffffU));

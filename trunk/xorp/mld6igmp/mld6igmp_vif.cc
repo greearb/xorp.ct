@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.12 2003/07/16 02:56:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.13 2003/07/30 19:05:43 pavlin Exp $"
 
 
 //
@@ -82,12 +82,12 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 
 /**
  * Mld6igmpVif::~Mld6igmpVif:
- * @void: 
+ * @: 
  * 
  * MLD6IGMP protocol vif destructor.
  * 
  **/
-Mld6igmpVif::~Mld6igmpVif(void)
+Mld6igmpVif::~Mld6igmpVif()
 {
     stop();
     
@@ -136,7 +136,7 @@ Mld6igmpVif::set_proto_version(int proto_version)
 
 /**
  * Mld6igmpVif::proto_is_ssm:
- * @void: 
+ * @: 
  * 
  * Test if the interface is running a source-specific multicast capable
  * protocol version (e.g. IGMPv3 or MLDv2).
@@ -145,7 +145,7 @@ Mld6igmpVif::set_proto_version(int proto_version)
  * capable, otherwise @fa.se
  **/
 bool
-Mld6igmpVif::proto_is_ssm(void) const
+Mld6igmpVif::proto_is_ssm() const
 {
     if (proto_is_igmp())
 	return (proto_version() >= 3);
@@ -157,14 +157,14 @@ Mld6igmpVif::proto_is_ssm(void) const
 
 /**
  * Mld6igmpVif::start:
- * @void: 
+ * @: 
  * 
  * Start MLD or IGMP on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::start(void)
+Mld6igmpVif::start()
 {
     if (! is_underlying_vif_up())
 	return (XORP_ERROR);
@@ -246,14 +246,14 @@ Mld6igmpVif::start(void)
 
 /**
  * Mld6igmpVif::stop:
- * @void: 
+ * @: 
  * 
  * Stop MLD or IGMP on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::stop(void)
+Mld6igmpVif::stop()
 {
     int ret_value = XORP_OK;
     
@@ -510,7 +510,7 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
 
 /**
  * Mld6igmpVif::is_igmpv1_mode:
- * @void: 
+ * @: 
  * 
  * Tests if the interface is running in IGMPv1 mode.
  * XXX: applies only to IGMP, and not to MLD.
@@ -519,7 +519,7 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
  * otherwise false.
  **/
 bool
-Mld6igmpVif::is_igmpv1_mode(void) const
+Mld6igmpVif::is_igmpv1_mode() const
 {
     return (proto_is_igmp()
 	    && ((proto_version() == IGMP_V1)
@@ -549,14 +549,14 @@ Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 
 /**
  * Mld6igmpVif::buffer_send_prepare:
- * @void: 
+ * @: 
  * 
  * Reset and prepare the buffer for sending data.
  * 
  * Return value: The prepared buffer.
  **/
 buffer_t *
-Mld6igmpVif::buffer_send_prepare(void)
+Mld6igmpVif::buffer_send_prepare()
 {
     BUFFER_RESET(_buffer_send);
     

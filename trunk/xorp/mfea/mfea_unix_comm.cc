@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.17 2003/05/21 05:32:51 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.18 2003/07/03 07:04:18 pavlin Exp $"
 
 
 //
@@ -150,14 +150,14 @@ UnixComm::~UnixComm()
 
 /**
  * UNUXcomm::start:
- * @void: 
+ * @: 
  * 
  * Start the UnixComm.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-UnixComm::start(void)
+UnixComm::start()
 {
     vector<MfeaVif *> mfea_vifs_array;
     vector<MfeaVif *>::iterator mfea_vifs_iter;
@@ -287,14 +287,14 @@ UnixComm::start(void)
 
 /**
  * UnixComm::stop:
- * @void: 
+ * @: 
  * 
  * Stop the UnixComm.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::stop(void)
+UnixComm::stop()
 {
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
@@ -377,14 +377,14 @@ UnixComm::get_mrib_table(Mrib **return_mrib_table)
 
 /**
  * UnixComm::open_ioctl_socket:
- * @void: 
+ * @: 
  * 
  * Open an ioctl socket (used for various ioctl() calls).
  * 
  * Return value: The socket value on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::open_ioctl_socket(void)
+UnixComm::open_ioctl_socket()
 {
     if (_ioctl_socket >= 0)
 	return (_ioctl_socket);	// The socket was open already
@@ -402,14 +402,14 @@ UnixComm::open_ioctl_socket(void)
 
 /**
  * UnixComm::close_ioctl_socket:
- * @void: 
+ * @: 
  * 
  * Close the ioctl socket.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::close_ioctl_socket(void)
+UnixComm::close_ioctl_socket()
 {
     if (_ioctl_socket < 0)
 	return (XORP_ERROR);
@@ -430,7 +430,7 @@ UnixComm::close_ioctl_socket(void)
 
 /**
  * UnixComm::open_mrib_socket:
- * @void: 
+ * @: 
  * 
  * Open a MRIB socket (used for obtaining Multicast Routing Information Base
  * information).
@@ -438,7 +438,7 @@ UnixComm::close_ioctl_socket(void)
  * Return value: The socket value on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::open_mrib_socket(void)
+UnixComm::open_mrib_socket()
 {
     if (_mrib_socket >= 0)
 	return (_mrib_socket);	// The socket was open already
@@ -456,7 +456,7 @@ UnixComm::open_mrib_socket(void)
 
 /**
  * UnixComm::close_mrib_socket:
- * @void: 
+ * @: 
  * 
  * Close the MRIB socket (used for access/lookup the unicast routing table
  * in the kernel to obtain Multicast Routing Information Base information).
@@ -464,7 +464,7 @@ UnixComm::open_mrib_socket(void)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::close_mrib_socket(void)
+UnixComm::close_mrib_socket()
 {
     if (_mrib_socket < 0)
 	return (XORP_ERROR);
@@ -486,14 +486,14 @@ UnixComm::close_mrib_socket(void)
 
 /**
  * UnixComm::open_mrouter_socket:
- * @void: 
+ * @: 
  * 
  * Open the mrouter socket (used for various multicast routing kernel calls).
  * 
  * Return value: The socket value on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::open_mrouter_socket(void)
+UnixComm::open_mrouter_socket()
 {
     int kernel_mrouter_ipproto = -1;
     
@@ -527,14 +527,14 @@ UnixComm::open_mrouter_socket(void)
 
 /**
  * UnixComm::close_mrouter_socket:
- * @void: 
+ * @: 
  * 
  * Close the mrouter socket.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::close_mrouter_socket(void)
+UnixComm::close_mrouter_socket()
 {
     if (_mrouter_socket < 0)
 	return (XORP_ERROR);
@@ -562,7 +562,7 @@ UnixComm::close_mrouter_socket(void)
 
 /**
  * UnixComm::set_my_mrouter_socket:
- * @void: 
+ * @: 
  * 
  * Set my mrouter socket by copying the mrouter socket value from the special
  * house-keeping #UnixComm with module_id of %XORP_MODULE_NULL.
@@ -571,7 +571,7 @@ UnixComm::close_mrouter_socket(void)
  * otherwise %XORP_ERROR.
  **/
 int
-UnixComm::set_my_mrouter_socket(void)
+UnixComm::set_my_mrouter_socket()
 {
     UnixComm *unix_comm;
     
@@ -601,7 +601,7 @@ UnixComm::set_my_mrouter_socket(void)
 
 /**
  * UnixComm::set_other_mrouter_socket:
- * @void: 
+ * @: 
  * 
  * Set the mrouter socket value of the other #UnixComm entries.
  * The mrouter socket value of the other #UnixComm entries is
@@ -613,7 +613,7 @@ UnixComm::set_my_mrouter_socket(void)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::set_other_mrouter_socket(void)
+UnixComm::set_other_mrouter_socket()
 {
     if (_module_id != XORP_MODULE_NULL)
 	return (XORP_ERROR);	// XXX: not the special house-keeping UnixComm
@@ -946,14 +946,14 @@ UnixComm::set_multicast_loop(bool enable_bool)
 
 /**
  * UnixComm::start_mrt:
- * @void: 
+ * @: 
  * 
  * Start/enable the multicast routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::start_mrt(void)
+UnixComm::start_mrt()
 {
     int v = 1;
     
@@ -1114,14 +1114,14 @@ UnixComm::start_mrt(void)
 
 /**
  * UnixComm::stop_mrt:
- * @void: 
+ * @: 
  * 
  * Stop/disable the multicast routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::stop_mrt(void)
+UnixComm::stop_mrt()
 {
     int v = 0;
     
@@ -1163,14 +1163,14 @@ UnixComm::stop_mrt(void)
 
 /**
  * UnixComm::start_pim:
- * @void: 
+ * @: 
  * 
  * Start/enable PIM routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::start_pim(void)
+UnixComm::start_pim()
 {
     int v = 1;
     
@@ -1204,14 +1204,14 @@ UnixComm::start_pim(void)
 
 /**
  * UnixComm::stop_pim:
- * @void: 
+ * @: 
  * 
  * Stop/disable PIM routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::stop_pim(void)
+UnixComm::stop_pim()
 {
     int v = 0;
     
@@ -2404,7 +2404,7 @@ UnixComm::is_multicast_capable(uint16_t vif_index) const
 
 /**
  * UnixComm::open_proto_socket:
- * @void: 
+ * @: 
  * 
  * Register and 'start' a multicast protocol (IGMP, MLD, PIM, etc)
  * in the kernel.
@@ -2414,7 +2414,7 @@ UnixComm::is_multicast_capable(uint16_t vif_index) const
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::open_proto_socket(void)
+UnixComm::open_proto_socket()
 {
     if (_ipproto < 0)
 	return (XORP_ERROR);
@@ -2523,14 +2523,14 @@ UnixComm::open_proto_socket(void)
 
 /**
  * UnixComm::close_proto_socket:
- * @void: 
+ * @: 
  * 
  * Close the protocol socket.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-UnixComm::close_proto_socket(void)
+UnixComm::close_proto_socket()
 {
     bool sock_close_flag = true;
     

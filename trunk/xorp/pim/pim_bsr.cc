@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.20 2003/04/22 23:27:23 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.21 2003/05/21 05:32:53 pavlin Exp $"
 
 
 //
@@ -75,7 +75,7 @@ PimBsr::PimBsr(PimNode& pim_node)
  * PimBsr destructor.
  * 
  **/
-PimBsr::~PimBsr(void)
+PimBsr::~PimBsr()
 {
     stop();
     
@@ -88,14 +88,14 @@ PimBsr::~PimBsr(void)
 
 /**
  * PimBsr::start:
- * @void: 
+ * @: 
  * 
  * Start the PIM Bootsrap protocol.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-PimBsr::start(void)
+PimBsr::start()
 {
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
@@ -127,14 +127,14 @@ PimBsr::start(void)
 
 /**
  * PimBsr::stop:
- * @void: 
+ * @: 
  * 
  * Stop the PIM Bootstrap protocol.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimBsr::stop(void)
+PimBsr::stop()
 {
     PimVif *pim_vif_up = NULL;
     

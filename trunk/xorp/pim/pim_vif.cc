@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.18 2003/07/16 02:12:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.19 2003/07/16 02:56:57 pavlin Exp $"
 
 
 //
@@ -102,12 +102,12 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
 
 /**
  * PimVif::~PimVif:
- * @void: 
+ * @: 
  * 
  * PIM protocol vif destructor.
  * 
  **/
-PimVif::~PimVif(void)
+PimVif::~PimVif()
 {
     stop();
     
@@ -189,14 +189,14 @@ PimVif::pim_mrt() const
 
 /**
  * PimVif::start:
- * @void: 
+ * @: 
  * 
  * Start PIM on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::start(void)
+PimVif::start()
 {
     if (! is_underlying_vif_up())
 	return (XORP_ERROR);
@@ -255,7 +255,7 @@ PimVif::start(void)
 
 /**
  * PimVif::stop:
- * @void: 
+ * @: 
  * 
  * Gracefully stop PIM on a single virtual interface.
  * XXX: The graceful stop will attempt to send Join/Prune, Assert, etc.
@@ -270,7 +270,7 @@ PimVif::start(void)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::stop(void)
+PimVif::stop()
 {
     int ret_value = XORP_OK;
     
@@ -318,14 +318,14 @@ PimVif::stop(void)
 
 /**
  * PimVif::final_stop:
- * @void: 
+ * @: 
  * 
  * Completely stop PIM on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::final_stop(void)
+PimVif::final_stop()
 {
     int ret_value = XORP_OK;
     
@@ -1077,14 +1077,14 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 
 /**
  * PimVif::buffer_send_prepare:
- * @void: 
+ * @: 
  * 
  * Reset and prepare the default buffer for sending data.
  * 
  * Return value: The prepared buffer.
  **/
 buffer_t *
-PimVif::buffer_send_prepare(void)
+PimVif::buffer_send_prepare()
 {
     return (buffer_send_prepare(_buffer_send));
 }
@@ -1323,7 +1323,7 @@ PimVif::jp_override_interval() const
 
 /**
  * PimVif::i_am_dr:
- * void: Void.
+ * @: 
  * 
  * Test if the protocol instance is a DR (Designated Router)
  * on a virtual interface.
@@ -1332,7 +1332,7 @@ PimVif::jp_override_interval() const
  * otherwise false.
  **/
 bool
-PimVif::i_am_dr(void) const
+PimVif::i_am_dr() const
 {
     if (_proto_flags & PIM_VIF_DR)
 	return (true);

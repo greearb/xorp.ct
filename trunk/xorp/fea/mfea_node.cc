@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.13 2003/08/06 18:50:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.14 2003/08/07 00:27:21 pavlin Exp $"
 
 
 //
@@ -101,12 +101,12 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
 
 /**
  * MfeaNode::~MfeaNode:
- * @void: 
+ * @: 
  * 
  * MFEA node destructor.
  * 
  **/
-MfeaNode::~MfeaNode(void)
+MfeaNode::~MfeaNode()
 {
     stop();
     
@@ -122,14 +122,14 @@ MfeaNode::~MfeaNode(void)
 
 /**
  * MfeaNode::start:
- * @void: 
+ * @: 
  * 
  * Start the MFEA.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-MfeaNode::start(void)
+MfeaNode::start()
 {
     if (ProtoNode<MfeaVif>::start() < 0)
 	return (XORP_ERROR);
@@ -162,14 +162,14 @@ MfeaNode::start(void)
 
 /**
  * MfeaNode::stop:
- * @void: 
+ * @: 
  * 
  * Stop the MFEA.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::stop(void)
+MfeaNode::stop()
 {
     if (! is_up())
 	return (XORP_ERROR);
@@ -464,7 +464,7 @@ MfeaNode::stop_vif(const string& vif_name, string& error_msg)
 
 /**
  * MfeaNode::start_all_vifs:
- * @void: 
+ * @: 
  * 
  * Start MFEA on all enabled interfaces.
  * 
@@ -472,7 +472,7 @@ MfeaNode::stop_vif(const string& vif_name, string& error_msg)
  * or %XORP_ERROR if error occured.
  **/
 int
-MfeaNode::start_all_vifs(void)
+MfeaNode::start_all_vifs()
 {
     int n = 0;
     vector<MfeaVif *>::iterator iter;
@@ -490,7 +490,7 @@ MfeaNode::start_all_vifs(void)
 
 /**
  * MfeaNode::stop_all_vifs:
- * @void: 
+ * @: 
  * 
  * Stop MFEA on all interfaces it was running on.
  * 
@@ -498,7 +498,7 @@ MfeaNode::start_all_vifs(void)
  * or %XORP_ERROR if error occured.
  **/
 int
-MfeaNode::stop_all_vifs(void)
+MfeaNode::stop_all_vifs()
 {
     int n = 0;
     vector<MfeaVif *>::iterator iter;
@@ -516,14 +516,14 @@ MfeaNode::stop_all_vifs(void)
 
 /**
  * MfeaNode::enable_all_vifs:
- * @void: 
+ * @: 
  * 
  * Enable MFEA on all interfaces.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::enable_all_vifs(void)
+MfeaNode::enable_all_vifs()
 {
     vector<MfeaVif *>::iterator iter;
     
@@ -539,14 +539,14 @@ MfeaNode::enable_all_vifs(void)
 
 /**
  * MfeaNode::disable_all_vifs:
- * @void: 
+ * @: 
  * 
  * Disable MFEA on all interfaces. All running interfaces are stopped first.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::disable_all_vifs(void)
+MfeaNode::disable_all_vifs()
 {
     vector<MfeaVif *>::iterator iter;
 
@@ -564,12 +564,12 @@ MfeaNode::disable_all_vifs(void)
 
 /**
  * MfeaNode::delete_all_vifs:
- * @void: 
+ * @: 
  * 
  * Delete all MFEA vifs.
  **/
 void
-MfeaNode::delete_all_vifs(void)
+MfeaNode::delete_all_vifs()
 {
     vector<MfeaVif *>::iterator iter;
     

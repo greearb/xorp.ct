@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.6 2003/07/03 07:05:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.7 2003/08/05 05:44:59 pavlin Exp $"
 
 
 //
@@ -213,14 +213,14 @@ ProtoComm::~ProtoComm()
 
 /**
  * ProtoComm::start:
- * @void: 
+ * @: 
  * 
  * Start the ProtoComm.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-ProtoComm::start(void)
+ProtoComm::start()
 {
     // XXX: all ProtoComm are automatically enabled by default
     ProtoUnit::enable();
@@ -248,14 +248,14 @@ ProtoComm::start(void)
 
 /**
  * ProtoComm::stop:
- * @void: 
+ * @: 
  * 
  * Stop the ProtoComm.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::stop(void)
+ProtoComm::stop()
 {
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
@@ -741,7 +741,7 @@ ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
 
 /**
  * ProtoComm::open_proto_socket:
- * @void: 
+ * @: 
  * 
  * Register and 'start' a multicast protocol (IGMP, MLD, PIM, etc)
  * in the kernel.
@@ -751,7 +751,7 @@ ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::open_proto_socket(void)
+ProtoComm::open_proto_socket()
 {
     if (_ipproto < 0)
 	return (XORP_ERROR);
@@ -853,14 +853,14 @@ ProtoComm::open_proto_socket(void)
 
 /**
  * ProtoComm::close_proto_socket:
- * @void: 
+ * @: 
  * 
  * Close the protocol socket.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::close_proto_socket(void)
+ProtoComm::close_proto_socket()
 {
     if (_proto_socket < 0)
 	return (XORP_ERROR);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.2 2003/03/10 23:20:52 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.3 2003/05/21 05:32:55 pavlin Exp $"
 
 
 //
@@ -77,26 +77,26 @@ RpTable::RpTable(PimNode& pim_node)
 
 /**
  * RpTable::~RpTable:
- * @void: 
+ * @: 
  * 
  * RpTable destructor.
  * 
  **/
-RpTable::~RpTable(void)
+RpTable::~RpTable()
 {
     stop();
 }
 
 /**
  * RpTable::start:
- * @void: 
+ * @: 
  * 
  * Start the RP table.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-RpTable::start(void)
+RpTable::start()
 {
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
@@ -109,14 +109,14 @@ RpTable::start(void)
 
 /**
  * RpTable::stop:
- * @void: 
+ * @: 
  * 
  * Stop the RP table.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-RpTable::stop(void)
+RpTable::stop()
 {
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);

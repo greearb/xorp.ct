@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.6 2003/03/03 04:27:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.7 2003/03/10 23:20:52 hodson Exp $"
 
 
 //
@@ -152,12 +152,12 @@ PimScopeZoneTable::PimScopeZoneTable(PimNode& pim_node)
 
 /**
  * PimScopeZoneTable::~PimScopeZoneTable:
- * @void: 
+ * @: 
  * 
  * PimScopeZoneTable destructor.
  * 
  **/
-PimScopeZoneTable::~PimScopeZoneTable(void)
+PimScopeZoneTable::~PimScopeZoneTable()
 {
     
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.1 2003/05/15 23:10:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.2 2003/05/16 19:23:18 pavlin Exp $"
 
 
 //
@@ -91,26 +91,26 @@ MfeaVif::MfeaVif(MfeaNode& mfea_node, const MfeaVif& mfea_vif)
 
 /**
  * MfeaVif::~MfeaVif:
- * @void: 
+ * @: 
  * 
  * MFEA vif destructor.
  * 
  **/
-MfeaVif::~MfeaVif(void)
+MfeaVif::~MfeaVif()
 {
     stop();
 }
 
 /**
  * MfeaVif::start:
- * @void: 
+ * @: 
  * 
  * Start MFEA a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaVif::start(void)
+MfeaVif::start()
 {
     if (! is_underlying_vif_up())
 	return (XORP_ERROR);
@@ -134,14 +134,14 @@ MfeaVif::start(void)
 
 /**
  * MfeaVif::stop:
- * @void: 
+ * @: 
  * 
  * Stop MFEA on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaVif::stop(void)
+MfeaVif::stop()
 {
     int ret_value = XORP_OK;
     

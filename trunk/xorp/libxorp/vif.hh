@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.4 2003/05/18 23:16:06 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.5 2003/07/03 06:47:09 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -299,14 +299,14 @@ public:
      * 
      * return true if this vif is multicast capable, otherwise false.
      */
-    bool	is_multicast_capable(void) const { return _is_multicast_capable; }
+    bool	is_multicast_capable() const { return _is_multicast_capable; }
     
     /**
      * Test if this vif is broadcast capable.
      * 
      * return true if this vif is broadcast capable, otherwise false.
      */
-    bool	is_broadcast_capable(void) const { return _is_broadcast_capable; }
+    bool	is_broadcast_capable() const { return _is_broadcast_capable; }
     
     /**
      * Test if the underlying vif is UP.
@@ -318,7 +318,7 @@ public:
      * return true if the underlying vif is UP (when applicable), otherwise
      * false.
      */
-    bool	is_underlying_vif_up(void) const { return _is_underlying_vif_up; }
+    bool	is_underlying_vif_up() const { return _is_underlying_vif_up; }
     
     /**
      * Set/reset the vif as a PIM Register interface.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.22 2003/08/06 18:52:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.23 2003/08/07 00:31:58 pavlin Exp $"
 
 
 //
@@ -101,12 +101,12 @@ PimNode::PimNode(int family, xorp_module_id module_id,
 
 /**
  * PimNode::~PimNode:
- * @void: 
+ * @: 
  * 
  * PIM node destructor.
  * 
  **/
-PimNode::~PimNode(void)
+PimNode::~PimNode()
 {
     stop();
     
@@ -122,7 +122,7 @@ PimNode::~PimNode(void)
 
 /**
  * PimNode::start:
- * @void: 
+ * @: 
  * 
  * Start the PIM protocol.
  * TODO: This function should not start the protocol operation on the
@@ -131,7 +131,7 @@ PimNode::~PimNode(void)
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-PimNode::start(void)
+PimNode::start()
 {
     if (ProtoNode<PimVif>::start() < 0)
 	return (XORP_ERROR);
@@ -166,7 +166,7 @@ PimNode::start(void)
 
 /**
  * PimNode::stop:
- * @void: 
+ * @: 
  * 
  * Gracefully stop the PIM protocol.
  * XXX: The graceful stop will attempt to send Join/Prune, Assert, etc.
@@ -183,7 +183,7 @@ PimNode::start(void)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::stop(void)
+PimNode::stop()
 {
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
@@ -206,14 +206,14 @@ PimNode::stop(void)
 
 /**
  * PimNode::final_stop:
- * @void: 
+ * @: 
  * 
  * Completely stop the PIM protocol.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::final_stop(void)
+PimNode::final_stop()
 {
     int ret_value = XORP_OK;
     
@@ -784,7 +784,7 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
 
 /**
  * PimNode::start_all_vifs:
- * @void: 
+ * @: 
  * 
  * Start PIM on all enabled interfaces.
  * 
@@ -792,7 +792,7 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
  * or %XORP_ERROR if error occured.
  **/
 int
-PimNode::start_all_vifs(void)
+PimNode::start_all_vifs()
 {
     int n = 0;
     vector<PimVif *>::iterator iter;
@@ -810,7 +810,7 @@ PimNode::start_all_vifs(void)
 
 /**
  * PimNode::stop_all_vifs:
- * @void: 
+ * @: 
  * 
  * Stop PIM on all interfaces it was running on.
  * 
@@ -818,7 +818,7 @@ PimNode::start_all_vifs(void)
  * or %XORP_ERROR if error occured.
  **/
 int
-PimNode::stop_all_vifs(void)
+PimNode::stop_all_vifs()
 {
     int n = 0;
     vector<PimVif *>::iterator iter;
@@ -836,14 +836,14 @@ PimNode::stop_all_vifs(void)
 
 /**
  * PimNode::enable_all_vifs:
- * @void: 
+ * @: 
  * 
  * Enable PIM on all interfaces.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::enable_all_vifs(void)
+PimNode::enable_all_vifs()
 {
     vector<PimVif *>::iterator iter;
     
@@ -859,14 +859,14 @@ PimNode::enable_all_vifs(void)
 
 /**
  * PimNode::disable_all_vifs:
- * @void: 
+ * @: 
  * 
  * Disable PIM on all interfaces. All running interfaces are stopped first.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::disable_all_vifs(void)
+PimNode::disable_all_vifs()
 {
     vector<PimVif *>::iterator iter;
     
@@ -884,12 +884,12 @@ PimNode::disable_all_vifs(void)
 
 /**
  * PimNode::delete_all_vifs:
- * @void: 
+ * @: 
  * 
  * Delete all PIM vifs.
  **/
 void
-PimNode::delete_all_vifs(void)
+PimNode::delete_all_vifs()
 {
     // XXX: here we must use proto_vifs().size() to end the iteration,
     // because the proto_vifs() array may be modified when a vif
@@ -1284,14 +1284,14 @@ PimNode::is_directly_connected(const PimVif& pim_vif,
 
 /**
  * PimNode::vif_find_pim_register:
- * @void: 
+ * @: 
  * 
  * Return the PIM Register virtual interface.
  * 
  * Return value: The PIM Register virtual interface if exists, otherwise NULL.
  **/
 PimVif *
-PimNode::vif_find_pim_register(void) const
+PimNode::vif_find_pim_register() const
 {
     return (vif_find_by_vif_index(pim_register_vif_index()));
 }

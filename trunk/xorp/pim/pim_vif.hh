@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.17 2003/07/15 00:46:49 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.18 2003/07/16 02:12:20 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -147,7 +147,7 @@ public:
      * @return the C++ style string with the flags about the vif status
      * (e.g., UP/DOWN/DISABLED, etc).
      */
-    string	flags_string(void) const;
+    string	flags_string() const;
     
     /**
      * Get the PIM node (@ref PimNode).

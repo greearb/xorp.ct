@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node_cli.hh,v 1.3 2003/03/03 03:26:26 pavlin Exp $
+// $XORP: xorp/pim/pim_node_cli.hh,v 1.4 2003/03/10 23:20:50 hodson Exp $
 
 
 #ifndef __PIM_PIM_NODE_CLI_HH__
@@ -46,14 +46,14 @@ public:
     PimNodeCli(PimNode& pim_node);
     virtual ~PimNodeCli();
     
-    int		start(void);
-    int		stop(void);
+    int		start();
+    int		stop();
 
-    int		add_all_cli_commands(void);
+    int		add_all_cli_commands();
     
 private:
     
-    PimNode& pim_node(void) const { return (_pim_node); }
+    PimNode& pim_node() const { return (_pim_node); }
     PimNode& _pim_node;
 
     //

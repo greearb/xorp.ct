@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.7 2003/06/02 02:17:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.8 2003/08/05 05:44:59 pavlin Exp $"
 
 
 //
@@ -167,14 +167,14 @@ MfeaMrouter::~MfeaMrouter()
 
 /**
  * MfeaMrouter::start:
- * @void: 
+ * @: 
  * 
  * Start the MfeaMrouter.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
 int
-MfeaMrouter::start(void)
+MfeaMrouter::start()
 {
     // XXX: MfeaMrouter is automatically enabled by default
     ProtoUnit::enable();
@@ -202,14 +202,14 @@ MfeaMrouter::start(void)
 
 /**
  * MfeaMrouter::stop:
- * @void: 
+ * @: 
  * 
  * Stop the MfeaMrouter.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::stop(void)
+MfeaMrouter::stop()
 {
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
@@ -251,14 +251,14 @@ MfeaMrouter::kernel_mrouter_ipproto() const
 
 /**
  * MfeaMrouter::open_mrouter_socket:
- * @void: 
+ * @: 
  * 
  * Open the mrouter socket (used for various multicast routing kernel calls).
  * 
  * Return value: The socket value on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::open_mrouter_socket(void)
+MfeaMrouter::open_mrouter_socket()
 {
     if (_mrouter_socket >= 0)
 	return (_mrouter_socket);
@@ -292,7 +292,7 @@ MfeaMrouter::open_mrouter_socket(void)
 
 /**
  * MfeaMrouter::adopt_mrouter_socket:
- * @void: 
+ * @: 
  * 
  * Adopt control over the mrouter socket.
  * When the #MfeaMrouter adopts control over the mrouter socket,
@@ -301,7 +301,7 @@ MfeaMrouter::open_mrouter_socket(void)
  * Return value: The adopted socket value on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::adopt_mrouter_socket(void)
+MfeaMrouter::adopt_mrouter_socket()
 {
     if (_mrouter_socket < 0)
 	return (XORP_ERROR);
@@ -359,14 +359,14 @@ MfeaMrouter::adopt_mrouter_socket(void)
 
 /**
  * MfeaMrouter::close_mrouter_socket:
- * @void: 
+ * @: 
  * 
  * Close the mrouter socket.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::close_mrouter_socket(void)
+MfeaMrouter::close_mrouter_socket()
 {
     if (_mrouter_socket < 0)
 	return (XORP_ERROR);
@@ -405,14 +405,14 @@ MfeaMrouter::close_mrouter_socket(void)
 
 /**
  * MfeaMrouter::start_mrt:
- * @void: 
+ * @: 
  * 
  * Start/enable the multicast routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::start_mrt(void)
+MfeaMrouter::start_mrt()
 {
     int v = 1;
     
@@ -573,14 +573,14 @@ MfeaMrouter::start_mrt(void)
 
 /**
  * MfeaMrouter::stop_mrt:
- * @void: 
+ * @: 
  * 
  * Stop/disable the multicast routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::stop_mrt(void)
+MfeaMrouter::stop_mrt()
 {
     int v = 0;
     
@@ -622,14 +622,14 @@ MfeaMrouter::stop_mrt(void)
 
 /**
  * MfeaMrouter::start_pim:
- * @void: 
+ * @: 
  * 
  * Start/enable PIM routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::start_pim(void)
+MfeaMrouter::start_pim()
 {
     int v = 1;
     
@@ -663,14 +663,14 @@ MfeaMrouter::start_pim(void)
 
 /**
  * MfeaMrouter::stop_pim:
- * @void: 
+ * @: 
  * 
  * Stop/disable PIM routing in the kernel.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::stop_pim(void)
+MfeaMrouter::stop_pim()
 {
     int v = 0;
     
