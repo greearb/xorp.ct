@@ -3,17 +3,243 @@
 
 \section{Terminology and Concepts}
 
-PIM: Protocol Independent Multicast
+PIM stands for {\it Protocol Independent Multicast}, and denotes a
+class of multicast routing protocols.  The term {\it protocol
+independent} comes from the fact that PIM does not have its own
+topology discovery protocol, but instead relies on routing information
+supplied by protocols such as RIP and BGP.  What PIM does do is to
+build multicast trees from senders to receivers based on paths
+determined by this external topology information.  
 
-PIM concepts: Sparse-mode, RP, DR, RPT, SPT, BSR
+There are two PIM protocols:
+\begin{itemize}
+\item PIM Sparse-Mode (PIM-SM) is the most commonly used multicast
+  routing protocol, and explicitly builds distribution trees from the
+  receivers back towards senders.
+\item PIM Dense-Mode (PIM-DM) is less commonly used, and builds trees
+  by flooding multicast traffic domain-wide, and then pruning off
+  branches from the tree where there are no receivers.  
+\end{itemize}
+At the present time, XORP only implements PIM Sparse Mode.
 
-ref to RFC ???.
+\subsection{PIM-SM Protocol Overview}
 
-interaction with IGMP
+{\it The following description is adapted from the PIM-SM
+  specification.  }
 
-SSM
+PIM-SM relies on an underlying topology-gathering protocol to populate a
+routing table with routes.  This routing table is called the {\it MRIB} or
+{\it Multicast Routing Information Base}.  The routes in this table may be
+taken directly from the unicast routing table, or it may be
+different and provided by a separate routing protocol such as
+Multiprotocol BGP.
 
-v4 vs v6
+Regardless of how it is created, the primary role of the MRIB in the
+PIM-SM protocol
+is to provide the next hop router along a multicast-capable
+path to each destination subnet.
+The MRIB is used to determine the next hop neighbor to which any PIM
+Join/Prune message is sent.
+Data flows along the reverse path of the Join messages.
+Thus, in contrast to the unicast RIB which specifies the
+next hop that a data packet would take to get {\it to} some subnet,
+the MRIB gives reverse-path information, and indicates the path that
+a multicast data packet would take {\it from} 
+its origin subnet to the router that has the MRIB.  
+
+Like all multicast routing protocols that implement the ASM service model,
+PIM-SM must be able to route data packets from sources to receivers
+without either the sources or receivers knowing a-priori of the
+existence of the others.  This is essentially done in three phases,
+although as senders and receivers may come and go at any time, all
+three phases may be occur simultaneously.
+
+\subsubsection*{Phase One: RP Tree}
+
+In phase one, a multicast receiver expresses its interest in receiving
+traffic destined for a multicast group.  Typically it does this using
+IGMP or MLD.  One of the receiver's local PIM routers is elected as the
+Designated Router (DR) for that subnet.  On receiving the receiver's
+expression of interest, the DR then sends a PIM Join message towards
+the Rendezvous Point (RP) for that multicast group.  The RP is a
+PIM-SM router that has been configured to serve a bootstrapping role
+for certain multicast groups.  This Join message is known as a (*,G)
+Join because it joins group G for all sources to that group.  The
+(*,G) Join travels hop-by-hop towards the RP for the group, and in
+each router it passes through, multicast tree state for group G is
+instantiated.  Eventually the (*,G) Join either reaches the RP, or
+reaches a router that already has (*,G) Join state for that group.
+When many receivers join the group, their Join messages converge on
+the RP, and form a distribution tree for group G that is rooted at the
+RP.  This is known as the RP Tree (RPT), and is also known as the
+shared tree because it is shared by all sources sending to that group.
+Join messages are resent periodically so long as the receiver remains
+in the group.  When all receivers on a leaf-network leave the group,
+the DR will send a PIM (*,G) Prune message towards the RP for that
+multicast group. However if the Prune message is not sent for any
+reason, the state will eventually time out.
+
+A multicast data sender just starts sending data destined for a
+multicast group.  The sender's local router (DR) takes those data
+packets, unicast-encapsulates them, and sends them directly to the RP.
+The RP receives these encapsulated data packets, decapsulates them,
+and forwards them onto the shared tree.  The packets then follow the
+(*,G) multicast tree state in the routers on the RP Tree, being
+replicated wherever the RP Tree branches, and eventually reaching all
+the receivers for that multicast group.  The process of encapsulating
+data packets to the RP is called {\it registering}, and the encapsulation
+packets are known as PIM Register packets.  
+
+At the end of phase one, multicast traffic is flowing encapsulated to
+the RP, and then natively over the RP tree to the multicast receivers.
+
+\subsubsection*{Phase Two: Register-Stop}
+
+Register-encapsulation of data packets is inefficient for two reasons:
+\begin{itemize}
+\item Encapsulation and decapsulation may be relatively expensive
+operations for a router to perform, depending on whether or not the
+router has appropriate hardware for these tasks.
+
+\item Traveling all the way to the RP, and then back down the shared
+tree may entail the packets traveling a relatively long distance to
+reach receivers that are close to the sender.  For some applications,
+this increased latency is undesirable.
+\end{itemize}
+Although Register-encapsulation may continue indefinitely, for the
+reasons above, the RP will normally choose to switch to native forwarding.
+To do this, when the RP receives a register-encapsulated data packet
+from source S on group G, it will normally initiate an (S,G)
+source-specific Join towards S.  This Join message travels hop-by-hop
+towards S, instantiating (S,G) multicast tree state in the routers
+along the path.  (S,G) multicast tree state is used only to forward
+packets for group G if those packets come from source S.  Eventually
+the Join message reaches S's subnet or a router that already has (S,G)
+multicast tree state, and then packets from S start to flow following
+the (S,G) tree state towards the RP.  These data packets may also
+reach routers with (*,G) state along the path towards the RP - if so,
+they can short-cut onto the RP tree at this point.
+
+While the RP is in the process of joining the source-specific tree for
+S, the data packets will continue being encapsulated to the RP.
+When packets from S also start to arrive natively at the the RP, the
+RP will be receiving two copies of each of these packets.  At this
+point, the RP starts to discard the encapsulated copy of these
+packets, and it sends a {\it Register-Stop} message back to S's DR to
+prevent the DR unnecessarily encapsulating the packets.
+
+At the end of phase 2, traffic will be flowing natively from S along a
+source-specific tree to the RP, and from there along the shared tree
+to the receivers.  Where the two trees intersect, traffic may transfer
+from the source-specific tree to the RP tree, and so avoid taking a
+long detour via the RP.
+
+It should be noted that a sender may start sending before or after a
+receiver joins the group, and thus phase two may happen before the
+shared tree to the receiver is built.
+
+\subsubsection*{Phase 3: Shortest-Path Tree}
+
+Although having the RP join back towards the source removes the
+encapsulation overhead, it does not completely optimize the forwarding
+paths.  For many receivers the route via the RP may involve a
+significant detour when compared with the shortest path from the
+source to the receiver.  
+
+To obtain lower latencies, a router on the receiver's LAN, typically
+the DR, may optionally initiate a transfer from the shared tree to a
+source-specific shortest-path tree (SPT).  To do this, it issues an
+(S,G) Join towards S.  This instantiates state in the routers along
+the path to S.  Eventually this join either reaches S's subnet, or
+reaches a router that already has (S,G) state.  When this happens,
+data packets from S start to flow following the (S,G) state until they
+reach the receiver.
+
+At this point the receiver (or a router upstream of the receiver) will
+be receiving two copies of the data - one from the SPT and one from
+the RPT.  When the first traffic starts to arrive from the SPT, the DR
+or upstream router starts to drop the packets for G from S that arrive
+via the RP tree.  In addition, it sends an (S,G) Prune message towards
+the RP.  This is known as an (S,G,rpt) Prune.  The Prune message
+travels hop-by-hop, instantiating state along the path towards the RP
+indicating that traffic from S for G should NOT be forwarded in this
+direction.  The prune is propagated until it reaches the RP or a
+router that still needs the traffic from S for other receivers.
+
+By now, the receiver will be receiving traffic from S along the
+shortest-path tree between the receiver and S.  In addition, the RP is
+receiving the traffic from S, but this traffic is no longer reaching
+the receiver along the RP tree.  As far as the receiver is concerned,
+this is the final distribution tree.
+
+\subsubsection{Multi-access Transit LANs}
+
+The overview so far has concerned itself with point-to-point links.
+However, using multi-access LANs such as Ethernet for transit is not
+uncommon.  This can cause complications for three reasons:
+\begin{itemize}
+\item Two or more routers on the LAN may issue (*,G) Joins to different
+upstream routers on the LAN because they have inconsistent MRIB
+entries regarding how to reach the RP.  Both paths on the RP tree will
+be set up, causing two copies of all the shared tree traffic to appear
+on the LAN.
+\item Two or more routers on the LAN may issue (S,G) Joins to different
+upstream routers on the LAN because they have inconsistent MRIB
+entries regarding how to reach source S.  Both paths on the
+source-specific tree will be set up, causing two copies of all the
+traffic from S to appear on the LAN.
+\item A router on the LAN may issue a (*,G) Join to one upstream router on
+the LAN, and another router on the LAN may issue an (S,G) Join to a
+different upstream router on the same LAN.  Traffic from S may reach
+the LAN over both the RPT and the SPT.  If the receiver behind the
+downstream (*,G) router doesn't issue an (S,G,rpt) prune, then this
+condition would persist.
+\end{itemize}
+All of these problems are caused by there being more than one upstream
+router with join state for the group or source-group pair.  PIM-SM does
+not prevent such duplicate joins from occurring - instead when
+duplicate data packets appear on the LAN from different routers, these
+routers notice this, and then elect a single forwarder.  This election
+is performed using PIM {\it Assert} messages, which resolve the problem in
+favor of the upstream router which has (S,G) state, or if neither or
+both router has (S,G) state, then in favor of the router with the best
+metric to the RP for RP trees, or the best metric to the source to
+source-specific trees.
+
+These Assert messages are also received by the downstream routers on
+the LAN, and these cause subsequent Join messages to be sent to the
+upstream router that won the Assert.
+
+\subsection*{RP Discovery}
+
+PIM-SM routers need to know the address of the RP for each group for
+which they have (*,G) state.  This address is obtained either through
+a bootstrap mechanism or through static configuration.
+
+One dynamic way to do this is to use the {\it Bootstrap Router} (BSR)
+mechanism. 
+One router in each PIM-SM domain is elected the Bootstrap Router through
+a simple election process.  All the routers in the domain that are
+configured to be candidates to be RPs periodically unicast their
+candidacy to the BSR.  From the candidates, the BSR picks an RP-set,
+and periodically announces this set in a Bootstrap message.  Bootstrap
+messages are flooded hop-by-hop throughout the domain until all
+routers in the domain know the RP-Set.
+
+To map a group to an RP, a router hashes the group address into the
+RP-set using an order-preserving hash function (one that minimizes
+changes if the RP-Set changes).  The resulting RP is the one that it
+uses as the RP for that group.
+
+\section{Standards}
+
+XORP is compliant with the following PIM-SM specification:
+\begin{description}
+\item{\bf draft-ietf-pim-sm-v2-new-10}.  Protocol Independent
+  Multicast - Sparse Mode (PIM-SM): Protocol Specification (Revised).
+\item{\bf draft-ietf-pim-sm-bsr-02}.  Bootstrap Router (BSR) Mechanism
+  for PIM Sparse Mode.
+\end{description}
 
 \section{Configuring PIM-SM}
 \subsection{Configuration Syntax}
@@ -163,6 +389,46 @@ protocols \{\\
 }
 \vspace{0.1in}
 
+\begin{description}
+protocols \{\\
+\>pimsm4 \{\\
+\>\>targetname: {\it text}\\
+\>\>enabled: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>dr-priority: {\it uint}\\
+\>\>\>\>alternative-subnet {\it IPv4}/{\it int(1..32)}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>enabled: {\it bool}\\
+\>\>static-rps \{\\
+\>\>\>rp {\it IPv4} \{\\
+\>\>\>\>group-prefix {\it IPv4Mcast}/{\it int(4..32)} \{\\
+\>\>\>\>\>rp-priority: {\it uint}\\
+\>\>\>\>\>hash-mask-len: {\it uint}\\
+\>\>bootstrap \{\\
+\>\>\>enabled: {\it bool}\\
+\>\>\>cand-bsr \{\\
+\>\>\>\>scope-zone  {\it IPv4Mcast}/{\it int(4..32)} \{\\
+\>\>\>\>\>is-scope-zone: {\it bool}\\
+\>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
+\>\>\>\>\>bsr-priority: {\it uint}\\
+\>\>\>\>\>hash-mask-len: {\it uint}\\
+\>\>\>cand-rp \{\\
+\>\>\>\>group-prefix  {\it IPv4Mcast}/{\it int(4..32)} \{\\
+\>\>\>\>\>is-scope-zone: {\it bool}\\
+\>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
+\>\>\>\>\>rp-priority: {\it uint}\\
+\>\>\>\>\>rp-holdtime: {\it uint}\\
+\>\>switch-to-spt-threshold \{\\
+\>\>\>enabled: {\it bool}\\
+\>\>\>interval-sec: {\it uint}\\
+\>\>\>bytes: {\it uint}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>enabled: {\it bool}\\
+\end{description}
 \subsection{Example Configurations}
 
 \vspace{0.1in}
