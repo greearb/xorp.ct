@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.8 2003/06/20 19:33:24 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.9 2003/07/17 00:28:32 pavlin Exp $
 #
 
 #
@@ -46,17 +46,29 @@ LOCALHOST=$HOST
 ID=192.150.187.78
 AS=65008
 
-# IBGP
+# IBGP - IPV4
 PEER1=$HOST
 PORT1=10001
 PEER1_PORT=20001
 PEER1_AS=$AS
 
-# EBGP
+# EBGP - IPV4
 PEER2=$HOST
 PORT2=10002
 PEER2_PORT=20002
 PEER2_AS=65000
+
+# IBGP - IPV6
+PEER3=$HOST
+PORT3=10003
+PEER3_PORT=20003
+PEER3_AS=$AS
+
+# EBGP - IPV6
+PEER4=$HOST
+PORT4=10004
+PEER4_PORT=20004
+PEER4_AS=65000
 
 HOLDTIME=30
 
@@ -67,15 +79,31 @@ configure_bgp()
     # Don't try and talk to the rib.
     register_rib ""
 
+    # IBGP - IPV4
     PEER=$PEER1
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
     enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
 
+    # EBGP - IPV4
     PEER=$PEER2
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
     enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
+
+    # IBGP - IPV6
+    PEER=$PEER3
+    NEXT_HOP=192.150.187.78
+    add_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT3 $PEER $PEER3_PORT MultiProtocolIPv6
+    enable_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT
+
+    # IBGP - IPV6
+    PEER=$PEER4
+    NEXT_HOP=192.150.187.78
+    add_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT $PEER4_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT4 $PEER $PEER4_PORT MultiProtocolIPv6
+    enable_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT
 }
 
 HOLD_TIMER=4
@@ -656,9 +684,22 @@ test21()
     coord peer1 assert established
 }
 
+test22()
+{
+    echo "TEST22 - EBGP Establish an IPV6 peering"
+
+    coord reset
+    coord target $HOST $PORT3
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER3_AS holdtime 0 id 192.150.187.100 ipv6 true
+
+    coord peer1 assert established
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11
- test12 test13 test14 test15 test16 test17 test18 test19 test20 test21'
+ test12 test13 test14 test15 test16 test17 test18 test19 test20 test21 test22'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
