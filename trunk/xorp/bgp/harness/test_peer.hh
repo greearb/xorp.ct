@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.7 2003/06/20 18:55:57 hodson Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.8 2003/06/26 19:41:48 atanu Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -94,7 +94,7 @@ private:
 
 class XrlTestPeerTarget : XrlTestPeerTargetBase {
 public:
-    XrlTestPeerTarget(XrlRouter *r, TestPeer& test_peer);
+    XrlTestPeerTarget(XrlRouter *r, TestPeer& test_peer, bool trace);
 
     /**
      *  Get name of Xrl Target
@@ -186,6 +186,7 @@ public:
 
 private:
     TestPeer& _test_peer;
+    bool _trace;
 };
 
 

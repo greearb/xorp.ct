@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.13 2003/06/20 18:55:57 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.14 2003/06/26 19:41:48 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -42,8 +42,9 @@ static const char SERVER_VERSION[] = "0.1";
 -------------------- XRL --------------------
 */
 
-XrlTestPeerTarget::XrlTestPeerTarget(XrlRouter *r, TestPeer& test_peer)
-    : XrlTestPeerTargetBase(r), _test_peer(test_peer)
+XrlTestPeerTarget::XrlTestPeerTarget(XrlRouter *r, TestPeer& test_peer,
+				     bool trace)
+    : XrlTestPeerTargetBase(r), _test_peer(test_peer), _trace(trace)
 {
     debug_msg("\n");
 }
@@ -95,6 +96,9 @@ XrlTestPeerTarget::test_peer_0_1_register(const string& coordinator,
 {
     debug_msg("\n");
 
+    if(_trace)
+	printf("register(%s,%u)\n", coordinator.c_str(), genid);
+
     _test_peer.register_coordinator(coordinator);
     _test_peer.register_genid(genid);
 
@@ -105,6 +109,9 @@ XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_packetisation(const string& protocol)
 {
     debug_msg("\n");
+
+    if(_trace)
+	printf("packetisation(%s)\n", protocol.c_str());
 
     if(!_test_peer.packetisation(protocol)) 
 	return XrlCmdError::COMMAND_FAILED(c_format("Unsupported protocol %s",
@@ -118,6 +125,9 @@ XrlTestPeerTarget::test_peer_0_1_connect(const string&	host,
 					 const uint32_t&  port)
 {
     debug_msg("\n");
+
+    if(_trace)
+	printf("connect(%s,%u)\n", host.c_str(), port);
 
     string error_string;
     if(!_test_peer.connect(host, port, error_string)) {
@@ -133,6 +143,9 @@ XrlTestPeerTarget::test_peer_0_1_listen(const string& address,
 {
     debug_msg("\n");
 
+    if(_trace)
+	printf("listen(%s,%u)\n", address.c_str(), port);
+
     string error_string;
     if(!_test_peer.listen(address, port, error_string)) {
 	return XrlCmdError::COMMAND_FAILED(error_string);
@@ -145,6 +158,10 @@ XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_send(const vector<uint8_t>& data)
 {
     debug_msg("\n");
+
+    if(_trace && MESSAGETYPEOPEN == data[BGP_COMMON_HEADER_LEN - 1]) {
+	printf("send() - open\n");
+    }
 
     string error_string;
     if(!_test_peer.send(data, error_string)) {
@@ -159,6 +176,9 @@ XrlTestPeerTarget::test_peer_0_1_disconnect()
 {
     debug_msg("\n");
 
+    if(_trace)
+	printf("disconnect()\n");
+
     string error_string;
     if(!_test_peer.disconnect(error_string)) {
 	return XrlCmdError::COMMAND_FAILED(error_string);
@@ -172,6 +192,9 @@ XrlTestPeerTarget::test_peer_0_1_reset()
 {
     debug_msg("\n");
 
+    if(_trace)
+	printf("reset()\n");
+
     _test_peer.reset();
 
     return XrlCmdError::OKAY();
@@ -181,6 +204,9 @@ XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_terminate()
 {
     debug_msg("\n");
+
+    if(_trace)
+	printf("terminate()\n");
 
     string error_string;
     if(!_test_peer.terminate(error_string)) {
@@ -747,7 +773,7 @@ void
 usage(char *name)
 {
     fprintf(stderr,
-	    "usage: %s [-h (finder host)] [-s server name] [-v]\n", name);
+	    "usage: %s [-h (finder host)] [-s server name] [-v][-t]\n", name);
     exit(-1);
 }
 
@@ -769,8 +795,9 @@ main(int argc, char **argv)
     const char *finder_host = "localhost";
     const char *server = SERVER;
     bool verbose = false;
+    bool trace = false;
 
-    while((c = getopt (argc, argv, "h:s:v")) != EOF) {
+    while((c = getopt (argc, argv, "h:s:vt")) != EOF) {
 	switch(c) {  
 	case 'h':
 	    finder_host = optarg;
@@ -781,6 +808,9 @@ main(int argc, char **argv)
 	case 'v':
 	    verbose = true;
 	    break;
+	case 't':
+	    trace = true;
+	    break;
 	case '?':
 	    usage(argv[0]);
 	}
@@ -790,7 +820,7 @@ main(int argc, char **argv)
 	EventLoop eventloop;
 	XrlStdRouter router(eventloop, server, finder_host);
 	TestPeer test_peer(eventloop, router, server, verbose);
-	XrlTestPeerTarget xrl_target(&router, test_peer);
+	XrlTestPeerTarget xrl_target(&router, test_peer, trace);
 
 	while(!test_peer.done()) {
 	    eventloop.run();
