@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.76 2004/05/30 22:51:04 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.77 2004/06/07 22:57:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -446,6 +446,10 @@ BGPPeer::event_stop()			// EVENTBGPSTOP
 	break;
 
     case STATECONNECT:
+	_SocketClient->connect_break();
+	clear_connect_retry_timer();
+	/*FALLTHROUGH*/
+
     case STATEACTIVE:
 	set_state(STATEIDLE);
 	break;
