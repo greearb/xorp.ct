@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.1 2004/08/31 17:47:28 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.2 2004/09/02 01:55:43 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -60,7 +60,7 @@ typedef IpfwFwRule<IPvXNet> IpfwFwRuleX;
  * The port sysutils/ipa (IP Accounting for IPFW) is also worth looking at
  * as a further reference.
  */
-class IpfwFwProvider : FwProvider {
+class IpfwFwProvider : public FwProvider {
 public:
 	IpfwFwProvider(FirewallManager& m)
 	    throw(InvalidFwProvider);
