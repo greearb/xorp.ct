@@ -30,55 +30,24 @@
 #include "template_tree.hh"
 #include "master_conf_tree.hh"
 #include "module_manager.hh"
-#include "userdb.hh"
-#include "xrl_rtrmgr_interface.hh"
-#include "randomness.hh"
 #include "main_rtrmgr.hh"
 
 //
 // Defaults
 //
-static bool 	   default_do_exec 	       = true;
-static const char* default_config_boot	       = "config.boot";
+static const char* default_config_boot	       = "config.boot.sample";
 static const char* default_config_template_dir = "../etc/templates";
 static const char* default_xrl_dir 	       = "../xrl/targets";
 
-static bool running;
-
-static void signalhandler(int) {
-    running = false;
-}
-
-void
-usage(const char *name)
-{
-    fprintf(stderr,
-	"usage: %s [-n] [-b config.boot] [-t cfg_dir] [-x xrl_dir]\n",
-	    name);
-    fprintf(stderr, "options:\n");
-
-    fprintf(stderr, 
-	    "\t-n		do not execute XRLs		[ %s ]\n",
-	    default_do_exec ? "false" : "true");
-
-    fprintf(stderr, 
-	    "\t-b config.boot	specify boot file 		[ %s ]\n",
-	    default_config_boot);
-	    
-    fprintf(stderr, 
-	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
-	    default_config_template_dir);
-
-    fprintf(stderr, 
-	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
-	    default_xrl_dir);
-
-    exit(-1);
-}
+/**
+ * This test loads the template tree, then loads the sample config,
+ * but doesn't call any XRLs or start any processes.
+ */
 
 int
 main(int argc, char* const argv[])
 {
+    UNUSED(argc);
     int errcode = 0;
 
     //
@@ -90,89 +59,43 @@ main(int argc, char* const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    running = true;
 
-    RandomGen randgen;    
-
-    bool do_exec = default_do_exec;
     const char*	config_template_dir = default_config_template_dir;
     const char*	xrl_dir 	    = default_xrl_dir;
     const char*	config_boot         = default_config_boot;
-
-    int c;
-
-    while ((c = getopt (argc, argv, "t:b:x:n")) != EOF) {
-	switch(c) {  
-	case 't':
-	    config_template_dir = optarg;
-	    break;
-	case 'b':
-	    config_boot = optarg;
-	    break;
-	case 'x':
-	    xrl_dir = optarg;
-	    break;
-	case 'n':
-	    do_exec = false;
-	    break;
-	case '?':
-	default:
-	    usage(argv[0]);
-	}
-    }
 
     //read the router config template files
     TemplateTree *tt;
     try {
 	tt = new TemplateTree(config_template_dir, xrl_dir);
     } catch (const XorpException&) {
-	printf("caught exception\n");
 	xorp_unexpected_handler();
+	fprintf(stderr, "test_sample_config: failed to load template file\n");
+	fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	return -1;
     }
-#if 0
-    tt->display_tree();
-#endif
-
-
-    //signal handlers so we can clean up when we're killed
-    signal(SIGTERM, signalhandler);
-    signal(SIGINT, signalhandler);
-    //    signal(SIGBUS, signalhandler);
-    //    signal(SIGSEGV, signalhandler);
 
     //initialize the event loop
     EventLoop eventloop; 
-    randgen.add_eventloop(&eventloop);
 
     /* Finder Server */
     FinderServer fs(eventloop);
 
     //start the module manager
-    ModuleManager mmgr(eventloop, /*verbose = */true);
+    ModuleManager mmgr(eventloop, /*verbose = */false);
     try {
-	UserDB userdb;
-	userdb.load_password_file();
-
 	//initialize the IPC mechanism
-	XrlStdRouter xrlrouter(eventloop, "rtrmgr");
+	XrlStdRouter xrlrouter(eventloop, "rtrmgr-test");
 	XorpClient xclient(eventloop, xrlrouter);
 
 	//read the router startup configuration file,
 	//start the processes required, and initialize them
-	MasterConfigTree ct(config_boot, tt, mmgr, xclient, do_exec);
-	XrlRtrmgrInterface rtrmgr_target(xrlrouter, userdb,
-					 ct, eventloop, randgen);
-
-	//loop while handling configuration events and signals
-	while (running) {
-	    printf("+");
-	    fflush(stdout);
-	    eventloop.run();
-	}
+	MasterConfigTree ct(config_boot, tt, mmgr, xclient, false);
     } catch (InitError& e) {
-	XLOG_ERROR("rtrmgr shutting down due to error\n");
 	xorp_print_standard_exceptions();
-	errcode = 1;
+	fprintf(stderr, "test_sample_config: failed to load config file\n");
+	fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	return -1;
     }
 
     mmgr.shutdown();

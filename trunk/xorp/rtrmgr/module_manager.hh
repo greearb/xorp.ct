@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.5 2003/04/22 19:42:17 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.6 2003/04/23 04:24:35 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -41,7 +41,7 @@ public:
 
 class Module {
 public:
-    Module(const ModuleCommand& cmd);
+    Module(const ModuleCommand& cmd, bool verbose);
     int set_execution_path(const string &path);
     ~Module();
     int run(bool do_exec);
@@ -60,11 +60,12 @@ private:
                    //shouldn't actually start any processes
 
     const ModuleCommand& _cmd;
+    bool _verbose; //verbose output of important events
 };
 
 class ModuleManager {
 public:
-    ModuleManager(EventLoop& eventloop);
+    ModuleManager(EventLoop& eventloop, bool verbose);
 
     ~ModuleManager();
     Module *new_module(const ModuleCommand& cmd);
@@ -78,6 +79,7 @@ public:
 private:
     map <string, Module *> _modules;
     EventLoop& _eventloop;
+    bool _verbose; //verbose output of important events
 };
 
 #endif // __RTRMGR_MODULE_MANAGER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.5 2003/04/22 19:42:17 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.6 2003/04/23 04:24:35 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -44,8 +44,8 @@ static void childhandler(int x) {
     module_pids[pid]->failed();
 }
 
-Module::Module(const ModuleCommand& cmd)
-    : _cmd(cmd)
+Module::Module(const ModuleCommand& cmd, bool verbose)
+    : _cmd(cmd), _verbose(verbose)
 {
     _name = cmd.name();
 }
@@ -55,9 +55,11 @@ int Module::set_execution_path(const string &path) {
     _running = false;
     _pid = 0;
     struct stat sb;
-    printf("**********************************************************\n");
-    printf("new module: %s path: %s\n", _name.c_str(), _path.c_str());
-    printf("**********************************************************\n");
+    if (_verbose) {
+	printf("**********************************************************\n");
+	printf("new module: %s path: %s\n", _name.c_str(), _path.c_str());
+	printf("**********************************************************\n");
+    }
 
     if (path[0] != '/') {
 	//we're going to call glob, but don't want to allow wildcard expansion
@@ -108,9 +110,11 @@ int Module::set_execution_path(const string &path) {
 
 int Module::run(bool do_exec)
 {
-    printf("**********************************************************\n");
-    printf("running module: %s path: %s\n", _name.c_str(), _path.c_str());
-    printf("**********************************************************\n");
+    if (_verbose) {
+	printf("**********************************************************\n");
+	printf("running module: %s path: %s\n", _name.c_str(), _path.c_str());
+	printf("**********************************************************\n");
+    }
     _do_exec = do_exec;
 
     if (!_do_exec)
@@ -126,7 +130,8 @@ int Module::run(bool do_exec)
 	    exit(-1);
 	}
     }
-    printf("New module has PID %d\n", _pid);
+    if (_verbose)
+	printf("New module has PID %d\n", _pid);
     module_pids[_pid] = this;
     _status = MODULE_STARTUP;
     return XORP_OK;
@@ -152,7 +157,8 @@ void Module::module_run_done(bool success) {
 }
 
 Module::~Module() {
-    printf("Shutting down %s\n", _name.c_str());
+    if (_verbose)
+	printf("Shutting down %s\n", _name.c_str());
     if (!_do_exec)
 	return;
     if (_status != MODULE_FAILED) {
@@ -173,13 +179,15 @@ Module::~Module() {
 
 void
 Module::failed() {
-    printf("Module failed: %s status:%d\n", _name.c_str(), _status);
+    if (_verbose)
+	printf("Module failed: %s status:%d\n", _name.c_str(), _status);
     if (_status == MODULE_STARTUP || _status == MODULE_SHUTDOWN) {
 	_status = MODULE_FAILED;
 	return;
     }
     _status = MODULE_FAILED;
-    printf("need to restart module %s\n", _name.c_str());
+    if (_verbose)
+	printf("need to restart module %s\n", _name.c_str());
 }
 
 
@@ -193,8 +201,8 @@ Module::str() const {
     return s;
 }
 
-ModuleManager::ModuleManager(EventLoop& eventloop) 
-    : _eventloop(eventloop)
+ModuleManager::ModuleManager(EventLoop& eventloop, bool verbose) 
+    : _eventloop(eventloop), _verbose(verbose)
 {
 }
 
@@ -204,19 +212,21 @@ ModuleManager::~ModuleManager() {
 
 Module *
 ModuleManager::new_module(const ModuleCommand& cmd) {
-    printf("ModuleManager::new_module %s\n", cmd.name().c_str());
+    if (_verbose)
+	printf("ModuleManager::new_module %s\n", cmd.name().c_str());
     string name = cmd.name();
     map<string, Module *>::iterator found_mod;
     found_mod = _modules.find(name);
     if (found_mod == _modules.end()) {
 	Module *newmod;
-	newmod = new Module(cmd);
+	newmod = new Module(cmd, _verbose);
 	_modules[name] = newmod;
 	if (newmod->set_execution_path(cmd.path()) != XORP_OK)
 	    return NULL;
 	return newmod;
     } else {
-	printf("module %s already exists\n", name.c_str());
+	if (_verbose)
+	    printf("module %s already exists\n", name.c_str());
 	return found_mod->second;
     }
 }
@@ -239,10 +249,10 @@ ModuleManager::find_module(const string &name) {
     map<string, Module *>::iterator found;
     found = _modules.find(name);
     if (found == _modules.end()) {
-	printf("ModuleManager: Failed to find module %s\n", name.c_str());
+	debug_msg("ModuleManager: Failed to find module %s\n", name.c_str());
 	return NULL;
     } else {
-	printf("ModuleManager: Found module %s\n", name.c_str());
+	debug_msg("ModuleManager: Found module %s\n", name.c_str());
 	return found->second;
     }
 }
@@ -260,7 +270,7 @@ ModuleManager::const_find_module(const string &name) const {
 
 void
 ModuleManager::shutdown() {
-    printf("ModuleManager::shutdown\n");
+    debug_msg("ModuleManager::shutdown\n");
     map<string, Module *>::iterator found, prev;
     found = _modules.begin(); 
     while (found != _modules.end()) {

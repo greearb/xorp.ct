@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.8 2003/04/15 16:37:46 hodson Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.9 2003/04/21 06:41:45 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -13,7 +13,7 @@ bin_PROGRAMS	 = rtrmgr xorpsh
 # -- Test Programs
 #bin_PROGRAMS	+=
 
-TESTS		 = test_templates
+TESTS		 = test_templates test_sample_config
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -102,6 +102,26 @@ test_templates_SOURCES	+= xorp_client.cc
 test_templates_SOURCES	+= module_manager.cc
 test_templates_SOURCES	+= split.cc
 test_templates_LDADD 	 = $(LDADD)
+
+test_sample_config_SOURCES	 = test_sample_config.cc
+test_sample_config_SOURCES	+= y.tplt_tab.cc
+test_sample_config_SOURCES	+= lex.tplt.cc
+test_sample_config_SOURCES	+= y.boot_tab.cc
+test_sample_config_SOURCES	+= lex.boot.cc
+test_sample_config_SOURCES	+= template_tree.cc
+test_sample_config_SOURCES	+= template_tree_node.cc
+test_sample_config_SOURCES	+= template_commands.cc
+test_sample_config_SOURCES	+= xrldb.cc
+test_sample_config_SOURCES	+= unexpanded_xrl.cc
+test_sample_config_SOURCES	+= conf_tree_node.cc
+test_sample_config_SOURCES	+= conf_tree.cc
+test_sample_config_SOURCES	+= master_conf_tree_node.cc
+test_sample_config_SOURCES	+= master_conf_tree.cc
+test_sample_config_SOURCES	+= command_tree.cc
+test_sample_config_SOURCES	+= xorp_client.cc
+test_sample_config_SOURCES	+= module_manager.cc
+test_sample_config_SOURCES	+= split.cc
+test_sample_config_LDADD 	 = $(LDADD)
 
 # -- Library Sources
 
