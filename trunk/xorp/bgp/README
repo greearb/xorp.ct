@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/README,v 1.3 2003/06/06 08:37:07 pavlin Exp $
+# $XORP: xorp/bgp/README,v 1.4 2003/06/06 18:53:36 atanu Exp $
 #
 
 Border Gateway Protocol (BGP) Implementation
@@ -25,9 +25,9 @@ For testing and debugging purposes, BGP can be manually started.  The
 Xorp BGP process assumes that a number of programs will be running
 before it is started:
 
-../libxipc/finder (or rtrmgr which includes a finder)
-../rib/rib
-../fea/fea
+../libxipc/xorp_finder (or xorp_rtrmgr which includes a xorp_finder)
+../rib/xorp_rib
+../fea/xorp_fea
 
 Documentation
 =============
