@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.19 2003/09/05 01:52:44 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.20 2003/09/16 21:00:26 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -268,8 +268,36 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     assert(_packet != NULL);
-    XLOG_UNFINISHED();
-    UNUSED(rt);
+
+    if (_packet->big_enough()) {
+	push_packet();
+	start_packet(_ibgp);
+    }
+
+    // did we already add the packet attribute list?
+    if (_packet->pa_list().empty()) {
+	debug_msg("First add on this packet\n");
+	debug_msg("SubnetRoute is %s\n", rt.str().c_str());
+	// no, so add all the path attributes
+	PathAttributeList<IPv4>::const_iterator pai;
+	pai = rt.attributes()->begin();
+	while (pai != rt.attributes()->end()) {
+	    debug_msg("Adding attribute\n");
+	    /*
+	    ** Don't put an IPv6 next hop in the IPv4 path attribute list.
+	    */
+	    if (NEXT_HOP != (*pai)->type())
+		_packet->add_pathatt(**pai);
+	    ++pai;
+	}
+	MPReachNLRIAttribute<IPv6> mp;
+	mp.set_nexthop(rt.nexthop());
+	_packet->add_pathatt(mp);
+    }
+
+    XLOG_ASSERT(_packet->mpreach());
+    _packet->mpreach()->add_nlri(rt.net());
+
     return 0;
 }
 
@@ -316,8 +344,14 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt)
 {
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     assert(_packet != NULL);
-    UNUSED(rt);
-    XLOG_UNFINISHED();
+
+    if (0 == _packet->mpunreach()) {
+	MPUNReachNLRIAttribute<IPv6> mp;
+	_packet->add_pathatt(mp);
+    }
+
+    _packet->mpunreach()->add_withdrawn(rt.net());
+
     return 0;
 }
 
@@ -328,16 +362,25 @@ PeerHandler::push_packet()
 	      _packet->str().c_str());
 
     // do some sanity checking
-    assert(_packet != NULL);
+    XLOG_ASSERT(_packet);
     int wdr = _packet->wr_list().size();
     int nlri = _packet->nlri_list().size();
     int pa = _packet->pa_list().size();
-    assert( (wdr+nlri) > 0);
-    if (nlri > 0) assert(pa > 0);
+
+    // Account for IPv6
+    if(_packet->mpunreach())
+	wdr += _packet->mpunreach()->wr_list().size();
+
+    if(_packet->mpreach())
+	nlri += _packet->mpreach()->nlri_list().size();
+
+    XLOG_ASSERT( (wdr+nlri) > 0);
+    if (nlri > 0)
+	XLOG_ASSERT(pa > 0);
+
     _nlri_total += nlri;
     _packets++;
-    debug_msg("Mean packet has %f nlri's\n",
-	    ((float)_nlri_total)/_packets);
+    debug_msg("Mean packet has %f nlri's\n", ((float)_nlri_total)/_packets);
 
     PeerOutputState result;
     result = _peer->send_update_message(*_packet);
