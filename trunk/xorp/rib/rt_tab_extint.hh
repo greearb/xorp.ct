@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_extint.hh,v 1.9 2004/04/28 15:56:48 hodson Exp $
+// $XORP: xorp/rib/rt_tab_extint.hh,v 1.10 2004/06/10 22:41:40 hodson Exp $
 
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
@@ -157,6 +157,9 @@ public:
 private:
     typedef typename ResolvedIPRouteEntry<A>::RouteBackLink RouteBackLink;
 
+    int delete_ext_route(const IPRouteEntry<A>* route,
+			 bool& is_delete_propagated);
+
     const ResolvedIPRouteEntry<A>* lookup_in_resolved_table(
 	const IPNet<A>& ipv4net);
 
@@ -180,6 +183,10 @@ private:
     const IPRouteEntry<A>* lookup_route_in_igp_parent(
 	const IPNet<A>& subnet) const;
     const IPRouteEntry<A>* lookup_route_in_igp_parent(const A& addr) const;
+
+    const IPRouteEntry<A>* lookup_route_in_egp_parent(
+	const IPNet<A>& subnet) const;
+    const IPRouteEntry<A>* lookup_route_in_egp_parent(const A& addr) const;
 
     RouteTable<A>*				_ext_table;
     RouteTable<A>*				_int_table;

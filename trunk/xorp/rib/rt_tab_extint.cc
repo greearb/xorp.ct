@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.18 2004/04/28 15:56:48 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.19 2004/06/10 22:41:40 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -48,15 +48,6 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	// The new route comes from the IGP table
 	debug_msg("route comes from IGP\n");
 	const IPRouteEntry<A>* found;
-	found = lookup_in_resolved_table(route.net());
-	if (found != NULL) {
-	    if (found->admin_distance() > route.admin_distance()) {
-		// The admin distance of the existing route is worse
-		delete_route(found, _ext_table);
-	    } else {
-		return XORP_ERROR;
-	    }
-	}
 
 	if (route.nexthop()->type() == EXTERNAL_NEXTHOP) {
 	    // An IGP route must have a local nexthop.
@@ -64,6 +55,25 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		       "a non-local nexthop: %s",
 		       route.str().c_str());
 	    return XORP_ERROR;
+	}
+
+	found = lookup_route_in_egp_parent(route.net());
+	if (found != NULL) {
+	    if (found->admin_distance() < route.admin_distance()) {
+		// The admin distance of the existing EGP route is better
+		return XORP_ERROR;
+	    }
+	}
+
+	found = lookup_in_resolved_table(route.net());
+	if (found != NULL) {
+	    if (found->admin_distance() < route.admin_distance()) {
+		// The admin distance of the existing route is better
+		return XORP_ERROR;
+	    } else {
+		bool is_delete_propagated = false;
+		this->delete_ext_route(found, is_delete_propagated);
+	    }
 	}
 
 	if (this->next_table() != NULL)
@@ -84,12 +94,12 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	const IPRouteEntry<A>* found;
 	found = lookup_route_in_igp_parent(route.net());
 	if (found != NULL) {
-	    if (found->admin_distance() > route.admin_distance()) {
-		// The admin distance of the existing route is worse
+	    if (found->admin_distance() < route.admin_distance()) {
+		// The admin distance of the existing IGP route is better
+		return XORP_ERROR;
+	    } else {
 		if (this->next_table() != NULL)
 		    this->next_table()->delete_route(found, this);
-	    } else {
-		return XORP_ERROR;
 	    }
 	}
 	IPNextHop<A>* rt_nexthop;
@@ -176,7 +186,6 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 
     if (caller == _int_table) {
 	debug_msg("  called from _int_table\n");
-	const ResolvedIPRouteEntry<A>* found;
 	const IPRouteEntry<A>* egp_parent;
 
 	if (route->nexthop()->type() == EXTERNAL_NEXTHOP) {
@@ -184,6 +193,16 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 	    return XORP_ERROR;
 	}
 
+	const IPRouteEntry<A>* found_egp_route;
+	found_egp_route = lookup_route_in_egp_parent(route->net());
+	if (found_egp_route != NULL) {
+	    if (found_egp_route->admin_distance() < route->admin_distance()) {
+		// The admin distance of the existing EGP route is better
+		return XORP_ERROR;
+	    }
+	}
+
+	const ResolvedIPRouteEntry<A>* found;
 	found = lookup_by_igp_parent(route);
 
 	if (found != NULL) {
@@ -218,37 +237,72 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 
     } else if (caller == _ext_table) {
 	debug_msg("  called from _ext_table\n");
-	const ResolvedIPRouteEntry<A>* found;
-	found = lookup_in_resolved_table(route->net());
-	if (found != NULL) {
-	    // Erase from table first to prevent lookups on this entry
-	    _ip_route_table.erase(found->net());
-	    _ip_igp_parents.erase(found->backlink());
 
-	    // Delete the route's IGP parent from _resolving_routes if
-	    // no-one is using it anymore
-	    if (lookup_by_igp_parent(found->igp_parent()) == NULL) {
-		_resolving_routes.erase(found->igp_parent()->net());
+	const IPRouteEntry<A>* found_igp_route;
+	found_igp_route = lookup_route_in_igp_parent(route->net());
+	if (found_igp_route != NULL) {
+	    if (found_igp_route->admin_distance() < route->admin_distance()) {
+		// The admin distance of the existing IGP route is better
+		return XORP_ERROR;
 	    }
+	}
 
-	    // Propagate the delete next
-	    if (this->next_table() != NULL)
-		this->next_table()->delete_route(found, this);
-
-	    // Now delete the locally modified copy
-	    delete found;
-	} else {
-	    // Propagate the delete only if the route wasn't found in
-	    // the unresolved nexthops table.
-	    if (delete_unresolved_nexthop(route) == false)
-		if (this->next_table() != NULL)
-		    this->next_table()->delete_route(route, this);
-
+	bool is_delete_propagated = false;
+	this->delete_ext_route(route, is_delete_propagated);
+	if (is_delete_propagated) {
+	    // It is possible the external route had masked an internal one.
+	    const IPRouteEntry<A>* masked_route;
+	    masked_route = _int_table->lookup_route(route->net());
+	    if (masked_route != NULL)
+		add_route(*masked_route, _int_table);
 	}
     } else {
 	XLOG_FATAL("ExtIntTable::delete_route called from a class that "
 		   "isn't a component of this override table\n");
     }
+    return XORP_OK;
+}
+
+template<class A>
+int
+ExtIntTable<A>::delete_ext_route(const IPRouteEntry<A>* route,
+				 bool& is_delete_propagated)
+{
+    const ResolvedIPRouteEntry<A>* found;
+
+    is_delete_propagated = false;
+
+    found = lookup_in_resolved_table(route->net());
+    if (found != NULL) {
+	// Erase from table first to prevent lookups on this entry
+	_ip_route_table.erase(found->net());
+	_ip_igp_parents.erase(found->backlink());
+
+	// Delete the route's IGP parent from _resolving_routes if
+	// no-one is using it anymore
+	if (lookup_by_igp_parent(found->igp_parent()) == NULL) {
+	    _resolving_routes.erase(found->igp_parent()->net());
+	}
+
+	// Propagate the delete next
+	if (this->next_table() != NULL) {
+	    this->next_table()->delete_route(found, this);
+	    is_delete_propagated = true;
+	}
+
+	// Now delete the locally modified copy
+	delete found;
+    } else {
+	// Propagate the delete only if the route wasn't found in
+	// the unresolved nexthops table.
+	if (delete_unresolved_nexthop(route) == false) {
+	    if (this->next_table() != NULL) {
+		this->next_table()->delete_route(route, this);
+		is_delete_propagated = true;
+	    }
+	}
+    }
+
     return XORP_OK;
 }
 
@@ -606,6 +660,28 @@ ExtIntTable<A>::lookup_route_in_igp_parent(const A& addr) const
 	if (found->nexthop()->type() == EXTERNAL_NEXTHOP)
 	    found = NULL;
     }
+    return found;
+}
+
+template<class A>
+const IPRouteEntry<A>*
+ExtIntTable<A>::lookup_route_in_egp_parent(const IPNet<A>& ipnet) const
+{
+    const IPRouteEntry<A>* found;
+
+    found = _ext_table->lookup_route(ipnet);
+
+    return found;
+}
+
+template<class A>
+const IPRouteEntry<A>*
+ExtIntTable<A>::lookup_route_in_egp_parent(const A& addr) const
+{
+    const IPRouteEntry<A>* found;
+
+    found = _ext_table->lookup_route(addr);
+
     return found;
 }
 
