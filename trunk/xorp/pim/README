@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.2 2003/03/04 20:07:15 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.3 2003/03/11 01:23:30 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -30,16 +30,16 @@ http://netweb.usc.edu/pim/pimd/
 
 For testing and debugging purposes, PIM-SM can be manually started.  The
 Xorp PIM-SM process assumes that the XRL finder, the MFEA and MLD/IGMP
-are already running. However, the binary program ``test_pim'' already
+are already running. However, the binary program ``./test_pim'' already
 contains them as well, therefore it is sufficient to start only this
 program.
 
-After ``test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
+After ``./test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
 disabled by default. To start them, and to configure their operation,
-as well as the PIM-SM operation, run script ``configure_pim''.
-Note that it MUST be run from the ``pim'' directory.
+as well as the PIM-SM operation, run script ``./configure_pim''.
+Note that it MUST be run from the ``xorp/pim'' directory.
 
-However, before running ``configure_pim'', you must configure
+However, before running ``./configure_pim'', you must configure
 it for each router:
 
  - Add an entry for each router under "case $HOSTNAME in" with the
@@ -55,14 +55,14 @@ it for each router:
 
  - If you don't want to configure the PIM-SM router as a Candidate-BSR
    and/or a Candidate-RP, then comment-out the CAND_BSR_VIF
-   or CAND_RP_VIF respectively.
+   and/or CAND_RP_VIF respectively.
 
  - If you want to configure static RPs, add all IP addresses to the
    variable STATIC_RPS:
 
 	STATIC_RPS="10.2.0.1 10.4.0.2"
 
- - By default, ``test_pim'' will log all protocol-related messages.
+ - By default, ``./test_pim'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
 
 	MFEA_ENABLE_LOG_TRACE=yes
@@ -91,6 +91,14 @@ it for each router:
    Ctrl-E to go to the beginning or end of the current line, Ctrl-A
    to kill the remaining part of the current line, etc.
    To exit, press Ctrl-D when you are on a new empty line.
+
+ - Note that on start-up, it takes on the order of 2-3 minutes for
+   a Candidate-BSR to become the Bootstrap router, therefore after a
+   (re)boot of the BSR, it may take up to 2-3 minutes before multicast
+   routing is working. You can use the CLI command "show pim bootstrap"
+   on the Candidate-BSR that is expected to become the BSR to observe the
+   remaining time before that Candidate-BSR becomes the BSR (the Timeout
+   value for the Active zone(s)).
 
 Documentation
 =============
