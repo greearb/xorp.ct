@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.4 2003/01/31 00:50:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.5 2003/02/05 05:20:38 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -171,7 +171,7 @@ PimMfc::recompute_iif_olist_mfc()
     }
     
     if ((old_iif_vif_index != Vif::VIF_INDEX_INVALID)
-	&& (old_olist.empty())) {
+	&& (old_olist.none())) {
 	// XXX: probably an entry that was installed to stop NOCACHE upcalls,
 	// or that was left around until the (S,G) NotJoined routing state
 	// expires. Just delete the PimMfc entry, and then later when we are
