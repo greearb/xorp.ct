@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.57 2004/11/29 00:32:02 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.58 2004/11/29 01:59:42 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -182,12 +182,12 @@ XrlFeaTarget::fea_click_0_1_stop_click()
     FtiConfig& ftic = _xftm.ftic();
     string error_msg1, error_msg2;
 
-    if (ifc.stop_click(error_msg1) < 0) {
-	ftic.stop_click(error_msg2);
+    if (ftic.stop_click(error_msg1) < 0) {
+	ifc.stop_click(error_msg2);
 	return XrlCmdError::COMMAND_FAILED(error_msg1);
     }
-    if (ftic.stop_click(error_msg2) < 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg2);
+    if (ifc.stop_click(error_msg1) < 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg1);
     }
 
     return XrlCmdError::OKAY();
