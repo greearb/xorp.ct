@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.2 2003/03/10 18:06:01 hodson Exp $"
 
 #include "config.h"
 
@@ -26,7 +26,7 @@ RibManager::RibManager()
     _rserv(&_xrl_rtr),
     _urib4(UNICAST), _mrib4(MULTICAST), _urib6(UNICAST), _mrib6(MULTICAST),
     _vifmanager(_xrl_rtr, _event_loop, this),
-    _xrt(&_xrl_rtr, _urib4, _mrib4, _urib6, _mrib6, _vifmanager)
+    _xrt(&_xrl_rtr, _urib4, _mrib4, _urib6, _mrib6, _vifmanager, this)
 {
     _urib4.initialize_export(&_fea);
     _urib4.initialize_register(&_rserv);

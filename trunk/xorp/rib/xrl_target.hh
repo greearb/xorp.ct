@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.10 2002/12/10 06:56:09 mjh Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -44,9 +44,9 @@ public:
     XrlRibTarget(XrlRouter* r,
 		 RIB<IPv4>& u4, RIB<IPv4>& m4,
 		 RIB<IPv6>& u6, RIB<IPv6>& m6,
-		 VifManager& vifmanager) : 
+		 VifManager& vifmanager, RibManager *ribmanager) : 
 	XrlRibTargetBase(r), _urib4(u4), _mrib4(m4), _urib6(u6), _mrib6(m6),
-	_vifmanager(vifmanager) {}
+	_vifmanager(vifmanager), _ribmanager(ribmanager) {}
     /**
      * XrlRibTarget destructor
      */
@@ -58,6 +58,7 @@ protected:
     RIB<IPv6>& _urib6;
     RIB<IPv6>& _mrib6;
     VifManager& _vifmanager;
+    RibManager* _ribmanager;
 
 protected:
 
@@ -68,6 +69,8 @@ protected:
     virtual XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    virtual XrlCmdError rib_0_1_no_fea();
 
     virtual XrlCmdError rib_0_1_add_igp_table4(
 	// Input values, 

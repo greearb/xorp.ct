@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.2 2002/12/14 23:43:10 hodson Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xorp.h"
@@ -312,7 +312,7 @@ int main (int /* argc */, char *argv[]) {
     mrib6.add_igp_table("connected");
 
     VifManager vifmanager(xrl_rtr, event_loop, NULL);
-    XrlRibTarget xrt(&xrl_rtr, urib4, mrib4, urib6, mrib6, vifmanager);
+    XrlRibTarget xrt(&xrl_rtr, urib4, mrib4, urib6, mrib6, vifmanager, NULL);
 
     XrlRibV0p1Client xc(&xrl_rtr);
 

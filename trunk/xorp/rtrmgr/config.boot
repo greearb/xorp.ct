@@ -2,7 +2,7 @@ interfaces {
   interface xl0 {
     description: "control interface"
     vif xl0 {
-      address 192.150.187.20 {
+      address 192.150.187.7 {
         prefix-length: 24
         broadcast: 192.150.187.255
       }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.4 2003/02/06 22:21:32 hodson Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.5 2003/03/10 18:06:01 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -290,7 +290,7 @@ ifname(const IPRouteEntry<A>& re)
 /* FeaClient */
 
 FeaClient::FeaClient(XrlRouter& rtr, uint32_t	max_ops)
-    : _xrl_router(rtr), _busy(false), _max_ops(max_ops), _en(true)
+    : _xrl_router(rtr), _busy(false), _max_ops(max_ops), _enabled(true)
 {}
 
 FeaClient::~FeaClient()
@@ -299,13 +299,13 @@ FeaClient::~FeaClient()
 void
 FeaClient::set_enabled(bool en)
 {
-    _en = en;
+    _enabled = en;
 }
 
 bool
 FeaClient::enabled() const
 {
-    return _en;
+    return _enabled;
 }
 
 void
@@ -428,7 +428,7 @@ FeaClient::start()
 	return;
     }
 
-    if (_en) {
+    if (_enabled) {
 	debug_msg("start\n");
 	_busy = true;
 	_op_count = 0;

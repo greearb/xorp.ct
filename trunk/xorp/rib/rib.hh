@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/rib.hh,v 1.2 2003/02/25 04:05:20 mjh Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -70,6 +70,11 @@ public:
      * RIB Destructor.
      */
     virtual ~RIB();
+
+    /**
+     * set test-mode: don't try to send to FEA
+     */
+    void no_fea() {_no_fea = true;}
 
     /**
      * Initialize the RIB's ExportTable so that the winning routes are
@@ -508,7 +513,8 @@ private:
 protected:
     RouteTable<A>*	_final_table;
     RegisterTable<A>*	_register_table;
-    bool		_mcast;
+    bool _mcast;
+    bool _no_fea;
 
     map<const string, RouteTable<A>*>	_tables;
     map<const string, Protocol*>        _protocols;

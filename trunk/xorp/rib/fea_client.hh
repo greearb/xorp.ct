@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.3 2003/02/06 22:21:32 hodson Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.4 2003/03/10 18:06:01 hodson Exp $
 
 #ifndef __RIB_FEA_CLIENT_HH__
 #define __RIB_FEA_CLIENT_HH__
@@ -176,7 +176,7 @@ protected:
 						// later deletion.
     const uint32_t _max_ops;	// Maximum allowed tasks in a transaction.
     uint32_t _op_count;		// Number of tasks in this transaction.
-    bool _en;			// Enabled state
+    bool _enabled;		// Enabled state
 };
 
 #endif // __RIB_FEA_CLIENT_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.2 2003/02/06 22:21:32 hodson Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -66,6 +66,11 @@ public:
      * VifManager destructor
      */
     ~VifManager();
+
+    /**
+     * Set test-mode - don't try to communicate with the FEA
+     */
+    void no_fea() {_no_fea = true;}
 
     /**
      * Start the process of registering with the FEA, etc
@@ -165,6 +170,8 @@ private:
 			  const IPv4& addr);
     void vifaddr6_deleted(const string& ifname, const string& vifname,
 			  const IPv6& addr);
+
+    bool _no_fea;
 
     XrlRouter &_xrl_rtr;
     EventLoop &_eventloop;

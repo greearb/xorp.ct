@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.2 2003/01/28 00:37:54 hodson Exp $"
 
 #include "version.h"
 #include "urib_module.h"
 #include "xrl_target.hh"
 #include "rt_tab_register.hh"
+#include "rib_manager.hh"
+#include "vifmanager.hh"
 
 #define RETURN_FAIL(x) return XrlCmdError::COMMAND_FAILED(x)
 
@@ -32,6 +34,14 @@ XrlCmdError
 XrlRibTarget::common_0_1_get_version(string& version)
 {
     version = RIB_VERSION;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlRibTarget::rib_0_1_no_fea()
+{
+    _ribmanager->set_fea_enabled(false);
+    _vifmanager.no_fea();
     return XrlCmdError::OKAY();
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.4 2003/01/31 03:00:25 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.5 2003/03/10 18:50:20 hodson Exp $
 #
 
 #
@@ -80,6 +80,8 @@ NH2=172.16.2.1
 
 configure_rib()
 {
+    no_fea
+
     VIF0="vif0"
     VIF1="vif1"
 
@@ -419,7 +421,7 @@ then
 CXRL="$CALLXRL -r 10"
     ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/finder
-    ../../rib/rib -F      = $CXRL finder://rib/common/0.1/get_target_name
+    ../../rib/rib         = $CXRL finder://rib/common/0.1/get_target_name
     ../bgp                = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1  = $CXRL finder://peer1/common/0.1/get_target_name
     ./coord               = $CXRL finder://coord/common/0.1/get_target_name

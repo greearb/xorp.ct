@@ -1,7 +1,7 @@
-/* $XORP: xorp/xrl/targets/rib.tgt,v 1.7 2002/11/20 23:28:13 hodson Exp $ */
+/* $XORP: xorp/xrl/targets/rib.tgt,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $ */
 
 #include "common.xif"
 #include "rib.xif"
 #include "fea_ifmgr_client.xif"
 
-target rib implements common/0.1, rib/0.1, fea_ifmgr_client/0.1
+target rib implements rib/0.1, fea_ifmgr_client/0.1, common/0.1

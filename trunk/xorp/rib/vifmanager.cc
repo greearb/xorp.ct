@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.12 2002/12/10 04:53:08 mjh Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
 
 #include "urib_module.h"
 #include "config.h"
@@ -26,6 +26,7 @@ VifManager::VifManager(XrlRouter& xrl_rtr, EventLoop& eventloop,
     : _xrl_rtr(xrl_rtr), _eventloop(eventloop), _rib_manager(rib_manager),
       _ifmgr_client(&xrl_rtr)
 {
+    _no_fea = false;
     _state = INITIALIZING;
     _register_retry_counter = 0;
     _interfaces_remaining = 0;
@@ -48,6 +49,11 @@ VifManager::~VifManager()
 void
 VifManager::start() 
 {
+    if (_no_fea) {
+	_state = READY;
+	return;
+    }
+
     clean_out_old_state();
 }
 
@@ -94,12 +100,17 @@ VifManager::register_if_spy_done(const XrlError& e)
 	return;
     }
 
+    if (_no_fea) {
+	_state = READY;
+	return;
+    }
+
     // if the resolve failed, it could be that we got going too quickly
     // for the FEA.  Retry every two seconds.  If after ten seconds we
     // still can't register, give up.  It's a higher level issue as to
     // whether failing to register is a fatal error.
     if (e==XrlError::RESOLVE_FAILED() && (_register_retry_counter < 5)) {
-	XLOG_ERROR("Register Interface Spy: RESOLVE_FAILED\n");
+	debug_msg("Register Interface Spy: RESOLVE_FAILED\n");
 	_register_retry_counter++;
 	OneoffTimerCallback cb;
 	cb = callback(this, &VifManager::register_if_spy);
