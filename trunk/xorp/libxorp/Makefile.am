@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.30 2004/11/12 02:44:43 bms Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.31 2004/11/16 05:41:05 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -20,6 +20,7 @@ TESTS		+= test_ipvx
 TESTS		+= test_ipvxnet
 TESTS		+= test_mac
 TESTS		+= test_observers
+TESTS		+= test_profile
 TESTS		+= test_ref_ptr
 TESTS		+= test_ref_trie
 TESTS		+= test_service
@@ -30,7 +31,6 @@ TESTS		+= test_timeval
 TESTS		+= test_trie
 TESTS		+= test_types
 TESTS		+= test_vif
-TESTS		+= test_profile
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_asyncio
@@ -46,6 +46,7 @@ noinst_PROGRAMS	+= test_ipvx
 noinst_PROGRAMS	+= test_ipvxnet
 noinst_PROGRAMS	+= test_mac
 noinst_PROGRAMS	+= test_observers
+noinst_PROGRAMS	+= test_profile
 noinst_PROGRAMS	+= test_ref_ptr
 noinst_PROGRAMS	+= test_ref_trie
 noinst_PROGRAMS	+= test_service
@@ -56,7 +57,6 @@ noinst_PROGRAMS	+= test_timeval
 noinst_PROGRAMS	+= test_trie
 noinst_PROGRAMS	+= test_types
 noinst_PROGRAMS	+= test_vif
-noinst_PROGRAMS	+= test_profile
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libxorp.la
@@ -78,6 +78,7 @@ test_ipvx_SOURCES	= test_ipvx.cc
 test_ipvxnet_SOURCES	= test_ipvxnet.cc
 test_mac_SOURCES	= test_mac.cc
 test_observers_SOURCES  = test_observers.cc
+test_profile_SOURCES	= test_profile.cc
 test_ref_ptr_SOURCES	= test_ref_ptr.cc
 test_ref_trie_SOURCES	= test_ref_trie.cc
 test_service_SOURCES	= test_service.cc
@@ -88,7 +89,6 @@ test_timeval_SOURCES	= test_timeval.cc
 test_trie_SOURCES	= test_trie.cc
 test_types_SOURCES	= test_types.cc
 test_vif_SOURCES	= test_vif.cc
-test_profile_SOURCES	= test_profile.cc
 
 # -- Library Sources
 libxorp_la_SOURCES  = libxorp_module.h
@@ -122,6 +122,7 @@ libxorp_la_SOURCES += mac.hh
 libxorp_la_SOURCES += nexthop.hh
 libxorp_la_SOURCES += old_trie.hh
 libxorp_la_SOURCES += popen.hh
+libxorp_la_SOURCES += profile.hh
 libxorp_la_SOURCES += ref_ptr.hh
 libxorp_la_SOURCES += safe_callback_obj.hh
 libxorp_la_SOURCES += selector.hh
@@ -136,7 +137,6 @@ libxorp_la_SOURCES += transaction.hh
 libxorp_la_SOURCES += trie.hh
 libxorp_la_SOURCES += utils.hh
 libxorp_la_SOURCES += vif.hh
-libxorp_la_SOURCES += profile.hh
 
 libxorp_la_SOURCES += debug.c
 # libxorp_la_SOURCES += ether_compat.c
@@ -157,6 +157,7 @@ libxorp_la_SOURCES += ipvx.cc
 libxorp_la_SOURCES += mac.cc
 libxorp_la_SOURCES += nexthop.cc
 libxorp_la_SOURCES += popen.cc
+libxorp_la_SOURCES += profile.cc
 libxorp_la_SOURCES += ref_ptr.cc
 libxorp_la_SOURCES += safe_callback_obj.cc
 libxorp_la_SOURCES += selector.cc
@@ -166,7 +167,6 @@ libxorp_la_SOURCES += timer.cc
 libxorp_la_SOURCES += token.cc
 libxorp_la_SOURCES += transaction.cc
 libxorp_la_SOURCES += vif.cc
-libxorp_la_SOURCES += profile.cc
 
 BUILT_SOURCES	   = callback_nodebug.hh callback_debug.hh
 

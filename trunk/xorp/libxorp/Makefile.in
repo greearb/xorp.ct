@@ -100,10 +100,10 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif test_profile
+TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
 
 # -- No-install Programs
-noinst_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif test_profile
+noinst_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libxorp.la
@@ -125,6 +125,7 @@ test_ipvx_SOURCES = test_ipvx.cc
 test_ipvxnet_SOURCES = test_ipvxnet.cc
 test_mac_SOURCES = test_mac.cc
 test_observers_SOURCES = test_observers.cc
+test_profile_SOURCES = test_profile.cc
 test_ref_ptr_SOURCES = test_ref_ptr.cc
 test_ref_trie_SOURCES = test_ref_trie.cc
 test_service_SOURCES = test_service.cc
@@ -135,11 +136,10 @@ test_timeval_SOURCES = test_timeval.cc
 test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
 test_vif_SOURCES = test_vif.cc
-test_profile_SOURCES = test_profile.cc
 
 # -- Library Sources
 # libxorp_la_SOURCES += ether_compat.c
-libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh popen.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh profile.hh debug.c utility.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc profile.cc
+libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh popen.hh profile.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc profile.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
 
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
@@ -160,9 +160,9 @@ libxorp_la_LIBADD =
 am_libxorp_la_OBJECTS = debug.lo utility.lo xlog.lo asyncio.lo \
 	buffered_asyncio.lo c_format.lo callback.lo clock.lo \
 	eventloop.lo exceptions.lo heap.lo ipv4.lo ipv6.lo ipvx.lo \
-	mac.lo nexthop.lo popen.lo ref_ptr.lo safe_callback_obj.lo \
-	selector.lo service.lo time_slice.lo timer.lo token.lo \
-	transaction.lo vif.lo profile.lo
+	mac.lo nexthop.lo popen.lo profile.lo ref_ptr.lo \
+	safe_callback_obj.lo selector.lo service.lo time_slice.lo \
+	timer.lo token.lo transaction.lo vif.lo
 libxorp_la_OBJECTS = $(am_libxorp_la_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
@@ -170,11 +170,11 @@ noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_ipnet$(EXEEXT) test_ipv4$(EXEEXT) test_ipv4net$(EXEEXT) \
 	test_ipv6$(EXEEXT) test_ipv6net$(EXEEXT) test_ipvx$(EXEEXT) \
 	test_ipvxnet$(EXEEXT) test_mac$(EXEEXT) test_observers$(EXEEXT) \
-	test_ref_ptr$(EXEEXT) test_ref_trie$(EXEEXT) \
-	test_service$(EXEEXT) test_test_main$(EXEEXT) \
-	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
-	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
-	test_vif$(EXEEXT) test_profile$(EXEEXT)
+	test_profile$(EXEEXT) test_ref_ptr$(EXEEXT) \
+	test_ref_trie$(EXEEXT) test_service$(EXEEXT) \
+	test_test_main$(EXEEXT) test_time_slice$(EXEEXT) \
+	test_timer$(EXEEXT) test_timeval$(EXEEXT) test_trie$(EXEEXT) \
+	test_types$(EXEEXT) test_vif$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
