@@ -15,7 +15,7 @@
 #include "config.h"
 #include "libxorp/xorp.h"
 
-#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
