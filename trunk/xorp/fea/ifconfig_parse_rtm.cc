@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.6 2003/08/06 02:09:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.7 2003/08/12 21:50:21 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -172,8 +172,9 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	    XLOG_FATAL("Could not find interface corresponding to index %d",
 		       if_index);
 	}
-	
 	if_name = string(name);
+	debug_msg("interface: %s\n", if_name.c_str());
+	debug_msg("interface index: %d\n", if_index);
 	
 	IfTreeInterface* fi = ifc.get_if(it, if_name);
 	if (fi == NULL) {
@@ -181,22 +182,34 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 		       if_name.c_str());
 	}
 	fi->set_enabled(ifm->ifm_flags & IFF_UP);
-	debug_msg("Set Interface %s enabled %d\n",
-		  if_name.c_str(), fi->enabled());
-
+	debug_msg("enabled: %s\n", fi->enabled() ? "true" : "false");
+	
+	// XXX: vifname == ifname on this platform
 	IfTreeVif* fv = ifc.get_vif(it, if_name, if_name);
 	if (fv == NULL) {
 	    XLOG_FATAL("Could not find IfTreeVif on %s named %s",
 		       if_name.c_str(), if_name.c_str());
 	}
+	
+	//
+	// Set the physical interface index for the vif
+	//
 	fv->set_pif_index(if_index);
+	
+	//
+	// Set the vif flags
+	//
 	fv->set_enabled(fi->enabled() && (ifm->ifm_flags & IFF_UP));
 	fv->set_broadcast(ifm->ifm_flags & IFF_BROADCAST);
 	fv->set_loopback(ifm->ifm_flags & IFF_LOOPBACK);
 	fv->set_point_to_point(ifm->ifm_flags & IFF_POINTOPOINT);
 	fv->set_multicast(ifm->ifm_flags & IFF_MULTICAST);
-	debug_msg("Set Vif %s on Interface %s enabled %d\n",
-		  if_name.c_str(), if_name.c_str(), fv->enabled());
+	debug_msg("vif enabled: %s\n", fv->enabled() ? "true" : "false");
+	debug_msg("vif broadcast: %s\n", fv->broadcast() ? "true" : "false");
+	debug_msg("vif loopback: %s\n", fv->loopback() ? "true" : "false");
+	debug_msg("vif point_to_point: %s\n", fv->point_to_point() ? "true"
+		  : "false");
+	debug_msg("vif multicast: %s\n", fv->multicast() ? "true" : "false");
 	return;
     }
     
@@ -225,9 +238,10 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	}
 	if_name = string(name);
     }
+    debug_msg("interface: %s\n", if_name.c_str());
     
     //
-    // Try to get the physical interface index (if unknown)
+    // Get the physical interface index (if unknown)
     //
     do {
 	if (if_index > 0)
@@ -261,12 +275,10 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	    break;
     } while (false);
     if (if_index == 0) {
-	// TODO: what to do? Shall I assign my own pseudo-indexes?
 	XLOG_FATAL("Could not find index for interface %s", if_name.c_str());
     }
-    
     if_index_hint = if_index;
-    
+    debug_msg("interface index: %d\n", if_index);
     
     //
     // Add the interface (if a new one)
@@ -275,31 +287,89 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
     it.add_if(if_name);
     IfTreeInterface& fi = it.get_if(if_name)->second;
     
-    if (sdl->sdl_type == IFT_ETHER) {
-	if (sdl->sdl_alen == sizeof(ether_addr)) {
-	    ether_addr ea;
-	    memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen, sdl->sdl_alen);
-	    fi.set_mac(EtherMac(ea));
-	} else if (sdl->sdl_alen != 0) {
-	    XLOG_ERROR("Address size %d uncatered for interface %s",
-		       sdl->sdl_alen, if_name.c_str());
+    //
+    // Get the MAC address
+    //
+    do {
+	if (sdl->sdl_type == IFT_ETHER) {
+	    if (sdl->sdl_alen == sizeof(ether_addr)) {
+		ether_addr ea;
+		memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
+		       sdl->sdl_alen);
+		fi.set_mac(EtherMac(ea));
+		break;
+	    } else if (sdl->sdl_alen != 0) {
+		XLOG_ERROR("Address size %d uncatered for interface %s",
+			   sdl->sdl_alen, if_name.c_str());
+	    }
 	}
-    }
+	
+#ifdef SIOCGIFHWADDR
+	{
+	    int s;
+	    struct ifreq ifridx;
+	    memset(&ifridx, 0, sizeof(ifridx));
+	    strncpy(ifridx.ifr_name, if_name.c_str(),
+		    sizeof(ifridx.ifr_name));
+	    
+	    s = socket(AF_INET, SOCK_DGRAM, 0);
+	    if (s < 0) {
+		XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    }
+	    if (ioctl(s, SIOCGIFHWADDR, &ifridx) < 0) {
+		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
+			   if_name.c_str(), strerror(errno));
+	    } else {
+		ether_addr ea;
+		memcpy(&ea, ifridx.ifr_hwaddr.sa_data, sizeof(ea));
+		fi.set_mac(EtherMac(ea));
+		close(s);
+		break;
+	    }
+	    close(s);
+	}
+#endif // SIOCGIFHWADDR
+	
+	break;
+    } while (false);
+    debug_msg("MAC address: %s\n", fi.mac().str().c_str());
     
+    //
+    // Get the MTU
+    //
     fi.set_mtu(ifm->ifm_data.ifi_mtu);
-    fi.set_enabled(ifm->ifm_flags & IFF_UP);
-
-    debug_msg("%s flags %s\n",
-	      if_name.c_str(), IfConfigGet::iff_flags(ifm->ifm_flags).c_str());
+    debug_msg("MTU: %d\n", fi.mtu());
+    
+    //
+    // Get the flags
+    //
+    int flags = ifm->ifm_flags;
+    fi.set_enabled(flags & IFF_UP);
+    debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
+    
     // XXX: vifname == ifname on this platform
     fi.add_vif(if_name);
     IfTreeVif& fv = fi.get_vif(if_name)->second;
+    
+    //
+    // Set the physical interface index for the vif
+    //
     fv.set_pif_index(if_index);
+    
+    //
+    // Set the vif flags
+    //
     fv.set_enabled(fi.enabled() && (ifm->ifm_flags & IFF_UP));
     fv.set_broadcast(ifm->ifm_flags & IFF_BROADCAST);
     fv.set_loopback(ifm->ifm_flags & IFF_LOOPBACK);
     fv.set_point_to_point(ifm->ifm_flags & IFF_POINTOPOINT);
     fv.set_multicast(ifm->ifm_flags & IFF_MULTICAST);
+    debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
+    debug_msg("vif broadcast: %s\n", fv.broadcast() ? "true" : "false");
+    debug_msg("vif loopback: %s\n", fv.loopback() ? "true" : "false");
+    debug_msg("vif point_to_point: %s\n", fv.point_to_point() ? "true"
+	      : "false");
+    debug_msg("vif multicast: %s\n", fv.multicast() ? "true" : "false");
 }
 
 static void
@@ -327,7 +397,6 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	if_index = if_index_hint;	// XXX: in case if_index is unknown
     
     if (if_index == 0) {
-	// TODO: what to do? Shall I assign my own pseudo-indexes?
 	XLOG_FATAL("Could not add or delete address for interface "
 		   "with unknown index");
     }
@@ -345,16 +414,15 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	XLOG_FATAL("Could not find interface corresponding to index %d\n",
 		   if_index);
     }
-    
     if_name = string(name);
     
-    debug_msg("Address on %s flags %s\n",
-	      if_name.c_str(),
-	      IfConfigGet::iff_flags(ifa->ifam_flags).c_str());
-
+    debug_msg("Address on interface %s with interface index %d\n",
+	      if_name.c_str(), if_index);
+    
     //
-    // Locate VIF to pin data on
+    // Locate the vif to pin data on
     //
+    // XXX: vifname == ifname on this platform
     IfTreeVif *fv = ifc.get_vif(it, if_name, if_name);
     if (fv == NULL) {
 	XLOG_FATAL("Could not find vif named %s in IfTree.", if_name.c_str());
@@ -366,10 +434,11 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
     }
     
     if (rti_info[RTAX_IFA]->sa_family == AF_INET) {
-	IPv4 a(*rti_info[RTAX_IFA]);
-	fv->add_addr(a);
+	IPv4 lcl_addr(*rti_info[RTAX_IFA]);
+	fv->add_addr(lcl_addr);
+	debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	
-	IfTreeAddr4& fa = fv->get_addr(a)->second;
+	IfTreeAddr4& fa = fv->get_addr(lcl_addr)->second;
 	fa.set_enabled(fv->enabled());
 	fa.set_broadcast(fv->broadcast());
 	fa.set_loopback(fv->loopback());
@@ -378,8 +447,11 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 
 	// Get the netmask
 	if (rti_info[RTAX_NETMASK] != NULL) {
-	    fa.set_prefix(RtmUtils::get_sock_masklen(AF_INET,
-						     rti_info[RTAX_NETMASK]));
+	    int masklen = RtmUtils::get_sock_masklen(AF_INET,
+						     rti_info[RTAX_NETMASK]);
+	    fa.set_prefix(masklen);
+	    IPv4 subnet_mask(IPv4::make_prefix(masklen));
+	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	}
 	
 	// Get the broadcast or point-to-point address
@@ -391,10 +463,12 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	    if (fa.broadcast()) {
 		fa.set_bcast(o);
 		has_broadcast_addr = true;
+		debug_msg("Broadcast address: %s\n", o.str().c_str());
 	    }
 	    if (fa.point_to_point()) {
 		fa.set_endpoint(o);
 		has_peer_addr = true;
+		debug_msg("Peer address: %s\n", o.str().c_str());
 	    }
 	}
 	if (! has_broadcast_addr)
@@ -411,12 +485,12 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
     
 #ifdef HAVE_IPV6
     if (rti_info[RTAX_IFA]->sa_family == AF_INET6) {
-	IPv6 a(*rti_info[RTAX_IFA]);
-	a = kernel_ipv6_adjust(a);
+	IPv6 lcl_addr(*rti_info[RTAX_IFA]);
+	lcl_addr = kernel_ipv6_adjust(lcl_addr);
+	fv->add_addr(lcl_addr);
+	debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	
-	fv->add_addr(a);
-	
-	IfTreeAddr6& fa = fv->get_addr(a)->second;
+	IfTreeAddr6& fa = fv->get_addr(lcl_addr)->second;
 	fa.set_enabled(fv->enabled());
 	fa.set_loopback(fv->loopback());
 	fa.set_point_to_point(fv->point_to_point());
@@ -424,8 +498,11 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	
 	// Get the netmask
 	if (rti_info[RTAX_NETMASK] != NULL) {
-	    fa.set_prefix(RtmUtils::get_sock_masklen(AF_INET6,
-						     rti_info[RTAX_NETMASK]));
+	    int masklen = RtmUtils::get_sock_masklen(AF_INET6,
+						     rti_info[RTAX_NETMASK]);
+	    fa.set_prefix(masklen);
+	    IPv6 subnet_mask(IPv6::make_prefix(masklen));
+	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	}
 	
 	// Get the point-to-point address
@@ -436,6 +513,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 		IPv6 o(*rti_info[RTAX_BRD]);
 		fa.set_endpoint(o);
 		has_peer_addr = true;
+		debug_msg("Peer address: %s\n", o.str().c_str());
 	    }
         }
 	if (! has_peer_addr)
@@ -492,8 +570,9 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it)
     u_short if_index = ifan->ifan_index;
     string if_name = string(ifan->ifan_name);
     
-    debug_msg("RTM_IFANNOUNCE %s\n",
-	      (ifan->ifan_what == IFAN_DEPARTURE) ? "DEPARTURE" : "ARRIVAL");
+    debug_msg("RTM_IFANNOUNCE %s on interface %s with interface index %d\n",
+	      (ifan->ifan_what == IFAN_DEPARTURE) ? "DEPARTURE" : "ARRIVAL",
+	      if_name.c_str(), if_index);
     
     switch (ifan->ifan_what) {
     case IFAN_ARRIVAL:
@@ -506,6 +585,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it)
 	
 	it.add_if(if_name);
 	IfTreeInterface* fi = ifc.get_if(it, if_name);
+	// XXX: vifname == ifname on this platform
 	if (fi != NULL) {
 	    fi->add_vif(if_name);
 	} else {
@@ -527,6 +607,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it)
 	    debug_msg("Attempted to delete missing interface: %s\n",
 		      if_name.c_str());
 	}
+	// XXX: vifname == ifname on this platform
 	IfTreeVif* fv = ifc.get_vif(it, if_name, if_name);
 	if (fv != NULL) {
 	    fv->mark(IfTree::DELETED);
