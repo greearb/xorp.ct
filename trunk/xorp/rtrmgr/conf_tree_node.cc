@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.10 2003/04/22 23:43:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.11 2003/04/23 04:24:35 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -126,7 +126,6 @@ bool ConfigTreeNode::operator==(const ConfigTreeNode& them) const {
     return true;
 }
 
-
 void 
 ConfigTreeNode::add_child(ConfigTreeNode *child) {
     _children.push_back(child);
@@ -197,8 +196,6 @@ ConfigTreeNode::set_value(const string &value, uid_t user_id) {
     _user_id = user_id;
     TimerList::system_gettimeofday(&_modification_time);
 }
-
-
 
 void
 ConfigTreeNode::command_status_callback(Command *cmd, bool success) {
@@ -640,7 +637,6 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
     return success;
 }
 
-
 bool 
 ConfigTreeNode::check_commit_status(string &response) const {
 #ifdef DEBUG_COMMIT
@@ -679,7 +675,6 @@ ConfigTreeNode::check_commit_status(string &response) const {
 
     return result;
 }
-
 
 void 
 ConfigTreeNode::finalize_commit() {
@@ -800,7 +795,6 @@ ConfigTreeNode::value() const {
 	return _segname;
     }
 }
-
 
 string 
 ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
@@ -938,7 +932,6 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id) {
     _value_committed = false;
 }
 				
-
 void
 ConfigTreeNode::delete_subtree_silently() {
     /* delete_subtree calls remove_child, so we just iterate until no
@@ -953,38 +946,6 @@ ConfigTreeNode::delete_subtree_silently() {
     delete this;
 }	
 
-void
-ConfigTreeNode::delete_subtree(XorpClient &xclient, uint tid, 
-			       bool do_exec) {
-    /* we delete all the children of this node, then delete the node
-       itself */
-#ifdef DEBUG_DELETE
-    printf("Delete subtree: %s\n", _segname.c_str());
-#endif
-    
-    /* delete_subtree calls remove_child, so we just iterate until no
-       children are left */
-    while (!_children.empty()) {
-	_children.front()->delete_subtree(xclient, tid, do_exec);
-    }
-
-    if (_parent != NULL)
-	_parent->remove_child(this);
-
-    if (do_exec && _template != NULL) {
-	//finally, on the way back out, we run the %delete commands
-	const Command *cmd = _template->const_command("%delete");
-	if (cmd != NULL) {
-#ifdef DEBUG_DELETE
-	    printf("found commands: %s\n", cmd->s().c_str());
-#endif
-	    cmd->execute(*this, xclient, tid, do_exec);
-	}
-    }
-
-    delete this;
-}
-
 void 
 ConfigTreeNode::clone_subtree(const ConfigTreeNode& orig_node) {
     list <ConfigTreeNode*>::const_iterator i;
@@ -998,8 +959,6 @@ ConfigTreeNode::clone_subtree(const ConfigTreeNode& orig_node) {
 	new_node->clone_subtree(**i);
     }
 }
-
-					
 
 string 
 ConfigTreeNode::typestr() const{
@@ -1027,7 +986,6 @@ void ConfigTreeNode::print_tree() const {
 	(*ci)->print_tree();
     }
 }
-
 
 ConfigTreeNode* 
 ConfigTreeNode::find_node(list <string>& path) {
@@ -1530,4 +1488,9 @@ ConfigTreeNode::retain_common_nodes(const ConfigTreeNode& them) {
 	return;
     }
 }
+
+
+
+
+
 
