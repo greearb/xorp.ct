@@ -8954,6 +8954,7 @@ cat >conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
+#include <netinet/in.h>
 #include <netinet/ip_fw.h>
 
 #ifdef F77_DUMMY_MAIN
