@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.5 2003/03/10 23:20:09 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.6 2003/04/02 22:18:59 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -181,6 +181,8 @@ Command::peer(const string& line, const vector<string>& words)
     const string command = words[1];
     if("connect" == command) {
 	p->connect(line, words);
+    } else if("disconnect" == command) {
+	p->disconnect(line, words);
     } else if("establish" == command) {
 	p->establish(line, words);
     } else if ("send" == command) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.2 2003/03/10 23:20:09 hodson Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.3 2003/04/02 22:19:00 pavlin Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -39,6 +39,9 @@ public:
 	throw(InvalidString);
 
     void connect(const string& line, const vector<string>& words)
+	throw(InvalidString);
+
+    void disconnect(const string& line, const vector<string>& words)
 	throw(InvalidString);
 
     void establish(const string& line, const vector<string>& words)

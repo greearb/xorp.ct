@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.19 2003/04/02 22:18:59 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.20 2003/06/02 22:27:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -156,6 +156,24 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
     test_peer.send_connect(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
 			   ::callback(this, &Peer::callback, "connect"));
+}
+
+void 
+Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
+	throw(InvalidString)
+{
+    /*
+    ** Retrieved from the router..
+    */
+    const string coordinator = _xrlrouter->name();
+
+    /* Connect the test peer to the target BGP */
+    debug_msg("About to disconnect from: %s\n", _peername.c_str());
+    XrlTestPeerV0p1Client test_peer(_xrlrouter);
+    _session = false;
+    _established = false;
+    test_peer.send_disconnect(_peername.c_str(),
+			      ::callback(this, &Peer::callback, "disconnect"));
 }
 
 /*
@@ -407,6 +425,8 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
     debug_msg("callback %s %s\n", comment, error.str().c_str());
     if(XrlError::OKAY() != error) {
 	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+	fclose(fp);
+	return;
     }
 
     size_t len;
