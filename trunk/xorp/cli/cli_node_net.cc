@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.15 2003/06/03 10:10:59 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.16 2003/07/10 23:44:31 pavlin Exp $"
 
 
 //
@@ -334,6 +334,7 @@ CliClient::start_connection(void)
 	if (term_name.empty())
 	    term_name = "vt100";	// Set to default
     }
+
     // Change the input and output streams for libtecla
     if (gl_change_terminal(_gl, _cli_fd_file_read, _cli_fd_file_write,
 			   term_name.c_str())
@@ -341,16 +342,24 @@ CliClient::start_connection(void)
 	_gl = del_GetLine(_gl);
 	return (XORP_ERROR);
     }
-    
+
     // Add the command completion hook
     if (gl_customize_completion(_gl, this, command_completion_func) != 0) {
 	_gl = del_GetLine(_gl);
 	return (XORP_ERROR);
     }
-    
+
+    //
+    // Key bindings
+    //
+
     // Bind Ctrl-C to no-op
     gl_configure_getline(_gl, "bind ^C user-event4", NULL, NULL);
-    
+
+    // Bind Ctrl-W to delete the word before the cursor, because
+    // the default libtecla behavior is to delete the whole line.
+    gl_configure_getline(_gl, "bind ^W backward-delete-word", NULL, NULL);
+
     // Print the welcome message and show the prompt
     cli_print(c_format("%s\n%s", XORP_CLI_WELCOME, current_cli_prompt()));
     
