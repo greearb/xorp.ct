@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.17 2003/06/12 23:58:15 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.18 2003/06/18 22:12:07 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -179,7 +179,7 @@ SelectorList::remove_selector(int fd, SelectorMask mask)
     for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (mask & (1 << i) && FD_ISSET(fd, &_fds[i])) {
 	    FD_CLR(fd, &_fds[i]);
-	    if (_observer) 
+	    if (_observer)
 		_observer->notify_removed(fd, ((SelectorMask) (1 << i)));
 	}
     }
@@ -198,7 +198,6 @@ SelectorList::select(TimeVal* timeout)
     fd_set testfds[SEL_MAX_IDX];
     int n = 0;
 
- select_again:
     memcpy(testfds, _fds, sizeof(_fds));
 
     if (timeout == 0 || *timeout == TimeVal::MAXIMUM()) {
@@ -218,10 +217,6 @@ SelectorList::select(TimeVal* timeout)
     }
 
     if (n < 0) {
-	if (errno == EINTR) {
-	    // The system call was interrupted by a signal, hence restart it.
-	    goto select_again;
-	}
 	switch (errno) {
 	case EBADF:
 	    callback_bad_descriptors();
@@ -312,7 +307,7 @@ SelectorList::callback_bad_descriptors()
 }
 
 
-void 
+void
 SelectorList::set_observer(SelectorListObserverBase& obs)
 {
     _observer = &obs;
@@ -320,7 +315,7 @@ SelectorList::set_observer(SelectorListObserverBase& obs)
     return;
 }
 
-void 
+void
 SelectorList::remove_observer()
 {
     if (_observer) _observer->_observed = NULL;
