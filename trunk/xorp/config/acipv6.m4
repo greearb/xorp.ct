@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.10 2003/09/27 05:55:47 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.11 2003/10/01 19:10:30 pavlin Exp $
 dnl
 
 dnl
@@ -11,6 +11,7 @@ dnl Check whether the system IPv6 stack implementation is reasonable
 dnl XXX: The check is very primitive. Add more checks as needed.
 dnl ------------------------------------
 AC_MSG_CHECKING(whether the system IPv6 stack implementation is reasonable)
+ipv6=no
 if test "${enable_ipv6}" = "no"; then
   AC_MSG_RESULT(disabled)
 else
@@ -34,22 +35,21 @@ main()
    return (0);
 }
 ],
-  [
-   dnl AC_DEFINE(HAVE_IPV6, 1, [Define to 1 if you have IPv6])
-   AC_MSG_RESULT(yes)
+  [AC_MSG_RESULT(yes)
+   AC_DEFINE(HAVE_IPV6, 1, [Define to 1 if you have IPv6])
    ipv6=yes],
-  [AC_MSG_RESULT(no)
-   ipv6=no],
-  [AC_MSG_RESULT(no)
-   ipv6=no])
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)])
   AC_LANG_RESTORE
 fi
 
 dnl ----------------------------
 dnl Check whether the system IPv6 stack supports IPv6 multicast.
 dnl ----------------------------
-AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast)
-AC_TRY_COMPILE([
+ipv6_multicast=no
+if test "${ipv6}" = "yes"; then
+  AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast)
+  AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netinet/in.h>
 ],
@@ -63,23 +63,27 @@ dummy += IPV6_MULTICAST_IF;
 dummy += IPV6_JOIN_GROUP;
 dummy += IPV6_LEAVE_GROUP;
 ],
-[AC_MSG_RESULT(yes)
- AC_DEFINE(HAVE_IPV6_MULTICAST, 1, [Define to 1 if you have IPv6 multicast])],
- AC_MSG_RESULT(no))
+  [AC_MSG_RESULT(yes)
+   AC_DEFINE(HAVE_IPV6_MULTICAST, 1, [Define to 1 if you have IPv6 multicast])
+   ipv6_multicast=yes],
+   AC_MSG_RESULT(no))
+fi
 
 dnl ----------------------------
 dnl Check whether the system IPv6 stack supports IPv6 multicast routing.
 dnl ----------------------------
 dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on some OS,
 dnl hence we need to include them conditionally.
-AC_CHECK_HEADER(net/if_var.h,
-  [test_net_if_var_h="#include <net/if_var.h>"],
-  [test_net_if_var_h=""])
-AC_CHECK_HEADER(netinet/in_var.h,
-  [test_netinet_in_var_h="#include <netinet/in_var.h>"],
-  [test_netinet_in_var_h=""])
+ipv6_multicast_routing=no
+if test "${ipv6_multicast}" = "yes"; then
+  AC_CHECK_HEADER(net/if_var.h,
+    [test_net_if_var_h="#include <net/if_var.h>"],
+    [test_net_if_var_h=""])
+  AC_CHECK_HEADER(netinet/in_var.h,
+    [test_netinet_in_var_h="#include <netinet/in_var.h>"],
+    [test_netinet_in_var_h=""])
 
-test_multicast_routing_header_files=["
+  test_multicast_routing_header_files=["
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/socket.h>
@@ -90,8 +94,8 @@ ${test_netinet_in_var_h}
 #include <netinet6/ip6_mroute.h>
 "]
 
-AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast routing)
-AC_TRY_COMPILE([
+  AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast routing)
+  AC_TRY_COMPILE([
 ${test_multicast_routing_header_files}
 ],
 [
@@ -115,9 +119,12 @@ dummy += MRT6MSG_WHOLEPKT;
 #error Missing SIOCGETMIFCNT_IN6
 #endif
 ],
-[AC_MSG_RESULT(yes)
- AC_DEFINE(HAVE_IPV6_MULTICAST_ROUTING, 1, [Define to 1 if you have IPv6 multicastst routing])],
- AC_MSG_RESULT(no))
+  [AC_MSG_RESULT(yes)
+   AC_DEFINE(HAVE_IPV6_MULTICAST_ROUTING, 1,
+             [Define to 1 if you have IPv6 multicastst routing])
+   ipv6_multicast_routing=yes],
+   AC_MSG_RESULT(no))
+fi
 
 dnl ------------------------------------
 dnl Check if the newer (post-RFC2292) IPv6 advanced API is supported
