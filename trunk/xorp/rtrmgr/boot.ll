@@ -1,11 +1,11 @@
 %{
 #include <string.h>
+#include <string>
 #include "y.boot_tab.h"
-#define SBUFSIZE 1024
 %}
 	int boot_linenum = 1;
 	extern char* bootlval;
-	char stringbuf[SBUFSIZE + 1];
+	string parsebuf;
 %option noyywrap
 %option nounput
 %x comment
@@ -133,34 +133,34 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 
 \"			{
 			BEGIN(string);
-			memset(stringbuf, 0, SBUFSIZE);
+			parsebuf="";
 			}
 
 <string>[^\\\n\"]*	/* normal text */ {
-			strncat(stringbuf, boottext, SBUFSIZE);
+			parsebuf += boottext;
 			}
 
 <string>\\+\"		/* allow quoted quotes */ {
-			strncat(stringbuf, "\"", SBUFSIZE);
+			parsebuf += "\"";
 			}
 
 <string>\\+\\		/* allow quoted backslash */ {
-			strncat(stringbuf, "\\", SBUFSIZE);
+			parsebuf += "\\";
 			}
 
 <string>\n		/* allow unquoted newlines */ {
 			boot_linenum++;
-			strncat(stringbuf, "\n", SBUFSIZE);
+			parsebuf += "\n";
 			}
 
 <string>\\+\n		/* allow quoted newlines */ {
 			boot_linenum++;
-			strncat(stringbuf, "\n", SBUFSIZE);
+			parsebuf += "\n";
 			}
 
 <string>\"		{
 			BEGIN(INITIAL);
-			bootlval = strdup(stringbuf);
+			bootlval = strdup(parsebuf.c_str());
 			return STRING;
 			}
 

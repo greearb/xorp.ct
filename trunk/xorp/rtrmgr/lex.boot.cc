@@ -1531,11 +1531,11 @@ char *yytext;
 #define INITIAL 0
 #line 2 "boot.ll"
 #include <string.h>
+#include <string>
 #include "y.boot_tab.h"
-#define SBUFSIZE 1024
 int boot_linenum = 1;
 extern char* bootlval;
-char stringbuf[SBUFSIZE + 1];
+string parsebuf;
 #define YY_NO_UNPUT 1
 #define comment 1
 
@@ -1922,28 +1922,28 @@ YY_RULE_SETUP
 #line 134 "boot.ll"
 {
 			BEGIN(string);
-			memset(stringbuf, 0, SBUFSIZE);
+			parsebuf="";
 			}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 139 "boot.ll"
 /* normal text */ {
-			strncat(stringbuf, boottext, SBUFSIZE);
+			parsebuf += boottext;
 			}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 143 "boot.ll"
 /* allow quoted quotes */ {
-			strncat(stringbuf, "\"", SBUFSIZE);
+			parsebuf += "\"";
 			}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 147 "boot.ll"
 /* allow quoted backslash */ {
-			strncat(stringbuf, "\\", SBUFSIZE);
+			parsebuf += "\\";
 			}
 	YY_BREAK
 case 20:
@@ -1951,7 +1951,7 @@ YY_RULE_SETUP
 #line 151 "boot.ll"
 /* allow unquoted newlines */ {
 			boot_linenum++;
-			strncat(stringbuf, "\n", SBUFSIZE);
+			parsebuf += "\n";
 			}
 	YY_BREAK
 case 21:
@@ -1959,7 +1959,7 @@ YY_RULE_SETUP
 #line 156 "boot.ll"
 /* allow quoted newlines */ {
 			boot_linenum++;
-			strncat(stringbuf, "\n", SBUFSIZE);
+			parsebuf += "\n";
 			}
 	YY_BREAK
 case 22:
@@ -1967,7 +1967,7 @@ YY_RULE_SETUP
 #line 161 "boot.ll"
 {
 			BEGIN(INITIAL);
-			bootlval = strdup(stringbuf);
+			bootlval = strdup(parsebuf.c_str());
 			return STRING;
 			}
 	YY_BREAK
