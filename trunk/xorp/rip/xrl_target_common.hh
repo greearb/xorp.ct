@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.16 2004/09/17 13:57:16 abittau Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.17 2004/09/18 00:00:33 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -523,7 +523,7 @@ XrlRipCommonTarget<A>::ripx_0_1_set_cost(const string&	ifname,
 
     if (cost > RIP_INFINITY) {
 	string e = c_format("Cost must be less that RIP infinity (%u)",
-			    RIP_INFINITY);
+			    XORP_UINT_CAST(RIP_INFINITY));
 	return XrlCmdError::COMMAND_FAILED(e);
     }
 
@@ -744,11 +744,11 @@ XrlRipCommonTarget<A>::ripx_0_1_advertise_default_route(
     if (t < min_val) 							\
 	return XrlCmdError::COMMAND_FAILED(c_format(			\
 	    "value supplied less than permitted minimum (%u < %u)", 	\
-	    t, min_val));						\
+	    XORP_UINT_CAST(t), XORP_UINT_CAST(min_val)));		\
     if (t > max_val) 							\
 	return XrlCmdError::COMMAND_FAILED(c_format(			\
 	    "value supplied greater than permitted maximum (%u > %u)", 	\
-	    t, max_val));						\
+	    XORP_UINT_CAST(t), XORP_UINT_CAST(max_val)));		\
     if (p->constants().set_##field (t) == false)			\
 	return XrlCmdError::COMMAND_FAILED(				\
 	    "Failed to set value.");					\
@@ -1234,8 +1234,8 @@ XrlRipCommonTarget<A>::socketx_user_0_1_connect_event(
 					)
 {
     debug_msg("socketx_user_0_1_connect_event %s %s/%u %s\n",
-	      sockid.c_str(), src_host.str().c_str(), src_port,
-	      new_sockid.c_str());
+	      sockid.c_str(), src_host.str().c_str(),
+	      XORP_UINT_CAST(src_port), new_sockid.c_str());
 
     UNUSED(sockid);
     UNUSED(src_host);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.7 2004/09/18 00:00:32 pavlin Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.8 2004/12/09 07:54:41 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -203,7 +203,8 @@ parse_finder_args(const string& host_colon_port, string& host, uint16_t& port)
 	string s_port = string(host_colon_port, sp + 1, 14);
 	uint32_t t_port = atoi(s_port.c_str());
 	if (t_port == 0 || t_port > 65535) {
-	    XLOG_ERROR("Finder port %d is not in range 1--65535.\n", t_port);
+	    XLOG_ERROR("Finder port %u is not in range 1--65535.\n",
+		       XORP_UINT_CAST(t_port));
 	    return false;
 	}
 	port = (uint16_t)t_port;
