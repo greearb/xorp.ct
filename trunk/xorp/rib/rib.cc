@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.40 2004/09/18 02:05:52 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.41 2004/10/29 01:10:05 bms Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -833,7 +833,9 @@ RIB<A>::verify_route(const A& lookup_addr,
 	return XORP_ERROR;
     }
 
+#ifdef notyet
     // 3. Check for discard (blackhole) routes.
+    // XXX: re->vif() must be non-NULL and valid. Revisit this in future.
     DiscardNextHop* dnh = dynamic_cast<DiscardNextHop*>(re->nexthop());
     if (matchtype == RibVerifyType(DISCARD)) {
 	    if (dnh == NULL) {
@@ -844,6 +846,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 		return XORP_OK;
 	    }
     }
+#endif
 
     // 4. Check for protocol level routes (specifically IP).
     IPNextHop<A>* route_nexthop = dynamic_cast<IPNextHop<A>* >(re->nexthop());
@@ -888,12 +891,30 @@ RIB<A>::lookup_route(const A& lookupaddr)
     debug_msg("looking up %s\n", lookupaddr.str().c_str());
 
     const IPRouteEntry<A>* re = _final_table->lookup_route(lookupaddr);
-    if (re == NULL || re->vif() == NULL) {
+    // Case 1: Route miss. Return the null IP address.
+    // Vif cannot be NULL for a valid route.
+    if (re == NULL || re->vif() == NULL)
 	return A::ZERO();
-    }
 
+#ifdef notyet
+    DiscardNextHop* discard_nexthop =
+	dynamic_cast<DiscardNextHop* >(re->nexthop());
+    // Case 2: Discard route. Return the loopback address.
+    if (discard_nexthop != NULL)
+	return A::LOOPBACK();
+
+    IPNextHop<A>* ip_nexthop = dynamic_cast<IPNextHop<A>* >(re->nexthop());
+    // Case 3: IP protocol route. Return the nexthop address.
+    if (ip_nexthop != NULL)
+	return ip_nexthop->addr();
+
+    // Default: Return the null IP address.
+    return A::ZERO();
+#else
+    // Default: Assume the route points to a resolved IPNextHop.
     IPNextHop<A>* route_nexthop = static_cast<IPNextHop<A>* >(re->nexthop());
     return route_nexthop->addr();
+#endif
 }
 
 template <typename A>
