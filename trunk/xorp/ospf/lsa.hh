@@ -191,8 +191,10 @@ class Lsa {
     typedef ref_ptr<Lsa> LsaRef;
 
     Lsa(OspfTypes::Version version)
-	: _version(version), _header(version)
+	:  _header(version), _version(version)
     {}
+
+    virtual ~Lsa();
 
     /**
      * Decode an LSA.
@@ -218,10 +220,13 @@ class Lsa {
      */
 //     void install_type(LsaType type, Lsa *lsa); 
 
+ protected:
+    Lsa_header _header;	// Common LSA header.
+    uint8_t *ptr;	// Encoded or decoded packets are stored here.
+    size_t _len;	// Length of the packet.
+
  private:
     const OspfTypes::Version 	_version;
-
-    Lsa_header _header;	// Common LSA header.
 
 //     AckList _ack_list;		// List of ACKs received for this LSA.
 //     XorpTimer _retransmit;	// Retransmit timer.
@@ -229,12 +234,40 @@ class Lsa {
 //     XorpTimer _timeout;		// Timeout this LSA.
 };
 
+/**
+ * Defines a link/interface, carried in a RouterLsa.
+ */
+class RouterLink {
+ public:
+    RouterLink(OspfTypes::Version version) : _version(version)
+    {}
+ private:
+    const OspfTypes::Version 	_version;
+
+    enum type_description {
+	p2p = 1,	// Point-to-point connection to another router
+	transit = 2,	//
+    };
+
+    uint16_t	_type;
+    uint16_t	_metric;
+
+    uint32_t	_link_id;		// OSPF V2 Only
+    uint32_t	_link_data;		// OSPF V2 Only
+
+    uint32_t	_interface_id;		// OSPF V3 Only
+    uint32_t	_neighbour_interface_id;// OSPF V3 Only
+    uint32_t	_neighbour_router_id;	// OSPF V3 Only
+};
+
 class RouterLsa : public Lsa {
  public:
     RouterLsa(OspfTypes::Version version)
 	: Lsa(version)
     {}
+
  private:
+    list<RouterLink> _router_links;
 };
 
 #if	0
@@ -251,7 +284,6 @@ class LsaTransmit : class Transmit {
     LsaRef _lsaref;	// LSA.
 }
 #endif
-
 
 /**
  * Link State Request as sent in a Link State Request Packet.
