@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.23 2004/04/14 23:02:11 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.24 2004/05/14 01:45:38 atanu Exp $
 #
 
 #
@@ -978,11 +978,40 @@ test28_ipv6()
     coord peer1 assert established
 }
 
+test29()
+{
+    echo "TEST29"
+    echo "	1) Make a connection"
+    echo "	2) Send a notify packet before establishing a session"
+    echo "	3) Verify that we do not get a notify packet in response"
+    echo "	4) Verify that the TCP session has been torn down"
+
+    reset
+
+    coord peer1 connect
+
+    # Verify that we have a connection
+    sleep 2
+    coord peer1 assert connected
+
+    sleep 2
+    # We have to add something to the queue in order to make the
+    # assertion later
+    coord peer1 expect packet notify $FSM_ERROR
+    coord peer1 send packet notify $UPDATEMSGERR $MALATTRLIST
+
+    sleep 2
+    coord peer1 assert queue 1
+
+    sleep 2
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
-    test25 test26 test27 test27_ipv6 test28 test28_ipv6'
+    test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29'
 
 # Include command line
 . ${srcdir}/args.sh
