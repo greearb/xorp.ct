@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.6 2003/06/09 20:02:21 pavlin Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.7 2003/08/28 00:23:16 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Multicast Routing Design Architecture \\
 \vspace{1ex}
-Version 0.4}
+Version 0.5}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{August 28, 2003}
+\date{November 6, 2003}
 
 \maketitle
 
@@ -267,7 +267,7 @@ PIM-SM needs to interact with the MFEA module for the following:
 
   \item Obtain information about existing interfaces on a router.
 
-  \item Currently (August 2003), the MRIB information is
+  \item Currently (November 2003), the MRIB information is
   obtained through the MFEA.
 
 \end{itemize}
@@ -296,8 +296,9 @@ performance, the PIM encapsulation should be done in the kernel, and
 then we need a signaling mechanism between the kernel and the user
 process managing the kernel multicast forwarding entries. That mechanism
 would deal with installing the appropriate information needed by kernel-level
-Register encapsulation. Currently (August 2003), FreeBSD-CURRENT and
-the fortcoming FreeBSD-4.9 do support such kernel-level encapsulation.
+Register encapsulation. Currently (November 2003), only few systems (\eg
+FreeBSD-CURRENT, FreeBSD-4.9, and DragonFlyBSD) do support such kernel-level
+encapsulation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interaction between the MFEA and MLD/IGMP modules}
@@ -338,7 +339,7 @@ membership for group 224.0.1.20 on interface vif0''.
 Note that control packets used for multicast debugging such as MRINFO or
 multicast traceroute use IGMP as the network protocol. Hence, if such
 messages are received by the MLD/IGMP module, the appropriate
-information should be sent to the PIM module. Currently (August 2003),
+information should be sent to the PIM module. Currently (November 2003),
 the handling of such messages is not implemented yet.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -346,7 +347,7 @@ the handling of such messages is not implemented yet.
 
 The PIM module needs to interact with the RIB module to obtain the MRIB
 information, and to keep track if there is any change.
-Currently (August 2003), this interaction is not implemented;
+Currently (November 2003), this interaction is not implemented;
 instead, the MRIB information is received from the MFEA instead.
 
 
@@ -367,6 +368,9 @@ instead, the MRIB information is received from the MFEA instead.
   (changes related to the MFEA--FEA merging).
 
   \item August 28, 2003: Bump-up the version to 0.4, and the date;
+  minor edits.
+
+  \item November 6, 2003: Bump-up the version to 0.5, and the date;
   minor edits.
 
 \end{itemize}
