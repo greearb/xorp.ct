@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.20 2004/03/26 19:44:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.21 2004/04/01 19:54:06 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -81,8 +81,8 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//store it locally
 	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
 	ti = _route_table.insert(msg_route->net(), *msg_route);
-	printf("Cache Table: %s\n", this->tablename().c_str());
-	printf("Caching route: %p net: %s atts: %p  %s\n", msg_route,
+	debug_msg("Cache Table: %s\n", this->tablename().c_str());
+	debug_msg("Caching route: %p net: %s atts: %p  %s\n", msg_route,
 	       msg_route->net().str().c_str(), 
 	       (msg_route->attributes()), 
 	       msg_route->str().c_str());
@@ -196,7 +196,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//store it locally
 	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
 	ti = _route_table.insert(net, *new_route);
-	printf("Caching route2: %p net: %s atts: %p  %s\n", new_route,
+	debug_msg("Caching route2: %p net: %s atts: %p  %s\n", new_route,
 	       new_route->net().str().c_str(), 
 	       (new_route->attributes()), 
 	       new_route->str().c_str());
