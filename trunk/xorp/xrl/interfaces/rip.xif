@@ -8,7 +8,7 @@ interface rip4/0.1 {
      *
      * @param ifname the interface that owns vif that has address.
      * @param vifname virtual interface owning address.
-     * @param address the address to be added.
+     * @param addr the address to be added.
      */
     add_rip_address ? ifname:txt					\
 		    & vifname:txt					\
@@ -19,7 +19,7 @@ interface rip4/0.1 {
      *
      * @param ifname the interface that owns vif that has address.
      * @param vifname virtual interface owning address.
-     * @param address the address to be removed.
+     * @param addr the address to be removed.
      */
     remove_rip_address ? ifname:txt & vifname:txt & addr:ipv4
 
@@ -39,7 +39,7 @@ interface rip4/0.1 {
      *
      * @param ifname the interface that owns vif that has the address.
      * @param vifname virtual interface owns the address.
-     * @param address the address to query.
+     * @param addr the address to query.
      */
     get_rip_address_status ? ifname:txt					\
 			   & vifname:txt				\
