@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.2 2002/12/14 23:43:08 hodson Exp $"
+#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.3 2003/01/23 11:14:23 pavlin Exp $"
 
 
 //
@@ -174,13 +174,13 @@ main(int argc, char *argv[])
 	//
 	// CLI access
 	//
-	IPvXNet enable_ipvxnet1("127.0.0.1/32");
+	// IPvXNet enable_ipvxnet1("127.0.0.1/32");
 	// IPvXNet enable_ipvxnet2("192.150.187.0/25");
-	IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
+	// IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
 	//
-	cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet1);
+	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet1);
 	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet2);
-	cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
+	// cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
 	//
 	// Create and configure the CLI XRL interface
 	//
