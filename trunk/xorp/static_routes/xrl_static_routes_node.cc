@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.14 2004/06/10 22:41:57 hodson Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.15 2004/09/17 13:58:24 abittau Exp $"
 
 #include "static_routes_module.h"
 
@@ -956,9 +956,10 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 
 XrlCmdError
 XrlStaticRoutesNode::policy_backend_0_1_configure(const uint32_t& filter,
-						  const string& conf) {
+						  const string& conf)
+{
     try {
-	StaticRoutesNode::configure_filter(filter,conf);
+	StaticRoutesNode::configure_filter(filter, conf);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
 					   e.str());
@@ -967,7 +968,8 @@ XrlStaticRoutesNode::policy_backend_0_1_configure(const uint32_t& filter,
 }
 
 XrlCmdError
-XrlStaticRoutesNode::policy_backend_0_1_reset(const uint32_t& filter) {
+XrlStaticRoutesNode::policy_backend_0_1_reset(const uint32_t& filter)
+{
     try {
 	StaticRoutesNode::reset_filter(filter);
     } catch(const PolicyException& e) {
@@ -979,7 +981,8 @@ XrlStaticRoutesNode::policy_backend_0_1_reset(const uint32_t& filter) {
 }
 
 XrlCmdError
-XrlStaticRoutesNode::policy_backend_0_1_push_routes() {
+XrlStaticRoutesNode::policy_backend_0_1_push_routes()
+{
     StaticRoutesNode::push_routes(); 
     return XrlCmdError::OKAY();
 }
