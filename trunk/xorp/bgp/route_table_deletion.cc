@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.4 2003/01/16 23:18:58 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.5 2003/02/07 05:35:37 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -82,9 +82,11 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	// propogate downstream
 	InternalMessage<A> old_rt_msg(route_copy, _peer, _genid);
 	old_rt_msg.set_from_previous_peering();
-	return _next_table->replace_route(old_rt_msg, rtmsg,
+	int result;
+	result = _next_table->replace_route(old_rt_msg, rtmsg,
 					  (BGPRouteTable<A>*)this);
 	route_copy->unref();
+	return result;
     }
     abort();
 }
@@ -235,6 +237,7 @@ DeletionTable<A>::delete_next_chain()
 	rt_msg.set_from_previous_peering();
 	if (_next_table != NULL)
 	    _next_table->delete_route(rt_msg, (BGPRouteTable<A>*)this);
+	route_copy->unref();
 	_deleted++;
 	if (chained_rt == first_rt) {
 	    debug_msg("end of chain\n");
@@ -243,7 +246,6 @@ DeletionTable<A>::delete_next_chain()
 	    debug_msg("chain continues\n");
 	}
 	chained_rt = next_rt;
-	route_copy->unref();
     }
     if (_next_table != NULL)
 	_next_table->push((BGPRouteTable<A>*)this);
