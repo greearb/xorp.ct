@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.3 2003/03/10 23:20:46 hodson Exp $
+// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.4 2003/04/22 23:27:23 hodson Exp $
 
 #ifndef __XORP_OSPF_XORP_XRL_TARGET_HH__
 #define __XORP_OSPF_XORP_XRL_TARGET_HH__
@@ -33,124 +33,131 @@ public:
     /**
      *  Get name of Xrl Target
      */
-    virtual XrlCmdError common_0_1_get_target_name(
+    XrlCmdError common_0_1_get_target_name(
 	// Output values, 
 	string&	name);
 
     /**
      *  Get version string from Xrl Target
      */
-    virtual XrlCmdError common_0_1_get_version(
+    XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    /**
+     *  Get status from Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(// Output values,
+				      uint32_t& status,
+				      string&	reason);
 
     /* OSPFD Global Configuration ------------------------------------------ */
 
      /**
       *  Set router id
       */
-    virtual XrlCmdError ospf_0_1_set_router_id(
+    XrlCmdError ospf_0_1_set_router_id(
 	// Input values, 
 	const uint32_t&	id);
 
     /**
      *  Get router id
      */
-    virtual XrlCmdError ospf_0_1_get_router_id(
+    XrlCmdError ospf_0_1_get_router_id(
 	// Output values, 
 	uint32_t&	id);
 
     /**
      *  Set maximum number of AS-external LSA's
      */
-    virtual XrlCmdError ospf_0_1_set_lsdb_limit(
+    XrlCmdError ospf_0_1_set_lsdb_limit(
 	// Input values, 
 	const int32_t&	limit);
 
     /**
      *  Get maximum number of AS-external LSA's
      */
-    virtual XrlCmdError ospf_0_1_get_lsdb_limit(
+    XrlCmdError ospf_0_1_get_lsdb_limit(
 	// Output values, 
 	int32_t&	limit);
 
     /**
      *  Enable / disable MOSPF
      */
-    virtual XrlCmdError ospf_0_1_set_mospf(
+    XrlCmdError ospf_0_1_set_mospf(
 	// Input values, 
 	const bool&	enabled);
 
     /**
      *  Get MOSPF enabled stated
      */
-    virtual XrlCmdError ospf_0_1_get_mospf(
+    XrlCmdError ospf_0_1_get_mospf(
 	// Output values, 
 	bool&	enabled);
 
     /**
      *  Enable / Disable Inter-area multicast
      */
-    virtual XrlCmdError ospf_0_1_set_interarea_mc(
+    XrlCmdError ospf_0_1_set_interarea_mc(
 	// Input values, 
 	const bool&	enabled);
 
-    virtual XrlCmdError ospf_0_1_get_interarea_mc(
+    XrlCmdError ospf_0_1_get_interarea_mc(
 	// Output values, 
 	bool&	enabled);
 
     /**
      *  Set time to exit overflow state
      */
-    virtual XrlCmdError ospf_0_1_set_overflow_interval(
+    XrlCmdError ospf_0_1_set_overflow_interval(
 	// Input values, 
 	const int32_t&	ovfl_int);
 
-    virtual XrlCmdError ospf_0_1_get_overflow_interval(
+    XrlCmdError ospf_0_1_get_overflow_interval(
 	// Output values, 
 	int32_t&	ovfl_int);
 
     /**
      *  Set flood rate - self orig per second
      */
-    virtual XrlCmdError ospf_0_1_set_flood_rate(
+    XrlCmdError ospf_0_1_set_flood_rate(
 	// Input values, 
 	const int32_t&	rate);
 
-    virtual XrlCmdError ospf_0_1_get_flood_rate(
+    XrlCmdError ospf_0_1_get_flood_rate(
 	// Output values, 
 	int32_t&	rate);
 
     /**
      *  Set back-to-back retransmissions
      */
-    virtual XrlCmdError ospf_0_1_set_max_rxmt_window(
+    XrlCmdError ospf_0_1_set_max_rxmt_window(
 	// Input values, 
 	const uint32_t&	window);
 
-    virtual XrlCmdError ospf_0_1_get_max_rxmt_window(
+    XrlCmdError ospf_0_1_get_max_rxmt_window(
 	// Output values, 
 	uint32_t&	window);
 
     /**
      *  Set maximum simultaneous DB exchanges
      */
-    virtual XrlCmdError ospf_0_1_set_max_dds(
+    XrlCmdError ospf_0_1_set_max_dds(
 	// Input values, 
 	const uint32_t&	max_dds);
 
-    virtual XrlCmdError ospf_0_1_get_max_dds(
+    XrlCmdError ospf_0_1_get_max_dds(
 	// Output values, 
 	uint32_t&	max_dds);
 
     /**
      *  Set rate to refresh DoNotAge LSAs
      */
-    virtual XrlCmdError ospf_0_1_set_lsa_refresh_rate(
+    XrlCmdError ospf_0_1_set_lsa_refresh_rate(
 	// Input values, 
 	const uint32_t&	rate);
 
-    virtual XrlCmdError ospf_0_1_get_lsa_refresh_rate(
+    XrlCmdError ospf_0_1_get_lsa_refresh_rate(
 	// Output values, 
 	uint32_t&	rate);
 
@@ -159,22 +166,22 @@ public:
      *  adjacent to a particular neighbor. If there is no limit then value is
      *  zero.
      */
-    virtual XrlCmdError ospf_0_1_set_p2p_adj_limit(
+    XrlCmdError ospf_0_1_set_p2p_adj_limit(
 	// Input values, 
 	const uint32_t&	max_adj);
 
-    virtual XrlCmdError ospf_0_1_get_p2p_adj_limit(
+    XrlCmdError ospf_0_1_get_p2p_adj_limit(
 	// Output values, 
 	uint32_t&	max_adj);
 
     /**
      *  Set randomized LSA refreshes
      */
-    virtual XrlCmdError ospf_0_1_set_random_refresh(
+    XrlCmdError ospf_0_1_set_random_refresh(
 	// Input values, 
 	const bool&	enabled);
 
-    virtual XrlCmdError ospf_0_1_get_random_refresh(
+    XrlCmdError ospf_0_1_get_random_refresh(
 	// Output values, 
 	bool&	enabled);
 
@@ -184,7 +191,7 @@ public:
     /**
      *  Create or configure area
      */
-    virtual XrlCmdError ospf_0_1_add_or_configure_area(
+    XrlCmdError ospf_0_1_add_or_configure_area(
 	// Input values, 
 	const uint32_t&	area_id, 
 	const bool&	is_stub, 
@@ -194,14 +201,14 @@ public:
     /**
      *  Delete area
      */
-    virtual XrlCmdError ospf_0_1_delete_area(
+    XrlCmdError ospf_0_1_delete_area(
 	// Input values, 
 	const uint32_t&	area_id);
 
     /**
      *  Query area options
      */
-    virtual XrlCmdError ospf_0_1_query_area(
+    XrlCmdError ospf_0_1_query_area(
 	// Input values, 
 	const uint32_t&	area_id, 
 	// Output values, 
@@ -212,7 +219,7 @@ public:
     /**
      *  @param area_ids list of value area_ids. Each id is a u32.
      */
-    virtual XrlCmdError ospf_0_1_list_area_ids(
+    XrlCmdError ospf_0_1_list_area_ids(
 	// Output values, 
 	XrlAtomList&	area_ids);
 
@@ -230,7 +237,7 @@ public:
      *  
      *  @param suppress_advertisement of aggregate.
      */
-    virtual XrlCmdError ospf_0_1_add_or_configure_aggregate(
+    XrlCmdError ospf_0_1_add_or_configure_aggregate(
 	// Input values, 
 	const uint32_t&	area_id, 
 	const IPv4&	network, 
@@ -240,7 +247,7 @@ public:
     /**
      *  Delete aggregate identified by area_id, network, and netmask
      */
-    virtual XrlCmdError ospf_0_1_delete_aggregate(
+    XrlCmdError ospf_0_1_delete_aggregate(
 	// Input values, 
 	const uint32_t&	area_id, 
 	const IPv4&	network, 
@@ -249,7 +256,7 @@ public:
     /**
      *  Query aggregate identified by area_id, network, and netmask
      */
-    virtual XrlCmdError ospf_0_1_query_aggregate(
+    XrlCmdError ospf_0_1_query_aggregate(
 	// Input values, 
 	const uint32_t&	area_id, 
 	const IPv4&	network, 
@@ -263,7 +270,7 @@ public:
      *  tuple (network,netmask) that uniquely identifies the aggregate within
      *  the area.
      */
-    virtual XrlCmdError ospf_0_1_list_aggregates(
+    XrlCmdError ospf_0_1_list_aggregates(
 	// Input values, 
 	const uint32_t&	area_id, 
 	// Output values, 
@@ -280,7 +287,7 @@ public:
      *  
      *  @param cost metric associated with host (0-65535).
      */
-    virtual XrlCmdError ospf_0_1_add_or_configure_host(
+    XrlCmdError ospf_0_1_add_or_configure_host(
 	// Input values, 
 	const IPv4&	network, 
 	const IPv4&	netmask, 
@@ -290,7 +297,7 @@ public:
     /**
      *  Delete host identified by network and netmask
      */
-    virtual XrlCmdError ospf_0_1_delete_host(
+    XrlCmdError ospf_0_1_delete_host(
 	// Input values, 
 	const IPv4&	network, 
 	const IPv4&	netmask, 
@@ -299,7 +306,7 @@ public:
     /**
      *  Query host identified by network and netmask
      */
-    virtual XrlCmdError ospf_0_1_query_host(
+    XrlCmdError ospf_0_1_query_host(
 	// Input values, 
 	const IPv4&	network, 
 	const IPv4&	netmask, 
@@ -312,7 +319,7 @@ public:
      *  lists are returned, the nth elements in each list comprise the tuple
      *  (network,netmask) that uniquely identifies the host within the area.
      */
-    virtual XrlCmdError ospf_0_1_list_hosts(
+    XrlCmdError ospf_0_1_list_hosts(
 	// Input values, 
 	const uint32_t&	area_id, 
 	// Output values, 
@@ -320,64 +327,64 @@ public:
 	XrlAtomList&	netmasks);
 
     /* --------------------------------------------------------------------- */
-    /* OSPFD Virtual Link Configuration */
+    /* OSPFD Link Configuration */
 
-    virtual XrlCmdError ospf_0_1_add_vlink(
+    XrlCmdError ospf_0_1_add_vlink(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id);
 
-    virtual XrlCmdError ospf_0_1_delete_vlink(
+    XrlCmdError ospf_0_1_delete_vlink(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id);
 
-    virtual XrlCmdError ospf_0_1_vlink_set_transmit_delay(
+    XrlCmdError ospf_0_1_vlink_set_transmit_delay(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	const uint32_t&	delay_secs);
 
-    virtual XrlCmdError ospf_0_1_vlink_get_transmit_delay(
+    XrlCmdError ospf_0_1_vlink_get_transmit_delay(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	// Output values, 
 	uint32_t&	delay_secs);
 
-    virtual XrlCmdError ospf_0_1_vlink_set_retransmit_interval(
+    XrlCmdError ospf_0_1_vlink_set_retransmit_interval(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	const uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_vlink_get_retransmit_interval(
+    XrlCmdError ospf_0_1_vlink_get_retransmit_interval(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	// Output values, 
 	uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_vlink_set_hello_interval(
+    XrlCmdError ospf_0_1_vlink_set_hello_interval(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	const uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_vlink_get_hello_interval(
+    XrlCmdError ospf_0_1_vlink_get_hello_interval(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	// Output values, 
 	uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_vlink_set_router_dead_interval(
+    XrlCmdError ospf_0_1_vlink_set_router_dead_interval(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	const uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_vlink_get_router_dead_interval(
+    XrlCmdError ospf_0_1_vlink_get_router_dead_interval(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
@@ -387,14 +394,14 @@ public:
     /**
      *  @param type is one of "none", "cleartext", "md5"
      */
-    virtual XrlCmdError ospf_0_1_vlink_set_authentication(
+    XrlCmdError ospf_0_1_vlink_set_authentication(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
 	const string&	type, 
 	const string&	key);
 
-    virtual XrlCmdError ospf_0_1_vlink_get_authentication(
+    XrlCmdError ospf_0_1_vlink_get_authentication(
 	// Input values, 
 	const uint32_t&	transit_area, 
 	const uint32_t&	neighbor_id, 
@@ -405,7 +412,7 @@ public:
     /**
      *  Return list of neighbour id's (unsigned 32 bit values)
      */
-    virtual XrlCmdError ospf_0_1_list_vlinks(
+    XrlCmdError ospf_0_1_list_vlinks(
 	// Input values, 
 	const uint32_t&	transit_id, 
 	// Output values, 
@@ -414,7 +421,7 @@ public:
     /* --------------------------------------------------------------------- */
     /* OSPFD External Route Configuration */
 
-    virtual XrlCmdError ospf_0_1_add_or_configure_external_route(
+    XrlCmdError ospf_0_1_add_or_configure_external_route(
 	// Input values, 
 	const IPv4Net&	network, 
 	const IPv4&	gateway, 
@@ -423,12 +430,12 @@ public:
 	const bool&	multicast, 
 	const uint32_t&	external_route_tag);
 
-    virtual XrlCmdError ospf_0_1_delete_external_route(
+    XrlCmdError ospf_0_1_delete_external_route(
 	// Input values, 
 	const IPv4Net&	network, 
 	const IPv4&	gateway);
 
-    virtual XrlCmdError ospf_0_1_query_external_route(
+    XrlCmdError ospf_0_1_query_external_route(
 	// Input values, 
 	const IPv4Net&	network, 
 	const IPv4&	gateway, 
@@ -438,7 +445,7 @@ public:
 	bool&		multicast, 
 	uint32_t&	external_route_tag);
 
-    virtual XrlCmdError ospf_0_1_list_external_routes(
+    XrlCmdError ospf_0_1_list_external_routes(
 	// Input values, 
 	const IPv4Net&	network, 
 	// Output values, 
@@ -447,7 +454,7 @@ public:
     /* --------------------------------------------------------------------- */
     /* Interface configuration */
 
-    virtual XrlCmdError ospf_0_1_add_interface(
+    XrlCmdError ospf_0_1_add_interface(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	if_index, 
@@ -458,185 +465,185 @@ public:
 	const bool&	ondemand, 
 	const bool&	passive);
 
-    virtual XrlCmdError ospf_0_1_interface_set_if_index(
+    XrlCmdError ospf_0_1_interface_set_if_index(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	index);
 
-    virtual XrlCmdError ospf_0_1_interface_get_if_index(
+    XrlCmdError ospf_0_1_interface_get_if_index(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	index);
 
-    virtual XrlCmdError ospf_0_1_interface_set_area_id(
+    XrlCmdError ospf_0_1_interface_set_area_id(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	area_id);
 
-    virtual XrlCmdError ospf_0_1_interface_get_area_id(
+    XrlCmdError ospf_0_1_interface_get_area_id(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	area_id);
 
-    virtual XrlCmdError ospf_0_1_interface_set_cost(
+    XrlCmdError ospf_0_1_interface_set_cost(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	cost);
 
-    virtual XrlCmdError ospf_0_1_interface_get_cost(
+    XrlCmdError ospf_0_1_interface_get_cost(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	cost);
 
-    virtual XrlCmdError ospf_0_1_interface_set_mtu(
+    XrlCmdError ospf_0_1_interface_set_mtu(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	mtu);
 
-    virtual XrlCmdError ospf_0_1_interface_get_mtu(
+    XrlCmdError ospf_0_1_interface_get_mtu(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	mtu);
 
-    virtual XrlCmdError ospf_0_1_interface_set_type(
+    XrlCmdError ospf_0_1_interface_set_type(
 	// Input values, 
 	const string&	identifier, 
 	const string&	type);
 
-    virtual XrlCmdError ospf_0_1_interface_get_type(
+    XrlCmdError ospf_0_1_interface_get_type(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	string&	type);
 
-    virtual XrlCmdError ospf_0_1_interface_set_dr_priority(
+    XrlCmdError ospf_0_1_interface_set_dr_priority(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	dr_priority);
 
-    virtual XrlCmdError ospf_0_1_interface_get_dr_priority(
+    XrlCmdError ospf_0_1_interface_get_dr_priority(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	dr_priority);
 
-    virtual XrlCmdError ospf_0_1_interface_set_transit_delay(
+    XrlCmdError ospf_0_1_interface_set_transit_delay(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	delay_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_get_transit_delay(
+    XrlCmdError ospf_0_1_interface_get_transit_delay(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	delay_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_set_retransmit_interval(
+    XrlCmdError ospf_0_1_interface_set_retransmit_interval(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_get_retransmit_interval(
+    XrlCmdError ospf_0_1_interface_get_retransmit_interval(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_set_router_dead_interval(
+    XrlCmdError ospf_0_1_interface_set_router_dead_interval(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_get_router_dead_interval(
+    XrlCmdError ospf_0_1_interface_get_router_dead_interval(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_set_poll_interval(
+    XrlCmdError ospf_0_1_interface_set_poll_interval(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_get_poll_interval(
+    XrlCmdError ospf_0_1_interface_get_poll_interval(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	uint32_t&	interval_secs);
 
-    virtual XrlCmdError ospf_0_1_interface_set_authentication(
+    XrlCmdError ospf_0_1_interface_set_authentication(
 	// Input values, 
 	const string&	identifier, 
 	const string&	type, 
 	const string&	key);
 
-    virtual XrlCmdError ospf_0_1_interface_get_authentication(
+    XrlCmdError ospf_0_1_interface_get_authentication(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	string&	type, 
 	string&	key);
 
-    virtual XrlCmdError ospf_0_1_interface_set_multicast_forwarding(
+    XrlCmdError ospf_0_1_interface_set_multicast_forwarding(
 	// Input values, 
 	const string&	identifier, 
 	const string&	type);
 
-    virtual XrlCmdError ospf_0_1_interface_get_multicast_forwarding(
+    XrlCmdError ospf_0_1_interface_get_multicast_forwarding(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	string&		type);
 
-    virtual XrlCmdError ospf_0_1_interface_set_on_demand(
+    XrlCmdError ospf_0_1_interface_set_on_demand(
 	// Input values, 
 	const string&	identifier, 
 	const bool&	on_demand);
 
-    virtual XrlCmdError ospf_0_1_interface_get_on_demand(
+    XrlCmdError ospf_0_1_interface_get_on_demand(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	bool&	on_demand);
 
-    virtual XrlCmdError ospf_0_1_interface_set_passive(
+    XrlCmdError ospf_0_1_interface_set_passive(
 	// Input values, 
 	const string&	identifier, 
 	const bool&	passive);
 
-    virtual XrlCmdError ospf_0_1_interface_get_passive(
+    XrlCmdError ospf_0_1_interface_get_passive(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	bool&	passive);
 
-    virtual XrlCmdError ospf_0_1_interface_set_igmp(
+    XrlCmdError ospf_0_1_interface_set_igmp(
 	// Input values, 
 	const string&	identifier, 
 	const bool&	enabled);
 
-    virtual XrlCmdError ospf_0_1_interface_get_igmp(
+    XrlCmdError ospf_0_1_interface_get_igmp(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
 	bool&	enabled);
 
-    virtual XrlCmdError ospf_0_1_delete_interface(
+    XrlCmdError ospf_0_1_delete_interface(
 	// Input values, 
 	const string&	identifier);
 
-    virtual XrlCmdError ospf_0_1_list_interfaces(
+    XrlCmdError ospf_0_1_list_interfaces(
 	// Output values, 
 	XrlAtomList&	identifiers);
 
     /* --------------------------------------------------------------------- */
     /* Interface MD5 configuration */
 
-    virtual XrlCmdError ospf_0_1_interface_add_md5_key(
+    XrlCmdError ospf_0_1_interface_add_md5_key(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	key_id, 
@@ -646,7 +653,7 @@ public:
 	const string&	start_transmit, 
 	const string&	stop_transmit);
 
-    virtual XrlCmdError ospf_0_1_interface_get_md5_key(
+    XrlCmdError ospf_0_1_interface_get_md5_key(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	key_id, 
@@ -657,12 +664,12 @@ public:
 	string&	start_transmit, 
 	string&	stop_transmit);
 
-    virtual XrlCmdError ospf_0_1_interface_delete_md5_key(
+    XrlCmdError ospf_0_1_interface_delete_md5_key(
 	// Input values, 
 	const string&	identifier, 
 	const uint32_t&	key_id);
 
-    virtual XrlCmdError ospf_0_1_interface_list_md5_keys(
+    XrlCmdError ospf_0_1_interface_list_md5_keys(
 	// Input values, 
 	const string&	identifier, 
 	// Output values, 
@@ -671,22 +678,22 @@ public:
     /* --------------------------------------------------------------------- */
     /* Static Neighbor configuration */
     
-    virtual XrlCmdError ospf_0_1_add_neighbor(
+    XrlCmdError ospf_0_1_add_neighbor(
 	// Input values, 
 	const IPv4&	nbr_addr, 
 	const bool&	dr_eligible);
 
-    virtual XrlCmdError ospf_0_1_get_neighbor(
+    XrlCmdError ospf_0_1_get_neighbor(
 	// Input values, 
 	const IPv4&	nbr_addr, 
 	// Output values, 
 	bool&	dr_eligible);
 
-    virtual XrlCmdError ospf_0_1_delete_neighbor(
+    XrlCmdError ospf_0_1_delete_neighbor(
 	// Input values, 
 	const IPv4&	nbr_addr);
 
-    virtual XrlCmdError ospf_0_1_list_neighbors(
+    XrlCmdError ospf_0_1_list_neighbors(
 	// Output values, 
 	XrlAtomList&	nbr_addrs);
 

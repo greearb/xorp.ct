@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.15 2003/03/29 19:03:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.16 2003/04/18 04:52:10 pavlin Exp $"
 
+#include "libxorp/status_codes.h"
 #include "pim_module.h"
 #include "pim_private.hh"
 #include "pim_mfc.hh"
@@ -940,6 +941,17 @@ XrlPimNode::common_0_1_get_version(
 {
     version = XORP_MODULE_VERSION;
     
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::common_0_1_get_status(// Output values, 
+				  uint32_t& status,
+				  string& reason)
+{
+    //XXX placeholder only
+    status = PROC_READY;
+    reason = "Ready";
     return XrlCmdError::OKAY();
 }
 

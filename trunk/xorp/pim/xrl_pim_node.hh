@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.18 2003/03/29 19:03:10 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.19 2003/04/22 23:27:24 hodson Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -177,6 +177,13 @@ protected:
     XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    /**
+     *  Get status from Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(// Output values,
+				      uint32_t& status,
+				      string&	reason);
     
     /**
      *  Process a CLI command.

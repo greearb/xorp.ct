@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.6 2003/03/17 23:23:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.7 2003/03/25 01:21:45 pavlin Exp $"
 
+#include "libxorp/status_codes.h"
 #include "cli_module.h"
 #include "cli_private.hh"
 #include "xrl_cli_node.hh"
@@ -90,6 +91,18 @@ XrlCliNode::common_0_1_get_version(
     string&	version)
 {
     version = XORP_MODULE_VERSION;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlCliNode::common_0_1_get_status(
+    // Output values, 
+    uint32_t& status,
+    string&	reason)
+{
+    //XXX Default to READY status because this probably won't be used.
+    status = PROC_READY;
+    reason = "Ready";
     return XrlCmdError::OKAY();
 }
 

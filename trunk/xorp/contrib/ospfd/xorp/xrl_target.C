@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $"
+#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.2 2003/01/28 00:37:54 hodson Exp $"
 
 #include <time.h>
 #include <vector>
@@ -20,6 +20,7 @@
 #include "ospf_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 
 #include "ospfinc.h"
 #include "tcppkt.h"
@@ -141,6 +142,19 @@ XrlOspfTarget::common_0_1_get_version(
     version = c_format("OSPFD v%d.%d", OSPF::vmajor, OSPF::vminor);
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError
+XrlOspfTarget::common_0_1_get_status(// Output values, 
+				     uint32_t& status,
+				     string& reason)
+{
+    //XXX placeholder only
+    status = PROC_READY;
+    reason = "Ready";
+    return XrlCmdError::OKAY();
+}
+
+
 
 // ----------------------------------------------------------------------------
 // Macros to help OSPF Global Config Methods

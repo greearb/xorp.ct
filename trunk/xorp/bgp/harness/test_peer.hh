@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.2 2003/01/24 19:50:11 rizzo Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.3 2003/03/10 23:20:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -101,6 +101,14 @@ public:
     XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    /**
+     *  Get status from Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(
+				      // Output values,
+				      uint32_t& status,
+				      string&	reason);
 
     /**
      *  Register for receiving packets and events.

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.5 2003/04/02 22:18:59 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.6 2003/04/21 05:46:52 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -55,6 +56,17 @@ XrlCoordTarget::common_0_1_get_version(string& version)
     debug_msg("\n");
 
     version = SERVER_VERSION;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlCoordTarget::common_0_1_get_status(// Output values, 
+				      uint32_t& status,
+				      string& reason)
+{
+    //XXX placeholder only
+    status = PROC_READY;
+    reason = "Ready";
     return XrlCmdError::OKAY();
 }
 

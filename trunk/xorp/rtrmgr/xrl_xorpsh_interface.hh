@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.2 2003/03/10 23:21:03 hodson Exp $
+// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.3 2003/04/23 21:09:32 mjh Exp $
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
@@ -32,6 +32,13 @@ public:
     XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    /**
+     *  Get status from Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(// Output values,
+				      uint32_t& status,
+				      string&	reason);
 
     XrlCmdError rtrmgr_client_0_1_new_config_user(
 	// Input values, 

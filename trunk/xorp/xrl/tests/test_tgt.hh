@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/xrl/tests/test_tgt.hh,v 1.2 2003/01/28 00:37:58 hodson Exp $
+// $XORP: xorp/xrl/tests/test_tgt.hh,v 1.3 2003/03/10 23:21:04 hodson Exp $
 
 #include <string>
 
@@ -32,6 +32,11 @@ protected:
     virtual XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    virtual XrlCmdError common_0_1_get_status(
+	// Output values,
+        uint32_t& status,
+	string&	reason);
 
     virtual XrlCmdError test_1_0_print_hello_world();
 

@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.1 2003/02/24 19:39:18 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.2 2003/04/23 20:50:45 hodson Exp $"
 
+#include "libxorp/status_codes.h"
 #include "finder_client_xrl_target.hh"
 #include "finder_client.hh"
 
@@ -34,6 +35,15 @@ XrlCmdError
 FinderClientXrlTarget::common_0_1_get_version(string& v)
 {
     v = version();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderClientXrlTarget::common_0_1_get_status(uint32_t& status, string& r)
+{
+    //Finder client is always ready if it can receive requests.
+    status = PROC_READY;
+    r = "Ready";
     return XrlCmdError::OKAY();
 }
 

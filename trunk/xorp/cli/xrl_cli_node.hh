@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.6 2003/03/17 23:23:29 pavlin Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.7 2003/03/25 01:21:45 pavlin Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -59,6 +59,14 @@ protected:
     virtual XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    /**
+     *  Get status from Xrl Target
+     */
+    virtual XrlCmdError common_0_1_get_status(
+	// Output values,
+        uint32_t& status,
+	string&	reason);
 
     /**
      *  Enable/disable/start/stop the CLI.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.8 2003/04/11 22:26:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.9 2003/05/02 07:50:49 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -23,6 +23,7 @@
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "xrl_target.hh"
@@ -53,6 +54,18 @@ XrlFeaTarget::common_0_1_get_version(
 				     string&   version)
 {
     version = "0.1";
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::common_0_1_get_status(
+				    // Output values, 
+				    uint32_t& status,
+				    string&	reason)
+{
+    //XXX This is a placeholder - need to fill out status correctly.
+    status = PROC_READY;
+    reason = "Ready";
     return XrlCmdError::OKAY();
 }
 

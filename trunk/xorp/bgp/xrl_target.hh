@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.9 2003/03/16 08:35:03 pavlin Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.10 2003/03/29 19:03:09 pavlin Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -34,6 +34,14 @@ public:
 	version = "0.1";
 	return XrlCmdError::OKAY();
     }
+
+    /**
+     *  Get status from Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(
+				      // Output values,
+				      uint32_t& status,
+				      string&	reason);
 
     XrlCmdError bgp_0_2_get_bgp_version(
 					// Output values, 

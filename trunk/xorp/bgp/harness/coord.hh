@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/coord.hh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+// $XORP: xorp/bgp/harness/coord.hh,v 1.2 2003/03/10 23:20:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_COORD_HH__
 #define __BGP_HARNESS_COORD_HH__
@@ -53,6 +53,14 @@ public:
     XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    /**
+     *  Get status from Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(
+				      // Output values,
+				      uint32_t& status,
+				      string&	reason);
 
     XrlCmdError coord_0_1_command(
 	// Input values, 

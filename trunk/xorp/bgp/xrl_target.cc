@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.10 2003/03/10 23:20:08 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.11 2003/03/29 19:03:09 pavlin Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -32,6 +33,19 @@ XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	  _awaiting_bgpid(true),
 	  _done(false)
 {
+}
+
+XrlCmdError
+XrlBgpTarget::common_0_1_get_status(
+    // Output values, 
+    uint32_t& status,
+    string&	reason)
+{
+    //As nothing depends directly on BGP, it is safe to return READY.
+    //XXX really should handle returning correct shutdown codes though.
+    status = PROC_READY;
+    reason = "Ready";
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError 

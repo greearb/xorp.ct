@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.13 2003/03/24 19:11:42 hodson Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.14 2003/03/25 00:44:51 pavlin Exp $"
 
+#include "libxorp/status_codes.h"
 #include "version.h"
 #include "rib_module.h"
 #include "xrl_target.hh"
@@ -34,6 +35,18 @@ XrlCmdError
 XrlRibTarget::common_0_1_get_version(string& version)
 {
     version = RIB_VERSION;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::common_0_1_get_status(
+    // Output values, 
+    uint32_t& status,
+    string&	reason)
+{
+    //XXX need to replace this with something that returns actual status.
+    status = PROC_READY;
+    reason = "Ready";
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.6 2003/05/02 22:33:54 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.7 2003/05/04 06:25:21 mjh Exp $"
 
 #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -20,6 +20,7 @@
 #include "version.h"
 #include "config.h"
 #include "libxorp/xorp.h"
+#include "libxorp/status_codes.h"
 #include "userdb.hh"
 #include "master_conf_tree.hh"
 #include "xrl_rtrmgr_interface.hh"
@@ -56,6 +57,17 @@ XrlCmdError
 XrlRtrmgrInterface::common_0_1_get_version(// Output values, 
 					   string& version) {
     version = RTRMGR_VERSION;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRtrmgrInterface::common_0_1_get_status(// Output values, 
+					  uint32_t& status,
+					  string& reason)
+{
+    //XXX placeholder only
+    status = PROC_READY;
+    reason = "Ready";
     return XrlCmdError::OKAY();
 }
 

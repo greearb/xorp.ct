@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_tgt.cc,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_tgt.cc,v 1.2 2003/03/10 23:21:04 hodson Exp $"
 
 #include <iostream>
 
 #include "test_tgt.hh"
+#include "libxorp/status_codes.h"
 
 const string XrlTestTarget::greetings[] = {
     "Hi", "Howdy Partner", "You again"
@@ -36,6 +37,15 @@ XrlCmdError
 XrlTestTarget::common_0_1_get_version(string& version)
 {
     version = "1.0";
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlTestTarget::common_0_1_get_status(uint32_t& status, 
+				     string& reason)
+{
+    status = PROC_READY;
+    reason = "Test Reason";
     return XrlCmdError::OKAY();
 }
 

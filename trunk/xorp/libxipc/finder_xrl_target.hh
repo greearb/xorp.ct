@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.5 2003/03/16 08:20:28 pavlin Exp $
+// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.6 2003/04/23 20:50:48 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_XRL_TARGET_HH__
@@ -33,6 +33,10 @@ public:
      *  Get version string from Xrl Target
      */
     XrlCmdError common_0_1_get_version(string&	version);
+    /**
+     *  Get status of Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
 
     /**
      *  Fails if target_name is already registered. The target_name must

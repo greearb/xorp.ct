@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.6 2003/03/22 04:29:46 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.7 2003/03/24 19:11:42 hodson Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -64,24 +64,32 @@ protected:
 
 protected:
 
-    virtual XrlCmdError common_0_1_get_target_name(
+    XrlCmdError common_0_1_get_target_name(
 	// Output values, 
 	string&	name);
 
-    virtual XrlCmdError common_0_1_get_version(
+    XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
 
     /**
+     *  Get status from Xrl Target
+     */
+    XrlCmdError common_0_1_get_status(
+	// Output values,
+        uint32_t& status,
+	string&	reason);
+
+    /**
      *  Enable/disable/start/stop RIB.
      */
-    virtual XrlCmdError rib_0_1_enable_rib();
+    XrlCmdError rib_0_1_enable_rib();
 
-    virtual XrlCmdError rib_0_1_disable_rib();
+    XrlCmdError rib_0_1_disable_rib();
 
-    virtual XrlCmdError rib_0_1_start_rib();
+    XrlCmdError rib_0_1_start_rib();
 
-    virtual XrlCmdError rib_0_1_stop_rib();
+    XrlCmdError rib_0_1_stop_rib();
 
     /**
      *  Add/delete/enable/disable a RIB client. Add/delete/enable/disable a RIB
@@ -94,105 +102,105 @@ protected:
      *  
      *  @param multicast true if a client for the multicast RIB.
      */
-    virtual XrlCmdError rib_0_1_add_rib_client4(
+    XrlCmdError rib_0_1_add_rib_client4(
 	// Input values, 
 	const string&	target_name, 
 	const bool&	unicast, 
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_add_rib_client6(
+    XrlCmdError rib_0_1_add_rib_client6(
 	// Input values, 
 	const string&	target_name, 
 	const bool&	unicast, 
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_delete_rib_client4(
+    XrlCmdError rib_0_1_delete_rib_client4(
 	// Input values, 
 	const string&	target_name, 
 	const bool&	unicast, 
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_delete_rib_client6(
+    XrlCmdError rib_0_1_delete_rib_client6(
 	// Input values, 
 	const string&	target_name, 
 	const bool&	unicast, 
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_enable_rib_client4(
+    XrlCmdError rib_0_1_enable_rib_client4(
 	// Input values, 
 	const string&	target_name, 
 	const bool&	unicast, 
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_enable_rib_client6(
+    XrlCmdError rib_0_1_enable_rib_client6(
 	// Input values, 
 	const string&	target_name, 
 	const bool&	unicast, 
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_disable_rib_client4(
+    XrlCmdError rib_0_1_disable_rib_client4(
 	// Input values, 
 	const string&	target_name,
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_disable_rib_client6(
+    XrlCmdError rib_0_1_disable_rib_client6(
 	// Input values, 
 	const string&	target_name, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_no_fea();
+    XrlCmdError rib_0_1_no_fea();
 
-    virtual XrlCmdError rib_0_1_add_igp_table4(
+    XrlCmdError rib_0_1_add_igp_table4(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_add_igp_table6(
+    XrlCmdError rib_0_1_add_igp_table6(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_delete_igp_table4(
+    XrlCmdError rib_0_1_delete_igp_table4(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_delete_igp_table6(
+    XrlCmdError rib_0_1_delete_igp_table6(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_add_egp_table4(
+    XrlCmdError rib_0_1_add_egp_table4(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_add_egp_table6(
+    XrlCmdError rib_0_1_add_egp_table6(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_delete_egp_table4(
+    XrlCmdError rib_0_1_delete_egp_table4(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_delete_egp_table6(
+    XrlCmdError rib_0_1_delete_egp_table6(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_add_route4(
+    XrlCmdError rib_0_1_add_route4(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
@@ -201,7 +209,7 @@ protected:
 	const IPv4&     nexthop,
 	const uint32_t&       metric);
 
-    virtual XrlCmdError rib_0_1_add_route6(
+    XrlCmdError rib_0_1_add_route6(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
@@ -210,7 +218,7 @@ protected:
 	const IPv6&	nexthop,
 	const uint32_t&       metric);
 
-    virtual XrlCmdError rib_0_1_replace_route4(
+    XrlCmdError rib_0_1_replace_route4(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
@@ -219,7 +227,7 @@ protected:
 	const IPv4&     nexthop,
 	const uint32_t&       metric);
 
-    virtual XrlCmdError rib_0_1_replace_route6(
+    XrlCmdError rib_0_1_replace_route6(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
@@ -228,21 +236,21 @@ protected:
 	const IPv6&	nexthop,
 	const uint32_t&       metric);
 
-    virtual XrlCmdError rib_0_1_delete_route4(
+    XrlCmdError rib_0_1_delete_route4(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast,
 	const IPv4Net&	network);
 
-    virtual XrlCmdError rib_0_1_delete_route6(
+    XrlCmdError rib_0_1_delete_route6(
 	// Input values, 
 	const string&	protocol, 
 	const bool&	unicast,
 	const bool&	multicast,
 	const IPv6Net&	network);
 
-    virtual XrlCmdError rib_0_1_lookup_route4(
+    XrlCmdError rib_0_1_lookup_route4(
 	// Input values, 
 	const IPv4&	addr, 
 	const bool&	unicast,
@@ -250,7 +258,7 @@ protected:
 	// Output values, 
 	IPv4&	nexthop);
 
-    virtual XrlCmdError rib_0_1_lookup_route6(
+    XrlCmdError rib_0_1_lookup_route6(
 	// Input values, 
 	const IPv6&	addr, 
 	const bool&	unicast,
@@ -258,51 +266,51 @@ protected:
 	// Output values, 
 	IPv6&		nexthop);
 
-    virtual XrlCmdError rib_0_1_new_vif(
+    XrlCmdError rib_0_1_new_vif(
 	// Input values, 
 	const string&	name);
 
-    virtual XrlCmdError rib_0_1_add_vif_addr4(
+    XrlCmdError rib_0_1_add_vif_addr4(
 	// Input values, 
 	const string&	name, 
 	const IPv4&	addr, 
 	const IPv4Net&	subnet);
 
-    virtual XrlCmdError rib_0_1_add_vif_addr6(
+    XrlCmdError rib_0_1_add_vif_addr6(
 	// Input values, 
 	const string&	name, 
 	const IPv6&	addr, 
 	const IPv6Net&	subnet);
 
-    virtual XrlCmdError rib_0_1_redist_enable4(
+    XrlCmdError rib_0_1_redist_enable4(
 	// Input values, 
 	const string&	from, 
 	const string&	to, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_redist_enable6(
+    XrlCmdError rib_0_1_redist_enable6(
 	// Input values, 
 	const string&	from, 
 	const string&	to, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_redist_disable4(
+    XrlCmdError rib_0_1_redist_disable4(
 	// Input values, 
 	const string&	from, 
 	const string&	to, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_redist_disable6(
+    XrlCmdError rib_0_1_redist_disable6(
 	// Input values, 
 	const string&	from, 
 	const string&	to, 
 	const bool&	unicast,
 	const bool&	multicast);
 
-    virtual XrlCmdError rib_0_1_register_interest4(
+    XrlCmdError rib_0_1_register_interest4(
 	// Input values, 
         const string&	target,
 	const IPv4&	addr, 
@@ -314,13 +322,13 @@ protected:
 	IPv4&	nexthop, 
 	uint32_t&	metric);
 
-    virtual XrlCmdError rib_0_1_deregister_interest4(
+    XrlCmdError rib_0_1_deregister_interest4(
 	// Input values,  
         const string&	target,
 	const IPv4&	addr, 
 	const uint32_t&	prefix);
 
-    virtual XrlCmdError rib_0_1_register_interest6(
+    XrlCmdError rib_0_1_register_interest6(
 	// Input values, 
         const string&	target,
 	const IPv6&	addr, 
@@ -332,31 +340,31 @@ protected:
 	IPv6&	nexthop, 
 	uint32_t&	metric);
 
-    virtual XrlCmdError rib_0_1_deregister_interest6(
+    XrlCmdError rib_0_1_deregister_interest6(
 	// Input values,  
         const string&	target,
 	const IPv6&	addr, 
 	const uint32_t&	prefix);
 
-    virtual XrlCmdError fea_ifmgr_client_0_1_interface_update(
+    XrlCmdError fea_ifmgr_client_0_1_interface_update(
 	// Input values, 
 	const string&	ifname, 
 	const uint32_t&	event);
 
-    virtual XrlCmdError fea_ifmgr_client_0_1_vif_update(
+    XrlCmdError fea_ifmgr_client_0_1_vif_update(
 	// Input values, 
 	const string&	ifname, 
 	const string&	vifname, 
 	const uint32_t&	event);
 
-    virtual XrlCmdError fea_ifmgr_client_0_1_vifaddr4_update(
+    XrlCmdError fea_ifmgr_client_0_1_vifaddr4_update(
 	// Input values, 
 	const string&	ifname, 
 	const string&	vifname, 
 	const IPv4&	addr, 
 	const uint32_t&	event);
 
-    virtual XrlCmdError fea_ifmgr_client_0_1_vifaddr6_update(
+    XrlCmdError fea_ifmgr_client_0_1_vifaddr6_update(
 	// Input values, 
 	const string&	ifname, 
 	const string&	vifname, 
