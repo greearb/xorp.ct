@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.9 2003/06/03 09:58:52 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.10 2003/07/10 23:44:31 pavlin Exp $"
 
 
 //
@@ -642,7 +642,7 @@ CliClient::process_char_page_mode(uint8_t val)
 "                       | no-more command.)\n"				\
 "\n"									\
 "    -- Scroll Up --\n"							\
-"  j   ^H  ^P        *  Display the previous lien of output.\n"		\
+"  j   ^H  ^P        *  Display the previous line of output.\n"		\
 "  UpArrow\n"								\
 "  u   ^U            *  Scroll up one-half screen.\n"			\
 "  b   ^B            *  Scroll up one whole screen.\n"			\
