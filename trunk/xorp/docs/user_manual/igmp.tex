@@ -213,11 +213,14 @@ information about IGMP group membership:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxx\=\kill
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxx\=xxxx\=xxxx\=\kill
 Xorp> \textbf{show igmp group}\\
-\\
-TBD\\
-\\
+Interface  \>Group         \>Source        \>LastReported\>Timeout\\
+dc0        \>224.0.0.2     \>0.0.0.0       \>10.4.0.1     \>\>161\\
+dc0        \>224.0.0.13    \>0.0.0.0       \>10.4.0.1     \>\>159\\
+dc0        \>224.0.1.20    \>0.0.0.0       \>10.4.0.2     \>\>197\\
+dc2        \>224.0.0.2     \>0.0.0.0       \>10.3.0.2     \>\>155\\
+dc2        \>224.0.0.13    \>0.0.0.0       \>10.3.0.1     \>\>157
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -232,11 +235,12 @@ information about IGMP interfaces:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxx\=\kill
+xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxx\=x\=xxxx\=xxxxxx\=xx\=xxxxx\=x\=\kill
 Xorp> \textbf{show igmp interface}\\
-\\
-TBD\\
-\\
+Interface  \>State  \>Querier       \>Timeout\>\>\>Version\>\>Groups\\
+dc0        \>UP     \>10.4.0.1       \>\>None \>\>\>2          \>\>3\\
+dc2        \>UP     \>10.3.0.1      \>\>\>136   \>\>2          \>\>2\\
+register\_vif\>DISABLED\>0.0.0.0      \>\>None \>\>\>2          \>\>0
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -251,11 +255,12 @@ information about addresses of IGMP interfaces:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxx\=\kill
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxx\=\kill
 Xorp> \textbf{show igmp interface address}\\
-\\
-TBD\\
-\\
+Interface  \>PrimaryAddr   \>SecondaryAddr\\
+dc0        \>10.4.0.1\\
+dc2        \>10.3.0.2\\
+register\_vif\>0.0.0.0       \>10.4.0.1
 \end{tabbing}
 \end{alltt}
 \end{minipage}
