@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.18 2003/02/08 09:16:40 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.19 2003/03/10 23:20:01 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -718,10 +718,10 @@ void
 PathAttributeList<A>::rehash()
 {
     MD5_CTX context;
-    MD5Init(&context);
+    MD5_Init(&context);
     for (const_iterator i = begin(); i != end(); i++)
 	(*i)->add_hash(&context);
-    MD5Final(_hash, &context);
+    MD5_Final(_hash, &context);
 }
 
 template<class A>

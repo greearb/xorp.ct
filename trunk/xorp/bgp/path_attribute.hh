@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.12 2003/03/10 23:20:01 hodson Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.13 2003/04/15 16:37:48 hodson Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -20,8 +20,8 @@
 #include "config.h"
 #include "libxorp/xorp.h"
 
-#include <md5.h>
 #include <unistd.h>
+#include <openssl/md5.h>
 
 #include <list>
 #include <string>
@@ -141,7 +141,7 @@ public:
      * compute the hash for this object.
      */
     void add_hash(MD5_CTX *context) const	{
-	MD5Update(context, data(), wire_size());
+	MD5_Update(context, data(), wire_size());
     }
 
     virtual string str() const;

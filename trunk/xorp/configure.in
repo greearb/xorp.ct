@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.22 2003/04/15 18:55:36 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.23 2003/04/16 05:58:24 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -163,7 +163,13 @@ dnl XXX: XR_WITH_DMALLOC_DIR (a local modified version of AM_WITH_DMALLOC)
 dnl is specified later, so it will overwrite -ld
 builtin(include, config/dmalloc.m4)
 
-
+dnl ----------------------------
+dnl --with-openssl
+dnl ----------------------------
+AC_ARG_WITH(openssl,
+	[  --with-openssl=DIR      specify root of OpenSSL installation ],
+	[ xr_openssl_prefix="$withval" ]
+)
 
 dnl ---------------------------------------------------------------------------
 dnl Compiler probing
@@ -257,6 +263,35 @@ fi
 AC_SUBST(PY_BUILD)
 AC_SUBST(PYTHON)
 
+dnl ----------------------------
+dnl OpenSSL (Strictly OpenSSL MD5 implementation)
+dnl ----------------------------
+
+fail_openssl()
+{
+	echo "Could not find part of OpenSSL or one it's components in $1"
+	echo "Use --with-openssl=DIR to specify OpenSSL directory"
+	exit 1
+}
+
+if test "X${xr_openssl_prefix}" = "X" ; then
+   AC_CACHE_VAL(xr_cv_openssl_prefix, xr_cv_openssl_prefix="/usr")
+else
+   AC_CACHE_VAL(xr_cv_openssl_prefix, 
+	        xr_cv_openssl_prefix="${xr_openssl_prefix}")
+fi
+
+if test -d ${xr_cv_openssl_prefix}/include/openssl; then
+    if test "${xr_cv_openssl_prefix}" != "/usr"; then
+	CPPFLAGS="${CPPFLAGS} -I${xr_cv_openssl_prefix}/include"
+	LIBS="${LIBS} -L${xr_cv_openssl_prefix}"
+    fi
+    AC_HEADER_CHECK(openssl/md5.h, , fail_openssl "${xr_cv_openssl_prefix}")
+    AC_CHECK_LIB(crypto, MD5_Init, , fail_openssl "${xr_cv_openssl_prefix}")
+else
+    fail_openssl "${xr_cv_openssl_prefix}"
+fi
+
 dnl ---------------------------------------------------------------------------
 dnl Check for programs 
 dnl ---------------------------------------------------------------------------
@@ -304,8 +339,6 @@ AC_SEARCH_LIBS(socket, socket)
 AC_SEARCH_LIBS(inet_addr, nsl)
 AC_SEARCH_LIBS(dlopen, dl)
 
-AC_SEARCH_LIBS(MD5Init, md5 md)
-
 dnl Replace main with a function in -lc:
 dnl AC_CHECK_LIB(c, main)
 dnl XXX: XR_WITH_DMALLOC_DIR must be after -lc otherwise it won't have efect
@@ -327,7 +360,7 @@ AC_HEADER_STDC
 dnl
 dnl Check for misc. header files
 dnl
-AC_CHECK_HEADERS(sys/ioctl.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h md5global.h)
+AC_CHECK_HEADERS(sys/ioctl.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h)
 
 dnl
 dnl XXX ether_addr is defined in one of the following header files:

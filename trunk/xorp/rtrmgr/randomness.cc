@@ -12,17 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.3 2003/03/10 23:21:01 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.4 2003/04/15 16:37:47 hodson Exp $"
 
 #include "config.h"
-#include "libxorp/xorp.h"
 
 #include <fcntl.h>
-#include <md5.h>
+#include <openssl/md5.h>
 
-#include <string>
-
+#include "libxorp/xorp.h"
 #include "libxorp/eventloop.hh"
+
 #include "randomness.hh"
 
 
@@ -189,9 +188,9 @@ RandomGen::RandomGen() {
 	if (file != NULL) {
 	    uint8_t outbuf[16];
 	    MD5_CTX md5_context;
-	    MD5Init(&md5_context);
-	    MD5Update(&md5_context, _random_data, RAND_POOL_SIZE);
-	    MD5Final(outbuf, &md5_context);
+	    MD5_Init(&md5_context);
+	    MD5_Update(&md5_context, _random_data, RAND_POOL_SIZE);
+	    MD5_Final(outbuf, &md5_context);
 	    fwrite(outbuf, 1, 16, file);
 	    fwrite(&tv, 1, sizeof(tv), file);
 	    fclose(file);
@@ -239,14 +238,14 @@ bool RandomGen::read_fd(FILE *file) {
 	    //sensitive data being able to be read from a memory image.
 	    MD5_CTX md5_context;
 	    u_char chain[16];
-	    MD5Init(&md5_context);
-	    MD5Update(&md5_context, tbuf, bytes);
-	    MD5Final(chain, &md5_context);
+	    MD5_Init(&md5_context);
+	    MD5_Update(&md5_context, tbuf, bytes);
+	    MD5_Final(chain, &md5_context);
 	    for (i=0; i<RAND_POOL_SIZE/16; i++) {
-		MD5Init(&md5_context);
-		MD5Update(&md5_context, chain, 16);
-		MD5Update(&md5_context, tbuf+(i*16), 16);
-		MD5Final(chain, &md5_context);
+		MD5_Init(&md5_context);
+		MD5_Update(&md5_context, chain, 16);
+		MD5_Update(&md5_context, tbuf+(i*16), 16);
+		MD5_Final(chain, &md5_context);
 		//overwrite in situe
 		memcpy(tbuf+(i*16), chain, 16);
 		if (i*16 > bytes) {
@@ -337,14 +336,14 @@ void RandomGen::get_random_bytes(size_t len, uint8_t *buf) {
     MD5_CTX md5_context;
     size_t bytes_written = 0;
     while (bytes_written < len) {
-	MD5Init(&md5_context);
+	MD5_Init(&md5_context);
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	add_buf_to_randomness((uint8_t*)(&_counter), 4);
 	_counter++;
 	add_buf_to_randomness((uint8_t*)(&tv), sizeof(tv));
-	MD5Update(&md5_context, _random_data, RAND_POOL_SIZE);
-	MD5Final(outbuf, &md5_context);
+	MD5_Update(&md5_context, _random_data, RAND_POOL_SIZE);
+	MD5_Final(outbuf, &md5_context);
 	memcpy(buf+bytes_written, outbuf, min(16, (int)(len-bytes_written)));
 	bytes_written += min(16, (int)(len-bytes_written));
     }

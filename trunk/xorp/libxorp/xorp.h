@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.4 2003/04/15 17:09:24 hodson Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.5 2003/04/16 05:58:24 pavlin Exp $
  */
 
 
@@ -49,10 +49,6 @@
 #include <netinet/in.h>
 #include <net/route.h>
 #include <arpa/inet.h>  
-
-#ifdef HAVE_MD5GLOBAL_H
-#include <md5global.h>
-#endif
 
 #include "utility.h"
 
