@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.38 2004/01/13 00:45:48 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.39 2004/01/14 01:42:33 pavlin Exp $"
 
 #include <signal.h>
 
@@ -131,7 +131,7 @@ rtrmgr_main()
     running = true;
 
     //
-    // Install signal handlers so we can clean up when we're killed.
+    // Install signal handlers so we can clean up when we're killed
     //
     signal(SIGTERM, signalhandler);
     signal(SIGINT, signalhandler);
@@ -139,12 +139,12 @@ rtrmgr_main()
     // XXX signal(SIGSEGV, signalhandler);
 
     //
-    // Initialize the event loop.
+    // Initialize the event loop
     //
     EventLoop eventloop;
 
     //
-    // Read the router config template files.
+    // Read the router config template files
     //
     TemplateTree* tt = NULL;
     try {
@@ -162,7 +162,6 @@ rtrmgr_main()
     // These are dynamically created so we have control over the
     // deletion order.
     //
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
     FinderServer* fs = NULL;
     try {
 	fs = new FinderServer(eventloop, bind_port);
@@ -185,13 +184,13 @@ rtrmgr_main()
     }
 
     //
-    // Initialize the IPC mechanism.
+    // Initialize the IPC mechanism
     //
     XrlStdRouter xrl_router(eventloop, "rtrmgr", fs->addr(), fs->port());
     XorpClient xclient(eventloop, xrl_router);
 
     //
-    // Start the module manager.
+    // Start the module manager
     //
     ModuleManager mmgr(eventloop, /*verbose = */true, xorp_binary_root_dir());
 
@@ -235,7 +234,9 @@ rtrmgr_main()
 					      callback(signalhandler, 0));
 	}
 
-	// Loop while handling configuration events and signals.
+	//
+	// Loop while handling configuration events and signals
+	//
 	while (running) {
 	    fflush(stdout);
 	    eventloop.run();
@@ -245,10 +246,10 @@ rtrmgr_main()
 	fflush(stdout);
 
 	//
-	// Shutdown everything.
+	// Shutdown everything
 	//
 
-	// Delete the configuration.
+	// Delete the configuration
 	mct->delete_entire_config();
 
 	// Wait until changes due to deleting config have finished
@@ -263,7 +264,7 @@ rtrmgr_main()
 	errcode = 1;
     }
 
-    // Shut down child processes that haven't already been shutdown.
+    // Shut down child processes that haven't already been shutdown
     mmgr.shutdown();
 
     // Wait until child processes have terminated
@@ -296,6 +297,11 @@ main(int argc, char* const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+
+    //
+    // Install the handler for unexpected exceptions
+    //
+    XorpUnexpectedHandler ex(xorp_unexpected_handler);
 
     //
     // Expand the default variables to include the XORP root path
