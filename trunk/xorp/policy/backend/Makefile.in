@@ -100,6 +100,8 @@ libpolicybackend_a_SOURCES = instr_visitor.hh instruction.hh instruction_base.hh
 # XXX find a way to link libpolicycommon
 libpolicybackend_a_LIBADD = ../common/dispatcher.o ../common/elem_set.o ../common/element.o ../common/element_factory.o ../common/filter.o ../common/policy_utils.o ../common/register_elements.o ../common/register_operations.o
 
+
+################################################################
 INCLUDES = -I$(top_srcdir)
 subdir = policy/backend
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs

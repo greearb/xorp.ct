@@ -1,5 +1,6 @@
+## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/policy/backend/Makefile.am,v 1.1 2004/09/17 13:48:55 abittau Exp $
 ##
 
 # -- No-install Libraries
@@ -44,5 +45,10 @@ libpolicybackend_a_LIBADD		+= ../common/register_elements.o
 libpolicybackend_a_LIBADD		+= ../common/register_operations.o
 
 
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
 
 INCLUDES =      -I$(top_srcdir)

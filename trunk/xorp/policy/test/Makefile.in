@@ -107,6 +107,8 @@ execpolicy_SOURCES = execpolicy.cc file_varrw.hh file_varrw.cc
 
 execpolicy_LDADD = ../backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 
+
+################################################################
 INCLUDES = -I$(top_srcdir)
 subdir = policy/test
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs

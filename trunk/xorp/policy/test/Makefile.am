@@ -1,5 +1,6 @@
+## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/policy/test/Makefile.am,v 1.1 2004/09/17 13:49:00 abittau Exp $
 ##
 
 # -- Test Programs
@@ -41,5 +42,10 @@ execpolicy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
 
 INCLUDES =      -I$(top_srcdir)

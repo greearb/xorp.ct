@@ -97,6 +97,8 @@ noinst_LIBRARIES = libpolicycommon.a
 # Common policy library
 libpolicycommon_a_SOURCES = dispatcher.hh elem_null.hh elem_set.hh element.hh element_base.hh element_factory.hh filter.hh operator.hh operator_base.hh policy_exception.hh policy_utils.hh register_elements.hh register_operations.hh varrw.hh dispatcher.cc elem_set.cc element.cc element_factory.cc filter.cc policy_utils.cc register_elements.cc register_operations.cc
 
+
+################################################################
 INCLUDES = -I$(top_srcdir)
 subdir = policy/common
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs

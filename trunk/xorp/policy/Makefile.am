@@ -1,5 +1,6 @@
+## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/policy/Makefile.am,v 1.7 2004/09/17 13:48:47 abittau Exp $
 ##
 
 # -- Subdirectories
@@ -87,5 +88,11 @@ libpolicy_a_SOURCES		+= yacc.yy_policy_parser.h
 libpolicy_a_SOURCES		+= yacc.yy_policy_parser.cc
 libpolicy_a_SOURCES		+= lex.yy_policy_parser.cc
 
+
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
 
 INCLUDES =      -I$(top_srcdir)

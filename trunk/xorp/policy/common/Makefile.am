@@ -1,3 +1,8 @@
+## Process this file with automake to produce Makefile.in.
+##
+## $XORP$
+##
+
 # -- No-install Libraries
 noinst_LIBRARIES = libpolicycommon.a
 
@@ -27,5 +32,10 @@ libpolicycommon_a_SOURCES             += register_elements.cc
 libpolicycommon_a_SOURCES             += register_operations.cc
 
 
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
 
 INCLUDES =      -I$(top_srcdir)
