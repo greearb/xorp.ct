@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.8 2003/05/31 16:16:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.9 2003/06/01 02:17:01 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -351,6 +351,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 	break;
 #ifdef HAVE_IPV6
+    case AF_INET6:
 	XrlMfeaClientV0p1Client::send_add_mrib6(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
@@ -397,6 +398,7 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
 	    callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
 	break;
 #ifdef HAVE_IPV6
+    case AF_INET6:
 	XrlMfeaClientV0p1Client::send_delete_mrib6(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
@@ -1516,6 +1518,8 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 	// Send MRIB info
 	//
 	MribTable::iterator iter;
+	bool is_sent = false;
+	
 	for (iter = MfeaNode::mrib_table().begin();
 	     iter != MfeaNode::mrib_table().end();
 	     ++iter) {
@@ -1526,7 +1530,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 	    Vif *vif = MfeaNode::vif_find_by_vif_index(mrib->next_hop_vif_index());
 	    if (vif != NULL)
 		vif_name = vif->name();
-	    
+	    is_sent = true;
 	    switch (family()) {
 	    case AF_INET:
 		XrlMfeaClientV0p1Client::send_add_mrib4(
@@ -1541,6 +1545,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 		break;
 #ifdef HAVE_IPV6
+	    case AF_INET6:
 		XrlMfeaClientV0p1Client::send_add_mrib6(
 		    xrl_sender_name.c_str(),
 		    my_xrl_target_name(),
@@ -1561,10 +1566,12 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 	//
 	// Done
 	//
-	XrlMfeaClientV0p1Client::send_set_mrib_done(
-	    xrl_sender_name.c_str(),
-	    my_xrl_target_name(),
-	    callback(this, &XrlMfeaNode::xrl_result_set_mrib_done));
+	if (is_sent) {
+	    XrlMfeaClientV0p1Client::send_set_mrib_done(
+		xrl_sender_name.c_str(),
+		my_xrl_target_name(),
+		callback(this, &XrlMfeaNode::xrl_result_set_mrib_done));
+	}
     }
     
     //
