@@ -1,0 +1,68 @@
+/**
+ * An interface supported by Finder to pass on notifications through
+ * Xrl interfaces of Finder events.  The events supported are Xrl target
+ * birth and death events.
+ *
+ * Processes registering interest through this interface are expected to
+ * support finder_event_observer/0.1.
+ */
+interface finder_event_notifier/0.1 {
+	/**
+	 * Register interest in events relating to a particular class.
+	 *
+	 * Following this call the requester will receive birth event
+	 * notifications for existing instances within the named class and
+	 * will receive birth and deatch event notifications as instances
+	 * are created and destroyed subsequently.
+	 *
+	 * @param requester_instance instance name of Xrl Target interested
+	 * 	in receiving event notifications.
+	 *
+	 * @param class_name class of Xrl Targets to generate event
+	 *	notifications for.
+	 */
+	register_class_event_interest	 ? requester_instance:txt	\
+					 & class_name:txt
+
+	/**
+	 * Deregister interest in events relating to a particular class.
+	 *
+	 * @param requester_instance instance name of Xrl Target interested
+	 * 	in receiving event notifications.
+	 *
+	 * @param class_name class of Xrl Targets to stop event
+	 *	notifications for.
+	 */
+	deregister_class_event_interest	 ? requester_instance:txt	\
+					 & class_name:txt
+
+	/**
+	 * Register interest in events relating to a particular instance.
+	 *
+	 * Following this call the requester will receive a birth event
+	 * notification for the named instance if it exists.  When the
+	 * named instance dies, the requester will receive a death event
+	 * notification.
+	 *
+	 * This method will fail if the named instance does not exist.
+	 *
+	 * @param requester_instance instance name of Xrl Target interested
+	 * 	in receiving event notifications.
+	 *
+	 * @param instance_name name of Xrl Target instance to receive event
+	 *	notifications for.
+	 */
+	register_instance_event_interest ? requester_instance:txt	\
+					 & instance_name:txt
+	/**
+	 * Register interest in events relating to a particular instance.
+	 *
+	 * @param requester_instance instance name of Xrl Target interested
+	 * 	in receiving event notifications.
+	 *
+	 * @param instance_name name of Xrl Target instance to stop event
+	 *	notifications for.
+	 */
+	deregister_instance_event_interest ? requester_instance:txt	\
+					   & instance_name:txt
+}

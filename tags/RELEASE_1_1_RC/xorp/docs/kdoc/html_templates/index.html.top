@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>XORP Source File Documentation</TITLE>
+<!-- This style is copied from generated kdoc html-->
+<META NAME="Generator" CONTENT="KDOC ">
+<link rel="stylesheet" type="text/css" href="http://www.icir.org/hodson/xorp-test/new/xorp-kdoc.css">
+</HEAD>
+
+<BODY>
+
+<A HREF="http://www.xorp.org/"><IMG SRC="@HTML_LOGO@" ALT="XORP Logo" BORDER="0"></a>
+
+<h1>XORP Source Code Documentation</h1>
+
+<p> The following     source code documentation is available:
+
+<CENTER>
+<DIV class="listing-subtable">
+<TABLE>
+<TR><TH>Title</TH><TH>Description</TH></TR>

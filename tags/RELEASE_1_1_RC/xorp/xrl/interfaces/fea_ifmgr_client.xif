@@ -1,0 +1,23 @@
+/* 
+ * Interface implemented by routing process interested in configuration
+ * changes in the Forwarding Engine Abstraction process.
+ */
+
+/*
+ * Event enumerations:
+ * 1 = created.
+ * 2 = deleted.
+ * 3 = configuration change.
+ */
+
+interface fea_ifmgr_client/0.1 {
+	interface_update ? ifname:txt & event:u32
+
+	vif_update ? ifname:txt & vifname:txt & event:u32
+
+	vifaddr4_update ? ifname:txt & vifname:txt & addr:ipv4 & event:u32
+
+	vifaddr6_update ? ifname:txt & vifname:txt & addr:ipv6 & event:u32
+
+	updates_completed
+}

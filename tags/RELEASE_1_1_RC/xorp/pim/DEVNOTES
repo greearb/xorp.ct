@@ -1,0 +1,62 @@
+#
+# $XORP: xorp/pim/DEVNOTES,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
+#
+
+* Always call PimMre::entry_try_remove() for (S,G,rpt) routing entry
+  whenever one of the following happens:
+  - its Override Timer timeout or is canceled: PimMre::override_timer();
+  - the upstream state machine moves to RPTNotJoined or NotPruned state:
+    PimMre::set_rpt_not_joined_state()
+    PimMre::set_not_pruned_state();
+  - the downstream interface state machine moves to NoInfo state
+    PimMre::set_downstream_noinfo_state()
+
+* If accept_nohello_neighbors configuration is set to true,
+  all messages enumerated below will be accepted from a neighbor that didn't
+  send a Hello first: Join/Prune, Bootstrap, Assert, Graft, GraftAck.
+  Further, the Hello holdtime value for such neighbors will be assumed
+  to be MAX(Default_Hello_Holdtime, Default J/P Holdtime = 3.5*t_periodic)
+
+* PimRpfTable::find(const IPvX& address)
+  returns NULL if the RPF PimVif is not UP.
+
+* PimMre::check_switch_to_spt_sg() does NOT restart the KeepAliveTimer(S,G)
+  If necessary, this timer must be restarted by the function that calls
+  PimMre::check_switch_to_spt_sg()
+  
+* The SPT-bit is set only for (S,G) PimMre entry.
+  Fortunately, needs to be set only after an (S,G) Join or (S,G) Assert
+  message is received. Hence, the side effect of this is that
+  if there is (S,G) asssert, we must create (S,G) PimMre entry.
+  If the (S,G) Assert was the only reason to create a (S,G) PimMre entry,
+  we must delete that entry if the Assert state expires.
+  
+* If an output_state_t action for PimMre tracking state needs to
+  be applied to more than one type of PimMre entry,
+  then in PimMreTrackState::output_state_foo()
+  call the corresponding track_state_foo() more
+  than once: once for each PimMre entry type.
+
+* The macros in Section "4.3.  Designated Routers (DR) and Hello Messages"
+  are not added to the PimMre::track_dependency_*() methods.
+
+* PimMre::set_rp_entry() is set only for (*,G) entries. The (S,G) and (S,G,rpt)
+  entries get rp_entry() indirectly through their own (*,G) entry.
+
+* PimMrt table contains four separate lookup tables:
+  (S,G), (S,G,rpt), (*,G), and (*,*,RP) tables
+  In addition, there is a separate MFC table.
+
+* If (S,G) Assert is received, we keep it only in an (S,G) PimMre entry,
+  even if this means that we may have to create it first (e.g.,
+  when we are forwarding on (S,G,rpt) entry.
+
+* If there is an (S,G) entry, we may not have (*,G) entry.
+
+* A PimRp entry contains a list of all (*,G) entries that match to
+  that RP, but two lists of only those (S,G) and (S,G,rpt) entries
+  that don't have (*,G) entry.
+
+* Whenever pim_mre_find() is used to create a new PimMre entry,
+  make sure that pim_mre->recompute_is_join_desired_FOO();
+  is called in case none of the downstream-related state is changed.

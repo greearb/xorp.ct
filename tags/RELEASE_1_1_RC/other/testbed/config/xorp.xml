@@ -1,0 +1,246 @@
+<!-- The mappings from machines to HP Switch ports -->
+<!-- Initial file automatically generated from Motorola style config files
+by create_xml -->
+<!-- If the attribute name has the value "main" or "control" this is
+	special change it at your peril -->
+
+<testbed_physical>
+	<host name="xorp0">
+		<mac name="main" port="a1" cable='237' type="fxp" use="no">
+			<!-- Connection to main net -->
+			00:02:B3:10:DF:4F
+		</mac>
+		<mac name="f0" port="f1" cable='329' type="fxp" man="">
+			00:02:b3:10:e2:e5
+		</mac>
+		<mac name="f1" port="e1" cable='319' type="fxp" man="">
+			00:02:b3:10:e2:ec
+		</mac>
+		<mac name="f2" port="d1" cable='320' type="fxp" man="">
+			00:02:b3:10:df:aa
+		</mac>
+		<mac name="t0" port="h1" cable='327' type="tulip" man="quad">
+			00:80:c8:b9:3f:5d
+		</mac>
+		<mac name="t1" port="g1" cable='332' type="tulip" man="quad">
+			00:80:c8:b9:3f:5e
+		</mac>
+		<mac name="t2" port="b1" cable='330' type="tulip" man="quad">
+			00:80:c8:b9:3f:5f
+		</mac>
+		<mac name="t3" port="c1" cable='321' type="tulip" man="quad">
+			00:80:c8:b9:3f:60
+		</mac>
+	</host>
+	<host name="xorp1">
+		<mac name="main" port="a2" cable='238' type="fxp" use="no">
+			<!-- Connection to main net -->
+			00:02:b3:10:e2:e4
+		</mac>
+		<mac name="f0" port="f2" cable='491' type="fxp" man="">
+			00:02:b3:10:e2:e2
+		</mac>
+		<mac name="f1" port="e2" cable='312' type="fxp" man="">
+			00:02:b3:10:e2:e9
+		</mac>
+		<mac name="f2" port="d2" cable='316' type="fxp" man="">
+			00:02:b3:10:e3:e7
+		</mac>
+		<mac name="t0" port="h2" cable='307' type="tulip" man="quad">
+			00:80:c8:b9:05:59
+		</mac>
+		<mac name="t1" port="g2" cable='480' type="tulip" man="quad">
+			00:80:c8:b9:05:5a
+		</mac>
+		<mac name="t2" port="b2" cable='318' type="tulip" man="quad">
+			00:80:c8:b9:05:5b
+		</mac>
+		<mac name="t3" port="c2" cable='317' type="tulip" man="quad">
+			00:80:c8:b9:05:5c
+		</mac>
+		<mac name="t4" port="i2" cable='486' type="tulip" 
+							man="ADMtek AN985">
+			00:03:6d:1c:cf:a0
+		</mac>
+	</host>
+	<host name="xorp2">
+		<mac name="main" port="a3" cable='245' type="fxp" use="no">
+			<!-- Connection to main net -->
+			00:02:b3:10:df:ac
+		</mac>
+		<mac name="f0" port="f3" cable='478' type="fxp" man="">
+			00:02:b3:10:c2:0b
+		</mac>
+		<mac name="f1" port="e3" cable='323' type="fxp" man="">
+			00:02:b3:10:dc:df
+		</mac>
+		<mac name="f2" port="d3" cable='324' type="fxp" man="">
+			00:02:b3:09:6f:80
+		</mac>
+		<mac name="t0" port="h3" cable='481' type="tulip" man="quad">
+			00:80:c8:b9:17:c1
+		</mac>
+		<mac name="t1" port="g3" cable='479' type="tulip" man="quad">
+			00:80:c8:b9:17:c2
+		</mac>
+		<mac name="t2" port="b3" cable='326' type="tulip" man="quad">
+			00:80:c8:b9:17:c3
+		</mac>
+		<mac name="t3" port="c3" cable='325' type="tulip" man="quad">
+			00:80:c8:b9:17:c4
+		</mac>
+		<mac name="t4" port="i3" cable='484' type="tulip"
+							man="ADMtek AN985">
+			00:03:6d:1d:48:c7
+		</mac>
+	</host>
+	<host name="xorp3">
+		<mac name="main" port="a4" cable='244' type="fxp" use="no">
+			<!-- Connection to main net -->
+			00:02:b3:10:e2:ef
+		</mac>
+		<mac name="f0" port="f4" cable='482' type="fxp" man="">
+			00:02:b3:10:dc:e0
+		</mac>
+		<mac name="f1" port="e4" cable='308' type="fxp" man="">
+			00:02:b3:10:e2:eb
+		</mac>
+		<mac name="f2" port="d4" cable='309' type="fxp" man="">
+			00:02:b3:10:e2:ed
+		</mac>
+		<mac name="t0" port="h4" cable='485' type="tulip" man="quad">
+			00:80:c8:cf:ac:51
+		</mac>
+		<mac name="t1" port="g4" cable='489' type="tulip" man="quad">
+			00:80:c8:cf:ac:52
+		</mac>
+		<mac name="t2" port="b4" cable='315' type="tulip" man="quad">
+			00:80:c8:cf:ac:53
+		</mac>
+		<mac name="t3" port="c4" cable='310' type="tulip" man="quad">
+			00:80:c8:cf:ac:54
+		</mac>
+		<mac name="d0" port="i4" cable='492' type="dfe" man="dfe530tx">
+			<!-- Currently we don't have a driver for this -->
+			<!-- card. Hence no mac address -->
+			No Worries
+		</mac>
+	</host>
+	<host name="xorp4">
+		<mac name="main" port="a5" cable='246' type="fxp" use="no">
+			<!-- Connection to main net -->
+			00:02:b3:10:e2:c5
+		</mac>
+		<mac name="t4" port="i5" cable='487' type="tulip" 
+					man="linksys nc100">
+			00:04:5a:58:18:45
+		</mac>
+		<mac name="t5" port="f5" cable='488' type="tulip" 
+					man="linksys nc100">
+			00:04:5a:58:18:bc
+		</mac>
+		<mac name="t6" port="e5" cable='304' type="tulip" 
+					man="linksys nc100">
+			00:04:5a:57:91:84
+		</mac>
+		<mac name="t7" port="d5" cable='306' type="tulip" 
+					man="linksys nc100">
+			00:04:5a:49:5d:11
+		</mac>
+		<mac name="t0" port="h5" cable='490' type="tulip" man="quad">
+			00:80:c8:b9:43:4d
+		</mac>
+		<mac name="t1" port="g5" cable='483' type="tulip" man="quad">
+			00:80:c8:b9:43:4e
+		</mac>
+		<mac name="t2" port="b5" cable='314' type="tulip" man="quad">
+			00:80:c8:b9:43:4f
+		</mac>
+		<mac name="t3" port="c5" cable='311' type="tulip" man="quad">
+			00:80:c8:b9:43:50
+		</mac>
+	</host>
+        <host name="xorp5">
+		<mac name="main" port="b6" cable='224' type="sis" use="no">
+			<!-- Connection to main net -->
+                        00:00:24:c0:0e:dc
+		</mac>
+		<mac name="s0" port="c6" cable='507' type="sis" man="">
+                        00:00:24:c0:0e:dd
+		</mac>
+		<mac name="s1" port="d6" cable='506' type="sis" man="">
+                        00:00:24:c0:0e:de
+		</mac>
+        </host> 
+	<host name="xorp6">
+		<mac name="main" port="i7" cable='416' type="fxp" use="no">
+			<!-- Connection to main net -->
+			00:20:E0:60:1B:4D
+		</mac>
+		<mac name="t0" port="h7" cable='331' type="tulip" man="quad">
+			00:80:c8:b9:60:ed
+		</mac>
+		<mac name="t1" port="g7" cable='497' type="tulip" man="quad">
+			00:80:c8:b9:60:ee
+		</mac>
+		<mac name="t2" port="b7" cable='505' type="tulip" man="quad">
+			00:80:c8:b9:60:ef
+		</mac>
+		<mac name="t3" port="c7" cable='500' type="tulip" man="quad">
+			00:80:c8:b9:60:f0
+		</mac>
+        </host> 
+	<host name="xorp7">
+		<mac name="main" port="i8" cable='235' type="fxp" use="no">
+			<!-- Connection to main net -->
+			00:20:E0:60:1B:4F
+		</mac>
+		<mac name="t0" port="h8" cable='502' type="tulip" man="quad">
+			00:80:c8:b9:61:01
+		</mac>
+		<mac name="t1" port="g8" cable='498' type="tulip" man="quad">
+			00:80:c8:b9:61:02
+		</mac>
+		<mac name="t2" port="b8" cable='328' type="tulip" man="quad">
+			00:80:c8:b9:61:03
+		</mac>
+		<mac name="t3" port="c8" cable='493' type="tulip" man="quad">
+			00:80:c8:b9:61:04
+		</mac>
+        </host> 
+	<host name="xorp12">
+		<mac name="t0" port="i6" cable='611' type="tulip" man="quad">
+			172.16.0.1 
+		</mac>
+		<mac name="t1" port="h6" cable='612' type="tulip" man="quad">
+			172.16.1.1
+		</mac>
+		<mac name="t2" port="g6" cable='614' type="tulip" man="quad">
+			172.16.2.1
+		</mac>
+		<mac name="t3" port="f6" cable='615' type="tulip" man="quad">
+			172.16.3.1
+		</mac>
+        </host> 
+	<!-- These entries are here for completeness -->
+	<host name="xorpc">
+		<mac name="control" port="a6" cable='305' type="sis" use="no">
+			CONTROL
+		</mac>
+	</host>
+	<host name="xorppwr1">
+		<mac name="control" port="a7" cable='313' type="-" use="no">
+			CONTROL
+		</mac>
+	</host>
+	<host name="xorppwr2">
+		<mac name="control" port="i1" cable='504' type="-" use="no">
+			CONTROL
+		</mac>
+	</host>
+	<host name="MAIN_NET">
+		<mac name="main" port="a8" cable='247' type="-" use="no">
+			MAIN
+		</mac>
+	</host>
+</testbed_physical>

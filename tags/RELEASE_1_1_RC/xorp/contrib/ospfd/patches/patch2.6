@@ -1,0 +1,132 @@
+diff -X exclude_files -Nabur ospfd2.5/linux/Makefile ospfd2.6/linux/Makefile
+--- ospfd2.5/linux/Makefile	Wed Sep 19 08:51:02 2001
++++ ospfd2.6/linux/Makefile	Wed Sep 26 15:54:03 2001
+@@ -58,7 +58,7 @@
+ ospfd:	ospfd_linux.C linux.o system.o tcppkt.o ${OBJS}
+ 	g++ $(CXXFLAGS) $(CPPFLAGS) ospfd_linux.C linux.o system.o \
+ 	 tcppkt.o ${OBJS} \
+-	-DINSTALL_DIR=\"${INSTALL_DIR}\" -ltcl8.0 -lm -ldl -o ospfd
++	-DINSTALL_DIR=\"${INSTALL_DIR}\" -ltcl -lm -ldl -o ospfd
+ 
+ ospfd_mon: tcppkt.o lsa_prn.o
+ 
+@@ -66,7 +66,7 @@
+ 
+ clean:
+ 	rm -rf .depfiles
+-	rm -f *.o ospf_sim ospfd_sim ospfd_mon ospfd_browser
++	rm -f *.o ospfd ospfd_mon ospfd_browser
+ 
+ # Stuff to automatically maintain dependency files
+ 
+diff -X exclude_files -Nabur ospfd2.5/linux/ospfd_linux.C ospfd2.6/linux/ospfd_linux.C
+--- ospfd2.5/linux/ospfd_linux.C	Wed Sep 19 08:51:02 2001
++++ ospfd2.6/linux/ospfd_linux.C	Wed Sep 26 15:54:03 2001
+@@ -346,6 +346,9 @@
+ 	    break;
+ 	  case NLMSG_ERROR:
+ 	    errmsg = (nlmsgerr *)NLMSG_DATA(msg);
++	    // Sometimes we try to delete routes that aren't there
++	    // We ignore the resulting error messages
++	    if (errmsg->msg.nlmsg_type != RTM_DELROUTE)
+ 	    syslog(LOG_ERR, "Netlink error %d", errmsg->error);
+ 	    break;
+ 	  default:
+diff -X exclude_files -Nabur ospfd2.5/linux/system.C ospfd2.6/linux/system.C
+--- ospfd2.5/linux/system.C	Wed Sep 19 08:51:02 2001
++++ ospfd2.6/linux/system.C	Wed Sep 26 15:54:03 2001
+@@ -24,6 +24,7 @@
+ #include <asm/types.h>
+ #include <sys/time.h>
+ #include <unistd.h>
++#include <stdlib.h>
+ #include <string.h>
+ #include <sys/socket.h>
+ #if LINUX_VERSION_CODE >= LINUX22
+diff -X exclude_files -Nabur ospfd2.5/ospf_sim/linux/Makefile ospfd2.6/ospf_sim/linux/Makefile
+--- ospfd2.5/ospf_sim/linux/Makefile	Wed Sep 19 08:51:08 2001
++++ ospfd2.6/ospf_sim/linux/Makefile	Wed Sep 26 15:54:09 2001
+@@ -69,7 +69,7 @@
+ ospfd_mon: tcppkt.o lsa_prn.o
+ 
+ ospf_sim: tcppkt.o avl.o pat.o sim_linux.o ../sim.C
+-	g++ tcppkt.o avl.o pat.o sim_linux.o ../sim.C -ltcl8.0 -ltk8.0 \
++	g++ tcppkt.o avl.o pat.o sim_linux.o ../sim.C -ltcl -ltk \
+ 	${CPPFLAGS} ${CXXFLAGS} -DINSTALL_DIR=\"${INSTALL_DIR}\" \
+ 	-L/usr/X11R6/lib -lX11 -lm -ldl -o ospf_sim
+ 
+diff -X exclude_files -Nabur ospfd2.5/ospf_sim/sim_system.C ospfd2.6/ospf_sim/sim_system.C
+--- ospfd2.5/ospf_sim/sim_system.C	Wed Sep 19 08:51:07 2001
++++ ospfd2.6/ospf_sim/sim_system.C	Wed Sep 26 15:54:07 2001
+@@ -21,6 +21,7 @@
+ #include <stdio.h>
+ #include <sys/types.h>
+ #include <unistd.h>
++#include <stdlib.h>
+ #include <string.h>
+ #include <sys/socket.h>
+ #include <sys/ioctl.h>
+diff -X exclude_files -Nabur ospfd2.5/src/lsalist.C ospfd2.6/src/lsalist.C
+--- ospfd2.5/src/lsalist.C	Wed Sep 19 08:51:01 2001
++++ ospfd2.6/src/lsalist.C	Wed Sep 26 15:54:02 2001
+@@ -46,8 +46,6 @@
+     }
+ 
+     ep = (LsaListElement *) ::new char[BlkSize * sizeof(LsaListElement)];
+-    if (!ep)
+-	return(0);
+ 
+     n_free = BlkSize - 1;
+     n_allocated += BlkSize;
+diff -X exclude_files -Nabur ospfd2.5/src/mcache.h ospfd2.6/src/mcache.h
+--- ospfd2.5/src/mcache.h	Wed Sep 19 08:51:02 2001
++++ ospfd2.6/src/mcache.h	Wed Sep 26 15:54:03 2001
+@@ -62,4 +62,4 @@
+     bool valid_outgoing(int phyint, InAddr nbr_addr, byte &ttl);
+ };
+ 
+-#endif MCACHE_H
++#endif
+diff -X exclude_files -Nabur ospfd2.5/src/ospf.h ospfd2.6/src/ospf.h
+--- ospfd2.5/src/ospf.h	Wed Sep 19 08:51:01 2001
++++ ospfd2.6/src/ospf.h	Wed Sep 26 15:54:02 2001
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 5,	// Minor version number
++	vminor = 6,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.5/src/rte.C ospfd2.6/src/rte.C
+--- ospfd2.5/src/rte.C	Wed Sep 19 08:51:01 2001
++++ ospfd2.6/src/rte.C	Wed Sep 26 15:54:02 2001
+@@ -142,10 +142,11 @@
+     bool modified=false;
+     NH paths[MAXPATH];
+     int i, j;
+-    int n_paths = mp->npaths;
++    int n_paths;
+ 
+     if (!mp)
+         return(0);
++    n_paths = mp->npaths;
+     for (i = 0, j = 0; i < mp->npaths; i++, j++) {
+ 	SpfIfc *ip;
+ 	paths[j] = mp->NHs[i];
+diff -X exclude_files -Nabur ospfd2.5/src/spforig.C ospfd2.6/src/spforig.C
+--- ospfd2.5/src/spforig.C	Wed Sep 19 08:51:01 2001
++++ ospfd2.6/src/spforig.C	Wed Sep 26 15:54:02 2001
+@@ -118,8 +118,9 @@
+ 	return(InitLSSeq);
+     if (in_hitless_restart())
+         return(lsap->ls_seqno());
+-    if ((!forced) && 
+-	lsap->in_agebin && lsap->since_received() < MinLSInterval) {
++    if ((!forced) && lsap->in_agebin && 
++	(lsap->is_aging() && lsap->lsa_age() < MinLSInterval) ||
++	(lsap->do_not_age() && lsap->since_received() < MinLSInterval)) {
+ 	lsap->deferring = true;
+ 	if (spflog(LOG_LSADEFER, 3))
+ 	    log(lsap);

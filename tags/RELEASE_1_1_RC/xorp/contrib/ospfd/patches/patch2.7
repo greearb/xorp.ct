@@ -1,0 +1,438 @@
+diff -X exclude_files -Nabur ospfd2.6/linux/ospfd_linux.C ospfd2.7/linux/ospfd_linux.C
+--- ospfd2.6/linux/ospfd_linux.C	Wed Sep 26 15:54:03 2001
++++ ospfd2.7/linux/ospfd_linux.C	Mon Oct 22 13:51:59 2001
+@@ -411,7 +411,6 @@
+     rlimit rlim;
+ 
+     next_phyint = 0;
+-    memset(phys, 0, sizeof(phys));
+     (void) gettimeofday(&last_time, NULL);
+     changing_routerid = false;
+     change_complete = false;
+@@ -589,12 +588,11 @@
+ int LinuxOspfd::get_phyint(InAddr addr)
+ 
+ {
+-    int i;
+-    for (i=0; i < MAXIFs; i++) {
++    AVLsearch iter(&phyints);
+ 	BSDPhyInt *phyp;
+-	phyp = phys[i];
+-	if (phyp && (phyp->addr & phyp->mask) == (addr & phyp->mask))
+-	    return(i);
++    while ((phyp = (BSDPhyInt *)iter.next())) {
++	if ((phyp->addr & phyp->mask) == (addr & phyp->mask))
++	    return(phyp->phyint());
+     }
+ 
+     return(-1);
+@@ -638,7 +636,6 @@
+     end = (ifreq *)(ifcbuf + cfgreq.ifc_len);
+     for (; ifrp < end; ifrp = (ifreq *)(((byte *)ifrp) + size)) {
+ 	BSDPhyInt *phyp;
+-	byte *phystr;
+ 	ifreq ifr;
+ 	sockaddr_in *insock;
+ 	InAddr addr;
+@@ -646,11 +643,7 @@
+ 	size = sizeof(InAddr) + sizeof(ifrp->ifr_name);
+ 	if (size < sizeof(ifreq))
+ 	    size = sizeof(ifreq);
+-	// IP interfaces only
+-	if (ifrp->ifr_addr.sa_family != AF_INET)
+-	    continue;
+ 	// Ignore loopback interfaces
+-	// Also ignore "down" interfaces
+ 	// Get interface flags
+ 	short ifflags;
+ 	memcpy(ifr.ifr_name, ifrp->ifr_name, sizeof(ifr.ifr_name));
+@@ -670,32 +663,25 @@
+ 	    exit(1);
+ 	}
+ 	ifindex = ifr.ifr_ifindex;
++#else
++	ifindex = ++next_phyint;
+ #endif
+ 	/* Found a legitimate interface
+ 	 * Add physical interface and
+ 	 * IP address maps
+ 	 */
+-	if (!(phyp = (BSDPhyInt *) phyints.find((byte *)ifrp->ifr_name,
+-						sizeof(ifrp->ifr_name)))){
+-	    phyp = new BSDPhyInt;
+-	    phystr = new byte[sizeof(ifrp->ifr_name)];
+-	    memcpy(phystr, ifrp->ifr_name, sizeof(ifrp->ifr_name));
+-	    phyp->key = phystr;
+-	    phyp->keylen = sizeof(ifrp->ifr_name);
+-#if LINUX_VERSION_CODE < LINUX22
+-	    phyp->phyint = ++next_phyint;
+-#else
+-	    phyp->phyint = ifindex;
+-#endif
++	if (!(phyp = (BSDPhyInt *) phyints.find(ifindex, 0))) {
++	    phyp = new BSDPhyInt(ifindex);
++	    phyp->phyname = new char[strlen(ifrp->ifr_name)];
++	    strcpy(phyp->phyname, ifrp->ifr_name);
+ 	    phyp->flags = 0;
+ 	    phyints.add(phyp);
+-	    // May have multiple interfaces attached to same physical
+-	    // net
+-	    if (!phys[phyp->phyint])
+-	        phys[phyp->phyint] = phyp;
+ 	}
+ 	if (!memchr(ifrp->ifr_name, ':', sizeof(ifrp->ifr_name)))
+ 	    set_flags(phyp, ifflags);
++	// store address information; IP interfaces only
++	if (ifrp->ifr_addr.sa_family != AF_INET)
++	    continue;
+ 	insock = (sockaddr_in *) &ifrp->ifr_addr;
+ 	addr = phyp->addr = ntoh32(insock->sin_addr.s_addr);
+ 	// Get subnet mask
+@@ -761,9 +747,9 @@
+     phyp->flags = flags;
+     if (((old_flags^flags) & IFF_UP) != 0 && ospf) {
+         if ((flags & IFF_UP) != 0)
+-	    ospf->phy_up(phyp->phyint);
++	    ospf->phy_up(phyp->phyint());
+ 	else
+-	    ospf->phy_down(phyp->phyint);
++	    ospf->phy_down(phyp->phyint());
+     }
+ }
+ 
+@@ -803,49 +789,17 @@
+ 	    phyp = map->phyp;
+     }
+     else {
+-	byte ifname[IFNAMSIZ];
+-	memset(ifname, 0, IFNAMSIZ);
+-	strncpy((char *)ifname, arg, IFNAMSIZ);
+-	phyp = (BSDPhyInt *) phyints.find(ifname, IFNAMSIZ);
+-#if LINUX_VERSION_CODE >= LINUX22
+-	// Try to detect unnumbered interfaces
+-	if (!phyp) {
+-	    int ifindex;
+-	    byte *phystr;
+-	    ifreq ifr;
+-	    short ifflags;
+-	    memcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
+-	    if (memchr(ifr.ifr_name, ':', sizeof(ifr.ifr_name)))
+-	        goto done;
+-	    if (ioctl(udpfd, SIOCGIFFLAGS, (char *)&ifr) < 0)
+-	        goto done;
+-	    if ((ifr.ifr_flags & IFF_LOOPBACK) != 0)
+-	        goto done;
+-	    ifflags = ifr.ifr_flags;
+-	    // Get interface index
+-	    if (ioctl(udpfd, SIOCGIFINDEX, (char *)&ifr) < 0)
+-	        goto done;
+-	    ifindex = ifr.ifr_ifindex;
+-	    if (phys[ifindex])
+-	        goto done;
+-	    phyp = new BSDPhyInt;
+-	    phystr = new byte[sizeof(ifr.ifr_name)];
+-	    memcpy(phystr, ifr.ifr_name, sizeof(ifr.ifr_name));
+-	    phyp->key = phystr;
+-	    phyp->keylen = sizeof(ifr.ifr_name);
+-	    phyp->phyint = ifindex;
+-	    phyp->flags = 0;
+-	    phyints.add(phyp);
+-	    phys[phyp->phyint] = phyp;
+-	    set_flags(phyp, ifflags);
+-	    phyp->addr = 0;
+-	    phyp->mask = 0;
+-	    phyp->dstaddr = 0;
++        AVLsearch iter(&phyints);
++	while ((phyp = (BSDPhyInt *)iter.next())) {
++	    if (strcmp(arg, phyp->phyname))
++	        continue;
++	    // Found interface by name
++	    addr.s_addr = hton32(phyp->addr);
++	    break;
+ 	}
+-#endif
+     }
+ 
+-  done:
++
+     if (!phyp) {
+ 	syslog(LOG_ERR, "Bad interface identifier %s", arg);
+ 	return(false);
+@@ -963,7 +917,7 @@
+ 	return(TCL_OK);
+ 
+     m.address = phyp->addr;
+-    m.phyint = phyp->phyint;
++    m.phyint = phyp->phyint();
+     m.mask = phyp->mask;
+     intval = atoi(argv[2]);
+     m.mtu = (intval ? intval : phyp->mtu);
+@@ -1059,7 +1013,7 @@
+ 
+     gettimeofday(&now, 0);
+     m.address = phyp->addr;
+-    m.phyint = phyp->phyint;
++    m.phyint = phyp->phyint();
+     m.key_id = atoi(argv[2]);
+     memset(m.auth_key, 0, 16);
+     strncpy((char *) m.auth_key, argv[3], (size_t) 16);
+diff -X exclude_files -Nabur ospfd2.6/linux/ospfd_linux.h ospfd2.7/linux/ospfd_linux.h
+--- ospfd2.6/linux/ospfd_linux.h	Wed Sep 26 15:54:03 2001
++++ ospfd2.7/linux/ospfd_linux.h	Mon Oct 22 13:51:59 2001
+@@ -29,10 +29,9 @@
+     int rtsock; // rtnetlink file descriptor
+     timeval last_time; // Last return from gettimeofday
+     int next_phyint; // Next phyint value
+-    PatTree phyints; // Physical interfaces
++    AVLtree phyints; // Physical interfaces
+     AVLtree interface_map; // IP addresses to phyint
+     AVLtree directs; // Directly attached prefixes
+-    class BSDPhyInt *phys[MAXIFs];
+     rtentry m;
+     uns32 nlm_seq;
+     FILE *logstr;
+@@ -81,21 +80,35 @@
+ };
+ 
+ /* Representation of a physical interface.
+- * Used to map strings into small integers.
++ * Indexed by IfIndex (phyint).
+  */
+ 
+-class BSDPhyInt : public PatEntry {
+-    int phyint;
++class BSDPhyInt : public AVLitem {
++    char *phyname;
+     InAddr addr;
+     short flags;
+     InMask mask;
+     InAddr dstaddr;	// Other end of p-p link
+     int mtu;
+ 
++    inline BSDPhyInt(int index);
+     friend class LinuxOspfd;
+     friend int SendInterface(void *,struct Tcl_Interp *, int,char *[]);
+     friend int SendMD5Key(void *, Tcl_Interp *, int, char *argv[]);
++    inline int phyint();
+ };
++
++inline BSDPhyInt::BSDPhyInt(int index) : AVLitem(index, 0)
++{
++    addr = 0;
++    mask = 0;
++    dstaddr = 0;
++}
++
++inline int BSDPhyInt::phyint()
++{
++    return(index1());
++}
+ 
+ /* Map an IP interface (either belonging to an interface, or
+  * the other end of a point-to-point interface) to a
+diff -X exclude_files -Nabur ospfd2.6/linux/system.C ospfd2.7/linux/system.C
+--- ospfd2.6/linux/system.C	Wed Sep 26 15:54:03 2001
++++ ospfd2.7/linux/system.C	Mon Oct 22 13:52:00 2001
+@@ -67,7 +67,7 @@
+     size_t len;
+     sockaddr_in to;
+ 
+-    phyp = phys[phyint];
++    phyp = (BSDPhyInt *)phyints.find(phyint, 0);
+ #if LINUX_VERSION_CODE < LINUX22
+     if (phyp->flags & IFF_POINTOPOINT)
+ 	pkt->i_dest = hton32(phyp->dstaddr);
+@@ -154,7 +154,7 @@
+ 
+     if (phyint == -1)
+         return(false);
+-    if (!(phyp = phys[phyint]))
++    if (!(phyp = (BSDPhyInt *)phyints.find(phyint, 0)))
+         return(false);
+     return((phyp->flags & IFF_UP) != 0);
+ }
+@@ -192,7 +192,7 @@
+ #endif
+     BSDPhyInt *phyp;
+ 
+-    phyp = phys[phyint];
++    phyp = (BSDPhyInt *)phyints.find(phyint, 0);
+     if ((phyp->flags & IFF_MULTICAST) == 0)
+ 	return;
+     mreq.imr_multiaddr.s_addr = hton32(group);
+@@ -222,7 +222,7 @@
+ #endif
+     BSDPhyInt *phyp;
+ 
+-    phyp = phys[phyint];
++    phyp = (BSDPhyInt *)phyints.find(phyint, 0);
+     if ((phyp->flags & IFF_MULTICAST) == 0)
+ 	return;
+     mreq.imr_multiaddr.s_addr = hton32(group);
+@@ -301,7 +301,7 @@
+     BSDPhyInt *phyp;
+     int optname;
+ 
+-    phyp = phys[phyint];
++    phyp = (BSDPhyInt *)phyints.find(phyint, 0);
+     if (igmpfd == -1)
+         return;
+     if ((phyp->flags & IFF_MULTICAST) == 0)
+@@ -346,7 +346,7 @@
+ 	BSDPhyInt *phyp=0;
+ 	gw = mpp->NHs[0].gw;
+ 	if (mpp->NHs[0].phyint != -1)
+-	    phyp = phys[mpp->NHs[0].phyint];
++	    phyp = (BSDPhyInt *)phyints.find(mpp->NHs[0].phyint, 0);
+ 	if (phyp && (phyp->flags & IFF_POINTOPOINT) != 0)
+ 	    gw = phyp->dstaddr;
+ 	isp = (sockaddr_in *) &m.rt_gateway;
+@@ -495,7 +495,7 @@
+ 	int phyint;
+ 	gw = hton32(mpp->NHs[0].gw);
+ 	if ((phyint = mpp->NHs[0].phyint) != -1)
+-	    phyp = phys[phyint];
++	    phyp = (BSDPhyInt *)phyints.find(phyint, 0);
+ 	if (phyp && (phyp->flags & IFF_POINTOPOINT) != 0){
+ 	    // Fill in gw attribute
+ 	    rta_gw->rta_len = RTA_SPACE(sizeof(phyint));
+@@ -635,8 +635,8 @@
+ {
+     BSDPhyInt *phyp;
+ 
+-    phyp = phys[phyint];
+-    return((char *) phyp->key);
++    phyp = (BSDPhyInt *)phyints.find(phyint, 0);
++    return(phyp ? (char *) phyp->phyname : 0);
+ }
+ 
+ /* Print an OSPF logging message into the
+diff -X exclude_files -Nabur ospfd2.6/src/dbage.C ospfd2.7/src/dbage.C
+--- ospfd2.6/src/dbage.C	Wed Sep 26 15:54:02 2001
++++ ospfd2.7/src/dbage.C	Mon Oct 22 13:51:58 2001
+@@ -181,7 +181,7 @@
+     refresh_lsas();
+     maxage_lsas();
+     refresh_donotages();
+-    do_random_refreshes();
++    do_refreshes();
+ 
+     // Finish any flooding that was caused by age routines
+     send_updates();
+@@ -198,6 +198,11 @@
+ 
+ /* Go through the LSAs of age MinLSInterval, reoriginating
+  * those that have been deferred.
++ * We firest put them on a list, so that the act of reoriginating
++ * doesn't corrupt the singly linked list within t he age bins (in
++ * some cases, reoriginating one LSA causes others to be reoriginated,
++ * so it is not enough to simply remember the next LSA in the
++ * age bin).
+  */
+ 
+ void OSPF::deferred_lsas()
+@@ -205,19 +210,27 @@
+ {
+     uns16 bin;
+     LSA	*lsap;
+-    LSA	*next_lsa;
++    LsaList defer_list;
+ 
+     bin = Age2Bin(MinLSInterval);
+ 
+-    for (lsap = LSA::AgeBins[bin]; lsap; lsap = next_lsa) {
+-	next_lsa = lsap->lsa_agefwd;
++    for (lsap = LSA::AgeBins[bin]; lsap; lsap = lsap->lsa_agefwd) {
+ 	if (!lsap->deferring)
+ 	    continue;
+ 	if (lsap->adv_rtr() == myid) {
+ 	    lsap->deferring = false;
+-	    lsap->reoriginate(false);
++	    defer_list.addEntry(lsap);
+ 	}
+     }
++
++    LsaListIterator *iter;
++    iter = new LsaListIterator(&defer_list);
++    while((lsap = iter->get_next())) {
++        if (lsap->valid() && lsap->lsa_agebin == bin)
++	    lsap->reoriginate(false);
++	iter->remove_current();
++    }
++    delete iter;
+ }
+ 
+ /* Verify LSA checksums every 15 minutes, on the average.
+@@ -488,34 +501,27 @@
+ {
+     int slot;
+ 
+-    if (!random_refresh) {
+-	int msgno;
+-	msgno = lsap->do_not_age() ? LOG_DNAREFR : LOG_LSAREFR;
+-	if (spflog(msgno, 1))
+-	    log(lsap);
+-        lsap->reoriginate(true);
+-    }
+-
+-    /* We are going to randomly delay reorigination
++    /* If random_refresh, 
++     * we are going to randomly delay reorigination
+      * until some time in the next MaxAgeDiff
+      * seconds. Note: we don't care where the current
+      * refresh bin is.
+      */
+     slot = Timer::random_period(MaxAgeDiff);
+-    if (slot < 0 || slot >= MaxAgeDiff)
++    if (!random_refresh || slot < 0 || slot >= MaxAgeDiff)
+         slot = LSA::RefreshBin0;
+     LSA::RefreshBins[slot]++;
+     pending_refresh.addEntry(lsap);
+ }
+ 
+-/* Go through the list of delayed originations, and refresh
++/* Go through the list of scheduled originations, and refresh
+  * the number that have been scheduled for this 
+  * timeslot (width one second). LSAs that have already
+  * been overwritten or deleted still count against the tally,
+  * but are of course not refreshed.
+  */
+ 
+-void OSPF::do_random_refreshes()
++void OSPF::do_refreshes()
+ 
+ {
+     int count;
+diff -X exclude_files -Nabur ospfd2.6/src/monitor.C ospfd2.7/src/monitor.C
+--- ospfd2.6/src/monitor.C	Wed Sep 26 15:54:02 2001
++++ ospfd2.7/src/monitor.C	Mon Oct 22 13:51:58 2001
+@@ -557,7 +557,7 @@
+ 	rtersp->net = hton32(rte->net());
+ 	rtersp->mask = hton32(rte->mask());
+ 	strncpy(rtersp->type, rtt_ascii[rte->type()], MON_RTYPELEN);
+-	if (rte->t2cost == Infinity) {
++	if (rte->intra_AS() || rte->t2cost == Infinity) {
+ 	    rtersp->cost = hton32(rte->cost);
+ 	    rtersp->o_cost = 0;
+ 	}
+diff -X exclude_files -Nabur ospfd2.6/src/ospf.h ospfd2.7/src/ospf.h
+--- ospfd2.6/src/ospf.h	Wed Sep 26 15:54:02 2001
++++ ospfd2.7/src/ospf.h	Mon Oct 22 13:51:58 2001
+@@ -245,7 +245,7 @@
+     void free_maxage_lsas();
+     void donotage_changes();
+     void schedule_refresh(LSA *);
+-    void do_random_refreshes();
++    void do_refreshes();
+ 
+     // LSA origination
+     int	self_originated(SpfNbr *, LShdr *hdr, LSA *database_copy);
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 6,	// Minor version number
++	vminor = 7,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code

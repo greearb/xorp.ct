@@ -1,0 +1,7 @@
+/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.4 2004/09/17 14:05:11 abittau Exp $ */
+
+#include "common.xif"
+#include "profile_client.xif"
+
+target profiler implements	common/0.1,				\
+				profile_client/0.1
