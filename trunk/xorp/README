@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.10 2003/06/06 08:52:26 pavlin Exp $
+# $XORP: xorp/README,v 1.11 2003/06/09 19:13:32 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -261,7 +261,15 @@ The core team currently consists of:
   * Sponsors (in chronological order, oldest first):
     - AT&T funding (through ICIR)
     - Intel Corporation
-    - NSF grant (NSF/ANI 12954).
+    - NSF grant (ANI-0129541).
+      The following acknowledgment and disclaimer applies for the NSF
+      support:
+	This material is based upon work supported by the National
+	Science Foundation under Grant No. 0129541.
+	Any opinions, findings, and conclusions or recommendations
+	expressed in this material are those of the author(s) and do not
+	necessarily reflect the views of the National Science Foundation.
+
   * Martin C. Shepherd for the libtecla library (used by the CLI).
 
 8. Additional information
