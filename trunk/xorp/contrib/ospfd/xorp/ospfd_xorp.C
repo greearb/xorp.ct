@@ -27,6 +27,8 @@
 #include <netinet/in.h>
 #include <netinet/ip.h>
 
+#include <arpa/inet.h>
+
 #include <net/if.h>
 
 #include "ospf_module.h"
