@@ -99,8 +99,8 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	com1 = com0->add_command(*iter, "help");
 	com1->set_global_name(*iter);
 	// Set the callback to generate the node's children
-	com1->set_dynamic_children(callback(op_cmd_list(),
-					    &OpCommandList::childlist));
+	com1->set_dynamic_children_callback(callback(op_cmd_list(),
+						     &OpCommandList::childlist));
 	// Set the callback to pass to the node's children when they
 	// are executed
 	com1->set_dynamic_process_callback(callback(this,
