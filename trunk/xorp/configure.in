@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.50 2003/06/27 00:40:57 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.51 2003/07/16 03:45:40 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -39,6 +39,11 @@ AC_CANONICAL_SYSTEM
 AC_CONFIG_SUBDIRS(cli/libtecla)
 AM_INIT_AUTOMAKE(xorp, 0.3)
 AM_CONFIG_HEADER(config.h)
+
+dnl
+dnl Change the default installation prefix
+dnl
+AC_PREFIX_DEFAULT(/usr/local/xorp)
 
 # Add --enable-maintainer-mode as a command-line option for folks who
 # want to play with auto* tools.

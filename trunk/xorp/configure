@@ -260,6 +260,7 @@ PACKAGE_BUGREPORT=
 
 ac_unique_file="libxorp/xorp.h"
 ac_subdirs_all="$ac_subdirs_all cli/libtecla"
+ac_default_prefix=/usr/local/xorp
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -1644,6 +1645,8 @@ INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 
 
 		    		    		    ac_config_headers="$ac_config_headers config.h"
+
+
 
 
 # Add --enable-maintainer-mode as a command-line option for folks who
