@@ -79,7 +79,7 @@ PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 
 noinst_LIBRARIES = libxorp.a
-TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_ref_ptr test_ref_trie test_test_main test_time_slice test_timer test_trie test_types test_vif 
+TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_ref_ptr test_ref_trie test_test_main test_time_slice test_timer test_timeval test_trie  test_types test_vif 
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -103,6 +103,7 @@ test_ref_trie_SOURCES = test_ref_trie.cc
 test_test_main_SOURCES = test_test_main.cc
 test_time_slice_SOURCES = test_time_slice.cc
 test_timer_SOURCES = test_timer.cc
+test_timeval_SOURCES = test_timeval.cc
 test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
 test_vif_SOURCES = test_vif.cc
@@ -192,6 +193,10 @@ test_timer_OBJECTS =  test_timer.o
 test_timer_LDADD = $(LDADD)
 test_timer_DEPENDENCIES =  libxorp.a
 test_timer_LDFLAGS = 
+test_timeval_OBJECTS =  test_timeval.o
+test_timeval_LDADD = $(LDADD)
+test_timeval_DEPENDENCIES =  libxorp.a
+test_timeval_LDFLAGS = 
 test_trie_OBJECTS =  test_trie.o
 test_trie_LDADD = $(LDADD)
 test_trie_DEPENDENCIES =  libxorp.a
@@ -230,11 +235,12 @@ DEP_FILES =  .deps/asyncio.P .deps/c_format.P .deps/debug.P \
 .deps/test_ipv4net.P .deps/test_ipv6.P .deps/test_ipv6net.P \
 .deps/test_ipvx.P .deps/test_ipvxnet.P .deps/test_mac.P \
 .deps/test_ref_ptr.P .deps/test_ref_trie.P .deps/test_test_main.P \
-.deps/test_time_slice.P .deps/test_timer.P .deps/test_trie.P \
-.deps/test_types.P .deps/test_vif.P .deps/time_slice.P .deps/timer.P \
-.deps/token.P .deps/transaction.P .deps/vif.P .deps/xlog.P
-SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
-OBJECTS = $(libxorp_a_OBJECTS) $(test_asyncio_OBJECTS) $(test_callback_OBJECTS) $(test_config_param_OBJECTS) $(test_ipnet_OBJECTS) $(test_ipv4_OBJECTS) $(test_ipv4net_OBJECTS) $(test_ipv6_OBJECTS) $(test_ipv6net_OBJECTS) $(test_ipvx_OBJECTS) $(test_ipvxnet_OBJECTS) $(test_mac_OBJECTS) $(test_ref_ptr_OBJECTS) $(test_ref_trie_OBJECTS) $(test_test_main_OBJECTS) $(test_time_slice_OBJECTS) $(test_timer_OBJECTS) $(test_trie_OBJECTS) $(test_types_OBJECTS) $(test_vif_OBJECTS)
+.deps/test_time_slice.P .deps/test_timer.P .deps/test_timeval.P \
+.deps/test_trie.P .deps/test_types.P .deps/test_vif.P \
+.deps/time_slice.P .deps/timer.P .deps/token.P .deps/transaction.P \
+.deps/vif.P .deps/xlog.P
+SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+OBJECTS = $(libxorp_a_OBJECTS) $(test_asyncio_OBJECTS) $(test_callback_OBJECTS) $(test_config_param_OBJECTS) $(test_ipnet_OBJECTS) $(test_ipv4_OBJECTS) $(test_ipv4net_OBJECTS) $(test_ipv6_OBJECTS) $(test_ipv6net_OBJECTS) $(test_ipvx_OBJECTS) $(test_ipvxnet_OBJECTS) $(test_mac_OBJECTS) $(test_ref_ptr_OBJECTS) $(test_ref_trie_OBJECTS) $(test_test_main_OBJECTS) $(test_time_slice_OBJECTS) $(test_timer_OBJECTS) $(test_timeval_OBJECTS) $(test_trie_OBJECTS) $(test_types_OBJECTS) $(test_vif_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -349,6 +355,10 @@ test_time_slice: $(test_time_slice_OBJECTS) $(test_time_slice_DEPENDENCIES)
 test_timer: $(test_timer_OBJECTS) $(test_timer_DEPENDENCIES)
 	@rm -f test_timer
 	$(CXXLINK) $(test_timer_LDFLAGS) $(test_timer_OBJECTS) $(test_timer_LDADD) $(LIBS)
+
+test_timeval: $(test_timeval_OBJECTS) $(test_timeval_DEPENDENCIES)
+	@rm -f test_timeval
+	$(CXXLINK) $(test_timeval_LDFLAGS) $(test_timeval_OBJECTS) $(test_timeval_LDADD) $(LIBS)
 
 test_trie: $(test_trie_OBJECTS) $(test_trie_DEPENDENCIES)
 	@rm -f test_trie
