@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib_client.xif,v 1.2 2002/09/23 22:22:28 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib_client.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
 
 /*
  * Routing Information Base XRL interface, client interface for
@@ -18,7 +18,6 @@ interface rib_client/0.1 {
 	 *
 	 * @param prefix_len prefix length of the subnet that was registered
 	 */
-
 	route_info_changed4 ? addr:ipv4 & prefix_len:u32 & \
 			      nexthop:ipv4 & metric:u32
 	route_info_changed6 ? addr:ipv6 & prefix_len:u32 & \
@@ -37,7 +36,6 @@ interface rib_client/0.1 {
          * interest in the route, and the client will normally need to
          * send a register_interest request again.
          */
-
 	route_info_invalid4 ? addr:ipv4 & prefix_len:u32
 	route_info_invalid6 ? addr:ipv6 & prefix_len:u32
 }    

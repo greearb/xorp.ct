@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.2 2003/03/10 20:26:48 mjh Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -118,7 +118,6 @@ interface rib/0.1 {
 	 *
 	 * @param metric returns the IGP metric for this route
          */
-
 	register_interest4 ? target:txt & addr:ipv4 \
 		-> resolves:bool & base_addr:ipv4 & prefix:u32 & \
                    realprefix:u32 & nexthop:ipv4 & metric:u32
@@ -136,7 +135,6 @@ interface rib/0.1 {
 	 * @param prefix the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */
-
 	deregister_interest4 ?  target:txt & addr:ipv4 & prefix:u32
 
 	/**
@@ -167,7 +165,6 @@ interface rib/0.1 {
 	 *
 	 * @param metric returns the IGP metric for this route
          */
-
 	register_interest6 ? target:txt & addr:ipv6 \
 		-> resolves:bool & base_addr:ipv6 & prefix:u32 & \
                    realprefix:u32 & nexthop:ipv6 & metric:u32
@@ -185,7 +182,6 @@ interface rib/0.1 {
 	 * @param prefix the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */
-
 	deregister_interest6 ?  target:txt & addr:ipv6 & prefix:u32
 }
 
