@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.56 2004/02/20 04:38:18 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.57 2004/03/04 17:49:55 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -452,20 +452,19 @@ BGPPeer::event_open()			// EVENTBGPTRANOPEN
 
     case STATECONNECT:
     case STATEACTIVE: {
-	OpenPacket *open_packet =
-	    new OpenPacket(_localdata->as(),
-		    _localdata->id(),
-		    _peerdata->get_configured_hold_time());
+	OpenPacket open_packet(_localdata->as(),
+			       _localdata->id(),
+			       _peerdata->get_configured_hold_time());
 
 	ParameterList::const_iterator
 	    pi = _peerdata->parameter_sent_list().begin();
 	while(pi != _peerdata->parameter_sent_list().end()) {
 	    const BGPParameter *par = pi->get();
-	    open_packet->add_parameter(par);
+	    open_packet.add_parameter(par);
 	    pi++;
 	}
 
-	send_message(*open_packet);
+	send_message(open_packet);
 
 	clear_connect_retry_timer();
 	if (_state == STATEACTIVE) {
