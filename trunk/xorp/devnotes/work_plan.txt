@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.18 2003/06/04 21:53:45 pavlin Exp $
+# $XORP: xorp/devnotes/work_plan.txt,v 1.19 2003/06/11 00:02:11 pavlin Exp $
 #
 
 Priority:
@@ -25,6 +25,8 @@ For 0.4:
 
 For 0.x:
 * Equal-cost multipath					L	??
+* Add support for discard interface			H	PR
+  (pkts routed on that interface are discarded).
 
 Longer Term tasks
 -----------------
@@ -37,13 +39,20 @@ Immediate Tasks                                       Priority Who
 For 0.4:
 * Add route tag support to routing->RIB interface 	M	MH
   to support policy filtering
+  - ask Mark re. this
 * Equal-cost multipath					M	MH
+  - add info when a set of routes should be together; propagate
+    that info down to the FEA
 * Handle route process death				H	MH/??
+  - see the error-handling document (e.g., exit if the FEA is gone)
 
 For 0.x:
 * Support recursive BGP Lookups				L	MH
 * Add XRL interface to dump routing table state		M	MH
   (for monitoring/informational purpose: xorpsh, etc).
+* Add support for discard interface			H	PR
+  (pkts routed on that interface are discarded).
+
 
 Longer Term tasks
 -----------------
@@ -53,10 +62,11 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.4:
+* Make the tests working again				H	AG
 * Add test for unrecognized optional transitive attributes H	AG
 * IPv6 support						L	AG
 * Monitoring/Instrumentation (show ip bgp, MIB)		H	JC
-  (add a trie iterator to libxorp trie implementation)
+  (DONE: add a trie iterator to libxorp trie implementation)
 * Finish Kdoc'ing BGP                                   L	as needed
 
 For 0.x:
@@ -128,9 +138,11 @@ For 0.4:
 * BGP user tutorial					H	Everyone
 * FEA user tutorial (vifs, etc)				H	Everyone
 * Task interruption.
-  (make sure that the task is interrupted at the server	H	MH+PR
-   process)
-
+  - make sure that the task is interrupted at the	H	MH+PR
+    server process. XXX: if we hit Ctrl-C in UNIX,
+    is the expected result? Undetermined, hence
+    do we need to do anything in case of xorpsh?
+* Make sure that XORPSH can be started via a shell script H	PR
 
 For 0.x:
 
@@ -153,22 +165,17 @@ For 0.4:
 For 0.x:
 * Implementation of RIPng				M	OH
 
-================================ Other =======================================
-For 1.0:
-* Simulation-like environment for running XORP		H Defer	PR  3-6 months
-
-Longer Term tasks
------------------
-* Rewrite CLI						L	PR  2-3 weeks
-
 ================================ SNMP  =======================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.4:
 * Write bgp4_mib_1657 module				Incomplete JC 3 weeks
-* Hide events synchronization				H	JC
-* Fix snmpd termination problem				H	JC
+* Hide events synchronization				Done	JC
+* Fix snmpd termination problem				Done	JC
 * Implement SNMP traps					M	JC
+
+For 0.x:
+* Improve documentation					H	JC few days
 
 ================================ TESTS =======================================
 Immediate Tasks                                       Priority Who
@@ -176,6 +183,16 @@ Immediate Tasks                                       Priority Who
 For 0.4:
 * Use BGP/RIB/FEA test-router on xorp8			H	Everyone
   (think what exactly we want to happen)
+
+================================ Other =======================================
+
+For 1.0:
+* Simulation-like environment for running XORP		H Defer	PR  3-6 months
+* Implement Web manager					H	JC  by 10/03
+
+Longer Term tasks
+-----------------
+* Rewrite CLI						L	PR  2-3 weeks
 
 ================================ Next Release ================================
 * Next release (xorp-0.4): August 14, 2003
@@ -185,7 +202,7 @@ Immediate Tasks                                       Priority Who
 * Finder notifications handling				H	Everyone
   (handling death of processes you depend on)
 * Need to complete support for error handling as 	H	Everyone
-    specified in error doc.
+    specified in error doc (bgp: done)
 * Process name convention: xorp_foo
 * Work-out the conventions for command-line options	M	OH
 * Test programs infrastructure				L	OH+PR
