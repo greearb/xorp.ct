@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.29 2004/03/23 11:24:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.30 2004/03/24 19:14:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -44,7 +44,7 @@ XrlRibTarget::common_0_1_get_version(string& v)
 
 XrlCmdError
 XrlRibTarget::common_0_1_get_status(
-    // Output values, 
+    // Output values,
     uint32_t& status,
     string&	reason)
 {
@@ -93,10 +93,10 @@ XrlRibTarget::rib_0_1_stop_rib()
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_rib_client4(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
-    const bool&		multicast) 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
+    const bool&		multicast)
 {
     if (_rib_manager->add_rib_client(target_name, AF_INET, unicast,
 				     multicast) != XORP_OK) {
@@ -107,10 +107,10 @@ XrlRibTarget::rib_0_1_add_rib_client4(
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_rib_client6(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
-    const bool&		multicast) 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
+    const bool&		multicast)
 {
 #ifndef HAVE_IPV6
     UNUSED(target_name);
@@ -128,9 +128,9 @@ XrlRibTarget::rib_0_1_add_rib_client6(
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_rib_client4(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
     const bool&		multicast)
 {
     if (_rib_manager->delete_rib_client(target_name, AF_INET, unicast,
@@ -142,9 +142,9 @@ XrlRibTarget::rib_0_1_delete_rib_client4(
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_rib_client6(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
     const bool&		multicast)
 {
 #ifndef HAVE_IPV6
@@ -163,9 +163,9 @@ XrlRibTarget::rib_0_1_delete_rib_client6(
 
 XrlCmdError
 XrlRibTarget::rib_0_1_enable_rib_client4(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
     const bool&		multicast)
 {
     if (_rib_manager->enable_rib_client(target_name, AF_INET, unicast,
@@ -177,9 +177,9 @@ XrlRibTarget::rib_0_1_enable_rib_client4(
 
 XrlCmdError
 XrlRibTarget::rib_0_1_enable_rib_client6(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
     const bool&		multicast)
 {
 #ifndef HAVE_IPV6
@@ -198,23 +198,23 @@ XrlRibTarget::rib_0_1_enable_rib_client6(
 
 XrlCmdError
 XrlRibTarget::rib_0_1_disable_rib_client4(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
-    const bool&		multicast) 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
+    const bool&		multicast)
 {
     if (_rib_manager->disable_rib_client(target_name, AF_INET, unicast,
 					 multicast) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED("Failed to disable rib client");
-    }    
+    }
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_disable_rib_client6(
-    // Input values, 
-    const string&	target_name, 
-    const bool&		unicast, 
+    // Input values,
+    const string&	target_name,
+    const bool&		unicast,
     const bool&		multicast)
 {
 #ifndef HAVE_IPV6
@@ -226,19 +226,19 @@ XrlRibTarget::rib_0_1_disable_rib_client6(
     if (_rib_manager->disable_rib_client(target_name, AF_INET6, unicast,
 					 multicast) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED("Failed to disable rib client");
-    }    
+    }
     return XrlCmdError::OKAY();
 #endif // HAVE_IPV6
 }
 
-XrlCmdError 
+XrlCmdError
 XrlRibTarget::rib_0_1_no_fea()
 {
     _rib_manager->no_fea();
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlRibTarget::rib_0_1_make_errors_fatal()
 {
     _rib_manager->make_errors_fatal();
@@ -827,13 +827,13 @@ XrlRibTarget::rib_0_1_add_vif_addr6(const string&	name,
     return XrlCmdError::OKAY();
 }
 
-
-
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_enable4(const string&	from,
+XrlRibTarget::rib_0_1_redist_enable4(const string&	/* router_name */,
+				     const string&	from,
 				     const string&	to,
 				     const bool&	unicast,
-				     const bool&	multicast)
+				     const bool&	multicast,
+				     const string&	/* cookie */)
 {
     if (unicast && _urib4.redist_enable(from, to) != XORP_OK) {
 	string err = c_format("Failed to enable unicast IPv4 redistribution "
@@ -853,10 +853,12 @@ XrlRibTarget::rib_0_1_redist_enable4(const string&	from,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_enable6(const string&	from,
+XrlRibTarget::rib_0_1_redist_enable6(const string&	/* router_name */,
+				     const string&	from,
 				     const string&	to,
 				     const bool&	unicast,
-				     const bool&	multicast)
+				     const bool&	multicast,
+				     const string&	/* cookie */)
 {
     if (unicast && _urib6.redist_enable(from, to) != XORP_OK) {
 	string err = c_format("Failed to enable unicast IPv6 redistribution "
@@ -876,7 +878,8 @@ XrlRibTarget::rib_0_1_redist_enable6(const string&	from,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_disable4(const string&	from,
+XrlRibTarget::rib_0_1_redist_disable4(const string&	/* router_name */,
+				      const string&	from,
 				      const string&	to,
 				      const bool&	unicast,
 				      const bool&	multicast)
@@ -899,7 +902,8 @@ XrlRibTarget::rib_0_1_redist_disable4(const string&	from,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_disable6(const string&	from,
+XrlRibTarget::rib_0_1_redist_disable6(const string&	/* router_name */,
+				      const string&	from,
 				      const string&	to,
 				      const bool&	unicast,
 				      const bool&	multicast)
@@ -917,7 +921,7 @@ XrlRibTarget::rib_0_1_redist_disable6(const string&	from,
 			      from.c_str(), to.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -1087,12 +1091,12 @@ XrlRibTarget::fea_ifmgr_client_0_1_vifaddr6_update(// Input values,
 }
 
 
-XrlCmdError 
+XrlCmdError
 XrlRibTarget::finder_event_observer_0_1_xrl_target_birth(
-        const string&	target_class, 
+        const string&	target_class,
 	const string&	target_instance)
 {
-    debug_msg(("Target Birth: " + target_class + " " + target_instance 
+    debug_msg(("Target Birth: " + target_class + " " + target_instance
 	       + "\n").c_str());
     UNUSED(target_class);
     UNUSED(target_instance);
@@ -1100,12 +1104,12 @@ XrlRibTarget::finder_event_observer_0_1_xrl_target_birth(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlRibTarget::finder_event_observer_0_1_xrl_target_death(
-	const string&	target_class, 
+	const string&	target_class,
 	const string&	target_instance)
 {
-    debug_msg(("Target Death: " + target_class + " " + target_instance 
+    debug_msg(("Target Death: " + target_class + " " + target_instance
 	       + "\n").c_str());
     _rib_manager->target_death(target_class, target_instance);
     return XrlCmdError::OKAY();

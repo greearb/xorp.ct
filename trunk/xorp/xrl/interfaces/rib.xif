@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.10 2004/02/06 22:43:26 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.11 2004/03/23 11:24:26 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -15,10 +15,10 @@ interface rib/0.1 {
 
 	/**
 	 * Add/delete/enable/disable a RIB client.
-	 * 
+	 *
 	 * Add/delete/enable/disable a RIB client for a given target name,
 	 * address family, and unicast/multicast flags.
-	 * 
+	 *
 	 * @param target_name the target name of the RIB client.
 	 * @param unicast true if a client for the unicast RIB.
 	 * @param multicast true if a client for the multicast RIB.
@@ -49,12 +49,12 @@ interface rib/0.1 {
 
 	/**
 	 * Don't send anything to the FEA - used for testing only
-	 */	
-	no_fea 
+	 */
+	no_fea
 
 	/**
 	 * Make errors fatal; used to detect errors we'd normally mask
-	 */	
+	 */
 	make_errors_fatal
 
 	/**
@@ -81,7 +81,7 @@ interface rib/0.1 {
 	delete_igp_table6	? protocol:txt				\
 				& target_class:txt & target_instance:txt\
 				& unicast:bool & multicast:bool
-	
+
 	add_egp_table4		? protocol:txt				\
 				& target_class:txt & target_instance:txt\
 				& unicast:bool & multicast:bool
@@ -194,20 +194,118 @@ interface rib/0.1 {
 	 */
 	lookup_route6 ? addr:ipv6 & unicast:bool & multicast:bool	      \
 		-> nexthop:ipv6
-	
+
 	new_vif ? name:txt
-	
+
 	add_vif_addr4 ? name:txt & addr:ipv4 & subnet:ipv4net
 
 	add_vif_addr6 ? name:txt & addr:ipv6 & subnet:ipv6net
-	
-	redist_enable4 ? from:txt & to:txt & unicast:bool & multicast:bool
 
-	redist_enable6	? from:txt & to:txt & unicast:bool & multicast:bool
+	/**
+	 * Enable route redistribution from one routing protocol to
+	 * another.
+	 *
+	 * @param target the XRL Target instance name of the caller.
+	 *	  The caller must implement redist4/0.1.
+	 *
+	 * @param from the name of the routing process routes are to be
+	 *	  redistributed from.
+	 *
+	 * @param to the name of the routing process routes are to be
+	 *	  redistributed to.
+	 *
+	 * @param unicast enable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast enable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through it redist_client/0.1
+	 *	  interface.
+	 */
+	redist_enable4 ? target:txt					\
+		       & from:txt					\
+		       & to:txt						\
+		       & unicast:bool					\
+		       & multicast:bool					\
+		       & cookie:txt
 
-	redist_disable4	? from:txt & to:txt & unicast:bool & multicast:bool
+	/**
+	 * Enable route redistribution from one routing protocol to
+	 * another.
+	 *
+	 * @param target the XRL Target instance name of the caller.
+	 *	  The caller must implement redist6/0.1.
+	 *
+	 * @param from the name of the routing process routes are to be
+	 *	  redistributed from.
+	 *
+	 * @param to the name of the routing process routes are to be
+	 *	  redistributed to.
+	 *
+	 * @param unicast enable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast enable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through it redist_client/0.1
+	 *	  interface.
+	 */
+	redist_enable6 ? target:txt					\
+		       & from:txt					\
+		       & to:txt						\
+		       & unicast:bool					\
+		       & multicast:bool					\
+		       & cookie:txt
 
-	redist_disable6	? from:txt & to:txt & unicast:bool & multicast:bool
+	/**
+	 * Disable route redistribution from one routing protocol to
+	 * another.
+	 *
+	 * @param target the XRL Target instance name of the caller.
+	 *	  The caller must implement redist4/0.1 and previously
+	 *	  called redist_enable4.
+	 *
+	 * @param from the name of the routing process routes are to be
+	 *	  redistributed from.
+	 *
+	 * @param to the name of the routing process routes are to be
+	 *	  redistributed to.
+	 *
+	 * @param unicast disable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast disable for multicast RIBs matching from and to.
+	 */
+	redist_disable4	? target:txt					\
+			& from:txt					\
+			& to:txt					\
+			& unicast:bool					\
+			& multicast:bool
+
+	/**
+	 * Disable route redistribution from one routing protocol to
+	 * another.
+	 *
+	 * @param target:txt the XRL Target instance name of the caller.
+	 *	  The caller must implement redist6/0.1 and previously
+	 *	  called redist_enable6.
+	 *
+	 * @param from:txt the name of the routing process routes are to be
+	 *	  redistributed from.
+	 *
+	 * @param to:txt the name of the routing process routes are to be
+	 *	  redistributed to.
+	 *
+	 * @param unicast disable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast disable for multicast RIBs matching from and to.
+	 */
+	redist_disable6	? target:txt					\
+			& from:txt					\
+			& to:txt					\
+			& unicast:bool					\
+			& multicast:bool
 
 	/**
  	 * Register an interest in a route
@@ -232,7 +330,7 @@ interface rib/0.1 {
          * not the same as prefix_len, this is because there are some more
          * specific routes that overlap addr/real_prefix_len.  real_prefix_len
          * is primarily given for debugging reasons.
-	 * 
+	 *
 	 * @param nexthop returns the address of the next hop for packets sent
 	 * to addr
 	 *
@@ -251,7 +349,7 @@ interface rib/0.1 {
 	 * @param addr the address of the previous registered
          * interest.  addr should be the base address of the
          * add/prefix_len subnet.
-	 * 
+	 *
 	 * @param prefix_len the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */
@@ -279,7 +377,7 @@ interface rib/0.1 {
          * not the same as prefix_len, this is because there are some more
          * specific routes that overlap addr/real_prefix_len.  real_prefix_len
          * is primarily given for debugging reasons.
-	 * 
+	 *
 	 * @param nexthop returns the address of the next hop for packets sent
 	 * to addr
 	 *
@@ -298,7 +396,7 @@ interface rib/0.1 {
 	 * @param addr the address of the previous registered
          * interest.  addr should be the base address of the
          * add/prefix_len subnet.
-	 * 
+	 *
 	 * @param prefix_len the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.5 2003/09/27 22:32:45 mjh Exp $
+// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.7 2004/02/11 08:48:46 pavlin Exp $
 
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
@@ -30,8 +30,8 @@ enum XrlCompletion {
 
 // Simple handler - most of RIB interface just returns true/false
 
-static void 
-pass_fail_handler(const XrlError& e, XrlCompletion* c) 
+static void
+pass_fail_handler(const XrlError& e, XrlCompletion* c)
 {
     if (e == XrlError::OKAY()) {
 	*c = SUCCESS;
@@ -47,10 +47,10 @@ pass_fail_handler(const XrlError& e, XrlCompletion* c)
 
 class XrlRouteAddCommand : public RouteAddCommand {
 public:
-    XrlRouteAddCommand(EventLoop&	 e, 
+    XrlRouteAddCommand(EventLoop&	 e,
 		       XrlRibV0p1Client& xrl_client,
-		       XrlCompletion&	 completion) 
-	: RouteAddCommand(), 
+		       XrlCompletion&	 completion)
+	: RouteAddCommand(),
  	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
@@ -75,10 +75,10 @@ private:
 
 class XrlRouteDeleteCommand : public RouteDeleteCommand {
 public:
-    XrlRouteDeleteCommand(EventLoop&		e, 
+    XrlRouteDeleteCommand(EventLoop&		e,
 			  XrlRibV0p1Client&	xrl_client,
 			  XrlCompletion&	completion)
-	: RouteDeleteCommand(), 
+	: RouteDeleteCommand(),
 	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
@@ -89,7 +89,7 @@ public:
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_delete_route4(
-	    "rib", _tablename, unicast, multicast, _net, 
+	    "rib", _tablename, unicast, multicast, _net,
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;
@@ -106,7 +106,7 @@ public:
     XrlRedistEnableCommand(EventLoop&		e,
 			   XrlRibV0p1Client&	xrl_client,
 			   XrlCompletion&	completion)
-	: RedistEnableCommand(), 
+	: RedistEnableCommand(),
 	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
@@ -117,8 +117,8 @@ public:
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_redist_enable4(
-	    "rib", _from_table, _to_table, unicast, multicast, 
-	    callback(&pass_fail_handler, &_completion));
+	    "rib", "target", _from_table, _to_table, unicast, multicast,
+	    "cookie", callback(&pass_fail_handler, &_completion));
 
 	return _completion;
     }
@@ -131,9 +131,9 @@ private:
 
 class XrlRedistDisableCommand : public RedistDisableCommand {
 public:
-    XrlRedistDisableCommand(EventLoop&		e, 
+    XrlRedistDisableCommand(EventLoop&		e,
 			    XrlRibV0p1Client&	xrl_client,
-			    XrlCompletion&	completion) 
+			    XrlCompletion&	completion)
 	: RedistDisableCommand(),
 	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
@@ -145,7 +145,7 @@ public:
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_redist_disable4(
-	    "rib", _from_table, _to_table, unicast, multicast,
+	    "rib", "target", _from_table, _to_table, unicast, multicast,
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;
@@ -159,7 +159,7 @@ private:
 
 class XrlAddIGPTableCommand : public AddIGPTableCommand {
 public:
-    XrlAddIGPTableCommand(EventLoop& 	    e, 
+    XrlAddIGPTableCommand(EventLoop& 	    e,
 			  XrlRibV0p1Client& xrl_client,
 			  XrlCompletion&    completion) :
 	AddIGPTableCommand(), _eventloop(e), _xrl_client(xrl_client),
@@ -186,10 +186,10 @@ private:
 
 class XrlDeleteIGPTableCommand : public DeleteIGPTableCommand {
 public:
-    XrlDeleteIGPTableCommand(EventLoop&		e, 
+    XrlDeleteIGPTableCommand(EventLoop&		e,
 			     XrlRibV0p1Client&	xrl_client,
 			     XrlCompletion&	completion) :
-	DeleteIGPTableCommand(), 
+	DeleteIGPTableCommand(),
 	_eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
@@ -199,7 +199,7 @@ public:
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_delete_igp_table4(
-	    "rib", _tablename, "", "", unicast, multicast, 
+	    "rib", _tablename, "", "", unicast, multicast,
 	    callback(&pass_fail_handler, &_completion)
 	    );
 
@@ -214,7 +214,7 @@ private:
 
 class XrlAddEGPTableCommand : public AddEGPTableCommand {
 public:
-    XrlAddEGPTableCommand(EventLoop&	    e, 
+    XrlAddEGPTableCommand(EventLoop&	    e,
 			  XrlRibV0p1Client& xrl_client,
 			  XrlCompletion&    completion) :
 	AddEGPTableCommand(), _eventloop(e), _xrl_client(xrl_client),
@@ -240,7 +240,7 @@ private:
 
 class XrlDeleteEGPTableCommand : public DeleteEGPTableCommand {
 public:
-    XrlDeleteEGPTableCommand(EventLoop&		e, 
+    XrlDeleteEGPTableCommand(EventLoop&		e,
 			     XrlRibV0p1Client&	xrl_client,
 			     XrlCompletion&	completion) :
 	DeleteEGPTableCommand(), _eventloop(e), _xrl_client(xrl_client),
@@ -251,7 +251,7 @@ public:
 	_completion = XRL_PENDING;
 	bool unicast = true, multicast = false;
 	_xrl_client.send_delete_egp_table4(
-	    "rib", _tablename, "", "", unicast, multicast, 
+	    "rib", _tablename, "", "", unicast, multicast,
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;

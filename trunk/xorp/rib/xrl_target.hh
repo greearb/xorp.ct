@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.15 2004/02/11 08:48:51 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.16 2004/03/23 11:24:25 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -29,7 +29,7 @@
  * @short Implement RIB Xrl target methods.
  *
  * XrlRibTarget implements the auto-generated sub methods to handle
- * XRL requests from the routing protocols to the RIB.  
+ * XRL requests from the routing protocols to the RIB.
  */
 class XrlRibTarget : public XrlRibTargetBase {
 public:
@@ -45,7 +45,7 @@ public:
      * @param vif_manager the VifManager for this process handling
      * communication with the FEA regarding VIF changes.
      * @param rib_manager the RibManager for this process.
-     */ 
+     */
     XrlRibTarget(XrlRouter* xrl_router,
 		 RIB<IPv4>& urib4, RIB<IPv4>& mrib4,
 		 RIB<IPv6>& urib6, RIB<IPv6>& mrib6,
@@ -69,11 +69,11 @@ protected:
 protected:
 
     XrlCmdError common_0_1_get_target_name(
-	// Output values, 
+	// Output values,
 	string&	name);
 
     XrlCmdError common_0_1_get_version(
-	// Output values, 
+	// Output values,
 	string&	version);
 
     /**
@@ -104,58 +104,58 @@ protected:
      *  Add/delete/enable/disable a RIB client. Add/delete/enable/disable a RIB
      *  client for a given target name, address family, and unicast/multicast
      *  flags.
-     *  
+     *
      *  @param target_name the target name of the RIB client.
-     *  
+     *
      *  @param unicast true if a client for the unicast RIB.
-     *  
+     *
      *  @param multicast true if a client for the multicast RIB.
      */
     XrlCmdError rib_0_1_add_rib_client4(
-	// Input values, 
-	const string&	target_name, 
-	const bool&	unicast, 
+	// Input values,
+	const string&	target_name,
+	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_rib_client6(
-	// Input values, 
-	const string&	target_name, 
-	const bool&	unicast, 
+	// Input values,
+	const string&	target_name,
+	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_rib_client4(
-	// Input values, 
-	const string&	target_name, 
-	const bool&	unicast, 
+	// Input values,
+	const string&	target_name,
+	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_rib_client6(
-	// Input values, 
-	const string&	target_name, 
-	const bool&	unicast, 
+	// Input values,
+	const string&	target_name,
+	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_enable_rib_client4(
-	// Input values, 
-	const string&	target_name, 
-	const bool&	unicast, 
+	// Input values,
+	const string&	target_name,
+	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_enable_rib_client6(
-	// Input values, 
-	const string&	target_name, 
-	const bool&	unicast, 
+	// Input values,
+	const string&	target_name,
+	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_disable_rib_client4(
-	// Input values, 
+	// Input values,
 	const string&	target_name,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_disable_rib_client6(
-	// Input values, 
-	const string&	target_name, 
+	// Input values,
+	const string&	target_name,
 	const bool&	unicast,
 	const bool&	multicast);
 
@@ -183,66 +183,66 @@ protected:
      *  @param multicast true if the table is for the multicast RIB.
      */
     XrlCmdError rib_0_1_add_igp_table4(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_igp_table6(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_igp_table4(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_igp_table6(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_egp_table4(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_egp_table6(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_egp_table4(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_egp_table6(
-	// Input values, 
-	const string&	protocol, 
-	const string&	target_class, 
-	const string&	target_instance, 
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
 
@@ -263,51 +263,51 @@ protected:
      *  @param metric the routing metric.
      */
     XrlCmdError rib_0_1_add_route4(
-	// Input values, 
-	const string&	protocol, 
+	// Input values,
+	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
-	const IPv4Net&	network, 
+	const IPv4Net&	network,
 	const IPv4&     nexthop,
 	const uint32_t&       metric);
 
     XrlCmdError rib_0_1_add_route6(
-	// Input values, 
-	const string&	protocol, 
+	// Input values,
+	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
-	const IPv6Net&	network, 
+	const IPv6Net&	network,
 	const IPv6&	nexthop,
 	const uint32_t&       metric);
 
     XrlCmdError rib_0_1_replace_route4(
-	// Input values, 
-	const string&	protocol, 
+	// Input values,
+	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
-	const IPv4Net&	network, 
+	const IPv4Net&	network,
 	const IPv4&     nexthop,
 	const uint32_t&       metric);
 
     XrlCmdError rib_0_1_replace_route6(
-	// Input values, 
-	const string&	protocol, 
+	// Input values,
+	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
-	const IPv6Net&	network, 
+	const IPv6Net&	network,
 	const IPv6&	nexthop,
 	const uint32_t&       metric);
 
     XrlCmdError rib_0_1_delete_route4(
-	// Input values, 
-	const string&	protocol, 
+	// Input values,
+	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
 	const IPv4Net&	network);
 
     XrlCmdError rib_0_1_delete_route6(
-	// Input values, 
-	const string&	protocol, 
+	// Input values,
+	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
 	const IPv6Net&	network);
@@ -393,11 +393,11 @@ protected:
      *  be true or both false.
      */
     XrlCmdError rib_0_1_lookup_route4(
-	// Input values, 
-	const IPv4&	addr, 
+	// Input values,
+	const IPv4&	addr,
 	const bool&	unicast,
 	const bool&	multicast,
-	// Output values, 
+	// Output values,
 	IPv4&	nexthop);
 
     /**
@@ -414,54 +414,62 @@ protected:
      *  be true or both false.
      */
     XrlCmdError rib_0_1_lookup_route6(
-	// Input values, 
-	const IPv6&	addr, 
+	// Input values,
+	const IPv6&	addr,
 	const bool&	unicast,
 	const bool&	multicast,
-	// Output values, 
+	// Output values,
 	IPv6&		nexthop);
 
     XrlCmdError rib_0_1_new_vif(
-	// Input values, 
+	// Input values,
 	const string&	name);
 
     XrlCmdError rib_0_1_add_vif_addr4(
-	// Input values, 
-	const string&	name, 
-	const IPv4&	addr, 
+	// Input values,
+	const string&	name,
+	const IPv4&	addr,
 	const IPv4Net&	subnet);
 
     XrlCmdError rib_0_1_add_vif_addr6(
-	// Input values, 
-	const string&	name, 
-	const IPv6&	addr, 
+	// Input values,
+	const string&	name,
+	const IPv6&	addr,
 	const IPv6Net&	subnet);
 
     XrlCmdError rib_0_1_redist_enable4(
-	// Input values, 
-	const string&	from, 
-	const string&	to, 
+	// Input values,
+	const string&	target,
+	const string&	from,
+	const string&	to,
 	const bool&	unicast,
-	const bool&	multicast);
+	const bool&	multicast,
+	const string&	cookie
+	);
 
     XrlCmdError rib_0_1_redist_enable6(
-	// Input values, 
-	const string&	from, 
-	const string&	to, 
+	// Input values,
+	const string&	target,
+	const string&	from,
+	const string&	to,
 	const bool&	unicast,
-	const bool&	multicast);
+	const bool&	multicast,
+	const string&	cookie
+	);
 
     XrlCmdError rib_0_1_redist_disable4(
-	// Input values, 
-	const string&	from, 
-	const string&	to, 
+	// Input values,
+	const string&	target,
+	const string&	from,
+	const string&	to,
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_redist_disable6(
-	// Input values, 
-	const string&	from, 
-	const string&	to, 
+	// Input values,
+	const string&	target,
+	const string&	from,
+	const string&	to,
 	const bool&	unicast,
 	const bool&	multicast);
 
@@ -494,15 +502,15 @@ protected:
      *  @param metric returns the IGP metric for this route
      */
     XrlCmdError rib_0_1_register_interest4(
-	// Input values, 
+	// Input values,
         const string&	target,
-	const IPv4&	addr, 
-	// Output values, 
+	const IPv4&	addr,
+	// Output values,
 	bool& resolves,
-	IPv4&	base_addr, 
-	uint32_t&	prefix_len, 
-	uint32_t&	real_prefix_len, 
-	IPv4&	nexthop, 
+	IPv4&	base_addr,
+	uint32_t&	prefix_len,
+	uint32_t&	real_prefix_len,
+	IPv4&	nexthop,
 	uint32_t&	metric);
 
     /**
@@ -517,9 +525,9 @@ protected:
      *  given in the response from register_interest.
      */
     XrlCmdError rib_0_1_deregister_interest4(
-	// Input values,  
+	// Input values,
         const string&	target,
-	const IPv4&	addr, 
+	const IPv4&	addr,
 	const uint32_t&	prefix_len);
 
     /**
@@ -551,15 +559,15 @@ protected:
      *  @param metric returns the IGP metric for this route
      */
     XrlCmdError rib_0_1_register_interest6(
-	// Input values, 
+	// Input values,
         const string&	target,
-	const IPv6&	addr, 
-	// Output values, 
+	const IPv6&	addr,
+	// Output values,
 	bool& resolves,
-	IPv6&	base_addr, 
-	uint32_t&	prefix_len, 
-	uint32_t&	real_prefix_len, 
-	IPv6&	nexthop, 
+	IPv6&	base_addr,
+	uint32_t&	prefix_len,
+	uint32_t&	real_prefix_len,
+	IPv6&	nexthop,
 	uint32_t&	metric);
 
     /**
@@ -574,50 +582,50 @@ protected:
      *  given in the response from register_interest.
      */
     XrlCmdError rib_0_1_deregister_interest6(
-	// Input values,  
+	// Input values,
         const string&	target,
-	const IPv6&	addr, 
+	const IPv6&	addr,
 	const uint32_t&	prefix_len);
 
     XrlCmdError fea_ifmgr_client_0_1_interface_update(
-	// Input values, 
-	const string&	ifname, 
+	// Input values,
+	const string&	ifname,
 	const uint32_t&	event);
 
     XrlCmdError fea_ifmgr_client_0_1_vif_update(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vifname, 
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
 	const uint32_t&	event);
 
     XrlCmdError fea_ifmgr_client_0_1_vifaddr4_update(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vifname, 
-	const IPv4&	addr, 
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
 	const uint32_t&	event);
 
     XrlCmdError fea_ifmgr_client_0_1_vifaddr6_update(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vifname, 
-	const IPv6&	addr, 
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv6&	addr,
 	const uint32_t&	event);
 
     /**
      *  Announce target birth.
      */
     XrlCmdError finder_event_observer_0_1_xrl_target_birth(
-	// Input values, 
-	const string&	target_class, 
+	// Input values,
+	const string&	target_class,
 	const string&	target_instance);
 
     /**
      *  Announce target death.
      */
     XrlCmdError finder_event_observer_0_1_xrl_target_death(
-	// Input values, 
-	const string&	target_class, 
+	// Input values,
+	const string&	target_class,
 	const string&	target_instance);
 };
 

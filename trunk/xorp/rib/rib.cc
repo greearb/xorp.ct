@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.22 2004/03/18 13:10:35 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.23 2004/03/23 11:24:25 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -44,14 +44,14 @@ RIB<A>::find_table(const string& tablename)
 
 template<class A>
 inline OriginTable<A>*
-RIB<A>::find_table_by_instance(const string& tablename, 
+RIB<A>::find_table_by_instance(const string& tablename,
 			       const string& target_class,
 			       const string& target_instance)
 {
     typename map<string, OriginTable<A>* >::iterator mi;
 
-    mi = _routing_protocol_instances.find(tablename + " " 
-					  + target_class + " " 
+    mi = _routing_protocol_instances.find(tablename + " "
+					  + target_class + " "
 					  + target_instance);
     if (mi == _routing_protocol_instances.end()) {
 	return NULL;
@@ -59,7 +59,7 @@ RIB<A>::find_table_by_instance(const string& tablename,
     return mi->second;
 }
 
-template<class A> 
+template<class A>
 Protocol*
 RIB<A>::find_protocol(const string& protocol)
 {
@@ -91,7 +91,7 @@ RIB<A>::remove_table(const string& tablename)
 
     mi = _tables.find(tablename);
     if (mi == _tables.end()) {
-	XLOG_WARNING("remove_table: table %s doesn't exist", 
+	XLOG_WARNING("remove_table: table %s doesn't exist",
 		     tablename.c_str());
 	return XORP_ERROR;
     }
@@ -122,7 +122,7 @@ RIB<A>::find_vif(const A& addr)
 
     for (mi = _vifs.begin(); mi != _vifs.end(); ++mi) {
 	Vif& v = mi->second;
-	if (v.is_my_addr(addr)) 
+	if (v.is_my_addr(addr))
 	    return &v;
     }
     return NULL;
@@ -204,7 +204,7 @@ merge_tablename(const string& table_a, const string& table_b)
 }
 
 // ----------------------------------------------------------------------------
-// RIB class 
+// RIB class
 
 template<class A>
 RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
@@ -228,7 +228,7 @@ RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
     _admin_distances["eigrp-summary"] =    5;
     _admin_distances["ebgp"] =            20;
     _admin_distances["eigrp-internal"] =  90;
-    _admin_distances["igrp"] =           100; 
+    _admin_distances["igrp"] =           100;
     _admin_distances["ospf"] =           110;
     _admin_distances["is-is"] =          115;
     _admin_distances["rip"] =            120;
@@ -244,7 +244,7 @@ RIB<A>::initialize_export(list<RibClient* >* rib_clients_list)
 {
     ExportTable<A>* et = new ExportTable<A>("ExportToRibClients", 0,
 					    rib_clients_list);
-    
+
     if (add_table("ExportToRibClients", et) != XORP_OK) {
 	XLOG_FATAL("Export already initialized.");
 	//delete et;
@@ -265,7 +265,7 @@ RIB<A>::~RIB<A>()
 
 template<class A>
 int
-RIB<A>::initialize_register(RegisterServer* regserv) 
+RIB<A>::initialize_register(RegisterServer* regserv)
 {
     if (_register_table != NULL) {
 	XLOG_WARNING("Register table already initialized.");
@@ -296,9 +296,9 @@ RIB<A>::initialize_register(RegisterServer* regserv)
 
 template<class A>
 int
-RIB<A>::new_origin_table(const string&	tablename, 
-			 const string&	target_class, 
-			 const string&	target_instance, 
+RIB<A>::new_origin_table(const string&	tablename,
+			 const string&	target_class,
+			 const string&	target_instance,
 			 int		admin_distance,
 			 ProtocolType	protocol_type)
 {
@@ -318,7 +318,7 @@ RIB<A>::new_origin_table(const string&	tablename,
     //
     if (!target_instance.empty()) {
 	_rib_manager.register_interest_in_target(target_class);
-	_routing_protocol_instances[tablename + " " 
+	_routing_protocol_instances[tablename + " "
 				   + target_class + " "
 				   + target_instance] = ot;
     }
@@ -327,9 +327,9 @@ RIB<A>::new_origin_table(const string&	tablename,
 
 template<class A>
 int
-RIB<A>::new_merged_table(const string& tablename, 
+RIB<A>::new_merged_table(const string& tablename,
 			 const string& ta,
-			 const string& tb) 
+			 const string& tb)
 {
     RouteTable<A>* table_a = find_table(ta);
     if (NULL == table_a) {
@@ -344,7 +344,7 @@ RIB<A>::new_merged_table(const string& tablename,
 	XLOG_WARNING("Attempted to create merged table \"%s\" "
 		     "from not existent table \"%s\"",
 		     tablename.c_str(), tb.c_str());
-	return XORP_ERROR; 
+	return XORP_ERROR;
     }
 
     MergedTable<A>* mt = new MergedTable<A>(tablename, table_a, table_b);
@@ -358,15 +358,15 @@ RIB<A>::new_merged_table(const string& tablename,
 }
 
 template<class A>
-int 
-RIB<A>::new_extint_table(const string& tablename, 
+int
+RIB<A>::new_extint_table(const string& tablename,
 			 const string& t_ext,
-			 const string& t_int) 
+			 const string& t_int)
 {
     RouteTable<A>* table_ext = find_table(t_ext);
     if (NULL == table_ext) {
 	XLOG_WARNING("Could not create extint table \"%s\" as external table "
-		     "\"%s\" does not exist", 
+		     "\"%s\" does not exist",
 		     tablename.c_str(), t_ext.c_str());
 	return XORP_ERROR;
     }
@@ -384,14 +384,14 @@ RIB<A>::new_extint_table(const string& tablename,
 	XLOG_WARNING("Could not add extint table \"%s\"", tablename.c_str());
 	delete eit;
 	return XORP_ERROR;
-    } 
+    }
     _final_table = eit;
     return XORP_OK;
 }
 
-template<> 
+template<>
 int
-RIB<IPv4>::new_vif(const string& vifname, const Vif& vif) 
+RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 {
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
     if (_vifs.find(vifname) == _vifs.end()) {
@@ -409,7 +409,7 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 	     ai != new_vif->addr_list().end();
 	     ai++) {
 	    if (ai->addr().is_ipv4()) {
-		add_route("connected", ai->subnet_addr().get_ipv4net(), 
+		add_route("connected", ai->subnet_addr().get_ipv4net(),
 			  ai->addr().get_ipv4(), "", "", 0);
 	    }
 	}
@@ -419,9 +419,9 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
     return XORP_ERROR;
 }
 
-template<> 
+template<>
 int
-RIB<IPv6>::new_vif(const string& vifname, const Vif& vif) 
+RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 {
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
     if (_vifs.find(vifname) == _vifs.end()) {
@@ -439,7 +439,7 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 	     ai != new_vif->addr_list().end();
 	     ai++) {
 	    if (ai->addr().is_ipv6()) {
-		add_route("connected", ai->subnet_addr().get_ipv6net(), 
+		add_route("connected", ai->subnet_addr().get_ipv6net(),
 			  ai->addr().get_ipv6(), "", "", 0);
 	    }
 	}
@@ -449,9 +449,9 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
     return XORP_ERROR;
 }
 
-template<class A> 
+template<class A>
 int
-RIB<A>::delete_vif(const string& vifname) 
+RIB<A>::delete_vif(const string& vifname)
 {
     debug_msg("RIB::delete_vif: %s\n", vifname.c_str());
     map<const string, Vif>::iterator iter;
@@ -460,7 +460,7 @@ RIB<A>::delete_vif(const string& vifname)
 	return XORP_ERROR;
     }
     list<VifAddr>::const_iterator vai;
-    for (vai = iter->second.addr_list().begin(); 
+    for (vai = iter->second.addr_list().begin();
 	 vai != iter->second.addr_list().end();
 	 ++vai) {
 	// Delete the directly connected routes associated with this VIF
@@ -476,9 +476,9 @@ RIB<A>::delete_vif(const string& vifname)
 
 template<class A>
 int
-RIB<A>::add_vif_address(const string&	vifname, 
-			const A&	addr, 
-			const IPNet<A>&	subnet) 
+RIB<A>::add_vif_address(const string&	vifname,
+			const A&	addr,
+			const IPNet<A>&	subnet)
 {
     map<const string, Vif>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
@@ -494,8 +494,8 @@ RIB<A>::add_vif_address(const string&	vifname,
 
 template<class A>
 int
-RIB<A>::delete_vif_address(const string& vifname, 
-			   const A& addr) 
+RIB<A>::delete_vif_address(const string& vifname,
+			   const A& addr)
 {
     map<const string, Vif>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
@@ -504,7 +504,7 @@ RIB<A>::delete_vif_address(const string& vifname,
 	return XORP_ERROR;
     }
     list<VifAddr>::const_iterator vai;
-    for (vai = vi->second.addr_list().begin(); 
+    for (vai = vi->second.addr_list().begin();
 	 vai != vi->second.addr_list().end();
 	 ++vai) {
 	IPvX addrvX = vai->addr();
@@ -621,7 +621,7 @@ RIB<A>::add_route(const string&		tablename,
 	    }
 
 	    IPNextHop<A>* nexthop = find_or_create_external_nexthop(nexthop_addr);
-	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nexthop, 
+	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nexthop,
 					  *protocol, metric));
 	    flush();
 	    return XORP_OK;
@@ -700,7 +700,7 @@ RIB<A>::replace_route(const string&	tablename,
 
 template<class A>
 int
-RIB<A>::delete_route(const string& tablename, const IPNet<A>& net) 
+RIB<A>::delete_route(const string& tablename, const IPNet<A>& net)
 {
     RouteTable<A>* rt = find_table(tablename);
     if (NULL == rt)
@@ -727,10 +727,10 @@ RIB<A>::flush()
 
 template<class A>
 int
-RIB<A>::verify_route(const A& lookup_addr, 
-		     const string& ifname, 
+RIB<A>::verify_route(const A& lookup_addr,
+		     const string& ifname,
 		     const A& nexthop_addr,
-		     uint32_t metric) 
+		     uint32_t metric)
 {
     const IPRouteEntry<A>* re;
 
@@ -740,11 +740,11 @@ RIB<A>::verify_route(const A& lookup_addr,
 	if (ifname == "discard") {
 	    debug_msg("****ROUTE FAILURE SUCCESSFULLY VERIFIED****\n");
 	    return XORP_OK;
-	} 
+	}
 	if (re == NULL) {
 	    debug_msg("RouteVerify: Route Lookup failed\n");
 	} else {
-	    debug_msg("Route lookup returned NULL vif: %s\n", 
+	    debug_msg("Route lookup returned NULL vif: %s\n",
 		      re->str().c_str());
 	}
 	return XORP_ERROR;
@@ -765,20 +765,20 @@ RIB<A>::verify_route(const A& lookup_addr,
 		  route_nexthop->addr().str().c_str());
     }
     if (ifname != re->vif()->name()) {
-	XLOG_ERROR("Interface \"%s\" does not match expected \"%s\".", 
+	XLOG_ERROR("Interface \"%s\" does not match expected \"%s\".",
 		   re->vif()->str().c_str(), ifname.c_str());
 	return XORP_ERROR;
     } else {
-	debug_msg("Ifname: Exp: %s == Got: %s\n", 
+	debug_msg("Ifname: Exp: %s == Got: %s\n",
 		  ifname.c_str(),
 		  re->vif()->name().c_str());
     }
     if (metric != re->metric()) {
-	XLOG_ERROR("Metric \"%d\" does not match expected \"%d\".", 
+	XLOG_ERROR("Metric \"%d\" does not match expected \"%d\".",
 		   re->metric(), metric);
 	return XORP_ERROR;
     } else {
-	debug_msg("Metric: Exp: %d == Got: %d\n", metric, 
+	debug_msg("Metric: Exp: %d == Got: %d\n", metric,
 		  re->metric());
     }
     debug_msg("****ROUTE SUCCESSFULLY VERIFIED****\n");
@@ -787,7 +787,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 
 template<class A>
 const A&
-RIB<A>::lookup_route(const A& lookupaddr) 
+RIB<A>::lookup_route(const A& lookupaddr)
 {
     debug_msg("looking up %s\n", lookupaddr.str().c_str());
 
@@ -825,45 +825,69 @@ RIB<A>::route_deregister(const IPNet<A>& subnet, const string& module)
 
 template<class A>
 int
-RIB<A>::redist_enable(const string& from_table, const string& to_table)
+RIB<A>::redist_enable(const string& src_tablename,
+		      const string& dst_tablename)
 {
-    // We can redistribute from any RouteTable<A>
-    RouteTable<A>* fromtab = find_table(from_table);
-    if (fromtab == NULL) {
+    //
+    // In theory we can redistribute from any RouteTable<A>, in practice,
+    // we practice it has to be an OriginTable for the time being.
+    //
+    RouteTable<A>* src_table = find_table(src_tablename);
+    if (src_table == 0) {
 	XLOG_ERROR("Attempt to redistribute from non-existent table \"%s\".",
-		   from_table.c_str());
+		   src_tablename.c_str());
 	return XORP_ERROR;
     }
 
-    // Find the table to redistribute to
-    RouteTable<A>* trt = find_table(to_table);
-    if (trt == NULL) {
-	XLOG_ERROR("Attempt to redistribute to non-existent table \"%s\".",
-		   to_table.c_str());
-	return XORP_ERROR;
-    }
-    // We can only redistribute to an OriginTable
-    OriginTable<A>* totab = dynamic_cast<OriginTable<A>* >(trt);
-    if (totab == NULL) {
+    OriginTable<A>* src_otable = dynamic_cast<OriginTable<A>*>(src_table);
+    if (src_otable == 0) {
 	XLOG_ERROR("Redistribution failed \"%s\" is not an origin table.",
-		   to_table.c_str());
+		   src_tablename.c_str());
 	return XORP_ERROR;
     }
 
-    string tablename = redist_tablename(from_table, to_table);
-    RedistTable<A>* rdt = new RedistTable<A>(tablename, fromtab, totab);
-    if (add_table(tablename, rdt) != XORP_OK) {
+    //
+    // Find the table to redistribute to
+    //
+    // Note this table is not used by the RedistTable for anything execpt
+    // it's name.  We just want to know that a valid target to receive
+    // the redistributed routes exists.
+    //
+    RouteTable<A>* dst_table = find_table(dst_tablename);
+    if (dst_table == 0) {
+	XLOG_ERROR("Attempt to redistribute to non-existent table \"%s\".",
+		   dst_tablename.c_str());
+	return XORP_ERROR;
+    }
+
+    //
+    // We can only redistribute to an OriginTable (since it is associated
+    // with a routing protocol).
+    //
+    OriginTable<A>* dst_otable = dynamic_cast<OriginTable<A>*>(dst_table);
+    if (dst_otable == NULL) {
+	XLOG_ERROR("Redistribution failed \"%s\" is not an origin table.",
+		   dst_tablename.c_str());
+	return XORP_ERROR;
+    }
+
+    string tablename = redist_tablename(src_tablename, dst_tablename);
+    RedistTable<A>* redist_table = new RedistTable<A>(tablename,
+						      src_otable,
+						      dst_otable,
+						      _eventloop);
+    if (add_table(tablename, redist_table) != XORP_OK) {
 	XLOG_WARNING("Redistribution failed because redist table \"%s\" "
 		     "already exists", tablename.c_str());
-	delete rdt;
+	delete redist_table;
 	return XORP_ERROR;
     }
     return XORP_OK;
 }
 
-template<class A> 
+template<class A>
 int
-RIB<A>::redist_disable(const string& from_table, const string& to_table) 
+RIB<A>::redist_disable(const string& from_table, const string& to_table)
 {
     string tname = redist_tablename(from_table, to_table);
 
@@ -880,9 +904,9 @@ RIB<A>::redist_disable(const string& from_table, const string& to_table)
     return XORP_OK;
 }
 
-template<class A> 
-int 
-RIB<A>::add_igp_table(const string& tablename, 
+template<class A>
+int
+RIB<A>::add_igp_table(const string& tablename,
 		      const string& target_class,
 		      const string& target_instance)
 {
@@ -890,9 +914,9 @@ RIB<A>::add_igp_table(const string& tablename,
     return add_origin_table(tablename, target_class, target_instance, IGP);
 }
 
-template<class A> 
+template<class A>
 int
-RIB<A>::add_egp_table(const string& tablename, 
+RIB<A>::add_egp_table(const string& tablename,
 		      const string& target_class,
 		      const string& target_instance)
 {
@@ -906,7 +930,7 @@ RIB<A>::add_egp_table(const string& tablename,
 
 template<class A>
 int
-RIB<A>::add_origin_table(const string& tablename, 
+RIB<A>::add_origin_table(const string& tablename,
 			 const string& target_class,
 			 const string& target_instance,
 			 ProtocolType protocol_type)
@@ -934,7 +958,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	}
     }
 
-    if (new_origin_table(tablename, target_class, target_instance, 
+    if (new_origin_table(tablename, target_class, target_instance,
 			 admin_distance(tablename), protocol_type)
 	!= XORP_OK) {
 	debug_msg("new_origin_table failed\n");
@@ -962,11 +986,11 @@ RIB<A>::add_origin_table(const string& tablename,
     //
     // If we're adding an IGP table:
     // we can handle 2 and 3 the same, adding a MergedTable, but 1
-    // requires we construct an ExtInt table instead.  
+    // requires we construct an ExtInt table instead.
     //
     // If we're adding an EGP table:
     // we can handle 1 and 2 the same, adding a MergedTable, but 3
-    // requires we construct an ExtInt table instead.  
+    // requires we construct an ExtInt table instead.
     //
 
     // First step: find out what tables already exist
@@ -986,7 +1010,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	    if (ot->protocol_type() == IGP) {
 		igp_table = ot;
 	    } else if (ot->protocol_type() == EGP) {
-		egp_table = ot; 
+		egp_table = ot;
 	    } else {
 		XLOG_UNREACHABLE();
 	    }
@@ -1002,7 +1026,7 @@ RIB<A>::add_origin_table(const string& tablename,
     // Depending on which tables already exist, we may need to create
     // a MergedTable or an ExtInt table.
     //
-    if (((igp_table == NULL) && (protocol_type == IGP)) || 
+    if (((igp_table == NULL) && (protocol_type == IGP)) ||
 	((egp_table == NULL) && (protocol_type == EGP))) {
 	//
 	// We are going to need to create an ExtInt table.
@@ -1017,10 +1041,10 @@ RIB<A>::add_origin_table(const string& tablename,
 	if ((egp_table == NULL) && (igp_table == NULL)) {
 	    //
 	    // There are tables, but neither IGP or EGP origin tables
-	    // Therefore the final table must be an ExportTable<A> or 
+	    // Therefore the final table must be an ExportTable<A> or
 	    // a RegisterTable (MRIB's have no ExportTable<A>).
 	    //
-	    if (_final_table->type() != EXPORT_TABLE 
+	    if (_final_table->type() != EXPORT_TABLE
 		&& _final_table->type() != REGISTER_TABLE) {
 		XLOG_UNREACHABLE();
 	    }
@@ -1030,7 +1054,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	    // ExportTable such as RegisterTable - track back to be
 	    // first of them.
 	    //
-	    RouteTable<A>* rt = track_back(_final_table, 
+	    RouteTable<A>* rt = track_back(_final_table,
 					   EXPORT_TABLE | REGISTER_TABLE);
 
 	    //
@@ -1116,16 +1140,16 @@ RIB<A>::add_origin_table(const string& tablename,
 
 template<class A>
 int
-RIB<A>::delete_igp_table(const string& tablename, 
+RIB<A>::delete_igp_table(const string& tablename,
 			 const string& target_class,
-			 const string& target_instance) 
+			 const string& target_instance)
 {
     return delete_origin_table(tablename, target_class, target_instance);
 }
 
 template<class A>
 int
-RIB<A>::delete_egp_table(const string& tablename, 
+RIB<A>::delete_egp_table(const string& tablename,
 			 const string& target_class,
 			 const string& target_instance)
 {
@@ -1136,7 +1160,7 @@ template <class A>
 int
 RIB<A>::delete_origin_table(const string& tablename,
 			    const string& target_class,
-			    const string& target_instance) 
+			    const string& target_instance)
 {
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(find_table(tablename));
     if (NULL == ot)
@@ -1148,8 +1172,8 @@ RIB<A>::delete_origin_table(const string& tablename,
 	    XLOG_ERROR("Got delete_origin_table for wrong target name\n");
 	    return XORP_ERROR;
 	} else {
-	    _routing_protocol_instances.erase(tablename + " " 
-					      + target_class + " " 
+	    _routing_protocol_instances.erase(tablename + " "
+					      + target_class + " "
 					      + target_instance);
 	}
     }
@@ -1192,7 +1216,7 @@ RIB<A>::track_back(RouteTable<A>* rt, int typemask) const
 	return rt;
     }
 
-    for (RouteTable<A>* parent = rt->parent(); 
+    for (RouteTable<A>* parent = rt->parent();
 	 parent && (parent->type() & typemask);
 	 parent = rt->parent()) {
 	rt = parent;
@@ -1219,7 +1243,7 @@ RIB<A>::track_forward(RouteTable<A>* rt, int typemask) const
     while (next != NULL) {
 	debug_msg("here3\n");
 	if ((next->type() & typemask) != 0) {
-	    debug_msg("here4 next->type()= %d, typemask=%x\n", 
+	    debug_msg("here4 next->type()= %d, typemask=%x\n",
 		      next->type(), typemask);
 	    rt = next;
 	    next = rt->next_table();
@@ -1238,7 +1262,7 @@ RIB<A>::print_rib() const
 {
 #ifdef DEBUG_LOGGING
     map<string, RouteTable<A>* >::const_iterator pair;
-    pair = _tables.begin(); 
+    pair = _tables.begin();
     // XXX: this is printf not debug_msg for a reason.
     printf("==============================================================\n");
     while (pair != _tables.end()) {
