@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.20 2003/10/15 18:54:29 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.21 2003/10/24 22:45:21 pavlin Exp $
 #
 
 #
@@ -139,9 +139,9 @@ fi
 #
 # Comment-out to disable log trace
 #
-MFEA_ENABLE_LOG_TRACE=yes
-MLD6IGMP_ENABLE_LOG_TRACE=yes
-PIM_ENABLE_LOG_TRACE=yes
+MFEA_LOG_TRACE_ALL_ENABLE=yes
+MLD6IGMP_LOG_TRACE_ALL_ENABLE=yes
+PIM_LOG_TRACE_ALL_ENABLE=yes
 
 #
 # The subnets to enable/disable CLI access
@@ -182,16 +182,22 @@ MLD6IGMP_ENABLE_VIFS="${ENABLE_VIFS}"
 PIM_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
 
 #
-# Disable log trace
+# Enable/disable log trace
 #
-if [ "${MFEA_ENABLE_LOG_TRACE}" != "yes" ] ; then
-	mfea_disable_log_trace
+if [ "${MFEA_LOG_TRACE_ALL_ENABLE}" = "yes" ] ; then
+	mfea_log_trace_all true
+else
+	mfea_log_trace_all false
 fi
-if [ "${MLD6IGMP_ENABLE_LOG_TRACE}" != "yes" ] ; then
-	mld6igmp_disable_log_trace
+if [ "${MLD6IGMP_LOG_TRACE_ALL_ENABLE}" = "yes" ] ; then
+	mld6igmp_log_trace_all true
+else
+	mld6igmp_log_trace_all false
 fi
-if [ "${PIM_ENABLE_LOG_TRACE}" != "yes" ] ; then
-	pim_disable_log_trace
+if [ "${PIM_LOG_TRACE_ALL_ENABLE}" = "yes" ] ; then
+	pim_log_trace_all true
+else
+	pim_log_trace_all false
 fi
 
 #

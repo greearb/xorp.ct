@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.19 2003/10/15 18:54:29 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.20 2003/10/16 18:23:07 pavlin Exp $
 #
 
 #
@@ -1139,19 +1139,18 @@ pim_reset_switch_to_spt_threshold()
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 
-pim_enable_log_trace()
+pim_log_trace_all()
 {
-    echo "pim_enable_log_trace" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/enable_log_trace"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_log_trace_all <enable:bool>"
+	exit 1
+    fi
+    enable=$1
 
-pim_disable_log_trace()
-{
-    echo "pim_disable_log_trace" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/disable_log_trace"
-    XRL_ARGS=""
+    echo "pim_log_trace_all" $*
+
+    XRL="finder://$PIM_TARGET/pim/0.1/log_trace_all"
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 

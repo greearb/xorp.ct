@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.31 2003/09/30 18:27:06 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.32 2003/09/30 18:52:21 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1435,11 +1435,13 @@ protected:
     XrlCmdError pim_0_1_reset_switch_to_spt_threshold();
 
     /**
-     *  Enable/disable the PIM trace log.
+     *  Enable/disable the PIM trace log for all operations.
+     *
+     *  @param enable if true, then enable the trace log, otherwise disable it.
      */
-    XrlCmdError pim_0_1_enable_log_trace();
-
-    XrlCmdError pim_0_1_disable_log_trace();
+    XrlCmdError pim_0_1_log_trace_all(
+	// Input values,
+	const bool&	enable);
 
     /**
      *  Test-related methods: add Join/Prune entries, and send them to a

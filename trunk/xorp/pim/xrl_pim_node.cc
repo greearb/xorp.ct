@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.40 2003/09/30 18:27:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.41 2003/11/19 01:03:38 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -1130,8 +1130,19 @@ XrlPimNode::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlPimNode::common_0_1_shutdown()
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    return XrlCmdError::COMMAND_FAILED();
+    bool is_error = false;
+    string error_msg;
+
+    if (stop_pim() != XORP_OK) {
+	if (! is_error)
+	    error_msg = c_format("Failed to stop PIM");
+	is_error = true;
+    }
+
+    if (is_error)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -3922,17 +3933,11 @@ XrlPimNode::pim_0_1_reset_switch_to_spt_threshold()
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_enable_log_trace()
+XrlPimNode::pim_0_1_log_trace_all(
+    // Input values,
+    const bool&	enable)
 {
-    PimNode::set_log_trace(true);
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::pim_0_1_disable_log_trace()
-{
-    PimNode::set_log_trace(false);
+    PimNode::set_log_trace(enable);
     
     return XrlCmdError::OKAY();
 }
