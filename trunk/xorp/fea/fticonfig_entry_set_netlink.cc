@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.3 2003/10/13 23:32:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.4 2004/03/30 08:20:27 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -268,7 +268,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
     // Add the route priority as an attribute
-    int int_priority = fte.admin_distance();
+    int int_priority = fte.metric();
     rta_len = RTA_LENGTH(sizeof(int_priority));
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
@@ -281,19 +281,10 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     memcpy(data, &int_priority, sizeof(int_priority));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    // Add the route metric as an attribute
-    int int_metric = fte.metric();
-    rta_len = RTA_LENGTH(sizeof(int_metric));
-    if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
-    }
-    rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
-    rtattr->rta_type = RTA_METRICS;
-    rtattr->rta_len = rta_len;
-    data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
-    memcpy(data, &int_metric, sizeof(int_metric));
-    nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
+    //
+    // XXX: the Linux kernel doesn't keep the admin distance, hence
+    // we don't add it.
+    //
     
     string reason;
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,

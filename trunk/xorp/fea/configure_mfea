@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/configure_mfea,v 1.6 2003/12/20 01:43:34 pavlin Exp $
+# $XORP: xorp/fea/configure_mfea,v 1.7 2004/02/26 08:49:02 pavlin Exp $
 #
 
 #
@@ -88,6 +88,10 @@ else
 	oreo.icir.org)
 	ENABLE_VIFS="wi0"
 	ENABLE_VIFS="ed1"
+	;;
+
+	koala.icir.org)
+	ENABLE_VIFS="eth0"
 	;;
 	
 	pie)
