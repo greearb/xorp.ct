@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_main.hh,v 1.1 2002/12/18 03:06:07 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_main.hh,v 1.2 2003/03/10 23:20:35 hodson Exp $"
 
 #include <string>
 #include <list>
@@ -239,7 +239,7 @@ public:
      *
      * Run a test function/method. The test function/method is passed
      * a TestInfo. The test function/method should return
-     * "TestMain::SUCCESS" for sucess and "TestMain::FAILURE" for
+     * "TestMain::SUCCESS" for success and "TestMain::FAILURE" for
      * failure.
      *
      * To run a function call "test":
