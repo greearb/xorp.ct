@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.16 2003/05/14 09:32:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.17 2003/05/23 00:02:05 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -752,23 +752,18 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** We attempted to register a next hop with the RIB and an error
     ** ocurred. Its not clear that we should continue.
     */
-    if (XrlError::OKAY() != error) {
-	if (error == XrlError::NO_FINDER()
-	    || error == XrlError::NO_SUCH_METHOD() 
-	    || error == XrlError::SEND_FAILED() 
-	    || (error == XrlError::RESOLVE_FAILED() 
-		&& _previously_successful) ) {
-	    //A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
-	    //unrecoverable.  A RESOLVE_FAILED error when it had
-	    //previously been successful is also unrecoverable.
-	    _interface_failed = true;
-	    while (!_queue.empty()) {
-		delete _queue.front();
-		_queue.pop_front();
-	    }
-	    return;
-	}
-	if (error == XrlError::RESOLVE_FAILED()) {
+    switch (error.error_code()) {
+    case OKAY:
+	_previously_successful = true;
+	break;
+
+    case REPLY_TIMED_OUT:
+	XLOG_FATAL("callback: Use a reliable transport %s %s",
+		   comment.c_str(), error.str().c_str());
+	break;
+
+    case RESOLVE_FAILED:
+	if (!_previously_successful) {
 	    //RESOLVE_FAILED when we hadn't been previously successful
 	    //might indicate an ordering problem at startup.  In both
 	    //cases, we resend.
@@ -783,11 +778,16 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 				 nexthop_interest));
 	    return;
 	}
-	//We received an application-level error when attempting to
-	//register.  For now, this is fatal.
-	XLOG_FATAL("%s %s", comment.c_str(), error.str().c_str());
-    } else {
-	_previously_successful = true;
+	/* FALLTHROUGH */
+    case SEND_FAILED:
+    case SEND_FAILED_TRANSIENT:
+    case NO_FINDER:
+    case NO_SUCH_METHOD:
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+    case INTERNAL_ERROR:
+	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
     }
 
     debug_msg("Error %s resolves %d addr %s "
@@ -1140,11 +1140,19 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
     XLOG_ASSERT(prefix_len == rd->prefix_len());
 
     debug_msg("%s %s\n", comment.c_str(), error.str().c_str());
-    if (error != XrlError::OKAY()) {
-	if (error == XrlError::NO_FINDER()
-	    /* || (error == FATAL_TRANSPORT_ERROR()) */
-	    || (error == XrlError::RESOLVE_FAILED() 
-		&& _previously_successful) ) {
+    switch (error.error_code()) {
+    case OKAY:
+	_previously_successful = true;
+	break;
+
+    case REPLY_TIMED_OUT:
+	XLOG_FATAL("callback: Use a reliable transport %s %s",
+		   comment.c_str(), error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	if (_previously_successful) {
 	    //A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
 	    //unrecoverable.  A RESOLVE_FAILED error when it had
 	    //previously been successful is also unrecoverable.
@@ -1155,30 +1163,29 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	    }
 	    return;
 	}
-	if (error == XrlError::RESOLVE_FAILED()
-	    || error == XrlError::SEND_FAILED()) {
-	    //SEND_FAILED can be a transient error.  RESOLVE_FAILED
-	    //when we hadn't been previously successful might indicate
-	    //an ordering problem at startup.  In both cases, we resend.
-	    XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
+	/* FALLTHROUGH */
+    case SEND_FAILED:
+	//SEND_FAILED can be a transient error.  RESOLVE_FAILED
+	//when we hadn't been previously successful might indicate
+	//an ordering problem at startup.  In both cases, we resend.
+	XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
 	    
-	    //The request will still be on the request queue.
-	    //All we need to do is resend it after a respectable delay
-	    _rtx_delay_timer = 
-		_next_hop_resolver.eventloop().new_oneoff_after_ms(1000,
-                      ::callback(this,
-				 &NextHopRibRequest<A>::deregister_interest,
-				 addr, prefix_len));
+	//The request will still be on the request queue.
+	//All we need to do is resend it after a respectable delay
+	_rtx_delay_timer = 
+	    _next_hop_resolver.eventloop().new_oneoff_after_ms(1000,
+			      ::callback(this,
+			      &NextHopRibRequest<A>::deregister_interest,
+			      addr, prefix_len));
 	    return;
-	}
-
-	//If we fell through to here, something bad happened, but it's
-	//not clear exactly what.  Log a warning, and carry on
-	//regardless.
-	XLOG_WARNING("callback: %s %s",  comment.c_str(), error.str().c_str());
-    } else {
-	//We were successful
-	_previously_successful = true;
+	    break;
+    case SEND_FAILED_TRANSIENT:
+    case NO_SUCH_METHOD:
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+    case INTERNAL_ERROR:
+	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
     }
 
     //remove this request from the queue
