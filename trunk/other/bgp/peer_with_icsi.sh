@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: other/bgp/peer_with_icsi.sh,v 1.1 2003/01/31 03:03:23 atanu Exp $
+# $XORP: other/bgp/peer_with_icsi.sh,v 1.2 2003/08/27 21:04:02 atanu Exp $
 #
 
 #
@@ -113,6 +113,8 @@ bgp()
     PEER_PORT=$BORDER_ROUTER_PORT
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     $BGP_FUNCS add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    # Enable Multiprotocol IPv6 support
+#    $BGP_FUNCS set_parameter $IPTUPLE MultiProtocolIPv6
     # Rewrite the next hop onto our test net
     $BGP_FUNCS next_hop_rewrite_filter $IPTUPLE $NEXT_HOP_REWRITE1
 #    $BGP_FUNCS enable_peer $IPTUPLE
@@ -124,6 +126,8 @@ bgp()
     PEER_PORT=$TEST_PEER_PORT
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     $BGP_FUNCS add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    # Enable Multiprotocol IPv6 support
+    $BGP_FUNCS set_parameter $IPTUPLE MultiProtocolIPv6
     # Rewrite the next hop onto our test net
     $BGP_FUNCS next_hop_rewrite_filter $IPTUPLE $NEXT_HOP_REWRITE2
     $BGP_FUNCS enable_peer $IPTUPLE
@@ -171,7 +175,10 @@ test_peer()
     $TEST_FUNCS coord target $PEER $PORT
     $TEST_FUNCS coord initialise attach peer1
     
-    $TEST_FUNCS coord peer1 establish AS $PEER_AS holdtime 0 id 192.150.187.100
+    $TEST_FUNCS coord peer1 establish AS $PEER_AS \
+				      holdtime 0 \
+				      id 192.150.187.100 \
+				      ipv6 true
 }
 
 # We have no arguments.
