@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.28 2004/06/02 18:33:24 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.29 2004/06/10 22:41:27 hodson Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -145,8 +145,13 @@ XrlMld6igmpNode::stop_mld6igmp()
 void
 XrlMld6igmpNode::mfea_register_startup()
 {
-    if (! _is_mfea_add_protocol_registered)
+    if (! _is_mfea_add_protocol_registered) {
 	Mld6igmpNode::incr_startup_requests_n();
+	// XXX: another incr to wait for network interface information
+	// on startup.
+	Mld6igmpNode::set_vif_setup_completed(false);
+	Mld6igmpNode::incr_startup_requests_n();
+    }
 
     send_mfea_registration();
 }
@@ -1280,8 +1285,17 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
 XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_set_all_vifs_done()
 {
+    bool old_is_vif_setup_completed = Mld6igmpNode::is_vif_setup_completed();
+
     Mld6igmpNode::set_vif_setup_completed(true);
-    
+
+    if (Mld6igmpNode::is_vif_setup_completed()
+	&& ! old_is_vif_setup_completed) {
+	// XXX: a decr to compensate the wait for network interface
+	// information on startup.
+	Mld6igmpNode::decr_startup_requests_n();
+    }
+
     return XrlCmdError::OKAY();
 }
 

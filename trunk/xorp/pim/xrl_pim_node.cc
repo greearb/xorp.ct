@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.57 2004/08/03 03:01:07 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.58 2004/08/03 18:09:13 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -190,8 +190,13 @@ XrlPimNode::stop_bsr()
 void
 XrlPimNode::mfea_register_startup()
 {
-    if (! _is_mfea_add_protocol_registered)
+    if (! _is_mfea_add_protocol_registered) {
 	PimNode::incr_startup_requests_n();
+	// XXX: another incr to wait for network interface information
+	// on startup.
+	PimNode::set_vif_setup_completed(false);
+	PimNode::incr_startup_requests_n();
+    }
 
     if (! _is_mfea_allow_signal_messages_registered)
 	PimNode::incr_startup_requests_n();
@@ -2031,9 +2036,17 @@ XrlCmdError
 XrlPimNode::mfea_client_0_1_set_all_vifs_done()
 {
     string error_msg;
-    
+    bool old_is_vif_setup_completed = PimNode::is_vif_setup_completed();
+
     if (PimNode::set_config_all_vifs_done(error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    if (PimNode::is_vif_setup_completed()
+	&& ! old_is_vif_setup_completed) {
+	// XXX: a decr to compensate the wait for network interface
+	// information on startup.
+	PimNode::decr_startup_requests_n();
+    }
     
     return XrlCmdError::OKAY();
 }
