@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.15 2004/05/28 18:26:28 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.16 2004/05/28 22:27:59 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -116,7 +116,7 @@ protected:
     bool name_is_variable() const;
 
 private:
-    void split_up_varname(const string& varname,
+    bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
     const TemplateTreeNode* find_parent_varname_node(const list<string>& var_parts) const;
     const TemplateTreeNode* find_child_varname_node(const list<string>& var_parts) const;

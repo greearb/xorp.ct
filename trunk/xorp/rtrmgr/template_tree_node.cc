@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.24 2004/05/28 22:27:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.25 2004/05/29 22:47:14 atanu Exp $"
 
 
 #include <glob.h>
@@ -338,8 +338,10 @@ TemplateTreeNode::expand_variable(const string& varname, string& value) const
 	return false;
 
     list<string> var_parts;
-    split_up_varname(varname, var_parts);
-    string nodename = var_parts.back();
+    if (split_up_varname(varname, var_parts) == false) {
+	return false;
+    }
+    const string& nodename = var_parts.back();
 
     XLOG_ASSERT((nodename == varname_node->segname())
 		|| (nodename == "DEFAULT"));
@@ -353,6 +355,11 @@ bool
 TemplateTreeNode::expand_expression(const string& expression,
 				    string& value) const
 {
+    // Expecting at least "`~" + a_name + "`"
+    if (expression.size() < 4) {
+	return false;
+    }
+
     if ((expression[0] != '`') || (expression[expression.size() - 1] != '`'))
 	return false;
 
@@ -425,16 +432,23 @@ TemplateTreeNode::get_default_target_name_by_variable(const string& varname) con
     return "";		// XXX: nothing found
 }
 
-void
+bool
 TemplateTreeNode::split_up_varname(const string& varname,
 				   list<string>& var_parts) const
 {
-    XLOG_ASSERT(varname[0] == '$');
-    XLOG_ASSERT(varname[1] == '(');
-    XLOG_ASSERT(varname[varname.size() - 1] == ')');
+    if (varname.size() < 4)
+	return false;
+
+    if (varname[0] != '$'
+	|| varname[1] != '('
+	|| varname[varname.size() - 1] != ')') {
+	return false;
+    }
 
     string trimmed = varname.substr(2, varname.size() - 3);
     var_parts = split(trimmed, '.');
+
+    return true;
 }
 
 const TemplateTreeNode*
@@ -453,7 +467,9 @@ TemplateTreeNode::find_varname_node(const string& varname) const
 
     // Split varname
     list<string> var_parts;
-    split_up_varname(varname, var_parts);
+    if (split_up_varname(varname, var_parts) == false) {
+	return NULL;
+    }
 
     if (var_parts.front() == "@") {
 	return find_child_varname_node(var_parts);
