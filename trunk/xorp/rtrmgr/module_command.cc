@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.5 2003/05/19 21:27:05 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.6 2003/05/23 00:02:08 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -283,46 +283,9 @@ ModuleCommand::action_complete(const XrlError& err,
 	    }
 	}
 	return;
-    } else if (err == XrlError::BAD_ARGS()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::COMMAND_FAILED()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::RESOLVE_FAILED()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::NO_FINDER()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::SEND_FAILED()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::REPLY_TIMED_OUT()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::NO_SUCH_METHOD()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::INTERNAL_ERROR()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::SYSCALL_FAILED()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
-	//XXX 
-	XLOG_UNFINISHED();
-    } else if (err == XrlError::FAILED_UNKNOWN()) {
-	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
-	//XXX 
-	XLOG_UNFINISHED();
+    } else {
+	//There was an error.  There's nothing we can so here - errors
+	//are handled in the TaskManager.
+	return;
     }
-    XLOG_UNREACHABLE();
 }
