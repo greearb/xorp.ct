@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.2 2003/01/13 20:40:21 pavlin Exp $"
 
 
 //
@@ -91,6 +91,10 @@ MfeaNodeCli::add_all_cli_commands()
     // XXX: command "show" must have been installed by the CLI itself.
 
     add_cli_dir_command("show mfea",	"Display information about MFEA");
+
+    add_cli_command("show mfea dataflow",
+		    "Display information about MFEA dataflow filters",
+		    callback(this, &MfeaNodeCli::cli_show_mfea_dataflow));
     
     add_cli_command("show mfea interface",
 		    "Display information about MFEA interfaces",
@@ -103,6 +107,130 @@ MfeaNodeCli::add_all_cli_commands()
     add_cli_command("show mfea mrib",
 		    "Display MRIB information inside MFEA",
 		    callback(this, &MfeaNodeCli::cli_show_mfea_mrib));
+    
+    return (XORP_OK);
+}
+
+//
+// CLI COMMAND: "show mfea dataflow [group | group-range]"
+//
+// Display information about the dataflow filters the MFEA knows about.
+//
+int
+MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
+{
+    IPvXNet group_range = IPvXNet::ip_multicast_base_prefix(family());
+    
+    // Check the optional argument
+    if (argv.size()) {
+	try {
+	    group_range = IPvXNet(argv[0].c_str());
+	} catch (InvalidString) {
+	    try {
+		group_range = IPvXNet(IPvX(argv[0].c_str()),
+				      IPvX::addr_bitlen(family()));
+	    } catch (InvalidString) {
+		cli_print(c_format("ERROR: Invalid group range: %s\n",
+				   argv[0].c_str()));
+		return (XORP_ERROR);
+	    }
+	}
+	if (! group_range.is_multicast()) {
+	    cli_print(c_format("ERROR: Group range is not multicast: %s\n",
+			       cstring(group_range)));
+	    return (XORP_ERROR);
+	}
+    }
+    
+    cli_print(c_format("%-16s%-16s\n",
+		       "Group", "Source"));
+    
+    //
+    // The MfeaDfe entries
+    //
+    MfeaDft::const_gs_iterator iter_dft, iter_begin_dft, iter_end_dft;
+    iter_begin_dft = mfea_node().mfea_dft().group_by_prefix_begin(group_range);
+    iter_end_dft = mfea_node().mfea_dft().group_by_prefix_end(group_range);
+    struct timeval now;
+    
+    // XXX: for simulation purpose, replace gettimeofday() with NOW()
+    gettimeofday(&now, NULL);
+    
+    for (iter_dft = iter_begin_dft; iter_dft != iter_end_dft; ++iter_dft) {
+	MfeaDfeLookup *mfea_dfe_lookup = iter_dft->second;
+	list<MfeaDfe *>::const_iterator iter;
+	
+	cli_print(c_format("%-16s%-16s\n",
+			   cstring(mfea_dfe_lookup->group_addr()),
+			   cstring(mfea_dfe_lookup->source_addr())));
+	cli_print(c_format("    %-30s%-5s%-30s%7s\n",
+			   "Measured(Start|Packets|Bytes)",
+			   "Type",
+			   "Thresh(Interval|Packets|Bytes)",
+			   "Remain"));
+	
+	for (iter = mfea_dfe_lookup->mfea_dfe_list().begin();
+	     iter != mfea_dfe_lookup->mfea_dfe_list().end();
+	     ++iter) {
+	    char s1[256], s2[256];
+	    char measured_s[256], type_s[256], thresh_s[256], remain_s[256];
+	    MfeaDfe *mfea_dfe = *iter;
+	    struct timeval start_time, threshold_interval, end, delta;
+	    
+	    start_time = mfea_dfe->start_time();
+	    threshold_interval = mfea_dfe->threshold_interval();
+	    
+	    // The measured values
+	    if (mfea_dfe->is_threshold_in_packets())
+		sprintf(s1, "%u", (uint32_t)mfea_dfe->measured_packets());
+	    else
+		sprintf(s1, "?");
+	    if (mfea_dfe->is_threshold_in_bytes())
+		sprintf(s2, "%u", (uint32_t)mfea_dfe->measured_bytes());
+	    else
+		sprintf(s2, "?");
+	    sprintf(measured_s, "%u.%u|%s|%s",
+		    (uint32_t)start_time.tv_sec,
+		    (uint32_t)start_time.tv_usec,
+		    s1, s2);
+	    
+	    // The entry type
+	    sprintf(type_s, "%-3s",
+		    mfea_dfe->is_geq_upcall()? ">="
+		    : mfea_dfe->is_leq_upcall()? "<="
+		    : "?");
+	    
+	    // The threshold values
+	    if (mfea_dfe->is_threshold_in_packets())
+		sprintf(s1, "%u", mfea_dfe->threshold_packets());
+	    else
+		sprintf(s1, "?");
+	    if (mfea_dfe->is_threshold_in_bytes())
+		sprintf(s2, "%u", mfea_dfe->threshold_bytes());
+	    else
+		sprintf(s2, "?");
+	    sprintf(thresh_s, "%u.%u|%s|%s",
+		    (uint32_t)threshold_interval.tv_sec,
+		    (uint32_t)threshold_interval.tv_usec,
+		    s1, s2);
+	    
+	    // Remaining time
+	    TIMEVAL_ADD(&start_time, &threshold_interval, &end);
+	    if (TIMEVAL_CMP(&now, &end, <=)) {
+		TIMEVAL_SUB(&end, &now, &delta);
+		sprintf(remain_s, "%u.%u",
+			(uint32_t)delta.tv_sec, (uint32_t)delta.tv_usec);
+	    } else {
+		// Negative time
+		TIMEVAL_SUB(&now, &end, &delta);
+		sprintf(remain_s, "-%u.%u",
+			(uint32_t)delta.tv_sec, (uint32_t)delta.tv_usec);
+	    }
+	    
+	    cli_print(c_format("    %-30s%-5s%-30s%7s\n",
+			       measured_s, type_s, thresh_s, remain_s));
+	}
+    }
     
     return (XORP_OK);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node_cli.hh,v 1.13 2002/12/09 18:29:17 hodson Exp $
+// $XORP: xorp/mfea/mfea_node_cli.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_CLI_HH__
@@ -86,6 +86,7 @@ private:
     //
     // MFEA CLI commands
     //
+    int		cli_show_mfea_dataflow(const vector<string>& argv);
     int		cli_show_mfea_interface(const vector<string>& argv);
     int		cli_show_mfea_interface_address(const vector<string>& argv);
     int		cli_show_mfea_mrib(const vector<string>& argv);
