@@ -53,6 +53,9 @@
  * SIGUSR1 can be used to reset all trackers.
  */
 
+#include "config.h"
+#ifdef HOST_OS_FREEBSD   
+
 #include <dlfcn.h>
 #include <memory.h>
 #include <assert.h>
@@ -500,3 +503,5 @@ free (void *ptr)
 
     return;
 }
+
+#endif /* HOST_OS_FREEBSD */

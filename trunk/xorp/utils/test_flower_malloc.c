@@ -1,6 +1,10 @@
 
-#include <unistd.h>
+
+#include "config.h"
 #include <stdio.h>
+
+#ifdef HOST_OS_FREEBSD
+#include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
@@ -241,3 +245,14 @@ int main(void)
 #endif /* INTERACTIVE_EXECUTION */
     return 0;
 }
+
+#else
+int main(void) 
+{ 
+    fprintf(stderr, "-------------------------------------------------\n");
+    fprintf(stderr, "flower_malloc runs on FreeBSD only:  Test skipped\n");
+    fprintf(stderr, "-------------------------------------------------\n");
+    return 0; 
+}
+#endif /* HOST_OS_FREEBSD */
+
