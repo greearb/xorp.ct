@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.8 2003/12/19 20:30:20 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.9 2004/01/05 23:45:42 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -27,7 +27,7 @@
 #include "module_manager.hh"
 #include "xorp_client.hh"
 #include "xrldb.hh"
-#include "parse_error.hh"
+#include "rtrmgr_error.hh"
 
 
 enum TTNodeType {
@@ -81,13 +81,16 @@ public:
     const string& segname() const { return _segname; }
     string path() const;
 
+    bool check_template_tree(string& errmsg) const;
     bool check_command_tree(const list<string>& commands, 
 			    bool include_intermediates, size_t depth) const;
     bool has_default() const { return _has_default; }
     bool check_variable_name(const vector<string>& parts, size_t part) const;
+    string get_module_name_by_variable(const string& varname) const;
     string get_default_target_name_by_variable(const string& varname) const;
     bool expand_variable(const string& varname, string& value) const;
     bool expand_expression(const string& expr, string& value) const;
+    const TemplateTreeNode* find_varname_node(const string& varname) const;
 
     const list<string>& mandatory_children() const { return _mandatory_children; }
 
@@ -101,7 +104,6 @@ protected:
 private:
     void split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
-    const TemplateTreeNode* find_varname_node(const string& varname) const;
     const TemplateTreeNode* find_parent_varname_node(const list<string>& var_parts) const;
     const TemplateTreeNode* find_child_varname_node(const list<string>& var_parts) const;
 
@@ -114,8 +116,8 @@ private:
     string _segname;
 
     // If this node has a variable name associated with it, _varname is
-    // where its stored.  Otherwise its an empty string.
-    string _varname; 
+    // where its stored. Otherwise it is an empty string.
+    string _varname;
 
     // Does the node have a default value?
     bool _has_default;

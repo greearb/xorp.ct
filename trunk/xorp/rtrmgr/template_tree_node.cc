@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.13 2004/01/05 23:45:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.14 2004/01/06 02:55:28 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -83,8 +83,6 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
 	if (iter == _cmd_map.end()) {
 	    command = new ModuleCommand(tt, *this, cmd);
 	    _cmd_map[cmd] = command;
-	} else {
-	    command = iter->second;
 	}
     } else if (cmd == "%allow") {
 	// If the command already exists, no need to create it again.
@@ -298,7 +296,8 @@ TemplateTreeNode::expand_variable(const string& varname, string& value) const
     split_up_varname(varname, var_parts);
     string nodename = var_parts.back();
 
-    XLOG_ASSERT(varname_node->segname() == nodename);
+    XLOG_ASSERT((nodename == varname_node->segname())
+		|| (nodename == "DEFAULT"));
     if (! varname_node->has_default())
 	return false;		// XXX: the variable has no default value
     value = varname_node->default_str();
@@ -316,6 +315,26 @@ TemplateTreeNode::expand_expression(const string& expr, string& value) const
     UNUSED(value);
 
     return false;
+}
+
+string
+TemplateTreeNode::get_module_name_by_variable(const string& varname) const
+{
+    const TemplateTreeNode* ttn;
+
+    ttn = find_varname_node(varname);
+    //
+    // Search all template tree nodes toward the root
+    // to find the module name.
+    //
+    while (ttn != NULL) {
+	string module_name = ttn->module_name();
+	if (module_name.length() > 0)
+	    return (module_name);
+	ttn = ttn->parent();
+    }
+
+    return "";		// XXX: nothing found
 }
 
 string
@@ -354,8 +373,14 @@ TemplateTreeNode::split_up_varname(const string& varname,
 const TemplateTreeNode*
 TemplateTreeNode::find_varname_node(const string& varname) const
 {
-    if (varname == "$(@)" || (varname == "$(" + _segname + ")") ) {
+    if (varname == "$(@)"
+	|| (varname == "$(DEFAULT)")
+	|| (varname == "$(" + _segname + ")") ) {
 	XLOG_ASSERT(! is_tag());
+	if (varname == "$(DEFAULT)") {
+	    if (! has_default())
+		return NULL;	// The template tree node has no default value
+	}
 	return this;
     }
 
@@ -365,12 +390,17 @@ TemplateTreeNode::find_varname_node(const string& varname) const
 
     if (var_parts.front() == "@") {
 	return find_child_varname_node(var_parts);
-    } else if (var_parts.size() > 1) {
+    }
+
+    if (var_parts.size() > 1) {
 	// It's a parent node, or a child of a parent node
 	return find_parent_varname_node(var_parts);
     }
 
-    // XXX: if not "$(@)", then size of 0 or 1 is not valid syntax
+    //
+    // XXX: if not referring to this node, then size of 0 or 1
+    // is not valid syntax.
+    //
     return NULL;
 }
 
@@ -406,6 +436,16 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
 	}
     }
 
+    // The name might refer to the default value of this node
+    if ((var_parts.size() == 2) && (var_parts.back() == "DEFAULT")) {
+	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
+	    // The name refers to the default value of this node
+	    if (! has_default())
+		return NULL;	// The template tree node has no default value
+	    return this;
+	}
+    }
+
     // The name might refer to a child of ours
     list<string> child_var_parts = var_parts;
     child_var_parts.pop_front();
@@ -419,6 +459,36 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
     }
 
     return NULL;
+}
+
+bool
+TemplateTreeNode::check_template_tree(string& errmsg) const
+{
+    //
+    // First check this node, then check recursively all children nodes
+    //
+
+    //
+    // Check whether all referred variable names are valid
+    //
+    map<string, Command *>::const_iterator iter1;
+    for (iter1 = _cmd_map.begin(); iter1 != _cmd_map.end(); ++iter1) {
+	const Command* command = iter1->second;
+	if (! command->check_referred_variables(errmsg))
+	    return false;
+    }
+
+    //
+    // Recursively check all children nodes
+    //
+    list<TemplateTreeNode*>::const_iterator iter2;
+    for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
+	const TemplateTreeNode* ttn = *iter2;
+	if (ttn->check_template_tree(errmsg) != true)
+	    return false;
+    }
+
+    return true;
 }
 
 bool
