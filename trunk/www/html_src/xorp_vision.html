@@ -1,0 +1,104 @@
+<h1>The XORP Vision</h1>
+
+XORP is called an <I>extensible</I> router platform for good reason.  We believe that by designing for extensibility from the outset, we can simultaneously satisfy several different user groups:
+<UL>
+
+<LI>Network researchers needing a platform for experimentation.</LI>
+
+<LI>Network operators needing a cheap stable routing platform on
+commodity hardware.</LI>
+
+<LI>Network equipment vendors with special purpose hardware.</LI>
+
+<LI>Network application writers looking for an open platform to
+support their applications.</LI>
+</UL>
+
+Only time will tell if we're right, but in this note we'll try and
+explain where we hope to go.  Of course we'll only get there with good
+luck and a lot of help from all of these communities.
+
+<h2>Network Research</h2>
+
+There are a lot of very smart people in the network research
+community, but it's hard for many of these people to do experiments
+that give meaningful results.  A lot of work happens in simulation,
+but often it's hard to know whether the simulation bears much
+relationship to reality.  There's really no substitute for trying
+something out in the real world.  This is where XORP comes in.
+<P>
+Here are some examples of how XORP can be used:
+<UL>
+
+<LI> If XORP is used as a production router, it is easy to instrument
+it to perform measurements of traffic, routing messages, or
+practically anything else that goes on in a router.  </LI>
+
+<LI> XORP can be used as a platform to develop new routing protocols.
+XORP has no built-in concept of which routing protocols exists, so you
+can easily add your own, together with an ASCII <a
+href="releases/current/docs/rtrmgr/rtrmgr.pdf">configuration template
+file</a>, so the XORP command line interface knows what new
+functionality is available.</LI>
+
+<LI> XORP can be used as a <a
+href="http://tel.fer.hr/imunes/index.en.shtml">network emulator</a>.
+XORP's Forwarding Engine Abstraction (FEA) process provides an
+abstract interface through which the whole control plane communicates
+with the forwarding plane and the outside world.  It is possible to
+modify the FEA so that multiple emulated routers all exist on the same
+host.  This allows experiments using XORP's real routing code to take
+place in a carefully controlled environment.  It also facilitates new
+protocol development without needing a large lab of machines.</LI>
+
+<LI>XORP is scriptable.  XORP's internal communication between
+processes uses <a
+href="/releases/current/docs/libxipc/libxipc_overview.pdf">XRLs</a>.
+These have a canonical form that is ASCII, such as <pre>
+finder://fea/fti/0.1/add_route?net:ipv4net=10.0.0.1/8&gateway:ipv4=192.150.187.1</pre>
+There's a command line program <B>call_xrl</B> that allows any
+scripting language to make calls to any XORP process and get back the
+response.  How you use this scripting capability is up to you, but we
+think it is unique in it's ability to allow novel uses of existing
+router code.</LI>
+</UL>
+
+<h2>XORP as a Cheap Router</h2>
+<P>
+There are many organizations that need router functionality, but
+cannot justifybuying an expensive commercial router.  Although there
+are cheap home routers available these days, they are not really
+intended to run any non-trivial routing configuration.  A modern $300
+PC has enough forwarding capability to saturate a few 100Mb/s network
+links, and ethernet NICs are extremely cheap, so with a little
+knowledge, it's very viable to build your own PC-based router.
+<P>
+We offer XORP as a Live CD - a CD image that you can burn to a
+bootable CD which allows you to run XORP without installing any
+software or knowing anything about Unix system administration.  As it
+runs from a readonly CD, this configuration is more secure than a
+normal Unix installation.
+<P>
+The goal is that you shouldn't need to know anything about how XORP
+works internally to run it as a router.  XORP has a single unified
+command line interface which allows all the routing protocols, network
+interfaces, and so forth to be configured.  In future releases, this
+CLI will also be extended to encompass additional router functionality
+such as queue manangement, QoS configuration, firewalls, NATs and DHCP
+configuration.
+<P>
+XORP already supports IPv4 and IPv6, together with BGP4+ and RIP for
+unicast routing, PIM-SM and IGMPv2 for multicast, and limited SNMP
+support.  
+<P>
+It is very important to us that XORP is both very stable and has
+sufficient features for mission production use.  We'll realise this
+goal only with extensive feedback from our users we regards to what
+works well in the real world, and what doesn't.
+
+
+<h2>XORP for Equipment Vendors</h2>
+<P>
+
+<h2>XORP for Network Application Writers</h2>
+<P>
