@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.29 2004/12/17 00:19:35 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.30 2004/12/17 05:49:42 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -533,6 +533,8 @@ private:
 class IfConfigSetClick : public IfConfigSet,
 			 public ClickSocket {
 public:
+    class ClickConfigGenerator;
+
     IfConfigSetClick(IfConfig& ifc);
     virtual ~IfConfigSetClick();
 
@@ -568,9 +570,22 @@ public:
      */
     const IfTree& iftree() const { return _iftree; }
 
-private:
-    class ClickConfigGenerator;
+    /**
+     * Receive a signal the work of a Click configuration generator is done.
+     *
+     * @param click_config_generator a pointer to the @see
+     * IfConfigSetClick::ClickConfigGenerator instance that has completed
+     * its work.
+     * @param success if true, then the generator has successfully finished
+     * its work, otherwise false.
+     * @param error_msg the error message (if error).
+     */
+    void click_config_generator_done(
+	IfConfigSetClick::ClickConfigGenerator* click_config_generator,
+	bool success,
+	const string& error_msg);
 
+private:
     virtual int config_begin(string& error_msg);
     virtual int config_end(string& error_msg);
     virtual int add_interface(const string& ifname,
@@ -623,10 +638,6 @@ private:
 
     int execute_click_config_generator(string& error_msg);
     void terminate_click_config_generator();
-    void click_config_generator_done(
-	IfConfigSetClick::ClickConfigGenerator* click_config_generator,
-	bool success,
-	const string& error_msg);
     int write_generated_config(bool is_kernel_click,
 			       const string& kernel_config,
 			       bool is_user_click,
