@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.6 2003/05/21 09:53:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.7 2003/09/20 06:26:00 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -247,7 +247,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 		// XXX: a poor attempt to return something meaningful
 		
 		// XXX: sock->sa_family is undefined
-		const struct sockaddr_in* sin = reintepret_cast<const struct sockaddr_in*>(sock);
+		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
 		IPv4 netmask(sin->sin_addr);
 		return (netmask.prefix_length());
 	    }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.6 2003/05/28 21:50:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.7 2003/09/20 06:41:01 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -282,7 +282,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     // Set the request
     //
     memset(rtmbuf, 0, sizeof(rtmbuf));
-    rtm = reinterptet_cast<struct rt_msghdr*>(rtmbuf);
+    rtm = reinterpret_cast<struct rt_msghdr*>(rtmbuf);
     
     switch (dst.af()) {
     case AF_INET:
