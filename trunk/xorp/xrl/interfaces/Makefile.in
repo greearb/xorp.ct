@@ -114,6 +114,8 @@ snmpd2 = @snmpd2@
 
 # FEA Interface Manager Client Interface
 
+# FEA Interface Manager Client2 Interface
+
 # Forwarding Table Interface Client Interface
 
 # FEA Raw Packet Server Interface
@@ -155,7 +157,7 @@ snmpd2 = @snmpd2@
 #
 # Sample Test Client Interface 
 #
-noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaifmgrclient2xif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
 libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -165,7 +167,8 @@ libcoordxif_a_SOURCES = coord_xif.hh coord_xif.cc
 libdatainxif_a_SOURCES = datain_xif.hh datain_xif.cc
 libfeaxif_a_SOURCES = fea_xif.hh fea_xif.cc
 libfeaifmgrxif_a_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
-libfeaifmgrclientxif_a_SOURCES = fea_ifmgr_client_xif.hh  fea_ifmgr_client_xif.cc 
+libfeaifmgrclientxif_a_SOURCES = fea_ifmgr_client_xif.hh fea_ifmgr_client_xif.cc
+libfeaifmgrclient2xif_a_SOURCES = fea_ifmgr_client2_xif.hh fea_ifmgr_client2_xif.cc
 libftixif_a_SOURCES = fti_xif.hh fti_xif.cc
 libfearawpkt_a_SOURCES = fea_rawpkt_xif.hh fea_rawpkt_xif.cc
 libfearawpktclient_a_SOURCES = fea_rawpkt_client_xif.hh  fea_rawpkt_client_xif.cc 
@@ -231,6 +234,10 @@ libdatainxif_a_AR = $(AR) cru
 libdatainxif_a_LIBADD =
 am_libdatainxif_a_OBJECTS = datain_xif.$(OBJEXT)
 libdatainxif_a_OBJECTS = $(am_libdatainxif_a_OBJECTS)
+libfeaifmgrclient2xif_a_AR = $(AR) cru
+libfeaifmgrclient2xif_a_LIBADD =
+am_libfeaifmgrclient2xif_a_OBJECTS = fea_ifmgr_client2_xif.$(OBJEXT)
+libfeaifmgrclient2xif_a_OBJECTS = $(am_libfeaifmgrclient2xif_a_OBJECTS)
 libfeaifmgrclientxif_a_AR = $(AR) cru
 libfeaifmgrclientxif_a_LIBADD =
 am_libfeaifmgrclientxif_a_OBJECTS = fea_ifmgr_client_xif.$(OBJEXT)
@@ -339,6 +346,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/cli_processor_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/common_xif.Po $(DEPDIR)/coord_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/datain_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_client2_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_client_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt_client_xif.Po \
@@ -368,10 +376,10 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) \
 	$(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) \
-	$(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) \
-	$(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) \
-	$(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) \
-	$(libfinderclientxif_a_SOURCES) \
+	$(libdatainxif_a_SOURCES) $(libfeaifmgrclient2xif_a_SOURCES) \
+	$(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) \
+	$(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) \
+	$(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) \
 	$(libfindereventnotifierxif_a_SOURCES) \
 	$(libfindereventobserverxif_a_SOURCES) \
 	$(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) \
@@ -383,7 +391,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) \
 	$(libxorpifmibxif_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclient2xif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 
 all: all-am
 
@@ -429,6 +437,10 @@ libdatainxif.a: $(libdatainxif_a_OBJECTS) $(libdatainxif_a_DEPENDENCIES)
 	-rm -f libdatainxif.a
 	$(libdatainxif_a_AR) libdatainxif.a $(libdatainxif_a_OBJECTS) $(libdatainxif_a_LIBADD)
 	$(RANLIB) libdatainxif.a
+libfeaifmgrclient2xif.a: $(libfeaifmgrclient2xif_a_OBJECTS) $(libfeaifmgrclient2xif_a_DEPENDENCIES) 
+	-rm -f libfeaifmgrclient2xif.a
+	$(libfeaifmgrclient2xif_a_AR) libfeaifmgrclient2xif.a $(libfeaifmgrclient2xif_a_OBJECTS) $(libfeaifmgrclient2xif_a_LIBADD)
+	$(RANLIB) libfeaifmgrclient2xif.a
 libfeaifmgrclientxif.a: $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif_a_DEPENDENCIES) 
 	-rm -f libfeaifmgrclientxif.a
 	$(libfeaifmgrclientxif_a_AR) libfeaifmgrclientxif.a $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif_a_LIBADD)
@@ -535,6 +547,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/common_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/coord_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/datain_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_client2_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_client_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt_client_xif.Po@am__quote@

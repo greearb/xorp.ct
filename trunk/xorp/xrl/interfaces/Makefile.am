@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.8 2003/05/21 00:13:03 atanu Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.9 2003/07/31 01:17:39 jcardona Exp $
 ##
 
 ###############################################################################
@@ -45,8 +45,13 @@ libfeaifmgrxif_a_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
 
 # FEA Interface Manager Client Interface
 noinst_LIBRARIES += libfeaifmgrclientxif.a
-libfeaifmgrclientxif_a_SOURCES  = fea_ifmgr_client_xif.hh 
-libfeaifmgrclientxif_a_SOURCES += fea_ifmgr_client_xif.cc 
+libfeaifmgrclientxif_a_SOURCES  = fea_ifmgr_client_xif.hh
+libfeaifmgrclientxif_a_SOURCES += fea_ifmgr_client_xif.cc
+
+# FEA Interface Manager Client2 Interface
+noinst_LIBRARIES += libfeaifmgrclient2xif.a
+libfeaifmgrclient2xif_a_SOURCES  = fea_ifmgr_client2_xif.hh
+libfeaifmgrclient2xif_a_SOURCES += fea_ifmgr_client2_xif.cc
 
 # Forwarding Table Interface Client Interface
 noinst_LIBRARIES += libftixif.a
