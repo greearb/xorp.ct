@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.15 2003/05/14 22:56:04 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.16 2003/05/20 21:52:38 pavlin Exp $
 #
 
 Priority:
@@ -20,7 +20,7 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
 * mfea2fea_merge_plan.txt				H	PR
-* Route tagging in kernel. So that routes can be	H	AG
+* Route tagging in kernel. So that routes can be	Done	AG
   withdrawn on startup and controlled shutdown.
 * Handle errors as specified in error doc.		H	Everyone
 
@@ -117,6 +117,7 @@ Immediate Tasks                                       Priority Who
 For 0.3:
 * Isolation test suite				     PartlyDone	MH
 * Refactoring						Done	MH
+* Rtrmgr error handling					H	MH
 
 For 0.x:
 * Add target name and instance				H	MH+PR
@@ -142,6 +143,12 @@ For 0.x:
 Longer Term tasks
 -----------------
 
+================================ XRL =======================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.3:
+* Switch to reliable XRLs				H	OH
+
 ================================ Other =======================================
 * Simulation-like environment for running XORP		H Defer	PR  3-6 months
 * Rewrite CLI						L	PR  2-3 weeks
@@ -159,23 +166,30 @@ For 0.3:
 * Write bgp4_mib_1657 tests using Net-SNMP tools	Done	JC    1 week
 * Generate Net-SNMP configuration file for XORP		Done	JC    1 week
 
+================================ TESTS =======================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.3:
+* Create BGP/RIB/FEA test-router on xorp8		H	??
+
 ================================ Next Release ================================
-* Next release (xorp-0.3): May 29, 2003
+* Next release (xorp-0.3): June 5, 2003
   - Add second CVSWEB for public (DONE)
   - Write a Web page wishlist of tasks/projects that other people may choose
     to do (Started, Everyone):
     - MIBS implementation (each protocol, etc)
   - Add a pointer from the web page to xorp/RELEASE_NOTES (PR)
-  - Finder supports target failure registration/notification requests
+  - Finder supports target failure registration/notification requests (Done)
   - Defer Finder notifications handling for release-0.4
-  - Code semi-freeze: May 23, 2003
+  - Code semi-freeze: May 30, 2003
   - RUN ALL SOFTWARE!!!
     - Stress testing programs
-  - Add XLOG_UNREACHABLE()
+  - Add XLOG_UNREACHABLE() (Done)
         equivalent of XLOG_ASSERT(false)
-  - Add XLOG_UNFINISHED("Message")
+  - Add XLOG_UNFINISHED("Message") (Done)
         similar to XLOG_FATAL, but used in code that needs fixing.
-  - Command-line option for the finder: port number, and host name
+  - Document command-line option for the finder: port number, and host name
+    (see xorp/docs/libxipc/finder_command_line.txt)
 
 ================================ Next-Next Release ===========================
 * Next-next release (xorp-0.4): ?? ??, 2003
@@ -185,6 +199,8 @@ For 0.3:
   - Add bugzilla
   - Add automated process running (expect scripts, etc)
   - Test programs infrastructure
+  - Implement command-line option for the finder: port number, and host name
+    (see xorp/docs/libxipc/finder_command_line.txt)
 
 ================================ Next Stable Release =========================
 * Next stable release (xorp-1.0): ?? ??, 200?
