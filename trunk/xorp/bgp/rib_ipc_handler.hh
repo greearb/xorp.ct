@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.18 2003/11/19 01:05:34 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.19 2003/12/19 01:19:03 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -93,8 +93,7 @@ private:
 
 class RibIpcHandler : public PeerHandler {
 public:
-    RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop,
-		  BGPMain& bgp);
+    RibIpcHandler(XrlStdRouter *xrl_router, BGPMain& bgp);
 
     ~RibIpcHandler();
 
@@ -139,23 +138,6 @@ public:
     ** Delete static route from routing table.
     */
     bool delete_static_route(const IPNet<IPv4>& nlri);
-    EventLoop& eventloop() {return _eventloop;}
-
-    /*
-    ** Indicate to the RIB IPC handler that the Xrl interface to the
-    ** RIB has suffered a fatal error 
-    */
-    void fatal_error(const string& reason);
-
-    /**
-     * Get the status of the RibIpcHandler
-     *
-     * @param reason the human-readable reason for any failure
-     *
-     * @return false if RibIpcHandler has suffered a fatal error,
-     * true otherwise 
-     */
-    bool status(string& reason) const;
 
     //fake a zero IP address so the RIB IPC handler gets listed first
     //in the Fanout Table.
@@ -166,12 +148,8 @@ private:
 
     string _ribname;
     XrlStdRouter *_xrl_router;
-    EventLoop& _eventloop;
 
     bool _ibgp; //did the current update message originate in IBGP?
-
-    bool _interface_failed; //we've seen a fatal error
-    string _failure_reason;
 
     XrlQueue<IPv4> _v4_queue;
     XrlQueue<IPv6> _v6_queue;

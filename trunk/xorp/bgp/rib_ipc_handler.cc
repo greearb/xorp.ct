@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.33 2003/12/19 01:08:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.34 2003/12/19 01:19:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,13 +25,10 @@
 #include "bgp.hh"
 #include "rib_ipc_handler.hh"
 
-RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop, 
-			     BGPMain& bgp) 
+RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, BGPMain& bgp) 
     : PeerHandler("RIBIpcHandler", NULL, NULL, NULL), 
       _ribname(""),
       _xrl_router(xrl_router),
-      _eventloop(eventloop),
-      _interface_failed(false),
       _v4_queue(this, xrl_router, &bgp),
     _v6_queue(this, xrl_router, &bgp),
     _fake_id((unsigned int)0)
@@ -339,24 +336,6 @@ RibIpcHandler::delete_static_route(const IPNet<IPv4>& nlri)
     msg_route->unref();
 
     return true;
-}
-
-void 
-RibIpcHandler::fatal_error(const string& reason)
-{
-    _interface_failed = true;
-    _failure_reason = reason;
-}
-
-bool 
-RibIpcHandler::status(string& reason) const
-{
-    if (_interface_failed) {
-	reason = _failure_reason;
-	return false;
-    } else {
-	return true;
-    }
 }
 
 template<class A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.22 2003/11/19 01:05:33 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.23 2003/11/19 23:56:02 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -57,7 +57,7 @@ BGPMain::BGPMain()
 	}
     }
 
-    _rib_ipc_handler = new RibIpcHandler(_xrl_router, eventloop(), *this);
+    _rib_ipc_handler = new RibIpcHandler(_xrl_router, *this);
     _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
 							eventloop(),
 							*this);
@@ -182,10 +182,8 @@ BGPMain::status(string& reason)
     ProcessStatus s = PROC_READY;
     reason = "Ready";
 
-    if (_rib_ipc_handler->status(reason) == false) {
-	s = PROC_FAILED;
-    } else if (_plumbing_unicast->status(reason) == false ||
-	       _plumbing_multicast->status(reason) == false) {
+    if (_plumbing_unicast->status(reason) == false ||
+	_plumbing_multicast->status(reason) == false) {
 	s = PROC_FAILED;
     } else if (_exit_loop == true) {
 	s = PROC_SHUTDOWN;
