@@ -101,11 +101,14 @@ TEXINPUTS_PATH = $(top_srcdir)/docs/tex:
 SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 
 # -- Document Names
-DOCS = design_arch
+DOCS = design_arch error_handling
 
 # -- Document Sources
 design_arch_LATEX = ../tex/xorp.bib design_arch.tex
 design_arch_FIGURES = figs/processes3.ps
+
+error_handling_LATEX = ../tex/xorp.bib error_handling.tex
+error_handling_FIGURES = figs/error_dependency.eps
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
