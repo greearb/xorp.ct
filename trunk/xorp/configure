@@ -868,6 +868,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-openssl=DIR               specify root of OpenSSL installation
   --with-snmp                   build XORP MIBs for Net-SNMP
+  --with-dmalloc=DIR    use dmalloc (http://www.dmalloc.com/) from DIR
 
 Some influential environment variables:
   CC          C compiler command
@@ -2894,7 +2895,7 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$lt_target" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 2897 "configure"' > conftest.$ac_ext
+  echo '#line 2898 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4540,6 +4541,7 @@ echo $ECHO_N "checking whether preprocessor supports GNU style variable argument
 if test "${xorp_cv_cpp_gnu_va_args+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+
 
 cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"

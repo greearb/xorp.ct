@@ -10,7 +10,7 @@
 
 # serial 1
 
-AC_DEFUN(XR_WITH_DMALLOC_DIR,
+AC_DEFUN([XR_WITH_DMALLOC_DIR],
 [AC_MSG_CHECKING(if malloc debugging is wanted)
 AC_ARG_WITH(dmalloc,
 [  --with-dmalloc[=DIR]    use dmalloc (http://www.dmalloc.com/) from DIR],

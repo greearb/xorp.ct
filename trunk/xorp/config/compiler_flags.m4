@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/compiler_flags.m4,v 1.4 2002/10/18 19:34:03 pavlin Exp $
+dnl $XORP: xorp/config/compiler_flags.m4,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
 dnl
 
 dnl
@@ -14,7 +14,7 @@ dnl
 dnl
 dnl XR_CHECK_CFLAG(COMPILER-FLAG, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
-AC_DEFUN(XR_CHECK_CFLAG,
+AC_DEFUN([XR_CHECK_CFLAG],
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
   ac_safe=`echo "$1" | sed 'y%./+- %__p__%'`
   AC_LANG_SAVE
@@ -45,7 +45,7 @@ AC_DEFUN(XR_CHECK_CFLAG,
 dnl
 dnl XR_CHECK_CFLAGS(COMPILER-FLAG... [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
-AC_DEFUN(XR_CHECK_CFLAGS,
+AC_DEFUN([XR_CHECK_CFLAGS],
 [for ac_flag in $1
   do
     XR_CHECK_CFLAG($ac_flag, $2, $3)
@@ -57,7 +57,7 @@ dnl XR_TRY_ADD_CFLAGS(COMPILER-FLAG...)
 dnl
 dnl Conditionally add each of COMPILER-FLAG (if supported) to CFLAGS
 dnl
-AC_DEFUN(XR_TRY_ADD_CFLAGS,
+AC_DEFUN([XR_TRY_ADD_CFLAGS],
 [for ac_flag in $1
   do
     XR_CHECK_CFLAG($ac_flag, [CFLAGS="$CFLAGS $ac_flag"])
@@ -73,7 +73,7 @@ dnl
 dnl
 dnl XR_CHECK_CXXFLAG(COMPILER-FLAG, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
-AC_DEFUN(XR_CHECK_CXXFLAG,
+AC_DEFUN([XR_CHECK_CXXFLAG],
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
   ac_safe=`echo "$1" | sed 'y%./+- %__p__%'`
   AC_LANG_SAVE
@@ -104,7 +104,7 @@ AC_DEFUN(XR_CHECK_CXXFLAG,
 dnl
 dnl XR_CHECK_CXXFLAGS(COMPILER-FLAG... [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
-AC_DEFUN(XR_CHECK_CXXFLAGS,
+AC_DEFUN([XR_CHECK_CXXFLAGS],
 [for ac_flag in $1
   do
     XR_CHECK_CXXFLAG($ac_flag, $2, $3)
@@ -116,7 +116,7 @@ dnl XR_TRY_ADD_CXXFLAGS(COMPILER-FLAG...)
 dnl
 dnl Conditionally add each of COMPILER-FLAG (if supported) to CXXFLAGS
 dnl
-AC_DEFUN(XR_TRY_ADD_CXXFLAGS,
+AC_DEFUN([XR_TRY_ADD_CXXFLAGS],
 [for ac_flag in $1
   do
     XR_CHECK_CXXFLAG($ac_flag, [CXXFLAGS="$CXXFLAGS $ac_flag"])

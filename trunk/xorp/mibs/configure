@@ -4398,6 +4398,7 @@ if test "${xorp_cv_cpp_gnu_va_args+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
 
+
 cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
