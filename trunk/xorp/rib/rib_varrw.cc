@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/rib/rib_varrw.cc,v 1.1 2004/09/17 14:00:04 abittau Exp $"
 
 #include "rib_module.h"
 #include "rib_varrw.hh"
@@ -24,7 +24,7 @@ RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route) :
 {
     initialize("policytags", _route.policytags().element());
 
-    readRouteNh(route);
+    read_route_nexthop(route);
 
     ostringstream oss;
 
@@ -35,7 +35,7 @@ RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route) :
 
 template <>
 void
-RIBVarRW<IPv4>::readRouteNh(IPRouteEntry<IPv4>& route) {
+RIBVarRW<IPv4>::read_route_nexthop(IPRouteEntry<IPv4>& route) {
     initialize("network4",
 	       _ef.create(ElemIPv4Net::id,route.net().str().c_str()));
     initialize("nexthop4",
@@ -46,7 +46,7 @@ RIBVarRW<IPv4>::readRouteNh(IPRouteEntry<IPv4>& route) {
 
 template <>
 void
-RIBVarRW<IPv6>::readRouteNh(IPRouteEntry<IPv6>& route) {
+RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route) {
     initialize("network6",
 	       _ef.create(ElemIPv6Net::id,route.net().str().c_str()));
     initialize("nexthop6",

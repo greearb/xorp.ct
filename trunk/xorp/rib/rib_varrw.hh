@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/rib/rib_varrw.hh,v 1.1 2004/09/17 14:00:04 abittau Exp $
 
 #ifndef __RIB_RIB_VARRW_HH__
 #define __RIB_RIB_VARRW_HH__
@@ -62,7 +62,7 @@ private:
      *
      * @param r route from which to read addresses.
      */
-    void readRouteNh(IPRouteEntry<A>& r);
+    void read_route_nexthop(IPRouteEntry<A>& r);
 
     IPRouteEntry<A>&   _route;
 
