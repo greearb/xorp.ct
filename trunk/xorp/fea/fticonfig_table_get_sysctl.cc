@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.5 2003/05/22 01:05:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.6 2003/05/28 21:50:54 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -152,7 +152,7 @@ FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), table_data, &sz, NULL, 0)
 	    == 0) {
 	    // Parse the result
-	    return (parse_buffer_rtm(family, fte_list, table_data, sz));
+	    return (parse_buffer_rtm(family, fte_list, table_data, sz, true));
 	}
 	
 	// Error
