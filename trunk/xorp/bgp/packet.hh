@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.17 2003/09/19 20:54:35 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.18 2003/09/27 03:42:20 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -173,9 +173,7 @@ public:
     bool operator==(const OpenPacket& him) const;
     void add_parameter(const BGPParameter *p);
 
-    const ParameterList& parameter_list() const {
-	return _parameter_list;
-    }
+    const ParameterList& parameter_list() const { return _parameter_list; }
 
 protected:
 
@@ -191,7 +189,6 @@ private:
     uint8_t	_Version;
 
     ParameterList _parameter_list;
-//     uint8_t _num_parameters;
 };
 
 /* **************** UpdatePacket *********************** */
@@ -244,11 +241,11 @@ class NotificationPacket : public BGPPacket {
 public:
     NotificationPacket(const uint8_t *d, uint16_t l) throw(InvalidPacket);
     NotificationPacket(uint8_t ec, uint8_t esc = 0,
-		const uint8_t *d = 0, size_t l=0);
+		       const uint8_t *d = 0, size_t l=0);
     NotificationPacket();
     ~NotificationPacket()			{ delete[] _error_data; }
-    uint8_t error_code() const { return _error_code; }
-    uint8_t error_subcode() const { return _error_subcode; }
+    uint8_t error_code() const 			{ return _error_code; }
+    uint8_t error_subcode() const 		{ return _error_subcode; }
     /**
     * Verify that the supplied error code and subcode are legal.
     */
@@ -258,7 +255,7 @@ public:
      */
     static string pretty_print_error_code(const int error, const int subcode,
 					  const uint8_t* error_data = 0);
-    const uint8_t* error_data() const { return _error_data; }
+    const uint8_t* error_data() const 		{ return _error_data; }
     const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
     string str() const;
     bool operator==(const NotificationPacket& him) const;
@@ -283,7 +280,7 @@ public:
      * need nothing to parse incoming data
      */
     KeepAlivePacket(const uint8_t *, uint16_t l)
-		throw(CorruptMessage)			{
+		throw(CorruptMessage) {
 	if (l != MINKEEPALIVEPACKET)
 	    xorp_throw(CorruptMessage,
 		c_format("KeepAlivePacket length %d instead of %u",
@@ -293,11 +290,11 @@ public:
 	_Type = MESSAGETYPEKEEPALIVE;
     }
 
-    KeepAlivePacket()					{
+    KeepAlivePacket() {
 	_Type = MESSAGETYPEKEEPALIVE;
     }
     ~KeepAlivePacket()					{}
-    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const		{
+    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const {
 	len = MINKEEPALIVEPACKET;
 	return basic_encode(len, buf);
     }
