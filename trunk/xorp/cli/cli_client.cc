@@ -473,10 +473,76 @@ CliClient::set_page_mode(bool v)
 }
 
 const string&
-CliClient::page_buffer_line(size_t line_number) const
+CliClient::page_buffer_line(size_t line_n) const
 {
-    XLOG_ASSERT(line_number < _page_buffer->size());
-    return ((*_page_buffer)[line_number]);
+    XLOG_ASSERT(line_n < _page_buffer->size());
+    return ((*_page_buffer)[line_n]);
+}
+
+size_t
+CliClient::page_buffer_window_lines_n()
+{
+    if (page_buffer_lines_n() == 0)
+	return (0);
+    return (page_buffer2window_line_n(page_buffer_lines_n() - 1));
+}
+
+size_t
+CliClient::page_buffer_last_window_line_n()
+{
+    if (page_buffer_last_line_n() == 0)
+	return (0);
+    return (page_buffer2window_line_n(page_buffer_last_line_n() - 1));
+}
+
+size_t
+CliClient::page_buffer2window_line_n(size_t buffer_line_n)
+{
+    size_t i;
+    size_t window_line_n = 0;
+
+    for (i = 0; i <= buffer_line_n; i++) {
+	window_line_n += window_lines_n(buffer_line_n);
+    }
+
+    return (window_line_n);
+}
+
+size_t
+CliClient::window_lines_n(size_t buffer_line_n)
+{
+    XLOG_ASSERT(buffer_line_n < _page_buffer->size());
+
+    const string& line = page_buffer_line(buffer_line_n);
+    size_t window_line_n = (line.size() / window_width())
+	+ ((line.size() % window_width())? (1) : (0));
+
+    return (window_line_n);
+}
+
+size_t
+CliClient::calculate_first_page_buffer_line_by_window_size(
+    size_t last_buffer_line_n,
+    size_t max_window_size)
+{
+    size_t first_buffer_line_n;
+    size_t window_size = 0;
+
+    if (last_buffer_line_n == 0)
+	return (0);
+
+    first_buffer_line_n = last_buffer_line_n - 1;
+    window_size += window_lines_n(first_buffer_line_n);
+    while (window_size < max_window_size) {
+	if (first_buffer_line_n == 0)
+	    break;
+	window_size += window_lines_n(first_buffer_line_n - 1);
+	if (window_size > max_window_size)
+	    break;
+	first_buffer_line_n--;
+    }
+
+    return (first_buffer_line_n);
 }
 
 //
@@ -540,12 +606,8 @@ CliClient::cli_print(const string& msg)
 	    && (_client_type == CLIENT_TERMINAL)
 	    && (pipe_result[i] == '\n')) {
 	    // Add the line to the buffer output
-#if 0	    // TODO: need to modify to handle longer lines
-	    size_t window_line_n = pipe_line.size() / window_width()
-		+ (pipe_line.size() % window_width)? (1) : (0);
-#endif
 	    add_page_buffer_line(pipe_line);
-	    if ((page_buffer_lines_n() >= window_height())
+	    if ((page_buffer_window_lines_n() >= window_height())
 		&& (! is_nomore_mode())) {
 		set_page_mode(true);
 	    } else {
@@ -691,10 +753,12 @@ CliClient::process_char_page_mode(uint8_t val)
 	|| (val == 'd')
 	|| (val == CHAR_TO_CTRL('d'))
 	|| (val == CHAR_TO_CTRL('x'))) {
-	for (size_t i = 0; i < window_height()/2; i++) {
-	    if (page_buffer_last_line_n() >= page_buffer_lines_n()) {
+	for (size_t i = 0; i <= window_height() / 2; ) {
+	    if (page_buffer_last_line_n() >= page_buffer_lines_n())
 		break;
-	    }
+	    i += window_lines_n(page_buffer_last_line_n());
+	    if (i > window_height() / 2)
+		break;
 	    cli_print(page_buffer_line(page_buffer_last_line_n()));
 	    incr_page_buffer_last_line_n();
 	}
@@ -706,10 +770,12 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == ' ')
 	|| (val == CHAR_TO_CTRL('f'))) {
-	for (size_t i = 0; i < window_height() - 1; i++) {
-	    if (page_buffer_last_line_n() >= page_buffer_lines_n()) {
+	for (size_t i = 0; i <= window_height() - 1; ) {
+	    if (page_buffer_last_line_n() >= page_buffer_lines_n())
 		break;
-	    }
+	    i += window_lines_n(page_buffer_last_line_n());
+	    if (i > window_height() - 1)
+		break;
 	    cli_print(page_buffer_line(page_buffer_last_line_n()));
 	    incr_page_buffer_last_line_n();
 	}
@@ -721,14 +787,8 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'G')
 	|| (val == CHAR_TO_CTRL('e'))) {
-	if (page_buffer_last_line_n() + window_height() - 1
-	    < page_buffer_lines_n())
-	    set_page_buffer_last_line_n(page_buffer_lines_n() - window_height() + 1);
-	while (page_buffer_last_line_n() < page_buffer_lines_n()) {
-	    cli_print(page_buffer_line(page_buffer_last_line_n()));
-	    incr_page_buffer_last_line_n();
-	}
-	goto redisplay_line_label;
+	set_page_buffer_last_line_n(page_buffer_lines_n());
+	goto redisplay_screen_label;
     }
     
     //
@@ -753,7 +813,6 @@ CliClient::process_char_page_mode(uint8_t val)
 	|| (val == CHAR_TO_CTRL('h'))
 	|| (val == CHAR_TO_CTRL('p'))
 	|| (gl_get_user_event(gl()) == 1)) {
-	// TODO: add the "up arrow" as well
 	if (page_buffer_last_line_n() > 0)
 	    decr_page_buffer_last_line_n();
 	goto redisplay_screen_label;
@@ -764,11 +823,11 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'u')
 	|| (val == CHAR_TO_CTRL('u'))) {
-	if (page_buffer_last_line_n() > window_height() - 1 + window_height()/2)
-	    set_page_buffer_last_line_n(page_buffer_last_line_n() - window_height()/2);
-	else
-	    set_page_buffer_last_line_n(min(window_height() - 1,
-					    page_buffer_lines_n()));
+	if (page_buffer_last_line_n() > 0) {
+	    size_t start_window_line = calculate_first_page_buffer_line_by_window_size(
+		page_buffer_last_line_n(), window_height() / 2);
+	    set_page_buffer_last_line_n(start_window_line);
+	}
 	goto redisplay_screen_label;
     }
     
@@ -777,11 +836,11 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'b')
 	|| (val == CHAR_TO_CTRL('b'))) {
-	if (page_buffer_last_line_n() > window_height() - 1 + window_height() - 1)
-	    set_page_buffer_last_line_n(page_buffer_last_line_n() - window_height() + 1);
-	else
-	    set_page_buffer_last_line_n(min(window_height() - 1,
-					    page_buffer_lines_n()));
+	if (page_buffer_last_line_n() > 0) {
+	    size_t start_window_line = calculate_first_page_buffer_line_by_window_size(
+		page_buffer_last_line_n(), window_height() - 1);
+	    set_page_buffer_last_line_n(start_window_line);
+	}
 	goto redisplay_screen_label;
     }
     
@@ -790,9 +849,7 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'g')
 	|| (val == CHAR_TO_CTRL('a'))) {
-	size_t start_window_line = 0;
-	set_page_buffer_last_line_n(min(start_window_line + window_height() - 1,
-					page_buffer_lines_n()));
+	set_page_buffer_last_line_n(0);
 	goto redisplay_screen_label;
     }
     
@@ -802,14 +859,23 @@ CliClient::process_char_page_mode(uint8_t val)
     if ((val == CHAR_TO_CTRL('l'))) {
     redisplay_screen_label:
 	size_t i, start_window_line = 0;
-	if (page_buffer_last_line_n() >= window_height() - 1)
-	    start_window_line = page_buffer_last_line_n() - window_height() + 1;
-	else
-	    start_window_line = 0;
-	set_page_buffer_last_line_n(min(start_window_line + window_height() - 1,
-					page_buffer_lines_n()));
-	for (i = start_window_line; i < page_buffer_last_line_n(); i++)
-	    cli_print(page_buffer_line(i));
+	// XXX: clean-up the previous window
+	for (i = 0; i < window_height() - 1; i++)
+	    cli_print("\n");
+	if (page_buffer_last_line_n() > 0) {
+	    start_window_line = calculate_first_page_buffer_line_by_window_size(
+		page_buffer_last_line_n(), window_height() - 1);
+	}
+	set_page_buffer_last_line_n(start_window_line);
+	for (i = 0; i <= window_height() - 1; ) {
+	    if (page_buffer_last_line_n() >= page_buffer_lines_n())
+		break;
+	    i += window_lines_n(page_buffer_last_line_n());
+	    if (i > window_height() - 1)
+		break;
+	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    incr_page_buffer_last_line_n();
+	}
 	// XXX: fill-up the rest of the window
 	for ( ; i < window_height() - 1; i++)
 	    cli_print("\n");

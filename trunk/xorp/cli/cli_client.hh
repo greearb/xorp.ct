@@ -365,7 +365,7 @@ private:
     bool	is_page_buffer_mode() { return (*_is_page_buffer_mode); }
     void	set_page_buffer_mode(bool v) { *_is_page_buffer_mode = v; }
     vector<string>& page_buffer() { return (*_page_buffer); }
-    const string& page_buffer_line(size_t line_number) const;
+    const string& page_buffer_line(size_t line_n) const;
     void	reset_page_buffer() { page_buffer().clear(); set_page_buffer_last_line_n(0); }
     size_t	page_buffer_lines_n() { return (page_buffer().size()); }
     void	add_page_buffer_line(const string& buffer_line);
@@ -373,6 +373,14 @@ private:
     void	set_page_buffer_last_line_n(size_t v) { *_page_buffer_last_line_n = v; }
     void	incr_page_buffer_last_line_n() { (*_page_buffer_last_line_n)++; }
     void	decr_page_buffer_last_line_n() { (*_page_buffer_last_line_n)--; }
+    size_t	page_buffer_window_lines_n();
+    size_t	page_buffer_last_window_line_n();
+    size_t	page_buffer2window_line_n(size_t buffer_line_n);
+    size_t	window_lines_n(size_t buffer_line_n);
+    size_t	calculate_first_page_buffer_line_by_window_size(
+	size_t last_buffer_line_n,
+	size_t max_window_size);
+
     bool	is_help_mode() { return (_is_help_mode); }
     void	set_help_mode(bool v) { _is_help_mode = v; }
     bool	is_nomore_mode() { return (_is_nomore_mode); }
