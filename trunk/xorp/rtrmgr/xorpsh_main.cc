@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.28 2004/05/28 22:28:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.29 2004/06/10 22:41:56 hodson Exp $"
 
 
 #include <sys/types.h>
@@ -216,7 +216,7 @@ XorpShell::run()
     try {
 	_ct = new SlaveConfigTree(_configuration, _tt, _xclient, _verbose);
 
-	_ocl->set_config_tree(_ct);
+	_ocl->set_slave_config_tree(_ct);
 
 	// Start up the CLI
 	_cli_node.enable();

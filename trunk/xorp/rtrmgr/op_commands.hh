@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.18 2004/06/11 06:30:40 atanu Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.19 2004/06/12 01:34:11 atanu Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -146,7 +146,7 @@ public:
 	throw (InitError);
     ~OpCommandList();
 
-    void set_config_tree(SlaveConfigTree* sct) { _conf_tree = sct; }
+    void set_slave_config_tree(SlaveConfigTree* sct) { _slave_config_tree = sct; }
     bool check_variable_name(const string& variable_name) const;
     OpCommand* find_op_command(const list<string>& command_parts);
     OpCommand* add_op_command(const OpCommand& op_command);
@@ -170,7 +170,7 @@ private:
     list<string>	_path_segments;
     OpCommand*		_current_command;
     const TemplateTree*	_template_tree;
-    SlaveConfigTree*	_conf_tree;
+    SlaveConfigTree*	_slave_config_tree;
 };
 
 #endif // __RTRMGR_OP_COMMAND_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.32 2004/06/12 03:53:24 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.33 2004/07/20 23:02:28 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -393,7 +393,7 @@ OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
 
 bool
 OpCommand::command_match(const list<string>& path_parts,
-			 SlaveConfigTree* conf_tree,
+			 SlaveConfigTree* slave_config_tree,
 			 bool exact_match) const
 {
     list<string>::const_iterator them, us;
@@ -420,7 +420,7 @@ OpCommand::command_match(const list<string>& path_parts,
 	if ((*us)[0] == '$') {
 	    // Matching against a varname
 	    list<string> varmatches;
-	    conf_tree->expand_varname_to_matchlist(*us, varmatches);
+	    slave_config_tree->expand_varname_to_matchlist(*us, varmatches);
 	    list<string>::const_iterator vi;
 	    bool ok = false;
 	    for (vi = varmatches.begin(); vi != varmatches.end(); ++vi) {
@@ -460,7 +460,7 @@ OpCommand::command_match(const list<string>& path_parts,
 }
 
 void
-OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
+OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 		       map<string, string>& return_matches,
 		       bool& is_executable,
 		       bool& can_pipe) const
@@ -488,7 +488,7 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
 	    XLOG_ASSERT(match[1] == '(');
 	    XLOG_ASSERT(match[match.size() - 1] == ')');
 	    list<string> var_matches;
-	    conf_tree->expand_varname_to_matchlist(match, var_matches);
+	    slave_config_tree->expand_varname_to_matchlist(match, var_matches);
 	    list<string>::const_iterator vi;
 	    for (vi = var_matches.begin(); vi != var_matches.end(); ++vi) {
 		return_matches.insert(make_pair(*vi, _help_string));
@@ -609,7 +609,8 @@ OpCommandList::command_match(const list<string>& command_parts,
 {
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
-	if ((*iter)->command_match(command_parts, _conf_tree, exact_match))
+	if ((*iter)->command_match(command_parts, _slave_config_tree,
+				   exact_match))
 	    return true;
     }
     return false;
@@ -623,7 +624,7 @@ OpCommandList::execute(EventLoop *eventloop, const list<string>& command_parts,
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	// Find the right command
-	if ((*iter)->command_match(command_parts, _conf_tree, true)) {
+	if ((*iter)->command_match(command_parts, _slave_config_tree, true)) {
 	    // Execute it
 	    return (*iter)->execute(eventloop,
 				    command_parts, print_cb, done_cb);
@@ -738,11 +739,11 @@ OpCommandList::childlist(const string& path, bool& is_executable,
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;
-	if (op_command->command_match(path_parts, _conf_tree, false)) {
+	if (op_command->command_match(path_parts, _slave_config_tree, false)) {
 	    map<string, string> matches;
 	    bool tmp_is_executable;
 	    bool tmp_can_pipe;
-	    op_command->get_matches(path_parts.size(), _conf_tree,
+	    op_command->get_matches(path_parts.size(), _slave_config_tree,
 				    matches, tmp_is_executable, tmp_can_pipe);
 	    if (tmp_is_executable)
 		is_executable = true;
