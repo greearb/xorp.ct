@@ -1,15 +1,15 @@
 // ----------------------------------------------------------------------------
 // Pre 1.0 Release
 
+o Validate origin address in Port<A>::port_io_receive If packet does
+  not come from a host on the same network or from the end of a point
+  to point link it should not be processed.
+
+o Re-jig socket code.  1 socket to receive multicast on.  One socket
+  per interface to send mcast on, one socket per interface to receive
+  unicast on.
+
 o Add HopCount check on received RIPng packets.
-
-o Add accessors for counters, listing peers, getting peer counters,
-  getting port counters, etc.  These form the basis for operational
-  commands.
-
-o Update peer last active field.
-
-o Add Operational commands.
 
 o Check and double check nexthop handling paying attention to incoming
   and outgoing interfaces and their properties.
@@ -34,3 +34,7 @@ o Consider keeping losing routes, age them in the normal way, etc, and
 o Arrange to have triggered updates go out of all RIP Port instances
   at the same time.  This is a little tricky as each RIP Port instance
   is autonomous.
+
+o Add horizon checks to tools/rip_announcer.cc and
+  tools/ripng_announcer.cc for packets they receive.  This is icing on
+  the cake.
