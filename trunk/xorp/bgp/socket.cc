@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.19 2004/12/10 14:52:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.20 2004/12/14 19:59:11 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -60,12 +60,22 @@ Socket::create_listener()
     create_socket(sin);
 
     int opt = 1;
-    if(-1 == setsockopt(get_sock(),
-			SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
-	XLOG_FATAL("setsockopt failed: %s", strerror(errno));
-    
-    if(-1 == bind(get_sock(), sin, len))
-	XLOG_FATAL("Bind failed: %s", strerror(errno));
+    if (::setsockopt(get_sock(), SOL_SOCKET, SO_REUSEADDR, &opt,
+		     sizeof(opt)) == -1) {
+	XLOG_WARNING("setsockopt failed: %s", strerror(errno));
+    }
+
+    if (::bind(get_sock(), sin, len) == -1) {
+	int saved_errno = errno;
+	try {
+	    IPvX addr(*sin);
+	    XLOG_ERROR("Failed to bind socket %d to address %s: %s",
+		get_sock(), addr.str().c_str(), strerror(saved_errno));
+	} catch (InvalidFamily e) {
+	    XLOG_ERROR("Failed to bind socket %d to address %s: %s",
+		get_sock(), "(unprintable)", strerror(saved_errno));
+	};
+    }
 }
 
 /* **************** BGPSocket - PROTECTED METHODS *********************** */
@@ -86,8 +96,9 @@ Socket::create_socket(const struct sockaddr *sin)
 
     XLOG_ASSERT(UNCONNECTED == _s);
 
-    if(UNCONNECTED == (_s = ::socket (sin->sa_family, SOCK_STREAM, 0)))
-	XLOG_FATAL("Socket call failed: %s", strerror(errno));
+    if (UNCONNECTED == (_s = ::socket(sin->sa_family, SOCK_STREAM, 0))) {
+	XLOG_ERROR("socket() failed: %s", strerror(errno));
+    }
 
     debug_msg("BGPSocket socket created (sock - %d)\n", _s);
 }
