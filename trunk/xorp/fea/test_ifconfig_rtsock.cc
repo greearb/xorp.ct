@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.6 2005/03/05 01:41:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.7 2005/03/25 02:53:15 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -138,7 +138,7 @@ main(int argc, char* const* argv)
     //
     if (geteuid() != 0) {
 	fprintf(stderr, "%s\n*\n", string(79, '*').c_str());
-	fprintf(stderr, "* This program needs root privelages.\n");
+	fprintf(stderr, "* This program needs root privileges.\n");
 	fprintf(stderr, "* Returning success even though not run.\n");
 	fprintf(stderr, "*\n%s\n", string(79, '*').c_str());
 	// Return 0 because if part of 'make check' we don't want this
