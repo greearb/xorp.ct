@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.2 2002/12/14 23:42:51 hodson Exp $
+// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.3 2003/03/10 23:20:18 hodson Exp $
 
 #ifndef __FEA_XRL_IFUPDATE_HH__
 #define __FEA_XRL_IFUPDATE_HH__
@@ -51,7 +51,7 @@ public:
     bool remove_reportee(const string& xrl_target);
 
     /**
-     * Send announcment of interface update.
+     * Send announcement of interface update.
      *
      * @param ifname the name of the interface updated.
      * @param u the update that occured
@@ -61,7 +61,7 @@ public:
 			  const Update& u);
 
     /**
-     * Send announcment of a vif update.
+     * Send announcement of a vif update.
      *
      * @param ifname the name of the interface associated with vif.
      * @param vifname the name of the vif updated.
@@ -73,7 +73,7 @@ public:
 		    const Update& u);
 
     /**
-     * Send announcment of a vif address update.
+     * Send announcement of a vif address update.
      *
      * @param ifname the name of the interface associated with vif address.
      * @param vifname the name of the vif associated with the address.
@@ -87,7 +87,7 @@ public:
 			 const Update&	u);
 
     /**
-     * Send announcment of a vif address update.
+     * Send announcement of a vif address update.
      *
      * @param ifname the name of the interface associated with vif address.
      * @param vifname the name of the vif associated with the address.
