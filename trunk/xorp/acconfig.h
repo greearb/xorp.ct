@@ -48,9 +48,9 @@
 #undef HAVE_DEV_URANDOM
 
 /*
- * Define this if you have new.h
+ * Define this if you have <new>
  */
-#undef HAVE_NEW_H
+#undef HAVE_NEW_HEADER
 
 /*
  * Define this if you have netinet/ether.h
@@ -226,12 +226,15 @@ typedef int socklen_t;
 #endif
 
 #ifdef __cplusplus
-#ifdef HAVE_NEW_H
-#include <new.h>
+#ifdef HAVE_NEW_HEADER
+#include <new>
 #else
 inline void *operator new(size_t, void *v) { return v; }
 #endif
 #endif /* __cplusplus */
 
+#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
+using namespace std;
+#endif
 
 #endif /* __XORP_CONFIG_H__ */

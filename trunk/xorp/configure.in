@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.123 2002/12/11 19:42:44 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -364,20 +364,20 @@ dnl ----------------------------
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
-AC_CACHE_CHECK(for working new.h, xorp_cv_good_new_h,
+AC_CACHE_CHECK(for working <new>, xorp_cv_good_new_header,
   AC_TRY_RUN([
-		#include <new.h>
+		#include <new>
 		int main(int c, char **v) {
 		int a;
 		int *b = new(&a) int;
 		return 0;
 		}], 
-		xorp_cv_good_new_h=yes, 
-		xorp_cv_good_new_h=no, 
-		xorp_cv_good_new_h=no))
+		xorp_cv_good_new_header=yes, 
+		xorp_cv_good_new_header=no, 
+		xorp_cv_good_new_header=no))
 AC_LANG_RESTORE
-if test "$xorp_cv_good_new_h" = yes; then
-  AC_DEFINE(HAVE_NEW_H)
+if test "$xorp_cv_good_new_header" = yes; then
+  AC_DEFINE(HAVE_NEW_HEADER)
 fi
 
 dnl ----------------------------
