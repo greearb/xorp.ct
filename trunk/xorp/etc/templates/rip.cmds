@@ -1,0 +1,24 @@
+show rip peer statistics $(protocols.rip.interface.*) $(protocols.rip.interface.*.vif.*) $(protocols.rip.interface.*.vif.*.address.*) {
+     %command: "rip/tools/show_peer_stats $0" %help: HELP;
+     %module: rip;
+     %tag: HELP "Show RIP statistics for peers on specified address";
+}
+
+show rip peer statistics all {
+     %command: "rip/tools/show_peer_stats" %help: HELP;
+     %module: rip;
+     %tag: HELP "Show RIP statistics for all peers";
+}
+
+show rip statistics $(protocols.rip.interface.*) $(protocols.rip.interface.*.vif.*) $(protocols.rip.interface.*.vif.*.address.*) {
+     %command: "rip/tools/show_stats $0" %help: HELP;
+     %module: rip;
+     %tag: HELP "Show RIP statistics on specified address";
+}
+
+show rip statistics all {
+     %command: "rip/tools/show_stats" %help: HELP;
+     %module: rip;
+     %tag: HELP "Show RIP statistics for all addresses";
+}
+
