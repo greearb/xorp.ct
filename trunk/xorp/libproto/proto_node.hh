@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.14 2003/07/16 02:56:55 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.15 2003/08/07 00:36:37 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -802,6 +802,9 @@ ProtoNode<V>::start_config(string& error_msg)
     case PROC_FAILED:
 	error_msg = "invalid start config in PROC_FAILED state";
 	return (XORP_ERROR);
+    case PROC_DONE:
+	error_msg = "invalid start config in PROC_DONE state";
+	return (XORP_ERROR);
     case PROC_NULL:
 	// FALLTHROUGH
     default:
@@ -831,6 +834,9 @@ ProtoNode<V>::end_config(string& error_msg)
 	return (XORP_ERROR);
     case PROC_FAILED:
 	error_msg = "invalid end config in PROC_FAILED state";
+	return (XORP_ERROR);
+    case PROC_DONE:
+	error_msg = "invalid end config in PROC_DONE state";
 	return (XORP_ERROR);
     case PROC_NULL:
 	// FALLTHROUGH
