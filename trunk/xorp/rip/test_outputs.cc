@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.14 2004/06/10 22:41:46 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.15 2004/09/17 13:57:15 abittau Exp $"
 
 #include <set>
 
@@ -537,10 +537,10 @@ public:
 	ou.start();
 
 	while (ou.running() && timeout == false) {
-	    _e.run();
+  	    _e.run();
 	}
-	verbose_log("%d bytes buffered in packet queue.\n",
-		    op_out.buffered_bytes());
+	verbose_log("%u bytes buffered in packet queue.\n",
+		    XORP_UINT_CAST(op_out.buffered_bytes()));
 	if (timeout) {
 	    verbose_log("Timed out!\n");
 	    return 1;
@@ -629,7 +629,7 @@ run_all_test_cases()
     //
     {
 	verbose_log("=== IPv%u No Horizon updates test ===\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
 	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
 	NoHorizonValidator<A> nohv(tpn, opn);
 	rval |= tester.run_test(NONE, nohv);
@@ -638,7 +638,7 @@ run_all_test_cases()
     }
     {
 	verbose_log("=== IPv%u Split Horizon updates test ===\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
 	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
 	SplitHorizonValidator<A> shv(tpn, opn);
 	rval |= tester.run_test(SPLIT, shv);
@@ -647,7 +647,7 @@ run_all_test_cases()
     }
     {
 	verbose_log("=== IPv%u Split Horizon Poison Reverse test ===\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
 	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
 	PoisonReverseValidator<A> prv(tpn, opn);
 	rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
@@ -660,7 +660,7 @@ run_all_test_cases()
     //
     {
 	verbose_log("=== IPv%u No Horizon table test ===\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
 	OutputTester<A, OutputTable<A> > tester(tpn, opn);
 	NoHorizonValidator<A> nohv(tpn, opn);
 	rval |= tester.run_test(NONE, nohv);
@@ -669,7 +669,7 @@ run_all_test_cases()
     }
     {
 	verbose_log("=== IPv%u Split Horizon table test ===\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
 	OutputTester<A, OutputTable<A> > tester(tpn, opn);
 	SplitHorizonValidator<A> shv(tpn, opn);
 	rval |= tester.run_test(SPLIT, shv);
@@ -678,7 +678,7 @@ run_all_test_cases()
     }
     {
 	verbose_log("=== IPv%u Split Horizon Poison Reverse table test ===\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
 	OutputTester<A, OutputTable<A> > tester(tpn, opn);
 	PoisonReverseValidator<A> prv(tpn, opn);
 	rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
