@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.12 2003/08/06 18:50:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.13 2003/08/07 00:27:21 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -1003,7 +1003,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	    mfea_vif->is_loopback(),
 	    mfea_vif->is_multicast_capable(),
 	    mfea_vif->is_broadcast_capable(),
-	    mfea_vif->is_up(),
+	    mfea_vif->is_underlying_vif_up(),
 	    callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
     }
     
@@ -1100,7 +1100,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	    mfea_vif->is_loopback(),
 	    mfea_vif->is_multicast_capable(),
 	    mfea_vif->is_broadcast_capable(),
-	    mfea_vif->is_up(),
+	    mfea_vif->is_underlying_vif_up(),
 	    callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
     }
     
