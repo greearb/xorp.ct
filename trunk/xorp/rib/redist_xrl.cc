@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.1 2004/05/06 17:59:53 hodson Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.2 2004/05/12 08:28:50 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -305,6 +305,15 @@ template <>
 bool
 AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 {
+    if (this->parent()->transaction_in_error()
+	|| ! this->parent()->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route add for %s\n",
+		   _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_add_route(this->parent()->xrl_target_name().c_str(),
 			     this->parent()->tid(),
@@ -319,6 +328,15 @@ template <>
 bool
 AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 {
+    if (this->parent()->transaction_in_error()
+	|| ! this->parent()->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route add for %s\n",
+		   _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_add_route(this->parent()->xrl_target_name().c_str(),
 			     this->parent()->tid(),
@@ -338,6 +356,15 @@ template <>
 bool
 DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 {
+    if (this->parent()->transaction_in_error()
+	|| ! this->parent()->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route delete for %s\n",
+		   _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_delete_route(
 		this->parent()->xrl_target_name().c_str(),
@@ -352,6 +379,15 @@ template <>
 bool
 DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 {
+    if (this->parent()->transaction_in_error()
+	|| ! this->parent()->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route delete for %s\n",
+		   _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_delete_route(
 		this->parent()->xrl_target_name().c_str(),
