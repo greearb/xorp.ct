@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.21 2003/09/05 00:43:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.22 2003/09/05 02:39:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -468,8 +468,8 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
-	XLOG_FATAL("BGPPlumbingAF<A>::stop_peering: peer %#x not found",
-		(u_int)peer_handler);
+	XLOG_FATAL("BGPPlumbingAF<%s>::stop_peering: peer %#x not found",
+		NameOf<A>::get(), (u_int)peer_handler);
     rt = iter->second;
     prevrt = rt;
     while (rt != _fanout_table) {
@@ -482,7 +482,9 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
 	if (rt == NULL) {
 	    //peering was already stopped.  This can happen when we're
 	    //doing an ALLSTOP.
-	    XLOG_WARNING("NULL parent table in stop_peering");
+	    XLOG_WARNING("BGPPlumbingAF<%s>::stop_peering: "
+			 "NULL parent table in stop_peering",
+			 NameOf<A>::get());
 	    return 0;
 	}
     }
