@@ -4512,30 +4512,9 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 
 
-build_fea_rtsock=false
-case "${host_os}" in
-freebsd* ) 
-    build_fea_rtsock=true
-    ;;
-* )
-    build_fea_rtsock=false
-    ;;
-esac
-
-
-
-if test x$build_fea_rtsock = xtrue; then
-  FEA_BUILD_RTSOCK_TRUE=
-  FEA_BUILD_RTSOCK_FALSE='#'
-else
-  FEA_BUILD_RTSOCK_TRUE='#'
-  FEA_BUILD_RTSOCK_FALSE=
-fi
-
-
 
 echo $ac_n "checking ospfd platform""... $ac_c" 1>&6
-echo "configure:4539: checking ospfd platform" >&5
+echo "configure:4518: checking ospfd platform" >&5
 if eval "test \"`echo '$''{'xorp_cv_ospfd_os'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4615,19 +4594,19 @@ cross_compiling=$ac_cv_prog_cc_cross
 
   CFLAGS="$CFLAGS $ac_flag"
   echo $ac_n "checking whether C compiler supports flag "$ac_flag"""... $ac_c" 1>&6
-echo "configure:4619: checking whether C compiler supports flag "$ac_flag"" >&5
+echo "configure:4598: checking whether C compiler supports flag "$ac_flag"" >&5
   if eval "test \"`echo '$''{'ac_cv_prog_c_compiler_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4624 "configure"
+#line 4603 "configure"
 #include "confdefs.h"
 
 int main() {
 return (0);
 ; return 0; }
 EOF
-if { (eval echo configure:4631: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4610: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
             
@@ -4674,19 +4653,19 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo $ac_n "checking whether C++ compiler supports flag "$ac_flag"""... $ac_c" 1>&6
-echo "configure:4678: checking whether C++ compiler supports flag "$ac_flag"" >&5
+echo "configure:4657: checking whether C++ compiler supports flag "$ac_flag"" >&5
   if eval "test \"`echo '$''{'ac_cv_prog_cxx_compiler_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4683 "configure"
+#line 4662 "configure"
 #include "confdefs.h"
 
 int main() {
 return (0);
 ; return 0; }
 EOF
-if { (eval echo configure:4690: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4669: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
             
@@ -4733,19 +4712,19 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo $ac_n "checking whether C++ compiler supports flag "$ac_flag"""... $ac_c" 1>&6
-echo "configure:4737: checking whether C++ compiler supports flag "$ac_flag"" >&5
+echo "configure:4716: checking whether C++ compiler supports flag "$ac_flag"" >&5
   if eval "test \"`echo '$''{'ac_cv_prog_cxx_compiler_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4742 "configure"
+#line 4721 "configure"
 #include "confdefs.h"
 
 int main() {
 return (0);
 ; return 0; }
 EOF
-if { (eval echo configure:4749: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4728: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
             
@@ -5024,8 +5003,6 @@ s%@net_snmp_found@%$net_snmp_found%g
 s%@MIBS@%$MIBS%g
 s%@snmpd@%$snmpd%g
 s%@snmpd2@%$snmpd2%g
-s%@FEA_BUILD_RTSOCK_TRUE@%$FEA_BUILD_RTSOCK_TRUE%g
-s%@FEA_BUILD_RTSOCK_FALSE@%$FEA_BUILD_RTSOCK_FALSE%g
 s%@OSPFD@%$OSPFD%g
 s%@OSPFD_OS@%$OSPFD_OS%g
 

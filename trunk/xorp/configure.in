@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.30 2003/05/20 01:16:51 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.31 2003/05/21 03:05:34 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -966,23 +966,6 @@ AC_LANG_RESTORE
 dnl ---------------------------------------------------------------------------
 dnl FEA Related
 dnl ---------------------------------------------------------------------------
-
-dnl ---------------------------------------------------------------------------
-dnl FEA check - only builds on freebsd and uses coarse grained os
-dnl check, should get for prescence of routing socket support, netlink, etc
-dnl ---------------------------------------------------------------------------
-
-build_fea_rtsock=false
-case "${host_os}" in
-freebsd* ) 
-    build_fea_rtsock=true
-    ;;
-* )
-    build_fea_rtsock=false
-    ;;
-esac
-
-AM_CONDITIONAL(FEA_BUILD_RTSOCK, test x$build_fea_rtsock = xtrue)
 
 dnl ---------------------------------------------------------------------------
 dnl OSPFD Related
