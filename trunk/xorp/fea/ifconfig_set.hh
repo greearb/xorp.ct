@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.9 2003/10/13 23:32:41 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.10 2003/10/24 00:02:23 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -137,6 +137,10 @@ protected:
 				   const IPvX& addr,
 				   uint32_t prefix_len,
 				   string& reason) = 0;
+
+protected:
+    // Misc other state
+    bool	_is_running;
 
 private:
     void push_interface(const IfTreeInterface& i);

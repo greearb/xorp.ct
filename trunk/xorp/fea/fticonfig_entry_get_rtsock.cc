@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.11 2003/10/30 07:44:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.12 2004/03/17 07:23:53 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -55,13 +55,26 @@ FtiConfigEntryGetRtsock::~FtiConfigEntryGetRtsock()
 int
 FtiConfigEntryGetRtsock::start()
 {
-    return (RoutingSocket::start());
+    if (RoutingSocket::start() < 0)
+	return (XORP_ERROR);
+
+    _is_running = true;
+
+    return (XORP_OK);
 }
-    
+
 int
 FtiConfigEntryGetRtsock::stop()
 {
-    return (RoutingSocket::stop());
+    if (! _is_running)
+	return (XORP_OK);
+
+    if (RoutingSocket::stop() < 0)
+	return (XORP_ERROR);
+
+    _is_running = false;
+
+    return (XORP_OK);
 }
 
 /**

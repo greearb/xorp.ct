@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.11 2003/11/06 03:00:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.12 2003/11/10 22:25:48 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -63,16 +63,23 @@ IfConfigGetProcLinux::start()
     // XXX: this method relies on the ioctl() method
     if (ifc().ifc_get_ioctl().start() < 0)
 	return (XORP_ERROR);
-    
+
+    _is_running = true;
+
     return (XORP_OK);
 }
 
 int
 IfConfigGetProcLinux::stop()
 {
+    if (! _is_running)
+	return (XORP_OK);
+
     // XXX: this method relies on the ioctl() method
     ifc().ifc_get_ioctl().stop();
-    
+
+    _is_running = false;
+
     return (XORP_OK);
 }
 

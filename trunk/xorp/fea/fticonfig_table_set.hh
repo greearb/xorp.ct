@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.4 2003/05/14 01:13:41 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.6 2003/10/13 02:23:19 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -146,9 +146,12 @@ protected:
     
     inline bool in_configuration() const { return _in_configuration; }
 
+    // Misc other state
+    bool	_is_running;
+
 private:
     FtiConfig&	_ftic;
-    bool _in_configuration;
+    bool	_in_configuration;
 };
 
 class FtiConfigTableSetDummy : public FtiConfigTableSet {

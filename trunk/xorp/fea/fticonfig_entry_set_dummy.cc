@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_dummy.cc,v 1.1 2003/05/10 00:06:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_dummy.cc,v 1.2 2003/05/14 01:13:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -47,12 +47,19 @@ FtiConfigEntrySetDummy::~FtiConfigEntrySetDummy()
 int
 FtiConfigEntrySetDummy::start()
 {
+    _is_running = true;
+
     return (XORP_OK);
 }
     
 int
 FtiConfigEntrySetDummy::stop()
 {
+    if (! _is_running)
+	return (XORP_OK);
+
+    _is_running = false;
+
     return (XORP_OK);
 }
 

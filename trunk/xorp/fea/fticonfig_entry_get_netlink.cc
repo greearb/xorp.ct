@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.13 2003/10/21 02:04:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.14 2004/03/17 07:22:52 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -69,7 +69,9 @@ FtiConfigEntryGetNetlink::start()
 	return (XORP_ERROR);
     }
 #endif
-    
+
+    _is_running = true;
+
     return (XORP_OK);
 }
 
@@ -78,7 +80,10 @@ FtiConfigEntryGetNetlink::stop()
 {
     int ret_value4 = XORP_OK;
     int ret_value6 = XORP_OK;
-    
+
+    if (! _is_running)
+	return (XORP_OK);
+
     ret_value4 = NetlinkSocket4::stop();
     
 #ifdef HAVE_IPV6
@@ -87,7 +92,9 @@ FtiConfigEntryGetNetlink::stop()
     
     if ((ret_value4 < 0) || (ret_value6 < 0))
 	return (XORP_ERROR);
-    
+
+    _is_running = false;
+
     return (XORP_OK);
 }
 

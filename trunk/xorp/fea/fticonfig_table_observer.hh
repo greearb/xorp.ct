@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.6 2003/10/14 02:17:12 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.7 2004/03/18 13:09:45 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FTICONFIG_TABLE_OBSERVER_HH__
@@ -79,7 +79,10 @@ protected:
     void propagate_fib_changes(const list<FteX>& fte_list);
 
     list<FibTableObserverBase* > _fib_table_observers;
-    
+
+    // Misc other state
+    bool	_is_running;
+
 private:
     FtiConfig&	_ftic;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.6 2004/03/26 01:26:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.7 2004/03/27 23:28:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -34,7 +34,8 @@
 
 
 IfConfigSet::IfConfigSet(IfConfig& ifc)
-    : _ifc(ifc)
+    : _is_running(false),
+      _ifc(ifc)
 {
     
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_rtsock.cc,v 1.3 2003/05/20 23:25:13 atanu Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_rtsock.cc,v 1.4 2003/10/12 22:19:12 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -50,14 +50,21 @@ FtiConfigTableSetRtsock::start()
     delete_all_entries4();
     delete_all_entries6();
 
+    _is_running = true;
+
     return (XORP_OK);
 }
 
 int
 FtiConfigTableSetRtsock::stop()
 {
+    if (! _is_running)
+	return (XORP_OK);
+
     delete_all_entries4();
     delete_all_entries6();
+
+    _is_running = false;
 
     return (XORP_OK);
 }

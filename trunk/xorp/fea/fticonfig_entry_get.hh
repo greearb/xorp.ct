@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.10 2004/03/16 21:45:19 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.11 2004/03/17 07:20:44 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -134,7 +134,10 @@ protected:
     
     int	_s4;
     int _s6;
-    
+
+    // Misc other stat
+    bool	_is_running;
+
 private:
     FtiConfig&	_ftic;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.16 2004/03/24 23:34:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.17 2004/05/11 20:10:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -59,7 +59,8 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
       _accept_rtadv_enabled6(false),
-      _is_dummy(false)
+      _is_dummy(false),
+      _is_running(false)
 {
     string error_msg;
     
@@ -176,7 +177,9 @@ FtiConfig::start()
 	if (_ftic_table_observer->start() < 0)
 	    return (XORP_ERROR);
     }
-    
+
+    _is_running = true;
+
     return (XORP_OK);
 }
 
@@ -184,9 +187,11 @@ int
 FtiConfig::stop()
 {
     string error_msg;
-
     int ret_value = XORP_OK;
-    
+
+    if (! _is_running)
+	return (XORP_OK);
+
     if (_ftic_table_observer != NULL) {
 	if (_ftic_table_observer->stop() < 0)
 	    ret_value = XORP_ERROR;
@@ -228,7 +233,9 @@ FtiConfig::stop()
 	ret_value = XORP_ERROR;
     }
 #endif // HAVE_IPV6
-    
+
+    _is_running = false;
+
     return (ret_value);
 }
 

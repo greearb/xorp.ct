@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.2 2003/03/10 23:20:14 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get.cc,v 1.1 2003/05/02 07:50:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -32,6 +32,7 @@
 FtiConfigEntryGet::FtiConfigEntryGet(FtiConfig& ftic)
     : _s4(-1),
       _s6(-1),
+      _is_running(false),
       _ftic(ftic)
 {
     

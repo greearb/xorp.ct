@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.22 2004/03/27 23:28:25 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.23 2004/04/10 07:54:49 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -240,6 +240,7 @@ private:
     // Misc other state
     //
     bool	_is_dummy;
+    bool	_is_running;
 };
 
 /**

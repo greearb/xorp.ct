@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.18 2003/11/11 22:21:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.19 2004/03/24 19:14:06 atanu Exp $"
 
 
 #include "fea_module.h"
@@ -105,13 +105,18 @@ IfConfigSetIoctl::start()
 	}
     }
 #endif // HAVE_IPV6
-    
+
+    _is_running = true;
+
     return (XORP_OK);
 }
 
 int
 IfConfigSetIoctl::stop()
 {
+    if (! _is_running)
+	return (XORP_OK);
+
     if (_s4 >= 0) {
 	close(_s4);
 	_s4 = -1;
@@ -120,7 +125,9 @@ IfConfigSetIoctl::stop()
 	close(_s6);
 	_s6 = -1;
     }
-    
+
+    _is_running = false;
+
     return (XORP_OK);
 }
 
