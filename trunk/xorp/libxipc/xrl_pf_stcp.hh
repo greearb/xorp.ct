@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.10 2003/06/09 22:14:19 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.11 2003/06/20 18:55:58 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -36,7 +36,7 @@ struct RequestState {
 
     RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x,
 		 const XrlPFSender::SendCallback& scb)
-	: parent(p), seqno(sno), xrl(x), cb(cb)
+	: parent(p), seqno(sno), xrl(x), cb(scb)
     {}
 
     bool has_seqno(uint32_t n) const { return seqno == n; }
