@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.24 2004/07/26 02:57:24 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.25 2004/09/17 14:23:20 abittau Exp $
 ##
 
 # Redefine the bin installation directory
@@ -40,6 +40,7 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.a
 ### MFEA libraries
 LDADD		+= $(top_builddir)/fea/libfea.a
 # FEA-specific begin

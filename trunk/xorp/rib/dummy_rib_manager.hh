@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.12 2004/09/17 14:00:03 abittau Exp $
+// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.13 2004/09/18 02:05:52 pavlin Exp $
 
 #ifndef __RIB_DUMMY_RIB_MANAGER_HH__
 #define __RIB_DUMMY_RIB_MANAGER_HH__
@@ -24,6 +24,7 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
+#include "libxorp/profile.hh"
 
 #include "libproto/proto_state.hh"
 
@@ -365,6 +366,7 @@ public:
 
     PolicyFilters&      policy_filters();
     PolicyRedistMap&	policy_redist_map();
+    Profile&		profile();
     XrlStdRouter&	xrl_router();
 
     void		set_xrl_router(XrlStdRouter&);
@@ -373,6 +375,7 @@ public:
 private:
     PolicyFilters   _policy_filters;
     PolicyRedistMap _policy_redist_map;
+    Profile 	    _profile;
     XrlStdRouter*   _xrl_router;
 };
 

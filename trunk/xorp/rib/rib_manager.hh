@@ -13,17 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.27 2004/07/24 01:01:52 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.28 2004/09/17 14:00:04 abittau Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
 
 #include "libxorp/xorp.h"
+#include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
+#include "libxipc/xrl_std_router.hh"
+#include "libxorp/profile.hh"
 
 #include "libproto/proto_state.hh"
-
-#include "libxipc/xrl_std_router.hh"
 
 #include "rib.hh"
 #include "register_server.hh"
@@ -393,6 +394,11 @@ public:
      */
     void reset_policy_redist_tags();
 
+    /**
+     * @return a reference to the profiler.
+     */
+    Profile& profile() {return _profile;}
+
 private:
     ProcessStatus       _status_code;
     string              _status_reason;
@@ -419,6 +425,7 @@ private:
 						// [links policy-tags to
 						// targets].
 						// only one should be present.
+    Profile _profile;				// Profiling logs.
 };
 
 #endif // __RIB_RIB_MANAGER_HH__

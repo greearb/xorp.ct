@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.12 2004/07/24 01:01:51 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.13 2004/09/17 14:00:03 abittau Exp $"
 
 #include "rib_module.h"
 
@@ -21,9 +21,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
+#include "libxorp/profile.hh"
 
 #include "dummy_rib_manager.hh"
-
 
 RibManager::RibManager()
 {
@@ -250,6 +250,12 @@ PolicyRedistMap&
 RibManager::policy_redist_map() 
 { 
     return _policy_redist_map;
+}
+
+Profile&
+RibManager::profile() 
+{ 
+    return _profile;
 }
 
 XrlStdRouter&

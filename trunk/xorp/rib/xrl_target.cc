@@ -13,15 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.41 2004/09/18 02:05:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.42 2004/09/28 00:36:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+#define PROFILE_UTILS_REQUIRED
 
 #include "rib_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/status_codes.h"
+
+#include "libxipc/xrl_std_router.hh"
+#include "xrl/interfaces/profile_client_xif.hh"
 
 #include "xrl_target.hh"
 #include "rt_tab_register.hh"
@@ -1060,5 +1064,80 @@ XrlRibTarget::rib_0_1_reset_policy_redist_tags()
 	return XrlCmdError::COMMAND_FAILED("Reset policy redist tags failed: " +
 					   e.str());
     }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::profile_0_1_enable(const string& pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_rib_manager->profile().enable(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::profile_0_1_disable(const string&	pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_rib_manager->profile().disable(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlRibTarget::profile_0_1_get_entries(const string& pname,
+				      const string& instance_name)
+{
+    debug_msg("profile variable %s instance %s\n", pname.c_str(),
+	      instance_name.c_str());
+
+    // Lock and initialize.
+    try {
+	_rib_manager->profile().lock_log(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    ProfileUtils::transmit_log(pname,
+			       &_rib_manager->xrl_router(), instance_name,
+			       &_rib_manager->profile());
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::profile_0_1_clear(const string& pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_rib_manager->profile().clear(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::profile_0_1_list(string& info)
+{
+    debug_msg("\n");
+    
+    info = _rib_manager->profile().list();
     return XrlCmdError::OKAY();
 }

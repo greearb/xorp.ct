@@ -107,7 +107,7 @@ noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_direct
 noinst_LIBRARIES = librib.a libribxrl.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
@@ -190,6 +190,7 @@ add_route_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \
@@ -214,6 +215,7 @@ main_routemap_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \
@@ -238,6 +240,7 @@ test_deletion_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \
@@ -269,6 +272,7 @@ test_register_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \
@@ -293,6 +297,7 @@ test_register_xrls_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \
@@ -321,6 +326,7 @@ test_rib_direct_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \
@@ -346,6 +352,7 @@ test_rib_xrls_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \
@@ -372,6 +379,7 @@ xorp_rib_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/policy/backend/libpolicybackend.a \

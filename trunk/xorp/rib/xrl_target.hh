@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.27 2004/09/17 14:00:05 abittau Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.28 2004/09/18 02:05:53 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -759,6 +759,51 @@ protected:
      */
     XrlCmdError rib_0_1_reset_policy_redist_tags();
 
+    /**
+     *  Enable profiling
+     *
+     *  @param pname profile variable
+     */
+     XrlCmdError profile_0_1_enable(
+	// Input values,
+	const string&	pname);
+
+    /**
+     *  Disable profiling
+     *
+     *  @param pname profile variable
+     */
+    XrlCmdError profile_0_1_disable(
+	// Input values,
+	const string&	pname);
+
+    /**
+     *  Get log entries.
+     *
+     *  @param pname profile variable
+     *
+     *  @param instance_name to send the profiling info to.
+     */
+    XrlCmdError profile_0_1_get_entries(
+	// Input values,
+	const string&	pname,
+	const string&	instance_name);
+
+    /**
+     *  Clear the profiling entries
+     *
+     *  @param pname profile variable
+     */
+    XrlCmdError profile_0_1_clear(
+	// Input values,
+	const string&	pname);
+
+    /**
+     *  List all the profiling variables registered with this target.
+     */
+    XrlCmdError profile_0_1_list(
+	// Output values,
+	string&	info);
 };
 
 #endif // __RIB_XRL_TARGET_HH__
