@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.1 2003/07/11 22:10:59 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -56,6 +56,7 @@ do {									\
     if (verbose()) {							\
 	printf("From %s:%d: ", file, line);				\
 	printf(x);							\
+	fflush(stdout);							\
     }									\
 } while(0)
 
@@ -98,14 +99,19 @@ fake_random()
 static void
 make_nets(vector<IPv4Net>& nets, uint32_t n)
 {
+    uint32_t fails = 0;
     // attempt at deterministic nets sequence
     while (nets.size() != n) {
 	IPv4 addr(htonl(fake_random()));
-	IPv4Net net = IPv4Net(addr, 24 + fake_random() % 8);
+	IPv4Net net = IPv4Net(addr, 1 + n % 23 + fake_random() % 8);
 	if (find(nets.begin(), nets.end(), net) == nets.end()) {
 	    nets.push_back(net);
+	    fails = 0;
 	} else {
-	    abort();
+	    // Does not occur with test parameters in practice
+	    if (++fails == 5) {
+		verbose_log("Failed to generate nets.\n");
+	    }
 	}
     }
 }
@@ -193,7 +199,7 @@ public:
 	_e.current_time(now);
 
 	TimeVal ten_ms(0, 10000);
-	
+
 	verbose_log("walked routes = %u\n", *done);
 	rw->resume();
 	while (todo != 0) {
@@ -217,17 +223,17 @@ public:
 	rw->pause(1);
 	return true;
     }
-        
+
     int
     run_test()
     {
 	const uint32_t n_routes = 20000;
 
-	verbose_log("Generating nets");
+	verbose_log("Generating nets\n");
 	vector<IPNet<A> > nets;
 	make_nets(nets, n_routes);
-	
-	verbose_log("Creating routes for nets");
+
+	verbose_log("Creating routes for nets\n");
 	RouteDB<A>& rdb = _rip_system.route_db();
 	for(uint32_t i = 0; i < nets.size(); ++i) {
 	    if (rdb.update_route(nets[i], A::ZERO(), 5, 0,
@@ -253,6 +259,10 @@ public:
 					 &routes_done, 97u));
 	    while (t.scheduled()) {
 		_e.run();
+		if (routes_done > n_routes) {
+		    verbose_log("Walked more routes than exist!\n");
+		    return 1;
+		}
 	    }
 	    if (routes_done != n_routes) {
 		verbose_log("Read %u routes, expected to read %d\n",
@@ -267,7 +277,7 @@ public:
 	// slowly we have a reasonable chance of standing on a route as
 	// it gets deleted.
 	//
-	// Read 10 routes every 30ms.  
+	// Read 10 routes every 30ms.
 	// 20000 routes -> 20000 / 10 * 0.030 = 60 seconds
 	//
 	// Except it doesn't run that long as the routes are collapsing
@@ -282,13 +292,17 @@ public:
 				     &routes_done, 10u));
 	while (t.scheduled()) {
 	    _e.run();
+	    if (routes_done > n_routes) {
+		verbose_log("Walked more routes than exist!\n");
+		return 1;
+	    }
 	}
-	verbose_log("Read %u routes, %u available at end.",
+	verbose_log("Read %u routes, %u available at end.\n",
 		    routes_done, rdb.route_count());
-	
+
 	rdb.flush_routes();
 	if (rdb.route_count() != 0) {
-	    verbose_log("Had routes left when none expected.");
+	    verbose_log("Had routes left when none expected.\n");
 	    return 1;
 	}
 	return 0;
