@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.18 2003/02/05 00:59:54 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.19 2003/02/05 04:55:03 pavlin Exp $
 #
 
 * IMPL:
@@ -13,12 +13,6 @@
   Hence, debug the problem. As part of the debugging, add
   the following CLI command to the MFEA: "show mfea dataflow" that shows
   the dataflow state in the MFEA.
-  In the above scenario, if (f) Send (S,G) Join from TR1 to RUT,
-  then if we just update the MFC in the kernel, the SPT bit is not set
-  because no WRONGVIF signal received. Therefore,
-  PimMfc::recompute_iif_olist_mfc() should delete PimMfc entries that
-  have iif != INVALID AND olist == NULL (i.e., the entries that were
-  installed to stop the NOCACHE upcalls).
 
 * IMPL: what to do when (S,G) packet received on wrong iif, and there
   is no routing entry yet? Currently, PimMrt::receive_data() processing
