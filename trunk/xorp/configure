@@ -7923,8 +7923,8 @@ fi
 
 
 
-echo "$as_me:$LINENO: checking routing sockets (AF_ROUTE)" >&5
-echo $ECHO_N "checking routing sockets (AF_ROUTE)... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether the system has routing sockets (AF_ROUTE)" >&5
+echo $ECHO_N "checking whether the system has routing sockets (AF_ROUTE)... $ECHO_C" >&6
 
 
 ac_ext=c
@@ -8017,8 +8017,8 @@ echo "${ECHO_T}no" >&6
 esac
 
 
-echo "$as_me:$LINENO: checking netlink sockets (AF_NETLINK)" >&5
-echo $ECHO_N "checking netlink sockets (AF_NETLINK)... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether the system has netlink sockets (AF_NETLINK)" >&5
+echo $ECHO_N "checking whether the system has netlink sockets (AF_NETLINK)... $ECHO_C" >&6
 
 
 ac_ext=c
@@ -8086,8 +8086,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-echo "$as_me:$LINENO: checking ioctl(SIOCGIFCONF) interface read" >&5
-echo $ECHO_N "checking ioctl(SIOCGIFCONF) interface read... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether the system has ioctl(SIOCGIFCONF) interface read" >&5
+echo $ECHO_N "checking whether the system has ioctl(SIOCGIFCONF) interface read... $ECHO_C" >&6
 
 
 ac_ext=c
@@ -8178,8 +8178,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-echo "$as_me:$LINENO: checking sysctl(NET_RT_IFLIST) interface read" >&5
-echo $ECHO_N "checking sysctl(NET_RT_IFLIST) interface read... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether the system has sysctl(NET_RT_IFLIST) interface read" >&5
+echo $ECHO_N "checking whether the system has sysctl(NET_RT_IFLIST) interface read... $ECHO_C" >&6
 
 
 ac_ext=c
@@ -8251,8 +8251,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-echo "$as_me:$LINENO: checking sysctl(NET_RT_DUMP) routing table read" >&5
-echo $ECHO_N "checking sysctl(NET_RT_DUMP) routing table read... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether the system has sysctl(NET_RT_DUMP) routing table read" >&5
+echo $ECHO_N "checking whether the system has sysctl(NET_RT_DUMP) routing table read... $ECHO_C" >&6
 
 
 ac_ext=c
