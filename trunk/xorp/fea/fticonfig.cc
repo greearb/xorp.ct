@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.5 2003/08/15 23:58:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.6 2003/08/16 00:12:33 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -25,6 +25,9 @@
 #endif
 
 #include "fticonfig.hh"
+
+#define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"
+#define PROC_LINUX_FILE_FORWARDING_V6 "/proc/sys/net/ipv6/conf/all/forwarding"
 
 //
 // Unicast forwarding table related configuration.
@@ -382,31 +385,47 @@ FtiConfig::get_table6(list<Fte6>& fte_list)
 int
 FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 {
-    size_t enabled = 0;
-    size_t sz = sizeof(enabled);
+    int enabled = 0;
     
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-    if (sysctlbyname("net.inet.ip.forwarding", &enabled, &sz, NULL, 0)
-	!= 0) {
-	error_msg = c_format("Cannot get 'net.inet.ip.forwarding': %s",
-			     strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	size_t sz = sizeof(enabled);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET;
+	mib[2] = IPPROTO_IP;	
+	mib[3] = IPCTL_FORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
+	    != 0) {
+	    error_msg = c_format("Get sysctl(IPCTL_FORWARDING) failed: %s",
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
     }
 #elif defined(HOST_OS_LINUX)
-#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
-    if (sysctlbyname("net.ipv4.conf.all.forwarding", &enabled, &sz, NULL, 0)
-	!= 0) {
-	error_msg = c_format("Cannot get 'net.ipv4.conf.all.forwarding': %s",
-			     strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V4, "r");
+	
+	if (fh == NULL) {
+	    error_msg = c_format("Cannot open file %s for reading: %s",
+				 PROC_LINUX_FILE_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	if (fscanf(fh, "%d", &enabled) != 1) {
+	    error_msg = c_format("Error reading file %s: %s",
+				 PROC_LINUX_FILE_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    fclose(fh);
+	    return (XORP_ERROR);
+	}
+	fclose(fh);
     }
-#endif
-    UNUSED(enabled);
-    UNUSED(sz);
-    UNUSED(error_msg);
-    
 #else
 #error "OS not supported: don't know how to test whether"
 #error "IPv4 unicast forwarding is enabled/disabled"
@@ -441,36 +460,52 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
     
 #else // HAVE_IPV6
     
-    size_t enabled = 0;
-    size_t sz = sizeof(enabled);
+    int enabled = 0;
     
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-    if (sysctlbyname("net.inet6.ip6.forwarding", &enabled, &sz, NULL, 0)
-	!= 0) {
-	error_msg = c_format("Cannot get 'net.inet6.ip6.forwarding': %s",
-			     strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	size_t sz = sizeof(enabled);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET6;
+	mib[2] = IPPROTO_IPV6;
+	mib[3] = IPV6CTL_FORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
+	    != 0) {
+	    error_msg = c_format("Get sysctl(IPV6CTL_FORWARDING) failed: %s",
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
     }
 #elif defined(HOST_OS_LINUX)
-#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
-    if (sysctlbyname("net.ipv6.conf.all.forwarding", &enabled, &sz, NULL, 0)
-	!= 0) {
-	error_msg = c_format("Cannot get 'net.ipv6.conf.all.forwarding': %s",
-			     strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V6, "r");
+	
+	if (fh == NULL) {
+	    error_msg = c_format("Cannot open file %s for reading: %s",
+				 PROC_LINUX_FILE_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	if (fscanf(fh, "%d", &enabled) != 1) {
+	    error_msg = c_format("Error reading file %s: %s",
+				 PROC_LINUX_FILE_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    fclose(fh);
+	    return (XORP_ERROR);
+	}
+	fclose(fh);
     }
-#endif
-    UNUSED(enabled);
-    UNUSED(sz);
-    UNUSED(error_msg);
-    
 #else
 #error "OS not supported: don't know how to test whether"
 #error "IPv6 unicast forwarding is enabled/disabled"
 #endif
-
+    
     if (enabled > 0)
 	ret_value = true;
     else
@@ -502,16 +537,25 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
     
 #else // HAVE_IPV6
     
-    size_t enabled = 0;
-    size_t sz = sizeof(enabled);
+    int enabled = 0;
     
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-    if (sysctlbyname("net.inet6.ip6.accept_rtadv", &enabled, &sz, NULL, 0)
-	!= 0) {
-	error_msg = c_format("Cannot get 'net.inet6.ip6.accept_rtadv': %s",
-			     strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	size_t sz = sizeof(enabled);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET6;
+	mib[2] = IPPROTO_IPV6;
+	mib[3] = IPV6CTL_ACCEPT_RTADV;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
+	    != 0) {
+	    error_msg = c_format("Get sysctl(IPV6CTL_ACCEPT_RTADV) failed: %s",
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
     }
 #elif defined(HOST_OS_LINUX)
     // XXX: nothing to do in case of Linux
@@ -543,7 +587,7 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 int
 FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 {
-    size_t enable = (v) ? 1 : 0;
+    int enable = (v) ? 1 : 0;
     bool old_value;
     
     if (unicast_forwarding_enabled4(old_value, error_msg) < 0)
@@ -553,28 +597,45 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	return (XORP_OK);	// Nothing changed
     
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-    if (sysctlbyname("net.inet.ip.forwarding", NULL, NULL,
-		     &enable, sizeof(enable))
-	!= 0) {
-	error_msg = c_format("Cannot set 'net.inet.ip.forwarding' "
-			     "to %d: %s", enable, strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	size_t sz = sizeof(enable);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET;
+	mib[2] = IPPROTO_IP;	
+	mib[3] = IPCTL_FORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
+	    != 0) {
+	    error_msg = c_format("Set sysctl(IPCTL_FORWARDING) to %s failed: %s",
+				 (v) ? "true" : "false", strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
     }
 #elif defined(HOST_OS_LINUX)
-#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
-    if (sysctlbyname("net.ipv4.conf.all.forwarding", NULL, NULL,
-		     &enable, sizeof(enable))
-	!= 0) {
-	error_msg = c_format("Cannot set 'net.ipv4.conf.all.forwarding' "
-			     "to %d: %s", enable, strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V4, "w");
+	
+	if (fh == NULL) {
+	    error_msg = c_format("Cannot open file %s for writing: %s",
+				 PROC_LINUX_FILE_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	if (fprintf(fh, "%d", enable) != 1) {
+	    error_msg = c_format("Error writing %d to file %s: %s",
+				 enable,
+				 PROC_LINUX_FILE_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    fclose(fh);
+	    return (XORP_ERROR);
+	}
+	fclose(fh);
     }
-#endif // 0
-    UNUSED(enable);
-    UNUSED(error_msg);
-    
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "IPv4 unicast forwarding"
@@ -603,7 +664,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
     
 #else // HAVE_IPV6
     
-    size_t enable = (v) ? 1 : 0;
+    int enable = (v) ? 1 : 0;
     bool old_value, old_value_accept_rtadv;
     
     if (unicast_forwarding_enabled6(old_value, error_msg) < 0)
@@ -618,38 +679,57 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	return (XORP_ERROR);
     
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-    if (sysctlbyname("net.inet6.ip6.forwarding", NULL, NULL,
-		     &enable, sizeof(enable))
-	!= 0) {
-	error_msg = c_format("Cannot set 'net.inet6.ip6.forwarding' "
-			     "to %d: %s", enable, strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	// Restore the old accept_rtadv value
-	if (old_value_accept_rtadv != !v) {
-	    string dummy_error_msg;
-	    set_accept_rtadv_enabled6(old_value_accept_rtadv, dummy_error_msg);
+    {
+	size_t sz = sizeof(enable);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET;
+	mib[2] = IPPROTO_IP;	
+	mib[3] = IPV6CTL_FORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
+	    != 0) {
+	    error_msg = c_format("Set sysctl(IPV6CTL_FORWARDING) to %s failed: %s",
+				 (v) ? "true" : "false", strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    // Restore the old accept_rtadv value
+	    if (old_value_accept_rtadv != !v) {
+		string dummy_error_msg;
+		set_accept_rtadv_enabled6(old_value_accept_rtadv,
+					  dummy_error_msg);
+	    }
+	    return (XORP_ERROR);
 	}
-	return (XORP_ERROR);
     }
 #elif defined(HOST_OS_LINUX)
-#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
-    if (sysctlbyname("net.ipv6.conf.all.forwarding", NULL, NULL,
-		     &enable, sizeof(enable))
-	!= 0) {
-	error_msg = c_format("Cannot set 'net.ipv6.conf.all.forwarding' "
-			     "to %d: %s", enable, strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	// Restore the old accept_rtadv value
-	if (old_value_accept_rtadv != !v) {
-	    string dummy_error_msg;
-	    set_accept_rtadv_enabled6(old_value_accept_rtadv, dummy_error_msg);
+    {
+	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V6, "w");
+	
+	if (fh == NULL) {
+	    error_msg = c_format("Cannot open file %s for writing: %s",
+				 PROC_LINUX_FILE_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
 	}
-	return (XORP_ERROR);
+	if (fprintf(fh, "%d", enable) != 1) {
+	    error_msg = c_format("Error writing %d to file %s: %s",
+				 enable,
+				 PROC_LINUX_FILE_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    // Restore the old accept_rtadv value
+	    if (old_value_accept_rtadv != !v) {
+		string dummy_error_msg;
+		set_accept_rtadv_enabled6(old_value_accept_rtadv,
+					  dummy_error_msg);
+	    }
+	    fclose(fh);
+	    return (XORP_ERROR);
+	}
+	fclose(fh);
     }
-#endif // 0
-    UNUSED(enable);
-    UNUSED(error_msg);
-    
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "IPv6 unicast forwarding"
@@ -682,7 +762,7 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
     
 #else // HAVE_IPV6
 
-    size_t enable = (v) ? 1 : 0;
+    int enable = (v) ? 1 : 0;
     bool old_value;
     
     if (accept_rtadv_enabled6(old_value, error_msg) < 0)
@@ -692,17 +772,28 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	return (XORP_OK);	// Nothing changed
     
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-    if (sysctlbyname("net.inet6.ip6.accept_rtadv", NULL, NULL,
-		     &enable, sizeof(enable))
-	!= 0) {
-	error_msg = c_format("Cannot set 'net.inet6.ip6.accept_rtadv' "
-			     "to %d: %s", enable, strerror(errno));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    {
+	size_t sz = sizeof(enable);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET;
+	mib[2] = IPPROTO_IP;	
+	mib[3] = IPV6CTL_ACCEPT_RTADV;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
+	    != 0) {
+	    error_msg = c_format("Set sysctl(IPV6CTL_ACCEPT_RTADV) to %s failed: %s",
+				 (v) ? "true" : "false", strerror(errno));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
     }
 #elif defined(HOST_OS_LINUX)
-    // XXX: nothing to do in case of Linux
-    error_msg = "";
+    {
+	// XXX: nothing to do in case of Linux
+	error_msg = "";
+    }
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "the acceptance of IPv6 Router Advertisement messages"
