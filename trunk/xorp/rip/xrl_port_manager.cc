@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.5 2004/02/14 00:28:22 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.6 2004/02/20 01:22:04 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -114,7 +114,8 @@ XrlPortManager<A>::shutdown()
 
     debug_msg("XXX XrlPortManager<A>::shutdown (%p)\n", this);
     debug_msg("XXX n_ports = %u n_dead_ports %u\n",
-	      ports().size(), _dead_ports.size());
+	      uint32_t(ports().size()),
+	      uint32_t(_dead_ports.size()));
 
     while (i != pl.end()) {
 	Port<A>* p = *i;
