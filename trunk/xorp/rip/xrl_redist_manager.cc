@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.5 2004/09/17 13:57:16 abittau Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.6 2004/09/18 00:00:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -550,8 +550,8 @@ XrlRedistManager<A>::run_next_job()
 	return;
     }
 
-    XLOG_INFO("Failed to dispatch command %s after %d attempts - giving up.",
-	      rj->str().c_str(), max_retries);
+    XLOG_INFO("Failed to dispatch command %s after %u attempts - giving up.",
+	      rj->str().c_str(), XORP_UINT_CAST(max_retries));
 }
 
 #ifdef INSTANTIATE_IPV4

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.39 2004/12/11 21:29:58 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.40 2004/12/23 17:33:13 mjh Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -446,7 +446,8 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	    //set userid as required.
 	    if (_userid != NO_SETUID_ON_EXEC) {
 		if (setuid(_userid) != 0) {
-		    XLOG_ERROR("Failed to setuid(%d) on exec", _userid);
+		    XLOG_ERROR("Failed to setuid(%u) on exec",
+			       XORP_UINT_CAST(_userid));
 		    exit(1);
 		}
 	    }

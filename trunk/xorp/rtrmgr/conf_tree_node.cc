@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.59 2005/01/19 00:08:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.60 2005/01/21 09:59:13 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -694,7 +694,7 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id)
     // Delete_subtree calls remove_child, so we just iterate until no
     // children are left.
     //
-    debug_msg("Node has %u children\n", (uint32_t)_children.size());
+    debug_msg("Node has %u children\n", XORP_UINT_CAST(_children.size()));
     list<ConfigTreeNode*>::iterator iter, prev_iter;
     iter = _children.begin();
     while (iter != _children.end()) {

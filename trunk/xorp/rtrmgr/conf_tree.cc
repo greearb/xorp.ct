@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.23 2004/12/11 21:29:56 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.24 2004/12/18 02:08:11 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -413,7 +413,8 @@ bool
 ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
 			 bool provisional_change, string& response)
 {
-    XLOG_TRACE(_verbose, "CT apply_deltas %d %s\n", user_id, deltas.c_str());
+    XLOG_TRACE(_verbose, "CT apply_deltas %u %s\n",
+	       XORP_UINT_CAST(user_id), deltas.c_str());
 
     ConfigTree* delta_tree = create_tree(_template_tree, _verbose);
     if (delta_tree->parse(deltas, "", response) == false)
@@ -435,8 +436,8 @@ bool
 ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
 			    bool provisional_change, string& response)
 {
-    XLOG_TRACE(_verbose, "CT apply_deletions %d %s\n",
-	       user_id, deletions.c_str());
+    XLOG_TRACE(_verbose, "CT apply_deletions %u %s\n",
+	       XORP_UINT_CAST(user_id), deletions.c_str());
 
     ConfigTree *deletion_tree = create_tree(_template_tree, _verbose);
     if (deletion_tree->parse(deletions, "", response) == false)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.12 2004/05/28 22:27:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.13 2004/06/10 22:41:53 hodson Exp $"
 
 
 #include <fcntl.h>
@@ -251,7 +251,7 @@ RandomGen::read_fd(FILE* file)
 	u_char tbuf[RAND_POOL_SIZE];
 
 	bytes = fread(tbuf, 1, RAND_POOL_SIZE, file);
-	debug_msg("RNG: read %u bytes\n", (uint32_t)bytes);
+	debug_msg("RNG: read %u bytes\n", XORP_UINT_CAST(bytes));
 	if (bytes > 0) {
 	    size_t i;
 
@@ -277,7 +277,7 @@ RandomGen::read_fd(FILE* file)
 		// Overwrite in situe
 		memcpy(tbuf + (i * 16), chain, 16);
 		if (i * 16 > bytes) {
-		    debug_msg("i=%u\n", (uint32_t)i);
+		    debug_msg("i=%u\n", XORP_UINT_CAST(i));
 		    break;
 		}
 	    }
@@ -340,7 +340,7 @@ RandomGen::get_random_bytes(size_t len, uint8_t* buf)
 	    size_t bytes_read = fread(buf, 1, len, file);
 	    if (bytes_read < len) {
 		XLOG_ERROR("Failed read on randomness source; read %u words",
-			   (uint32_t)bytes_read);
+			   XORP_UINT_CAST(bytes_read));
 	    }
 	}
 	fclose(file);

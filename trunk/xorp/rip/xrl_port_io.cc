@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.12 2004/06/10 22:41:47 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.13 2004/09/02 03:16:45 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -156,7 +156,7 @@ XrlPortIO<IPv4>::send(const IPv4& 		dst_addr,
 		rip_packet,
 		callback(this, &XrlPortIO<IPv4>::send_cb))) {
 	    debug_msg("Sent %u bytes to %s/%u from %s\n",
-		      static_cast<uint32_t>(rip_packet.size()),
+		      XORP_UINT_CAST(rip_packet.size()),
 		      dst_addr.str().c_str(), dst_port,
 		      this->address().str().c_str());
 	    _pending = true;
@@ -167,7 +167,7 @@ XrlPortIO<IPv4>::send(const IPv4& 		dst_addr,
 			    dst_addr, dst_port, rip_packet,
 			    callback(this, &XrlPortIO<IPv4>::send_cb))) {
 	    debug_msg("Sent %u bytes to %s/%u\n",
-		      static_cast<uint32_t>(rip_packet.size()),
+		      XORP_UINT_CAST(rip_packet.size()),
 		      dst_addr.str().c_str(), dst_port);
 	    _pending = true;
 	    return true;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.15 2004/06/09 04:08:40 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.16 2004/06/10 22:41:48 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -217,8 +217,8 @@ XrlPortManager<A>::shutdown()
 
     debug_msg("XXX XrlPortManager<A>::shutdown (%p)\n", this);
     debug_msg("XXX n_ports = %u n_dead_ports %u\n",
-	      uint32_t(this->ports().size()),
-	      uint32_t(_dead_ports.size()));
+	      XORP_UINT_CAST(this->ports().size()),
+	      XORP_UINT_CAST(_dead_ports.size()));
 
     while (i != pl.end()) {
 	Port<A>* p = *i;
@@ -241,8 +241,8 @@ template <typename A>
 void
 XrlPortManager<A>::tree_complete()
 {
-    debug_msg("XrlPortManager<IPv%d>::tree_complete notification\n",
-	      A::ip_version());
+    debug_msg("XrlPortManager<IPv%u>::tree_complete notification\n",
+	      XORP_UINT_CAST(A::ip_version()));
     set_status(RUNNING);
 }
 
@@ -250,8 +250,8 @@ template <typename A>
 void
 XrlPortManager<A>::updates_made()
 {
-    debug_msg("XrlPortManager<IPv%d>::updates_made notification\n",
-	      A::ip_version());
+    debug_msg("XrlPortManager<IPv%u>::updates_made notification\n",
+	      XORP_UINT_CAST(A::ip_version()));
 
     // Scan ports and enable/disable underlying i/o handler
     // according to fea state
@@ -350,7 +350,7 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
 
     debug_msg("Packet on %s from %s/%u %u bytes\n",
 	      sockid.c_str(), src_addr.str().c_str(), src_port,
-	      static_cast<uint32_t>(pdata.size()));
+	      XORP_UINT_CAST(pdata.size()));
 
     i = find_if(pl.begin(), pl.end(),
 		is_port_for<A>(&sockid, &src_addr, &_ifm));
@@ -358,7 +358,7 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
     if (i == this->ports().end()) {
 	debug_msg("Discarding packet %s/%u %u bytes\n",
 		  src_addr.str().c_str(), src_port,
-		  static_cast<uint32_t>(pdata.size()));
+		  XORP_UINT_CAST(pdata.size()));
 	return false;
     }
     Port<A>* p = *i;

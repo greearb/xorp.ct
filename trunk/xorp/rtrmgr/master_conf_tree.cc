@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.42 2004/12/18 02:08:11 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.43 2005/01/21 09:41:34 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -688,8 +688,8 @@ MasterConfigTree::save_to_file(const string& filename,
     orig_gid = getgid();
     gid = grp->gr_gid;
     if (setegid(gid) < 0) {
-	errmsg = c_format("Failed to seteuid to group \"xorp\", gid %d\n",
-			  gid);
+	errmsg = c_format("Failed to seteuid to group \"xorp\", gid %u\n",
+			  XORP_UINT_CAST(gid));
 	return false;
     }
 
@@ -697,7 +697,8 @@ MasterConfigTree::save_to_file(const string& filename,
     uid_t orig_uid;
     orig_uid = getuid();
     if (seteuid(user_id) < 0) {
-	errmsg = c_format("Failed to seteuid to uid %d\n", user_id);
+	errmsg = c_format("Failed to seteuid to uid %u\n",
+			  XORP_UINT_CAST(user_id));
 	setegid(orig_gid);
 	return false;
     }
@@ -887,8 +888,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     orig_gid = getgid();
     gid = grp->gr_gid;
     if (setegid(gid) < 0) {
-	errmsg = c_format("Failed to seteuid to group \"xorp\", gid %d\n",
-			  gid);
+	errmsg = c_format("Failed to seteuid to group \"xorp\", gid %u\n",
+			  XORP_UINT_CAST(gid));
 	return false;
     }
 
@@ -896,7 +897,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     uid_t orig_uid;
     orig_uid = getuid();
     if (seteuid(user_id) < 0) {
-	errmsg = c_format("Failed to seteuid to user_id %d\n", user_id);
+	errmsg = c_format("Failed to seteuid to user_id %u\n",
+			  XORP_UINT_CAST(user_id));
 	setegid(orig_gid);
 	return false;
     }
