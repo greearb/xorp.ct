@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.16 2004/08/12 22:18:37 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.17 2004/08/17 02:20:06 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -400,60 +400,72 @@ private:
     list<FtiConfigTableObserver*>	_ftic_table_observers;
     
     //
-    // The mechanisms to get single-entry information from the unicast
-    // forwarding table.
-    // Ordering is important: the last that is supported is the one to use.
+    // The primary mechanisms to get single-entry information
+    // from the unicast forwarding table.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     FtiConfigEntryGetDummy	_ftic_entry_get_dummy;
     FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
     FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
     
     //
-    // The mechanisms to set single-entry information into the unicast
-    // forwarding table.
-    // Ordering is important: the last that is supported is the one to use.
+    // The primary mechanisms to set single-entry information
+    // into the unicast forwarding table.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     FtiConfigEntrySetDummy	_ftic_entry_set_dummy;
     FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
     FtiConfigEntrySetNetlink	_ftic_entry_set_netlink;
     
     //
-    // The mechanisms to observe single-entry information change about the
-    // unicast forwarding table.
+    // The primary mechanisms to observe single-entry information change
+    // about the unicast forwarding table.
     // E.g., if the forwarding table has changed, then the information
     // received by the observer would specify the particular entry that
     // has changed.
-    // Ordering is important: the last that is supported is the one to use.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     FtiConfigEntryObserverDummy	 _ftic_entry_observer_dummy;
     FtiConfigEntryObserverRtsock _ftic_entry_observer_rtsock;
     FtiConfigEntryObserverNetlink _ftic_entry_observer_netlink;
 
     //
-    // The mechanisms to get the whole table information from the unicast
-    // forwarding table.
-    // Ordering is important: the last that is supported is the one to use.
+    // The primary mechanisms to get the whole table information
+    // from the unicast forwarding table.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     FtiConfigTableGetDummy	_ftic_table_get_dummy;
     FtiConfigTableGetSysctl	_ftic_table_get_sysctl;
     FtiConfigTableGetNetlink	_ftic_table_get_netlink;
     
     //
-    // The mechanisms to set the whole table information into the unicast
-    // forwarding table.
-    // Ordering is important: the last that is supported is the one to use.
+    // The primary mechanisms to set the whole table information
+    // into the unicast forwarding table.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     FtiConfigTableSetDummy	_ftic_table_set_dummy;
     FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
     FtiConfigTableSetNetlink	_ftic_table_set_netlink;
     
     //
-    // The mechanisms to observe the whole-table information change about the
-    // unicast forwarding table.
+    // The primary mechanisms to observe the whole-table information change
+    // about the unicast forwarding table.
     // E.g., if the forwarding table has changed, then the information
     // received by the observer would NOT specify the particular entry that
     // has changed.
-    // Ordering is important: the last that is supported is the one to use.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     FtiConfigTableObserverDummy	 _ftic_table_observer_dummy;
     FtiConfigTableObserverRtsock _ftic_table_observer_rtsock;
