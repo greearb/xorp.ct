@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.5 2003/05/29 17:59:08 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -122,6 +122,15 @@ public:
 private:
 };
 
+template<class A>
+class UnknownFilter : public BGPRouteFilter<A> {
+public:
+    UnknownFilter();
+    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
+				     bool &modified) const ;
+private:
+};
+
 /*
  * FilterTable is a route table that can hold banks of route
  * filters.  Normally FilterTable propagates add_route,
@@ -166,6 +175,7 @@ public:
     int add_localpref_removal_filter();
     int add_med_insertion_filter();
     int add_med_removal_filter();
+    int add_unknown_filter();
 private:
     const InternalMessage<A> *
         apply_filters(const InternalMessage<A> *rtmsg) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.9 2003/02/07 05:35:37 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.10 2003/03/10 23:20:05 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -372,6 +372,47 @@ MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
+UnknownFilter<A>::UnknownFilter<A>() 
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+UnknownFilter<A>::filter(const InternalMessage<A> *rtmsg,
+				 bool &modified) const
+{
+    debug_msg("Unknown filter\n");
+
+    //Form a new path attribute list containing the new AS path
+    PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
+    palist.process_unknown_attributes();
+    palist.rehash();
+    
+    //Create a new route message with the new path attribute list
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist, 
+			     rtmsg->route()->original_route(), 
+			     rtmsg->route()->igp_metric());
+
+    InternalMessage<A> *new_rtmsg = 
+	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
+			       rtmsg->genid());
+
+    propagate_flags(rtmsg, new_rtmsg);
+    
+    //drop and free the old message
+    drop_message(rtmsg, modified);
+
+    //note that we changed the route
+    modified = true;
+    new_rtmsg->set_changed();
+
+    return new_rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
 FilterTable<A>::FilterTable(string table_name,  
 				  BGPRouteTable<A> *parent_table,
 				  NextHopResolver<A>& next_hop_resolver) 
@@ -642,6 +683,15 @@ FilterTable<A>::add_med_removal_filter(){
     MEDRemovalFilter<A> *med_filter;
     med_filter = new MEDRemovalFilter<A>();
     _filters.push_back(med_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterTable<A>::add_unknown_filter(){
+    UnknownFilter<A> *unknown_filter;
+    unknown_filter = new UnknownFilter<A>();
+    _filters.push_back(unknown_filter);
     return 0;
 }
 

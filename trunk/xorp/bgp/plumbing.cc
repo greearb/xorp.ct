@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.15 2003/06/17 06:44:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.16 2003/06/23 22:09:12 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -430,13 +430,16 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 	filter_out->add_ibgp_loop_filter();
     }
 
-    /* 7. load up any configured filters */
+    /* 7. Process unknown attributes */
+    filter_out->add_unknown_filter();
+
+    /* 8. load up any configured filters */
     /* TBD */
 
-    /* 8. load up damping filters */
+    /* 9. load up damping filters */
     /* TBD */
     
-    /* 9. cause the routing table to be dumped to the new peer */
+    /* 10. cause the routing table to be dumped to the new peer */
     _fanout_table->dump_entire_table(filter_out);
     if(_awaits_push)
 	push(peer_handler);

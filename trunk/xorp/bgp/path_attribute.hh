@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.14 2003/04/16 08:05:09 hodson Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.15 2003/08/06 17:24:13 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -437,6 +437,12 @@ public:
     void replace_nexthop(const A& nexthop);
     void replace_AS_path(const AsPath& as_path);
     void remove_attribute_by_type(PathAttType type);
+    /**
+     * For unknown attributes:
+     *	1) If transitive set the partial bit.
+     *  2) If not transitive remove.
+     */
+    void process_unknown_attributes();
 
     string str() const;
 
