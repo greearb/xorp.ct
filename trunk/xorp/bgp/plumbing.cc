@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.56 2004/09/21 18:05:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.57 2004/10/04 07:49:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -360,6 +360,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     _tables.insert(filter_in);
     _tables.insert(policy_filter_in);
     _tables.insert(cache_in);
+    _tables.insert(nexthop_in);
 
     /*
      * Plumb the output branch
