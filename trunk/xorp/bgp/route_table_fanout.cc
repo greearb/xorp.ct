@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.20 2004/02/24 03:16:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.21 2004/02/25 05:03:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -90,7 +90,8 @@ NextTableMap<A>::erase(iterator& iter)
 
 template<class A> 
 typename NextTableMap<A>::iterator 
-NextTableMap<A>::find(BGPRouteTable<A> *next_table) {
+NextTableMap<A>::find(BGPRouteTable<A> *next_table)
+{
 #ifdef NEWMAP
     typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
     i = _next_tables.find(next_table);
@@ -160,7 +161,6 @@ FanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
     return 0;
 }
 
-
 template<class A>
 int
 FanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table) 
@@ -180,7 +180,6 @@ FanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table)
     _next_tables.erase(iter);
     return 0;
 }
-
 
 template<class A>
 int
@@ -487,7 +486,6 @@ FanoutTable<A>::add_to_queue(RouteQueueOp operation,
 	add_push_to_queue(queued_peers, rtmsg.origin_peer());
 }
 
-
 template<class A>
 void
 FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
@@ -524,7 +522,6 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
 	    add_push_to_queue(queued_peers, NULL);
     }
 }
-
 
 template<class A>
 void
@@ -854,8 +851,6 @@ FanoutTable<A>::peering_down_complete(const PeerHandler *peer,
 					  (BGPRouteTable<A>*)this);
     }
 }
-
-
 
 template<class A>
 void
