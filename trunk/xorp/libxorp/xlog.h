@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.2 2003/03/10 23:20:38 hodson Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.3 2003/05/16 17:28:16 hodson Exp $
  */
 
 
@@ -261,7 +261,7 @@ int	xlog_add_default_output(void);
 int	xlog_remove_default_output(void);
 
 /**
- * Write an FATAL message to the xlog output streams and aborts the program.
+ * Write a FATAL message to the xlog output streams and aborts the program.
  * 
  * Note that FATAL messages cannot be disabled by @ref xlog_disable().
  * 
@@ -324,6 +324,27 @@ do {									\
 	if (!(assertion))						\
 		XLOG_FATAL("Assertion (%s) failed", #assertion);	\
 } while (0)
+
+/**
+ * A marker that can be used in code that should never be executed.
+ * 
+ * Note that it cannot be conditionally disabled and logs error through
+ * the standard XLOG mechanism.
+ * Always calls XLOG_FATAL.
+ */
+#define XLOG_UNREACHABLE()						\
+do {									\
+	XLOG_FATAL("Internal error");					\
+} while (0)
+
+/**
+ * Write a FATAL message to the xlog output streams and aborts the program.
+ * 
+ * This is similar to XLOG_FATAL, except that it should be used for
+ * code that is yet to be implemented.
+ * 
+ */
+#define XLOG_UNFINISHED(fmt...)	XLOG_FN(fatal, fmt)
 
 /*
  * The macros below define the XLOG_TRACE(), the macro responsible for
