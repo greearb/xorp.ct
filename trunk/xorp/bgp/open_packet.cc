@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.11 2003/03/10 23:20:00 hodson Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.12 2003/05/23 00:02:05 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -103,7 +103,9 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
 	BGPParameter *p = BGPParameter::create(d, i, len);
 	if (p != NULL)
 	    add_parameter(p);
-	assert(len > 0);	// make sure we terminate!
+	// This assert is safe because if len is bad an exception
+	// should already have been thrown.
+	XLOG_ASSERT(len > 0);
 	i -= len;
 	d += len;
     }
