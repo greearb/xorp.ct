@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.20 2004/06/01 11:46:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.21 2004/06/01 17:13:26 mjh Exp $"
 
 
 #include <glob.h>
@@ -589,12 +589,21 @@ OpCommandList::find_executable_filename(const string& command_filename,
     string xorp_root_dir = _template_tree->xorp_root_dir();
 
     list<string> path;
-    path.push_back(xorp_root_dir + "/");
+    path.push_back(xorp_root_dir);
+
+    // Expand path
+    const char* p = getenv("PATH");
+    if (p != NULL) {
+	list <string> l2 = split(p, ':');
+	path.splice(path.end(), l2);
+    }
+
     while (!path.empty()) {
-	if ((stat((path.front() + command_filename).c_str(), &statbuf) == 0)
+	string full_path_executable = path.front() + "/" + command_filename;
+	if ((stat(full_path_executable.c_str(), &statbuf) == 0)
 	    && (statbuf.st_mode & S_IFREG > 0)
 	    && (statbuf.st_mode & S_IXUSR > 0)) {
-	    executable_filename = path.front() + command_filename;
+	    executable_filename = full_path_executable;
 	    return true;
 	}
 	path.pop_front();
