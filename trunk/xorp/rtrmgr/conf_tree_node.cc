@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.33 2004/01/14 21:36:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.34 2004/01/14 22:50:05 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -666,7 +666,11 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    }
 		}
 
-		// Next, we run any "create" or "set" commands
+		//
+		// Next, we run any "create" or "set" commands.
+		// Note that if there is no "create" command, then we run
+		// the "set" command instead.
+		//
 		cmd = _template_tree_node->const_command("%create");
 		if (cmd == NULL)
 		    cmd = _template_tree_node->const_command("%set");
@@ -762,7 +766,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 }
 
 bool 
-ConfigTreeNode::check_commit_status(string &response) const
+ConfigTreeNode::check_commit_status(string& response) const
 {
 #ifdef DEBUG_COMMIT
     printf("ConfigTreeNode::check_commit_status %s\n", _segname.c_str());
