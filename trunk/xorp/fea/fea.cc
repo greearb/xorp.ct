@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.9 2003/05/23 00:38:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.10 2003/05/29 21:55:59 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -130,7 +130,8 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     // XXX: currently, the access to the CLI is either IPv4 or IPv6
     CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
     cli_node4.set_cli_port(12000);
-    XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name());
+    XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
+				     finder_hostname, finder_port);
     XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
     
     //
@@ -138,13 +139,15 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     //
     XrlStdRouter xrl_std_router_mfea4(eventloop,
 				      xorp_module_name(AF_INET,
-						       XORP_MODULE_MFEA));
+						       XORP_MODULE_MFEA),
+				      finder_hostname, finder_port);
     XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, eventloop,
 			       &xrl_std_router_mfea4, fticonfig);
 #ifdef HAVE_IPV6
     XrlStdRouter xrl_std_router_mfea6(eventloop,
 				      xorp_module_name(AF_INET6,
-						       XORP_MODULE_MFEA));
+						       XORP_MODULE_MFEA),
+				      finder_hostname, finder_port);
     XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
 			       &xrl_std_router_mfea6, fticonfig);
 #endif // HAVE_IPV6
