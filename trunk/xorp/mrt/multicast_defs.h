@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/multicast_defs.h,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
+ * $XORP: xorp/mrt/multicast_defs.h,v 1.2 2003/03/10 23:20:45 hodson Exp $
  */
 
 #ifndef __MRT_MULTICAST_DEFS_H__
@@ -23,7 +23,7 @@
 
 
 /*
- * Various multicast-repated definitions.
+ * Various multicast-related definitions.
  */
 /* XXX: everything here probably should go somewhere else. */
 
@@ -40,8 +40,9 @@ enum action_jp_t {
     ACTION_JOIN	= 0,
     ACTION_PRUNE
 };
-#define ACTION_JP2ASCII(action_flag)	(((action_flag) == ACTION_JOIN) ?     \
-						"JOIN" : "PRUNE")
+#define ACTION_JP2ASCII(action_flag)			\
+	(((action_flag) == ACTION_JOIN) ? 		\
+		"JOIN" : "PRUNE")
 
 #ifndef MINTTL
 #define MINTTL		1
@@ -50,7 +51,7 @@ enum action_jp_t {
 #define IPDEFTTL	64
 #endif
 #ifndef MAXTTL
-#define MAXTTL		255	/* TODO: is it OK to use MAXTTL of 255? */
+#define MAXTTL		255
 #endif
 
 
