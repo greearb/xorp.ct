@@ -114,15 +114,17 @@ def output_header(args, dbg):
     from time import time, localtime, strftime
     print \
 """/*
- * Copyright (c) 2001-2003 International Computer Science Institute
+ * Copyright (c) 2001-2004 International Computer Science Institute
  * See LICENSE file for licensing, conditions, and warranties on use.
  *
  * This file is PROGRAMMATICALLY GENERATED.
  *"""
     print " * This instance was generated with:\n *     ",
+    o = ""
     for a in args:
-        print "%s" % a,
-    print "\n */"
+        o += "%s " % a
+    print o.strip()
+    print " */"
 
     print """
 /**
@@ -331,6 +333,12 @@ if (! cb.is_empty()) {
 #else
 #define callback(...) dbg_callback(__FILE__,__LINE__,__VA_ARGS__)
 #endif
+
+void trace_dispatch_enter(const char* file, int line);
+void trace_dispatch_leave(const char* file, int line);
+
+#define record_dispatch_enter() trace_dispatch_enter(file(), line())
+#define record_dispatch_leave() trace_dispatch_leave(file(), line())
 """
 
 def output_trailer():
@@ -388,6 +396,7 @@ def output_rest(l_types, b_types, dbg):
     nb = len(b_types)
 
     base_class = "XorpCallback%d<R%s>" % (nl, joining_csv(l_types))
+    void_base_class = "XorpCallback%d<void%s>" % (nl, joining_csv(l_types))
     if (dbg):
         debug_args = (("const char*", "file"),
                                  ("int", "line"))
@@ -408,9 +417,43 @@ def output_rest(l_types, b_types, dbg):
              base_class,
              csv(second_args(debug_args)),
              joining_csv(cons_args(b_types)))
-    o += "    R dispatch(%s) { return (*_f)(%s); }\n" \
-         % (csv(decl_args(l_types)),
-            csv(call_args(l_types) + mem_args(b_types)))
+    o += "    R dispatch(%s) {\n" % csv(decl_args(l_types))
+    if (dbg):
+        o += "\trecord_dispatch_enter();\n"
+    o += "\tR r = (*_f)(%s);\n" % csv(call_args(l_types) + mem_args(b_types))
+    if (dbg):
+        o += "\trecord_dispatch_leave();\n"
+    o += "\treturn r;\n"
+    o += "    }\n"
+    o += "protected:\n    F   _f;\n"
+    for ba in mem_decls(b_types):
+        o += "    %s;\n" % ba
+    o += "};\n"
+    print o
+    print ''
+
+    output_kdoc_class("void functions", nl, nb)
+    o  = ""
+    o += "template <%s>\n" % \
+        csv(class_args(l_types) + class_args(b_types))
+
+    o += "struct XorpFunctionCallback%dB%d<void%s> : public %s {\n" \
+          % (nl, nb, joining_csv(l_types + b_types), void_base_class)
+    o += "    typedef void (*F)(%s);\n" % csv(l_types + b_types)
+    o += "    XorpFunctionCallback%dB%d(" % (nl, nb)
+    o += starting_csv(flatten_pair_list(debug_args))
+    o += "F f%s)\n\t: %s(%s),\n\t  _f(f)%s\n    {}\n" \
+          % (joining_csv(decl_args(b_types)),
+             void_base_class,
+             csv(second_args(debug_args)),
+             joining_csv(cons_args(b_types)))
+    o += "    void dispatch(%s) {\n" % csv(decl_args(l_types))
+    if (dbg):
+        o += "\trecord_dispatch_enter();\n"
+    o += "\t(*_f)(%s);\n" % csv(call_args(l_types) + mem_args(b_types))
+    if (dbg):
+        o += "\trecord_dispatch_leave();\n"
+    o += "    }\n"
     o += "protected:\n    F   _f;\n"
     for ba in mem_decls(b_types):
         o += "    %s;\n" % ba
@@ -446,8 +489,41 @@ def output_rest(l_types, b_types, dbg):
         o += "O* o, M m%s)\n\t :" % joining_csv(decl_args(b_types))
         o += " %s(%s),\n\t  " % (base_class, csv(second_args(debug_args)))
         o += "_o(o), _m(m)%s {}\n" % joining_csv(cons_args(b_types))
-        o += "    R dispatch(%s) { return ((*_o).*_m)(%s); }\n" \
-             % (csv(decl_args(l_types)), csv(call_args(l_types) + mem_args(b_types)))
+        o += "    R dispatch(%s) {\n" % csv(decl_args(l_types))
+        if (dbg):
+            o += "\trecord_dispatch_enter();\n"
+        o += "\tR r = ((*_o).*_m)(%s);\n" % csv(call_args(l_types) + mem_args(b_types))
+        if (dbg):
+            o += "\trecord_dispatch_leave();\n"
+        o += "\treturn r;\n"
+        o += "    }\n"
+        o += "protected:\n"
+        o += "    O*	_o;	// Callback's target object\n"
+        o += "    M	_m;	// Callback's target method\n"
+        for ba in mem_decls(b_types):
+            o += "    %s;	// Bound argument\n" % ba
+        o += "};\n"
+        print o
+
+        output_kdoc_class("void%s member methods" % const, nl, nb)
+        o = ""
+        o += "template <class O%s>\n" % joining_csv(class_args(l_types) + class_args(b_types))
+        o += "struct Xorp%sMemberCallback%dB%d<void, O%s>\n" % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += ": public %s {\n" % void_base_class
+
+        o += "    typedef void (O::*M)(%s) %s;\n" % (csv(l_types + b_types), const)
+        o += "    Xorp%sMemberCallback%dB%d(" % (CONST, nl, nb)
+        o += starting_csv(flatten_pair_list(debug_args))
+        o += "O* o, M m%s)\n\t :" % joining_csv(decl_args(b_types))
+        o += " %s(%s),\n\t  " % (void_base_class, csv(second_args(debug_args)))
+        o += "_o(o), _m(m)%s {}\n" % joining_csv(cons_args(b_types))
+        o += "    void dispatch(%s) {\n" % csv(decl_args(l_types))
+        if (dbg):
+            o += "\trecord_dispatch_enter();\n"
+        o += "\t((*_o).*_m)(%s);\n" % csv(call_args(l_types) + mem_args(b_types))
+        if (dbg):
+            o += "\trecord_dispatch_leave();\n"
+        o += "    }\n"
         o += "protected:\n"
         o += "    O*	_o;	// Callback's target object\n"
         o += "    M	_m;	// Callback's target method\n"
@@ -471,10 +547,44 @@ def output_rest(l_types, b_types, dbg):
         o += "o, m"
         o += joining_csv(call_args(b_types))
         o += "),\n\t   SafeCallbackBase(o) {}\n"
-        o += "    ~Xorp%sSafeMemberCallback%dB%d() {}" % (CONST, nl, nb)
+        o += "    ~Xorp%sSafeMemberCallback%dB%d() {}\n" % (CONST, nl, nb)
         o += "    R dispatch(%s) {\n" % (csv(decl_args(l_types)))
-        o += "\tif (valid())\n"
-        o += "\t    return Xorp%sMemberCallback%dB%d<R, O%s>::dispatch(%s);\n" % (CONST, nl, nb, joining_csv(l_types + b_types), csv(call_args(l_types)))
+        o += "\tif (valid()) {\n"
+        if (dbg):
+            o += "\t    record_dispatch_enter();\n"
+        o += "\t    R r = Xorp%sMemberCallback%dB%d<R, O%s>::dispatch(%s);\n" % (CONST, nl, nb, joining_csv(l_types + b_types), csv(call_args(l_types)))
+        if (dbg):
+            o += "\t    record_dispatch_leave();\n"
+        o += "\t    return r;\n"
+        o += "\t}\n"
+        o += "    }\n"
+        o += "};\n"
+        print o
+
+        output_kdoc_class("void%s safe member methods" % const, nl, nb)
+        o = ""
+        o += "template <class O%s>\n" % (joining_csv(class_args(l_types + b_types)))
+        o += "struct Xorp%sSafeMemberCallback%dB%d<void,O%s>\n" % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += "    : public Xorp%sMemberCallback%dB%d<void, O%s>,\n" % (CONST, nl, nb, (joining_csv(l_types + b_types)))
+        o += "      public SafeCallbackBase {\n"
+        o += "    typedef typename Xorp%sMemberCallback%dB%d<void, O%s>::M M;\n" % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += "    Xorp%sSafeMemberCallback%dB%d(" % (CONST, nl, nb)
+        o += starting_csv(flatten_pair_list(debug_args))
+        o += "O* o, M m%s)\n\t : " % joining_csv(decl_args(b_types))
+        o += "Xorp%sMemberCallback%dB%d<void, O%s>(" % (CONST, nl, nb, joining_csv(l_types + b_types))
+        o += starting_csv(second_args(debug_args))
+        o += "o, m"
+        o += joining_csv(call_args(b_types))
+        o += "),\n\t   SafeCallbackBase(o) {}\n"
+        o += "    ~Xorp%sSafeMemberCallback%dB%d() {}\n" % (CONST, nl, nb)
+        o += "    void dispatch(%s) {\n" % (csv(decl_args(l_types)))
+        o += "\tif (valid()) {\n"
+        if (dbg):
+            o += "\t    record_dispatch_enter();\n"
+        o += "\t    Xorp%sMemberCallback%dB%d<void, O%s>::dispatch(%s);\n" % (CONST, nl, nb, joining_csv(l_types + b_types), csv(call_args(l_types)))
+        if (dbg):
+            o += "\t    record_dispatch_leave();\n"
+        o += "\t}\n"
         o += "    }\n"
         o += "};\n"
         print o
@@ -553,7 +663,7 @@ def cb_gen(max_bound, max_late, dbg):
 us = \
 """Usage: %s [options]
    -h                  Display usage information
-   -n		       No debug information (no file and line info)
+   -d		       debug information (file and line and dispatch watchdog)
    -b <B>              Set maximum number of bound argument
    -l <L>              Set maximum number of late arguments"""
 
@@ -562,15 +672,15 @@ def main():
         print us % sys.argv[0]
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hnb:l:",\
-                                   ["help",  "nodebug", "bound-args=", "late-args="])
+        opts, args = getopt.getopt(sys.argv[1:], "hdb:l:",\
+                                   ["help",  "debug", "bound-args=", "late-args="])
     except getopt.GetoptError:
         usage()
         sys.exit(1)
 
-    nb = 4
-    nl = 4
-    dbg = 1
+    nb  = 4
+    nl  = 4
+    dbg = 0
 
     for o, a in opts:
         if (o in ("-h", "--help")):
@@ -580,8 +690,8 @@ def main():
             nb = int(a)
         if (o in ("-l", "--late-args")):
             nl = int(a)
-        if (o in ("-n", "--nodebug")):
-            dbg = 0
+        if (o in ("-d", "--debug")):
+            dbg = 1
 
     output_header(sys.argv[:], dbg)
 

@@ -37,6 +37,9 @@
    */
 #undef CPP_SUPPORTS_GNU_VA_ARGS
 
+/* Define to enable callback debugging */
+#undef DEBUG_CALLBACKS
+
 /* Define to 1 to enable globally debug messages output */
 #undef DEBUG_LOGGING_GLOBAL
 
