@@ -35,8 +35,8 @@ class IO {
 		      const char *dst,
 		      uint8_t* data, uint32_t len) = 0;
 
-    typedef XorpCallback6<void, const char*, const char *, const char *,
-			  const char *, uint8_t*,
+    typedef XorpCallback4<void, const string&, const string&,
+			  uint8_t*,
 			  uint32_t>::RefPtr ReceiveCallback;
     /**
      * Register for receiving raw frames.
