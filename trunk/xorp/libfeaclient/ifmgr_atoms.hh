@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.8 2003/10/15 19:19:25 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.9 2003/10/22 21:09:31 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -227,8 +227,8 @@ public:
     inline bool		loopback() const		{ return _loopback; }
     inline void		set_loopback(bool l)		{ _loopback = l; }
 
-    inline uint32_t	pif_index() const		{ return _pif; }
-    inline uint32_t	set_pif_index(uint32_t i) 	{ return _pif = i; }
+    inline uint16_t	pif_index() const		{ return _pif; }
+    inline uint16_t	set_pif_index(uint16_t i) 	{ return _pif = i; }
 
     inline const V4Map&	ipv4addrs() const		{ return _v4addrs; }
     inline V4Map&	ipv4addrs() 			{ return _v4addrs; }
@@ -249,7 +249,7 @@ protected:
     bool	_bcap;		// broadcast capable
     bool	_p2pcap;	// point-to-point capable
     bool	_loopback;	// true if loopback Vif
-    uint32_t	_pif;		// physical interface index
+    uint16_t	_pif;		// physical interface index
 
     V4Map	_v4addrs;
     V6Map	_v6addrs;
@@ -264,9 +264,7 @@ protected:
  */
 class IfMgrIPv4Atom {
 public:
-    inline IfMgrIPv4Atom(const IPv4& addr)
-	: _addr(addr)
-    {}
+    inline IfMgrIPv4Atom(const IPv4& addr);
 
     inline IPv4		addr() const			{ return _addr; }
 
@@ -319,9 +317,7 @@ protected:
 
 class IfMgrIPv6Atom {
 public:
-    inline IfMgrIPv6Atom(const IPv6& addr)
-	: _addr(addr)
-    {}
+    inline IfMgrIPv6Atom(const IPv6& addr);
 
     inline const IPv6&  addr() const			{ return _addr; }
 
@@ -374,7 +370,7 @@ IfMgrIfTree::clear()
 
 inline
 IfMgrIfAtom::IfMgrIfAtom(const string& name)
-    : _name(name)
+    : _name(name), _en(false), _mtu(0), _pif(0)
 {}
 
 
@@ -383,11 +379,20 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
 
 inline
 IfMgrVifAtom::IfMgrVifAtom(const string& name)
-    : _name(name)
+    : _name(name),
+      _en(false), _mcap(false), _bcap(false), _loopback(false),
+      _pif(0)
 {}
 
 // ----------------------------------------------------------------------------
 // Inline IfMgrIPv4Atom methods
+
+inline
+IfMgrIPv4Atom::IfMgrIPv4Atom(const IPv4& addr)
+    : _addr(addr), _prefix_len(0),
+      _en(false), _mcap(false), _loop(false), _bcast(false), _p2p(false)
+{
+}
 
 inline void
 IfMgrIPv4Atom::set_broadcast_addr(const IPv4 oaddr)
@@ -428,6 +433,13 @@ IfMgrIPv4Atom::endpoint_addr() const
 
 // ----------------------------------------------------------------------------
 // Inline IfMgrIPv6Atom methods
+
+inline
+IfMgrIPv6Atom::IfMgrIPv6Atom(const IPv6& addr)
+    : _addr(addr), _prefix_len(0),
+      _en(false), _mcap(false), _loop(false), _p2p(false)
+{
+}
 
 inline void
 IfMgrIPv6Atom::set_endpoint_addr(const IPv6& oaddr)
