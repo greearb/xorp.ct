@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.15 2004/01/15 08:51:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.16 2004/02/26 15:28:23 mjh Exp $"
 
 // #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -96,6 +96,10 @@ SlaveConfigTree::commit_changes(string& result, XorpShell& xorpsh, CallBack cb)
     CallBack empty_cb;
     _xclient.end_transaction(tid, empty_cb);
 #else
+    // check that all mandatory node children are present
+    if (_root_node.check_config_tree(result) == false) {
+	return false;
+    }
     UNUSED(result);
 #endif
 

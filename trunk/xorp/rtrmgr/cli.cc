@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.32 2004/03/09 17:11:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.33 2004/03/11 22:31:44 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -1881,6 +1881,7 @@ RouterCLI::text_entry_func(const string& ,
 		ctn = new SlaveConfigTreeNode(value, 
 					      makepath(path_segments),
 					      data_ttn, ctn, getuid());
+		_changes_made = true;
 		value_expected = false;
 	    } else if (ctn->is_leaf()) {
 		//it must be a leaf, and we're expecting a value
@@ -1957,6 +1958,7 @@ RouterCLI::text_entry_func(const string& ,
 	    ctn = new SlaveConfigTreeNode(ttn->segname(), 
 					  makepath(path_segments),
 					  ttn, ctn, getuid());
+	    _changes_made = true;
 	    if (ttn->is_tag() || ctn->is_leaf()) {
 #ifdef DEBUG_TEXT_ENTRY
 		printf("value expected\n");
@@ -1992,6 +1994,11 @@ RouterCLI::text_entry_func(const string& ,
 	// We're finishing text_entry mode
 	_braces.pop_front();
 	config_tree()->add_default_children();
+
+	//force the commands to be regenerated if any changes were made
+	if (_mode == CLI_MODE_CONFIGURE && _changes_made)
+	    _mode = CLI_MODE_TEXTENTRY;
+
 	configure_mode();
     } else {
 	// We need to remain in text_entry mode because we haven't seen
@@ -2006,7 +2013,6 @@ RouterCLI::text_entry_func(const string& ,
 	com->set_global_name("}");
     }
 
-    _changes_made = true;
     return (XORP_OK);
 
  cleanup:
@@ -2244,8 +2250,12 @@ RouterCLI::commit_func(const string& ,
     if (!success) {
 	// _changes_made = false;
 	_cli_client.cli_print(response);
-	set_prompt("", "XORP> ");
-	apply_path_change();
+	_cli_client.cli_print("The configuration has not been changed.\n");
+	_cli_client.cli_print("Fix this error, and run \"commit\" again.\n");
+	//	set_prompt("", "XORP> ");
+	//	apply_path_change();
+	silent_reenable_ui();
+
 	return (XORP_ERROR);
     }
     // _cli_client.cli_print(response + "\n");
@@ -2257,6 +2267,12 @@ void
 RouterCLI::idle_ui()
 {
     _cli_client.set_is_waiting_for_data(true);
+}
+
+void
+RouterCLI::silent_reenable_ui()
+{
+    _cli_client.set_is_waiting_for_data(false);
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.37 2004/02/27 12:12:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.38 2004/03/11 22:31:44 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -528,7 +528,7 @@ ConfigTreeNode::check_config_tree(string& result) const
 		}
 	    }
 	    if (! found) {
-		result = c_format("Node \"%s\" has no configured mandatory child node \"%s\"",
+		result = c_format("Node \"%s\" has no configured mandatory child node \"%s\"\n",
 				  _path.c_str(), mandatory_child.c_str());
 		return false;
 	    }

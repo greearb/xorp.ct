@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.12 2004/02/27 21:21:03 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.13 2004/03/11 22:31:44 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -155,6 +155,7 @@ private:
     void config_mode_prompt();
     void idle_ui();
     void reenable_ui();
+    void silent_reenable_ui();
 
     string pathstr() const;
     string pathstr2() const;
