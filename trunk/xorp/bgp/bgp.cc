@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -45,6 +45,7 @@ main(int /*argc*/, char **argv)
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
+    xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
 
