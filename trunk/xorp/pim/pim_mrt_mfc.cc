@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.16 2004/02/22 03:55:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.17 2004/02/27 07:52:25 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -195,7 +195,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 		}
 	    }
 	}
-	if (pim_node().is_directly_connected(src)) {
+	if (pim_node().is_directly_connected(*pim_vif, src)) {
 	    is_directly_connected_s = true;
 	    break;
 	}
