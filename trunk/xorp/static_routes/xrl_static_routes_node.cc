@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.20 2005/02/11 02:49:31 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.21 2005/02/12 08:09:12 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -637,6 +637,13 @@ XrlStaticRoutesNode::common_0_1_shutdown()
     return XrlCmdError::OKAY();
 }
 
+/**
+ *  Announce target birth to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
+ */
 XrlCmdError
 XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
     // Input values,
@@ -664,6 +671,13 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
     UNUSED(target_instance);
 }
 
+/**
+ *  Announce target death to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
+ */
 XrlCmdError
 XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
     // Input values,

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.12 2005/02/09 23:29:40 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.13 2005/02/11 02:49:31 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -103,11 +103,25 @@ protected:
      */
     XrlCmdError common_0_1_shutdown();
 
+    /**
+     *  Announce target birth to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
     XrlCmdError finder_event_observer_0_1_xrl_target_birth(
 	// Input values,
 	const string&	target_class,
 	const string&	target_instance);
 
+    /**
+     *  Announce target death to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
     XrlCmdError finder_event_observer_0_1_xrl_target_death(
 	// Input values,
 	const string&	target_class,
