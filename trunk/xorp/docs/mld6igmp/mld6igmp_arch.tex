@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
+% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.2 2003/03/07 19:28:03 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -72,7 +72,7 @@ relatively small. Further, the multicast routing performance does not
 depend on the MLD/IGMP performance, therefore it is not necessary to
 optimize the implementation. Only if it turns out that there are
 performance issues with MLD/IGMP, we would try to optimize those parts of the
-implementation which are the bottleneck.
+implementation that should prove to be a bottleneck.
 
 Currently (March 2003), the MLD and IGMP implementation is based
 on the specification in the following documents:
@@ -175,9 +175,9 @@ Mld6igmpNode, and must be implemented separately.
 Mld6igmpNode contains several pure virtual methods (\eg
 \verb=join_multicast_group()= is used to join a multicast group on
 an interface) that must be implemented by a class that inherits Mld6igmpNode.
-For example, XrlMld6igmpNode is a class that uses Mld6igmpNode as a base class,
-and that implements XRL-based communication mechanisms between Mld6igmpNode
-and other XORP components such as the MFEA and PIM modules.
+For example, XrlMld6igmpNode is a class that uses Mld6igmpNode as a base
+class; XrlMld6igmpNode uses XRL-based communication mechanisms between
+Mld6igmpNode and other XORP components such as the MFEA and PIM modules.
 
 By default, Mld6igmpNode is disabled; therefore, on startup it must be
 enabled explicitly.
@@ -195,9 +195,9 @@ and composing MLD/IGMP control messages.
 
 Typically, there would be one Mld6igmpVif per network interface
 such as physical interface, tunnel, or the loopback
-interface. Not all virtual interfaces will be
+interface. Not all virtual interfaces are
 used by MLD/IGMP; for example, all interfaces that are not multicast
-capable, and the loopback interface will be ignored for multicast
+capable, and the loopback interface are ignored for multicast
 routing.
 
 Typically, from developer's point of view, all interaction with Mld6igmpNode
@@ -219,7 +219,7 @@ the following files:
 Mld6igmpVif contains state such as group membership information about
 local members (a list of objects of class MemberQuery), and information
 about the current MLD/IGMP querier. Also, all 
-of the MLD/IGMP-specific methods for parsing or constructing MLD/IGMP control
+the MLD/IGMP-specific methods for parsing or constructing MLD/IGMP control
 messages when a MLD/IGMP packet is received or sent are implemented as
 methods in Mld6igmpVif. The parsing or construction of each message type is
 implemented in files \verb=mld6_proto.cc= and \verb=igmp_proto.cc=
