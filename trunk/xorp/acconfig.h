@@ -73,6 +73,11 @@
  */
 #undef HAVE_SYS_ETHERNET_H
 
+/**
+ * Define this if you have md5global.h
+ */
+#undef HAVE_MD5GLOBAL_H
+
 /*
  * Define this if you want IPv6 support.
  */

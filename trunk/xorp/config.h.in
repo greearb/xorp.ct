@@ -194,6 +194,9 @@
 /* Define if you have the <linux/rtnetlink.h> header file.  */
 #undef HAVE_LINUX_RTNETLINK_H
 
+/* Define if you have the <md5global.h> header file.  */
+#undef HAVE_MD5GLOBAL_H
+
 /* Define if you have the <net/ethernet.h> header file.  */
 #undef HAVE_NET_ETHERNET_H
 
