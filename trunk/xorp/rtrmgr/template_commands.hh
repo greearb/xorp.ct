@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.18 2004/01/13 01:06:44 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.19 2004/01/15 08:51:58 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -101,15 +101,43 @@ class AllowCommand : public Command {
 public:
     AllowCommand(TemplateTreeNode& template_tree_node, const string& cmd_name);
 
-    void add_action(const list<string>& action) throw (ParseError);
-    bool verify_variable_value(const ConfigTreeNode& ctn,
-			       string& errmsg) const;
+    virtual void add_action(const list<string>& action) throw (ParseError) = 0;
+    virtual bool verify_variable_value(const ConfigTreeNode& ctn,
+				       string&		     errmsg) const = 0;
+    virtual string str() const = 0;
+};
 
-    string str() const;
+class AllowOptionsCommand : public AllowCommand {
+public:
+    AllowOptionsCommand(TemplateTreeNode&	template_tree_node,
+			const string&		cmd_name);
+
+    virtual void add_action(const list<string>& action) throw (ParseError);
+    virtual bool verify_variable_value(const ConfigTreeNode& 	ctn,
+				       string&			errmsg) const;
+
+    virtual string str() const;
 
 private:
     string		_varname;
     list<string>	_allowed_values;
+};
+
+class AllowRangeCommand : public AllowCommand {
+public:
+    AllowRangeCommand(TemplateTreeNode&	template_tree_node,
+		      const string&	cmd_name);
+
+    virtual void add_action(const list<string>& action) throw (ParseError);
+    virtual bool verify_variable_value(const ConfigTreeNode& 	ctn,
+				       string&			errmsg) const;
+
+    virtual string str() const;
+
+private:
+    string		_varname;
+    int32_t		_lower;
+    int32_t		_upper;
 };
 
 #endif // __RTRMGR_TEMPLATE_COMMANDS_HH__

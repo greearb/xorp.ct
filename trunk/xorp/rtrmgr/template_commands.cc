@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.39 2004/03/24 19:14:09 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.40 2004/05/22 23:38:01 mjh Exp $"
 
-// #define DEBUG_LOGGING
+//#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -25,6 +25,7 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 #include "task.hh"
+#include "util.hh"
 
 Action::Action(TemplateTreeNode& template_tree_node,
 	       const list<string>& action)
@@ -43,11 +44,8 @@ Action::Action(TemplateTreeNode& template_tree_node,
 
     iter = action.begin();
     while (iter != action.end()) {
-	string word = (*iter);
+	string word = unquote(*iter);
 	char c;
-
-	if (word[0] == '"' && word[word.size() - 1] == '"')
-	    word = word.substr(1, word.size() - 2);
 
 	for (size_t i = 0; i < word.length(); i++) {
 	    c = word[i];
@@ -460,9 +458,8 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 	    XLOG_WARNING(err.c_str());
 	}
 
-	string xrlstr = args[1];
-	if (xrlstr[0] == '"' && xrlstr[xrlstr.size() - 1] == '"')
-	    xrlstr = xrlstr.substr(1, xrlstr.size() - 2);
+	string xrlstr = unquote(args[1]);
+
 	debug_msg("CALL XRL: %s\n", xrlstr.c_str());
 
 	UnexpandedXrl uxrl(ctn, *this);
@@ -512,12 +509,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	if (segment[0] == '`') {
 	    expand_done = tn.expand_expression(segment, expanded_var);
 	    if (expand_done) {
-		size_t len = expanded_var.length();
-		// Remove quotes
-		if (expanded_var[0] == '"' && expanded_var[len - 1] == '"')
-		    word += expanded_var.substr(1, len - 2);
-		else
-		    word += expanded_var;
+		word += unquote(expanded_var);
 	    } else {
 		// Error
 		errmsg = c_format("failed to expand expression \"%s\" "
@@ -528,12 +520,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	} else if (segment[0] == '$') {
 	    expand_done = tn.expand_variable(segment, expanded_var);
 	    if (expand_done) {
-		size_t len = expanded_var.length();
-		// Remove quotes
-		if (expanded_var[0] == '"' && expanded_var[len - 1] == '"')
-		    word += expanded_var.substr(1, len - 2);
-		else
-		    word += expanded_var;
+		word += unquote(expanded_var);
 	    } else {
 		// Error
 		errmsg = c_format("failed to expand variable \"%s\" "
@@ -552,10 +539,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 
     XLOG_ASSERT(expanded_cmd.size() >= 1);
 
-    string xrlstr = expanded_cmd.front();
-    if (xrlstr[0] == '"' && xrlstr[xrlstr.size() - 1] == '"')
-	xrlstr = xrlstr.substr(1, xrlstr.size() - 2);
-    result = xrlstr;
+    result = unquote(expanded_cmd.front());
 
     return (XORP_OK);
 }
@@ -712,6 +696,9 @@ Command::check_referred_variables(string& errmsg) const
     return true;
 }
 
+
+// ----------------------------------------------------------------------------
+// AllowCommand implementation
 
 AllowCommand::AllowCommand(TemplateTreeNode& template_tree_node,
 			   const string& cmd_name)
@@ -719,10 +706,20 @@ AllowCommand::AllowCommand(TemplateTreeNode& template_tree_node,
 {
 }
 
-void
-AllowCommand::add_action(const list<string>& action) throw (ParseError)
+
+// ----------------------------------------------------------------------------
+// AllowOptionsCommand implementation
+
+AllowOptionsCommand::AllowOptionsCommand(TemplateTreeNode& 	ttn,
+					 const string&		cmd_name)
+    : AllowCommand(ttn, cmd_name)
 {
-    debug_msg("AllowCommand::add_action\n");
+}
+
+void
+AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
+{
+    debug_msg("AllowOptionsCommand::add_action\n");
 
     if (action.size() < 2) {
 	xorp_throw(ParseError, "Allow command with less than two parameters");
@@ -738,17 +735,13 @@ AllowCommand::add_action(const list<string>& action) throw (ParseError)
     _varname = *iter;
     ++iter;
     for ( ; iter != action.end(); ++iter) {
-	const string& value = *iter;
-	if (value[0] == '"')
-	    _allowed_values.push_back(value.substr(1, value.size() - 2));
-	else
-	    _allowed_values.push_back(value);
+	_allowed_values.push_back(unquote(*iter));
     }
 }
 
 bool
-AllowCommand::verify_variable_value(const ConfigTreeNode& ctn,
-				    string& errmsg) const
+AllowOptionsCommand::verify_variable_value(const ConfigTreeNode& ctn,
+					   string&		 errmsg) const
 {
     string value;
 
@@ -791,11 +784,11 @@ AllowCommand::verify_variable_value(const ConfigTreeNode& ctn,
 }
 
 string
-AllowCommand::str() const
+AllowOptionsCommand::str() const
 {
     string tmp;
 
-    tmp = "AllowCommand: varname = " + _varname + " \n       Allowed values: ";
+    tmp = "AllowOptionsCommand: varname = " + _varname + " \n       Allowed values: ";
 
     list<string>::const_iterator iter;
     for (iter = _allowed_values.begin();
@@ -805,6 +798,68 @@ AllowCommand::str() const
     }
     tmp += "\n";
     return tmp;
+}
+
+// ----------------------------------------------------------------------------
+// AllowRangeCommand implementation
+
+AllowRangeCommand::AllowRangeCommand(TemplateTreeNode& 	ttn,
+				     const string&	cmd_name)
+    : AllowCommand(ttn, cmd_name)
+{
+}
+
+void
+AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
+{
+    debug_msg("AllowRangeCommand::add_action\n");
+
+    if (action.size() < 3) {
+	xorp_throw(ParseError, "Allow range command with less than three parameters");
+    }
+
+    list<string>::const_iterator iter;
+    iter = action.begin();
+    if ((_varname.size() != 0) && (_varname != *iter)) {
+	xorp_throw(ParseError,
+		   "Currently only one variable per node can be specified "
+		   "using \"allow range\" commands");
+    }
+    _varname = *iter;
+    ++iter;
+    _lower = atoi(unquote(*iter).c_str());
+    ++iter;
+    _upper = atoi(unquote(*iter).c_str());
+
+    if (_lower > _upper)
+	swap(_lower, _upper);
+}
+
+bool
+AllowRangeCommand::verify_variable_value(const ConfigTreeNode&	ctn,
+					 string&		errmsg) const
+{
+    string value;
+
+    if (ctn.expand_variable(_varname, value) == false) {
+	// Error: cannot expand the variable
+	errmsg = c_format("Variable %s is not defined.", _varname.c_str());
+	return false;
+    }
+
+    int32_t ival = atoi(value.c_str());
+    if (ival < _lower || ival > _upper) {
+	errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable %s.", value.c_str(), _lower, _upper, _varname.c_str());
+	return false;
+    }
+
+    return true;
+}
+
+string
+AllowRangeCommand::str() const
+{
+    return c_format("AllowRangeCommand: varname = %s\n       Allowed range: %d...%d", _varname.c_str(), _lower, _upper);
 }
 
 //

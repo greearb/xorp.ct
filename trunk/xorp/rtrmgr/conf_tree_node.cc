@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.39 2004/03/20 17:59:35 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.40 2004/05/22 06:09:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -565,7 +565,7 @@ ConfigTreeNode::initialize_commit()
 
 bool
 ConfigTreeNode::commit_changes(TaskManager& task_manager,
-			       bool do_commit, 
+			       bool do_commit,
 			       int depth, int last_depth,
 			       string& result)
 {
@@ -638,6 +638,10 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		// Check any allow commands that might prevent us
 		// going any further
 		cmd = _template_tree_node->const_command("%allow");
+		if (cmd == NULL) {
+		    // Try allow-range
+		    cmd = _template_tree_node->const_command("%allow-range");
+		}
 		if (cmd != NULL) {
 		    const AllowCommand* allow_cmd;
 #ifdef DEBUG_COMMIT

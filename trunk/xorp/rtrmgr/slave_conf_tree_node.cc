@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.7 2004/01/13 00:55:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.8 2004/05/22 21:35:02 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -267,12 +267,15 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 bool 
 SlaveConfigTreeNode::check_allowed_value(string& errmsg) const
 {
-    const AllowCommand* cmd;
-
     if (_template_tree_node == NULL)
 	return true;
 
-    cmd = dynamic_cast<const AllowCommand *>(_template_tree_node->const_command("%allow"));
+    const Command* c = _template_tree_node->const_command("%allow");
+    if (c == NULL) {
+	c = _template_tree_node->const_command("%allow-range");
+    }
+
+    const AllowCommand* cmd = dynamic_cast<const AllowCommand *>(c);
     if (cmd != NULL) {
 	string tmpmsg;
 	if (cmd->verify_variable_value(*this, tmpmsg) != true) {
