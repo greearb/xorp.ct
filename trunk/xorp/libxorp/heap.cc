@@ -15,21 +15,18 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.10 2002/12/09 18:29:11 hodson Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 #include <strings.h>
-
+#include "libxorp_module.h"
+#include "config.h"
+#include "xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/eventloop.hh"
+#include "libxorp/xlog.h"
 #include "heap.hh"
 
 #define DBG(x)	//	x
-
-static int
-panic(const char *s)
-{
-    fprintf(stderr, "--panic: %s\n",s);
-    exit(0);
-}
-
 
 /*
  * A heap entry is made of a key and a pointer to the actual
@@ -148,18 +145,18 @@ Heap::pop_obj(void *obj)
     father = 0 ; /* default: move up smallest child */
     if (obj != NULL) { /* extract specific element, index is at offset */
         if (_offset <= 0)
-            panic("*** heap_extract from middle not supported on this heap!!!\n"
-);
+            XLOG_FATAL(
+		       "*** heap_extract from middle "
+		       "not supported on this heap!!!");
+
         father = *((int *)((char *)obj + _offset)) ;
         if (father < 0 || father >= _elements) {
-            fprintf(stderr, "-- heap_extract, father %d out of bound 0..%d\n",
-                father, _elements);
-            panic("heap_extract");
+            XLOG_FATAL("-- heap_extract, father %d out of bound 0..%d",
+			 father, _elements);
         }
 	if (_p[father].object != obj) {
-	    fprintf(stderr, "-- bad obj 0x%p instead of 0x%p at %d\n",
-		_p[father].object, obj, father);
-	    panic("");
+	    XLOG_FATAL("-- bad obj 0x%p instead of 0x%p at %d",
+			 _p[father].object, obj, father);
 	}
 	DBG(fprintf(stderr, "-- delete key %ld\n", _p[father].key.tv_sec););
     }
@@ -198,7 +195,7 @@ Heap::move(Heap_Key new_key, void *object)
     struct heap_entry buf ;
 
     if (_offset <= 0)
-        panic("cannot move items on this heap");
+        XLOG_FATAL("cannot move items on this heap");
 
     i = *((int *)((char *)object + _offset));
     if ( new_key < _p[i].key ) { /* must move up */
@@ -258,7 +255,7 @@ Heap::verify()
     int i ;
     for (i = 1 ; i < _elements ; i++ )
 	if ( _p[i].key < _p[(i-1)/2 ].key ) {
-	    fprintf(stderr, "+++ heap violated at %d\n", i-1/2);
+	    XLOG_WARNING("+++ heap violated at %d", i-1/2);
 #if LRD
 	    print_all(i-1/2);
 #endif
