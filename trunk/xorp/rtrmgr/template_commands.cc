@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.7 2003/02/22 07:14:33 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.8 2003/02/22 21:02:23 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -780,7 +780,6 @@ ModuleCommand::str() const {
     string tmp;
     tmp= "ModuleCommand: provides: " + _modname + "\n";
     tmp+="               path: " + _modpath + "\n";
-    abort();
     typedef list<string>::const_iterator CI;
     CI ptr = _depends.begin();
     while (ptr != _depends.end()) {

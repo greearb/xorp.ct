@@ -45,7 +45,7 @@ protocols {
       next-hop {
       }
       disable {
-        %set: xrl "bgp/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=$(@)";
+        %set: xrl "bgp/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
       }
     }
   }
