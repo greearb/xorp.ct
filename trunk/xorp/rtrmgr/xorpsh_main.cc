@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.13 2003/09/12 00:50:57 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.14 2003/09/24 16:16:08 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -480,7 +480,7 @@ main(int argc, char *argv[])
 
 	// Try the parent directory
 	string s = find_exec_path_name(argv[0]);
-	if (strlen(s.c_str()) > 0) {
+	if (s.empty() == false) {
 	    s += "/..";		// XXX: add the parent directory
 	    string t_dir = s + "/" + DEFAULT_CONFIG_TEMPLATE_DIR;
 	    string x_dir = s + "/" + DEFAULT_XRL_DIR;
