@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/static_routes/Makefile.am,v 1.7 2004/09/17 19:44:16 pavlin Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.8 2004/11/12 02:44:50 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -31,6 +31,7 @@ LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la

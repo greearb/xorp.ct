@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.15 2004/09/17 13:58:24 abittau Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.16 2004/09/17 19:52:35 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -28,6 +28,7 @@
 #include "static_routes_node.hh"
 #include "xrl_static_routes_node.hh"
 
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 
 XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop& eventloop,
 					 XrlRouter* xrl_router,
@@ -35,6 +36,7 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop& eventloop,
 					 const string& rib_target)
     : StaticRoutesNode(eventloop),
       XrlStaticRoutesTargetBase(xrl_router),
+      _xrl_router(xrl_router),
       _class_name(xrl_router->class_name()),
       _instance_name(xrl_router->instance_name()),
       _xrl_rib_client(xrl_router),
@@ -57,9 +59,26 @@ XrlStaticRoutesNode::~XrlStaticRoutesNode()
     _ifmgr.unset_observer(dynamic_cast<StaticRoutesNode*>(this));
 }
 
+void
+XrlStaticRoutesNode::finder_interest_callback(const XrlError& error)
+{
+    if (error != XrlError::OKAY()) {
+	XLOG_ERROR("callback: %s",  error.str().c_str());
+    }
+}
+
 bool
 XrlStaticRoutesNode::startup()
 {
+    XrlFinderEventNotifierV0p1Client finder(_xrl_router);
+    XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
+	::callback(this, &XrlStaticRoutesNode::finder_interest_callback);
+
+    finder.send_register_class_event_interest("finder",
+	_xrl_router->instance_name(), _fea_target, cb);
+    finder.send_register_class_event_interest("finder",
+	_xrl_router->instance_name(), _rib_target, cb);
+
     return StaticRoutesNode::startup();
 }
 
@@ -384,6 +403,34 @@ XrlStaticRoutesNode::common_0_1_shutdown()
     StaticRoutesNode::shutdown();
 
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
+    // Input values,
+    const string&   target_class,
+    const string&   target_instance)
+{
+    return XrlCmdError::OKAY();
+    UNUSED(target_class);
+    UNUSED(target_instance);
+}
+
+XrlCmdError
+XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
+    // Input values,
+    const string&   target_class,
+    const string&   target_instance)
+{
+
+    if ((_fea_target == target_class) || (_rib_target == target_class)) {
+	XLOG_ERROR("FEA or RIB died, exiting.");
+	// TODO: Actually clean up.
+	::exit(-1);
+    }
+
+    return XrlCmdError::OKAY();
+    UNUSED(target_instance);
 }
 
 /**

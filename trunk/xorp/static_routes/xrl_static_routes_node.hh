@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.9 2004/09/17 13:58:24 abittau Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.10 2004/09/18 01:24:43 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -59,6 +59,11 @@ public:
      */
     bool	shutdown();
 
+    /**
+     * Callback for process birth/death events.
+     */
+    void	finder_interest_callback(const XrlError& error);
+
 protected:
     //
     // XRL target methods
@@ -90,6 +95,16 @@ protected:
      *  Request clean shutdown of Xrl Target
      */
     XrlCmdError common_0_1_shutdown();
+
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
+
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
 
     /**
      *  Enable/disable/start/stop StaticRoutes.
@@ -301,6 +316,7 @@ private:
 	return XrlStaticRoutesTargetBase::name();
     }
 
+    XrlRouter*		_xrl_router;
     const string	_class_name;
     const string	_instance_name;
     XrlRibV0p1Client	_xrl_rib_client;
