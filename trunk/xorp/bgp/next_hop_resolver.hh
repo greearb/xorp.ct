@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.11 2003/04/02 20:34:38 mjh Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.12 2003/04/18 23:27:44 mjh Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -21,7 +21,7 @@
 #include <map>
 #include <algorithm>
 #include <functional>
-#include <deque>
+#include <list>
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -105,25 +105,25 @@ public:
      * Register interest in this nexthop.
      *
      * @param nexthop Nexthop.
-     * @param net The net that is associated with this
-     * nexthop. Treated as an opaque id.
+     * @param net_from_route The net that is associated with this
+     * nexthop in the NextHopLookupTable. Treated as an opaque id.
      * @param requester Once the registration with the RIB suceeds the
      * requester is called back.
      * @return True if the registration succeed.
      */
-    virtual bool register_nexthop(A nexthop, IPNet<A> net,
+    virtual bool register_nexthop(A nexthop, IPNet<A> net_from_route,
 				  NhLookupTable<A> *requester);
 
     /**
      * De-Register interest in this nexthop.
      *
      * @param nexthop Nexthop.
-     * @param net The net that is associated with this
-     * nexthop. Treated as an opaque id.
+     * @param net_from_route The net that is associated with this
+     * nexthop in the NextHopLookupTable. Treated as an opaque id.
      * @param requester Original requester, not used.
      * @return True if the registration succeed.
      */
-    virtual void deregister_nexthop(A nexthop, IPNet<A> net,
+    virtual void deregister_nexthop(A nexthop, IPNet<A> net_from_route,
 				    NhLookupTable<A> *requester);
 
 
@@ -147,16 +147,16 @@ public:
      * Call from the RIB to notify us that a metric has changed.
      */
     bool rib_client_route_info_changed(const A& addr,
-				       const uint32_t& real_prefix,
+				       const uint32_t& real_prefix_len,
 				       const A& nexthop,
 				       const uint32_t& metric);
 
     /**
      * Call from the RIB to notify us that any registrations with this
-     * address and prefix are now invalid.
+     * address and prefix_len are now invalid.
      */
     bool rib_client_route_info_invalid(const A&	addr,
-				       const uint32_t&	prefix);
+				       const uint32_t&	prefix_len);
 
     /**
      * Next hop changed.
@@ -215,7 +215,7 @@ private:
  * that questions have been asked and if the state of a next hop
  * changes then this is reported back to BGP. In order to save space the
  * RIB does not record information about each next hop but returns an
- * address/prefix range for which the answer is valid.
+ * address/prefix_len range for which the answer is valid.
  *
  * Not only can the RIB report changes but can also report that a
  * previous entry is totally invalid. In the case that an entry is
@@ -232,14 +232,14 @@ public:
      *
      * @param addr Base address.
      * @param nexthop Next hop that is being added to the trie.
-     * @param prefix The prefix that is masked with the nexhop.
-     * @param real_prefix The actual prefix that this next hop
+     * @param prefix_len The prefix_len that is masked with the nexhop.
+     * @param real_prefix_len The actual prefix_len that this next hop
      * resolves too. This is only used to match with upcalls from the
      * RIB.
      * @param resolvable Is this route resolvable.
      * @param metric If this route is resolvable its metric.
      */
-    void add_entry(A addr, A nexthop, int prefix, int real_prefix,
+    void add_entry(A addr, A nexthop, int prefix_len, int real_prefix_len,
 		   bool resolvable, uint32_t metric = 0);
 
     /**
@@ -254,17 +254,17 @@ public:
      *
      * @param addr Base address.
      * @param nexthop Next hop that is being added to the trie.
-     * @param prefix The prefix that is masked with the nexhop.
-     * @param real_prefix The actual prefix that this next hop
+     * @param prefix_len The prefix_len that is masked with the nexhop.
+     * @param real_prefix_len The actual prefix_len that this next hop
      * @return true if the entry is in use.
      */
-    bool validate_entry(A addr, A nexthop, int prefix, int real_prefix);
+    bool validate_entry(A addr, A nexthop, int prefix_len, int real_prefix_len);
 
     /**
      * Change an entry in the next hop table.
      *
      * @param addr The base address.
-     * @param real_prefix The actual prefix that this next hop
+     * @param real_prefix_len The actual prefix_len that this next hop
      * resolves too. This is only used to match with upcalls from the
      * RIB.
      * @param metric If this route is resolvable its metric.
@@ -272,7 +272,7 @@ public:
      * covered by this entry.
      *
      */
-    map <A, int> change_entry(A addr, int real_prefix, uint32_t metric);
+    map <A, int> change_entry(A addr, int real_prefix_len, uint32_t metric);
 
     /**
      * Delete an entry from the nexthop table.
@@ -281,23 +281,23 @@ public:
      * exist.
      *
      * @param addr Base address that is being removed from the trie.
-     * @param prefix The prefix.
+     * @param prefix_len The prefix_len.
      * @return The map of next hops with reference counts that were
      * covered by this entry.
      */
-    map <A, int> delete_entry(A addr, int prefix);
+    map <A, int> delete_entry(A addr, int prefix_len);
 
     /**
      * Lookup by base address
      *
      * @param addr Base address.
-     * @param prefix Prefix.
+     * @param prefix_len Prefix_Len.
      * @param resolvable Is this route resolvable.
      * @param metric If this route is resolvable the metric of this route.
      * @return True if this next hop is found.
      *
      */
-    bool lookup_by_addr(A addr, int prefix, bool& resolvable,
+    bool lookup_by_addr(A addr, int prefix_len, bool& resolvable,
 			uint32_t& metric) const;
 
     /**
@@ -357,20 +357,20 @@ public:
      * @param last True if this is the last next hop and the entry
      * has been freed.
      * @param addr If this was the last entry the base address.
-     * @param prefix If this was the last entry the associated prefix.
+     * @param prefix_len If this was the last entry the associated prefix_len.
      * @return True if an entry was found.
      */
-    bool deregister_nexthop(A nexthop, bool& last, A& addr, uint32_t& prefix);
+    bool deregister_nexthop(A nexthop, bool& last, A& addr, uint32_t& prefix_len);
 private:
     struct NextHopEntry {
 	A _address;	// Base address as returned by the RIB
 #ifdef	USE_NEXTHOP
 	A _nexthop;	// The initial next hop. Used to find entry by
-			// prefix
+			// prefix_len
 #endif
 	map <A, int> _nexthop_references;
-	int _prefix;
-	int _real_prefix;
+	int _prefix_len;
+	int _real_prefix_len;
 	bool _resolvable;
 	int _metric;
     };
@@ -382,8 +382,8 @@ private:
     typedef TrieIterator<A, PrefixEntry *> PrefixIterator;
 
     /**
-     * The NextHopEntry is indexed in two ways either by prefix or by
-     * real prefix.
+     * The NextHopEntry is indexed in two ways either by prefix_len or by
+     * real prefix_len.
      *
      * Both of these data structures need to be kept in sync.
      */
@@ -391,25 +391,25 @@ private:
     Trie<A, RealPrefixEntry> _next_hop_by_real_prefix;
 
     /**
-    * Given a real prefix entry return a prefix entry.
+    * Given a real prefix_len entry return a prefix_len entry.
     *
-    * @param pe A real prefix entry.
+    * @param pe A real prefix_len entry.
     * @param addr Address.
-    * @param real_prefix The real prefix.
-    * @return A prefix entry if found 0 otherwise.
+    * @param real_prefix_len The real prefix_len.
+    * @return A prefix_len entry if found 0 otherwise.
     */
     PrefixEntry *rpe_to_pe(const RealPrefixEntry& pe, A addr,
-			   int real_prefix) const;
+			   int real_prefix_len) const;
     /**
-    * Given a real prefix entry return a prefix entry.
+    * Given a real prefix_len entry return a prefix_len entry.
     *
-    * @param pe A real prefix entry.
+    * @param pe A real prefix_len entry.
     * @param addr Address.
-    * @param real_prefix The real prefix.
-    * @return A prefix entry if found 0 otherwise.
+    * @param real_prefix_len The real prefix_len.
+    * @return A prefix_len entry if found 0 otherwise.
     */
     PrefixEntry *rpe_to_pe_delete(RealPrefixEntry& pe, A addr,
-				  int real_prefix);
+				  int real_prefix_len);
 };
 
 /**
@@ -425,27 +425,44 @@ private:
 template <class A>
 class RibRequestQueueEntry {
 public:
-    RibRequestQueueEntry(A nexthop, IPNet<A> net, NhLookupTable<A> *requester)
-	: _register_mode(REGISTER),
-	  _nexthop(nexthop), _new_register(true), _requests(net, requester),
+    typedef enum {REGISTER, DEREGISTER} RegisterMode;
+    RibRequestQueueEntry(RegisterMode mode) : _register_mode(mode) {}
+    virtual ~RibRequestQueueEntry() {}
+protected:
+    RegisterMode _register_mode;
+};
+
+template <class A>
+class RibRegisterQueueEntry : public RibRequestQueueEntry<A> {
+public:
+    RibRegisterQueueEntry(A nexthop, IPNet<A> net_from_route, 
+			 NhLookupTable<A> *requester)
+	: RibRequestQueueEntry<A>(REGISTER),
+	  _nexthop(nexthop), _new_register(true), 
+	  _requests(net_from_route, requester),
 	  _reregister(false), _ref_cnt(0)
     {}
-    RibRequestQueueEntry(A nexthop, uint32_t ref_cnt, bool resolvable, uint32_t
-	       metric)
-	: _register_mode(REGISTER),
+    RibRegisterQueueEntry(A nexthop, uint32_t ref_cnt, bool resolvable, 
+			   uint32_t metric)
+	: RibRequestQueueEntry<A>(REGISTER),
 	  _nexthop(nexthop), _new_register(false), _reregister(true),
 	  _ref_cnt(ref_cnt), _resolvable(resolvable), _metric(metric)
     {}
 
-    void register_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
+    void register_nexthop(IPNet<A> net_from_route, 
+			  NhLookupTable<A> *requester) {
 	XLOG_ASSERT(true == _reregister || true == _new_register);
+	XLOG_ASSERT(_register_mode == REGISTER);
 	_new_register = true;
-	_requests.add_request(net, requester);
+	_requests.add_request(net_from_route, requester);
     }
 
-    bool deregister_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
+    bool deregister_nexthop(IPNet<A> net_from_route, 
+			    NhLookupTable<A> *requester) {
 	XLOG_ASSERT(true == _reregister || true == _new_register);
-	if (_new_register && _requests.remove_request(net, requester)) {
+	XLOG_ASSERT(_register_mode == REGISTER);
+	if (_new_register && _requests.remove_request(net_from_route, 
+						      requester)) {
 	    return true;
 	}
 	if (_reregister) {
@@ -460,6 +477,7 @@ public:
 			    uint32_t metric) {
 	XLOG_ASSERT(false == _reregister);
 	XLOG_ASSERT(0 == _ref_cnt);
+	XLOG_ASSERT(_register_mode == REGISTER);
 	_reregister = true;
 	_ref_cnt = ref_cnt;
 	_resolvable = resolvable;
@@ -493,18 +511,16 @@ public:
 	return _requests;
     }
 private:
-    enum {REGISTER, DEREGISTER} _register_mode;
+    /*
+    ** Register info.
+    */
     A _nexthop;
-
-	/*
-	** Register info.
-	*/
     bool _new_register;
     NHRequest<A> _requests;
 
-	/*
-	** Reregister info.
-	*/
+    /*
+    ** Reregister info.
+    */
     bool _reregister;
     uint32_t _ref_cnt;
     /**
@@ -515,13 +531,32 @@ private:
     uint32_t _metric;
 };
 
+template <class A>
+class RibDeregisterQueueEntry : public RibRequestQueueEntry<A> {
+public:
+    RibDeregisterQueueEntry(A base_addr, uint32_t prefix_len)
+	: RibRequestQueueEntry<A>(DEREGISTER), 
+	_base_addr(base_addr), _prefix_len(prefix_len)
+
+    {}
+    const A& base_addr() const { return _base_addr;}
+    uint32_t prefix_len() const { return _prefix_len;}
+private:
+    /*
+    ** Deregister info.
+    */
+    A _base_addr;
+    uint32_t _prefix_len;
+};
+
+
 /**
  * Make requests of the RIB and get responses.
  *
  * At any time there is only ever one outstanding request to the
  * RIB. Firstly we don't want to overrun the RIB with
  * requests. Secondly it is possible that different next hops in the
- * queue of requests may resolve to the same address/prefix answer
+ * queue of requests may resolve to the same address/prefix_len answer
  * (see below).
  */
 template<class A>
@@ -545,6 +580,10 @@ public:
     void register_nexthop(A nexthop, IPNet<A> net,
 			  NhLookupTable<A> *requester);
 
+    /**
+     * Send the next queued request
+     */
+    void send_next_request();
 
     /**
      * Actually register interest with the RIB.
@@ -562,8 +601,8 @@ public:
     void register_interest_response(const XrlError& error,
 				    const bool *resolves,
 				    const A *addr,
-				    const uint32_t *prefix,
-				    const uint32_t *real_prefix,
+				    const uint32_t *prefix_len,
+				    const uint32_t *real_prefix_len,
 				    const A *actual_nexthop,
 				    const uint32_t *metric,
 				    const string comment);
@@ -614,15 +653,23 @@ public:
      * @return True if this next hop is found.
      *
      */
-    bool lookup(const A nexthop, bool& resolvable, uint32_t& metric) const;
+    bool lookup(const A& nexthop, bool& resolvable, uint32_t& metric) const;
 
     /*
      * Deregister ourselves from the RIB for this next hop
      *
      * @param nexthop The next hop.
-     * @param prefix The prefix we registered with.
+     * @param prefix_len The prefix_len we registered with.
      */
-    void deregister_from_rib(A nexthop, uint32_t prefix);
+    void deregister_from_rib(const A& nexthop, uint32_t prefix_len);
+
+    /*
+     * Deregister ourselves from the RIB for this next hop
+     *
+     * @param nexthop The next hop.
+     * @param prefix_len The prefix_len we registered with.
+     */
+    void deregister_interest(A nexthop, uint32_t prefix_len);
 
     /**
      * XRL response method.
@@ -632,7 +679,7 @@ public:
      */
     void deregister_interest_response(const XrlError& error, 
 				      A addr,
-				      uint32_t prefix,
+				      uint32_t prefix_len,
 				      string comment);
 private:
     string _ribname;
@@ -646,13 +693,16 @@ private:
     /**
      * The queue of outstanding requests.
      */
-    deque<RibRequestQueueEntry<A> *> _queue;
+    list<RibRequestQueueEntry<A> *> _queue;
     /**
-     * Retransmit delay timer list for sending registrations This is a
-     * list because there might be one register and multiple
-     * deregister requests in retransmit timout.  
+     * Retransmit delay timer for resending (de)registrations.
      */
-    list <XorpTimer> _rtx_delay_timers;
+    XorpTimer _rtx_delay_timer;
+
+    bool _previously_successful; /* true if we've managed to
+                                    communicate with the RIB already */
+    bool _interface_failed; /* true if we've received a fatal error */
+
     /**
      * Used by the destructor to delete all the "RibRequestQueueEntry" objects
      * that have been allocated.

@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.11 2003/04/02 20:34:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.12 2003/04/18 23:27:43 mjh Exp $"
 
-// #define DEBUG_LOGGING
+//#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -64,11 +64,11 @@ NextHopResolver<A>::register_ribname(const string& ribname)
  */
 template <class A>
 bool
-NextHopResolver<A>::register_nexthop(A nexthop, IPNet<A> net,
+NextHopResolver<A>::register_nexthop(A nexthop, IPNet<A> net_from_route,
 				     NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
-	      nexthop.str().c_str(), net.str().c_str(), requester);
+	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
 
     /*
     ** We haven't hooked up with a rib so just return true.
@@ -87,18 +87,18 @@ NextHopResolver<A>::register_nexthop(A nexthop, IPNet<A> net,
     /*
     ** We don't have an answer so make a request of the rib.
     */
-    _next_hop_rib_request.register_nexthop(nexthop, net, requester);
+    _next_hop_rib_request.register_nexthop(nexthop, net_from_route, requester);
 
     return false;
 }
 
 template <class A>
 void
-NextHopResolver<A>::deregister_nexthop(A nexthop, IPNet<A> net,
+NextHopResolver<A>::deregister_nexthop(A nexthop, IPNet<A> net_from_route,
 				    NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
-	      nexthop.str().c_str(), net.str().c_str(), requester);
+	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
     /*
     ** We haven't hooked up with a rib so just return.
     */
@@ -112,18 +112,19 @@ NextHopResolver<A>::deregister_nexthop(A nexthop, IPNet<A> net,
     */
     bool last;
     A addr;
-    uint32_t prefix;
-    if (_next_hop_cache.deregister_nexthop(nexthop, last, addr, prefix)) {
+    uint32_t prefix_len;
+    if (_next_hop_cache.deregister_nexthop(nexthop, last, addr, prefix_len)) {
 	if (last) {
 	    /*
 	    ** We no longer have any interest in this entry.
 	    */
-	    _next_hop_rib_request.deregister_from_rib(addr, prefix);
+	    _next_hop_rib_request.deregister_from_rib(addr, prefix_len);
 	}
 	return;
     }
 
-    if (!_next_hop_rib_request.deregister_nexthop(nexthop, net, requester))
+    if (!_next_hop_rib_request.deregister_nexthop(nexthop, net_from_route, 
+						  requester))
 	XLOG_FATAL("Unknown nexthop %s", nexthop.str().c_str());
 }
 
@@ -168,18 +169,18 @@ NextHopResolver<A>::lookup(const A nexthop, bool& resolvable,
 template <class A>
 bool
 NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
-						  const uint32_t& real_prefix,
+						  const uint32_t& real_prefix_len,
 						  const A& nexthop,
 						  const uint32_t& metric)
 {
-    debug_msg("addr %s prefix %d nexthop %s metric %d\n",
-	      addr.str().c_str(), real_prefix, nexthop.str().c_str(), metric);
+    debug_msg("addr %s prefix_len %d nexthop %s metric %d\n",
+	      addr.str().c_str(), real_prefix_len, nexthop.str().c_str(), metric);
 
     /*
     ** Change the entries in the cache and make an upcall notifying
     ** the decision code that the metrics have changed.
     */
-    map<A, int> m = _next_hop_cache.change_entry(addr, real_prefix, metric);
+    map<A, int> m = _next_hop_cache.change_entry(addr, real_prefix_len, metric);
     typename map<A, int>::iterator i;
     for (i = m.begin(); i != m.end(); i++)
 	next_hop_changed(i->first);
@@ -190,15 +191,15 @@ NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
 template <class A>
 bool
 NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
-						  const uint32_t& prefix)
+						  const uint32_t& prefix_len)
 {
-    debug_msg("addr %s prefix %d\n", addr.str().c_str(), prefix);
+    debug_msg("addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
     /*
     ** This is a callback from the RIB telling us that this
-    ** addr/prefix should no longer be used to satisfy nexthop
+    ** addr/prefix_len should no longer be used to satisfy nexthop
     ** requests.
-    ** 1) As a sanity check verify that we have this add/prefix in our
+    ** 1) As a sanity check verify that we have this add/prefix_len in our
     ** cache.
     ** 2) Delete the entry from our cache.
     ** 3) Reregister interest for this nexthop. It may be the case
@@ -210,13 +211,13 @@ NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
 
     bool resolvable;
     uint32_t metric;
-    if (!_next_hop_cache.lookup_by_addr(addr, prefix, resolvable, metric)) {
+    if (!_next_hop_cache.lookup_by_addr(addr, prefix_len, resolvable, metric)) {
 	XLOG_WARNING("address not found in next hop cache: %s/%d",
-		   addr.str().c_str(), prefix);
+		   addr.str().c_str(), prefix_len);
 	return false;
     }
 
-    map<A, int> m = _next_hop_cache.delete_entry(addr, prefix);
+    map<A, int> m = _next_hop_cache.delete_entry(addr, prefix_len);
     typename map<A, int>::iterator i;
     for (i = m.begin(); i != m.end(); i++)
 	_next_hop_rib_request.reregister_nexthop(i->first, i->second,
@@ -273,7 +274,8 @@ NextHopCache<A>::~NextHopCache()
     ** Free all the allocated NextHopEntrys.
     */
     PrefixIterator i;
-    for (i = _next_hop_by_prefix.begin(); i != _next_hop_by_prefix.end(); i++){
+    for (i = _next_hop_by_prefix.begin(); 
+	 i != _next_hop_by_prefix.end(); i++){
 	NextHopEntry *entry = i.payload();
 	delete entry;
     }
@@ -281,13 +283,13 @@ NextHopCache<A>::~NextHopCache()
 
 template<class A>
 void
-NextHopCache<A>::add_entry(A addr, A nexthop, int prefix, int real_prefix,
+NextHopCache<A>::add_entry(A addr, A nexthop, int prefix_len, int real_prefix_len,
 			   bool resolvable, uint32_t metric)
 {
-    debug_msg("addr %s prefix %d real prefix %d\n",
-	      addr.str().c_str(), prefix, real_prefix);
+    debug_msg("addr %s prefix_len %d real prefix_len %d\n",
+	      addr.str().c_str(), prefix_len, real_prefix_len);
 
-    XLOG_ASSERT(addr == nexthop.mask_by_prefix(prefix));
+    XLOG_ASSERT(addr == nexthop.mask_by_prefix(prefix_len));
 
     PrefixEntry *entry = new PrefixEntry;
     entry->_address = addr;
@@ -296,41 +298,42 @@ NextHopCache<A>::add_entry(A addr, A nexthop, int prefix, int real_prefix,
 #endif
     // Don't create any map entries.
 //  entry->_nexthop_references[nexthop] = 0;	// Initial Ref count of 0
-    entry->_prefix = prefix;
-    entry->_real_prefix = real_prefix;
+    entry->_prefix_len = prefix_len;
+    entry->_real_prefix_len = real_prefix_len;
     entry->_resolvable = resolvable;
     entry->_metric = metric;
 
     // This entry must not already be in the trie.
-    XLOG_ASSERT(_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix)) ==
-		_next_hop_by_prefix.end());
+    XLOG_ASSERT(_next_hop_by_prefix.lookup_node(IPNet<A>(addr, 
+							     prefix_len))
+		== _next_hop_by_prefix.end());
 
     // This entry must not already be in the trie.
     RealPrefixIterator rpi = _next_hop_by_real_prefix.
-	lookup_node(IPNet<A>(addr, real_prefix));
+	lookup_node(IPNet<A>(addr, real_prefix_len));
 
     if (rpi == _next_hop_by_real_prefix.end()) {
 	RealPrefixEntry rpe;
 	rpe.insert(entry);
-	_next_hop_by_real_prefix.insert(IPNet<A>(addr, real_prefix), rpe);
+	_next_hop_by_real_prefix.insert(IPNet<A>(addr, real_prefix_len), rpe);
     } else {
 	RealPrefixEntry *rpep = &(rpi.payload());
-	XLOG_ASSERT(0 == rpe_to_pe(*rpep, addr, real_prefix));
+	XLOG_ASSERT(0 == rpe_to_pe(*rpep, addr, real_prefix_len));
 	rpep->insert(entry);
     }
 
-    _next_hop_by_prefix.insert(IPNet<A>(addr, prefix), entry);
+    _next_hop_by_prefix.insert(IPNet<A>(addr, prefix_len), entry);
 }
 
 template<class A>
 bool
-NextHopCache<A>::validate_entry(A addr, A nexthop, int prefix, int real_prefix)
+NextHopCache<A>::validate_entry(A addr, A nexthop, int prefix_len, int real_prefix_len)
 {
-    debug_msg("addr %s nexthop %s prefix %d real prefix %d\n",
-	      addr.str().c_str(), nexthop.str().c_str(), prefix, real_prefix);
+    debug_msg("addr %s nexthop %s prefix_len %d real prefix_len %d\n",
+	      addr.str().c_str(), nexthop.str().c_str(), prefix_len, real_prefix_len);
 
     PrefixIterator pi =
-	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix));
+	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix_len));
     XLOG_ASSERT(pi != _next_hop_by_prefix.end());
 
     PrefixEntry *en = pi.payload();
@@ -340,11 +343,11 @@ NextHopCache<A>::validate_entry(A addr, A nexthop, int prefix, int real_prefix)
 #else
     nexthop = nexthop;
 #endif
-    XLOG_ASSERT(en->_prefix == prefix);
-    XLOG_ASSERT(en->_real_prefix == real_prefix);
+    XLOG_ASSERT(en->_prefix_len == prefix_len);
+    XLOG_ASSERT(en->_real_prefix_len == real_prefix_len);
 
     if (en->_nexthop_references.empty()) {
-	delete_entry(addr, prefix);
+	delete_entry(addr, prefix_len);
  	debug_msg("No references\n");
 	return false;
     }
@@ -354,18 +357,18 @@ NextHopCache<A>::validate_entry(A addr, A nexthop, int prefix, int real_prefix)
 
 template<class A>
 map<A, int>
-NextHopCache<A>::change_entry(A addr, int real_prefix, uint32_t metric)
+NextHopCache<A>::change_entry(A addr, int real_prefix_len, uint32_t metric)
 {
     RealPrefixIterator rpi =
-	_next_hop_by_real_prefix.lookup_node(IPNet<A>(addr, real_prefix));
+	_next_hop_by_real_prefix.lookup_node(IPNet<A>(addr, real_prefix_len));
     XLOG_ASSERT(rpi != _next_hop_by_real_prefix.end());
 
     RealPrefixEntry rpe = rpi.payload();
-    PrefixEntry *en = rpe_to_pe(rpe, addr, real_prefix);
+    PrefixEntry *en = rpe_to_pe(rpe, addr, real_prefix_len);
 
     XLOG_ASSERT(en);
     XLOG_ASSERT(en->_address == addr);
-    XLOG_ASSERT(en->_real_prefix == real_prefix);
+    XLOG_ASSERT(en->_real_prefix_len == real_prefix_len);
 
     // Save all the next hops and reference counts that were covered
     // by this entry.
@@ -379,28 +382,28 @@ NextHopCache<A>::change_entry(A addr, int real_prefix, uint32_t metric)
 
 template<class A>
 map<A, int>
-NextHopCache<A>::delete_entry(A addr, int prefix)
+NextHopCache<A>::delete_entry(A addr, int prefix_len)
 {
-    debug_msg("addr %s prefix %d\n", addr.str().c_str(), prefix);
+    debug_msg("addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
     PrefixIterator pi =
-	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix));
+	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix_len));
     XLOG_ASSERT(pi != _next_hop_by_prefix.end());
 
     PrefixEntry *en = pi.payload();
 
     XLOG_ASSERT(en->_address == addr);
-    XLOG_ASSERT(en->_prefix == prefix);
+    XLOG_ASSERT(en->_prefix_len == prefix_len);
 
     RealPrefixIterator rpi =
-	_next_hop_by_real_prefix.lookup_node(IPNet<A>(addr, en->_real_prefix));
+	_next_hop_by_real_prefix.lookup_node(IPNet<A>(addr, en->_real_prefix_len));
     XLOG_ASSERT(rpi != _next_hop_by_real_prefix.end());
 
     RealPrefixEntry *rpep = &(rpi.payload());
     // These should both point at the same entry.
-    if (rpe_to_pe_delete(*rpep, addr, en->_real_prefix) != en)
-	XLOG_FATAL("Entry was not present addr %s real prefix %d",
-		   addr.str().c_str(), en->_real_prefix);
+    if (rpe_to_pe_delete(*rpep, addr, en->_real_prefix_len) != en)
+	XLOG_FATAL("Entry was not present addr %s real_prefix_len %d",
+		   addr.str().c_str(), en->_real_prefix_len);
 
     // Save all the next hops and reference counts that were covered
     // by this entry.
@@ -419,17 +422,17 @@ NextHopCache<A>::delete_entry(A addr, int prefix)
 
 template<class A>
 bool
-NextHopCache<A>::lookup_by_addr(A addr, int prefix, bool& resolvable,
+NextHopCache<A>::lookup_by_addr(A addr, int prefix_len, bool& resolvable,
 				uint32_t& metric) const
 {
     PrefixIterator pi =
-	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix));
+	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix_len));
     if (pi == _next_hop_by_prefix.end())
 	return false;
 
     NextHopEntry *en = pi.payload();
 
-    XLOG_ASSERT(en->_prefix == prefix);
+    XLOG_ASSERT(en->_prefix_len == prefix_len);
     resolvable = en->_resolvable;
     metric = en->_metric;
 
@@ -516,7 +519,7 @@ NextHopCache<A>::register_nexthop(A nexthop, int ref_cnt_incr)
 template<class A>
 bool
 NextHopCache<A>::deregister_nexthop(A nexthop, bool& last,
-				    A& addr, uint32_t& prefix)
+				    A& addr, uint32_t& prefix_len)
 {
     PrefixIterator pi = _next_hop_by_prefix.find(nexthop);
 
@@ -534,8 +537,8 @@ NextHopCache<A>::deregister_nexthop(A nexthop, bool& last,
 	if (en->_nexthop_references.empty()) {
 	    last = true;
 	    addr = en->_address;
-	    prefix = en->_prefix;
-	    delete_entry(en->_address, en->_prefix);
+	    prefix_len = en->_prefix_len;
+	    delete_entry(en->_address, en->_prefix_len);
 	    return true;
 	}
     }
@@ -547,22 +550,22 @@ NextHopCache<A>::deregister_nexthop(A nexthop, bool& last,
 
 template<class A>
 typename NextHopCache<A>::PrefixEntry *
-NextHopCache<A>::rpe_to_pe(const RealPrefixEntry& rpe, A addr, int real_prefix)
+NextHopCache<A>::rpe_to_pe(const RealPrefixEntry& rpe, A addr, int real_prefix_len)
     const
 {
-    debug_msg("addr %s real prefix %d\n", addr.str().c_str(), real_prefix);
+    debug_msg("addr %s real prefix_len %d\n", addr.str().c_str(), real_prefix_len);
 
     typename RealPrefixEntry::const_iterator si;
 
 #ifdef	DEBUG_LOGGING
     for (si = rpe.begin(); si != rpe.end(); si++)
-	debug_msg("addr %s prefix %d real prefix %d\n",
-		  (*si)->_address.str().c_str(), (*si)->_prefix,
-		  (*si)->_real_prefix);
+	debug_msg("addr %s prefix_len %d real prefix_len %d\n",
+		  (*si)->_address.str().c_str(), (*si)->_prefix_len,
+		  (*si)->_real_prefix_len);
 #endif
 
     for (si = rpe.begin(); si != rpe.end(); si++)
- 	if ((*si)->_real_prefix == real_prefix && (*si)->_address == addr)
+ 	if ((*si)->_real_prefix_len == real_prefix_len && (*si)->_address == addr)
  	    return *si;
 
     return 0;
@@ -571,21 +574,22 @@ NextHopCache<A>::rpe_to_pe(const RealPrefixEntry& rpe, A addr, int real_prefix)
 template<class A>
 typename NextHopCache<A>::PrefixEntry *
 NextHopCache<A>::rpe_to_pe_delete(RealPrefixEntry& rpe, A addr,
-				  int real_prefix)
+				  int real_prefix_len)
 {
-    debug_msg("addr %s real prefix %d\n", addr.str().c_str(), real_prefix);
+    debug_msg("addr %s real prefix_len %d\n", addr.str().c_str(), 
+	      real_prefix_len);
 
     typename RealPrefixEntry::const_iterator si;
 
 #ifdef	DEBUG_LOGGING
     for (si = rpe.begin(); si != rpe.end(); si++)
-	debug_msg("addr %s prefix %d real prefix %d\n",
-		  (*si)->_address.str().c_str(), (*si)->_prefix,
-		  (*si)->_real_prefix);
+	debug_msg("addr %s prefix_len %d real prefix_len %d\n",
+		  (*si)->_address.str().c_str(), (*si)->_prefix_len,
+		  (*si)->_real_prefix_len);
 #endif
 
     for (si = rpe.begin(); si != rpe.end(); si++)
- 	if ((*si)->_real_prefix == real_prefix && (*si)->_address == addr) {
+ 	if ((*si)->_real_prefix_len == real_prefix_len && (*si)->_address == addr) {
 	    PrefixEntry *pi = *si;
 	    rpe.erase(si);
  	    return pi;
@@ -601,7 +605,8 @@ NextHopRibRequest<A>::NextHopRibRequest(XrlStdRouter *xrl_router,
 					NextHopResolver<A>& next_hop_resolver,
 					NextHopCache<A>& next_hop_cache)
     : _xrl_router(xrl_router), _next_hop_resolver(next_hop_resolver),
-      _next_hop_cache(next_hop_cache), _busy(false)
+      _next_hop_cache(next_hop_cache), _busy(false), 
+      _previously_successful(false), _interface_failed(false)
 {
 }
 
@@ -616,28 +621,34 @@ NextHopRibRequest<A>::~NextHopRibRequest()
 
 template<class A>
 void
-NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net,
+NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net_from_route,
 				       NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
-	      nexthop.str().c_str(), net.str().c_str(), requester);
+	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
 
+    //don't do anything if we've already fatally failed
+    if (_interface_failed)
+	return;
     /*
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    typename deque<RibRequestQueueEntry<A> *>::iterator i;
-    for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->nexthop() == nexthop) {
-	    (*i)->register_nexthop(net, requester);
+    typename list<RibRequestQueueEntry<A> *>::iterator i;
+    for (i = _queue.begin(); i != _queue.end(); i++) {
+	RibRegisterQueueEntry<A> *rr = 
+	    dynamic_cast<RibRegisterQueueEntry<A> *>(*i);
+	if (rr && rr->nexthop() == nexthop) {
+	    rr->register_nexthop(net_from_route, requester);
 	    return;
 	}
+    }
 
     /*
     ** Construct a request.
     */
-    RibRequestQueueEntry<A> *rr 
-	= new RibRequestQueueEntry<A>(nexthop, net, requester);
+    RibRegisterQueueEntry<A> *rr 
+	= new RibRegisterQueueEntry<A>(nexthop, net_from_route, requester);
 
     /*
     ** Add the request to the queue.
@@ -649,8 +660,36 @@ NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net,
     ** flag marks if there is currently an outstanding request.
     */
     if (!_busy) {
-	_busy = true;
-	register_interest(nexthop);
+	send_next_request();
+    }
+}
+
+template<class A>
+void
+NextHopRibRequest<A>::deregister_from_rib(const A& base_addr, 
+					  uint32_t prefix_len)
+{
+    //don't do anything if we've already fatally failed
+    if (_interface_failed)
+	return;
+
+    /*
+    ** Construct a request.
+    */
+    RibDeregisterQueueEntry<A> *rr 
+	= new RibDeregisterQueueEntry<A>(base_addr, prefix_len);
+
+    /*
+    ** Add the request to the queue.
+    */
+    _queue.push_back(rr);
+
+    /*
+    ** We allow only one outstanding request to the RIB. The "_busy"
+    ** flag marks if there is currently an outstanding request.
+    */
+    if (!_busy) {
+	send_next_request();
     }
 }
 
@@ -691,65 +730,83 @@ void
 NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 						 const bool *resolves,
 						 const A *addr,
-						 const uint32_t *prefix,
-						 const uint32_t *real_prefix,
+						 const uint32_t *prefix_len,
+						 const uint32_t *real_prefix_len,
 						 const A *actual_nexthop,
 						 const uint32_t *metric,
 						 const string comment)
 {
-    while (!_rtx_delay_timers.empty() 
-	   && !_rtx_delay_timers.front().scheduled()) {
-	//clean up any expired timers.
-	_rtx_delay_timers.pop_front();
-    }
-
     /*
     ** We attempted to register a next hop with the RIB and an error
     ** ocurred. Its not clear that we should continue.
     */
     if (XrlError::OKAY() != error) {
+	if (error == XrlError::NO_FINDER()
+	    /* || (error == FATAL_TRANSPORT_ERROR()) */
+	    || (error == XrlError::RESOLVE_FAILED() 
+		&& _previously_successful) ) {
+	    //A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
+	    //unrecoverable.  A RESOLVE_FAILED error when it had
+	    //previously been successful is also unrecoverable.
+	    _interface_failed = true;
+	    while (!_queue.empty()) {
+		delete _queue.front();
+		_queue.pop_front();
+	    }
+	    return;
+	}
 	if (error == XrlError::RESOLVE_FAILED()
-	    || error == XrlError::NO_FINDER()
-	    || error == XrlError::SEND_FAILED()
-	    || error == XrlError::REPLY_TIMED_OUT()) {
-	    //These are transport errors.  According to the XORP Error
-	    //Handling spec, we treat these errors as transient and
-	    //resend.
+	    || error == XrlError::SEND_FAILED()) {
+	    //SEND_FAILED can be a transient error.  RESOLVE_FAILED
+	    //when we hadn't been previously successful might indicate
+	    //an ordering problem at startup.  In both cases, we resend.
 	    XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
 	    
 	    //The request will still be on the request queue.
 	    //All we need to do is resend it after a respectable delay
 	    A nexthop = *addr;
-	    _rtx_delay_timers.push_back(
+	    _rtx_delay_timer = 
                  _next_hop_resolver.event_loop().new_oneoff_after_ms(1000,
                       ::callback(this,
 				 &NextHopRibRequest<A>::register_interest,
-				 nexthop)));
+				 nexthop));
 	    return;
 	}
+	//We received an application-level error when attempting to
+	//register.  For now, this is fatal.
 	XLOG_FATAL("%s %s", comment.c_str(), error.str().c_str());
+    } else {
+	_previously_successful = true;
     }
 
     debug_msg("Error %s resolves %d addr %s "
-	      "prefix %d real prefix %d actual nexthop %s metric %d %s\n",
+	      "prefix_len %d real prefix_len %d actual nexthop %s metric %d %s\n",
  	      error.str().c_str(), *resolves, addr->str().c_str(),
-	      *prefix, *real_prefix, actual_nexthop->str().c_str(), *metric,
+	      *prefix_len, *real_prefix_len, actual_nexthop->str().c_str(), *metric,
 	      comment.c_str());
 
     /*
     ** Make sure that there is something on our queue.
     */
     XLOG_ASSERT(!_queue.empty());
+    RibRegisterQueueEntry<A> *first_rr =
+	dynamic_cast<RibRegisterQueueEntry<A> *>(_queue.front());
+
+    /*
+    ** Make sure the front entry is a register rather than a deregister
+    */
+    XLOG_ASSERT(first_rr != NULL);
 
     /*
     ** At this point I would really like to directly compare the
     ** nexthop that we actually registered interest for with the
     ** nexthop that was returned. Unfortunately what is returned is
     ** a base address for the covered region. So the comparison has to
-    ** be masked by the prefix that is returned.
+    ** be masked by the prefix_len that is returned.
     */
-    XLOG_ASSERT(IPNet<A>(*addr, *prefix) ==
-		IPNet<A>(_queue.front()->nexthop(), *prefix));
+    
+    XLOG_ASSERT(IPNet<A>(*addr, *prefix_len) ==
+		IPNet<A>(first_rr->nexthop(), *prefix_len));
 
     /*
     ** We have a lot to do here. This response may have satisfied
@@ -765,9 +822,9 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** NextHopCache. Then traverse the queue removing all entries that
     ** are satisfied by the NextHopCache.
     */
-    A first_nexthop = _queue.front()->nexthop();
-    _next_hop_cache.add_entry(*addr, first_nexthop, *prefix, *real_prefix,
-			      *resolves, *metric);
+    A first_nexthop = first_rr->nexthop();
+    _next_hop_cache.add_entry(*addr, first_nexthop, *prefix_len, 
+			      *real_prefix_len, *resolves, *metric);
 
     /*
     ** As soon as we come across an entry in the queue that we
@@ -775,95 +832,138 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** there are other entries later in the queue that may
     ** resolve. Don't worry about it we will get there eventually.
     */
-    for (RibRequestQueueEntry<A> *rr = _queue.front(); !_queue.empty(); ) {
+    typename list<RibRequestQueueEntry<A> *>::iterator i;
+    i = _queue.begin();
+    while (i != _queue.end()) {
 	bool lookup_succeeded;
 	uint32_t m;
-
-	if (_next_hop_cache.lookup_by_nexthop_without_entry(rr->nexthop(),
-					     lookup_succeeded, m)) {
-	    XLOG_ASSERT(rr->new_register() || rr->reregister());
-	    /*
-	    ** See if this request was caused by a downcall from the next hop
-	    ** table.
-	    */
-	    if (rr->new_register()) {
-		NHRequest<A>* request_data = &rr->requests();
+	RibRegisterQueueEntry<A> *rr
+	    = dynamic_cast<RibRegisterQueueEntry<A> *>(*i);
+	if (rr) {
+	    if (_next_hop_cache.lookup_by_nexthop_without_entry(rr->nexthop(),
+								lookup_succeeded, m)) {
+		XLOG_ASSERT(rr->new_register() || rr->reregister());
 		/*
-		** If nobody is interested then don't register or run
-		** the callbacks.
-		*/
-		if(0 != request_data->requests()) {
-		    _next_hop_cache.register_nexthop(rr->nexthop(),
-						     request_data->requests());
+		** See if this request was caused by a downcall from the next hop
+		** table.
+	    */
+		if (rr->new_register()) {
+		    NHRequest<A>* request_data = &rr->requests();
+		    /*
+		    ** If nobody is interested then don't register or run
+		    ** the callbacks.
+		    */
+		    if(0 != request_data->requests()) {
+			_next_hop_cache.register_nexthop(rr->nexthop(),
+							 request_data->requests());
 
-		    typename set <NhLookupTable<A> *>::const_iterator req_iter;
-		    for (req_iter = request_data->requesters().begin();
-			 req_iter != request_data->requesters().end();
-			 req_iter++) {
-			NhLookupTable<A> *requester = (*req_iter);
-			requester->RIB_lookup_done(rr->nexthop(),
-					request_data->request_nets(requester),
-						   lookup_succeeded);
+			typename set <NhLookupTable<A> *>::const_iterator req_iter;
+			for (req_iter = request_data->requesters().begin();
+			     req_iter != request_data->requesters().end();
+			     req_iter++) {
+			    NhLookupTable<A> *requester = (*req_iter);
+			    requester->RIB_lookup_done(rr->nexthop(),
+						       request_data->request_nets(requester),
+						       lookup_succeeded);
+			}
 		    }
 		}
-	    }
-	    /*
+		/*
 	    ** See if this request was caused by an upcall from the
 	    ** RIB. If it was then notify decision that this next hop
 	    ** has changed.
 	    */
-	    if (rr->reregister() && 0 != rr->ref_cnt()) {
-		_next_hop_cache.register_nexthop(rr->nexthop(), rr->ref_cnt());
-		/*
-		** Start the upcall with the old metrics. Only if the
-		** state has changed will the upcall be made.
-		*/
-		_next_hop_resolver.next_hop_changed(rr->nexthop(),
-						    rr->resolvable(),
-						    rr->metric());
+		if (rr->reregister() && 0 != rr->ref_cnt()) {
+		    _next_hop_cache.register_nexthop(rr->nexthop(), rr->ref_cnt());
+		    /*
+		    ** Start the upcall with the old metrics. Only if the
+		    ** state has changed will the upcall be made.
+		    */
+		    _next_hop_resolver.next_hop_changed(rr->nexthop(),
+							rr->resolvable(),
+							rr->metric());
+		}
+		delete rr;
+		i = _queue.erase(i);
+	    } else {
+		break;
 	    }
-
-	    delete rr;
-	    _queue.pop_front();
-	    rr = _queue.front();
 	} else {
-	    break;
+	    RibDeregisterQueueEntry<A> *rd
+		= dynamic_cast<RibDeregisterQueueEntry<A> *>(*i);
+	    assert(rd != NULL);
+	    if ((rd->base_addr() == *addr) 
+		&& (rd->prefix_len() == *prefix_len)) {
+		//We got an answer back, and there was a matching
+		//deregister in the queue.  Remove the deregister from
+		//the queue.  It's possible this was actually needed,
+		//but at this point we can't tell for sure.  Later
+		//we'll validate the entry, and back a deregister if
+		//it was needed.
+		delete rd;
+		i = _queue.erase(i);
+	    } else {
+		//skip the deregister
+		i++;
+	    }
 	}
     }
 
     /*
-    ** A NextHopResolver::register_nexthop caused as to make a request
+    ** A NextHopResolver::register_nexthop caused us to make a request
     ** of the RIB. In the meantime a NextHopResolver::deregister_nexthop
     ** call took place. We removed the reference but couldn't stop the
     ** call to RIB. It may be that this response may satisfy other
     ** outstanding queries in the queue. If it hasn't then the entry
     ** will be invalid so deregister interest with the RIB.
     */
-    if (!_next_hop_cache.validate_entry(*addr, first_nexthop, *prefix,
-				       *real_prefix))
-	deregister_from_rib(*addr, *prefix);
-
-    if (_queue.empty()) {
-	_busy = false;
-	return;
+    if (!_next_hop_cache.validate_entry(*addr, first_nexthop, *prefix_len,
+					*real_prefix_len)) {
+	RibDeregisterQueueEntry<A> *rd
+	    = new RibDeregisterQueueEntry<A>(*addr, *prefix_len);
+	_queue.push_back(rd);
     }
+
 
     /*
     ** There are entries left on the queue, so, fire off another request.
     */
-    RibRequestQueueEntry<A> *rr = _queue.front();
-    register_interest(rr->nexthop());
+    send_next_request();
+}
+
+template<class A>
+void
+NextHopRibRequest<A>::send_next_request() {
+    if (_queue.empty()) {
+	_busy = false;
+	return;
+    }
+    _busy = true;
+    RibRegisterQueueEntry<A> *rr = 
+	dynamic_cast<RibRegisterQueueEntry<A> *>(_queue.front());
+    if (rr) {
+	register_interest(rr->nexthop());
+	return;
+    }
+    
+    RibDeregisterQueueEntry<A> *rd = 
+	dynamic_cast<RibDeregisterQueueEntry<A> *>(_queue.front());
+    if (rd) {
+	deregister_interest(rd->base_addr(), rd->prefix_len());
+	return;
+    }
+    abort();
 }
 
 template<class A>
 bool
-NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net,
+NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net_from_route,
 					 NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
-	      nexthop.str().c_str(), net.str().c_str(), requester);
+	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
 
-    typename deque<RibRequestQueueEntry<A> *>::iterator i;
+    typename list<RibRequestQueueEntry<A> *>::iterator i;
 
     /*
     ** The deregister may mean that there are no more interested parties.
@@ -873,10 +973,12 @@ NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net,
     ** occasionally make a request for a next hop for which there are
     ** no requesters.
     */
-    for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->nexthop() == nexthop)
-		return (*i)->deregister_nexthop(net, requester);
-
+    for (i = _queue.begin(); i != _queue.end(); i++) {
+	RibRegisterQueueEntry<A> *rr = 
+	    dynamic_cast<RibRegisterQueueEntry<A> *>(*i);
+	if (rr && rr->nexthop() == nexthop)
+	    return rr->deregister_nexthop(net_from_route, requester);
+    }
     return false;
 }
 
@@ -914,18 +1016,21 @@ NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    typename deque<RibRequestQueueEntry<A> *>::iterator i;
-    for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->nexthop() == nexthop) {
-	    (*i)->reregister_nexthop(ref_cnt, resolvable, metric);
+    typename list<RibRequestQueueEntry<A> *>::iterator i;
+    for (i = _queue.begin(); i != _queue.end(); i++) {
+	RibRegisterQueueEntry<A> *rr = 
+	    dynamic_cast<RibRegisterQueueEntry<A> *>(*i);
+	if (rr && rr->nexthop() == nexthop) {
+	    rr->reregister_nexthop(ref_cnt, resolvable, metric);
 	    return;
 	}
+    }
 
     /*
     ** Construct a request.
     */
-    RibRequestQueueEntry<A> *rr 
-	= new RibRequestQueueEntry<A>(nexthop, ref_cnt, resolvable, metric);
+    RibRegisterQueueEntry<A> *rr 
+	= new RibRegisterQueueEntry<A>(nexthop, ref_cnt, resolvable, metric);
 
     /*
     ** Add the request to the queue.
@@ -937,29 +1042,31 @@ NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
     ** flag marks if there is currently an outstanding request.
     */
     if (!_busy) {
-	_busy = true;
-	register_interest(nexthop);
+	send_next_request();
     }
 }
 
 template<class A>
 bool
-NextHopRibRequest<A>::lookup(A nexthop, bool& resolvable, uint32_t& metric)
-    const
+NextHopRibRequest<A>::lookup(const A& nexthop, 
+			     bool& resolvable, uint32_t& metric) const
 {
     /*
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    typename deque<RibRequestQueueEntry<A> *>::const_iterator i;
-    for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->reregister() && (*i)->nexthop() == nexthop) {
-	    resolvable = (*i)->resolvable();
-	    metric = (*i)->metric();
+    typename list<RibRequestQueueEntry<A> *>::const_iterator i;
+    for (i = _queue.begin(); i != _queue.end(); i++) {
+	RibRegisterQueueEntry<A> *rr = 
+	    dynamic_cast<RibRegisterQueueEntry<A> *>(*i);
+	if (rr && rr->reregister() && rr->nexthop() == nexthop) {
+	    resolvable = rr->resolvable();
+	    metric = rr->metric();
 	    debug_msg("nexthop %s resolvable %d metric %d\n",
 		      nexthop.str().c_str(), resolvable, metric);
 	    return true;
 	}
+    }
 
     debug_msg("nexthop %s not resolvable\n", nexthop.str().c_str());
 
@@ -968,9 +1075,10 @@ NextHopRibRequest<A>::lookup(A nexthop, bool& resolvable, uint32_t& metric)
 
 template<>
 void
-NextHopRibRequest<IPv4>::deregister_from_rib(IPv4 addr, uint32_t prefix)
+NextHopRibRequest<IPv4>::deregister_interest(IPv4 addr, 
+					     uint32_t prefix_len)
 {
-    debug_msg("addr %s/%d\n", addr.str().c_str(), prefix);
+    debug_msg("addr %s/%d\n", addr.str().c_str(), prefix_len);
     if(0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
@@ -978,18 +1086,19 @@ NextHopRibRequest<IPv4>::deregister_from_rib(IPv4 addr, uint32_t prefix)
     rib.send_deregister_interest4(_ribname.c_str(),
 				  _xrl_router->name(),
 				  addr,
-				  prefix,
+				  prefix_len,
 	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
-		       addr, prefix,
+		       addr, prefix_len,
 		       c_format("deregister_from_rib: addr %s/%d",
-				addr.str().c_str(), prefix)));
+				addr.str().c_str(), prefix_len)));
 }
 
 template<>
 void
-NextHopRibRequest<IPv6>::deregister_from_rib(IPv6 addr, uint32_t prefix)
+NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr, 
+					     uint32_t prefix_len)
 {
-    debug_msg("addr %s/%d\n", addr.str().c_str(), prefix);
+    debug_msg("addr %s/%d\n", addr.str().c_str(), prefix_len);
     if(0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
@@ -997,48 +1106,81 @@ NextHopRibRequest<IPv6>::deregister_from_rib(IPv6 addr, uint32_t prefix)
     rib.send_deregister_interest6(_ribname.c_str(),
 				  _xrl_router->name(),
 				  addr,
-				  prefix,
+				  prefix_len,
 	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
-		       addr, prefix,
+		       addr, prefix_len,
 		       c_format("deregister_from_rib: addr %s/%d",
-				addr.str().c_str(), prefix)));
+				addr.str().c_str(), prefix_len)));
 }
 
 template <class A>
 void
 NextHopRibRequest<A>::deregister_interest_response(const XrlError& error, 
 						   A addr,
-						   uint32_t prefix,
+						   uint32_t prefix_len,
 						   string comment)
 {
-    while (!_rtx_delay_timers.empty() 
-	   && !_rtx_delay_timers.front().scheduled()) {
-	//Clean up any expired timers.
-	_rtx_delay_timers.pop_front();
-    }
+    //Check that this answer is for the question on the front of the queue
+    XLOG_ASSERT(!_queue.empty());
+    RibDeregisterQueueEntry<A> *rd = 
+	dynamic_cast<RibDeregisterQueueEntry<A> *>(_queue.front());
+    XLOG_ASSERT(rd != NULL);
+    XLOG_ASSERT(addr == rd->base_addr());
+    XLOG_ASSERT(prefix_len == rd->prefix_len());
 
     debug_msg("%s %s\n", comment.c_str(), error.str().c_str());
-    if (XrlError::OKAY() != error) {
+    if (error != XrlError::OKAY()) {
+	if (error == XrlError::NO_FINDER()
+	    /* || (error == FATAL_TRANSPORT_ERROR()) */
+	    || (error == XrlError::RESOLVE_FAILED() 
+		&& _previously_successful) ) {
+	    //A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
+	    //unrecoverable.  A RESOLVE_FAILED error when it had
+	    //previously been successful is also unrecoverable.
+	    _interface_failed = true;
+	    while (!_queue.empty()) {
+		delete _queue.front();
+		_queue.pop_front();
+	    }
+	    return;
+	}
 	if (error == XrlError::RESOLVE_FAILED()
-	    || error == XrlError::NO_FINDER()
-	    || error == XrlError::SEND_FAILED()
-	    || error == XrlError::REPLY_TIMED_OUT()) {
-	    //These are transport errors.  According to the XORP Error
-	    //Handling spec, we treat these errors as transient and
-	    //resend.
+	    || error == XrlError::SEND_FAILED()) {
+	    //SEND_FAILED can be a transient error.  RESOLVE_FAILED
+	    //when we hadn't been previously successful might indicate
+	    //an ordering problem at startup.  In both cases, we resend.
 	    XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
 	    
 	    //The request will still be on the request queue.
 	    //All we need to do is resend it after a respectable delay
-	    _rtx_delay_timers.push_back(
-                 _next_hop_resolver.event_loop().new_oneoff_after_ms(1000,
+	    _rtx_delay_timer = 
+		_next_hop_resolver.event_loop().new_oneoff_after_ms(1000,
                       ::callback(this,
-				 &NextHopRibRequest<A>::deregister_from_rib,
-				 addr, prefix)));
+				 &NextHopRibRequest<A>::deregister_interest,
+				 addr, prefix_len));
 	    return;
 	}
+
+	//If we fell through to here, something bad happened, but it's
+	//not clear exactly what.  Log a warning, and carry on
+	//regardless.
 	XLOG_WARNING("callback: %s %s",  comment.c_str(), error.str().c_str());
+    } else {
+	//We were successful
+	_previously_successful = true;
     }
+
+    //remove this request from the queue
+    delete rd;
+    _queue.pop_front();
+
+    //if there's anything else queued, send it.
+    if (_queue.empty())
+	_busy = false;
+    else
+	send_next_request();
+
+    return;
 }
 
 /****************************************/
