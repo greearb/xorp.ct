@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.21 2004/05/06 23:09:46 hodson Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.22 2004/05/12 08:56:00 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -95,6 +95,7 @@ test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredist6xif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
+test_pim_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
 libpim_a_SOURCES  = pim_module.h
