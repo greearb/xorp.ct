@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.4 2003/10/09 00:11:02 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.5 2003/10/11 19:47:37 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -219,7 +219,8 @@ private:
 
 class IfConfigSetNetlink : public IfConfigSet,
 			   public NetlinkSocket4,
-			   public NetlinkSocket6 {
+			   public NetlinkSocket6,
+			   public NetlinkSocketObserver {
 public:
     IfConfigSetNetlink(IfConfig& ifc);
     virtual ~IfConfigSetNetlink();
@@ -237,6 +238,14 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
+
+    /**
+     * Data has pop-up.
+     * 
+     * @param data the buffer with the data.
+     * @param nbytes the number of bytes in the @ref data buffer.
+     */
+    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
 
 private:
     virtual int set_interface_mac_address(const string& ifname,
@@ -269,9 +278,17 @@ private:
 				   uint32_t prefix_len,
 				   string& reason);
 
+    int		check_request(NetlinkSocket& ns, uint32_t seqno,
+			      string& reason);
+
+    bool	    _cache_valid;	// Cache data arrived.
+    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
+					// cache so route lookup via netlink
+					// socket can appear synchronous.
+    vector<uint8_t> _cache_data;	// Cached netlink socket data.
+
     int _s4;
     int _s6;
 };
-
 
 #endif // __FEA_IFCONFIG_SET_HH__
