@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.1 2004/09/17 13:49:00 abittau Exp $"
 
 #include "config.h"
 
@@ -71,18 +71,16 @@ FileVarRW::doLine(const string& str) {
     iss >> type;
 
 
-    while(iss.eof())
-	return false;
-    
-    
-    unsigned len = str.length();
-    unsigned pos = len - iss.rdbuf()->in_avail();
-    pos++;
-
-    if(pos >= len)
+    if(iss.eof())
 	return false;
 
-    value = str.substr(pos,len-pos-1);
+    iss >> value;
+    while (! iss.eof()) {
+	string v;
+	iss >> v;
+	if (v.size())
+	    value += " " + v;
+    }
 
     Element* e = _ef.create(type,value.c_str());
 
