@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.13 2003/08/28 15:57:33 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.1 2003/10/15 04:10:20 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -46,7 +46,7 @@ gmake check
       you must install a new compiler (e.g., gcc-3.3 from
       /usr/ports/lang/gcc33 in the ports collection). Then, you must
       set environmental variables CC and CXX to point to the new compiler
-      before running "./configure".
+      before running "./configure"
       (e.g., "setenv CC gcc33; setenv CXX g++33").
     - The code compiles with the new compiler, and the internal tests
       appear to succeed.
@@ -68,8 +68,8 @@ gmake check
       packages). Then, you must set environmental variables CC and CXX
       to point to the new compiler before running "./configure"
       (e.g., "setenv CC egcc; setenv CXX eg++").
-    - The code compiles with the new compiler, but some of the internal tests
-      fail.
+    - The code compiles with the new compiler, and the internal tests
+      appear to succeed.
     - The default datasize limit per user may not be sufficient to compile
       some parts of the code, hence you may need to increase the datasize
       limit.  If you see the following compilation error:
