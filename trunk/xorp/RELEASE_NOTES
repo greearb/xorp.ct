@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.38 2003/11/06 19:47:41 hodson Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.39 2003/11/06 20:23:56 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -37,6 +37,8 @@ Release 0.5 (2003/??/??)
   RTRMGR:
     - Fix the process name of a started proces to be the same
       as the binary name.
+
+    - Minor code cleanup.
 
   XORPSH:
     - 
