@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.52 2004/04/01 22:01:33 mjh Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.53 2004/04/15 16:13:30 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,10 +56,11 @@ Peer::Peer(EventLoop    *eventloop,
       _target_port(target_port),
       _up(true),
       _busy(0),
+      _connected(false),
       _session(false),
       _passive(false),
-      _keepalive(false),
       _established(false),
+      _keepalive(false),
       _as(AsNum::AS_INVALID), // XXX
       _holdtime(0),
       _ipv6(false)
@@ -246,7 +247,8 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
 	XLOG_FATAL("send_packetisation failed");
     if(!test_peer.send_connect(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
-			       callback(this, &Peer::xrl_callback, "connect")))
+			       callback(this, &Peer::xrl_callback_connected,
+					"connected")))
 	XLOG_FATAL("send_connect failed");
 }
 
@@ -379,55 +381,36 @@ Peer::send(const string& line, const vector<string>& words)
 }
 
 /*
-** At the moment the form of the command is:
-** peer1 send packet update \
-**                   origin 0 \
-**                   aspath 1/2/3 \
-**                   nexthop 10.10.10.10 \
-**                   nlri 1.2.3/24
+** Form of command:
+** peer1 send packet update ...
+** peer1 send packet notify ...
+** peer1 send packet open ...
+** peer1 send packet keepalive
 **
+** See the packet method for the rest of the commands
 */
 void
 Peer::send_packet(const string& line, const vector<string>& words)
     throw(InvalidString)
 {
-    /* XXX
-    ** For the time being only handle sending update packets.
-    ** Make sending updates a separate routine when we support sending
-    ** other types of packets.
-    */
-    const char update[] = "update";
-    if(update != words[3])
-	xorp_throw(InvalidString,
-		   c_format("Third argument should be %s not <%s>\n[%s]",
-			    update, words[3].c_str(), line.c_str()));
-    
-    /*
-    ** Parse the command line.
-    ** The arguments for this command come in pairs:
-    ** name value
-    */
-
-    size_t size = words.size();
-    if(0 != (size % 2))
-	xorp_throw(InvalidString,
-		   c_format("Incorrect number of arguments:\n[%s]",
-			    line.c_str()));
-
     const BGPPacket *pkt = Peer::packet(line, words, 3);
 
     size_t len;
     const uint8_t *buf = pkt->encode(len);
     delete pkt;
+
     /*
-    ** Save the update message in the sent trie.
+    ** If this is an update message, save it in the sent trie.
     */
-    TimeVal tv;
-    _eventloop->current_time(tv);
-    _trie_sent.process_update_packet(tv, buf, len);
+    const char update[] = "update";
+    if(update == words[3]) {
+	TimeVal tv;
+	_eventloop->current_time(tv);
+	_trie_sent.process_update_packet(tv, buf, len);
+    }
 
     _busy++;
-    send_message(buf, len, callback(this, &Peer::xrl_callback, "update"));
+    send_message(buf, len, callback(this, &Peer::xrl_callback, "send packet"));
 }
 
 struct mrt_header {
@@ -693,6 +676,9 @@ Peer::expect(const string& line, const vector<string>& words)
 ** peer assert queue <len>
 ** 0    1      2     3
 **
+** peer assert connected
+** 0    1      2
+**
 ** peer assert established
 ** 0    1      2
 **
@@ -730,12 +716,16 @@ Peer::assertX(const string& line, const vector<string>& words)
 			    line.c_str()));
 	    break;
 	}
+    } else if("connected" == words[2]) {
+	if(!_connected)
+	    xorp_throw(InvalidString,
+		       c_format("No TCP session established"));
     } else if("established" == words[2]) {
 	if(!_established)
 	    xorp_throw(InvalidString,
-		       c_format("No session established"));
+		       c_format("No BGP session established"));
     } else if("idle" == words[2]) {
-	if(_established)
+	if(_connected)
 	    xorp_throw(InvalidString,
 		       c_format("Session established"));
     } else
@@ -1202,6 +1192,18 @@ Peer::xrl_callback(const XrlError& error, const char *comment)
     }
 }
 
+void
+Peer::xrl_callback_connected(const XrlError& error, const char *comment)
+{
+    debug_msg("callback_connected %s %s\n", comment, error.str().c_str());
+    if(XrlError::OKAY() == error) {
+	_connected = true;
+    } else {
+	_connected = false;
+    }
+    xrl_callback(error, comment);
+}
+
 /*
 ** This method receives data from the BGP process under test via the
 ** test_peer. The test_peer attempts to packetise the data into BGP
@@ -1225,6 +1227,9 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	if(0 == data.size()) {
 	    XLOG_WARNING("TCP connection from test_peer: %s to: %s closed",
 		       _peername.c_str(), _target_hostname.c_str());
+	    _connected = false;
+	    _session = false;
+	    _established = false;
 	    return;
 	}
 	XLOG_FATAL("Bad BGP message received by test_peer: %s from: %s",
@@ -1329,6 +1334,7 @@ Peer::datain_closed()
 {
     XLOG_WARNING("TCP connection from test_peer: %s to %s closed",
 		 _peername.c_str(), _target_hostname.c_str());
+    _connected = false;
     _session = false;
     _established = false;
 }

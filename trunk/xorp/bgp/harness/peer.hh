@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.11 2003/08/05 22:14:45 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.12 2003/08/27 22:42:09 atanu Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -90,6 +90,7 @@ public:
     void check_expect(BGPPacket *rec);
 
     void xrl_callback(const XrlError& error, const char *comment);
+    void xrl_callback_connected(const XrlError& error, const char *comment);
 
     void datain(const bool& status, const TimeVal& tv,
 		const vector<uint8_t>&  data);
@@ -123,10 +124,11 @@ private:
 
     uint32_t _busy;	// Count of outstanding transactions.
 
+    bool _connected;	// True if we believe a TCP connection session.
     bool _session;	// We are attempting to form a BGP session.
     bool _passive;	// We are passively trying to create a session.
-    bool _keepalive;	// If true echo all received keepalives.
     bool _established;	// True if we believe a session has been formed.
+    bool _keepalive;	// If true echo all received keepalives.
 
     AsNum _as;		// Our AS number.
     int _holdtime;	// The holdtime sent in the BGP open message.

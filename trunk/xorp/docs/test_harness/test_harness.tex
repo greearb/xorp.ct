@@ -298,6 +298,22 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   should be noted that at this time it is not possible to create an
   illegal path attribute.
 
+\item {\sf send packet notify $<$error code$>$ $<$sub error code$>$}
+
+  Send a notification packet. The $<$error code$>$ is mandatory. The
+  $<$sub error code$>$ is optional.
+
+\item {\sf send packet keepalive}
+
+  Send a keepalive packet.
+
+\item {\sf send packet open
+                        asnum $<$value$>$ 
+                        bgpid $<$ipv4$>$ 
+                        holdtime $<$value$>$}
+
+  Send an open packet.  All fields shown are mandatory.
+
 \item {\sf send dump mrtd update filename $<$packet count$>$}
   
   Given a file in mrtd dump format send the update packets in this
@@ -350,9 +366,13 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   occurred then this call will return the error. The length of the
   queue check is optional.
 
+\item {\sf assert connected}
+
+  Verify that a TCP session exists.
+
 \item {\sf assert established}
 
-  Verify that a session has actually been established. Some tests can pass
+  Verify that a BGP session has actually been established. Some tests can pass
   without a BGP process being present. These tests require this interface.
 
 \item {\sf assert idle}
