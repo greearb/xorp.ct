@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.1 2004/02/19 20:15:42 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.2 2004/02/19 21:38:33 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -51,153 +51,159 @@ public:
 					       const string& instance_name);
 
     XrlCmdError
-    rip_0_1_add_rip_address(const string&	ifname,
-			    const string&	vifname,
-			    const IPv6&		addr);
+    ripng_0_1_add_rip_address(const string&	ifname,
+			      const string&	vifname,
+			      const IPv6&	addr);
 
     XrlCmdError
-    rip_0_1_remove_rip_address(const string&	ifname,
-			       const string&	vifname,
-			       const IPv6&	addr);
-
-    XrlCmdError
-    rip_0_1_set_rip_address_enabled(const string&	ifname,
-				    const string&	vifname,
-				    const IPv6&		addr,
-				    const bool&		enabled);
-
-    XrlCmdError
-    rip_0_1_rip_address_enabled(const string&	ifname,
-				const string&	vifname,
-				const IPv6&	addr,
-				bool&		enabled);
-
-    XrlCmdError rip_0_1_set_cost(const string&		ifname,
-				 const string&		vifname,
-				 const IPv6&		addr,
-				 const uint32_t&	cost);
-
-    XrlCmdError rip_0_1_cost(const string&	ifname,
-			     const string&	vifname,
-			     const IPv6&	addr,
-			     uint32_t&		cost);
-
-    XrlCmdError rip_0_1_set_horizon(const string&	ifname,
-				    const string&	vifname,
-				    const IPv6&		addr,
-				    const string&	horizon);
-
-    XrlCmdError rip_0_1_horizon(const string&	ifname,
-				const string&	vifname,
-				const IPv6&	addr,
-				string&		horizon);
-
-    XrlCmdError
-    rip_0_1_set_route_expiry_seconds(const string&	ifname,
-				     const string&	vifname,
-				     const IPv6&	addr,
-				     const uint32_t&	t_secs);
-
-    XrlCmdError
-    rip_0_1_route_expiry_seconds(const string&	ifname,
+    ripng_0_1_remove_rip_address(const string&	ifname,
 				 const string&	vifname,
-				 const IPv6&	addr,
-				 uint32_t&	t_secs);
+				 const IPv6&	addr);
 
     XrlCmdError
-    rip_0_1_set_route_deletion_seconds(const string&	ifname,
+    ripng_0_1_set_rip_address_enabled(const string&	ifname,
+				      const string&	vifname,
+				      const IPv6&	addr,
+				      const bool&	enabled);
+
+    XrlCmdError
+    ripng_0_1_rip_address_enabled(const string&	ifname,
+				  const string&	vifname,
+				  const IPv6&	addr,
+				  bool&		enabled);
+
+    XrlCmdError ripng_0_1_set_cost(const string&	ifname,
+				   const string&	vifname,
+				   const IPv6&		addr,
+				   const uint32_t&	cost);
+
+    XrlCmdError ripng_0_1_cost(const string&	ifname,
+			       const string&	vifname,
+			       const IPv6&	addr,
+			       uint32_t&	cost);
+
+    XrlCmdError ripng_0_1_set_horizon(const string&	ifname,
+				      const string&	vifname,
+				      const IPv6&	addr,
+				      const string&	horizon);
+
+    XrlCmdError ripng_0_1_horizon(const string&	ifname,
+				  const string&	vifname,
+				  const IPv6&	addr,
+				  string&	horizon);
+
+    XrlCmdError
+    ripng_0_1_set_route_expiry_seconds(const string&	ifname,
 				       const string&	vifname,
 				       const IPv6&	addr,
 				       const uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_route_deletion_seconds(const string&	ifname,
+    ripng_0_1_route_expiry_seconds(const string&	ifname,
 				   const string&	vifname,
 				   const IPv6&		addr,
 				   uint32_t&		t_secs);
 
     XrlCmdError
-    rip_0_1_set_table_request_seconds(const string&	ifname,
-				      const string&	vifname,
-				      const IPv6&	addr,
-				      const uint32_t&	t_secs);
+    ripng_0_1_set_route_deletion_seconds(
+					const string&	ifname,
+					const string&	vifname,
+					const IPv6&	addr,
+					const uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_table_request_seconds(const string&		ifname,
-				  const string&		vifname,
-				  const IPv6&		addr,
-				  uint32_t&		t_secs);
+    ripng_0_1_route_deletion_seconds(const string&	ifname,
+				     const string&	vifname,
+				     const IPv6&	addr,
+				     uint32_t&		t_secs);
 
     XrlCmdError
-    rip_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
-						 const string&	vifname,
-						 const IPv6&	addr,
-						 const uint32_t& t_secs);
+    ripng_0_1_set_table_request_seconds(const string&	ifname,
+					const string&	vifname,
+					const IPv6&	addr,
+					const uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_unsolicited_response_min_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv6&	addr,
-					     uint32_t&		t_secs);
+    ripng_0_1_table_request_seconds(const string&	ifname,
+				    const string&	vifname,
+				    const IPv6&		addr,
+				    uint32_t&		t_secs);
 
     XrlCmdError
-    rip_0_1_set_unsolicited_response_max_seconds(const string&	ifname,
-						 const string&	vifname,
-						 const IPv6&	addr,
-						 const uint32_t& t_secs);
+    ripng_0_1_set_unsolicited_response_min_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv6&	addr,
+						const uint32_t& t_secs);
 
     XrlCmdError
-    rip_0_1_unsolicited_response_max_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv6&	addr,
-					     uint32_t&		t_secs);
-
-    XrlCmdError
-    rip_0_1_set_triggered_update_min_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv6&	addr,
-					     const uint32_t&	t_secs);
-
-    XrlCmdError
-    rip_0_1_triggered_update_min_seconds(const string&	ifname,
-					 const string&	vifname,
-					 const IPv6&	addr,
-					 uint32_t&	t_secs);
-
-    XrlCmdError
-    rip_0_1_set_triggered_update_max_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv6&	addr,
-					     const uint32_t&	t_secs);
-
-    XrlCmdError
-    rip_0_1_triggered_update_max_seconds(const string&	ifname,
-					 const string&	vifname,
-					 const IPv6&	addr,
-					 uint32_t&	t_secs);
-
-    XrlCmdError
-    rip_0_1_set_interpacket_delay_milliseconds(const string&	ifname,
+    ripng_0_1_unsolicited_response_min_seconds(const string&	ifname,
 					       const string&	vifname,
 					       const IPv6&	addr,
-					       const uint32_t&	t_msecs);
+					       uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_interpacket_delay_milliseconds(const string&	ifname,
+    ripng_0_1_set_unsolicited_response_max_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv6&	addr,
+						const uint32_t& t_secs
+						);
+
+    XrlCmdError
+    ripng_0_1_unsolicited_response_max_seconds(const string&	ifname,
+					       const string&	vifname,
+					       const IPv6&	addr,
+					       uint32_t&	t_secs);
+
+    XrlCmdError
+    ripng_0_1_set_triggered_update_min_seconds(const string&	ifname,
+					       const string&	vifname,
+					       const IPv6&	addr,
+					       const uint32_t&	t_secs);
+
+    XrlCmdError
+    ripng_0_1_triggered_update_min_seconds(const string&	ifname,
 					   const string&	vifname,
 					   const IPv6&		addr,
-					   uint32_t&		t_msecs);
+					   uint32_t&		t_secs);
 
-    XrlCmdError rip_0_1_rip_address_status(const string&	ifname,
+    XrlCmdError
+    ripng_0_1_set_triggered_update_max_seconds(const string&	ifname,
+					       const string&	vifname,
+					       const IPv6&	addr,
+					       const uint32_t&	t_secs);
+
+    XrlCmdError
+    ripng_0_1_triggered_update_max_seconds(const string&	ifname,
 					   const string&	vifname,
 					   const IPv6&		addr,
-					   string&		status);
+					   uint32_t&		t_secs);
 
-    XrlCmdError rip_0_1_add_static_route(const IPv6Net& 	network,
-					 const IPv6& 		nexthop,
-					 const uint32_t& 	cost);
+    XrlCmdError
+    ripng_0_1_set_interpacket_delay_milliseconds(
+					const string&	ifname,
+					const string&	vifname,
+					const IPv6&	addr,
+					const uint32_t&	t_msecs
+					);
 
-    XrlCmdError rip_0_1_delete_static_route(const IPv6Net& 	network);
+    XrlCmdError
+    ripng_0_1_interpacket_delay_milliseconds(const string&	ifname,
+					     const string&	vifname,
+					     const IPv6&	addr,
+					     uint32_t&		t_msecs);
+
+    XrlCmdError ripng_0_1_rip_address_status(const string&	ifname,
+					     const string&	vifname,
+					     const IPv6&	addr,
+					     string&		status);
+
+    XrlCmdError ripng_0_1_add_static_route(const IPv6Net& 	network,
+					   const IPv6& 		nexthop,
+					   const uint32_t& 	cost);
+
+    XrlCmdError ripng_0_1_delete_static_route(const IPv6Net& 	network);
 
     XrlCmdError socket6_user_0_1_recv_event(const string&	sockid,
 					    const IPv6&		src_host,
