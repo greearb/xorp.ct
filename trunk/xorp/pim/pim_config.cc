@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.11 2003/05/31 07:03:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.12 2003/05/31 17:53:37 pavlin Exp $"
 
 
 //
@@ -23,263 +23,17 @@
 #include "pim_module.h"
 #include "pim_private.hh"
 #include "mrt/random.h"
+
 #include "pim_node.hh"
 #include "pim_vif.hh"
-
-
-/**
- * Start a set of configuration changes.
- * 
- * Note that it may change the node status.
- * 
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-PimNode::start_config(string& reason)
-{
-    switch (ProtoNode<PimVif>::node_status()) {
-    case PROC_NOT_READY:
-	break;	// OK, probably the first set of configuration changes,
-		// or a batch of configuration changes that call end_config()
-		// at the end.
-    case PROC_READY:
-	ProtoNode<PimVif>::set_node_status(PROC_NOT_READY);
-	break;	// OK, start a set of configuration changes
-    case PROC_STARTUP:
-	reason = "invalid start config in PROC_STARTUP state";
-	return (XORP_ERROR);
-    case PROC_SHUTDOWN:
-	reason = "invalid start config in PROC_SHUTDOWN state";
-	return (XORP_ERROR);
-    case PROC_FAILED:
-	reason = "invalid start config in PROC_FAILED state";
-	return (XORP_ERROR);
-    case PROC_NULL:
-	// FALLTHROUGH
-    default:
-	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * End a set of configuration changes.
- * 
- * Note that it may change the node status.
- * 
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-PimNode::end_config(string& reason)
-{
-    switch (ProtoNode<PimVif>::node_status()) {
-    case PROC_NOT_READY:
-	ProtoNode<PimVif>::set_node_status(PROC_READY);
-	break;	// OK, end a set of configuration changes
-    case PROC_READY:
-	reason = "invalid end config in PROC_READY state";
-	return (XORP_ERROR);
-    case PROC_STARTUP:
-	reason = "invalid end config in PROC_STARTUP state";
-	return (XORP_ERROR);
-    case PROC_SHUTDOWN:
-	reason = "invalid end config in PROC_SHUTDOWN state";
-	return (XORP_ERROR);
-    case PROC_FAILED:
-	reason = "invalid end config in PROC_FAILED state";
-	return (XORP_ERROR);
-    case PROC_NULL:
-	// FALLTHROUGH
-    default:
-	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
-    }
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::add_config_vif(const string& vif_name, uint16_t vif_index,
-			string& reason)
-{
-    map<string, Vif>::iterator iter;
-    
-    if (start_config(reason) != XORP_OK)
-	return (XORP_ERROR);
-    
-    // Check whether we have vif with same name
-    iter = _configured_vifs.find(vif_name);
-    if (iter != _configured_vifs.end()) {
-	reason = c_format("Cannot add vif %s: already have such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
-	return (XORP_ERROR);
-    }
-    
-    // Check whether we have vif with same vif_index
-    for (iter = _configured_vifs.begin();
-	 iter != _configured_vifs.end();
-	 ++iter) {
-	Vif* tmp_vif = &iter->second;
-	if (tmp_vif->vif_index() == vif_index) {
-	    reason = c_format("Cannot add vif %s with vif_index %d: "
-			      "already have vif %s with same vif_index",
-			      vif_name.c_str(), vif_index,
-			      tmp_vif->name().c_str());
-	    XLOG_ERROR(reason.c_str());
-	    return (XORP_ERROR);
-	}
-    }
-    
-    // Insert the new vif
-    Vif vif(vif_name);
-    vif.set_vif_index(vif_index);
-    _configured_vifs.insert(make_pair(vif_name, vif));
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::delete_config_vif(const string& vif_name, string& reason)
-{
-    map<string, Vif>::iterator iter;
-    
-    if (start_config(reason) != XORP_OK)
-	return (XORP_ERROR);
-    
-    // Find the vif
-    iter = _configured_vifs.find(vif_name);
-    if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot delete vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
-	return (XORP_ERROR);
-    }
-    
-    // Delete the vif
-    _configured_vifs.erase(iter);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::add_config_vif_addr(const string& vif_name, const IPvX& addr,
-			     const IPvXNet& subnet, const IPvX& broadcast,
-			     const IPvX& peer, string& reason)
-{
-    map<string, Vif>::iterator iter;
-    
-    if (start_config(reason) != XORP_OK)
-	return (XORP_ERROR);
-    
-    // Find the vif
-    iter = _configured_vifs.find(vif_name);
-    if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot add address to vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
-	return (XORP_ERROR);
-    }
-    
-    Vif* vif = &iter->second;
-    
-    // Test if we have same address
-    if (vif->find_address(addr) != NULL) {
-	reason = c_format("Cannot add address %s to vif %s: "
-			  "already have such address",
-			  cstring(addr), vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
-	return (XORP_ERROR);
-    }
-    
-    // Add the address
-    vif->add_address(addr, subnet, broadcast, peer);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::delete_config_vif_addr(const string& vif_name, const IPvX& addr,
-				string& reason)
-{
-    map<string, Vif>::iterator iter;
-    
-    if (start_config(reason) != XORP_OK)
-	return (XORP_ERROR);
-    
-    // Find the vif
-    iter = _configured_vifs.find(vif_name);
-    if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot delete address from vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
-	return (XORP_ERROR);
-    }
-    
-    Vif* vif = &iter->second;
-    
-    // Test if we have this address
-    if (vif->find_address(addr) == NULL) {
-	reason = c_format("Cannot delete address %s from vif %s: "
-			  "no such address",
-			  cstring(addr), vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
-    }
-    
-    // Delete the address
-    vif->delete_address(addr);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::set_config_vif_flags(const string& vif_name,
-			      bool is_pim_register,
-			      bool is_p2p,
-			      bool is_loopback,
-			      bool is_multicast,
-			      bool is_broadcast,
-			      bool is_up,
-			      string& reason)
-{
-    map<string, Vif>::iterator iter;
-    
-    if (start_config(reason) != XORP_OK)
-	return (XORP_ERROR);
-
-    // Find the vif
-    iter = _configured_vifs.find(vif_name);
-    if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot set flags for vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
-	return (XORP_ERROR);
-    }
-    
-    Vif* vif = &iter->second;
-    
-    vif->set_pim_register(is_pim_register);
-    vif->set_p2p(is_p2p);
-    vif->set_loopback(is_loopback);
-    vif->set_multicast_capable(is_multicast);
-    vif->set_broadcast_capable(is_broadcast);
-    vif->set_underlying_vif_up(is_up);
-    
-    return (XORP_OK);
-}
 
 
 int
 PimNode::set_config_all_vifs_done(string& reason)
 {
-    map<string, Vif>::iterator iter;
+    map<string, Vif>::iterator vif_iter;
     string err;
+    map<string, Vif>& configured_vifs = ProtoNode<PimVif>::configured_vifs();
     
     //
     // Remove vifs that don't exist anymore
@@ -290,7 +44,7 @@ PimNode::set_config_all_vifs_done(string& reason)
 	    continue;
 	if (node_vif->is_pim_register())
 	    continue;		// XXX: don't delete the PIM Register vif
-	if (_configured_vifs.find(node_vif->name()) == _configured_vifs.end()) {
+	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
 	    delete_vif(vif_name, err);
@@ -301,10 +55,10 @@ PimNode::set_config_all_vifs_done(string& reason)
     //
     // Add new vifs, and update existing ones
     //
-    for (iter = _configured_vifs.begin();
-	 iter != _configured_vifs.end();
-	 ++iter) {
-	Vif* vif = &iter->second;
+    for (vif_iter = configured_vifs.begin();
+	 vif_iter != configured_vifs.end();
+	 ++vif_iter) {
+	Vif* vif = &vif_iter->second;
 	Vif* node_vif = vif_find_by_name(vif->name());
 	
 	//

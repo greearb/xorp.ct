@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.15 2003/05/31 07:03:32 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.16 2003/05/31 17:53:37 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -781,50 +781,14 @@ public:
     //
     // Configuration methods
     //
-    /**
-     * Start a set of configuration changes.
-     * 
-     * Note that it may change the node status.
-     * 
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start_config(string& reason);
-
-    /**
-     * End a set of configuration changes.
-     * 
-     * Note that it may change the node status.
-     * 
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		end_config(string& reason);
     
-    int		add_config_vif(const string& vif_name,
-			       uint16_t vif_index,
-			       string& reason);
-    int		delete_config_vif(const string& vif_name,
-				  string& reason);
-    int		add_config_vif_addr(const string& vif_name,
-				    const IPvX& addr,
-				    const IPvXNet& subnet,
-				    const IPvX& broadcast,
-				    const IPvX& peer,
-				    string& reason);
-    int		delete_config_vif_addr(const string& vif_name,
-				       const IPvX& addr,
-				       string& reason);
-    int		set_config_vif_flags(const string& vif_name,
-				     bool is_pim_register,
-				     bool is_p2p,
-				     bool is_loopback,
-				     bool is_multicast,
-				     bool is_broadcast,
-				     bool is_up,
-				     string& reason);
+    /**
+     * Complete the set of vif configuration changes.
+     * 
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
     int		set_config_all_vifs_done(string& reason);
     
     int		set_vif_proto_version(const string& vif_name,
@@ -1067,11 +1031,6 @@ private:
     ConfigParam<bool>		_is_switch_to_spt_enabled;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_interval_sec;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_bytes;
-    
-    //
-    // Config-related state
-    //
-    map<string, Vif>		_configured_vifs;	// Configured vifs
     
     //
     // Status-related state
