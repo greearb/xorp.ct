@@ -17,3 +17,5 @@
 # Set a user-defined keyword as an alias for CVSHeader
 #
 LocalKeyword=XORP=CVSHeader
+
+UseNewInfoFormatStrings=yes
