@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.50 2004/05/06 23:40:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.51 2004/05/07 03:12:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -517,8 +517,13 @@ void
 XrlQueue<A>::start()
 {
     // If we are currently busy don't attempt to send any more XRLs.
+#if	0
     if (busy())
 	return;
+#else
+    if (maximum_number_inflight())
+	return;
+#endif
 
     // Now there are no outstanding XRLs try and send as many of the queued
     // route commands as possible as possible.
@@ -548,9 +553,11 @@ XrlQueue<A>::start()
 	if (sent) {
 	    _flying++;
 	    _xrl_queue.pop_front();
+	    if (maximum_number_inflight())
+		return;
  	    continue;
 	}
-
+	
 	// We expect that the send may fail if the socket buffer is full.
 	// It should therefore be the case that we have some route
 	// adds/deletes in flight. If _flying is zero then something

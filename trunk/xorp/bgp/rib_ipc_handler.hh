@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.27 2004/04/14 19:15:01 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.28 2004/05/06 23:40:29 hodson Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -42,6 +42,9 @@ public:
 
     bool busy();
 private:
+    static const size_t WINDOW = 1;	// Maximum number of XRLs
+					// allowed in flight.
+
     RibIpcHandler *_rib_ipc_handler;
     XrlStdRouter *_xrl_router;
     BGPMain *_bgp;
@@ -58,6 +61,13 @@ private:
 
     deque <Queued> _xrl_queue;
     size_t _flying; //XRLs currently in flight
+
+    /**
+     * Maximum number in flight
+     */
+    inline bool maximum_number_inflight() const {
+	return _flying >= WINDOW;
+    }
 
     /**
      * Start the transmission of XRLs to tbe RIB.
