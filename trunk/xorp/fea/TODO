@@ -1,6 +1,19 @@
 #
-# $XORP: xorp/fea/TODO,v 1.10 2003/08/28 14:15:29 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.11 2003/09/11 23:44:37 pavlin Exp $
 #
+
+* Check whether a returned MAC addresses of an interface is an
+  Ethernet address before attempting to assign it as an Ethernet
+  address.
+
+* When reading data from routing socket or netlink socket
+  (e.g. inside force_read(), make sure that read all dta on that socket
+  even if it is bigger than the pre-allocated buffer).
+  E.g., in case of netlink socket we may need to check
+  the NLM_F_MULTI flag and/or the NLMSG_DONE entry.
+
+* Make sure that we take care of all asynchronous data that pop-up
+  on routing socket or netlink socket.
 
 * Do we need to include <asm/types.h> for Linux, when we include
   <linux/rtnetlink.h> ?
