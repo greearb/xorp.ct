@@ -3,6 +3,7 @@
 \usepackage{times}
 \usepackage{psfig}
 \usepackage{amsmath}
+\usepackage{graphicx}
 \newcommand{\module} {{\em module}\@\xspace}
 \newcommand{\modules} {{\em modules}\@\xspace}
 \newcommand{\finder} {{\em Finder}\@\xspace}
@@ -203,15 +204,14 @@ failure of this process. A XORP process on detecting the loss of the
 \finder must exit. There is one exception to this rule the \xorpsh
 process, this will be discussed later [REF].
 
-
-
 Each process in a XORP router is described and how it should behave
 when another process in the system fails. Processes can explicitly
 register interest in the status of other processes through the
 \finder. If process A is dependent on the state of process B then
 process A must register interest in process B.
 
-The only mechanism that a process should use to determine if 
+The only mechanism that a process should use to determine another
+processes failure is notification from the \finder.
 
 It is conceivable that the \finder could restart and in the same time
 window another monitored process could restart. In which case the
@@ -219,6 +219,21 @@ restarting of the monitored process could be missed. To guard against
 this possible race if the \finder fails or restarts all processes
 should exit. The assumption is that the \finder failing is a very low
 probability event.
+
+Table \ref{failure_table} indicates what action a process should take
+on detecting failure in other processes. The ``(G)'' denotes that the
+process should attempt to exit gracefully. Figure \ref{failure_fig}
+shows the relationship between the various processes. The thick arrows
+should be modelled as a signal sent from a process dying to its
+dependent processes.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{figs/error_dependency.eps}
+    \caption{Process relationship on failure}
+    \label{failure_fig}
+  \end{center}
+\end{figure}
 
 \begin{table}[ht]
 \begin{center}
@@ -250,7 +265,7 @@ OSPF          &  Restart       & -        & -    & -    & -    & -       & -    
 XORPSH        &  Restart       & -        & -    & -    & -    & -       & -    & -    & -    & /      \\\hline
 \end{tabular}
 \end{center}
-\caption{\label{stt}Action to take on detecting process failure}
+\caption{\label{failure_table}Action to take on detecting process failure}
 \end{table}
 
 
