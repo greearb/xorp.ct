@@ -24,6 +24,8 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgp4pathattrtable.hh"
 
+#undef USE_DMALLOC
+
 #ifdef USE_DMALLOC
 #include <dmalloc.h>
 #endif
@@ -132,6 +134,7 @@ static void local_route_table_update()
 	    update.status = UpdateManager::RESTING;
 #ifdef USE_DMALLOC
 	    static unsigned long dmalloc_mark_1 = dmalloc_mark();
+	    dmalloc_message("dump allocated pointers\n");
 	    dmalloc_log_changed(dmalloc_mark_1, 1, 0, 1);
 #endif
 	    // schedule next update
@@ -660,7 +663,8 @@ rows_are_equal(bgp4PathAttrTable_context * lr, bgp4PathAttrTable_context * rr)
 	(lr->bgp4PathAttrIpAddrPrefixLen == rr->bgp4PathAttrIpAddrPrefixLen) &&
 	(lr->bgp4PathAttrIpAddrPrefix == rr->bgp4PathAttrIpAddrPrefix) &&
 	(lr->bgp4PathAttrOrigin == rr->bgp4PathAttrOrigin) &&
-	(lr->bgp4PathAttrASPathSegment == rr->bgp4PathAttrASPathSegment) &&
+	(!memcmp(lr->bgp4PathAttrASPathSegment, rr->bgp4PathAttrASPathSegment,
+		 lr->bgp4PathAttrASPathSegmentLen)) &&
 	(lr->bgp4PathAttrNextHop == rr->bgp4PathAttrNextHop) &&
 	(lr->bgp4PathAttrMultiExitDisc == rr->bgp4PathAttrMultiExitDisc) &&
 	(lr->bgp4PathAttrLocalPref == rr->bgp4PathAttrLocalPref) &&
@@ -669,7 +673,8 @@ rows_are_equal(bgp4PathAttrTable_context * lr, bgp4PathAttrTable_context * rr)
 	(lr->bgp4PathAttrAggregatorAddr == rr->bgp4PathAttrAggregatorAddr) &&
 	(lr->bgp4PathAttrCalcLocalPref == rr->bgp4PathAttrCalcLocalPref) &&
 	(lr->bgp4PathAttrBest == rr->bgp4PathAttrBest) &&
-	(lr->bgp4PathAttrUnknown == rr->bgp4PathAttrUnknown)); 
+	(!memcmp(lr->bgp4PathAttrUnknown, rr->bgp4PathAttrUnknown,
+		 lr->bgp4PathAttrUnknownLen))); 
 }
 
 /****************************************************************************
