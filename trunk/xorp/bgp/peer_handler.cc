@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.7 2003/01/31 00:08:15 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.8 2003/02/06 06:44:33 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -94,7 +94,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     // The way multiprotocol BGP works, the routes from the Withdrawn
     // Routes part of the update packet can only be IPv4 routes.  IPv6
     // withdrawn routes would be in an MP_UNREACH_NLRI attribute.
-    list <BGPUpdateAttrib>::const_iterator wi;
+    BGPUpdateAttribList::const_iterator wi;
     wi = p->wr_list().begin();
     while (wi != p->wr_list().end()) {
 	_plumbing->delete_route(wi->net(), this);
@@ -124,7 +124,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     // The way multiprotocol BGP works, the routes from the NLRI part
     // of the update packet can only be IPv4 routes.  IPv6 withdrawn
     // routes would be in an MP_REACH_NLRI attribute.
-    list <BGPUpdateAttrib>::const_iterator ni;
+    BGPUpdateAttribList::const_iterator ni;
     ni = p->nlri_list().begin();
     while (ni != p->nlri_list().end()) {
 	SubnetRoute<IPv4> msg_route(ni->net(), &pa_list, NULL);

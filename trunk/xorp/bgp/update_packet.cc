@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.15 2003/01/30 04:25:06 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.16 2003/02/06 04:19:22 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,18 +96,15 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
 {
     XLOG_ASSERT( _nlri_list.empty() ||  ! pa_list().empty());
 
-    list <BGPUpdateAttrib>::const_iterator uai;
     list <PathAttribute*>::const_iterator pai;
-    size_t i, wr_len = 0, pa_len = 0, nlri_len = 0;
+    size_t i, pa_len = 0;
+    size_t wr_len = wr_list().wire_size();
+    size_t nlri_len = nlri_list().wire_size();
 
     // compute packet length
 
-    for (uai = wr_list().begin() ; uai != wr_list().end(); ++uai)
-	wr_len += uai->wire_size();
     for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai)
 	pa_len += (*pai)->wire_size();
-    for (uai = nlri_list().begin() ; uai != nlri_list().end(); ++uai)
-	nlri_len += uai->wire_size();
 
     size_t desired_len = MINUPDATEPACKET + wr_len + pa_len + nlri_len;
     if (d != 0)		// XXX have a buffer, check length
@@ -122,18 +119,16 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
 	      (uint32_t)_nlri_list.size(), (uint32_t)len);
     d = basic_encode(len, d);	// allocate buffer and fill header
 
-    // fill withdraw list length XXX (bytes ?)
+    // fill withdraw list length (bytes)
     d[BGP_COMMON_HEADER_LEN] = (wr_len >> 8) & 0xff;
     d[BGP_COMMON_HEADER_LEN + 1] = wr_len & 0xff;
 
     // fill withdraw list
     i = BGP_COMMON_HEADER_LEN + 2;
-    for (uai = wr_list().begin() ; uai != wr_list().end(); ++uai) {
-	uai->copy_out(d+i);
-	i += uai->wire_size();
-    }
+    wr_list().encode(wr_len, d+i);
+    i += wr_len;
 
-    // fill pathattribute length XXX (bytes ?)
+    // fill pathattribute length (bytes)
     d[i++] = (pa_len >> 8) & 0xff;
     d[i++] = pa_len & 0xff;
 
@@ -144,10 +139,8 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     }	
 
     // fill NLRI list
-    for (uai = nlri_list().begin() ; uai != nlri_list().end(); ++uai) {
-	uai->copy_out(d+i);
-	i += uai->wire_size();
-    }	
+    nlri_list().encode(nlri_len, d+i);
+    i += nlri_len;
     return d;
 }
 
@@ -246,11 +239,7 @@ UpdatePacket::str() const
 	      (uint32_t)_wr_list.size(), (uint32_t)pa_list().size(),
 	      (uint32_t)_nlri_list.size());
 
-    list <BGPUpdateAttrib>::const_iterator wi = _wr_list.begin();
-    while (wi != _wr_list.end()) {
-	s = s + " - " + wi->str() + "\n";
-	++wi;
-    }
+    s += _wr_list.str();
 
     list <PathAttribute*>::const_iterator pai = pa_list().begin();
     while (pai != pa_list().end()) {
@@ -258,11 +247,7 @@ UpdatePacket::str() const
 	++pai;
     }
     
-    list <BGPUpdateAttrib>::const_iterator ni = _nlri_list.begin();
-    while (ni != _nlri_list.end()) {
-	s = s + " - " + ni->str() + "\n";
-	++ni;
-    }
+    s += _nlri_list.str();
     return s;
 }
 
@@ -281,28 +266,8 @@ UpdatePacket::operator==(const UpdatePacket& him) const
 {
     debug_msg("compare %s and %s", this->str().c_str(), him.str().c_str());
 
-    //withdrawn routes equals
-    list <BGPUpdateAttrib> temp_wr_list(_wr_list);
-    temp_wr_list.sort();
-    list <BGPUpdateAttrib> temp_wr_list_him(him.wr_list());
-    temp_wr_list_him.sort();
-
-    if (temp_wr_list.size() != temp_wr_list_him.size())
+    if (_wr_list != him.wr_list())
 	return false;
-
-    list <BGPUpdateAttrib>::const_iterator wi = temp_wr_list.begin();
-    list <BGPUpdateAttrib>::const_iterator wi_him = 
-	temp_wr_list_him.begin();
-    while (wi != temp_wr_list.end() && 
-	   wi_him != temp_wr_list_him.end()) {
-	
-	if ( (*wi) == (*wi_him) )  {
-	    ++wi;
-	    ++wi_him;
-	} else {
-	    return false;
-	}
-    }
 
     //path attribute equals
     list <PathAttribute *> temp_att_list(pa_list());
@@ -328,26 +293,8 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     }
 
     //net layer reachability equals
-    list <BGPUpdateAttrib> temp_nlri_list(_nlri_list);
-    temp_nlri_list.sort();
-    list <BGPUpdateAttrib> temp_nlri_list_him(him.nlri_list());
-    temp_nlri_list_him.sort();
-
-    if (temp_nlri_list.size() != temp_nlri_list_him.size())
+    if (_nlri_list != him.nlri_list())
 	return false;
-
-    list <BGPUpdateAttrib>::const_iterator ni = temp_nlri_list.begin();
-    list <BGPUpdateAttrib>::const_iterator ni_him = 
-	temp_nlri_list_him.begin();
-    while (ni != temp_nlri_list.end() && ni_him != temp_nlri_list_him.end()) {
-	
-	if ( (*ni) == (*ni_him) ) {
-	    ++ni;
-	    ++ni_him;
-	} else {
-	    return false;
-	}
-    }
 
     return true;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.15 2003/01/29 20:32:32 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.16 2003/01/29 23:38:12 rizzo Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
@@ -338,7 +338,7 @@ test_withdraw_packet()
 
     UpdatePacket receivedpacket(buf, plen);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
-    list <BGPUpdateAttrib>::const_iterator iter;
+    BGPUpdateAttribList::const_iterator iter;
     iter = receivedpacket.wr_list().begin();
     verbose_log("Withdrawn route: %s n1 %s\n",
 	iter->net().str().c_str(), n1.str().c_str());
@@ -474,7 +474,7 @@ test_announce_packet()
 	   == receivedpacket.wr_list().end());
 
     //check the NLRI
-    list <BGPUpdateAttrib>::const_iterator ni;
+    BGPUpdateAttribList::const_iterator ni;
     ni = receivedpacket.nlri_list().begin();
     verbose_log("NLRI: %s\n", ni->net().str().c_str());
     assert(ni->net() == n1);

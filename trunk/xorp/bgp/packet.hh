@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.11 2003/01/29 22:17:10 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.12 2003/01/29 23:38:12 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -207,9 +207,9 @@ public:
     void add_withdrawn(const BGPUpdateAttrib& wdr);
     void add_pathatt(const PathAttribute& pa);
     void add_nlri(const BGPUpdateAttrib& nlri);
-    const list <BGPUpdateAttrib>& wr_list() const	{ return _wr_list; }
+    const BGPUpdateAttribList& wr_list() const		{ return _wr_list; }
     const list <PathAttribute*>& pa_list() const	{ return _pa_list; }
-    const list <BGPUpdateAttrib>& nlri_list() const	{ return _nlri_list; }
+    const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
     const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
 
     bool big_enough() const;
@@ -221,9 +221,9 @@ protected:
 private:
     // don't allow the use of the default copy constructor
     UpdatePacket(const UpdatePacket& UpdatePacket);
-    list <BGPUpdateAttrib>	_wr_list;
+    BGPUpdateAttribList		_wr_list;
     list <PathAttribute*>	_pa_list;
-    list <BGPUpdateAttrib>	_nlri_list;
+    BGPUpdateAttribList		_nlri_list;
 };
 
 /* **************** BGPNotificationPacket *********************** */

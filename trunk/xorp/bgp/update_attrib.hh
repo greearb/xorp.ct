@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/update_attrib.hh,v 1.2 2003/01/29 20:32:33 rizzo Exp $
+// $XORP: xorp/bgp/update_attrib.hh,v 1.3 2003/02/06 04:19:22 rizzo Exp $
 
 #ifndef __BGP_UPDATE_ATTRIB_HH__
 #define __BGP_UPDATE_ATTRIB_HH__
@@ -20,6 +20,7 @@
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/exceptions.hh"
 #include "exceptions.hh"
+#include <list>
 
 /**
  * Encoding used in BGP update packets to encode prefixes
@@ -82,6 +83,35 @@ public:
 
 protected:
 private:
+};
+
+
+class BGPUpdateAttribList : public list <BGPUpdateAttrib> {
+public:
+    typedef list <BGPUpdateAttrib>::const_iterator const_iterator;
+    typedef list <BGPUpdateAttrib>::iterator iterator;
+
+    size_t wire_size() const;
+    uint8_t *encode(size_t &l, uint8_t *buf = 0) const;
+    void decode(const uint8_t *d, size_t len)
+	throw(CorruptMessage);
+    string str() const;
+
+    // XXX this needs to be fixed, we do not want to sort all the times.
+    bool operator== (const BGPUpdateAttribList& other)	{
+	if (size() != other.size())
+	    return false;
+        BGPUpdateAttribList me(*this);
+        BGPUpdateAttribList him(other);
+	me.sort();
+	him.sort();
+ 	const_iterator i, j;
+	// only check one iterator as we know length is the same
+	for (i=me.begin(), j=him.begin(); i!=me.end(); ++i, ++j)
+	    if ( *i != *j )
+		return false;
+	return true;
+    }
 };
 
 #endif // __BGP_UPDATE_ATTRIB_HH__

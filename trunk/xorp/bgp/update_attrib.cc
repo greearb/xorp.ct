@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.2 2003/01/29 20:32:32 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -22,6 +22,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "libxorp/debug.h"
+#include "packet.hh"
+#include <set>
 
 BGPUpdateAttrib::BGPUpdateAttrib(const uint8_t *d)
 {
@@ -50,4 +52,76 @@ BGPUpdateAttrib::copy_out(uint8_t *d) const
 	d[3] = (a >> 8) & 0xff;
     if (d[0] > 24)
 	d[4] = a & 0xff;
+}
+
+size_t
+BGPUpdateAttribList::wire_size() const
+{
+    size_t len = 0;
+
+    for (const_iterator uai = begin() ; uai != end(); ++uai)
+        len += uai->wire_size();
+    debug_msg("BGPUpdateAttribList::wire_size %p is %d (list size %u)\n",
+	this, len, (uint32_t)size());
+    return len;
+}
+
+uint8_t *
+BGPUpdateAttribList::encode(size_t &l, uint8_t *d) const
+{
+    size_t want = wire_size();
+    if (d != 0) {       // have a buffer, check length
+        // XXX this should become an exception
+        assert (l >= want);
+    } else
+	d = new uint8_t[want];
+    l = want;
+
+    size_t i=0;
+    for (const_iterator uai = begin() ; uai != end(); ++uai) {
+        uai->copy_out(d+i);
+        i += uai->wire_size();
+    }
+    return d;
+}
+
+#if 0
+void
+BGPUpdateAttribList::add(const BGPUpdateAttrib &x)
+{
+	// XXX fill it up
+}
+#endif
+
+void
+BGPUpdateAttribList::decode(const uint8_t *d, size_t len)
+	throw(CorruptMessage)
+{
+    clear();
+    set <IPv4Net> x_set;
+
+    while (len >0 && len >= BGPUpdateAttrib::size(d)) {
+        BGPUpdateAttrib wr(d);
+        len -= BGPUpdateAttrib::size(d);
+        d += BGPUpdateAttrib::size(d);
+        if (x_set.find(wr.net()) == x_set.end()) {
+            push_back(wr);
+            x_set.insert(wr.net());
+        } else
+            XLOG_WARNING(("Received duplicate " + wr.str() +
+                       " in update message\n").c_str());
+    }
+    if (len != 0)
+        xorp_throw(CorruptMessage,
+                   c_format("leftover bytes %u", (uint32_t)len),
+                   UPDATEMSGERR, ATTRLEN);
+}
+
+string
+BGPUpdateAttribList::str() const
+{
+    string s = "";
+    for (const_iterator i = begin(); i != end(); ++i)
+        s += " - " + i->str() + "\n";
+    return s;
 }
