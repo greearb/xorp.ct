@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.1 2003/03/31 03:46:48 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.2 2003/03/31 03:50:59 pavlin Exp $"
 
 
 //
@@ -79,7 +79,8 @@ Mld6igmpVif::other_querier_timer_timeout()
 		TimeVal(IGMP_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
-    
+
+#ifdef HAVE_IPV6    
     if (proto_is_mld6()) {
 	// Now I am the querier. Send a general membership query.
 	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
@@ -92,6 +93,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 		TimeVal(MLD6_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
+#endif // HAVE_IPV6
 }
 
 /**
