@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.12 2004/11/18 14:25:28 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.13 2004/11/18 14:39:57 bms Exp $"
 
 #include "xrl_fti.hh"
 
@@ -483,7 +483,7 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
     // If FIB updates were requested by the client, then send notification
     // of a route being added or deleted.
     //
-    if (_send_updates) {
+    if (_send_updates && !fte.is_unresolved()) {
 	if (!fte.is_deleted()) {
 	    // Send notification of a route being added
 	    success = _xftm.send_fib_client_add_route(_target_name, fte);
