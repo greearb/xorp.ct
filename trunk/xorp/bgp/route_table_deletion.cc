@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.15 2004/05/14 18:30:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.16 2004/05/15 15:12:16 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -174,7 +174,15 @@ template<class A>
 void
 DeletionTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
-    this->_parent->route_used(rt, in_use);
+    //either we have this route, in which case we process this
+    //locally, or we don't, in which case we pass it upstream. Not
+    //both.
+    typename BgpTrie<A>::iterator iter = _route_table->lookup_node(rt->net());
+    if (iter != _route_table->end()) {
+	iter.payload().set_in_use(in_use);
+    } else {
+	this->_parent->route_used(rt, in_use);
+    }
 }
 
 template<class A>
