@@ -35,7 +35,7 @@ the web server that looks in /usr/local/www/data/xorp-test for
 content.  If you check out a copy of xorp there using:
 
   $ cd /usr/local/www/data
-  $ cvs -d ext:xorpc.icir.org:/usr/local/www/data/cvs co -d xorp-test www
+  $ cvs -d :ext:xorpc.icir.org:/usr/local/www/data/cvs co -d xorp-test www
 
 You can then make you changes to html_src and rebuild the pages with
 gmake (and validate them with 'gmake check').  Later in this document
