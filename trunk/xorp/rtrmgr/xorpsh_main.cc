@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.15 2003/09/24 16:26:32 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.16 2003/09/25 00:54:10 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -495,12 +495,14 @@ main(int argc, char *argv[])
     }
     hostname[MAXHOSTNAMELEN - 1] = '\0';
 
-    string IPCname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
+    string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
 
-    XorpShell xorpsh(IPCname, xorp_config_root_dir(), template_dir, xrl_dir);
-
-    // this doesn't return until we're done
-    xorpsh.run();
+    try {
+	XorpShell xorpsh(xname, xorp_binary_root_dir(), template_dir, xrl_dir);
+	xorpsh.run();
+    } catch (...) {
+	xorp_catch_standard_exceptions();
+    }
 
     //
     // Gracefully stop and exit xlog
