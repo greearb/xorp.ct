@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.9 2004/02/20 21:19:11 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.10 2004/02/21 00:34:05 hodson Exp $"
 
 #include <set>
 
@@ -640,8 +640,8 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	rval |= run_all_test_cases<IPv6>();
-	// rval = run_all_test_cases<IPv4>();
+	//	rval |= run_all_test_cases<IPv6>();
+	rval = run_all_test_cases<IPv4>();
 
 
     } catch (...) {
