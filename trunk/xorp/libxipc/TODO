@@ -1,12 +1,5 @@
-Finder -> Xrl protocol selection and negotiation.
+o Rework the xrl parser related routines to make them more akin to the
+  parsing capabilities of the python scripts used to generate XRL
+  interfaces.
 
-Finder -> Add support for re-mapping Xrl's.
-
-Xrl/Finder -> Interface specification and checking.
-
-Xrl Parsing -> Lexification.  Current method add hock.
-
-Xrl Extractor -> Spit out Xrl's from a text file / string.
-
-Xrl Converters -> Presentation <--> Spaceless
-
+o Add support for pipelining to Xrl protocol families.
