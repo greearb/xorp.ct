@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/internal_message.hh,v 1.4 2003/03/10 23:19:58 hodson Exp $
+// $XORP: xorp/bgp/internal_message.hh,v 1.5 2004/05/07 09:23:56 mjh Exp $
 
 #ifndef __BGP_INTERNAL_MESSAGES_HH__
 #define __BGP_INTERNAL_MESSAGES_HH__
@@ -63,21 +63,6 @@ public:
 
     uint32_t genid() const { return _genid; }
 
-    inline bool has_igp_metric() const {return _has_igp_metric;}
-    inline uint32_t igp_metric() const {return _igp_metric;}
-    inline void set_igp_metric(uint32_t metric) const
-    {
-	_igp_metric = metric;
-	_has_igp_metric = true;
-    }
-
-    inline void clone_igp_metric(const InternalMessage<A>& them) 
-    {
-	if (them.has_igp_metric()) {
-	    set_igp_metric(them.igp_metric());
-	}
-    }
-
     // This is a hack to override const in DecisionTable.
     void force_clear_push() const { _push = false; }
 
@@ -123,13 +108,6 @@ private:
      * originates from a previous peering that has now gone down.
      */
     bool _from_previous_peering;
-
-    /**
-     * igp_metric is added by the DecisionTable so that downsteam
-     * tables can know what metric DecisionTable used.
-     */
-    mutable uint32_t _igp_metric;
-    mutable bool _has_igp_metric;
 };
 
 #endif // __BGP_INTERNAL_MESSAGES_HH__
