@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.18 2004/03/24 19:14:05 atanu Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.19 2004/03/27 23:28:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -142,6 +142,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = ifm->ifm_index;
     string if_name;
+    bool is_newlink = false;	// True if really a new link
     
     debug_msg("%p index %d RTM_IFINFO\n", ifm, if_index);
     
@@ -182,18 +183,23 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	    XLOG_FATAL("Could not find IfTreeInterface named %s",
 		       if_name.c_str());
 	}
+	if (fi->is_marked(IfTreeItem::CREATED))
+	    is_newlink = true;
 
 	//
 	// Set the physical interface index for the interface
 	//
-	fi->set_pif_index(if_index);
+	if (is_newlink || (if_index != fi->pif_index()))
+	    fi->set_pif_index(if_index);
 
 	//
-	// Get the flags
+	// Set the flags
 	//
-	int flags = ifm->ifm_flags;
-	fi->set_if_flags(flags);
-	fi->set_enabled(flags & IFF_UP);
+	unsigned int flags = ifm->ifm_flags;
+	if (is_newlink || (flags != fi->if_flags())) {
+	    fi->set_if_flags(flags);
+	    fi->set_enabled(flags & IFF_UP);
+	}
 	debug_msg("enabled: %s\n", fi->enabled() ? "true" : "false");
 	
 	// XXX: vifname == ifname on this platform
@@ -206,16 +212,19 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	//
 	// Set the physical interface index for the vif
 	//
-	fv->set_pif_index(if_index);
+	if (is_newlink || (if_index != fv->pif_index()))
+	    fv->set_pif_index(if_index);
 	
 	//
 	// Set the vif flags
 	//
-	fv->set_enabled(fi->enabled() && (flags & IFF_UP));
-	fv->set_broadcast(flags & IFF_BROADCAST);
-	fv->set_loopback(flags & IFF_LOOPBACK);
-	fv->set_point_to_point(flags & IFF_POINTOPOINT);
-	fv->set_multicast(flags & IFF_MULTICAST);
+	if (is_newlink || (flags != fi->if_flags())) {
+	    fv->set_enabled(fi->enabled() && (flags & IFF_UP));
+	    fv->set_broadcast(flags & IFF_BROADCAST);
+	    fv->set_loopback(flags & IFF_LOOPBACK);
+	    fv->set_point_to_point(flags & IFF_POINTOPOINT);
+	    fv->set_multicast(flags & IFF_MULTICAST);
+	}
 	debug_msg("vif enabled: %s\n", fv->enabled() ? "true" : "false");
 	debug_msg("vif broadcast: %s\n", fv->broadcast() ? "true" : "false");
 	debug_msg("vif loopback: %s\n", fv->loopback() ? "true" : "false");
@@ -301,16 +310,20 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     // Add the interface (if a new one)
     //
     ifc.map_ifindex(if_index, if_name);
-    it.add_if(if_name);
+    if (it.get_if(if_name) == it.ifs().end()) {
+	it.add_if(if_name);
+	is_newlink = true;
+    }
     IfTreeInterface& fi = it.get_if(if_name)->second;
 
     //
     // Set the physical interface index for the interface
     //
-    fi.set_pif_index(if_index);
+    if (is_newlink || (if_index != fi.pif_index()))
+	fi.set_pif_index(if_index);
 
     //
-    // Get the MAC address
+    // Set the MAC address
     //
     do {
 	if (sdl->sdl_type == IFT_ETHER) {
@@ -318,7 +331,9 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 		struct ether_addr ea;
 		memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
 		       sdl->sdl_alen);
-		fi.set_mac(EtherMac(ea));
+		EtherMac ether_mac(ea);
+		if (is_newlink || (ether_mac != EtherMac(fi.mac())))
+		    fi.set_mac(ether_mac);
 		break;
 	    } else if (sdl->sdl_alen != 0) {
 		XLOG_ERROR("Address size %d uncatered for interface %s",
@@ -344,7 +359,9 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	    } else {
 		struct ether_addr ea;
 		memcpy(&ea, ifridx.ifr_hwaddr.sa_data, sizeof(ea));
-		fi.set_mac(EtherMac(ea));
+		EtherMac ether_mac(ea);
+		if (is_newlink || (ether_mac != EtherMac(fi.mac())))
+		    fi.set_mac(ether_mac);
 		close(s);
 		break;
 	    }
@@ -357,36 +374,44 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     debug_msg("MAC address: %s\n", fi.mac().str().c_str());
     
     //
-    // Get the MTU
+    // Set the MTU
     //
-    fi.set_mtu(ifm->ifm_data.ifi_mtu);
+    unsigned int mtu = ifm->ifm_data.ifi_mtu;
+    if (is_newlink || (mtu != fi.mtu()))
+	fi.set_mtu(mtu);
     debug_msg("MTU: %d\n", fi.mtu());
     
     //
-    // Get the flags
+    // Set the flags
     //
-    int flags = ifm->ifm_flags;
-    fi.set_if_flags(flags);
-    fi.set_enabled(flags & IFF_UP);
+    unsigned int flags = ifm->ifm_flags;
+    if (is_newlink || (flags != fi.if_flags())) {
+	fi.set_if_flags(flags);
+	fi.set_enabled(flags & IFF_UP);
+    }
     debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
     
     // XXX: vifname == ifname on this platform
-    fi.add_vif(if_name);
+    if (is_newlink)
+	fi.add_vif(if_name);
     IfTreeVif& fv = fi.get_vif(if_name)->second;
     
     //
     // Set the physical interface index for the vif
     //
-    fv.set_pif_index(if_index);
+    if (is_newlink || (if_index != fv.pif_index()))
+	fv.set_pif_index(if_index);
     
     //
     // Set the vif flags
     //
-    fv.set_enabled(fi.enabled() && (flags & IFF_UP));
-    fv.set_broadcast(flags & IFF_BROADCAST);
-    fv.set_loopback(flags & IFF_LOOPBACK);
-    fv.set_point_to_point(flags & IFF_POINTOPOINT);
-    fv.set_multicast(flags & IFF_MULTICAST);
+    if (is_newlink || (flags != fi.if_flags())) {
+	fv.set_enabled(fi.enabled() && (flags & IFF_UP));
+	fv.set_broadcast(flags & IFF_BROADCAST);
+	fv.set_loopback(flags & IFF_LOOPBACK);
+	fv.set_point_to_point(flags & IFF_POINTOPOINT);
+	fv.set_multicast(flags & IFF_MULTICAST);
+    }
     debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
     debug_msg("vif broadcast: %s\n", fv.broadcast() ? "true" : "false");
     debug_msg("vif loopback: %s\n", fv.loopback() ? "true" : "false");
