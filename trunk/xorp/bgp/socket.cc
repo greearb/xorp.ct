@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.15 2004/06/10 22:40:36 hodson Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.16 2004/08/06 01:41:17 bms Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -112,8 +112,7 @@ Socket::init_sockaddr(struct sockaddr_in *name,
 
 /* **************** BGPSocketClient - PUBLIC METHODS *********************** */
 
-SocketClient::SocketClient(const Iptuple& iptuple, EventLoop& e,
-    bool md5sig = false)
+SocketClient::SocketClient(const Iptuple& iptuple, EventLoop& e, bool md5sig)
     : Socket(iptuple, e), _md5sig(md5sig)
 {
     debug_msg("SocketClient constructor called\n");
