@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.11 2002/12/06 18:45:15 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.1.1.1 2002/12/11 23:55:14 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . $CONFIG
@@ -26,6 +26,28 @@ post_log()
     ${POST} $MSGFILE
 
     rm -f ${FILTFILE} ${MSGFILE}
+}
+
+#
+# init_log_header <file> <host>
+#
+init_log_header()
+{
+    local HEADER RHOST NOW SINFO CINFO
+    HEADER=$1
+    RHOST=$2
+    NOW=`date "+%Y-%m-%d %H:%M:%S %Z"`
+    SINFO=`ssh -n ${RHOST} 'uname -s -r'`
+    CINFO=`ssh -n ${RHOST} 'gcc -v 2>&1' | grep 'version'`
+    cat >${HEADER} <<EOF
+-------------------------------------------------------------------------------
+Remote build on: ${RHOST}
+Start time:	 ${NOW}
+System Info:	 ${SINFO}
+Compiler Info:	 ${CINFO}
+-------------------------------------------------------------------------------
+
+EOF
 }
 
 extoll()
@@ -54,7 +76,8 @@ run_tinderbox() {
     for i in $REMOTEHOSTS ; do
 	RHOST=`scp_path_host $i`
 	DIR=`scp_path_directory $i`
-	ERRFILE=${ROOTDIR}/${RHOST}
+	ERRFILE="${ROOTDIR}/${RHOST}"
+	HEADER="${ERRFILE}.header"
 
 	if [ "${DIR}" = "${RHOST}" -o -z "${DIR}" ] ; then
 	    DIR="."
@@ -67,22 +90,16 @@ run_tinderbox() {
 	    continue
 	fi
 
-	echo "Remote build ${RHOST}" > ${ERRFILE}
-	echo "System Info:" >>${ERRFILE}
-	ssh -n ${RHOST} 'uname -a && gcc -v' >>${ERRFILE} 2>&1
-	echo "Output:" >>${ERRFILE}
+	init_log_header ${HEADER} ${RHOST}
 
+	cp ${HEADER} ${ERRFILE}
 	ssh -n ${RHOST} ${DIR}/scripts/build_xorp.sh >>${ERRFILE} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp ${RHOST} "remote build failed"
 	    continue
 	fi
 
-	echo "Remote build check ${RHOST}" > ${ERRFILE}
-	echo "System Info:" >>${ERRFILE}
-	ssh -n ${RHOST} 'uname -a && gcc -v' >>${ERRFILE} 2>&1
-	echo "Output:" >>${ERRFILE}
-
+	cp ${HEADER} ${ERRFILE}
 	ssh -n ${RHOST} ${DIR}/scripts/build_xorp.sh check >>${ERRFILE} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp ${RHOST} "remote check failed"
@@ -112,3 +129,4 @@ fi
 
 checkout
 run_tinderbox
+
