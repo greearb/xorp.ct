@@ -12,18 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.16 2004/09/11 01:28:18 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.17 2004/09/13 20:37:48 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
 
 
+#include "iftree.hh"
+
 class IfConfig;
-class IfTree;
-class IfTreeInterface;
-class IfTreeVif;
-class IfTreeAddr4;
-class IfTreeAddr6;
 
 class IfConfigSet {
 public:
@@ -108,6 +105,7 @@ protected:
      * @param if_index the interface index.
      * @param flags the flags to set on the interface.
      * @param is_up if true, the interface is UP, otherwise is DOWN.
+     * @param is_deleted if true, the interface is deleted.
      * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -115,6 +113,7 @@ protected:
 				 uint16_t if_index,
 				 uint32_t flags,
 				 bool is_up,
+				 bool is_deleted,
 				 string& errmsg) = 0;
 
     /**
@@ -125,6 +124,7 @@ protected:
      * @param if_index the interface index.
      * @param flags the flags to set on the vif.
      * @param is_up if true, the vif is UP, otherwise is DOWN.
+     * @param is_deleted if true, the vif is deleted.
      * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -133,6 +133,7 @@ protected:
 			   uint16_t if_index,
 			   uint32_t flags,
 			   bool is_up,
+			   bool is_deleted,
 			   string& errmsg) = 0;
 
     /**
@@ -265,12 +266,14 @@ private:
 				 uint16_t if_index,
 				 uint32_t flags,
 				 bool is_up,
+				 bool is_deleted,
 				 string& errmsg);
     virtual int config_vif(const string& ifname,
 			   const string& vifname,
 			   uint16_t if_index,
 			   uint32_t flags,
 			   bool is_up,
+			   bool is_deleted,
 			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
@@ -330,12 +333,14 @@ private:
 				 uint16_t if_index,
 				 uint32_t flags,
 				 bool is_up,
+				 bool is_deleted,
 				 string& errmsg);
     virtual int config_vif(const string& ifname,
 			   const string& vifname,
 			   uint16_t if_index,
 			   uint32_t flags,
 			   bool is_up,
+			   bool is_deleted,
 			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
@@ -418,12 +423,14 @@ private:
 				 uint16_t if_index,
 				 uint32_t flags,
 				 bool is_up,
+				 bool is_deleted,
 				 string& errmsg);
     virtual int config_vif(const string& ifname,
 			   const string& vifname,
 			   uint16_t if_index,
 			   uint32_t flags,
 			   bool is_up,
+			   bool is_deleted,
 			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,

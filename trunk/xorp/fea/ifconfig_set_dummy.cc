@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.11 2004/09/11 01:28:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.12 2004/09/13 20:37:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -135,16 +135,20 @@ IfConfigSetDummy::config_interface(const string& ifname,
 				   uint16_t if_index,
 				   uint32_t flags,
 				   bool is_up,
+				   bool is_deleted,
 				   string& errmsg)
 {
     debug_msg("config_interface "
-	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s)\n",
-	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false");
+	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
+	      "is_deleted = %s)\n",
+	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false",
+	      (is_deleted)? "true" : "false");
 
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(flags);
     UNUSED(is_up);
+    UNUSED(is_deleted);
     UNUSED(errmsg);
 
     return (XORP_OK);
@@ -156,19 +160,22 @@ IfConfigSetDummy::config_vif(const string& ifname,
 			     uint16_t if_index,
 			     uint32_t flags,
 			     bool is_up,
+			     bool is_deleted,
 			     string& errmsg)
 {
     debug_msg("config_vif "
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s)\n",
+	      "is_up = %s is_deleted = %s)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, flags,
-	      (is_up)? "true" : "false");
+	      (is_up)? "true" : "false",
+	      (is_deleted)? "true" : "false");
 
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
     UNUSED(flags);
     UNUSED(is_up);
+    UNUSED(is_deleted);
     UNUSED(errmsg);
 
     return (XORP_OK);

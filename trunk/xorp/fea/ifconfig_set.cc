@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.13 2004/09/11 01:28:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.14 2004/09/13 20:37:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -224,7 +224,8 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	    break;		// XXX: nothing changed
 	new_up = (new_flags & IFF_UP)? true : false;
 
-	if (config_interface(i.ifname(), if_index, new_flags, new_up, errmsg)
+	if (config_interface(i.ifname(), if_index, new_flags, new_up,
+			     deleted, errmsg)
 	    < 0) {
 	    errmsg = c_format("Failed to configure interface: %s",
 			      errmsg.c_str());
@@ -369,7 +370,7 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 	new_up = (new_flags & IFF_UP)? true : false;
 
 	if (config_vif(i.ifname(), v.vifname(), if_index, new_flags, new_up,
-		       errmsg)
+		       deleted, errmsg)
 	    < 0) {
 	    errmsg = c_format("Failed to configure vif: %s", errmsg.c_str());
 	    ifc().er().vif_error(i.ifname(), v.vifname(), errmsg);
