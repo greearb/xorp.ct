@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.31 2004/11/10 00:39:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.32 2004/11/27 04:14:04 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -88,23 +88,23 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile, IfTree& iftree,
 	XLOG_FATAL("No primary mechanism to get forwarding table entries "
 		   "from the underlying system");
     }
-    if (_ftic_entry_set_primary) {
+    if (_ftic_entry_set_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to set forwarding table entries "
 		   "into the underlying system");
     }
-    if (_ftic_entry_observer_primary) {
+    if (_ftic_entry_observer_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to observe forwarding table entries "
 		   "from the underlying system");
     }
-    if (_ftic_table_get_primary) {
+    if (_ftic_table_get_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to get the forwarding table "
 		   "information from the underlying system");
     }
-    if (_ftic_table_set_primary) {
+    if (_ftic_table_set_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to set the forwarding table "
 		   "information into the underlying system");
     }
-    if (_ftic_table_observer_primary) {
+    if (_ftic_table_observer_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to observe the forwarding table "
 		   "information from the underlying system");
     }
