@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.1 2002/11/15 00:09:04 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -97,6 +97,14 @@ interface ifmgr/0.1 {
 
 	delete_address4 ? tid:u32 & ifname:txt & vif:txt & address:ipv4
 
+	set_address_enabled4 ? tid:u32					      \
+			     & ifname:txt				      \
+			     & vif:txt					      \
+			     & address:ipv4				      \
+			     & enabled:bool 
+
+	get_address_enabled4 ? ifname:txt & vif:txt & address:ipv4 -> enabled:bool
+
 	set_prefix4 ? tid:u32 						      \
 		    & ifname:txt					      \
 		    & vif:txt						      \
@@ -124,6 +132,14 @@ interface ifmgr/0.1 {
 			& ifname:txt					      \
 			& vif:txt					      \
 			& address:ipv6
+
+	set_address_enabled6 ? tid:u32					      \
+			     & ifname:txt				      \
+			     & vif:txt					      \
+			     & address:ipv6				      \
+			     & enabled:bool 
+
+	get_address_enabled6 ? ifname:txt & vif:txt & address:ipv6 -> enabled:bool
 
 	set_prefix6 ? tid:u32						      \
 		    & ifname:txt					      \
