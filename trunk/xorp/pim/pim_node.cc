@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.26 2003/08/12 15:50:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.27 2003/08/12 18:24:10 pavlin Exp $"
 
 
 //
@@ -406,7 +406,7 @@ PimNode::node_status(string& reason_msg)
 
 /**
  * PimNode::add_vif:
- * @vif: Information about new PimVif to install.
+ * @vif: Information about the new PimVif to install.
  * @error_msg: The error message (if error).
  * 
  * Install a new PIM vif.

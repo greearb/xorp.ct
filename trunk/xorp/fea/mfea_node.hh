@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.12 2003/08/07 00:27:21 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.13 2003/09/23 03:35:38 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -117,7 +117,7 @@ public:
     /**
      * Install a new MFEA vif.
      * 
-     * @param vif vif information about new MfeaVif to install.
+     * @param vif vif information about the new MfeaVif to install.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */

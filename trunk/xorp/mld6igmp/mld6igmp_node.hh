@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.10 2003/08/06 18:51:17 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.11 2003/08/07 00:35:38 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -114,7 +114,7 @@ public:
     /**
      * Install a new MLD/IGMP vif.
      * 
-     * @param vif vif information about new Mld6igmpVif to install.
+     * @param vif vif information about the new Mld6igmpVif to install.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
