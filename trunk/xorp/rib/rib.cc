@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.13 2003/05/24 23:35:26 mjh Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.14 2003/07/03 06:59:38 pavlin Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -510,7 +510,7 @@ RIB<A>::add_route(const string& tablename,
 
     // Find the vif so we can see if the nexthop is a peer.  first
     // lookup the nexthop addr, and see it's the subnet is a directly
-    // conencted one.
+    // connected one.
     const IPRouteEntry<A> *re = _final_table->lookup_route(nexthop_addr);
     if (re != NULL) {
 	// We found a route.  Is the subnet directly connected?
