@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.7 2004/02/19 04:33:12 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.8 2004/02/19 16:12:29 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -312,29 +312,29 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
     SocketUserSendRecvEvent<A>* cmd =
 	new SocketUserSendRecvEvent<A>(owner().tgt_name(), sockid());
 
-    struct sockaddr sa;
-    socklen_t sa_len = sizeof(sa);
+    typename A::SockAddrType sin;
+    socklen_t sin_len = sizeof(sin);
+    sockaddr* sa = reinterpret_cast<sockaddr*>(&sin);
 
     // XXX buffer is overprovisioned for normal case and size hard-coded...
     // It get's resized a little later on to amount of data read.
     cmd->data().resize(64000);
     ssize_t rsz = recvfrom(fd, &cmd->data()[0], cmd->data().size(), 0,
-			   &sa, &sa_len);
+			   sa, &sin_len);
 
     if (rsz < 0) {
 	delete cmd;
 	ref_ptr<XrlSocketCommandBase> ecmd = new
-	    SocketUserSendErrorEvent<IPv4>(owner().tgt_name(),
-					   sockid(), strerror(errno), false);
+	    SocketUserSendErrorEvent<A>(owner().tgt_name(),
+					sockid(), strerror(errno), false);
 	owner().enqueue(ecmd);
 	return;
     }
 
     cmd->data().resize(rsz);
 
-    XLOG_ASSERT(sa.sa_family == A::af());
-    cmd->set_source_host(sa);
-    cmd->set_source_port(sockaddr_ip_port<A>(sa));
+    XLOG_ASSERT(sa->sa_family == A::af());
+    cmd->set_source(sin, sin_len);
 
     owner().enqueue(cmd);
 }

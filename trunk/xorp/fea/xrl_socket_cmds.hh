@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.1 2003/12/17 00:04:49 hodson Exp $
+// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.2 2004/02/19 04:33:12 hodson Exp $
 
 #ifndef __FEA_XRL_SOCKET_CMDS_HH__
 #define __FEA_XRL_SOCKET_CMDS_HH__
@@ -51,6 +51,9 @@ public:
     {}
     inline void set_source_host(const A& host)		{ _src_host = host; }
     inline void set_source_port(uint16_t port)		{ _src_port = port; }
+    inline void set_source(const typename A::SockAddrType& sa,
+			   socklen_t salen);
+
     inline vector<uint8_t>& data()			{ return _data; }
     inline const vector<uint8_t>& data() const		{ return _data; }
 
@@ -63,6 +66,28 @@ private:
     uint32_t		_src_port;
     vector<uint8_t>	_data;
 };
+
+template <>
+void
+SocketUserSendRecvEvent<IPv4>::set_source(const IPv4::SockAddrType& sin,
+					  socklen_t sin_len)
+{
+    XLOG_ASSERT(sin_len == sizeof(sockaddr_in));
+
+    _src_host = IPv4(sin);
+    _src_port = ntohs(sin.sin_port);
+}
+
+template <>
+void
+SocketUserSendRecvEvent<IPv6>::set_source(const IPv6::SockAddrType& sin6,
+					  socklen_t sin6_len)
+{
+    XLOG_ASSERT(sin6_len == sizeof(sockaddr_in6));
+
+    _src_host = IPv6(sin6);
+    _src_port = ntohs(sin6.sin6_port);
+}
 
 template <typename A>
 class SocketUserSendConnectEvent : public XrlSocketCommandBase {
