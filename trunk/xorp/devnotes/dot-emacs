@@ -1,4 +1,6 @@
-;; $Id$
+;;
+;; $XORP$
+;;
 
 ;; These settings can be added to your .emacs file to give standard
 ;; xorp developer emacs settings.  Please update if there are features

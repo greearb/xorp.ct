@@ -1,6 +1,9 @@
+#
+# $XORP$
+#
+
 			Finder Protocol (v0.0)
 
-$Id$
 
 The finder is a centralized service location application.  It allows
 XORP modules to determine how to talk to the different hardware and
