@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/config7.xt,v 1.1 2002/11/23 05:59:40 pavlin Exp $
+# $XORP: other/testbed/config/config7.xt,v 1.1.1.1 2002/12/11 23:55:13 hodson Exp $
 #
 # Shared testbed configuration:
 #
@@ -36,7 +36,7 @@ kernel[/home/xorpc/u2/homes/pavlin/kernel] = xorp1, xorp2, xorp3
 
 #
 # Pavlin's Linux multicast kernel
-kernel[/home/xorpc/u2/homes/pavlin/xorp4.nb] = xorp4
+kernel[/home/xorpc/u2/homes/pavlin/kernel.linux.xorp4] = xorp4
 
 #
 # Petros's kernel
