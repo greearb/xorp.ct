@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.64 2003/12/10 22:24:49 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.65 2004/02/22 03:18:05 pavlin Exp $
 #
+
+* IMPL:
+  Apply the following optimization to stop generating PIM Assert packets
+  if there are no more PIM neighbors on an interface:
+  "If I am in Assert Winner state and if
+  Assert Timer Expires and if there are no more PIM neighbors, then
+  the assert state-machine should transitinto NoInfo state".
 
 * BSR SPEC:
   Change all "sec" to "secs".
