@@ -531,8 +531,9 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
 [separator]-------------------------------------
-[comment] ONE EVENT RUN
+[comment] LET EVENT QUEUE DRAIN
 [comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -545,9 +546,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
-[separator]-------------------------------------
-[comment] TWO EVENT RUN
-[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -560,17 +558,29 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GOES DOWN
 [** TABLE DebugTable-D1 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
-[** TABLE DebugTable-D3 **]
-[PUSH]
 [** TABLE DebugTable-D1 **]
 [DELETE]
 SubnetRoute:
@@ -594,6 +604,15 @@ SubnetRoute:
 [** TABLE DebugTable-D3 **]
 [PUSH]
 [** TABLE DebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
@@ -761,7 +780,7 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
 [separator]-------------------------------------
-[comment] ONE EVENT RUN
+[comment] LET EVENT QUEUE DRAIN
 [comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -775,17 +794,50 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GOES DOWN
 [** TABLE DebugTable-D1 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
-[** TABLE DebugTable-D3 **]
-[PUSH]
 [** TABLE DebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
@@ -799,6 +851,15 @@ SubnetRoute:
 [** TABLE DebugTable-D3 **]
 [PUSH]
 [** TABLE DebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
@@ -1078,8 +1139,10 @@ SubnetRoute:
 	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
-[comment] ONE EVENT RUN
+[comment] LET EVENT QUEUE DRAIN
 [comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [PUSH]
 [** TABLE DebugTable-D3 **]
@@ -1094,9 +1157,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
-[separator]-------------------------------------
-[comment] ONE EVENT RUN
-[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -1109,9 +1169,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
-[separator]-------------------------------------
-[comment] TWO EVENT RUN
-[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -1119,6 +1176,18 @@ SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
@@ -1138,6 +1207,16 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.0.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.5
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] EXPECT RECEIVED BY PEER 1
@@ -1151,35 +1230,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-[separator]-------------------------------------
-[comment] LET EVENT QUEUE DRAIN
-[comment] EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3
-[comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3
-[** TABLE DebugTable-D3 **]
-[ADD]
-SubnetRoute:
-  Net: 1.0.0.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.5
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
-[** TABLE DebugTable-D3 **]
-[PUSH]
-[** TABLE DebugTable-D3 **]
-[ADD]
-PUSH flag is set
-SubnetRoute:
-  Net: 1.0.4.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.4
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -1190,8 +1240,10 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
@@ -1406,8 +1458,9 @@ SubnetRoute:
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
-[comment] ONE EVENT RUN
+[comment] LET EVENT QUEUE DRAIN
 [comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [PUSH]
 [** TABLE DebugTable-D3 **]
@@ -1422,9 +1475,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
-[separator]-------------------------------------
-[comment] TWO EVENT RUN
-[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -1437,11 +1487,40 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.4
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] EXPECT REPLACE AT PEER 1
 [comment] EXPECT REPLACE AT PEER 3 WHEN EVENTLOOP RUNS
 [** TABLE DebugTable-D1 **]
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.5
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
 [REPLACE]
 SubnetRoute:
   Net: 1.0.3.0/24
@@ -1478,32 +1557,15 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-[separator]-------------------------------------
-[comment] LET EVENT QUEUE DRAIN
-[comment] EXPECT REPLACE 1.0.3.0/24 RECEIVED BY PEER 3
-[comment] EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [REPLACE]
 SubnetRoute:
-  Net: 1.0.3.0/24
+  Net: 1.0.4.0/24
   PAList: 
-	Next Hop Attribute 2.0.0.3
+	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-SubnetRoute:
-  Net: 1.0.3.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.5
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
-[** TABLE DebugTable-D3 **]
-[PUSH]
-[** TABLE DebugTable-D3 **]
-[ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
@@ -1512,8 +1574,10 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT REPLACE 1.0.3.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
@@ -1768,7 +1832,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
-[separator]-------------------------------------
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -1793,6 +1856,7 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
+[separator]-------------------------------------
 [separator]-------------------------------------
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1974,7 +2038,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
-[separator]-------------------------------------
 [** TABLE DebugTable-D2 **]
 [DELETE]
 SubnetRoute:
@@ -2002,6 +2065,7 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
+[separator]-------------------------------------
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
@@ -2086,8 +2150,9 @@ SubnetRoute:
 [comment] BRING PEER 3 UP
 [comment] EXPECT NO CHANGE UNTIL EVENTLOOP RUNS
 [separator]-------------------------------------
-[comment] SINGLE STEP EVENT LOOP
+[comment] LET EVENT QUEUE DRAIN
 [comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[comment] EXPECT (MOVES TO DUMPING NEXT PEER)
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -2097,36 +2162,6 @@ SubnetRoute:
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
-[comment] STEP AGAIN (MOVES TO DUMPING NEXT PEER)
-[separator]-------------------------------------
-[comment] SENDING FROM PEER 1
-[comment] EXPECT RECEIVED BY PEER 2
-[comment] EXPECT NOT RECEIVED BY PEER 3 YET
-[** TABLE DebugTable-D2 **]
-[ADD]
-PUSH flag is set
-SubnetRoute:
-  Net: 1.0.3.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.3
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-	Local Preference Attribute - 100
-[separator]-------------------------------------
-[comment] RUN EVENT LOOP TO COMPLETION
-[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
-[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
-[** TABLE DebugTable-D3 **]
-[ADD]
-SubnetRoute:
-  Net: 1.0.3.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.3
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2142,6 +2177,34 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[comment] EXPECT NOT RECEIVED BY PEER 3 YET
+[** TABLE DebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] RUN EVENT LOOP TO COMPLETION
+[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3
@@ -2236,8 +2299,20 @@ SubnetRoute:
 [comment] BRING PEER 3 UP
 [comment] EXPECT NO CHANGE UNTIL EVENTLOOP RUNS
 [separator]-------------------------------------
-[comment] SINGLE STEP EVENT LOOP
+[comment] LET EVENT QUEUE DRAIN
 [comment] NO ROUTES IN 1st PEER (MOVES TO DUMPING NEXT PEER)
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [comment] EXPECT RECEIVED BY PEER 2
@@ -2252,12 +2327,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-[separator]-------------------------------------
-[comment] RUN EVENT LOOP TO COMPLETION
-[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
-[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
+PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2265,20 +2337,10 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
-[** TABLE DebugTable-D3 **]
-[ADD]
-PUSH flag is set
-SubnetRoute:
-  Net: 1.0.2.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.2
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
-[PUSH]
+[separator]-------------------------------------
+[comment] RUN EVENT LOOP TO COMPLETION
+[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3
@@ -2936,41 +2998,13 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
-[separator]-------------------------------------
-[comment] TAKE PEER 1 DOWN
-[comment] EXPECT NO CHANGE UNTIL EVENTLOOP RUNS
-[** TABLE DebugTable-D2 **]
-[PUSH]
-[separator]-------------------------------------
-[comment] BRING PEER 1 UP
-[comment] NO NEED TO DUMP TO THIS PEER FOR THIS TEST
-[separator]-------------------------------------
-[comment] SENDING FROM PEER 1
-[comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 2
-[** TABLE DebugTable-D2 **]
+[** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
 SubnetRoute:
-  Net: 1.0.5.0/24
+  Net: 1.0.3.0/24
   PAList: 
-	Next Hop Attribute 2.0.0.5
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-	Local Preference Attribute - 100
-[separator]-------------------------------------
-[comment] RUN EVENT LOOP TO COMPLETION
-[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3
-[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 2
-[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
-[comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3
-[** TABLE DebugTable-D3 **]
-[PUSH]
-[** TABLE DebugTable-D3 **]
-[ADD]
-SubnetRoute:
-  Net: 1.0.5.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.5
+	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
@@ -2988,7 +3022,55 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
+[separator]-------------------------------------
+[comment] TAKE PEER 1 DOWN
+[comment] EXPECT NO CHANGE UNTIL EVENTLOOP RUNS
 [** TABLE DebugTable-D2 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] BRING PEER 1 UP
+[comment] NO NEED TO DUMP TO THIS PEER FOR THIS TEST
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 2
+[** TABLE DebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.5.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.5
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.5.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.5
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] RUN EVENT LOOP TO COMPLETION
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 2
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3
+[** TABLE DebugTable-D2 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -3002,17 +3084,17 @@ SubnetRoute:
 [** TABLE DebugTable-D2 **]
 [PUSH]
 [** TABLE DebugTable-D3 **]
-[DELETE]
-SubnetRoute:
-  Net: 1.0.1.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.1
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-	Local Preference Attribute - 100
-[** TABLE DebugTable-D3 **]
 [PUSH]
 [** TABLE DebugTable-D2 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
