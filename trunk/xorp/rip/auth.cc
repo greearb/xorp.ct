@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.7 2004/06/10 22:41:43 hodson Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.8 2005/01/06 03:21:49 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -511,7 +511,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 	// should contain and only one packet.
 	if (-1 == access(badmd5, R_OK)) {
 	    XLOG_INFO("Dumping bad MD5 to %s", badmd5);
-	    FILE *fp = fopen("/tmp/rip_badmd5", "w");
+	    FILE *fp = fopen(badmd5, "w");
 	    fwrite(packet, packet_bytes, 1 , fp);
 	    fclose(fp);
 	}
