@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.5 2003/05/21 17:47:27 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.6 2003/05/22 22:31:43 mjh Exp $
  */
 
 
@@ -335,6 +335,7 @@ do {									\
 #define XLOG_UNREACHABLE()						\
 do {									\
 	XLOG_FATAL("Internal fatal error: unreachable code reached");	\
+        exit(1); /*keep the compiler happy*/				\
 } while (0)
 
 /**
@@ -345,6 +346,7 @@ do {									\
 #define XLOG_UNFINISHED()						\
 do {									\
 	XLOG_FATAL("Internal fatal error: unfinished code reached");	\
+        exit(1); /*keep the compiler happy*/				\
 } while (0)
 
 
