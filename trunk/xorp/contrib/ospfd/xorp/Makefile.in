@@ -91,7 +91,7 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-bin_PROGRAMS = ospfd ospfd_mon ospfd_browser
+bin_PROGRAMS = xorp_ospf ospfd_mon ospfd_browser
 
 
 # -- Test Programs
@@ -102,7 +102,7 @@ AM_CPPFLAGS = -I$(top_builddir) -I$(srcdir)/../src
 LDADD = $(top_builddir)/ospfd/src/libospfd.a $(top_builddir)/xrl/targets/libospfbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-ospfd_SOURCES = ospf_module.h ospfd_xorp.h os-instance.h tcppkt.h xrl_target.h  ospfd_xorp.C os-instance.C tcppkt.C system.C xrl_target.C
+xorp_ospf_SOURCES = ospf_module.h ospfd_xorp.h os-instance.h tcppkt.h xrl_target.h  ospfd_xorp.C os-instance.C tcppkt.C system.C xrl_target.C
 
 ospfd_mon_SOURCES = tcppkt.h tcppkt.C lsa_prn.C ospfd_mon.C
 
@@ -117,20 +117,10 @@ subdir = ospfd/xorp
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = ospfd$(EXEEXT) ospfd_mon$(EXEEXT) ospfd_browser$(EXEEXT)
+bin_PROGRAMS = xorp_ospf$(EXEEXT) ospfd_mon$(EXEEXT) \
+	ospfd_browser$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_ospfd_OBJECTS = ospfd_xorp.$(OBJEXT) os-instance.$(OBJEXT) \
-	tcppkt.$(OBJEXT) system.$(OBJEXT) xrl_target.$(OBJEXT)
-ospfd_OBJECTS = $(am_ospfd_OBJECTS)
-ospfd_LDADD = $(LDADD)
-ospfd_DEPENDENCIES = $(top_builddir)/ospfd/src/libospfd.a \
-	$(top_builddir)/xrl/targets/libospfbase.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
-ospfd_LDFLAGS =
 am_ospfd_browser_OBJECTS = tcppkt.$(OBJEXT) lsa_prn.$(OBJEXT) \
 	ospfd_browser.$(OBJEXT)
 ospfd_browser_OBJECTS = $(am_ospfd_browser_OBJECTS)
@@ -153,6 +143,17 @@ ospfd_mon_DEPENDENCIES = $(top_builddir)/ospfd/src/libospfd.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 ospfd_mon_LDFLAGS =
+am_xorp_ospf_OBJECTS = ospfd_xorp.$(OBJEXT) os-instance.$(OBJEXT) \
+	tcppkt.$(OBJEXT) system.$(OBJEXT) xrl_target.$(OBJEXT)
+xorp_ospf_OBJECTS = $(am_xorp_ospf_OBJECTS)
+xorp_ospf_LDADD = $(LDADD)
+xorp_ospf_DEPENDENCIES = $(top_builddir)/ospfd/src/libospfd.a \
+	$(top_builddir)/xrl/targets/libospfbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_ospf_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -175,10 +176,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(ospfd_SOURCES) $(ospfd_browser_SOURCES) \
-	$(ospfd_mon_SOURCES)
+DIST_SOURCES = $(ospfd_browser_SOURCES) $(ospfd_mon_SOURCES) \
+	$(xorp_ospf_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(ospfd_SOURCES) $(ospfd_browser_SOURCES) $(ospfd_mon_SOURCES)
+SOURCES = $(ospfd_browser_SOURCES) $(ospfd_mon_SOURCES) $(xorp_ospf_SOURCES)
 
 all: all-am
 
@@ -214,15 +215,15 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-ospfd$(EXEEXT): $(ospfd_OBJECTS) $(ospfd_DEPENDENCIES) 
-	@rm -f ospfd$(EXEEXT)
-	$(CXXLINK) $(ospfd_LDFLAGS) $(ospfd_OBJECTS) $(ospfd_LDADD) $(LIBS)
 ospfd_browser$(EXEEXT): $(ospfd_browser_OBJECTS) $(ospfd_browser_DEPENDENCIES) 
 	@rm -f ospfd_browser$(EXEEXT)
 	$(CXXLINK) $(ospfd_browser_LDFLAGS) $(ospfd_browser_OBJECTS) $(ospfd_browser_LDADD) $(LIBS)
 ospfd_mon$(EXEEXT): $(ospfd_mon_OBJECTS) $(ospfd_mon_DEPENDENCIES) 
 	@rm -f ospfd_mon$(EXEEXT)
 	$(CXXLINK) $(ospfd_mon_LDFLAGS) $(ospfd_mon_OBJECTS) $(ospfd_mon_LDADD) $(LIBS)
+xorp_ospf$(EXEEXT): $(xorp_ospf_OBJECTS) $(xorp_ospf_DEPENDENCIES) 
+	@rm -f xorp_ospf$(EXEEXT)
+	$(CXXLINK) $(xorp_ospf_LDFLAGS) $(xorp_ospf_OBJECTS) $(xorp_ospf_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core

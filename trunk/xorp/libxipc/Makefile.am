@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.26 2003/06/11 23:18:44 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.27 2003/06/19 19:20:07 hodson Exp $
 ##
 
 # - The library
 noinst_LIBRARIES = libxipc.a libfinder.a
 
 # -- Programs
-bin_PROGRAMS  =	call_xrl finder
+bin_PROGRAMS  =	call_xrl xorp_finder
 
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs  = test_xrl_error test_xrl test_xrl_atom test_xrl_args
@@ -31,14 +31,14 @@ LDADD		+= ./libxipc.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 
-finder_LDADD			 = libfinder.a
-finder_LDADD			+= ./libxipc.a
-finder_LDADD			+= $(top_builddir)/libxorp/libxorp.a
-finder_LDADD			+= $(top_builddir)/libcomm/libcomm.a
+xorp_finder_LDADD		 = libfinder.a
+xorp_finder_LDADD		+= ./libxipc.a
+xorp_finder_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+xorp_finder_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 
 # -- Program Sources
 call_xrl_SOURCES		 = call_xrl.cc
-finder_SOURCES			 = finder_main.cc
+xorp_finder_SOURCES		 = finder_main.cc
 
 test_finder_messenger_SOURCES	 = test_finder_messenger.cc
 test_finder_msgs_SOURCES	 = test_finder_msgs.cc

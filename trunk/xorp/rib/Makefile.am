@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.10 2003/05/07 21:58:12 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.11 2003/05/23 01:02:41 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS		 = rib main_routemap
+bin_PROGRAMS		 = xorp_rib main_routemap
 
 # -- Test Programs
 bin_PROGRAMS		+= test_rib_client
@@ -32,9 +32,9 @@ LDADD			+= $(top_builddir)/xrl/interfaces/libribclientxif.a
 # -- Program Sources
 main_routemap_SOURCES	 = routemap.hh routemap.cc main_routemap.cc
 
-rib_SOURCES		 = main_rib.cc
-rib_LDADD		 = $(LDADD)
-rib_LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
+xorp_rib_SOURCES	 = main_rib.cc
+xorp_rib_LDADD		 = $(LDADD)
+xorp_rib_LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
 
 test_rib_direct_SOURCES	 = parser.hh parser_direct_cmds.hh
 test_rib_direct_SOURCES	+= parser.cc test_rib_direct.cc

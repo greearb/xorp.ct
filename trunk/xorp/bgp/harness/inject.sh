@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/bgp/harness/inject.sh,v 1.1 2003/01/31 03:02:14 atanu Exp $
 #
 
 # Inject a saved conversation in mrtd format to our BGP process using
@@ -9,10 +9,10 @@
 # of the peer that the data originally came from.
 
 # Preconditons
-# 1) Run "xorp/libxipc/finder"
-# 2) Run "xorp/fea/fea" or "xorp/fea/fea_dummy"
-# 3) Run "xorp/rib/rib"
-# 4) Run "xorp/bgp/bgp"
+# 1) Run "xorp/libxipc/xorp_finder"
+# 2) Run "xorp/fea/xorp_fea" or "xorp/fea/xorp_fea_dummy"
+# 3) Run "xorp/rib/xorp_rib"
+# 4) Run "xorp/bgp/xorp_bgp"
 # 5) Run "xorp/bgp/harness/test_peer -s peer1 -v"
 # 6) Run "xorp/bgp/harness/test_peer -s peer2 -v"
 # 7) Run "xorp/bgp/harness/coord"
@@ -52,7 +52,7 @@ DUMPNAME=${DUMPNAME:-$TREETOP/../data/bgp/icsi1.mrtd}
 start_processes()
 {
     (cd $TREETOP 
-    for i in libxipc/finder fea/fea_dummy rib/rib bgp/bgp \
+    for i in libxipc/xorp_finder fea/xorp_fea_dummy rib/xorp_rib bgp/xorp_bgp \
 	    "bgp/harness/test_peer -s peer1 -v" \
 	    "bgp/harness/test_peer -s peer2 -v" \
 	    bgp/harness/coord

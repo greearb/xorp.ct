@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.16 2003/05/07 21:58:07 pavlin Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.17 2003/06/17 06:44:15 atanu Exp $
 ##
 
 # -- Subdirectories
 SUBDIRS = . harness tools
 
 # -- Real Programs
-bin_PROGRAMS	 = bgp
+bin_PROGRAMS	 = xorp_bgp
 
 # -- Test Programs
 bin_PROGRAMS	+= packet_test plumbing_test update_test
@@ -29,9 +29,9 @@ LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-bgp_SOURCES			 = bgp.cc
-bgp_SOURCES			+= main.hh
-bgp_SOURCES			+= main.cc
+xorp_bgp_SOURCES		 = bgp.cc
+xorp_bgp_SOURCES		+= main.hh
+xorp_bgp_SOURCES		+= main.cc
 
 packet_test_SOURCES		 = packet_test.hh packet_test.cc
 

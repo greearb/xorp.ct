@@ -89,36 +89,34 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-bin_PROGRAMS = fea fea_dummy demo_fea_ifmgr_client test_mfea
+bin_PROGRAMS = xorp_fea xorp_fea_dummy demo_fea_ifmgr_client test_mfea
 check_PROGRAMS = test_rawsock4 test_ifmanager_transaction
 TESTS = $(check_PROGRAMS)
 
 demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
-
-# disabled test_fea
 noinst_LIBRARIES = libfea.a
 
 
 # -- Libraries and library flags to link the binary programs
 
 # -- Program Sources
-fea_SOURCES = fea.cc
+xorp_fea_SOURCES = fea.cc
 ### FEA XRL libraries
 ### MFEA XRL libraries
 ### MRT libraries
 ### CLI libraries
 ### XORP misc libraries
-fea_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+xorp_fea_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
-fea_dummy_SOURCES = fea_dummy.cc
+xorp_fea_dummy_SOURCES = fea_dummy.cc
 ### FEA XRL libraries
 ### MFEA XRL libraries
 ### MRT libraries
 ### CLI libraries
 ### XORP misc libraries
-fea_dummy_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+xorp_fea_dummy_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 test_mfea_SOURCES = test_mfea.cc
 # FEA-specific begin
@@ -198,7 +196,7 @@ am_libfea_a_OBJECTS = fti_transaction.$(OBJEXT) fticonfig.$(OBJEXT) \
 	xrl_mfea_vif_manager.$(OBJEXT) xrl_rawsock4.$(OBJEXT) \
 	xrl_target.$(OBJEXT)
 libfea_a_OBJECTS = $(am_libfea_a_OBJECTS)
-bin_PROGRAMS = fea$(EXEEXT) fea_dummy$(EXEEXT) \
+bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT) \
 	demo_fea_ifmgr_client$(EXEEXT) test_mfea$(EXEEXT)
 check_PROGRAMS = test_rawsock4$(EXEEXT) \
 	test_ifmanager_transaction$(EXEEXT)
@@ -213,44 +211,6 @@ demo_fea_ifmgr_client_DEPENDENCIES = \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 demo_fea_ifmgr_client_LDFLAGS =
-am_fea_OBJECTS = fea.$(OBJEXT)
-fea_OBJECTS = $(am_fea_OBJECTS)
-fea_DEPENDENCIES = libfea.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
-	$(top_builddir)/xrl/targets/libfeabase.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
-	$(top_builddir)/xrl/targets/libmfeabase.a \
-	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
-	$(top_builddir)/xrl/targets/libclibase.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
-fea_LDFLAGS =
-am_fea_dummy_OBJECTS = fea_dummy.$(OBJEXT)
-fea_dummy_OBJECTS = $(am_fea_dummy_OBJECTS)
-fea_dummy_DEPENDENCIES = libfea.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
-	$(top_builddir)/xrl/targets/libfeabase.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
-	$(top_builddir)/xrl/targets/libmfeabase.a \
-	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
-	$(top_builddir)/xrl/targets/libclibase.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
-fea_dummy_LDFLAGS =
 am_test_ifmanager_transaction_OBJECTS = \
 	test_ifmanager_transaction.$(OBJEXT) iftree.$(OBJEXT)
 test_ifmanager_transaction_OBJECTS = \
@@ -283,6 +243,44 @@ am_test_rawsock4_OBJECTS = test_rawsock4.$(OBJEXT) rawsock4.$(OBJEXT)
 test_rawsock4_OBJECTS = $(am_test_rawsock4_OBJECTS)
 test_rawsock4_DEPENDENCIES = $(top_builddir)/libxorp/libxorp.a
 test_rawsock4_LDFLAGS =
+am_xorp_fea_OBJECTS = fea.$(OBJEXT)
+xorp_fea_OBJECTS = $(am_xorp_fea_OBJECTS)
+xorp_fea_DEPENDENCIES = libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
+	$(top_builddir)/xrl/targets/libmfeabase.a \
+	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
+	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_fea_LDFLAGS =
+am_xorp_fea_dummy_OBJECTS = fea_dummy.$(OBJEXT)
+xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
+xorp_fea_dummy_DEPENDENCIES = libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
+	$(top_builddir)/xrl/targets/libmfeabase.a \
+	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
+	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_fea_dummy_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -360,11 +358,11 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libfea_a_SOURCES) $(demo_fea_ifmgr_client_SOURCES) \
-	$(fea_SOURCES) $(fea_dummy_SOURCES) \
 	$(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) \
-	$(test_rawsock4_SOURCES)
+	$(test_rawsock4_SOURCES) $(xorp_fea_SOURCES) \
+	$(xorp_fea_dummy_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libfea_a_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(fea_SOURCES) $(fea_dummy_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES)
+SOURCES = $(libfea_a_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES) $(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
 
 all: all-am
 
@@ -415,12 +413,6 @@ clean-checkPROGRAMS:
 demo_fea_ifmgr_client$(EXEEXT): $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_DEPENDENCIES) 
 	@rm -f demo_fea_ifmgr_client$(EXEEXT)
 	$(CXXLINK) $(demo_fea_ifmgr_client_LDFLAGS) $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_LDADD) $(LIBS)
-fea$(EXEEXT): $(fea_OBJECTS) $(fea_DEPENDENCIES) 
-	@rm -f fea$(EXEEXT)
-	$(CXXLINK) $(fea_LDFLAGS) $(fea_OBJECTS) $(fea_LDADD) $(LIBS)
-fea_dummy$(EXEEXT): $(fea_dummy_OBJECTS) $(fea_dummy_DEPENDENCIES) 
-	@rm -f fea_dummy$(EXEEXT)
-	$(CXXLINK) $(fea_dummy_LDFLAGS) $(fea_dummy_OBJECTS) $(fea_dummy_LDADD) $(LIBS)
 test_ifmanager_transaction$(EXEEXT): $(test_ifmanager_transaction_OBJECTS) $(test_ifmanager_transaction_DEPENDENCIES) 
 	@rm -f test_ifmanager_transaction$(EXEEXT)
 	$(CXXLINK) $(test_ifmanager_transaction_LDFLAGS) $(test_ifmanager_transaction_OBJECTS) $(test_ifmanager_transaction_LDADD) $(LIBS)
@@ -430,6 +422,12 @@ test_mfea$(EXEEXT): $(test_mfea_OBJECTS) $(test_mfea_DEPENDENCIES)
 test_rawsock4$(EXEEXT): $(test_rawsock4_OBJECTS) $(test_rawsock4_DEPENDENCIES) 
 	@rm -f test_rawsock4$(EXEEXT)
 	$(CXXLINK) $(test_rawsock4_LDFLAGS) $(test_rawsock4_OBJECTS) $(test_rawsock4_LDADD) $(LIBS)
+xorp_fea$(EXEEXT): $(xorp_fea_OBJECTS) $(xorp_fea_DEPENDENCIES) 
+	@rm -f xorp_fea$(EXEEXT)
+	$(CXXLINK) $(xorp_fea_LDFLAGS) $(xorp_fea_OBJECTS) $(xorp_fea_LDADD) $(LIBS)
+xorp_fea_dummy$(EXEEXT): $(xorp_fea_dummy_OBJECTS) $(xorp_fea_dummy_DEPENDENCIES) 
+	@rm -f xorp_fea_dummy$(EXEEXT)
+	$(CXXLINK) $(xorp_fea_dummy_LDFLAGS) $(xorp_fea_dummy_OBJECTS) $(xorp_fea_dummy_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core

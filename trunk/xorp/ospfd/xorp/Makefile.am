@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.3 2003/03/31 16:10:18 hodson Exp $
+## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.4 2003/05/07 21:58:11 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS = ospfd ospfd_mon ospfd_browser
+bin_PROGRAMS = xorp_ospf ospfd_mon ospfd_browser
 
 # -- Test Programs
 #bin_PROGRAMS +=
@@ -20,17 +20,17 @@ LDADD	    += $(top_builddir)/libcomm/libcomm.a
 LDADD	    += $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-ospfd_SOURCES  = ospf_module.h
-ospfd_SOURCES += ospfd_xorp.h
-ospfd_SOURCES += os-instance.h
-ospfd_SOURCES += tcppkt.h
-ospfd_SOURCES += xrl_target.h
-ospfd_SOURCES += 
-ospfd_SOURCES += ospfd_xorp.C
-ospfd_SOURCES += os-instance.C
-ospfd_SOURCES += tcppkt.C
-ospfd_SOURCES += system.C
-ospfd_SOURCES += xrl_target.C
+xorp_ospf_SOURCES  = ospf_module.h
+xorp_ospf_SOURCES += ospfd_xorp.h
+xorp_ospf_SOURCES += os-instance.h
+xorp_ospf_SOURCES += tcppkt.h
+xorp_ospf_SOURCES += xrl_target.h
+xorp_ospf_SOURCES += 
+xorp_ospf_SOURCES += ospfd_xorp.C
+xorp_ospf_SOURCES += os-instance.C
+xorp_ospf_SOURCES += tcppkt.C
+xorp_ospf_SOURCES += system.C
+xorp_ospf_SOURCES += xrl_target.C
 
 ospfd_mon_SOURCES  = tcppkt.h
 ospfd_mon_SOURCES += tcppkt.C

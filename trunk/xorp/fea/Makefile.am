@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.13 2003/05/21 03:53:38 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.14 2003/06/03 21:59:23 pavlin Exp $
 ##
 
 
-bin_PROGRAMS		 = fea fea_dummy
+bin_PROGRAMS		 = xorp_fea xorp_fea_dummy
 bin_PROGRAMS 		+= demo_fea_ifmgr_client test_mfea
 check_PROGRAMS		 = test_rawsock4 test_ifmanager_transaction
 TESTS			 = $(check_PROGRAMS)
@@ -16,63 +16,61 @@ demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxipc/libxipc.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libcomm/libcomm.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
 
-# disabled test_fea
-
 noinst_LIBRARIES	 = libfea.a
 
 # -- Libraries and library flags to link the binary programs
 
 # -- Program Sources
 
-fea_SOURCES		= fea.cc
-fea_LDADD		= $(noinst_LIBRARIES)
+xorp_fea_SOURCES	= fea.cc
+xorp_fea_LDADD		= $(noinst_LIBRARIES)
 ### FEA XRL libraries
-fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
-fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
-fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
 ### MFEA XRL libraries
-fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
-fea_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
-fea_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
-fea_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
 ### MRT libraries
-fea_LDADD		+= $(top_builddir)/mrt/libmrt.a
+xorp_fea_LDADD		+= $(top_builddir)/mrt/libmrt.a
 ### CLI libraries
-fea_LDADD		+= $(top_builddir)/cli/libcli.a
-fea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
-fea_LDADD		+= -lcurses
-fea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
-fea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+xorp_fea_LDADD		+= $(top_builddir)/cli/libcli.a
+xorp_fea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
+xorp_fea_LDADD		+= -lcurses
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### XORP misc libraries
-fea_LDADD		+= $(top_builddir)/libproto/libproto.a
-fea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
-fea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
-fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+xorp_fea_LDADD		+= $(top_builddir)/libproto/libproto.a
+xorp_fea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+xorp_fea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
+xorp_fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
-fea_dummy_SOURCES	= fea_dummy.cc
-fea_dummy_LDADD		=  $(noinst_LIBRARIES)
+xorp_fea_dummy_SOURCES	= fea_dummy.cc
+xorp_fea_dummy_LDADD	=  $(noinst_LIBRARIES)
 ### FEA XRL libraries
-fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
-fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
-fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libfeabase.a
 ### MFEA XRL libraries
-fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
-fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
-fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
-fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libmfeabase.a
 ### MRT libraries
-fea_dummy_LDADD		+= $(top_builddir)/mrt/libmrt.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/mrt/libmrt.a
 ### CLI libraries
-fea_dummy_LDADD		+= $(top_builddir)/cli/libcli.a
-fea_dummy_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
-fea_dummy_LDADD		+= -lcurses
-fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
-fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/cli/libcli.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
+xorp_fea_dummy_LDADD	+= -lcurses
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libclibase.a
 ### XORP misc libraries
-fea_dummy_LDADD		+= $(top_builddir)/libproto/libproto.a
-fea_dummy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
-fea_dummy_LDADD		+= $(top_builddir)/libcomm/libcomm.a
-fea_dummy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/libproto/libproto.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/libxipc/libxipc.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/libcomm/libcomm.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
 test_mfea_SOURCES	= test_mfea.cc
 test_mfea_LDADD		= $(noinst_LIBRARIES)

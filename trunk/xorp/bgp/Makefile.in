@@ -96,7 +96,7 @@ SUBDIRS = . harness tools
 # -- Real Programs
 
 # -- Test Programs
-bin_PROGRAMS = bgp packet_test plumbing_test update_test
+bin_PROGRAMS = xorp_bgp packet_test plumbing_test update_test
 
 TESTS = aspath_test packet_coding_test isolation_tests
 
@@ -107,7 +107,7 @@ noinst_LIBRARIES = libbgp.a
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-bgp_SOURCES = bgp.cc main.hh main.cc
+xorp_bgp_SOURCES = bgp.cc main.hh main.cc
 
 packet_test_SOURCES = packet_test.hh packet_test.cc
 
@@ -155,8 +155,8 @@ am_libbgp_a_OBJECTS = aspath.$(OBJEXT) attribute_manager.$(OBJEXT) \
 	subnet_route.$(OBJEXT) update_attrib.$(OBJEXT) \
 	update_packet.$(OBJEXT) xrl_target.$(OBJEXT)
 libbgp_a_OBJECTS = $(am_libbgp_a_OBJECTS)
-bin_PROGRAMS = bgp$(EXEEXT) packet_test$(EXEEXT) plumbing_test$(EXEEXT) \
-	update_test$(EXEEXT)
+bin_PROGRAMS = xorp_bgp$(EXEEXT) packet_test$(EXEEXT) \
+	plumbing_test$(EXEEXT) update_test$(EXEEXT)
 noinst_PROGRAMS = aspath_test$(EXEEXT) packet_coding_test$(EXEEXT) \
 	isolation_tests$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -172,16 +172,6 @@ aspath_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 aspath_test_LDFLAGS =
-am_bgp_OBJECTS = bgp.$(OBJEXT) main.$(OBJEXT)
-bgp_OBJECTS = $(am_bgp_OBJECTS)
-bgp_LDADD = $(LDADD)
-bgp_DEPENDENCIES = libbgp.a $(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
-bgp_LDFLAGS =
 am_isolation_tests_OBJECTS = test_main.$(OBJEXT) test_ribin.$(OBJEXT) \
 	test_deletion.$(OBJEXT) test_filter.$(OBJEXT) \
 	test_cache.$(OBJEXT) test_nhlookup.$(OBJEXT) \
@@ -237,6 +227,17 @@ update_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 update_test_LDFLAGS =
+am_xorp_bgp_OBJECTS = bgp.$(OBJEXT) main.$(OBJEXT)
+xorp_bgp_OBJECTS = $(am_xorp_bgp_OBJECTS)
+xorp_bgp_LDADD = $(LDADD)
+xorp_bgp_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_bgp_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -297,10 +298,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(bgp_SOURCES) \
+DIST_SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) \
 	$(isolation_tests_SOURCES) $(packet_coding_test_SOURCES) \
 	$(packet_test_SOURCES) $(plumbing_test_SOURCES) \
-	$(update_test_SOURCES)
+	$(update_test_SOURCES) $(xorp_bgp_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -308,7 +309,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(bgp_SOURCES) $(isolation_tests_SOURCES) $(packet_coding_test_SOURCES) $(packet_test_SOURCES) $(plumbing_test_SOURCES) $(update_test_SOURCES)
+SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(packet_coding_test_SOURCES) $(packet_test_SOURCES) $(plumbing_test_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
 
 all: all-recursive
 
@@ -359,9 +360,6 @@ clean-noinstPROGRAMS:
 aspath_test$(EXEEXT): $(aspath_test_OBJECTS) $(aspath_test_DEPENDENCIES) 
 	@rm -f aspath_test$(EXEEXT)
 	$(CXXLINK) $(aspath_test_LDFLAGS) $(aspath_test_OBJECTS) $(aspath_test_LDADD) $(LIBS)
-bgp$(EXEEXT): $(bgp_OBJECTS) $(bgp_DEPENDENCIES) 
-	@rm -f bgp$(EXEEXT)
-	$(CXXLINK) $(bgp_LDFLAGS) $(bgp_OBJECTS) $(bgp_LDADD) $(LIBS)
 isolation_tests$(EXEEXT): $(isolation_tests_OBJECTS) $(isolation_tests_DEPENDENCIES) 
 	@rm -f isolation_tests$(EXEEXT)
 	$(CXXLINK) $(isolation_tests_LDFLAGS) $(isolation_tests_OBJECTS) $(isolation_tests_LDADD) $(LIBS)
@@ -377,6 +375,9 @@ plumbing_test$(EXEEXT): $(plumbing_test_OBJECTS) $(plumbing_test_DEPENDENCIES)
 update_test$(EXEEXT): $(update_test_OBJECTS) $(update_test_DEPENDENCIES) 
 	@rm -f update_test$(EXEEXT)
 	$(CXXLINK) $(update_test_LDFLAGS) $(update_test_OBJECTS) $(update_test_LDADD) $(LIBS)
+xorp_bgp$(EXEEXT): $(xorp_bgp_OBJECTS) $(xorp_bgp_DEPENDENCIES) 
+	@rm -f xorp_bgp$(EXEEXT)
+	$(CXXLINK) $(xorp_bgp_LDFLAGS) $(xorp_bgp_OBJECTS) $(xorp_bgp_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core

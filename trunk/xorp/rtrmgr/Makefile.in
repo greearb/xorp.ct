@@ -94,9 +94,8 @@ snmpd2 = @snmpd2@
 SUBDIRS = . tools
 
 # -- Real Programs
-bin_PROGRAMS = rtrmgr xorpsh
+bin_PROGRAMS = xorp_rtrmgr xorpsh
 
-#bin_PROGRAMS	 = rtrmgr
 
 # -- Test Programs
 #bin_PROGRAMS	+=
@@ -108,9 +107,9 @@ noinst_PROGRAMS = $(TESTS)
 LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-rtrmgr_SOURCES = rtrmgr_module.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc task.cc
+xorp_rtrmgr_SOURCES = rtrmgr_module.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc task.cc
 
-rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a  $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a  $(LDADD) 
+xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a  $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a  $(LDADD) 
 
 #slave_module_manager really shouldn't be needed
 #unexpanded_xrl shouldn't really be needed
@@ -141,28 +140,11 @@ subdir = rtrmgr
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = rtrmgr$(EXEEXT) xorpsh$(EXEEXT)
+bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT)
 noinst_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
 	test_module_manager$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
-am_rtrmgr_OBJECTS = y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) \
-	y.boot_tab.$(OBJEXT) lex.boot.$(OBJEXT) main_rtrmgr.$(OBJEXT) \
-	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
-	template_commands.$(OBJEXT) module_command.$(OBJEXT) \
-	conf_tree_node.$(OBJEXT) conf_tree.$(OBJEXT) \
-	master_conf_tree_node.$(OBJEXT) master_conf_tree.$(OBJEXT) \
-	module_manager.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
-	split.$(OBJEXT) userdb.$(OBJEXT) xrl_rtrmgr_interface.$(OBJEXT) \
-	randomness.$(OBJEXT) unexpanded_xrl.$(OBJEXT) task.$(OBJEXT)
-rtrmgr_OBJECTS = $(am_rtrmgr_OBJECTS)
-rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.a \
-	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
-rtrmgr_LDFLAGS =
 am_test_module_manager_OBJECTS = test_module_manager.$(OBJEXT) \
 	y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) template_tree.$(OBJEXT) \
 	template_tree_node.$(OBJEXT) template_commands.$(OBJEXT) \
@@ -205,6 +187,23 @@ test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_templates_LDFLAGS =
+am_xorp_rtrmgr_OBJECTS = y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) \
+	y.boot_tab.$(OBJEXT) lex.boot.$(OBJEXT) main_rtrmgr.$(OBJEXT) \
+	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
+	template_commands.$(OBJEXT) module_command.$(OBJEXT) \
+	conf_tree_node.$(OBJEXT) conf_tree.$(OBJEXT) \
+	master_conf_tree_node.$(OBJEXT) master_conf_tree.$(OBJEXT) \
+	module_manager.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
+	split.$(OBJEXT) userdb.$(OBJEXT) xrl_rtrmgr_interface.$(OBJEXT) \
+	randomness.$(OBJEXT) unexpanded_xrl.$(OBJEXT) task.$(OBJEXT)
+xorp_rtrmgr_OBJECTS = $(am_xorp_rtrmgr_OBJECTS)
+xorp_rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.a \
+	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_rtrmgr_LDFLAGS =
 am_xorpsh_OBJECTS = xorpsh_main.$(OBJEXT) y.tplt_tab.$(OBJEXT) \
 	lex.tplt.$(OBJEXT) y.boot_tab.$(OBJEXT) lex.boot.$(OBJEXT) \
 	y.opcmd_tab.$(OBJEXT) lex.opcmd.$(OBJEXT) \
@@ -271,9 +270,9 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(rtrmgr_SOURCES) $(test_module_manager_SOURCES) \
+DIST_SOURCES = $(test_module_manager_SOURCES) \
 	$(test_sample_config_SOURCES) $(test_templates_SOURCES) \
-	$(xorpsh_SOURCES)
+	$(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -281,7 +280,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(rtrmgr_SOURCES) $(test_module_manager_SOURCES) $(test_sample_config_SOURCES) $(test_templates_SOURCES) $(xorpsh_SOURCES)
+SOURCES = $(test_module_manager_SOURCES) $(test_sample_config_SOURCES) $(test_templates_SOURCES) $(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
 
 all: all-recursive
 
@@ -320,9 +319,6 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-rtrmgr$(EXEEXT): $(rtrmgr_OBJECTS) $(rtrmgr_DEPENDENCIES) 
-	@rm -f rtrmgr$(EXEEXT)
-	$(CXXLINK) $(rtrmgr_LDFLAGS) $(rtrmgr_OBJECTS) $(rtrmgr_LDADD) $(LIBS)
 test_module_manager$(EXEEXT): $(test_module_manager_OBJECTS) $(test_module_manager_DEPENDENCIES) 
 	@rm -f test_module_manager$(EXEEXT)
 	$(CXXLINK) $(test_module_manager_LDFLAGS) $(test_module_manager_OBJECTS) $(test_module_manager_LDADD) $(LIBS)
@@ -332,6 +328,9 @@ test_sample_config$(EXEEXT): $(test_sample_config_OBJECTS) $(test_sample_config_
 test_templates$(EXEEXT): $(test_templates_OBJECTS) $(test_templates_DEPENDENCIES) 
 	@rm -f test_templates$(EXEEXT)
 	$(CXXLINK) $(test_templates_LDFLAGS) $(test_templates_OBJECTS) $(test_templates_LDADD) $(LIBS)
+xorp_rtrmgr$(EXEEXT): $(xorp_rtrmgr_OBJECTS) $(xorp_rtrmgr_DEPENDENCIES) 
+	@rm -f xorp_rtrmgr$(EXEEXT)
+	$(CXXLINK) $(xorp_rtrmgr_LDFLAGS) $(xorp_rtrmgr_OBJECTS) $(xorp_rtrmgr_LDADD) $(LIBS)
 xorpsh$(EXEEXT): $(xorpsh_OBJECTS) $(xorpsh_DEPENDENCIES) 
 	@rm -f xorpsh$(EXEEXT)
 	$(CXXLINK) $(xorpsh_LDFLAGS) $(xorpsh_OBJECTS) $(xorpsh_LDADD) $(LIBS)

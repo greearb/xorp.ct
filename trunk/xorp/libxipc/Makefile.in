@@ -94,7 +94,7 @@ snmpd2 = @snmpd2@
 noinst_LIBRARIES = libxipc.a libfinder.a
 
 # -- Programs
-bin_PROGRAMS = call_xrl finder
+bin_PROGRAMS = call_xrl xorp_finder
 
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header test_inproc test_sudp test_stcp test_lemming test_xrl_router test_finder_tcp test_finder_messenger test_finder_msgs test_finder test_finder_events
@@ -111,11 +111,11 @@ noinst_SCRIPTS = $(test_scripts)
 # -- Libraries and library flags to link the binary programs
 LDADD = ./libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
-finder_LDADD = libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+xorp_finder_LDADD = libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
 # -- Program Sources
 call_xrl_SOURCES = call_xrl.cc
-finder_SOURCES = finder_main.cc
+xorp_finder_SOURCES = finder_main.cc
 
 test_finder_messenger_SOURCES = test_finder_messenger.cc
 test_finder_msgs_SOURCES = test_finder_msgs.cc
@@ -199,7 +199,7 @@ am_libxipc_a_OBJECTS = hmac_md5.$(OBJEXT) finder_messenger.$(OBJEXT) \
 	xrl_error.$(OBJEXT) xuid.$(OBJEXT) common_xif.$(OBJEXT) \
 	finder_client_base.$(OBJEXT) finder_xif.$(OBJEXT)
 libxipc_a_OBJECTS = $(am_libxipc_a_OBJECTS)
-bin_PROGRAMS = call_xrl$(EXEEXT) finder$(EXEEXT)
+bin_PROGRAMS = call_xrl$(EXEEXT) xorp_finder$(EXEEXT)
 noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_xrl_atom$(EXEEXT) test_xrl_args$(EXEEXT) \
 	test_header$(EXEEXT) test_inproc$(EXEEXT) test_sudp$(EXEEXT) \
@@ -217,12 +217,6 @@ call_xrl_DEPENDENCIES = ./libfinder.a ./libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 call_xrl_LDFLAGS =
-am_finder_OBJECTS = finder_main.$(OBJEXT)
-finder_OBJECTS = $(am_finder_OBJECTS)
-finder_DEPENDENCIES = libfinder.a ./libxipc.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/libcomm/libcomm.a
-finder_LDFLAGS =
 am_test_finder_OBJECTS = test_finder.$(OBJEXT)
 test_finder_OBJECTS = $(am_test_finder_OBJECTS)
 test_finder_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
@@ -340,6 +334,12 @@ test_xrl_router_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_router_LDFLAGS =
+am_xorp_finder_OBJECTS = finder_main.$(OBJEXT)
+xorp_finder_OBJECTS = $(am_xorp_finder_OBJECTS)
+xorp_finder_DEPENDENCIES = libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+xorp_finder_LDFLAGS =
 SCRIPTS = $(noinst_SCRIPTS)
 
 
@@ -407,7 +407,7 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 CXXFLAGS = @CXXFLAGS@
 DIST_SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) \
-	$(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_SOURCES) \
+	$(call_xrl_SOURCES) $(test_finder_SOURCES) \
 	$(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) \
 	$(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) \
 	$(test_finder_to_SOURCES) $(test_header_SOURCES) \
@@ -415,9 +415,9 @@ DIST_SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) \
 	$(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) \
 	$(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) \
 	$(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) \
-	$(test_xrl_router_SOURCES)
+	$(test_xrl_router_SOURCES) $(xorp_finder_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_router_SOURCES)
+SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_router_SOURCES) $(xorp_finder_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -473,9 +473,6 @@ clean-noinstPROGRAMS:
 call_xrl$(EXEEXT): $(call_xrl_OBJECTS) $(call_xrl_DEPENDENCIES) 
 	@rm -f call_xrl$(EXEEXT)
 	$(CXXLINK) $(call_xrl_LDFLAGS) $(call_xrl_OBJECTS) $(call_xrl_LDADD) $(LIBS)
-finder$(EXEEXT): $(finder_OBJECTS) $(finder_DEPENDENCIES) 
-	@rm -f finder$(EXEEXT)
-	$(CXXLINK) $(finder_LDFLAGS) $(finder_OBJECTS) $(finder_LDADD) $(LIBS)
 test_finder$(EXEEXT): $(test_finder_OBJECTS) $(test_finder_DEPENDENCIES) 
 	@rm -f test_finder$(EXEEXT)
 	$(CXXLINK) $(test_finder_LDFLAGS) $(test_finder_OBJECTS) $(test_finder_LDADD) $(LIBS)
@@ -527,6 +524,9 @@ test_xrl_parser$(EXEEXT): $(test_xrl_parser_OBJECTS) $(test_xrl_parser_DEPENDENC
 test_xrl_router$(EXEEXT): $(test_xrl_router_OBJECTS) $(test_xrl_router_DEPENDENCIES) 
 	@rm -f test_xrl_router$(EXEEXT)
 	$(CXXLINK) $(test_xrl_router_LDFLAGS) $(test_xrl_router_OBJECTS) $(test_xrl_router_LDADD) $(LIBS)
+xorp_finder$(EXEEXT): $(xorp_finder_OBJECTS) $(xorp_finder_DEPENDENCIES) 
+	@rm -f xorp_finder$(EXEEXT)
+	$(CXXLINK) $(xorp_finder_LDFLAGS) $(xorp_finder_OBJECTS) $(xorp_finder_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core

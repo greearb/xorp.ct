@@ -2,18 +2,18 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/test2.sh,v 1.2 2003/05/24 23:35:25 mjh Exp $
+# $XORP: xorp/bgp/harness/test2.sh,v 1.3 2003/05/29 23:42:31 pavlin Exp $
 #
 
 #
 # Preconditions
-# 1) Run a finder process on tigger "../../xorp/libxipc/finder"
+# 1) Run a finder process on tigger "../../xorp/libxipc/xorp_finder"
 # 2) Run a test peer on xorp0.
 #    "ssh xorp0 xorp/xorp/bgp/harness/test_peer -s peer1 -h tigger"
-# 3) Run a RIB on tigger. "../../rib/rib"
+# 3) Run a RIB on tigger. "../../rib/xorp_rib"
 # 4) Run a fea on xorp0 as root.
-#    "ssh root@xorp0 xorp/xorp/fea/fea  -h tigger -b"
-# 5) Run a bgp process on tigger. "../bgp"
+#    "ssh root@xorp0 xorp/xorp/fea/xorp_fea  -h tigger -b"
+# 5) Run a bgp process on tigger. "../xorp_bgp"
 #
 
 set -e

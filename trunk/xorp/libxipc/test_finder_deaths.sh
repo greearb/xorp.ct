@@ -6,7 +6,7 @@ finder_port=17777
 #
 # Start finder
 #
-./finder -p ${finder_port} &
+./xorp_finder -p ${finder_port} &
 finder_pid=$!
 
 #

@@ -13,7 +13,7 @@
  # 1) Run a finder process
 # 2) Run a FEA process.
 # 3) Run a RIB process.
-# 4) Run xorp "../bgp"
+# 4) Run xorp "../xorp_bgp"
 # 5) Run "./test_peer -s peer1"
 # 6) Run "./coord"
 # 7) Run "snmpd"
@@ -303,10 +303,10 @@ then
     XTB=${XORP_TOP_BUILDDIR}
     BH=${XTB}/bgp/harness
     ${XTB}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ${XTB}/libxipc/finder
-    ${XTB}/fea/fea_dummy     = $CXRL finder://fea/common/0.1/get_target_name
-    ${XTB}/rib/rib           = $CXRL finder://rib/common/0.1/get_target_name
-    ${XTB}/bgp/bgp           = $CXRL finder://bgp/common/0.1/get_target_name
+    ${XTB}/libxipc/xorp_finder
+    ${XTB}/fea/xorp_fea_dummy = $CXRL finder://fea/common/0.1/get_target_name
+    ${XTB}/rib/xorp_rib       = $CXRL finder://rib/common/0.1/get_target_name
+    ${XTB}/bgp/xorp_bgp       = $CXRL finder://bgp/common/0.1/get_target_name
     ${BH}/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
     ${BH}/coord = $CXRL finder://coord/common/0.1/get_target_name
     ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.22 2003/07/03 23:52:23 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.23 2003/07/04 00:10:54 atanu Exp $
 #
 
 #
@@ -14,7 +14,7 @@
 # 1) Run a finder process
 # 2) Run a FEA process.
 # 3) Run a RIB process.
-# 4) Run xorp "../bgp"
+# 4) Run xorp "../xorp_bgp"
 # 5) Run "./test_peer -s peer1"
 # 6) Run "./test_peer -s peer2"
 # 7) Run "./coord"
@@ -442,13 +442,13 @@ if [ $START_PROGRAMS = "yes" ]
 then
 CXRL="$CALLXRL -r 10"
     ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/finder
-    ../../fea/fea_dummy   = $CXRL finder://fea/common/0.1/get_target_name
-    ../../rib/rib         = $CXRL finder://rib/common/0.1/get_target_name
-    ../bgp                = $CXRL finder://bgp/common/0.1/get_target_name
-    ./test_peer -s peer1  = $CXRL finder://peer1/common/0.1/get_target_name
-    ./test_peer -s peer2  = $CXRL finder://peer1/common/0.1/get_target_name
-    ./coord               = $CXRL finder://coord/common/0.1/get_target_name
+    ../../libxipc/xorp_finder
+    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
+    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
+    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
+    ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
+    ./test_peer -s peer2      = $CXRL finder://peer1/common/0.1/get_target_name
+    ./coord                   = $CXRL finder://coord/common/0.1/get_target_name
 EOF
     trap '' 0
     exit $?

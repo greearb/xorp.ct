@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.3 2003/05/29 18:56:27 hodson Exp $
+# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.4 2003/05/29 23:34:02 atanu Exp $
 #
 
 #
@@ -12,7 +12,7 @@
 #
 # Preconditons
 # 1) Run a finder process
-# 2) Run xorp "../bgp"
+# 2) Run xorp "../xorp_bgp"
 #
 
 set -e
@@ -66,8 +66,8 @@ if [ $START_PROGRAMS = "yes" ]
 then
 CXRL="$CALLXRL -r 10"
     ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/finder
-    ../bgp                = $CXRL finder://bgp/common/0.1/get_target_name
+    ../../libxipc/xorp_finder
+    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
 EOF
     trap '' 0
     exit $?

@@ -1,14 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.13 2003/05/02 09:00:01 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.14 2003/05/07 21:58:12 pavlin Exp $
 ##
 
 # -- Subdirectories
 SUBDIRS = . tools
 
 # -- Real Programs
-bin_PROGRAMS	 = rtrmgr xorpsh
-#bin_PROGRAMS	 = rtrmgr
+bin_PROGRAMS	 = xorp_rtrmgr xorpsh
 
 # -- Test Programs
 #bin_PROGRAMS	+=
@@ -24,34 +23,34 @@ LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-rtrmgr_SOURCES	 = rtrmgr_module.h
-rtrmgr_SOURCES	+= version.h
-rtrmgr_SOURCES	+= y.tplt_tab.cc
-rtrmgr_SOURCES	+= lex.tplt.cc
-rtrmgr_SOURCES	+= y.boot_tab.cc
-rtrmgr_SOURCES	+= lex.boot.cc
-rtrmgr_SOURCES	+= main_rtrmgr.cc
-rtrmgr_SOURCES	+= template_tree.cc
-rtrmgr_SOURCES	+= template_tree_node.cc
-rtrmgr_SOURCES	+= template_commands.cc
-rtrmgr_SOURCES	+= module_command.cc
-rtrmgr_SOURCES	+= conf_tree_node.cc
-rtrmgr_SOURCES	+= conf_tree.cc
-rtrmgr_SOURCES	+= master_conf_tree_node.cc
-rtrmgr_SOURCES	+= master_conf_tree.cc
-rtrmgr_SOURCES	+= module_manager.cc
-rtrmgr_SOURCES	+= xorp_client.cc
-rtrmgr_SOURCES	+= xrldb.cc
-rtrmgr_SOURCES	+= split.cc
-rtrmgr_SOURCES	+= userdb.cc
-rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
-rtrmgr_SOURCES	+= randomness.cc
-rtrmgr_SOURCES	+= unexpanded_xrl.cc
-rtrmgr_SOURCES  += task.cc
+xorp_rtrmgr_SOURCES	 = rtrmgr_module.h
+xorp_rtrmgr_SOURCES	+= version.h
+xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
+xorp_rtrmgr_SOURCES	+= lex.tplt.cc
+xorp_rtrmgr_SOURCES	+= y.boot_tab.cc
+xorp_rtrmgr_SOURCES	+= lex.boot.cc
+xorp_rtrmgr_SOURCES	+= main_rtrmgr.cc
+xorp_rtrmgr_SOURCES	+= template_tree.cc
+xorp_rtrmgr_SOURCES	+= template_tree_node.cc
+xorp_rtrmgr_SOURCES	+= template_commands.cc
+xorp_rtrmgr_SOURCES	+= module_command.cc
+xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
+xorp_rtrmgr_SOURCES	+= conf_tree.cc
+xorp_rtrmgr_SOURCES	+= master_conf_tree_node.cc
+xorp_rtrmgr_SOURCES	+= master_conf_tree.cc
+xorp_rtrmgr_SOURCES	+= module_manager.cc
+xorp_rtrmgr_SOURCES	+= xorp_client.cc
+xorp_rtrmgr_SOURCES	+= xrldb.cc
+xorp_rtrmgr_SOURCES	+= split.cc
+xorp_rtrmgr_SOURCES	+= userdb.cc
+xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
+xorp_rtrmgr_SOURCES	+= randomness.cc
+xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
+xorp_rtrmgr_SOURCES  += task.cc
 
-rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a 
-rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a 
-rtrmgr_LDADD	+= $(LDADD) 
+xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a 
+xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a 
+xorp_rtrmgr_LDADD	+= $(LDADD) 
 
 xorpsh_SOURCES	 = rtrmgr_module.h
 xorpsh_SOURCES	+= version.h
