@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.8 2004/05/07 21:03:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.9 2004/06/10 22:40:56 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -82,11 +82,8 @@ RoutingSocket::force_read()
 int
 RoutingSocket::start(int af)
 {
-    if (_fd >= 0) {
-	XLOG_ERROR("Cound not start routing socket operation: "
-		   "already started");
-	return (XORP_ERROR);
-    }
+    if (_fd >= 0)
+	return (_fd);
 
     //
     // Open the socket

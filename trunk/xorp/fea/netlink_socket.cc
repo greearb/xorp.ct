@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.16 2004/05/07 21:03:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.17 2004/06/10 22:40:56 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -96,11 +96,8 @@ NetlinkSocket::start(int af)
     struct sockaddr_nl	snl;
     socklen_t		snl_len;
 
-    if (_fd >= 0) {
-	XLOG_ERROR("Cound not start netlink socket operation: "
-		   "already started");
-	return (XORP_ERROR);
-    }
+    if (_fd >= 0)
+	return (_fd);
     
     //
     // Select the protocol
