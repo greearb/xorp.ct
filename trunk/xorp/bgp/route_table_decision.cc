@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.33 2005/03/03 07:29:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.34 2005/03/04 03:55:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,6 +43,20 @@ DecisionTable<A>::DecisionTable(string table_name,
     : BGPRouteTable<A>("DecisionTable" + table_name, safi),
     _next_hop_resolver(next_hop_resolver)
 {
+}
+
+template<class A>
+DecisionTable<A>::~DecisionTable()
+{
+    //clean up - this should really be done by removing the parent
+    //when the peering goes down, but we don't do that currently - we
+    //reuse the existing branch because that makes deleting old routes
+    //much easier.  
+    typename map<BGPRouteTable<A>*, PeerTableInfo<A>* >::iterator i;
+    for (i = _parents.begin();  i != _parents.end();  i++) {
+	delete i->second;
+	_parents.erase(i);
+    }
 }
 
 template<class A>
