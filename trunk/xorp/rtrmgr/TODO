@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.14 2003/12/03 20:29:13 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.15 2003/12/05 06:25:26 pavlin Exp $
 #
 
 Urgent
@@ -29,7 +29,8 @@ Configure Mode
    specification.
 
 Operational Mode
-
+ - Change MasterConfigTree::parse() to return error message string
+   by reference.
  - Ensure commands only appear when modules are loaded.
  - If signal SIGSTOP is delivered to a child process
    (e.g., by kill -STOP <pid>), the child process will properly deliver
