@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.23 2004/02/26 08:46:48 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.24 2004/02/28 21:14:49 pavlin Exp $"
 
 
 //
@@ -407,19 +407,37 @@ cli_print2(const string& ,		// server_name
 	return (XORP_ERROR);
     }
 
-#if 1
     for (int i = 0; i < 10; i++)
 	cli_client->cli_print(c_format("This is my line number %d\n", i));
-#endif
-#if 0
-    cli_client->cli_print("Line 1\n");
-    cli_client->cli_print("Line 2");
-#endif
-    // cli_print("\n");
 
     return (XORP_OK);
 }
 
+int
+cli_print_wide(const string& ,		// server_name
+	       const string& cli_term_name,
+	       uint32_t ,		// cli_session_id
+	       const string& ,		// command_global_name,
+	       const vector<string>& argv)
+{
+    CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
+    if (cli_client == NULL)
+	return (XORP_ERROR);
+
+    if (argv.size() > 0) {
+	cli_client->cli_print("Error: unexpected arguments\n");
+	return (XORP_ERROR);
+    }
+
+    string trail = "111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999";
+#if 1
+    for (int i = 0; i < 100; i++)
+	cli_client->cli_print(c_format("This is my line number %d %s\n",
+				       i, trail.c_str()));
+#endif
+
+    return (XORP_OK);
+}
 
 int
 add_my_cli_commands(CliNode& cli_node)
@@ -439,6 +457,7 @@ add_my_cli_commands(CliNode& cli_node)
 
     com1 = com0->add_command("print", "Print numbers", cli_print);
     com1 = com0->add_command("print2", "Print few numbers", cli_print2);
+    com1 = com0->add_command("print_wide", "Print wide lines", cli_print_wide);
 #endif
     com2 = com0->add_command("myset", "Set my variable", cli_myset_func);
     com1 = com0->add_command("myshow", "Show my information", "Myshow> ");
@@ -454,6 +473,7 @@ add_my_cli_commands(CliNode& cli_node)
 
     com1 = com0->add_command("print", "Print numbers", cli_print);
     com1 = com0->add_command("print2", "Print few numbers", cli_print2);
+    com1 = com0->add_command("print_wide", "Print wide lines", cli_print_wide);
 
     return (XORP_OK);
 }
