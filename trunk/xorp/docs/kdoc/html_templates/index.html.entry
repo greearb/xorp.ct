@@ -1,4 +1,4 @@
 <TR @ROW_BG@>
   <TD> <a href="@START_URL@">@DIR_NAME@</a></TD>
-  <TD>@DESC@</a></TD>
+  <TD>@DESC@</TD>
 </TR>
