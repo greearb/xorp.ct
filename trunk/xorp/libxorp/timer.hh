@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.10 2003/04/02 02:53:51 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.11 2003/04/02 17:10:39 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -291,7 +291,7 @@ public:
      *
      * @param tv reference that is assigned expiry time of next timer.
      * If there is no @ref XorpTimer pending, this value is assigned the
-     * maximum @ref TimeVal value (@see TimeVal::set_max()).
+     * maximum @ref TimeVal::MAXIMUM().
      *
      * @return true if there is a XorpTimer awaiting expiry, false otherwise.  
      */
