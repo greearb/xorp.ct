@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.1 2004/09/17 13:49:00 abittau Exp $"
 
 /*
  * EXIT CODES:
@@ -229,7 +229,8 @@ void usage(const char* x) {
     
     cout << "-h\t\tthis help message\n";
     cout << "-s <file>\tsource file of policy\n";
-    cout << "-f <filterid>\ttarget filter to procude code for\n";
+    cout << "-m <policy_var_map_file>\tfile with policy variables mapping\n";
+    cout << "-f <filterid>\ttarget filter to produce code for\n";
     cout << "-p <protocol>\ttarget protocol to produce code for\n";
     cout << "-o <outfile>\tfile where generated code should be stored\n";
     exit(3);
@@ -239,6 +240,7 @@ int main(int argc, char *argv[]) {
     int filterid = -1;
     string protocol("");
     string source_file("");
+    string policy_var_map_file("");
 
     if(argc < 2) 
 	usage(argv[0]);
@@ -246,10 +248,14 @@ int main(int argc, char *argv[]) {
 
     int ch;
 
-    while( (ch = getopt(argc,argv,"hs:p:f:o:")) != -1) {
+    while( (ch = getopt(argc,argv,"hs:m:p:f:o:")) != -1) {
 	switch(ch) {
 	    case 's':
 		source_file = optarg;
+		break;
+
+	    case 'm':
+		policy_var_map_file = optarg;
 		break;
 	    
 	    case 'p':
@@ -302,12 +308,15 @@ int main(int argc, char *argv[]) {
     xlog_add_default_output();
     xlog_start();
 
-    string fvarmap = "policyvarmap.conf";
-
     if(source_file.empty()) {
 	cout << "No source file specified\n\n";
 	usage(argv[0]);
-    }	
+    }
+
+    if (policy_var_map_file.empty()) {
+	cout << "No source file specified for mapping of policy variables\n\n";
+	usage(argv[0]);
+    }
     
     struct timeval tv_start;
     
@@ -317,7 +326,7 @@ int main(int argc, char *argv[]) {
     }
 
     try {
-	go(source_file,fvarmap,filterid,protocol);
+	go(source_file,policy_var_map_file,filterid,protocol);
     } catch(const PolicyException& e) {
 	cout << "Compile FAILED" << endl;
 	cout << "PolicyException: " << e.str() << endl;
