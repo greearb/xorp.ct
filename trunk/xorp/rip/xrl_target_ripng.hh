@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.13 2004/06/10 13:45:54 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.14 2004/06/10 22:41:49 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -274,11 +274,11 @@ public:
 				uint32_t&	peer_last_active
 				);
 
-    XrlCmdError ripng_0_1_import_protocol_routes(const string&	protocol,
+    XrlCmdError ripng_0_1_redist_protocol_routes(const string&	protocol,
 						 const uint32_t& cost,
 						 const uint32_t& tag);
 
-    XrlCmdError ripng_0_1_no_import_protocol_routes(const string& protocol);
+    XrlCmdError ripng_0_1_no_redist_protocol_routes(const string& protocol);
 
     XrlCmdError redist6_0_1_add_route(const IPv6Net&		net,
 				      const IPv6&		nexthop,

@@ -540,17 +540,17 @@ XrlRipTarget::rip_0_1_get_peer_counters(const string&	ifn,
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_import_protocol_routes(const string&	protocol_name,
+XrlRipTarget::rip_0_1_redist_protocol_routes(const string&	protocol_name,
 					     const uint32_t&	cost,
 					     const uint32_t&	tag)
 {
-    return _ct->ripx_0_1_import_protocol_routes(protocol_name, cost, tag);
+    return _ct->ripx_0_1_redist_protocol_routes(protocol_name, cost, tag);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_no_import_protocol_routes(const string&	protocol_name)
+XrlRipTarget::rip_0_1_no_redist_protocol_routes(const string&	protocol_name)
 {
-    return _ct->ripx_0_1_no_import_protocol_routes(protocol_name);
+    return _ct->ripx_0_1_no_redist_protocol_routes(protocol_name);
 }
 
 XrlCmdError

@@ -459,17 +459,17 @@ XrlRipngTarget::ripng_0_1_get_peer_counters(const string&	ifn,
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_import_protocol_routes(const string&	 protocol,
+XrlRipngTarget::ripng_0_1_redist_protocol_routes(const string&	 protocol,
 						 const uint32_t& cost,
 						 const uint32_t& tag)
 {
-    return _ct->ripx_0_1_import_protocol_routes(protocol, cost, tag);
+    return _ct->ripx_0_1_redist_protocol_routes(protocol, cost, tag);
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_no_import_protocol_routes(const string& protocol)
+XrlRipngTarget::ripng_0_1_no_redist_protocol_routes(const string& protocol)
 {
-    return _ct->ripx_0_1_no_import_protocol_routes(protocol);
+    return _ct->ripx_0_1_no_redist_protocol_routes(protocol);
 }
 
 XrlCmdError

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.13 2004/06/06 02:06:48 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.14 2004/06/10 22:41:48 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -271,11 +271,11 @@ public:
 					   XrlAtomList&		values,
 					   uint32_t&		peer_last_pkt);
 
-    XrlCmdError ripx_0_1_import_protocol_routes(const string&	protocol,
+    XrlCmdError ripx_0_1_redist_protocol_routes(const string&	protocol,
 						const uint32_t& cost,
 						const uint32_t& tag);
 
-    XrlCmdError ripx_0_1_no_import_protocol_routes(const string& protocol);
+    XrlCmdError ripx_0_1_no_redist_protocol_routes(const string& protocol);
 
     XrlCmdError redistx_0_1_add_route(const IPNet<A>&		net,
 				      const A&			nexthop,
@@ -1145,7 +1145,7 @@ XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_import_protocol_routes(const string&	protocol,
+XrlRipCommonTarget<A>::ripx_0_1_redist_protocol_routes(const string&	protocol,
 						       const uint32_t&	cost,
 						       const uint32_t& 	tag)
 {
@@ -1155,7 +1155,7 @@ XrlRipCommonTarget<A>::ripx_0_1_import_protocol_routes(const string&	protocol,
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_no_import_protocol_routes(const string& protocol)
+XrlRipCommonTarget<A>::ripx_0_1_no_redist_protocol_routes(const string& protocol)
 {
     _xrm.request_no_redist_for(protocol);
     return XrlCmdError::OKAY();

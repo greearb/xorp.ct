@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.14 2004/06/15 03:09:43 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.15 2004/06/15 16:13:26 hodson Exp $ */
 
 
 interfaces {
@@ -68,14 +68,14 @@ protocols {
     rip {
 /* Redistribute routes for connected interfaces */
 /*
-	import connected {
+	export connected {
 	    metric: 0
 	    tag: 0
 	}
 */
 /* Redistribute static routes */
 /*
-	import static {
+	export static {
 	    metric: 1
 	    tag: 0
 	}

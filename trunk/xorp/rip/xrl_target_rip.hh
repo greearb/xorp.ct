@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.12 2004/06/10 13:45:54 hodson Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.13 2004/06/10 22:41:48 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -280,11 +280,11 @@ public:
 					  XrlAtomList&	values,
 					  uint32_t&	peer_last_active);
 
-    XrlCmdError rip_0_1_import_protocol_routes(const string&	protocol_name,
+    XrlCmdError rip_0_1_redist_protocol_routes(const string&	protocol_name,
 					       const uint32_t&	cost,
 					       const uint32_t&	tag);
 
-    XrlCmdError rip_0_1_no_import_protocol_routes(const string&	protocol_name);
+    XrlCmdError rip_0_1_no_redist_protocol_routes(const string&	protocol_name);
 
     XrlCmdError redist4_0_1_add_route(const IPv4Net&		net,
 				      const IPv4&		nexthop,
