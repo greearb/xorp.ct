@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.10 2004/06/10 22:41:57 hodson Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.11 2004/09/17 13:58:24 abittau Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -505,7 +505,6 @@ public:
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
 
-   
     /**
      * Configure a policy filter.
      *
@@ -676,17 +675,16 @@ private:
     bool is_directly_connected(const IfMgrIfTree& if_tree,
 			       const IPvX& addr) const;
 
-   
     /**
      * Do policy filtering on a route.
      *
-     * @param route route to filter
+     * @param route route to filter.
      * @return true if route was accepted by policy filter, false otherwise.
      */
     bool doFiltering(StaticRoute& route);
     
     /**
-     * Inform the RIB about a route
+     * Inform the RIB about a route.
      *
      * @param r route which should be updated in the RIB.
      */
@@ -713,9 +711,9 @@ private:
     //
     // Debug and test-related state
     //
-    bool	_is_log_trace;		// If true, enable XLOG_TRACE()
+    bool		_is_log_trace;		// If true, enable XLOG_TRACE()
 
-    PolicyFilters	_policy_filters;    // only one instance of this!
+    PolicyFilters	_policy_filters;	// Only one instance of this!
 };
 
 #endif // __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
