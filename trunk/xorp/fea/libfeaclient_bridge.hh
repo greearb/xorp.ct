@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.1 2003/10/14 21:56:27 hodson Exp $
 
 #ifndef __FEA_LIBFEACLIENT_BRIDGE_HH__
 #define __FEA_LIBFEACLIENT_BRIDGE_HH__
@@ -20,8 +20,9 @@
 #include "ifconfig.hh"
 
 class XrlRouter;
-class IfMgrXrlReplicationManager;
 class IfTree;
+class IfMgrXrlReplicationManager;
+class IfMgrIfTree;
 
 /**
  * @short Bridge class to intervene between the FEA's interface
@@ -70,6 +71,22 @@ public:
      */
     bool remove_libfeaclient_mirror(const string& xrl_target_name);
 
+    /**
+     * Get reference to libfeaclient's interface configuration tree.
+     *
+     * @return reference to tree.
+     */
+    inline const IfMgrIfTree& libfeaclient_iftree() const;
+
+    /**
+     * Get pointer FEA interface configuration tree that is
+     * being used to feed data into libfeaclient's interface
+     * configuration tree.
+     *
+     * @return pointer to tree.
+     */
+    inline const IfTree* fea_iftree() const;
+
 protected:
     void interface_update(const string& ifname,
 			  const Update& update,
@@ -96,5 +113,24 @@ protected:
     IfMgrXrlReplicationManager* _rm;
     const IfTree*		_iftree;
 };
+
+/**
+ * Check equivalence of interface configuration trees in FEA and
+ * libfeaclient.  This is a debugging method.
+ *
+ * @param fea_iftree reference to an FEA interface configuration tree.
+ *
+ * @param libfeaclient_iftree reference to a libfeaclient interface
+ * configuration tree.
+ *
+ * @param errlog string to store textual representation of
+ * differences.
+ *
+ * @return true if tree's are equivalent, false otherwise.
+ */
+bool
+equivalent(const IfTree&	fea_iftree,
+	   const IfMgrIfTree&	libfeaclient_iftree,
+	   string&		errlog);
 
 #endif // __FEA_LIBFEACLIENT_BRIDGE_HH__
