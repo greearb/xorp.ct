@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.10 2002/12/09 18:28:47 hodson Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -27,16 +27,17 @@ template<class A>
 class BGPDeletionTable : public BGPRouteTable<A>  {
 public:
     BGPDeletionTable(string tablename,
-		     BgpTrie<A>* route_table, 
+		     BgpTrie<A>* route_table,
 		     const PeerHandler *peer,
 		     uint32_t genid,
 		     BGPRouteTable<A> *parent);
+    ~BGPDeletionTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,
 		      const InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(const InternalMessage<A> &rtmsg,
 		     BGPRouteTable<A> *caller);
     int route_dump(const InternalMessage<A> &rtmsg,
 		   BGPRouteTable<A> *caller,
@@ -46,7 +47,7 @@ public:
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
 
-    RouteTableType type() const {return DELETION_TABLE;}
+    RouteTableType type() const { return DELETION_TABLE; }
     string str() const;
 
     /* mechanisms to implement flow control in the output plumbing */
@@ -68,11 +69,11 @@ private:
     const PeerHandler *_peer;
     uint32_t _genid;
     BgpTrie<A>* _route_table;
-    map<const PathAttributeList<A> *, 
+    map<const PathAttributeList<A> *,
 	const ChainedSubnetRoute<A>*>::const_iterator _del_sweep;
     int _deleted, _chains;
     XorpTimer _deletion_timer;
-    
+
 };
 
 #endif // __BGP_ROUTE_TABLE_DELETION_HH__

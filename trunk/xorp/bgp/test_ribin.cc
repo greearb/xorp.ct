@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.2 2002/12/14 00:51:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -494,7 +494,6 @@ int main(int, char** argv) {
 	
     }
     unlink("/tmp/test_ribin");
-    exit(0);
 }
 
 

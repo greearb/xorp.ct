@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.2 2002/12/14 00:51:07 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -40,9 +40,9 @@ public:
       RibIn that decides whether this is an add or a replace*/
     int replace_route(const InternalMessage<A> & /*old_rtmsg*/,
 		      const InternalMessage<A> & /*new_rtmsg*/,
-		      BGPRouteTable<A> * /*caller*/ ) { abort();}
+		      BGPRouteTable<A> * /*caller*/ ) { abort(); }
 
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(const InternalMessage<A> &rtmsg,
 		     BGPRouteTable<A> *caller);
 
     int push(BGPRouteTable<A> *caller);
@@ -52,7 +52,7 @@ public:
 
     BGPRouteTable<A> *parent() { return NULL; }
 
-    RouteTableType type() const {return RIB_IN_TABLE;}
+    RouteTableType type() const { return RIB_IN_TABLE; }
 
     string str() const;
 
@@ -64,7 +64,7 @@ public:
     bool get_next_message(BGPRouteTable<A> */*next_table*/) {
 	abort();
     }
-    void set_peer_is_up() {_peer_is_up = true;}
+    void set_peer_is_up() { _peer_is_up = true; }
 
     bool dump_next_route(DumpIterator<A>& dump_iter);
 
@@ -89,8 +89,8 @@ private:
     uint32_t _genid;
     uint32_t _table_version;
 
-    //state and methods related to re-sending all the routes related
-    //to a nexthop whose IGP information has changed.
+    // state and methods related to re-sending all the routes related
+    // to a nexthop whose IGP information has changed.
     set <A> _changed_nexthops;
     bool _nexthop_push_active;
     A _current_changed_nexthop;
@@ -99,7 +99,7 @@ private:
     void push_next_changed_nexthop();
     void deletion_nexthop_check(const SubnetRoute<A>* route);
     void next_chain();
-    //end of IGP nexthop handing stuff
+    // end of IGP nexthop handing stuff
 };
 
 #endif // __BGP_ROUTE_TABLE_RIBIN_HH__

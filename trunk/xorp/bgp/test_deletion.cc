@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.4 2002/12/09 18:28:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -712,6 +712,9 @@ int main(int, char** argv) {
     debug_table->write_comment("SHUTDOWN AND CLEAN UP");
     delete ribin;
     delete debug_table;
+    delete palist1;
+    delete palist2;
+    delete palist3;
 
     FILE *file = fopen("/tmp/test_deletion", "r");
     if (file == NULL) {
@@ -753,7 +756,6 @@ int main(int, char** argv) {
 	
     }
     unlink("/tmp/test_deletion");
-    exit(0);
 }
 
 
