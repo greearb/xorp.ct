@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.20 2003/04/01 00:56:20 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.21 2003/06/12 03:01:06 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -401,7 +401,7 @@ public:
     // J/P (downstream) state (per interface)
     //
     // Note: each method below applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-    // (except for the *_tmp_* and *_processed_sg_rpt*
+    // (except for the *_tmp_* and *_processed_wc_by_sg_rpt*
     // methods which apply only for (S,G,rpt))
     void	set_downstream_noinfo_state(uint16_t vif_index);
     void	set_downstream_join_state(uint16_t vif_index);
@@ -483,14 +483,10 @@ public:
     const Mifset& pim_include_sg() const;
     // Note: applies for (S,G)
     const Mifset& pim_exclude_sg() const;
-    // Note: applies for (S,G)
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     const Mifset& inherited_olist_sg() const;
-    // Note: applies for (S,G,rpt)
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     const Mifset& inherited_olist_sg_rpt() const;
-    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-    const Mifset& inherited_olist_sg_forward() const;
-    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-    const Mifset& inherited_olist_sg_rpt_forward() const;
     // Note: applies for (S,G,rpt)
     bool	recompute_inherited_olist_sg_rpt();
     

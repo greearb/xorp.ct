@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.3 2003/04/16 07:45:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.4 2003/05/21 05:32:55 pavlin Exp $"
 
 
 //
@@ -230,7 +230,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	}
     } while (false);
     
-    olist = pim_mre->inherited_olist_sg_forward();
+    olist = pim_mre->inherited_olist_sg();
     
     if (olist.any() && pim_mre->is_switch_to_spt_desired_sg()) {
 	//

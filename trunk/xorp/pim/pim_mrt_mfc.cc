@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.6 2003/03/18 02:44:36 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.7 2003/06/12 02:42:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -275,7 +275,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	&& (pim_mre_sg->is_joined_state()
 	    || is_directly_connected_s)) {
 	is_wrong_iif = false;
-	olist = pim_mre_sg->inherited_olist_sg_forward();
+	olist = pim_mre_sg->inherited_olist_sg();
 	if (olist.any() && (! is_keepalive_timer_restarted)) {
 	    // restart KeepaliveTimer(S,G)
 	    pim_mre_sg->start_keepalive_timer();
@@ -284,7 +284,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     } else if ((iif_vif_index == pim_mre->rpf_interface_rp())
 	       && (is_sptbit_set == false)) {
 	is_wrong_iif = false;
-	olist = pim_mre->inherited_olist_sg_rpt_forward();
+	olist = pim_mre->inherited_olist_sg_rpt();
 	if (pim_mre->check_switch_to_spt_sg()) {
 	    if (pim_mre_sg == NULL) {
 		// XXX: create the (S,G) entry to initiate (S,G) Join
@@ -308,12 +308,12 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     } else {
 	// # Note: RPF check failed
 	if ((is_sptbit_set == true)
-	    && pim_mre->inherited_olist_sg_forward().test(iif_vif_index)) {
+	    && pim_mre->inherited_olist_sg().test(iif_vif_index)) {
 	    // send Assert(S,G) on iif_vif_index
 	    XLOG_ASSERT(pim_mre_sg != NULL);
 	    pim_mre_sg->wrong_iif_data_arrived_sg(pim_vif, src);
 	} else if ((is_sptbit_set == false)
-		   && (pim_mre->inherited_olist_sg_rpt_forward().test(
+		   && (pim_mre->inherited_olist_sg_rpt().test(
 		       iif_vif_index))) {
 	    // send Assert(*,G) on iif_vif_index
 	    PimMre *pim_mre_wc = NULL;

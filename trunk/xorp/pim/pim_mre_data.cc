@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.4 2003/03/10 23:20:48 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.5 2003/03/27 00:19:03 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -75,7 +75,7 @@ PimMre::update_sptbit_sg(uint16_t iif_vif_index)
 	&& is_join_desired_sg()
 	&& (is_directly_connected_s()
 	    || (rpf_interface_s() != rpf_interface_rp())
-	    || (inherited_olist_sg_rpt_forward().none())
+	    || (inherited_olist_sg_rpt().none())
 	    || (rpfp_nbr_sg() == pim_nbr_rpfp_nbr_wc))) {
 	set_spt(true);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.9 2003/02/14 23:59:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.10 2003/03/10 23:20:47 hodson Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -166,7 +166,7 @@ PimMfc::recompute_iif_olist_mfc()
 	new_iif_vif_index = pim_mre->rpf_interface_rp();
     }
     
-    new_olist = pim_mre->inherited_olist_sg_forward();
+    new_olist = pim_mre->inherited_olist_sg();
     
     if (new_iif_vif_index == Vif::VIF_INDEX_INVALID) {
 	// TODO: XXX: PAVPAVPAV: completely remove the olist check and comments

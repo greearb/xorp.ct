@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.22 2003/05/21 05:32:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.23 2003/06/12 03:01:06 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -471,6 +471,11 @@ PimMre::immediate_olist_wc() const
 {
     static Mifset mifs;
     
+    if (! (is_wc() || is_sg() || is_sg_rpt())) {
+	mifs.reset();
+	return (mifs);
+    }
+    
     mifs = joins_wc();
     mifs |= pim_include_wc();
     mifs &= ~lost_assert_wc();
@@ -496,68 +501,25 @@ PimMre::immediate_olist_sg() const
     return (mifs);
 }
 
-// Note: works for (S,G)
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 const Mifset&
 PimMre::inherited_olist_sg() const
 {
     static Mifset mifs;
-    PimMre *pim_mre_sg_rpt;
     
-    if (! is_sg()) {
-	mifs.reset();
-	return (mifs);
-    }
-    
-    mifs.reset();
-    
-    pim_mre_sg_rpt = sg_rpt_entry();
-    if (pim_mre_sg_rpt != NULL)
-	mifs = pim_mre_sg_rpt->inherited_olist_sg_rpt();
-    else
-	mifs = inherited_olist_sg_rpt_forward();	// XXX
-    mifs |= immediate_olist_sg();
+    mifs = inherited_olist_sg_rpt();
+    if (is_sg())
+	mifs |= immediate_olist_sg();
     
     return (mifs);
 }
 
-// Note: works for (S,G,rpt)
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 const Mifset&
 PimMre::inherited_olist_sg_rpt() const
 {
     static Mifset mifs;
     Mifset mifs2;
-    PimMre *pim_mre_sg;
-    
-    if (! is_sg_rpt()) {
-	mifs.reset();
-	return (mifs);
-    }
-    
-    mifs = joins_rp();
-    mifs |= joins_wc();
-    mifs &= ~prunes_sg_rpt();
-    
-    mifs2 = pim_include_wc();
-    pim_mre_sg = sg_entry();
-    if (pim_mre_sg != NULL)
-	mifs2 &= ~(pim_mre_sg->pim_exclude_sg());
-    mifs |= mifs2;
-    
-    mifs2 = lost_assert_wc();
-    mifs2 |= lost_assert_sg_rpt();
-    mifs &= ~mifs2;
-    
-    return (mifs);
-}
-
-//
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-// XXX: internals MUST be syncronized with PimMre::inherited_olist_sg()
-//
-const Mifset&
-PimMre::inherited_olist_sg_forward() const
-{
-    static Mifset mifs;
     
     mifs.reset();
     
@@ -567,61 +529,19 @@ PimMre::inherited_olist_sg_forward() const
 	    // (S,G,rpt)
 	    //
 	    PimMre *pim_mre_sg = sg_entry();
-	    if (pim_mre_sg != NULL) {
-		mifs = pim_mre_sg->inherited_olist_sg();
-		break;
-	    }
-	    mifs = inherited_olist_sg_rpt();
 	    
-	    break;
-	}
-	if (is_sg()) {
-	    //
-	    // (S,G)
-	    //
-	    mifs = inherited_olist_sg();
+	    mifs = joins_rp();
+	    mifs |= joins_wc();
+	    mifs &= ~prunes_sg_rpt();
 	    
-	    break;
-	}
-	if (is_wc()) {
-	    //
-	    // (*,G)
-	    //
-	    mifs = inherited_olist_sg_rpt_forward();
+	    mifs2 = pim_include_wc();
+	    if (pim_mre_sg != NULL)
+		mifs2 &= ~(pim_mre_sg->pim_exclude_sg());
+	    mifs |= mifs2;
 	    
-	    break;
-	}
-	if (is_rp()) {
-	    //
-	    // (*,*,RP)
-	    //
-	    mifs = inherited_olist_sg_rpt_forward();
-	    
-	    break;
-	}
-    } while (false);
-    
-    return (mifs);
-}
-
-//
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-// XXX: internals MUST be syncronized with PimMre::inherited_olist_sg_rpt()
-//
-const Mifset&
-PimMre::inherited_olist_sg_rpt_forward() const
-{
-    static Mifset mifs;
-    Mifset mifs2;
-
-    mifs.reset();
-    
-    do {
-	if (is_sg_rpt()) {
-	    //
-	    // (S,G,rpt)
-	    //
-	    mifs = inherited_olist_sg_rpt();
+	    mifs2 = lost_assert_wc();
+	    mifs2 |= lost_assert_sg_rpt();
+	    mifs &= ~mifs2;
 	    
 	    break;
 	}
@@ -630,18 +550,18 @@ PimMre::inherited_olist_sg_rpt_forward() const
 	    // (S,G)
 	    //
 	    PimMre *pim_mre_sg_rpt = sg_rpt_entry();
-	    if (pim_mre_sg_rpt != NULL) {
-		mifs = pim_mre_sg_rpt->inherited_olist_sg_rpt_forward();
-		break;
-	    }
+
 	    mifs = joins_rp();
 	    mifs |= joins_wc();
+	    if (pim_mre_sg_rpt != NULL)
+		mifs &= ~(pim_mre_sg_rpt->prunes_sg_rpt());
 	    
 	    mifs2 = pim_include_wc();
 	    mifs2 &= ~pim_exclude_sg();
 	    mifs |= mifs2;
 	    
 	    mifs2 = lost_assert_wc();
+	    mifs2 |= lost_assert_sg_rpt(); // XXX: applies for (S,G) as well
 	    mifs &= ~mifs2;
 	    
 	    break;
@@ -911,9 +831,9 @@ PimMre::entry_can_remove() const
 	    return (false);
     }
 #if 0		// TODO: XXX: PAVPAVPAV: not needed?
-    if (inherited_olist_sg_forward().any())
+    if (inherited_olist_sg().any())
 	return (false);
-    if (inherited_olist_sg_rpt_forward().any())
+    if (inherited_olist_sg_rpt().any())
 	return (false);
 #endif // 0
 #if 1		// TODO: XXX: PAVPAVPAV: not needed?
