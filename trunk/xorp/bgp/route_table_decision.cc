@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.17 2003/10/25 13:23:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.18 2003/10/25 20:40:14 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -195,12 +195,14 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	delete_route(old_rtmsg, caller);
 	if (new_rtmsg.push() && !old_rtmsg.push())
 	    _next_table->push(this);
+	delete old_winner_clone;
 	return ADD_UNUSED;
     }
     
     if (new_winner->route() == old_winner_clone->route()) {
 	//No change.
 	//I don't think this can happen.
+	delete old_winner_clone;
 	return ADD_USED;
     }
 
