@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.9 2003/05/28 21:47:44 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.10 2003/06/01 02:07:12 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -428,6 +428,24 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		end_config(string& reason);
+
+    /**
+     * Find an unused vif index from the set of configured vifs.
+     * 
+     * @return the smallest unused vif index from the set of configured vifs
+     * if there is one available, otherwise return @ref Vif::VIF_INDEX_INVALID.
+     */
+    inline uint16_t find_unused_config_vif_index() const;
+
+    /**
+     * Add a configured vif.
+     * 
+     * @param vif the vif with the information to add.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		add_config_vif(const Vif& vif, string& reason);
     
     /**
      * Add a configured vif.
@@ -438,8 +456,7 @@ public:
      * string with information about the reason for failure (if any).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_config_vif(const string& vif_name,
-			       uint16_t vif_index,
+    int		add_config_vif(const string& vif_name, uint16_t vif_index,
 			       string& reason);
 
     /**
@@ -450,8 +467,7 @@ public:
      * string with information about the reason for failure (if any).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_config_vif(const string& vif_name,
-				  string& reason);
+    int		delete_config_vif(const string& vif_name, string& reason);
 
     /**
      * Add an address to a configured vif.
@@ -791,6 +807,74 @@ ProtoNode<V>::end_config(string& reason)
 	// FALLTHROUGH
     default:
 	XLOG_UNREACHABLE();
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+template<class V>
+inline uint16_t
+ProtoNode<V>::find_unused_config_vif_index() const
+{
+    map<string, Vif>::const_iterator iter;
+    
+    for (uint16_t i = 0; i < Vif::VIF_INDEX_INVALID; i++) {
+	bool is_avail = true;
+	// Check if this vif index is in use
+	for (iter = _configured_vifs.begin();
+	     iter != _configured_vifs.end();
+	     ++iter) {
+	    const Vif& vif = iter->second;
+	    if (vif.vif_index() == i) {
+		is_avail = false;
+		break;
+	    }
+	}
+	if (is_avail)
+	    return (i);
+    }
+    
+    return (Vif::VIF_INDEX_INVALID);
+}
+
+template<class V>
+inline int
+ProtoNode<V>::add_config_vif(const Vif& vif, string& reason)
+{
+    if (start_config(reason) != XORP_OK)
+	return (XORP_ERROR);
+    
+    if (add_config_vif(vif.name(), vif.vif_index(), reason) < 0)
+	return (XORP_ERROR);
+    
+    list<VifAddr>::const_iterator vif_addr_iter;
+    for (vif_addr_iter = vif.addr_list().begin();
+	 vif_addr_iter != vif.addr_list().end();
+	 ++vif_addr_iter) {
+	const VifAddr& vif_addr = *vif_addr_iter;
+	if (add_config_vif_addr(vif.name(),
+				vif_addr.addr(),
+				vif_addr.subnet_addr(),
+				vif_addr.broadcast_addr(),
+				vif_addr.peer_addr(),
+				reason) < 0) {
+	    string dummy_reason;
+	    delete_config_vif(vif.name(), dummy_reason);
+	    return (XORP_ERROR);
+	}
+    }
+    
+    if (set_config_vif_flags(vif.name(),
+			     vif.is_pim_register(),
+			     vif.is_p2p(),
+			     vif.is_loopback(),
+			     vif.is_multicast_capable(),
+			     vif.is_broadcast_capable(),
+			     vif.is_underlying_vif_up(),
+			     reason) < 0) {
+	string dummy_reason;
+	delete_config_vif(vif.name(), dummy_reason);
 	return (XORP_ERROR);
     }
     
