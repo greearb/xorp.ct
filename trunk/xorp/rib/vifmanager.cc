@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.31 2004/05/20 22:18:18 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.32 2004/06/10 22:41:42 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -66,12 +66,12 @@ VifManager::~VifManager()
 
 /**
  * Start operation.
- * 
+ *
  * Start the process of registering with the FEA, etc.
  * After the startup operations are completed,
  * @ref VifManager::final_start() is called internally
  * to complete the job.
- * 
+ *
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
@@ -81,7 +81,7 @@ VifManager::start()
 	return (XORP_OK);
 
     enable();	// XXX: by default the VifManager is always enabled
-    
+
     if (ProtoState::pending_start() < 0)
 	return (XORP_ERROR);
 
@@ -98,10 +98,10 @@ VifManager::start()
 
 /**
  * Completely start the node operation.
- * 
+ *
  * This method should be called internally after @ref VifManager::start()
  * to complete the job.
- * 
+ *
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
@@ -122,12 +122,12 @@ VifManager::final_start()
 
 /**
  * Stop operation.
- * 
+ *
  * Gracefully stop operation.
  * After the shutdown operations are completed,
  * @ref VifManager::final_stop() is called internally
  * to complete the job.
- * 
+ *
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
@@ -155,10 +155,10 @@ VifManager::stop()
 
 /**
  * Completely stop the node operation.
- * 
+ *
  * This method should be called internally after @ref VifManager::stop()
  * to complete the job.
- * 
+ *
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
@@ -327,7 +327,7 @@ VifManager::updates_made()
 	    }
 	}
     }
-    
+
     //
     // Add new vifs, and update existing ones
     //
@@ -372,6 +372,7 @@ VifManager::updates_made()
 			       ifmgr_vif_name.c_str(), error_msg.c_str());
 		}
 	    } else {
+		vif.set_ifname(ifmgr_iface_name);
 		vif.set_p2p(ifmgr_vif.p2p_capable());
 		vif.set_loopback(ifmgr_vif.loopback());
 		vif.set_multicast_capable(ifmgr_vif.multicast_capable());
