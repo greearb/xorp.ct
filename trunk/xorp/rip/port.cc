@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.9 2003/07/21 18:06:56 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.10 2003/08/01 04:08:12 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -228,14 +228,15 @@ Port<A>::route_policy(const RouteEntry<A>& r) const
 	break;
     case SPLIT:
 	// Don't advertise route back to source
-	return make_pair(A::ZERO(), ~0);
+	cost = ~0;
+	break;
     case SPLIT_POISON_REVERSE:
 	// Advertise back at cost of infinity
 	cost = RIP_INFINITY;
 	break;
     }
 
-    return make_pair(A::ZERO(), ~0);
+    return make_pair(A::ZERO(), cost);
 }
 
 template <typename A>
