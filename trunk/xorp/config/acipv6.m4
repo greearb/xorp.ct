@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.2 2003/01/29 02:59:06 pavlin Exp $
 dnl
 
 dnl
@@ -116,4 +116,21 @@ int sin_len = sizeof(sockaddr_in6.sin6_len);
 ],
 [AC_MSG_RESULT(yes)
  AC_DEFINE(HAVE_SIN6_LEN)],
+ AC_MSG_RESULT(no))
+
+dnl ----------------------------
+dnl Check for struct mld_hdr in netinet/icmp6.h
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether netinet/icmp6.h contains struct mld_hdr)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netinet/icmp6.h>
+],
+[
+size_t size = sizeof(struct mld_hdr);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_MLD_HDR)],
  AC_MSG_RESULT(no))

@@ -93,6 +93,11 @@
 #undef HAVE_SIN6_LEN
 
 /*
+ * Define this if there is struct mld_hdr in netinet/icmp6.h
+ */
+#undef HAVE_MLD_HDR
+
+/*
  * Define this if you have struct ip_mreqn.
  */
 #undef HAVE_ST_IP_MREQN
