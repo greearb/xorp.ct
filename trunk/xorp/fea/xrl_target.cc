@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.39 2004/03/24 01:26:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.40 2004/04/06 07:14:24 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1698,6 +1698,154 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
+}
+
+//
+// RIB routes redistribution transaction-based XRL interface
+//
+
+XrlCmdError
+XrlFeaTarget::redist_transaction4_0_1_start_transaction(
+    // Output values,
+    uint32_t&	tid)
+{
+    return _xftm.start_transaction(tid);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction4_0_1_commit_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    return _xftm.commit_transaction(tid);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction4_0_1_abort_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    return _xftm.abort_transaction(tid);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction4_0_1_add_route(
+    // Input values,
+    const uint32_t&	tid,
+    const IPv4Net&	dst,
+    const IPv4&		nh,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	ad,
+    const string&	cookie,
+    const string&	protocol_origin)
+{
+    if (! have_ipv4())
+	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
+
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+    FtiTransactionManager::Operation op(
+	new FtiAddEntry4(_xftm.ftic(), dst, nh, ifname, vifname, metric, ad)
+	);
+    return _xftm.add(tid, op);
+
+    // TODO: use the protocol_origin argument
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction4_0_1_delete_route(
+    // Input values,
+    const uint32_t&	tid,
+    const IPv4Net&	network,
+    const string&	cookie)
+{
+    if (! have_ipv4())
+	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
+
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+    FtiTransactionManager::Operation op(
+	new FtiDeleteEntry4(_xftm.ftic(), network)
+	);
+    return _xftm.add(tid, op);
+
+    UNUSED(cookie);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_start_transaction(
+    // Output values,
+    uint32_t&	tid)
+{
+    return _xftm.start_transaction(tid);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_commit_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    return _xftm.commit_transaction(tid);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_abort_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    return _xftm.abort_transaction(tid);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_add_route(
+    // Input values,
+    const uint32_t&	tid,
+    const IPv6Net&	dst,
+    const IPv6&		nh,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	ad,
+    const string&	cookie,
+    const string&	protocol_origin)
+{
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+    FtiTransactionManager::Operation op(
+	new FtiAddEntry6(_xftm.ftic(), dst, nh, ifname, vifname, metric, ad)
+	);
+    return _xftm.add(tid, op);
+
+    // TODO: use the protocol_origin argument
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_delete_route(
+    // Input values,
+    const uint32_t&	tid,
+    const IPv6Net&	network,
+    const string&	cookie)
+{
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+    FtiTransactionManager::Operation op(
+	new FtiDeleteEntry6(_xftm.ftic(), network)
+	);
+    return _xftm.add(tid, op);
+
+    UNUSED(cookie);
 }
 
 // ----------------------------------------------------------------------------

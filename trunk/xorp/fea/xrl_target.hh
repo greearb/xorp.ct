@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.28 2004/03/24 01:26:13 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.29 2004/04/06 07:14:25 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -694,6 +694,146 @@ public:
     XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
 	// Input values,
 	const bool&	enabled);
+
+    //
+    // RIB routes redistribution transaction-based XRL interface
+    //
+
+    /**
+     *  Start transaction.
+     *
+     *  @param tid the transaction ID to use for this transaction.
+     */
+    XrlCmdError redist_transaction4_0_1_start_transaction(
+	// Output values,
+	uint32_t&	tid);
+
+    /**
+     *  Commit transaction.
+     *
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError redist_transaction4_0_1_commit_transaction(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Abort transaction.
+     *
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError redist_transaction4_0_1_abort_transaction(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Add/delete a routing entry.
+     *
+     *  @param tid the transaction ID of this transaction.
+     *
+     *  @param dst destination network.
+     *
+     *  @param nh nexthop router address.
+     *
+     *  @param ifname interface name associated with nexthop.
+     *
+     *  @param vifname virtual interface name with nexthop.
+     *
+     *  @param metric origin routing protocol metric for route.
+     *
+     *  @param ad administrative distance of origin routing protocol.
+     *
+     *  @param cookie value set be requestor to identify redistribution source.
+     *  Typical value is the originating protocol name.
+     *
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
+     */
+    XrlCmdError redist_transaction4_0_1_add_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv4Net&	dst,
+	const IPv4&	nh,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	ad,
+	const string&	cookie,
+	const string&	protocol_origin);
+
+    XrlCmdError redist_transaction4_0_1_delete_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv4Net&	network,
+	const string&	cookie);
+
+    /**
+     *  Start transaction.
+     *
+     *  @param tid the transaction ID to use for this transaction.
+     */
+    XrlCmdError redist_transaction6_0_1_start_transaction(
+	// Output values,
+	uint32_t&	tid);
+
+    /**
+     *  Commit transaction.
+     *
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError redist_transaction6_0_1_commit_transaction(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Abort transaction.
+     *
+     *  @param tid the transaction ID of this transaction.
+     */
+    XrlCmdError redist_transaction6_0_1_abort_transaction(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Add/delete a routing entry.
+     *
+     *  @param tid the transaction ID of this transaction.
+     *
+     *  @param dst destination network.
+     *
+     *  @param nh nexthop router address.
+     *
+     *  @param ifname interface name associated with nexthop.
+     *
+     *  @param vifname virtual interface name with nexthop.
+     *
+     *  @param metric origin routing protocol metric for route.
+     *
+     *  @param ad administrative distance of origin routing protocol.
+     *
+     *  @param cookie value set be requestor to identify redistribution source.
+     *  Typical value is the originating protocol name.
+     *
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
+     */
+    XrlCmdError redist_transaction6_0_1_add_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv6Net&	dst,
+	const IPv6&	nh,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	ad,
+	const string&	cookie,
+	const string&	protocol_origin);
+
+    XrlCmdError redist_transaction6_0_1_delete_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv6Net&	network,
+	const string&	cookie);
 
     //
     // Raw Socket Server Interface
