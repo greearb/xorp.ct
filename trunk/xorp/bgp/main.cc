@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.32 2003/09/12 17:28:13 hodson Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.33 2003/09/15 18:17:58 hodson Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -51,8 +51,8 @@ BGPMain::BGPMain()
 	    eventloop().run();
 	}
 
-	if (timed_out) {
-	    XLOG_ERROR("XrlRouter did not become ready.  No Finder?\n");
+	if (_xrl_router->ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	}
     }
 
