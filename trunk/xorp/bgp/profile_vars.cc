@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.6 2004/10/02 03:47:07 atanu Exp $"
+#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.7 2004/10/02 19:47:54 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -28,6 +28,8 @@ struct profile_vars {
     {profile_route_ribin, 	"Routes entering BGP"},
     {profile_route_rpc_in, 	"Routes being queued for the RIB"},
     {profile_route_rpc_out, 	"Routes being sent to the RIB"},
+
+    {trace_message_in, 		"Trace Message entering BGP"},
 };
 
 void

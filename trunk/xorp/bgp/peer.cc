@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.83 2004/12/15 04:41:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.84 2004/12/17 01:31:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -123,6 +123,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
+	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
 	    // want unified decode call. now need to get peerdata out.
@@ -135,6 +137,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("KEEPALIVE Packet RECEIVED %u\n", (uint32_t)length);
 	    // Check that the length is correct or throw an exception
 	    KeepAlivePacket pac(buf, length);
+	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       cstring(pac));
 	    // debug_msg(pac.str().c_str());
 	    event_keepmess();
 	    TIMESPENT_CHECK();
@@ -145,6 +149,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    _in_updates++;
 	    _mainprocess->eventloop().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length);
+	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
 	    event_recvupdate(pac);
@@ -159,6 +165,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
 	    try {
 		NotificationPacket pac(buf, length);
+		XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			   cstring(pac));
 		// All decode errors should throw an InvalidPacket
 		debug_msg(pac.str().c_str());
 		event_recvnotify(pac);
