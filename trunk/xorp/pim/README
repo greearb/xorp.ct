@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.4 2003/03/11 01:38:26 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.5 2003/03/12 10:58:59 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -131,7 +131,9 @@ on the specification in the following documents:
 
 The only major features not implemented yet are SSM support and security.
 
-Many detailed tests have been performed so far, but there is still a
-large number of tests to complete.
+Many detailed tests have been performed so far
+(see the "XORP PIM-SM Test Suite" document in xorp/docs/pim_testsute/ or
+http://www.xorp.org/current-release/docs/index.html), and the code appears
+to be spec-compliant and robust, but no guarantees it is bug-free of course.
 Further, even though IPv6 support for PIM-SM has been implemented as well,
 it has not been tested yet.
