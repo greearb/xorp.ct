@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.8 2003/06/13 01:32:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.9 2003/06/13 18:23:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -267,6 +267,15 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     }
     
     //
+    // Process the "Data arrived" event that may trigger an Assert message.
+    //
+    if (pim_mre_sg != NULL) {
+	pim_mre_sg->data_arrived_could_assert(pim_vif, src, dst);
+    } else {
+	pim_mre->data_arrived_could_assert(pim_vif, src, dst);
+    }
+    
+    //
     // Perform the rest of the processing
     //
     if ((pim_mre_sg != NULL)
@@ -287,10 +296,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	if (pim_mre->check_switch_to_spt_sg()) {
 	    if (pim_mre_sg == NULL) {
 		// XXX: create the (S,G) entry to initiate (S,G) Join
-		pim_mre_sg = pim_mre_find(src,
-					  dst,
-					  PIM_MRE_SG,
-					  PIM_MRE_SG);
+		pim_mre_sg = pim_mre_find(src, dst, PIM_MRE_SG, PIM_MRE_SG);
 		pim_mre_sg->start_keepalive_timer();
 		is_keepalive_timer_restarted = true;
 		
@@ -327,7 +333,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 		break;
 	    } while (false);
 	    if (pim_mre_wc == NULL) {
-		pim_mre_wc = pim_mre_find(src, dst,  PIM_MRE_WC,  PIM_MRE_WC);
+		pim_mre_wc = pim_mre_find(src, dst, PIM_MRE_WC, PIM_MRE_WC);
 		is_new_entry = true;
 	    }
 	    XLOG_ASSERT(pim_mre_wc != NULL);
@@ -335,7 +341,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	    if (is_new_entry)
 		pim_mre_wc->entry_try_remove();
 	}
-	return;		// TODO: XXX: PAVPAVPAV: not in the spec (yet)
+	return;		// XXX: a short-cut to avoid the rest of the processing
     }
     
     olist.reset(iif_vif_index);

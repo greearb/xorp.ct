@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.23 2003/06/13 01:49:08 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.24 2003/06/24 18:29:52 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -665,13 +665,22 @@ public:
 				  AssertMetric *assert_metric,
 				  assert_state_t state,
 				  bool i_am_assert_winner_bool);
+    // Note: applies for all entries
+    int		data_arrived_could_assert(PimVif *pim_vif,
+					  const IPvX& src,
+					  const IPvX& dst);
+    // Note: applies only for (S,G)
+    int		data_arrived_could_assert_sg(PimVif *pim_vif,
+					     const IPvX& assert_source_addr);
+    // Note: applies only for (*,G)
+    int		data_arrived_could_assert_wc(PimVif *pim_vif,
+					     const IPvX& assert_source_addr);
     // Note: applies only for (S,G)
     int		wrong_iif_data_arrived_sg(PimVif *pim_vif,
 					  const IPvX& assert_source_addr);
     // Note: applies only for (*,G)
     int		wrong_iif_data_arrived_wc(PimVif *pim_vif,
 					  const IPvX& assert_source_addr);
-
     // Note: applies only for (S,G)
     bool	recompute_assert_tracking_desired_sg();
     // Note: applies only for (S,G)
@@ -716,7 +725,7 @@ public:
 	const IPvX& nbr_addr);
     
     // Assert rate-limiting stuff
-    // TODO: XXX: PAVPAVPAV: not used yet.
+    void	asserts_rate_limit_timer_timeout();
     Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
     XorpTimer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
 						// support

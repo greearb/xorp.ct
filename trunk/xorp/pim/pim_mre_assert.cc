@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.20 2003/06/13 01:49:08 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.21 2003/06/24 18:28:38 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -716,6 +716,168 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
 				  const IPvX& assert_source_addr)
 {
     uint16_t vif_index = pim_vif->vif_index();
+    
+    if (! is_wc())
+	return (XORP_ERROR);
+    
+    if (_asserts_rate_limit.test(vif_index))
+	return (XORP_OK);	// XXX: we are rate-limiting the Asserts
+    
+    // Send Assert(*,G)
+    pim_vif->pim_assert_mre_send(this, assert_source_addr);
+    
+    // Set the bit-flag, and restart the rate-limited timer (if not running)
+    // XXX: On average, the data packets trigger no more than one Assert
+    // message per second.
+    _asserts_rate_limit.set(vif_index);
+    if (! _asserts_rate_limit_timer.scheduled()) {
+	_asserts_rate_limit_timer = pim_node().eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &PimMre::asserts_rate_limit_timer_timeout));
+    }
+    
+    return (XORP_OK);
+}
+
+// Note: applies only for (S,G)
+int
+PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
+				  const IPvX& assert_source_addr)
+{
+    uint16_t vif_index = pim_vif->vif_index();
+    
+    if (! is_sg())
+	return (XORP_ERROR);
+    XLOG_ASSERT(assert_source_addr == source_addr());
+    
+    if (_asserts_rate_limit.test(vif_index))
+	return (XORP_OK);	// XXX: we are rate-limiting the Asserts
+    
+    // Send Assert(S,G)
+    pim_vif->pim_assert_mre_send(this, source_addr());
+    
+    // Set the bit-flag, and restart the rate-limited timer (if not running)
+    // XXX: On average, the data packets trigger no more than one Assert
+    // message per second.
+    _asserts_rate_limit.set(vif_index);
+    if (! _asserts_rate_limit_timer.scheduled()) {
+	_asserts_rate_limit_timer = pim_node().eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &PimMre::asserts_rate_limit_timer_timeout));
+    }
+    
+    return (XORP_OK);
+}
+
+void
+PimMre::asserts_rate_limit_timer_timeout()
+{
+    if (! (is_sg() || is_wc()))
+	return;
+    
+    // Reset the rate-limiting bits
+    _asserts_rate_limit.reset();
+    
+    // XXX: try to remove the entry if it was created just for
+    // the purpose of rate-limiting the triggered assert messages.
+    entry_try_remove();
+}
+
+//
+// Data packet received that may trigger an Assert.
+//
+// XXX: should be applied to (S,G) entry (if such exists). If the
+// entry is not (S,G), then we assume that there is no such entry
+// in the multicast routing table.
+//
+// Note: applies for all entries
+int
+PimMre::data_arrived_could_assert(PimVif *pim_vif, const IPvX& src,
+				  const IPvX& dst)
+{
+    uint16_t vif_index = pim_vif->vif_index();
+    int ret_value;
+    
+    //
+    // Data packet received that may trigger an Assert
+    //
+    // First try to apply this event to the (S,G) assert state machine.
+    // Only if the (S,G) assert state machine is in NoInfo state, and
+    // only if there was no change in the (S,G) assert state machine
+    // a result of receiving this message, then apply it to the (*,G)
+    // assert state machine.
+    //
+    do {
+	bool is_sg_noinfo_old, is_sg_noinfo_new;
+	
+	//
+	// XXX: strictly speaking, we should try to create
+	// the (S,G) state, and explicitly compare the old
+	// and new (S,G) assert state.
+	// However, we use the observation that if there is no (S,G)
+	// routing state, then the receiving of the data packet will not change
+	// the (S,G) assert state mchine. Note that this observation is
+	// based on the specific details of the (S,G) assert state machine.
+	// In particular, the action in NoInfo state when
+	// "Data arrives from S to G on I and CouldAssert(S,G,I)".
+	// If there is no (S,G) routing state, then the SPTbit cannot
+	// be true, and therefore CouldAssert(S,G,I) also cannot be true.
+	//
+	
+	if (! is_sg())
+	    break;
+	
+	is_sg_noinfo_old = is_assert_noinfo_state(vif_index);
+	ret_value = data_arrived_could_assert_sg(pim_vif, src);
+	is_sg_noinfo_new = is_assert_noinfo_state(vif_index);
+	
+	//
+	// If there was transaction in the (S,G) assert state,
+	// or if the new (S,G) assert state is not NoInfo, then
+	// don't apply this event to the (*,G) assert state machine.
+	// In other words, both the old and the new state in the
+	// (S,G) assert state machine must be in NoInfo state to
+	// apply the event to the (*,G) assert state
+	// machine.
+	//
+	if (is_sg_noinfo_old && is_sg_noinfo_new)
+	    break;
+	return (ret_value);
+    } while (false);
+    
+    //
+    // No transaction occured in the (S,G) assert state machine, and 
+    // it is in NoInfo state.
+    // Apply the event to the (*,G) assert state machine.
+    //
+    if (is_wc()) {
+	return (data_arrived_could_assert_wc(pim_vif, src));
+    }
+    
+    PimMre *pim_mre_wc;
+    pim_mre_wc = pim_mrt().pim_mre_find(src, dst, PIM_MRE_WC, PIM_MRE_WC);
+    if (pim_mre_wc == NULL) {
+	XLOG_ERROR("Internal error lookup/creating PIM multicast routing "
+		   "entry for source = %s group = %s",
+		   cstring(src),
+		   cstring(dst));
+	return (XORP_ERROR);
+    }
+    
+    ret_value = pim_mre_wc->data_arrived_could_assert_wc(pim_vif, src);
+    
+    // Try to remove the entry in case we don't need it
+    pim_mre_wc->entry_try_remove();
+    
+    return (ret_value);
+}
+
+// Note: applies only for (*,G)
+int
+PimMre::data_arrived_could_assert_wc(PimVif *pim_vif,
+				     const IPvX& assert_source_addr)
+{
+    uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
     Mifset mifs;
     
@@ -730,13 +892,7 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
     // NoInfo state
     mifs = could_assert_wc();
     if (! mifs.test(vif_index)) {
-	// XXX: "wrong iif" packet arrived, but it is not on one of our
-	// outgoing interfaces. Ignore.
-	// TODO: if the kernel API allows, disable the "wrong iif"
-	// signalling from the kernel.
-	// TODO: here probably should be the code for completing
-	// the switch to the shortest-path.
-	return (XORP_OK);
+	return (XORP_OK);	// CouldAssert(*,G,I) is false. Ignore.
     }
     set_i_am_assert_winner_state(vif_index);
     goto a1;
@@ -760,8 +916,8 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
 
 // Note: applies only for (S,G)
 int
-PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
-				  const IPvX& assert_source_addr)
+PimMre::data_arrived_could_assert_sg(PimVif *pim_vif,
+				     const IPvX& assert_source_addr)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
@@ -779,13 +935,7 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
     // NoInfo state
     mifs = could_assert_sg();
     if (! mifs.test(vif_index)) {
-	// XXX: "wrong iif" packet arrived, but it is not on one of our
-	// outgoing interfaces. Ignore.
-	// TODO: if the kernel API allows, disable the "wrong iif"
-	// signalling from the kernel.
-	// TODO: here probably should be the code for completing
-	// the switch to the shortest-path.
-	return (XORP_OK);
+	return (XORP_OK);	// CouldAssert(S,G,I) is false. Ignore.
     }
     set_i_am_assert_winner_state(vif_index);
     goto a1;
@@ -1184,7 +1334,6 @@ PimMre::set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v)
 void
 PimMre::set_assert_winner_metric(uint16_t vif_index, AssertMetric *v)
 {
-    
     AssertMetric *old_assert_metric;
     
     if (vif_index == Vif::VIF_INDEX_INVALID)
