@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.22 2004/06/15 00:06:55 pavlin Exp $
+# $XORP: xorp/README,v 1.23 2004/06/15 19:20:37 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -49,8 +49,8 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is a release candidate. It is expected to work, but there are
-known issues.
+This is a release candidate. It is reasonably stable and can be used
+for routing, but there are known issues.
 
 Supported platforms:
 
