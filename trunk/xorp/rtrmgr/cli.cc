@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.10 2003/06/03 10:00:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.11 2003/09/24 16:16:07 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -27,8 +27,8 @@
 #include "util.hh"
 
 RouterCLI::RouterCLI(XorpShell& xorpsh,
-		     CliNode& cli_node) 
-    : _xorpsh(xorpsh), _cli_node(cli_node), 
+		     CliNode& cli_node)
+    : _xorpsh(xorpsh), _cli_node(cli_node),
     _cli_client(*(_cli_node.enable_stdio_access()))
 {
     _changes_made = false;
@@ -39,8 +39,9 @@ RouterCLI::RouterCLI(XorpShell& xorpsh,
     operational_mode();
 }
 
-void 
-RouterCLI::commit_done_by_user(int uid) {
+void
+RouterCLI::commit_done_by_user(int uid)
+{
     //someone just did a commit, so we may need to regenerate options
     if (_mode == CLI_MODE_OPERATIONAL) {
 	_cli_client.cli_print(c_format("\nUser %d changed the configuration.\n", uid));
@@ -49,8 +50,9 @@ RouterCLI::commit_done_by_user(int uid) {
     }
 }
 
-void 
-RouterCLI::operational_mode() {
+void
+RouterCLI::operational_mode()
+{
     if (_mode == CLI_MODE_OPERATIONAL) {
 	return;
     }
@@ -61,20 +63,22 @@ RouterCLI::operational_mode() {
     add_op_mode_commands(NULL);
 }
 
-void RouterCLI::add_op_mode_commands(CliCommand *com0) {
+void
+RouterCLI::add_op_mode_commands(CliCommand *com0)
+{
     CliCommand *com1, *com2;
     //    com0->add_command("clear", "Clear information in the system *");
 
     //if no root node is specified, default to the true root
     if (com0 == NULL)
 	com0 = _cli_node.cli_command_root();
-	    
+
     if (com0 == _cli_node.cli_command_root()) {
-	com1 = com0->add_command("configure", 
+	com1 = com0->add_command("configure",
 				 "Switch to configuration mode",
 				 callback(this, &RouterCLI::configure_func));
 	com1->set_global_name("configure");
-	com2 = com1->add_command("exclusive", 
+	com2 = com1->add_command("exclusive",
 				 "Switch to configuration mode, locking out other users",
 				 callback(this, &RouterCLI::configure_func));
 	com2->set_global_name("configure exclusive");
@@ -84,11 +88,11 @@ void RouterCLI::add_op_mode_commands(CliCommand *com0) {
     }
     set <string> cmds = op_cmd_list()->top_level_commands();
     set <string>::const_iterator i;
-    for (i=cmds.begin(); i!=cmds.end(); i++) {
+    for (i = cmds.begin(); i != cmds.end(); i++) {
 	com1 = com0->add_command(i->c_str(), "help");
 	com1->set_global_name(i->c_str());
 	//set the callback to generate the node's children
-	com1->set_dynamic_children(callback(op_cmd_list(), 
+	com1->set_dynamic_children(callback(op_cmd_list(),
 					    &OpCommandList::childlist));
 	//set the callback to pass to the node's children when they
 	//are executed
@@ -103,8 +107,9 @@ void RouterCLI::add_op_mode_commands(CliCommand *com0) {
     //    com0->add_command("traceroute", "Trace the unicast path to a network host");
 }
 
-void 
-RouterCLI::configure_mode() {
+void
+RouterCLI::configure_mode()
+{
     _nesting_depth = 0;
     if (_mode == CLI_MODE_CONFIGURE)
 	return;
@@ -122,21 +127,23 @@ RouterCLI::configure_mode() {
     apply_path_change();
 }
 
-void 
-RouterCLI::display_config_mode_users() const {
+void
+RouterCLI::display_config_mode_users() const
+{
     _cli_client.cli_print("Entering configuration mode.\n");
     if (_config_mode_users.empty()) {
 	_cli_client.
 	    cli_print("There are no other users in configuration mode.\n");
     } else {
-	if (_config_mode_users.size()==1)
+	if (_config_mode_users.size() == 1)
 	    _cli_client.cli_print("User ");
 	else
 	    _cli_client.cli_print("Users ");
 	list <uint32_t>::const_iterator i, i2;
 	struct passwd* pwent;
-	for(i=_config_mode_users.begin(); i!=_config_mode_users.end(); i++) {
-	    if (i!=_config_mode_users.begin()) {
+	for(i = _config_mode_users.begin(); i != _config_mode_users.end();
+	    i++) {
+	    if (i != _config_mode_users.begin()) {
 		i2 = i; i2++;
 		if (i2 == _config_mode_users.end())
 		    _cli_client.cli_print(" and ");
@@ -150,7 +157,7 @@ RouterCLI::display_config_mode_users() const {
 		_cli_client.cli_print(pwent->pw_name);
 	}
 	endpwent();
-	if (_config_mode_users.size()==1)
+	if (_config_mode_users.size() == 1)
 	    _cli_client.cli_print(" is also in configuration mode.\n");
 	else
 	    _cli_client.cli_print(" are also in configuration mode.\n");
@@ -158,7 +165,8 @@ RouterCLI::display_config_mode_users() const {
 }
 
 void
-RouterCLI::display_alerts() {
+RouterCLI::display_alerts()
+{
     //display any alert messages that accumulated while we were busy
     while (!_alerts.empty()) {
 	_cli_client.cli_print(_alerts.front());
@@ -166,8 +174,9 @@ RouterCLI::display_alerts() {
     }
 }
 
-bool 
-RouterCLI::is_config_mode() const {
+bool
+RouterCLI::is_config_mode() const
+{
     //this is a switch statement to get compile time checking
     switch (_mode) {
     case CLI_MODE_NONE:
@@ -181,26 +190,28 @@ RouterCLI::is_config_mode() const {
 }
 
 void
-RouterCLI::text_entry_mode() {
+RouterCLI::text_entry_mode()
+{
     _mode = CLI_MODE_TEXTENTRY;
     clear_command_set();
     char prompt[256];
     strncpy(prompt, "    > ", 256);
     assert(_nesting_depth < 128);
-    for (int i = 0; i < _nesting_depth; i++) 
+    for (int i = 0; i < _nesting_depth; i++)
 	strncat(prompt, "  ", 255);
     set_prompt("", prompt);
 }
 
-void 
-RouterCLI::add_static_configure_mode_commands() {
+void
+RouterCLI::add_static_configure_mode_commands()
+{
     CliCommand *com0, *com1, *com2;
     com0 = _cli_node.cli_command_root();
     if (_changes_made)
 	com0->add_command("commit", "Commit the current set of changes",
 			  callback(this, &RouterCLI::commit_func));
 
-    _delete_node = 
+    _delete_node =
 	com0->add_command("delete", "Delete a configuration element");
 
     /* Edit command */
@@ -211,11 +222,11 @@ RouterCLI::add_static_configure_mode_commands() {
     com1 = com0->add_command("exit", "Exit from this configuration level",
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("exit");
-    com2 = com1->add_command("configuration-mode", 
+    com2 = com1->add_command("configuration-mode",
 			     "Exit from configuration mode",
 			     callback(this, &RouterCLI::exit_func));
     com2->set_global_name("exit configuration-mode");
-    com2 = com1->add_command("discard", 
+    com2 = com1->add_command("discard",
 			     "Exit from configuration mode, discarding changes.",
 			     callback(this, &RouterCLI::exit_func));
     com2->set_global_name("exit discard");
@@ -259,31 +270,36 @@ RouterCLI::add_static_configure_mode_commands() {
     com1->set_global_name("up");
 }
 
-void RouterCLI::reset_path() {
+void
+RouterCLI::reset_path()
+{
     while (_path.size() > 0)
 	_path.pop_front();
 }
 
-void RouterCLI::set_path(string path) {
+void
+RouterCLI::set_path(string path)
+{
     reset_path();
     debug_msg("set path: >%s<\n", path.c_str());
     uint ix;
-    while (path.size()>0) {
+    while (path.size() > 0) {
 	ix = path.find(' ');
-	if ((ix == string::npos) && (path.size()>0)) {
+	if (ix == string::npos && path.size() > 0) {
 	    _path.push_back(path);
 	    break;
 	} else {
 	    _path.push_back(path.substr(0, ix));
-	    path = path.substr(ix+1, path.size()-(ix+1));
+	    path = path.substr(ix + 1, path.size() - ix + 1);
 	}
     }
 }
 
-void 
-RouterCLI::config_mode_prompt() {
+void
+RouterCLI::config_mode_prompt()
+{
     string prompt;
-    if (pathstr()=="") {
+    if (pathstr() == "") {
 	prompt = "[edit]";
     } else {
 	prompt = "[edit " + pathstr() + "]";
@@ -291,7 +307,9 @@ RouterCLI::config_mode_prompt() {
     set_prompt(prompt, "XORP> ");
 }
 
-void RouterCLI::apply_path_change() {
+void
+RouterCLI::apply_path_change()
+{
     _cli_node.cli_command_root()->delete_all_commands();
     add_static_configure_mode_commands();
 
@@ -323,8 +341,10 @@ void RouterCLI::apply_path_change() {
     config_mode_prompt();
 }
 
-void RouterCLI::set_prompt(const string& line1, 
-			   const string& line2) {
+void
+RouterCLI::set_prompt(const string& line1,
+		      const string& line2)
+{
     if (line1 != "") {
 	_cli_client.cli_print(c_format("%s\n", line1.c_str()));
     }
@@ -336,8 +356,9 @@ void
 RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 			       const CommandTreeNode& current_command_node,
 			       const CLI_PROCESS_CALLBACK& cb,
-			       string path, int depth) {
-    const list<CommandTreeNode*> &cmdchildren = 
+			       string path, int depth)
+{
+    const list<CommandTreeNode*> &cmdchildren =
 	current_command_node.children();
     if (depth > 0) {
 	if (path.empty())
@@ -345,11 +366,10 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	else
 	    path += " " + current_command_node.name();
     }
-	    
-    
+
     list <CommandTreeNode*>::const_iterator cmd_iter;
-    for (cmd_iter = cmdchildren.begin(); 
-	 cmd_iter != cmdchildren.end(); 
+    for (cmd_iter = cmdchildren.begin();
+	 cmd_iter != cmdchildren.end();
 	 ++cmd_iter) {
 
 	CliCommand *com;
@@ -378,15 +398,16 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 				  const list <string>& cmd_names,
 				  bool include_intermediates,
 				  const CLI_PROCESS_CALLBACK& cb,
-				  string path) {
+				  string path)
+{
     string subpath;
     set <string> existing_children;
 
-    const list<CommandTreeNode*> &cmdchildren = 
+    const list<CommandTreeNode*> &cmdchildren =
 	command_tree.root().children();
     list <CommandTreeNode*>::const_iterator cmd_iter;
-    for (cmd_iter = cmdchildren.begin(); 
-	 cmd_iter != cmdchildren.end(); 
+    for (cmd_iter = cmdchildren.begin();
+	 cmd_iter != cmdchildren.end();
 	 ++cmd_iter) {
 	if (include_intermediates || (*cmd_iter)->has_command()) {
 	    if (path.empty())
@@ -398,7 +419,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 	    com = current_cli_node.
 		add_command((*cmd_iter)->name().c_str(), "help", cb);
 	    if (com == NULL) {
-		XLOG_FATAL("AI: add_command %s failed\n", 
+		XLOG_FATAL("AI: add_command %s failed\n",
 			   (*cmd_iter)->name().c_str());
 	    } else {
 		com->set_global_name(subpath.c_str());
@@ -420,7 +441,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 	tti != ttn->children().end();
 	tti++) {
 	//we don't need to consider this child if it's already added
-	if (existing_children.find((*tti)->segname()) 
+	if (existing_children.find((*tti)->segname())
 	    == existing_children.end()) {
 	    if ((*tti)->check_command_tree(cmd_names, include_intermediates,
 					   /*depth*/0)) {
@@ -433,7 +454,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 		com = current_cli_node.
 		    add_command((*tti)->segname().c_str(), "help", cb);
 		if (com == NULL) {
-		    XLOG_FATAL("AI: add_command %s for template failed\n", 
+		    XLOG_FATAL("AI: add_command %s for template failed\n",
 			       (*tti)->segname().c_str());
 		} else {
 		    com->set_global_name(subpath.c_str());
@@ -443,15 +464,17 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
     }
 }
 
-void 
-RouterCLI::clear_command_set() {
+void
+RouterCLI::clear_command_set()
+{
     CliCommand *com0;
     com0 = _cli_node.cli_command_root();
     com0->delete_all_commands();
 }
 
-string 
-RouterCLI::pathstr() const {
+string
+RouterCLI::pathstr() const
+{
     string s;
     list <string>::const_iterator i;
     for (i=_path.begin(); i!=_path.end(); i++) {
@@ -463,11 +486,12 @@ RouterCLI::pathstr() const {
     return s;
 }
 
-string 
-RouterCLI::pathstr2() const {
+string
+RouterCLI::pathstr2() const
+{
     string s;
     list <string>::const_iterator i;
-    for (i=_path.begin(); i!=_path.end(); i++) {
+    for (i = _path.begin(); i != _path.end(); i++) {
 	if (s.empty())
 	    s = ">" + *i + "<";
 	else
@@ -476,8 +500,9 @@ RouterCLI::pathstr2() const {
     return s;
 }
 
-void 
-RouterCLI::add_edit_subtree() {
+void
+RouterCLI::add_edit_subtree()
+{
     CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%create");
@@ -490,15 +515,15 @@ RouterCLI::add_edit_subtree() {
     //tree, go back up one level now
     const TemplateTreeNode* ttn = _current_config_node->template_node();
     if (ttn != NULL) {
-	if (ttn->is_tag() && !_path.empty()) { 
-	    _path.pop_back(); 
+	if (ttn->is_tag() && !_path.empty()) {
+	    _path.pop_back();
 	    _current_config_node = _current_config_node->parent();
 	}
     }
 
     _current_config_node->create_command_tree(cmd_tree,
-					      cmds, 
-					      /*include_intermediates*/true, 
+					      cmds,
+					      /*include_intermediates*/true,
 					      /*include templates*/true);
 #ifdef DEBUG_CMD_TREES
     printf("==============================================================\n");
@@ -514,18 +539,19 @@ RouterCLI::add_edit_subtree() {
 	else
 	    cmdpath = "edit " + pathstr();
 
-	add_command_subtree(*_edit_node, cmd_tree.root(), 
-			    callback(this, &RouterCLI::edit_func), 
+	add_command_subtree(*_edit_node, cmd_tree.root(),
+			    callback(this, &RouterCLI::edit_func),
 			    cmdpath, 0);
     }
-    add_immediate_commands(*(_cli_node.cli_command_root()), cmd_tree, 
-			   cmds, /*include_intermediates*/true, 
-			   callback(this, &RouterCLI::text_entry_func), 
+    add_immediate_commands(*(_cli_node.cli_command_root()), cmd_tree,
+			   cmds, /*include_intermediates*/true,
+			   callback(this, &RouterCLI::text_entry_func),
 			   pathstr());
 }
 
-void 
-RouterCLI::add_delete_subtree() {
+void
+RouterCLI::add_delete_subtree()
+{
     CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%create");
@@ -533,8 +559,8 @@ RouterCLI::add_delete_subtree() {
     cmds.push_back("%set");
     cmds.push_back("%delete");
     _current_config_node->create_command_tree(cmd_tree,
-					      cmds, 
-					      /*include_intermediates*/true, 
+					      cmds,
+					      /*include_intermediates*/true,
 					      /*include templates*/false);
 #ifdef DEBUG_CMD_TREES
     printf("==============================================================\n");
@@ -549,19 +575,20 @@ RouterCLI::add_delete_subtree() {
     else
 	cmdpath = "delete " + pathstr();
 
-    add_command_subtree(*_delete_node, cmd_tree.root(), 
-			callback(this, &RouterCLI::delete_func), 
+    add_command_subtree(*_delete_node, cmd_tree.root(),
+			callback(this, &RouterCLI::delete_func),
 			cmdpath, 0);
 }
 
-void 
-RouterCLI::add_set_subtree() {
+void
+RouterCLI::add_set_subtree()
+{
     CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%set");
     _current_config_node->create_command_tree(cmd_tree,
-					      cmds, 
-					      /*include_intermediates*/false, 
+					      cmds,
+					      /*include_intermediates*/false,
 					      /*include templates*/true);
 
 #ifdef DEBUG_CMD_TREES
@@ -578,26 +605,27 @@ RouterCLI::add_set_subtree() {
 	else
 	    cmdpath = "set " + pathstr();
 
-	add_command_subtree(*_set_node, cmd_tree.root(), 
-			    callback(this, &RouterCLI::set_func), 
+	add_command_subtree(*_set_node, cmd_tree.root(),
+			    callback(this, &RouterCLI::set_func),
 			    cmdpath, 0);
     }
 
-    add_immediate_commands(*(_cli_node.cli_command_root()), cmd_tree, 
-			   cmds, /*include_intermediates*/false, 
-			   callback(this, &RouterCLI::immediate_set_func), 
+    add_immediate_commands(*(_cli_node.cli_command_root()), cmd_tree,
+			   cmds, /*include_intermediates*/false,
+			   callback(this, &RouterCLI::immediate_set_func),
 			   pathstr());
 
 }
 
-void 
-RouterCLI::add_show_subtree() {
+void
+RouterCLI::add_show_subtree()
+{
     CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%get");
     _current_config_node->create_command_tree(cmd_tree,
-					      cmds, 
-					      /*include_intermediates*/true, 
+					      cmds,
+					      /*include_intermediates*/true,
 					      /*include templates*/false);
 
 #ifdef DEBUG_CMD_TREES
@@ -613,20 +641,20 @@ RouterCLI::add_show_subtree() {
     else
 	cmdpath = "show " + pathstr();
 
-    add_command_subtree(*_show_node, cmd_tree.root(), 
-			callback(this, &RouterCLI::show_func), 
+    add_command_subtree(*_show_node, cmd_tree.root(),
+			callback(this, &RouterCLI::show_func),
 			cmdpath, 0);
 }
 
 int
 RouterCLI::configure_func(const char * ,
 			  const char * ,
-			  uint32_t ,		
+			  uint32_t ,
 			  const char *command_global_name,
 			  const vector<string>& /*argv*/)
 {
     bool exclusive = false;
-    if (strcmp(command_global_name, "configure exclusive")==0) {
+    if (strcmp(command_global_name, "configure exclusive") == 0) {
 	exclusive = true;
     }
     idle_ui();
@@ -636,10 +664,11 @@ RouterCLI::configure_func(const char * ,
 }
 
 void
-RouterCLI::enter_config_done(const XrlError& e) {
+RouterCLI::enter_config_done(const XrlError& e)
+{
     if (e != XrlError::OKAY()) {
-	if ((e == XrlError::COMMAND_FAILED()) 
-	    && (e.note()=="AUTH_FAIL")) {
+	if ((e == XrlError::COMMAND_FAILED())
+	    && (e.note() == "AUTH_FAIL")) {
 	    check_for_rtrmgr_restart();
 	    return;
 	}
@@ -653,12 +682,13 @@ RouterCLI::enter_config_done(const XrlError& e) {
    _xorpsh.get_config_users(callback(this, &RouterCLI::got_config_users));
 }
 
-void 
-RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users) {
+void
+RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
+{
     //clear the old list
     if (e != XrlError::OKAY()) {
-	if ((e == XrlError::COMMAND_FAILED()) 
-	    && (e.note()=="AUTH_FAIL")) {
+	if (e == XrlError::COMMAND_FAILED()
+	    && e.note() == "AUTH_FAIL") {
 	    check_for_rtrmgr_restart();
 	    return;
 	}
@@ -680,7 +710,7 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users) {
 		else
 		    _config_mode_users.push_back(uid);
 	    }
-	    catch (XrlAtom::WrongType wt) {
+	    catch (const XrlAtom::WrongType& wt) {
 		//this had better not happen
 		XLOG_FATAL("Internal Error");
 	    }
@@ -692,7 +722,8 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users) {
 }
 
 void
-RouterCLI::new_config_user(uid_t user_id) {
+RouterCLI::new_config_user(uid_t user_id)
+{
     if (_mode == CLI_MODE_CONFIGURE || _mode == CLI_MODE_TEXTENTRY) {
 	_config_mode_users.push_back(user_id);
 	struct passwd *pwent = getpwuid(user_id);
@@ -701,19 +732,19 @@ RouterCLI::new_config_user(uid_t user_id) {
 	    username = c_format("UID:%d", user_id);
 	else
 	    username = pwent->pw_name;
-	string alert = c_format("User %s entered configuration mode\n", 
+	string alert = c_format("User %s entered configuration mode\n",
 				username.c_str());
 	notify_user(alert, /*not urgent*/false);
     }
 }
 
 void
-RouterCLI::leave_config_done(const XrlError& e) {
+RouterCLI::leave_config_done(const XrlError& e)
+{
     if (e != XrlError::OKAY()) {
 	_cli_client.cli_print("ERROR: failed to inform rtrmgr of entry into config mode\n");
 	//something really bad happened - should we just exit here?
-	if ((e == XrlError::COMMAND_FAILED()) 
-	    && (e.note()=="AUTH_FAIL")) {
+	if (e == XrlError::COMMAND_FAILED() && e.note() == "AUTH_FAIL") {
 	    check_for_rtrmgr_restart();
 	    operational_mode();
 	    return;
@@ -723,24 +754,25 @@ RouterCLI::leave_config_done(const XrlError& e) {
     reenable_ui();
 }
 
-void 
-RouterCLI::notify_user(const string& alert, bool urgent) {
+void
+RouterCLI::notify_user(const string& alert, bool urgent)
+{
     if (_mode == CLI_MODE_TEXTENTRY && !urgent) {
 	_alerts.push_back(alert);
     } else {
-	_cli_client.cli_print(alert); 
+	_cli_client.cli_print(alert);
     }
 }
 
 
 int
-RouterCLI::exit_func(const char * ,
-		     const char *,
+RouterCLI::exit_func(const char* ,
+		     const char* ,
 		     uint32_t ,
-		     const char *command_global_name,
+		     const char* command_global_name,
 		     const vector<string>& argv)
 {
-    if (strcmp(command_global_name, "exit configuration-mode")==0) {
+    if (strcmp(command_global_name, "exit configuration-mode") == 0) {
 	if (argv.size() > 0) {
 	    _cli_client.cli_print("Error: \"exit configuration-mode\"  does not take any additional parameters\n");
 	    return (XORP_ERROR);
@@ -751,22 +783,22 @@ RouterCLI::exit_func(const char * ,
 	    return (XORP_ERROR);
 	}
 	idle_ui();
-	_xorpsh.leave_config_mode(callback(this, 
+	_xorpsh.leave_config_mode(callback(this,
 					   &RouterCLI::leave_config_done));
 	return (XORP_OK);
     }
-    if (strcmp(command_global_name, "exit discard")==0) {
+    if (strcmp(command_global_name, "exit discard") == 0) {
 	if (argv.size() > 0) {
 	    _cli_client.cli_print("Error: \"exit discard\"  does not take any additional parameters\n");
 	    return (XORP_ERROR);
 	}
 	config_tree()->discard_changes();
 	idle_ui();
-	_xorpsh.leave_config_mode(callback(this, 
+	_xorpsh.leave_config_mode(callback(this,
 					   &RouterCLI::leave_config_done));
 	return (XORP_OK);
     }
-    if (strcmp(command_global_name, "top")==0) {
+    if (strcmp(command_global_name, "top") == 0) {
 	if (argv.size() > 0) {
 	    _cli_client.cli_print("Error: top does not take any parameters\n");
 	    return (XORP_ERROR);
@@ -776,27 +808,26 @@ RouterCLI::exit_func(const char * ,
 	return (XORP_OK);
     }
 
-
     //up and exit are similar, except up doesn't exit
     //configuration-mode if it's executed at the top level
-    if (strcmp(command_global_name, "up")==0) {
+    if (strcmp(command_global_name, "up") == 0) {
 	if (argv.size() > 0) {
 	    _cli_client.cli_print("Error: up does not take any parameters\n");
 	    return (XORP_ERROR);
 	}
-	if (_path.size()>0)
+	if (_path.size() > 0)
 	    _path.pop_back();
     }
-    if ((strcmp(command_global_name, "exit")==0) ||
-	(strcmp(command_global_name, "quit")==0)) {
-	if (_path.size()==0) {
+    if ((strcmp(command_global_name, "exit") == 0) ||
+	(strcmp(command_global_name, "quit") == 0)) {
+	if (_path.size() == 0) {
 	    if (_changes_made) {
 		_cli_client.cli_print("Error: There are uncommitted changes\n");
 		_cli_client.cli_print("Use \"commit\" to commit the changes, or \"exit discard\" to discard them\n");
 		return (XORP_ERROR);
 	    }
 	    idle_ui();
-	    _xorpsh.leave_config_mode(callback(this, 
+	    _xorpsh.leave_config_mode(callback(this,
 					       &RouterCLI::leave_config_done));
 	    return (XORP_OK);
 	} else {
@@ -807,19 +838,17 @@ RouterCLI::exit_func(const char * ,
     return (XORP_OK);
 }
 
-
-
 int
-RouterCLI::edit_func(const char * ,
-		     const char * ,
+RouterCLI::edit_func(const char* ,
+		     const char* ,
 		     uint32_t ,		// cli_session_id
-		     const char *command_global_name,
+		     const char* command_global_name,
 		     const vector<string>& argv)
 {
     if (argv.size() == 0) {
 	string cmd_name(command_global_name);
-	assert(cmd_name.substr(0,5)=="edit ");
-	string path = cmd_name.substr(5,cmd_name.size()-5);
+	assert(cmd_name.substr(0,5) == "edit ");
+	string path = cmd_name.substr(5, cmd_name.size() - 5);
 	set_path(path);
 	apply_path_change();
 	return (XORP_OK);
@@ -829,22 +858,22 @@ RouterCLI::edit_func(const char * ,
 }
 
 int
-RouterCLI::text_entry_func(const char * ,
-			   const char * ,
+RouterCLI::text_entry_func(const char* ,
+			   const char* ,
 			   uint32_t /*cli_session_id*/,
-			   const char *command_global_name,
+			   const char* command_global_name,
 			   const vector<string>& argv)
 {
     string path(command_global_name);
     list <string> pathsegs;
     while (path.size()>0) {
 	uint ix = path.find(' ');
-	if ((ix == string::npos) && (path.size()>0)) {
+	if ((ix == string::npos) && (path.size() > 0)) {
 	    pathsegs.push_back(path);
 	    break;
 	} else {
 	    pathsegs.push_back(path.substr(0, ix));
-	    path = path.substr(ix+1, path.size()-(ix+1));
+	    path = path.substr(ix + 1, path.size() - ix + 1);
 	}
     }
 
@@ -852,7 +881,6 @@ RouterCLI::text_entry_func(const char * ,
     const TemplateTreeNode *tag_ttn, *data_ttn;
     bool create_needed = false;
     string nodename;
-    
 
     if (argv.size() != 0 || (pathsegs.back() != "}")) {
 	if (ctn == NULL) {
@@ -892,7 +920,7 @@ RouterCLI::text_entry_func(const char * ,
 		}
 	    }
 	    if (data_ttn == NULL) {
-		string result = "ERROR: argument \"" + argv[0] + 
+		string result = "ERROR: argument \"" + argv[0] +
 		    "\" is not a valid " + tag_ttn->segname();
 		_cli_client.cli_print(c_format("%s\n", result.c_str()));
 		return (XORP_ERROR);
@@ -906,9 +934,9 @@ RouterCLI::text_entry_func(const char * ,
 		     cti != ctn->children().end();
 		     cti++) {
 		    if ((*cti)->segname() == argv[0]) {
-			string result = "ERROR: can't create \"" + argv[0] + 
+			string result = "ERROR: can't create \"" + argv[0] +
 			    "\", as it already exists.";
-			_cli_client.cli_print(c_format("%s\n", 
+			_cli_client.cli_print(c_format("%s\n",
 						       result.c_str()));
 			return (XORP_ERROR);
 		    }
@@ -917,7 +945,7 @@ RouterCLI::text_entry_func(const char * ,
 
 	    /* check remaining args are OK*/
 	    if (argv.size() == 2 && argv[1] != "{") {
-		string result = "ERROR: \"{\" expected instead of  \"" 
+		string result = "ERROR: \"{\" expected instead of  \""
 		    + argv[1];
 		_cli_client.cli_print(c_format("%s\n", result.c_str()));
 		return (XORP_ERROR);
@@ -932,7 +960,7 @@ RouterCLI::text_entry_func(const char * ,
 
 	    assert(tag_ttn->type() == NODE_VOID);
 	    if (argv.size() == 1 && argv[0] != "{") {
-		string result = "ERROR: \"{\" expected instead of  \"" 
+		string result = "ERROR: \"{\" expected instead of  \""
 		    + argv[1];
 		_cli_client.cli_print(c_format("%s\n", result.c_str()));
 		return (XORP_ERROR);
@@ -955,7 +983,7 @@ RouterCLI::text_entry_func(const char * ,
 	    else
 		newpath += " " + *i;
 	    }
-	    ctn = new SlaveConfigTreeNode(pathsegs.back(), newpath, tag_ttn, 
+	    ctn = new SlaveConfigTreeNode(pathsegs.back(), newpath, tag_ttn,
 					  _current_config_node,
 					  getuid());
 	}
@@ -981,7 +1009,7 @@ RouterCLI::text_entry_func(const char * ,
 		return (XORP_ERROR);
 	    }
 
-	    if (argv.size()==1 && _nesting_depth==0) {
+	    if (argv.size() == 1 && _nesting_depth == 0) {
 		//nothing more to enter
 		_cli_client.cli_print("OK\n");
 		_changes_made = true;
@@ -1001,8 +1029,7 @@ RouterCLI::text_entry_func(const char * ,
 	    }
 	} else {
 	    //We're dealing with a NODE_VOID structuring node.
-
-	    if (argv.size()==0 && _nesting_depth==0) {
+	    if (argv.size() == 0 && _nesting_depth == 0) {
 		//nothing more to enter
 		_cli_client.cli_print("OK\n");
 		_changes_made = true;
@@ -1024,7 +1051,7 @@ RouterCLI::text_entry_func(const char * ,
 	add_set_subtree();
 	CliCommand *com;
 	com = _cli_node.cli_command_root()->
-	    add_command("}", "complete this configuration level", 
+	    add_command("}", "complete this configuration level",
 			callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
 	_changes_made = true;
@@ -1046,7 +1073,7 @@ RouterCLI::text_entry_func(const char * ,
 	    add_set_subtree();
 	    CliCommand *com;
 	    com = _cli_node.cli_command_root()->
-		add_command("}", "complete this configuration level", 
+		add_command("}", "complete this configuration level",
 			    callback(this, &RouterCLI::text_entry_func));
 	    com->set_global_name("}");
 	    _changes_made = true;
@@ -1062,25 +1089,25 @@ RouterCLI::text_entry_func(const char * ,
 }
 
 int
-RouterCLI::delete_func(const char * ,
-		       const char * ,
+RouterCLI::delete_func(const char* ,
+		       const char* ,
 		       uint32_t,
-		       const char *command_global_name,
+		       const char* command_global_name,
 		       const vector<string>& argv)
 {
     if (argv.size() == 0) {
 	string cmd_name(command_global_name);
-	assert(cmd_name.substr(0,7)=="delete ");
-	string path = cmd_name.substr(7,cmd_name.size()-7);
-	list <string> pathsegs;
-	while (path.size()>0) {
+	assert(cmd_name.substr(0,7) == "delete ");
+	string path = cmd_name.substr(7, cmd_name.size() - 7);
+	list<string> pathsegs;
+	while (path.size() > 0) {
 	    uint ix = path.find(' ');
-	    if ((ix == string::npos) && (path.size()>0)) {
+	    if ((ix == string::npos) && (path.size() > 0)) {
 		pathsegs.push_back(path);
 		break;
 	    } else {
 		pathsegs.push_back(path.substr(0, ix));
-		path = path.substr(ix+1, path.size()-(ix+1));
+		path = path.substr(ix + 1, path.size() - ix + 1);
 	    }
 	}
 
@@ -1101,14 +1128,14 @@ RouterCLI::delete_func(const char * ,
 }
 
 int
-RouterCLI::set_func(const char * ,
-		    const char * ,
-		    uint32_t,		
-		    const char *command_global_name,
+RouterCLI::set_func(const char* ,
+		    const char* ,
+		    uint32_t,
+		    const char* command_global_name,
 		    const vector<string>& argv)
 {
     string cmd_name(command_global_name);
-    assert(cmd_name.substr(0,4)=="set ");
+    assert(cmd_name.substr(0,4) == "set ");
     string path = cmd_name.substr(4,cmd_name.size()-4);
     string response = run_set_command(path, argv);
     _cli_client.cli_print(c_format("%s\n", response.c_str()));
@@ -1117,10 +1144,10 @@ RouterCLI::set_func(const char * ,
 }
 
 int
-RouterCLI::immediate_set_func(const char * ,
-			      const char * ,
+RouterCLI::immediate_set_func(const char* ,
+			      const char* ,
 			      uint32_t,
-			      const char *command_global_name,
+			      const char* command_global_name,
 			      const vector<string>& argv)
 {
     string path(command_global_name);
@@ -1129,14 +1156,14 @@ RouterCLI::immediate_set_func(const char * ,
 	_cli_client.cli_print(c_format("%s\n", response.c_str()));
 	config_mode_prompt();
     } else {
-	if (response != "OK") 
+	if (response != "OK")
 	    _cli_client.cli_print(c_format("%s\n", response.c_str()));
 	text_entry_mode();
 	add_edit_subtree();
 	add_set_subtree();
 	CliCommand *com;
 	com = _cli_node.cli_command_root()->
-	    add_command("}", "complete this configuration level", 
+	    add_command("}", "complete this configuration level",
 			callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
     }
@@ -1144,10 +1171,10 @@ RouterCLI::immediate_set_func(const char * ,
 }
 
 string
-RouterCLI::run_set_command(string path,  const vector<string>& argv) {
+RouterCLI::run_set_command(string path,  const vector<string>& argv)
+{
     list <string> path_parts;
     path_parts = split(path, ' ');
-
 
     ConfigTreeNode *ctn = config_tree()->find_node(path_parts);
     const TemplateTreeNode *ttn;
@@ -1163,10 +1190,10 @@ RouterCLI::run_set_command(string path,  const vector<string>& argv) {
 	assert(ctn->is_leaf());
 	ttn = ctn->template_node();
     }
-    
+
     assert(ctn != NULL && ttn != NULL);
 
-    if (argv.size()!=1) {
+    if (argv.size() != 1) {
 	string result = "ERROR: \"set " + path + "\" should take one argument of type " + ttn->typestr();
 	return result;
     }
@@ -1180,7 +1207,7 @@ RouterCLI::run_set_command(string path,  const vector<string>& argv) {
 	string newpath;
 	path_parts.push_back(nodename);
 	list <string>::const_iterator i;
-	for(i=path_parts.begin(); i!= path_parts.end(); i++) {
+	for(i = path_parts.begin(); i != path_parts.end(); i++) {
 	    if (newpath.empty())
 		newpath = *i;
 	    else
@@ -1188,7 +1215,7 @@ RouterCLI::run_set_command(string path,  const vector<string>& argv) {
 	}
 	ConfigTreeNode *newnode = new ConfigTreeNode(path_parts.back(),
 						     newpath, ttn,
-						     ctn, 
+						     ctn,
 						     getuid());
 	ctn = newnode;
 	ctn->set_value(argv[0], getuid());
@@ -1203,10 +1230,10 @@ RouterCLI::run_set_command(string path,  const vector<string>& argv) {
 }
 
 int
-RouterCLI::commit_func(const char * ,
-		       const char * ,
+RouterCLI::commit_func(const char* ,
+		       const char* ,
 		       uint32_t,
-		       const char */*command_global_name*/,
+		       const char*/*command_global_name*/,
 		       const vector<string>& argv)
 {
     if (!argv.empty()) {
@@ -1234,16 +1261,22 @@ RouterCLI::commit_func(const char * ,
     return (XORP_OK);
 }
 
-void RouterCLI::idle_ui() {
+void
+RouterCLI::idle_ui()
+{
     _cli_client.set_is_waiting_for_data(true);
 }
 
-void RouterCLI::reenable_ui() {
+void
+RouterCLI::reenable_ui()
+{
     _cli_client.set_is_waiting_for_data(false);
     _cli_client.post_process_command();
 }
 
-void RouterCLI::commit_done(bool success, string errmsg) {
+void
+RouterCLI::commit_done(bool success, string errmsg)
+{
     //If we get a failure back here, report it.  Otherwise expect an
     //XRL from the rtrmgr to inform us what really happened as the
     //change was applied.
@@ -1261,31 +1294,31 @@ void RouterCLI::commit_done(bool success, string errmsg) {
 }
 
 int
-RouterCLI::show_func(const char * ,
-		     const char * ,
+RouterCLI::show_func(const char* ,
+		     const char* ,
 		     uint32_t ,		// cli_session_id
-		     const char *command_global_name,
+		     const char* command_global_name,
 		     const vector<string>& argv)
 {
     if (argv.size() == 0) {
 	string cmd_name(command_global_name);
-	assert(cmd_name.substr(0,4)=="show");
+	assert(cmd_name.substr(0,4) == "show");
 	string path;
 	if (cmd_name == "show") {
 	    //show with no parameters at the top level
 	    path = "";
 	} else {
-	    path = cmd_name.substr(5,cmd_name.size()-5);
+	    path = cmd_name.substr(5, cmd_name.size() - 5);
 	}
 	list <string> pathsegs;
-	while (path.size()>0) {
+	while (path.size() > 0) {
 	    uint ix = path.find(' ');
-	    if ((ix == string::npos) && (path.size()>0)) {
+	    if (ix == string::npos && path.size() > 0) {
 		pathsegs.push_back(path);
 		break;
 	    } else {
 		pathsegs.push_back(path.substr(0, ix));
-		path = path.substr(ix+1, path.size()-(ix+1));
+		path = path.substr(ix + 1, path.size() - ix + 1);
 	    }
 	}
 	string result = config_tree()->show_subtree(pathsegs);
@@ -1298,10 +1331,10 @@ RouterCLI::show_func(const char * ,
 }
 
 int
-RouterCLI::op_mode_func(const char * ,
-			const char *, //cli_term_name
+RouterCLI::op_mode_func(const char* ,
+			const char*, //cli_term_name
 			uint32_t, // cli_session_id
-			const char *command_global_name,
+			const char* command_global_name,
 			const vector<string>& argv)
 {
     string full_command = command_global_name;
@@ -1330,7 +1363,7 @@ RouterCLI::op_mode_func(const char * ,
 		cmd_error += " ";
 	    test_parts.push_back(*pi);
 	    if (op_cmd_list()->prefix_matches(test_parts)) {
-		for (u_int i=0; i<pi->size(); i++) {
+		for (u_int i = 0; i < pi->size(); i++) {
 		    cmd_error += " ";
 		}
 	    } else {
@@ -1346,8 +1379,9 @@ RouterCLI::op_mode_func(const char * ,
     return XORP_OK;
 }
 
-void RouterCLI::op_mode_cmd_done(bool success, const string& result) {
-
+void
+RouterCLI::op_mode_cmd_done(bool success, const string& result)
+{
     if (success) {
 	_cli_client.cli_print("OK\n");
     } else {
@@ -1363,32 +1397,33 @@ void RouterCLI::op_mode_cmd_done(bool success, const string& result) {
 }
 
 int
-RouterCLI::save_func(const char * ,
-		     const char * ,
+RouterCLI::save_func(const char* ,
+		     const char* ,
 		     uint32_t ,		// cli_session_id
-		     const char *command_global_name,
+		     const char* command_global_name,
 		     const vector<string>& argv)
 {
     if (argv.size() != 1) {
 	_cli_client.cli_print("Usage: save <filename>\n");
 	return (XORP_ERROR);
     } else {
-	assert(strcmp(command_global_name,"save")==0);
+	assert(strcmp(command_global_name,"save") == 0);
 	printf("save, filename = %s\n", argv[0].c_str());
 	_xorpsh.save_to_file(argv[0],
 			      callback(this, &RouterCLI::save_done));
 	idle_ui();
 	return (XORP_OK);
-    } 
+    }
 }
 
-void 
-RouterCLI::save_done(const XrlError& e) {
+void
+RouterCLI::save_done(const XrlError& e)
+{
     printf("in save done\n");
     if (e != XrlError::OKAY()) {
 	_cli_client.cli_print("ERROR: Save failed\n");
 	if (e == XrlError::COMMAND_FAILED()) {
-	    if (e.note()=="AUTH_FAIL") {
+	    if (e.note() == "AUTH_FAIL") {
 		check_for_rtrmgr_restart();
 		return;
 	    }  else {
@@ -1406,17 +1441,17 @@ RouterCLI::save_done(const XrlError& e) {
 };
 
 int
-RouterCLI::load_func(const char * ,
-		     const char * ,
-		     uint32_t ,	
-		     const char *command_global_name,
+RouterCLI::load_func(const char* ,
+		     const char* ,
+		     uint32_t ,
+		     const char* command_global_name,
 		     const vector<string>& argv)
 {
     if (argv.size() != 1) {
 	_cli_client.cli_print("Usage: load <filename>\n");
 	return (XORP_ERROR);
     } else {
-	assert(strcmp(command_global_name,"load")==0);
+	assert(strcmp(command_global_name, "load") == 0);
 #ifdef DEBUG_LOADING
 	printf("load, filename = %s\n", argv[0].c_str());
 #endif
@@ -1425,17 +1460,18 @@ RouterCLI::load_func(const char * ,
 				callback(this, &RouterCLI::load_done));
 	idle_ui();
 	return (XORP_OK);
-    } 
+    }
 }
 
 //load communicated is called when the request for the load has been
 //communicated to the rtrmgr, or when this communication has failed.
-void 
-RouterCLI::load_communicated(const XrlError& e) {
+void
+RouterCLI::load_communicated(const XrlError& e)
+{
     if (e != XrlError::OKAY()) {
 	_cli_client.cli_print("ERROR: Load failed.\n");
 	if (e == XrlError::COMMAND_FAILED()) {
-	    if (e.note()=="AUTH_FAIL") {
+	    if (e.note() == "AUTH_FAIL") {
 		check_for_rtrmgr_restart();
 		return;
 	    }  else {
@@ -1457,8 +1493,9 @@ RouterCLI::load_communicated(const XrlError& e) {
 //load done is called when the load has successfully been applied to
 //all the router modules, or when something goes wrong during this
 //process
-void 
-RouterCLI::load_done(bool success, string errmsg) {
+void
+RouterCLI::load_done(bool success, string errmsg)
+{
     if (!success) {
 	_cli_client.cli_print("ERROR: Load failed.\n");
 	_cli_client.cli_print(errmsg);
@@ -1471,31 +1508,36 @@ RouterCLI::load_done(bool success, string errmsg) {
 };
 
 //just to make the code more readable:
-SlaveConfigTree* 
-RouterCLI::config_tree() {
+SlaveConfigTree*
+RouterCLI::config_tree()
+{
     return _xorpsh.config_tree();
 }
 
 //just to make the code more readable:
-TemplateTree* 
-RouterCLI::template_tree() {
+TemplateTree*
+RouterCLI::template_tree()
+{
     return _xorpsh.template_tree();
 }
 
 //just to make the code more readable:
-OpCommandList* 
-RouterCLI::op_cmd_list() {
+OpCommandList*
+RouterCLI::op_cmd_list()
+{
     return _xorpsh.op_cmd_list();
 }
 
-void 
-RouterCLI::check_for_rtrmgr_restart() {
-    _xorpsh.get_rtrmgr_pid(callback(this, 
+void
+RouterCLI::check_for_rtrmgr_restart()
+{
+    _xorpsh.get_rtrmgr_pid(callback(this,
 				     &RouterCLI::verify_rtrmgr_restart));
 }
 
 void
-RouterCLI::verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid) {
+RouterCLI::verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid)
+{
     if (e == XrlError::OKAY()) {
 	if (_xorpsh.rtrmgr_pid() != *pid) {
 	    _cli_client.cli_print("FATAL ERROR.\n");
