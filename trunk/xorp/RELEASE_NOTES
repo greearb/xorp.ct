@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.35 2003/09/02 22:06:24 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.36 2003/10/15 04:17:29 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -33,7 +33,7 @@ Release 0.5 (2003/??/??)
       that information in the kernel.
 
   RIB: 
-    - 
+    - No significant changes.
 
   BGP:
     - 
