@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.5 2003/06/26 18:36:17 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.6 2003/08/28 14:56:18 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -36,7 +36,7 @@ though logically it is a separate entity.
 Configuration
 =============
 
-MFEA like most Xorp modules does not take its configuration
+MFEA like most XORP modules does not take its configuration
 parameters from the command line. Its parameters are provided via
 XRLs. At the very least a MFEA module must be provided with
 the set of network interfaces to enable for multicast.
@@ -48,14 +48,14 @@ In normal operation, MFEA would be started by the XORP router manager
 process, not directly from the command line.  
 
 For testing and debugging purposes, MFEA can be manually started.  The
-Xorp MFEA module (as part of the FEA process) assumes that the XRL finder
+XORP MFEA module (as part of the FEA process) assumes that the XRL finder
 is are already running.  However, the binary program ``test_mfea''
 already contains it as well, therefore it is sufficient to start only
 this program (as a root).
 
 After ``test_mfea'' is started, the MFEA is disabled by default. To
 start it, and to configure its operation, run script ``configure_mfea''.
-Note that it MUST be run from the ``fea'' directory.
+Note that it MUST be run from the ``$XORP/fea'' directory.
 
 However, before running ``configure_mfea'', you must configure
 it for each router:
@@ -67,6 +67,9 @@ it for each router:
 	xorp1)
 	ENABLE_VIFS="dc1 dc2 dc4"
 	;;
+
+   Alternatively, you can predefine variable ENABLE_VIFS in your shell
+   environment.
 
  - By default, ``test_mfea'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
@@ -120,7 +123,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (August 2003), the MFEA supports abstraction for
+Currently (November 2003), the MFEA supports abstraction for
 the following systems:
 
  * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).
