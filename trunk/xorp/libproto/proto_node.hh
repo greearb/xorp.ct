@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.6 2003/04/01 00:56:15 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.7 2003/04/22 23:27:17 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -439,6 +439,8 @@ ProtoNode<V>::vif_find_by_name(const string& name) const
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
+	if (vif == NULL)
+	    continue;
 	if (vif->name() == name)
 	    return (vif);
     }
@@ -454,6 +456,8 @@ ProtoNode<V>::vif_find_by_addr(const IPvX& ipaddr_test) const
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
+	if (vif == NULL)
+	    continue;
 	if (vif->is_my_addr(ipaddr_test))
 	    return (vif);
     }
@@ -469,6 +473,8 @@ ProtoNode<V>::vif_find_by_pif_index(uint16_t pif_index) const
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
+	if (vif == NULL)
+	    continue;
 	if (vif->pif_index() == pif_index)
 	    return (vif);
     }
@@ -495,6 +501,8 @@ ProtoNode<V>::vif_find_direct(const IPvX& ipaddr_test) const
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
+	if (vif == NULL)
+	    continue;
 	if (vif->is_directly_connected(ipaddr_test))
 	    return (vif);
     }
