@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.24 2004/02/24 03:16:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.25 2004/02/25 05:03:06 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,6 +29,18 @@
 #include "path_attribute.hh"
 #include "local_data.hh"
 #include "dummy_next_hop_resolver.hh"
+
+bool
+test_dump_create(TestInfo& /*info*/)
+{
+    const list <const PeerHandler*> l;
+    DumpTable<IPv4> *dt = new
+	DumpTable<IPv4>("dumptable", 0, l, 0, SAFI_UNICAST);
+    dt->set_next_table(dt);
+    dt->suspend_dump();
+
+    return true;
+}
 
 bool
 test_dump(TestInfo& /*info*/)

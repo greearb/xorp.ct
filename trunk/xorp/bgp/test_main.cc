@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.6 2003/07/03 02:03:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.7 2003/09/27 01:21:09 atanu Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
@@ -21,12 +21,14 @@
 #include "test_next_hop_resolver.hh"
 
 bool test_ribin(TestInfo& info);
+bool test_ribin_dump(TestInfo& info);
 bool test_deletion(TestInfo& info);
 bool test_filter(TestInfo& info);
 bool test_cache(TestInfo& info);
 bool test_nhlookup(TestInfo& info);
 bool test_decision(TestInfo& info);
 bool test_fanout(TestInfo& info);
+bool test_dump_create(TestInfo& info);
 bool test_dump(TestInfo& info);
 bool test_ribout(TestInfo& info);
 
@@ -58,12 +60,14 @@ main(int argc, char** argv)
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
 	    {"RibIn", callback(test_ribin)},
+	    {"RibInDump", callback(test_ribin_dump)},
 	    {"Deletion", callback(test_deletion)},
 	    {"Filter", callback(test_filter)},
 	    {"Cache", callback(test_cache)},
 	    {"NhLookup", callback(test_nhlookup)},
 	    {"Decision", callback(test_decision)},
 	    {"Fanout", callback(test_fanout)},
+	    {"DumpCreate", callback(test_dump_create)},
 	    {"Dump", callback(test_dump)},
 	    {"Ribout", callback(test_ribout)},
 

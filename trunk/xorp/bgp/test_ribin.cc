@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.19 2003/10/11 03:17:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.20 2004/02/24 03:16:58 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -28,6 +28,120 @@
 #include "path_attribute.hh"
 #include "local_data.hh"
 #include "dump_iterators.hh"
+
+bool
+test_ribin_dump(TestInfo& /*info*/)
+{
+    BGPMain bgpmain;
+    LocalData localdata;
+    BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
+    BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
+    PeerHandler handler1("test1", &peer1, NULL, NULL);
+    PeerHandler handler2("test1", &peer2, NULL, NULL);
+
+    RibInTable<IPv4> *ribin 
+	= new RibInTable<IPv4>("RIB-IN", SAFI_UNICAST, &handler1);
+    DebugTable<IPv4>* debug_table
+	= new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)ribin);
+    ribin->set_next_table(debug_table);
+    debug_table->set_output_file(stdout);
+
+    IPNet<IPv4> net1("10.0.0.0/8");
+    IPNet<IPv4> net2("30.0.0.0/8");
+    IPNet<IPv4> net3("20.0.0.0/8");
+
+    IPv4 nexthop1("2.0.0.1");
+    NextHopAttribute<IPv4> nhatt1(nexthop1);
+    OriginAttribute igp_origin_att(IGP);
+    AsPath aspath1("3,2,1");
+    ASPathAttribute aspathatt1(aspath1);
+    PathAttributeList<IPv4>* palist1 =
+	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+
+    SubnetRoute<IPv4> *sr1, *sr2, *sr3;
+
+    debug_table->write_comment("TEST 1");
+
+    InternalMessage<IPv4>* msg;
+
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete msg;
+    sr1->unref();
+
+    sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete msg;
+    sr2->unref();
+
+    list <const PeerHandler*> peers_to_dump;
+    peers_to_dump.push_back(&handler1);
+    DumpIterator<IPv4>* dump_iter 
+	= new DumpIterator<IPv4>(&handler2, peers_to_dump);
+
+    ribin->dump_next_route(*dump_iter);
+
+    debug_table->write_comment("The dump has started now add a new route"
+			       " it should appear once we start dumping again"
+			       " but it doesn't");
+
+    sr3 = new SubnetRoute<IPv4>(net3, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete msg;
+    sr3->unref();
+
+    while (ribin->dump_next_route(*dump_iter)) {
+	while (bgpmain.eventloop().timers_pending()) {
+	    bgpmain.eventloop().run();
+	}
+    }
+
+    delete dump_iter;
+
+    debug_table->
+	write_comment(c_format("USE A NEW ITERATOR to prove %s is present",
+			       net3.str().c_str()).c_str());
+
+    dump_iter = new DumpIterator<IPv4>(&handler2, peers_to_dump);
+    ribin->dump_next_route(*dump_iter);
+    ribin->dump_next_route(*dump_iter);
+    ribin->dump_next_route(*dump_iter);
+
+    delete dump_iter;
+
+    // Delete all the allocated memory
+    // Delete the routes from the ribin.
+    debug_table->write_comment("Delete all the routes from the RIB-IN "
+			       "so the memory can be free'd");
+
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->delete_route(*msg, NULL);
+    delete msg;
+    sr1->unref();
+
+    sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
+    ribin->delete_route(*msg, NULL);
+    delete msg;
+    sr2->unref();
+
+    sr3 = new SubnetRoute<IPv4>(net3, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
+    ribin->delete_route(*msg, NULL);
+    delete msg;
+    sr3->unref();
+
+    delete palist1;
+
+    delete ribin;
+    delete debug_table;
+
+    return true;
+}
 
 bool
 test_ribin(TestInfo& /*info*/)
@@ -511,5 +625,3 @@ test_ribin(TestInfo& /*info*/)
     unlink(filename.c_str());
     return true;
 }
-
-
