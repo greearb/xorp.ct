@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.6 2003/06/06 18:48:57 pavlin Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.7 2003/06/09 20:02:19 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Design Overview \\
 \vspace{1ex}
-Version 0.3}
+Version 0.4}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 9, 2003}
+\date{August 28, 2003}
 
 \maketitle
 
@@ -105,8 +105,8 @@ example:
 \section{Functionality}
 
 XORP is designed to support both IPv4 and IPv6. However, even though
-most of the code is written to support both, as of Release 0.3
-(Mune 2003) only IPv4 has been tested.
+most of the code is written to support both, as of Release 0.4
+(August 2003) only IPv4 has been tested in details.
 
 Below is our initial target list of protocols and features to be
 supported by XORP. Those in bold are already implemented or supported
@@ -137,7 +137,7 @@ yet.
 
 \begin{itemize}
   \item {\bf Command Line Interface} (similar to Juniper)
-  \item SNMP
+  \item {\bf SNMP}
   \item WWW
 \end{itemize}
 
@@ -318,7 +318,7 @@ OSPF implementation to support both IPv4 and IPv6.
 
 This is the RIP routing daemon. Similarly to OSPF, the IPv4 and IPv6
 daemons will be separate.
-As of June 2003, the RIP implementation is work in progress.
+As of August 2003, the RIP implementation is work in progress.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{MLD/IGMP}
@@ -389,7 +389,6 @@ This is the SNMP management process. It is used for SNMP access to the
 router. For example, it can be used to translate SNMP requests into XRL
 requests. Internally, SNMP will communicate with the other processes
 using XRLs.
-As of June 2003, the SNMP implementation is work in progress.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -404,6 +403,8 @@ As of June 2003, the SNMP implementation is work in progress.
   \item March 10, 2003: Updated to match XORP version 0.2 release code;
   cleanup.
   \item June 9, 2003: Updated to match XORP version 0.3 release code.
+  \item August 28, 2003: Add SNMP to the set of implemented items. Bump-up the
+  version to 0.4, and the date.
 
 \end{itemize}
 
