@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.9 2004/06/10 22:41:02 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.10 2004/11/05 03:19:26 bms Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -225,7 +225,6 @@ IfMgrIfSetEnabled::str() const
 // ----------------------------------------------------------------------------
 // IfMgrIfSetDiscard
 
-#ifdef notyet
 bool
 IfMgrIfSetDiscard::execute(IfMgrIfTree& t) const
 {
@@ -257,7 +256,6 @@ IfMgrIfSetDiscard::str() const
     return if_str_begin(this, "SetDiscard")
 	+ "\", " + bool2str(discard()) + if_str_end();
 }
-#endif
 
 // ----------------------------------------------------------------------------
 // IfMgrIfSetMtu

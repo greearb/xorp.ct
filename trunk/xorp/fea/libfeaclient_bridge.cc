@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.10 2004/06/10 22:40:54 hodson Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.11 2004/11/05 03:19:26 bms Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -152,9 +152,7 @@ LibFeaClientBridge::interface_update(const string& ifname,
     // equivalent.
     //
     _rm->push(new IfMgrIfSetEnabled(ifname, ii->second.enabled()));
-#ifdef notyet
     _rm->push(new IfMgrIfSetDiscard(ifname, ii->second.discard()));
-#endif
     _rm->push(new IfMgrIfSetMtu(ifname, ii->second.mtu()));
     _rm->push(new IfMgrIfSetMac(ifname, ii->second.mac()));
     _rm->push(new IfMgrIfSetPifIndex(ifname, ii->second.pif_index()));

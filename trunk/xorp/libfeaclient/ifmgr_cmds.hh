@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.7 2004/06/10 22:41:02 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.8 2004/11/05 03:19:26 bms Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -96,7 +96,6 @@ protected:
     bool _en;
 };
 
-#ifdef notyet
 /**
  * @short Command to set discard condition on interface.
  */
@@ -119,7 +118,6 @@ public:
 protected:
     bool _discard;
 };
-#endif
 
 /**
  * @short Command to set MTU of interface.

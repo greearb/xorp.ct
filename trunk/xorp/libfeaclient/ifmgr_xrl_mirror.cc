@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.9 2004/06/03 16:45:44 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.10 2004/06/10 22:41:02 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -81,6 +81,11 @@ protected:
 	// Input values,
 	const string&	ifname,
 	const bool&	enabled);
+
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_discard(
+	// Input values,
+	const string&	ifname,
+	const bool&	discard);
 
     XrlCmdError fea_ifmgr_mirror_0_1_interface_set_mtu(
 	// Input values,
@@ -335,6 +340,19 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_enabled(
 	)
 {
     _dispatcher.push(new IfMgrIfSetEnabled(ifname, en));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_discard(
+	const string&	ifname,
+	const bool&	discard
+	)
+{
+    _dispatcher.push(new IfMgrIfSetDiscard(ifname, discard));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

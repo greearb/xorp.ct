@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.13 2004/06/10 22:41:02 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.14 2004/11/05 03:19:26 bms Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -168,10 +168,8 @@ public:
     inline bool		enabled() const			{ return _en; }
     inline void		set_enabled(bool en)		{ _en = en; }
 
-#ifdef notyet
     inline bool		discard() const			{ return _discard; }
     inline void		set_discard(bool discard)	{ _discard = discard; }
-#endif
 
     inline uint32_t	mtu_bytes() const		{ return _mtu; }
     inline void		set_mtu_bytes(uint32_t mtu) 	{ _mtu = mtu; }
@@ -196,9 +194,7 @@ protected:
     string	_name;
 
     bool	_en;		// enabled
-#ifdef notyet
     bool	_discard;	// is a discard interface
-#endif
     uint32_t	_mtu;		// mtu in bytes
     Mac		_mac;		// MAC address
     uint16_t	_pif;		// Physical interface index
