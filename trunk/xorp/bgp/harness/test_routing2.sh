@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.13 2005/02/28 23:12:03 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.14 2005/03/01 22:47:24 atanu Exp $
 #
 
 #
@@ -671,8 +671,101 @@ test8()
     coord peer3 assert established
 }
 
+test9()
+{
+    echo "TEST9 - Next hop resolvability on multiple peerings"
+    # Used to trigger a bug in the RIB-OUT
+    # Same as previous test use the meds to change the priority of the routes.
+
+    config_peers
+
+    # Configure IGP routes in the RIB as if IS-IS is running.
+    add_igp_table4 is-is isis isis true false
+
+    sleep 2
+
+    # Route 1
+    coord peer1 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	nexthop $NH1 \
+	localpref 100 \
+	med 3 \
+	nlri 10.10.10.10/24
+
+    # Route 2
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	nexthop $NH1 \
+	localpref 100 \
+	med 2 \
+	nlri 10.10.10.10/24
+
+    # Route 3
+    coord peer3 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	nexthop $NH1 \
+	localpref 100 \
+	med 1 \
+	nlri 10.10.10.10/24
+
+    add_route4 is-is true false $NH1/24 $GW1 10
+
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
+test10()
+{
+    echo "TEST10 - Next hop resolvability on multiple peerings"
+    # Used to trigger a bug in the RIB-OUT
+
+    config_peers
+
+    # Configure IGP routes in the RIB as if IS-IS is running.
+    add_igp_table4 is-is isis isis true false
+    add_route4 is-is true false $NH1/24 $GW1 10
+
+    # Route 1
+    coord peer1 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	nexthop $NH1 \
+	localpref 100 \
+	med 3 \
+	nlri 10.10.10.10/24
+
+    # Route 2
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	nexthop $NH1 \
+	localpref 100 \
+	med 2 \
+	nlri 10.10.10.10/24
+
+    # Route 3
+    coord peer3 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	nexthop $NH1 \
+	localpref 100 \
+	med 1 \
+	nlri 10.10.10.10/24
+
+
+    delete_route4 is-is true false $NH1/24
+
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8'
+TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8 test9 test10'
 
 # Include command line
 . ${srcdir}/args.sh
