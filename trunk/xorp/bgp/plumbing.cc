@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.12 2003/04/22 23:27:15 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.13 2003/05/08 23:45:11 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -817,3 +817,6 @@ BGPPlumbingAF<A>::status(string& reason) const
 {
     return _next_hop_resolver.status(reason);
 }
+
+template class BGPPlumbingAF<IPv4>;
+template class BGPPlumbingAF<IPv6>;
