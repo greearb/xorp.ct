@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.16 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.17 2003/09/30 18:24:02 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -63,24 +63,23 @@ MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt,
 }
 
 bool
-MasterConfigTree::read_file(string& configuration, const string& conffile,
-			    string& errmsg) {
-    size_t len=0;
-    FILE *file;
-    file = fopen(conffile.c_str(), "r");
+MasterConfigTree::read_file(string& configuration,
+			    const string& conffile,
+			    string& errmsg)
+{
+    FILE* file = fopen(conffile.c_str(), "r");
     if (file == NULL) {
 	errmsg = c_format("Failed to open config file: %s\n",
 			  conffile.c_str());
 	return false;
     }
-#define MCT_READBUF 8192
-    char buf[MCT_READBUF+1];
-    while (feof(file)==0) {
-	size_t bytes;
-	bytes = fread(buf, 1, MCT_READBUF, file);
-	len+=bytes;
+    static const uint32_t MCT_READBUF = 8192;
+    char buf[MCT_READBUF + 1];
+
+    while (feof(file) == 0) {
+	size_t bytes = fread(buf, 1, sizeof(buf), file);
 	//null terminate it.
-	buf[bytes]=0;
+	buf[bytes] = 0;
 	if (bytes > 0) {
 	    configuration += buf;
 	}
@@ -89,10 +88,15 @@ MasterConfigTree::read_file(string& configuration, const string& conffile,
     return true;
 }
 
-bool MasterConfigTree::parse(const string& configuration,
-			    const string& conffile) {
+bool
+MasterConfigTree::parse(const string& configuration,
+			const string& conffile)
+{
     try {
 	((ConfigTree*)this)->parse(configuration, conffile);
+	string s = show_tree();
+	printf("== MasterConfigTree::parse yields ==\n%s\n"
+	       "====================================\n", s.c_str());
     } catch (ParseError &pe) {
 	printf("caught ParseError: %s\n", pe.why().c_str());
 	booterrormsg(pe.why().c_str());
@@ -102,7 +106,9 @@ bool MasterConfigTree::parse(const string& configuration,
     return true;
 }
 
-void MasterConfigTree::execute() {
+void
+MasterConfigTree::execute()
+{
     printf("##############################################################\n");
     printf("MasterConfigTree::execute\n");
     list <string> changed_modules = find_changed_modules();
@@ -116,7 +122,9 @@ void MasterConfigTree::execute() {
     commit_changes_pass2();
 }
 
-void MasterConfigTree::config_done(bool success, string errmsg) {
+void
+MasterConfigTree::config_done(bool success, string errmsg)
+{
     printf("MasterConfigTree::config_done: ");
     if (success)
 	printf("success\n");
@@ -138,7 +146,8 @@ void MasterConfigTree::config_done(bool success, string errmsg) {
 }
 
 list <string>
-MasterConfigTree::find_changed_modules() const {
+MasterConfigTree::find_changed_modules() const
+{
     printf("Find changed modules\n");
     set <string> changed_modules;
     _root_node.find_changed_modules(changed_modules);
@@ -148,7 +157,8 @@ MasterConfigTree::find_changed_modules() const {
 }
 
 list <string>
-MasterConfigTree::find_active_modules() const {
+MasterConfigTree::find_active_modules() const
+{
     printf("Find active modules\n");
     set <string> active_modules;
     _root_node.find_active_modules(active_modules);
@@ -158,7 +168,8 @@ MasterConfigTree::find_active_modules() const {
 }
 
 list <string>
-MasterConfigTree::find_inactive_modules() const {
+MasterConfigTree::find_inactive_modules() const
+{
     printf("Find inactive modules\n");
     set <string> all_modules;
     list <string> ordered_all_modules;
@@ -202,7 +213,8 @@ MasterConfigTree::find_inactive_modules() const {
 
 void
 MasterConfigTree::order_module_list(const set <string>& module_set,
-				    list <string>& ordered_modules) const {
+				    list <string>& ordered_modules) const
+{
     //we've found the list of modules that have changed that need to
     //be applied.  Now we need to sort them so that the modules to be
     //performed first are at the beginning of the list.
@@ -332,7 +344,8 @@ MasterConfigTree::order_module_list(const set <string>& module_set,
 }
 
 void
-MasterConfigTree::commit_changes_pass1(CallBack cb) {
+MasterConfigTree::commit_changes_pass1(CallBack cb)
+{
     printf("##############################################################\n");
     printf("MasterConfigTree::commit_changes_pass1\n");
     _commit_in_progress = true;
@@ -390,7 +403,8 @@ MasterConfigTree::commit_changes_pass1(CallBack cb) {
 }
 
 void
-MasterConfigTree::commit_pass1_done(bool success, string result) {
+MasterConfigTree::commit_pass1_done(bool success, string result)
+{
     printf("##############################################################\n");
     printf("## commit_pass1_done\n");
     if (success)
@@ -402,7 +416,8 @@ MasterConfigTree::commit_pass1_done(bool success, string result) {
 }
 
 void
-MasterConfigTree::commit_changes_pass2() {
+MasterConfigTree::commit_changes_pass2()
+{
     printf("##############################################################\n");
     printf("## commit_changes_pass2\n");
     _commit_in_progress = true;
@@ -456,7 +471,8 @@ MasterConfigTree::commit_changes_pass2() {
 }
 
 void
-MasterConfigTree::commit_pass2_done(bool success, string result) {
+MasterConfigTree::commit_pass2_done(bool success, string result)
+{
     printf("##############################################################\n");
     printf("## commit_pass2_done\n");
     if (success)
@@ -538,7 +554,8 @@ MasterConfigTree::unlock_node(const string& /*node*/, uid_t /*user_id*/)
 bool
 MasterConfigTree::save_to_file(const string& filename,
 			       uid_t user_id,
-			       string& errmsg) {
+			       string& errmsg)
+{
     errmsg = "";
 
     //set the effective group to "xorp"
@@ -703,7 +720,8 @@ MasterConfigTree::save_to_file(const string& filename,
 bool
 MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 				 string& errmsg,
-				 string& deltas, string& deletions) {
+				 string& deltas, string& deletions)
+{
     //We run load_from_file as the UID of the user making the request
     //and as group xorp.  This prevents users using the rtrmgr to
     //attempt to load files they wouldn't normally have had the
@@ -791,7 +809,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 void
 MasterConfigTree::diff_configs(const ConfigTree& new_tree,
 			       ConfigTree& delta_tree,
-			       ConfigTree& deletion_tree) {
+			       ConfigTree& deletion_tree)
+{
     //clone the existing config tree into the delta tree.
     //clone the new config tree into the delta tree
     deletion_tree = *((ConfigTree*)(this));
@@ -833,7 +852,7 @@ MasterConfigTree::module_config_start(const string& module_name,
 #ifdef NOTDEF
 bool
 MasterConfigTree::module_shutdown(const string& module_name,
-				     string& result)
+				  string& result)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
     if (cmd == NULL) {
