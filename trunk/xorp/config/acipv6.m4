@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.8 2003/09/13 02:33:44 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.9 2003/09/26 16:19:58 pavlin Exp $
 dnl
 
 dnl
@@ -160,7 +160,7 @@ AC_MSG_RESULT($ipv6type)
 dnl ------------------------------------
 dnl Check for IPv6 related headers
 dnl ------------------------------------
-AC_CHECK_HEADERS(netinet6/in6_var.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h)
+AC_CHECK_HEADERS(netinet6/in6_var.h netinet6/nd6.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h)
 
 
 dnl ----------------------------
