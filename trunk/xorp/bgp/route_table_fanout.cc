@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.28 2004/04/14 23:00:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.29 2004/04/15 16:13:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -867,6 +867,18 @@ FanoutTable<A>::peering_down_complete(const PeerHandler *peer,
 	i++;
 	next_table->peering_down_complete(peer, genid, 
 					  (BGPRouteTable<A>*)this);
+    }
+}
+
+template<class A>
+void
+FanoutTable<A>::peering_came_up(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller) 
+{
+    XLOG_ASSERT(this->_parent == caller);
+    typename NextTableMap<A>::iterator i;
+    for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
+	i.first()->peering_came_up(peer, genid, (BGPRouteTable<A>*)this);
     }
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.4 2004/02/25 05:03:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.5 2004/04/15 16:13:28 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -82,6 +82,16 @@ BGPRouteTable<A>::peering_down_complete(const PeerHandler *peer,
     XLOG_ASSERT(_parent == caller);
     XLOG_ASSERT(_next_table != NULL);
     _next_table->peering_down_complete(peer, genid, this);
+}
+
+template<class A>
+void
+BGPRouteTable<A>::peering_came_up(const PeerHandler *peer, 
+					uint32_t genid,
+					BGPRouteTable<A> *caller) {
+    XLOG_ASSERT(_parent == caller);
+    if (_next_table)
+	_next_table->peering_came_up(peer, genid, this);
 }
 
 template class BGPRouteTable<IPv4>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.9 2003/10/22 10:58:26 mjh Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.10 2004/02/24 03:16:55 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -106,6 +106,8 @@ public:
 			   BGPRouteTable<A> *caller);
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
+    void peering_came_up(const PeerHandler *peer, uint32_t genid,
+			 BGPRouteTable<A> *caller);
 
 private:
     const SubnetRoute<A> *lookup_route(const BGPRouteTable<A>* ignore_parent,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.9 2004/02/25 05:03:05 atanu Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.10 2004/03/04 03:50:30 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -115,10 +115,6 @@ public:
 
     int dump_entire_table(BGPRouteTable<A> *child_to_dump_to, Safi safi,
 			  string ribname, bool unplumb_allowed = true);
-#ifdef NOTDEF
-    void peering_went_down(const PeerHandler* peer_handler);
-#endif
-
     /* mechanisms to implement flow control in the output plumbing */
     void output_state(bool busy, BGPRouteTable<A> *next_table);
     bool get_next_message(BGPRouteTable<A> *next_table);
@@ -127,6 +123,8 @@ public:
 			   BGPRouteTable<A> *caller);
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
+    void peering_came_up(const PeerHandler *peer, uint32_t genid,
+			 BGPRouteTable<A> *caller);
 
     void print_queue();
 private:

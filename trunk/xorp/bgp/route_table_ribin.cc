@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.25 2004/04/15 16:13:29 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.26 2004/05/07 03:09:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -99,6 +99,8 @@ RibInTable<A>::ribin_peering_came_up()
     }
 
     _table_version = 1;
+
+    this->_next_table->peering_came_up(_peer, _genid, this);
 }
 
 template<class A>

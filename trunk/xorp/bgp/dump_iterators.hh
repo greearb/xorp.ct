@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.6 2004/02/12 07:00:49 atanu Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.7 2004/03/03 04:00:51 atanu Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -28,13 +28,14 @@ class PeerHandler;
 template <class A> class InternalMessage;
 
 template <class A>
-class DownedPeer {
+class PeerDumpState {
 public:
-    DownedPeer(const PeerHandler* peer,
+    PeerDumpState(const PeerHandler* peer,
 	       bool routes_dumped,
 	       const IPNet<A>& last_net,
 	       uint32_t genid);
-    ~DownedPeer();
+    PeerDumpState(const PeerHandler* peer, uint32_t genid);
+    ~PeerDumpState();
     string str() const;
     const PeerHandler* peer_handler() const { return _peer; }
     bool routes_dumped() const { return _routes_dumped; }
@@ -98,6 +99,11 @@ public:
     void peering_down_complete(const PeerHandler *peer, uint32_t genid);
 
     /**
+     * A peer that was down came up.
+     */
+    void peering_came_up(const PeerHandler *peer, uint32_t genid);
+
+    /**
      * @return true while peers we deleting routes.
      */
     bool waiting_for_deletion_completion() const;
@@ -106,14 +112,26 @@ private:
     const PeerHandler *_peer;
     list <const PeerHandler*> _peers_to_dump;
     list <const PeerHandler*>::iterator _current_peer;
+    uint32_t _current_peers_genid;
     bool _route_iterator_is_valid;
     typename BgpTrie<A>::iterator _route_iterator;
-    //IPNet<A> _route_iterator_net;
-    //    uint32_t _rib_version;
 
     bool _routes_dumped_on_current_peer;
     IPNet<A> _last_dumped_net;
-    list <DownedPeer<A> > _downed_peers;
+    /**
+     * The list of peers that went down during the dump process.
+     */
+    list <PeerDumpState<A> > _downed_peers;
+
+    /**
+     * The list of new peers that appeared during the dump process.
+     */
+    list <PeerDumpState<A> > _new_peers;
+    
+    /**
+     * The list of peers we've already dumped.
+     */
+    list <PeerDumpState<A> > _dumped_peers;
 };
 
 #endif // __BGP_DUMP_ITERATORS_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.8 2004/02/24 03:16:55 atanu Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.9 2004/03/04 03:50:30 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -73,6 +73,13 @@ public:
      */
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
+
+    /**
+     * A peer which was previously down came up.
+     */
+    void peering_came_up(const PeerHandler *peer, uint32_t genid,
+			 BGPRouteTable<A> *caller);
+
 private:
     /**
      * Called when the dump table has completed its tasks.

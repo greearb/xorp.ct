@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.11 2004/04/01 19:54:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.12 2004/04/15 16:13:27 hodson Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+//#define DEBUG_LOGGING
+//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -23,10 +23,10 @@
 #include "internal_message.hh"
 
 template <class A>
-DownedPeer<A>::DownedPeer(const PeerHandler* peer,
-			     bool routes_dumped,
-			     const IPNet<A>& last_net,
-			     uint32_t genid) 
+PeerDumpState<A>::PeerDumpState(const PeerHandler* peer,
+			  bool routes_dumped,
+			  const IPNet<A>& last_net,
+			  uint32_t genid) 
 {
     _peer = peer;
     _routes_dumped = routes_dumped;
@@ -39,8 +39,17 @@ DownedPeer<A>::DownedPeer(const PeerHandler* peer,
 }
 
 template <class A>
+PeerDumpState<A>::PeerDumpState(const PeerHandler* peer, uint32_t genid) 
+{
+    _peer = peer;
+    _routes_dumped = false;
+    _genid = genid;
+    _delete_complete = false;
+}
+
+template <class A>
 string
-DownedPeer<A>::str() const
+PeerDumpState<A>::str() const
 {
     return c_format("peer: %p routes_dumped: %s last_net: %s, genid: %d\n",
 		    _peer, _routes_dumped ? "true" : "false",
@@ -49,7 +58,7 @@ DownedPeer<A>::str() const
 }
 
 template <class A>
-DownedPeer<A>::~DownedPeer()
+PeerDumpState<A>::~PeerDumpState()
 {
 }
 
@@ -69,6 +78,7 @@ DumpIterator<A>::DumpIterator(const PeerHandler* peer,
 	    ctr++;
 	}
     }
+
     debug_msg("Peers to dump has %d members\n", ctr);
     _current_peer = _peers_to_dump.begin();
     _route_iterator_is_valid = false;
@@ -89,6 +99,7 @@ void
 DumpIterator<A>::route_dump(const InternalMessage<A> &rtmsg)
 {
     _routes_dumped_on_current_peer = true;
+    _current_peers_genid = rtmsg.genid();
     _last_dumped_net = rtmsg.net();
 }
 
@@ -113,6 +124,10 @@ template <class A>
 bool
 DumpIterator<A>::next_peer()
 {
+    // record the genid of peer we just finished dumping
+    if (_routes_dumped_on_current_peer)
+	_dumped_peers.push_back(PeerDumpState<A>(*_current_peer, 
+						 _current_peers_genid));
 
     _current_peer++;
     // Make sure the iterator no longer points at a trie that may go away.
@@ -131,7 +146,7 @@ DumpIterator<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
 {
     debug_msg("peering_is_down %p genid %d\n", peer, genid);
     _peers_to_dump.push_back(peer);
-    _downed_peers.push_back(DownedPeer<A>(peer, false, IPNet<A>(), genid));
+    _downed_peers.push_back(PeerDumpState<A>(peer, genid));
 }
 
 template <class A>
@@ -162,15 +177,14 @@ DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 	       valid iterator, then we'll have received a dump, and so we'll
 	       have a valid genid for the ribin.  We can filter using this
 	       information */
-	    _downed_peers.push_back(DownedPeer<A>(peer,
+	    _downed_peers.push_back(PeerDumpState<A>(peer,
 						  true,
 						  _last_dumped_net,
 						  genid));
 	} else {
 	    /* we hadn't yet dumped anything from this peer - make
                sure we don't propagate any deletes from it */
-	    _downed_peers.push_back(DownedPeer<A>(peer, false, IPNet<A>(),
-						  genid));
+	    _downed_peers.push_back(PeerDumpState<A>(peer, genid));
 	}
 	/*skip to the next peer*/
 	next_peer();
@@ -185,8 +199,7 @@ DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 		/* add it to the downed peers list so we prevent
                    unnecessary deletions for this genid getting
                    though. */
-		_downed_peers.push_back(DownedPeer<A>(peer, false, IPNet<A>(),
-						      genid));
+		_downed_peers.push_back(PeerDumpState<A>(peer, genid));
 		return;
 	    }
 	}
@@ -203,7 +216,7 @@ DumpIterator<A>::peering_down_complete(const PeerHandler *peer,
 {
     debug_msg("peering_down_complete %p genid %d\n", peer, genid);
 
-    typename list <DownedPeer<A> >::iterator i;
+    typename list <PeerDumpState<A> >::iterator i;
     bool delete_complete = true;
     for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {
 	if ((i->peer_handler() == peer) && (i->genid() == genid)){
@@ -218,7 +231,7 @@ template <class A>
 bool
 DumpIterator<A>::waiting_for_deletion_completion() const
 {
-    typename list <DownedPeer<A> >::const_iterator i;
+    typename list <PeerDumpState<A> >::const_iterator i;
     bool wait = false;
     for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {
 	debug_msg("downed peers: %s\n", i->str().c_str());
@@ -226,6 +239,47 @@ DumpIterator<A>::waiting_for_deletion_completion() const
 	    wait = true;
     }
     return wait;
+}
+
+template <class A>
+void
+DumpIterator<A>::peering_came_up(const PeerHandler *peer, uint32_t genid)
+{
+    debug_msg("peering_came_up %p genid %d\n", peer, genid);
+    
+    /* A peering came up.  Now, this peering could have been one that
+       we know went down, because it went down after we started the
+       down, or it could be one we've never heard of before.  In the
+       later case, there could still be routes in a DeletionTable from
+       before, so we need to record the GenID so we don't get confused
+       between old and new routes */
+
+    list <PeerDumpState<A> >::iterator i;
+    for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {
+	if (i->peer_handler() == peer) {
+	    // OK, we've heard about this one before, so nothing more needed.
+	    return;
+	}
+    }
+
+    // perhaps it came up, went down, and came up again.  In which
+    // case it may be in our new_peers list.
+    for (i = _new_peers.begin(); i != _new_peers.end(); i++) {
+	if (i->peer_handler() == peer) {
+	    // OK, we've heard about this one before, so nothing more needed.
+	    return;
+	}
+    }
+
+    //sanity check.  If the peering came up, and it wasn't in the
+    //downed_peers list, the we must have never have heard of it,
+    list <const PeerHandler*>::iterator pi;
+    for (pi = _current_peer; pi != _peers_to_dump.end(); pi++) {
+	XLOG_ASSERT(*pi != peer);
+    }
+    
+    // this peer is a new one for us, so record it.
+    _new_peers.push_back(PeerDumpState<A>(peer, false, IPNet<A>(), genid));
 }
 
 template <class A>
@@ -241,6 +295,37 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
        dump process.  true indicates that the change should be
        propagated downstream; false indicates it shouldn't because the
        dump will get to this eventually */
+
+    /* If we've not yet dumped this peer, but it is in our list of
+       peers to dump, then we return false, because we'll get to it
+       later.
+ 
+       If this route change is on the peer we're currently dumping,
+       then the change is valid if we've passed that point in the
+       route space, otherwise we'll get to it in due course.
+
+       If we've already dumped this peer, then the change is if it's
+       genid is at least as new as the genid when we dumped the peer.
+       Otherwise the change may be an old background deletion finally
+       getting round to deleting the route.
+    */
+
+    /* This is complicated by peers that come up and down during the
+       dump process.
+
+       If the peer is one that came up after we started dumping, then
+       normally the route change will be valid, but it could be
+       invalid if it has an older GenID that the GenID of the peer
+       when it came up.  This might happen because there's a
+       DeletionTable doing a background deletion for routes from
+       before we started the dump.
+
+       If the peer is one we've never heard of, then the change must
+       be from a DeletionTable doing a background deletion for routes from
+       before we started the dump.
+    */
+
+
     debug_msg("peer:%p, pa:%s , gi:%d, op:%d\n",
 	      origin_peer, net.str().c_str(), genid, op);
     switch (op) {
@@ -272,6 +357,14 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    debug_msg("we've dumped this route: %s last dumped: %s\n",
 		      net.str().c_str(), _last_dumped_net.str().c_str());
 	    /*we've already dumped this route*/
+
+	    if (_current_peers_genid != genid) {
+		// the route comes from an old version of the Rib,
+		// probably from a DeletionTable.
+		printf("Route %s genid %d, expected genid %d\n",
+		       net.str().c_str(), _current_peers_genid, genid);
+		return false;
+	    }
 	    return true;
 	} else {
 	    debug_msg("we'll dump this route later. last dumped: %s\n",
@@ -286,7 +379,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    /* this peer has already finished being dumped */
 	    /* we need to check whether the peering went down while we
 	       were dumping it */
-	    typename list <DownedPeer<A> >::iterator dpi;
+	    typename list <PeerDumpState<A> >::iterator dpi;
 	    for (dpi = _downed_peers.begin();
 		 dpi != _downed_peers.end(); dpi++) {
 		if (origin_peer == dpi->peer_handler()) {
@@ -298,7 +391,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 		    /*the peer had gone down when we were in the
                       middle of dumping it */
 		    if (genid == dpi->genid()) {
-			DownedPeer<A>* tmp = &(*dpi);
+			PeerDumpState<A>* tmp = &(*dpi);
 			UNUSED(tmp);
 			switch (op) {
 			case RTQUEUE_OP_DELETE:
@@ -340,6 +433,42 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    }
 	    /* the peer didn't go down in mid dump */
 	    debug_msg("peer didn't go down in mid dump\n");
+
+	    /* we need to check the genid of the routes we dumped in
+	       case this is older */
+	    for (dpi = _dumped_peers.begin();
+		 dpi != _dumped_peers.end(); dpi++) {
+		if (origin_peer == dpi->peer_handler()) {
+		    if (genid >= dpi->genid()) {
+			// it's a new change, so it's valid
+			return true;
+		    } else {
+			// change must have come from a DeletionTable
+			XLOG_ASSERT(op != RTQUEUE_OP_REPLACE_NEW);
+			XLOG_ASSERT(op != RTQUEUE_OP_ADD);
+			return false;
+		    }
+		}
+	    }
+	    /* We don't have this peer in the _dumped_peers list. We
+	       must have not dumped any routes from it */
+	    switch (op) {
+	    case RTQUEUE_OP_DELETE:
+	    case RTQUEUE_OP_REPLACE_OLD:
+		/* if we didn't dump any routes from it, a delete
+		   cannot be valid */
+		return false;
+	    case RTQUEUE_OP_REPLACE_NEW:
+	    case RTQUEUE_OP_ADD:
+		/* if we didn't dump any routes from it, an add must
+		   be valid */
+		/* make sure we keep track of the genid this time */
+		_dumped_peers.push_back(PeerDumpState<A>(origin_peer, genid));
+		return true;
+	    default:
+		XLOG_UNREACHABLE();
+	    }
+	    
 	    return true;
 	}
     }
@@ -352,9 +481,32 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
     }
 
     /* if we got this far the peer isn't in our list of peers to dump,
-       so it must have appeared since we started the dump */
-    debug_msg("must be a new peer\n");
-    return true;
+       so it must have appeared since we started the dump, or it must
+       be down */
+    debug_msg("must be a new peer or must be down\n");
+
+    typename list <PeerDumpState<A> >::const_iterator npi;
+    for (npi = _new_peers.begin(); npi != _new_peers.end(); npi++) {
+	if (npi->peer_handler() == origin_peer) {
+	    //It is a new peer.  Check the GenID in case this came
+	    //from a DeletionTable on this peer.
+	    if (npi->genid() >= genid) {
+		// the route change is not from before the peer came up
+		return true;
+	    } else {
+		// it must be from a DeletionTable, so it's 
+		XLOG_ASSERT(op != RTQUEUE_OP_REPLACE_NEW);
+		XLOG_ASSERT(op != RTQUEUE_OP_ADD);
+		return false;
+	    }
+	}
+    }
+
+    debug_msg("we've never heard of the peer - it must be down\n");
+    XLOG_ASSERT(op != RTQUEUE_OP_REPLACE_NEW);
+    XLOG_ASSERT(op != RTQUEUE_OP_ADD);
+    
+    return false;
 }
 
 template class DumpIterator<IPv4>;

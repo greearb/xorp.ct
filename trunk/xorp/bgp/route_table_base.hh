@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.4 2003/08/04 21:58:58 pavlin Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.5 2004/02/24 03:16:55 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -98,6 +98,8 @@ public:
 				   BGPRouteTable<A> *caller);
     virtual void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 				       BGPRouteTable<A> *caller);
+    virtual void peering_came_up(const PeerHandler *peer, uint32_t genid,
+				 BGPRouteTable<A> *caller);
 
     Safi safi() const {return _safi; }
 protected:
