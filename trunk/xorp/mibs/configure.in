@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP$
+dnl $XORP: xorp/mibs/configure.in,v 1.1 2004/11/19 05:19:09 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ dnl ---------------------------------------------------------------------------
 AC_PREREQ(2.13)
 
 AC_INIT
-AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(mibs, 1.0)
 AM_MAINTAINER_MODE

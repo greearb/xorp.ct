@@ -114,7 +114,7 @@ EXTRA_DIST = README getbgppeertable getbgpversion snmp.conf startsnmp.in stopsnm
 ################################################################
 INCLUDES = -I$(top_srcdir)
 subdir = snmpdscripts
-mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+mkinstalldirs = $(SHELL) $(top_srcdir)/../config/mkinstalldirs
 CONFIG_CLEAN_FILES = startsnmp
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 
