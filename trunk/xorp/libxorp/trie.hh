@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.19 2004/04/18 20:59:11 hodson Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.20 2004/06/10 22:41:22 hodson Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -903,7 +903,8 @@ TrieNode<A,Payload>::find_subtree(const Key &key)
     TrieNode *cand = r && key.contains(r->_k) ? r : NULL;
 
     for ( ; r && r->_k.contains(key) ; ) {
-        cand = r;		// we have a candidate.
+	if (key.contains(r->_k))
+	    cand = r;		// we have a candidate.
 	if (r->_left && r->_left->_k.contains(key))
 	    r = r->_left;
 	else			// should check that right contains(key), but

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_trie.cc,v 1.6 2004/06/10 22:41:21 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_trie.cc,v 1.7 2005/03/03 07:48:00 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -183,6 +183,55 @@ void test_upper_bound6(IPv6 test_addr, IPv6 test_answer) {
 	abort();
     }
     printf("-----------\n");
+}
+
+void
+test_find_subtree()
+{
+    printf("Find subtree\n");
+
+    Trie<IPv4, string> trie_subtree;
+    
+    IPv4Net n1(IPv4("169.229.0.136"), 29);
+    trie_subtree.insert(n1, "169.229.0.136/29");
+
+    IPv4Net n2(IPv4("192.150.187.0"), 25);
+    trie_subtree.insert(n2, "192.150.187.0/25");
+ 
+    IPv4Net n3(IPv4("192.168.254.2"), 32);
+    trie_subtree.insert(n3, "192.168.254.2/32");
+
+    IPv4Net n4(IPv4("192.168.254.3"), 32);
+    trie_subtree.insert(n4, "192.168.254.3/32");
+
+    trie_subtree.print();
+
+    IPv4Net nsearch1(IPv4("192.150.187.248"), 29);
+    Trie<IPv4, string>::iterator iter;
+
+    iter = trie_subtree.search_subtree(nsearch1);
+    for( ;iter != trie_subtree.end(); iter++) {
+	printf("subtree = %s\n", iter.payload().c_str());
+	printf("FAIL\n");
+	abort();
+    }
+
+    IPv4Net n5(IPv4("192.150.187.248"), 29);
+    trie_subtree.insert(n5, "192.150.187.248/29");
+
+    IPv4Net nsearch2(IPv4("192.150.187.0"), 25);
+    trie_subtree.erase(n2);
+
+    trie_subtree.print();
+
+    iter = trie_subtree.search_subtree(nsearch2);
+    for( ;iter != trie_subtree.end(); iter++) {
+	printf("subtree = %s\n", iter.payload().c_str());
+	printf("FAIL\n");
+	abort();
+    }
+
+    printf("PASS\n");
 }
 
 int main() {
@@ -586,4 +635,6 @@ int main() {
 	exit(1);
     }
     printf("PASS\n");
+
+    test_find_subtree();
 }
