@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.2 2003/03/12 22:46:02 pavlin Exp $"
 
 
 /*
@@ -880,7 +880,7 @@ socket2family(int sock)
     } un;
     
     len = MAXSOCKADDR;
-    if (getsockname(sock, (struct sockaddr *)un.data, &len) < 0) {
+    if (getsockname(sock, &un.sa, &len) < 0) {
 	XLOG_ERROR("Error getsockname() for socket %d: %s",
 		   sock, strerror(errno));
 	close(sock);
