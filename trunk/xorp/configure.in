@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.108 2004/08/25 22:09:11 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.109 2004/08/31 17:12:32 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1081,9 +1081,11 @@ AC_TRY_COMPILE([
 #include <net/if_var.h>
 #include <netinet/ip_compat.h>
 #include <netinet/ip_fil.h>
+],
+[
 main()
 {
-  char *myipfname = _ipfname;
+  char *myipfname = IPL_NAME;
   int myioctl = SIOCGETFF;
 }
 ],
@@ -1108,6 +1110,8 @@ AC_TRY_COMPILE([
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netinet/ip_fw.h>
+],
+[
 main()
 {
   int mysockopt = IP_FW_ADD;
@@ -1139,6 +1143,8 @@ AC_TRY_COMPILE([
 #include <unistd.h>
 #include "libiptc/libiptc.h"
 #include "iptables.h"
+],
+[
 main()
 {
 }
