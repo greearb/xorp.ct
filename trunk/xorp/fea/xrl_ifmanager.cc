@@ -12,9 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.10 2003/08/10 22:02:59 pavlin Exp $"
-
-#define DEBUG_LOGGING
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.11 2003/08/12 21:55:24 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
