@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.8 2003/03/10 23:20:47 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.1 2003/03/13 00:32:05 pavlin Exp $"
 
 
 //
@@ -27,26 +27,61 @@
 
 
 int
-Mld6igmpNode::set_vif_proto_version(const string& vif_name, int proto_version)
+Mld6igmpNode::get_vif_proto_version(const string& vif_name, int& proto_version,
+				    string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     
-    if (mld6igmp_vif == NULL)
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot get protocol version for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
 	return (XORP_ERROR);
+    }
     
-    if (mld6igmp_vif->set_proto_version(proto_version) < 0)
-	return (XORP_ERROR);
+    proto_version = mld6igmp_vif->proto_version();
     
     return (XORP_OK);
 }
 
 int
-Mld6igmpNode::reset_vif_proto_version(const string& vif_name)
+Mld6igmpNode::set_vif_proto_version(const string& vif_name, int proto_version,
+				    string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot set protocol version for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    if (mld6igmp_vif->set_proto_version(proto_version) < 0) {
+        error_msg = c_format("Cannot set protocol version for vif %s: "
+			     "invalid protocol version %d",
+			     vif_name.c_str(), proto_version);
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::reset_vif_proto_version(const string& vif_name,
+				      string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     
-    if (mld6igmp_vif == NULL)
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot reset protocol version for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
+    }
     
     mld6igmp_vif->set_proto_version(mld6igmp_vif->proto_version_default());
     

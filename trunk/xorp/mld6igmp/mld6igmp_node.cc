@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.11 2003/07/16 02:56:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.12 2003/08/06 18:51:17 pavlin Exp $"
 
 
 //
@@ -210,7 +210,7 @@ Mld6igmpNode::decr_waiting_for_mfea_startup_events()
 
 /**
  * Mld6igmpNode::has_pending_down_units:
- * @reason: return-by-reference string that contains human-readable
+ * @reason_msg: return-by-reference string that contains human-readable
  * information about the status.
  * 
  * Test if there is an unit that is in PENDING_DOWN state.
@@ -219,7 +219,7 @@ Mld6igmpNode::decr_waiting_for_mfea_startup_events()
  * otherwise false.
  **/
 bool
-Mld6igmpNode::has_pending_down_units(string& reason)
+Mld6igmpNode::has_pending_down_units(string& reason_msg)
 {
     vector<Mld6igmpVif *>::iterator iter;
     
@@ -233,9 +233,9 @@ Mld6igmpNode::has_pending_down_units(string& reason)
 	// TODO: XXX: PAVPAVPAV: vif pending-down state
 	// is not used/implemented yet
 	if (mld6igmp_vif->is_pending_down()) {
-	    reason = c_format("Vif %s is in state %s",
-			      mld6igmp_vif->name().c_str(),
-			      mld6igmp_vif->state_string());
+	    reason_msg = c_format("Vif %s is in state %s",
+				  mld6igmp_vif->name().c_str(),
+				  mld6igmp_vif->state_string());
 	    return (true);
 	}
     }
@@ -245,13 +245,13 @@ Mld6igmpNode::has_pending_down_units(string& reason)
     // in PENDING_DOWN state.
     //
     
-    reason = "No pending-down units";
+    reason_msg = "No pending-down units";
     return (false);
 }
 
 /**
  * Mld6igmpNode::node_status:
- * @reason: return-by-reference string that contains human-readable
+ * @reason_msg: return-by-reference string that contains human-readable
  * information about the status.
  * 
  * Get the node status (see @ref ProcessStatus).
@@ -259,12 +259,12 @@ Mld6igmpNode::has_pending_down_units(string& reason)
  * Return value: The node status (see @ref ProcessStatus).
  **/
 ProcessStatus
-Mld6igmpNode::node_status(string& reason)
+Mld6igmpNode::node_status(string& reason_msg)
 {
     ProcessStatus status = ProtoNode<Mld6igmpVif>::node_status();
     
     // Set the return message with the reason
-    reason = "";
+    reason_msg = "";
     switch (status) {
     case PROC_NULL:
 	// Can't be running and in this state
@@ -272,7 +272,7 @@ Mld6igmpNode::node_status(string& reason)
 	break;
     case PROC_STARTUP:
 	if (is_waiting_for_mfea_startup()) {
-	    reason = "Waiting for MFEA startup";
+	    reason_msg = "Waiting for MFEA startup";
 	    break;
 	}
 	// Waiting for unknown reason
@@ -283,12 +283,12 @@ Mld6igmpNode::node_status(string& reason)
 	XLOG_UNFINISHED();
 	break;
     case PROC_READY:
-	reason = c_format("Node is READY (running status %s)",
-			  ProtoState::state_string());
+	reason_msg = c_format("Node is READY (running status %s)",
+			      ProtoState::state_string());
 	break;
     case PROC_SHUTDOWN:
 	// Get the message about the shutdown progress
-	has_pending_down_units(reason);
+	has_pending_down_units(reason_msg);
 	break;
     case PROC_FAILED:
 	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
@@ -306,14 +306,14 @@ Mld6igmpNode::node_status(string& reason)
 /**
  * Mld6igmpNode::add_vif:
  * @vif: Information about new Mld6igmpVif to install.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Install a new MLD/IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::add_vif(const Vif& vif, string& err)
+Mld6igmpNode::add_vif(const Vif& vif, string& error_msg)
 {
     //
     // Create a new Mld6igmpVif
@@ -322,9 +322,9 @@ Mld6igmpNode::add_vif(const Vif& vif, string& err)
     
     if (ProtoNode<Mld6igmpVif>::add_vif(mld6igmp_vif) != XORP_OK) {
 	// Cannot add this new vif
-	err = c_format("Cannot add vif %s: internal error",
-		       vif.name().c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot add vif %s: internal error",
+			     vif.name().c_str());
+	XLOG_ERROR(error_msg.c_str());
 	
 	delete mld6igmp_vif;
 	return (XORP_ERROR);
@@ -339,14 +339,15 @@ Mld6igmpNode::add_vif(const Vif& vif, string& err)
  * Mld6igmpNode::add_vif:
  * @vif_name: The name of the new vif.
  * @vif_index: The vif index of the new vif.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Install a new MLD/IGMP vif. If the vif exists, nothing is installed.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index, string& err)
+Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index,
+		      string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
     
@@ -359,7 +360,7 @@ Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index, string& err)
     //
     Vif vif(vif_name);
     vif.set_vif_index(vif_index);
-    if (add_vif(vif, err) != XORP_OK) {
+    if (add_vif(vif, error_msg) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -369,27 +370,27 @@ Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index, string& err)
 /**
  * Mld6igmpNode::delete_vif:
  * @vif_name: The name of the vif to delete.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Delete an existing MLD/IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::delete_vif(const string& vif_name, string& err)
+Mld6igmpNode::delete_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot delete vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot delete vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (ProtoNode<Mld6igmpVif>::delete_vif(mld6igmp_vif) != XORP_OK) {
-	err = c_format("Cannot delete vif %s: internal error",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot delete vif %s: internal error",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	delete mld6igmp_vif;
 	return (XORP_ERROR);
     }
@@ -406,15 +407,15 @@ Mld6igmpNode::set_vif_flags(const string& vif_name,
 			    bool is_pim_register, bool is_p2p,
 			    bool is_loopback, bool is_multicast,
 			    bool is_broadcast, bool is_up,
-			    string& err)
+			    string& error_msg)
 {
     bool is_changed = false;
     
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot set flags vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot set flags vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -455,13 +456,13 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
 			   const IPvXNet& subnet_addr,
 			   const IPvX& broadcast_addr,
 			   const IPvX& peer_addr,
-			   string& err)
+			   string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot add address on vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot add address on vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -471,20 +472,20 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
     // Check the arguments
     //
     if (! addr.is_unicast()) {
-	err = c_format("Cannot add address on vif %s: "
-		       "invalid unicast address: %s",
-		       vif_name.c_str(), addr.str().c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot add address on vif %s: "
+			     "invalid unicast address: %s",
+			     vif_name.c_str(), addr.str().c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     if ((addr.af() != family())
 	|| (subnet_addr.af() != family())
 	|| (broadcast_addr.af() != family())
 	|| (peer_addr.af() != family())) {
-	err = c_format("Cannot add address on vif %s: "
-		       "invalid address family: %s ",
-		       vif_name.c_str(), vif_addr.str().c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot add address on vif %s: "
+			     "invalid address family: %s ",
+			     vif_name.c_str(), vif_addr.str().c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -512,22 +513,22 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
 int
 Mld6igmpNode::delete_vif_addr(const string& vif_name,
 			      const IPvX& addr,
-			      string& err)
+			      string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot delete address on vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot delete address on vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     const VifAddr *tmp_vif_addr = mld6igmp_vif->find_address(addr);
     if (tmp_vif_addr == NULL) {
-	err = c_format("Cannot delete address on vif %s: "
-		       "invalid address %s",
-		       vif_name.c_str(), addr.str().c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot delete address on vif %s: "
+			     "invalid address %s",
+			     vif_name.c_str(), addr.str().c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -546,20 +547,20 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 /**
  * Mld6igmpNode::enable_vif:
  * @vif_name: The name of the vif to enable.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error_msgor).
  * 
  * Enable an existing MLD6IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::enable_vif(const string& vif_name, string& err)
+Mld6igmpNode::enable_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot enable vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot enable vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -573,20 +574,20 @@ Mld6igmpNode::enable_vif(const string& vif_name, string& err)
 /**
  * Mld6igmpNode::disable_vif:
  * @vif_name: The name of the vif to disable.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Disable an existing MLD6IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::disable_vif(const string& vif_name, string& err)
+Mld6igmpNode::disable_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot disable vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot disable vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -600,27 +601,27 @@ Mld6igmpNode::disable_vif(const string& vif_name, string& err)
 /**
  * Mld6igmpNode::start_vif:
  * @vif_name: The name of the vif to start.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Start an existing MLD6IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::start_vif(const string& vif_name, string& err)
+Mld6igmpNode::start_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot start vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot start vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (mld6igmp_vif->start() != XORP_OK) {
-	err = c_format("Cannot start vif %s: internal error",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot start vif %s: internal error",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -632,27 +633,27 @@ Mld6igmpNode::start_vif(const string& vif_name, string& err)
 /**
  * Mld6igmpNode::stop_vif:
  * @vif_name: The name of the vif to stop.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Stop an existing MLD6IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::stop_vif(const string& vif_name, string& err)
+Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	err = c_format("Cannot stop vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot stop vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (mld6igmp_vif->stop() != XORP_OK) {
-	err = c_format("Cannot stop vif %s: internal error",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot stop vif %s: internal error",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
