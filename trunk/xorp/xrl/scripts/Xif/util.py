@@ -67,6 +67,23 @@ def proper(n):
 def cpp_classname(s):
     return proper(s.replace("-", " ").replace("_", " ")).replace(" ", "").replace(".", "_")
 
+# Generate a capitalized class name "dilbert_chaser" -> "DilbertChaser"
+def caps_cpp_classname(s):
+    apply_cap = 1
+    r = ""
+    for l in s:
+        digit = (string.find(string.digits, l) >= 0);
+        if (digit):
+            apply_cap = 1
+        elif (string.find(string.ascii_letters, l) < 0):
+            apply_cap = 1
+            l = ''
+        elif (apply_cap):
+            l = string.upper(l)
+            apply_cap = 0
+        r += l
+    return r
+
 def cpp_version(v):
     # v looks like %d.%d
     return ("V" + v).replace(".", "p")

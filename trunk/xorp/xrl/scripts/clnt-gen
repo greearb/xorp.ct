@@ -7,9 +7,9 @@ import os, sys
 # This is a bit of mess as this code was split into separate files
 import Xif.util
 
-from Xif.util import \
-     joining_csv, csv, cpp_name, cpp_classname, cpp_version, \
-     xorp_indent_string, xorp_indent
+from Xif.util import							      \
+     joining_csv, csv, cpp_name, cpp_classname, caps_cpp_classname,	      \
+     cpp_version, xorp_indent_string, xorp_indent
 
 from Xif.xiftypes import \
      XrlArg, XrlMethod, XrlInterface, XrlTarget
@@ -37,25 +37,25 @@ def kdoc_comment(method):
 
     return kdt.output_kdoc("    ", params, comment)
 
-def declare_send_xrl(method_no, x):
+def declare_send_xrl(method_no, method):
     rtypes = []
-    for r in x.rargs():
+    for r in method.rargs():
         rtypes.append("const " + r.cpp_type() + "*")
-    cb_name = "CB%d" % method_no
+    cb_name = "%sCB" % (caps_cpp_classname(method.name()))
     s = "    typedef XorpCallback%s<void, const XrlError&%s>::RefPtr %s;\n" \
         % (1 + len(rtypes), joining_csv(rtypes), cb_name)
 
-    s += kdoc_comment(x) + "\n"
+    s += kdoc_comment(method) + "\n"
     atypes = ["\n\tconst char*\ttarget_name"]
-    for a in x.args():
+    for a in method.args():
         atypes.append("\n\tconst %s&\t%s" % (a.cpp_type(), a.name()))
     atypes.append("\n\tconst %s&\tcb" % cb_name)
     s += "    bool send_%s(%s\n    );\n\n" \
-        % (cpp_name(x.name()), csv(atypes))
+        % (cpp_name(method.name()), csv(atypes))
     return s;
 
 def implement_send_xrl(cls, method_no, method, ifqname):
-    cb_name = "CB%d" % method_no
+    cb_name = "%sCB" % (caps_cpp_classname(method.name()))
     atypes = ["\n\tconst char*\tthe_tgt"]
     for a in method.args():
         atypes.append("\n\tconst %s&\t%s" % (a.cpp_type(), a.name()))
@@ -66,23 +66,24 @@ def implement_send_xrl(cls, method_no, method, ifqname):
     s += "    Xrl x(the_tgt, \"%s\");\n" % ifqname
     for a in method.args():
         s += "    x.args().add(\"%s\", %s);\n" % (a.name(), a.name())
-    s += "    return _sender->send(x, callback(this, &%s::unmarshall%d, cb));\n" % (cls, method_no)
+    s += "    return _sender->send(x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
     s += "}\n\n"
 
     return s
 
-def declare_unmarshall_common(cls, indent, method_no):
+def declare_unmarshall_common(cls, indent, method_name):
     s = xorp_indent_string(indent , "void")
-    s += "%sunmarshall%d(" % (cls, method_no)
-    args = [ "const XrlError&\te", "XrlArgs*\ta", "CB%d\t\tcb" % method_no]
+    s += "%sunmarshall_%s(" % (cls, method_name)
+    cb_name = "%sCB" % (caps_cpp_classname(method_name))
+    args = [ "const XrlError&\te", "XrlArgs*\ta", "%s\t\tcb" % cb_name]
     for i in range(0, len(args)):
         args[i] = "\n\t" + args[i]
     s += csv(args)
     s += "\n%s)" % xorp_indent(indent)
     return s
 
-def declare_unmarshall(method_no):
-    return declare_unmarshall_common(" ", 1, method_no) + ";\n\n"
+def declare_unmarshall(method_name):
+    return declare_unmarshall_common(" ", 1, method_name) + ";\n\n"
 
 def implement_unmarshall(cls, method_no, method):
 
@@ -92,7 +93,7 @@ def implement_unmarshall(cls, method_no, method):
     fail_args = joining_csv(nargs)
 
     s = "\n/* Unmarshall %s */\n" % method.name()
-    s += declare_unmarshall_common("\n%s::" % cls, 0, method_no) + "\n{\n"
+    s += declare_unmarshall_common("\n%s::" % cls, 0, method.name()) + "\n{\n"
     s += "    if (e != XrlError::OKAY()) {\n"
     s += "\tcb->dispatch(e%s);\n" % fail_args
     s += "\treturn;\n"
@@ -165,7 +166,7 @@ public:
 private:
 """
     for i in range(0, len(methods)):
-        s += declare_unmarshall(i)
+        s += declare_unmarshall(methods[i].name())
     s += "};\n"
 
     return s
