@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.9 2003/03/07 00:48:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.10 2003/03/10 23:20:03 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 // XXX - As soon as this works remove the define and make the code unconditonal
 #define FLOW_CONTROL
+
+#define MAX_ERR_RETRIES 30
 
 #include "bgp_module.h"
 #include "rib_ipc_handler.hh"
@@ -325,7 +327,8 @@ XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
 		      XrlStdRouter *xrl_router) 
     : _rib_ipc_handler(rib_ipc_handler),
       _xrl_router(xrl_router),
-      _flying(0), _previously_succeeded(false)
+      _flying(0), _previously_succeeded(false), _synchronous_mode(false),
+      _errors(0), _interface_failed(false)
 {
 }
 
@@ -334,6 +337,9 @@ void
 XrlQueue<A>::queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
 			 const A& nexthop)
 {
+    if (_interface_failed)
+	return;
+
     Queued q;
 
     q.add = true;
@@ -351,6 +357,9 @@ template<class A>
 void
 XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, const IPNet<A>& net)
 {
+    if (_interface_failed)
+	return;
+
     Queued q;
 
     q.add = false;
@@ -376,7 +385,7 @@ XrlQueue<IPv4>::sendit()
 {
     debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
 
-    if(_flying >= FLYING_LIMIT)
+    if(_flying >= FLYING_LIMIT || (_flying >= 1 && _synchronous_mode))
 	return;
 
     if(_xrl_queue.empty()) {
@@ -460,27 +469,27 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
     debug_msg("callback %s %s\n", comment, error.str().c_str());
     if (error == XrlError::OKAY()) {
 	_errors = 0;
+	_synchronous_mode = false;
 	_previously_succeeded = true;
 	_xrl_queue.pop();
 	sendit();
-    } else if (error == XrlError::NO_FINDER()) {
-	_errors++;
-	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
-	delayed_send(1000);
     } else if (error == XrlError::SEND_FAILED()) {
-	abort();
-	//XXX we shouldn't really need to workaround this
-	_errors++;
 	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+	_errors++;
+	_synchronous_mode = true;
 	delayed_send(1000);
-    } else if (error == XrlError::RESOLVE_FAILED()) {
+    } else if (error == XrlError::RESOLVE_FAILED()
+	       || error == XrlError::NO_FINDER()) {
 	if (_previously_succeeded) {
-	    //XXX to be replaced with exit in production code
-	    abort();
+	    //This is fatal for this interface.
+	    _errors = MAX_ERR_RETRIES;
 	} else {
-	    //give the other end time to get started
+	    //give the other end time to get started.  we shouldn't
+	    //really need to do this if we're started from rtrmgr, but
+	    //it doesn't do any harm, and makes us more robust.
 	    XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
 	    _errors++;
+	    _synchronous_mode = true;
 	    delayed_send(1000);
 	}
     } else {
@@ -488,9 +497,18 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 	//XXX to be replaced with exit in production code
 	abort();
     }
-    if (_errors > 10) {
-	//XXX to be replaced with exit in production code
-	abort();
+    if (_errors >= MAX_ERR_RETRIES) {
+	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
+	XLOG_ERROR("Interface is now permanently disabled\n");
+	//This is fatal for this interface.  Cause the interface to
+	//fail permanently, and await notification from the finder
+	//that the RIB has really gone down.
+	_interface_failed = true;
+
+	//Clean up the queue - we can no longer handle these requests.
+	while (!_xrl_queue.empty()) {
+	    _xrl_queue.pop();
+	}
     }
 }
 
@@ -499,7 +517,10 @@ template<class A>
 void
 XrlQueue<A>::delayed_send(uint32_t delay_ms) 
 {
-    
+    //don't re-schedule if the timer is already running
+    if (_delayed_send_timer.scheduled())
+	return;
+
     _delayed_send_timer = get_eventloop().
 	new_oneoff_after_ms(delay_ms, ::callback(this, 
 						 &XrlQueue<A>::sendit));
