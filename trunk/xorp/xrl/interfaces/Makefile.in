@@ -195,12 +195,14 @@ snmpd2 = @snmpd2@
 
 # Test Peer Interface
 
+# Test XRLs Interface
+
 # XORP MIBS Interface
 
 #
 # Sample Test Client Interface
 #
-noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeafibxif.a libfeafibclientxif.a libfirewallxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libpolicyxif.a libpolicybackendxif.a libpolicyredist4xif.a libpolicyredist6xif.a libprofilexif.a libprofileclientxif.a libredist4xif.a libredist6xif.a libredisttransaction4xif.a libredisttransaction6xif.a libribxif.a libribclientxif.a libripxif.a libripngxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libsocket6xif.a libsocket6locatorxif.a libsocket6userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeafibxif.a libfeafibclientxif.a libfirewallxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libpolicyxif.a libpolicybackendxif.a libpolicyredist4xif.a libpolicyredist6xif.a libprofilexif.a libprofileclientxif.a libredist4xif.a libredist6xif.a libredisttransaction4xif.a libredisttransaction6xif.a libribxif.a libribclientxif.a libripxif.a libripngxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libsocket6xif.a libsocket6locatorxif.a libsocket6userxif.a libstaticroutesxif.a libtestpeerxif.a libtestxrlsxif.a libxorpifmibxif.a libtestxif.a
 libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -253,6 +255,7 @@ libsocket6locatorxif_a_SOURCES = socket6_locator_xif.hh socket6_locator_xif.cc
 libsocket6userxif_a_SOURCES = socket6_user_xif.hh socket6_user_xif.cc
 libstaticroutesxif_a_SOURCES = static_routes_xif.hh static_routes_xif.cc
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
+libtestxrlsxif_a_SOURCES = test_xrls_xif.hh test_xrls_xif.cc
 libxorpifmibxif_a_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
 libtestxif_a_SOURCES = test_xif.hh test_xif.cc
 
@@ -494,6 +497,10 @@ libtestxif_a_AR = $(AR) cru
 libtestxif_a_LIBADD =
 am_libtestxif_a_OBJECTS = test_xif.$(OBJEXT)
 libtestxif_a_OBJECTS = $(am_libtestxif_a_OBJECTS)
+libtestxrlsxif_a_AR = $(AR) cru
+libtestxrlsxif_a_LIBADD =
+am_libtestxrlsxif_a_OBJECTS = test_xrls_xif.$(OBJEXT)
+libtestxrlsxif_a_OBJECTS = $(am_libtestxrlsxif_a_OBJECTS)
 libxorpifmibxif_a_AR = $(AR) cru
 libxorpifmibxif_a_LIBADD =
 am_libxorpifmibxif_a_OBJECTS = xorp_if_mib_xif.$(OBJEXT)
@@ -549,6 +556,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/socket6_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/static_routes_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peer_xif.Po $(DEPDIR)/test_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrls_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_if_mib_xif.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -592,9 +600,10 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libsocket6locatorxif_a_SOURCES) \
 	$(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) \
 	$(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) \
-	$(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+	$(libtestxif_a_SOURCES) $(libtestxrlsxif_a_SOURCES) \
+	$(libxorpifmibxif_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeafibclientxif_a_SOURCES) $(libfeafibxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfirewallxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libpolicybackendxif_a_SOURCES) $(libpolicyredist4xif_a_SOURCES) $(libpolicyredist6xif_a_SOURCES) $(libpolicyxif_a_SOURCES) $(libprofileclientxif_a_SOURCES) $(libprofilexif_a_SOURCES) $(libredist4xif_a_SOURCES) $(libredist6xif_a_SOURCES) $(libredisttransaction4xif_a_SOURCES) $(libredisttransaction6xif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libsocket6locatorxif_a_SOURCES) $(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeafibclientxif_a_SOURCES) $(libfeafibxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfirewallxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libpolicybackendxif_a_SOURCES) $(libpolicyredist4xif_a_SOURCES) $(libpolicyredist6xif_a_SOURCES) $(libpolicyxif_a_SOURCES) $(libprofileclientxif_a_SOURCES) $(libprofilexif_a_SOURCES) $(libredist4xif_a_SOURCES) $(libredist6xif_a_SOURCES) $(libredisttransaction4xif_a_SOURCES) $(libredisttransaction6xif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libsocket6locatorxif_a_SOURCES) $(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libtestxrlsxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 
 all: all-am
 
@@ -824,6 +833,10 @@ libtestxif.a: $(libtestxif_a_OBJECTS) $(libtestxif_a_DEPENDENCIES)
 	-rm -f libtestxif.a
 	$(libtestxif_a_AR) libtestxif.a $(libtestxif_a_OBJECTS) $(libtestxif_a_LIBADD)
 	$(RANLIB) libtestxif.a
+libtestxrlsxif.a: $(libtestxrlsxif_a_OBJECTS) $(libtestxrlsxif_a_DEPENDENCIES) 
+	-rm -f libtestxrlsxif.a
+	$(libtestxrlsxif_a_AR) libtestxrlsxif.a $(libtestxrlsxif_a_OBJECTS) $(libtestxrlsxif_a_LIBADD)
+	$(RANLIB) libtestxrlsxif.a
 libxorpifmibxif.a: $(libxorpifmibxif_a_OBJECTS) $(libxorpifmibxif_a_DEPENDENCIES) 
 	-rm -f libxorpifmibxif.a
 	$(libxorpifmibxif_a_AR) libxorpifmibxif.a $(libxorpifmibxif_a_OBJECTS) $(libxorpifmibxif_a_LIBADD)
@@ -888,6 +901,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/static_routes_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrls_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_xif.Po@am__quote@
 
 distclean-depend:

@@ -1,0 +1,29 @@
+/* $XORP$ */
+
+/*
+ * Test XRLs XRL interface.
+ */
+
+
+interface test_xrls/0.1 {
+
+	start_transmission
+	end_transmission
+
+	add_xrl0
+
+	add_xrl1	? data1:txt
+
+	add_xrl2	? data1:txt					\
+			& data2:txt
+
+	add_xrl9	? data1:bool					\
+			& data2:i32					\
+			& data3:ipv4					\
+			& data4:ipv4net					\
+			& data5:ipv6					\
+			& data6:ipv6net					\
+			& data7:mac					\
+			& data8:txt					\
+			& data9:binary
+}

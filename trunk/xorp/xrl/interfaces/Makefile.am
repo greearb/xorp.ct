@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.21 2004/09/17 14:05:09 abittau Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.22 2004/09/21 18:09:12 atanu Exp $
 ##
 
 ###############################################################################
@@ -221,6 +221,10 @@ libstaticroutesxif_a_SOURCES = static_routes_xif.hh static_routes_xif.cc
 # Test Peer Interface
 noinst_LIBRARIES += libtestpeerxif.a
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
+
+# Test XRLs Interface
+noinst_LIBRARIES += libtestxrlsxif.a
+libtestxrlsxif_a_SOURCES = test_xrls_xif.hh test_xrls_xif.cc
 
 # XORP MIBS Interface
 noinst_LIBRARIES += libxorpifmibxif.a
