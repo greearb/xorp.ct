@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.2 2004/09/01 23:30:44 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.3 2004/09/08 08:45:00 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -55,8 +55,8 @@ public:
 	virtual ~FwRule() {}
 
 	// accessors
-	const string& ifname() const		{ return _ifname; }
-	const string& vifname() const		{ return _vifname; }
+	const string&	ifname() const		{ return _ifname; }
+	const string&	vifname() const		{ return _vifname; }
 	const N&	src() const		{ return _src; }
 	const N&	dst() const		{ return _dst; }
 	uint8_t		proto() const		{ return _proto; }
