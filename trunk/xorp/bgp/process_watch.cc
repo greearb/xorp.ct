@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.1 2003/06/17 06:44:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -81,11 +81,12 @@ ProcessWatch::death(const string& target_class, const string& target_instance)
 void
 ProcessWatch::finder_death() const
 {
+    XLOG_ERROR("The finder died");
     ::exit(-1);
 }
 
 bool
-ProcessWatch::ready() 
+ProcessWatch::ready() const
 {
     return _fea && _rib;
 }
