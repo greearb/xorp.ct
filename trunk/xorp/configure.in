@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.96 2004/06/15 21:25:27 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.97 2004/06/17 05:33:01 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1290,6 +1290,8 @@ case "${host_os}" in
     openbsd* )
     AC_DEFINE(IPV4_RAW_OUTPUT_IS_RAW, 1,
 	[Define to 1 if your IPv4 values are not modified on sending raw IPv4 packets])
+    AC_DEFINE(IPV4_RAW_INPUT_IS_RAW, 1,
+	[Define to 1 if your IPv4 values are not modified on receiving raw IPv4 packets])
 ;;
     linux* )
     AC_DEFINE(IPV4_RAW_OUTPUT_IS_RAW, 1,

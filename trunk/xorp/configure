@@ -9172,6 +9172,11 @@ cat >>confdefs.h <<\_ACEOF
 #define IPV4_RAW_OUTPUT_IS_RAW 1
 _ACEOF
 
+
+cat >>confdefs.h <<\_ACEOF
+#define IPV4_RAW_INPUT_IS_RAW 1
+_ACEOF
+
 ;;
     linux* )
 
