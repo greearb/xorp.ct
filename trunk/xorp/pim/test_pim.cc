@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.33 2004/05/28 05:00:36 hodson Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.34 2004/06/10 22:41:34 hodson Exp $"
 
 
 //
@@ -45,6 +45,7 @@
 #include "fea/xrl_target.hh"
 
 #include "rib/rib_manager.hh"
+#include "fib2mrib/xrl_fib2mrib_node.hh"
 
 #include "mld6igmp/xrl_mld6igmp_node.hh"
 
@@ -140,9 +141,10 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     //
     // FEA
     //
-    XrlStdRouter xrl_std_router_fea(eventloop,
-				    xorp_module_name(AF_INET, XORP_MODULE_FEA),
-				    finder_hostname, finder_port);
+    XrlStdRouter xrl_std_router_fea(
+	eventloop,
+	xorp_module_name(AF_INET, XORP_MODULE_FEA),
+	finder_hostname, finder_port);
 
     //
     // FtiConfig
@@ -190,74 +192,79 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     //
     IfConfigAddressTable ifc_addr_table(iftree);
     ifc_repl.add_reporter(&ifc_addr_table);
-    XrlSocketServer xss(eventloop,
-			ifc_addr_table,
-			xrl_std_router_fea.finder_address(),
-			xrl_std_router_fea.finder_port());
+    XrlSocketServer xss(
+	eventloop,
+	ifc_addr_table,
+	xrl_std_router_fea.finder_address(),
+	xrl_std_router_fea.finder_port());
     xss.startup();
 
     //
     // XRL Target
     //
-    XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
-				fticonfig, ifm, xrl_ifc_reporter,
-				0, &lfc_bridge, &xss);
+    XrlFeaTarget xrl_fea_target(
+	eventloop,
+	xrl_std_router_fea,
+	fticonfig, ifm, xrl_ifc_reporter,
+	NULL, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 
     //
     // MFEA node
     //
-    XrlStdRouter xrl_std_router_mfea4(eventloop,
-				      xorp_module_name(AF_INET,
-						       XORP_MODULE_MFEA),
-				      finder_hostname, finder_port);
-    XrlMfeaNode xrl_mfea_node4(AF_INET,
-			       XORP_MODULE_MFEA,
-			       eventloop,
-			       &xrl_std_router_mfea4,
-			       xorp_module_name(AF_INET, XORP_MODULE_FEA),
-			       fticonfig);
+    XrlStdRouter xrl_std_router_mfea4(
+	eventloop,
+	xorp_module_name(AF_INET, XORP_MODULE_MFEA),
+	finder_hostname, finder_port);
+    XrlMfeaNode xrl_mfea_node4(
+	AF_INET,
+	XORP_MODULE_MFEA,
+	eventloop,
+	&xrl_std_router_mfea4,
+	xorp_module_name(AF_INET, XORP_MODULE_FEA),
+	fticonfig);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea4);
 
 #ifdef HAVE_IPV6
-    XrlStdRouter xrl_std_router_mfea6(eventloop,
-				      xorp_module_name(AF_INET6,
-						       XORP_MODULE_MFEA),
-				      finder_hostname, finder_port);
-    XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
-			       eventloop,
-			       &xrl_std_router_mfea6,
-			       xorp_module_name(AF_INET6, XORP_MODULE_FEA),
-			       fticonfig);
+    XrlStdRouter xrl_std_router_mfea6(
+	eventloop,
+	xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
+	finder_hostname, finder_port);
+    XrlMfeaNode xrl_mfea_node6(
+	AF_INET6, XORP_MODULE_MFEA,
+	eventloop,
+	&xrl_std_router_mfea6,
+	xorp_module_name(AF_INET6, XORP_MODULE_FEA),
+	fticonfig);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
 #endif // HAVE_IPV6
 
     //
     // MLD6IGMP node
     //
-    XrlStdRouter xrl_std_router_mld6igmp4(eventloop,
-					  xorp_module_name(AF_INET,
-							   XORP_MODULE_MLD6IGMP),
-					  finder_hostname, finder_port);
-    XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET,
-				       XORP_MODULE_MLD6IGMP,
-				       eventloop,
-				       &xrl_std_router_mld6igmp4,
-				       xorp_module_name(AF_INET,
-							XORP_MODULE_MFEA));
+    XrlStdRouter xrl_std_router_mld6igmp4(
+	eventloop,
+	xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP),
+	finder_hostname, finder_port);
+    XrlMld6igmpNode xrl_mld6igmp_node4(
+	AF_INET,
+	XORP_MODULE_MLD6IGMP,
+	eventloop,
+	&xrl_std_router_mld6igmp4,
+	xorp_module_name(AF_INET, XORP_MODULE_MFEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mld6igmp4);
 
 #ifdef HAVE_IPV6
-    XrlStdRouter xrl_std_router_mld6igmp6(eventloop,
-					  xorp_module_name(AF_INET6,
-							   XORP_MODULE_MLD6IGMP),
-					  finder_hostname, finder_port);
-    XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6,
-				       XORP_MODULE_MLD6IGMP,
-				       eventloop,
-				       &xrl_std_router_mld6igmp6,
-				       xorp_module_name(AF_INET6,
-							XORP_MODULE_MFEA));
+    XrlStdRouter xrl_std_router_mld6igmp6(
+	eventloop,
+	xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP),
+	finder_hostname, finder_port);
+    XrlMld6igmpNode xrl_mld6igmp_node6(
+	AF_INET6,
+	XORP_MODULE_MLD6IGMP,
+	eventloop,
+	&xrl_std_router_mld6igmp6,
+	xorp_module_name(AF_INET6, XORP_MODULE_MFEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mld6igmp6);
 #endif // HAVE_IPV6
 
@@ -265,28 +272,49 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     // The RIB manager
     //
     // XXX: we use a single RIB manager to handle both IPv4 and IPv6
-    XrlStdRouter xrl_std_router_rib(eventloop,
-				    xorp_module_name(AF_INET,
-						     XORP_MODULE_RIB),
-				    finder_hostname, finder_port);
-    RibManager rib_manager(eventloop, xrl_std_router_rib,
-			   xorp_module_name(AF_INET, XORP_MODULE_FEA));
+    XrlStdRouter xrl_std_router_rib(
+	eventloop,
+	xorp_module_name(AF_INET, XORP_MODULE_RIB),
+	finder_hostname, finder_port);
+    RibManager rib_manager(
+	eventloop,
+	xrl_std_router_rib,
+	xorp_module_name(AF_INET, XORP_MODULE_FEA));
+    rib_manager.enable();
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
+    rib_manager.start();
+
+    //
+    // Fib2Mrib node
+    //
+    // XXX: we use a single Fib2Mrib node to handle both IPv4 and IPv6
+    XrlStdRouter xrl_std_router_fib2mrib(
+	eventloop,
+	xorp_module_name(AF_INET, XORP_MODULE_FIB2MRIB),
+	finder_hostname, finder_port);
+    XrlFib2mribNode xrl_fib2mrib_node(
+	eventloop,
+	&xrl_std_router_fib2mrib,
+	xorp_module_name(AF_INET, XORP_MODULE_FEA),
+	xorp_module_name(AF_INET, XORP_MODULE_RIB));
+    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fib2mrib);
+    xrl_fib2mrib_node.startup();
 
     //
     // PIMSM node
     //
-    XrlStdRouter xrl_std_router_pimsm4(eventloop,
-				       xorp_module_name(AF_INET,
-							XORP_MODULE_PIMSM),
-				       finder_hostname, finder_port);
-    XrlPimNode xrl_pimsm_node4(AF_INET,
-			       XORP_MODULE_PIMSM,
-			       eventloop,
-			       &xrl_std_router_pimsm4,
-			       xorp_module_name(AF_INET, XORP_MODULE_MFEA),
-			       xorp_module_name(AF_INET, XORP_MODULE_RIB),
-			       xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
+    XrlStdRouter xrl_std_router_pimsm4(
+	eventloop,
+	xorp_module_name(AF_INET, XORP_MODULE_PIMSM),
+	finder_hostname, finder_port);
+    XrlPimNode xrl_pimsm_node4(
+	AF_INET,
+	XORP_MODULE_PIMSM,
+	eventloop,
+	&xrl_std_router_pimsm4,
+	xorp_module_name(AF_INET, XORP_MODULE_MFEA),
+	xorp_module_name(AF_INET, XORP_MODULE_RIB),
+	xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
     xrl_pimsm_node4.set_receive_mrib_from_mfea(true);	// XXX
     // XXX: print the PimMre state dependency (for debug purpose)
     // xrl_pimsm_node4.pim_mrt().track_state_print_actions_name();
@@ -295,17 +323,18 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm4);
 
 #ifdef HAVE_IPV6
-    XrlStdRouter xrl_std_router_pimsm6(eventloop,
-				       xorp_module_name(AF_INET6,
-							XORP_MODULE_PIMSM),
-				       finder_hostname, finder_port);
-    XrlPimNode xrl_pimsm_node6(AF_INET6,
-			       XORP_MODULE_PIMSM,
-			       eventloop,
-			       &xrl_std_router_pimsm6,
-			       xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
-			       xorp_module_name(AF_INET6, XORP_MODULE_RIB),
-			       xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
+    XrlStdRouter xrl_std_router_pimsm6(
+	eventloop,
+	xorp_module_name(AF_INET6, XORP_MODULE_PIMSM),
+	finder_hostname, finder_port);
+    XrlPimNode xrl_pimsm_node6(
+	AF_INET6,
+	XORP_MODULE_PIMSM,
+	eventloop,
+	&xrl_std_router_pimsm6,
+	xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
+	xorp_module_name(AF_INET6, XORP_MODULE_RIB),
+	xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
     xrl_pimsm_node6.set_receive_mrib_from_mfea(true);	// XXX
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm6);
 #endif // HAVE_IPV6

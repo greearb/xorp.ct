@@ -126,7 +126,7 @@ xorp_pimsm6_SOURCES = xorp_pimsm6.cc
 
 test_pim_SOURCES = test_pim.cc $(top_builddir)/rib/rib_manager.hh $(top_builddir)/rib/rib_manager.cc $(top_builddir)/rib/xrl_target.hh $(top_builddir)/rib/xrl_target.cc $(top_builddir)/rib/redist_xrl.hh $(top_builddir)/rib/redist_xrl.cc
 
-test_pim_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4userxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libsocket6userxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/targets/libsocketserverbase.a $(top_builddir)/libxorp/libxorp.a
+test_pim_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/fib2mrib/libfib2mrib.a $(top_builddir)/xrl/targets/libfib2mribbase.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libfeafibxif.a $(top_builddir)/xrl/interfaces/libsocket4userxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libsocket6userxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/targets/libsocketserverbase.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
 libpim_a_SOURCES = pim_module.h pim_proto.h pim_bsr.hh pim_mfc.hh pim_mre.hh pim_mre_task.hh pim_mre_track_state.hh pim_mrib_table.hh pim_mrt.hh pim_nbr.hh pim_node.hh pim_node_cli.hh pim_private.hh pim_proto_assert.hh pim_proto_join_prune_message.hh pim_rp.hh pim_scope_zone_table.hh pim_vif.hh xrl_pim_node.hh pim_bsr.cc pim_config.cc pim_mfc.cc pim_mre.cc pim_mre_assert.cc pim_mre_data.cc pim_mre_join_prune.cc pim_mre_register.cc pim_mre_rpf.cc pim_mre_task.cc pim_mre_track_state.cc pim_mrib_table.cc pim_mrt.cc pim_mrt_mfc.cc pim_mrt_task.cc pim_nbr.cc pim_node.cc pim_node_cli.cc pim_proto_assert.cc pim_proto_bootstrap.cc pim_proto_cand_rp_adv.cc pim_proto_graft.cc pim_proto_graft_ack.cc pim_proto_hello.cc pim_proto_join_prune.cc pim_proto_join_prune_message.cc pim_proto_register.cc pim_proto_register_stop.cc pim_rp.cc pim_scope_zone_table.cc pim_vif.cc xrl_pim_node.cc
@@ -205,6 +205,10 @@ test_pim_DEPENDENCIES = libpim.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/fib2mrib/libfib2mrib.a \
+	$(top_builddir)/xrl/targets/libfib2mribbase.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/xrl/interfaces/libfeafibxif.a \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.a \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.a \
 	$(top_builddir)/xrl/interfaces/libredist4xif.a \
