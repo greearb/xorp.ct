@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.10 2003/05/21 05:32:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.11 2003/05/31 07:03:32 pavlin Exp $"
 
 
 //
@@ -91,8 +91,10 @@ PimNode::PimNode(int family, xorp_module_id module_id,
     
     _buffer_recv = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     
-    // Set the node status: waiting for MFEA and MLD6IGMP    
-    ProtoNode<PimVif>::set_node_status(PROC_STARTUP);
+    // Set the node status.
+    // XXX: note that we don't really need to wait for MFEA and MLD6IGMP,
+    // hence we are READY.
+    ProtoNode<PimVif>::set_node_status(PROC_READY);
 }
 
 /**
@@ -150,8 +152,10 @@ PimNode::start(void)
     if (ProtoNode<PimVif>::start() < 0)
 	return (XORP_ERROR);
     
-    // Set the node status: waiting for MFEA and MLD6IGMP
-    ProtoNode<PimVif>::set_node_status(PROC_STARTUP);
+    // Set the node status.
+    // XXX: note that we don't really need to wait for MFEA and MLD6IGMP,
+    // hence we are READY.
+    ProtoNode<PimVif>::set_node_status(PROC_READY);
     
     //
     // Start the protocol with the kernel
