@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/nexthop_port_mapper.cc,v 1.4 2004/10/26 01:13:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/nexthop_port_mapper.cc,v 1.5 2004/10/26 20:01:38 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -47,8 +47,6 @@ NexthopPortMapper::clear()
     _ipv6_map.clear();
     _ipv4net_map.clear();
     _ipv6net_map.clear();
-
-    notify_observers();
 }
 
 int

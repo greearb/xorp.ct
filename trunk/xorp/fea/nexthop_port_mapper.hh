@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.2 2004/10/26 01:02:55 pavlin Exp $
+// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.3 2004/10/26 20:01:38 pavlin Exp $
 
 #ifndef __FEA_NEXTHOP_PORT_MAPPER_HH__
 #define __FEA_NEXTHOP_PORT_MAPPER_HH__
@@ -40,8 +40,6 @@ class NexthopPortMapperObserver;
  * Note that observers (@see NexthopPortMapperObserver) can be attached
  * to monitor changes to the port mapping. The observers notification
  * is triggered by an explicit call to @see NexthopPortMapper#notify_observers.
- * The only exception is @see NexthopPortMapper#clear which calls
- * internally @see NexthopPortMapper#notify_observers.
  */
 class NexthopPortMapper {
 public:
