@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.34 2004/08/19 01:01:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.35 2004/11/16 05:41:04 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -214,10 +214,11 @@ OpInstance::terminate()
 	pclose2(_out_stream);
 	_out_stream = NULL;
     }
-//     if (_err_stream != NULL) {
-// 	fclose(_err_stream);
-// 	_err_stream = NULL;
-//     }
+    //
+    // XXX: don't call pclose2(_err_stream), because pclose2(_out_stream)
+    // automatically takes care of the _err_stream as well.
+    //
+    _err_stream = NULL;
 }
 
 OpCommand::OpCommand(const list<string>& command_parts)
