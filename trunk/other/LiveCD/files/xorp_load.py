@@ -43,7 +43,7 @@ def loadManifest(filename):
 def copyFileIn(fe):
   shutil.copyfile(fe.source,fe.destination);
   os.chown(fe.destination,pwd.getpwnam(fe.owner).pw_uid,grp.getgrnam(fe.group).gr_gid);
-  os.chmod(fe.destination,0755);
+  os.chmod(fe.destination, int(fe.permission, 8));
   print "copied in file " + fe.source + "."
 
 # Copy all files in
