@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.4 2003/02/06 22:21:31 hodson Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.5 2003/03/10 23:20:12 hodson Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -30,7 +30,7 @@
 //
 class XrlCliNode : public XrlCliTargetBase, public XrlCliProcessorV0p1Client {
 public:
-    XrlCliNode(XrlRouter* r, CliNode& cli_node);
+    XrlCliNode(XrlRouter* xrl_router, CliNode& cli_node);
     virtual ~XrlCliNode() {}
 
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.4 2003/01/28 01:02:57 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.5 2003/03/10 23:20:12 hodson Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -20,9 +20,9 @@
 #include "cli_node.hh"
 
 
-XrlCliNode::XrlCliNode(XrlRouter* r, CliNode& cli_node)
-	: XrlCliTargetBase(r),
-	  XrlCliProcessorV0p1Client(r),
+XrlCliNode::XrlCliNode(XrlRouter* xrl_router, CliNode& cli_node)
+	: XrlCliTargetBase(xrl_router),
+	  XrlCliProcessorV0p1Client(xrl_router),
 	  _cli_node(cli_node)
 {
     _cli_node.set_send_process_command_callback(callback(this,
