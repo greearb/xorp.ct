@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.12 2003/04/01 00:56:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.13 2003/04/02 22:58:57 hodson Exp $"
 
 
 //
@@ -159,7 +159,7 @@ main(int argc, char *argv[])
 	//
 	// Finder
 	//
-	TestFinderServer* finder = NULL;
+	TestFinderServer *finder = NULL;
 	finder = new TestFinderServer(event_loop);
 	
 	//
