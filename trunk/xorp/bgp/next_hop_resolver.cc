@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.8 2003/01/16 23:18:57 pavlin Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.9 2003/03/10 23:19:59 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -21,14 +21,17 @@
 #include "config.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libxorp/timer.hh"
 
 #include "next_hop_resolver.hh"
 #include "route_table_nhlookup.hh"
 #include "route_table_decision.hh"
 
 template <class A>
-NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router)
+NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,
+				    TimerList &timer_list)
     : _xrl_router(xrl_router),
+      _timer_list(timer_list),
       _next_hop_rib_request(xrl_router, *this, _next_hop_cache)
 {
 }
@@ -698,6 +701,27 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** ocurred. Its not clear that we should continue.
     */
     if (XrlError::OKAY() != error) {
+	if (error == XrlError::RESOLVE_FAILED()
+	    || error == XrlError::NO_FINDER()
+	    || error == XrlError::SEND_FAILED()
+	    || error == XrlError::REPLY_TIMED_OUT()) {
+	    //These are transport errors.  According to the XORP Error
+	    //Handling spec, we treat these errors as transient and
+	    //resend.
+	    XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
+	    
+	    //The request will still be on the request queue.
+	    //All we need to do is resend it after a respectable delay
+	    A nexthop = *addr;
+	    _rtx_delay_timer 
+		= _next_hop_resolver
+		.timer_list()
+		.new_oneoff_after_ms(1000,
+				     ::callback(this,
+						&NextHopRibRequest<A>::register_interest,
+						nexthop));
+	    return;
+	}
 	XLOG_FATAL("%s %s", comment.c_str(), error.str().c_str());
     }
 

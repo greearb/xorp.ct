@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.8 2003/03/10 23:19:59 hodson Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.9 2003/03/16 08:35:03 pavlin Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -80,7 +80,7 @@ template<class A> class NHRequest;
 template<class A>
 class NextHopResolver {
 public:
-    NextHopResolver(XrlStdRouter *xrl_router);
+    NextHopResolver(XrlStdRouter *xrl_router, TimerList& timer_list);
 
     virtual ~NextHopResolver();
 
@@ -191,11 +191,17 @@ public:
     {
 	return &_next_hop_rib_request;
     }
+
+    /**
+     * Get a reference to the main timer list
+     */
+    TimerList& timer_list() {return _timer_list;}
 protected:
     DecisionTable<A> *_decision;
 private:
     string _ribname;	// RIB name to use in XRL calls
     XrlStdRouter *_xrl_router;
+    TimerList& _timer_list;
     NextHopCache<A> _next_hop_cache;
     NextHopRibRequest<A> _next_hop_rib_request;
 };
@@ -606,6 +612,10 @@ private:
      * The queue of outstanding requests.
      */
     deque<RibRequest *> _queue;
+    /**
+     * Retransmit delay timer
+     */
+    XorpTimer _rtx_delay_timer;
     /**
      * Used by the destructor to delete all the "RibRequest" objects
      * that have been allocated.

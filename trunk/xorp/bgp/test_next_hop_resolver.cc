@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.4 2003/02/12 20:24:26 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.5 2003/03/10 23:20:07 hodson Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -98,8 +98,8 @@ private:
 template <class A>
 class DummyNextHopResolver2 : public NextHopResolver<A> {
 public:
-    DummyNextHopResolver2() :
-	NextHopResolver<A>(0)	
+    DummyNextHopResolver2(TimerList& timer_list) :
+	NextHopResolver<A>(0, timer_list)	
     {
 	// Must set a ribname to force RIB interactions.
 	register_ribname("bogus");	
@@ -117,7 +117,8 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -209,7 +210,8 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -304,7 +306,8 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -405,7 +408,8 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -491,7 +495,8 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -642,7 +647,8 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -719,7 +725,8 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -852,7 +859,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
+    TimerList timer_list;
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(timer_list);
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
