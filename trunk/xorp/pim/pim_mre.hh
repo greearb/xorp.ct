@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.16 2003/02/07 00:40:22 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.17 2003/02/07 05:16:06 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -616,25 +616,28 @@ public:
     const Mifset& lost_assert_sg() const;
     // Note: applies only for (S,G,rpt)
     const Mifset& lost_assert_sg_rpt() const;
-
+    
     // Note: applies for (*,G)
     const Mifset& assert_tracking_desired_wc() const;
     // Note: applies for (S,G)
     const Mifset& assert_tracking_desired_sg() const;
-    Mifset	_assert_tracking_desired_state;	// To store the
-						// AssertTrackingDesired state
+    // Note: applies only for (*,G) and (S,G)
+    const Mifset& assert_tracking_desired_state() const {
+	return (_assert_tracking_desired_state);
+    }
     // Note: applies only for (*,G) and (S,G)
     void	set_assert_tracking_desired_state(uint16_t vif_index, bool v);
     // Note: applies only for (*,G) and (S,G)
     bool	is_assert_tracking_desired_state(uint16_t vif_index) const;
-    // Note: applies only for (S,G)
-    bool	recompute_assert_tracking_desired_sg(uint16_t vif_index);
-    // Note: applies only for (*,G)
-    bool	recompute_assert_tracking_desired_wc(uint16_t vif_index);
+    Mifset	_assert_tracking_desired_state;	// To store the
+						// AssertTrackingDesired state
+    
     // Note: applies only for (*,G) and (S,G)
     const Mifset& could_assert_wc() const;
     // Note: applies only for (S,G)
     const Mifset& could_assert_sg() const;
+    // Note: applies only for (*,G) and (S,G)
+    const Mifset& could_assert_state() const { return (_could_assert_state); }
     // Note: applies only for (*,G) and (S,G)
     bool	is_could_assert_state(uint16_t vif_index) const;
     // Note: applies only for (*,G) and (S,G)
@@ -669,10 +672,25 @@ public:
     // Note: applies only for (*,G)
     int		wrong_iif_data_arrived_wc(PimVif *pim_vif,
 					  const IPvX& assert_source_addr);
+
     // Note: applies only for (S,G)
-    bool	recompute_could_assert_sg(uint16_t vif_index);
+    bool	recompute_assert_tracking_desired_sg();
+    // Note: applies only for (S,G)
+    bool	process_assert_tracking_desired_sg(uint16_t vif_index,
+						   bool new_value);
     // Note: applies only for (*,G)
-    bool	recompute_could_assert_wc(uint16_t vif_index);
+    bool	recompute_assert_tracking_desired_wc();
+    // Note: applies only for (*,G)
+    bool	process_assert_tracking_desired_wc(uint16_t vif_index,
+						   bool new_value);
+    // Note: applies only for (S,G)
+    bool	recompute_could_assert_sg();
+    // Note: applies only for (S,G)
+    bool	process_could_assert_sg(uint16_t vif_index, bool new_value);
+    // Note: applies only for (*,G)
+    bool	recompute_could_assert_wc();
+    // Note: applies only for (*,G)
+    bool	process_could_assert_wc(uint16_t vif_index, bool new_value);
     // Note: applies only for (S,G)
     bool	recompute_my_assert_metric_sg(uint16_t vif_index);
     // Note: applies only for (*,G)

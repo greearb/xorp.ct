@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.9 2003/02/09 00:25:29 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.10 2003/02/09 00:42:37 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -3356,43 +3356,19 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG:	// 19
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_tracking_desired_sg(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_tracking_desired_sg(i);
-	}
+	pim_mre.recompute_assert_tracking_desired_sg();
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC:	// 20
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_tracking_desired_wc(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_tracking_desired_wc(i);
-	}
+	pim_mre.recompute_assert_tracking_desired_wc();
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_COULD_ASSERT_SG:		// 21
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_could_assert_sg(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_could_assert_sg(i);
-	}
+	pim_mre.recompute_could_assert_sg();
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_COULD_ASSERT_WC:		// 22
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_could_assert_wc(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_could_assert_wc(i);
-	}
+	pim_mre.recompute_could_assert_wc();
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_MY_ASSERT_METRIC_SG:		// 23

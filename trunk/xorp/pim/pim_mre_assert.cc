@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.12 2003/02/07 05:58:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.13 2003/02/09 03:40:13 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -23,6 +23,7 @@
 #include "pim_private.hh"
 #include "pim_mre.hh"
 #include "pim_mrt.hh"
+#include "pim_node.hh"
 #include "pim_vif.hh"
 
 
@@ -594,9 +595,32 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_could_assert_wc(uint16_t vif_index)
+PimMre::recompute_could_assert_wc()
 {
-    bool old_value, new_value;
+    Mifset old_value, new_value, diff_value;
+    
+    if (! is_wc())
+	return (false);
+    
+    old_value = could_assert_state();
+    new_value = could_assert_wc();
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    diff_value = new_value ^ old_value;
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	if (diff_value.test(i))
+	    process_could_assert_wc(i, new_value.test(i));
+    }
+    
+    return (true);
+}
+
+// Note: applies only for (*,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::process_could_assert_wc(uint16_t vif_index, bool new_value)
+{
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL)
@@ -604,11 +628,6 @@ PimMre::recompute_could_assert_wc(uint16_t vif_index)
     
     if (! is_wc())
 	return (false);
-    
-    old_value = is_could_assert_state(vif_index);
-    new_value = could_assert_wc().test(vif_index);
-    if (new_value == old_value)
-	return (false);			// Nothing changed
     
     // Set the new value
     set_could_assert_state(vif_index, new_value);
@@ -641,9 +660,32 @@ PimMre::recompute_could_assert_wc(uint16_t vif_index)
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_could_assert_sg(uint16_t vif_index)
+PimMre::recompute_could_assert_sg()
 {
-    bool old_value, new_value;
+    Mifset old_value, new_value, diff_value;
+    
+    if (! is_sg())
+	return (false);
+    
+    old_value = could_assert_state();
+    new_value = could_assert_sg();
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    diff_value = new_value ^ old_value;
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	if (diff_value.test(i))
+	    process_could_assert_sg(i, new_value.test(i));
+    }
+    
+    return (true);
+}
+
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::process_could_assert_sg(uint16_t vif_index, bool new_value)
+{
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL)
@@ -651,11 +693,6 @@ PimMre::recompute_could_assert_sg(uint16_t vif_index)
     
     if (! is_sg())
 	return (false);
-    
-    old_value = is_could_assert_state(vif_index);
-    new_value = could_assert_sg().test(vif_index);
-    if (new_value == old_value)
-	return (false);			// Nothing changed
     
     // Set the new value
     set_could_assert_state(vif_index, new_value);
@@ -1007,22 +1044,40 @@ PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
     return (XORP_OK);
 }
 
+// Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_tracking_desired_sg(uint16_t vif_index)
+PimMre::recompute_assert_tracking_desired_sg()
 {
-    bool old_value, new_value;
+    Mifset old_value, new_value, diff_value;
     
+    if (! is_sg())
+	return (false);
+    
+    old_value = assert_tracking_desired_state();
+    new_value = assert_tracking_desired_sg();
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    diff_value = new_value ^ old_value;
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	if (diff_value.test(i))
+	    process_assert_tracking_desired_sg(i, new_value.test(i));
+    }
+    
+    return (true);
+}
+
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::process_assert_tracking_desired_sg(uint16_t vif_index, bool new_value)
+{
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
     
     if (! is_sg())
 	return (false);
-    
-    old_value = is_assert_tracking_desired_state(vif_index);
-    new_value = assert_tracking_desired_sg().test(vif_index);
-    if (new_value == old_value)
-	return (false);			// Nothing changed
     
     // Set the new value
     set_assert_tracking_desired_state(vif_index, new_value);
@@ -1052,20 +1107,37 @@ PimMre::recompute_assert_tracking_desired_sg(uint16_t vif_index)
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_tracking_desired_wc(uint16_t vif_index)
+PimMre::recompute_assert_tracking_desired_wc()
 {
-    bool old_value, new_value;
+    Mifset old_value, new_value, diff_value;
     
+    if (! is_wc())
+	return (false);
+    
+    old_value = assert_tracking_desired_state();
+    new_value = assert_tracking_desired_wc();
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    diff_value = new_value ^ old_value;
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	if (diff_value.test(i))
+	    process_assert_tracking_desired_wc(i, new_value.test(i));
+    }
+    
+    return (true);
+}
+
+// Note: applies only for (*,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::process_assert_tracking_desired_wc(uint16_t vif_index, bool new_value)
+{
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
     
     if (! is_wc())
 	return (false);
-
-    old_value = is_assert_tracking_desired_state(vif_index);
-    new_value = assert_tracking_desired_wc().test(vif_index);
-    if (new_value == old_value)
-	return (false);			// Nothing changed
     
     // Set the new value
     set_assert_tracking_desired_state(vif_index, new_value);
