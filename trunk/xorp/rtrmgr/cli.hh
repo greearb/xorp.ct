@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.8 2003/11/20 05:45:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.9 2004/01/28 00:35:44 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -60,6 +60,11 @@ public:
     void new_config_user(uid_t user_id);
     void leave_config_done(const XrlError& e);
     void notify_user(const string& alert, bool urgent);
+    int logout_func(const string& ,
+		   const string& ,
+		   uint32_t ,
+		   const string& command_global_name,
+		   const vector<string>& argv);
     int exit_func(const string& ,
 		  const string& ,
 		  uint32_t ,

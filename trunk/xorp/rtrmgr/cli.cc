@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.20 2004/01/13 00:24:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.22 2004/01/29 01:55:34 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -90,7 +90,9 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	com2->set_global_name("configure exclusive");
 
 	com0->add_command("help", "Provide help with commands");
-	com0->add_command("quit", "Quit this command session");
+	com0->add_command("quit", 
+			  "Quit this command session",
+			  callback(this, &RouterCLI::logout_func));
     }
 
     set<string> cmds = op_cmd_list()->top_level_commands();
@@ -779,6 +781,23 @@ RouterCLI::notify_user(const string& alert, bool urgent)
 	_alerts.push_back(alert);
     } else {
 	_cli_client.cli_print(alert);
+    }
+}
+
+int
+RouterCLI::logout_func(const string& ,
+		       const string& ,
+		       uint32_t ,		// cli_session_id
+		       const string& ,
+		       const vector<string>& argv)
+{
+    if (argv.size() == 0) {
+	idle_ui();
+	_cli_node.delete_stdio_client(&_cli_client);
+	return (XORP_OK);
+    } else {
+	_cli_client.cli_print("Error: quit does not take any parameters\n");
+	return (XORP_ERROR);
     }
 }
 
