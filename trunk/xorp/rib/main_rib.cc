@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.14 2003/09/15 18:56:16 atanu Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.15 2003/09/16 07:06:16 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -57,7 +57,7 @@ main (int /* argc */, char *argv[])
 		eventloop.run();
 	    }
 
-	    if (xrl_std_router_rib.ready() == false && timed_out) {
+	    if (xrl_std_router_rib.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready. No Finder?");
 	    }
 	}

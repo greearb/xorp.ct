@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.21 2003/06/03 10:30:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.22 2003/09/16 09:02:37 pavlin Exp $"
 
 
 //
@@ -262,9 +262,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_cli4.ready() == false && timed_out) {
+	    if (xrl_std_router_cli4.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #else
@@ -281,9 +280,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_cli6.ready() == false && timed_out) {
+	    if (xrl_std_router_cli6.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #endif // ! DO_IPV4
@@ -334,9 +332,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_fea.ready() == false && timed_out) {
+	    if (xrl_std_router_fea.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 
@@ -357,9 +354,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_mfea4.ready() == false && timed_out) {
+	    if (xrl_std_router_mfea4.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #else
@@ -379,9 +375,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_mfea6.ready() == false && timed_out) {
+	    if (xrl_std_router_mfea6.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #endif // ! DO_IPV4
@@ -427,9 +422,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_mld6igmp4.ready() == false && timed_out) {
+	    if (xrl_std_router_mld6igmp4.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #else
@@ -450,9 +444,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_mld6igmp6.ready() == false && timed_out) {
+	    if (xrl_std_router_mld6igmp6.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #endif // ! DO_IPV4

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.17 2003/06/01 21:38:13 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.18 2003/09/16 08:13:10 pavlin Exp $"
 
 
 //
@@ -268,13 +268,12 @@ main(int argc, char *argv[])
 	    
 	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
 	    while (xrl_std_router_cli4.ready() == false
-		   && timed_out == false) {
+		&& timed_out == false) {
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_cli4.ready() == false && timed_out) {
+	    if (xrl_std_router_cli4.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #else
@@ -291,9 +290,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_cli6.ready() == false && timed_out) {
+	    if (xrl_std_router_cli6.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #endif // ! DO_IPV4

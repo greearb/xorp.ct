@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.1 2003/06/03 21:59:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.2 2003/09/16 09:02:24 pavlin Exp $"
 
 
 //
@@ -260,9 +260,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_cli4.ready() == false && timed_out) {
+	    if (xrl_std_router_cli4.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #else
@@ -279,9 +278,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_cli6.ready() == false && timed_out) {
+	    if (xrl_std_router_cli6.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #endif // ! DO_IPV4
@@ -332,9 +330,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_fea.ready() == false && timed_out) {
+	    if (xrl_std_router_fea.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 	
@@ -355,9 +352,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_mfea4.ready() == false && timed_out) {
+	    if (xrl_std_router_mfea4.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #else
@@ -377,9 +373,8 @@ main(int argc, char *argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_std_router_mfea6.ready() == false && timed_out) {
+	    if (xrl_std_router_mfea6.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 #endif // ! DO_IPV4

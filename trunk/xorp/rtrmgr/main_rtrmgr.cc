@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.26 2003/09/11 22:23:54 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.27 2003/09/16 09:35:17 pavlin Exp $"
 
 #include <signal.h>
 
@@ -381,9 +381,8 @@ main(int argc, char* const argv[])
 		eventloop.run();
 	    }
 	    
-	    if (xrl_router.ready() == false && timed_out) {
+	    if (xrl_router.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-		exit (1);
 	    }
 	}
 	MasterConfigTree* ct = new MasterConfigTree(config_boot, tt, taskmgr);

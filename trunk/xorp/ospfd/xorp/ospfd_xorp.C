@@ -594,9 +594,8 @@ static void ospfd_main()
 	    eventloop.run();
 	}
 	
-	if (xrtr.ready() == false && timed_out) {
+	if (xrtr.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    exit (1);
 	}
     }
 

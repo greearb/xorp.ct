@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.12 2003/09/15 19:08:16 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.13 2003/09/16 07:05:04 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -273,7 +273,7 @@ main(int argc, char **argv)
 	    while (router.ready() == false && timed_out == false) {
 		eventloop.run();
 	    }
-	    if (router.ready() == false && timed_out)
+	    if (router.ready() == false)
 		XLOG_FATAL("Xrl router did not become ready - No Finder?");
 	}
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.20 2003/09/16 07:06:30 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.21 2003/09/16 09:03:21 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -94,9 +94,8 @@ parser_main()
 	    eventloop.run();
 	}
 	
-	if (xrl_router.ready() == false && timed_out) {
+	if (xrl_router.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    exit (1);
 	}
     }
 
@@ -108,9 +107,8 @@ parser_main()
 	while (xrl_router.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	if (xrl_router.ready() == false && timed_out) {
-	    cout << "XrlRouter did not become ready." << endl;
-	    return;
+	if (xrl_router.ready() == false) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	}
     }
 

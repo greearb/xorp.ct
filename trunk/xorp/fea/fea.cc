@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.12 2003/09/16 01:15:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.13 2003/09/16 09:02:23 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -132,9 +132,8 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	    eventloop.run();
 	}
 	
-	if (xrl_std_router_fea.ready() == false && timed_out) {
+	if (xrl_std_router_fea.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    exit (1);
 	}
     }
     
@@ -156,9 +155,8 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	    eventloop.run();
 	}
 	
-	if (xrl_std_router_cli4.ready() == false && timed_out) {
+	if (xrl_std_router_cli4.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    exit (1);
 	}
     }
     
@@ -180,9 +178,8 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	    eventloop.run();
 	}
 	
-	if (xrl_std_router_mfea4.ready() == false && timed_out) {
+	if (xrl_std_router_mfea4.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    exit (1);
 	}
     }
 
@@ -202,9 +199,8 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	    eventloop.run();
 	}
 	
-	if (xrl_std_router_mfea6.ready() == false && timed_out) {
+	if (xrl_std_router_mfea6.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    exit (1);
 	}
     }
 #endif // HAVE_IPV6_MULTICAST
