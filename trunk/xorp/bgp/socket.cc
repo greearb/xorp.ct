@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.6 2003/04/22 19:20:19 mjh Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.7 2003/06/20 22:20:28 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -323,9 +323,9 @@ SocketClient::send_message_complete(AsyncFileWriter::Event ev,
 }
 
 bool
-SocketClient::send_message(const uint8_t*	    buf,
-			       const size_t	    cnt,
-			       SendCompleteCallback cb)
+SocketClient::send_message(const uint8_t* buf,
+			   const size_t	cnt,
+			   SendCompleteCallback cb)
 {
     debug_msg("peer %s bytes = %u\n", get_remote_host(), (uint32_t)cnt);
 
@@ -352,7 +352,8 @@ SocketClient::send_message(const uint8_t*	    buf,
 }
 
 bool 
-SocketClient::output_queue_busy() const {
+SocketClient::output_queue_busy() const 
+{
     //20 is a fairly arbitrary soft limit on how many buffers we want
     //in the output queue before we start to push back
     XLOG_ASSERT(_async_writer);
@@ -457,30 +458,14 @@ SocketClient::async_remove_reader()
     }
 }
 
-bool SocketClient::valid_marker(uint8_t* m)
-{
-    m = 0; //temp assignment
-    return true;
-}
-
-bool SocketClient::valid_length(uint16_t l)
-{
-    l = 0;//temp assignment
-    return true;
-}
-
-bool SocketClient::valid_type(uint8_t t)
-{
-    t = 0;//temp assignment
-    return true;
-}
-
-bool SocketClient::is_connected()
+bool 
+SocketClient::is_connected()
 {
     return get_sock() != UNCONNECTED;
 }	
 
-bool SocketClient::still_reading()
+bool
+SocketClient::still_reading()
 {
     return _async_reader;
 }
@@ -493,7 +478,8 @@ SocketServer::SocketServer(const Iptuple& iptuple, EventLoop& e) :
     debug_msg("SocketServer constructor called\n");	
 }
 
-void SocketServer::listen()
+void
+SocketServer::listen()
 {
     if(::listen(get_sock(), MAX_LISTEN_QUEUE) == -1) {
 	debug_msg("listen failed\n");

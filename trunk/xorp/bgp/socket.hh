@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.2 2003/03/10 23:20:06 hodson Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.3 2003/04/22 19:20:20 mjh Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -53,11 +53,6 @@ public:
     EventLoop& eventloop() {return _eventloop;}
 
     int get_sock() { return _s;}
-#ifdef	DEPRECATED
-    bool compare_remote_addr(struct in_addr addr) {
-	return addr.s_addr == get_remote_addr().s_addr;
-    }
-#endif
 
     void create_listener();
 
@@ -150,9 +145,6 @@ private:
     
     void read_from_server(int sock);
     void write_to_server(int sock);
-    bool valid_marker(uint8_t* marker);
-    bool valid_length(uint16_t length);
-    bool valid_type(uint8_t type);
 
     MessageCallback _callback;
     AsyncFileWriter *_async_writer;
