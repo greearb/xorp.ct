@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.21 2003/09/30 18:27:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.22 2003/09/30 18:42:40 pavlin Exp $"
 
 
 //
@@ -1100,7 +1100,7 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 	return (XORP_ERROR);
     }
     
-    if (pim_vif->addr_ptr() == NULL) {
+    if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
 	end_config(error_msg);
 	error_msg = c_format("Cannot add configure BSR with vif %s: "
 			     "the vif has no configured address",
@@ -1111,7 +1111,7 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
     
     return (add_config_cand_bsr_by_addr(scope_zone_id,
 					is_scope_zone,
-					*pim_vif->addr_ptr(),
+					pim_vif->domain_wide_addr(),
 					bsr_priority,
 					hash_mask_len,
 					error_msg));
@@ -1239,7 +1239,7 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     }
     
-    if (pim_vif->addr_ptr() == NULL) {
+    if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
 	end_config(error_msg);
 	error_msg = c_format("Cannot add configure Cand-RP with vif %s: "
 			     "the vif has no configured address",
@@ -1250,7 +1250,7 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
     
     return (add_config_cand_rp_by_addr(group_prefix,
 				       is_scope_zone,
-				       *pim_vif->addr_ptr(),
+				       pim_vif->domain_wide_addr(),
 				       rp_priority,
 				       rp_holdtime,
 				       error_msg));
@@ -1360,7 +1360,7 @@ PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     }
     
-    if (pim_vif->addr_ptr() == NULL) {
+    if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
 	end_config(error_msg);
 	error_msg = c_format("Cannot delete configure Cand-RP with vif %s: "
 			     "the vif has no configured address",
@@ -1371,7 +1371,7 @@ PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
     
     return (delete_config_cand_rp_by_addr(group_prefix,
 					  is_scope_zone,
-					  *pim_vif->addr_ptr(),
+					  pim_vif->domain_wide_addr(),
 					  error_msg) < 0);
 }
 
