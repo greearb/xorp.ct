@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.43 2003/10/25 00:30:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.44 2003/10/26 04:17:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1388,20 +1388,22 @@ PathAttribute::set_header(size_t payload_size)
 #define PARANOID
 
 template<class A>
-PathAttributeList<A>::PathAttributeList<A>()
+PathAttributeList<A>::PathAttributeList<A>() 
+    : _nexthop_att(0), _aspath_att(0), _origin_att(0)
 {
-    _nexthop_att = NULL;
-    _aspath_att = NULL;
-    _origin_att = NULL;
+    debug_msg("%p\n", this);
+
     memset(_hash, 0, 16);
 }
 
 template<class A>
 PathAttributeList<A>::
   PathAttributeList<A>(const NextHopAttribute<A> &nexthop_att,
-			  const ASPathAttribute &aspath_att,
-			  const OriginAttribute &origin_att)
+		       const ASPathAttribute &aspath_att,
+		       const OriginAttribute &origin_att)
 {
+    debug_msg("%p\n", this);
+
     // no need to clear the *_att pointers, will be done by these 3 adds.
     add_path_attribute(origin_att);
     add_path_attribute(nexthop_att);
@@ -1411,11 +1413,11 @@ PathAttributeList<A>::
 
 template<class A>
 PathAttributeList<A>::PathAttributeList<A>(const PathAttributeList<A>& palist)
-	: list <PathAttribute *>()
+	:  list <PathAttribute *>(),
+	   _nexthop_att(0), _aspath_att(0), _origin_att(0)
 {
-    _nexthop_att = NULL;
-    _aspath_att = NULL;
-    _origin_att = NULL;
+    debug_msg("%p\n", this);
+
     for (const_iterator i = palist.begin(); i != palist.end() ; ++i)
 	add_path_attribute(**i);
     rehash();
@@ -1424,7 +1426,7 @@ PathAttributeList<A>::PathAttributeList<A>(const PathAttributeList<A>& palist)
 template<class A>
 PathAttributeList<A>::~PathAttributeList<A>()
 {
-    debug_msg("++ ~PathAttributeList delete:\n%s\n", str().c_str());
+    debug_msg("%p %s\n", this, str().c_str());
     for (const_iterator i = begin(); i != end() ; ++i)
 	delete (*i);
 }
@@ -1433,6 +1435,8 @@ template<class A>
 void
 PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 {
+    debug_msg("%p %s\n", this, att.str().c_str());
+
     PathAttribute *a = att.clone();
     // store a reference to the mandatory attributes, ignore others
     switch (att.type()) {
@@ -1549,6 +1553,8 @@ template<class A>
 void
 PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 {
+    debug_msg("%p\n", this);
+
     PathAttType type = new_att->type();
 
     switch (new_att->type()) {
@@ -1587,6 +1593,8 @@ template<class A>
 void
 PathAttributeList<A>::replace_AS_path(const AsPath& new_as_path)
 {
+    debug_msg("%p\n", this);
+
     replace_attribute(new ASPathAttribute(new_as_path));
 }
 
@@ -1594,6 +1602,8 @@ template<class A>
 void
 PathAttributeList<A>::replace_nexthop(const A& new_nexthop)
 {
+    debug_msg("%p\n", this);
+
     replace_attribute(new NextHopAttribute<A>(new_nexthop));
 }
 
@@ -1601,6 +1611,8 @@ template<class A>
 void
 PathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 {
+    debug_msg("%p\n", this);
+
     // we only remove the first instance of an attribute with matching type
     iterator i;
     for (i = begin(); i != end(); i++) {
@@ -1617,6 +1629,8 @@ template<class A>
 void
 PathAttributeList<A>::remove_attribute_by_pointer(PathAttribute *p)
 {
+    debug_msg("%p\n", this);
+
     iterator i;
     for (i = begin(); i != end(); i++) {
 	if ((*i) == p) {
@@ -1634,6 +1648,8 @@ template<class A>
 void
 PathAttributeList<A>::process_unknown_attributes()
 {
+    debug_msg("%p\n", this);
+
     iterator i;
     for (i = begin(); i != end();) {
 	iterator tmp = i++;
@@ -1653,6 +1669,8 @@ template<class A>
 const PathAttribute*
 PathAttributeList<A>::find_attribute_by_type(PathAttType type) const
 {
+    debug_msg("%p\n", this);
+
     const_iterator i;
     for (i = begin(); i != end(); i++)
 	if ((*i)->type() == type)
@@ -1664,6 +1682,8 @@ template<class A>
 const MEDAttribute* 
 PathAttributeList<A>::med_att() const 
 {
+    debug_msg("%p\n", this);
+
     return dynamic_cast<const MEDAttribute*>(find_attribute_by_type(MED));
 }
 
@@ -1671,6 +1691,8 @@ template<class A>
 const LocalPrefAttribute*
 PathAttributeList<A>::local_pref_att() const 
 {
+    debug_msg("%p\n", this);
+
     return dynamic_cast<const LocalPrefAttribute*>(
 		find_attribute_by_type(LOCAL_PREF));
 }
@@ -1679,6 +1701,8 @@ template<class A>
 const AtomicAggAttribute*
 PathAttributeList<A>::atomic_aggregate_att() const 
 {
+    debug_msg("%p\n", this);
+
     return dynamic_cast<const AtomicAggAttribute*>(
 	find_attribute_by_type(ATOMIC_AGGREGATE));
 }
@@ -1687,6 +1711,8 @@ template<class A>
 const AggregatorAttribute*
 PathAttributeList<A>::aggregator_att() const 
 {
+    debug_msg("%p\n", this);
+
     return dynamic_cast<const AggregatorAttribute*>(
 	find_attribute_by_type(AGGREGATOR));
 }
