@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.35 2004/11/23 22:43:48 bms Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.36 2004/12/05 23:43:24 mjh Exp $
 ##
 
 # -- Real Programs
@@ -169,6 +169,7 @@ test_templates_SOURCES	+= conf_tree.hh
 test_templates_SOURCES	+= conf_tree_node.hh
 test_templates_SOURCES	+= master_conf_tree.hh
 test_templates_SOURCES	+= module_commands.hh
+test_templates_SOURCES	+= generic_module_manager.hh
 test_templates_SOURCES	+= module_manager.hh
 test_templates_SOURCES	+= path_segment.hh
 test_templates_SOURCES	+= rtrmgr_error.hh
@@ -190,6 +191,7 @@ test_templates_SOURCES	+= lex.boot.cc
 test_templates_SOURCES	+= lex.tplt.cc
 test_templates_SOURCES	+= master_conf_tree.cc
 test_templates_SOURCES	+= module_command.cc
+test_templates_SOURCES	+= generic_module_manager.cc
 test_templates_SOURCES	+= module_manager.cc
 test_templates_SOURCES	+= task.cc
 test_templates_SOURCES	+= template_commands.cc
@@ -217,6 +219,7 @@ test_sample_config_SOURCES	+= conf_tree.hh
 test_sample_config_SOURCES	+= conf_tree_node.hh
 test_sample_config_SOURCES	+= master_conf_tree.hh
 test_sample_config_SOURCES	+= module_commands.hh
+test_sample_config_SOURCES	+= generic_module_manager.hh
 test_sample_config_SOURCES	+= module_manager.hh
 test_sample_config_SOURCES	+= path_segment.hh
 test_sample_config_SOURCES	+= rtrmgr_error.hh
@@ -236,6 +239,7 @@ test_sample_config_SOURCES	+= lex.boot.cc
 test_sample_config_SOURCES	+= lex.tplt.cc
 test_sample_config_SOURCES	+= master_conf_tree.cc
 test_sample_config_SOURCES	+= module_command.cc
+test_sample_config_SOURCES	+= generic_module_manager.cc
 test_sample_config_SOURCES	+= module_manager.cc
 test_sample_config_SOURCES	+= task.cc
 test_sample_config_SOURCES	+= template_commands.cc
@@ -263,6 +267,7 @@ test_module_manager_SOURCES	+= conf_tree.hh
 test_module_manager_SOURCES	+= conf_tree_node.hh
 test_module_manager_SOURCES	+= master_conf_tree.hh
 test_module_manager_SOURCES	+= module_commands.hh
+test_module_manager_SOURCES	+= generic_module_manager.hh
 test_module_manager_SOURCES	+= module_manager.hh
 test_module_manager_SOURCES	+= path_segment.hh
 test_module_manager_SOURCES	+= rtrmgr_error.hh
@@ -281,6 +286,7 @@ test_module_manager_SOURCES	+= lex.boot.cc
 test_module_manager_SOURCES	+= lex.tplt.cc
 test_module_manager_SOURCES	+= master_conf_tree.cc
 test_module_manager_SOURCES	+= module_command.cc
+test_module_manager_SOURCES	+= generic_module_manager.cc
 test_module_manager_SOURCES	+= module_manager.cc
 test_module_manager_SOURCES	+= task.cc
 test_module_manager_SOURCES	+= template_commands.cc
