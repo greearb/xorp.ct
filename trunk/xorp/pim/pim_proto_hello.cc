@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.2 2003/01/06 20:28:45 pavlin Exp $"
 
 
 //
@@ -568,7 +568,8 @@ PimVif::pim_hello_send()
     BUFFER_PUT_HOST_16(PIM_HELLO_LAN_PRUNE_DELAY_OPTION, buffer);
     BUFFER_PUT_HOST_16(PIM_HELLO_LAN_PRUNE_DELAY_LENGTH, buffer);
     lan_delay_tbit = lan_delay().get();
-    lan_delay_tbit |= PIM_HELLO_LAN_PRUNE_DELAY_TBIT;
+    if (is_tracking_support_disabled().get())
+	lan_delay_tbit |= PIM_HELLO_LAN_PRUNE_DELAY_TBIT;
     BUFFER_PUT_HOST_16(lan_delay_tbit, buffer);
     BUFFER_PUT_HOST_16(override_interval().get(), buffer);
     
