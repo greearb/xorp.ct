@@ -1,4 +1,4 @@
-<!-- $XORP: www/cvs.html,v 1.1.1.1 2002/12/11 23:55:34 hodson Exp $ -->
+<!-- $XORP: www/cvs.html,v 1.2 2002/12/12 02:12:07 hodson Exp $ -->
 <HTML>
 <HEAD>
 <TITLE>XORP CVS Access</TITLE>
@@ -6,6 +6,7 @@
 <META HTTP-EQUIV="pragma" CONTENT="no-cache">
 </HEAD>
 <BODY BGCOLOR="white">
+<img src="xorp2.png">
 <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" WIDTH="100%" HEIGHT="100%">
 <TR>
 <TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#FFFFFF">
@@ -60,10 +61,12 @@ on the XORP machines at ICIR.
 <ul>
 <li> Set environment variable CVS_RSH to ssh and CVSROOT to
 point to the XORP repository:
+
 <PRE>
 setenv CVS_RSH ssh
 setenv CVSROOT :ext:&lt;username&gt;@cvs.xorp.org:/usr/local/www/data/cvs
 </PRE>
+
 <li> Use ssh-agent to avoid re-typing your passphrase when CVS uses SSH to connect to the server:
 	<ul>
 	<li> One time actions:
@@ -93,25 +96,25 @@ setenv CVSROOT :ext:&lt;username&gt;@cvs.xorp.org:/usr/local/www/data/cvs
    descriptions of the modules are listed in the table below.
 
 <CENTER>
-<TABLE BORDER=1>
-<TR>
+<TABLE BORDER=0>
+<TR bgcolor="#b0b0b0">
   <TH ALIGN=LEFT>Module</TH>
   <TH ALIGN=CENTER>Description</TH>
 </TR>
 
-<TR>
+<TR bgcolor="#eeeeee">
   <TD><tt>xorp</tt></td>
   <TD>The XORP source tree. </TD>
 </TR>
 
-<TR>
+<TR bgcolor="#eeeeee">
   <TD><tt>other</tt></TD>
 
   <TD>Utilities and tools found to be useful by the XORP developers at
      ICSI/ICIR.</TD>
 </TR>
 
-<TR>
+<TR bgcolor="#eeeeee">
   <TD><tt>www</tt></TD>
   <TD>The material for XORP WWW pages.</TD>
 </TR>         
@@ -122,7 +125,8 @@ setenv CVSROOT :ext:&lt;username&gt;@cvs.xorp.org:/usr/local/www/data/cvs
 <h2><A NAME="Examples">Examples</A></h2>
 
 <h3> UNIX </h3>
-<PRE>
+
+<table border="0" width="100%"><tr><td bgcolor="#BEEAE0"><PRE>
 % setenv CVSROOT :pserver:xorpcvs@cvs.xorp.org:/cvs
 % cvs login
 (Logging in to xorpcvs@cvs.xorp.org)
@@ -142,7 +146,7 @@ Makefile       cli/           devnotes/      mfea/          stamp-h.in
 Makefile.am    config/        docs/          mld6igmp/      utils/
 Makefile.in    config.cache   etc/           mrt/           xrl/
 README         config.h       fea/           ospfd/
-</PRE>
+</PRE></td></tr></table>
 
 <h2><A NAME="Trouble">Troubleshooting</A></h2>
 
@@ -158,7 +162,7 @@ be sent to <a href="mailto:feedback@xorp.org">feedback@xorp.org</a>. </i></P>
 <!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
 <!-- hhmts start -->
 <small>
-Last modified: $XORP: www/cvs.html,v 1.1.1.1 2002/12/11 23:55:34 hodson Exp $
+Last modified: $XORP: www/cvs.html,v 1.2 2002/12/12 02:12:07 hodson Exp $
 </small>
 <!-- hhmts end -->
 
