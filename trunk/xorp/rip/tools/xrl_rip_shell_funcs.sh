@@ -548,25 +548,25 @@ rip_rip_get_peer_counters()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_import_protocol_routes()
+rip_rip_redist_protocol_routes()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_import_protocol_routes <protocol_name:txt> <cost:u32> <tag:u32>"
+        echo "Usage: rip_rip_redist_protocol_routes <protocol_name:txt> <cost:u32> <tag:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/import_protocol_routes?protocol_name:txt=$1&cost:u32=$2&tag:u32=$3"
+    XRL="finder://rip/rip/0.1/redist_protocol_routes?protocol_name:txt=$1&cost:u32=$2&tag:u32=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_no_import_protocol_routes()
+rip_rip_no_redist_protocol_routes()
 {
     if [ $# -ne 1 ] ; then
-        echo "Usage: rip_rip_no_import_protocol_routes <protocol_name:txt>"
+        echo "Usage: rip_rip_no_redist_protocol_routes <protocol_name:txt>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/no_import_protocol_routes?protocol_name:txt=$1"
+    XRL="finder://rip/rip/0.1/no_redist_protocol_routes?protocol_name:txt=$1"
     call_xrl_wrapper -p all "${XRL}"
 }
 
