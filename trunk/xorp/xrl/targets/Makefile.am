@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.26 2004/02/26 22:46:49 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.27 2004/03/15 23:28:06 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -139,6 +139,7 @@ $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 libfib2mribbase_a_SOURCES = fib2mrib_base.hh fib2mrib_base.cc
 $(srcdir)/fib2mrib_base.hh $(srcdir)/fib2mrib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_fib_client.xif 			\
 		$(INTERFACES_DIR)/fib2mrib.xif
 
 #

@@ -787,6 +787,7 @@ $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 		$(INTERFACES_DIR)/fea_ifmgr_mirror.xif
 $(srcdir)/fib2mrib_base.hh $(srcdir)/fib2mrib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_fib_client.xif 			\
 		$(INTERFACES_DIR)/fib2mrib.xif
 $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 		$(INTERFACES_DIR)/common.xif 				\
