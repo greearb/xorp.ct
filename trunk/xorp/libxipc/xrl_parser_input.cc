@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.1 2002/12/14 23:43:01 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.2 2002/12/19 01:29:13 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 #include "xrl_parser_input.hh"
@@ -47,7 +47,7 @@ XrlParserFileInput::slurp_line(string& line)
     }
 
     stack_top().incr_line();
-    ::getline(*stack_top().input(), line);
+    std::getline(*stack_top().input(), line);
 
     // Okay, got line see if it's a pre-processor directive
     for (string::const_iterator c = line.begin();
