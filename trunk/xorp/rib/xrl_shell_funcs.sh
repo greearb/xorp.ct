@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.3 2003/05/24 23:35:27 mjh Exp $
+# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.4 2003/09/18 23:56:02 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -16,6 +16,20 @@ make_rib_errors_fatal()
 {
     echo -n "make_rib_errors_fatal" $1
     $CALLXRL "finder://rib/rib/0.1/make_errors_fatal"
+}
+
+add_igp_table4()
+{
+    echo -n "add_igp_table4" $*
+    
+    $CALLXRL "finder://rib/rib/0.1/add_igp_table4?protocol:txt=$1&tgt_class:txt=$2&tgt_instance:txt=$3&unicast:bool=$4&multicast:bool=$5"
+}
+
+delete_igp_table4()
+{
+    echo -n "delete_igp_table4" $*
+    
+    $CALLXRL "finder://rib/rib/0.1/delete_igp_table4?protocol:txt=$1&tgt_class:txt=$2&tgt_instance:txt=$3&unicast:bool=$4&multicast:bool=$5"
 }
 
 new_vif()
@@ -58,6 +72,12 @@ delete_route6()
 {
     echo -n "delete_route6" $*
     $CALLXRL "finder://rib/rib/0.1/delete_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4"
+}
+
+lookup_route4()
+{
+    echo -n "lookup_route4" $*
+    $CALLXRL "finder://rib/rib/0.1/lookup_route4?addr:ipv4=$1&unicast:bool=$2&multicast:bool=$3"
 }
 
 # We have arguments.
