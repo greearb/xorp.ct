@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_io.hh,v 1.2 2003/04/23 17:06:48 hodson Exp $
+// $XORP: xorp/rip/port_io.hh,v 1.3 2003/05/15 17:22:22 hodson Exp $
 
 #ifndef __RIP_PORT_IO_HH__
 #define __RIP_PORT_IO_HH__
@@ -69,7 +69,7 @@ public:
 		      uint16_t		dst_port,
 		      const uint8_t*	rip_packet,
 		      size_t		rip_packet_bytes) = 0;
-    
+
     /**
      * Get Interface name associated with I/O.
      */
@@ -141,11 +141,11 @@ public:
 				 size_t 	rip_packet_bytes) = 0;
 
     virtual void port_io_enabled_change(bool en) = 0;
-    
+
     inline bool set_io_handler(PortIO* pio, bool set_owner);
 
     inline PortIO* io_handler();
-    
+
 protected:
     PortIO*	_pio;
     bool	_pio_owner;

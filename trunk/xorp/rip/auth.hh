@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.1 2003/04/18 19:42:38 hodson Exp $
+// $XORP: xorp/rip/auth.hh,v 1.2 2003/04/23 17:06:48 hodson Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -124,7 +124,7 @@ public:
 			  size_t		  packet_bytes,
 			  PacketRouteEntry<IPv4>* first_entry,
 			  vector<uint8_t>&	  trailer_data);
-    
+
     uint32_t head_entries() const;
 
     uint32_t max_routing_entries() const;
@@ -147,13 +147,13 @@ public:
 			  size_t		  packet_bytes,
 			  PacketRouteEntry<IPv4>* first_entry,
 			  vector<uint8_t>&	  trailer_data);
-    
+
     uint32_t head_entries() const;
 
     uint32_t max_routing_entries() const;
 
     const char* name() const;
-    
+
     void set_key(const string& plaintext_key);
 
     const string& key() const;
@@ -260,7 +260,7 @@ public:
 	 * is automatically updated with each call of this method.
 	 */
 	inline uint32_t next_seqno_out()		{ return _o_sno++; }
-	
+
     protected:
 	uint8_t   _id;
 	char	  _key_data[KEY_BYTES];
@@ -292,7 +292,7 @@ public:
      * period.
      */
     MD5AuthHandler(EventLoop& e, uint32_t timing_slack_secs = 3600);
-    
+
     bool authenticate(const uint8_t*			packet,
 		      size_t				packet_bytes,
 		      const PacketRouteEntry<IPv4>*&	entries_start,
@@ -303,13 +303,13 @@ public:
 			  size_t		  packet_bytes,
 			  PacketRouteEntry<IPv4>* first_entry,
 			  vector<uint8_t>&	  trailer_data);
-    
+
     uint32_t head_entries() const;
 
     uint32_t max_routing_entries() const;
 
     const char* name() const;
-    
+
     /**
      * Add key to MD5 key chain.  If key already exists, it is updated with
      * new settings.  If the start and end times are the same the key
@@ -342,7 +342,7 @@ public:
      * value outside valid range otherwise 256-65535.
      */
     uint16_t currently_active_key() const;
-    
+
     /**
      * Get all keys managed by MD5AuthHandler.
      *
@@ -357,7 +357,7 @@ protected:
      * @param when_secs time in seconds since midnight 1 Jan 1970.
      */
     KeyChain::iterator key_at(uint32_t when_secs);
-    
+
 protected:
     EventLoop&	_e;
     KeyChain	_key_chain;
