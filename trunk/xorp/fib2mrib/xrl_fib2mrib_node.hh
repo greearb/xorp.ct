@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.5 2004/04/29 23:27:59 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.6 2004/05/06 19:32:24 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -24,6 +24,7 @@
 
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
+#include "xrl/interfaces/fti_xif.hh"
 #include "xrl/interfaces/fea_fib_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/targets/fib2mrib_base.hh"
@@ -258,6 +259,10 @@ private:
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
     void send_fea_fib_client_registration();
+    void fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
+					  const bool* result);
+    void fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
+					  const bool* result);
     void fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error);
     void fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error);
     void send_fea_fib_client_deregistration();
@@ -277,6 +282,7 @@ private:
 
     const string	_class_name;
     const string	_instance_name;
+    XrlFtiV0p2Client	_xrl_fea_fti_client;
     XrlFeaFibV0p1Client	_xrl_fea_fib_client;
     XrlRibV0p1Client	_xrl_rib_client;
     const string	_fea_target;
@@ -285,6 +291,10 @@ private:
 
     list<Fib2mribRoute>	_inform_rib_queue;
     XorpTimer		_inform_rib_queue_timer;
+    bool		_is_fea_have_ipv4_tested;
+    bool		_is_fea_have_ipv6_tested;
+    bool		_fea_have_ipv4;
+    bool		_fea_have_ipv6;
     bool		_is_fea_fib_client4_registered;
     bool		_is_fea_fib_client6_registered;
     XorpTimer		_fea_fib_client_registration_timer;

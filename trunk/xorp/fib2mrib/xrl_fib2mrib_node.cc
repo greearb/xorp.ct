@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.9 2004/05/06 19:32:24 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.10 2004/05/07 02:01:42 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -36,12 +36,17 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
       XrlFib2mribTargetBase(xrl_router),
       _class_name(xrl_router->class_name()),
       _instance_name(xrl_router->instance_name()),
+      _xrl_fea_fti_client(xrl_router),
       _xrl_fea_fib_client(xrl_router),
       _xrl_rib_client(xrl_router),
       _fea_target(fea_target),
       _rib_target(rib_target),
       _ifmgr(eventloop, fea_target.c_str(), xrl_router->finder_address(),
 	     xrl_router->finder_port()),
+      _is_fea_have_ipv4_tested(false),
+      _is_fea_have_ipv6_tested(false),
+      _fea_have_ipv4(false),
+      _fea_have_ipv6(false),
       _is_fea_fib_client4_registered(false),
       _is_fea_fib_client6_registered(false),
       _is_rib_igp_table4_registered(false),
@@ -162,30 +167,58 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 {
     bool success = true;
 
-    if (! _is_fea_fib_client4_registered) {
-	bool success4;
-	success4 = _xrl_fea_fib_client.send_add_fib_client4(
+    //
+    // Test whether the underlying system supports IPv4
+    //
+    if (! _is_fea_have_ipv4_tested) {
+	success = _xrl_fea_fti_client.send_have_ipv4(
+	    _fea_target.c_str(),
+	    callback(this, &XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb));
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to test using the FEA whether the system "
+		   "supports IPv4. "
+		   "Will try again.");
+	goto start_timer_label;
+    }
+
+    //
+    // Test whether the underlying system supports IPv6
+    //
+    if (! _is_fea_have_ipv6_tested) {
+	success = _xrl_fea_fti_client.send_have_ipv6(
+	    _fea_target.c_str(),
+	    callback(this, &XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb));
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to test using the FEA whether the system "
+		   "supports IPv6. "
+		   "Will try again.");
+	goto start_timer_label;
+    }
+
+    if (_fea_have_ipv4 && ! _is_fea_fib_client4_registered) {
+	success = _xrl_fea_fib_client.send_add_fib_client4(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb));
-	if (success4 != true) {
-	    XLOG_ERROR("Failed to register IPv4 FIB client with the FEA. "
-		"Will try again.");
-	    success = false;
-	}
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to register IPv4 FIB client with the FEA. "
+		   "Will try again.");
+	goto start_timer_label;
     }
 
-    if (! _is_fea_fib_client6_registered) {
-	bool success6;
-	success6 = _xrl_fea_fib_client.send_add_fib_client6(
+    if (_fea_have_ipv6 && ! _is_fea_fib_client6_registered) {
+	success = _xrl_fea_fib_client.send_add_fib_client6(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb));
-	if (success6 != true) {
-	    XLOG_ERROR("Failed to register IPv6 FIB client with the FEA. "
-		"Will try again.");
-	    success = false;
-	}
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to register IPv6 FIB client with the FEA. "
+		   "Will try again.");
+	goto start_timer_label;
     }
 
     if (! success) {
@@ -193,10 +226,83 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+    start_timer_label:
 	_fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
     }
+}
+
+void
+XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
+						  const bool* result)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_have_ipv4_tested = true;
+	_fea_have_ipv4 = *result;
+	send_fea_fib_client_registration();
+	// XXX: if the underying system doesn't support IPv4, then we are done
+	if (! _fea_have_ipv4)
+	    Fib2mribNode::decr_startup_requests_n();
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot test using the FEA whether the system "
+		   "supports IPv4: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    // TODO: XXX: the timer value is hardcoded here!!
+    //
+    if (_fea_fib_client_registration_timer.scheduled())
+	return;
+    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+}
+
+void
+XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
+						  const bool* result)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_have_ipv6_tested = true;
+	_fea_have_ipv6 = *result;
+	send_fea_fib_client_registration();
+	// XXX: if the underying system doesn't support IPv6, then we are done
+	if (! _fea_have_ipv6)
+	    Fib2mribNode::decr_startup_requests_n();
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot test using the FEA whether the system "
+		   "supports IPv6: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    // TODO: XXX: the timer value is hardcoded here!!
+    //
+    if (_fea_fib_client_registration_timer.scheduled())
+	return;
+    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
 }
 
 void
@@ -205,6 +311,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_erro
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_fea_fib_client4_registered = true;
+	send_fea_fib_client_registration();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -235,6 +342,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_erro
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_fea_fib_client6_registered = true;
+	send_fea_fib_client_registration();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -304,6 +412,8 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_e
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
+	_is_fea_have_ipv4_tested = false;
+	_fea_have_ipv4 = false;
 	_is_fea_fib_client4_registered = false;
 	Fib2mribNode::decr_shutdown_requests_n();
 	return;
@@ -323,6 +433,8 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_e
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
+	_is_fea_have_ipv6_tested = false;
+	_fea_have_ipv6 = false;
 	_is_fea_fib_client6_registered = false;
 	Fib2mribNode::decr_shutdown_requests_n();
 	return;
@@ -346,8 +458,7 @@ XrlFib2mribNode::send_rib_registration()
     bool success = true;
 
     if (! _is_rib_igp_table4_registered) {
-	bool success4;
-	success4 = _xrl_rib_client.send_add_igp_table4(
+	success = _xrl_rib_client.send_add_igp_table4(
 	    _rib_target.c_str(),
 	    Fib2mribNode::protocol_name(),
 	    _class_name,
@@ -355,16 +466,15 @@ XrlFib2mribNode::send_rib_registration()
 	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::rib_client_send_add_igp_table4_cb));
-	if (success4 != true) {
-	    XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
-		"Will try again.");
-	    success = false;
-	}
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
+		   "Will try again.");
+	goto start_timer_label;
     }
 
     if (! _is_rib_igp_table6_registered) {
-	bool success6;
-	success6 = _xrl_rib_client.send_add_igp_table6(
+	success = _xrl_rib_client.send_add_igp_table6(
 	    _rib_target.c_str(),
 	    Fib2mribNode::protocol_name(),
 	    _class_name,
@@ -372,11 +482,11 @@ XrlFib2mribNode::send_rib_registration()
 	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::rib_client_send_add_igp_table6_cb));
-	if (success6 != true) {
-	    XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
-		"Will try again.");
-	    success = false;
-	}
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
+		   "Will try again.");
+	goto start_timer_label;
     }
 
     if (! success) {
@@ -384,6 +494,7 @@ XrlFib2mribNode::send_rib_registration()
 	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+    start_timer_label:
 	_rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlFib2mribNode::send_rib_registration));
@@ -396,6 +507,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table4_registered = true;
+	send_rib_registration();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -426,6 +538,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table6_registered = true;
+	send_rib_registration();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -867,7 +980,7 @@ XrlFib2mribNode::cancel_rib_route_change(const Fib2mribRoute& fib2mrib_route)
 void
 XrlFib2mribNode::send_rib_route_change()
 {
-    bool success = false;
+    bool success = true;
 
     do {
 	// Pop-up all routes that are to be ignored
@@ -887,11 +1000,15 @@ XrlFib2mribNode::send_rib_route_change()
     //
     // Check whether we have already registered with the RIB
     //
-    if (fib2mrib_route.is_ipv4() && (! _is_rib_igp_table4_registered))
-	goto error_label;
+    if (fib2mrib_route.is_ipv4() && (! _is_rib_igp_table4_registered)) {
+	success = false;
+	goto start_timer_label;
+    }
 
-    if (fib2mrib_route.is_ipv6() && (! _is_rib_igp_table6_registered))
-	goto error_label;
+    if (fib2mrib_route.is_ipv6() && (! _is_rib_igp_table6_registered)) {
+	success = false;
+	goto start_timer_label;
+    }
 
     //
     // Send the appropriate XRL
@@ -910,6 +1027,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_add_route4(
 		    _rib_target.c_str(),
@@ -920,6 +1039,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv4(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
 	if (fib2mrib_route.is_ipv6()) {
@@ -935,6 +1056,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_add_route6(
 		    _rib_target.c_str(),
@@ -945,6 +1068,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv6(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
     }
@@ -963,6 +1088,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_replace_route4(
 		    _rib_target.c_str(),
@@ -973,6 +1100,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv4(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
 	if (fib2mrib_route.is_ipv6()) {
@@ -988,6 +1117,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_replace_route6(
 		    _rib_target.c_str(),
@@ -998,6 +1129,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv6(),
 		    fib2mrib_route.metric(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
     }
@@ -1011,6 +1144,8 @@ XrlFib2mribNode::send_rib_route_change()
 		true,			/* multicast */
 		fib2mrib_route.network().get_ipv4net(),
 		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    if (success)
+		return;
 	}
 	if (fib2mrib_route.is_ipv6()) {
 	    success = _xrl_rib_client.send_delete_route6(
@@ -1020,15 +1155,23 @@ XrlFib2mribNode::send_rib_route_change()
 		true,			/* multicast */
 		fib2mrib_route.network().get_ipv6net(),
 		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
+	    if (success)
+		return;
 	}
     }
 
     if (! success) {
-    error_label:
 	//
 	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+	XLOG_ERROR("Failed to %s route for %s with the RIB. "
+		   "Will try again.",
+		   (fib2mrib_route.is_add_route())? "add"
+		   : (fib2mrib_route.is_replace_route())? "replace"
+		   : "delete",
+		   fib2mrib_route.network().str().c_str());
+    start_timer_label:
 	_inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlFib2mribNode::send_rib_route_change));
