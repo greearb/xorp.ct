@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.8 2004/05/07 11:45:06 mjh Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.9 2004/05/15 16:05:21 mjh Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -114,7 +114,7 @@ private:
     BGPPlumbing *_plumbing;
     const PeerHandler *_peer;
     list <PeerTableInfo<A> > _peers_to_dump;
-    list <PeerTableInfo<A> >::iterator _current_peer;
+    typename list <PeerTableInfo<A> >::iterator _current_peer;
     bool _route_iterator_is_valid;
     typename BgpTrie<A>::iterator _route_iterator;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.17 2004/05/08 16:46:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.18 2004/05/15 16:05:21 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -76,7 +76,7 @@ DumpIterator<A>::DumpIterator(const PeerHandler* peer,
     debug_msg("peer: %p\n", peer);
 
     _peer = peer;
-    list <const PeerTableInfo<A>*>::const_iterator i;
+    typename list <const PeerTableInfo<A>*>::const_iterator i;
     int ctr = 0;
     for (i = peers_to_dump.begin(); i != peers_to_dump.end(); i++) {
 	if ((*i)->peer_handler() != peer) {
@@ -197,7 +197,7 @@ DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 	/*skip to the next peer*/
 	next_peer();
     } else {
-	list <PeerTableInfo<A> >::iterator pi;
+	typename list <PeerTableInfo<A> >::iterator pi;
 	for (pi = _current_peer; pi != _peers_to_dump.end(); pi++) {
 	    if (pi->peer_handler() == peer) {
 		/* the peer that went down hasn't been dumped yet */
@@ -281,7 +281,7 @@ DumpIterator<A>::peering_came_up(const PeerHandler *peer, uint32_t genid)
 
     //sanity check.  If the peering came up, and it wasn't in the
     //downed_peers list, the we must have never have heard of it,
-    list <PeerTableInfo<A> >::iterator pi;
+    typename list <PeerTableInfo<A> >::iterator pi;
     for (pi = _current_peer; pi != _peers_to_dump.end(); pi++) {
 	XLOG_ASSERT(pi->peer_handler() != peer);
     }
@@ -392,7 +392,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    return false;
 	}
     }
-    list <PeerTableInfo<A> >::const_iterator pi;
+    typename list <PeerTableInfo<A> >::const_iterator pi;
     for (pi = _peers_to_dump.begin(); pi != _current_peer; pi++) {
 	cp(12);
 	if (pi->peer_handler() == origin_peer) {
