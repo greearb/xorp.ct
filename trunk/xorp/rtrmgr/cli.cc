@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.47 2004/06/02 04:15:35 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.48 2004/06/07 19:36:48 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -2732,7 +2732,7 @@ RouterCLI::load_communicated(const XrlError& e)
 		check_for_rtrmgr_restart();
 		return;
 	    }  else {
-		_cli_client.cli_print(e.note());
+		_cli_client.cli_print(c_format("%s\n", e.note().c_str()));
 	    }
 	} else {
 	    _cli_client.cli_print("Failed to communicate load command to rtrmgr.\n");
