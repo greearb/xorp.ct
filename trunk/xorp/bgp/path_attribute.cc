@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.46 2003/11/05 00:08:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.47 2004/02/19 04:22:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -885,7 +885,8 @@ MPUNReachNLRIAttribute<IPv6>::encode()
 {
     delete[] _data;	// Zap any old allocation.
 
-    XLOG_ASSERT(AFI_IPV6 == _afi && SAFI_UNICAST == _safi);
+    XLOG_ASSERT(AFI_IPV6 == _afi);
+    XLOG_ASSERT((SAFI_UNICAST  == _safi) || (SAFI_MULTICAST == _safi));
     XLOG_ASSERT(16 == IPv6::addr_size());
 
     /*
