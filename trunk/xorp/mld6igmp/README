@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.9 2003/11/07 00:00:12 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.10 2004/02/26 13:21:39 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -28,9 +28,18 @@ are already running. However, the binary program ``test_mld6igmp'' already
 contains them as well, therefore it is sufficient to start only this
 program (as a root).
 
+First, make sure that IP forwarding is enabled.
+ - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
+      sysctl net.inet.ip.forwarding=1
+      sysctl net.inet6.ip6.forwarding=1
+
+ - In case of Linux run as a root (for IPv4):
+      echo 1 > /proc/sys/net/ipv4/ip_forward
+   Note that currently Linux doesn't support IPv6 multicast routing.
+
 After ``test_mld6igmp'' is started, the MFEA and MLD/IGMP are
 disabled by default. To start them, and to configure their operation,
-as well as the MLD/IGMP operation, run script ``configure_mld6igmp''.
+as well as the MLD/IGMP operation, run script ``./configure_mld6igmp''.
 Note that it MUST be run from the ``${XORP}/mld6igmp'' directory.
 To run MLD/IGMP in IPv6 mode, then run ``./configure_mld6igmp -6'' instead.
 
@@ -45,8 +54,11 @@ it for each router:
 	ENABLE_VIFS="dc1 dc2 dc4"
 	;;
 
-   Alternatively, you can predefine variable ENABLE_VIFS in your shell
-   environment.
+   Note that each enabled vif must have a link-local address in case of
+   IPv6. In case of IPv4 each enabled vif must have a valid address.
+
+ - All configuration variables described above can be predefined in your
+   shell environment instead.
 
  - By default, ``test_mld6igmp'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
@@ -73,9 +85,12 @@ it for each router:
 
    Currently, the CLI supports primarily "show" commands. For example,
    "show igmp interface" will show the list of all interfaces known to
-   IGMP and their status. At each moment you can press <TAB> for the
-   list of existing commands at each level, and a brief description
-   of them. Command-line editing is similar to tcsh: e.g., Ctrl-A and
+   IGMP and their status. All MLD/IGMP commands start with "show igmp"
+   or "show mld" for IGMP and MLD respectively. At each moment you
+   can press <TAB> for the list of existing commands at each level,
+   and a brief description of them. Pressing '?' after a command has
+   similar function.
+   Command-line editing is similar to tcsh: e.g., Ctrl-A and
    Ctrl-E to go to the beginning or end of the current line, Ctrl-A
    to kill the remaining part of the current line, etc.
    To exit, press Ctrl-D when you are on a new empty line.
@@ -106,5 +121,3 @@ on the specification in the following documents:
 
  * RFC 2710: Multicast Listener Discovery for IPv6, Version 1
  * RFC 2236: Internet Group Management Protocol, Version 2
-
-However, only IGMP has been tested.
