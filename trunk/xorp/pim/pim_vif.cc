@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.22 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.23 2003/08/12 15:50:13 pavlin Exp $"
 
 
 //
@@ -733,10 +733,12 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		    buffer_t *buffer)
 {
     uint8_t pim_vt;
+    uint16_t cksum;
+    uint16_t cksum2 = 0;
     uint8_t message_type, proto_version;
     PimNbr *pim_nbr;
     int ret_value = XORP_ERROR;
-
+    
     // Ignore my own PIM messages
     if (pim_node().vif_find_by_addr(src) != NULL)
 	return (XORP_ERROR);
@@ -766,9 +768,33 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     //
     // Checksum verification.
     //
+    if (is_ipv6()) {
+	// XXX: The checksum for IPv6 includes the IPv6 "pseudo-header"
+	// as described in RFC 2460.
+	struct ip6_pseudo_hdr {
+	    struct in6_addr	ip6_src;	// Source address
+	    struct in6_addr	ip6_dst;	// Destination address
+	    uint32_t		ph_len;		// Upper-layer packet length
+	    uint8_t		ph_zero[3];	// Zero
+	    uint8_t		ph_next;	// Upper-layer protocol number
+	} ip6_pseudo_header;	// TODO: may need __attribute__((__packed__))
+	
+	src.copy_out(ip6_pseudo_header.ip6_src);
+	dst.copy_out(ip6_pseudo_header.ip6_dst);
+	ip6_pseudo_header.ph_len = htonl(BUFFER_DATA_SIZE(buffer));
+	ip6_pseudo_header.ph_zero[0] = 0;
+	ip6_pseudo_header.ph_zero[1] = 0;
+	ip6_pseudo_header.ph_zero[2] = 0;
+	ip6_pseudo_header.ph_next = IPPROTO_PIM;
+	
+	cksum2 = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
+    }
+    
     switch (message_type) {
     case PIM_REGISTER:
-	if (!INET_CKSUM(BUFFER_DATA_HEAD(buffer), PIM_MINLEN))
+	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), PIM_MINLEN);
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	if (cksum == 0)
 	    break;
 	//
 	// XXX: Some non-spec compliant (the PC name for "buggy" :)
@@ -778,8 +804,12 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 	// the whole packet.
 	//
 	// FALLTHROUGH
+	
     default:
-	if (INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer))) {
+	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	
+	if (cksum != 0) {
 	    XLOG_WARNING("RX packet from %s to %s on vif %s: "
 			 "checksum error",
 			 cstring(src), cstring(dst),
