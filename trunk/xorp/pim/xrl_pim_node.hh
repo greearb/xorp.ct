@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.36 2004/03/18 00:47:18 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.37 2004/04/29 23:39:28 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -506,339 +506,131 @@ protected:
 
     /**
      *  Start transaction.
-     *  
+     *
      *  @param tid the transaction ID to use for this transaction.
      */
-    XrlCmdError fti_0_2_start_transaction(
-	// Output values, 
+    XrlCmdError redist_transaction4_0_1_start_transaction(
+	// Output values,
 	uint32_t&	tid);
 
     /**
      *  Commit transaction.
-     *  
+     *
      *  @param tid the transaction ID of this transaction.
      */
-    virtual XrlCmdError fti_0_2_commit_transaction(
-	// Input values, 
+    XrlCmdError redist_transaction4_0_1_commit_transaction(
+	// Input values,
 	const uint32_t&	tid);
 
     /**
      *  Abort transaction.
-     *  
+     *
      *  @param tid the transaction ID of this transaction.
      */
-    XrlCmdError fti_0_2_abort_transaction(
-	// Input values, 
+    XrlCmdError redist_transaction4_0_1_abort_transaction(
+	// Input values,
 	const uint32_t&	tid);
 
     /**
-     *  Add a routing entry.
-     *  
+     *  Add/delete a routing entry.
+     *
      *  @param tid the transaction ID of this transaction.
-     *  
-     *  @param dst the destination subnet address of the entry.
-     *  
-     *  @param gateway the address of the next-hop router toward dst.
-     *  
-     *  @param ifname the name of the physical interface toward dst.
-     *  
-     *  @param vifname the name of the virtual interface toward dst.
-     *  
-     *  @param metric the routing metric toward dst.
-     *  
-     *  @param admin_distance the administratively defined distance toward dst.
-     *  
-     *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
+     *
+     *  @param dst destination network.
+     *
+     *  @param nh nexthop router address.
+     *
+     *  @param ifname interface name associated with nexthop.
+     *
+     *  @param vifname virtual interface name with nexthop.
+     *
+     *  @param metric origin routing protocol metric for route.
+     *
+     *  @param ad administrative distance of origin routing protocol.
+     *
+     *  @param cookie value set be requestor to identify redistribution source.
+     *  Typical value is the originating protocol name.
      */
-    XrlCmdError fti_0_2_add_entry4(
-	// Input values, 
-	const uint32_t&	tid, 
-	const IPv4Net&	dst, 
-	const IPv4&	gateway, 
-	const string&	ifname, 
-	const string&	vifname, 
-	const uint32_t&	metric, 
-	const uint32_t&	admin_distance, 
-	const string&	protocol_origin);
+    XrlCmdError redist_transaction4_0_1_add_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv4Net&	dst,
+	const IPv4&	nh,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	ad,
+	const string&	cookie);
+
+    XrlCmdError redist_transaction4_0_1_delete_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv4Net&	network,
+	const string&	cookie);
 
     /**
-     *  Add a routing entry.
-     *  
-     *  @param tid the transaction ID of this transaction.
-     *  
-     *  @param dst the destination subnet address of the entry.
-     *  
-     *  @param gateway the address of the next-hop router toward dst.
-     *  
-     *  @param ifname the name of the physical interface toward dst.
-     *  
-     *  @param vifname the name of the virtual interface toward dst.
-     *  
-     *  @param metric the routing metric toward dst.
-     *  
-     *  @param admin_distance the administratively defined distance toward dst.
-     *  
-     *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
+     *  Start transaction.
+     *
+     *  @param tid the transaction ID to use for this transaction.
      */
-    XrlCmdError fti_0_2_add_entry6(
-	// Input values, 
-	const uint32_t&	tid, 
-	const IPv6Net&	dst, 
-	const IPv6&	gateway, 
-	const string&	ifname, 
-	const string&	vifname, 
-	const uint32_t&	metric, 
-	const uint32_t&	admin_distance, 
-	const string&	protocol_origin);
+    XrlCmdError redist_transaction6_0_1_start_transaction(
+	// Output values,
+	uint32_t&	tid);
 
     /**
-     *  Delete a routing entry.
-     *  
-     *  @param tid the transaction ID of this transaction.
-     *  
-     *  @param dst the destination subnet address of the entry.
-     */
-    XrlCmdError fti_0_2_delete_entry4(
-	// Input values, 
-	const uint32_t&	tid, 
-	const IPv4Net&	dst);
-
-    /**
-     *  Delete a routing entry.
-     *  
-     *  @param tid the transaction ID of this transaction.
-     *  
-     *  @param dst the destination subnet address of the entry.
-     */
-    XrlCmdError fti_0_2_delete_entry6(
-	// Input values, 
-	const uint32_t&	tid, 
-	const IPv6Net&	dst);
-
-    /**
-     *  Delete all routing entries for all address families.
-     *  
+     *  Commit transaction.
+     *
      *  @param tid the transaction ID of this transaction.
      */
-    XrlCmdError fti_0_2_delete_all_entries(
-	// Input values, 
+    XrlCmdError redist_transaction6_0_1_commit_transaction(
+	// Input values,
 	const uint32_t&	tid);
 
     /**
-     *  Delete all routing entries for the IPv4 address family.
-     *  
+     *  Abort transaction.
+     *
      *  @param tid the transaction ID of this transaction.
      */
-    XrlCmdError fti_0_2_delete_all_entries4(
-	// Input values, 
+    XrlCmdError redist_transaction6_0_1_abort_transaction(
+	// Input values,
 	const uint32_t&	tid);
 
     /**
-     *  Delete all routing entries for the IPv6 address family.
-     *  
+     *  Add/delete a routing entry.
+     *
      *  @param tid the transaction ID of this transaction.
+     *
+     *  @param dst destination network.
+     *
+     *  @param nh nexthop router address.
+     *
+     *  @param ifname interface name associated with nexthop.
+     *
+     *  @param vifname virtual interface name with nexthop.
+     *
+     *  @param metric origin routing protocol metric for route.
+     *
+     *  @param ad administrative distance of origin routing protocol.
+     *
+     *  @param cookie value set be requestor to identify redistribution source.
+     *  Typical value is the originating protocol name.
      */
-    XrlCmdError fti_0_2_delete_all_entries6(
-	// Input values, 
-	const uint32_t&	tid);
+    XrlCmdError redist_transaction6_0_1_add_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv6Net&	dst,
+	const IPv6&	nh,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	ad,
+	const string&	cookie);
 
-    /**
-     *  Lookup a route for a destination host address.
-     *  
-     *  @param dst the destination host address to lookup.
-     *  
-     *  @param gateway the address of the next-hop router toward dst.
-     *  
-     *  @param ifname the name of the physical interface toward dst.
-     *  
-     *  @param vifname the name of the virtual interface toward dst.
-     *  
-     *  @param metric the routing metric toward dst.
-     *  
-     *  @param admin_distance the administratively defined distance toward dst.
-     *  
-     *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
-     */
-    XrlCmdError fti_0_2_lookup_route4(
-	// Input values, 
-	const IPv4&	dst, 
-	// Output values, 
-	IPv4Net&	netmask, 
-	IPv4&		gateway, 
-	string&		ifname, 
-	string&		vifname, 
-	uint32_t&	metric, 
-	uint32_t&	admin_distance, 
-	string&		protocol_origin);
-
-    /**
-     *  Lookup a route for a destination host address.
-     *  
-     *  @param dst the destination host address to lookup.
-     *  
-     *  @param gateway the address of the next-hop router toward dst.
-     *  
-     *  @param ifname the name of the physical interface toward dst.
-     *  
-     *  @param vifname the name of the virtual interface toward dst.
-     *  
-     *  @param metric the routing metric toward dst.
-     *  
-     *  @param admin_distance the administratively defined distance toward dst.
-     *  
-     *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
-     */
-    XrlCmdError fti_0_2_lookup_route6(
-	// Input values, 
-	const IPv6&	dst, 
-	// Output values, 
-	IPv6Net&	netmask, 
-	IPv6&		gateway, 
-	string&		ifname, 
-	string&		vifname, 
-	uint32_t&	metric, 
-	uint32_t&	admin_distance, 
-	string&		protocol_origin);
-
-    /**
-     *  Lookup a route for a destination subnet address.
-     *  
-     *  @param dst the destination subnet address to lookup.
-     *  
-     *  @param gateway the address of the next-hop router toward dst.
-     *  
-     *  @param ifname the name of the physical interface toward dst.
-     *  
-     *  @param vifname the name of the virtual interface toward dst.
-     *  
-     *  @param metric the routing metric toward dst.
-     *  
-     *  @param admin_distance the administratively defined distance toward dst.
-     *  
-     *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
-     */
-    XrlCmdError fti_0_2_lookup_entry4(
-	// Input values, 
-	const IPv4Net&	dst, 
-	// Output values, 
-	IPv4&		gateway, 
-	string&		ifname, 
-	string&		vifname, 
-	uint32_t&	metric, 
-	uint32_t&	admin_distance, 
-	string&		protocol_origin);
-
-    /**
-     *  Lookup a route for a destination subnet address.
-     *  
-     *  @param dst the destination subnet address to lookup.
-     *  
-     *  @param gateway the address of the next-hop router toward dst.
-     *  
-     *  @param ifname the name of the physical interface toward dst.
-     *  
-     *  @param vifname the name of the virtual interface toward dst.
-     *  
-     *  @param metric the routing metric toward dst.
-     *  
-     *  @param admin_distance the administratively defined distance toward dst.
-     *  
-     *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
-     */
-    XrlCmdError fti_0_2_lookup_entry6(
-	// Input values, 
-	const IPv6Net&	dst, 
-	// Output values, 
-	IPv6&		gateway, 
-	string&		ifname, 
-	string&		vifname, 
-	uint32_t&	metric, 
-	uint32_t&	admin_distance, 
-	string&		protocol_origin);
-
-    /**
-     *  Test if the underlying system supports IPv4.
-     *  
-     *  Note: this is a dummy method that doesn't apply to this target.
-     *  
-     *  @param result true if the underlying system supports IPv4, otherwise
-     *  false.
-     */
-    XrlCmdError fti_0_2_have_ipv4(
-	// Output values, 
-	bool&	result);
-
-    /**
-     *  Test if the underlying system supports IPv6.
-     *  
-     *  Note: this is a dummy method that doesn't apply to this target.
-     *  
-     *  @param result true if the underlying system supports IPv6, otherwise
-     *  false.
-     */
-    XrlCmdError fti_0_2_have_ipv6(
-	// Output values, 
-	bool&	result);
-
-    /**
-     *  Test whether the IPv4 unicast forwarding engine is enabled or disabled
-     *  to forward packets.
-     *  
-     *  Note: this is a dummy method that doesn't apply to this target.
-     *  
-     *  @param enabled if true, then the IPv4 unicast forwarding is enabled,
-     *  otherwise is disabled.
-     */
-    XrlCmdError fti_0_2_get_unicast_forwarding_enabled4(
-	// Output values, 
-	bool&	enabled);
-
-    /**
-     *  Test whether the IPv6 unicast forwarding engine is enabled or disabled
-     *  to forward packets.
-     *  
-     *  Note: this is a dummy method that doesn't apply to this target.
-     *  
-     *  @param enabled if true, then the IPv6 unicast forwarding is enabled,
-     *  otherwise is disabled.
-     */
-    XrlCmdError fti_0_2_get_unicast_forwarding_enabled6(
-	// Output values, 
-	bool&	enabled);
-
-    /**
-     *  Pure-virtual function that needs to be implemented to:
-     *  
-     *  Set the IPv4 unicast forwarding engine to enable or disable forwarding
-     *  of packets.
-     *  
-     *  Note: this is a dummy method that doesn't apply to this target.
-     *  
-     *  @param enabled if true, then enable IPv4 unicast forwarding, otherwise
-     *  disable it.
-     */
-    XrlCmdError fti_0_2_set_unicast_forwarding_enabled4(
-	// Input values, 
-	const bool&	enabled);
-
-    /**
-     *  Set the IPv6 unicast forwarding engine to enable or disable forwarding
-     *  of packets.
-     *  
-     *  Note: this is a dummy method that doesn't apply to this target.
-     *  
-     *  @param enabled if true, then enable IPv6 unicast forwarding, otherwise
-     *  disable it.
-     */
-    XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
-	// Input values, 
-	const bool&	enabled);
+    XrlCmdError redist_transaction6_0_1_delete_route(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv6Net&	network,
+	const string&	cookie);
 
     /**
      *  Add/delete membership information.
@@ -2320,9 +2112,9 @@ private:
     void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
 
     void send_rib_registration();
-    void rib_client_send_add_rib_client_cb(const XrlError& xrl_error);
+    void rib_client_send_redist_transaction_enable_cb(const XrlError& xrl_error);
     void send_rib_deregistration();
-    void rib_client_send_delete_rib_client_cb(const XrlError& xrl_error);
+    void rib_client_send_redist_transaction_disable_cb(const XrlError& xrl_error);
 
     //
     // Protocol node methods

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.47 2004/04/29 23:39:28 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.48 2004/04/30 23:06:23 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -494,12 +494,14 @@ XrlPimNode::send_rib_registration()
 	&& (!  PimNode::is_receive_mrib_from_mfea())) {
 	if (PimNode::is_ipv4()) {
 	    bool success4;
-	    success4 = _xrl_rib_client.send_add_rib_client4(
+	    success4 = _xrl_rib_client.send_redist_transaction_enable4(
 		_rib_target.c_str(),
 		my_xrl_target_name(),
+		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
-		callback(this, &XrlPimNode::rib_client_send_add_rib_client_cb));
+		string("all"),		// TODO: XXX: hard-coded value
+		callback(this, &XrlPimNode::rib_client_send_redist_transaction_enable_cb));
 	    if (success4 != true) {
 		XLOG_ERROR("Failed to register with the RIB. "
 			   "Will try again.");
@@ -509,12 +511,14 @@ XrlPimNode::send_rib_registration()
 
 	if (PimNode::is_ipv6()) {
 	    bool success6;
-	    success6 = _xrl_rib_client.send_add_rib_client6(
+	    success6 = _xrl_rib_client.send_redist_transaction_enable6(
 		_rib_target.c_str(),
 		my_xrl_target_name(),
+		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
-		callback(this, &XrlPimNode::rib_client_send_add_rib_client_cb));
+		string("all"),		// TODO: XXX: hard-coded value
+		callback(this, &XrlPimNode::rib_client_send_redist_transaction_enable_cb));
 	    if (success6 != true) {
 		XLOG_ERROR("Failed to register with the RIB. "
 			   "Will try again.");
@@ -536,7 +540,7 @@ XrlPimNode::send_rib_registration()
 }
 
 void
-XrlPimNode::rib_client_send_add_rib_client_cb(const XrlError& xrl_error)
+XrlPimNode::rib_client_send_redist_transaction_enable_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -568,12 +572,14 @@ XrlPimNode::send_rib_deregistration()
     if (_is_rib_client_registered) {
 	if (PimNode::is_ipv4()) {
 	    bool success4;
-	    success4 = _xrl_rib_client.send_delete_rib_client4(
+	    success4 = _xrl_rib_client.send_redist_transaction_disable4(
 		_rib_target.c_str(),
 		my_xrl_target_name(),
+		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
-		callback(this, &XrlPimNode::rib_client_send_delete_rib_client_cb));
+		string("all"),		// TODO: XXX: hard-coded value
+		callback(this, &XrlPimNode::rib_client_send_redist_transaction_disable_cb));
 	    if (success4 != true) {
 		XLOG_ERROR("Failed to deregister with the RIB. "
 			   "Will give up.");
@@ -583,12 +589,14 @@ XrlPimNode::send_rib_deregistration()
 
 	if (PimNode::is_ipv6()) {
 	    bool success6;
-	    success6 = _xrl_rib_client.send_delete_rib_client6(
+	    success6 = _xrl_rib_client.send_redist_transaction_disable6(
 		_rib_target.c_str(),
 		my_xrl_target_name(),
+		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
-		callback(this, &XrlPimNode::rib_client_send_delete_rib_client_cb));
+		string("all"),		// TODO: XXX: hard-coded value
+		callback(this, &XrlPimNode::rib_client_send_redist_transaction_disable_cb));
 	    if (success6 != true) {
 		XLOG_ERROR("Failed to deregister with the RIB. "
 			   "Will give up.");
@@ -604,7 +612,7 @@ XrlPimNode::send_rib_deregistration()
 }
 
 void
-XrlPimNode::rib_client_send_delete_rib_client_cb(const XrlError& xrl_error)
+XrlPimNode::rib_client_send_redist_transaction_disable_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -2322,10 +2330,19 @@ XrlPimNode::mfea_client_0_1_recv_dataflow_signal6(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_2_start_transaction(
+XrlPimNode::redist_transaction4_0_1_start_transaction(
     // Output values, 
     uint32_t&	tid)
 {
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (_mrib_transaction_manager.start(tid) != true) {
 	string error_msg = c_format("Resource limit on number of pending "
 				    "transactions hit");
@@ -2336,10 +2353,19 @@ XrlPimNode::fti_0_2_start_transaction(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_2_commit_transaction(
+XrlPimNode::redist_transaction4_0_1_commit_transaction(
     // Input values, 
     const uint32_t&	tid)
 {
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (_mrib_transaction_manager.commit(tid) != true) {
 	string error_msg = c_format("Cannot commit MRIB transaction "
 				    "for tid %u",
@@ -2353,10 +2379,19 @@ XrlPimNode::fti_0_2_commit_transaction(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_2_abort_transaction(
+XrlPimNode::redist_transaction4_0_1_abort_transaction(
     // Input values, 
     const uint32_t&	tid)
 {
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (_mrib_transaction_manager.abort(tid) != true) {
 	string error_msg = c_format("Cannot abort MRIB transaction for tid %u",
 				    tid);
@@ -2369,16 +2404,16 @@ XrlPimNode::fti_0_2_abort_transaction(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_2_add_entry4(
+XrlPimNode::redist_transaction4_0_1_add_route(
     // Input values, 
     const uint32_t&	tid, 
     const IPv4Net&	dst, 
-    const IPv4&		gateway, 
+    const IPv4&		nh, 
     const string&	/* ifname */, 
     const string&	vifname,
     const uint32_t&	metric,
-    const uint32_t&	admin_distance,
-    const string&	protocol_origin)
+    const uint32_t&	ad,
+    const string&	cookie)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
@@ -2391,9 +2426,6 @@ XrlPimNode::fti_0_2_add_entry4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    // TODO: use "protocol_origin"
-    UNUSED(protocol_origin);
-    
     if (pim_vif == NULL) {
 	string error_msg = c_format("Cannot add MRIB entry for vif %s: "
 				    "no such vif",
@@ -2405,9 +2437,9 @@ XrlPimNode::fti_0_2_add_entry4(
     // Create the Mrib entry
     //
     Mrib mrib = Mrib(IPvXNet(dst));
-    mrib.set_next_hop_router_addr(IPvX(gateway));
+    mrib.set_next_hop_router_addr(IPvX(nh));
     mrib.set_next_hop_vif_index(pim_vif->vif_index());
-    mrib.set_metric_preference(admin_distance);
+    mrib.set_metric_preference(ad);
     mrib.set_metric(metric);
     
     //
@@ -2419,19 +2451,129 @@ XrlPimNode::fti_0_2_add_entry4(
     // Success
     //
     return XrlCmdError::OKAY();
+
+    UNUSED(cookie);
 }
 
 XrlCmdError
-XrlPimNode::fti_0_2_add_entry6(
+XrlPimNode::redist_transaction4_0_1_delete_route(
+    // Input values, 
+    const uint32_t&	tid, 
+    const IPv4Net&	network,
+    const string&	cookie)
+{
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    //
+    // Create the Mrib entry
+    //
+    Mrib mrib = Mrib(IPvXNet(network));
+    
+    //
+    // Add the Mrib to the list of pending transactions as an 'remove()' entry
+    //
+    PimNode::pim_mrib_table().add_pending_remove(tid, mrib);
+
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+
+    UNUSED(cookie);
+}
+
+XrlCmdError
+XrlPimNode::redist_transaction6_0_1_start_transaction(
+    // Output values, 
+    uint32_t&	tid)
+{
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_mrib_transaction_manager.start(tid) != true) {
+	string error_msg = c_format("Resource limit on number of pending "
+				    "transactions hit");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::redist_transaction6_0_1_commit_transaction(
+    // Input values, 
+    const uint32_t&	tid)
+{
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_mrib_transaction_manager.commit(tid) != true) {
+	string error_msg = c_format("Cannot commit MRIB transaction "
+				    "for tid %u",
+				    tid);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    PimNode::pim_mrib_table().commit_pending_transactions(tid);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::redist_transaction6_0_1_abort_transaction(
+    // Input values, 
+    const uint32_t&	tid)
+{
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_mrib_transaction_manager.abort(tid) != true) {
+	string error_msg = c_format("Cannot abort MRIB transaction for tid %u",
+				    tid);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    PimNode::pim_mrib_table().abort_pending_transactions(tid);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::redist_transaction6_0_1_add_route(
     // Input values, 
     const uint32_t&	tid, 
     const IPv6Net&	dst, 
-    const IPv6&		gateway, 
+    const IPv6&		nh, 
     const string&	/* ifname */, 
     const string&	vifname,
     const uint32_t&	metric,
-    const uint32_t&	admin_distance,
-    const string&	protocol_origin)
+    const uint32_t&	ad,
+    const string&	cookie)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
@@ -2444,9 +2586,6 @@ XrlPimNode::fti_0_2_add_entry6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    // TODO: use "protocol_origin"
-    UNUSED(protocol_origin);
-    
     if (pim_vif == NULL) {
 	string error_msg = c_format("Cannot add MRIB entry for vif %s: "
 				    "no such vif",
@@ -2458,58 +2597,30 @@ XrlPimNode::fti_0_2_add_entry6(
     // Create the Mrib entry
     //
     Mrib mrib = Mrib(IPvXNet(dst));
-    mrib.set_next_hop_router_addr(IPvX(gateway));
+    mrib.set_next_hop_router_addr(IPvX(nh));
     mrib.set_next_hop_vif_index(pim_vif->vif_index());
-    mrib.set_metric_preference(admin_distance);
+    mrib.set_metric_preference(ad);
     mrib.set_metric(metric);
     
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
     //
     PimNode::pim_mrib_table().add_pending_insert(tid, mrib);
-
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_delete_entry4(
-    // Input values, 
-    const uint32_t&	tid, 
-    const IPv4Net&	dst)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Create the Mrib entry
-    //
-    Mrib mrib = Mrib(IPvXNet(dst));
     
     //
-    // Add the Mrib to the list of pending transactions as an 'remove()' entry
-    //
-    PimNode::pim_mrib_table().add_pending_remove(tid, mrib);
-
-    //
     // Success
     //
     return XrlCmdError::OKAY();
+
+    UNUSED(cookie);
 }
 
 XrlCmdError
-XrlPimNode::fti_0_2_delete_entry6(
+XrlPimNode::redist_transaction6_0_1_delete_route(
     // Input values, 
     const uint32_t&	tid, 
-    const IPv6Net&	dst)
+    const IPv6Net&	network,
+    const string&	cookie)
 {
     //
     // Verify the address family
@@ -2523,373 +2634,19 @@ XrlPimNode::fti_0_2_delete_entry6(
     //
     // Create the Mrib entry
     //
-    Mrib mrib = Mrib(IPvXNet(dst));
+    Mrib mrib = Mrib(IPvXNet(network));
     
     //
     // Add the Mrib to the list of pending transactions as an 'remove()' entry
     //
     PimNode::pim_mrib_table().add_pending_remove(tid, mrib);
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_delete_all_entries(
-    // Input values, 
-    const uint32_t&	/* tid */)
-{
-    PimNode::pim_mrib_table().clear();
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_delete_all_entries4(
-    // Input values, 
-    const uint32_t&	/* tid */)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    PimNode::pim_mrib_table().clear();
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_delete_all_entries6(
-    // Input values, 
-    const uint32_t&	/* tid */)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    PimNode::pim_mrib_table().clear();
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_lookup_route4(
-    // Input values, 
-    const IPv4&		dst, 
-    // Output values, 
-    IPv4Net&		netmask, 
-    IPv4&		gateway, 
-    string&		ifname, 
-    string&		vifname,
-    uint32_t&		metric,
-    uint32_t&		admin_distance,
-    string&		protocol_origin)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Lookup
-    //
-    Mrib *mrib = PimNode::pim_mrib_table().find(IPvX(dst));
-    if (mrib == NULL) {
-	string error_msg = c_format("No routing entry for %s", cstring(dst));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Find the vif
-    //
-    PimVif *pim_vif;
-    pim_vif = PimNode::vif_find_by_vif_index(mrib->next_hop_vif_index());
-    if (pim_vif == NULL) {
-	string error_msg = c_format("Lookup error for %s: next-hop vif "
-				    "has vif_index %d: "
-				    "no such vif",
-				    cstring(dst),
-				    mrib->next_hop_vif_index());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // The return values
-    //
-    netmask = mrib->dest_prefix().get_ipv4net();
-    gateway = mrib->next_hop_router_addr().get_ipv4();
-    ifname = pim_vif->ifname();
-    vifname = pim_vif->name();
-    metric = mrib->metric();
-    admin_distance = mrib->metric_preference();
-    // TODO: set the value of protocol_origin to something meaningful
-    protocol_origin = "NOT_SUPPORTED";
 
     //
     // Success
     //
     return XrlCmdError::OKAY();
-}
 
-XrlCmdError
-XrlPimNode::fti_0_2_lookup_route6(
-    // Input values, 
-    const IPv6&		dst, 
-    // Output values, 
-    IPv6Net&		netmask, 
-    IPv6&		gateway, 
-    string&		ifname, 
-    string&		vifname,
-    uint32_t&		metric,
-    uint32_t&		admin_distance,
-    string&		protocol_origin)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Lookup
-    //
-    Mrib *mrib = PimNode::pim_mrib_table().find(IPvX(dst));
-    if (mrib == NULL) {
-	string error_msg = c_format("No routing entry for %s", cstring(dst));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Find the vif
-    //
-    PimVif *pim_vif;
-    pim_vif = PimNode::vif_find_by_vif_index(mrib->next_hop_vif_index());
-    if (pim_vif == NULL) {
-	string error_msg = c_format("Lookup error for %s: next-hop vif "
-				    "has vif_index %d: "
-				    "no such vif",
-				    cstring(dst),
-				    mrib->next_hop_vif_index());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // The return values
-    //
-    netmask = mrib->dest_prefix().get_ipv6net();
-    gateway = mrib->next_hop_router_addr().get_ipv6();
-    ifname = pim_vif->ifname();
-    vifname = pim_vif->name();
-    metric = mrib->metric();
-    admin_distance = mrib->metric_preference();
-    // TODO: set the value of protocol_origin to something meaningful
-    protocol_origin = "NOT_SUPPORTED";
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_lookup_entry4(
-    // Input values, 
-    const IPv4Net&	dst, 
-    // Output values, 
-    IPv4&		gateway, 
-    string&		ifname, 
-    string&		vifname,
-    uint32_t&		metric,
-    uint32_t&		admin_distance,
-    string&		protocol_origin)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Lookup
-    //
-    Mrib *mrib = PimNode::pim_mrib_table().find_exact(IPvXNet(dst));
-    if (mrib == NULL) {
-	string error_msg = c_format("No routing entry for %s", cstring(dst));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Find the vif
-    //
-    PimVif *pim_vif;
-    pim_vif = PimNode::vif_find_by_vif_index(mrib->next_hop_vif_index());
-    if (pim_vif == NULL) {
-	string error_msg = c_format("Lookup error for %s: next-hop vif "
-				    "has vif_index %d: "
-				    "no such vif",
-				    cstring(dst),
-				    mrib->next_hop_vif_index());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // The return values
-    //
-    gateway = mrib->next_hop_router_addr().get_ipv4();
-    ifname = pim_vif->ifname();
-    vifname = pim_vif->name();
-    metric = mrib->metric();
-    admin_distance = mrib->metric_preference();
-    // TODO: set the value of protocol_origin to something meaningful
-    protocol_origin = "NOT_SUPPORTED";
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_lookup_entry6(
-    // Input values, 
-    const IPv6Net&	dst, 
-    // Output values, 
-    IPv6&		gateway, 
-    string&		ifname, 
-    string&		vifname,
-    uint32_t&		metric,
-    uint32_t&		admin_distance,
-    string&		protocol_origin)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Lookup
-    //
-    Mrib *mrib = PimNode::pim_mrib_table().find_exact(IPvXNet(dst));
-    if (mrib == NULL) {
-	string error_msg = c_format("No routing entry for %s", cstring(dst));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Find the vif
-    //
-    PimVif *pim_vif;
-    pim_vif = PimNode::vif_find_by_vif_index(mrib->next_hop_vif_index());
-    if (pim_vif == NULL) {
-	string error_msg = c_format("Lookup error for %s: next-hop vif "
-				    "has vif_index %d: "
-				    "no such vif",
-				    cstring(dst),
-				    mrib->next_hop_vif_index());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // The return values
-    //
-    gateway = mrib->next_hop_router_addr().get_ipv6();
-    ifname = pim_vif->ifname();
-    vifname = pim_vif->name();
-    metric = mrib->metric();
-    admin_distance = mrib->metric_preference();
-    // TODO: set the value of protocol_origin to something meaningful
-    protocol_origin = "NOT_SUPPORTED";
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_have_ipv4(
-    // Output values, 
-    bool&	result)
-{
-    result = false;
-    
-    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_have_ipv6(
-    // Output values, 
-    bool&	result)
-{
-    result = false;
-    
-    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_get_unicast_forwarding_enabled4(
-    // Output values, 
-    bool&	enabled)
-{
-    enabled = false;
-    
-    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_get_unicast_forwarding_enabled6(
-    // Output values, 
-    bool&	enabled)
-{
-    enabled = false;
-    
-    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_set_unicast_forwarding_enabled4(
-    // Input values, 
-    const bool&	enabled)
-{
-    UNUSED(enabled);
-    
-    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
-}
-
-XrlCmdError
-XrlPimNode::fti_0_2_set_unicast_forwarding_enabled6(
-    // Input values, 
-    const bool&	enabled)
-{
-    UNUSED(enabled);
-    
-    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
+    UNUSED(cookie);
 }
 
 XrlCmdError
