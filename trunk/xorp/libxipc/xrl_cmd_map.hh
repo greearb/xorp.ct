@@ -28,30 +28,26 @@ typedef
 XorpCallback2<const XrlCmdError, const Xrl&, XrlArgs*>::RefPtr XrlRecvCallback;
 
 struct XrlCmdEntry {
-    XrlCmdEntry(const char* s, XrlRecvCallback cb) :
+    XrlCmdEntry(const string& s, XrlRecvCallback cb) :
 	name(s), callback(cb) {}
-    //    XrlCmdEntry() : name("") {} // this has to be here for map<>.
     string		name;
     XrlRecvCallback	callback;
 };
 
 class XrlCmdMap {
 public:
-    XrlCmdMap(const char* name = "anonymous") : _name(name) {}
+    XrlCmdMap(const string& name = "anonymous") : _name(name) {}
 
     const string& name() { return _name; }
 
-    inline bool add_handler(const char* cmd, const XrlRecvCallback& rcb)
-    {
-	return add_handler(XrlCmdEntry(cmd, rcb));
-    }
+    inline bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 
     bool add_handler (const XrlCmdEntry& c);
 
-    bool remove_handler (const char* name);
+    bool remove_handler (const string& name);
 
-    const XrlCmdEntry* get_handler(const char* name) const;
-
+    const XrlCmdEntry* get_handler(const string& name) const;
+    
     uint32_t count_handlers() const;
 
     const XrlCmdEntry* get_handler(uint32_t index) const;
@@ -65,5 +61,11 @@ protected:
 
     CmdMap _cmd_map;
 };
+
+inline bool
+XrlCmdMap::add_handler(const string& cmd, const XrlRecvCallback& rcb)
+{
+    return add_handler(XrlCmdEntry(cmd, rcb));
+}
 
 #endif // __XRL_CMD_MAP_HH__

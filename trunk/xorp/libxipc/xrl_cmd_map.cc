@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.2 2002/12/18 22:54:30 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.3 2002/12/19 01:29:12 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -32,24 +32,22 @@ XrlCmdMap::add_handler(const XrlCmdEntry& cmd)
 }
 
 const XrlCmdEntry*
-XrlCmdMap::get_handler(const char* name) const
+XrlCmdMap::get_handler(const string& name) const
 {
     CMI c = _cmd_map.find(name);
-    if (c != _cmd_map.end()) {
-	return &c->second;
-    }
-    return NULL;
+    if (c == _cmd_map.end())
+	return 0;
+    return &c->second;
 }
 
 bool
-XrlCmdMap::remove_handler(const char* name)
+XrlCmdMap::remove_handler(const string& name)
 {
     MI c = _cmd_map.find(name);
-    if (c != _cmd_map.end()) {
-	_cmd_map.erase(c);
-	return true;
-    }
-    return false;
+    if (c == _cmd_map.end())
+	return false;
+    _cmd_map.erase(c);
+    return true;
 }
 
 const XrlCmdEntry*
