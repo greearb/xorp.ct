@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.40 2005/03/10 01:13:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.41 2005/03/15 00:35:00 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -1440,10 +1440,12 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 					    bool is_command_processor
     )
 {
+    bool success = true;
+
     if (! _is_finder_alive)
 	return(XORP_ERROR);	// The Finder is dead
 
-    _xrl_cli_manager_client.send_add_cli_command(
+    success = _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
@@ -1452,7 +1454,13 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 	string(command_cd_prompt),
 	is_command_processor,
 	callback(this, &XrlMfeaNode::cli_manager_client_send_add_cli_command_cb));
-    
+
+    if (! success) {
+	XLOG_ERROR("Failed to add CLI command '%s' to the CLI manager",
+		   command_name);
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -1518,15 +1526,23 @@ XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(
 int
 XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
+    bool success = true;
+
     if (! _is_finder_alive)
 	return(XORP_ERROR);	// The Finder is dead
 
-    _xrl_cli_manager_client.send_delete_cli_command(
+    success = _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	callback(this, &XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb));
-    
+
+    if (! success) {
+	XLOG_ERROR("Failed to delete CLI command '%s' with the CLI manager",
+		   command_name);
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.37 2005/03/10 01:13:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.38 2005/03/15 00:34:39 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1518,10 +1518,12 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 						bool is_command_processor
     )
 {
+    bool success = false;
+
     if (! _is_finder_alive)
 	return (XORP_ERROR);	// The Finder is dead
 
-    _xrl_cli_manager_client.send_add_cli_command(
+    success = _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
@@ -1530,7 +1532,13 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 	string(command_cd_prompt),
 	is_command_processor,
 	callback(this, &XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb));
-    
+
+    if (! success) {
+	XLOG_ERROR("Failed to add CLI command '%s' to the CLI manager",
+		   command_name);
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -1596,15 +1604,23 @@ XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(
 int
 XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
+    bool success = true;
+
     if (! _is_finder_alive)
 	return (XORP_ERROR);	// The Finder is dead
 
-    _xrl_cli_manager_client.send_delete_cli_command(
+    success = _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	callback(this, &XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb));
-    
+
+    if (! success) {
+	XLOG_ERROR("Failed to delete CLI command '%s' with the CLI manager",
+		   command_name);
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
