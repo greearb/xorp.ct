@@ -519,3 +519,42 @@ RouterLsa::encode()
 
     return true;
 }
+
+string
+RouterLsa::str() const
+{
+    OspfTypes::Version version = get_version();
+
+    string output;
+
+    output = _header.str();
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	output += c_format("\tW-bit %s\n", get_w_bit() ? "true" : "false");
+	break;
+    }
+
+    output += c_format("\tV-bit %s\n", get_v_bit() ? "true" : "false");
+    output += c_format("\tE-bit %s\n", get_e_bit() ? "true" : "false");
+    output += c_format("\tB-bit %s\n", get_b_bit() ? "true" : "false");
+
+    switch(version) {
+    case OspfTypes::V2:
+	// # links we don't bother to store this info.
+	break;
+    case OspfTypes::V3:
+	output += c_format("\tOptions %#x\n", get_options());
+	break;
+    }
+
+    const list<RouterLink> &rl = _router_links;
+    list<RouterLink>::const_iterator i = rl.begin();
+
+    for (; i != rl.end(); i++) {
+	output += "\n\t" + (*i).str();
+    }
+
+    return output;
+}

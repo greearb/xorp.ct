@@ -539,6 +539,11 @@ class RouterLsa : public Lsa {
 	return _router_links;
     }
 
+    /**
+     * Generate a printable representation of the header.
+     */
+    string str() const;
+
  private:
     bool _w_bit;	// Wildcard multicast receiver! OSPFV3 Only
     bool _v_bit;	// Virtual link endpoint
