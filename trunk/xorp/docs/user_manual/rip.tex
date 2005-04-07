@@ -1,3 +1,7 @@
+%
+% $XORP$
+%
+
 \chapter{RIP and RIPng}
 \label{rip}
 \section{Terminology and Concepts}
@@ -78,6 +82,11 @@ coarse-grain, allowing all routes originating from a particular
 routing ``protocol'' to be exported.  For example, to export routes
 for directly connected interfaces, the directive ``{\stt export
 connected}'' would be used.
+
+{\bf Note that this mechanism for originating
+routes is temporary. In the next release it will be replaced by
+a more generic policy framework. Unfortunately, the same keyword
+{\stt export} will be used but with different syntax.}
 
 \subsection{Configuration Syntax}
 
