@@ -1,9 +1,13 @@
+%
+% $XORP$
+%
+
 \chapter{Command Structure}
 \label{xorpsh}
 
 \section{Introduction}
 To interact with a \xorp router using the command line interface (CLI),
-a user runs the \xorp command shell ``\xorpsh''.  This allows
+the user runs the \xorp command shell ``\xorpsh''.  This allows
 configuration of the router and monitoring of the router state.
 
 In this chapter we describe how to interact with \xorpsh.  In later
@@ -15,9 +19,9 @@ router.  This manual and the xorpsh itself are works in progress, and
 so may change significantly in the future.
 
 \section{Running xorpsh}
-\xorpsh provides an interactive command shell to a \xorp user, similar
-in many ways to the role played by a Unix shell.  In a production
-router or on the \xorp live CD, \xorpsh might be set up as a user's
+The \xorpsh command provides an interactive command shell to a \xorp user,
+similar in many ways to the role played by a Unix shell.  In a production
+router or on the \xorp LiveCD, \xorpsh might be set up as an user's
 login shell - they would login to the router via ssh and be directly
 in the \xorpsh environment.  However, for research and development
 purposes, it makes more sense to login normally to the machine running
@@ -25,10 +29,10 @@ the \xorp processes, and to run \xorpsh directly from the Unix command
 line.
 
 \xorpsh should normally be run as a regular user; it is neither
-necessary or desirable to run it as root.  If the user is to be
-permitted to make changes to the running router configuration, they
-need to be in the Unix group {\tt xorp}.  The choice of GID for group
-xorp is not important.
+necessary or desirable to run it as root.  If an user is to be
+permitted to make changes to the running router configuration, that user
+needs to be in the Unix group {\tt xorp}.  The choice of GID for group
+{\tt xorp} is not important.
 
 \xorpsh needs to be able to communicate with the \xorp router
 management process \rtrmgr using the local file system.  If
@@ -162,7 +166,7 @@ configuration of the router, to change that configuration, and to
 load and save configurations to file.
 \end{description}
 Generally speaking, operational mode is considered to give
-non-privileged access; there should be nothing a user can type that
+non-privileged access; there should be nothing an user can type that
 would seriously impact the operation of the router.  In contrast,
 configuration mode allows all aspects of router operation to be
 modified.
@@ -172,8 +176,8 @@ fine-grained access control, so that some users can be given
 permission to change only subsets of the router configuration.  At the
 present time though, there is no fine-grained access control.
 
-A user can only enter configuration mode if they are in the {\tt xorp} Unix
-group.
+An user can only enter configuration mode if that user is in the {\tt xorp}
+Unix group.
 
 \section{Operational Mode}
 \noindent\framebox[\textwidth][l]{
@@ -233,9 +237,7 @@ Xorp> \textbf{show}
 The \emph{show} command is used to display many aspects of the running state
 of the router.  We don't describe the sub-commands here, because they
 depend on the running state of the router.  For example, only a router
-that is running BGP should provide {\tt show bgp} commands\footnote{Note that
-currently all possible commands are shown, even if the router is not
-running a particular protocol.}.
+that is running BGP should provide {\tt show bgp} commands.
 
 As an example, we show the peers of a BGP router:
 \vspace{0.1in}
@@ -277,7 +279,6 @@ Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
 Xorp> \textbf{configure}\\
 Entering configuration mode.\\
 There are no other users in configuration mode.\\
-\\
 \noindent[edit]\\
 XORP>
 \end{tabbing}
@@ -378,7 +379,6 @@ For example:
 xx\=xx\=xx\=xx\=xx\=\kill
 [edit]\\
 XORP> \textbf{edit interfaces interface rl0 vif rl0}\\
-\\
 \noindent[edit interfaces interface rl0 vif rl0]\\
 XORP> \textbf{show}\\
 \>address 192.150.187.108 \{\\
@@ -390,10 +390,8 @@ XORP> \textbf{show}\\
 \\
 \noindent[edit interfaces interface rl0 vif rl0]\\
 XORP> \textbf{up}\\
-\\
 \noindent[edit interfaces interface rl0]\\
 XORP> \textbf{top}\\
-\\
 \noindent[edit]\\
 XORP>
 \end{tabbing}
@@ -529,8 +527,6 @@ XORP> \textbf{create vif rl0b \{}\\
 \>\>>\>\> \textbf{\}}\\
 \>\>>\> \textbf{disable false}\\
 \>\>>\> \textbf{\}}\\
-OK. Use "commit" to apply these changes.\\
-\\
 \noindent[edit interfaces interface rl0]\\
 XORP> \textbf{show}\\
 \>description: "control interface"\\
@@ -563,7 +559,6 @@ configuration.  The deletion will be visible in the results of the
 \emph{show} command, but will not actually take place until the changes are
 committed.
 \vspace{0.1in}
-
 
 \noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
@@ -600,7 +595,6 @@ Deleting:\\
 \>\}\\
 \\
 OK\\
-\\
 \noindent[edit]\\
 XORP> \textbf{show interfaces interface rl0}\\
 \>description: "control interface"\\
@@ -674,7 +668,6 @@ configuration mode:
 XORP> \textbf{exit}\\
 ERROR: There are uncommitted changes\\
 Use "commit" to commit the changes, or "exit discard" to discard them\\
-\\
 XORP> \textbf{exit discard}\\
 Xorp>
 \end{tabbing}
