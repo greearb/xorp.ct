@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.6 2005/04/07 03:09:12 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -13,7 +13,7 @@ The configuration information can be provided in one of the two ways:
   Use a configuration file when the rtrmgr is started.
   By default, the rtrmgr will load the configuration from file
   ``config.boot'' in the XORP installation directory.
-  This file can be specified by the ``-b $<$filename$>$'' command line
+  This file can be specified by the ``-b~~$<$filename$>$'' command line
   option:
 \begin{verbatim}
     xorp_rtrmgr -b my_config.boot
@@ -159,7 +159,7 @@ forwarding information), those can be specified in the StaticRoutes
 configuration (Section~\ref{sec:protocols:static_routes}).
 If there are no
 unicast routing protocols configured, the FIB2MRIB module may
-also need to be configured too (Section~\ref{sec:protocols:fib2mrib}).
+need to be configured as well (Section~\ref{sec:protocols:fib2mrib}).
 
 \subsection{Static Routes}
 \label{sec:protocols:static_routes}
@@ -205,9 +205,6 @@ protocols \{\\
 }
 \vspace{0.1in}
 
-Static routes can be redistributed through the RIP protocol using RIP's
-{\tt export} statement.
-
 \newpage
 \subsection{Routing Information Protocol}
 \label{sec:protocols:rip}
@@ -218,13 +215,16 @@ which RIP is enabled~\footnote{Note that prior to XORP Release-1.1,
 the {\tt enable} flag was used instead of {\tt disable} to enable
 or disable each part of the configuration.}.
 
-If you wish to announce routes then it is necessary to {\tt export} the
-routes that are to be announced. For example, {\tt connected},
+If you wish to announce routes then it is necessary to
+{\tt export}~\footnote{Note that in release candidate 1.0-RC, the {\tt import}
+ keyword is used in place of {\tt export}.}
+the routes that are to be announced. For example, {\tt connected},
 {\tt static} and {\tt rip}.
 
-Note: In release candidate 1.0-RC, the {\tt import} keyword is used in
-place of {\tt export}.
-
+{\bf Note that this mechanism for originating
+routes is temporary. In the next release it will be replaced by
+a more generic policy framework. Unfortunately, the same keyword
+{\stt export} will be used but with different syntax.}
 
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
@@ -538,13 +538,6 @@ protocols \{\\
 \>\>\>\}\\
 \>\>\}\\
 \\
-\>\>switch-to-spt-threshold \{\\
-\>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
-\>\>\>disable: false\\
-\>\>\>interval-sec: 100\\
-\>\>\>bytes: 102400\\
-\>\>\}\\
-\\
 {\rm continued overleaf....}
 \end{tabbing}
 \end{alltt}
@@ -557,6 +550,13 @@ protocols \{\\
 \begin{alltt}
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
+\>\>switch-to-spt-threshold \{\\
+\>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
+\>\>\>disable: false\\
+\>\>\>interval-sec: 100\\
+\>\>\>bytes: 102400\\
+\>\>\}\\
+\\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
 \>\>\>\>disable: false\\
@@ -613,6 +613,18 @@ protocols \{\\
 \>\>\>\}\\
 \>\>\}\\
 \\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
 \>\>switch-to-spt-threshold \{\\
 \>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
 \>\>\>disable: false\\
