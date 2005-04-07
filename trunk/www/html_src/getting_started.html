@@ -329,17 +329,6 @@ protocols {
 }
 </PRE>
 
-Static routes can be redistributed through the RIP protocol using RIP's
-"export" statement.
-
-<P>
-<B>
-Note that this mechanism for originating
-routes is temporary. In the next release it will be replaced by
-a more generic policy framework. Unfortunately, the same keyword
-"export" will be used but with different syntax.
-</B>
-
 <H4>Routing Information Protocol</H4>
 
 In order to run RIP it is sufficient to specify the "interface"s, "vif"s
@@ -350,6 +339,14 @@ must be explicitly configured.
 If you wish to announce routes then it is necessary to "export" the
 routes that are to be announced. For example, "connected", "static" and
 "rip".
+
+<P>
+<B>
+Note that this mechanism for originating
+routes is temporary. In the next release it will be replaced by
+a more generic policy framework. Unfortunately, the same keyword
+"export" will be used but with different syntax.
+</B>
 
 <p><u>Note</u>: In release candidate 1.0-RC, the "import" keyword is used in
 place of "export".
