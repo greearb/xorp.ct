@@ -1,3 +1,7 @@
+%
+% $XORP$
+%
+
 \chapter{Unicast Routing}
 
 \section{An Overview of Unicast Routing}
@@ -109,6 +113,7 @@ administrative distances, but this capability will be added soon.
 
 A common requirement is to redistribute routes between routing
 protocols.  Some examples might be:
+
 \begin{itemize}
 \item When interconnecting some subnets that are statically routed
   with some subnets use RIP for dynamic routing.  Rather
@@ -124,18 +129,22 @@ protocols.  Some examples might be:
   we can simply configure the border routers to redistribute RIP
   routes into BGP.  
 \end{itemize}
-XORP is capable of performing such route redistribution.  This is
-generally configured using the {\stt import} and {\stt export}
-configuration statements.  These terms are relative to the router's
-routing table, so if the directive {\stt export static} is added to
-the RIP configuration, then this indicates that RIP should export all
-the static routes to its neighbors via the RIP protocol.
 
-While route redistribution is a powerful tool, it needs to be used
-carefully.  For example, redistributing BGP routes into RIP at one
-router, and redistributing RIP routes into BGP at another router,
-would cause all the BGP routes to lose their original AS paths, and
-hence for much of the Internet to believe your AS is the best way to
-everywhere.  In any event, it is rarely a good idea to distribute a
-large number of BGP routes into an IGP because most IGPs simply do not
-cope well with large routing tables.
+Currently, XORP has an experimental policy mechanism that allows
+route redistribution. This feature will be enabled in the next release.
+
+%% XORP is capable of performing such route redistribution.  This is
+%% generally configured using the {\stt import} and {\stt export}
+%% configuration statements.  These terms are relative to the router's
+%% routing table, so if the directive {\stt export static} is added to
+%% the RIP configuration, then this indicates that RIP should export all
+%% the static routes to its neighbors via the RIP protocol.
+
+%% While route redistribution is a powerful tool, it needs to be used
+%% carefully.  For example, redistributing BGP routes into RIP at one
+%% router, and redistributing RIP routes into BGP at another router,
+%% would cause all the BGP routes to lose their original AS paths, and
+%% hence for much of the Internet to believe your AS is the best way to
+%% everywhere.  In any event, it is rarely a good idea to distribute a
+%% large number of BGP routes into an IGP because most IGPs simply do not
+%% cope well with large routing tables.
