@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/unicast_routing.tex,v 1.5 2005/04/07 03:06:47 pavlin Exp $
 %
 
 \chapter{Unicast Routing}
@@ -41,7 +41,7 @@ does this in three ways:
 the forwarding table.
 \item Routes may be configured via the router's configuration file or
 command line interface.  Such routes are known as {\it static
-routes}. Static routes will be discussed in chapter \ref{static_routes}.
+routes}. Static routes will be discussed in Chapter \ref{static_routes}.
 \item Routes may be learned from another router via a routing
 protocol.  Such routes are known as {\it dynamic routes}.
 \end{itemize}
@@ -63,11 +63,11 @@ on large ISP networks.  Similar to OSPF.
 \item {\bf IGRP}: Used for intra-domain routing, typically in small to
 medium sized networks.  Cisco-proprietary.
 \end{itemize}
-As of the 1.0 release, XORP supports BGP and RIP.  We plan to
+Currently (April 2005), XORP supports BGP and RIP.  We plan to
 implement OSPF and IS-IS shortly.  Our BGP implementation is discussed
-in chapter \ref{bgp} and our RIP implementation is discussed in
-chapter \ref{rip}.  In addition, there are also multicast routing
-protocols, which we will discuss in chapter \ref{multicast}.
+in Chapter \ref{bgp} and our RIP implementation is discussed in
+Chapter \ref{rip}.  In addition, there are also multicast routing
+protocols, which we will discuss in Chapter \ref{multicast}.
 
 \subsection{Administrative Distance}
 
@@ -106,7 +106,7 @@ xxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \end{tabbing}
 Hence, in the example above, the route learned from BGP will be prefered.
 
-As of the XORP 1.0 release, the is no way to modify these default
+Currently (April 2005), there is no way to modify these default
 administrative distances, but this capability will be added soon.
 
 \subsection{Route Redistribution}
