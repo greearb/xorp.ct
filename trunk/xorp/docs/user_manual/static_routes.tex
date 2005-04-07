@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.8 2005/04/07 03:09:12 pavlin Exp $
 %
 
 \chapter{Static Routes}
@@ -25,8 +25,9 @@ tables for unicast routes and for multicast routes.  Unicast routes
 will be used to determine the forwarding table used for unicast packet
 forwarding.  Multicast routes do not directly determine the multicast
 forwarding table, but instead are used by multicast routing protocols
-such as PIM.  PIM uses this to determine the reverse-path
-information\footnote{the path back to a source} needed to route
+such as PIM.  PIM uses this to determine the RPF (Reverse-Path
+Forwarding) information\footnote{The RPF information represents the path back
+to a source.} needed to route 
 multicast control information that in turn sets up the multicast
 forwarding tree.  The part of the {\it RIB} used to contain multicast
 topology information is called the {\it Multicast RIB} or {\it MRIB}.
@@ -35,7 +36,7 @@ topology information is called the {\it Multicast RIB} or {\it MRIB}.
 \section{Configuration of Static Routes}
 
 When a static route is specified, it is necessary to indicate not only
-the {\it destination subnet} and {\it nexthop} router, but also
+the {\it destination subnet} and {\it next-hop} router, but also
 whether the route should be placed in the unicast RIB or in the MRIB
 or both.
 
@@ -53,24 +54,45 @@ protocols \{\\
 \>static \{\\
 \>\>targetname: {\it text}\\
 \>\>disable: {\it bool}\\
-\>\>route4 {\it IPv4-addr}/{\it int(1..32)} \{\\
-\>\>\>nexthop: {\it IPv4-addr}\\
+\>\>route4 {\it IPv4-addr}/{\it int(0..32)} \{\\
+\>\>\>next-hop: {\it IPv4-addr}\\
 \>\>\>metric: {\it uint}\\
 \>\>\}\\
-\>\>mrib-route4 {\it IPv4-addr}/{\it int(1..32)} \{\\
-\>\>\>nexthop: {\it IPv4-addr}\\
-\>\>\>metric: {\it uint}\\
-\>\>\}\\
-\\
-\>\>route6 {\it IPv6-addr}/{\it int(1..128)} \{\\
-\>\>\>nexthop: {\it IPv4-addr}\\
-\>\>\>metric: {\it uint}\\
-\>\>\}\\
-\>\>mrib-route6 {\it IPv6-addr}/{\it int(1..128)} \{\\
-\>\>\>nexthop: {\it IPv6-addr}\\
+\>\>mrib-route4 {\it IPv4-addr}/{\it int(0..32)} \{\\
+\>\>\>next-hop: {\it IPv4-addr}\\
 \>\>\>metric: {\it uint}\\
 \>\>\}\\
 \\
+\>\>route6 {\it IPv6-addr}/{\it int(0..128)} \{\\
+\>\>\>next-hop: {\it IPv6-addr}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\>\>mrib-route6 {\it IPv6-addr}/{\it int(0..128)} \{\\
+\>\>\>next-hop: {\it IPv6-addr}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\\
+\>\>interface-route4 {\it IPv4-addr}/{\it int(0..32)} \{\\
+\>\>\>next-hop-interface: {\it text}\\
+\>\>\>next-hop-vif: {\it text}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\>\>mrib-interface-route4 {\it IPv4-addr}/{\it int(0..32)} \{\\
+\>\>\>next-hop-interface: {\it text}\\
+\>\>\>next-hop-vif: {\it text}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\\
+\>\>interface-route6 {\it IPv6-addr}/{\it int(0..128)} \{\\
+\>\>\>next-hop-interface: {\it text}\\
+\>\>\>next-hop-vif: {\it text}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
+\>\>mrib-interface-route6 {\it IPv6-addr}/{\it int(0..128)} \{\\
+\>\>\>next-hop-interface: {\it text}\\
+\>\>\>next-hop-vif: {\it text}\\
+\>\>\>metric: {\it uint}\\
+\>\>\}\\
 \>\}\\
 \}
 \end{tabbing}
@@ -105,8 +127,10 @@ The configuration parameters are used as follows:
   Each {\stt route4}: specification takes the following mandatory
   attributes:
 \begin{description}
-\item{\tt nexthop}: this specifies the IPv4 address of the nexthop
-  router towards the destination subnet.
+\item{\tt next-hop}: this specifies the IPv4 address of the nexthop
+  router towards the destination subnet~\footnote{Note that prior to the XORP
+  Release-1.1, the {\tt nexthop} attribute was used instead of {\tt
+  next-hop}.}.
 \item{\tt metric}: this specifies the routing metric or cost for this
   route.  It is a non-negative integer.  The metric for a static route
   is not directly used to decide which route to use, but may affect
@@ -132,7 +156,7 @@ The configuration parameters are used as follows:
   Each {\stt route6}: specification takes the following mandatory
   attributes:
 \begin{description}
-\item{\tt nexthop}: this specifies the IPv6 address of the nexthop
+\item{\tt next-hop}: this specifies the IPv6 address of the nexthop
   router towards the destination subnet.
 \item{\tt metric}: this specifies the routing metric or cost for this
   route.  See {\stt route4 metric} for details.
@@ -146,7 +170,33 @@ The configuration parameters are used as follows:
 
   An {\stt mrib-route6} specification takes the same attributes as a
   {\stt route6} specification.
+
+\item{\tt interface-route4}: this specifies an IPv4 unicast route to be
+  installed in the RIB.  The parameter is an IPv4 destination subnet
+  expressed in the form {\it address/prefix-length}. Typically, this
+  specification will be used in wireless environment to install
+  static routes where this router and next-hop router don't share the same
+  subnet address on some (wireless) interface.
+
+  Each {\stt interface-route4}: specification takes the following mandatory
+  attributes:
+\begin{description}
+\item{\tt next-hop-interface}: this specifies the name of the nexthop
+  interface towards the destination subnet.
+\item{\tt next-hop-vif}: this specifies the name of the nexthop
+  vif towards the destination subnet.
+\item{\tt metric}: this specifies the routing metric or cost for this
+  route.  See {\stt route4 metric} for details.
 \end{description}
+
+\end{description}
+
+The {\tt mrib-interface-route4} specification is same as the {\tt
+interface-route4} specification, except that it is used to configure
+IPv4 routes that are to be installed in the Multicast RIB.
+The {\tt interface-route6} and {\tt mrib-interface-route6} specifications
+are also same, except that they are used to configure IPv6 routes
+(in the Unicast and the Multicast RIB respectively).
 
 \newpage
 \subsection{Example Configurations}
@@ -159,20 +209,41 @@ xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>static \{\\
 \>\>route4 10.20.0.0/16 \{\\
-\>\>\>nexthop: 10.10.10.20\\
+\>\>\>next-hop: 10.10.10.20\\
 \>\>\>metric: 1\\
 \>\>\}\\
 \>\>mrib-route4 10.20.0.0/16 \{\\
-\>\>\>nexthop: 10.10.10.30\\
+\>\>\>next-hop: 10.10.10.30\\
 \>\>\>metric: 1\\
 \>\>\}\\
 \>\>\\
 \>\>route6 20:20:20:20::/64 \{\\
-\>\>\>nexthop: 10:10:10:10:10:10:10:20\\
+\>\>\>next-hop: 10:10:10:10:10:10:10:20\\
 \>\>\>metric: 1\\
 \>\>\}\\
 \>\>mrib-route6 20:20:20:20::/64 \{\\
-\>\>\>nexthop: 10:10:10:10:10:10:10:30\\
+\>\>\>next-hop: 10:10:10:10:10:10:10:30\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>interface-route4 10.30.0.0/16 \{\\
+\>\>\>next-hop-interface: rl0\\
+\>\>\>next-hop-vif: rl0\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>mrib-interface-route4 10.30.0.0/16 \{\\
+\>\>\>next-hop-interface: rl1\\
+\>\>\>next-hop-vif: rl1\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>\\
+\>\>interface-route6 30:30:30:30::/64 \{\\
+\>\>\>next-hop-interface: rl0\\
+\>\>\>next-hop-vif: rl0\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>mrib-interface-route6 30:30:30:30::/64 \{\\
+\>\>\>next-hop-interface: rl1\\
+\>\>\>next-hop-vif: rl1\\
 \>\>\>metric: 1\\
 \>\>\}\\
 \>\}\\
@@ -186,7 +257,7 @@ protocols \{\\
 
 \section{Monitoring Static Routes}
 
-IPv4 static routes can be displayed using the command {\stt show route
+IPv4 unicast static routes can be displayed using the command {\stt show route
 table ipv4 unicast static}:
 
 \vspace{0.1in}
@@ -218,20 +289,9 @@ If the nexthop is not actually reachable, the route will not be shown
 by this command because there is not current interface or vif.
 
 \vspace{0.2in}
-IPv6 static routes can be displayed using the command {\stt show route
-table ipv6 unicast static}:
+IPv6 unicast static routes can be displayed using the command {\stt show route
+table ipv6 unicast static}.
 
-\vspace{0.1in}
-\noindent\framebox[\textwidth][l]{\scriptsize
-\begin{minipage}{6in}
-\begin{alltt}
-\begin{tabbing}
-xx\=xxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show route table ipv6 unicast static}\\
-\\
-TBD\\
-\\
-\end{tabbing}
-\end{alltt}
-\end{minipage}
-}
+The Multicast RIB static routes can be displayed using the commands
+{\stt show route table ipv4 multicast static} and
+{\stt show route table ipv6 multicast static} for IPv4 and IPv6 respectively.
