@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.26 2005/03/21 23:51:54 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.27 2005/03/25 02:52:40 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -626,7 +626,7 @@ DumpIterator<A>::iterator_got_moved(IPNet<A> new_net) const
     if (new_net == _last_dumped_net) {
 	return false;
     } else {
-	printf("iterator has moved; was %s now %s\n", _last_dumped_net.str().c_str(), _last_dumped_net.str().c_str());
+	printf("iterator has moved; was %s now %s\n", _last_dumped_net.str().c_str(), new_net.str().c_str());
 	return true;
     }
 }
