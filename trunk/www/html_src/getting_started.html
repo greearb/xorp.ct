@@ -332,6 +332,14 @@ protocols {
 Static routes can be redistributed through the RIP protocol using RIP's
 "export" statement.
 
+<P>
+<B>
+Note that this mechanism for originating
+routes is temporary. In the next release it will be replaced by
+a more generic policy framework. Unfortunately, the same keyword
+"export" will be used but with different syntax.
+</B>
+
 <H4>Routing Information Protocol</H4>
 
 In order to run RIP it is sufficient to specify the "interface"s, "vif"s

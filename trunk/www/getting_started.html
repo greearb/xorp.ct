@@ -391,6 +391,14 @@ protocols {
 Static routes can be redistributed through the RIP protocol using RIP's
 "export" statement.
 
+<P>
+<B>
+Note that this mechanism for originating
+routes is temporary. In the next release it will be replaced by
+a more generic policy framework. Unfortunately, the same keyword
+"export" will be used but with different syntax.
+</B>
+
 <H4>Routing Information Protocol</H4>
 
 In order to run RIP it is sufficient to specify the "interface"s, "vif"s
@@ -849,7 +857,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.10 2005/02/24 00:04:48 atanu Exp $.
-<br>Generated on 31/Mar/2005 at 11:53:54.</em>
+<br>Generated on 06/Apr/2005 at 18:45:44.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
