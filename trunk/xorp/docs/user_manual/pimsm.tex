@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.10 2005/04/07 03:09:12 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -40,13 +40,13 @@ Multiprotocol BGP.
 
 Regardless of how it is created, the primary role of the MRIB in the
 PIM-SM protocol
-is to provide the next hop router along a multicast-capable
+is to provide the next-hop router along a multicast-capable
 path to each destination subnet.
-The MRIB is used to determine the next hop neighbor to which any PIM
+The MRIB is used to determine the next-hop neighbor to which any PIM
 Join/Prune message is sent.
 Data flows along the reverse path of the Join messages.
 Thus, in contrast to the unicast RIB which specifies the
-next hop that a data packet would take to get {\it to} some subnet,
+next-hop that a data packet would take to get {\it to} some subnet,
 the MRIB gives reverse-path information, and indicates the path that
 a multicast data packet would take {\it from} 
 its origin subnet to the router that has the MRIB.  
@@ -262,7 +262,7 @@ protocols \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
-\>\>\>\>alternative-subnet {\it IPv4}/{\it int(1..32)}\\
+\>\>\>\>alternative-subnet {\it IPv4}/{\it int(0..32)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
@@ -274,8 +274,8 @@ protocols \{\\
 \>\>static-rps \{\\
 \>\>\>rp {\it IPv4} \{\\
 \>\>\>\>group-prefix {\it IPv4Mcast}/{\it int(4..32)} \{\\
-\>\>\>\>\>rp-priority: {\it uint}\\
-\>\>\>\>\>hash-mask-len: {\it uint}\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(4..32)}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -286,8 +286,8 @@ protocols \{\\
 \>\>\>\>scope-zone  {\it IPv4Mcast}/{\it int(4..32)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
-\>\>\>\>\>bsr-priority: {\it uint}\\
-\>\>\>\>\>hash-mask-len: {\it uint}\\
+\>\>\>\>\>bsr-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(4..32)}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \\
@@ -295,15 +295,15 @@ protocols \{\\
 \>\>\>\>group-prefix  {\it IPv4Mcast}/{\it int(4..32)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
-\>\>\>\>\>rp-priority: {\it uint}\\
-\>\>\>\>\>rp-holdtime: {\it uint}\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>rp-holdtime: {\it uint(0..65535)}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
 \\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>disable: {\it bool}\\
-\>\>\>interval-sec: {\it uint}\\
+\>\>\>interval-sec: {\it uint(3..2147483647)}\\
 \>\>\>bytes: {\it uint}\\
 \>\>\}\\
 \\
@@ -335,7 +335,7 @@ protocols \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
-\>\>\>\>alternative-subnet  {\it IPv6}/{\it int(1..128)}\\
+\>\>\>\>alternative-subnet  {\it IPv6}/{\it int(0..128)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
@@ -347,8 +347,8 @@ protocols \{\\
 \>\>static-rps \{\\
 \>\>\>rp {\it IPv6} \{\\
 \>\>\>\>group-prefix  {\it IPv6Mcast}/{\it int(8..128)} \{\\
-\>\>\>\>\>rp-priority: {\it uint}\\
-\>\>\>\>\>hash-mask-len: {\it uint}\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(8..128)}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -359,8 +359,8 @@ protocols \{\\
 \>\>\>\>scope-zone {\it IPv6Mcast}/{\it int(8..128)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
-\>\>\>\>\>bsr-priority: {\it uint}\\
-\>\>\>\>\>hash-mask-len: {\it uint}\\
+\>\>\>\>\>bsr-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(8..128)}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \\
@@ -368,15 +368,15 @@ protocols \{\\
 \>\>\>\>group-prefix {\it IPv6Mcast}/{\it int(8..128)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
-\>\>\>\>\>rp-priority: {\it uint}\\
-\>\>\>\>\>rp-holdtime: {\it uint}\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>rp-holdtime: {\it uint(0..65535)}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
 \\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>disable: {\it bool}\\
-\>\>\>interval-sec: {\it uint}\\
+\>\>\>interval-sec: {\it uint(3..2147483647)}\\
 \>\>\>bytes: {\it uint}\\
 \>\>\}\\
 \\
@@ -473,7 +473,8 @@ protocols \{\\
   {\it address/prefix-length} format.
 \begin{description}
 \item{\tt rp-priority}: this specifies the priority of the specified
-  RP router.  It takes the form of a non-negative integer. 
+  RP router.  It takes the form of a non-negative integer in the
+  interval [0, 255].
 
   If multiple RP routers are known for a particular multicast group,
   then the one with the most specific {\stt group-prefix} will be
@@ -489,8 +490,11 @@ protocols \{\\
   the same RP.  Thus the hash function is only applied to the first
   $n$ bits of the group IP address, ensuring that if two groups have
   the same first $n$ bits, they will hash to the same RP address.  The
-  {\stt hash-mask-len} parameter specifies the value of $n$; it
-  defaults to 30 bits for IPv4.
+  {\stt hash-mask-len} parameter specifies the value of $n$.
+  For IPv4 it must be in the interval [4, 32], and defaults to 30 bits.
+  Typically its value shouldn't be changed.
+  If it is modified then all PIM-SM routers must be configured with the
+  same value.
 \end{description}
 \end{description}
 \end{description}
@@ -532,10 +536,11 @@ protocols \{\\
   vif} whose IP address will be used in the PIM bootstap messages.  It
   is a mandatory parameter.
 \item{\tt bsr-priority}: this specifies the BSR priority for this
-  router.  It takes a positive integer value, which is used in the
+  router.  It takes a positive integer value in the interval [0, 255],
+  which is used in the
   PIM-SM BSR election process.  For each {\stt scope-zone}, the
   candidate bootstrap router with the highest BSR priority will be
-  chosen to be BSR.
+  chosen to be BSR. Its default value is 1.
 \item{\tt hash-mask-len}: The BSR mechanism announces a list of
   candicate RPs (C-RPs) for each scope zone to the other routers in
   the scope zone.  To balance load, those routers then use a hash
@@ -546,8 +551,11 @@ protocols \{\\
   if two groups have the same first $n$ bits, they will hash to the
   same RP address.  Should this router become the BSR for this
   scope-zone, the {\stt hash-mask-len} parameter gives the value of
-  $n$ that this router will inform other routers they must use.  It
-  defaults to 30 bits for IPv4.
+  $n$ that this router will inform other routers they must use.
+  For IPv4 it must be in the interval [4, 32], and defaults to 30 bits.
+  Typically its value shouldn't be changed.
+  If it is modified then all PIM-SM routers must be configured with the
+  same value.
 \end{description}
 \end{description}
 \end{description}
@@ -578,7 +586,7 @@ protocols \{\\
   becomes an RP.  It is a mandatory parameter.
 \item{\tt rp-priority}: this specifies the RP priority of this router
   for this {\stt group-prefix}.  It takes the form of a non-negative
-  integer.
+  integer in the interval [0, 255].
 
   If multiple RP routers are known for a particular multicast group,
   then the one with the most specific {\stt group-prefix} will be
@@ -591,7 +599,8 @@ protocols \{\\
   will advertise when talking to the BSR.  If the BSR has not heard a
   Candidate RP Advertisement from this router for {\stt rp-holdtime}
   seconds, then the BSR will conclude it is dead, and will remove it
-  from the set of possible RPs.  The default value is 150 seconds.
+  from the set of possible RPs.  It takes the form of a non-negative
+  integer in the interval [0, 65535] and its default value is 150 seconds.
 \end{description}
 \end{description}
 \item{\tt switch-to-spt-threshold}: this directive permits the
@@ -607,8 +616,9 @@ protocols \{\\
 \item{\tt interval-sec}: this specifies the measurement interval in
   seconds for measuring the bitrate of traffic from a  multicast
   sender.  The measurement interval should normally not be set too
-  small - values greater than ten seconds are recommended.  The
-  default is 100 seconds, but the smallest accepted value is 3 seconds.
+  small - values greater than ten seconds are recommended.
+  It takes the form of a non-negative integer in the interval
+  [3, 2147483647] and its default value is 100 seconds.
 \item{\tt bytes}: this specifies the maximum number of bytes from a
   multicast sender that can be received in {\stt interval-sec}
   seconds.  If this threshold is exceeded, the router will attempt to
@@ -643,8 +653,8 @@ for IPv4, except for the following:
   instead of ``{\stt PIMSM\_4}''
 \item All IP addresses used in configuration are IPv6 addresses
   instead of IPv4 addresses.
-\item The default value of {\stt hash-mask-len} is 126 for IPv6 rather
-  than 30 for IPv4.
+\item The {\stt hash-mask-len} value must be in the interval [8, 128],
+  and defaults to 126.
 \end{itemize}
 
 \newpage
