@@ -308,20 +308,20 @@ reverse-path information by multicast routing protocols such as PIM-SM.
 protocols {
     static {
 	route4 10.20.0.0/16 {
-	    nexthop: 10.10.10.20
+	    next-hop: 10.10.10.20
 	    metric: 1
 	}
 	mrib-route4 10.20.0.0/16 {
-	    nexthop: 10.10.10.30
+	    next-hop: 10.10.10.30
 	    metric: 1
 	}
 /*
 	route6 20:20:20:20::/64 {
-	    nexthop: 10:10:10:10:10:10:10:20
+	    next-hop: 10:10:10:10:10:10:10:20
 	    metric: 1
 	}
 	mrib-route6 20:20:20:20::/64 {
-	    nexthop: 10:10:10:10:10:10:10:30
+	    next-hop: 10:10:10:10:10:10:10:30
 	    metric: 1
 	}
 */
