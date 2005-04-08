@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.10 2005/04/07 03:09:12 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.11 2005/04/07 06:27:34 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -36,7 +36,7 @@ routing table with routes.  This routing table is called the {\it MRIB} or
 {\it Multicast Routing Information Base}.  The routes in this table may be
 taken directly from the unicast routing table, or it may be
 different and provided by a separate routing protocol such as
-Multiprotocol BGP.
+Multi-protocol BGP.
 
 Regardless of how it is created, the primary role of the MRIB in the
 PIM-SM protocol
@@ -523,7 +523,7 @@ protocols \{\\
 \item{\tt scope-zone}: this directive specifies one multicast group
   prefix for which this router is willing to be BSR. 
  
-  For each scope zone, the following infomation can be specified: 
+  For each scope zone, the following information can be specified: 
 \begin{description}
 \item{\tt is-scope-zone}: this directive takes the value {\stt true}
   or {\stt false}.  When the value is {\stt true}, this indicates that
@@ -533,7 +533,7 @@ protocols \{\\
   multicast groups for which this router is willing to be BSR.  The
   default is {\stt false}.
 \item{\tt cand-bsr-by-vif-name}: this specifies the name of the {\stt
-  vif} whose IP address will be used in the PIM bootstap messages.  It
+  vif} whose IP address will be used in the PIM bootstrap messages.  It
   is a mandatory parameter.
 \item{\tt bsr-priority}: this specifies the BSR priority for this
   router.  It takes a positive integer value in the interval [0, 255],
@@ -542,7 +542,7 @@ protocols \{\\
   candidate bootstrap router with the highest BSR priority will be
   chosen to be BSR. Its default value is 1.
 \item{\tt hash-mask-len}: The BSR mechanism announces a list of
-  candicate RPs (C-RPs) for each scope zone to the other routers in
+  candidate RPs (C-RPs) for each scope zone to the other routers in
   the scope zone.  To balance load, those routers then use a hash
   function to choose the RP for each multicast group from amongst the
   C-RPs.  However, it is usually desirable for closely associated
@@ -810,4 +810,599 @@ protocols \{\\
 
 \section{Monitoring PIM-SM}
 
-op-mode stuff.
+All operational commands for monitoring PIM-SM for IPv4 begin with
+{\tt show pim}. This section describes those commands in details. All
+operational commands for monitoring PIM-SM for IPv6 are similar except that
+they begin with {\tt show pim6}.
+
+\subsection{Monitoring PIM-SM Bootstrap Information}
+
+The {\stt show pim bootstrap} command can be used to display
+information about PIM bootstrap routers:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxx\=xx\=xx\=xxxxxxxxxxxxxxxxxx\=xx\=xx\=xxxxxxxxxxxx\=xxxxx\=xxx\=xxxxxxx\=\kill
+Xorp> \textbf{show pim bootstrap}\\
+Active zones:\\
+BSR             \>Pri\>\>LocalAddress    \>Pri\>\>State           \>Timeout\>\>SZTimeout\\
+10.4.0.1        \>\>1\>10.2.0.2          \>\>1\>Candidate          \>\>75
+  \>\>-1\\
+Expiring zones:\\
+BSR             \>Pri\>\>LocalAddress    \>Pri\>\>State           \>Timeout\>\>SZTimeout\\
+Configured zones:\\
+BSR             \>Pri\>\>LocalAddress    \>Pri\>\>State           \>Timeout\>\>SZTimeout\\
+10.2.0.2        \>\>1\>10.2.0.2          \>\>1\>Init               \>\>-1        \>\>-1
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The bootstrap information is separated in three sections:
+\begin{itemize}
+
+  \item {\tt Active zones:} This section contains the bootstrap zones that are
+  currently in use.
+
+  \item {\tt Expiring zones:} If new bootstrap information is received and it
+  replaces the old bootstrap information, the old information is deleted.
+  However, if some of the old bootstrap information was not replaced,
+  that information is moved to the {\tt Expiring zones} section until
+  it times out.
+
+  \item {\tt Configured zones:} This section contains the bootstrap zones that
+  are configured on the router.
+
+\end{itemize}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt BSR:} The address of the Bootstrap router for the zone.
+
+  \item {\tt Pri:} The priority of the Bootstrap router.
+
+  \item {\tt LocalAddress:} The local Candidate-BSR address for the zone
+  (if the router is configured as a Candidate-BSR).
+
+  \item {\tt Pri:} The local Candidate-BSR priority for the zone
+  (if the router is configured as a Candidate-BSR).
+
+  \item {\tt State:} The state of the per-scope-zone state machine.
+  In the above example, the router is configured as a Candidate-BSR, 
+  but it is not the elected BSR, hence its state is {\tt Candidate}.
+
+  \item {\tt Timeout:} The number of seconds until the BSR times-out.
+  If it is -1, it will never timeout.
+
+  \item {\tt SZTimeout:} The number of seconds until the scoped zone
+  times-out. If it is -1, it will never timeout.
+
+\end{itemize}
+
+The {\stt show pim bootstrap rps} command can be used to display
+information about Candidate RP information received by the Bootstrap
+mechanism:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxx\=xxxx\=xxxx\=x\=xxx\=xxxxxxxxxxxx\=xxxxxxxxxxx\=xxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show pim bootstrap rps}\\
+Active RPs:\\
+RP              \>Pri \>Timeout \>\>\>GroupPrefix        \>BSR             \>CandRpAdvTimeout\\
+10.4.0.1        \>192     \>\>148 \>\>224.0.0.0/4        \>10.4.0.1
+    \>\>-1\\
+10.2.0.2        \>192     \>\>148 \>\>224.0.0.0/4        \>10.4.0.1                  \>\>-1\\
+Expiring RPs:\\
+RP              \>Pri \>Timeout \>\>\>GroupPrefix        \>BSR             \>CandRpAdvTimeout\\
+Configured RPs:\\
+RP              \>Pri \>Timeout \>\>\>GroupPrefix        \>BSR             \>CandRpAdvTimeout\\
+10.2.0.2        \>192      \>\>\>-1 \>224.0.0.0/4        \>10.2.0.2                      \>\>58
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The Candidate RPs information is separated in three sections:
+\begin{itemize}
+
+  \item {\tt Active RPs:} This section contains the Candidate RPs that are
+  currently in use.
+
+  \item {\tt Expiring RPs:} If new bootstrap information is received and it
+  replaces the old bootstrap information, the old information is deleted.
+  However, if some of the old bootstrap information was not replaced,
+  the Candidate RPs contained in that information are moved to the {\tt
+  Expiring RPs} section until they time-out.
+
+  \item {\tt Configured RPs:} This section contains the Candidate RP
+  information that is configured on the router.
+\end{itemize}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+  \item {\tt RP:} The address of the Candidate RP for the entry.
+
+  \item {\tt Pri:} The priority of the Candidate RP.
+
+  \item {\tt Timeout:} The number of seconds until the Candidate RP times-out.
+  If it is -1, it will never timeout.
+
+  \item {\tt GroupPrefix:} The multicast group prefix address the Candidate RP
+  is advertising.
+
+  \item {\tt BSR:} The address of the BSR that advertised this Candidate RP.
+
+  \item {\tt CandRpAdvTimeout:} The number of seconds until the Candidate RP
+  is advertised to the BSR. This applies only for the Candidate-RPs
+  configured in this router.
+  If it is -1, the Candidate RP is not advertised to the BSR.
+
+\end{itemize}
+
+\subsection{Monitoring PIM-SM Interface Information}
+
+The {\stt show pim interface} command can be used to display
+information about PIM network interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxx\=xx\=xxxxxxxxx\=xxxxxxx\=xx\=xxxxxxxxxxxxxxx\=xxxxxxxx\=\kill
+Xorp> \textbf{show pim interface}\\
+Interface    \>State    \>Mode   \>V \>PIMstate \>Priority \>\>DRaddr          \>Neighbors\\
+dc1          \>UP       \>Sparse \>2 \>NotDR           \>\>1 \>10.3.0.2                \>\>1\\
+dc2          \>UP       \>Sparse \>2 \>DR              \>\>1 \>10.2.0.2                \>\>0\\
+register\_vif \>UP       \>Sparse \>2 \>DR              \>\>1 \>10.3.0.1                \>\>0
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Interface:} The name of the interface.
+
+  \item {\tt State:} The state of the interface. E.g. {\tt UP}, {\tt DOWN},
+  {\tt DISABLED}, etc.
+
+  \item {\tt Mode:} The PIM mode of the interface. E.g. {\tt Sparse} means
+  PIM-SM.
+
+  \item {\tt V:} The protocol version.
+
+  \item {\tt PIMstate:} The protocol state on that interface. E.g., {\tt DR}
+  means the router is the Designated Router on that interface.
+
+  \item {\tt Priority:} The configured Designated Router priority on that
+  interface.
+
+  \item {\tt DRaddr:} The address of the elected Designated Router on the
+  subnet connected to that interface.
+
+  \item {\tt Neighbors:} The number of PIM neighbor routers on that interface.
+
+\end{itemize}
+
+The {\stt show pim interface address} command can be used to display
+address information about PIM network interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show pim interface address}\\
+Interface    \>PrimaryAddr     \>DomainWideAddr  \>SecondaryAddr  \\
+dc1          \>10.3.0.1        \>10.3.0.1                       \\
+dc2          \>10.2.0.2        \>10.2.0.2                       \\
+register\_vif\>10.3.0.1        \>10.3.0.1                       \\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Interface:} The name of the interface.
+
+  \item {\tt PrimaryAddr:} The primary address on the interface.
+
+  \item {\tt DomainWideAddr:} The domain-wide address on the interface.
+
+  \item {\tt SecondaryAddr:} The first secondary address on the interface
+  (if any). If there is more than one secondary address on the interface,
+  they are printed one per new line (in the same column).
+
+\end{itemize}
+
+\subsection{Monitoring PIM-SM Multicast Routing State Information}
+
+The {\stt show pim join} command can be used to display
+information about PIM multicast routing state:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxx\=xxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=x\=xxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show pim join}\\
+Group           \>\>Source          \>\>RP              \>Flags\\
+224.0.1.20      \>\>0.0.0.0         \>\>10.2.0.2        \>WC   \\
+    \>Upstream interface (RP):   \>\>register\_vif\\
+    \>Upstream MRIB next hop (RP): UNKNOWN\\
+    \>Upstream RPF'(*,G):        \>\>UNKNOWN\\
+    \>Upstream state:            \>\>Joined \\
+    \>Join timer:                \>\>21\\
+    \>Local receiver include WC: \>\>.O.\\
+    \>Joins RP:                  \>\>...\\
+    \>Joins WC:                  \>\>...\\
+    \>Join state:                \>\>...\\
+    \>Prune state:               \>\>...\\
+    \>Prune pending state:       \>\>...\\
+    \>I am assert winner state:  \>\>...\\
+    \>I am assert loser state:   \>\>...\\
+    \>Assert winner WC:          \>\>...\\
+    \>Assert lost WC:            \>\>...\\
+    \>Assert tracking WC:        \>\>.OO\\
+    \>Could assert WC:           \>\>.O.\\
+    \>I am DR:                   \>\>.OO\\
+    \>Immediate olist RP:        \>\>...\\
+    \>Immediate olist WC:        \>\>.O.\\
+    \>Inherited olist SG:        \>\>.O.\\
+    \>Inherited olist SG\_RPT:   \>\>.O.\\
+    \>PIM include WC:            \>\>.O.
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Group:} The group address.
+
+  \item {\tt Source:} The source address.
+
+  \item {\tt RP:} The address of the RP for this entry.
+
+  \item {\tt Flags:} The set of flags for this entry. For example:
+
+  \begin{itemize}
+
+    \item {\tt RP:} (*,*,RP) routing entry.
+
+    \item {\tt WC:} (*,G) routing entry.
+
+    \item {\tt SG:} (S,G) routing entry.
+
+    \item {\tt SG\_RPT:} (S,G,rpt) routing entry.
+
+    \item {\tt SPT:} The routing entry has the Shortest-Path Tree flag set.
+
+    \item {\tt DirectlyConnectedS:} The routing entry is for a
+    directly-connected source.
+
+  \end{itemize}
+
+\end{itemize}
+
+The remaining lines per entry display various additional information for that
+entry. Some of the information below contains a set of network interfaces:
+there is either ``.'' or ``O'' per interface (starting with the first
+interface according to the {\tt show pim interface} command), and if an
+interface is included, it is marked with ``O''.
+
+\begin{itemize}
+
+  \item {\tt Upstream interface (RP):} The name of the upstream interface
+  toward the RP.
+
+  \item {\tt Upstream MRIB next hop (RP):} The address of the next-hop router
+  (according to the MRIB) toward the RP. In the above example the router
+  itself is the RP, hence there is no next-hop router.
+
+  \item {\tt Upstream RPF'(*,G):} The address of the next-hop router
+  (according to PIM) toward the RP. Note that this address may be different,
+  because it may be affected by PIM-specific events such as PIM Assert
+  messages on the upstream interface. In the above example the router
+  itself is the RP, hence there is no next-hop router.
+
+  \item {\tt Upstream state:} The upstream state of this entry.
+
+  \item {\tt Join timer:} The number of seconds until the upstream Join
+  timer timeout.
+
+  \item {\tt Local receiver include WC:} The set of interfaces that
+  have local (*,G) receivers according to the MLD/IGMP module.
+
+  \item {\tt Joins RP:} The set of interfaces that have received (*,*,RP)
+  Join.
+
+  \item {\tt Joins WC:} The set of interfaces that have received (*,G) Join.
+
+  \item {\tt Join state:} The set of interfaces that are in Join state.
+
+  \item {\tt Prune state:} The set of interfaces that are in Prune state.
+
+  \item {\tt Prune pending state:} The set of interfaces that are in
+  Prune-Pending state.
+
+  \item {\tt I am assert winner state:} The set of interfaces that are in
+  Assert Winner state.
+
+  \item {\tt I am assert loser state:} The set of interfaces that are in
+  Assert Loser state.
+
+  \item {\tt Assert winner WC:} The set of interfaces for which the
+  corresponding (*,G) entry is in Assert Winner state.
+
+  \item {\tt Assert lost WC:} The set of interfaces for which the
+  corresponding (*,G) entry has lost the PIM Assert.
+
+  \item {\tt Assert tracking WC:} The set of interfaces for which the
+  corresponding (*,G) entry desires to track the PIM Asserts.
+
+  \item {\tt Could assert WC:} The set of interfaces for which the
+  corresponding (*,G) entry could trigger a PIM Assert.
+
+  \item {\tt I am DR:} The set of interfaces for which this is the Designated
+  Router.
+
+  \item {\tt Immediate olist RP:} The set of interfaces that are included
+  in the immediate outgoing interfaces for the corresponding (*,*,RP) entry.
+
+  \item {\tt Immediate olist WC:} The set of interfaces that are included
+  in the immediate outgoing interfaces for the corresponding (*,RP) entry.
+
+  \item {\tt Inherited olist SG:} The set of interfaces that are included
+  in the outgoing interface list for packets forwarded on (S,G) state taking
+  into account (*,*,RP) state, (*,G) state, asserts, etc.
+
+  \item {\tt Inherited olist SG\_RPT:} The set of interfaces that are included
+  in the outgoing interface list for packets forwarded
+  on (*,*,RP) or (*,G) state taking into account (S,G,rpt) prune state,
+  and asserts, etc.
+
+  \item {\tt PIM include WC:} The set of interfaces to which traffic might be
+    forwarded because of hosts that are local members on that interface.
+
+\end{itemize}
+
+The {\stt show pim join all} command can be used to display
+information about all PIM multicast routing entries including those that may
+be created internally by the PIM implementation. Typically, those are the
+(*,*,RP) entries that are created per RP for implementation-specific reasons
+even though there is no requirement to do so. Currently, this command is
+used only for debugging purpose.
+
+\subsection{Monitoring PIM-SM Multicast Routing State Information}
+
+The {\stt show pim mfc} command can be used to display
+information about PIM multicast forwarding entries that are installed
+in the multicast forwarding engine:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxx\=xxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=x\=xxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show pim mfc}\\
+Group           \>\>Source          \>\>RP\\
+224.0.1.20      \>\>10.4.0.2        \>\>10.2.0.2\\
+    \>Incoming interface :   \>\>register\_vif\\
+    \>Outgoing interfaces:    \>\>.O.
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Group:} The group address.
+
+  \item {\tt Source:} The source address.
+
+  \item {\tt RP:} The address of the RP for this entry.
+
+\end{itemize}
+
+The remaining lines per entry display various additional information for that
+entry. Some of the information below contains a set of network interfaces:
+there is either ``.'' or ``O'' per interface (starting with the first
+interface according to the {\tt show pim interface} command), and if an
+interface is included, it is marked with ``O''.
+
+\begin{itemize}
+
+  \item {\tt Incoming interface:} The name of the incoming interface.
+
+  \item {\tt Outgoing interfaces:} The set of outgoing interfaces.
+
+\end{itemize}
+
+\subsection{Monitoring PIM-SM Multicast Routing Information Base}
+
+The {\stt show pim mrib} command can be used to display
+information about the Multicast Routing Information Base (MRIB) that is used
+by PIM:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xxxxxxxx\=xxxxxxxxx\=xxxxxxx\=xx\=xx\=x\=xxxx\=\kill
+Xorp> \textbf{show pim mrib}\\
+DestPrefix         \>NextHopRouter   \>VifName \>VifIndex \>MetricPref \>\>\>Metric\\
+10.2.0.0/24        \>10.2.0.2        \>dc2     \>1                 \>\>\>0      \>\>\>0\\
+10.3.0.0/24        \>10.3.0.1        \>dc1     \>0                 \>\>\>0      \>\>\>0\\
+10.4.0.0/24        \>10.3.0.2        \>dc1     \>0               \>\>254  \>\>\>65535\\
+10.5.0.0/24        \>10.2.0.4        \>dc2     \>1               \>\>254  \>\>\>65535\\
+10.6.0.0/24        \>10.2.0.1        \>dc2     \>1               \>\>254  \>\>\>65535
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt DestPrefix:} The destination prefix address.
+
+  \item {\tt NextHopRouter:} The address of the next-hop router toward the
+  destination.
+
+  \item {\tt VifName:} The name of the virtual interface toward the
+  destination.
+
+  \item {\tt VifIndex:} The virtual interface index of the virtual interface
+  toward the destination.
+
+  \item {\tt MetricPref:} The metric preference of the entry.
+
+  \item {\tt Metric:} The routing metric of the entry.
+
+\end{itemize}
+
+
+\subsection{Monitoring PIM-SM Multicast Routing Information Base}
+
+The {\stt show pim neighbors} command can be used to display
+information about the PIM neighbor routers:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxx\=xx\=xxxxxxxxxxxxxxxx\=xx\=xxxxxxx\=xxxxx\=xxxx\=xxxxx\=\kill
+Xorp> \textbf{show pim neighbors}\\
+Interface    \>DRpriority \>\>NeighborAddr    \>V \>Mode   \>Holdtime \>\>Timeout\\
+dc1                   \>\>1 \>10.3.0.2        \>2 \>Sparse      \>\>105      \>\>97
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Interface:} The name of the interface toward the neighbor:
+
+  \item {\tt DRpriority:} The DR priority of the neighbor.
+
+  \item {\tt NeighborAddr:} The primary address of the neighbor.
+
+  \item {\tt V:} The PIM protocol version used by the neighbor.
+
+  \item {\tt Mode:} The PIM mode of the neighbor. E.g. {\tt Sparse} means
+  PIM-SM.
+
+  \item {\tt Holdtime:} The PIM Hello holdtime of the neighbor (in seconds).
+
+  \item {\tt Timeout:} The number of seconds until the neighbor timeout (in
+  case no more PIM Hello messages are received from it).
+
+\end{itemize}
+
+
+\subsection{Monitoring PIM-SM Candidate RP Set Information}
+
+The {\stt show pim rps} command can be used to display
+information about the Candidate RP Set:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxx\=xxxxxxxxxx\=xxxx\=xxxxx\=xxxx\=xxxx\=xxxx\=xxxxxxxxxxx\=xx\=\kill
+Xorp> \textbf{show pim rps}\\
+RP              \>Type      \>Pri \>Holdtime \>\>Timeout \>\>ActiveGroups \>\>GroupPrefix\\
+10.4.0.1        \>bootstrap \>192      \>\>150     \>\>134            \>\>0 \>224.0.0.0/4\\
+10.2.0.2        \>bootstrap \>192      \>\>150     \>\>134            \>\>1 \>224.0.0.0/4
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt RP:} The address of the Candidate RP.
+
+  \item {\tt Type:} The type of the mechanism that provided the Candidate RP.
+
+  \item {\tt Pri:} The priority of the Candidate RP.
+
+  \item {\tt Holdtime:} The holdtime (in number of seconds) of the Candidate
+  RP.
+
+  \item {\tt Timeout:} The number of seconds until the Candidate RP timeout.
+  If it is -1, the Candidate RP will never timeout.
+
+  \item {\tt ActiveGroups:} The number of groups that use this Candidate RP.
+
+  \item {\tt GroupPrefix:} The multicast group prefix address for this
+  Candidate RP.
+
+\end{itemize}
+
+
+\subsection{Monitoring PIM-SM Scope Zone Information}
+
+The {\stt show pim scope} command can be used to display
+information about the PIM scope zones:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show pim scope}\\
+GroupPrefix                                 \>Interface\\
+225.1.2.0/24                                \>dc1
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt GroupPrefix:} The multicast group prefix address of the scoped
+  zone.
+
+  \item {\tt Interface:} The name of the interface that is the boundary
+  of the scoped zone.
+
+\end{itemize}
+
+Note that currently (April 2005), configuring multicast scoped zones is not
+supported. This feature should be added in the future.
