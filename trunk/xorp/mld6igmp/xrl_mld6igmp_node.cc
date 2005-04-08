@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.43 2005/03/23 21:43:32 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.44 2005/03/25 02:53:55 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1501,11 +1501,21 @@ XrlMld6igmpNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 
     case COMMAND_FAILED:
 	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
+	// If a command failed because the other side rejected it,
+	// then print an error and send the next one.
 	//
-	XLOG_FATAL("Cannot send a protocol message: %s",
+	// XXX: The MFEA may fail to send a protocol message, therefore
+	// we don't call XLOG_FATAL() here. For example, the transimssion
+	// by the MFEA it may fail if there is no buffer space or if an
+	// unicast destination is not reachable.
+	// Furthermore, all protocol messages are soft-state (i.e., they are
+	// retransmitted periodically by the protocol),
+	// hence we don't retransmit them here if there was an error.
+	//
+	XLOG_ERROR("Cannot send a protocol message: %s",
 		   xrl_error.str().c_str());
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case NO_FINDER:
