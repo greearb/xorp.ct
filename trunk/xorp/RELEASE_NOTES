@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.63 2005/03/31 19:36:46 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.64 2005/04/02 12:06:06 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -72,6 +72,15 @@ Release 1.1 (2005/04/??)
       }
       The new syntax allows IPv4 unicast to be disabled which was not
       previously possible.
+
+    - The syntax for configuring the nexthop router address for static
+      routes has changed:
+
+      OLD:
+      nexthop: <IP address>
+
+      NEW:
+      next-hop: <IP address>
 
   LIBXORP:
     - Bug fix in ordering events scheduled at exactly the same time
