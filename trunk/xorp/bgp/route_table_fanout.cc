@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.49 2005/03/20 23:56:30 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.50 2005/03/25 02:52:46 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -402,8 +402,8 @@ FanoutTable<A>::wakeup_downstream(list <PeerTableInfo<A>*>& queued_peers)
     typename list <PeerTableInfo<A>*>::iterator i;
     for (i = queued_peers.begin(); i != queued_peers.end(); i++) {
 	if ((*i)->is_ready()) {
-	    (*i)->route_table()->wakeup();
 	    (*i)->wakeup_sent();
+	    (*i)->route_table()->wakeup();
 	}
     }
 }
