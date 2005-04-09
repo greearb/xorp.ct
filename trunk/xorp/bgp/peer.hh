@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.20 2005/03/11 06:57:41 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.21 2005/03/25 02:52:43 pavlin Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -74,8 +74,6 @@ public:
 
     void connected(int s);
     int get_sock();
-
-    bool same_sockaddr(struct sockaddr_in *sinp);
 
     /**
      * state machine handlers for the various BGP events
