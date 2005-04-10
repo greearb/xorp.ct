@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.90 2005/03/18 03:36:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.91 2005/03/25 02:52:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+// #define SAVE_PACKETS
 #define CHECK_TIME
 
 #include "bgp_module.h"
@@ -103,6 +104,83 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	TIMESPENT_CHECK();
 	return false;
     }
+
+#ifdef	SAVE_PACKETS
+    // XXX
+    // This is a horrible hack to try and find a problem before the
+    // 1.1 Release.
+    // All packets will be stored in fname, in MRTD format, if they
+    // arrived on an IPv4 peering. 
+    // The route_btoa program can be used to print the packets.
+    // TODO after the release:
+    // 1) Move the structures into a header file in libxorp.
+    // 2) Add an XRL to enable the saving of incoming packets on a
+    // per peer basis.
+    // 3) Handle IPv6 peerings.
+    // 4) Save all the values that are required by mrt_update.
+    // 5) Move all this code into a separate method.
+    // 6) Keep the file open.
+    // 7) Don't call gettimeofday directly, get the time from the eventloop.
+
+    string fname = "/tmp/bgpin.mrtd";
+
+    FILE *fp = fopen(fname.c_str(), "a");
+    if(0 == fp)
+	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(),
+		   strerror(errno));
+
+    struct mrt_header {
+	uint32_t time;
+	uint16_t type;
+	uint16_t subtype;
+	uint32_t length;
+    };
+
+    struct mrt_update {
+	uint16_t source_as;
+	uint16_t dest_as;
+	uint16_t ifindex;
+	uint16_t af;
+	uint32_t source_ip;
+	uint32_t dest_ip;
+    };
+
+    timeval now;
+    gettimeofday(&now, 0);
+    TimeVal tv(now);
+    
+    mrt_header mrt_header;
+    mrt_header.time = htonl(tv.sec());
+    mrt_header.type = htons(16);
+    mrt_header.subtype = htons(1);
+    mrt_header.length = htonl(length + sizeof(mrt_update));
+    
+    if(fwrite(&mrt_header, sizeof(mrt_header), 1, fp) != 1)
+	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(), strerror(errno));
+
+    mrt_update update;
+    memset(&update, 0, sizeof(update));
+    update.af = htons(1);	/* IPv4 */
+
+    string peer_addr = peerdata()->iptuple().get_peer_addr();
+    try {
+	update.source_as = htons(peerdata()->as().as());
+	update.source_ip = IPv4(peer_addr.c_str()).addr();
+
+	if(fwrite(&update, sizeof(update), 1, fp) != 1)
+	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
+		       strerror(errno));
+
+	if(fwrite(buf, length, 1, fp) != 1)
+	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
+		       strerror(errno));
+    } catch(InvalidFamily &e) {
+	XLOG_ERROR("%s might not be an IPv4 address %s", peer_addr.c_str(),
+		   e.str().c_str());
+    }
+	
+    fclose(fp);
+#endif
 
     _in_total_messages++;
 
