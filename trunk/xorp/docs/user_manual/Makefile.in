@@ -121,16 +121,9 @@ SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 # -- Document Names
 DOCS = user_manual
 
-user_manual_LATEX = user_manual.tex cli_intro.tex config_overview.tex \
-			  preface.tex interfaces.tex forwarding.tex \
-			unicast_routing.tex \
-			static_routes.tex rip.tex bgp.tex \
-			multicast_routing.tex igmp.tex pimsm.tex \
-			multicast_topology.tex snmp.tex users.tex \
-			diagnostics.tex \
-			glossary.tex
+user_manual_LATEX = user_manual.tex cli_intro.tex config_overview.tex preface.tex interfaces.tex forwarding.tex unicast_routing.tex static_routes.tex rip.tex bgp.tex multicast_routing.tex igmp.tex pimsm.tex multicast_topology.tex snmp.tex users.tex diagnostics.tex livecd.tex glossary.tex
 
-user_manual_FIGURES = figs/xorpsh.ps
+user_manual_FIGURES = figs/xorpsh.ps figs/cd1.ps figs/cd2.ps figs/cd3.ps figs/cd4.ps
 subdir = docs/user_manual
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
