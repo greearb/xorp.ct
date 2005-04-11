@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.37 2005/03/21 23:51:54 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.38 2005/03/25 02:52:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -545,7 +545,7 @@ RibInTable<A>::stop_nexthop_push()
     _changed_nexthops.clear();
     _nexthop_push_active = false;
     _current_changed_nexthop = A::ZERO();
-    _current_chain = _route_table->pathmap().end();
+//     _current_chain = _route_table->pathmap().end();
     _push_timer.unschedule();
 }
 
