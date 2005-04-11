@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/bgp.tex,v 1.10 2005/04/07 03:09:12 pavlin Exp $
 %
 
 \chapter{BGP}
@@ -202,6 +202,9 @@ The configuration parameters are used as follows:
   peering will not be established.  It is a 16-bit integer, and is
   mandatory to specify.
 \item{\tt next-hop}: this is the IPv4 address that will be sent as the
+  nexthop router address in routes that we send to this peer.
+  Typically this is only specified for EBGP peerings.
+\item{\tt next-hop6}: this is the IPv6 address that will be sent as the
   nexthop router address in routes that we send to this peer.
   Typically this is only specified for EBGP peerings.
 \item{\tt local-port}: by default, BGP establishes its BGP connections
