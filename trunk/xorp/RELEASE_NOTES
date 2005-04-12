@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.64 2005/04/02 12:06:06 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.65 2005/04/08 08:56:14 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.1 (2005/04/??)
+Release 1.1 (2005/04/12)
 =========================
   ALL:
     - Numerous improvements, bug fixes and cleanup.
@@ -193,6 +193,9 @@ Release 1.1 (2005/04/??)
 
     - Addition of support for better checking of the XRL error codes.
 
+    - Addition of support for better queueing of the outgoing XRLs
+      so their ordering is preserved.
+
     - Few other improvements and bug fixes.
 
   PIM-SM:
@@ -210,6 +213,9 @@ Release 1.1 (2005/04/??)
       processes, and for graceful registering/deregistering with them.
 
     - Addition of support for better checking of the XRL error codes.
+
+    - Addition of support for better queueing of the outgoing XRLs
+      so their ordering is preserved.
 
     - Various other bug fixes, improvements and cleanup.
 
