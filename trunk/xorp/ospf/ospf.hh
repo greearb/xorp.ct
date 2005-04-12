@@ -215,6 +215,11 @@ class Ospf {
      */
     EventLoop& get_eventloop() { return _eventloop; }
 
+    /**
+     * @return a reference to the PeerManager.
+     */
+    PeerManager<A>& get_peer_manager() { return _peer_manager; }
+
  private:
     const OspfTypes::Version _version;	// OSPF version.
     EventLoop& _eventloop;
