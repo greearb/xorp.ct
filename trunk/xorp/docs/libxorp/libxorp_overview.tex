@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.18 2005/04/06 22:34:18 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.19 2005/04/12 08:27:56 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -727,7 +727,9 @@ int     xlog_exit(void);
 \end{verbatim}
 
 	(think of this as the xlog destructor).
-	An example:
+\end{itemize}
+
+Below is an example of using the XLOG facility:
 
 \begin{verbatim}
 int
@@ -754,8 +756,6 @@ main(int argc, char *argv[])
     exit (0);
 }
 \end{verbatim}
-
-\end{itemize}
 
 
 Typically, a developer would use the macros described below
