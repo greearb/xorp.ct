@@ -149,6 +149,80 @@ PeerOut<A>::take_down_peering()
 	(*i).second->stop();
 }
 
+template <typename A>
+bool 
+PeerOut<A>::set_network_mask(OspfTypes::AreaID area, uint32_t network_mask)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	return false;
+    }
+
+    return _areas[area]->set_network_mask(network_mask);
+}
+
+template <typename A> 
+bool
+PeerOut<A>::set_interface_id(OspfTypes::AreaID area, uint32_t interface_id)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	return false;
+    }
+
+    return _areas[area]->set_interface_id(interface_id);
+}
+
+template <typename A>
+bool
+PeerOut<A>::set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	return false;
+    }
+
+    return _areas[area]->set_hello_interval(hello_interval);
+}
+
+template <typename A> 
+bool
+PeerOut<A>::set_options(OspfTypes::AreaID area,	uint32_t options)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	return false;
+    }
+
+    return _areas[area]->set_options(options);
+}
+
+template <typename A> 
+bool
+PeerOut<A>::set_router_priority(OspfTypes::AreaID area,
+				uint8_t priority)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	return false;
+    }
+
+    return _areas[area]->set_router_priority(priority);
+}
+
+template <typename A>
+bool
+PeerOut<A>::set_router_dead_interval(OspfTypes::AreaID area, 
+				     uint32_t router_dead_interval)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	return false;
+    }
+
+    return _areas[area]->set_router_dead_interval(router_dead_interval);
+}
+
 /****************************************/
 
 template <typename A>
@@ -175,7 +249,7 @@ Peer<A>::start_hello_timer()
     // XXX - The hello packet should have all its parameters set.
 
     _hello_timer = _ospf.get_eventloop().
-	new_periodic(_hello_interval, 
+	new_periodic(_hello_packet.get_hello_interval() * 1000,
 		     callback(this, &Peer<A>::send_hello_packet));
 }
 
@@ -190,6 +264,61 @@ Peer<A>::send_hello_packet()
     Transmit::TransmitRef tr(transmit);
 
     _peerout.transmit(tr);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::set_network_mask(uint32_t network_mask)
+{
+    _hello_packet.set_network_mask(network_mask);
+
+    return true;
+}
+
+
+template <typename A>
+bool
+Peer<A>::set_interface_id(uint32_t interface_id)
+{
+    _hello_packet.set_interface_id(interface_id);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::set_hello_interval(uint16_t hello_interval)
+{
+    _hello_packet.set_hello_interval(hello_interval);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::set_options(uint32_t options)
+{
+    _hello_packet.set_options(options);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::set_router_priority(uint8_t priority)
+{
+    _hello_packet.set_router_priority(priority);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::set_router_dead_interval(uint32_t router_dead_interval)
+{
+    _hello_packet.set_router_dead_interval(router_dead_interval);
 
     return true;
 }

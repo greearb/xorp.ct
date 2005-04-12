@@ -133,7 +133,7 @@ class Ospf {
      * Used to send traffic on the IO interface.
      */
     bool transmit(const string& interface, const string& vif,
-	      uint8_t* data, uint32_t len);
+		  uint8_t* data, uint32_t len);
 
     /**
      * The callback method that is called when data arrives on the IO
@@ -152,6 +152,48 @@ class Ospf {
      */
     bool disable_interface_vif(const string& interface, const string& vif);
 
+    /**
+     * Set the network mask OSPFv2 only.
+     */
+    bool set_network_mask(const string& interface, const string& vif,
+			  OspfTypes::AreaID area, 
+			  uint32_t network_mask);
+
+    /**
+     * Set the interface ID OSPFv3 only.
+     */
+    bool set_interface_id(const string& interface, const string& vif,
+			  OspfTypes::AreaID area,
+			  uint32_t interface_id);
+
+    /**
+     * Set the hello interval in seconds.
+     */
+    bool set_hello_interval(const string& interface, const string& vif,
+			    OspfTypes::AreaID area,
+			    uint16_t hello_interval);
+
+    /**
+     * Set options.
+     */
+    bool set_options(const string& interface, const string& vif,
+		     OspfTypes::AreaID area,
+		     uint32_t options);
+
+    /**
+     * Set router priority.
+     */
+    bool set_router_priority(const string& interface, const string& vif,
+			     OspfTypes::AreaID area,
+			     uint8_t priority);
+
+    /**
+     * Set the router dead interval in seconds.
+     */
+    bool set_router_dead_interval(const string& interface, const string& vif,
+				  OspfTypes::AreaID area,
+				  uint32_t router_dead_interval);
+    
     /**
      * XXX
      * Be sure to capture the multipath capability of OSPF.
@@ -172,6 +214,7 @@ class Ospf {
      * @return a reference to the eventloop, required for timers etc...
      */
     EventLoop& get_eventloop() { return _eventloop; }
+
  private:
     const OspfTypes::Version _version;	// OSPF version.
     EventLoop& _eventloop;

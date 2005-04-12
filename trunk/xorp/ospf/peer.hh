@@ -84,32 +84,32 @@ class PeerOut {
     /**
      * Set the network mask OSPFv2 only.
      */
-    void set_network_mask(OspfTypes::AreaID area, uint32_t network_mask);
+    bool set_network_mask(OspfTypes::AreaID area, uint32_t network_mask);
 
     /**
      * Set the interface ID OSPFv3 only.
      */
-    void set_interface_id(OspfTypes::AreaID area, uint32_t interface_id);
+    bool set_interface_id(OspfTypes::AreaID area, uint32_t interface_id);
 
     /**
      * Set the hello interval in seconds.
      */
-    void set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval);
+    bool set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval);
 
     /**
      * Set options.
      */
-    void set_options(OspfTypes::AreaID area, uint32_t options);
+    bool set_options(OspfTypes::AreaID area, uint32_t options);
 
     /**
      * Set router priority.
      */
-    void set_router_priority(OspfTypes::AreaID area, uint8_t priority);
+    bool set_router_priority(OspfTypes::AreaID area, uint8_t priority);
 
     /**
      * Set the router dead interval in seconds.
      */
-    void set_router_dead_interval(OspfTypes::AreaID area,
+    bool set_router_dead_interval(OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
 
  private:
@@ -134,8 +134,6 @@ class PeerOut {
     void take_down_peering();
 };
 
-const uint32_t HELLO_INTERVAL = 1000;	// Default hello interval in ms.
-
 /**
  * A peer represents a single area and is bound to a PeerOut.
  */
@@ -144,8 +142,14 @@ class Peer {
  public:
     Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area) 
 	: _ospf(ospf), _peerout(peerout), _area(area),
-	  _hello_interval(HELLO_INTERVAL), _hello_packet(ospf.get_version())
-    {}
+	  _hello_packet(ospf.get_version())
+    {
+	// Some defaults taken from the Juniper manual. These values
+	// should be overriden by the values in the templates files.
+	// For testing set some useful values
+	_hello_packet.set_hello_interval(10);
+	_hello_packet.set_router_priority(128);
+    }
 
     /**
      * Start the protocol machinery running
@@ -157,12 +161,41 @@ class Peer {
      */
     void stop();
 
+    /**
+     * Set the network mask OSPFv2 only.
+     */
+    bool set_network_mask(uint32_t network_mask);
+
+    /**
+     * Set the interface ID OSPFv3 only.
+     */
+    bool set_interface_id(uint32_t interface_id);
+
+    /**
+     * Set the hello interval in seconds.
+     */
+    bool set_hello_interval(uint16_t hello_interval);
+
+    /**
+     * Set options.
+     */
+    bool set_options(uint32_t options);
+
+    /**
+     * Set router priority.
+     */
+    bool set_router_priority(uint8_t priority);
+
+    /**
+     * Set the router dead interval in seconds.
+     */
+    bool set_router_dead_interval(uint32_t router_dead_interval);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
     OspfTypes::AreaID _area;		// Area that we are represent.
 
-    uint32_t  _hello_interval;		// Time between sending hello messages.
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
 
     enum PeerState {

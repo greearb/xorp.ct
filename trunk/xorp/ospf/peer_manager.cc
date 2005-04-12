@@ -205,6 +205,7 @@ PeerManager<A>::delete_peer(const PeerID peerid)
     return true;
 }
 
+
 template <typename A>
 void
 PeerManager<A>::incoming_packet(const string& interface, const string& vif,
@@ -213,6 +214,88 @@ PeerManager<A>::incoming_packet(const string& interface, const string& vif,
     debug_msg("Interface %s Vif %s %s\n", interface.c_str(),
 	      vif.c_str(), cstring((*packet)));
     XLOG_WARNING("TBD");
+}
+
+
+template <typename A>
+bool 
+PeerManager<A>::set_network_mask(const PeerID peerid, OspfTypes::AreaID area, 
+				 uint32_t network_mask)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_network_mask(area, network_mask);
+}
+
+template <typename A> 
+bool
+PeerManager<A>::set_interface_id(const PeerID peerid, OspfTypes::AreaID area,
+		 uint32_t interface_id)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_interface_id(area, interface_id);
+}
+
+template <typename A>
+bool
+PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
+				   uint16_t hello_interval)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_hello_interval(area, hello_interval);
+}
+
+template <typename A> 
+bool
+PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
+			    uint32_t options)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_options(area, options);
+}
+
+template <typename A> 
+bool
+PeerManager<A>::set_router_priority(const PeerID peerid,
+				    OspfTypes::AreaID area,
+				    uint8_t priority)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_router_priority(area, priority);
+}
+
+template <typename A>
+bool
+PeerManager<A>::set_router_dead_interval(const PeerID peerid,
+					 OspfTypes::AreaID area, 
+					 uint32_t router_dead_interval)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->
+	set_router_dead_interval(area, router_dead_interval);
 }
 
 template class PeerManager<IPv4>;
