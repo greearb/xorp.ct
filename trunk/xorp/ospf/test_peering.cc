@@ -35,23 +35,97 @@
 
 #include "ospf.hh"
 
+class DebugIO : public IO {
+ public:
+    DebugIO(TestInfo& info) : _info(info)
+    {}
+
+    /**
+     * Send Raw frames.
+     */
+    bool send(const string& interface, const string& vif, 
+	      uint8_t* /*data*/, uint32_t /*len*/)
+    {
+	DOUT(_info) << "send(" << interface << "," << vif << "...)" << endl;
+
+	return true;
+    }
+
+    /**
+     * Register for receiving raw frames.
+     */
+    bool register_receive(ReceiveCallback /*cb*/)
+    {
+	return true;
+    }
+
+    /**
+     * Enable the interface/vif to receive frames.
+     */
+    bool enable_interface_vif(const string& interface, const string& vif)
+    {
+	DOUT(_info) << "enable_interface_vif(" << interface << "," << vif <<
+	    "...)" << endl;
+
+	return true;
+    }
+
+    /**
+     * Disable this interface/vif from receiving frames.
+     */
+    bool disable_interface_vif(const string& interface, const string& vif)
+    {
+	DOUT(_info) << "disblae_interface_vif(" << interface << "," << vif <<
+	    "...)" << endl;
+
+	return true;
+    }
+
+    /**
+     * Add route to RIB.
+     */
+    bool add_route()
+    {
+	return true;
+    }
+
+    /**
+     * Delete route from RIB
+     */
+    bool delete_route()
+    {
+	return true;
+    }
+ private:
+    TestInfo& _info;
+};
+
+template <typename A> 
 bool
 single_peer(TestInfo& info, OspfTypes::Version version)
 {
+    DOUT(info) << "hello" << endl;
+
     EventLoop eventloop;
     string ribname = "rib";
-    XrlIO io(eventloop, ribname);
+    DebugIO io(info);
     
-    switch(version) {
-    case OspfTypes::V2:
-	Ospf<IPv4> ospf(OspfTypes::V2, eventloop, &io);
-	
-	break;
-    case OspfTypes::V3:
-	Ospf<IPv6> ospf(OspfTypes::V3, eventloop, &io);
-	break;
-    }
-	
+    Ospf<A> ospf(version, eventloop, &io);
+
+    OspfTypes::AreaID area("128.16.64.16");
+
+    // Create an area
+    ospf.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
+
+    // Create a peer associated with this area.
+    const string interface = "eth0";
+    const string vif = "vif0";
+    /*PeerID peerid = */ospf.get_peer_manager().create_peer(interface, vif,
+							OspfTypes::BROADCAST,
+							area);
+
+    // Bring the peering up
+    //    ospf.get_peer_manager().set_state_peer(peerid, true);
 
     return true;
 }
@@ -71,8 +145,8 @@ main(int argc, char **argv)
 	string test_name;
 	XorpCallback1<bool, TestInfo&>::RefPtr cb;
     } tests[] = {
-	{"single_peerV2", callback(single_peer, OspfTypes::V2)},
-	{"single_peerV3", callback(single_peer, OspfTypes::V3)},
+	{"single_peerV2", callback(single_peer<IPv4>, OspfTypes::V2)},
+	{"single_peerV3", callback(single_peer<IPv6>, OspfTypes::V3)},
     };
 
     try {
