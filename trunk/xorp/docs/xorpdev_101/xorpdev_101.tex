@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.8 2005/04/12 08:28:00 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.9 2005/04/12 22:25:25 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -143,7 +143,7 @@ The relevant file for us is {\stt
 xorp/xrl/interfaces/static\_routes.xif}. The first part of this file is
 shown in Listing \ref{lst:xif}.
 
-\begin{lstlisting}[caption={ The start of {\tt\small static\_routes.xif} %
+\begin{lstlisting}[caption={ The start of {\stt xorp/xrl/interfaces/static\_routes.xif} %
                                      \label{lst:xif} } ]{}
 /*
  * Static Routes XRL interface.
@@ -221,7 +221,7 @@ definition can be used by more than one process, hence the duplication
 in a process as simple as \SRI.
 
 \newpage
-\section{Using the {\tt static\_routes} XRL interface}
+\section{Using the {\tt static\_routes} XRL Interface}
 
 Now we have seen how the XRLs comprising the static\_routes interface
 are defined, we shall examine how processes actually use them.  For
@@ -240,7 +240,7 @@ easier for both these parties.
 If we examine the file {\stt Makefile.am} (the automake Makefile) in
 {\stt xorp/xrl/interfaces}, we find the fragment in Listing
 \ref{lst:iftemp}.
-\begin{lstlisting}[caption={ Fragment from xorp/xrl/interfaces/Makefile.am %
+\begin{lstlisting}[caption={ Fragment from {\stt xorp/xrl/interfaces/Makefile.am} %
                                      \label{lst:iftemp} } ]{}
 ###############################################################################
 # Client Interface related
@@ -294,7 +294,7 @@ XrlStaticRoutesV0p1Client} and its complete implementation.
 
 
 
-\begin{lstlisting}[caption={ Fragment from {\tt\small static\_routes\_xif.hh} %
+\begin{lstlisting}[caption={ Fragment from {\stt xorp/xrl/interfaces/static\_routes\_xif.hh} %
                                      \label{lst:sr.xif.hh} } ]{}
 class XrlStaticRoutesV0p1Client {
 public:
@@ -485,7 +485,8 @@ static\_routes\_0\_1\_add\_route4()} that actually does what we want when
 this XRL is called.
 
 \newpage
-\begin{lstlisting}[caption={Contents of static\_routes.tgt %
+\begin{lstlisting}[caption={Contents of {\stt
+	xorp/xrl/targets/static\_routes.tgt} %
                                      \label{lst:sr.tgt} } ]{}
 #include "common.xif"
 #include "finder_event_observer.xif"
@@ -549,7 +550,7 @@ TGTGEN_PY=$(SCRIPT_DIR)/tgt-gen
 \end{lstlisting}
 
 \newpage
-\begin{lstlisting}[caption={Extracts from {\stt static\_routes\_base.hh}%
+\begin{lstlisting}[caption={Extracts from {\stt xorp/xrl/targets/static\_routes\_base.hh}%
                                      \label{lst:sr.base} } ]{}
 class XrlStaticRoutesTargetBase {
 
@@ -728,6 +729,10 @@ and then passes to the constructor for the {\stt
 XrlStaticRoutesTargetBase} base class a pointer to this {\stt XrlStdRouter}
 base class (the return result for method {\stt xrl\_router()}).
 In addition, it initializes a lot of its own state (not shown).
+Note that if we were implementing a module that does not receive any XRLs (\ie
+it won't use the equivalent of {\stt XrlStaticRoutesTargetBase}), then
+we must call {\stt XrlStdRouter::finalize()} after {\stt XrlStdRouter}
+has been created.
 
 The complete implementation of {\stt
 XrlStaticRoutesNode::static\_routes\_0\_1\_add\_route4()} is shown.  In
@@ -768,9 +773,21 @@ comprise the entire initialization part and main loop of our \SRI
 process.
 
 First come the \#includes. Convention indicates that the first
-of these is a header file defining the module name and version - this
+of these ({\stt static\_routes\_module.h}) is a header file defining the
+module name and version - this
 information is used by later includes which will complain if this
-information is not available.  Then we include the functionality from
+information is not available. The content of {\stt static\_routes\_module.h}
+is very simple. It must define \verb=XORP_MODULE_NAME= and
+\verb=XORP_MODULE_VERSION=:
+
+\begin{lstlisting}[caption={Listing of {\stt xorp/static\_routes/static\_routes\_module.h} %
+                                     \label{lst:srn.module} } ]{}
+#define XORP_MODULE_NAME	"STATIC_ROUTES"
+#define XORP_MODULE_VERSION	"0.1"
+\end{lstlisting}
+
+
+Then we include the functionality from
 {\stt libxorp} that we'll need:
 \begin{itemize}
 \item {\stt libxorp/xorp.h}: generic headers that should always be included.
@@ -844,7 +861,7 @@ register our existence with the Finder.  Thus we call {\stt
 wait\_until\_xrl\_router\_is\_ready()}.
 
 \newpage
-\begin{lstlisting}[caption={Extracts from {\stt xorp/xorp\_static\_routes.cc} %
+\begin{lstlisting}[caption={Extracts from {\stt xorp/static\_routes/xorp\_static\_routes.cc} %
                                      \label{lst:srn.main} } ]{}
 //
 // XORP StaticRoutes module implementation.
@@ -1473,6 +1490,16 @@ specified by \verb=format=:
 
 \end{itemize}
 
+\newpage
+
+\section{The {\it rtrmgr} Template Files}
+\label{rtrmgr_templates}
+
+TODO: add description how to write rtrmgr template files.
+
+For the time being, the developer can check the ``XORP Router Manager Process
+(rtrmgr)'' document for information about the template semantics, and can use
+file {\stt xorp/etc/templates/static\_routes.tp} as an example.
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
