@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.7 2005/04/06 23:42:06 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.8 2005/04/12 08:28:00 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -777,7 +777,8 @@ information is not available.  Then we include the functionality from
 \item {\stt libxorp/xlog.h}: XORP logging functionality.  The convention is to
   use XLOG macros to log warnings and error messages, so we can
   redefine how logging if implemented in future without re-writing
-  the code that uses logging.  
+  the code that uses logging. See Section~\ref{xlog} for more information
+  about the XLOG facility.
 \item {\stt libxorp/debug.h}: XORP debugging functionality.
 \item {\stt libxorp/callback.hh}: XORP callback templates, needed to pass a
   handle into event handling code to be called later when an event
@@ -1270,6 +1271,209 @@ XrlStaticRoutesNode::lookup_route_by_dest4_cb(const XrlError& xrl_error,
 ...
 }
 \end{lstlisting}
+
+\newpage
+
+\section{The XLOG Logging Facility}
+\label{xlog}
+
+The XORP XLOG facility is used for log messages generation, similar to
+syslog. The log messages may be output to multiple output streams
+simultaneously. Below is a description of how to use the log utility.
+
+\begin{itemize}
+
+  \item The xlog utility assumes that \verb=XORP_MODULE_NAME= is defined
+   (per module). To do so, you must have in your directory a file like
+   ``foo\_module.h'', and inside it should contain something like:
+
+\begin{verbatim}
+#define XORP_MODULE_NAME "BGP"
+\end{verbatim}
+
+   This file then has to be included by each *.c and *.cc file,
+   and MUST be the first of the included local files.
+
+  \item Before using the xlog utility, a program MUST initialize it
+   first (think of this as the xlog constructor):
+
+\begin{verbatim}
+int xlog_init(const char *process_name, const char *preamble_message);
+\end{verbatim}
+
+   Further, if a program tries to use xlog without initializing it
+   first, the program will exit.
+
+  \item To add output streams, you MUST use one of the following (or both):
+
+\begin{verbatim}
+int xlog_add_output(FILE* fp);
+int xlog_add_default_output(void);
+\end{verbatim}
+
+  \item To change the verbosity of all xlog messages, use:
+
+\begin{verbatim}
+xlog_set_verbose(xlog_verbose_t verbose_level);
+\end{verbatim}
+
+   where ``verbose\_level'' is one of the following (\verb=XLOG_VERBOSE_MAX=
+   excluded):
+
+\begin{verbatim}
+typedef enum {
+    XLOG_VERBOSE_LOW = 0,       /* 0 */
+    XLOG_VERBOSE_MEDIUM,        /* 1 */
+    XLOG_VERBOSE_HIGH,          /* 2 */
+    XLOG_VERBOSE_MAX
+} xlog_verbose_t;
+\end{verbatim}
+
+   Default value is \verb=XLOG_VERBOSE_LOW= (least details).
+   Larger value for ``verbose\_level'' adds more details to the
+   preamble message (e.g., file name, line number, etc, about the place
+   where the log message was initiated).
+
+   Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL= (see
+   below) cannot be changed and is always set to the most verbose level
+   (\verb=XLOG_VERBOSE_HIGH=).
+
+  \item To change the verbosity of a particular message type, use:
+
+\begin{verbatim}
+void xlog_level_set_verbose(xlog_level_t log_level,
+	xlog_verbose_t verbose_level);
+\end{verbatim}
+
+where ``log\_level'' is one of the following (\verb=XLOG_LEVEL_MAX=
+excluded):
+
+\begin{verbatim}
+typedef enum {
+    XLOG_LEVEL_FATAL = 0,       /* 0 */
+    XLOG_LEVEL_ERROR,           /* 1 */
+    XLOG_LEVEL_WARNING,         /* 2 */
+    XLOG_LEVEL_INFO,            /* 3 */
+    XLOG_LEVEL_TRACE,           /* 4 */
+    XLOG_LEVEL_MAX
+} xlog_level_t;
+\end{verbatim}
+
+   Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL=
+   cannot be changed and is always set to the most verbose level
+   (\verb=XLOG_VERBOSE_HIGH=).
+
+  \item To start the xlog utility, you MUST use:
+
+\begin{verbatim}
+int xlog_start(void);
+\end{verbatim}
+
+
+  \item To enable or disable a particular message type, use:
+
+\begin{verbatim}
+int xlog_enable(xlog_level_t log_level);
+int xlog_disable(xlog_level_t log_level);
+\end{verbatim}
+
+	By default, all levels are enabled.
+	Note that \verb=XLOG_LEVEL_FATAL= cannot be disabled.
+
+  \item To stop the logging, use:
+
+\begin{verbatim}
+int xlog_stop(void);
+\end{verbatim}
+
+	Later you can restart it again by \verb=xlog_start()=
+
+  \item To gracefully exit the xlog utility, use
+
+\begin{verbatim}
+int     xlog_exit(void);
+\end{verbatim}
+
+	(think of this as the xlog destructor).
+\end{itemize}
+
+Listing \ref{lst:xlog.main} contains an example of using the XLOG facility.
+
+\begin{lstlisting}[caption={An example of using the XLOG facility %
+                                     \label{lst:xlog.main} } ]{}
+int
+main(int argc, char *argv[])
+{
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);	// Least verbose messages
+    // Increase verbosity of the error messages
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    // Do something
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+
+    exit (0);
+}
+\end{lstlisting}
+
+Typically, a developer would use the macros described below
+to print a message, add an assert statement, place a marker, etc.
+If a macro accepts a message to print, the format of the message is same
+as printf(3). The only difference is that the xlog utility automatically
+adds \verb='\n'=, (i.e. end-of-line) at the end of each string
+specified by \verb=format=:
+
+\begin{itemize}
+
+  \item \verb=XLOG_FATAL(const char *format, ...)=
+  \newline
+  Write a FATAL message to the xlog output streams and abort the program.
+
+  \item \verb=XLOG_ERROR(const char *format, ...)=
+  \newline
+  Write an ERROR message to the xlog output streams.
+
+  \item \verb=XLOG_WARNING(const char *format, ...)=
+  \newline
+  Write a WARNING message to the xlog output streams.
+
+  \item \verb=XLOG_INFO(const char *format, ...)=
+  \newline
+  Write an INFO message to the xlog output streams.
+
+  \item \verb=XLOG_TRACE(int cond_boolean, const char *format, ...)=
+  \newline
+  Write a TRACE message to the xlog output stream, but only
+  if \verb=cond_boolean= is not 0.
+
+  \item \verb=XLOG_ASSERT(assertion)=
+  \newline
+  The XORP replacement for assert(3), except that it cannot be
+  conditionally disabled and logs error messages through the standard
+  xlog mechanism. It calls \verb=XLOG_FATAL()= if the assertion fails.
+
+  \item \verb=XLOG_UNREACHABLE()=
+  \newline
+   A marker that can be used to indicate code that should never be executed.
+
+  \item \verb=XLOG_UNFINISHED()=
+  \newline
+  A marker that can be used to indicate code that is not yet implemented
+  and hence should not be run.
+
+\end{itemize}
+
+
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
@@ -1281,7 +1485,8 @@ XrlStaticRoutesNode::lookup_route_by_dest4_cb(const XrlError& xrl_error,
 
   \item July 19, 2004: Version 1.0.
 
-  \item Apr 7, 2005: Updated to match version 1.1.
+  \item April 12, 2005: Added the XLOG logging facility section. Udated to
+  match version 1.1.
 
 \end{itemize}
 
