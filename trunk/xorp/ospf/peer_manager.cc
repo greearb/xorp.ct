@@ -156,7 +156,7 @@ PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
 }
 
 template <typename A>
-bool
+PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
     OspfTypes::LinkType linktype, OspfTypes::AreaID area)
     throw(BadPeer)
@@ -168,7 +168,8 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 
     // Verify that we know about this area.
     if (0 == area_router)
-	return false;
+	xorp_throw(BadPeer, 
+		   c_format("Unknown Area %s", area.str().c_str()));
 
     PeerID peerid = create_peerid(interface, vif);
 
@@ -179,7 +180,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 
     area_router->add_peer(peerid);
 
-    return true;
+    return peerid;
 }
 
 template <typename A>

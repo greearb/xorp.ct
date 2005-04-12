@@ -61,14 +61,6 @@ class PeerManager {
      */
     bool destroy_area_router(OspfTypes::AreaID area);
 
-    /**
-     * Generate PeerID.
-     * Internally we want to deal with peers as simple IDs not
-     * interface/vif.
-     * Throw an exception if we already have a mapping.
-     */
-    PeerID create_peerid(const string& interface, const string& vif)
-	throw(BadPeer);
 
     /**
      * Convert an interface/vif to a PeerID.
@@ -77,16 +69,11 @@ class PeerManager {
     PeerID get_peerid(const string& interface, const string& vif) 
 	throw(BadPeer);
 
-    /**
-     * Get rid of this mapping.
-     */
-    void destroy_peerid(const string& interface, const string& vif)
-	throw(BadPeer);
 
     /**
      * Create a peer.
      */
-    bool create_peer(const string& interface, const string& vif,
+    PeerID create_peer(const string& interface, const string& vif,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area)
 	throw(BadPeer);
 	
@@ -155,6 +142,21 @@ class PeerManager {
     map<PeerID, PeerOut<A> *> _peers;	// All of our peers
 
     map<OspfTypes::AreaID, AreaRouter<A> *> _areas;	// All the areas
+
+    /**
+     * Generate PeerID.
+     * Internally we want to deal with peers as simple IDs not
+     * interface/vif.
+     * Throw an exception if we already have a mapping.
+     */
+    PeerID create_peerid(const string& interface, const string& vif)
+	throw(BadPeer);
+
+    /**
+     * Get rid of this mapping.
+     */
+    void destroy_peerid(const string& interface, const string& vif)
+	throw(BadPeer);
 };
 
 #endif // __OSPF_PEER_MANAGER_HH__
