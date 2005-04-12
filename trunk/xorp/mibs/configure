@@ -1594,7 +1594,7 @@ fi
 
 # Define the identity of the package.
 PACKAGE=mibs
-VERSION=1.1-RC
+VERSION=1.1
 
 cat >>confdefs.h <<_ACEOF
 #define PACKAGE "$PACKAGE"
