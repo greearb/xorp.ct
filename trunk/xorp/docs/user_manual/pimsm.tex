@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.12 2005/04/08 04:10:24 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.13 2005/04/11 21:21:13 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -246,6 +246,179 @@ XORP is compliant with the following PIM-SM specification:
 \end{description}
 
 \section{Configuring PIM-SM}
+
+\subsection{Configuring Multicast Routing on UNIX Systems}
+
+If XORP is to be run on a UNIX-based system, the following steps
+must be taken to enable the system for PIM-SM multicast routing
+before starting XORP:
+
+\begin{itemize}
+
+  \item Make sure that the underlying system supports multicast routing and
+  has PIM-SM kernel support. Unfortunately, there is no trivial guideline how
+  to check this, but the following OS-specific information can be useful:
+
+  \begin{itemize}
+
+    \item {\tt DragonFlyBSD}: DragonFlyBSD-1.0 and later.
+
+    \item {\tt FreeBSD}: IPv4 (FreeBSD-4.9 and later, FreeBSD-5.2 and later),
+    IPv6 (FreeBSD-4.x and later).
+
+    \item {\tt Linux}: IPv4 (Linux-2.2.11 and later, Linux-2.3.6 and later),
+    IPv6 (only with the IPv6 USAGI toolkit after 2005/02/14:
+    http://www.linux-ipv6.org/).
+
+    \item {\tt MacOS X}: No multicast routing support (as of MacOS X 10.3.x).
+
+    \item {\tt NetBSD}: IPv4 (any release after NetBSD-2.0), IPv6 (NetBSD-1.5
+    and later).
+
+    \item {\tt OpenBSD}: IPv4 (OpenBSD-3.7 and later), IPv6 (OpenBSD-2.7 and
+    later).
+
+  \end{itemize}
+
+  \item If necessary, configure the kernel to enable multicast routing and
+  PIM-SM:
+
+  \begin{itemize}
+
+    \item {\tt DragonFlyBSD}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+options         MROUTING                # Multicast routing
+options         PIM                     # PIM multicast routing
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+    \item {\tt FreeBSD}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+options         MROUTING                # Multicast routing
+options         PIM                     # PIM multicast routing
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+    \item {\tt Linux}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+CONFIG_IP_MULTICAST=y
+CONFIG_IP_MROUTE=y
+CONFIG_IP_PIMSM_V2=y
+\end{verbatim}
+
+    IPv6: Enable the following options in the kernel:
+
+\begin{verbatim}
+CONFIG_IPV6_MROUTE=y
+CONFIG_IPV6_PIMSM_V2=y
+\end{verbatim}
+
+    \item {\tt NetBSD}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+options         MROUTING        # IP multicast routing
+options         PIM             # Protocol Independent Multicast
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+    \item {\tt OpenBSD}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+option          MROUTING        # Multicast router
+option          PIM             # Protocol Independent Multicast
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+  \end{itemize}
+
+  \item Apply additional system configuration (if necessary):
+
+  \begin{itemize}
+
+    \item {\tt DragonFlyBSD}:
+
+    IPv4: Enable IPv4 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet.ip.forwarding=1
+\end{verbatim}
+
+    IPv6: Enable IPv6 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet6.ip6.forwarding=1
+\end{verbatim}
+
+    \item {\tt FreeBSD}:
+
+    IPv4: Enable IPv4 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet.ip.forwarding=1
+\end{verbatim}
+
+    IPv6: Enable IPv6 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet6.ip6.forwarding=1
+\end{verbatim}
+
+    \item {\tt Linux}:
+
+    IPv4: Enable IPv4 unicast forwarding:
+
+\begin{verbatim}
+echo 1 > /proc/sys/net/ipv4/ip_forward
+\end{verbatim}
+
+    If the unicast Reverse Path Forwarding information is different from the
+    multicast Reverse Path Forwarding information, the Reverse Path Filtering
+    should be disabled:
+
+\begin{verbatim}
+echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter
+\end{verbatim}
+    OR
+\begin{verbatim}
+echo 0 > /proc/sys/net/ipv4/conf/eth0/rp_filter
+echo 0 > /proc/sys/net/ipv4/conf/eth1/rp_filter
+...
+\end{verbatim}
+
+    IPv6: unknown
+
+    \item {\tt NetBSD}: none.
+
+    \item {\tt OpenBSD}: Add the following lines to {\stt /etc/rc.conf.local}
+    and reboot:
+
+\begin{verbatim}
+# Enable multicast routing (see netstart(8) for details).
+multicast_host=NO
+multicast_router=YES
+\end{verbatim}
+
+  \end{itemize}
+
+\end{itemize}
+
 \subsection{Configuration Syntax}
 
 \vspace{0.1in}
