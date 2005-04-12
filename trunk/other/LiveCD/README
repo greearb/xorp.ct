@@ -1,3 +1,7 @@
+#
+# $XORP$
+#
+
 XORP Live CD Creation Toolkit
 =============================
 
@@ -46,7 +50,7 @@ Requirements
 
 * To use the XORP LiveCD system:
 
-- Run it as ROOT ! You must have write permission on several places.
+- Run it as ROOT! You must have write permission on several places.
 - A working FreeBSD machine running version 4.9 or higher.  This
   probably does not work with FreeBSD 5.x.
 - Your sources (/usr/src mandatory !) synchronized with the above version.
@@ -102,7 +106,7 @@ the next step right after the last concluded step.
 Notes:
 ======
 
-Due to the nature of a CDROM-based system, you system RAM is used
+Due to the nature of a CDROM-based system, the system RAM is used
 heavily. This means that if, for some reason your system's hardware is
 not properly tuned or has bad quality memory, you may experience
 several problems like core dumps (with signals 10 and 11), computer
