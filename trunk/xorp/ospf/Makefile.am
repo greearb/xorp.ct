@@ -15,10 +15,12 @@ bin_PROGRAMS	 = xorp_ospfv2 xorp_ospfv3
 # -- Test Programs
 TESTS		 = test_packet
 TESTS		+= test_checksum
+TESTS		+= test_peering
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_packet
-noinst_PROGRAMS	 += test_checksum
+noinst_PROGRAMS += test_checksum
+noinst_PROGRAMS += test_peering
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES	 = libospf.la
@@ -43,6 +45,8 @@ xorp_ospfv3_SOURCES		= xorp_ospfv3.cc
 test_packet_SOURCES		= test_packet.cc
 
 test_checksum_SOURCES		= test_checksum.cc
+
+test_peering_SOURCES		= test_peering.cc
 
 # -- Library Sources
 libospf_la_SOURCES  = area_router.hh
