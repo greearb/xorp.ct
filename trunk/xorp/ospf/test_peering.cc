@@ -37,16 +37,29 @@
 
 class DebugIO : public IO {
  public:
-    DebugIO(TestInfo& info) : _info(info)
-    {}
+    DebugIO(TestInfo& info, OspfTypes::Version version, EventLoop& eventloop)
+	: _info(info), _eventloop(eventloop), _packets(0)
+    {
+	_dec.register_decoder(new HelloPacket(version));
+    }
 
     /**
      * Send Raw frames.
      */
     bool send(const string& interface, const string& vif, 
-	      uint8_t* /*data*/, uint32_t /*len*/)
+	      uint8_t* data, uint32_t len)
     {
+	TimeVal now;
+	_eventloop.current_time(now);
+	DOUT(_info) << now.pretty_print() << endl;
 	DOUT(_info) << "send(" << interface << "," << vif << "...)" << endl;
+	Packet *packet = _dec.decode(data, len);
+
+	DOUT(_info) << packet->str() << endl;
+
+	delete packet;
+
+	_packets++;
 
 	return true;
     }
@@ -96,8 +109,19 @@ class DebugIO : public IO {
     {
 	return true;
     }
+
+    /**
+     * Return the number of packets we have seen so far.
+     */
+    int packets()
+    {
+	return _packets;
+    }
  private:
     TestInfo& _info;
+    EventLoop& _eventloop;
+    PacketDecoder _dec;
+    int _packets;
 };
 
 template <typename A> 
@@ -108,7 +132,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 
     EventLoop eventloop;
     string ribname = "rib";
-    DebugIO io(info);
+    DebugIO io(info, version, eventloop);
     
     Ospf<A> ospf(version, eventloop, &io);
 
@@ -126,6 +150,12 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 
     // Bring the peering up
     ospf.get_peer_manager().set_state_peer(peerid, true);
+
+    while (ospf.running()) {
+	eventloop.run();
+	if (2 == io.packets())
+	    break;
+    }
 
     return true;
 }
