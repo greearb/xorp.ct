@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.19 2004/07/02 17:18:54 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.20 2004/09/17 14:10:29 abittau Exp $
 #
 
 #
@@ -283,7 +283,7 @@ fi
 #		     tree.
 #
 # excludes	  := files to excluded from from parsing.  Exists since
-#		     it's easier to to wildcard include files, then exclude
+#		     it's easier to wildcard include files, then exclude
 #		     a few.
 #
 # xref		  := list of already kdoc'ed directories to cross reference
@@ -425,7 +425,8 @@ kdoc_libfeaclient()
     lib="libfeaclient"
     desc="Forwarind Engine Abstraction Client library"
     html_start_page="index.html"
-    files="libfeaclient/*h"
+    files="libfeaclient/*.h libfeaclient/*.hh"
+    excludes=""
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
     kdocify
 }
@@ -438,8 +439,8 @@ kdoc_fea()
     lib="fea"
     desc="Forwarding Engine Abstraction daemon"
     html_start_page="index.html"
-    files="fea/*.hh"
-    excludes="fea/*click*hh"
+    files="fea/*.h fea/*.hh"
+    excludes=""
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli libfeaclient"
     kdocify
 }
@@ -480,7 +481,7 @@ kdoc_policy()
     lib="policy"
     desc="Policy manager daemon"
     html_start_page="index.html"
-    files="policy/*.hh"
+    files="policy/*.h policy/*.hh"
     excludes=""
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto policy-common"
     kdocify
@@ -494,7 +495,7 @@ kdoc_libpolicybackend()
     lib="libpolicybackend"
     desc="Policy backend filter"
     html_start_page="index.html"
-    files="policy/backend/*.hh"
+    files="policy/backend/*.h policy/backend/*.hh"
     excludes=""
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto policy-common"
     kdocify
@@ -508,7 +509,7 @@ kdoc_policycommon()
     lib="policy-common"
     desc="Policy shared routines between backend/frontend"
     html_start_page="index.html"
-    files="policy/common/*.hh"
+    files="policy/common/*.h policy/common/*.hh"
     excludes=""
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto"
     kdocify
@@ -522,8 +523,8 @@ kdoc_bgp()
     lib="bgp"
     desc="BGP4 daemon"
     html_start_page="index.html"
-    files="bgp/*.hh"
-    excludes="bgp/*test*h"
+    files="bgp/*.h bgp/*.hh"
+    excludes="bgp/test_*.h bgp/test_*.hh"
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libpolicybackend"
     kdocify
 }
@@ -536,9 +537,9 @@ kdoc_fib2mrib()
     lib="fib2mrib"
     desc="FIB2MRIB daemon"
     html_start_page="index.html"
-    files="fib2mrib/*.hh"
+    files="fib2mrib/*.h fib2mrib/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
     kdocify
 }
 
@@ -550,8 +551,8 @@ kdoc_mibs()
     lib="mibs"
     desc="MIB modules for Net-SNMP"
     html_start_page="index.html"
-    files="mibs/*.hh"
-    excludes=""
+    files="mibs/*.h mibs/*.hh"
+    excludes="mibs/patched_container.h"
     xref="libxorp libxipc xrl-interfaces xrl-targets"
     kdocify
 }
@@ -564,7 +565,7 @@ kdoc_rib()
     lib="rib"
     desc="Routing Information Base daemon"
     html_start_page="index.html"
-    files="rib/*.hh"
+    files="rib/*.h rib/*.hh"
     excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
     xref="libxorp libxorp-callback xrl-interfaces xrl-targets libproto libfeaclient libpolicybackend"
     kdocify
@@ -578,8 +579,8 @@ kdoc_rip()
     lib="rip"
     desc="Routing Information Protocol"
     html_start_page="index.html"
-    files="rip/*.hh"
-    excludes=""
+    files="rip/*.h rip/*.hh"
+    excludes="rip/test_*.h rip/test_*.hh"
     xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
     kdocify
 }
@@ -592,8 +593,8 @@ kdoc_rtrmgr()
     lib="rtrmgr"
     desc="Router Manager"
     html_start_page="index.html"
-    files="rtrmgr/*.hh"
-    excludes="rtrmgr/*test*h"
+    files="rtrmgr/*.h rtrmgr/*.hh"
+    excludes="rtrmgr/test_*.h rtrmgr/test_*.hh"
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
     kdocify
 }
@@ -606,7 +607,7 @@ kdoc_static_routes()
     lib="static_routes"
     desc="Static Routes daemon"
     html_start_page="index.html"
-    files="static_routes/*.hh"
+    files="static_routes/*.h static_routes/*.hh"
     excludes=""
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
     kdocify
