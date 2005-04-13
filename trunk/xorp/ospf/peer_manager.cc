@@ -41,10 +41,32 @@
 #include "area_router.hh"
 #include "peer_manager.hh"
 
+
+template <typename A>
+class DestroyAreaRouter : public unary_function<pair<OspfTypes::AreaID, 
+					  AreaRouter<A> * >, void> {
+ public:
+    DestroyAreaRouter(PeerManager<A>& peer_manager) : 
+	_peer_manager(peer_manager)
+    {}
+
+    void operator()(const pair<OspfTypes::AreaID, AreaRouter<A> * >& p)
+    {
+	_peer_manager.destroy_area_router(p.first);
+    }
+ private:
+    PeerManager<A>& _peer_manager;
+};
+
 template <typename A>
 PeerManager<A>::~PeerManager()
 {
-    XLOG_UNFINISHED();
+    // Remove all the areas, this should cause all the peers to be
+    // removed.
+    for_each(_areas.begin(), _areas.end(), DestroyAreaRouter<A>(*this));
+    XLOG_ASSERT(_pmap.empty());
+    XLOG_ASSERT(_peers.empty());
+    XLOG_ASSERT(_areas.empty());
 }
 
 template <typename A>
