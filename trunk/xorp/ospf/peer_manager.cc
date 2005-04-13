@@ -41,29 +41,19 @@
 #include "area_router.hh"
 #include "peer_manager.hh"
 
-
-template <typename A>
-class DestroyAreaRouter : public unary_function<pair<OspfTypes::AreaID, 
-					  AreaRouter<A> * >, void> {
- public:
-    DestroyAreaRouter(PeerManager<A>& peer_manager) : 
-	_peer_manager(peer_manager)
-    {}
-
-    void operator()(const pair<OspfTypes::AreaID, AreaRouter<A> * >& p)
-    {
-	_peer_manager.destroy_area_router(p.first);
-    }
- private:
-    PeerManager<A>& _peer_manager;
-};
-
 template <typename A>
 PeerManager<A>::~PeerManager()
 {
     // Remove all the areas, this should cause all the peers to be
-    // removed.
-    for_each(_areas.begin(), _areas.end(), DestroyAreaRouter<A>(*this));
+    // removed. Every call to destroy_area_router will change _areas,
+    // so call begin again each time.
+    for(;;) {
+	typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator i;
+	i = _areas.begin();
+	if (i == _areas.end())
+	    break;
+	destroy_area_router((*i).first);
+    }
     XLOG_ASSERT(_pmap.empty());
     XLOG_ASSERT(_peers.empty());
     XLOG_ASSERT(_areas.empty());
@@ -119,9 +109,12 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
     // the only area that the peer belonged to the peer can signify
     // this and the peer can be removed.
     typename map<PeerID, PeerOut<A> *>::iterator i;
-    for(i = _peers.begin(); i != _peers.end(); i++)
-	if ((*i).second->remove_area(area))
+    for(i = _peers.begin(); i != _peers.end();)
+	if ((*i).second->remove_area(area)) {
 	    delete_peer((*i).first);
+	    i = _peers.begin();
+	} else
+	    i++;
 
     delete _areas[area];
     _areas.erase(_areas.find(area));
@@ -224,6 +217,14 @@ PeerManager<A>::delete_peer(const PeerID peerid)
 
     delete _peers[peerid];
     _peers.erase(_peers.find(peerid));
+
+    // Remove the interface/vif to PeerID mapping
+    typename map<string, PeerID>::iterator pi;
+    for(pi = _pmap.begin(); pi != _pmap.end(); pi++)
+	if ((*pi).second == peerid) {
+	    _pmap.erase(pi);
+	    break;
+	}
 
     return true;
 }
