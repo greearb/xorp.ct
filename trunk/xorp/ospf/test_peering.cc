@@ -75,7 +75,7 @@ class DebugIO : public IO {
      */
     bool disable_interface_vif(const string& interface, const string& vif)
     {
-	DOUT(_info) << "disblae_interface_vif(" << interface << "," << vif <<
+	DOUT(_info) << "disable_interface_vif(" << interface << "," << vif <<
 	    "...)" << endl;
 
 	return true;
@@ -120,12 +120,12 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     // Create a peer associated with this area.
     const string interface = "eth0";
     const string vif = "vif0";
-    /*PeerID peerid = */ospf.get_peer_manager().create_peer(interface, vif,
+    PeerID peerid = ospf.get_peer_manager().create_peer(interface, vif,
 							OspfTypes::BROADCAST,
 							area);
 
     // Bring the peering up
-    //    ospf.get_peer_manager().set_state_peer(peerid, true);
+    ospf.get_peer_manager().set_state_peer(peerid, true);
 
     return true;
 }
