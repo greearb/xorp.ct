@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.32 2005/03/25 19:01:31 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.33 2005/03/29 19:58:50 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -104,11 +104,14 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 	MISC: - Update the documentation index Web page in
 		www/html_src/design_docs.html
-		by modifying the documents version and date.
+		by modifying the documents version, date and URLs.
 	      - Add an entry for the new release to
                 www/html_src/downloads.html
 		(set the definition for Release tag to $ReleaseTag as
 		defined later)
+		Move the previous release to the list of earlier releases,
+		and in the process delete its URL to the "Overview" in
+		the Documentation column.
 		Also, update the status on that page.
 	      - Update www/html_src/getting_started.html with information
 		about supported operating systems, compilers, and XORP
@@ -117,7 +120,7 @@ the login shell is csh or tcsh):
 		Modify all references to the most recent version and
 		its release date, etc.
 	      - If necessary, update www/html_src/license.html with a new
-		copyright year
+		copyright year.
 	      - If necessary, update www/html_src/livecd.html
                 E.g., update the XORP Version used in the LiveCD, if necessary.
 	      - Add a news item to news.html
@@ -244,9 +247,10 @@ the login shell is csh or tcsh):
  # The release tag is defined in the third command below.
  # If you make a mistake and you need to re-tag, then use flag -F after "rtag"
  # to move the tag.
- cd xorp
- cvs update VERSION
- setenv ReleaseTag RELEASE_`cat VERSION | sed 'y/./_/' | sed 'y/-/_/'`
+ mkdir xorp_release.tmp
+ cd xorp_release.tmp
+ cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp/VERSION
+ setenv ReleaseTag RELEASE_`cat xorp/VERSION | sed 'y/./_/' | sed 'y/-/_/'`
  echo $ReleaseTag
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag xorp
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag other
