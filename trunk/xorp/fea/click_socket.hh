@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.16 2005/01/20 00:43:16 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.17 2005/03/25 02:53:00 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -255,7 +255,7 @@ public:
      * Write Click configuration.
      *
      * @param element the Click element to write the configuration to. If it
-     * is an empty string, then we use only the @see handler to write the
+     * is an empty string, then we use only the @ref handler to write the
      * configuration.
      * @param handler the Click handler to write the configuration to.
      * @param has_kernel_config true if we wish to write the kernel-level Click
