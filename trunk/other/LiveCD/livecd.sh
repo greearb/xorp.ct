@@ -70,8 +70,9 @@ fi
 
 DIALOG=${DIALOG=/usr/bin/dialog}
 done_p="[ ]"
-done_g="[ ]"
+done_b="[ ]"
 done_d="[ ]"
+done_python="[ ]"
 done_cl="[ ]"
 done_k="[ ]"
 done_ki="[ ]"
@@ -109,8 +110,8 @@ prepare_directories() {
 
 # warning routines
 aviso() {
-    dialog --title "XORP LiveCD" --infobox "The compilation process failed, please see log file at \n $LIVEDIR/log" -1 -1
-    echo "The compilation process was aborted ..."
+    dialog --title "XORP LiveCD" --infobox "The LiveCD generation failed, please see log file at \n $LIVEDIR/log" -1 -1
+    echo "The LiveCD generation was aborted ..."
     exit 1
 }
 
@@ -144,7 +145,7 @@ check_prerequisites() {
     fi
     
     if [ ! -f "$KERNELDIR/GENERIC" ]; then
-	dialog --title "XORP LiveCD" --msgbox "kernel config file $KERNELDIR/GENERIC does not exist." 5 70
+	dialog --title "XORP LiveCD" --msgbox "kernel config file $KERNELDIR/GENERIC does not exist." 6 60
 	exit 1
     fi
     
@@ -161,26 +162,57 @@ dialog --title "XORP LiveCD" --yesno "The entire \"make buildworld\" process can
 
 case $? in
      1)
-     dialog --title "XORP LiveCD" --msgbox "Buildworld aborted" 5 60
+     dialog --title "XORP LiveCD" --msgbox "Buildworld aborted." 5 60
      ;;
      255)
-     echo "The compilation process was aborted ..."
+     echo "The compilation process was aborted."
      exit 1 
      ;;
      0)
      # Makes buildworld, creating logs under $LIVEDIR/log
-     dialog --title "XORP LiveCD" --infobox "running make buildworld..." 5 60
+     dialog --title "XORP LiveCD" --infobox "Running make buildworld..." 5 60
      cd /usr/src && make buildworld >> $LIVEDIR/log || aviso
 
-     #Build python
-     dialog --title "XORP LiveCD" --infobox "building python..." 5 60
-     cd /usr/ports/lang/python || aviso
-     make clean >> $LIVEDIR/log
-     make LOCALBASE=/usr/local DESTDIR=/usr/tmp/live_root NO_PKG_REGISTER=true >>  $LIVEDIR/log || aviso
-
      # Shows dialog telling the user that the buildworld process was done.
-     dialog --title "XORP LiveCD" --msgbox "Binary files done." 5 60
+     dialog --title "XORP LiveCD" --msgbox "Buildworld done." 5 60
      done_b="[*]"
+     cd $LIVEDIR
+     ;;
+esac
+}
+
+# This function compiles and installs python
+compile_install_python() {
+
+    python_ports_dir="/usr/ports/lang/python"
+# Shows dialog asking for compile python confirmation.
+# If the user does not confirm we will return execution to main_dialog.
+dialog --title "XORP LiveCD" --yesno "Compiling Python in the ${python_ports_dir} directory. This may take several minutes. Do you want to continue?" 6 70 
+
+case $? in
+     1)
+     dialog --title "XORP LiveCD" --msgbox "Compiling Python aborted." 5 60
+     ;;
+     255)
+     echo "The Python compilation process was aborted."
+     exit 1 
+     ;;
+     0)
+     # Compiles python, creating logs under $LIVEDIR/log
+     dialog --title "XORP LiveCD" --infobox "Compiling Python..." 5 60
+     cd ${python_ports_dir} || aviso
+     make clean >> $LIVEDIR/log
+     make LOCALBASE=/usr/local DESTDIR=${CHROOTDIR} NO_PKG_REGISTER=true >>  $LIVEDIR/log || aviso
+
+     #Install python
+     dialog --title "XORP LiveCD" --infobox "Installing Python..." 5 60
+     cd ${python_ports_dir} || aviso
+     #make clean >> $LIVEDIR/log
+     make install LOCALBASE=/usr/local DESTDIR=${CHROOTDIR} NO_PKG_REGISTER=true >>  $LIVEDIR/log || aviso
+
+     # Shows dialog telling the user that the installation process was done.
+    dialog --title "XORP LiveCD" --msgbox "Python was installed under $CHROOTDIR" 6 60
+     done_python="[*]"
      cd $LIVEDIR
      ;;
 esac
@@ -189,7 +221,7 @@ esac
 # This function distributes binaries under $CHROOTDIR
 install_binaries() {
 
-    dialog --title "XORP LiveCD" --infobox "creating directories..." 5 60
+    dialog --title "XORP LiveCD" --infobox "Creating directories..." 5 60
 
     cd /usr/src/etc && make distrib-dirs DESTDIR=$CHROOTDIR >> $LIVEDIR/log || aviso
     cd /usr/src/etc && make distribution DESTDIR=$CHROOTDIR >> $LIVEDIR/log || aviso
@@ -231,18 +263,18 @@ install_binaries() {
     rm  $CHROOTDIR/scripts/lang/livecd_*
 
     #Install python
-    dialog --title "XORP LiveCD" --infobox "Installing python..." 5 60
-    cd /usr/ports/lang/python || aviso
-    make clean >> $LIVEDIR/log
-    make install LOCALBASE=/usr/local DESTDIR=/usr/tmp/live_root NO_PKG_REGISTER=true >>  $LIVEDIR/log || aviso
+    #dialog --title "XORP LiveCD" --infobox "Installing Python..." 5 60
+    #cd /usr/ports/lang/python || aviso
+    #make clean >> $LIVEDIR/log
+    #make install LOCALBASE=/usr/local DESTDIR=${CHROOTDIR} NO_PKG_REGISTER=true >>  $LIVEDIR/log || aviso
 
     # Tells the user that the whole process was done ;-)
-    dialog --title "XORP LiveCD" --msgbox "The binary files were distributed under $CHROOTDIR" 5 60
+    dialog --title "XORP LiveCD" --msgbox "The binary files were distributed under $CHROOTDIR" 6 60
     done_d="[*]"
     cd $LIVEDIR
 }
 
-# This function distributes binaries under $CHROOTDIR
+# This function deletes unnecessary binaries under $CHROOTDIR
 cleanup_binaries() {
 
     dialog --title "XORP LiveCD" --infobox "Deleting files not needed by XORP..." 5 60
@@ -292,7 +324,7 @@ cleanup_binaries() {
     rm -rf usr/libexec/rexecd
 
 # Tells the user that the whole process was done ;-)
-    dialog --title "XORP LiveCD" --msgbox "Files not needed by XORP were removed from $CHROOTDIR" 5 60
+    dialog --title "XORP LiveCD" --msgbox "Files not needed by XORP were removed from $CHROOTDIR" 6 60
     done_cl="[*]"
 
     cd $LIVEDIR
@@ -301,16 +333,31 @@ cleanup_binaries() {
 # Now, we will patch GENERIC accordingly to our changes and build LIVECD from it
 build_kernel() {
 
+# Select the kernel config patch file
+    host_os_release=`uname -r`
+    kernel_config_patch=""
+    case "${host_os_release}" in
+	4.9-RELEASE )
+	kernel_config_patch=$LIVEDIR/files/patch_generic_freebsd4.9
+	;;
+	4.10-RELEASE )
+	kernel_config_patch=$LIVEDIR/files/patch_generic_freebsd4.10
+	;;
+	* )
+	echo "Kernel configuration patching not supported for host OS \"${host_os_release}\"."
+	exit 1;
+    esac
+
     dialog --title "XORP LiveCD" --infobox "Deleting compile dir..." 5 60
     rm -rf $COMPILEDIR >> $LIVEDIR/log
 
 # Copies GENERIC to LIVECD
-    dialog --title "XORP LiveCD" --infobox "Copying generic..." 5 60
+    dialog --title "XORP LiveCD" --infobox "Copying GENERIC kernel configuration file..." 5 60
     cp $KERNELDIR/GENERIC $KERNELDIR/LIVECD >> $LIVEDIR/log && \
 
 # Patch LIVECD up
     dialog --title "XORP LiveCD" --infobox "Patching kern config file..." 5 60
-    cd $KERNELDIR && patch -p < $LIVEDIR/files/patch_generic  >> $LIVEDIR/log && \
+    cd $KERNELDIR && patch -p < ${kernel_config_patch} >> $LIVEDIR/log && \
 
 # Lets build the kernel 
     dialog --title "XORP LiveCD" --infobox "Doing the kernel build..." 5 60
@@ -318,7 +365,7 @@ build_kernel() {
 	make  >> $LIVEDIR/log && make install DESTDIR=$CHROOTDIR  >> $LIVEDIR/log || aviso
 
 # Tells the user that this process was done.
-    dialog --title "XORP LiveCD" --msgbox "kernel build complete" 5 60
+    dialog --title "XORP LiveCD" --msgbox "Kernel build completed." 5 60
     done_k="[*]"
     cd $LIVEDIR
 
@@ -335,7 +382,7 @@ install_kernel() {
     cp $LIVEDIR/files/splash.bmp $CHROOTDIR/boot/
 
 # Tells the user that this process was done.
-    dialog --title "XORP LiveCD" --msgbox "The new kernel is at $CHROOTDIR" 5 60
+    dialog --title "XORP LiveCD" --msgbox "The new kernel is at $CHROOTDIR" 6 60
 
     done_ki="[*]"
     cd $LIVEDIR
@@ -347,7 +394,7 @@ build_xorp() {
 
     dialog --title "XORP LiveCD" --infobox "Doing XORP build..." 5 60
     sleep 1
-    dialog --title "XORP LiveCD" --infobox "Doing cd to $XORPSRCDIR..." 5 60
+    dialog --title "XORP LiveCD" --infobox "Doing cd to $XORPSRCDIR..." 6 60
     echo "attempting to cd to $XORPSRCDIR" >> $LIVEDIR/log
     cd $XORPSRCDIR || aviso
     dialog --title "XORP LiveCD" --infobox "Running XORP configure..." 5 60
@@ -358,7 +405,7 @@ build_xorp() {
     gmake >> $LIVEDIR/log || aviso
 
 # Tells the user that this process was done.
-    dialog --title "XORP LiveCD" --msgbox "XORP build in $XORPSRCDIR is complete" 5 60
+    dialog --title "XORP LiveCD" --msgbox "Completed XORP build in $XORPSRCDIR" 6 60
 
     done_x="[*]"
     cd $LIVEDIR
@@ -384,7 +431,7 @@ install_xorp() {
     cd $XORPSRCDIR || aviso
     rm -rf $CHROOTDIR/usr/local/xorp
     gmake install prefix=$CHROOTDIR/usr/local/xorp >> $LIVEDIR/log || aviso
-    dialog --title "XORP LiveCD" --infobox "Doing XORP install... done" 5 60
+    dialog --title "XORP LiveCD" --infobox "Doing XORP install..." 5 60
     cd $XORPSRCDIR || aviso
     cp $LIVEDIR/files/xorp_load.py $CHROOTDIR/usr/local/xorp/bin
     cp $LIVEDIR/files/xorp-makeconfig.sh $CHROOTDIR/usr/local/xorp/bin
@@ -405,7 +452,7 @@ install_xorp() {
     mv usr/local/xorp-debug usr/local/xorp >> $LIVEDIR/log
 
 # Tells the user that this process was done.
-    dialog --title "XORP LiveCD" --msgbox "XORP binaries, templates, and XIF files were installed in $CHROOTDIR" 5 60
+    dialog --title "XORP LiveCD" --msgbox "XORP binaries, templates, and XIF files were installed in $CHROOTDIR" 6 60
 
     done_xi="[*]"
     cd $LIVEDIR
@@ -453,7 +500,7 @@ patch_etc() {
     done;
 
     # Tell the user that /etc files were patched
-    dialog --title "XORP LiveCD" --msgbox "The $CHROOTDIR/etc files were changed." 5 60
+    dialog --title "XORP LiveCD" --msgbox "The $CHROOTDIR/etc files were changed." 6 60
     done_e="[*]"
 
     cd $LIVEDIR
@@ -463,7 +510,7 @@ patch_etc() {
 # This function generates ISOs and files to populate MFS
 create_iso() {
 
-    dialog --title "XORP LiveCD" --infobox "Creating the ISO in $LIVEISODIR/LiveCD.iso" 5 60
+    dialog --title "XORP LiveCD" --infobox "Creating the ISO in $LIVEISODIR/LiveCD.iso" 6 60
     # Lets create the .tgz files that will be used to mount MFS
     cd $CHROOTDIR
     tar cvzfp mfs/etc.tgz etc >> $LIVEDIR/log
@@ -492,17 +539,17 @@ create_iso() {
 	make install >> $LIVEDIR/log
 	make clean >> $LIVEDIR/log
 	#
-	dialog --title "XORP LiveCD" --msgbox "mkisofs instaled" 5 75
+	dialog --title "XORP LiveCD" --msgbox "Installation of mkisofs done." 5 75
 	#
 	# makes ISO image.
 	/usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -r -J -h -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
-	dialog --title "XORP LiveCD" --msgbox "Creation process done." 5 60
+	dialog --title "XORP LiveCD" --msgbox "ISO image creation process done." 5 60
 
     fi
 
     # If ISO image was successfully created, we tell the user it was done.
     if [ -f $LIVEISODIR/LiveCD.iso ]; then
-	dialog --title "XORP LiveCD" --msgbox "File $LIVEISODIR/LiveCD.iso created." 5 60
+	dialog --title "XORP LiveCD" --msgbox "Created file $LIVEISODIR/LiveCD.iso" 6 60
     fi
     
     done_i="[*]"
@@ -736,18 +783,19 @@ main_dialog() {
     log "main_dialog()"
     dialog --menu "XORP LiveCD Tool Set" 21 70 14 \
 	1 "$done_p Create folders (mkdir)" \
-	2 "$done_g Create binary files (buildworld)" \
+	2 "$done_b Create binary files (buildworld)" \
 	3 "$done_d Install binary files (installworld)" \
-	4 "$done_cl Remove unneeded binary files (cleanworld)" \
-	5 "$done_k Create kernel (buildkernel)" \
-	6 "$done_ki Install a previously built kernel (installkernel)" \
-	7 "$done_x Create XORP binaries (buildxorp)" \
-	8 "$done_xi Install XORP binaries (installxorp)" \
-	9 "$done_e Fix up /etc (patch's)" \
-	10 "$done_c Install packages on LiveCD (Customize)" \
-	11 "$done_i Create ISO (mkisofs)" \
-	12 "$done_f Burn CD" \
-	13 "$done_q Exit" \
+	4 "$done_python Compile and install Python" \
+	5 "$done_cl Remove unneeded binary files (cleanworld)" \
+	6 "$done_k Create kernel (buildkernel)" \
+	7 "$done_ki Install a previously built kernel (installkernel)" \
+	8 "$done_x Create XORP binaries (buildxorp)" \
+	9 "$done_xi Install XORP binaries (installxorp)" \
+	10 "$done_e Fix up /etc (patch's)" \
+	11 "$done_c Install packages on LiveCD (Customize)" \
+	12 "$done_i Create ISO (mkisofs)" \
+	13 "$done_f Burn CD" \
+	14 "$done_q Exit" \
 	2> $tempfile 
     
     opcao=`cat $tempfile`
@@ -763,33 +811,36 @@ main_dialog() {
 	install_binaries
 	;;
 	4)
-	cleanup_binaries
+	compile_install_python
 	;;
 	5)
-	build_kernel
+	cleanup_binaries
 	;;
 	6)
-	install_kernel
+	build_kernel
 	;;
 	7)
-	build_xorp
+	install_kernel
 	;;
 	8)
-	install_xorp
+	build_xorp
 	;;
 	9)
-	patch_etc
+	install_xorp
 	;;
 	10)
-	packages
+	patch_etc
 	;;
 	11)
-	create_iso 
+	packages
 	;;
 	12)
-	burn_cd
+	create_iso 
 	;;
 	13)
+	burn_cd
+	;;
+	14)
 	rm $tempfile
 	rm $LIVEDIR/config.ok
 	exit 0
