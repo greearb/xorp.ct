@@ -63,6 +63,7 @@ PeerOut<A>::add_area(OspfTypes::AreaID area)
 {
     debug_msg("Area %s\n", area.str().c_str());
 
+    // Only OSPFv3 is allowed a peer to be connected to multiple areas.
     XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
 
     Peer<A> *peer = _areas[area] = new Peer<A>(_ospf, *this, area);
@@ -77,9 +78,19 @@ bool
 PeerOut<A>::remove_area(OspfTypes::AreaID area)
 {
     debug_msg("Area %s\n", area.str().c_str());
-    XLOG_UNFINISHED();
+    // All the peers are notified when an area is deleted.
+    if (0 == _areas.count(area)) {
+	return false;
+    }
     
-    return true;
+    delete _areas[area];
+    _areas.erase(_areas.find(area));
+    
+    // If this peer is no longer serving any areas it can be deleted.
+    if (_areas.empty())
+	return true;
+    else
+	return false;
 }
 
 template <typename A>
