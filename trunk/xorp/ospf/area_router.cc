@@ -42,7 +42,7 @@ void
 AreaRouter<A>::add_peer(PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
-    XLOG_UNFINISHED();
+    _peers[peerid] = peer_state(false /* UP */);
 }
 
 template <typename A>
@@ -50,7 +50,11 @@ void
 AreaRouter<A>::delete_peer(PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
-    XLOG_UNFINISHED();
+
+    if (0 == _peers.count(peerid))
+	return;
+    
+    _peers.erase(_peers.find(peerid));
 }
 
 template class AreaRouter<IPv4>;
