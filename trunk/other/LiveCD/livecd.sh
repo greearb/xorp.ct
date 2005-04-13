@@ -1,7 +1,7 @@
 #!/bin/sh -
 
 #
-# $XORP$
+# $XORP: other/LiveCD/livecd.sh,v 1.12 2005/04/13 04:53:01 pavlin Exp $
 #
 
 # Copyright (c) 2004-2005 International Computer Science Institute
@@ -140,7 +140,7 @@ check_prerequisites() {
     fi
     
     if [ ! -d "$XORPSRCDIR" ]; then
-	dialog --title "XORP LiveCD" --msgbox "XORP source directory $XORPSRCDIR does not exist." 6 60
+	dialog --title "XORP LiveCD" --msgbox "XORP source directory $XORPSRCDIR does not exist." 7 60
 	exit 1
     fi
     
