@@ -229,6 +229,21 @@ PeerManager<A>::delete_peer(const PeerID peerid)
     return true;
 }
 
+template <typename A>
+bool
+PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
+{
+    debug_msg("PeerID %u\n", peerid);
+
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    _peers[peerid]->set_state(state);
+
+    return true;
+}
 
 template <typename A>
 void
