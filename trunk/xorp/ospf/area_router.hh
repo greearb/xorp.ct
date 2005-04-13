@@ -63,7 +63,17 @@ class AreaRouter {
     OspfTypes::AreaID _area;		// Area: That is represented.
     OspfTypes::AreaType _area_type;	// Type of this area.
 
-    set<PeerID>	_peers;			// Peers of this area.
+    /**
+     * Internal state that we require about this peer.
+     */
+    struct peer_state {
+	peer_state() {}
+	peer_state(bool up) : _up(up)
+	{}
+	bool _up;	// True if peer is enabled.
+    };
+
+    map<PeerID, peer_state> _peers;	// Peers of this area.
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__
