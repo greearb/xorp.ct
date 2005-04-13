@@ -144,6 +144,8 @@ class Peer {
 	: _ospf(ospf), _peerout(peerout), _area(area),
 	  _hello_packet(ospf.get_version())
     {
+	_hello_packet.set_area_id(area);
+
 	// Some defaults taken from the Juniper manual. These values
 	// should be overriden by the values in the templates files.
 	// For testing set some useful values
