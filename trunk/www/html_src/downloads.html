@@ -1,7 +1,7 @@
 <h1>XORP Source Downloads</h1>
 
 <p>
-As of March 2005, the architecture is basically complete and it might
+As of April 2005, the architecture is basically complete and it might
 be used as the basis for research.  The software is reasonably stable
 and can be used for routing, but there are known issues.  See the <a
 href="status.html">current status</a> of the
@@ -11,21 +11,50 @@ different parts of XORP, or the <a href="releases/current/docs/RELEASE_NOTES">re
 Please note that to build all the XORP modules and test programs with
 debugging enabled, you will need nearly 1GB of free disk space.  XORP
 is written in C++, and has been mainly developed on <B>FreeBSD
-4.x</B>.  The current release 1.1-RC is known to compile with gcc
+4.x</B>.  The current release 1.1 is known to compile with gcc
 2.95.x, 2.96, 3.3.4, and 3.4.2 20040827 (prerelease).
 
 <p>The code should build and run on
 <a href="http://www.linux.org/">Linux 2.4.x</a>,
 <a href="http://www.freebsd.org/">FreeBSD</a>,
-<a href="http://www.openbsd.org/">OpenBSD</a>, and
-<a href="http://www.netbsd.org/">NetBSD</a>.
-
-<!-- The code builds and passes regression tests on <a href="http://www.apple.com/osx/">OS X</a>, though we've not tried to use a Mac for forwarding. -->
+<a href="http://www.openbsd.org/">OpenBSD</a>,
+<a href="http://www.netbsd.org/">NetBSD</a>, and
+<a href="http://www.apple.com/">MacOS X</a>.
 
 <h2>Latest Release</h2>
 
-<p>The latest source code version is the release 1.1-RC.
+<p>The latest source code version is the release 1.1.
 If you have problems downloading, try a <a href="mirrors.html">mirror site</a>.
+
+<center>
+<table border="0" width="100%">
+<tr>
+<th>Date</th>
+<th>Version</th>
+<th>Release tag</th>
+<th>Tar ball</th>
+<th>Documentation</th>
+</tr>
+
+<tr class="odd">
+<td align="center">2005-04-13</td>
+<td align="center">1.1</td>
+<td>RELEASE_1_1</td>
+<td><a href="releases/1.1/xorp-1.1.tar.gz">xorp-1.1.tar.gz</a></td>
+<td align="center">
+<!-- XXX: Delete the Overview for older releases! -->
+<a href="design_docs.html">Overview</a><br>
+<a href="releases/1.1/docs-1.1.tar.gz">Tar ball</a><br>
+<a href="releases/1.1/docs/kdoc/html/index.html">Source code</a></td>
+</tr>
+
+</table>
+</center>
+<P>
+MD5 (xorp-1.1.tar.gz) = XXX
+
+<!-- EARLIER STABLE RELEASES GO HERE-->
+<h2>Earlier Releases</h2>
 
 <center>
 <table border="0" width="100%">
@@ -42,26 +71,9 @@ If you have problems downloading, try a <a href="mirrors.html">mirror site</a>.
 <td align="center">1.1-RC</td>
 <td>RELEASE_1_1_RC</td>
 <td><a href="releases/1.1-RC/xorp-1.1-RC.tar.gz">xorp-1.1-RC.tar.gz</a></td>
-<td align="center"><a href="design_docs.html">Overview</a><br>
+<td align="center">
+<a href="releases/1.1-RC/docs-1.1-RC.tar.gz">Tar ball</a><br>
 <a href="releases/1.1-RC/docs/kdoc/html/index.html">Source code</a></td>
-</tr>
-
-</table>
-</center>
-<P>
-MD5 (xorp-1.1-RC.tar.gz) = b14276cd7391ff20e559140f421beaa8
-
-<!-- EARLIER STABLE RELEASES GO HERE-->
-<h2>Earlier Releases</h2>
-
-<center>
-<table border="0" width="100%">
-<tr>
-<th>Date</th>
-<th>Version</th>
-<th>Release tag</th>
-<th>Tar ball</th>
-<th>Documentation</th>
 </tr>
 
 <tr class="odd">
@@ -69,7 +81,8 @@ MD5 (xorp-1.1-RC.tar.gz) = b14276cd7391ff20e559140f421beaa8
 <td align="center">1.0</td>
 <td>RELEASE_1_0</td>
 <td><a href="releases/1.0/xorp-1.0.tar.gz">xorp-1.0.tar.gz</a></td>
-<td align="center"><a href="design_docs.html">Overview</a><br>
+<td align="center">
+<a href="releases/1.0/docs-1.0.tar.gz">Tar ball</a><br>
 <a href="releases/1.0/docs/kdoc/html/index.html">Source code</a></td>
 </tr>
 
@@ -78,7 +91,8 @@ MD5 (xorp-1.1-RC.tar.gz) = b14276cd7391ff20e559140f421beaa8
 <td align="center">1.0-RC</td>
 <td>RELEASE_1_0_RC</td>
 <td><a href="releases/1.0-RC/xorp-1.0-RC.tar.gz">xorp-1.0-RC.tar.gz</a></td>
-<td align="center"><a href="design_docs.html">Overview</a><br>
+<td align="center">
+<a href="releases/1.0-RC/docs-1.0-RC.tar.gz">Tar ball</a><br>
 <a href="releases/1.0-RC/docs/kdoc/html/index.html">Source code</a></td>
 </tr>
 
@@ -108,7 +122,8 @@ MD5 (xorp-1.0.tar.gz) = 7f9c5ad3abad00cccee041274d8ffca9
 <td align="center">0.5</td>
 <td>RELEASE_0_5</td>
 <td><a href="releases/0.5/xorp-0.5.tar.gz">xorp-0.5.tar.gz</a></td>
-<td align="center"><a href="releases/0.5/docs/index.html">Overview</a><br>
+<td align="center">
+<a href="releases/0.5/docs-0.5.tar.gz">Tar ball</a><br>
 <a href="releases/0.5/docs/kdoc/html/index.html">Source code</a></td>
 </tr>
 
@@ -117,7 +132,8 @@ MD5 (xorp-1.0.tar.gz) = 7f9c5ad3abad00cccee041274d8ffca9
 <td align="center">0.4</td>
 <td>RELEASE_0_4</td>
 <td><a href="releases/0.4/xorp-0.4.tar.gz">xorp-0.4.tar.gz</a></td>
-<td align="center"><a href="releases/0.4/docs/index.html">Overview</a><br>
+<td align="center">
+<a href="releases/0.4/docs-0.4.tar.gz">Tar ball</a><br>
 <a href="releases/0.4/docs/kdoc/html/index.html">Source code</a></td>
 </tr>
 
@@ -126,7 +142,8 @@ MD5 (xorp-1.0.tar.gz) = 7f9c5ad3abad00cccee041274d8ffca9
 <td align="center">0.3</td>
 <td>RELEASE_0_3</td>
 <td><a href="releases/0.3/xorp-0.3.tar.gz">xorp-0.3.tar.gz</a></td>
-<td align="center"><a href="releases/0.3/docs/index.html">Overview</a><br>
+<td align="center">
+<a href="releases/0.3/docs-0.3.tar.gz">Tar ball</a><br>
 <a href="releases/0.3/docs/kdoc/html/index.html">Source code</a></td>
 </tr>
 
@@ -135,7 +152,8 @@ MD5 (xorp-1.0.tar.gz) = 7f9c5ad3abad00cccee041274d8ffca9
 <td align="center">0.2</td>
 <td>RELEASE_0_2</td>
 <td><a href="releases/0.2/xorp-0.2.tar.gz">xorp-0.2.tar.gz</a></td>
-<td align="center"><a href="releases/0.2/docs/index.html">Overview</a><br>
+<td align="center">
+<a href="releases/0.2/docs-0.2.tar.gz">Tar ball</a><br>
 <a href="releases/0.2/docs/kdoc/html/index.html">Source code</a></td>
 </tr>
 
@@ -144,7 +162,8 @@ MD5 (xorp-1.0.tar.gz) = 7f9c5ad3abad00cccee041274d8ffca9
 <td align="center">0.1</td>
 <td>RELEASE_0_1</td>
 <td><a href="releases/0.1/xorp-0.1.tar.gz">xorp-0.1.tar.gz</a></td>
-<td align="center"><a href="releases/0.1/docs/index.html">Overview</a><br>
+<td align="center">
+<a href="releases/0.1/docs-0.1.tar.gz">Tar ball</a><br>
 <a href="releases/0.1/docs/kdoc/html/index.html">Source code</a></td>
 </tr>
 
