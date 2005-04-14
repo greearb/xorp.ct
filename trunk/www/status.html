@@ -63,7 +63,7 @@
 See the <a href="design_docs.html">design documentation</a> for details of the
 XORP processes.
 <P>
-As of March 2005 (Release 1.1-RC), the status is as follows:
+As of April 2005 (Release 1.1), the status is as follows:
 <DL>
 <DT><B>RIB</B>
 
@@ -151,10 +151,7 @@ router) needs more polishing.
 <P>
 <DT><B>LibXIPC</B>
 
-<DD>The interfaces are stable, and the IPC mechanisms work well.  The
-finder code from release 0.1 has been replaced with much nicer finder
-design, which appears to be stable, but as with all new code there are
-probably new bugs.
+<DD>The interfaces are stable, and the IPC mechanisms work well.
 <P>
 <DT><B>SNMP</B>
 
@@ -162,11 +159,14 @@ probably new bugs.
 allows MIB modules to access information from XORP processes.  Currently we
 have fully implemented one such module, BGP4-MIB (RFC 1657).  The rtrmgr
 can be configured to start the SNMP agent and to load MIB modules.
+Just before Release-1.1 we noticed that the SNMP support is broken,
+hence it should not be enabled. This will be fixed immediately after
+the release.
 </DL>
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.10 2005/02/24 00:04:48 atanu Exp $.
-<br>Generated on 24/Mar/2005 at 20:42:35.</em>
+<br>Generated on 13/Apr/2005 at 21:18:07.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
