@@ -1,0 +1,247 @@
+
+=head1 NAME
+
+KDOC -- Programmers' Documentation Extraction and Generation Tool
+
+=head1 SYNOPSIS
+
+	kdoc [-DqpieaP] [-f format] [-n libname] [-d outdir] [-u url] [-l lib]
+
+	kdoc [--help]
+
+	kdoc [--version]
+
+=head1 DESCRIPTION
+
+KDOC uses specially formatted comments in your C++ headers and CORBA IDL
+files to create cross-referenced documentation in various formats. 
+
+KDOC can also correctly handle "signal" and "slot" specifiers as used by the
+Qt GUI Toolkit.
+
+=head1 EXAMPLES
+
+	kdoc -f html -d /home/web/komdoc -n kom *.idl
+	kdoc -d /home/web/kdecore 
+		-u "http://www.mydomain/kdecore/" 
+		-n kdecore ~/kdelibs/kdecore/*.h -lqt
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--stdin>, B<-i>
+
+Read the filenames to process from standard input. Ignored if
+filenames are specified at the command line.
+
+=item B<--format> <string>, B<-f> <string>
+
+Generate output in the specific format. This can be used many times to
+generate documentation in multiple formats. The default format is "html".
+
+See the OUTPUT FORMAT OPTIONS section for a list of available formats.
+
+=item B<--outputdir> <path>, B<-d> <path>
+
+Write output in the specified path.
+
+=item B<--url> <url>, B<-u> <url>
+
+The URL which will be used for links when cross-referencing with this library.
+
+=item B<--name> <string>, B<-n> <string>
+
+Set the name of the library being processed, eg "kdecore"
+If no name is set, no index file is produced.
+
+=item B<--xref> <library>, B<-l> <library>
+
+Cross-reference with the specified library. This will allow referencing
+of classes etc that exist in the linked library. This option can be
+specified multiple times.
+
+For linking to work, you need to have generated documentation for the
+linked library with kdoc, so that the necessary index file is produced.
+
+=item B<--libdir> <path>, B<-L> <path>
+
+Set the directory that will be used to store the index files generated
+for cross-referencing. This is also used to search for index files for
+xref. The default is $HOME/.kdoc.
+
+If multiple paths are specified, each will be searched in order of
+specification on the command line.
+
+Unless --liboutdir is specified (see below), the generated .kdoc file will
+be written to the first path specified with this option.
+
+=item B<--liboutdir> <path>
+
+Set the directory where newly created xref libraries (see above) will be
+written. The default is the libdir.
+
+=item B<--compress>, B<-z>
+
+Compress generated KDOC index files with gzip to save space.
+
+=item B<--private>, B<-p>
+
+Document all private members. These are not documented by default.
+
+=item B<--skip-internal>, B<-i>
+
+Do not document internal members. They are documented as internal by default.
+
+=item B<--skip-deprecated>, B<-e>
+
+Do not document deprecated members. They are documented as deprecated by 
+default.
+
+=item B<--strip-h-path>
+
+Strip the path from the filenames in the output.
+
+=back
+
+=head1 PREPROCESSOR OPTIONS
+
+=over 4
+
+=item B<--cpp>, B<-P>
+
+Pass each source file through the C preprocessor. Currently g++
+is required for this, but this requirement will change before
+2.0. Directories for inclusion in the preprocessor header search path
+can be specified via the B<-I> option.
+
+=item B<--docincluded>
+
+Parse files that are included by the preprocessor #include macro.
+This is off by default.
+
+=item B<-cppcmd> <command>, B<-C> <command>
+
+Specify the preprocessor command that will be used. The default is:
+
+	g++ -Wp,-C -E
+
+All specified B<-I> paths will be appended to the command. This option
+quietly enables the B<-P> option.
+
+=item B<--includedir> <path>, B<-I> <path>
+
+Add a directory to the preprocessor's header search paths. Requires the
+B<-P> option. This option can be specified multiple times.
+
+=back
+
+=head1 OUTPUT FORMAT OPTIONS
+
+=over 4
+
+=item B<html>
+
+Output documentation in HTML format. This is the default.
+
+=item B<latex>
+
+Output documentation as a LaTeX document.
+
+=item B<man>
+
+Output documentation as man pages.
+
+=item B<texinfo>
+
+Output documentation in texinfo format. You must set the library name
+with the B<-n> option for the output to be generated.
+
+=item B<docbook>
+
+Output documentation in the DocBook SGML format. You must set the library
+name with the B<-n> option for the output to be generated.
+
+=item B<check>
+
+Print a report about the documentation, eg undocumented classes
+and functions.
+
+=back
+
+=head2 Output format modifiers
+
+=over 4
+
+=item B<--html-css> <url>
+
+In HTML format, the stylesheet specified by this option will be used by
+the generated documentation.
+
+=back
+
+=over 4
+
+=item B<--html-cols> <1, 2 ..>
+
+In HTML format, set the number of columns for the Class Index.
+
+=back
+
+=over 4
+
+=item B<--html-logo> <image url>
+
+In HTML format, specify the logo image to display on every page.
+It will appear to the left of the quick links.
+
+=back
+
+=head1 CROSS-REFERENCING LIBRARIES
+
+=head1 FILES
+
+=over 4
+
+=item B<*.kdoc>, B<*.kdoc.gz>
+
+These are files that contain information about a library that has been
+processed with kdoc. It is read for cross-referencing with other libraries
+when the B<-l> option is used.
+
+The B<.gz> extension signifies gzipped cross-reference files. kdoc is
+capable of reading these, and generates them when the B<-z> option is used.
+
+=back
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item B<KDOCLIBS>
+
+If this is set, it is used as the default for the directory where generated
+cross-reference index files are saved. See also the B<--libdir> option.
+
+=back
+
+=head1 SEE ALSO
+
+See L<qt2kdoc> for info on linking with the Qt docs, and L<makekdedoc> for
+info on generating documentation for the KDE libraries.
+
+=head1 BUGS
+
+Lots and Lots. Please send reports to the address B<kdoc@kde.org>.
+
+=head1 AUTHOR
+
+Sirtaj Singh Kang <taj@kde.org>. B<KDOC> has a web page at:
+	http://www.ph.unimelb.edu.au/~ssk/kde/kdoc
+
+=head1 COPYRIGHT
+
+The KDOC tool is Copyright (c) 1998 by Sirtaj Singh Kang. KDOC is free
+software under the conditions of the GNU Public License.
+
+=cut

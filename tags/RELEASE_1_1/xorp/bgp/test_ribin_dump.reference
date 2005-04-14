@@ -1,0 +1,88 @@
+[comment] TEST 1
+[ADD]
+SubnetRoute:
+  Net: 10.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[ADD]
+SubnetRoute:
+  Net: 30.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[DUMP]
+SubnetRoute:
+  Net: 10.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[comment] The dump has started now add a new route it should appear once we start dumping again
+[ADD]
+SubnetRoute:
+  Net: 20.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[DUMP]
+SubnetRoute:
+  Net: 20.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[DUMP]
+SubnetRoute:
+  Net: 30.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[comment] USE A NEW ITERATOR to prove 20.0.0.0/8 is present
+[DUMP]
+SubnetRoute:
+  Net: 10.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[DUMP]
+SubnetRoute:
+  Net: 20.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[DUMP]
+SubnetRoute:
+  Net: 30.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[comment] Delete all the routes from the RIB-IN so the memory can be free'd
+[DELETE]
+SubnetRoute:
+  Net: 10.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[DELETE]
+SubnetRoute:
+  Net: 30.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[DELETE]
+SubnetRoute:
+  Net: 20.0.0.0/8
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]

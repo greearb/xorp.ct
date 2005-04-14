@@ -1,0 +1,66 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/command_pim,v 1.8 2003/10/15 19:02:07 pavlin Exp $
+#
+
+#
+# Send commands to a running StaticRoutes process.
+#
+
+MODULE_NAME="StaticRoutes"
+HOSTNAME=`hostname`
+
+echo "Sending command to $MODULE_NAME on $HOSTNAME..."
+
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+#
+# The optional first argument should be either -4 or -6 to specify
+# IPv4 or IPv6 command
+# 
+# The next argument should be the command to call.
+# The rest of the arguments should be the arguments to the command to call.
+#
+
+usage()
+{
+	echo "Usage: $0 [-4 | -6 ] <xrl_command> [xrl_command_arguments ... ]"
+}
+
+if [ $# -lt 1 ] ; then
+	usage;
+	exit 1
+fi
+
+case "${1}" in
+	-4)
+		if [ $# -lt 2 ] ; then
+			usage;
+			exit 1
+		fi
+		IP_VERSION=IPV4
+		shift
+		;;
+	-6)
+		if [ $# -lt 2 ] ; then
+			usage;
+			exit 1
+		fi
+		IP_VERSION=IPV6
+		shift
+		;;
+	*)
+		# XXX: IP version defaults to IPv4
+		IP_VERSION=IPV4
+		;;
+esac
+
+. ${srcdir}/../utils/xrl_shell_lib.sh
+. ${srcdir}/../static_routes/xrl_static_routes_shell_funcs.sh
+
+
+$*
+
+exit $?

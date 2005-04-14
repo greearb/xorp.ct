@@ -1,0 +1,12 @@
+/* $XORP: xorp/xrl/targets/fea_ifmgr_mirror.tgt,v 1.2 2003/08/28 00:08:53 hodson Exp $ */
+
+#include "common.xif"
+#include "fea_ifmgr_mirror.xif"
+
+/**
+ * This target is used by libfeaclient to provide a local copy of the
+ * FEA Interface Manager configuration state to Xorp processes.
+ */
+
+target fea_ifmgr_mirror implements	common/0.1,			\
+					fea_ifmgr_mirror/0.1

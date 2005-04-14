@@ -1,0 +1,372 @@
+diff -X exclude_files -Nabur ospfd2.13/ospf_sim/ospfd_sim.h ospfd2.14/ospf_sim/ospfd_sim.h
+--- ospfd2.13/ospf_sim/ospfd_sim.h	Tue Nov 20 13:33:02 2001
++++ ospfd2.14/ospf_sim/ospfd_sim.h	Fri Feb 15 10:29:28 2002
+@@ -95,8 +95,6 @@
+     bool hitless_preparation;
+     bool hitless_preparation_complete;
+     SPFtime grace_period;
+-    int n_md5;
+-    MD5Seq *snarray;
+   public:
+     SimSys(int fd);
+     ~SimSys();
+diff -X exclude_files -Nabur ospfd2.13/ospf_sim/sim_system.C ospfd2.14/ospf_sim/sim_system.C
+--- ospfd2.13/ospf_sim/sim_system.C	Tue Nov 20 13:33:02 2001
++++ ospfd2.14/ospf_sim/sim_system.C	Fri Feb 15 10:29:28 2002
+@@ -327,10 +327,6 @@
+ 
+ {
+     time_add(sys_etime, period*Timer::SECOND, &grace_period);
+-    delete snarray;
+-    snarray = new MD5Seq[n];
+-    n_md5 = n;
+-    memcpy(snarray, sns, n*sizeof(MD5Seq));
+     hitless_preparation = true;
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.13/src/helper.C ospfd2.14/src/helper.C
+--- ospfd2.13/src/helper.C	Tue Nov 20 13:32:59 2001
++++ ospfd2.14/src/helper.C	Fri Feb 15 10:29:23 2002
+@@ -75,9 +75,7 @@
+ 
+ {
+     SpfNbr *np;
+-    SPFtime grace_start;
+     int grace_period;
+-    SPFtime grace_end;
+     char *refusal = 0;
+ 
+     // Ignore our own
+@@ -85,23 +83,28 @@
+         return;
+     if (!(np = lsap->grace_lsa_parse((byte *)(hdr+1),
+ 				     ntoh16(hdr->ls_length)-sizeof(LShdr),
+-				     grace_start, grace_period)))
++				     grace_period)))
+         return;
+ 
+     // Have associated grace-LSA with a neighbor
+     if (spflog(LOG_GRACERX, 5))
+         log(np);
++    // If we are going to cancel some help sessions, do it now
++    if (topology_change)
++        htl_topology_change();
+ 
+     // Now determine whether we should accept it
+-    time_add(grace_start, grace_period*Timer::SECOND, &grace_end);
++    // Skip these checks if already helping
++    if (!np->we_are_helping()) {
+     // Neighbor must be in Full state
+     if (np->n_state != NBS_FULL)
+         refusal = "Not full";
+     // No topology changes since grace period start
+-    else if (time_less(grace_start, last_topology_change))
++	else if (np->changes_pending())
+         refusal = "Topology change";
++    }
+     // Grace period already expired?
+-    else if (time_less(grace_end, sys_etime))
++    if (refusal == 0 && grace_period <= 0)
+         refusal = "Timeout";
+ 
+     /* If we are refusing the grace request, either exit
+@@ -124,10 +127,12 @@
+         if (np->we_are_helping()) {
+ 	    np->n_helptim.stop();
+ 	    np->n_ifp->if_helping--;
++	    np->n_ifp->area()->a_helping--;
+ 	    n_helping--;
+ 	}
+ 	np->n_helptim.start(grace_period*Timer::SECOND, false);
+ 	np->n_ifp->if_helping++;
++	np->n_ifp->area()->a_helping++;
+ 	n_helping++;
+     }
+ }
+@@ -141,7 +146,6 @@
+ 
+ {
+     SpfNbr *np;
+-    SPFtime grace_start;
+     int grace_period;
+ 
+     // Ignore our own
+@@ -149,20 +153,19 @@
+         return;
+     if (!(np = lsap->grace_lsa_parse(lsap->lsa_body,
+ 				     lsap->lsa_length - sizeof(LShdr),
+-				     grace_start, grace_period)))
++				     grace_period)))
+         return;
+     // Exit helper mode
+     if (np->we_are_helping())
+         np->exit_helper_mode("Success");
+ }
+ 
+-/* Parse the body of a grace-LSA, determing a) the start of the
+- * requested grace period, b) the end, and c) the neighbor requesting
++/* Parse the body of a grace-LSA, determing a) the length of the
++ * requested grace period (from now) and b) the neighbor requesting
+  * grace.
+  */
+ 
+-SpfNbr *opqLSA::grace_lsa_parse(byte *body, int len, 
+-				SPFtime &g_start, int &g_period)
++SpfNbr *opqLSA::grace_lsa_parse(byte *body, int len, int &g_period)
+ 
+ {
+     TLVbuf buf(body, len);
+@@ -170,16 +173,6 @@
+     InAddr nbr_addr = 0;
+     int32 val;
+ 
+-    // Start of grace period determined by LS age
+-    if (sys_etime.sec < lsa_age()) {
+-        g_start.sec = 0;
+-	g_start.msec = 0;
+-    }
+-    else {
+-        g_start.sec = sys_etime.sec - lsa_age();
+-	g_start.msec = sys_etime.msec;
+-    }
+-
+     // Parse body of grace-LSA
+     g_period = 0;
+     while (buf.next_tlv(type)) {
+@@ -200,6 +193,7 @@
+ 	}
+     };
+ 
++    g_period -= (int) lsa_age();
+     return(lsa_ifp->find_nbr(nbr_addr, adv_rtr()));
+ }
+ 
+@@ -220,6 +214,7 @@
+     }
+     n_helptim.stop();
+     n_ifp->if_helping--;
++    n_ifp->area()->a_helping--;
+     ospf->n_helping--;
+     /* If neighbor is not yet full again, do the
+      * processing that should have been done when the
+@@ -247,6 +242,42 @@
+     }
+ }
+ 
++/* Determine whether a changed LSA should terminate
++ * helping sessions in one or more areas. If so,
++ * set SpfArea::cancel_help_sessions, and the sessions
++ * will be cancelled at the next timer tick. We don't
++ * cancel the sessions in this routine to avoid recursive
++ * updates of the link-state database.
++ */
++
++void OSPF::cancel_help_sessions(LSA *lsap)
++
++{
++    SpfArea *ap;
++
++    if (n_helping == 0)
++        return;
++    // Only LS types 1-5 are significant for hitless restart
++    if (lsap->lsa_type > LST_ASL)
++        return;
++    // Area-scoped change
++    else if (lsap->lsa_type < LST_ASL) {
++	ap = lsap->lsa_ap;
++	if ((ap->cancel_help_sessions = (ap->a_helping != 0)))
++	    topology_change = true;;
++    }
++    // Global-scoped change
++    else {
++        AreaIterator iter(this);
++	while ((ap = iter.get_next())) {
++	    if (ap->is_stub())
++	        continue;
++	    if ((ap->cancel_help_sessions = (ap->a_helping != 0)))
++	        topology_change = true;;
++	}
++    }
++}
++
+ /* A topology change has occurred. Cancel all helping modes,
+  * and reoriginate router-LSAs, network-LSAs and rerun
+  * Designated Router calculations, as necessary.
+@@ -258,19 +289,21 @@
+ void OSPF::htl_topology_change()
+ 
+ {
+-    // clear topolog change flag
++    AreaIterator a_iter(this);
++    SpfArea *ap;
++
+     topology_change = false;
+-    // Update time of last topology change
+-    last_topology_change = sys_etime;
+     // Cancel any helping sessions
+-    if (n_helping != 0) {
+-        IfcIterator iiter(this);
++    while ((ap = a_iter.get_next())) {
++        if (!ap->cancel_help_sessions)
++	    continue;
++	IfcIterator iiter(ap);
+ 	SpfIfc *ip;
+ 	while ((ip = iiter.get_next())) {
+-	    NbrIterator niter(ip);
+-	    SpfNbr *np;
+ 	    if (ip->if_helping == 0)
+ 	        continue;
++	    NbrIterator niter(ip);
++	    SpfNbr *np;
+ 	    while ((np = niter.get_next()))
+ 	        if (np->we_are_helping())
+ 		    np->exit_helper_mode("Topology change", false);
+@@ -279,7 +312,8 @@
+ 	    // Reoriginate network-LSA
+ 	    ip->nl_orig(false);
+ 	}
++	ap->cancel_help_sessions = false;
++    }
+ 	// Re-originate all router-LSAs
+ 	rl_orig();
+-    }
+ }
+diff -X exclude_files -Nabur ospfd2.13/src/lsdb.C ospfd2.14/src/lsdb.C
+--- ospfd2.13/src/lsdb.C	Tue Nov 20 13:32:58 2001
++++ ospfd2.14/src/lsdb.C	Fri Feb 15 10:29:22 2002
+@@ -259,9 +259,7 @@
+     // If changes, schedule new routing calculations
+     if (changed) {
+ 	rtsched(lsap, old_rte);
+-	// Only LS types 1-5 are significant for hitless restart
+-	if (lsap->lsa_type <= LST_ASL)
+-	    topology_change = true;
++	cancel_help_sessions(lsap);
+ 	if (in_hitless_restart())
+ 	    htl_check_consistency(ap, hdr);
+     }
+diff -X exclude_files -Nabur ospfd2.13/src/opqlsa.h ospfd2.14/src/opqlsa.h
+--- ospfd2.13/src/opqlsa.h	Tue Nov 20 13:32:59 2001
++++ ospfd2.14/src/opqlsa.h	Fri Feb 15 10:29:23 2002
+@@ -42,7 +42,7 @@
+     virtual void unparse();
+     virtual void build(LShdr *hdr);
+     virtual void update_in_place(LSA *);
+-    SpfNbr *grace_lsa_parse(byte *, int, SPFtime &, int &);
++    SpfNbr *grace_lsa_parse(byte *, int, int &);
+     friend class OSPF;
+ };
+ 
+diff -X exclude_files -Nabur ospfd2.13/src/ospf.C ospfd2.14/src/ospf.C
+--- ospfd2.13/src/ospf.C	Tue Nov 20 13:32:58 2001
++++ ospfd2.14/src/ospf.C	Fri Feb 15 10:29:22 2002
+@@ -119,7 +119,6 @@
+     htl_exit_reason = 0;
+     topology_change = false;
+     start_time = sys_etime;
+-    last_topology_change = sys_etime;
+     n_helping = 0;
+ 
+     n_dijkstras = 0;
+diff -X exclude_files -Nabur ospfd2.13/src/ospf.h ospfd2.14/src/ospf.h
+--- ospfd2.13/src/ospf.h	Tue Nov 20 13:32:58 2001
++++ ospfd2.14/src/ospf.h	Fri Feb 15 10:29:22 2002
+@@ -167,7 +167,6 @@
+     // Helper variables
+     bool topology_change;
+     SPFtime start_time;
+-    SPFtime last_topology_change;
+     int n_helping;	// # neighbors being helped
+ 
+     // Monitoring routines
+@@ -303,6 +302,7 @@
+     void grace_LSA_rx(class opqLSA *, LShdr *);
+     void grace_LSA_flushed(class opqLSA *);
+     void htl_topology_change();
++    void cancel_help_sessions(LSA *lsap);
+     // While restarting hitlessly
+     bool in_hitless_restart();
+     void htl_exit_criteria();
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 13,	// Minor version number
++	vminor = 14,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.13/src/spfack.C ospfd2.14/src/spfack.C
+--- ospfd2.13/src/spfack.C	Tue Nov 20 13:32:58 2001
++++ ospfd2.14/src/spfack.C	Fri Feb 15 10:29:22 2002
+@@ -343,3 +343,34 @@
+ {
+     ip->if_send_dack();
+ }
++
++/* Look through retransmission list to see if any real
++ * changes are pending to the neighbor (periodic refreshes
++ * don't count). This is used to evaluate whether we should
++ * help a neighbor requesting a hitless restart.
++ */
++
++bool SpfNbr::changes_pending()
++
++{
++    LsaListIterator iter1(&n_pend_rxl);
++    LsaListIterator iter2(&n_rxlst);
++    LsaListIterator iter3(&n_failed_rxl);
++    LSA *lsap;
++
++    while ((lsap = iter1.get_next())) {
++        if (lsap->valid() && lsap->changed)
++	    return(true);
++    }
++    while ((lsap = iter2.get_next())) {
++        if (lsap->valid() && lsap->changed)
++	    return(true);
++    }
++    while ((lsap = iter3.get_next())) {
++        if (lsap->valid() && lsap->changed)
++	    return(true);
++    }
++
++    return(false);
++}
++
+diff -X exclude_files -Nabur ospfd2.13/src/spfarea.C ospfd2.14/src/spfarea.C
+--- ospfd2.13/src/spfarea.C	Tue Nov 20 13:32:58 2001
++++ ospfd2.14/src/spfarea.C	Fri Feb 15 10:29:22 2002
+@@ -59,6 +59,8 @@
+     size_mospf_incoming = 0;
+     mospf_in_phys = 0;
+     mospf_in_count = 0;
++    a_helping = 0;
++    cancel_help_sessions = false;
+ }
+ 
+ /* Find an area data structure, given its Area ID.
+diff -X exclude_files -Nabur ospfd2.13/src/spfarea.h ospfd2.14/src/spfarea.h
+--- ospfd2.13/src/spfarea.h	Tue Nov 20 13:32:58 2001
++++ ospfd2.14/src/spfarea.h	Fri Feb 15 10:29:22 2002
+@@ -56,6 +56,9 @@
+     int size_mospf_incoming; // Size of incoming interface array
+     int *mospf_in_phys; // Incoming phyints
+     int mospf_in_count; // Number of same;
++    // Hitless restart parameters
++    int a_helping;	// # neighbors being helped in area
++    bool cancel_help_sessions; // should we cancel helping sessions?
+ 
+     AVLtree abr_tbl;	// RTRrte's for area border routers
+     AVLtree AdjAggr;	// Aggregate adjacency information
+diff -X exclude_files -Nabur ospfd2.13/src/spfnbr.h ospfd2.14/src/spfnbr.h
+--- ospfd2.13/src/spfnbr.h	Tue Nov 20 13:32:58 2001
++++ ospfd2.14/src/spfnbr.h	Fri Feb 15 10:29:22 2002
+@@ -211,6 +211,7 @@
+     bool remove_from_pending_rxmt(LSA *lsap);
+     LSA	*get_next_rxmt(LsaList * &list, uns32 &nexttime);
+     void clear_rxmt_list();
++    bool changes_pending();
+ 
+     // Packet reception functions
+     void recv_dd(Pkt *pdesc);

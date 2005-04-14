@@ -1,0 +1,210 @@
+diff -X exclude_files -Nabur ospfd2.8/linux/ospfd_linux.C ospfd2.9/linux/ospfd_linux.C
+--- ospfd2.8/linux/ospfd_linux.C	Tue Oct 23 15:44:10 2001
++++ ospfd2.9/linux/ospfd_linux.C	Fri Oct 26 15:00:37 2001
+@@ -48,6 +48,7 @@
+ #include <linux/mroute.h>
+ #include <netinet/ip.h>
+ #include <linux/if_tunnel.h>
++#include <net/if_arp.h>
+ #include "../src/ospfinc.h"
+ #include "../src/monitor.h"
+ #include "../src/system.h"
+@@ -291,7 +292,6 @@
+ 	    ifinfo = (ifinfomsg *)NLMSG_DATA(msg);
+ 	    syslog(LOG_NOTICE, "Ifc change IfIndex %d flags 0x%x",
+ 		   ifinfo->ifi_index, ifinfo->ifi_flags);
+-	    if ((ifinfo->ifi_flags & IFF_LOOPBACK) == 0)
+ 	      read_config();
+ 	    break;
+ 	  case RTM_DELLINK:	// Interface deletion
+@@ -661,9 +661,6 @@
+ 	    syslog(LOG_ERR, "SIOCGIFFLAGS Failed: %m");
+ 	    exit(1);
+ 	}
+-	// Ignore loopback interfaces
+-	if ((ifr.ifr_flags & IFF_LOOPBACK) != 0)
+-	    continue;
+ 	// Ignore master tunnel interface
+ 	if (strncmp(ifrp->ifr_name, "tunl0", 5) == 0)
+ 	    continue;
+@@ -690,14 +687,12 @@
+ 	    strcpy(phyp->phyname, ifrp->ifr_name);
+ 	    phyp->flags = 0;
+ 	    phyints.add(phyp);
+-	    if (strncmp(phyp->phyname, "tunl", 4) == 0) {
++	    ioctl(udpfd, SIOCGIFHWADDR, &ifr);
++	    if (ifr.ifr_hwaddr.sa_family == ARPHRD_TUNNEL) {
+ 	        ip_tunnel_parm tp;
+ 		phyp->tunl = true;
+ 		ifr.ifr_ifru.ifru_data = (char *)&tp;
+-		if (ioctl(udpfd, SIOCGETTUNNEL, &ifr) == -1) {
+-	            syslog(LOG_ERR, "SIOCGETTUNNEL failed: %m");
+-		    continue;
+-		}
++	        ioctl(udpfd, SIOCGETTUNNEL, &ifr);
+ 		phyp->tsrc = ntoh32(tp.iph.saddr);
+ 		phyp->tdst = ntoh32(tp.iph.daddr);
+ 		
+@@ -710,9 +705,12 @@
+ 	if (ioctl(udpfd, SIOCGIFMTU, (char *)&ifr) >= 0)
+ 	    phyp->mtu = ifr.ifr_mtu;
+ 	// store address information; real IP interfaces only
+-	if (phyp->tunl || ifrp->ifr_addr.sa_family != AF_INET)
+-	    continue;
++	// Allow loopback interfaces; just not 127.x.x.x addresses
+ 	insock = (sockaddr_in *) &ifrp->ifr_addr;
++	if (phyp->tunl ||
++	    ifrp->ifr_addr.sa_family != AF_INET ||
++	    (ntoh32(insock->sin_addr.s_addr) & 0xff000000) == 0x7f000000)
++	    continue;
+ 	addr = phyp->addr = ntoh32(insock->sin_addr.s_addr);
+ 	// Get subnet mask
+ 	if (ioctl(udpfd, SIOCGIFNETMASK, (char *)&ifr) < 0) {
+diff -X exclude_files -Nabur ospfd2.8/src/grplsa.C ospfd2.9/src/grplsa.C
+--- ospfd2.8/src/grplsa.C	Tue Oct 23 15:44:08 2001
++++ ospfd2.9/src/grplsa.C	Fri Oct 26 15:00:36 2001
+@@ -143,8 +143,10 @@
+ 	        continue;
+ 	    if (!phyp->mospf_ifp)
+ 	        continue;
+-	    if (phyp->mospf_ifp->area() == this &&
+-		phyp->mospf_ifp->if_nfull > 0) {
++	    if (phyp->mospf_ifp->area() != this)
++	        continue;
++	    if (phyp->mospf_ifp->if_nfull > 0 &&
++		phyp->mospf_ifp->is_multi_access()) {
+ 	        if (phyp->mospf_ifp->if_state == IFS_DR) {
+ 	            gmref->ls_type = hton32(LST_NET);
+ 		    gmref->ls_id = hton32(phyp->mospf_ifp->if_addr);
+@@ -153,6 +155,7 @@
+ 		}
+ 		continue;
+ 	    }
++	    // Fall through on stubs and point-to-point links
+ 	}
+ 	// Add self instead
+ 	if (!added_self) {
+diff -X exclude_files -Nabur ospfd2.8/src/mospf.C ospfd2.9/src/mospf.C
+--- ospfd2.8/src/mospf.C	Tue Oct 23 15:44:08 2001
++++ ospfd2.9/src/mospf.C	Fri Oct 26 15:00:36 2001
+@@ -159,6 +159,7 @@
+     MCache *ce;
+     int i;
+     int n_out;
++    PhyInt *phyp;
+ 
+     // Local scope multicast?
+     if ((group & 0xffffff00) == 0xe0000000)
+@@ -175,6 +176,11 @@
+ 	return(0);
+     }
+ 
++    // No interfaces installed in cache entry yet
++    AVLsearch iter2(&ospf->phyints);
++    while ((phyp = (PhyInt *)iter2.next()))
++        phyp->cached = false;
++
+     // Calculate multicast path through each area
+     while ((ap = a_iter.get_next())) {
+         uns32 cost;
+@@ -235,6 +241,8 @@
+ 	o_ifp = ospf->find_ifc(V->t_mpath->NHs[0].if_addr,
+ 			       V->t_mpath->NHs[0].phyint);
+ 	ce->down_str[i].phyint = o_ifp->if_phyint;
++	phyp = (PhyInt *)ospf->phyints.find(o_ifp->if_phyint, 0);
++	phyp->cached = true;
+ 	ce->down_str[i].ttl = V->closest_member;
+ 	if (V->lsa_type == LST_NET || o_ifp->type() == IFT_PP)
+ 	    ce->down_str[i].nbr_addr = 0;
+@@ -245,22 +253,24 @@
+ 
+     // Add stub interfaces from local group database
+     AVLsearch iter(&ospf->phyints);
+-    PhyInt *phyp;
+     while ((phyp = (PhyInt *)iter.next())) {
+ 	int phyint=(int)phyp->index1();
+-	byte mbr_ttl=255;
++	if (phyp->cached)
++	    continue;
+ 	if (ce->valid_incoming(phyint))
+ 	    continue;
+-	if (phyp->mospf_ifp &&
+-	    phyp->mospf_ifp->if_nfull == 0) {
+-	    if (ospf->local_membership.find(group, phyint))
+-	        mbr_ttl = 0;
++	if (!phyp->mospf_ifp)
++	    continue;
++	if (phyp->mospf_ifp->is_multi_access() &&
++	    phyp->mospf_ifp->if_nfull != 0)
++	    continue;
++	if (!ospf->local_membership.find(group, phyint))
++	    continue;
+ 	    i = new_entry->val.n_downstream;
+ 	    ce->down_str[i].phyint = phyint;
+-	    ce->down_str[i].ttl = mbr_ttl;
++	ce->down_str[i].ttl = 0;
+ 	    ce->down_str[i].nbr_addr = 0;
+ 	    new_entry->val.n_downstream++;
+-	}
+     }
+ 
+     if (spflog(MCACHE_REQ, 5)) {
+diff -X exclude_files -Nabur ospfd2.8/src/ospf.h ospfd2.9/src/ospf.h
+--- ospfd2.8/src/ospf.h	Tue Oct 23 15:44:08 2001
++++ ospfd2.9/src/ospf.h	Fri Oct 26 15:00:36 2001
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 8,	// Minor version number
++	vminor = 9,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.8/src/phyint.C ospfd2.9/src/phyint.C
+--- ospfd2.8/src/phyint.C	Tue Oct 23 15:44:08 2001
++++ ospfd2.9/src/phyint.C	Fri Oct 26 15:00:36 2001
+@@ -150,7 +150,7 @@
+  * to determine whether we should run IGMP on the interface and,
+  * if so, which address we should use in the Group Membership
+  * Queries.
+- * At least one of the interfaces must be broadcast, with MOSPF
++ * At least one of the interfaces must be numbered, with MOSPF
+  * enabled, for us to send IGMP queries. As for what source address
+  * to use, we always use the smallest interface address associated
+  * with the interface (which might not be the interface running
+@@ -178,7 +178,7 @@
+ 	    if (ospf->mospf_enabled() &&
+ 		(ip->if_mcfwd == IF_MCFWD_MC))
+ 		multicast_routing = true;
+-	    if (ip->type() != IFT_BROADCAST)
++	    if (ip->unnumbered())
+ 	        continue;
+ 	    // Can do IGMP on the interface
+ 	    if (my_addr == 0 || ip->if_addr < my_addr)
+@@ -390,7 +390,12 @@
+ 	return;
+     }
+ 
+-    phyp = (PhyInt *)phyints.find((uns32) phyint, 0);
++    if (!(phyp = (PhyInt *)phyints.find((uns32) phyint, 0))) {
++	if (spflog(IGMP_RCV_NOIFC, 3))
++	    log(pkt);
++	return;
++    }
++
+     group = ntoh32(igmpkt->ig_group);
+     if (spflog(IGMP_RCV, 1)) {
+ 	log(igmpkt->ig_type);
+diff -X exclude_files -Nabur ospfd2.8/src/phyint.h ospfd2.9/src/phyint.h
+--- ospfd2.8/src/phyint.h	Tue Oct 23 15:44:08 2001
++++ ospfd2.9/src/phyint.h	Fri Oct 26 15:00:36 2001
+@@ -71,6 +71,8 @@
+     int startup_query_count;
+     int last_member_query_interval;// Tenths of seconds
+     int last_member_query_count;
++    // Dynamic data
++    bool cached;	// Already installed in multicast entry?
+   public:
+     PhyInt(int phyint);
+     inline bool IAmQuerier();

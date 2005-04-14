@@ -1,0 +1,26 @@
+/* $XORP: xorp/etc/templates/rib.tp,v 1.14 2004/06/04 04:47:05 pavlin Exp $ */
+
+plumbing {
+    rib {
+	targetname:	txt = "rib";
+    }
+}
+
+plumbing {
+    rib {
+	%help:		short		"Configure the Routing Information Base module";
+	%modinfo:	provides	rib;
+	%modinfo:	depends		fea;
+	%modinfo:	path		"rib/xorp_rib";
+	%modinfo:	default_targetname "rib";
+	%modinfo:	status_method	xrl "$(rib.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl "$(rib.targetname)/common/0.1/shutdown";
+
+	%mandatory:	targetname;
+
+	targetname {
+	    %help:	short "Set the target name";
+	    %set:;
+	}
+    }
+}

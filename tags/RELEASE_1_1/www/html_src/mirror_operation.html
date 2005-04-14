@@ -1,0 +1,54 @@
+<h1>Operating a Mirror</h1>
+<p>
+If you would like to run a mirror please send a request to
+feedback@xorp.org, with your IP address. We require your IP address to
+enable access and to create a wwwNNN.xorp.org DNS entry.
+
+<p>
+Currently 600MB of disk space is required. Each additional release
+will require on the order of 200MB (130MB of this is the LiveCD).
+
+<p>
+We are running an <a href="http://samba.anu.edu.au/rsync/">anonymous
+rsync server</a>. You need to periodically (we suggest hourly) run the
+following script (or equivalent).
+
+<pre>
+#!/bin/sh
+
+# Pathname of the local mirror directory.
+XORP_ROOT=/usr/local/www
+XORP_MAIN=$XORP_ROOT/xorp
+XORP_RELEASES=$XORP_ROOT/xorp-releases
+
+rsync -a www.xorp.org::xorp $XORP_MAIN
+rsync -a www.xorp.org::xorp-releases $XORP_RELEASES
+</pre>
+
+<p>
+For logistic reasons we maintain two trees, one is auto-generated
+(main web pages) the other (release data) is maintained manually. On
+our Apache web server we use the "Alias" command to link the release
+data into place. The simpler option is to copy both trees to the same
+directory, but then the potentially dangerous "--delete" option could
+not be used with rsync.
+
+<p>
+It would be simplest from our point of view if mirrors are run as <a
+href="http://httpd.apache.org/docs/vhosts/">virtual hosts</a>, rather
+than as a subtree of an existing server.
+
+<p>
+The solution (if you are running an Apache server) is:
+
+<pre>
+&lt;VirtualHost {your IP address here}&gt;
+    ServerAdmin {your admin email address}
+    DocumentRoot /usr/local/www/xorp
+    ServerName {your xorp dns name}
+    ErrorLog /var/log/www-xorp-error_log
+    CustomLog /var/log/www-xorp-access_log common
+
+    Alias /releases "/usr/local/www/xorp-releases"
+&lt;/VirtualHost&gt;
+</pre>

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/rcommand_pim,v 1.2 2003/03/25 00:29:46 pavlin Exp $
+#
+
+#
+# Run command_pim on a remote machine
+# Usage: 'rcommand_pim <hostname> <xrl_command> [xrl_command_arguments ... ]
+#
+
+if [ $# -lt 2 ] ; then
+    echo "Usage: $0 <hostname> [-4 | -6 ] <xrl_command> [xrl_command_arguments ... ]"
+    exit 0
+fi
+
+#
+# Get the hostname, the command, and the command arguments
+#
+hostname=$1
+os=`ssh $hostname uname -s`
+config_path="~/work/xorp/$os-xorp/pim"
+shift
+xrl_command=$*;
+
+# Run command on remote host
+ssh $hostname "(cd $config_path; ./command_pim $xrl_command; )"
+
+exit $?

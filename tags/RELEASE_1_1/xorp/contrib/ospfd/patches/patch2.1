@@ -1,0 +1,40 @@
+diff -X exclude_files -Nabur ospfd2.0/src/opqlsa.C ospfd2.1/src/opqlsa.C
+--- ospfd2.0/src/opqlsa.C	Thu Apr  5 14:56:22 2001
++++ ospfd2.1/src/opqlsa.C	Thu Apr 19 17:50:48 2001
+@@ -48,9 +48,9 @@
+     exception = true;
+     // Store for Opaque-LSA application upload, in case
+     // LSA is deleted before it can be uploaded
+-    phyint = lsa_ifp->if_phyint;
+-    if_addr = lsa_ifp->if_addr;
+-    a_id = lsa_ap->id();
++    phyint = (lsa_ifp ? lsa_ifp->if_phyint : -1);
++    if_addr = (lsa_ifp ? lsa_ifp->if_addr : 0);
++    a_id = (lsa_ap ? lsa_ap->id() : 0);
+ }
+ 
+ /* Unparse an opaque-LSA. NULL function.
+diff -X exclude_files -Nabur ospfd2.0/src/ospf.h ospfd2.1/src/ospf.h
+--- ospfd2.0/src/ospf.h	Tue Apr  3 16:14:01 2001
++++ ospfd2.1/src/ospf.h	Thu Apr 19 17:50:47 2001
+@@ -270,7 +270,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 0,	// Minor version number
++	vminor = 1,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.0/src/spfcalc.C ospfd2.1/src/spfcalc.C
+--- ospfd2.0/src/spfcalc.C	Mon Apr  2 17:16:39 2001
++++ ospfd2.1/src/spfcalc.C	Thu Apr 19 17:50:47 2001
+@@ -787,7 +787,7 @@
+     
+     ifp = ospf->find_nbr_ifc(address());
+     match = inrttbl->best_match(address());
+-    if (!match || !(match->intra_AS() || match->r_type == RT_DIRECT))
++    if (!match || !match->intra_AS())
+ 	r_type = RT_NONE;
+     else {
+ 	r_type = match->type();
