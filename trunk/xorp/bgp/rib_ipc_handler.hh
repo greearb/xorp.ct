@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.34 2004/11/10 22:50:14 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.35 2005/03/25 02:52:45 pavlin Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -45,7 +45,7 @@ public:
 
     bool busy();
 private:
-    static const size_t WINDOW = 1;	// Maximum number of XRLs
+    static const size_t WINDOW = 100;	// Maximum number of XRLs
 					// allowed in flight.
 
     RibIpcHandler &_rib_ipc_handler;
