@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.21 2005/01/30 05:30:39 pavlin Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.22 2005/03/25 02:53:44 pavlin Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -559,7 +559,6 @@ public:
     {
 	// printf("operator= , old node: %p new node: %p\n", _cur, x._cur);
 	Node *oldnode = _cur;
-	_trie = x._trie;
 	_cur = x._cur;
 	_root = x._root;
 
@@ -577,6 +576,7 @@ public:
 		    set_root(oldnode->erase());
 	    }
 	}
+	_trie = x._trie;
 	return *this;
     }
 private:
@@ -809,7 +809,6 @@ public:
     {
 	// printf("operator= , old node: %p new node: %p\n", _cur, x._cur);
 	Node *oldnode = _cur;
-	_trie = x._trie;
 	_cur = x._cur;
 	_root = x._root;
 
@@ -826,6 +825,7 @@ public:
 		const_cast<RefTrie*>(_trie)->set_root(oldnode->erase());
 	    }
 	}
+	_trie = x._trie;
 	return *this;
     }
 

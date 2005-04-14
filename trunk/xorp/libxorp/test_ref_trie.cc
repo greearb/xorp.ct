@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.9 2005/03/03 07:48:00 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.10 2005/03/25 02:53:47 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -186,6 +186,60 @@ void test_upper_bound6(IPv6 test_addr, IPv6 test_answer) {
 	abort();
     }
     printf("-----------\n");
+}
+
+void test_equals_preorder()
+{
+    printf("Remove entry that is being pointed at by an iterator\n");
+
+    // Create an trie and install a single entry
+    RefTrie<IPv4, IPv4RouteEntry*> test_trie;
+    IPv4RouteEntry d1;
+    IPv4Net n1(IPv4("1.2.1.0"), 24);
+    printf("adding n1: %s route: %p\n", n1.str().c_str(), &d1);
+    test_trie.insert(n1, &d1);
+
+    // Create an iterator pointing at this entry
+    RefTrie<IPv4, IPv4RouteEntry*>::PreOrderIterator iter;
+    iter = test_trie.begin();
+
+    // Erase the entry
+    test_trie.erase(iter);
+
+    // The iterator is now the only thing pointing at the entry.
+    // Zap the iterator to allow the entry that is being pointed at to
+    // be removed. Used to triger a bug in the iterator code.
+    RefTrie<IPv4, IPv4RouteEntry*>::PreOrderIterator empty;
+    iter = empty;
+
+    printf("PASS\n");
+}
+
+void test_equals_postorder()
+{
+    printf("Remove entry that is being pointed at by an iterator\n");
+
+    // Create an trie and install a single entry
+    RefTrie<IPv4, IPv4RouteEntry*> test_trie;
+    IPv4RouteEntry d1;
+    IPv4Net n1(IPv4("1.2.1.0"), 24);
+    printf("adding n1: %s route: %p\n", n1.str().c_str(), &d1);
+    test_trie.insert(n1, &d1);
+
+    // Create an iterator pointing at this entry
+    RefTrie<IPv4, IPv4RouteEntry*>::PostOrderIterator iter;
+    iter = test_trie.begin();
+
+    // Erase the entry
+    test_trie.erase(iter);
+
+    // The iterator is now the only thing pointing at the entry.
+    // Zap the iterator to allow the entry that is being pointed at to
+    // be removed. Used to triger a bug in the iterator code.
+    RefTrie<IPv4, IPv4RouteEntry*>::PostOrderIterator empty;
+    iter = empty;
+
+    printf("PASS\n");
 }
 
 int main() {
@@ -585,6 +639,8 @@ int main() {
     }
     printf("PASS\n");
 
+    test_equals_postorder();
+    test_equals_preorder();
 #if	0
     //-------------------------------------------------------    
     printf("-----------\n");
