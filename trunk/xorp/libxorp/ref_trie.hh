@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.22 2005/03/25 02:53:44 pavlin Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.23 2005/04/14 09:54:34 atanu Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -871,7 +871,7 @@ public:
      */
     RefTrie() : _root(0), _payload_count(0), _deleted(false)	{}
 
-    ~RefTrie()					{ delete_all_nodes(); }
+    virtual ~RefTrie()	{ delete_all_nodes(); }
 
     void delete_self() {
 	_deleted = true;
