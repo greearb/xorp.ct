@@ -220,6 +220,16 @@ class Ospf {
      */
     PeerManager<A>& get_peer_manager() { return _peer_manager; }
 
+    /**
+     * Get the Router ID.
+     */
+    OspfTypes::RouterID get_router_id() const { return _router_id; }
+
+    /**
+     * Set the Router ID.
+     */
+    void set_router_id(OspfTypes::RouterID id) { _router_id = id; }
+
  private:
     const OspfTypes::Version _version;	// OSPF version.
     EventLoop& _eventloop;
@@ -233,6 +243,8 @@ class Ospf {
     LsaDecoder _lsa_decoder;		// LSA decoders.
     PeerManager<A> _peer_manager;
     LS_database_manager<A> _database;	// Database manager.
+
+    OspfTypes::RouterID _router_id;	// Router ID.
 };
 
 #endif // __OSPF_OSPF_HH__
