@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.4 2004/09/17 13:48:51 abittau Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.5 2005/03/25 02:54:09 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -22,11 +22,11 @@
 
 using namespace policy_utils;
 
-Term::Term(const string& name) : _name(name),
-				 _source_nodes(NULL),
-				 _dest_nodes(NULL), 
-				 _action_nodes(NULL) {}
-
+Term::Term(const string& name) : _name(name) {
+    _source_nodes = new vector<Node*>;
+    _dest_nodes = new vector<Node*>;
+    _action_nodes = new vector<Node*>;
+}
 
 Term::~Term() {
     delete_vector(_source_nodes);
