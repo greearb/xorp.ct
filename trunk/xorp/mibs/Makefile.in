@@ -32,13 +32,11 @@ datadir = @datadir@
 sysconfdir = @sysconfdir@
 sharedstatedir = @sharedstatedir@
 localstatedir = @localstatedir@
-libdir = @libdir@
 infodir = @infodir@
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
 pkgdatadir = $(datadir)/@PACKAGE@
-pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
 top_builddir = .
 
@@ -92,6 +90,10 @@ snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
 bindir = $(prefix)/$(subdir)
+
+# Redefine the lib and pkglib installation directories
+libdir = $(prefix)/$(subdir)
+pkglibdir = $(prefix)/$(subdir)
 
 # --- Options
 ETAGS_ARGS = --c++
