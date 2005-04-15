@@ -259,9 +259,19 @@ Peer<A>::start_hello_timer()
 {
     // XXX - The hello packet should have all its parameters set.
 
+    // Schedule one for the future.
     _hello_timer = _ospf.get_eventloop().
 	new_periodic(_hello_packet.get_hello_interval() * 1000,
 		     callback(this, &Peer<A>::send_hello_packet));
+
+    // Send one immediately.
+    send_hello_packet();
+
+    // A more logical way of structuring the code may have been to get
+    // send_hello_packet to schedule the next hello packet. The
+    // problem with such an approach is that the interval between
+    // transmissions would not be fixed. Any elasticity would allow
+    // hello packets to become synchronized which is bad.
 }
 
 template <typename A>
