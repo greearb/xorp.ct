@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.34 2005/04/13 03:09:26 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.35 2005/04/15 20:32:37 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -392,6 +392,24 @@ the login shell is csh or tcsh):
  ssh www.xorp.org
  cd /home/www/u1/www/data/xorp
  cvs update -d -P
+
+========================================================================
+2725.	TASK: Verify that all the links on XORP main Web server www.xorp.org
+	      are valid.
+	WHO:  Release manager
+	WHEN: Right after the release
+	COMMANDS:
+	 # You can use the WDG Link Valet tool for link validation:
+	 # http://www.htmlhelp.com/tools/valet/
+
+========================================================================
+2750.	TASK: Verify that all the HTML on XORP main Web server www.xorp.org
+	      is valid.
+	WHO:  Release manager
+	WHEN: Right after the release
+	COMMANDS:
+	 # You can use the WDG HTML Validator tool:
+	 # http://www.htmlhelp.com/tools/validator/
 
 ========================================================================
 2800.	TASK: Send email to xorp-dev@xorp.org that the release process has
