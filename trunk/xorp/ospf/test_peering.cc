@@ -61,6 +61,18 @@ class DebugIO : public IO {
 
 	_packets++;
 
+	if (!_forward_cb.is_empty())
+	    _forward_cb->dispatch(interface, vif, data, len);
+	return true;
+    }
+
+    /**
+     * Register where frames should be forwarded. Specific to DebugIO.
+     */
+    bool register_forward(ReceiveCallback cb)
+    {
+	_forward_cb = cb;
+
 	return true;
     }
 
@@ -122,6 +134,8 @@ class DebugIO : public IO {
     EventLoop& _eventloop;
     PacketDecoder _dec;
     int _packets;
+
+    ReceiveCallback _forward_cb;
 };
 
 /**
