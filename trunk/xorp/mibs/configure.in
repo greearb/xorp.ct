@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.5 2005/04/12 08:33:28 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.6 2005/04/15 00:07:58 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -30,6 +30,13 @@ AC_VALIDATE_CACHED_SYSTEM_TUPLE(
 	rm -f config.cache
 	exec ./configure
 )
+
+dnl
+dnl Append "mibs" to the installation prefix, because we are using
+dnl a separate configure.in to configure the mibs stuff, and we want
+dnl to install everything relative to the xorp/mibs sub-directory.
+dnl
+prefix="${prefix}/mibs"
 
 dnl ---------------------------------------------------------------------------
 dnl Command line options
