@@ -124,6 +124,10 @@ class DebugIO : public IO {
     int _packets;
 };
 
+/**
+ * Configure a single peering. Nothing is really expected to go wrong
+ * but the test is useful to verify the normal path through the code.
+ */
 template <typename A> 
 bool
 single_peer(TestInfo& info, OspfTypes::Version version)
@@ -152,11 +156,15 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     // Bring the peering up
     ospf.get_peer_manager().set_state_peer(peerid, true);
 
+    // XXX - We don't have a fall back position if no packets are generated.
     while (ospf.running()) {
 	eventloop.run();
 	if (2 == io.packets())
 	    break;
     }
+
+    // Take the peering down
+    ospf.get_peer_manager().set_state_peer(peerid, false);
 
     return true;
 }

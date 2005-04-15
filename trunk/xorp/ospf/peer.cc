@@ -50,7 +50,7 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
 template <typename A>
 PeerOut<A>::~PeerOut()
 {
-    take_down_peering();
+    set_state(false);
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
     for(i = _areas.begin(); i != _areas.end(); i++)
