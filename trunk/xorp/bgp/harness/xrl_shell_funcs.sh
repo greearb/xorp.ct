@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.8 2004/06/04 23:58:36 atanu Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.9 2005/03/18 01:44:48 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../../libxipc/call_xrl -w 10}
@@ -37,14 +37,14 @@ coord()
 
 status()
 {
-#    echo -n "Status $* "
+#    echo "Status $* "
     $CALLXRL "finder://coord/coord/0.1/status?peer:txt=$1" |
     sed -e 's/^status:txt=//' -e 's/+/ /g'
 }
 
 pending()
 {
-    echo -n "Pending "
+    echo "Pending "
     $CALLXRL "finder://coord/coord/0.1/pending"
 }
 
@@ -53,55 +53,55 @@ pending()
 #
 register()
 {
-    echo -n "Register $* "
+    echo "Register $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/register?coordinator:txt=$1"
 }
 
 packetisation()
 {
-    echo -n "Packetisation $* "
+    echo "Packetisation $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/packetisation?protocol:txt=$1"
 }
 
 connect()
 {
-    echo -n "Connect $* "
+    echo "Connect $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/connect?host:txt=$1&port:u32=$2"
 }
 
 send()
 {
-    echo -n "Send $* "
+    echo "Send $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/send?data:txt=$*"
 }
 
 listen()
 {
-    echo -n "Listen $* "
+    echo "Listen $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/listen?address:txt=$1&port:u32=$2"
 }
 
 bind()
 {
-    echo -n "Bind $* "
+    echo "Bind $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/bind?address:txt=$1&port:u32=$2"
 }
 
 disconnect()
 {
-    echo -n "Disconnect $* "
+    echo "Disconnect $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/disconnect"
 }
 
 reset()
 {
-    echo -n "Reset $* "
+    echo "Reset $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/reset"
 }
 
 terminate()
 {
-    echo -n "Terminate "
+    echo "Terminate "
     $CALLXRL "finder://$BASE/test_peer/0.1/terminate"
 }
 
