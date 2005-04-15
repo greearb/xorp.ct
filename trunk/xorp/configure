@@ -3252,17 +3252,19 @@ fi;
 # Check whether --with-snmp or --without-snmp was given.
 if test "${with_snmp+set}" = set; then
   withval="$with_snmp"
-   snmp="yes";
-	   MIBS="mibs";
+
+	    if test "${with_snmp}" = "yes"; then
+	      MIBS="mibs";
 
 
 subdirs="$subdirs mibs"
 
+	    else
+	      MIBS="";
+	    fi
 
 else
-   snmp="no";
-	   MIBS="";
-
+   MIBS="";
 
 fi;
 

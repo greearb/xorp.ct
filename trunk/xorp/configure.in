@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.132 2005/03/25 04:03:22 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.133 2005/04/12 08:33:27 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -217,13 +217,15 @@ dnl --with-snmp
 dnl ----------------------------
 AC_ARG_WITH(snmp,
 	[  --with-snmp                   build XORP MIBs for Net-SNMP],
-	 [ snmp="yes";
-	   MIBS="mibs";
-	   AC_CONFIG_SUBDIRS(mibs)
+	 [
+	    if test "${with_snmp}" = "yes"; then
+	      MIBS="mibs";
+	      AC_CONFIG_SUBDIRS(mibs)
+	    else
+	      MIBS="";
+	    fi
 	 ],
-	 [ snmp="no";
-	   MIBS="";
-	 ]
+	 [ MIBS=""; ]
 )
 AC_SUBST(MIBS)
 

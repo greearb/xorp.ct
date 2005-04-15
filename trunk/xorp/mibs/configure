@@ -863,7 +863,7 @@ Optional Packages:
   --with-openssl=DIR               specify root of OpenSSL installation
   --with-path-to-snmpd=DIR         specify path to the snmpd executable
   --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree
-  --without-snmp                   do not build XORP MIBs for Net-SNMP
+  --with-snmp                   build XORP MIBs for Net-SNMP
   --with-dmalloc=DIR    use dmalloc (http://www.dmalloc.com/) from DIR
 
 Some influential environment variables:
@@ -3116,10 +3116,9 @@ fi;
 # Check whether --with-snmp or --without-snmp was given.
 if test "${with_snmp+set}" = set; then
   withval="$with_snmp"
-  snmp="no";
-else
-  snmp="yes";
 
+else
+  with_snmp="false";
 fi;
 
 
@@ -4981,7 +4980,7 @@ fi
 
 
 
-if test "${snmp}" = "yes"; then
+if test "${with_snmp}" = "yes"; then
     # Extract the first word of "net-snmp-config", so it can be a program name with args.
 set dummy net-snmp-config; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5

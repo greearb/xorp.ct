@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.4 2005/03/25 19:05:44 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.5 2005/04/12 08:33:28 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -118,11 +118,12 @@ AC_ARG_WITH(path-to-net-snmp-src,
 )
 
 dnl ----------------------------
-dnl --without-snmp
+dnl --with-snmp
 dnl ----------------------------
 AC_ARG_WITH(snmp,
-	[  --without-snmp                   do not build XORP MIBs for Net-SNMP],
-	[snmp="no";], [snmp="yes";]
+	[  --with-snmp                   build XORP MIBs for Net-SNMP],
+	[],
+	[with_snmp="false";]			dnl XXX: disable by default
 )
 
 
@@ -246,7 +247,7 @@ dnl ---------------------------------------------------------------------------
 dnl SNMP
 dnl ---------------------------------------------------------------------------
 
-if test "${snmp}" = "yes"; then
+if test "${with_snmp}" = "yes"; then
     AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false")
 else
     net_snmp_found="skip_check"
