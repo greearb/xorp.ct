@@ -202,6 +202,17 @@ The configuration information can be provided in one of the two ways:
     before using it).
 
 <LI>Use the xorpsh command line interface after the rtrmgr is started.
+    The xorpsh has to be in configurational mode:
+<PRE>
+    Xorp> configure 
+    Entering configuration mode.
+    There are no other users in configuration mode.
+    [edit]
+    XORP> 
+</PRE>
+
+   On UNIX, only an user who belongs to group "xorp" can run xorpsh
+   in configurational mode.
    It should be noted that command line completion in the xorpsh
    does greatly simplify configuration.
 </UL>
