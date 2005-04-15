@@ -1,11 +1,14 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mibs/Makefile.am,v 1.29 2005/03/16 02:03:06 pavlin Exp $
+## $XORP: xorp/mibs/Makefile.am,v 1.30 2005/04/14 09:38:37 atanu Exp $
 ##
 
 # All of the following shared objects will be installed in
 # @pkglibdir@ rather than @libdir@ as they use the pkglib prefix.
 # This can be changed by setting pkglibdir directly.
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 # --- Options
 ETAGS_ARGS		= --c++

@@ -17,7 +17,7 @@
 # @pkglibdir@ rather than @libdir@ as they use the pkglib prefix.
 # This can be changed by setting pkglibdir directly.
 
-# --- Options
+# Redefine the bin installation directory
 
 SHELL = @SHELL@
 
@@ -26,8 +26,6 @@ top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
-
-bindir = @bindir@
 sbindir = @sbindir@
 libexecdir = @libexecdir@
 datadir = @datadir@
@@ -93,6 +91,9 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
+bindir = $(prefix)/$(subdir)
+
+# --- Options
 ETAGS_ARGS = --c++
 
 SUBDIRS = snmpdscripts tests
