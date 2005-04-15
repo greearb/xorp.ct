@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.10 2005/03/25 02:53:47 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.11 2005/04/14 09:54:34 atanu Exp $"
 
 #include "libxorp_module.h"
 
@@ -195,7 +195,7 @@ void test_equals_preorder()
     // Create an trie and install a single entry
     RefTrie<IPv4, IPv4RouteEntry*> test_trie;
     IPv4RouteEntry d1;
-    IPv4Net n1(IPv4("1.2.1.0"), 24);
+    IPv4Net n1("1.2.1.0/24");
     printf("adding n1: %s route: %p\n", n1.str().c_str(), &d1);
     test_trie.insert(n1, &d1);
 
@@ -222,7 +222,7 @@ void test_equals_postorder()
     // Create an trie and install a single entry
     RefTrie<IPv4, IPv4RouteEntry*> test_trie;
     IPv4RouteEntry d1;
-    IPv4Net n1(IPv4("1.2.1.0"), 24);
+    IPv4Net n1("1.2.1.0/24");
     printf("adding n1: %s route: %p\n", n1.str().c_str(), &d1);
     test_trie.insert(n1, &d1);
 
