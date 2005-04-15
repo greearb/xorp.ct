@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.35 2005/04/15 20:32:37 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.36 2005/04/15 22:43:30 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -433,7 +433,7 @@ the login shell is csh or tcsh):
 2955.	TASK: Contact the FreeBSD maintainer of net/xorp to update the
 	      entry:
 	       http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/
-	      The mainteiner's email address is available from the Makefile:
+	      The maintainer's email address is available from the Makefile:
 	       http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/Makefile
 	WHO:  Release manager
 	WHEN: Right after the release
@@ -444,8 +444,12 @@ the login shell is csh or tcsh):
 2960.	TASK: Contact the NetBSD maintainer of net/xorp to update the
 	      entry:
 	       http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/
-	      The mainteiner's email address is available from the Makefile:
+	      The maintainer's email address is available from the Makefile:
 	       http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/Makefile
+	      If the maintainer's email address is generic, then the following
+	      form can be used to submit the request:
+	      http://www.netbsd.org/cgi-bin/sendpr.cgi?gndb=netbsd
+
 	WHO:  Release manager
 	WHEN: Right after the release
 
@@ -453,7 +457,7 @@ the login shell is csh or tcsh):
 2965.	TASK: Contact the OpenBSD maintainer of net/xorp to update the
 	      entry:
 	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/
-	      The mainteiner's email address is available from the Makefile:
+	      The maintainer's email address is available from the Makefile:
 	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/Makefile
 	WHO:  Release manager
 	WHEN: Right after the release
