@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.33 2005/03/29 19:58:50 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.34 2005/04/13 03:09:26 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -32,6 +32,13 @@ the login shell is csh or tcsh):
 ========================================================================
 0300.	TASK: Stop adding new features.
 	WHO:  Everyone
+	WHEN: 1 week before the release date
+
+========================================================================
+0350.	TASK: Send email to xorp-mirrors@xorp.org to tell all mirror
+	      administrators to prepare for the forthcoming release
+	      and the result increase in disk space and bandwidth usage.
+	WHO:  Release manager
 	WHEN: 1 week before the release date
 
 ========================================================================
@@ -266,7 +273,7 @@ the login shell is csh or tcsh):
  # then $ReleaseVersion must be 0.5
  # The release version defined in the first line below:
  # Commands continue from the previous task
- setenv ReleaseVersion `cat VERSION`
+ setenv ReleaseVersion `cat xorp/VERSION`
  echo $ReleaseVersion
  mkdir tmp
  cd tmp
@@ -299,6 +306,9 @@ the login shell is csh or tcsh):
 	WHEN: Release time
 	COMMANDS:
  # See other/LiveCD/README
+ # Note that the LiveCD preparation process creates a file named LiveCD.iso,
+ # and that file needs to be explicitly compressed by hand:
+ #   gzip LiveCD.iso
 
 ========================================================================
 2500.	TASK: Copy the tarballs to the web server
@@ -356,7 +366,7 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: Release time
 	MISC: - Update www/html_src/livecd.html with the LiveCD MD5
-		checksum.
+		checksum, and the LiveCD size.
 	      - Update www/html_src/download.html with the MD5 checksum
 		of the XORP source code tarball.
 
@@ -398,6 +408,35 @@ the login shell is csh or tcsh):
 ========================================================================
 2950.	TASK: Update the FreshMeat XORP entry:
                http://freshmeat.net/projects/xorp/
+	WHO:  Release manager
+	WHEN: Right after the release
+
+========================================================================
+2955.	TASK: Contact the FreeBSD maintainer of net/xorp to update the
+	      entry:
+	       http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/
+	      The mainteiner's email address is available from the Makefile:
+	       http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/Makefile
+	WHO:  Release manager
+	WHEN: Right after the release
+	MISC: Note that currently there is no XORP port entry for FreeBSD,
+	      hence this task applies once the entry has been created.
+
+========================================================================
+2960.	TASK: Contact the NetBSD maintainer of net/xorp to update the
+	      entry:
+	       http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/
+	      The mainteiner's email address is available from the Makefile:
+	       http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/Makefile
+	WHO:  Release manager
+	WHEN: Right after the release
+
+========================================================================
+2965.	TASK: Contact the OpenBSD maintainer of net/xorp to update the
+	      entry:
+	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/
+	      The mainteiner's email address is available from the Makefile:
+	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/Makefile
 	WHO:  Release manager
 	WHEN: Right after the release
 
