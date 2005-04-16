@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.23 2005/02/27 20:49:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.24 2005/03/25 02:53:59 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -221,7 +221,7 @@ PimMfc::recompute_iif_olist_mfc()
 }
 
 //
-// A method for recomputing and setting the SPT bit that
+// A method for recomputing and setting the SPTbit that
 // is triggered by the dependency-tracking machinery.
 //
 // Note that the spec says that the recomputation
@@ -234,7 +234,7 @@ PimMfc::recompute_iif_olist_mfc()
 // a system uncall once the first multicast packet is received for
 // forwarding.
 //
-// Note: the SPT bit setting applies only if there is an (S,G) PimMfc entry.
+// Note: the SPTbit setting applies only if there is an (S,G) PimMfc entry.
 // Return true if state has changed, otherwise return false.
 bool
 PimMfc::recompute_update_sptbit_mfc()
@@ -247,14 +247,14 @@ PimMfc::recompute_update_sptbit_mfc()
 	return false;
 
     if (pim_mre_sg->is_spt()) {
-	// XXX: nothing to do, because the SPT bit is already set
+	// XXX: nothing to do, because the SPTbit is already set
 	return false;
     }
 
     pim_mre_sg->update_sptbit_sg(iif_vif_index());
 
     if (pim_mre_sg->is_spt())
-	return true;	// XXX: the SPT bit has been set
+	return true;	// XXX: the SPTbit has been set
 
     return false;
 }
