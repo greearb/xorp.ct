@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.39 2004/08/13 23:24:03 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.40 2005/03/25 02:53:59 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -124,9 +124,9 @@ public:
     // Note: applies only for (S,G)
     void	set_spt(bool v);
     
-    const IPvX*	rp_addr_ptr() const;	 // The RP address
-    const string rp_addr_string() const; // C++ string with the RP address
-					 // or "RP_ADDR_UNKNOWN"
+    const IPvX*	rp_addr_ptr() const;	// The RP address
+    string	rp_addr_string() const;	// C++ string with the RP address
+					// or "RP_ADDR_UNKNOWN"
     
     //
     // The RP entry
@@ -750,7 +750,19 @@ public:
     Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
     XorpTimer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
 						// support
-    
+
+    //
+    // PMBR info
+    //
+    // PMBR: the first PMBR to send a Register for this source
+    // with the Border bit set.
+    // Note: applies only for (S,G)
+    const IPvX&	pmbr_addr() const { return _pmbr_addr; }
+    void	set_pmbr_addr(const IPvX& v) { _pmbr_addr = v; }
+    void	clear_pmbr_addr() { _pmbr_addr = IPvX::ZERO(family()); }
+    bool	is_pmbr_addr_set() const { return (_pmbr_addr != IPvX::ZERO(family())); }
+    IPvX	_pmbr_addr;		// The address of the PMBR
+
     //
     // MISC. info
     //

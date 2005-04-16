@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.30 2005/02/27 20:49:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.31 2005/03/25 02:53:59 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -55,27 +55,23 @@
 
 PimMre::PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
     : Mre<PimMre>(source, group),
-    _pim_mrt(pim_mrt)
+      _pim_mrt(pim_mrt),
+      _pim_rp(NULL),
+      _mrib_rp(NULL),
+      _mrib_s(NULL),
+      _nbr_mrib_next_hop_rp(NULL),
+      _nbr_mrib_next_hop_s(NULL),
+      _rpfp_nbr_wc(NULL),
+      _rpfp_nbr_sg(NULL),
+      _rpfp_nbr_sg_rpt(NULL),
+      _wc_entry(NULL),
+      _rp_entry(NULL),
+      _sg_sg_rpt_entry(NULL),
+      _pmbr_addr(IPvX::ZERO(family())),
+      _flags(0)
 {
-    _pim_rp = NULL;
-    
-    _mrib_rp = NULL;
-    _mrib_s = NULL;
-    
-    _nbr_mrib_next_hop_rp = NULL;
-    _nbr_mrib_next_hop_s = NULL;
-    _rpfp_nbr_wc = NULL;
-    _rpfp_nbr_sg = NULL;
-    _rpfp_nbr_sg_rpt = NULL;
-    
-    _wc_entry = NULL;
-    _rp_entry = NULL;
-    _sg_sg_rpt_entry = NULL;
-    
     for (size_t i = 0; i < MAX_VIFS; i++)
 	_assert_winner_metrics[i] = NULL;
-    
-    _flags = 0;
 }
 
 PimMre::~PimMre()
@@ -373,7 +369,7 @@ PimMre::rp_addr_ptr() const
     return (NULL);
 }
 
-const string
+string
 PimMre::rp_addr_string() const
 {
     const IPvX *addr_ptr = rp_addr_ptr();
@@ -385,7 +381,8 @@ PimMre::rp_addr_string() const
 }
 
 //
-// Set of state interface functions (See Section 4.1.6 in I-D ver. 03)
+// Set of state interface functions
+// (See the "State Summarization Macros" section)
 //
 // Note: works for all entries
 const Mifset&
@@ -891,7 +888,20 @@ PimMre::cancel_keepalive_timer()
     
     if (! is_keepalive_timer_running())
 	return;		// Nothing changed
-    
+
+    //
+    // If an RP, the PMBR value must be cleared when the Keepalive Timer
+    // expires.
+    //
+    // XXX: We always clear the PMBR value and we don't use "is_rp()"
+    // to check whether we are the RP, because the PMBR value is not used
+    // on non-RPs, so it doesn't hurt to unconditionally reset it.
+    // Otherwise, we will have to add state dependency whenever the
+    // RP changes. This introduces complexity without any benefit,
+    // hence we don't do it.
+    //
+    clear_pmbr_addr();
+
     _flags &= ~PIM_MRE_KEEPALIVE_TIMER_IS_SET;
     
     pim_mrt().add_task_keepalive_timer_sg(source_addr(), group_addr());
@@ -918,6 +928,12 @@ PimMre::keepalive_timer_timeout()
     
     if (! is_keepalive_timer_running())
 	return;
+    //
+    // If an RP, the PMBR value must be cleared when the Keepalive Timer
+    // expires.
+    // XXX: this will happen inside cancel_keepalive_timer()
+    //
+
     cancel_keepalive_timer();
     entry_try_remove();
 }
