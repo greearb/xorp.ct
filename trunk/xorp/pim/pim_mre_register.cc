@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.17 2005/02/27 20:49:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.18 2005/03/25 02:53:59 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -253,8 +253,8 @@ PimMre::register_stop_timer_timeout()
     return;
     
  register_join_pending_state:
-    // Register JoinPending state
-    // Register JoinPending state -> Register Join state
+    // Register Join-Pending state
+    // Register Join-Pending state -> Register Join state
     set_register_join_state();
     // Add reg tunnel
     add_register_tunnel();
@@ -262,7 +262,7 @@ PimMre::register_stop_timer_timeout()
     
  register_prune_state:
     // Register Prune state
-    // Register Prune state -> Register JoinPending state
+    // Register Prune state -> Register Join-Pending state
     set_register_join_pending_state();
     // Stop timer(**) (** The Register-Stop Timer is set to Register_Probe_Time
     register_stop_timer() =
@@ -323,8 +323,8 @@ PimMre::receive_register_stop()
     return;
     
  register_join_pending_state_label:
-    // Register JoinPending state
-    // Register JoinPending state -> Register Prune state
+    // Register Join-Pending state
+    // Register Join-Pending state -> Register Prune state
     set_register_prune_state();
     // Set Register-Stop timer
     register_stop_tv = TimeVal(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
@@ -378,8 +378,8 @@ PimMre::rp_register_sg_changed()
     return;
     
  register_join_pending_state_label:
-    // Register JoinPending state
-    // Register JoinPending state -> Register Join state
+    // Register Join-Pending state
+    // Register Join-Pending state -> Register Join state
     set_register_join_state();
     // Add reg tunnel
     add_register_tunnel();
