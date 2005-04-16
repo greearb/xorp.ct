@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.20 2004/09/17 14:10:29 abittau Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.21 2005/04/13 03:02:22 pavlin Exp $
 #
 
 #
@@ -313,7 +313,7 @@ kdoc_callback()
     lib="libxorp-callback"
     desc="XORP callback routines"
     html_start_page="index.html"
-    files="libxorp/callback.hh"
+    files="libxorp/callback_nodebug.hh"
     excludes=""
     xref="libxorp"
     kdocify
