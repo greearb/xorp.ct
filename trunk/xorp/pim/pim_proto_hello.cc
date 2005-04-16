@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.17 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.18 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -176,7 +176,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	    break;
 	    
 	case PIM_HELLO_GENID_OPTION:
-	    // Gen ID option
+	    // GenID option
 	    option_length_spec = PIM_HELLO_GENID_LENGTH;
 	    if (option_length < option_length_spec) {
 		BUFFER_GET_SKIP(option_length, buffer);
