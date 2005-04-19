@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.83 2005/04/19 02:07:43 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.84 2005/04/19 02:29:23 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -339,7 +339,7 @@ probably should be replaced with
   after the keepalive timer expires?
   However check the scenario when there will be data traffic for (S,G)
   on the IIF because of another router: in that case will the
-  Keepalive timer expire, so the (S,G) entry can be deleted?
+  Keepalive Timer expire, so the (S,G) entry can be deleted?
 
 * SPEC+IMPL: if we ignore (*,G) Join/Prune entry because of RP mismatch,
   do we ignore all other (S,G) and (S,G,rpt) entries within same group

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.21 2005/02/27 20:49:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.22 2005/03/25 02:54:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -586,7 +586,7 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     }
     
     //
-    // Test if time to remove a MFC entry and/or if the Keepalive timer
+    // Test if time to remove a MFC entry and/or if the Keepalive Timer
     // has expired.
     //
     if ((measured_packets == 0)
@@ -602,7 +602,7 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     }
     
     //
-    // Restart the Keepalive timer if it has expired prematurely
+    // Restart the Keepalive Timer if it has expired prematurely
     //
     if ((measured_packets == 0)
 	&& (threshold_interval_sec < expected_dataflow_monitor_sec)) {
