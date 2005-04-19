@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.22 2005/03/25 02:54:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.23 2005/04/19 02:31:03 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -160,6 +160,10 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     return (XORP_OK);
 }
 
+//
+// XXX: Implement the following processing as described in the spec.
+// "On receipt of data from S to G on interface iif:"
+//
 void
 PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 {
@@ -175,6 +179,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     bool is_keepalive_timer_restarted = false;
     bool is_wrong_iif = true;
     bool is_assert_sent = false;
+    uint16_t directly_connected_rpf_interface_s = Vif::VIF_INDEX_INVALID;
     
     if (iif_vif_index == Vif::VIF_INDEX_INVALID) {
 	return;		// Invalid vif
@@ -197,12 +202,14 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	    if (pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
 		if (pim_mre->is_directly_connected_s()) {
 		    is_directly_connected_s = true;
+		    directly_connected_rpf_interface_s = pim_mre->rpf_interface_s();
 		    break;
 		}
 	    }
 	}
 	if (pim_node().is_directly_connected(*pim_vif, src)) {
 	    is_directly_connected_s = true;
+	    directly_connected_rpf_interface_s = pim_vif->vif_index();
 	    break;
 	}
 	break;
@@ -237,9 +244,10 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     } while (false);
     
     //
-    // Take action if directly-connected source
+    // Take action if directly-connected source and the iif matches
     //
-    if (is_directly_connected_s) {
+    if (is_directly_connected_s
+	&& (iif_vif_index == directly_connected_rpf_interface_s)) {
 	// Create a (S,G) entry if necessary
 	if (pim_mre_sg == NULL) {
 	    pim_mre = pim_mre_find(src, dst, PIM_MRE_SG, PIM_MRE_SG);
@@ -265,7 +273,17 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	pim_mre_sg->recompute_is_could_register_sg();
 	pim_mre_sg->recompute_is_join_desired_sg();
     }
-    
+
+    if (pim_mre_sg != NULL) {
+	if ((iif_vif_index == pim_mre_sg->rpf_interface_s())
+	    && pim_mre_sg->is_joined_state()
+	    && pim_mre_sg->inherited_olist_sg().any()) {
+	    // set KeepaliveTimer(S,G) to Keepalive_Period
+	    pim_mre_sg->start_keepalive_timer();
+	    is_keepalive_timer_restarted = true;
+	}
+    }
+
     if (pim_mre == NULL) {
 	// XXX: install a MFC in the kernel with NULL oifs
 	pim_mfc = pim_mfc_find(src, dst, true);
@@ -313,15 +331,9 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     //
     if ((pim_mre_sg != NULL)
 	&& (iif_vif_index == pim_mre_sg->rpf_interface_s())
-	&& (pim_mre_sg->is_joined_state()
-	    || is_directly_connected_s)) {
+	&& is_sptbit_set) {
 	is_wrong_iif = false;
 	olist = pim_mre_sg->inherited_olist_sg();
-	if (olist.any() && (! is_keepalive_timer_restarted)) {
-	    // set KeepaliveTimer(S,G) to Keepalive_Period
-	    pim_mre_sg->start_keepalive_timer();
-	    is_keepalive_timer_restarted = true;
-	}
     } else if ((iif_vif_index == pim_mre->rpf_interface_rp())
 	       && (is_sptbit_set == false)) {
 	is_wrong_iif = false;
@@ -332,6 +344,8 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	}
     } else {
 	// # Note: RPF check failed
+	// # A transition in an Assert FSM, may cause an Assert(S,G)
+	// # or Assert(*,G) message to be sent out interface iif.
 	if ((is_sptbit_set == true)
 	    && pim_mre->inherited_olist_sg().test(iif_vif_index)) {
 	    // send Assert(S,G) on iif_vif_index
