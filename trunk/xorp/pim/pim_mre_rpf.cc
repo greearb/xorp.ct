@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.32 2005/03/25 02:54:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.33 2005/04/16 02:06:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -71,7 +71,7 @@ PimMre::nbr_mrib_next_hop_rp() const
 // Note: applies only for (*,G) and (S,G,rpt), but works also for (S,G)
 // Note that we can compute RPF'(*,G) for (S,G) or (S,G,rpt) entry
 // even if there is no (*,G) entry; in that case we return
-// NBR(RPF_interface(RP), MRIB.next_hop(RP))
+// NBR(RPF_interface(RP(G)), MRIB.next_hop(RP(G)))
 // for the corresponding RP.
 PimNbr *
 PimMre::rpfp_nbr_wc() const
@@ -82,7 +82,7 @@ PimMre::rpfp_nbr_wc() const
     if (wc_entry() != NULL)
 	return (wc_entry()->rpfp_nbr_wc());
     
-    // Return NBR(RPF_interface(RP), MRIB.next_hop(RP))
+    // Return NBR(RPF_interface(RP(G)), MRIB.next_hop(RP(G)))
     return (nbr_mrib_next_hop_rp());
 }
 
@@ -812,7 +812,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
     if (pim_mre_wc != NULL)
 	return (pim_mre_wc->compute_rpfp_nbr_wc());
     //
-    // Return NBR(RPF_interface(RP), MRIB.next_hop(RP))
+    // Return NBR(RPF_interface(RP(G)), MRIB.next_hop(RP(G)))
     // XXX: note the indirection in the computation of RPF'(S,G,rpt) which
     // uses internal knowledge about how RPF'(*,G) is computed. This
     // indirection is needed to compute RPF'(S,G,rpt) even if there is no
