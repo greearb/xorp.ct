@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.32 2005/02/27 21:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.33 2005/03/25 02:54:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -2686,7 +2686,9 @@ void
 PimMreTrackState::track_state_inherited_olist_sg(list<PimMreAction> action_list)
 {
     track_state_inherited_olist_sg_rpt(action_list);
-    track_state_immediate_olist_sg(action_list);
+    track_state_joins_sg(action_list);
+    track_state_pim_include_sg(action_list);
+    track_state_lost_assert_sg(action_list);
 }
 
 void

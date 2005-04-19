@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.31 2005/03/25 02:53:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.32 2005/04/16 02:15:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -508,11 +508,29 @@ const Mifset&
 PimMre::inherited_olist_sg() const
 {
     static Mifset mifs;
+    const PimMre *pim_mre_sg = NULL;
     
     mifs = inherited_olist_sg_rpt();
-    if (is_sg())
-	mifs |= immediate_olist_sg();
-    
+
+    // Get a pointer to the (S,G) entry
+    do {
+	if (is_sg()) {
+	    pim_mre_sg = this;
+	    break;
+	}
+	if (is_sg_rpt()) {
+	    pim_mre_sg = sg_entry();
+	    break;
+	}
+	break;
+    } while (false);
+
+    if (pim_mre_sg != NULL) {
+	mifs |= pim_mre_sg->joins_sg();
+	mifs |= pim_mre_sg->pim_include_sg();
+	mifs &= ~(pim_mre_sg->lost_assert_sg());
+    }
+
     return (mifs);
 }
 
