@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.32 2005/04/16 02:15:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.33 2005/04/19 01:01:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -649,8 +649,8 @@ PimMre::pim_exclude_sg() const
     static Mifset mifs;
     
     mifs = i_am_dr();
-    mifs &= ~lost_assert_sg();
-    mifs |= i_am_assert_winner_sg();
+    mifs &= ~lost_assert_wc();
+    mifs |= i_am_assert_winner_wc();
     mifs &= local_receiver_exclude_sg();
     
     return (mifs);
