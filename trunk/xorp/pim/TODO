@@ -1,7 +1,9 @@
 #
-# $XORP: xorp/pim/TODO,v 1.85 2005/04/19 02:31:03 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.86 2005/04/19 02:32:43 pavlin Exp $
 #
 
+* PIM SPEC:
+  "# See section 4.6 for details." -> "# See Section 4.6 for details."
 * PIM IMPL:
   Get rid of PimNode::pim_nbr_find(const IPvX& nbr_addr),
   because the neighbor address may not be unique across all interfaces.
@@ -408,19 +410,6 @@ probably should be replaced with
  Note: the implementation has already taken care of it. If the
  spec change is not approved, then modify the implementation
  and the testsuite as well.
-
-* SPEC+IMPL:
-  Change from:
-      # Note: register state transition may happen as a result
-      # of restarting KeepaliveTimer, and must be dealt with here.
-
-  to:
-
-      # Note: register state transition or UpstreamJPState(S,G)
-      # transition may happen as a result
-      # of restarting KeepaliveTimer, and must be dealt with here.
-
-   Note: the implementation is probably OK, but check it just in case.
 
 * IMPL: Implement the lastest packet_arrives_on_rp_tunnel() processing.
 
