@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.33 2005/04/19 01:01:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.34 2005/04/19 01:52:50 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1043,7 +1043,7 @@ PimMre::recompute_set_keepalive_timer_sg()
 
     if (should_set_keepalive_timer_sg) {
 	//
-	// Start the (S,G) keepalive timer, and add a dataflow monitor
+	// Start the (S,G) Keepalive Timer, and add a dataflow monitor
 	// (if it wasn't added yet).
 	//
 	start_keepalive_timer();

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.84 2005/04/19 02:29:23 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.85 2005/04/19 02:31:03 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -336,7 +336,7 @@ probably should be replaced with
 
 * IMPL: OK NOT to remove (S,G) entry with olist=NULL if the
   KeepaliveTimer(S,G) is running? E.g., the entry will be removed
-  after the keepalive timer expires?
+  after the Keepalive Timer expires?
   However check the scenario when there will be data traffic for (S,G)
   on the IIF because of another router: in that case will the
   Keepalive Timer expire, so the (S,G) entry can be deleted?
