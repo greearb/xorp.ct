@@ -33,7 +33,7 @@
 #include "ospf.hh"
 
 template <typename A>
-Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO* io)
+Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
     : _version(version), _eventloop(eventloop), _io(io),
       _lsa_decoder(version), _peer_manager(*this),
       _database(*this)
@@ -131,12 +131,13 @@ Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
 template <typename A>
 bool
 Ospf<A>::transmit(const string& interface, const string& vif,
-		 uint8_t* data, uint32_t len)
+		  A dst, A src,
+		  uint8_t* data, uint32_t len)
 {
     debug_msg("Interface %s Vif %s data %p len %u",
 	      interface.c_str(), vif.c_str(), data, len);
 
-    return _io->send(interface, vif, data, len);
+    return _io->send(interface, vif, dst, src, data, len);
 }
 
 template <typename A>

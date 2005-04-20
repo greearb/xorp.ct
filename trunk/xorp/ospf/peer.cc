@@ -122,14 +122,15 @@ PeerOut<A>::set_state(bool state)
  */
 template <typename A>
 bool
-PeerOut<A>::transmit(Transmit::TransmitRef tr)
+PeerOut<A>::transmit(typename Transmit<A>::TransmitRef tr)
 {
     do {
 	if (!tr->valid())
 	    return true;
 	size_t len;
 	uint8_t *ptr = tr->generate(len);
-	_ospf.transmit(_interface, _vif, ptr, len);
+	_ospf.transmit(_interface, _vif, tr->destination(), tr->source(), 
+		       ptr, len);
     } while(tr->multiple());
 
     return true;
@@ -308,9 +309,11 @@ Peer<A>::send_hello_packet()
     // Fetch out router ID.
     _hello_packet.set_router_id(_ospf.get_router_id());
     _hello_packet.encode(pkt);
-    SimpleTransmit *transmit = new SimpleTransmit(pkt);
+    SimpleTransmit<A> *transmit = new SimpleTransmit<A>(pkt,
+							A::OSPFIGP_ROUTERS(),
+							_address);
 
-    Transmit::TransmitRef tr(transmit);
+    typename Transmit<A>::TransmitRef tr(transmit);
 
     _peerout.transmit(tr);
 

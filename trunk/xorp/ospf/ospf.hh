@@ -117,7 +117,7 @@ pp_area_type(OspfTypes::AreaType area_type)
 template <typename A>
 class Ospf {
  public:
-    Ospf(OspfTypes::Version version, EventLoop& eventloop, IO* io);
+    Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io);
 	
     /**
      * @return version of OSPF this implementation represents.
@@ -133,6 +133,7 @@ class Ospf {
      * Used to send traffic on the IO interface.
      */
     bool transmit(const string& interface, const string& vif,
+		  A dst, A src,
 		  uint8_t* data, uint32_t len);
 
     /**
@@ -234,7 +235,7 @@ class Ospf {
     const OspfTypes::Version _version;	// OSPF version.
     EventLoop& _eventloop;
 
-    IO* _io;			// Indirection for sending and
+    IO<A>* _io;			// Indirection for sending and
 				// receiving packets, as well as
 				// adding and deleting routes. 
     bool _running;		// Are we running?

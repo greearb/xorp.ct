@@ -25,7 +25,7 @@
 
 class XrlOspfV2Target : XrlOspfv2TargetBase {
  public:
-    XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf, XrlIO& io);
+    XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf, XrlIO<IPv4>& io);
 
     /**
      *  Get name of Xrl Target
@@ -63,7 +63,7 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 
  private:
     Ospf<IPv4>& _ospf;
-    XrlIO& _xrl_io;
+    XrlIO<IPv4>& _xrl_io;
 };
 
 class XrlOspfV3Target : XrlOspfv3TargetBase {
@@ -71,7 +71,8 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
     XrlOspfV3Target(XrlRouter *r,
 		    Ospf<IPv4>& ospf_ipv4,
 		    Ospf<IPv6>& ospf_ipv6,
-		    XrlIO& io);
+		    XrlIO<IPv4>& io_ipv4,
+		    XrlIO<IPv6>& io_ipv6);
 
     /**
      *  Get name of Xrl Target
@@ -110,6 +111,7 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
  private:
     Ospf<IPv4>& _ospf_ipv4;
     Ospf<IPv6>& _ospf_ipv6;
-    XrlIO& _xrl_io;
+    XrlIO<IPv4>& _xrl_io_ipv4;
+    XrlIO<IPv6>& _xrl_io_ipv6;
 };
 #endif // __OSPF_XRL_TARGET_HH__

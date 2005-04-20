@@ -38,7 +38,8 @@
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.
 
-class DebugIO : public IO {
+template <typename A>
+class DebugIO : public IO<A> {
  public:
     DebugIO(TestInfo& info, OspfTypes::Version version, EventLoop& eventloop)
 	: _info(info), _eventloop(eventloop), _packets(0)
@@ -50,12 +51,15 @@ class DebugIO : public IO {
      * Send Raw frames.
      */
     bool send(const string& interface, const string& vif, 
+	      A dst, A src,
 	      uint8_t* data, uint32_t len)
     {
 	TimeVal now;
 	_eventloop.current_time(now);
 	DOUT(_info) << now.pretty_print() << endl;
-	DOUT(_info) << "send(" << interface << "," << vif << "...)" << endl;
+	DOUT(_info) << "send(" << interface << "," << vif
+		    << "," << dst.str() << "," << src.str()
+		    <<  "...)" << endl;
 
 	// Decode the packet in order to pretty print it.
 	Packet *packet = _dec.decode(data, len);
@@ -73,7 +77,7 @@ class DebugIO : public IO {
     /**
      * Register where frames should be forwarded. Specific to DebugIO.
      */
-    bool register_forward(ReceiveCallback cb)
+    bool register_forward(typename IO<A>::ReceiveCallback cb)
     {
 	_forward_cb = cb;
 
@@ -83,7 +87,7 @@ class DebugIO : public IO {
     /**
      * Register for receiving raw frames.
      */
-    bool register_receive(ReceiveCallback cb)
+    bool register_receive(typename IO<A>::ReceiveCallback cb)
     {
 	_receive_cb = cb;
 
@@ -151,14 +155,15 @@ class DebugIO : public IO {
     PacketDecoder _dec;
     int _packets;
 
-    ReceiveCallback _forward_cb;
-    ReceiveCallback _receive_cb;
+    typename IO<A>::ReceiveCallback _forward_cb;
+    typename IO<A>::ReceiveCallback _receive_cb;
 };
 
 /**
  * Bind together a set of IO classes in order to form a virtual subnet
  * for testing, one instance per subnet.
  */
+template <typename A>
 class EmulateSubnet {
  public:
     EmulateSubnet(TestInfo& info) : _info(info)
@@ -175,7 +180,7 @@ class EmulateSubnet {
 	DOUT(_info) << "Receive on: " << instance << ": " <<
 	    interface << "/" << vif << " " << data << " " << len << endl;
 	
-	map<const multiplex,DebugIO *>::iterator i;
+	typename map<const multiplex, DebugIO<A> *>::iterator i;
 	for(i = _ios.begin(); i != _ios.end(); i++) {
 	    multiplex m = (*i).first;
 	    if (m._instance == instance)
@@ -192,7 +197,8 @@ class EmulateSubnet {
      */
     void
     bind_interfaces(const string& instance,
-		    const string& interface, const string& vif, DebugIO& io) {
+		    const string& interface, const string& vif,
+		    DebugIO<A>& io) {
 	DOUT(_info) << instance << ": " << interface << "/" << vif << endl;
 	
 	io.register_forward(callback(this, &EmulateSubnet::receive_frames,
@@ -217,7 +223,7 @@ class EmulateSubnet {
 	const string _vif;
     };
 
-    map<const multiplex, DebugIO *> _ios;
+    map<const multiplex, DebugIO<A> *> _ios;
 };
 
 /**
@@ -231,7 +237,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     DOUT(info) << "hello" << endl;
 
     EventLoop eventloop;
-    DebugIO io(info, version, eventloop);
+    DebugIO<A> io(info, version, eventloop);
     
     Ospf<A> ospf(version, eventloop, &io);
     ospf.set_router_id("192.150.187.78");
@@ -273,8 +279,8 @@ bool
 two_peers(TestInfo& info, OspfTypes::Version version)
 {
     EventLoop eventloop;
-    DebugIO io_1(info, version, eventloop);
-    DebugIO io_2(info, version, eventloop);
+    DebugIO<A> io_1(info, version, eventloop);
+    DebugIO<A> io_2(info, version, eventloop);
     
     Ospf<A> ospf_1(version, eventloop, &io_1);
     Ospf<A> ospf_2(version, eventloop, &io_2);
@@ -298,7 +304,7 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     PeerID peerid_2 = ospf_2.get_peer_manager().
 	create_peer(interface_2, vif_2, OspfTypes::BROADCAST, area);
     
-    EmulateSubnet emu(info);
+    EmulateSubnet<A> emu(info);
 
     emu.bind_interfaces("ospf1", interface_1, vif_1, io_1);
     emu.bind_interfaces("ospf2", interface_2, vif_2, io_2);

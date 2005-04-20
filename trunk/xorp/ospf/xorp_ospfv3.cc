@@ -50,12 +50,14 @@ main(int /*argc*/, char **argv)
 	EventLoop eventloop;
 
 	string ribname = "rib";
-	XrlIO io(eventloop, ribname);
- 	Ospf<IPv4> ospf_ipv4(OspfTypes::V3, eventloop, &io);
-	Ospf<IPv6> ospf_ipv6(OspfTypes::V3, eventloop, &io);
+	XrlIO<IPv4> io_ipv4(eventloop, ribname);
+	XrlIO<IPv6> io_ipv6(eventloop, ribname);
+ 	Ospf<IPv4> ospf_ipv4(OspfTypes::V3, eventloop, &io_ipv4);
+	Ospf<IPv6> ospf_ipv6(OspfTypes::V3, eventloop, &io_ipv6);
 
 	XrlStdRouter xrl_router(eventloop, "ospfv3");
-	XrlOspfV3Target v3target(&xrl_router, ospf_ipv4, ospf_ipv6, io);
+	XrlOspfV3Target v3target(&xrl_router, ospf_ipv4, ospf_ipv6,
+				 io_ipv4, io_ipv6);
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
 	while (ospf_ipv4.running() && ospf_ipv6.running())

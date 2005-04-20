@@ -23,29 +23,39 @@
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+
 #include "xrl_io.hh"
 
+template <typename A>
 bool
-XrlIO::send(const string& interface, const string& vif,
-	    uint8_t* data, uint32_t len)
+XrlIO<A>::send(const string& interface, const string& vif,
+	       A dst, A src,
+	       uint8_t* data, uint32_t len)
 {
-    debug_msg("send(%s,%s,%p,%d\n", interface.c_str(), vif.c_str(), data, len);
+    debug_msg("send(%s,%s,%s,%s,%p,%d\n",
+	      interface.c_str(), vif.c_str(),
+	      dst.str().c_str(), src.str().c_str(),
+	      data, len);
 
     XLOG_UNFINISHED();
 
     return true;
 }
 
+template <typename A>
 bool
-XrlIO::register_receive(ReceiveCallback cb)
+XrlIO<A>::register_receive(typename IO<A>::ReceiveCallback cb)
 {
     _cb = cb;
 
     return true;
 }
 
+template <typename A>
 bool 
-XrlIO::enable_interface_vif(const string& interface, const string& vif)
+XrlIO<A>::enable_interface_vif(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
@@ -54,8 +64,9 @@ XrlIO::enable_interface_vif(const string& interface, const string& vif)
     return true;
 }
 
+template <typename A>
 bool
-XrlIO::disable_interface_vif(const string& interface, const string& vif)
+XrlIO<A>::disable_interface_vif(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
@@ -64,20 +75,23 @@ XrlIO::disable_interface_vif(const string& interface, const string& vif)
     return true;
 }
 
+template <typename A>
 bool
-XrlIO::add_route()
+XrlIO<A>::add_route()
 {
     XLOG_UNFINISHED();
 
     return true;
 }
 
+template <typename A>
 bool
-XrlIO::delete_route()
+XrlIO<A>::delete_route()
 {
     XLOG_UNFINISHED();
 
     return true;
 }
 
-
+template class XrlIO<IPv4>;
+template class XrlIO<IPv6>;

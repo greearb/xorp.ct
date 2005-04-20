@@ -30,6 +30,7 @@
  *
  */
 
+template <typename A>
 class Transmit {
  public:
     typedef ref_ptr<Transmit> TransmitRef;
@@ -67,26 +68,43 @@ class Transmit {
      * @return A pointer that must be delete'd.
      */
     virtual uint8_t *generate(size_t &len) = 0;
+
+    /**
+     * @return the destination address of this packet.
+     */
+    virtual A destination() = 0;
+
+    /**
+     * @return the source address of this packet.
+     */
+    virtual A source() = 0;
 };
 
 /**
  * A transmit object that sends fixed data.
  */
-class SimpleTransmit : public Transmit {
+template <typename A>
+class SimpleTransmit : public Transmit<A> {
  public:
-    SimpleTransmit(vector<uint8_t>& pkt) {
+    SimpleTransmit(vector<uint8_t>& pkt, A dst, A src) : _dst(dst), _src(src)
+    {
 	_pkt.resize(pkt.size());
 	memcpy(&_pkt[0], &pkt[0], pkt.size());
     }
 
     bool valid() { return true; }
     bool multiple() { return false; }
-    TransmitRef clone() { return this; }
+    typename Transmit<A>::TransmitRef clone() { return this; }
     uint8_t *generate(size_t &len) {
 	len = _pkt.size();
 	return &_pkt[0];
     }
+    A destination() { return _dst; }
+    A source() { return _src; }
+
  private:
     vector<uint8_t> _pkt;
+    A _dst;	// Destination address
+    A _src;	// Source address
 };
 #endif // __OSPF_TRANSMIT_HH__

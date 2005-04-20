@@ -53,7 +53,7 @@ main(int /*argc*/, char **argv)
 	EventLoop eventloop;
 
 	string ribname = "rib";
-	XrlIO io(eventloop, ribname);
+	XrlIO<IPv4> io(eventloop, ribname);
 	Ospf<IPv4> ospf(OspfTypes::V2, eventloop, &io);
 
 	XrlStdRouter xrl_router(eventloop, "ospfv2");

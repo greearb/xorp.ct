@@ -23,6 +23,7 @@
  * transmission. The details of how packets are received or transmitted
  * are therefore hidden from the internals of the OSPF code.
  */
+template <typename A>
 class IO {
  public:
     virtual ~IO() {}
@@ -31,6 +32,7 @@ class IO {
      * Send Raw frames.
      */
     virtual bool send(const string& interface, const string& vif,
+		      A dst, A src,
 		      uint8_t* data, uint32_t len) = 0;
 
     typedef XorpCallback4<void, const string&, const string&,

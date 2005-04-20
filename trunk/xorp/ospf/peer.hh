@@ -72,7 +72,7 @@ class PeerOut {
     /**
      * Used by external and internal entities to transmit packets.
      */
-    bool transmit(Transmit::TransmitRef tr);
+    bool transmit(typename Transmit<A>::TransmitRef tr);
 
     /**
      * Packets for this peer are received here.
@@ -128,7 +128,7 @@ class PeerOut {
     // In order to maintain the requirement for an interpacket gap,
     // all outgoing packets are appended to this queue. Then they are
     // read off the queue and transmitted at the interpacket gap rate.
-    queue<Transmit::TransmitRef> _transmit_queue;	
+    queue<typename Transmit<A>::TransmitRef> _transmit_queue;	
 
     void bring_up_peering();
     void take_down_peering();
@@ -201,6 +201,7 @@ class Peer {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
+    const A	_address;		// Address of this interface/vif.
     OspfTypes::AreaID _area;		// Area that is being represented.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.

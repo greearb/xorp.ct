@@ -25,7 +25,8 @@ class EventLoop;
 /**
  * Concrete implementation of IO using XRLs.
  */
-class XrlIO : public IO {
+template <typename A>
+class XrlIO : public IO<A> {
  public:
     XrlIO(EventLoop& eventloop, string ribname)
 	: _eventloop(eventloop), _ribname(ribname)
@@ -36,12 +37,13 @@ class XrlIO : public IO {
      * Send Raw frames.
      */
     bool send(const string& interface, const string& vif, 
+	      A dst, A src,
 	      uint8_t* data, uint32_t len);
 
     /**
      * Register for receiving raw frames.
      */
-    bool register_receive(ReceiveCallback cb);
+    bool register_receive(typename IO<A>::ReceiveCallback cb);
 
     /**
      * Enable the interface/vif to receive frames.
@@ -67,6 +69,6 @@ class XrlIO : public IO {
     EventLoop& _eventloop;
     string _ribname;
 
-    ReceiveCallback _cb;
+    typename IO<A>::ReceiveCallback _cb;
 };
 #endif // __OSPF_XRL_IO_HH__

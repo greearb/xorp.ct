@@ -31,7 +31,8 @@
 #include "xrl_io.hh"
 #include "xrl_target.hh"
 
-XrlOspfV2Target::XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf, XrlIO& io)
+XrlOspfV2Target::XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf,
+				 XrlIO<IPv4>& io)
 	: XrlOspfv2TargetBase(r), _ospf(ospf), _xrl_io(io)
 {
 }
@@ -39,9 +40,11 @@ XrlOspfV2Target::XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf, XrlIO& io)
 XrlOspfV3Target::XrlOspfV3Target(XrlRouter *r,
 				 Ospf<IPv4>& ospf_ipv4, 
 				 Ospf<IPv6>& ospf_ipv6, 
-				 XrlIO& io)
+				 XrlIO<IPv4>& io_ipv4,
+				 XrlIO<IPv6>& io_ipv6)
     : XrlOspfv3TargetBase(r),
-      _ospf_ipv4(ospf_ipv4), _ospf_ipv6(ospf_ipv6), _xrl_io(io)
+      _ospf_ipv4(ospf_ipv4), _ospf_ipv6(ospf_ipv6),
+      _xrl_io_ipv4(io_ipv4), _xrl_io_ipv6(io_ipv6)
 {
 }
 
