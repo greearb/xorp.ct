@@ -137,6 +137,24 @@ PeerOut<A>::transmit(Transmit::TransmitRef tr)
 
 template <typename A>
 void
+PeerOut<A>::receive(Packet *packet)
+    throw(BadPeer)
+{
+    debug_msg("%s\n", cstring(*packet));
+    OspfTypes::AreaID area = packet->get_area_id();
+    // Does the area ID in the packet match any we are expecting.
+    if (0 == _areas.count(area)) {
+	    xorp_throw(BadPeer,
+		       c_format("Area %s not handled by %s/%s",
+				cstring(packet->get_area_id()),
+				_interface.c_str(), _vif.c_str()));
+    }
+
+    _areas[area]->receive(packet);
+}
+
+template <typename A>
+void
 PeerOut<A>::bring_up_peering()
 {
     // Start receiving packets on this peering.
@@ -235,6 +253,14 @@ PeerOut<A>::set_router_dead_interval(OspfTypes::AreaID area,
 }
 
 /****************************************/
+
+template <typename A>
+void
+Peer<A>::receive(Packet *packet)
+{
+    debug_msg("%s\n", cstring(*packet));
+    XLOG_WARNING("TBD");
+}
 
 template <typename A>
 void

@@ -77,7 +77,7 @@ class PeerOut {
     /**
      * Packets for this peer are received here.
      */
-    bool received(/* XXX */);
+    void receive(Packet *packet) throw(BadPeer);
 
     // Configure the peering.
 
@@ -152,6 +152,11 @@ class Peer {
 	_hello_packet.set_hello_interval(10);
 	_hello_packet.set_router_priority(128);
     }
+
+    /**
+     * Packets for this peer are received here.
+     */
+    void receive(Packet *packet);
 
     /**
      * Start the protocol machinery running
