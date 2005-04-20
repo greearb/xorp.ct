@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.67 2005/04/13 21:09:55 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.68 2005/04/18 23:26:19 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -54,7 +54,7 @@ Release 1.2 (2005/??/??)
     - 
 
   PIM-SM:
-    - 
+    - Bug fix related to the handling of the deleted MRIB entries.
 
   FIB2MRIB:
     - 
