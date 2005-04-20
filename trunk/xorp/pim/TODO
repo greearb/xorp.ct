@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.86 2005/04/19 02:32:43 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.87 2005/04/19 03:23:42 pavlin Exp $
 #
 
 * PIM SPEC:
@@ -545,11 +545,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: When setting a new protocol version on an interface, or on the node,
   do we restart the vif and/or node or do we let it run without
   interruption?
-
-* IMPL+SPEC: After the spec fixes the naming "DR priority"
-  / "DR election priority",
-  then fix the implementation naming "dr_priority", and
-  PIM_HELLO_DR_ELECTION_PRIORITY_DEFAULT
 
 * IMPL: Finish implementing gracefully start for PimVif
   (e.g., send all pending Join/Prune messages, BSR-related messages, etc)
