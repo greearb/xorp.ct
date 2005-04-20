@@ -1,9 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.87 2005/04/19 03:23:42 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.88 2005/04/20 03:51:22 pavlin Exp $
 #
 
 * PIM SPEC:
+  "Interface_Address_List Option" -> "interface Address_List Option"
+
+* PIM SPEC:
   "# See section 4.6 for details." -> "# See Section 4.6 for details."
+
 * PIM IMPL:
   Get rid of PimNode::pim_nbr_find(const IPvX& nbr_addr),
   because the neighbor address may not be unique across all interfaces.
@@ -104,7 +108,7 @@ address.
   if there are no more PIM neighbors on an interface:
   "If I am in Assert Winner state and if
   Assert Timer Expires and if there are no more PIM neighbors, then
-  the assert state-machine should transitinto NoInfo state".
+  the assert state machine should transitinto NoInfo state".
 
 * IMPL:
   If a PIM control message is received witn an unrecognized version
