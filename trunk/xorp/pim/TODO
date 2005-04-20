@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.88 2005/04/20 03:51:22 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.89 2005/04/20 07:23:15 pavlin Exp $
 #
 
 * PIM SPEC:
@@ -434,6 +434,7 @@ probably should be replaced with
             send RegisterStop(S,G) to outer.src
         } else {
 
+     [Note: the newest -11 I-D spec uses Register-Stop instead of RegisterStop]
   
 * SPEC+IMPL: make sure that the following is implemented:
 "Additionally a router sets SPTbit(S,G) to TRUE when it receives an
@@ -532,6 +533,8 @@ other than a Hello with version greater than 2, and log a warning."
 
   Note: the implementation already takes care of !I_am_RP(G),
   but it doesn't implement yet the RP(G) != NULL part.
+
+  [Note: the newest -11 I-D spec uses bool instead of Bool]
 
 * IMPL: fix following error due to fact that temp. sometimes we don't install
   any dataflow monitoring in the MFEA:
