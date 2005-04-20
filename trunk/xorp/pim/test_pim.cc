@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.51 2005/03/25 02:54:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.52 2005/04/20 09:44:44 pavlin Exp $"
 
 
 //
@@ -334,9 +334,9 @@ pim_main(const string& finder_hostname, uint16_t finder_port,
 	xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
     //
     // XXX: print the PimMre state dependency (for debug purpose)
-    xrl_pimsm_node4.pim_mrt().track_state_print_actions_name();
+    // xrl_pimsm_node4.pim_mrt().track_state_print_actions_name();
     // xrl_pimsm_node4.pim_mrt().track_state_print_actions_num();
-    exit (0);
+    // exit (0);
     wait_until_xrl_router_is_ready(eventloop, xrl_pimsm_node4.xrl_router());
 
 #ifdef HAVE_IPV6
