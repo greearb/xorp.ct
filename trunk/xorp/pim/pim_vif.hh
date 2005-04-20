@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.32 2005/03/25 02:54:04 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.33 2005/04/20 09:44:44 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -332,8 +332,8 @@ public:
     
     bool	is_lan_delay_enabled() const;
     // Link-related time intervals
-    const TimeVal& vif_propagation_delay() const;
-    const TimeVal& vif_override_interval() const;
+    const TimeVal& effective_propagation_delay() const;
+    const TimeVal& effective_override_interval() const;
     bool	is_lan_suppression_state_enabled() const;
     const TimeVal& upstream_join_timer_t_suppressed() const;
     const TimeVal& upstream_join_timer_t_override() const;

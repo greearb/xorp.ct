@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.48 2005/03/25 02:54:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.49 2005/04/20 09:44:44 pavlin Exp $"
 
 
 //
@@ -1620,56 +1620,60 @@ PimVif::is_lan_delay_enabled() const
 }
 
 const TimeVal&
-PimVif::vif_propagation_delay() const
+PimVif::effective_propagation_delay() const
 {
     static TimeVal tv;
     uint16_t delay;
-    
-    // XXX: propagation_delay is in milliseconds
-    tv = TimeVal(_propagation_delay.get() / 1000,
-		 (_propagation_delay.get() % 1000) * 1000);
-    
-    if (! is_lan_delay_enabled())
-	return (tv);
-    
-    delay = 0;
-    list<PimNbr *>::const_iterator iter;
-    for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
-	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->propagation_delay() > delay)
-	    delay = pim_nbr->propagation_delay();
-    }
-    
+
+    do {
+	if (! is_lan_delay_enabled()) {
+	    delay = _propagation_delay.get_initial_value();
+	    break;
+	}
+
+	delay = _propagation_delay.get();
+	list<PimNbr *>::const_iterator iter;
+	for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
+	    PimNbr *pim_nbr = *iter;
+	    if (pim_nbr->propagation_delay() > delay)
+		delay = pim_nbr->propagation_delay();
+	}
+
+	break;
+    } while (false);
+
     // XXX: delay is in milliseconds
     tv = TimeVal(delay / 1000, (delay % 1000) * 1000);
-    
+
     return (tv);
 }
 
 const TimeVal&
-PimVif::vif_override_interval() const
+PimVif::effective_override_interval() const
 {
     static TimeVal tv;
     uint16_t delay;
-    
-    // XXX: override_interval is in milliseconds
-    tv = TimeVal(_override_interval.get() / 1000,
-		 (_override_interval.get() % 1000) * 1000);
-    
-    if (! is_lan_delay_enabled())
-	return (tv);
-    
-    delay = 0;
-    list<PimNbr *>::const_iterator iter;
-    for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
-	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->override_interval() > delay)
-	    delay = pim_nbr->override_interval();
-    }
-    
+
+    do {
+	if (! is_lan_delay_enabled()) {
+	    delay = _override_interval.get_initial_value();
+	    break;
+	}
+
+	delay = _override_interval.get();
+	list<PimNbr *>::const_iterator iter;
+	for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
+	    PimNbr *pim_nbr = *iter;
+	    if (pim_nbr->override_interval() > delay)
+		delay = pim_nbr->override_interval();
+	}
+
+	break;
+    } while (false);
+
     // XXX: delay is in milliseconds
     tv = TimeVal(delay / 1000, (delay % 1000) * 1000);
-    
+
     return (tv);
 }
 
@@ -1723,7 +1727,7 @@ PimVif::upstream_join_timer_t_override() const
     
     // XXX: explicitly assign the value to 'tv' every time this method
     // is called, because 'tv' is static.
-    tv = vif_override_interval();
+    tv = effective_override_interval();
     
     // Randomize
     tv = random_uniform(tv);
@@ -1738,8 +1742,8 @@ PimVif::jp_override_interval() const
     static TimeVal tv;
     TimeVal res1, res2;
     
-    res1 = vif_propagation_delay();
-    res2 = vif_override_interval();
+    res1 = effective_propagation_delay();
+    res2 = effective_override_interval();
     tv = res1 + res2;
     
     return (tv);
