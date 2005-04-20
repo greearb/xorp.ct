@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.19 2005/04/16 02:03:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.20 2005/04/20 09:44:44 pavlin Exp $"
 
 
 //
@@ -164,7 +164,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	    break;
 	    
 	case PIM_HELLO_DR_PRIORITY_OPTION:
-	    // DR priority option
+	    // DR_Priority option
 	    option_length_spec = PIM_HELLO_DR_PRIORITY_LENGTH;
 	    if (option_length < option_length_spec) {
 		BUFFER_GET_SKIP(option_length, buffer);
@@ -634,7 +634,7 @@ PimVif::pim_hello_send()
     BUFFER_PUT_HOST_16(propagation_delay_tbit, buffer);
     BUFFER_PUT_HOST_16(override_interval().get(), buffer);
     
-    // DR priority option    
+    // DR_Priority option    
     BUFFER_PUT_HOST_16(PIM_HELLO_DR_PRIORITY_OPTION, buffer);
     BUFFER_PUT_HOST_16(PIM_HELLO_DR_PRIORITY_LENGTH, buffer);
     BUFFER_PUT_HOST_32(dr_priority().get(), buffer);
