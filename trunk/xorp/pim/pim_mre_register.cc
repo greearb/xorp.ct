@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.19 2005/04/16 02:05:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.20 2005/04/20 07:24:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -311,7 +311,7 @@ PimMre::receive_register_stop()
     set_register_prune_state();
     // Remove reg tunnel
     remove_register_tunnel();
-    // Set Register-Stop timer
+    // Set Register-Stop Timer
     register_stop_tv = TimeVal(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
     register_stop_tv = positive_random_uniform(register_stop_tv, 0.5);
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
@@ -326,7 +326,7 @@ PimMre::receive_register_stop()
     // Register Join-Pending state
     // Register Join-Pending state -> Register Prune state
     set_register_prune_state();
-    // Set Register-Stop timer
+    // Set Register-Stop Timer
     register_stop_tv = TimeVal(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
     register_stop_tv = positive_random_uniform(register_stop_tv, 0.5);
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
@@ -383,7 +383,7 @@ PimMre::rp_register_sg_changed()
     set_register_join_state();
     // Add reg tunnel
     add_register_tunnel();
-    // Cancel Register-Stop timer
+    // Cancel Register-Stop Timer
     register_stop_timer().unschedule();
     return;
     
@@ -393,7 +393,7 @@ PimMre::rp_register_sg_changed()
     set_register_join_state();
     // Add reg tunnel
     add_register_tunnel();
-    // Cancel Register-Stop timer
+    // Cancel Register-Stop Timer
     register_stop_timer().unschedule();
     return;
 }
