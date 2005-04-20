@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.18 2005/03/25 02:53:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.19 2005/04/16 02:05:03 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -343,7 +343,7 @@ PimMre::receive_register_stop()
 }
 
 //
-// Perform the "RP changed" action at the (S,G) register state-machine
+// Perform the "RP changed" action at the (S,G) register state machine
 // Note that the RP has already changed and assigned by the method that
 // calls this one, hence we unconditionally take the "RP changed" actions.
 //
