@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.80 2005/03/25 02:54:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.81 2005/04/08 09:10:51 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -5498,52 +5498,55 @@ XrlPimNode::pim_0_1_reset_vif_dr_priority(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_get_vif_lan_delay(
+XrlPimNode::pim_0_1_get_vif_propagation_delay(
     // Input values, 
     const string&	vif_name, 
     // Output values, 
-    uint32_t&		lan_delay)
+    uint32_t&		propagation_delay)
 {
     string error_msg;
     
     uint16_t v;
-    if (PimNode::get_vif_lan_delay(vif_name, v, error_msg) != XORP_OK)
+    if (PimNode::get_vif_propagation_delay(vif_name, v, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
-    lan_delay = v;
+    propagation_delay = v;
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_set_vif_lan_delay(
+XrlPimNode::pim_0_1_set_vif_propagation_delay(
     // Input values, 
     const string&	vif_name, 
-    const uint32_t&	lan_delay)
+    const uint32_t&	propagation_delay)
 {
     string error_msg;
     
-    if (lan_delay > 0xffff) {
-	error_msg = c_format("Invalid LAN delay value %d: "
+    if (propagation_delay > 0xffff) {
+	error_msg = c_format("Invalid 'Propagation Delay' value %d: "
 			     "max allowed is %d",
-			     lan_delay,
+			     propagation_delay,
 			     0xffff);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (PimNode::set_vif_lan_delay(vif_name, lan_delay, error_msg) < 0)
+    if (PimNode::set_vif_propagation_delay(vif_name, propagation_delay,
+					   error_msg)
+	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_reset_vif_lan_delay(
+XrlPimNode::pim_0_1_reset_vif_propagation_delay(
     // Input values, 
     const string&	vif_name)
 {
     string error_msg;
     
-    if (PimNode::reset_vif_lan_delay(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_propagation_delay(vif_name, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();

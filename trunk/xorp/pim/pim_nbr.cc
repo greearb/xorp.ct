@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.13 2005/02/27 20:49:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.14 2005/03/25 02:54:01 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -100,7 +100,7 @@ PimNbr::reset_received_options()
     _neighbor_liveness_timer.unschedule();
     _is_lan_prune_delay_present = false;
     _is_tracking_support_disabled = false;
-    _lan_delay = 0;
+    _propagation_delay = 0;
     _override_interval = 0;
     _is_nohello_neighbor = false;
     _secondary_addr_list.clear();

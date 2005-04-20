@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.10 2004/06/10 22:41:32 hodson Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.11 2005/03/25 02:54:01 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -83,8 +83,8 @@ public:
 	_is_tracking_support_disabled = v;
     }
     
-    uint16_t	lan_delay() const { return (_lan_delay); }
-    void	set_lan_delay(uint16_t v) { _lan_delay = v; }
+    uint16_t	propagation_delay() const { return (_propagation_delay); }
+    void	set_propagation_delay(uint16_t v) { _propagation_delay = v; }
     
     uint16_t	override_interval() const { return (_override_interval); }
     void	set_override_interval(uint16_t v) { _override_interval = v; }
@@ -98,7 +98,7 @@ public:
     
     void	pim_hello_holdtime_process(uint16_t holdtime);
     void	pim_hello_lan_prune_delay_process(bool lan_prune_delay_tbit,
-						  uint16_t lan_delay,
+						  uint16_t propagation_delay,
 						  uint16_t override_interval);
     void	pim_hello_dr_priority_process(uint32_t dr_priority);
     void	pim_hello_genid_process(uint32_t genid);
@@ -162,7 +162,7 @@ private:
     XorpTimer	_neighbor_liveness_timer; // Timer to expire the neighbor
     // LAN Prune Delay option related info
     bool	_is_tracking_support_disabled; // The T-bit
-    uint16_t	_lan_delay;		// The LAN Delay
+    uint16_t	_propagation_delay;	// The Propagation Delay
     uint16_t	_override_interval;	// The Override Interval
     bool	_is_lan_prune_delay_present;// Is the LAN Prune Delay present
     bool	_is_nohello_neighbor;	// True if no-Hello neighbor

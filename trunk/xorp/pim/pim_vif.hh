@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.31 2005/03/20 00:21:12 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.32 2005/03/25 02:54:04 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -269,7 +269,7 @@ public:
     ConfigParam<uint16_t>& hello_period() { return (_hello_period); }
     ConfigParam<uint16_t>& hello_holdtime() { return (_hello_holdtime); }
     ConfigParam<uint32_t>& dr_priority() { return (_dr_priority); }
-    ConfigParam<uint16_t>& lan_delay() { return (_lan_delay); }
+    ConfigParam<uint16_t>& propagation_delay() { return (_propagation_delay); }
     ConfigParam<uint16_t>& override_interval() { return (_override_interval); }
     ConfigParam<bool>& is_tracking_support_disabled() { return (_is_tracking_support_disabled); }
     ConfigParam<bool>& accept_nohello_neighbors() { return (_accept_nohello_neighbors); }
@@ -469,8 +469,8 @@ private:
 	_pim_nbr_me.set_dr_priority(v);
 	_pim_nbr_me.set_is_dr_priority_present(true);
     }
-    void	set_lan_delay_callback(uint16_t v) {
-	_pim_nbr_me.set_lan_delay(v);
+    void	set_propagation_delay_callback(uint16_t v) {
+	_pim_nbr_me.set_propagation_delay(v);
 	_pim_nbr_me.set_is_lan_prune_delay_present(true);
     }
     void	set_override_interval_callback(uint16_t v) {
@@ -542,7 +542,7 @@ private:
     ConfigParam<uint16_t> _hello_period;	// The Hello_Period
     ConfigParam<uint16_t> _hello_holdtime;	// The Hello_Holdtime
     ConfigParam<uint32_t> _dr_priority;		// The DR Priority
-    ConfigParam<uint16_t> _lan_delay;		// The LAN Delay
+    ConfigParam<uint16_t> _propagation_delay;	// The Propagation Delay
     ConfigParam<uint16_t> _override_interval;	// The Override_Interval
     ConfigParam<bool>	  _is_tracking_support_disabled; // The T-bit
     ConfigParam<bool>	  _accept_nohello_neighbors; // If true, accept

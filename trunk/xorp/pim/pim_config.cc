@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.28 2005/03/23 10:49:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.29 2005/03/25 02:53:58 pavlin Exp $"
 
 
 //
@@ -521,26 +521,28 @@ PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
 }
 
 int
-PimNode::get_vif_lan_delay(const string& vif_name, uint16_t& lan_delay,
-			   string& error_msg)
+PimNode::get_vif_propagation_delay(const string& vif_name,
+				   uint16_t& propagation_delay,
+				   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'LAN delay' for vif %s: "
+	error_msg = c_format("Cannot get 'Propagation Delay' for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
     }
     
-    lan_delay = pim_vif->lan_delay().get();
+    propagation_delay = pim_vif->propagation_delay().get();
     
     return (XORP_OK);
 }
 
 int
-PimNode::set_vif_lan_delay(const string& vif_name, uint16_t lan_delay,
-			   string& error_msg)
+PimNode::set_vif_propagation_delay(const string& vif_name,
+				   uint16_t propagation_delay,
+				   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
@@ -549,14 +551,14 @@ PimNode::set_vif_lan_delay(const string& vif_name, uint16_t lan_delay,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'LAN delay' for vif %s: "
+	error_msg = c_format("Cannot set 'Propagation Delay' for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
-    pim_vif->lan_delay().set(lan_delay);
+    pim_vif->propagation_delay().set(propagation_delay);
     
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
@@ -568,7 +570,7 @@ PimNode::set_vif_lan_delay(const string& vif_name, uint16_t lan_delay,
 }
 
 int
-PimNode::reset_vif_lan_delay(const string& vif_name, string& error_msg)
+PimNode::reset_vif_propagation_delay(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
@@ -577,14 +579,14 @@ PimNode::reset_vif_lan_delay(const string& vif_name, string& error_msg)
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'LAN delay' for vif %s: "
+	error_msg = c_format("Cannot reset 'Propagation Delay' for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
-    pim_vif->lan_delay().reset();
+    pim_vif->propagation_delay().reset();
     
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();

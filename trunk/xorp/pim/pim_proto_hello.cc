@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.18 2005/03/25 02:54:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.19 2005/04/16 02:03:49 pavlin Exp $"
 
 
 //
@@ -114,7 +114,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
     bool	is_genid_changed = false;
     uint16_t	option_type, option_length, option_length_spec;
     uint16_t	holdtime = 0;
-    uint16_t	lan_delay = 0;
+    uint16_t	propagation_delay_tbit = 0;
     uint16_t	lan_prune_delay_tbit = 0;
     uint16_t	override_interval = 0;
     uint32_t	dr_priority = 0;
@@ -153,12 +153,12 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 		BUFFER_GET_SKIP(option_length, buffer);
 		continue;
 	    }
-	    BUFFER_GET_HOST_16(lan_delay, buffer);
+	    BUFFER_GET_HOST_16(propagation_delay_tbit, buffer);
 	    BUFFER_GET_HOST_16(override_interval, buffer);
 	    lan_prune_delay_tbit
-		= (lan_delay & PIM_HELLO_LAN_PRUNE_DELAY_TBIT) ?
+		= (propagation_delay_tbit & PIM_HELLO_LAN_PRUNE_DELAY_TBIT) ?
 		true : false;
-	    lan_delay &= ~PIM_HELLO_LAN_PRUNE_DELAY_TBIT;
+	    propagation_delay_tbit &= ~PIM_HELLO_LAN_PRUNE_DELAY_TBIT;
 	    BUFFER_GET_SKIP(option_length - option_length_spec, buffer);
 	    lan_prune_delay_rcvd = true;
 	    break;
@@ -246,7 +246,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
     
     if (lan_prune_delay_rcvd)
 	pim_nbr->pim_hello_lan_prune_delay_process(lan_prune_delay_tbit,
-						   lan_delay,
+						   propagation_delay_tbit,
 						   override_interval);
     
     if (dr_priority_rcvd)
@@ -397,12 +397,12 @@ PimNbr::pim_hello_holdtime_process(uint16_t holdtime)
 
 void
 PimNbr::pim_hello_lan_prune_delay_process(bool lan_prune_delay_tbit,
-					  uint16_t lan_delay,
+					  uint16_t propagation_delay,
 					  uint16_t override_interval)
 {
     _is_lan_prune_delay_present = true;
     _is_tracking_support_disabled = lan_prune_delay_tbit;
-    _lan_delay = lan_delay;
+    _propagation_delay = propagation_delay;
     _override_interval = override_interval;
 }
 
@@ -612,7 +612,7 @@ PimVif::pim_hello_send()
     // can be triggered during the sending of another control message.
     //
     buffer_t *buffer = buffer_send_prepare(_buffer_send_hello);
-    uint16_t lan_delay_tbit;
+    uint16_t propagation_delay_tbit;
     
 #if 0
     // XXX: enable if for any reason sending Hello messages is not desirable
@@ -628,10 +628,10 @@ PimVif::pim_hello_send()
     // LAN Prune Delay option    
     BUFFER_PUT_HOST_16(PIM_HELLO_LAN_PRUNE_DELAY_OPTION, buffer);
     BUFFER_PUT_HOST_16(PIM_HELLO_LAN_PRUNE_DELAY_LENGTH, buffer);
-    lan_delay_tbit = lan_delay().get();
+    propagation_delay_tbit = propagation_delay().get();
     if (is_tracking_support_disabled().get())
-	lan_delay_tbit |= PIM_HELLO_LAN_PRUNE_DELAY_TBIT;
-    BUFFER_PUT_HOST_16(lan_delay_tbit, buffer);
+	propagation_delay_tbit |= PIM_HELLO_LAN_PRUNE_DELAY_TBIT;
+    BUFFER_PUT_HOST_16(propagation_delay_tbit, buffer);
     BUFFER_PUT_HOST_16(override_interval().get(), buffer);
     
     // DR priority option    

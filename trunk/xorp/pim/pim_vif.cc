@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.47 2005/03/24 00:40:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.48 2005/03/25 02:54:03 pavlin Exp $"
 
 
 //
@@ -75,9 +75,10 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
 		      callback(this, &PimVif::set_hello_holdtime_callback)),
       _dr_priority(PIM_HELLO_DR_PRIORITY_DEFAULT,
 		   callback(this, &PimVif::set_dr_priority_callback)),
-      _lan_delay(LAN_DELAY_MSEC_DEFAULT,
-		 callback(this, &PimVif::set_lan_delay_callback)),
-      _override_interval(LAN_OVERRIDE_INTERVAL_MSEC_DEFAULT,
+      _propagation_delay(PIM_PROPAGATION_DELAY_MSEC_DEFAULT,
+			 callback(this,
+				  &PimVif::set_propagation_delay_callback)),
+      _override_interval(PIM_OVERRIDE_INTERVAL_MSEC_DEFAULT,
 			 callback(this,
 				  &PimVif::set_override_interval_callback)),
       _is_tracking_support_disabled(false,
@@ -213,7 +214,7 @@ PimVif::set_default_config()
     hello_period().reset();
     hello_holdtime().reset();
     dr_priority().reset();
-    lan_delay().reset();
+    propagation_delay().reset();
     override_interval().reset();
     is_tracking_support_disabled().reset();
     accept_nohello_neighbors().reset();
@@ -1624,8 +1625,9 @@ PimVif::vif_propagation_delay() const
     static TimeVal tv;
     uint16_t delay;
     
-    // XXX: lan_delay is in milliseconds
-    tv = TimeVal(_lan_delay.get() / 1000, (_lan_delay.get() % 1000) * 1000);
+    // XXX: propagation_delay is in milliseconds
+    tv = TimeVal(_propagation_delay.get() / 1000,
+		 (_propagation_delay.get() % 1000) * 1000);
     
     if (! is_lan_delay_enabled())
 	return (tv);
@@ -1634,8 +1636,8 @@ PimVif::vif_propagation_delay() const
     list<PimNbr *>::const_iterator iter;
     for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->lan_delay() > delay)
-	    delay = pim_nbr->lan_delay();
+	if (pim_nbr->propagation_delay() > delay)
+	    delay = pim_nbr->propagation_delay();
     }
     
     // XXX: delay is in milliseconds

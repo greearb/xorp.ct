@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.48 2005/03/24 00:40:00 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.49 2005/03/25 02:54:01 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -845,14 +845,14 @@ public:
     int		reset_vif_dr_priority(const string& vif_name,
 				      string& error_msg);
     //
-    int		get_vif_lan_delay(const string&	vif_name,
-				  uint16_t& lan_delay,
-				  string& error_msg);
-    int		set_vif_lan_delay(const string&	vif_name,
-				  uint16_t lan_delay,
-				  string& error_msg);
-    int		reset_vif_lan_delay(const string& vif_name,
-				    string& error_msg);
+    int		get_vif_propagation_delay(const string&	vif_name,
+					  uint16_t& propagation_delay,
+					  string& error_msg);
+    int		set_vif_propagation_delay(const string&	vif_name,
+					  uint16_t propagation_delay,
+					  string& error_msg);
+    int		reset_vif_propagation_delay(const string& vif_name,
+					    string& error_msg);
     //
     int		get_vif_override_interval(const string&	vif_name,
 					  uint16_t& override_interval,

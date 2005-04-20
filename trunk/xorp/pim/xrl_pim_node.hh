@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.56 2005/03/23 10:49:59 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.57 2005/03/25 02:54:04 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1082,18 +1082,18 @@ protected:
 	// Input values, 
 	const string&	vif_name);
 
-    XrlCmdError pim_0_1_get_vif_lan_delay(
+    XrlCmdError pim_0_1_get_vif_propagation_delay(
 	// Input values, 
 	const string&	vif_name, 
 	// Output values, 
-	uint32_t&	lan_delay);
+	uint32_t&	propagation_delay);
 
-    XrlCmdError pim_0_1_set_vif_lan_delay(
+    XrlCmdError pim_0_1_set_vif_propagation_delay(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	lan_delay);
+	const uint32_t&	propagation_delay);
 
-    XrlCmdError pim_0_1_reset_vif_lan_delay(
+    XrlCmdError pim_0_1_reset_vif_propagation_delay(
 	// Input values, 
 	const string&	vif_name);
 

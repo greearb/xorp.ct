@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.11 2005/03/22 04:29:57 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.12 2005/03/25 02:54:02 pavlin Exp $
  */
 
 
@@ -115,8 +115,8 @@
 #define PIM_HELLO_HELLO_HOLDTIME_PERIOD_RATIO	3.5
 #define PIM_HELLO_HELLO_HOLDTIME_DEFAULT	((int)(PIM_HELLO_HELLO_HOLDTIME_PERIOD_RATIO * PIM_HELLO_HELLO_PERIOD_DEFAULT))
 
-#define LAN_DELAY_MSEC_DEFAULT			500	/* LAN_delay_default */
-#define LAN_OVERRIDE_INTERVAL_MSEC_DEFAULT	2500   /* t_override_default */
+#define PIM_PROPAGATION_DELAY_MSEC_DEFAULT	500	/* Propagation_delay_default */
+#define PIM_OVERRIDE_INTERVAL_MSEC_DEFAULT	2500   /* t_override_default */
 
 
 /* PIM_JOIN_PRUNE-related definitions */

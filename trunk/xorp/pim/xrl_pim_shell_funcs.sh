@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.24 2005/03/23 09:44:22 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.25 2005/03/23 10:49:59 pavlin Exp $
 #
 
 #
@@ -887,45 +887,45 @@ pim_reset_vif_dr_priority()
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 
-pim_get_vif_lan_delay()
+pim_get_vif_propagation_delay()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_get_vif_lan_delay <vif_name:txt>"
+	echo "Usage: pim_get_vif_propagation_delay <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
     
-    echo "pim_get_vif_lan_delay" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/get_vif_lan_delay"
+    echo "pim_get_vif_propagation_delay" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/get_vif_propagation_delay"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl_wrapper -p lan_delay:u32 $XRL$XRL_ARGS
+    call_xrl_wrapper -p propagation_delay:u32 $XRL$XRL_ARGS
 }
 
-pim_set_vif_lan_delay()
+pim_set_vif_propagation_delay()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_set_vif_lan_delay <vif_name:txt> <lan_delay:u32>"
+	echo "Usage: pim_set_vif_propagation_delay <vif_name:txt> <propagation_delay:u32>"
 	exit 1
     fi
     vif_name=$1
-    lan_delay=$2
+    propagation_delay=$2
     
-    echo "pim_set_vif_lan_delay" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/set_vif_lan_delay"
-    XRL_ARGS="?vif_name:txt=$vif_name&lan_delay:u32=$lan_delay"
+    echo "pim_set_vif_propagation_delay" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/set_vif_propagation_delay"
+    XRL_ARGS="?vif_name:txt=$vif_name&propagation_delay:u32=$propagation_delay"
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 
-pim_reset_vif_lan_delay()
+pim_reset_vif_propagation_delay()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_reset_vif_lan_delay <vif_name:txt>"
+	echo "Usage: pim_reset_vif_propagation_delay <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
     
-    echo "pim_reset_vif_lan_delay" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_lan_delay"
+    echo "pim_reset_vif_propagation_delay" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_propagation_delay"
     XRL_ARGS="?vif_name:txt=$vif_name"
     call_xrl_wrapper $XRL$XRL_ARGS
 }

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.17 2005/03/23 09:44:22 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.18 2005/03/23 10:49:59 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -207,8 +207,8 @@ interface pim/0.1 {
 	 * (in seconds).
 	 * @param dr_priority the DR Priority in the DR Priority
 	 * option (larger is better).
-	 * @param lan_delay the LAN Delay in the LAN Prune Delay option
-	 * (in milliseconds).
+	 * @param propagation_delay the Propagation Delay in the
+	 * LAN Prune Delay option (in milliseconds).
 	 * @param override_interval the Override_Interval in the
 	 * LAN Prune Delay option (in milliseconds).
 	 * @param is_tracking_support_disabled if true, the T-bit in the
@@ -231,9 +231,9 @@ interface pim/0.1 {
 	get_vif_dr_priority		? vif_name:txt -> dr_priority:u32
 	set_vif_dr_priority		? vif_name:txt  & dr_priority:u32
 	reset_vif_dr_priority		? vif_name:txt
-	get_vif_lan_delay		? vif_name:txt -> lan_delay:u32
-	set_vif_lan_delay		? vif_name:txt  & lan_delay:u32
-	reset_vif_lan_delay		? vif_name:txt
+	get_vif_propagation_delay	? vif_name:txt -> propagation_delay:u32
+	set_vif_propagation_delay	? vif_name:txt  & propagation_delay:u32
+	reset_vif_propagation_delay	? vif_name:txt
 	get_vif_override_interval	? vif_name:txt -> override_interval:u32
 	set_vif_override_interval	? vif_name:txt  & override_interval:u32
 	reset_vif_override_interval	? vif_name:txt
