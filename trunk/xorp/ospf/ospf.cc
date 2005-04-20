@@ -101,7 +101,11 @@ Ospf<A>::receive(const string& interface, const string& vif,
     debug_msg("%s\n", packet->str().c_str());
     // We have a packet and its good.
 
-    _peer_manager.incoming_packet(interface, vif, packet);
+    try {
+	_peer_manager.receive(interface, vif, packet);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+    }
 
     delete packet;
 }
