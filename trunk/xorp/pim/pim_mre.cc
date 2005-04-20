@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.34 2005/04/19 01:52:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.35 2005/04/19 02:32:43 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -986,22 +986,20 @@ PimMre::recompute_set_keepalive_timer_sg()
 	// On receipt of data from S to G on interface iif:
 	//     if( DirectlyConnected(S) == TRUE AND iif == RPF_interface(S) ) {
 	//         set KeepaliveTimer(S,G) to Keepalive_Period
+	//         ...
+	//     }
+	//
+	//     if( iif == RPF_interface(S) AND UpstreamJPState(S,G) == Joined AND
+	//        inherited_olist(S,G) != NULL ) {
+	//            set KeepaliveTimer(S,G) to Keepalive_Period
+	//     }
 	//
 	if (is_directly_connected_s()
-	    && (rpf_interface_s() == pim_mfc->iif_vif_index())) {
+	    && (pim_mfc->iif_vif_index() == rpf_interface_s())) {
 	    should_set_keepalive_timer_sg = true;
 	    break;
 	}
-
-	//
-	// Test the following scenario:
-	//
-	// if( iif == RPF_interface(S) AND UpstreamJPState(S,G) == Joined ) {
-	//    oiflist = inherited_olist(S,G)
-	//    if( oiflist != NULL ) {
-	//        set KeepaliveTimer(S,G) to Keepalive_Period
-	//
-	if ((rpf_interface_s() == pim_mfc->iif_vif_index())
+	if ((pim_mfc->iif_vif_index() == rpf_interface_s())
 	    && is_joined_state()
 	    && inherited_olist_sg().any()) {
 	    should_set_keepalive_timer_sg = true;
@@ -1032,6 +1030,16 @@ PimMre::recompute_set_keepalive_timer_sg()
 	//
 	// packet_arrives_on_rp_tunnel( pkt ) {
 	//     ....
+	//     if( I_am_RP(G) AND outer.dst == RP(G) ) {
+	//           ...
+	//           if ( SPTbit(S,G) OR SwitchToSptDesired(S,G) ) {
+	//                if ( sentRegisterStop == TRUE ) {
+	//                     restart KeepaliveTimer(S,G) to RP_Keepalive_Period;
+	//                } else {
+	//                     restart KeepaliveTimer(S,G) to Keepalive_Period;
+	//                }
+	//           }
+	//           ...
 	//
 	if (i_am_rp() && (is_spt() || was_switch_to_spt_desired_sg())) {
 	    should_set_keepalive_timer_sg = true;
