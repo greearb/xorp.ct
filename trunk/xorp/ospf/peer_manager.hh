@@ -92,8 +92,9 @@ class PeerManager {
      * packet contains LSAs send it to the LSA database manager if
      * appropriate.
      */
-    void incoming_packet(const string& interface, const string& vif,
-			 Packet *packet);
+    void receive(const string& interface, const string& vif,
+			 Packet *packet)
+	throw(BadPeer);
 
     // Configure the peering.
 

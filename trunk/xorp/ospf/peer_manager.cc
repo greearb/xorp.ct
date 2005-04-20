@@ -173,7 +173,8 @@ PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
 template <typename A>
 PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
-    OspfTypes::LinkType linktype, OspfTypes::AreaID area)
+			    OspfTypes::LinkType linktype, 
+			    OspfTypes::AreaID area)
     throw(BadPeer)
 {
     debug_msg("Interface %s Vif %s linktype %u area %s\n",
@@ -247,12 +248,16 @@ PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
 
 template <typename A>
 void
-PeerManager<A>::incoming_packet(const string& interface, const string& vif,
+PeerManager<A>::receive(const string& interface, const string& vif,
 				Packet *packet)
+    throw(BadPeer)
 {
     debug_msg("Interface %s Vif %s %s\n", interface.c_str(),
 	      vif.c_str(), cstring((*packet)));
-    XLOG_WARNING("TBD");
+
+    PeerID peerid = get_peerid(interface, vif);
+    XLOG_ASSERT(0 != _peers.count(peerid));
+    _peers[peerid]->receive(packet);
 }
 
 
