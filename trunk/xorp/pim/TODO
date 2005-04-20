@@ -1,6 +1,15 @@
 #
-# $XORP: xorp/pim/TODO,v 1.89 2005/04/20 07:23:15 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.90 2005/04/20 20:07:27 pavlin Exp $
 #
+
+* IMPL:
+  Check that the following is true for both the user-level and kernel-level
+  implementation:
+
+  The TTL of a forwarded data packet is decremented before it is
+  encapsulated in the Register Tunnel.  The encapsulating packet uses the
+  normal TTL that the router would use for any locally-generated IP
+  packet.
 
 * PIM SPEC:
   "Interface_Address_List Option" -> "interface Address_List Option"
@@ -117,16 +126,14 @@ address.
 * IMPL:
   Implement the following from the spec:
 
-  In IPv6, the DR MUST perform Path-MTU discovery, and
-  an ICMP Fragmentation Required message MUST be sent by the
-  encapsulating DR if it receives a packet that will not fit in the
-  effective MTU of the tunnel.
-  If the MTU between the DR and the RP results in the effective tunnel
-  MTU being smaller than 1280 (the IPv6 minimum MTU), the DR MUST
-  send Fragmentation Required messages with an MTU value of 1280 and
-  MUST fragment its PIM register messages as required, using an
-  IPv6 fragmentation header between the outer IPv6 header and the
-  PIM Register header.
+  In IPv6, the DR MUST perform Path MTU discovery, and an ICMP Packet Too
+  Big message MUST be sent by the encapsulating DR if it receives a packet
+  that will not fit in the effective MTU of the tunnel.  If the MTU
+  between the DR and the RP results in the effective tunnel MTU being
+  smaller than 1280 (the IPv6 minimum MTU), the DR MUST send Fragmentation
+  Required messages with an MTU value of 1280 and MUST fragment its PIM
+  register messages as required, using an IPv6 fragmentation header
+  between the outer IPv6 header and the PIM Register header.
 
 * IMPL+PIM KERNEL IMPL:
   Make sure that the following is implemented:
