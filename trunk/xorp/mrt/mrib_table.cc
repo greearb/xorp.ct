@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.10 2005/03/24 02:51:29 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.11 2005/03/25 02:53:57 pavlin Exp $"
 
 
 //
@@ -24,6 +24,8 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/vif.hh"
+#include "libxorp/utils.hh"
+
 #include "mrib_table.hh"
 
 
@@ -49,7 +51,7 @@
 
 
 //
-// MribTable functions
+// MribTable methods
 //
 
 /**
@@ -59,12 +61,12 @@
  * MribTable constructor.
  **/
 MribTable::MribTable(int family)
-    : _family(family)
+    : _family(family),
+      _mrib_lookup_root(NULL),
+      _mrib_lookup_size(0),
+      _mrib_size(0),
+      _is_preserving_removed_mrib_entries(false)
 {
-    // TODO: add the default entry
-    _mrib_lookup_root = NULL;
-    _mrib_lookup_size = 0;
-    _mrib_size = 0;
 }
 
 /**
@@ -81,7 +83,7 @@ MribTable::~MribTable()
 
 //
 // Clear all entries and pending transactions.
-// XXX: the entries themselves are deleted too.
+// XXX: The entries themselves are deleted too.
 //
 void
 MribTable::clear()
@@ -92,11 +94,17 @@ MribTable::clear()
     // Delete all pending transactions
     //
     _mrib_pending_transactions.clear();
+
+    //
+    // Delete the list with the removed Mrib entries
+    //
+    delete_pointers_list(_removed_mrib_entries);
 }
 
 //
 // Remove all MRIB entries from the table.
-// XXX: the entries themselves are deleted too.
+// XXX: The MRIB entries themselves are either deleted or added to
+// the list with removed entries.
 //
 void
 MribTable::remove_all_entries()
@@ -113,7 +121,8 @@ MribTable::remove_all_entries()
 //
 // Insert a copy of a MRIB routing entry that was already created.
 // XXX: if there is an existing MRIB entry for the same prefix, the old entry
-// is deleted.
+// is removed from the table and is either deleted or added to the list with
+// removed entries.
 //
 Mrib *
 MribTable::insert(const Mrib& mrib)
@@ -138,12 +147,13 @@ MribTable::insert(const Mrib& mrib)
     
     if (prefix_len == 0) {
 	// The default routing entry
-	if (mrib_lookup->_mrib != NULL) {
-	    delete mrib_lookup->_mrib;		// XXX: delete the old entry
+	if (mrib_lookup->mrib() != NULL) {
+	    // XXX: remove the old entry
+	    remove_mrib_entry(mrib_lookup->mrib());
 	    _mrib_size--;
 	}
 	Mrib *mrib_copy = new Mrib(mrib);
-	mrib_lookup->_mrib = mrib_copy;
+	mrib_lookup->set_mrib(mrib_copy);
 	_mrib_size++;
 	return (mrib_lookup->mrib());
     }
@@ -158,29 +168,30 @@ MribTable::insert(const Mrib& mrib)
 	    
 #define MRIB_LOOKUP_BITTEST	(1 << (sizeof(lookup_word)*NBBY - 1))
 	    if (lookup_word & MRIB_LOOKUP_BITTEST)
-		mrib_lookup = mrib_lookup->_right_child;
+		mrib_lookup = mrib_lookup->right_child();
 	    else
-		mrib_lookup = mrib_lookup->_left_child;
+		mrib_lookup = mrib_lookup->left_child();
 	    
 	    if (mrib_lookup == NULL) {
 		// Create a new entry
 		mrib_lookup = new MribLookup(parent_mrib_lookup);
 		_mrib_lookup_size++;
 		if (lookup_word & MRIB_LOOKUP_BITTEST)
-		    parent_mrib_lookup->_right_child = mrib_lookup;
+		    parent_mrib_lookup->set_right_child(mrib_lookup);
 		else
-		    parent_mrib_lookup->_left_child = mrib_lookup;
+		    parent_mrib_lookup->set_left_child(mrib_lookup);
 	    }
 #undef MRIB_LOOKUP_BITTEST
 	    
 	    if (--prefix_len == 0) {
 		// Found the place to install the entry
-		if (mrib_lookup->_mrib != NULL) {
-		    delete mrib_lookup->_mrib;	// XXX: delete the old entry
+		if (mrib_lookup->mrib() != NULL) {
+		    // XXX: remove the old entry
+		    remove_mrib_entry(mrib_lookup->mrib());
 		    _mrib_size--;
 		}
 		Mrib *mrib_copy = new Mrib(mrib);
-		mrib_lookup->_mrib = mrib_copy;
+		mrib_lookup->set_mrib(mrib_copy);
 		_mrib_size++;
 		return (mrib_lookup->mrib());
 	    }
@@ -217,9 +228,9 @@ MribTable::remove(const IPvXNet& dest_prefix)
     if (mrib_lookup == NULL)
 	return;			// TODO: should we return an error instead?
     
-    if (mrib_lookup->_mrib != NULL) {
-	delete mrib_lookup->_mrib;
-	mrib_lookup->_mrib = NULL;
+    if (mrib_lookup->mrib() != NULL) {
+	remove_mrib_entry(mrib_lookup->mrib());
+	mrib_lookup->set_mrib(NULL);
 	_mrib_size--;
     }
     
@@ -227,18 +238,18 @@ MribTable::remove(const IPvXNet& dest_prefix)
     // Remove recursively all parent nodes that are not in use anymore
     //
     do {
-	if ((mrib_lookup->_left_child != NULL)
-	    || (mrib_lookup->_right_child != NULL)
-	    || (mrib_lookup->_mrib != NULL))
+	if ((mrib_lookup->left_child() != NULL)
+	    || (mrib_lookup->right_child() != NULL)
+	    || (mrib_lookup->mrib() != NULL))
 	    break;	// Node is still in use
 	
-	MribLookup *parent_mrib_lookup = mrib_lookup->_parent;
+	MribLookup *parent_mrib_lookup = mrib_lookup->parent();
 	
 	if (parent_mrib_lookup != NULL) {
-	    if (parent_mrib_lookup->_left_child == mrib_lookup)
-		parent_mrib_lookup->_left_child = NULL;
+	    if (parent_mrib_lookup->left_child() == mrib_lookup)
+		parent_mrib_lookup->set_left_child(NULL);
 	    else
-		parent_mrib_lookup->_right_child = NULL;
+		parent_mrib_lookup->set_right_child(NULL);
 	}
 	delete mrib_lookup;
 	_mrib_lookup_size--;
@@ -251,7 +262,8 @@ MribTable::remove(const IPvXNet& dest_prefix)
 
 //
 // Remove recursively all MribLookup entries below (and including) mrib_lookup
-// XXX: the Mrib entries are also deleted.
+// XXX: the Mrib entries are either deleted or added to the list with
+// removed entries.
 //
 void
 MribTable::remove_mrib_lookup(MribLookup *mrib_lookup)
@@ -260,32 +272,32 @@ MribTable::remove_mrib_lookup(MribLookup *mrib_lookup)
     if (mrib_lookup == NULL)
 	return;
     
-    // Delete the Mrib entry itself
-    if (mrib_lookup->_mrib != NULL) {
-	delete mrib_lookup->_mrib;
+    // Remove the Mrib entry itself
+    if (mrib_lookup->mrib() != NULL) {
+	remove_mrib_entry(mrib_lookup->mrib());
 	_mrib_size--;
-	mrib_lookup->_mrib = NULL;
+	mrib_lookup->set_mrib(NULL);
     }
     
-    if (mrib_lookup->_parent != NULL) {
+    if (mrib_lookup->parent() != NULL) {
 	// Chear the state in the parent
-	if (mrib_lookup->_parent->_left_child == mrib_lookup) {
-	    mrib_lookup->_parent->_left_child = NULL;
+	if (mrib_lookup->parent()->left_child() == mrib_lookup) {
+	    mrib_lookup->parent()->set_left_child(NULL);
 	} else {
-	    XLOG_ASSERT(mrib_lookup->_parent->_right_child == mrib_lookup);
-	    mrib_lookup->_parent->_right_child = NULL;
+	    XLOG_ASSERT(mrib_lookup->parent()->right_child() == mrib_lookup);
+	    mrib_lookup->parent()->set_right_child(NULL);
 	}
     }
     
     // Remove recursively the left subtree
-    if (mrib_lookup->_left_child != NULL) {
-	mrib_lookup->_left_child->_parent = NULL;
-	remove_mrib_lookup(mrib_lookup->_left_child);
+    if (mrib_lookup->left_child() != NULL) {
+	mrib_lookup->left_child()->set_parent(NULL);
+	remove_mrib_lookup(mrib_lookup->left_child());
     }
     // Remove recursively the right subtree
-    if (mrib_lookup->_right_child != NULL) {
-	mrib_lookup->_right_child->_parent = NULL;
-	remove_mrib_lookup(mrib_lookup->_right_child);
+    if (mrib_lookup->right_child() != NULL) {
+	mrib_lookup->right_child()->set_parent(NULL);
+	remove_mrib_lookup(mrib_lookup->right_child());
     }
     
     // Delete myself
@@ -319,14 +331,14 @@ MribTable::find(const IPvX& lookup_addr) const
 	uint32_t lookup_word = ntohl(mem_lookup_addr[i]);
 	for (size_t j = 0; j < sizeof(lookup_word)*NBBY; j++) {
 	    MribLookup *parent_mrib_lookup = mrib_lookup;
-	    if (parent_mrib_lookup->_mrib != NULL)
-		longest_match_mrib = parent_mrib_lookup->_mrib;
+	    if (parent_mrib_lookup->mrib() != NULL)
+		longest_match_mrib = parent_mrib_lookup->mrib();
 	    
 #define MRIB_LOOKUP_BITTEST	(1 << (sizeof(lookup_word)*NBBY - 1))
 	    if (lookup_word & MRIB_LOOKUP_BITTEST)
-		mrib_lookup = mrib_lookup->_right_child;
+		mrib_lookup = mrib_lookup->right_child();
 	    else
-		mrib_lookup = mrib_lookup->_left_child;
+		mrib_lookup = mrib_lookup->left_child();
 #undef MRIB_LOOKUP_BITTEST
 	    
 	    if (mrib_lookup == NULL) {
@@ -337,8 +349,8 @@ MribTable::find(const IPvX& lookup_addr) const
 	}
     }
     
-    XLOG_ASSERT(mrib_lookup->_mrib != NULL);
-    return (mrib_lookup->_mrib);
+    XLOG_ASSERT(mrib_lookup->mrib() != NULL);
+    return (mrib_lookup->mrib());
 }
 
 Mrib *
@@ -349,7 +361,24 @@ MribTable::find_exact(const IPvXNet& dest_prefix) const
     if (mrib_lookup == NULL)
 	return (NULL);
     
-    return (mrib_lookup->_mrib);
+    return (mrib_lookup->mrib());
+}
+
+/**
+ * Remove a @ref Mrib entry from the table.
+ * 
+ * The @ref Mrib entry itself is either deleted or added to the list
+ * with removed entries.
+ * 
+ * @param mrib the @ref Mrib entry to remove.
+ */
+void
+MribTable::remove_mrib_entry(Mrib *mrib)
+{
+    if (is_preserving_removed_mrib_entries())
+	_removed_mrib_entries.push_back(mrib);
+    else
+	delete mrib;
 }
 
 //
@@ -386,9 +415,9 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
 	    
 #define MRIB_LOOKUP_BITTEST	(1 << (sizeof(lookup_word)*NBBY - 1))
 	    if (lookup_word & MRIB_LOOKUP_BITTEST)
-		mrib_lookup = mrib_lookup->_right_child;
+		mrib_lookup = mrib_lookup->right_child();
 	    else
-		mrib_lookup = mrib_lookup->_left_child;
+		mrib_lookup = mrib_lookup->left_child();
 	    
 	    if (mrib_lookup == NULL) {
 		// Not found
@@ -553,25 +582,26 @@ MribLookup::get_next() const
 }
 
 //
-// Mrib functions
+// Mrib methods
 //
 Mrib::Mrib(int family)
     : _dest_prefix(family),
-      _next_hop_router_addr(family)
+      _next_hop_router_addr(family),
+      _next_hop_vif_index(Vif::VIF_INDEX_INVALID),
+      _metric_preference(~0),
+      _metric(~0)
 {
-    _next_hop_vif_index = Vif::VIF_INDEX_INVALID;
-    _metric_preference = ~0;
-    _metric = ~0;
 }
 
 Mrib::Mrib(const IPvXNet& dest_prefix)
     : _dest_prefix(dest_prefix),
-      _next_hop_router_addr(dest_prefix.af())
+      _next_hop_router_addr(dest_prefix.af()),
+      _next_hop_vif_index(Vif::VIF_INDEX_INVALID),
+      _metric_preference(~0),
+      _metric(~0)
 {
-    _next_hop_vif_index = Vif::VIF_INDEX_INVALID;
-    _metric_preference = ~0;
-    _metric = ~0;
 }
+
 Mrib::Mrib(const Mrib& mrib)
     : _dest_prefix(mrib.dest_prefix()),
       _next_hop_router_addr(mrib.next_hop_router_addr()),
@@ -579,7 +609,6 @@ Mrib::Mrib(const Mrib& mrib)
       _metric_preference(mrib.metric_preference()),
       _metric(mrib.metric())
 {
-    
 }
 
 bool

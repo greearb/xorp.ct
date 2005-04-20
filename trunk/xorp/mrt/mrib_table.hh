@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrib_table.hh,v 1.8 2004/07/28 04:48:06 pavlin Exp $
+// $XORP: xorp/mrt/mrib_table.hh,v 1.9 2005/03/25 02:53:57 pavlin Exp $
 
 #ifndef __MRT_MRIB_TABLE_HH__
 #define __MRT_MRIB_TABLE_HH__
@@ -162,7 +162,6 @@ public:
     string str() const;
     
 private:
-    // The private state
     IPvXNet	_dest_prefix;		// The destination prefix address
     IPvX	_next_hop_router_addr;	// The address of the next-hop router
     uint16_t	_next_hop_vif_index;	// The vif index to the next-hop router
@@ -268,7 +267,36 @@ public:
      * Remove all entries.
      */
     void	remove_all_entries();
-    
+
+    /**
+     * Get a reference to the list with removed @ref Mrib entries.
+     * 
+     * @return a reference to the list with removed @ref Mrib entries.
+     */
+    list<Mrib *>& removed_mrib_entries() {
+	return (_removed_mrib_entries);
+    }
+
+    /**
+     * Test if the removed @ref Mrib entries are preserved or deleted.
+     * 
+     * @return true if the removed @ref Mrib entries are preserved, otherwise
+     * false.
+     */
+    bool is_preserving_removed_mrib_entries() const {
+	return (_is_preserving_removed_mrib_entries);
+    }
+
+    /**
+     * Enable or disable the preserving of the removed @ref Mrib entries.
+     * 
+     * @param v if true, then the removed @ref Mrib entries are preserved
+     * otherwise they are deleted.
+     */
+    void set_is_preserving_removed_mrib_entries(bool v) {
+	_is_preserving_removed_mrib_entries = v;
+    }
+
     /**
      * Insert a copy of a @ref Mrib entry.
      * 
@@ -414,6 +442,16 @@ public:
     
 private:
     /**
+     * Remove a @ref Mrib entry from the table.
+     * 
+     * The @ref Mrib entry itself is either deleted or added to the list
+     * with removed entries.
+     * 
+     * @param mrib the @ref Mrib entry to remove.
+     */
+    void remove_mrib_entry(Mrib *mrib);
+
+    /**
      * Find an exact @ref MribLookip match.
      * 
      * @param addr_prefix the lookup network address prefix.
@@ -451,7 +489,7 @@ private:
 	      _mrib(mrib),
 	      _is_insert(is_insert),
 	      _is_remove_all(false)
-	    {}
+	{}
 
 	/**
 	 * Constructor to remove all entries.
@@ -461,7 +499,7 @@ private:
 	      _mrib(Mrib(IPvXNet(IPvX::ZERO(mrib_table.family()), 0))),
 	      _is_insert(false),
 	      _is_remove_all(true)
-	    {}
+	{}
 	uint32_t	tid() const { return (_tid); }
 	const Mrib&	mrib() const { return (_mrib); }
 	bool		is_insert() const { return (_is_insert); }
@@ -489,6 +527,17 @@ private:
     // The list of pending transactions
     //
     list<PendingTransaction> _mrib_pending_transactions;
+
+    //
+    // A flag to indicate whether the removed Mrib entries are preserved
+    // on the _removed_mrib_entries list, or are deleted.
+    //
+    bool		_is_preserving_removed_mrib_entries;
+
+    //
+    // The list of removed Mrib entries that may be still in use.
+    //
+    list<Mrib *>	_removed_mrib_entries;
 };
 
 /**
@@ -501,10 +550,12 @@ public:
      * 
      * @param parent the parent entry.
      */
-    MribLookup(MribLookup *parent) : _parent(parent) {
-	_left_child = _right_child = NULL;
-	_mrib = NULL;
-    }
+    MribLookup(MribLookup *parent)
+	: _parent(parent),
+	  _left_child(NULL),
+	  _right_child(NULL),
+	  _mrib(NULL)
+    {}
     
     /**
      * Destructor
@@ -517,7 +568,65 @@ public:
      * @return the corresponding @ref Mrib entry if exists, otherwise NULL.
      */
     Mrib *mrib() const { return (_mrib); }
-    
+
+    /**
+     * Set the corresponding @ref Mrib entry.
+     * 
+     * Note that the previous value of the corresponding @ref Mrib entry
+     * is overwritten.
+     * 
+     * @param v the value of the corresponding @ref Mrib entry.
+     */
+    void set_mrib(Mrib *v) { _mrib = v; }
+
+    /**
+     * Get the parent @ref MribLookup entry.
+     * 
+     * @return the parent @ref MribLookup entry.
+     */
+    MribLookup *parent() { return (_parent); }
+
+    /**
+     * Set the parent @ref MribLookup entry.
+     * 
+     * Note that the previous value of the parent is overwritten.
+     * 
+     * @param v the parent @ref MribLookup to assign to this entry.
+     */
+    void set_parent(MribLookup *v) { _parent = v; }
+
+    /**
+     * Get the left child @ref MribLookup entry.
+     * 
+     * Note that the previous value of the left child is overwritten.
+     * 
+     * @return the left child @ref MribLookup entry.
+     */
+    MribLookup *left_child() { return (_left_child); }
+
+    /**
+     * Set the left child @ref MribLookup entry.
+     * 
+     * @param v the left child @ref MribLookup to assign to this entry.
+     */
+    void set_left_child(MribLookup *v) { _left_child = v; }
+
+    /**
+     * Get the right child @ref MribLookup entry.
+     * 
+     * @return the right child @ref MribLookup entry.
+     */
+    MribLookup *right_child() { return (_right_child); }
+
+    /**
+     * Set the right child @ref MribLookup entry.
+     * 
+     * Note that the previous value of the right child is overwritten.
+     * 
+     * @param v the right child @ref MribLookup to assign to this entry.
+     */
+    void set_right_child(MribLookup *v) { _right_child = v; }
+
     /**
      * Get the next @ref MribLookup entry.
      * 
@@ -532,9 +641,6 @@ public:
     MribLookup *get_next() const;
     
 private:
-    // The private state
-    friend class MribTable;
-    
     MribLookup	*_parent;	// The parent in the lookup tree
     MribLookup	*_left_child;	// The left child in the lookup tree
     MribLookup	*_right_child;	// The right child in the lookup tree
