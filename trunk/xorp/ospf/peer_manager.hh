@@ -148,7 +148,7 @@ class PeerManager {
      * Generate PeerID.
      * Internally we want to deal with peers as simple IDs not
      * interface/vif.
-     * Throw an exception if we already have a mapping.
+     * Throw an exception a mapping already exists.
      */
     PeerID create_peerid(const string& interface, const string& vif)
 	throw(BadPeer);

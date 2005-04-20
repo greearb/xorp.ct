@@ -57,7 +57,7 @@ class DebugIO : public IO {
 	DOUT(_info) << now.pretty_print() << endl;
 	DOUT(_info) << "send(" << interface << "," << vif << "...)" << endl;
 
-	// Decode the packet so we can pretty print it.
+	// Decode the packet in order to pretty print it.
 	Packet *packet = _dec.decode(data, len);
 	DOUT(_info) << packet->str() << endl;
 	delete packet;
@@ -139,7 +139,7 @@ class DebugIO : public IO {
     }
 
     /**
-     * Return the number of packets we have seen so far.
+     * Return the number of packets that have seen so far.
      */
     int packets()
     {

@@ -182,7 +182,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 
     AreaRouter<A> *area_router = get_area_router(area);
 
-    // Verify that we know about this area.
+    // Verify that this area is known.
     if (0 == area_router)
 	xorp_throw(BadPeer, 
 		   c_format("Unknown Area %s", area.str().c_str()));

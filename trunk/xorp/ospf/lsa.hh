@@ -317,7 +317,7 @@ class LsaDecoder {
     Lsa::LsaRef decode(uint8_t *ptr, size_t& len) throw(BadPacket);
 
     /**
-     * @return The length of the smallest LSA that we can decode.
+     * @return The length of the smallest LSA that can be decoded.
      */
     size_t min_length() const {
 	return _min_lsa_length + Lsa_header::length();
@@ -328,8 +328,8 @@ class LsaDecoder {
     }
  private:
     const OspfTypes::Version 	_version;
-    size_t _min_lsa_length;		// The smallest LSA we know
-					// how to decode, excluding LSA header.
+    size_t _min_lsa_length;		// The smallest LSA that can be
+					// decoded, excluding LSA header.
 
     map<uint16_t, Lsa *> _lsa_decoders;	// OSPF LSA decoders
 };

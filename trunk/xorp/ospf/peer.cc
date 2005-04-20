@@ -63,7 +63,7 @@ PeerOut<A>::add_area(OspfTypes::AreaID area)
 {
     debug_msg("Area %s\n", area.str().c_str());
 
-    // Only OSPFv3 is allowed a peer to be connected to multiple areas.
+    // Only OSPFv3 is allows a peer to be connected to multiple areas.
     XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
 
     Peer<A> *peer = _areas[area] = new Peer<A>(_ospf, *this, area);
@@ -142,7 +142,7 @@ PeerOut<A>::receive(Packet *packet)
 {
     debug_msg("%s\n", cstring(*packet));
     OspfTypes::AreaID area = packet->get_area_id();
-    // Does the area ID in the packet match any we are expecting.
+    // Does the area ID in the packet match any that are expecting.
     if (0 == _areas.count(area)) {
 	    xorp_throw(BadPeer,
 		       c_format("Area %s not handled by %s/%s",

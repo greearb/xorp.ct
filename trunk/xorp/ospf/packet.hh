@@ -563,8 +563,8 @@ class LinkStateUpdatePacket : public Packet {
  private:
     LsaDecoder& _lsa_decoder;	// LSA decoders.
 
-    // The packet contains a field with the number os LSAs that it
-    // contains we don't bother to store it.
+    // The packet contains a field with the number of LSAs that it
+    // contains there is no point in storing it.
 
     list<Lsa::LsaRef> _lsas;	// The list of LSAs in the packet.
 };

@@ -64,7 +64,7 @@ class AreaRouter {
     OspfTypes::AreaType _area_type;	// Type of this area.
 
     /**
-     * Internal state that we require about this peer.
+     * Internal state that is required about this peer.
      */
     struct peer_state {
 	peer_state() {}

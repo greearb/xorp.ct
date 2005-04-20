@@ -101,7 +101,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
 #endif
 
-    // Make sure that we have at least two bytes so we can extract the
+    // Make sure that at least two bytes have been extracted:
     // Version and Type fields.
     if (len < 2)
 	xorp_throw(BadPacket,
@@ -131,7 +131,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
 			    get_type(),
 			    ptr[1]));
 
-    // Make sure that we have at least the standard header length.
+    // Make sure that at least the standard header length is present.
     switch(version) {
     case OspfTypes::V2:
 	if (len < STANDARD_HEADER_V2)
@@ -147,8 +147,8 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
 				XORP_UINT_CAST(STANDARD_HEADER_V3)));
     }
 
-    // Verify that the length in the packet and the packet we received
-    // match.
+    // Verify that the length in the packet and the length of received
+    // data match.
     uint32_t packet_length = extract_16(&ptr[2]);
     if (packet_length != len)
 	xorp_throw(BadPacket,
@@ -167,7 +167,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
 	set_auth_type(extract_16(&ptr[14]));
 	memcpy(&_auth[0], &ptr[16], sizeof(_auth));
 	// The authentication field is expected to be zero for the
-	// checksumming. So zero it out we already have a copy.
+	// checksumming.
 	memset(&ptr[16], 0, sizeof(_auth));
 	break;
     case OspfTypes::V3:
@@ -182,7 +182,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
     embed_16(&ptr[12], 0);
     uint16_t checksum_actual = checksum(ptr, len);
 
-    // Put the fields that we zero'd back the way that we found them.
+    // Restore the zero'd fields.
     switch(version) {
     case OspfTypes::V2:
 	memcpy(&ptr[16], &_auth[0], sizeof(_auth));
@@ -319,7 +319,7 @@ PacketDecoder::register_decoder(Packet *packet)
 Packet *
 PacketDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
 {
-    // Make sure that we have at least two bytes so we can extract the
+    // Make sure that at least two bytes have been extracted:
     // Version and Type fields.
     if (len < 2)
 	xorp_throw(BadPacket,
@@ -806,8 +806,8 @@ LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
 {
     size_t header_offset = get_standard_header_length();
     size_t offset = header_offset;
-    // Make a pass over all the LSAs so we can compute the total
-    // length of the packet.
+    // Make a pass over all the LSAs to compute the total length of
+    // the packet.
     size_t n_lsas = 0;
     size_t len = offset + 4;	// 4 == # LSAs
     

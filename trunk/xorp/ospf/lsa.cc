@@ -257,8 +257,8 @@ LsaDecoder::register_decoder(Lsa *lsa)
 	break;
     }
 
-    // Keep a record of the smallest LSA that we may be required to
-    // decode. This will be useful as sanity check in the packet decoder.
+    // Keep a record of the smallest LSA that may be decoded.
+    // This will be useful as sanity check in the packet decoder.
     if (0 == _min_lsa_length)
 	_min_lsa_length = lsa->min_length();
     else if (_min_lsa_length > lsa->min_length())
@@ -611,7 +611,7 @@ RouterLsa::str() const
 
     switch(version) {
     case OspfTypes::V2:
-	// # links we don't bother to store this info.
+	// # links, don't bother to store this info.
 	break;
     case OspfTypes::V3:
 	output += c_format("\n\tOptions %#x", get_options());

@@ -120,7 +120,7 @@ class Ospf {
     Ospf(OspfTypes::Version version, EventLoop& eventloop, IO* io);
 	
     /**
-     * @return which version of OSPF are we implementing.
+     * @return version of OSPF this implementation represents.
      */
     OspfTypes::Version version() { return _version; }
 

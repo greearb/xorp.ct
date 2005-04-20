@@ -120,7 +120,7 @@ class PeerOut {
 
     OspfTypes::LinkType _linktype;	// Type of this link.
 
-					//  Areas we are serving.
+					//  Areas being served.
     map<OspfTypes::AreaID, Peer<A> *>  _areas; 
 
     bool _running;			// True if the peer is up and running
@@ -201,7 +201,7 @@ class Peer {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
-    OspfTypes::AreaID _area;		// Area that we are represent.
+    OspfTypes::AreaID _area;		// Area that is being represented.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
 
@@ -218,7 +218,7 @@ class Peer {
 
     PeerState _state;			// The state of this peer.
 
-    HelloPacket _hello_packet;		// The hello packet we will send.
+    HelloPacket _hello_packet;		// Hello packet that will be sent.
 
     void start_hello_timer();
 
