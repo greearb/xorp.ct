@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.13 2005/02/27 20:49:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.14 2005/03/25 02:54:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -182,6 +182,9 @@ PimMreTask::~PimMreTask()
 	if (pim_mfc->is_task_delete_done())
 	    delete pim_mfc;
     }
+
+    // Delete the Mrib entries pending deletion
+    delete_pointers_list(_mrib_delete_list);
     
     pim_mrt().delete_task(this);
 }
@@ -1671,4 +1674,15 @@ void
 PimMreTask::add_pim_mfc_delete(PimMfc *pim_mfc)
 {
     _pim_mfc_delete_list.push_back(pim_mfc);
+}
+
+//
+// Add a list of Mrib entries to the list of entries to delete
+//
+void
+PimMreTask::add_mrib_delete_list(const list<Mrib *>& mrib_list)
+{
+    _mrib_delete_list.insert(_mrib_delete_list.end(),
+			     mrib_list.begin(),
+			     mrib_list.end());
 }

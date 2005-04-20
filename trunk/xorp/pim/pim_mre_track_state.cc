@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.35 2005/04/19 01:52:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.36 2005/04/20 03:43:28 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -502,6 +502,7 @@ do {									\
     INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG);			// 52
     INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT);			// 53
     INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MFC);				// 54
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_MISC);				// 55
     
     OUTPUT_NAME(OUTPUT_STATE_RP_WC);					// 0
     OUTPUT_NAME(OUTPUT_STATE_RP_SG);					// 1

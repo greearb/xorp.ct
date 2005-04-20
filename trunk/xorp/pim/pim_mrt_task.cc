@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.17 2005/02/27 20:49:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.18 2005/03/25 02:54:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -167,6 +167,36 @@ PimMrt::add_task_mrib_changed(const IPvXNet& modified_prefix_addr)
 			     PimMreTrackState::INPUT_STATE_MRIB_S_CHANGED);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(modified_prefix_addr);
 	
+	add_task(pim_mre_task);
+    } while (false);
+}
+
+void
+PimMrt::add_task_delete_mrib_entries(const list<Mrib *>& mrib_list)
+{
+    PimMreTask *pim_mre_task = NULL;
+    
+    //
+    // If the lastest task is same, just
+    // reuse that task. Otherwise, allocate a new task.
+    //
+    list<PimMreTask *>::reverse_iterator iter;
+    iter = pim_mre_task_list().rbegin();
+    if (iter != pim_mre_task_list().rend()) {
+	pim_mre_task = *iter;
+	if (pim_mre_task->input_state()
+	    == PimMreTrackState::INPUT_STATE_IN_REMOVE_MISC) {
+	    pim_mre_task->add_mrib_delete_list(mrib_list);
+	    return;
+	}
+    }
+    
+    do {
+	// Schedule the deletion task
+	pim_mre_task
+	    = new PimMreTask(*this,
+			     PimMreTrackState::INPUT_STATE_IN_REMOVE_MISC);
+	pim_mre_task->add_mrib_delete_list(mrib_list);
 	add_task(pim_mre_task);
     } while (false);
 }

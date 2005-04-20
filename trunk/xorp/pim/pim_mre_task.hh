@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_task.hh,v 1.7 2004/07/17 00:18:16 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_task.hh,v 1.8 2005/03/25 02:54:00 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TASK_HH__
@@ -68,6 +68,7 @@ public:
     void	add_pim_mre_delete(PimMre *pim_mre);
     void	add_pim_mfc(PimMfc *pim_mfc);
     void	add_pim_mfc_delete(PimMfc *pim_mfc);
+    void	add_mrib_delete_list(const list<Mrib *>& mrib_list);
     
     //
     // (*,*,RP) state setup
@@ -279,6 +280,11 @@ private:
     // The 'occasionally-used' argument(s).
     uint16_t	_vif_index;
     IPvX	_addr_arg;
+
+    //
+    // Mrib related state
+    //
+    list<Mrib *> _mrib_delete_list;
 };
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.19 2004/08/13 23:24:03 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.20 2005/03/25 02:54:00 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -116,6 +116,12 @@ public:
 	INPUT_STATE_IN_REMOVE_PIM_MRE_SG,			// 52
 	INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT,			// 53
 	INPUT_STATE_IN_REMOVE_PIM_MFC,				// 54
+	//
+	// XXX: INPUT_STATE_IN_REMOVE_MISC is a special input state
+	// without output actions that is used only to remove various
+	// entries when the event-handling task itself is deleted.
+	//
+	INPUT_STATE_IN_REMOVE_MISC,				// 55
 	INPUT_STATE_MAX
     };
     //

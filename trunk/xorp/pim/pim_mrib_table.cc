@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.9 2005/02/27 20:49:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.10 2005/03/25 02:54:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Information Base Table implementation.
@@ -37,7 +37,11 @@ PimMribTable::PimMribTable(PimNode& pim_node)
     : MribTable(pim_node.family()),
       _pim_node(pim_node)
 {
-    
+    //
+    // XXX: enable the preserving of the removed Mrib entries, because
+    // they may be in-use even after they are removed from the MribTable.
+    //
+    MribTable::set_is_preserving_removed_mrib_entries(true);
 }
 
 PimMribTable::~PimMribTable()
@@ -158,6 +162,19 @@ PimMribTable::apply_mrib_changes()
 	
 	pim_node().pim_mrt().add_task_mrib_changed(modified_prefix_addr);
     }
+
+    //
+    // XXX: Add a task to delete all removed Mrib entries after they are
+    // not needed anymore.
+    // Note that by the time the task is processed the PimMre entries
+    // affected by the removed Mrib entries should have been processed
+    // and they should not point anymore to the removed Mrib entries.
+    //
+    list<Mrib *>& mrib_list = MribTable::removed_mrib_entries();
+    if (mrib_list.empty())
+	return;
+    pim_node().pim_mrt().add_task_delete_mrib_entries(mrib_list);
+    mrib_list.clear();
 }
 
 //

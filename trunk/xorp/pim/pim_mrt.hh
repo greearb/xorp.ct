@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.12 2005/02/27 20:09:24 pavlin Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.13 2005/03/25 02:54:01 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -196,6 +196,7 @@ public:
     //
     void add_task_rp_changed(const IPvX& affected_rp_addr);
     void add_task_mrib_changed(const IPvXNet& modified_prefix_addr);
+    void add_task_delete_mrib_entries(const list<Mrib *>& mrib_list);
     void add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr);
     void add_task_nbr_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr);
     void add_task_pim_nbr_changed(uint16_t vif_index,
