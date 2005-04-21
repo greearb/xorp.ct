@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.92 2005/04/21 09:18:30 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.93 2005/04/21 11:08:09 pavlin Exp $
 #
 
 * PIM IMPL+SPEC:
@@ -49,7 +49,7 @@
     // XXX: the computation of RPF'(S,G,rpt) when there is no (*,G) state
     // might be needed only if the spec allows to send (S,G,rpt) Prune
     // on the RPT tree when there is only (*,*,RP) state. This might
-    // not be the true in case that the "(S,G,rpt) Periodic Messages" section
+    // not be true in case the "(S,G,rpt) Periodic Messages" section
     // is modified such that (S,G,rpt) Prune are sent only when there is (*,G)
     // state.
     //

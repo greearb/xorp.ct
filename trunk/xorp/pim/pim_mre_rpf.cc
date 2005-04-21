@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.33 2005/04/16 02:06:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.34 2005/04/19 02:10:05 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -820,7 +820,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
     // XXX: the computation of RPF'(S,G,rpt) when there is no (*,G) state
     // might be needed only if the spec allows to send (S,G,rpt) Prune
     // on the RPT tree when there is only (*,*,RP) state. This might
-    // not be the true in case that the "(S,G,rpt) Periodic Messages" section
+    // not be true in case the "(S,G,rpt) Periodic Messages" section
     // is modified such that (S,G,rpt) Prune are sent only when there is (*,G)
     // state.
     //
