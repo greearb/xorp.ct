@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.35 2005/03/24 00:40:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.36 2005/03/25 02:53:58 pavlin Exp $"
 
 
 //
@@ -1190,7 +1190,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
 		callback(this, &BsrZone::bsr_timer_timeout));
     }
     
-    // Conditionally set the Scone-Zone Expiry timer
+    // Conditionally set the Scone-Zone Expiry Timer
     if (bsr_zone.const_scope_zone_expiry_timer().scheduled()) {
 	TimeVal tv_left;
 	bsr_zone.const_scope_zone_expiry_timer().time_remaining(tv_left);
@@ -2563,7 +2563,7 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const BsrRp& bsr_rp)
       _rp_priority(bsr_rp.rp_priority()),
       _rp_holdtime(bsr_rp.rp_holdtime())
 {
-    // Conditionally set the Cand-RP Expiry timer
+    // Conditionally set the Cand-RP Expiry Timer
     if (bsr_rp.const_candidate_rp_expiry_timer().scheduled()) {
 	TimeVal tv_left;
 	bsr_rp.const_candidate_rp_expiry_timer().time_remaining(tv_left);
