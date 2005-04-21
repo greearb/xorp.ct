@@ -229,8 +229,7 @@ PeerOut<A>::set_options(OspfTypes::AreaID area,	uint32_t options)
 
 template <typename A> 
 bool
-PeerOut<A>::set_router_priority(OspfTypes::AreaID area,
-				uint8_t priority)
+PeerOut<A>::set_router_priority(OspfTypes::AreaID area,	uint8_t priority)
 {
     if (0 == _areas.count(area)) {
 	XLOG_ERROR("Unknown Area %s", area.str().c_str());
@@ -309,9 +308,19 @@ Peer<A>::send_hello_packet()
     // Fetch the router ID.
     _hello_packet.set_router_id(_ospf.get_router_id());
     _hello_packet.encode(pkt);
-    SimpleTransmit<A> *transmit = new SimpleTransmit<A>(pkt,
-							A::OSPFIGP_ROUTERS(),
-							_address);
+
+    SimpleTransmit<A> *transmit;
+
+    switch(_peerout.get_linktype()) {
+    case OspfTypes::BROADCAST:
+	transmit = new SimpleTransmit<A>(pkt, A::OSPFIGP_ROUTERS(), _address);
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	XLOG_UNFINISHED();
+	break;
+    }
 
     typename Transmit<A>::TransmitRef tr(transmit);
 

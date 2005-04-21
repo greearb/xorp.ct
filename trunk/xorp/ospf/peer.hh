@@ -79,6 +79,11 @@ class PeerOut {
      */
     void receive(Packet *packet) throw(BadPeer);
 
+    /**
+     * @return the link type.
+     */
+    OspfTypes::LinkType get_linktype() const { return _linktype; }
+
     // Configure the peering.
 
     /**
