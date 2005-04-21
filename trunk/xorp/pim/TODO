@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.90 2005/04/20 20:07:27 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.91 2005/04/20 20:23:48 pavlin Exp $
 #
+
+* IMPL:
+  Check again the implementation of the packet_arrives_on_rp_tunnel()
+  pseudo-code from the spec.
+  E.g., simplify the implementation and make sure it follows
+  closely the spec.
+  The implementation itself is inside PimVif::pim_register_recv()
 
 * IMPL:
   Check that the following is true for both the user-level and kernel-level
