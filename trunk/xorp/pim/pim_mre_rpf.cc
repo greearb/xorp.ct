@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.34 2005/04/19 02:10:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.35 2005/04/21 23:19:40 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -884,7 +884,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
     }
     // Set the new upstream neighbor.
     set_nbr_mrib_next_hop_rp(new_pim_nbr);
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     join_timer() =
 	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
@@ -915,7 +915,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_gen_id_changed()
     pim_nbr = nbr_mrib_next_hop_rp();
     if (pim_nbr == NULL)
 	return;
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = &pim_nbr->pim_vif();
     if (pim_vif == NULL)
@@ -1005,7 +1005,7 @@ PimMre::recompute_rpfp_nbr_wc_assert_changed()
     set_rpfp_nbr_wc(new_pim_nbr);
     if (new_pim_nbr == NULL)
 	return;
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = &new_pim_nbr->pim_vif();
     if (pim_vif == NULL)
@@ -1088,7 +1088,7 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
     }
     // Set the new RPF'(*,G)
     set_rpfp_nbr_wc(new_pim_nbr);
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     join_timer() =
 	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
@@ -1119,7 +1119,7 @@ PimMre::recompute_rpfp_nbr_wc_gen_id_changed()
     pim_nbr = rpfp_nbr_wc();
     if (pim_nbr == NULL)
 	return;
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = &pim_nbr->pim_vif();
     if (pim_vif == NULL)
@@ -1168,7 +1168,7 @@ PimMre::recompute_rpfp_nbr_sg_assert_changed()
     set_rpfp_nbr_sg(new_pim_nbr);
     if (new_pim_nbr == NULL)
 	return;
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = &new_pim_nbr->pim_vif();
     if (pim_vif == NULL)
@@ -1236,7 +1236,7 @@ PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
     }
     // Set the new RPF'(S,G)
     set_rpfp_nbr_sg(new_pim_nbr);
-    // Restart the JoinTimer
+    // Set Join Timer to t_periodic
     join_timer() =
 	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
@@ -1267,7 +1267,7 @@ PimMre::recompute_rpfp_nbr_sg_gen_id_changed()
     pim_nbr = rpfp_nbr_sg();
     if (pim_nbr == NULL)
 	return;
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = &pim_nbr->pim_vif();
     if (pim_vif == NULL)

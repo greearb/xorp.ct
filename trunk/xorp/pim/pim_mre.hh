@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.41 2005/04/16 02:15:46 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.42 2005/04/20 07:24:00 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -316,7 +316,7 @@ public:
 	return (_join_or_override_timer);
     }
     void	override_timer_timeout();
-    XorpTimer	_join_or_override_timer; // The JoinTimer for
+    XorpTimer	_join_or_override_timer; // The Join Timer for
 					 // (*,*,RP) (*,G) (S,G);
 					 // Also OverrideTimer for (S,G,rpt)
     // Note: applies only for (*,*,RP)

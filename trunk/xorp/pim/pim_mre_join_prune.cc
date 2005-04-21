@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.31 2005/02/27 20:49:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.32 2005/03/25 02:53:59 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1296,7 +1296,7 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
 	return;
     
     // `target_nbr_addr' belongs to NBR(RPF_interface(RP), MRIB.next_hop(RP))
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1387,7 +1387,7 @@ PimMre::wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
 	return;
     
     // `target_nbr_addr' belongs to RPF'(*,G)
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1478,7 +1478,7 @@ PimMre::sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 	return;
     
     // `target_nbr_addr' belongs to RPF'(S,G)
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1522,7 +1522,7 @@ PimMre::sg_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
 	return;
     
     // `target_nbr_addr' belongs to RPF'(S,G)
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1565,7 +1565,7 @@ PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 	return;
     
     // `target_nbr_addr' belongs to RPF'(S,G)
-    // Restart JoinTimer if it is larger than t_override
+    // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1774,7 +1774,7 @@ PimMre::recompute_is_join_desired_rp()
 			      new_group_bool);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
-    // Set JoinTimer to t_periodic
+    // Set Join Timer to t_periodic
     join_timer() =
 	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
