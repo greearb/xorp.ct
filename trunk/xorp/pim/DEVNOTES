@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/DEVNOTES,v 1.3 2005/04/16 01:54:30 pavlin Exp $
+# $XORP: xorp/pim/DEVNOTES,v 1.4 2005/04/20 09:37:43 pavlin Exp $
 #
 
 * Always call PimMre::entry_try_remove() for (S,G,rpt) routing entry
@@ -70,4 +70,16 @@
   add is PimMrt::add_task_delete_mrib_entries(), and this task
   will delete the old Mrib entries.
 
-
+* The spec says the following about transmitting PruneEcho messages.
+  E.g., in case of PruneEcho(*,*,RP):
+    "A PruneEcho(*,*,RP) need not be sent on an interface
+     that contains only a single PIM neighbor during the time this
+     state machine was in Prune-Pending state."
+  However, it is rather difficult to track the number of neighbors during
+  all the time the state machine is in Prune-Pending state.
+  Hence, we check the number of neighbors only when it is time to send
+  the PruneEcho message. Indeed, in some specific scenarios this may
+  suppress the PruneEcho message when it shouldn't, but this is not
+  a source of concern, because those are transient scenarios.
+  A possible alternative would be to always send PruneEcho without
+  suppressing it, because the suppression itself is just an optimization.
