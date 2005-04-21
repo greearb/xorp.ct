@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.18 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.19 2005/03/25 02:54:03 pavlin Exp $"
 
 
 //
@@ -71,11 +71,11 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 			  buffer_t *buffer)
 {
     uint32_t pim_register_flags;
-    bool null_register_bool, border_register_bool;
+    bool is_null_register, is_border_register;
     IPvX inner_src(family()), inner_dst(family());
     uint32_t lookup_flags;
     PimMre *pim_mre, *pim_mre_sg;
-    PimMfc *pim_mfc;
+    PimMfc *pim_mfc = NULL;
     bool is_sptbit_set = false;
     bool sent_register_stop = false;
     bool is_keepalive_timer_restarted = false;
@@ -88,13 +88,13 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     BUFFER_GET_HOST_32(pim_register_flags, buffer);
     // The Border bit and the Null-Register bit
     if (pim_register_flags & PIM_BORDER_REGISTER)
-	border_register_bool = true;
+	is_border_register = true;
     else
-	border_register_bool = false;
+	is_border_register = false;
     if (pim_register_flags & PIM_NULL_REGISTER)
-	null_register_bool = true;
+	is_null_register = true;
     else
-	null_register_bool = false;
+	is_null_register = false;
     
     //
     // Get the inner source and destination addresses
@@ -107,7 +107,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	BUFFER_GET_DATA(cp, buffer, sizeof(ip4_header));
 	inner_src.copy_in(ip4_header.ip_src);
 	inner_dst.copy_in(ip4_header.ip_dst);
-	if (null_register_bool) {
+	if (is_null_register) {
 	    //
 	    // If the inner header checksum is non-zero, then
 	    // check the checksum.
@@ -118,7 +118,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		    XLOG_WARNING("RX %s%s from %s to %s: "
 				 "inner dummy IP header checksum error",
 				 PIMTYPE2ASCII(PIM_REGISTER),
-				 (null_register_bool)? "(Null)" : "",
+				 (is_null_register)? "(Null)" : "",
 				 cstring(src), cstring(dst));
 		    ++_pimstat_bad_checksum_messages;
 		    return (XORP_ERROR);
@@ -138,7 +138,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	inner_src.copy_in(ip6_header.ip6_src);
 	inner_dst.copy_in(ip6_header.ip6_dst);
 	inner_data_len = ntohs(ip6_header.ip6_plen);
-	if (null_register_bool) {
+	if (is_null_register) {
 	    //
 	    // If the dummy PIM header is present, then
 	    // check the checksum.
@@ -157,7 +157,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		    XLOG_WARNING("RX %s%s from %s to %s: "
 				 "inner dummy IP header checksum error",
 				 PIMTYPE2ASCII(PIM_REGISTER),
-				 (null_register_bool)? "(Null)" : "",
+				 (is_null_register)? "(Null)" : "",
 				 cstring(src), cstring(dst));
 		    ++_pimstat_bad_checksum_messages;
 		    return (XORP_ERROR);
@@ -180,7 +180,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	XLOG_WARNING("RX %s%s from %s to %s: "
 		     "inner source address = %s must be unicast",
 		     PIMTYPE2ASCII(PIM_REGISTER),
-		     (null_register_bool)? "(Null)" : "",
+		     (is_null_register)? "(Null)" : "",
 		     cstring(src), cstring(dst),
 		     cstring(inner_src));
 	return (XORP_ERROR);
@@ -189,7 +189,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	XLOG_WARNING("RX %s%s from %s to %s: "
 		     "inner destination address = %s must be multicast",
 		     PIMTYPE2ASCII(PIM_REGISTER),
-		     (null_register_bool)? "(Null)" : "",
+		     (is_null_register)? "(Null)" : "",
 		     cstring(src), cstring(dst),
 		     cstring(inner_dst));
 	return (XORP_ERROR);
@@ -200,20 +200,10 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		     "inner destination address = %s must not be "
 		     "link or node-local multicast group",
 		     PIMTYPE2ASCII(PIM_REGISTER),
-		     (null_register_bool)? "(Null)" : "",
+		     (is_null_register)? "(Null)" : "",
 		     cstring(src), cstring(dst),
 		     cstring(inner_dst));
 	return (XORP_ERROR);
-    }
-    
-    if (null_register_bool) {
-	// PIM Null Register
-    }
-
-    if (border_register_bool) {
-	// The Border bit is set: a Register from a PMBR
-	// XXX: the new spec doesn't say how to process PIM Register
-	// messages with the Border bit set.
     }
     
     //
@@ -227,7 +217,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     if (register_vif_index == Vif::VIF_INDEX_INVALID) {
 	// I don't have a PIM Register vif
 	//
-	// send Register-Stop(S,G) to outer.src
+	// "send Register-Stop(S,G) to outer.src"
 	//
 	pim_register_stop_send(src, inner_src, inner_dst);
 	++_pimstat_rx_register_not_rp;
@@ -246,7 +236,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	|| (! pim_mre->i_am_rp())
 	|| (dst != *pim_mre->rp_addr_ptr())) {
 	//
-	// send Register-Stop(S,G) to outer.src
+	// "send Register-Stop(S,G) to outer.src"
 	//
 	pim_register_stop_send(src, inner_src, inner_dst);
 	++_pimstat_rx_register_not_rp;
@@ -280,28 +270,48 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     //
     // The code below implements the core logic inside
     // packet_arrives_on_rp_tunnel()
-    // Note that we call is_switch_to_spt_desired_sg() with a time interval
-    // of zero seconds and a threshold of zero bytes.
-    // I.e., this check will evaluate to true if the SPT switch is enabled
-    // and the threshold for the switch is 0 bytes (i.e., switch immediately).
     //
     sent_register_stop = false;
+    if (is_border_register) {
+	if ((pim_mre_sg != NULL)
+	    && pim_mre_sg->is_pmbr_addr_set()
+	    && (pim_mre_sg->pmbr_addr() != src)) {
+	    //
+	    // "send Register-Stop(S,G) to outer.src
+	    // drop the packet silently."
+	    //
+	    pim_register_stop_send(src, inner_src, inner_dst);
+	    return (XORP_OK);
+	}
+    }
+    //
+    // Note that below we call is_switch_to_spt_desired_sg() with a time
+    // interval of zero seconds and a threshold of zero bytes.
+    // I.e., this check will evaluate to true if the SPT switch is enabled
+    // and the threshold for the switch is 0 bytes (i.e., switch
+    // immediately).
+    //
+    // If the configured threshold is larger, we are anyway going to
+    // install a bandwidth monitor so that monitor will take care of
+    // triggering the Register-Stop(S,G) if the bandwidth of the Register
+    // messages reaches the configured threshold.
+    //
     if (is_sptbit_set
 	|| (pim_mre->is_switch_to_spt_desired_sg(0, 0)
 	    && pim_mre->inherited_olist_sg().none())) {
 	//
-	// send Register-Stop(S,G) to outer.src
+	// "send Register-Stop(S,G) to outer.src"
 	//
 	pim_register_stop_send(src, inner_src, inner_dst);
 	sent_register_stop = true;
     }
     if (is_sptbit_set || pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
 	if (sent_register_stop) {
-	    // restart KeepaliveTimer(S,G) to Keepalive_Period
-	    keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-	} else {
-	    // restart KeepaliveTimer(S,G) to RP_Keepalive_Period
+	    // "restart KeepaliveTimer(S,G) to RP_Keepalive_Period"
 	    keepalive_timer_sec = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
+	} else {
+	    // "restart KeepaliveTimer(S,G) to Keepalive_Period"
+	    keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
 	}
 	// Create an (S,G) entry that will keep the Keepalive Timer running
 	if (pim_mre_sg == NULL) {
@@ -313,60 +323,92 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	pim_mre_sg->start_keepalive_timer();
 	is_keepalive_timer_restarted = true;
     }
-    if ((! is_sptbit_set) && (! null_register_bool)) {
-	    //
-	    // decapsulate and pass the inner packet to the normal
-	    // forwarding path for forwarding on the (*,G) tree.
-	    // XXX: will happen at the kernel
-	    //
-    }
-    
-    pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst, false);
-    
-    if (pim_mre_sg == NULL) {
+    if (is_border_register) {
 	//
-	// If necessary, add a dataflow monitor to monitor whether it is
-	// time to switch to the SPT.
+	// Update the PMBR address
 	//
-	if (pim_mfc == NULL)
-	    return (XORP_OK);
-	if (pim_node().is_switch_to_spt_enabled().get()
-	    && (! pim_mfc->has_spt_switch_dataflow_monitor())) {
-	    uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
-	    uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
-	    pim_mfc->add_dataflow_monitor(sec, 0,
-					  0,		// threshold_packets
-					  bytes,	// threshold_bytes
-					  false, // is_threshold_in_packets
-					  true,	 // is_threshold_in_bytes
-					  true,		// is_geq_upcall ">="
-					  false);	// is_leq_upcall "<="
+	if (pim_mre_sg != NULL) {
+	    if (! pim_mre_sg->is_pmbr_addr_set())
+		pim_mre_sg->set_pmbr_addr(src);
 	}
-	
-	return (XORP_OK);
     }
-    
-    if (pim_mfc == NULL) {
-	pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst, true);
-	pim_mfc->set_iif_vif_index(register_vif_index);
-	pim_mfc->set_olist(pim_mre->inherited_olist_sg());
-	pim_mfc->add_mfc_to_kernel();
-    }
-    if (is_keepalive_timer_restarted
-	|| (! pim_mfc->has_idle_dataflow_monitor())) {
+    if ((! is_sptbit_set) && (! is_null_register)) {
 	//
-	// Add a dataflow monitor to expire idle (S,G) PimMre state
-	// and/or idle PimMfc+MFC state
+	// "decapsulate and forward the inner packet to
+	// inherited_olist(S,G,rpt)"
 	//
-	pim_mfc->add_dataflow_monitor(keepalive_timer_sec, 0,
-				      0,	// threshold_packets
-				      0,	// threshold_bytes
-				      true,	// is_threshold_in_packets
-				      false,	// is_threshold_in_bytes
-				      false,	// is_geq_upcall ">="
-				      true);	// is_leq_upcall "<="
+	// XXX: This will happen inside the kernel.
+	// Here we only install the forwarding entry.
+	//
+	pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst,
+						    false);
+	if (pim_mfc == NULL) {
+	    pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst,
+							true);
+	    pim_mfc->set_iif_vif_index(register_vif_index);
+	    pim_mfc->set_olist(pim_mre->inherited_olist_sg_rpt());
+	    pim_mfc->add_mfc_to_kernel();
+	}
     }
 
+    //
+    // Restart KeepaliveTimer(S,G)
+    //
+    if (pim_mre_sg != NULL) {
+	if (is_keepalive_timer_restarted
+	    || ((pim_mfc != NULL)
+		&& (! pim_mfc->has_idle_dataflow_monitor()))) {
+	    if (pim_mfc == NULL) {
+		pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src,
+							    inner_dst,
+							    true);
+		if (is_sptbit_set) {
+		    pim_mfc->set_iif_vif_index(pim_mre_sg->rpf_interface_s());
+		    pim_mfc->set_olist(pim_mre->inherited_olist_sg());
+		} else {
+		    pim_mfc->set_iif_vif_index(register_vif_index);
+		    pim_mfc->set_olist(pim_mre->inherited_olist_sg_rpt());
+		}
+		pim_mfc->add_mfc_to_kernel();
+	    }
+	    //
+	    // Add a dataflow monitor to expire idle (S,G) PimMre state
+	    // and/or idle PimMfc+MFC state
+	    //
+	    pim_mfc->add_dataflow_monitor(keepalive_timer_sec, 0,
+					  0,		// threshold_packets
+					  0,		// threshold_bytes
+					  true,		// is_threshold_in_packets
+					  false,	// is_threshold_in_bytes
+					  false,	// is_geq_upcall ">="
+					  true);	// is_leq_upcall "<="
+	}
+	return (XORP_OK);
+    }
+
+    //
+    // If necessary, add a dataflow monitor to monitor whether it is
+    // time to switch to the SPT.
+    //
+    if (pim_mfc == NULL) {
+	pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst,
+						    false);
+    }
+    if (pim_mfc == NULL)
+	return (XORP_OK);
+    if (pim_node().is_switch_to_spt_enabled().get()
+	&& (! pim_mfc->has_spt_switch_dataflow_monitor())) {
+	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
+	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
+	pim_mfc->add_dataflow_monitor(sec, 0,
+				      0,	// threshold_packets
+				      bytes,	// threshold_bytes
+				      false,	// is_threshold_in_packets
+				      true,	// is_threshold_in_bytes
+				      true,	// is_geq_upcall ">="
+				      false);	// is_leq_upcall "<="
+    }
+    
     return (XORP_OK);
     
     UNUSED(pim_nbr);
