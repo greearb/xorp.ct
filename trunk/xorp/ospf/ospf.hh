@@ -141,6 +141,7 @@ class Ospf {
      * interface.
      */
     void receive(const string& interface, const string& vif,
+		 A dst, A src,
 		 uint8_t* data, uint32_t len);
 
     /**

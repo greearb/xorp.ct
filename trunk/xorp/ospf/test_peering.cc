@@ -70,7 +70,7 @@ class DebugIO : public IO<A> {
 	DOUT(_info) << "packets sent " << _packets << endl;
 
 	if (!_forward_cb.is_empty())
-	    _forward_cb->dispatch(interface, vif, data, len);
+	    _forward_cb->dispatch(interface, vif, dst, src, data, len);
 	return true;
     }
 
@@ -98,10 +98,11 @@ class DebugIO : public IO<A> {
      * Receive frames. Specific to DebugIO.
      */
     void receive(const string& interface, const string& vif, 
-	      uint8_t* data, uint32_t len)
+		 A dst, A src,
+		 uint8_t* data, uint32_t len)
     {
 	if (!_receive_cb.is_empty())
-	    _receive_cb->dispatch(interface, vif, data, len);
+	    _receive_cb->dispatch(interface, vif, dst, src, data, len);
     }
 
     /**
@@ -176,9 +177,13 @@ class EmulateSubnet {
      */
     void
     receive_frames(const string& interface, const string& vif,
+		   A dst, A src,
 		   uint8_t* data, uint32_t len, const string instance) {
-	DOUT(_info) << "Receive on: " << instance << ": " <<
-	    interface << "/" << vif << " " << data << " " << len << endl;
+	DOUT(_info) << "receive(" << instance << "," <<
+	    interface << "," << vif << "," 
+		    << dst.str() << "," << src.str()
+		    << "," << len
+		    <<  "...)" << endl;
 	
 	typename map<const multiplex, DebugIO<A> *>::iterator i;
 	for(i = _ios.begin(); i != _ios.end(); i++) {
@@ -188,7 +193,7 @@ class EmulateSubnet {
 	    DOUT(_info) << "Send to: " << m._instance << ": " <<
 		m._interface << "/" << m._vif << " " <<
 		data << " " << len << endl;
-	    (*i).second->receive(m._interface, m._vif, data, len);
+	    (*i).second->receive(m._interface, m._vif, dst, src, data, len);
 	}
     }
 
@@ -201,7 +206,8 @@ class EmulateSubnet {
 		    DebugIO<A>& io) {
 	DOUT(_info) << instance << ": " << interface << "/" << vif << endl;
 	
-	io.register_forward(callback(this, &EmulateSubnet::receive_frames,
+	io.register_forward(callback(this,
+				     &EmulateSubnet<A>::receive_frames,
 				     instance));
 
 	_ios[multiplex(instance, interface, vif)] = &io;

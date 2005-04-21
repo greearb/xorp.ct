@@ -85,10 +85,13 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
 template <typename A>
 void 
 Ospf<A>::receive(const string& interface, const string& vif,
+		 A dst, A src,
 		 uint8_t* data, uint32_t len)
 {
-    debug_msg("Interface %s Vif %s data %p len %u\n",
-	      interface.c_str(), vif.c_str(), data, len);
+    debug_msg("Interface %s Vif %s dst %s src %s data %p len %u\n",
+	      interface.c_str(), vif.c_str(),
+	      dst.str().c_str(), src.str().c_str(),
+	      data, len);
 
     Packet *packet;
     try {
