@@ -1,15 +1,23 @@
 #
-# $XORP: xorp/pim/TODO,v 1.91 2005/04/20 20:23:48 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.92 2005/04/21 09:18:30 pavlin Exp $
 #
 
-* IMPL:
+* PIM IMPL+SPEC:
+  The spec says that the Unicast Upstream Neighbor Address in Join/Prune
+  messages is the primary address associated with the interface.
+  What happens if the Unicast Upstream Neighbor Address in the J/P
+  message is one of the secondary addresses?
+  The spec should clarify it and the implementation should follow
+  the clarification.
+
+* PIM IMPL:
   Check again the implementation of the packet_arrives_on_rp_tunnel()
   pseudo-code from the spec.
   E.g., simplify the implementation and make sure it follows
   closely the spec.
   The implementation itself is inside PimVif::pim_register_recv()
 
-* IMPL:
+* PIM IMPL:
   Check that the following is true for both the user-level and kernel-level
   implementation:
 
