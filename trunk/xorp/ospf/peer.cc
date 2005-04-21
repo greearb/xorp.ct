@@ -306,7 +306,7 @@ bool
 Peer<A>::send_hello_packet()
 {
     vector<uint8_t> pkt;
-    // Fetch out router ID.
+    // Fetch the router ID.
     _hello_packet.set_router_id(_ospf.get_router_id());
     _hello_packet.encode(pkt);
     SimpleTransmit<A> *transmit = new SimpleTransmit<A>(pkt,
