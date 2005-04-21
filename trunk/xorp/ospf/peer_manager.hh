@@ -74,7 +74,8 @@ class PeerManager {
      * Create a peer.
      */
     PeerID create_peer(const string& interface, const string& vif,
-		     OspfTypes::LinkType linktype, OspfTypes::AreaID area)
+		       const A address,
+		       OspfTypes::LinkType linktype, OspfTypes::AreaID area)
 	throw(BadPeer);
 	
     /**

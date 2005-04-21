@@ -40,8 +40,10 @@
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
+		     const A address,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area)
-    : _ospf(ospf), _interface(interface), _vif(vif), 
+    : _ospf(ospf), _interface(interface), _vif(vif),
+      _address(address),
       _linktype(linktype), _running(false)
 {
     _areas[area] = new Peer<A>(ospf, *this, area);
@@ -313,7 +315,8 @@ Peer<A>::send_hello_packet()
 
     switch(_peerout.get_linktype()) {
     case OspfTypes::BROADCAST:
-	transmit = new SimpleTransmit<A>(pkt, A::OSPFIGP_ROUTERS(), _address);
+	transmit = new SimpleTransmit<A>(pkt, A::OSPFIGP_ROUTERS(), 
+					 _peerout.get_address());
 	break;
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:

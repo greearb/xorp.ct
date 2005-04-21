@@ -39,9 +39,15 @@ class PeerOut {
  public:
 
     PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
+	    const A address,
 	    OspfTypes::LinkType linktype, OspfTypes::AreaID area);
 
     ~PeerOut();
+
+    /**
+     * @return interface/vif address.
+     */
+    A get_address() { return _address; }
 
     /**
      * Add another Area for this peer to be in, should only be allowed
@@ -122,6 +128,7 @@ class PeerOut {
 
     const string _interface;	   	// The interface and vif this peer is
     const string _vif;			// responsible for.
+    const A	_address;		// Address of this interface/vif.
 
     OspfTypes::LinkType _linktype;	// Type of this link.
 
@@ -206,7 +213,6 @@ class Peer {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
-    const A	_address;		// Address of this interface/vif.
     OspfTypes::AreaID _area;		// Area that is being represented.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.

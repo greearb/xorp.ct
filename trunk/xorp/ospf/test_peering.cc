@@ -257,6 +257,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     const string interface = "eth0";
     const string vif = "vif0";
     PeerID peerid = ospf.get_peer_manager().create_peer(interface, vif,
+							"1.2.3.4",
 							OspfTypes::BROADCAST,
 							area);
 
@@ -305,10 +306,12 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     const string vif_2 = "vif2";
 
     PeerID peerid_1 = ospf_1.get_peer_manager().
-	create_peer(interface_1, vif_1, OspfTypes::BROADCAST, area);
+	create_peer(interface_1, vif_1, "10.10.10.1", 
+		    OspfTypes::BROADCAST, area);
 
     PeerID peerid_2 = ospf_2.get_peer_manager().
-	create_peer(interface_2, vif_2, OspfTypes::BROADCAST, area);
+	create_peer(interface_2, vif_2, "10.10.10.2",
+		    OspfTypes::BROADCAST, area);
     
     EmulateSubnet<A> emu(info);
 
