@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.42 2005/04/20 07:24:00 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.43 2005/04/21 23:43:22 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -81,7 +81,7 @@ enum {
     PIM_MRE_GRAFTED		= 1 << 16,   // For PIM-DM
     PIM_MRE_DIRECTLY_CONNECTED_S = 1 << 18,  // Directly-connected S
     PIM_MRE_I_AM_RP		 = 1 << 19,  // I am the RP for the group
-    PIM_MRE_KEEPALIVE_TIMER_IS_SET = 1 << 20,// The (S,G) KeepaliveTimer is
+    PIM_MRE_KEEPALIVE_TIMER_IS_SET = 1 << 20,// The (S,G) Keepalive Timer is
 					     // running
     PIM_MRE_TASK_DELETE_PENDING	= 1 << 21,   // Entry is pending deletion
     PIM_MRE_TASK_DELETE_DONE	= 1 << 22,   // Entry is ready to be deleted
@@ -318,7 +318,7 @@ public:
     void	override_timer_timeout();
     XorpTimer	_join_or_override_timer; // The Join Timer for
 					 // (*,*,RP) (*,G) (S,G);
-					 // Also OverrideTimer for (S,G,rpt)
+					 // Also Override Timer for (S,G,rpt)
     // Note: applies only for (*,*,RP)
     void	receive_join_rp(uint16_t vif_index, uint16_t holdtime);
     // Note: applies only for (*,*,RP)

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.93 2005/04/21 11:08:09 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.94 2005/04/21 23:19:40 pavlin Exp $
 #
 
 * PIM IMPL+SPEC:
@@ -874,7 +874,7 @@ for the kernel patches as well.
   disable the "wrong iif" signal from the kernel for that (S,G) state
   (assuming the kernel supports that API).
 
-* SPEC: If OverrideTimer expires, and RPF'(S,G,rpt) != RPF'(*,G)
+* SPEC: If Override Timer expires, and RPF'(S,G,rpt) != RPF'(*,G)
   it is unclear what exactly the spec suggests. Actually, it suggests
   don't do anything explicit, and the rest of the machineries
   will take care of everything. Hence, make sure that the implementation

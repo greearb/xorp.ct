@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.32 2005/03/25 02:53:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.33 2005/04/21 23:43:22 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1609,7 +1609,7 @@ PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 	return;
     
     // `target_nbr_addr' belongs to RPF'(S,G,rpt)
-    // Cancel OverrideTimer
+    // Cancel Override Timer
     override_timer().unschedule();
     
     // Try to remove the entry
@@ -1645,7 +1645,7 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 	return;
     
     // `target_nbr_addr' belongs to RPF'(S,G,rpt)
-    // Restart OverrideTimer if it is larger than t_override
+    // Restart Override Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1693,7 +1693,7 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 	return;
     
     // `target_nbr_addr' belongs to RPF'(S,G,rpt)
-    // Restart OverrideTimer if it is larger than t_override
+    // Restart Override Timer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
