@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.35 2005/04/21 23:19:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.36 2005/04/21 23:43:23 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -1049,7 +1049,21 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
     old_pim_nbr = rpfp_nbr_wc();
     if (new_pim_nbr == old_pim_nbr)
 	return;				// Nothing changed
-    
+
+    //
+    // Note that this transition does not occur if an Assert is active
+    // and the upstream interface does not change.
+    //
+    do {
+	if ((old_pim_nbr == NULL) || (new_pim_nbr == NULL))
+	    break;
+	if (old_pim_nbr->vif_index() != new_pim_nbr->vif_index())
+	    break;
+	if (is_i_am_assert_loser_state(new_pim_nbr->vif_index()))
+	    return;
+	break;
+    } while (false);
+
     // Send Join(*,G) to the new value of RPF'(*,G)
     if (new_pim_nbr != NULL) {
 	bool new_group_bool = false; // Group together all (*,G) entries
@@ -1211,7 +1225,21 @@ PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
     old_pim_nbr = rpfp_nbr_sg();
     if (new_pim_nbr == old_pim_nbr)
 	return;				// Nothing changed
-    
+
+    //
+    // Note that this transition does not occur if an Assert is active
+    // and the upstream interface does not change.
+    //
+    do {
+	if ((old_pim_nbr == NULL) || (new_pim_nbr == NULL))
+	    break;
+	if (old_pim_nbr->vif_index() != new_pim_nbr->vif_index())
+	    break;
+	if (is_i_am_assert_loser_state(new_pim_nbr->vif_index()))
+	    return;
+	break;
+    } while (false);
+
     // Send Join(S,G) to the new value of RPF'(S,G)
     if (new_pim_nbr != NULL) {
 	bool new_group_bool = false; // Group together all (S,G) entries
