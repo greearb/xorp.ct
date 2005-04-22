@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.58 2005/03/17 01:43:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.59 2005/03/25 02:54:35 pavlin Exp $"
 
 #include <signal.h>
 
@@ -88,7 +88,7 @@ usage(const char* argv0)
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -b <file> Specify boot file\n");
     fprintf(stderr, "  -s <app>  Specify save config file hook\n");
-    fprintf(stderr, "  -N        Do not execute XRLs\n");
+    fprintf(stderr, "  -N        Do not execute XRLs and do not start processes\n");
     fprintf(stderr, "  -r        Restart failed processes (partially working; not recommended!)\n");
     fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
     fprintf(stderr, "  -p <port> Set port to run Finder on\n");
