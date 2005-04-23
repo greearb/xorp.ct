@@ -298,7 +298,6 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after(TimeVal(10,0), &timeout);
     while (ospf.running() && !timeout) {
-	printf("%d\n", timeout);
 	eventloop.run();
 	if (2 == io.packets())
 	    break;
