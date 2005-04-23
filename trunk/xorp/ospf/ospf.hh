@@ -47,6 +47,7 @@ struct OspfTypes {
      * Link Type
      */
     enum LinkType {
+	PointToPoint,
 	BROADCAST,
 	NBMA,
 	PointToMultiPoint,
@@ -76,6 +77,8 @@ string
 pp_link_type(OspfTypes::LinkType link_type)
 {
     switch(link_type) {
+    case OspfTypes::PointToPoint:
+	return "PointToPoint";
     case OspfTypes::BROADCAST:
 	return "BROADCAST";
     case OspfTypes::NBMA:
