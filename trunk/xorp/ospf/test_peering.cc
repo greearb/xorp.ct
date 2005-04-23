@@ -286,7 +286,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 	break;
     }
 
-    // Drop the hello interval from 10 to 1 second to speed up the test.
+    // Reduce the hello interval from 10 to 1 second to speed up the test.
     uint16_t hello_interval = 1;
     ospf.get_peer_manager().set_hello_interval(peerid, area, hello_interval);
     ospf.get_peer_manager().set_router_dead_interval(peerid, area,
@@ -295,11 +295,17 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     // Bring the peering up
     ospf.get_peer_manager().set_state_peer(peerid, true);
 
-    // XXX - We don't have a fall back position if no packets are generated.
-    while (ospf.running()) {
+    bool timeout = false;
+    XorpTimer t = eventloop.set_flag_after(TimeVal(10,0), &timeout);
+    while (ospf.running() && !timeout) {
+	printf("%d\n", timeout);
 	eventloop.run();
 	if (2 == io.packets())
 	    break;
+    }
+    if (timeout) {
+	DOUT(info) << "No packets sent, test timed out\n";
+	return false;
     }
 
     // Take the peering down
@@ -390,11 +396,16 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     ospf_1.get_peer_manager().set_state_peer(peerid_1, true);
     ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
 
-    // XXX - We don't have a fall back position if no packets are generated.
-    while (ospf_1.running() && ospf_2.running()) {
+    bool timeout = false;
+    XorpTimer t = eventloop.set_flag_after(TimeVal(10,0), &timeout);
+    while (ospf_1.running() && ospf_2.running() && !timeout) {
 	if (0 < io_1.packets())
 	    break;
 	eventloop.run();
+    }
+    if (timeout) {
+	DOUT(info) << "No packets sent, test timed out\n";
+	return false;
     }
 
     // Take the peering down
