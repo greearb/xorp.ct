@@ -275,6 +275,23 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 							OspfTypes::BROADCAST,
 							area);
 
+    switch(src.ip_version()) {
+    case 4:
+	ospf.get_peer_manager().set_network_mask(peerid, area, 16);
+	break;
+    case 6:
+	break;
+    default:
+	XLOG_FATAL("Unknown IP version %d", src.ip_version());
+	break;
+    }
+
+    // Drop the hello interval from 10 to 1 second to speed up the test.
+    uint16_t hello_interval = 1;
+    ospf.get_peer_manager().set_hello_interval(peerid, area, hello_interval);
+    ospf.get_peer_manager().set_router_dead_interval(peerid, area,
+						     4 * hello_interval);
+
     // Bring the peering up
     ospf.get_peer_manager().set_state_peer(peerid, true);
 
@@ -338,6 +355,32 @@ two_peers(TestInfo& info, OspfTypes::Version version)
 	create_peer(interface_1, vif_1, src_1, OspfTypes::BROADCAST, area);
     PeerID peerid_2 = ospf_2.get_peer_manager().
 	create_peer(interface_2, vif_2, src_2, OspfTypes::BROADCAST, area);
+
+    switch(src_1.ip_version()) {
+    case 4:
+	{
+	    uint32_t mask = 16;
+	    ospf_1.get_peer_manager().set_network_mask(peerid_1, area, mask);
+	    ospf_2.get_peer_manager().set_network_mask(peerid_2, area, mask);
+	}
+	break;
+    case 6:
+	break;
+    default:
+	XLOG_FATAL("Unknown IP version %d", src_1.ip_version());
+	break;
+    }
+
+    // Drop the hello interval from 10 to 1 second to speed up the test.
+    uint16_t hello_interval = 1;
+    ospf_1.get_peer_manager().set_hello_interval(peerid_1, area,
+						 hello_interval);
+    ospf_1.get_peer_manager().set_router_dead_interval(peerid_1, area,
+						       4 * hello_interval);
+    ospf_2.get_peer_manager().set_hello_interval(peerid_2, area,
+						 hello_interval);
+    ospf_2.get_peer_manager().set_router_dead_interval(peerid_2, area,
+						       4 * hello_interval);
 
     EmulateSubnet<A> emu(info);
 
