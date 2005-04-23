@@ -256,8 +256,22 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     // Create a peer associated with this area.
     const string interface = "eth0";
     const string vif = "vif0";
+
+    A src;
+    switch(src.ip_version()) {
+    case 4:
+	src = "192.150.187.78";
+	break;
+    case 6:
+	src = "2001:468:e21:c800:220:edff:fe61:f033";
+	break;
+    default:
+	XLOG_FATAL("Unknown IP version %d", src.ip_version());
+	break;
+    }
+
     PeerID peerid = ospf.get_peer_manager().create_peer(interface, vif,
-							"1.2.3.4",
+							src,
 							OspfTypes::BROADCAST,
 							area);
 
@@ -305,14 +319,26 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     const string vif_1 = "vif1";
     const string vif_2 = "vif2";
 
-    PeerID peerid_1 = ospf_1.get_peer_manager().
-	create_peer(interface_1, vif_1, "10.10.10.1", 
-		    OspfTypes::BROADCAST, area);
-
-    PeerID peerid_2 = ospf_2.get_peer_manager().
-	create_peer(interface_2, vif_2, "10.10.10.2",
-		    OspfTypes::BROADCAST, area);
+    A src_1, src_2;
+    switch(src_1.ip_version()) {
+    case 4:
+	src_1 = "10.10.10.1";
+	src_2 = "10.10.10.2";
+	break;
+    case 6:
+	src_1 = "2001::1";
+	src_2 = "2001::2";
+	break;
+    default:
+	XLOG_FATAL("Unknown IP version %d", src_1.ip_version());
+	break;
+    }
     
+    PeerID peerid_1 = ospf_1.get_peer_manager().
+	create_peer(interface_1, vif_1, src_1, OspfTypes::BROADCAST, area);
+    PeerID peerid_2 = ospf_2.get_peer_manager().
+	create_peer(interface_2, vif_2, src_2, OspfTypes::BROADCAST, area);
+
     EmulateSubnet<A> emu(info);
 
     emu.bind_interfaces("ospf1", interface_1, vif_1, io_1);
