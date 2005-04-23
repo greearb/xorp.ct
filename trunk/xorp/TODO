@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.14 2004/12/13 17:18:21 bms Exp $
+# $XORP: xorp/TODO,v 1.15 2005/04/21 23:04:33 pavlin Exp $
 #
 
 * Add a list with acknowledgments for all people who have contributed:
@@ -18,8 +18,6 @@
   it should use AC_TRY_COMPILE or AC_TRY_RUN.
 
 * Make all #include "config.h" to be #ifdef HAVE_CONFIG_H  (??)
-
-* Make the code as POSIX as possible.
 
 * Fix all file names.
   E.g. all names non-capital letters + numbers, and use underscores.
