@@ -163,6 +163,12 @@ class Peer {
 	// For testing set some useful values
 	_hello_packet.set_hello_interval(10);
 	_hello_packet.set_router_priority(128);
+
+	// Appendix C.3 Router Interface Parameters
+	_hello_packet.
+	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
+
+	_interface_state = Down;
     }
 
     /**
@@ -179,6 +185,41 @@ class Peer {
      * Stop the protocol machinery running
      */
     void stop();
+
+    /**
+     * Event: InterfaceUP
+     */
+    void event_interface_up();
+
+    /**
+     * Event: WaitTimer
+     */
+    void event_wait_timer();
+
+    /**
+     * Event: BackupSeen
+     */
+    void event_backup_seen();
+
+    /**
+     * Event: NeighborChange
+     */
+    void event_neighbor_change();
+
+    /**
+     * Event: LoopInd
+     */
+    void event_loop_ind();
+
+    /**
+     * Event: UnLoopInd
+     */
+    void event_unloop_ind();
+
+    /**
+     * Event: InterfaceDown
+     */
+    void event_interface_down();
 
     /**
      * Set the network mask OSPFv2 only.
@@ -216,9 +257,25 @@ class Peer {
     OspfTypes::AreaID _area;		// Area that is being represented.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
+    XorpTimer _wait_timer;		// Wait to discover other DRs.
 
-    enum PeerState {
+    /**
+     * Interface as defined by OSPF not XORP.
+     */
+    enum InterfaceState {
 	Down,
+	Loopback,
+	Waiting,
+	Point2Point,
+	DR_other,
+	Backup,
+	DR,
+    };
+
+    InterfaceState _interface_state;
+
+    enum NeighborState {
+	NDown,
 	Attempt,
 	Init,
 	TwoWay,
@@ -228,13 +285,65 @@ class Peer {
 	Full
     };
 
-    PeerState _state;			// The state of this peer.
+    /**
+     * Neighbour specific information.
+     */
+    struct NeighborInfo {
+	NeighborInfo()
+	    : _hello_packet(0)
+	{}
+	NeighborInfo(NeighborState ns, HelloPacket *hp)
+	    : _neighbor_state(ns), _hello_packet(hp)
+	{}
+	~NeighborInfo() {
+	    delete _hello_packet;
+	}
 
-    HelloPacket _hello_packet;		// Hello packet that will be sent.
+	NeighborState _neighbor_state;	// State of this neighbor.
+	HelloPacket *_hello_packet;	// Last hello packet received
+					// from this neighbor.
+    };
+
+    map<OspfTypes::RouterID, NeighborInfo> _neighbors;
+
+    HelloPacket _hello_packet;		// Packet that is sent by this peer.
+
+    /**
+     * Possible DR or BDR candidates.
+     */
+    struct Candidate {
+	Candidate(OspfTypes::RouterID router_id, OspfTypes::RouterID dr,
+		  OspfTypes::RouterID bdr, uint8_t router_priority) 
+	    : _router_id(router_id), _dr(dr), _bdr(bdr), 
+	      _router_priority(router_priority)
+	{}
+
+	OspfTypes::RouterID _router_id;	// Candidate's ID
+	OspfTypes::RouterID _dr;	// Designated router.
+	OspfTypes::RouterID _bdr;	// Backup Designated router.
+	uint8_t  _router_priority;	// Router Priority.
+    };
 
     void start_hello_timer();
 
+    void start_wait_timer();
+
     bool send_hello_packet();
+    
+    OspfTypes::RouterID backup_designated_router(list<Candidate>& candidates);
+    OspfTypes::RouterID designated_router(list<Candidate>& candidates);
+
+    void compute_designated_router_and_backup_designated_router();
+
+    /**
+     * Stop all timers.
+     */
+    void tear_down_state();
+
+    /**
+     * Pretty print the interface state.
+     */
+    string pp_interface_state(InterfaceState is);
 };
 
 #endif // __OSPF_PEER_HH__

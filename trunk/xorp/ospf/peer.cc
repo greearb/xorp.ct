@@ -268,17 +268,155 @@ template <typename A>
 void
 Peer<A>::start()
 {
-    _state = Down;
-
-    // Start sending hello packets.
-    start_hello_timer();
+    //    _interface_state = Down;
+    _hello_packet.set_designated_router("0.0.0.0");
+    _hello_packet.set_backup_designated_router("0.0.0.0");
+    event_interface_up();
 }
 
 template <typename A>
 void
 Peer<A>::stop()
 {
-    _hello_timer.clear();
+    event_interface_down();
+}
+
+template <typename A>
+void
+Peer<A>::event_interface_up()
+{
+    XLOG_ASSERT(Down == _interface_state);
+
+    switch(_peerout.get_linktype()) {
+    case OspfTypes::PointToPoint:
+	_interface_state = Point2Point;
+	break;
+    case OspfTypes::BROADCAST:
+	// Not eligible to be the designated router.
+	if (0 == _hello_packet.get_router_priority()) {
+	    _interface_state = DR_other;
+
+	    // Start sending hello packets.
+	    start_hello_timer();
+	} else {
+	    _interface_state = Waiting;
+	    start_wait_timer();
+	}
+	break;
+    case OspfTypes::NBMA:
+	XLOG_UNFINISHED();
+	break;
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	_interface_state = Point2Point;
+	XLOG_UNFINISHED();
+	break;
+    }
+    
+    XLOG_ASSERT(Down != _interface_state);
+}
+
+template <typename A>
+void
+Peer<A>::event_wait_timer()
+{
+    event_backup_seen();
+}
+
+template <typename A>
+void
+Peer<A>::event_backup_seen()
+{
+    switch(_interface_state) {
+    case Down:
+    case Loopback:
+	XLOG_WARNING("Unexpected state %s",
+		     pp_interface_state(_interface_state).c_str());
+	break;
+    case Waiting:
+	compute_designated_router_and_backup_designated_router();
+
+	XLOG_ASSERT(_interface_state == DR_other ||
+		    _interface_state == Backup ||
+		    _interface_state == DR);
+
+	break;
+    case Point2Point:
+    case DR_other:
+    case Backup:
+    case DR:
+	XLOG_WARNING("Unexpected state %s",
+		     pp_interface_state(_interface_state).c_str());
+	break;
+    }
+}
+
+template <typename A>
+void
+Peer<A>::event_neighbor_change()
+{
+    switch(_interface_state) {
+    case Down:
+    case Loopback:
+    case Waiting:
+    case Point2Point:
+	XLOG_WARNING("Unexpected state %s",
+		     pp_interface_state(_interface_state).c_str());
+    case DR_other:
+    case Backup:
+    case DR:
+	compute_designated_router_and_backup_designated_router();
+
+	XLOG_ASSERT(_interface_state == DR_other ||
+		    _interface_state == Backup ||
+		    _interface_state == DR);
+
+	break;
+    }
+}
+
+template <typename A>
+void
+Peer<A>::event_loop_ind()
+{
+    _interface_state = Loopback;
+
+    tear_down_state();
+}
+
+template <typename A>
+void
+Peer<A>::event_unloop_ind()
+{
+    switch(_interface_state) {
+    case Down:
+	XLOG_WARNING("Unexpected state %s",
+		     pp_interface_state(_interface_state).c_str());
+	break;
+    case Loopback:
+	_interface_state = Down;
+	break;
+    case Waiting:
+    case Point2Point:
+    case DR_other:
+    case Backup:
+    case DR:
+	XLOG_WARNING("Unexpected state %s",
+		     pp_interface_state(_interface_state).c_str());
+
+	break;
+    }
+}
+
+template <typename A>
+void
+Peer<A>::event_interface_down()
+{
+    _interface_state = Down;
+
+    tear_down_state();
+
+    XLOG_WARNING("KillNbr");
 }
 
 template <typename A>
@@ -303,6 +441,15 @@ Peer<A>::start_hello_timer()
 }
 
 template <typename A>
+void
+Peer<A>::start_wait_timer()
+{
+    _wait_timer = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(_hello_packet.get_router_dead_interval()),
+			 callback(this, &Peer<A>::event_wait_timer));
+}
+
+template <typename A>
 bool
 Peer<A>::send_hello_packet()
 {
@@ -314,6 +461,9 @@ Peer<A>::send_hello_packet()
     SimpleTransmit<A> *transmit;
 
     switch(_peerout.get_linktype()) {
+    case OspfTypes::PointToPoint:
+	XLOG_UNFINISHED();
+	break;
     case OspfTypes::BROADCAST:
 	transmit = new SimpleTransmit<A>(pkt, A::OSPFIGP_ROUTERS(), 
 					 _peerout.get_address());
@@ -330,6 +480,207 @@ Peer<A>::send_hello_packet()
     _peerout.transmit(tr);
 
     return true;
+}
+
+template <typename A>
+OspfTypes::RouterID
+Peer<A>::backup_designated_router(list<Candidate>& candidates)
+{
+    // Step (2)
+    // Calculate the the new backup designated router.
+    // Look for routers that do not consider themselves to be the DR
+    // but do consider themselves to the the BDR.
+    Candidate c("0.0.0.0", "0.0.0.0", "0.0.0.0", 0);
+    typename list<Candidate>::const_iterator i;
+    for(i = candidates.begin(); i != candidates.end(); i++) {
+	if ((*i)._router_id != (*i)._dr && (*i)._router_id == (*i)._bdr) {
+	    if ((*i)._router_priority > c._router_priority)
+		c = *i;
+	    else if ((*i)._router_priority == c._router_priority &&
+		     (*i)._router_id > c._router_id)
+		c = *i;
+		
+	}
+    }
+
+    // It is possible that no router was selected because no router
+    // had itself as BDR.
+    if (0 == c._router_priority) {
+	for(i = candidates.begin(); i != candidates.end(); i++) {
+	    if ((*i)._router_id != (*i)._dr) {
+		if ((*i)._router_priority > c._router_priority)
+		    c = *i;
+		else if ((*i)._router_priority == c._router_priority &&
+			 (*i)._router_id > c._router_id)
+		    c = *i;
+		
+	    }
+	}
+    }
+
+    return c._router_id;
+}
+
+template <typename A>
+OspfTypes::RouterID
+Peer<A>::designated_router(list<Candidate>& candidates)
+{
+    // Step (3)
+    // Calculate the designated router.
+    Candidate c("0.0.0.0", "0.0.0.0", "0.0.0.0", 0);
+    typename list<Candidate>::const_iterator i;
+    for(i = candidates.begin(); i != candidates.end(); i++) {
+	if ((*i)._router_id == (*i)._dr) {
+	    if ((*i)._router_priority > c._router_priority)
+		c = *i;
+	    else if ((*i)._router_priority == c._router_priority &&
+		     (*i)._router_id > c._router_id)
+		c = *i;
+		
+	}
+    }
+
+    // It is possible that no router was selected because no router
+    // had itself as DR.
+    if (0 == c._router_priority) {
+	for(i = candidates.begin(); i != candidates.end(); i++) {
+	    if ((*i)._router_priority > c._router_priority)
+		c = *i;
+	    else if ((*i)._router_priority == c._router_priority &&
+		     (*i)._router_id > c._router_id)
+		c = *i;
+	}
+    }
+
+    return c._router_id;
+}
+
+template <typename A>
+void
+Peer<A>::compute_designated_router_and_backup_designated_router()
+{
+    list<Candidate> candidates;
+
+    // Is this peer a candidate?
+    if (0 != _hello_packet.get_router_priority()) {
+	candidates.
+	    push_back(Candidate(_ospf.get_router_id(),
+				_hello_packet.get_designated_router(),
+				_hello_packet.get_backup_designated_router(),
+				_hello_packet.get_router_priority()));
+					
+    }
+
+    // Go through the neighbours and pick possible candidates.
+    typename map<OspfTypes::RouterID, NeighborInfo>::const_iterator n;
+    for (n = _neighbors.begin(); n != _neighbors.end(); n++) {
+	HelloPacket *hello = (*n).second._hello_packet;
+	if (0 != hello->get_router_priority()) {
+	    candidates.
+		push_back(Candidate(hello->get_router_id(),
+				    hello->get_designated_router(),
+				    hello->get_backup_designated_router(),
+				    hello->get_router_priority()));
+	}
+    }
+    
+    // Step (2)
+    // Calculate the the new backup designated router.
+    OspfTypes::RouterID bdr = backup_designated_router(candidates);
+
+    // Step (3)
+    // Calculate the designated router.
+    OspfTypes::RouterID dr = designated_router(candidates);
+
+    // Step (4)
+    // If the router has become the DR or BDR or it was the DR or BDR
+    // and no longer is then steps (2) and (3) need to be repeated.
+
+    // If nothing has changed out of here.
+    if (_hello_packet.get_designated_router() == dr &&
+	_hello_packet.get_backup_designated_router() == bdr)
+	return;
+
+    bool recompute = false;
+    // Has this router just become the DR or BDR
+    if (_ospf.get_router_id() == dr && 
+	_hello_packet.get_designated_router() != dr)
+	recompute = true;
+    if (_ospf.get_router_id() == bdr && 
+	_hello_packet.get_backup_designated_router() != bdr)
+	recompute = true;
+
+    // Was this router the DR or BDR
+    if (_ospf.get_router_id() != dr && 
+	_hello_packet.get_designated_router() == _ospf.get_router_id())
+	recompute = true;
+    if (_ospf.get_router_id() != bdr && 
+	_hello_packet.get_backup_designated_router() == _ospf.get_router_id())
+	recompute = true;
+
+    if (recompute) {
+	typename list<Candidate>::iterator i = candidates.begin();
+	// Verify that the first entry in the candidate list is this router.
+	XLOG_ASSERT((*i)._router_id == _ospf.get_router_id());
+	// Update the DR and BDR
+	(*i)._dr = dr;
+	(*i)._bdr = bdr;
+	// Repeat steps (2) and (3).
+	bdr = backup_designated_router(candidates);
+	dr = designated_router(candidates);
+    }
+    
+    // Step(5)
+    _hello_packet.set_designated_router(dr);
+    _hello_packet.set_backup_designated_router(bdr);
+
+    if (_ospf.get_router_id() == dr)
+	_interface_state = DR;
+    else if (_ospf.get_router_id() == bdr)
+	_interface_state = Backup;
+    else
+	_interface_state = DR_other;
+
+    // Step(6)
+    if(OspfTypes::NBMA ==_peerout.get_linktype())
+	XLOG_UNFINISHED();
+	
+
+    // Step(7)
+    // Need to send AdjOK to all neighbours that are least 2-Way.
+    XLOG_WARNING("Send AdjOK");
+}
+
+template <typename A>
+void
+Peer<A>::tear_down_state()
+{
+    _hello_timer.clear();
+    _wait_timer.clear();
+    _neighbors.clear();
+}
+
+template <typename A>
+string
+Peer<A>::pp_interface_state(InterfaceState is)
+{
+    switch(is) {
+    case Peer<A>::Down:
+	return "Down";
+    case Peer<A>::Loopback:
+	return "Loopback";
+    case Peer<A>::Waiting:
+	return "Waiting";
+    case Peer<A>::Point2Point:
+	return "Point2Point";
+    case Peer<A>::DR_other:
+	return "DR_other";
+    case Peer<A>::Backup:
+	return "Backup";
+    case Peer<A>::DR:
+	return "DR";
+    }
+    XLOG_UNREACHABLE();
 }
 
 template <typename A>
