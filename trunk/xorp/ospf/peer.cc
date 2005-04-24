@@ -321,6 +321,8 @@ void
 Peer<A>::event_wait_timer()
 {
     event_backup_seen();
+    // Start sending hello packets.
+    start_hello_timer();
 }
 
 template <typename A>
@@ -561,7 +563,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 {
     list<Candidate> candidates;
 
-    // Is this peer a candidate?
+    // Is this router a candidate?
     if (0 != _hello_packet.get_router_priority()) {
 	candidates.
 	    push_back(Candidate(_ospf.get_router_id(),
@@ -648,7 +650,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 
     // Step(7)
     // Need to send AdjOK to all neighbours that are least 2-Way.
-    XLOG_WARNING("Send AdjOK");
+    XLOG_WARNING("TBD: Send AdjOK");
 }
 
 template <typename A>
