@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.22 2005/02/27 21:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.23 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -87,7 +87,7 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
     GET_ENCODED_UNICAST_ADDR(rcvd_family, assert_source_addr, buffer);
     BUFFER_GET_HOST_32(metric_preference, buffer);
     BUFFER_GET_HOST_32(metric, buffer);
-    // The RPT bit
+    // The RPTbit
     if (metric_preference & PIM_ASSERT_RPT_BIT)
 	rpt_bit = true;
     else
