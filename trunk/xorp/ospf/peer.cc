@@ -486,7 +486,7 @@ Peer<A>::send_hello_packet()
 
 template <typename A>
 OspfTypes::RouterID
-Peer<A>::backup_designated_router(list<Candidate>& candidates)
+Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 {
     // Step (2)
     // Calculate the the new backup designated router.
@@ -525,7 +525,7 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates)
 
 template <typename A>
 OspfTypes::RouterID
-Peer<A>::designated_router(list<Candidate>& candidates)
+Peer<A>::designated_router(list<Candidate>& candidates) const
 {
     // Step (3)
     // Calculate the designated router.
@@ -576,9 +576,9 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     // Go through the neighbours and pick possible candidates.
     typename map<OspfTypes::RouterID, NeighborInfo>::const_iterator n;
     for (n = _neighbors.begin(); n != _neighbors.end(); n++) {
-	HelloPacket *hello = (*n).second._hello_packet;
+	const HelloPacket *hello = (*n).second.get_hello_packet();
 	if (0 != hello->get_router_priority() &&
-	    TwoWay <= (*n).second._neighbor_state) {
+	    TwoWay <= (*n).second.get_neighbor_state()) {
 	    candidates.
 		push_back(Candidate(hello->get_router_id(),
 				    hello->get_designated_router(),

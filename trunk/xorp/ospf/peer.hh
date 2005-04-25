@@ -292,7 +292,8 @@ class Peer {
     /**
      * Neighbour specific information.
      */
-    struct NeighborInfo {
+    class NeighborInfo {
+    public:
 	NeighborInfo()
 	    : _hello_packet(0)
 	{}
@@ -302,6 +303,22 @@ class Peer {
 	~NeighborInfo() {
 	    delete _hello_packet;
 	}
+	
+	NeighborState get_neighbor_state() const { return _neighbor_state; }
+
+	void
+	set_neigbor_state(NeighborState state) {
+	    _neighbor_state = state;
+	}
+
+	HelloPacket *get_hello_packet() { return _hello_packet; }
+ 	HelloPacket *get_hello_packet() const { return _hello_packet; }
+
+	void
+	set_hello_packet(HelloPacket *packet) {
+	    _hello_packet = packet;
+	}
+    private:
 
 	NeighborState _neighbor_state;	// State of this neighbor.
 	HelloPacket *_hello_packet;	// Last hello packet received
@@ -334,8 +351,10 @@ class Peer {
 
     bool send_hello_packet();
     
-    OspfTypes::RouterID backup_designated_router(list<Candidate>& candidates);
-    OspfTypes::RouterID designated_router(list<Candidate>& candidates);
+    OspfTypes::RouterID
+    backup_designated_router(list<Candidate>& candidates) const;
+    OspfTypes::RouterID
+    designated_router(list<Candidate>& candidates) const;
 
     void compute_designated_router_and_backup_designated_router();
 
