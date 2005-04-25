@@ -146,6 +146,8 @@ class PeerOut {
     void take_down_peering();
 };
 
+class Neighbor;
+
 /**
  * A peer represents a single area and is bound to a PeerOut.
  */
@@ -274,57 +276,7 @@ class Peer {
 
     InterfaceState _interface_state;
 
-    /**
-     * NOTE: The ordering is important (used in the DR and BDR election).
-     */
-    enum NeighborState {
-	NDown = 1,
-	Attempt = 2,
-	Init = 3,
-	TwoWay = 4,
-	ExStart = 5,
-	Exchange = 6,
-	Loading = 7,
-	Full = 8
-    };
-
-    /**
-     * Neighbour specific information.
-     */
-    class NeighborInfo {
-    public:
-	NeighborInfo()
-	    : _hello_packet(0)
-	{}
-	NeighborInfo(NeighborState ns, HelloPacket *hp)
-	    : _neighbor_state(ns), _hello_packet(hp)
-	{}
-	~NeighborInfo() {
-	    delete _hello_packet;
-	}
-	
-	NeighborState get_neighbor_state() const { return _neighbor_state; }
-
-	void
-	set_neigbor_state(NeighborState state) {
-	    _neighbor_state = state;
-	}
-
-	HelloPacket *get_hello_packet() { return _hello_packet; }
- 	HelloPacket *get_hello_packet() const { return _hello_packet; }
-
-	void
-	set_hello_packet(HelloPacket *packet) {
-	    _hello_packet = packet;
-	}
-    private:
-
-	NeighborState _neighbor_state;	// State of this neighbor.
-	HelloPacket *_hello_packet;	// Last hello packet received
-					// from this neighbor.
-    };
-
-    map<OspfTypes::RouterID, NeighborInfo> _neighbors;
+    map<OspfTypes::RouterID, Neighbor *> _neighbors;
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
 
@@ -366,6 +318,55 @@ class Peer {
      * Pretty print the interface state.
      */
     string pp_interface_state(InterfaceState is);
+};
+
+/**
+ * Neighbour specific information.
+ */
+class Neighbor {
+ public:
+    /**
+     * NOTE: The ordering is important (used in the DR and BDR election).
+     */
+    enum State {
+	Down = 1,
+	Attempt = 2,
+	Init = 3,
+	TwoWay = 4,
+	ExStart = 5,
+	Exchange = 6,
+	Loading = 7,
+	Full = 8
+    };
+
+    Neighbor()
+	: _hello_packet(0)
+    {}
+
+    Neighbor(State ns, HelloPacket *hp)
+	: _neighbor_state(ns), _hello_packet(hp)
+    {}
+
+    ~Neighbor() {
+	delete _hello_packet;
+    }
+	
+    State get_neighbor_state() const { return _neighbor_state; }
+
+    void set_neigbor_state(State state) {_neighbor_state = state; }
+
+    HelloPacket *get_hello_packet() { return _hello_packet; }
+    HelloPacket *get_hello_packet() const { return _hello_packet; }
+
+    void set_hello_packet(HelloPacket *packet) {
+	delete _hello_packet;
+	_hello_packet = packet;
+    }
+
+ private:
+    State _neighbor_state;		// State of this neighbor.
+    HelloPacket *_hello_packet;		// Last hello packet received
+					// from this neighbor.
 };
 
 #endif // __OSPF_PEER_HH__
