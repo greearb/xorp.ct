@@ -139,7 +139,7 @@ PeerOut<A>::transmit(typename Transmit<A>::TransmitRef tr)
 }
 
 template <typename A>
-void
+bool
 PeerOut<A>::receive(Packet *packet)
     throw(BadPeer)
 {
@@ -153,7 +153,7 @@ PeerOut<A>::receive(Packet *packet)
 				_interface.c_str(), _vif.c_str()));
     }
 
-    _areas[area]->receive(packet);
+    return _areas[area]->receive(packet);
 }
 
 template <typename A>
@@ -257,11 +257,13 @@ PeerOut<A>::set_router_dead_interval(OspfTypes::AreaID area,
 /****************************************/
 
 template <typename A>
-void
+bool
 Peer<A>::receive(Packet *packet)
 {
     debug_msg("%s\n", cstring(*packet));
     XLOG_WARNING("TBD");
+
+    return false;
 }
 
 template <typename A>

@@ -249,9 +249,9 @@ PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
 }
 
 template <typename A>
-void
+bool
 PeerManager<A>::receive(const string& interface, const string& vif,
-				Packet *packet)
+			Packet *packet)
     throw(BadPeer)
 {
     debug_msg("Interface %s Vif %s %s\n", interface.c_str(),
@@ -259,7 +259,7 @@ PeerManager<A>::receive(const string& interface, const string& vif,
 
     PeerID peerid = get_peerid(interface, vif);
     XLOG_ASSERT(0 != _peers.count(peerid));
-    _peers[peerid]->receive(packet);
+    return _peers[peerid]->receive(packet);
 }
 
 

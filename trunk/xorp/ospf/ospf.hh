@@ -136,16 +136,14 @@ class Ospf {
      * Used to send traffic on the IO interface.
      */
     bool transmit(const string& interface, const string& vif,
-		  A dst, A src,
-		  uint8_t* data, uint32_t len);
-
+		  A dst, A src, uint8_t* data, uint32_t len);
+    
     /**
      * The callback method that is called when data arrives on the IO
      * interface.
      */
     void receive(const string& interface, const string& vif,
-		 A dst, A src,
-		 uint8_t* data, uint32_t len);
+		 A dst, A src, uint8_t* data, uint32_t len);
 
     /**
      * Enable the interface/vif to receive frames.

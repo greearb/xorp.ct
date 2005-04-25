@@ -83,7 +83,7 @@ class PeerOut {
     /**
      * Packets for this peer are received here.
      */
-    void receive(Packet *packet) throw(BadPeer);
+    bool receive(Packet *packet) throw(BadPeer);
 
     /**
      * @return the link type.
@@ -174,7 +174,7 @@ class Peer {
     /**
      * Packets for this peer are received here.
      */
-    void receive(Packet *packet);
+    bool receive(Packet *packet);
 
     /**
      * Start the protocol machinery running
@@ -275,8 +275,7 @@ class Peer {
     InterfaceState _interface_state;
 
     /**
-     * NOTE: The ordering is important and is used in the DR and BDR
-     * election.
+     * NOTE: The ordering is important (used in the DR and BDR election).
      */
     enum NeighborState {
 	NDown = 1,

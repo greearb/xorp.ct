@@ -76,11 +76,10 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
 /**
  * All packets for OSPF are received through this interface. All good
  * packets are sent to the peer manager which verifies that the packet
- * is expected and authenticates the packet if necessary. If the
- * packet contains LSAs and it is approriate the packet is sent to the
- * link state database manager. The packet is deleted by the receive
- * routine so if a copy is required the peer manager should take a
- * copy.
+ * is expected and authenticates the packet if necessary. The peer
+ * manager can choose to accept the packet in which case it becomes
+ * the owner. If the packet is rejected this routine will delete the
+ * packet.
  */
 template <typename A>
 void 
@@ -104,13 +103,15 @@ Ospf<A>::receive(const string& interface, const string& vif,
     debug_msg("%s\n", packet->str().c_str());
     // We have a packet and its good.
 
+    bool packet_accepted = false;
     try {
-	_peer_manager.receive(interface, vif, packet);
+	packet_accepted = _peer_manager.receive(interface, vif, packet);
     } catch(BadPeer& e) {
 	XLOG_ERROR("%s", cstring(e));
     }
 
-    delete packet;
+    if (!packet_accepted)
+	delete packet;
 }
 
 template <typename A>

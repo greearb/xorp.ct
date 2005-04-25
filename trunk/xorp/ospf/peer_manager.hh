@@ -92,9 +92,13 @@ class PeerManager {
      * Demultiplex incoming packets to the associated peer. If the
      * packet contains LSAs send it to the LSA database manager if
      * appropriate.
+     *
+     * @param interface that packet arrived on
+     * @param vif that packet arrived on
+     * @param packet
+     * @return true if the packet is now owned by the peer manager.
      */
-    void receive(const string& interface, const string& vif,
-			 Packet *packet)
+    bool receive(const string& interface, const string& vif, Packet *packet)
 	throw(BadPeer);
 
     // Configure the peering.
