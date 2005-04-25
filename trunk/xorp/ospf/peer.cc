@@ -263,7 +263,16 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 {
     debug_msg("dst %s src %s %s\n", cstring(dst), cstring(src),
 	      cstring(*packet));
-    XLOG_WARNING("TBD");
+
+    XLOG_WARNING("TBD - Check this packet");
+
+    HelloPacket *hello_packet = dynamic_cast<HelloPacket *>(packet);
+    if (0 != hello_packet) {
+	// Sanity check this hello packet.
+	
+    } else {
+	XLOG_WARNING("TBD - Process packet");
+    }
 
     return false;
 }
@@ -275,6 +284,7 @@ Peer<A>::start()
     //    _interface_state = Down;
     _hello_packet.set_designated_router("0.0.0.0");
     _hello_packet.set_backup_designated_router("0.0.0.0");
+    _hello_packet.get_neighbours().clear();
     event_interface_up();
 }
 
