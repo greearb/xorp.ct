@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.29 2005/02/27 20:49:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.30 2005/03/25 02:53:59 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -622,9 +622,10 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	    goto a2;
 	}
 	if ((! i_am_assert_winner_bool)
+	    && (! assert_metric->rpt_bit_flag())
 	    && (assert_winner_metric_sg(vif_index)->addr()
 		== assert_metric->addr())) {
-	    // Receive acceptable assert from current winner
+	    // Receive acceptable assert with RPTbit clear from current winner
 	    goto a2;
 	}
 	if ((i_am_assert_winner_bool)
@@ -708,8 +709,10 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
-    //  * If I is RPF_interface(S) Set SPTbit(S,G) to TRUE
-    if (vif_index == rpf_interface_s())
+    //  * If I is RPF_interface(S)
+    //       AND (UpstreamJPState(S,G) == true)
+    //        then set SPTbit(S,G) to TRUE
+    if ((vif_index == rpf_interface_s()) && is_joined_state())
 	set_spt(true);
     set_i_am_assert_loser_state(vif_index);
     return (XORP_OK);
