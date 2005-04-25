@@ -146,7 +146,7 @@ class PeerOut {
     void take_down_peering();
 };
 
-class Neighbor;
+template <typename A> class Neighbor;
 
 /**
  * A peer represents a single area and is bound to a PeerOut.
@@ -276,7 +276,7 @@ class Peer {
 
     InterfaceState _interface_state;
 
-    map<OspfTypes::RouterID, Neighbor *> _neighbors;
+    map<OspfTypes::RouterID, Neighbor<A> *> _neighbors;
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
 
@@ -323,6 +323,7 @@ class Peer {
 /**
  * Neighbour specific information.
  */
+template <typename A>
 class Neighbor {
  public:
     /**
@@ -339,13 +340,15 @@ class Neighbor {
 	Full = 8
     };
 
-    Neighbor()
-	: _hello_packet(0)
+    Neighbor(Ospf<A>& ospf, Peer<A>& peer)
+	: _ospf(ospf), _peer(peer),_hello_packet(0)
     {}
 
+#if	0
     Neighbor(State ns, HelloPacket *hp)
 	: _neighbor_state(ns), _hello_packet(hp)
     {}
+#endif
 
     ~Neighbor() {
 	delete _hello_packet;
@@ -364,7 +367,9 @@ class Neighbor {
     }
 
  private:
-    State _neighbor_state;		// State of this neighbor.
+    Ospf<A>& _ospf;			// Reference to the controlling class.
+    Peer<A>& _peer;			// Reference to Peer class.
+    State _neighbor_state;	// State of this neighbor.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbor.
 };

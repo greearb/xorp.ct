@@ -578,11 +578,11 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     }
 
     // Go through the neighbours and pick possible candidates.
-    typename map<OspfTypes::RouterID, Neighbor *>::const_iterator n;
+    typename map<OspfTypes::RouterID, Neighbor<A> *>::const_iterator n;
     for (n = _neighbors.begin(); n != _neighbors.end(); n++) {
 	const HelloPacket *hello = (*n).second->get_hello_packet();
 	if (0 != hello->get_router_priority() &&
-	    Neighbor::TwoWay <= (*n).second->get_neighbor_state()) {
+	    Neighbor<A>::TwoWay <= (*n).second->get_neighbor_state()) {
 	    candidates.
 		push_back(Candidate(hello->get_router_id(),
 				    hello->get_designated_router(),
