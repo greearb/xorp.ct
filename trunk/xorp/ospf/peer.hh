@@ -40,7 +40,8 @@ class PeerOut {
 
     PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
 	    const A address,
-	    OspfTypes::LinkType linktype, OspfTypes::AreaID area);
+	    OspfTypes::LinkType linktype, OspfTypes::AreaID area,
+	    OspfTypes::AreaType area_type);
 
     ~PeerOut();
 
@@ -53,7 +54,7 @@ class PeerOut {
      * Add another Area for this peer to be in, should only be allowed
      * for OSPFv3.
      */
-    bool add_area(OspfTypes::AreaID area);
+    bool add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type);
 
     /**
      * This area is being removed.
@@ -154,8 +155,9 @@ template <typename A> class Neighbour;
 template <typename A>
 class Peer {
  public:
-    Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area) 
-	: _ospf(ospf), _peerout(peerout), _area(area),
+    Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area,
+	 OspfTypes::AreaType area_type)
+	: _ospf(ospf), _peerout(peerout), _area(area), _area_type(area_type),
 	  _hello_packet(ospf.get_version())
     {
 	_hello_packet.set_area_id(area);
@@ -256,7 +258,8 @@ class Peer {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
-    OspfTypes::AreaID _area;		// Area that is being represented.
+    const OspfTypes::AreaID _area;	// Area that is being represented.
+    const OspfTypes::AreaType _area_type;// BORDER or STUB or NSSA.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
     XorpTimer _wait_timer;		// Wait to discover other DRs.

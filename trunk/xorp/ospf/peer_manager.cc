@@ -194,7 +194,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     // this interface/vif is unique.
 
     _peers[peerid] = new PeerOut<A>(_ospf, interface, vif, address, linktype,
-				    area);
+				    area, area_router->get_area_type());
 
     area_router->add_peer(peerid);
 

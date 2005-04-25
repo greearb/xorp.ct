@@ -41,12 +41,13 @@
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
 		     const A address,
-		     OspfTypes::LinkType linktype, OspfTypes::AreaID area)
+		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
+		     OspfTypes::AreaType area_type)
     : _ospf(ospf), _interface(interface), _vif(vif),
       _address(address),
       _linktype(linktype), _running(false)
 {
-    _areas[area] = new Peer<A>(ospf, *this, area);
+    _areas[area] = new Peer<A>(ospf, *this, area, area_type);
 }
 
 template <typename A>
@@ -61,14 +62,14 @@ PeerOut<A>::~PeerOut()
 
 template <typename A>
 bool
-PeerOut<A>::add_area(OspfTypes::AreaID area)
+PeerOut<A>::add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type)
 {
     debug_msg("Area %s\n", area.str().c_str());
 
     // Only OSPFv3 is allows a peer to be connected to multiple areas.
     XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
 
-    Peer<A> *peer = _areas[area] = new Peer<A>(_ospf, *this, area);
+    Peer<A> *peer = _areas[area] = new Peer<A>(_ospf, *this, area, area_type);
     if (_running)
 	peer->start();
 
@@ -309,7 +310,16 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	    return false;
 	}
 
-    
+	// Check the E-Bit
+       switch(_area_type) {
+       case OspfTypes::BORDER:
+	   return "BORDER";
+       case OspfTypes::STUB:
+	   return "STUB";
+       case OspfTypes::NSSA:
+	   return "NSSA";
+       }
+ 
 	return false;
     }
 
