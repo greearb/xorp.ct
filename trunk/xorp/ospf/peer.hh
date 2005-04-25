@@ -83,7 +83,7 @@ class PeerOut {
     /**
      * Packets for this peer are received here.
      */
-    bool receive(Packet *packet) throw(BadPeer);
+    bool receive(A dst, A src, Packet *packet) throw(BadPeer);
 
     /**
      * @return the link type.
@@ -176,7 +176,7 @@ class Peer {
     /**
      * Packets for this peer are received here.
      */
-    bool receive(Packet *packet);
+    bool receive(A dst, A src, Packet *packet);
 
     /**
      * Start the protocol machinery running

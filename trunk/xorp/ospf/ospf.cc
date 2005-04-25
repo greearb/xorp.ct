@@ -84,8 +84,7 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
 template <typename A>
 void 
 Ospf<A>::receive(const string& interface, const string& vif,
-		 A dst, A src,
-		 uint8_t* data, uint32_t len)
+		 A dst, A src, uint8_t* data, uint32_t len)
 {
     debug_msg("Interface %s Vif %s dst %s src %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(),
@@ -105,7 +104,8 @@ Ospf<A>::receive(const string& interface, const string& vif,
 
     bool packet_accepted = false;
     try {
-	packet_accepted = _peer_manager.receive(interface, vif, packet);
+	packet_accepted = _peer_manager.receive(interface, vif, dst, src,
+						packet);
     } catch(BadPeer& e) {
 	XLOG_ERROR("%s", cstring(e));
     }

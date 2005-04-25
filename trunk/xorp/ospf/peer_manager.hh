@@ -98,7 +98,8 @@ class PeerManager {
      * @param packet
      * @return true if the packet is now owned by the peer manager.
      */
-    bool receive(const string& interface, const string& vif, Packet *packet)
+    bool receive(const string& interface, const string& vif, A dst, A src,
+		 Packet *packet)
 	throw(BadPeer);
 
     // Configure the peering.
