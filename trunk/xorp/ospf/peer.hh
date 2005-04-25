@@ -274,15 +274,19 @@ class Peer {
 
     InterfaceState _interface_state;
 
+    /**
+     * NOTE: The ordering is important and is used in the DR and BDR
+     * election.
+     */
     enum NeighborState {
-	NDown,
-	Attempt,
-	Init,
-	TwoWay,
-	ExStart,
-	Exchange,
-	Loading,
-	Full
+	NDown = 1,
+	Attempt = 2,
+	Init = 3,
+	TwoWay = 4,
+	ExStart = 5,
+	Exchange = 6,
+	Loading = 7,
+	Full = 8
     };
 
     /**
