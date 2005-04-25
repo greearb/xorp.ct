@@ -116,6 +116,7 @@ pp_area_type(OspfTypes::AreaType area_type)
 #include "transmit.hh"
 #include "peer_manager.hh"
 #include "ls_database_manager.hh"
+#include "trace.hh"
 
 template <typename A>
 class Ospf {
@@ -233,6 +234,8 @@ class Ospf {
      */
     void set_router_id(OspfTypes::RouterID id) { _router_id = id; }
 
+    Trace& trace() { return _trace; }
+
  private:
     const OspfTypes::Version _version;	// OSPF version.
     EventLoop& _eventloop;
@@ -248,6 +251,8 @@ class Ospf {
     LS_database_manager<A> _database;	// Database manager.
 
     OspfTypes::RouterID _router_id;	// Router ID.
+
+    Trace _trace;		// Trace variables.
 };
 
 #endif // __OSPF_OSPF_HH__

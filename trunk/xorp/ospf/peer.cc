@@ -266,13 +266,54 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 
     XLOG_WARNING("TBD - Check this packet");
 
-    HelloPacket *hello_packet = dynamic_cast<HelloPacket *>(packet);
-    if (0 != hello_packet) {
+    HelloPacket *hello = dynamic_cast<HelloPacket *>(packet);
+    if (0 != hello) {
 	// Sanity check this hello packet.
-	
-    } else {
-	XLOG_WARNING("TBD - Process packet");
+
+	// Check the network masks - OSPF V2 only.
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    if (OspfTypes::PointToPoint == _peerout.get_linktype() ||
+		OspfTypes::VirtualLink == _peerout.get_linktype())
+		break;
+	    if (_hello_packet.get_network_mask() !=
+		hello->get_network_mask()) {
+		XLOG_TRACE(_ospf.trace()._input_errors,
+			   "Network masks don't match %d %s",
+			   _hello_packet.get_network_mask(),
+			   hello->str().c_str());
+		return false;
+	    }
+	    break;
+	case OspfTypes::V3:
+	    break;
+	}
+
+	// Check the hello interval.
+	if (_hello_packet.get_hello_interval() != 
+	    hello->get_hello_interval()) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Hello intervals don't match %d %s",
+		       _hello_packet.get_hello_interval(),
+		       hello->str().c_str());
+	    return false;
+	}
+
+	// Check the router dead interval.
+	if (_hello_packet.get_router_dead_interval() != 
+	    hello->get_router_dead_interval()) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Router dead intervals don't match %d %s",
+		       _hello_packet.get_router_dead_interval(),
+		       hello->str().c_str());
+	    return false;
+	}
+
+    
+	return false;
     }
+
+    XLOG_WARNING("TBD - Process packet");
 
     return false;
 }
