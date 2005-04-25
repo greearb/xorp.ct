@@ -72,6 +72,13 @@ class PeerManager {
 
     /**
      * Create a peer.
+     * @param interface
+     * @param vif
+     * @param address packets will be sourced from
+     * @param linktype broadcast or point-2-point, etc...
+     * @param area ID of area
+     *
+     * @return PeerID on success otherwise throw an exception.
      */
     PeerID create_peer(const string& interface, const string& vif,
 		       const A address,
