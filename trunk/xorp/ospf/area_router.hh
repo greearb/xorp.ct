@@ -53,6 +53,11 @@ class AreaRouter {
     void peer_down(PeerID peer);
 
     /**
+     * @return the type of this area.
+     */
+    OspfTypes::AreaType get_area_type() const { return _area_type; }
+
+    /**
      * Receive LSA
      * Callback registered with the peer manager.
      */
