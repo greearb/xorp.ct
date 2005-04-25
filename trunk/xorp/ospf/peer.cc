@@ -369,7 +369,7 @@ Peer<A>::event_backup_seen()
 
 template <typename A>
 void
-Peer<A>::event_neighbor_change()
+Peer<A>::event_neighbour_change()
 {
     switch(_interface_state) {
     case Down:
@@ -588,11 +588,11 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     }
 
     // Go through the neighbours and pick possible candidates.
-    typename map<OspfTypes::RouterID, Neighbor<A> *>::const_iterator n;
-    for (n = _neighbors.begin(); n != _neighbors.end(); n++) {
+    typename map<OspfTypes::RouterID, Neighbour<A> *>::const_iterator n;
+    for (n = _neighbours.begin(); n != _neighbours.end(); n++) {
 	const HelloPacket *hello = (*n).second->get_hello_packet();
 	if (0 != hello->get_router_priority() &&
-	    Neighbor<A>::TwoWay <= (*n).second->get_neighbor_state()) {
+	    Neighbour<A>::TwoWay <= (*n).second->get_neighbour_state()) {
 	    candidates.
 		push_back(Candidate(hello->get_router_id(),
 				    hello->get_designated_router(),
@@ -674,7 +674,7 @@ Peer<A>::tear_down_state()
 {
     _hello_timer.clear();
     _wait_timer.clear();
-    _neighbors.clear();
+    _neighbours.clear();
 }
 
 template <typename A>

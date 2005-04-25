@@ -146,7 +146,7 @@ class PeerOut {
     void take_down_peering();
 };
 
-template <typename A> class Neighbor;
+template <typename A> class Neighbour;
 
 /**
  * A peer represents a single area and is bound to a PeerOut.
@@ -206,7 +206,7 @@ class Peer {
     /**
      * Event: NeighborChange
      */
-    void event_neighbor_change();
+    void event_neighbour_change();
 
     /**
      * Event: LoopInd
@@ -276,7 +276,7 @@ class Peer {
 
     InterfaceState _interface_state;
 
-    map<OspfTypes::RouterID, Neighbor<A> *> _neighbors;
+    map<OspfTypes::RouterID, Neighbour<A> *> _neighbours;
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
 
@@ -324,7 +324,7 @@ class Peer {
  * Neighbour specific information.
  */
 template <typename A>
-class Neighbor {
+class Neighbour {
  public:
     /**
      * NOTE: The ordering is important (used in the DR and BDR election).
@@ -340,23 +340,17 @@ class Neighbor {
 	Full = 8
     };
 
-    Neighbor(Ospf<A>& ospf, Peer<A>& peer)
-	: _ospf(ospf), _peer(peer),_hello_packet(0)
+    Neighbour(Ospf<A>& ospf, Peer<A>& peer)
+	: _ospf(ospf), _peer(peer), _neighbour_state(Down), _hello_packet(0)
     {}
 
-#if	0
-    Neighbor(State ns, HelloPacket *hp)
-	: _neighbor_state(ns), _hello_packet(hp)
-    {}
-#endif
-
-    ~Neighbor() {
+    ~Neighbour() {
 	delete _hello_packet;
     }
 	
-    State get_neighbor_state() const { return _neighbor_state; }
+    State get_neighbour_state() const { return _neighbour_state; }
 
-    void set_neigbor_state(State state) {_neighbor_state = state; }
+    void set_neigbour_state(State state) {_neighbour_state = state; }
 
     HelloPacket *get_hello_packet() { return _hello_packet; }
     HelloPacket *get_hello_packet() const { return _hello_packet; }
@@ -369,9 +363,9 @@ class Neighbor {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     Peer<A>& _peer;			// Reference to Peer class.
-    State _neighbor_state;	// State of this neighbor.
+    State _neighbour_state;		// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
-					// from this neighbor.
+					// from this neighbour.
 };
 
 #endif // __OSPF_PEER_HH__
