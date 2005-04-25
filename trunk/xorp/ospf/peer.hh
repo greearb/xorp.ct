@@ -168,7 +168,7 @@ class Peer {
 	_hello_packet.set_hello_interval(10);
 	_hello_packet.set_router_priority(128);
 
-	// Appendix C.3 Router Interface Parameters
+	// RFC 2328 Appendix C.3 Router Interface Parameters
 	_hello_packet.
 	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
 
