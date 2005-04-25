@@ -569,6 +569,56 @@ class LinkStateUpdatePacket : public Packet {
     list<Lsa::LsaRef> _lsas;	// The list of LSAs in the packet.
 };
 
+/**
+ * Helper class to manipulate the options field in packets.
+ */
+class Options {
+ public:
+     static const uint32_t V6_bit = 0x1;
+     static const uint32_t E_bit = 0x2;
+     static const uint32_t MC_bit = 0x4;
+     static const uint32_t N_bit = 0x8;
+     static const uint32_t R_bit = 0x10;
+     static const uint32_t DC_bit = 0x20;
+
+     Options(OspfTypes::Version version, uint32_t options)
+	 : _version(version), _options(options)
+     {
+     }
+
+     void set_bit(bool set, uint32_t bit) {
+	 if (set)
+	     _options |= bit;
+	 else
+	     _options &= ~bit;
+	
+     }
+     bool get_bit(uint32_t bit) const { return _options & bit ? true : false; }
+
+     void set_v6_bit(bool set) { set_bit(set, V6_bit); }
+     bool get_v6_bit() const { return get_bit(V6_bit); }
+
+     void set_e_bit(bool set) { set_bit(set, E_bit); }
+     bool get_e_bit() const { return get_bit(E_bit); }
+
+     void set_mc_bit(bool set) { set_bit(set, MC_bit); }
+     bool get_mc_bit() const { return get_bit(MC_bit); }
+
+     void set_n_bit(bool set) { set_bit(set, N_bit); }
+     bool get_n_bit() const { return get_bit(N_bit); }
+
+     void set_r_bit(bool set) { set_bit(set, R_bit); }
+     bool get_r_bit() const { return get_bit(R_bit); }
+
+     void set_dc_bit(bool set) { set_bit(set, DC_bit); }
+     bool get_dc_bit() const { return get_bit(DC_bit); }
+     
+     uint32_t get_options() { return _options; }
+ private:
+     OspfTypes::Version _version;	// Version not currentlly used
+     uint32_t _options;
+};
+
 inline
 uint16_t
 extract_16(uint8_t *ptr)
