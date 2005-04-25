@@ -279,7 +279,7 @@ class Peer {
 
     InterfaceState _interface_state;
 
-    map<OspfTypes::RouterID, Neighbour<A> *> _neighbours;
+    map<A, Neighbour<A> *> _neighbours;
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
 
@@ -343,17 +343,23 @@ class Neighbour {
 	Full = 8
     };
 
-    Neighbour(Ospf<A>& ospf, Peer<A>& peer)
-	: _ospf(ospf), _peer(peer), _neighbour_state(Down), _hello_packet(0)
+    Neighbour(Ospf<A>& ospf, Peer<A>& peer, OspfTypes::RouterID router_id,
+	      A src)
+	: _ospf(ospf), _peer(peer), _router_id(router_id), _src(src),
+	  _neighbour_state(Down), _hello_packet(0)
     {}
 
     ~Neighbour() {
 	delete _hello_packet;
     }
-	
-    State get_neighbour_state() const { return _neighbour_state; }
+
+    OspfTypes::RouterID get_router_id() const { return _router_id; }
+
+    A get_source_address() const { return _src; }
 
     void set_neigbour_state(State state) {_neighbour_state = state; }
+
+    State get_neighbour_state() const { return _neighbour_state; }
 
     HelloPacket *get_hello_packet() { return _hello_packet; }
     HelloPacket *get_hello_packet() const { return _hello_packet; }
@@ -366,6 +372,8 @@ class Neighbour {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     Peer<A>& _peer;			// Reference to Peer class.
+    const OspfTypes::RouterID _router_id;// Neighbour's RouterID.
+    const A _src;			// Neighbour's source address.
     State _neighbour_state;		// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbour.

@@ -311,16 +311,26 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	}
 
 	// Check the E-Bit
-       switch(_area_type) {
-       case OspfTypes::BORDER:
-	   return "BORDER";
+	Options options(_ospf.get_version(), hello->get_options());
+	switch(_area_type) {
+	case OspfTypes::BORDER:
+	   if (!options.get_e_bit()) {
+	       XLOG_TRACE(_ospf.trace()._input_errors,
+			  "BORDER router but the E-bit is not set %s",
+			  hello->str().c_str());
+	       return false;
+	   }
        case OspfTypes::STUB:
-	   return "STUB";
        case OspfTypes::NSSA:
-	   return "NSSA";
+	   if (options.get_e_bit()) {
+	       XLOG_TRACE(_ospf.trace()._input_errors,
+			  "STUB/NSSA router but the E-bit is set %s",
+			  hello->str().c_str());
+	       return false;
+	   }
        }
  
-	return false;
+       return false;
     }
 
     XLOG_WARNING("TBD - Process packet");
@@ -639,7 +649,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     }
 
     // Go through the neighbours and pick possible candidates.
-    typename map<OspfTypes::RouterID, Neighbour<A> *>::const_iterator n;
+    typename map<A, Neighbour<A> *>::const_iterator n;
     for (n = _neighbours.begin(); n != _neighbours.end(); n++) {
 	const HelloPacket *hello = (*n).second->get_hello_packet();
 	if (0 != hello->get_router_priority() &&
