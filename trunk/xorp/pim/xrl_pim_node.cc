@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.81 2005/04/08 09:10:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.82 2005/04/20 09:44:45 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -5523,7 +5523,7 @@ XrlPimNode::pim_0_1_set_vif_propagation_delay(
     string error_msg;
     
     if (propagation_delay > 0xffff) {
-	error_msg = c_format("Invalid 'Propagation Delay' value %d: "
+	error_msg = c_format("Invalid Propagation delay value %d: "
 			     "max allowed is %d",
 			     propagation_delay,
 			     0xffff);
