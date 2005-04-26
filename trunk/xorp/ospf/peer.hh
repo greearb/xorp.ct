@@ -175,6 +175,13 @@ class Peer {
 	_interface_state = Down;
     }
 
+    ~Peer() {
+	typename map<A, Neighbour<A> *>::const_iterator n;
+	for (n = _neighbours.begin(); n != _neighbours.end(); n++)
+	    delete (*n).second;
+	_neighbours.clear();
+    }
+
     /**
      * Packets for this peer are received here.
      */
