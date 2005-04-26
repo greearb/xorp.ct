@@ -267,74 +267,82 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 
     XLOG_WARNING("TBD - Check this packet");
 
-    HelloPacket *hello = dynamic_cast<HelloPacket *>(packet);
-    if (0 != hello) {
-	// Sanity check this hello packet.
-
-	// Check the network masks - OSPF V2 only.
-	switch(_ospf.get_version()) {
-	case OspfTypes::V2:
-	    if (OspfTypes::PointToPoint == _peerout.get_linktype() ||
-		OspfTypes::VirtualLink == _peerout.get_linktype())
-		break;
-	    if (_hello_packet.get_network_mask() !=
-		hello->get_network_mask()) {
-		XLOG_TRACE(_ospf.trace()._input_errors,
-			   "Network masks don't match %d %s",
-			   _hello_packet.get_network_mask(),
-			   hello->str().c_str());
-		return false;
-	    }
-	    break;
-	case OspfTypes::V3:
-	    break;
-	}
-
-	// Check the hello interval.
-	if (_hello_packet.get_hello_interval() != 
-	    hello->get_hello_interval()) {
-	    XLOG_TRACE(_ospf.trace()._input_errors,
-		       "Hello intervals don't match %d %s",
-		       _hello_packet.get_hello_interval(),
-		       hello->str().c_str());
-	    return false;
-	}
-
-	// Check the router dead interval.
-	if (_hello_packet.get_router_dead_interval() != 
-	    hello->get_router_dead_interval()) {
-	    XLOG_TRACE(_ospf.trace()._input_errors,
-		       "Router dead intervals don't match %d %s",
-		       _hello_packet.get_router_dead_interval(),
-		       hello->str().c_str());
-	    return false;
-	}
-
-	// Check the E-Bit
-	Options options(_ospf.get_version(), hello->get_options());
-	switch(_area_type) {
-	case OspfTypes::BORDER:
-	   if (!options.get_e_bit()) {
-	       XLOG_TRACE(_ospf.trace()._input_errors,
-			  "BORDER router but the E-bit is not set %s",
-			  hello->str().c_str());
-	       return false;
-	   }
-       case OspfTypes::STUB:
-       case OspfTypes::NSSA:
-	   if (options.get_e_bit()) {
-	       XLOG_TRACE(_ospf.trace()._input_errors,
-			  "STUB/NSSA router but the E-bit is set %s",
-			  hello->str().c_str());
-	       return false;
-	   }
-       }
- 
-       return false;
-    }
+    HelloPacket *hello;
+    if (0 != (hello = dynamic_cast<HelloPacket *>(packet)))
+	return process_hello_packet(dst, src, hello);
 
     XLOG_WARNING("TBD - Process packet");
 
+    return false;
+}
+
+template <typename A>
+bool
+Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
+{
+    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*hello));
+
+    // Sanity check this hello packet.
+
+    // Check the network masks - OSPF V2 only.
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	if (OspfTypes::PointToPoint == _peerout.get_linktype() ||
+	    OspfTypes::VirtualLink == _peerout.get_linktype())
+	    break;
+	if (_hello_packet.get_network_mask() !=
+	    hello->get_network_mask()) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Network masks don't match %d %s",
+		       _hello_packet.get_network_mask(),
+		       hello->str().c_str());
+	    return false;
+	}
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+
+    // Check the hello interval.
+    if (_hello_packet.get_hello_interval() != 
+	hello->get_hello_interval()) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "Hello intervals don't match %d %s",
+		   _hello_packet.get_hello_interval(),
+		   hello->str().c_str());
+	return false;
+    }
+
+    // Check the router dead interval.
+    if (_hello_packet.get_router_dead_interval() != 
+	hello->get_router_dead_interval()) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "Router dead intervals don't match %d %s",
+		   _hello_packet.get_router_dead_interval(),
+		   hello->str().c_str());
+	return false;
+    }
+
+    // Check the E-Bit
+    Options options(_ospf.get_version(), hello->get_options());
+    switch(_area_type) {
+    case OspfTypes::BORDER:
+	if (!options.get_e_bit()) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "BORDER router but the E-bit is not set %s",
+		       hello->str().c_str());
+	    return false;
+	}
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	if (options.get_e_bit()) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "STUB/NSSA router but the E-bit is set %s",
+		       hello->str().c_str());
+	    return false;
+	}
+    }
+ 
     return false;
 }
 

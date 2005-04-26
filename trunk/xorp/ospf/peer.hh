@@ -181,6 +181,11 @@ class Peer {
     bool receive(A dst, A src, Packet *packet);
 
     /**
+     * Process a hello packet.
+     */
+    bool process_hello_packet(A dst, A src, HelloPacket *hello);
+
+    /**
      * Start the protocol machinery running
      */
     void start();
