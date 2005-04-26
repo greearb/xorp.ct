@@ -176,9 +176,9 @@ class Peer {
     }
 
     ~Peer() {
-	typename map<A, Neighbour<A> *>::const_iterator n;
+	typename list<Neighbour<A> *>::iterator n;
 	for (n = _neighbours.begin(); n != _neighbours.end(); n++)
-	    delete (*n).second;
+	    delete (*n);
 	_neighbours.clear();
     }
 
@@ -238,6 +238,12 @@ class Peer {
     void event_interface_down();
 
     /**
+     * Schedule an event, used by the neighbours to schedule an
+     * interface event.
+     */
+    void schedule_event(const char *);
+
+    /**
      * Set the network mask OSPFv2 only.
      */
     bool set_network_mask(uint32_t network_mask);
@@ -291,7 +297,7 @@ class Peer {
 
     InterfaceState _interface_state;
 
-    map<A, Neighbour<A> *> _neighbours;
+    list<Neighbour<A> *> _neighbours;
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
 
@@ -358,7 +364,7 @@ class Neighbour {
     Neighbour(Ospf<A>& ospf, Peer<A>& peer, OspfTypes::RouterID router_id,
 	      A src)
 	: _ospf(ospf), _peer(peer), _router_id(router_id), _src(src),
-	  _neighbour_state(Down), _hello_packet(0)
+	  _state(Down), _hello_packet(0)
     {}
 
     ~Neighbour() {
@@ -369,24 +375,23 @@ class Neighbour {
 
     A get_source_address() const { return _src; }
 
-    void set_neigbour_state(State state) {_neighbour_state = state; }
+    void set_state(State state) {_state = state; }
 
-    State get_neighbour_state() const { return _neighbour_state; }
+    State get_state() const { return _state; }
 
     HelloPacket *get_hello_packet() { return _hello_packet; }
     HelloPacket *get_hello_packet() const { return _hello_packet; }
 
-    void set_hello_packet(HelloPacket *packet) {
-	delete _hello_packet;
-	_hello_packet = packet;
-    }
+    void event_hello_received(HelloPacket *hello);
+    void event_1_way_received();
+    void event_2_way_received();
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     Peer<A>& _peer;			// Reference to Peer class.
     const OspfTypes::RouterID _router_id;// Neighbour's RouterID.
     const A _src;			// Neighbour's source address.
-    State _neighbour_state;		// State of this neighbour.
+    State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbour.
 };
