@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.19 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.20 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -336,7 +336,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     // Test if I am the target router; e.g., in case I need to
     // perform Join/Prune suppression.
     // XXX: on p2p interfaces, target_nbr_addr of all zeros is also accepted
-    if (pim_vif->is_my_addr(target_nbr_addr)
+    if ((target_nbr_addr == pim_vif->primary_addr())
 	|| (pim_vif->is_p2p() && target_nbr_addr == IPvX::ZERO(family()))) {
 	i_am_target_router_bool = true;
     } else {
