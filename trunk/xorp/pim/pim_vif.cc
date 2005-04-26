@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.49 2005/04/20 09:44:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.50 2005/04/20 19:35:22 pavlin Exp $"
 
 
 //
@@ -1735,7 +1735,7 @@ PimVif::upstream_join_timer_t_override() const
     return (tv);
 }
 
-// Return the J/P Override Interval
+// Return the J/P_Override_Interval
 const TimeVal&
 PimVif::jp_override_interval() const
 {
