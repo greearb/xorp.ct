@@ -191,8 +191,7 @@ class EmulateSubnet {
 	    if (m._instance == instance)
 		continue;
 	    DOUT(_info) << "Send to: " << m._instance << ": " <<
-		m._interface << "/" << m._vif << " " <<
-		data << " " << len << endl;
+		m._interface << "/" << m._vif << " " <<	len << endl;
 	    (*i).second->receive(m._interface, m._vif, dst, src, data, len);
 	}
     }
@@ -314,7 +313,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 }
 
 /**
- * Configure a single peering. Nothing is really expected to go wrong
+ * Configure two peerings. Nothing is really expected to go wrong
  * but the test is useful to verify the normal path through the code.
  */
 template <typename A> 
@@ -398,7 +397,7 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after(TimeVal(10,0), &timeout);
     while (ospf_1.running() && ospf_2.running() && !timeout) {
-	if (0 < io_1.packets())
+	if (2 < io_1.packets())
 	    break;
 	eventloop.run();
     }
