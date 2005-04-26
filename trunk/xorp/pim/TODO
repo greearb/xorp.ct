@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.95 2005/04/22 01:23:55 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.96 2005/04/26 02:30:43 pavlin Exp $
 #
 
 * PIM SPEC:
@@ -138,7 +138,8 @@ default."
   just for the sake of computing PruneDesired(S,G,rpt)
   inside PimMre::recompute_is_prune_desired_sg_rpt_sg()
 
-* PIM SPEC: Replace (*,*) with (*,*,RP) inside section 4.7.2
+* PIM SPEC: Replace (*,*) with (*,*,RP) inside section 11.2
+  "Sources Internal to the PIM-SM Domain"
 
 * PIM MIB SPEC:
   Look into the following emails from
@@ -235,7 +236,7 @@ address.
   regarding "RPF'(*,G) changes" -> "RPF'(*,G) changes due to an Assert"
   and "RPF'(S,G) changes" -> "RPF'(S,G) changes due to an Assert"
 
-* IMPL: Implement the PMBR behavior (Section 4.7)
+* IMPL: Implement the PMBR behavior in Section 11 (Appendix A)
 
 * IMPL: Add a discard interface that is needed to implement the PMBR
   behavior.
@@ -708,8 +709,8 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 
 * SPEC: Do we allow SPT switch if only (*,*,RP) entry, but not (*,G) entry?
   See CheckSwitchToSpt(S,G)
-  Maybe no, because by definition in Section 4.7 the border router must
-  generate (*,G) Join for each active group, hence it will contain
+  Maybe no, because by definition in Section 11 (Appendix A) the border
+  router must generate (*,G) Join for each active group, hence it will contain
   (*,G) entries.
 
 * SPEC+IMPL: When a packet is received in Section 4.2 (Data Packet Forwarding
