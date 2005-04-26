@@ -1,6 +1,53 @@
 #
-# $XORP: xorp/pim/TODO,v 1.94 2005/04/21 23:19:40 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.95 2005/04/22 01:23:55 pavlin Exp $
 #
+
+* PIM SPEC:
+  The PIM (S,G) assert state machine has a state transition that
+  happens whenever a Join message is received:
+  "We receive a Join(S,G) that has the Upstream Neighbor Address
+  field set to my primary IP address on interface I."
+  However, the corresponding text in the (*,G) assert state machine
+  says:
+  "We receive a Join(*,G) or a Join(*,*,RP(G)) that has the Upstream
+  Neighbor Address field set to my IP address on interface I."
+
+  Note that the the (*,G) text does not say "primary".
+  Is this an unintended omission, or in the (*,G) case the (*,G) Join
+  message's event will be applied even if the message uses a secondary
+  IP address for the Upstream Neighbor Address?
+
+  Similar mismatch exists in "Summary of Assert Rules and Rationale":
+  Rationale 6 says "... a Join(S,G) with an Upstream Neighbor Address
+  that is its primary IP address on that interface...", but Rationale
+  7 says "... a Join(*,G) or a Join(*,*,RP(G)) with an Upstream
+  Neighbor Address that is one of its addresses on that
+  interface...".
+
+* PIM SPEC:
+  - Edit Figure 10 (Per-interface (S,G) Assert State machine)
+  so the text at the bottom of the figure doesn't overlap.
+  - Fix the formatting for the PS table for Figure 10 above.
+
+* PIM SPEC + IMPL:
+  Edit Figure 11 (Per-interface (*,G) Assert State machine),
+  and remove the "with RPTbit" from the two events coming from
+  and point to the "I am Assert Loser" state, because the "with RPTbit"
+  is not in the tables and the text. If this is the case, then
+  modify the implementation to exclude this check.
+  However, the text itself says "We receive a (*,G) assert" which
+  implies that the RPTbit is set. Hence, if Figure 11 is correct, then
+  we must edit the text to include "with RPTbit".
+
+* PIM IMPL:
+  Implement the following from the spec (section 4.6 PIM Assert Messages):
+
+"We note that some older PIM implementations incorrectly fail to send
+Hello messages on point-to-point interfaces, so we also RECOMMEND that a
+configuration option be provided to allow interoperation with such older
+routers, but that this configuration option SHOULD NOT be enabled by
+default."
+  Probably the same applies for other control messages: J/P, etc.
 
 * PIM IMPL+SPEC:
   The spec says that the Unicast Upstream Neighbor Address in Join/Prune
