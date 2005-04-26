@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.20 2005/03/25 02:54:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.21 2005/04/26 02:16:50 pavlin Exp $"
 
 
 //
@@ -196,7 +196,8 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     //
     // Perform sanity check for conflicting entries,
     // and at the same time find the type of entry.
-    // XXX: the '?' entries in the J/P rules table are accepted
+    // XXX: the "?" entries in the J/P rules table are accepted, but
+    // the redundant entries are removed.
     // (see the J/P messages format section in the spec).
     //
     switch(mrt_entry_type) {
@@ -260,6 +261,8 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 		return (XORP_OK);		// Already added; ignore.
 	    if (jp_group->sg_rpt()->p_list_found(source_addr))
 		return (XORP_ERROR);		// Combination not allowed
+	    if (jp_group->sg()->p_list_found(source_addr))
+		return (XORP_OK);		// Redundant; ignore.
 	} else {
 	    // (S,G,rpt) Prune
 	    if (! jp_group->wc()->p_list().empty())
@@ -270,8 +273,6 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 		return (XORP_OK);		// Already added; ignore.
 	    if (jp_group->sg()->j_list_found(source_addr))
 		return (XORP_OK);		// Redundant; ignore.
-	    if (jp_group->sg()->p_list_found(source_addr))
-		return (XORP_OK);		// Redundant; ignore. (TODO: why?)
 	}
 	jp_sources = jp_group->sg_rpt();
 	break;
@@ -291,8 +292,8 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 		return (XORP_ERROR);		// Combination not allowed
 	    if (jp_group->sg()->p_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
-	    // Remove redundant entries: (S,G,rpt)P  (TODO: why?)
-	    jp_group->sg_rpt()->p_list_remove(source_addr);
+	    // Remove redundant entries: (S,G,rpt)J
+	    jp_group->sg_rpt()->j_list_remove(source_addr);
 	}
 	jp_sources = jp_group->sg();
 	break;
@@ -846,7 +847,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	size_t p_sources_n = 0;		// Number of prune sources per group
 	
 	//
-	// Add as much (*,*,RP) Join/Prune sources (i.e., the RPs) as we can
+	// Add as many (*,*,RP) Join/Prune sources (i.e., the RPs) as we can
 	//
 	// (*,*,RP) Join
 	for (iter2 = jp_group->rp()->j_list().begin();
@@ -898,7 +899,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	}
 	
 	//
-	// Add as much (*,G) Join/Prune sources (i.e., the RPs) as we can
+	// Add as many (*,G) Join/Prune sources (i.e., the RPs) as we can
 	//
 	// (*,G) Join
 	for (iter2 = jp_group->wc()->j_list().begin();
@@ -950,7 +951,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	}
 	
 	//
-	// Add as much (S,G,rpt) Join/Prune sources as we can
+	// Add as many (S,G,rpt) Join/Prune sources as we can
 	//
 	// (S,G,rpt) Prune
 	// XXX: if we are sending (*,G) Join, and if we can fit only N
@@ -966,7 +967,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    addrs_map.insert(pair<IPvX, IPvX>(source_addr, source_addr));
 	}
-	// Add as much addresses as we can
+	// Add as many addresses as we can
 	for (map_iter = addrs_map.begin(); map_iter != addrs_map.end();
 	     ++map_iter) {
 	    if ((p_sources_n == 0xffff)
@@ -1019,7 +1020,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	}
 
 	//
-	// Add as much (S,G) Join/Prune sources as we can
+	// Add as many (S,G) Join/Prune sources as we can
 	//
 	// (S,G) Join
 	for (iter2 = jp_group->sg()->j_list().begin();
