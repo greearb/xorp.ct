@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.33 2005/04/20 09:44:44 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.34 2005/04/20 19:35:22 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -542,7 +542,7 @@ private:
     ConfigParam<uint16_t> _hello_period;	// The Hello_Period
     ConfigParam<uint16_t> _hello_holdtime;	// The Hello_Holdtime
     ConfigParam<uint32_t> _dr_priority;		// The DR Priority
-    ConfigParam<uint16_t> _propagation_delay;	// The Propagation Delay
+    ConfigParam<uint16_t> _propagation_delay;	// The Propagation_Delay
     ConfigParam<uint16_t> _override_interval;	// The Override_Interval
     ConfigParam<bool>	  _is_tracking_support_disabled; // The T-bit
     ConfigParam<bool>	  _accept_nohello_neighbors; // If true, accept

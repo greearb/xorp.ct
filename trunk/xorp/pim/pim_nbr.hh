@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.11 2005/03/25 02:54:01 pavlin Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.12 2005/04/20 09:44:44 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -162,8 +162,8 @@ private:
     XorpTimer	_neighbor_liveness_timer; // Timer to expire the neighbor
     // LAN Prune Delay option related info
     bool	_is_tracking_support_disabled; // The T-bit
-    uint16_t	_propagation_delay;	// The Propagation Delay
-    uint16_t	_override_interval;	// The Override Interval
+    uint16_t	_propagation_delay;	// The Propagation_Delay
+    uint16_t	_override_interval;	// The Override_Interval
     bool	_is_lan_prune_delay_present;// Is the LAN Prune Delay present
     bool	_is_nohello_neighbor;	// True if no-Hello neighbor
     
