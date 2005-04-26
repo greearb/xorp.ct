@@ -333,6 +333,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 		       hello->str().c_str());
 	    return false;
 	}
+	break;
     case OspfTypes::STUB:
     case OspfTypes::NSSA:
 	if (options.get_e_bit()) {
@@ -341,9 +342,40 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 		       hello->str().c_str());
 	    return false;
 	}
+	break;
     }
- 
-    return false;
+
+    // Try and find this neighbour.
+    typename list<Neighbour<A> *>::iterator n;
+    switch(_peerout.get_linktype()) {
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	    if ((*n)->get_source_address() == src)
+		break;
+	break;
+    case OspfTypes::VirtualLink:
+    case OspfTypes::PointToPoint:
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	    if ((*n)->get_router_id() == hello->get_router_id())
+		break;
+	break;
+    }
+
+    if (_neighbours.end() == n) {
+	_neighbours.push_front(new Neighbour<A>(_ospf, *this,
+						hello->get_router_id(),
+						src));
+	n = _neighbours.begin();
+	XLOG_ASSERT((*n)->get_router_id() == hello->get_router_id());
+	XLOG_ASSERT((*n)->get_source_address() == src);
+	XLOG_ASSERT((*n)->get_state() == Neighbour<A>::Down);
+    }
+
+    (*n)->event_hello_received(hello);
+
+    return true;
 }
 
 template <typename A>
@@ -353,7 +385,6 @@ Peer<A>::start()
     //    _interface_state = Down;
     _hello_packet.set_designated_router("0.0.0.0");
     _hello_packet.set_backup_designated_router("0.0.0.0");
-    _hello_packet.get_neighbours().clear();
     event_interface_up();
 }
 
@@ -506,6 +537,13 @@ Peer<A>::event_interface_down()
 
 template <typename A>
 void
+Peer<A>::schedule_event(const char *event)
+{
+    XLOG_WARNING("TBD %s", event);
+}
+
+template <typename A>
+void
 Peer<A>::start_hello_timer()
 {
     // XXX - The hello packet should have all its parameters set.
@@ -539,8 +577,29 @@ bool
 Peer<A>::send_hello_packet()
 {
     vector<uint8_t> pkt;
+
     // Fetch the router ID.
     _hello_packet.set_router_id(_ospf.get_router_id());
+
+    // Set/UnSet E-Bit.
+    Options options(_ospf.get_version(), 0);
+    switch(_area_type) {
+    case OspfTypes::BORDER:
+	options.set_e_bit(true);
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	options.set_e_bit(false);
+	break;
+    }
+    _hello_packet.set_options(options.get_options());
+
+    // Put the neighbours into the hello packet.
+    _hello_packet.get_neighbours().clear();
+    typename list<Neighbour<A> *>::iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	_hello_packet.get_neighbours().push_back((*n)->get_router_id());
+
     _hello_packet.encode(pkt);
 
     SimpleTransmit<A> *transmit;
@@ -657,11 +716,11 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     }
 
     // Go through the neighbours and pick possible candidates.
-    typename map<A, Neighbour<A> *>::const_iterator n;
+    typename list<Neighbour<A> *>::const_iterator n;
     for (n = _neighbours.begin(); n != _neighbours.end(); n++) {
-	const HelloPacket *hello = (*n).second->get_hello_packet();
+	const HelloPacket *hello = (*n)->get_hello_packet();
 	if (0 != hello->get_router_priority() &&
-	    Neighbour<A>::TwoWay <= (*n).second->get_neighbour_state()) {
+	    Neighbour<A>::TwoWay <= (*n)->get_state()) {
 	    candidates.
 		push_back(Candidate(hello->get_router_id(),
 				    hello->get_designated_router(),
@@ -824,6 +883,51 @@ Peer<A>::set_router_dead_interval(uint32_t router_dead_interval)
     return true;
 }
 
+/****************************************/
+
+template <typename A>
+void
+Neighbour<A>::event_hello_received(HelloPacket *hello)
+{
+    bool first = 0 ==_hello_packet;
+    uint8_t router_priority;
+    if (first) {
+    } else {
+	router_priority = _hello_packet->get_router_priority();
+	delete _hello_packet;
+    }
+    _hello_packet = hello;
+
+    // Search for this router in the 
+    list<OspfTypes::RouterID> li = hello->get_neighbours();
+    list<OspfTypes::RouterID>::iterator i = li.begin();
+    for(; i != li.end(); i++) {
+	if ((*i) == _ospf.get_router_id())
+	    break;
+    }
+
+    if (i == li.end()) {
+	event_1_way_received();
+	return;
+    }
+    event_2_way_received();
+
+    _peer.schedule_event("NeighbourChange");
+}
+
+template <typename A>
+void
+Neighbour<A>::event_1_way_received()
+{
+    XLOG_WARNING("TBD");
+}
+
+template <typename A>
+void
+Neighbour<A>::event_2_way_received()
+{
+    XLOG_WARNING("TBD");
+}
+
 template class PeerOut<IPv4>;
 template class PeerOut<IPv6>;
-
