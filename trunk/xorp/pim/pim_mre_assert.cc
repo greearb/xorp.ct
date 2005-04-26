@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.30 2005/03/25 02:53:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.31 2005/04/25 23:48:47 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -500,14 +500,16 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 	break;
 	
     case ASSERT_STATE_LOSER:
-	if (*assert_metric > *assert_winner_metric_wc(vif_index)) {
-	    // Receive preferred assert
+	if ((*assert_metric > *assert_winner_metric_wc(vif_index))
+	    && assert_metric->rpt_bit_flag()) {
+	    // Receive preferred assert with RPTbit set
 	    goto a2;
 	}
 	if ((! i_am_assert_winner_bool)
+	    && assert_metric->rpt_bit_flag()
 	    && (assert_winner_metric_wc(vif_index)->addr()
 		== assert_metric->addr())) {
-	    // Receive acceptable assert from current winner
+	    // Receive acceptable assert from current winner with RPTbit set
 	    goto a2;
 	}
 	if ((i_am_assert_winner_bool)
