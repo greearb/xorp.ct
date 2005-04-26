@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.29 2005/03/25 02:53:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.30 2005/04/20 09:44:44 pavlin Exp $"
 
 
 //
@@ -214,7 +214,7 @@ PimNode::get_vif_hello_triggered_delay(const string& vif_name,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Hello triggered delay' for vif %s: "
+	error_msg = c_format("Cannot get Hello triggered delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -237,7 +237,7 @@ PimNode::set_vif_hello_triggered_delay(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Hello triggered delay' for vif %s: "
+	error_msg = c_format("Cannot set Hello triggered delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -263,7 +263,7 @@ PimNode::reset_vif_hello_triggered_delay(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Hello triggered delay' for vif %s: "
+	error_msg = c_format("Cannot reset Hello triggered delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -286,7 +286,7 @@ PimNode::get_vif_hello_period(const string& vif_name, uint16_t& hello_period,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Hello period' for vif %s: "
+	error_msg = c_format("Cannot get Hello period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -308,7 +308,7 @@ PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Hello period' for vif %s: "
+	error_msg = c_format("Cannot set Hello period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -338,7 +338,7 @@ PimNode::reset_vif_hello_period(const string& vif_name, string& error_msg)
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Hello period' for vif %s: "
+	error_msg = c_format("Cannot reset Hello period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -366,7 +366,7 @@ PimNode::get_vif_hello_holdtime(const string& vif_name,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Hello holdtime' for vif %s: "
+	error_msg = c_format("Cannot get Hello holdtime for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -389,7 +389,7 @@ PimNode::set_vif_hello_holdtime(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Hello holdtime' for vif %s: "
+	error_msg = c_format("Cannot set Hello holdtime for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -419,7 +419,7 @@ PimNode::reset_vif_hello_holdtime(const string& vif_name, string& error_msg)
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Hello holdtime' for vif %s: "
+	error_msg = c_format("Cannot reset Hello holdtime for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -446,7 +446,7 @@ PimNode::get_vif_dr_priority(const string& vif_name, uint32_t& dr_priority,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'DR priority' for vif %s: "
+	error_msg = c_format("Cannot get DR priority for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -468,7 +468,7 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'DR priority' for vif %s: "
+	error_msg = c_format("Cannot set DR priority for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -499,7 +499,7 @@ PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'DR priority' for vif %s: "
+	error_msg = c_format("Cannot reset DR priority for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -528,7 +528,7 @@ PimNode::get_vif_propagation_delay(const string& vif_name,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Propagation Delay' for vif %s: "
+	error_msg = c_format("Cannot get Propagation delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -551,7 +551,7 @@ PimNode::set_vif_propagation_delay(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Propagation Delay' for vif %s: "
+	error_msg = c_format("Cannot set Propagation delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -579,7 +579,7 @@ PimNode::reset_vif_propagation_delay(const string& vif_name, string& error_msg)
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Propagation Delay' for vif %s: "
+	error_msg = c_format("Cannot reset Propagation delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -605,7 +605,7 @@ PimNode::get_vif_override_interval(const string& vif_name,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Override interval' for vif %s: "
+	error_msg = c_format("Cannot get Override interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -628,7 +628,7 @@ PimNode::set_vif_override_interval(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Override interval' for vif %s: "
+	error_msg = c_format("Cannot set Override interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -656,7 +656,7 @@ PimNode::reset_vif_override_interval(const string& vif_name, string& error_msg)
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Override interval' for vif %s: "
+	error_msg = c_format("Cannot reset Override interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -682,7 +682,7 @@ PimNode::get_vif_is_tracking_support_disabled(const string& vif_name,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Tracking support disabled' for vif %s: "
+	error_msg = c_format("Cannot get Tracking support disabled flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -705,7 +705,7 @@ PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Tracking support disabled' for vif %s: "
+	error_msg = c_format("Cannot set Tracking support disabled flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -734,7 +734,7 @@ PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Tracking support disabled' for vif %s: "
+	error_msg = c_format("Cannot reset Tracking support disabled flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -760,7 +760,7 @@ PimNode::get_vif_accept_nohello_neighbors(const string& vif_name,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Accept nohello neighbors' for vif %s: "
+	error_msg = c_format("Cannot get Accept nohello neighbors flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -783,7 +783,7 @@ PimNode::set_vif_accept_nohello_neighbors(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Accept nohello neighbors' for vif %s: "
+	error_msg = c_format("Cannot set Accept nohello neighbors flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -814,7 +814,7 @@ PimNode::reset_vif_accept_nohello_neighbors(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Accept nohello neighbors' for vif %s: "
+	error_msg = c_format("Cannot reset Accept nohello neighbors flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -837,7 +837,7 @@ PimNode::get_vif_join_prune_period(const string& vif_name,
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'Join/Prune period' for vif %s: "
+	error_msg = c_format("Cannot get Join/Prune period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	return (XORP_ERROR);
@@ -860,7 +860,7 @@ PimNode::set_vif_join_prune_period(const string& vif_name,
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set 'Join/Prune period' for vif %s: "
+	error_msg = c_format("Cannot set Join/Prune period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
@@ -885,7 +885,7 @@ PimNode::reset_vif_join_prune_period(const string& vif_name, string& error_msg)
     
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'Join/Prune period' for vif %s: "
+	error_msg = c_format("Cannot reset Join/Prune period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR(error_msg.c_str());
