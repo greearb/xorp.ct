@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.23 2005/03/25 02:54:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.24 2005/04/25 23:42:56 pavlin Exp $"
 
 
 //
@@ -192,10 +192,9 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	//
 	// If the source address is not zero, then first try to apply
 	// this assert to the (S,G) assert state machine.
-	// Only if the (S,G) assert state machine is in NoInfo state, and
-	// only if there was no change in the (S,G) assert state machine
-	// a result of receiving this message, then apply it to the (*,G)
-	// assert state machine.
+	// Only if the (S,G) assert state machine is in NoInfo state before
+	// and after consideration of the received message, then apply the
+	// message to the (*,G) assert state machine.
 	//
 	do {
 	    bool is_sg_noinfo_old, is_sg_noinfo_new;
@@ -210,7 +209,7 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	    
 	    //
 	    // XXX: strictly speaking, we should try to create
-	    // the (S,G) state, and explicitly compare the old
+	    // the (S,G) state, and explicitly test the old
 	    // and new (S,G) assert state.
 	    // However, we use the observation that if there is no (S,G)
 	    // routing state, then the (*,G) assert message will not change
@@ -234,13 +233,9 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	    is_sg_noinfo_new = pim_mre_sg->is_assert_noinfo_state(vif_index());
 	    
 	    //
-	    // If there was transaction in the (S,G) assert state,
-	    // or if the new (S,G) assert state is not NoInfo, then
-	    // don't apply this message to the (*,G) assert state machine.
-	    // In other words, both the old and the new state in the
-	    // (S,G) assert state machine must be in NoInfo state to
-	    // apply the (*,G) assert message to the (*,G) assert state
-	    // machine.
+	    // Only if both the old and new state in the (S,G) assert state
+	    // machine are in the NoInfo state, then we apply the (*,G) assert
+	    // message to the (*,G) assert state machine.
 	    //
 	    if (is_sg_noinfo_old && is_sg_noinfo_new)
 		break;
@@ -330,7 +325,6 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
 {
     IPvX	assert_source_addr(family());
     IPvX	assert_group_addr(family());
-    const IPvX	*rp_addr_ptr;
     uint32_t	metric_preference, metric;
     int		ret_value;
     bool	rpt_bit = false;
@@ -340,11 +334,11 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
     
     // Prepare the Assert data
     if (pim_mre->is_sg()) {
+	// AssertCancel(S,G)
 	assert_source_addr = pim_mre->source_addr();
     } else {
-	rp_addr_ptr = pim_mre->rp_addr_ptr();
-	if (rp_addr_ptr != NULL)
-	    assert_source_addr = *rp_addr_ptr;
+	// AssertCancel(*,G)
+	assert_source_addr = IPvX::ZERO(family());
     }
     assert_group_addr  = pim_mre->group_addr();
     rpt_bit = true;
