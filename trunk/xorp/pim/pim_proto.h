@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.12 2005/03/25 02:54:02 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.13 2005/04/20 09:44:44 pavlin Exp $
  */
 
 
@@ -26,7 +26,7 @@
 /*
  * Protocol Independent Multicast protocol-specific definitions
  * (both for PIM-SMv2 and PIM-DMv2, as per
- * draft-ietf-pim-sm-v2-new-09.txt and draft-ietf-pim-dm-new-v2-03.txt)
+ * draft-ietf-pim-sm-v2-new-11.txt and draft-ietf-pim-dm-new-v2-03.txt)
  */
 
 
