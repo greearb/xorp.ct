@@ -244,6 +244,11 @@ class Peer {
     void schedule_event(const char *);
 
     /**
+     * Run all the deferred events, callback method.
+     */
+    void process_scheduled_events();
+
+    /**
      * Set the network mask OSPFv2 only.
      */
     bool set_network_mask(uint32_t network_mask);
@@ -281,6 +286,7 @@ class Peer {
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
     XorpTimer _wait_timer;		// Wait to discover other DRs.
+    XorpTimer _event_timer;		// Defer event timer.
 
     /**
      * Interface as defined by OSPF not XORP.
@@ -297,7 +303,7 @@ class Peer {
 
     InterfaceState _interface_state;
 
-    list<Neighbour<A> *> _neighbours;
+    list<Neighbour<A> *> _neighbours;	// List of discovered neighbours.
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
 
@@ -316,6 +322,8 @@ class Peer {
 	OspfTypes::RouterID _bdr;	// Backup Designated router.
 	uint8_t  _router_priority;	// Router Priority.
     };
+
+    list<string> _scheduled_events;	// List of deferred events.
 
     void start_hello_timer();
 

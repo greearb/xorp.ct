@@ -399,6 +399,8 @@ template <typename A>
 void
 Peer<A>::event_interface_up()
 {
+    XLOG_TRACE(_ospf.trace()._interface_events, "InterfaceUp");
+
     XLOG_ASSERT(Down == _interface_state);
 
     switch(_peerout.get_linktype()) {
@@ -434,6 +436,8 @@ template <typename A>
 void
 Peer<A>::event_wait_timer()
 {
+    XLOG_TRACE(_ospf.trace()._interface_events, "WaitTimer");
+
     event_backup_seen();
     // Start sending hello packets.
     start_hello_timer();
@@ -443,6 +447,8 @@ template <typename A>
 void
 Peer<A>::event_backup_seen()
 {
+    XLOG_TRACE(_ospf.trace()._interface_events, "BackupSeen");
+
     switch(_interface_state) {
     case Down:
     case Loopback:
@@ -471,6 +477,8 @@ template <typename A>
 void
 Peer<A>::event_neighbour_change()
 {
+    XLOG_TRACE(_ospf.trace()._interface_events, "NeighborChange");
+
     switch(_interface_state) {
     case Down:
     case Loopback:
@@ -495,6 +503,8 @@ template <typename A>
 void
 Peer<A>::event_loop_ind()
 {
+    XLOG_TRACE(_ospf.trace()._interface_events, "LoopInd");
+
     _interface_state = Loopback;
 
     tear_down_state();
@@ -504,6 +514,8 @@ template <typename A>
 void
 Peer<A>::event_unloop_ind()
 {
+    XLOG_TRACE(_ospf.trace()._interface_events, "UnLoopInd");
+
     switch(_interface_state) {
     case Down:
 	XLOG_WARNING("Unexpected state %s",
@@ -528,18 +540,53 @@ template <typename A>
 void
 Peer<A>::event_interface_down()
 {
+    XLOG_TRACE(_ospf.trace()._interface_events, "InterfaceDown");
+
     _interface_state = Down;
 
     tear_down_state();
 
-    XLOG_WARNING("KillNbr");
+    XLOG_WARNING("TBD - KillNbr");
 }
 
 template <typename A>
 void
 Peer<A>::schedule_event(const char *event)
 {
-    XLOG_WARNING("TBD %s", event);
+    if (_scheduled_events.empty()) {
+	_event_timer = _ospf.get_eventloop().
+	    new_oneoff_after_ms(0,
+				callback(this,
+					 &Peer<A>::process_scheduled_events));
+    }
+
+    _scheduled_events.push_back(event);
+}
+
+template <typename A>
+void
+Peer<A>::process_scheduled_events()
+{
+    struct event {
+	string event_name;
+	XorpCallback0<void>::RefPtr cb;
+    } events[] = {
+	{"NeighbourChange", callback(this, &Peer<A>::event_neighbour_change)},
+    };
+    list<string>::const_iterator e;
+    for(e = _scheduled_events.begin(); e != _scheduled_events.end(); e++) {
+	bool found = false;
+	for (size_t i = 0; i < sizeof(events) / sizeof(struct event); i++) {
+	    if ((*e) == events[i].event_name) {
+		events[i].cb->dispatch();
+		found = true;
+		break;
+	    }
+	}
+	if (!found)
+	    XLOG_FATAL("Unknown event %s", (*e).c_str());
+    }
+    _scheduled_events.clear();
 }
 
 template <typename A>
@@ -793,7 +840,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 
     // Step(7)
     // Need to send AdjOK to all neighbours that are least 2-Way.
-    XLOG_WARNING("TBD: Send AdjOK");
+    XLOG_WARNING("TBD - Send AdjOK");
 }
 
 template <typename A>
