@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.67 2005/03/24 00:40:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.68 2005/03/25 02:54:01 pavlin Exp $"
 
 
 //
@@ -1522,10 +1522,22 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
     //
     if (is_same_subnet) {
 	// A destination on the same subnet
-	if (pim_vif != NULL)
+	if (pim_vif != NULL) {
 	    pim_nbr = pim_vif->pim_nbr_find(dst_addr);
-	else
-	    pim_nbr = pim_nbr_find(dst_addr);
+	} else {
+	    //
+	    // TODO: XXX: try to remove all calls to pim_nbr_find_global().
+	    // The reason we don't want to search for a neighbor across
+	    // all network interfaces only by the neighbor's IP address is
+	    // because in case of IPv6 the link-local addresses are unique
+	    // only per subnet. In other words, there could be more than one
+	    // neighbor routers with the same link-local address.
+	    // To get rid of PimNode::pim_nbr_find_global(), we have to make
+	    // sure that all valid MRIB entries have a valid next-hop vif
+	    // index.
+	    //
+	    pim_nbr = pim_nbr_find_global(dst_addr);
+	}
     } else {
 	// Not a destination on the same subnet
 	if (pim_vif != NULL)
@@ -1536,7 +1548,7 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
 }
 
 /**
- * PimNode::pim_nbr_find:
+ * PimNode::pim_nbr_find_global:
  * @nbr_addr: The address of the neighbor to search for.
  * 
  * Find a PIM neighbor by its address.
@@ -1548,7 +1560,7 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
  * Return value: The #PimNbr entry for the neighbor if found, otherwise %NULL.
  **/
 PimNbr *
-PimNode::pim_nbr_find(const IPvX& nbr_addr)
+PimNode::pim_nbr_find_global(const IPvX& nbr_addr)
 {
     for (uint16_t i = 0; i < maxvifs(); i++) {
 	PimVif *pim_vif = vif_find_by_vif_index(i);

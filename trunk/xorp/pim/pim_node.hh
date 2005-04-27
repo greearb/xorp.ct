@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.50 2005/04/20 09:44:44 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.51 2005/04/27 21:58:43 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -761,7 +761,7 @@ public:
      * @param nbr_addr the address of the PIM neighbor.
      * @return the PIM neighbor (@ref PimNbr) if found, otherwise NULL.
      */
-    PimNbr	*pim_nbr_find(const IPvX& nbr_addr);
+    PimNbr	*pim_nbr_find_global(const IPvX& nbr_addr);
     
     /**
      * Enable the PIM Bootstrap mechanism.
