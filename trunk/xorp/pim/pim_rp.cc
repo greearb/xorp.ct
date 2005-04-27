@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.12 2005/03/23 10:49:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.13 2005/03/25 02:54:03 pavlin Exp $"
 
 
 //
@@ -284,7 +284,7 @@ uint32_t
 RpTable::derived_addr(const IPvX& addr) const
 {
     size_t addr_size = addr.addr_size()/sizeof(uint32_t);
-    uint32_t addr_array[addr_size];
+    uint32_t addr_array[sizeof(addr)];	// XXX: give us plenty of extra space
     uint32_t result = 0;
 	    
     addr.copy_out((uint8_t *)addr_array);
