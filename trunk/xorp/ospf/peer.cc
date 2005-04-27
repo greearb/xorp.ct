@@ -367,7 +367,9 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	_neighbours.push_front(new Neighbour<A>(_ospf, *this,
 						hello->get_router_id(),
 						src));
+	// An iterator is required so push to the front and call begin.
 	n = _neighbours.begin();
+	// Verify that we got back the one that we put in.
 	XLOG_ASSERT((*n)->get_router_id() == hello->get_router_id());
 	XLOG_ASSERT((*n)->get_source_address() == src);
 	XLOG_ASSERT((*n)->get_state() == Neighbour<A>::Down);
@@ -673,6 +675,20 @@ Peer<A>::send_hello_packet()
     return true;
 }
 
+template <>
+OspfTypes::RouterID
+Peer<IPv4>::get_candidate_id(IPv4 source_address, OspfTypes::RouterID) const
+{
+    return source_address;
+}
+
+template <>
+OspfTypes::RouterID
+Peer<IPv6>::get_candidate_id(IPv6, OspfTypes::RouterID router_id) const
+{
+    return router_id;
+}
+
 template <typename A>
 OspfTypes::RouterID
 Peer<A>::backup_designated_router(list<Candidate>& candidates) const
@@ -755,7 +771,8 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     // Is this router a candidate?
     if (0 != _hello_packet.get_router_priority()) {
 	candidates.
-	    push_back(Candidate(_ospf.get_router_id(),
+	    push_back(Candidate(get_candidate_id(_peerout.get_address(),
+						 _ospf.get_router_id()),
 				_hello_packet.get_designated_router(),
 				_hello_packet.get_backup_designated_router(),
 				_hello_packet.get_router_priority()));
@@ -766,10 +783,13 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     typename list<Neighbour<A> *>::const_iterator n;
     for (n = _neighbours.begin(); n != _neighbours.end(); n++) {
 	const HelloPacket *hello = (*n)->get_hello_packet();
+	// A priority of 0 means a router is not a candidate.
 	if (0 != hello->get_router_priority() &&
 	    Neighbour<A>::TwoWay <= (*n)->get_state()) {
 	    candidates.
-		push_back(Candidate(hello->get_router_id(),
+		push_back(Candidate(get_candidate_id((*n)->
+						     get_source_address(),
+						     hello->get_router_id()),
 				    hello->get_designated_router(),
 				    hello->get_backup_designated_router(),
 				    hello->get_router_priority()));

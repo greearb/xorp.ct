@@ -46,6 +46,8 @@ class PeerOut {
     ~PeerOut();
 
     /**
+     * Address of this interface/vif.
+     *
      * @return interface/vif address.
      */
     A get_address() { return _address; }
@@ -331,6 +333,13 @@ class Peer {
 
     bool send_hello_packet();
     
+    /**
+     * @return the value that should be used for DR or BDR.
+     * In OSPFv2 its the source address of the interface.
+     * In OSPFv3 its the router ID.
+     */
+    OspfTypes::RouterID get_candidate_id(A, OspfTypes::RouterID) const;
+
     OspfTypes::RouterID
     backup_designated_router(list<Candidate>& candidates) const;
     OspfTypes::RouterID
