@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.99 2005/04/27 02:47:25 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.100 2005/04/27 08:10:59 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -82,16 +82,6 @@
   However, the text itself says "We receive a (*,G) assert" which
   implies that the RPTbit is set. Hence, if Figure 11 is correct, then
   we must edit the text to include "with RPTbit".
-
-* PIM IMPL:
-  Implement the following from the spec (section 4.6 PIM Assert Messages):
-
-"We note that some older PIM implementations incorrectly fail to send
-Hello messages on point-to-point interfaces, so we also RECOMMEND that a
-configuration option be provided to allow interoperation with such older
-routers, but that this configuration option SHOULD NOT be enabled by
-default."
-  Probably the same applies for other control messages: J/P, etc.
 
 * PIM IMPL+SPEC:
   The spec says that the Unicast Upstream Neighbor Address in Join/Prune
@@ -273,10 +263,6 @@ address.
      participates in the election with an empty BSM. In that case routers
      continue to use the cached RP set.
 
-* IMPL: Implement the upstream (*,G) and (S,G) spec modifications
-  regarding "RPF'(*,G) changes" -> "RPF'(*,G) changes due to an Assert"
-  and "RPF'(S,G) changes" -> "RPF'(S,G) changes due to an Assert"
-
 * IMPL: Implement the PMBR behavior in Section 11 (Appendix A)
 
 * IMPL: Add a discard interface that is needed to implement the PMBR
@@ -310,10 +296,6 @@ address.
   new BSM for each new Cand-RP. Result: sudden explosion of
   Cand-RP and Bootstrap messages.
 
-* IMPL+SPEC: if the current Assert winner neighbor timeout, then
-  the action is A5, and move to NI state (this applies for both
-  the (S,G) and (*,G) Assert state machine).
-
 * IMPL: Take care of the
   (*,*,RP) Joins and AssertTrackingDesired(S,G,I) problem.
    In the AssertTrackingDesired(S,G,I) definition,
@@ -332,17 +314,6 @@ probably should be replaced with
 
 * TESTSUITE: clean-up all test setup procedures: move all common stuff
   to "Test Setup".
-
-* SPEC+IMPL: Add text to beginning of Section 4.6 that if an implementation
-  incorrectly fails to send Hello messages on p2p interfaces, then the
-  spec should RECOMMEND that a config option is provided to interoperate
-  with such routers (i.e., to accept Assert messages even if no Hello
-  was received). In other words, add text similar to the paragraph
-  right before Section 4.5.1
-  IMPL: the current implementation already allows Assert messages
-  to be accepted similar to Join/Prune messages. If the spec
-  is NOT modified to include that text, then modify the implementation
-  as well to be in sync with the spec.
 
 * TESTSUITE: Test Section 4.9, the last case of Part J:
   Prune override behavior in NotPruned(S,G,rpt) state when
