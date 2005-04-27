@@ -689,6 +689,20 @@ Peer<IPv6>::get_candidate_id(IPv6, OspfTypes::RouterID router_id) const
     return router_id;
 }
 
+template <>
+OspfTypes::RouterID
+Peer<IPv4>::get_candidate_id(IPv4) const
+{
+    return _peerout.get_address();
+}
+
+template <>
+OspfTypes::RouterID
+Peer<IPv6>::get_candidate_id(IPv6) const
+{
+    return _ospf.get_router_id();
+}
+
 template <typename A>
 OspfTypes::RouterID
 Peer<A>::backup_designated_router(list<Candidate>& candidates) const
@@ -815,25 +829,25 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 
     bool recompute = false;
     // Has this router just become the DR or BDR
-    if (_ospf.get_router_id() == dr && 
+    if (get_candidate_id() == dr && 
 	_hello_packet.get_designated_router() != dr)
 	recompute = true;
-    if (_ospf.get_router_id() == bdr && 
+    if (get_candidate_id() == bdr && 
 	_hello_packet.get_backup_designated_router() != bdr)
 	recompute = true;
 
     // Was this router the DR or BDR
-    if (_ospf.get_router_id() != dr && 
-	_hello_packet.get_designated_router() == _ospf.get_router_id())
+    if (get_candidate_id() != dr && 
+	_hello_packet.get_designated_router() == get_candidate_id())
 	recompute = true;
-    if (_ospf.get_router_id() != bdr && 
-	_hello_packet.get_backup_designated_router() == _ospf.get_router_id())
+    if (get_candidate_id() != bdr && 
+	_hello_packet.get_backup_designated_router() == get_candidate_id())
 	recompute = true;
 
     if (recompute) {
 	typename list<Candidate>::iterator i = candidates.begin();
 	// Verify that the first entry in the candidate list is this router.
-	XLOG_ASSERT((*i)._router_id == _ospf.get_router_id());
+	XLOG_ASSERT((*i)._router_id == get_candidate_id());
 	// Update the DR and BDR
 	(*i)._dr = dr;
 	(*i)._bdr = bdr;
@@ -846,9 +860,9 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     _hello_packet.set_designated_router(dr);
     _hello_packet.set_backup_designated_router(bdr);
 
-    if (_ospf.get_router_id() == dr)
+    if (get_candidate_id() == dr)
 	_interface_state = DR;
-    else if (_ospf.get_router_id() == bdr)
+    else if (get_candidate_id() == bdr)
 	_interface_state = Backup;
     else
 	_interface_state = DR_other;

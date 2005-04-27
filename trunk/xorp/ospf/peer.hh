@@ -340,6 +340,15 @@ class Peer {
      */
     OspfTypes::RouterID get_candidate_id(A, OspfTypes::RouterID) const;
 
+    /**
+     * @return the value that should be used for DR or BDR for this router
+     * In OSPFv2 its the source address of the interface.
+     * In OSPFv3 its the router ID.
+     * A dummy argument is used to force an IPv4 and an IPv6 instance
+     * of this method to be generated. Isn't C++ cool?
+     */
+    OspfTypes::RouterID get_candidate_id(A = A::ZERO()) const;
+
     OspfTypes::RouterID
     backup_designated_router(list<Candidate>& candidates) const;
     OspfTypes::RouterID
