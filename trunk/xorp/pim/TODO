@@ -1,6 +1,18 @@
 #
-# $XORP: xorp/pim/TODO,v 1.97 2005/04/26 02:33:27 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.98 2005/04/27 02:10:06 pavlin Exp $
 #
+
+* PIM IMPL:
+  Implement the following from the BSR spec:
+
+  "As an optimation, a router MAY choose not to forward a BSM out
+   of the interface the message was received on if that interface
+   is a point-to-point interface.  On interfaces with multiple
+   PIM neighbors, a router MUST forward an accepted BSM onto the
+   interface that BSM was received on, but if the number of PIM
+   neighbors on that interface is large, it MAY delay forwarding
+   a BSM onto that interface by a small randomized interval to
+   prevent message implosion."
 
 * PIM IMPL:
   Implement the security section. E.g., one of the things that need to
