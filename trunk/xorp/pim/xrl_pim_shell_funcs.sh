@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.25 2005/03/23 10:49:59 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.26 2005/04/20 09:44:45 pavlin Exp $
 #
 
 #
@@ -1275,29 +1275,31 @@ pim_add_test_jp_entry6()
 
 pim_send_test_jp_entry4()
 {
-    if [ $# -lt 1 ] ; then
-	echo "Usage: pim_send_test_jp_entry4 <nbr_addr:ipv4>"
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_send_test_jp_entry4 <vif_name:txt> <nbr_addr:ipv4>"
 	exit 1
     fi
-    nbr_addr=$1
+    vif_name=$1
+    nbr_addr=$2
     
     echo "pim_send_test_jp_entry4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_jp_entry4"
-    XRL_ARGS="?nbr_addr:ipv4=$nbr_addr"
+    XRL_ARGS="?vif_name:txt=$vif_name&nbr_addr:ipv4=$nbr_addr"
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 
 pim_send_test_jp_entry6()
 {
-    if [ $# -lt 1 ] ; then
-	echo "Usage: pim_send_test_jp_entry6 <nbr_addr:ipv6>"
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_send_test_jp_entry6 <vif_name:txt> <nbr_addr:ipv6>"
 	exit 1
     fi
-    nbr_addr=$1
+    vif_name=$1
+    nbr_addr=$2
     
     echo "pim_send_test_jp_entry6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_jp_entry6"
-    XRL_ARGS="?nbr_addr:ipv6=$nbr_addr"
+    XRL_ARGS="?vif_name:txt=$vif_name&nbr_addr:ipv6=$nbr_addr"
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 

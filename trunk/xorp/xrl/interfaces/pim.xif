@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.18 2005/03/23 10:49:59 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.19 2005/04/20 09:44:46 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -323,8 +323,8 @@ interface pim/0.1 {
 				& action_jp:txt				\
 				& holdtime:u32				\
 				& new_group_bool:bool
-	send_test_jp_entry4	? nbr_addr:ipv4
-	send_test_jp_entry6	? nbr_addr:ipv6
+	send_test_jp_entry4	? vif_name:txt & nbr_addr:ipv4
+	send_test_jp_entry6	? vif_name:txt & nbr_addr:ipv6
 
 	/**
 	 * Test-related methods: send an Assert message on an interface.

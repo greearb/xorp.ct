@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.57 2005/03/25 02:54:04 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.58 2005/04/20 09:44:45 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1260,10 +1260,12 @@ protected:
 
     XrlCmdError pim_0_1_send_test_jp_entry4(
 	// Input values, 
+	const string&	vif_name, 
 	const IPv4&	nbr_addr);
 
     XrlCmdError pim_0_1_send_test_jp_entry6(
 	// Input values, 
+	const string&	vif_name, 
 	const IPv6&	nbr_addr);
 
     /**

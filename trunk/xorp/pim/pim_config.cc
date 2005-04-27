@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.30 2005/04/20 09:44:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.31 2005/04/26 21:41:44 pavlin Exp $"
 
 
 //
@@ -1741,16 +1741,19 @@ PimNode::add_test_jp_entry(const IPvX& source_addr, const IPvX& group_addr,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::send_test_jp_entry(const IPvX& nbr_addr)
+PimNode::send_test_jp_entry(const string& vif_name, const IPvX& nbr_addr)
 {
     int ret_value;
-    PimNbr *pim_nbr = pim_nbr_find(nbr_addr);
+    PimVif *pim_vif = vif_find_by_name(vif_name);
     
+    if (pim_vif == NULL)
+	return (XORP_ERROR);
+
+    PimNbr *pim_nbr = pim_vif->pim_nbr_find(nbr_addr);
     if (pim_nbr == NULL)
 	return (XORP_ERROR);
     
-    PimVif& pim_vif = pim_nbr->pim_vif();
-    ret_value = pim_vif.pim_join_prune_send(pim_nbr, &_test_jp_header);
+    ret_value = pim_vif->pim_join_prune_send(pim_nbr, &_test_jp_header);
     
     return (ret_value);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.82 2005/04/20 09:44:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.83 2005/04/26 22:24:41 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -6143,6 +6143,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
 XrlCmdError
 XrlPimNode::pim_0_1_send_test_jp_entry4(
     // Input values, 
+    const string&	vif_name, 
     const IPv4&		nbr_addr)
 {
     string error_msg;
@@ -6156,9 +6157,10 @@ XrlPimNode::pim_0_1_send_test_jp_entry4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_jp_entry(IPvX(nbr_addr)) < 0) {
-	error_msg = c_format("Failed to send Join/Prune test message to %s",
-			     cstring(nbr_addr));
+    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr)) < 0) {
+	error_msg = c_format("Failed to send Join/Prune test message to %s "
+			     "on vif %s",
+			     cstring(nbr_addr), vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6168,6 +6170,7 @@ XrlPimNode::pim_0_1_send_test_jp_entry4(
 XrlCmdError
 XrlPimNode::pim_0_1_send_test_jp_entry6(
     // Input values, 
+    const string&	vif_name, 
     const IPv6&		nbr_addr)
 {
     string error_msg;
@@ -6181,9 +6184,10 @@ XrlPimNode::pim_0_1_send_test_jp_entry6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_jp_entry(IPvX(nbr_addr)) < 0) {
-	error_msg = c_format("Failed to send Join/Prune test message to %s",
-			     cstring(nbr_addr));
+    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr)) < 0) {
+	error_msg = c_format("Failed to send Join/Prune test message to %s "
+			     "on vif %s",
+			     cstring(nbr_addr), vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
