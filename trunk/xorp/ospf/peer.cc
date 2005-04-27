@@ -932,6 +932,9 @@ Peer<A>::set_router_dead_interval(uint32_t router_dead_interval)
 
 /****************************************/
 
+/**
+ * RFC 2328 Section 10.5 Receiving Hello Packets
+ */
 template <typename A>
 void
 Neighbour<A>::event_hello_received(HelloPacket *hello)
@@ -945,7 +948,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     }
     _hello_packet = hello;
 
-    // Search for this router in the 
+    // Search for this router in the neighbour list.
     list<OspfTypes::RouterID> li = hello->get_neighbours();
     list<OspfTypes::RouterID>::iterator i = li.begin();
     for(; i != li.end(); i++) {
@@ -954,12 +957,17 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     }
 
     if (i == li.end()) {
+	// This neighbour has no knowledge of this router.
 	event_1_way_received();
 	return;
     }
     event_2_way_received();
 
-    _peer.schedule_event("NeighbourChange");
+    if (first || router_priority != hello->get_router_priority())
+	_peer.schedule_event("NeighbourChange");
+
+    
+
 }
 
 template <typename A>
