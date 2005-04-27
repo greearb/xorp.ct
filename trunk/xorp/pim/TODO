@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.100 2005/04/27 08:10:59 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.101 2005/04/27 08:40:58 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -92,13 +92,6 @@
   the clarification.
 
 * PIM IMPL:
-  Check again the implementation of the packet_arrives_on_rp_tunnel()
-  pseudo-code from the spec.
-  E.g., simplify the implementation and make sure it follows
-  closely the spec.
-  The implementation itself is inside PimVif::pim_register_recv()
-
-* PIM IMPL:
   Check that the following is true for both the user-level and kernel-level
   implementation:
 
@@ -114,27 +107,10 @@
   "# See section 4.6 for details." -> "# See Section 4.6 for details."
 
 * PIM IMPL:
-  Get rid of PimNode::pim_nbr_find(const IPvX& nbr_addr),
+  Get rid of PimNode::pim_nbr_find_global(const IPvX& nbr_addr),
   because the neighbor address may not be unique across all interfaces.
-
-* PIM IMPL:
-  Check whether the following comment inside PimMre::compute_rpfp_nbr_sg_rpt()
-  is still valid, and fix the implementation if the spec was modified
-  regarding the "(S,G,rpt) Periodic Messages".
-    //
-    // Return NBR(RPF_interface(RP(G)), MRIB.next_hop(RP(G)))
-    // XXX: note the indirection in the computation of RPF'(S,G,rpt) which
-    // uses internal knowledge about how RPF'(*,G) is computed. This
-    // indirection is needed to compute RPF'(S,G,rpt) even if there is no
-    // (*,G) routing state.
-    // XXX: the computation of RPF'(S,G,rpt) when there is no (*,G) state
-    // might be needed only if the spec allows to send (S,G,rpt) Prune
-    // on the RPT tree when there is only (*,*,RP) state. This might
-    // not be true in case the "(S,G,rpt) Periodic Messages" section
-    // is modified such that (S,G,rpt) Prune are sent only when there is (*,G)
-    // state.
-    //
-
+  To get rid of PimNode::pim_nbr_find_global(), we have to make
+  sure that all valid MRIB entries have a valid next-hop vif index.
 
 * PIM SPEC: draft-11, Section 4.1.4:
   "On an RP, the PMBR value must be cleared when the Keepalive Timer
@@ -162,11 +138,6 @@
   Add support for scoped zone configuration (e.g., to the Bootstrap
   configuration) per interface.
 
-* IMPL:
-  Get rid of the temporary creation of (S,G,rpt) PimMfc entry
-  just for the sake of computing PruneDesired(S,G,rpt)
-  inside PimMre::recompute_is_prune_desired_sg_rpt_sg()
-
 * PIM SPEC: Replace (*,*) with (*,*,RP) inside section 11.2
   "Sources Internal to the PIM-SM Domain"
 
@@ -186,8 +157,8 @@
   vif_find_by_addr() and vif_find_same_subnet_or_p2p()
 
 * IMPL:
- Take care of Section 4.5.10: Background: (*,*,RP) and (S,G,rpt) interaction.
-  (check whether the implementation does the right thing).
+  Test all scenarios in
+  Section 4.5.10: Background: (*,*,RP) and (S,G,rpt) interaction.
 
 * IMPL:
   Implement mixing of IPv4/IPv6 addresses within PIM Join/Prune messages
@@ -205,13 +176,6 @@ flexibility for dual-stack IPv4/IPv6 routers.  If a router receives a
 message with mixed family addresses, it SHOULD only process the
 addresses which are of the same family as the unicast upstream neighbor
 address.
-
-* IMPL:
-  Apply the following optimization to stop generating PIM Assert packets
-  if there are no more PIM neighbors on an interface:
-  "If I am in Assert Winner state and if
-  Assert Timer Expires and if there are no more PIM neighbors, then
-  the assert state machine should transitinto NoInfo state".
 
 * IMPL:
   If a PIM control message is received witn an unrecognized version
