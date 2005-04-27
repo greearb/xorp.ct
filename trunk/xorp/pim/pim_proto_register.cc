@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.19 2005/03/25 02:54:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.20 2005/04/21 09:15:16 pavlin Exp $"
 
 
 //
@@ -306,19 +306,21 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	sent_register_stop = true;
     }
     if (is_sptbit_set || pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
-	if (sent_register_stop) {
-	    // "restart KeepaliveTimer(S,G) to RP_Keepalive_Period"
-	    keepalive_timer_sec = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
-	} else {
-	    // "restart KeepaliveTimer(S,G) to Keepalive_Period"
-	    keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-	}
 	// Create an (S,G) entry that will keep the Keepalive Timer running
 	if (pim_mre_sg == NULL) {
 	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(inner_src,
 							   inner_dst,
 							   PIM_MRE_SG,
 							   PIM_MRE_SG);
+	}
+	if (sent_register_stop) {
+	    // "restart KeepaliveTimer(S,G) to RP_Keepalive_Period"
+	    keepalive_timer_sec = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
+	    pim_mre_sg->set_is_kat_set_to_rp_keepalive_period(true);
+	} else {
+	    // "restart KeepaliveTimer(S,G) to Keepalive_Period"
+	    keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
+	    pim_mre_sg->set_is_kat_set_to_rp_keepalive_period(false);
 	}
 	pim_mre_sg->start_keepalive_timer();
 	is_keepalive_timer_restarted = true;

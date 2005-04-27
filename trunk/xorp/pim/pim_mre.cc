@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.35 2005/04/19 02:32:43 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.36 2005/04/20 22:47:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1066,8 +1066,7 @@ PimMre::recompute_set_keepalive_timer_sg()
 	    // Register decapsulation.
 	    //
 	    uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-	    if ((pim_mfc->iif_vif_index() == pim_register_vif_index())
-		&& i_am_rp()) {
+	    if (is_kat_set_to_rp_keepalive_period()) {
 		if (expected_dataflow_monitor_sec
 		    < PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
 		    expected_dataflow_monitor_sec

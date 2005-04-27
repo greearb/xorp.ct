@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.23 2005/04/19 02:31:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.24 2005/04/19 03:27:18 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -389,16 +389,16 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	// and/or idle PimMfc+MFC state
 	//
 	// First, compute the dataflow monitor value, which may be different
-	// for (S,G) entry in the RP that is used for Register decapsulation.
+	// for the (S,G) entry in the RP if a Register-Stop was sent.
 	uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
 	if (is_keepalive_timer_restarted
-	    && (iif_vif_index == pim_register_vif_index())
-	    && (pim_mre->i_am_rp())) {
-		if (expected_dataflow_monitor_sec
-		    < PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
-		    expected_dataflow_monitor_sec
-			= PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
-		}
+	    && (pim_mre_sg != NULL)
+	    && (pim_mre_sg->is_kat_set_to_rp_keepalive_period())) {
+	    if (expected_dataflow_monitor_sec
+		< PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
+		expected_dataflow_monitor_sec
+		    = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
+	    }
 	}
 	
 	pim_mfc->add_dataflow_monitor(expected_dataflow_monitor_sec, 0,
@@ -453,7 +453,6 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     uint32_t lookup_flags
 	= PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
     uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-    bool i_am_rp = false;
     
     XLOG_TRACE(pim_node().is_log_trace(),
 	       "RX DATAFLOW signal: "
@@ -578,25 +577,10 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     //
     // Compute what is the expected value for the Keepalive Timer
     //
-    if (pim_mfc->iif_vif_index() == pim_register_vif_index()) {
-	do {
-	    i_am_rp = false;
-	    if (pim_mre_sg != NULL) {
-		i_am_rp = pim_mre_sg->i_am_rp();
-		break;
-	    }
-	    if (pim_mre != NULL) {
-		i_am_rp = pim_mre->i_am_rp();
-		break;
-	    }
-	} while (false);
-	if (i_am_rp) {
-	    if (expected_dataflow_monitor_sec
-		< PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
-		expected_dataflow_monitor_sec
-		    = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
-	    }
-	}
+    if ((pim_mre_sg != NULL)
+	&& pim_mre_sg->is_kat_set_to_rp_keepalive_period()) {
+	if (expected_dataflow_monitor_sec < PIM_RP_KEEPALIVE_PERIOD_DEFAULT)
+	    expected_dataflow_monitor_sec = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
     }
     
     //

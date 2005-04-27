@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.43 2005/04/21 23:43:22 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.44 2005/04/22 01:23:55 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -85,7 +85,9 @@ enum {
 					     // running
     PIM_MRE_TASK_DELETE_PENDING	= 1 << 21,   // Entry is pending deletion
     PIM_MRE_TASK_DELETE_DONE	= 1 << 22,   // Entry is ready to be deleted
-    PIM_MRE_SWITCH_TO_SPT_DESIRED = 1 << 23  // SwitchToSptDesired(S,G) is true
+    PIM_MRE_SWITCH_TO_SPT_DESIRED = 1 << 23, // SwitchToSptDesired(S,G) is true
+    PIM_MRE_IS_KAT_SET_TO_RP_KEEPALIVE_PERIOD = 1 << 24 // At the RP, when
+						        // Register-Stop is sent
 };
 
 
@@ -866,10 +868,24 @@ public:
     bool	i_am_rp() const	{ return (_flags & PIM_MRE_I_AM_RP); }
     // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	set_i_am_rp(bool v) {
-	if (v)
+	if (v) {
 	    _flags |= PIM_MRE_I_AM_RP;
+	} else {
+	    //
+	    // XXX: Reset the PIM_MRE_IS_KAT_SET_TO_RP_KEEPALIVE_PERIOD flag
+	    // as well, because it applies only at the RP.
+	    //
+	    _flags &= ~(PIM_MRE_I_AM_RP | PIM_MRE_IS_KAT_SET_TO_RP_KEEPALIVE_PERIOD);
+	}
+    }
+
+    // Note: applies for (S,G)
+    bool	is_kat_set_to_rp_keepalive_period() const { return (_flags & PIM_MRE_IS_KAT_SET_TO_RP_KEEPALIVE_PERIOD); }
+    void	set_is_kat_set_to_rp_keepalive_period(bool v) {
+	if (v)
+	    _flags |= PIM_MRE_IS_KAT_SET_TO_RP_KEEPALIVE_PERIOD;
 	else
-	    _flags &= ~PIM_MRE_I_AM_RP;
+	    _flags &= ~PIM_MRE_IS_KAT_SET_TO_RP_KEEPALIVE_PERIOD;
     }
     
     // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)

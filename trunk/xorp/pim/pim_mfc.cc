@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.24 2005/03/25 02:53:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.25 2005/04/16 02:04:26 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -366,8 +366,8 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 	if (has_idle) {
 	    // Restore the idle dataflow monitor
 	    uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-	    if ((iif_vif_index() == pim_node().pim_register_vif_index())
-		&& (pim_mre->i_am_rp())) {
+	    if ((pim_mre_sg != NULL)
+		&& pim_mre_sg->is_kat_set_to_rp_keepalive_period()) {
 		if (expected_dataflow_monitor_sec
 		    < PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
 		    expected_dataflow_monitor_sec
