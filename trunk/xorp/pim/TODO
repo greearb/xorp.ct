@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.98 2005/04/27 02:10:06 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.99 2005/04/27 02:47:25 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -45,17 +45,6 @@
     but row "Prune(S,G)" vs column "Join(S,G,rpt)" still remains "yes".
   - Row "Prune(S,G,rpt)" vs column "Prune(S,G)" was changed from "?" to "yes",
     but row "Prune(S,G)" vs row "Prune(S,G,rpt)" still remains "?".
-
-* PIM IMPL:
-  Implement the following regarding the processing of Join/Prune
-  messages:
-  "If a router receives a
-  message with mixed family addresses, it SHOULD only process the
-  addresses which are of the same family as the unicast upstream neighbor
-  address."
-
-  Currently, if a Join/Prune message mixes the address family of the
-  included addresses, the whole message is ignored.
 
 * PIM SPEC:
   The PIM (S,G) assert state machine has a state transition that
@@ -180,11 +169,6 @@ default."
     uint8_t first_frag[mtu];
 
 * IMPL:
-  If a PIM Hello message is received and it contains an unrecognized
-  Hello option, then print a warning, but still accept the sender
-  as a neighbor.
-
-* IMPL:
   Add support for scoped zone configuration (e.g., to the Bootstrap
   configuration) per interface.
 
@@ -217,7 +201,9 @@ default."
 
 * IMPL:
   Implement mixing of IPv4/IPv6 addresses within PIM Join/Prune messages
-  as specified in the spec:
+  as specified in the spec (see below).
+  Currently, if a Join/Prune message mixes the address family of the
+  included addresses, the whole message is ignored.
 
 Within one PIM Join/Prune message, all the Multicast Group Addresses,
 Joined Source addresses and Pruned Source addresses MUST be of the same
