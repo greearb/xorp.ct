@@ -245,7 +245,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     DebugIO<A> io(info, version, eventloop);
     
     Ospf<A> ospf(version, eventloop, &io);
-    ospf.set_router_id("192.150.187.78");
+    ospf.set_router_id("0.0.0.1");
 
     OspfTypes::AreaID area("128.16.64.16");
 
