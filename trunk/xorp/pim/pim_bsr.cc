@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.36 2005/03/25 02:53:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.37 2005/04/21 19:16:11 pavlin Exp $"
 
 
 //
@@ -2009,8 +2009,8 @@ BsrZone::randomized_override_interval(const IPvX& my_addr,
     double addr_delay, delay;
     uint8_t best_priority = max(bsr_priority(), my_priority);
     uint8_t priority_diff;
-    uint8_t my_addr_array[sizeof(IPvX)];
-    uint8_t stored_addr_array[sizeof(IPvX)];
+    uint8_t my_addr_array[sizeof(my_addr)];
+    uint8_t stored_addr_array[sizeof(my_addr)];
     double my_addr_double, stored_addr_double;
     size_t addr_bitlen = IPvX::addr_bitlen(_pim_bsr.family());
     size_t addr_size = IPvX::addr_size(_pim_bsr.family());
