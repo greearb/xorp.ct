@@ -22,10 +22,16 @@
  * All the trace variables in one place.
  */
 struct Trace {
-    // Enable all the error tracing be default.
-    Trace() : _input_errors(true)
+    // Enable all the error tracing by default.
+    // XXX - Enable all tracing during development.
+    // atanu@xorp.org 2005-04-26
+    Trace() : _input_errors(true),
+	      _interface_events(true),
+	      _neighbour_events(true)
 	{}
     bool _input_errors;
+    bool _interface_events;
+    bool _neighbour_events;
 };
 
 #endif // __OSPF_TRACE_HH__
