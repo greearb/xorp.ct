@@ -1,6 +1,49 @@
 #
-# $XORP: xorp/pim/TODO,v 1.96 2005/04/26 02:30:43 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.97 2005/04/26 02:33:27 pavlin Exp $
 #
+
+* PIM IMPL:
+  Implement the security section. E.g., one of the things that need to
+  be implemented is:
+
+  "An implementation SHOULD provide a mechanism to allow an RP to restrict
+  the range of source addresses from which it accepts Register-
+  encapsulated packets."
+
+* PIM IMPL:
+  Implement the following from the spec:
+
+  If the the Register_Suppression_Time or the Register_Probe_Time are
+  configured to values other than the defaults it MUST be ensured that the
+  value of the Register_Probe_Time is less than half the value of the
+  Register_Suppression_Time to prevent a possible negative value in the
+  setting of the Register-Stop Timer.
+
+* PIM IMPL:
+  Implement the following whenever an invalid "no" combination of
+  J/P entries is received:
+  "An error message MAY be logged to the administrator in a rate limited
+  manner."
+
+* PIM SPEC:
+  The table with the Join/Prune rules combinations (in the section
+  that describes the J/P messages format) is assymetric after
+  recent changes to the I-D spec:
+  - Row "Join(S,G,rpt)" vs column "Prune(S,G)" was changed from "yes" to "?",
+    but row "Prune(S,G)" vs column "Join(S,G,rpt)" still remains "yes".
+  - Row "Prune(S,G,rpt)" vs column "Prune(S,G)" was changed from "?" to "yes",
+    but row "Prune(S,G)" vs row "Prune(S,G,rpt)" still remains "?".
+
+* PIM IMPL:
+  Implement the following regarding the processing of Join/Prune
+  messages:
+  "If a router receives a
+  message with mixed family addresses, it SHOULD only process the
+  addresses which are of the same family as the unicast upstream neighbor
+  address."
+
+  Currently, if a Join/Prune message mixes the address family of the
+  included addresses, the whole message is ignored.
 
 * PIM SPEC:
   The PIM (S,G) assert state machine has a state transition that
