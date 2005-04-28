@@ -1083,7 +1083,24 @@ template <typename A>
 void
 Neighbour<A>::event_1_way_received()
 {
-    XLOG_WARNING("TBD");
+    XLOG_TRACE(_ospf.trace()._neighbour_events, "1-WayReceived");
+
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+	XLOG_WARNING("Unexpected state %s", pp_state(get_state()).c_str());
+	break;
+    case Init:
+	// No change
+	break;
+    case TwoWay:
+    case ExStart:
+    case Exchange:
+    case Loading:
+    case Full:
+	set_state(Init);
+	break;
+    }
 }
 
 template <typename A>
