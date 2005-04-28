@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.70 2005/03/05 01:39:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.71 2005/03/25 02:53:17 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2020,6 +2020,8 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
 	      admin_distance,
 	      protocol_origin.c_str());
 
+    UNUSED(cookie);
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
@@ -2039,8 +2041,6 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
 			 admin_distance, is_xorp_route, is_connected_route)
 	);
     return _xftm.add(tid, op);
-
-    UNUSED(cookie);
 }
 
 XrlCmdError
@@ -2057,6 +2057,8 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
 	      "network = %s protocol_origin = %s\n",
 	      network.str().c_str(),
 	      protocol_origin.c_str());
+
+    UNUSED(cookie);
 
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
@@ -2075,8 +2077,6 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
 	new FtiDeleteEntry4(_xftm.ftic(), network, is_connected_route)
 	);
     return _xftm.add(tid, op);
-
-    UNUSED(cookie);
 }
 
 XrlCmdError
@@ -2085,6 +2085,8 @@ XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
 	const uint32_t&	tid,
 	const string&	cookie)
 {
+    UNUSED(cookie);
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
@@ -2095,8 +2097,6 @@ XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
 	new FtiDeleteAllEntries4(_xftm.ftic())
 	);
     return _xftm.add(tid, op);
-
-    UNUSED(cookie);
 }
 
 XrlCmdError
@@ -2150,6 +2150,8 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
 	      admin_distance,
 	      protocol_origin.c_str());
 
+    UNUSED(cookie);
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
@@ -2169,8 +2171,6 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
 			 admin_distance, is_xorp_route, is_connected_route)
 	);
     return _xftm.add(tid, op);
-
-    UNUSED(cookie);
 }
 
 XrlCmdError
@@ -2187,6 +2187,8 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
 	      "network = %s protocol_origin = %s\n",
 	      network.str().c_str(),
 	      protocol_origin.c_str());
+
+    UNUSED(cookie);
 
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
@@ -2205,8 +2207,6 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
 	new FtiDeleteEntry6(_xftm.ftic(), network, is_connected_route)
 	);
     return _xftm.add(tid, op);
-
-    UNUSED(cookie);
 }
 
 XrlCmdError
@@ -2215,6 +2215,8 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
 	const uint32_t&	tid,
 	const string&	cookie)
 {
+    UNUSED(cookie);
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
@@ -2224,9 +2226,8 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
     FtiTransactionManager::Operation op(
 	new FtiDeleteAllEntries6(_xftm.ftic())
 	);
-    return _xftm.add(tid, op);
 
-    UNUSED(cookie);
+    return _xftm.add(tid, op);
 }
 
 // ----------------------------------------------------------------------------

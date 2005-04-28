@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.83 2005/04/26 22:24:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.84 2005/04/27 21:58:43 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -3615,6 +3615,9 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     uint16_t vif_index = Vif::VIF_INDEX_INVALID;
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
+
     //
     // Verify the address family
     //
@@ -3645,9 +3648,6 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     // Success
     //
     return XrlCmdError::OKAY();
-
-    UNUSED(cookie);
-    UNUSED(protocol_origin);
 }
 
 XrlCmdError
@@ -3659,6 +3659,9 @@ XrlPimNode::redist_transaction4_0_1_delete_route(
     const string&	protocol_origin)
 {
     string error_msg;
+
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
 
     //
     // Verify the address family
@@ -3683,9 +3686,6 @@ XrlPimNode::redist_transaction4_0_1_delete_route(
     // Success
     //
     return XrlCmdError::OKAY();
-
-    UNUSED(cookie);
-    UNUSED(protocol_origin);
 }
 
 XrlCmdError
@@ -3695,6 +3695,8 @@ XrlPimNode::redist_transaction4_0_1_delete_all_routes(
     const string&	cookie)
 {
     string error_msg;
+
+    UNUSED(cookie);
 
     //
     // Verify the address family
@@ -3714,8 +3716,6 @@ XrlPimNode::redist_transaction4_0_1_delete_all_routes(
     // Success
     //
     return XrlCmdError::OKAY();
-
-    UNUSED(cookie);
 }
 
 XrlCmdError
@@ -3812,6 +3812,9 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     uint16_t vif_index = Vif::VIF_INDEX_INVALID;
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
+
     //
     // Verify the address family
     //
@@ -3842,9 +3845,6 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     // Success
     //
     return XrlCmdError::OKAY();
-
-    UNUSED(cookie);
-    UNUSED(protocol_origin);
 }
 
 XrlCmdError
@@ -3856,6 +3856,9 @@ XrlPimNode::redist_transaction6_0_1_delete_route(
     const string&	protocol_origin)
 {
     string error_msg;
+
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
 
     //
     // Verify the address family
@@ -3880,9 +3883,6 @@ XrlPimNode::redist_transaction6_0_1_delete_route(
     // Success
     //
     return XrlCmdError::OKAY();
-
-    UNUSED(cookie);
-    UNUSED(protocol_origin);
 }
 
 XrlCmdError
@@ -3892,6 +3892,8 @@ XrlPimNode::redist_transaction6_0_1_delete_all_routes(
     const string&	cookie)
 {
     string error_msg;
+
+    UNUSED(cookie);
 
     //
     // Verify the address family
@@ -3911,8 +3913,6 @@ XrlPimNode::redist_transaction6_0_1_delete_all_routes(
     // Success
     //
     return XrlCmdError::OKAY();
-
-    UNUSED(cookie);
 }
 
 XrlCmdError
