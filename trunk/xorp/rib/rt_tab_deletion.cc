@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.8 2005/03/05 01:31:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.9 2005/03/25 02:54:22 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -28,10 +28,10 @@
 // A = Address Type. E.g., IPv4 or IPv6
 //
 template<class A>
-DeletionTable<A>::DeletionTable<A>(const string& tablename,
-				   RouteTable<A>* parent,
-				   Trie<A, const IPRouteEntry<A>* >* ip_route_trie,
-				   EventLoop& eventloop)
+DeletionTable<A>::DeletionTable(const string& tablename,
+				RouteTable<A>* parent,
+				Trie<A, const IPRouteEntry<A>* >* ip_route_trie,
+				EventLoop& eventloop)
     : RouteTable<A>(tablename),
       _parent(parent),
       _eventloop(eventloop),

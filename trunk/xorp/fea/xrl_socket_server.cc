@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.20 2005/03/05 01:41:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.21 2005/03/25 02:53:17 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -295,10 +295,10 @@ XrlSocketServer::remove_sockets_owned_by(const string& target)
 // RemoteSocket<A>
 
 template <typename A>
-XrlSocketServer::RemoteSocket<A>::RemoteSocket<A>(XrlSocketServer& ss,
-			      RemoteSocketOwner&		   owner,
-			      int				   fd,
-			      const A&				   addr)
+XrlSocketServer::RemoteSocket<A>::RemoteSocket(XrlSocketServer&	ss,
+			      RemoteSocketOwner&		owner,
+			      int				fd,
+			      const A&				addr)
     : _ss(ss), _owner(owner), _fd(fd), _addr(addr), _sockid(XUID().str())
 {
     _owner.incr_socket_count();
