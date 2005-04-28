@@ -1124,6 +1124,7 @@ Neighbour<A>::event_2_way_received()
 	       "%s (%s) 2-WayReceived",
 	       _peer.get_if_name().c_str(), pp_state(get_state()).c_str());
 
+    set_state(TwoWay);	// XXX - temporary hack
     XLOG_WARNING("TBD");
 }
 
