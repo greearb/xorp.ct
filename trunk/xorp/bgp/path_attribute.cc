@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.54 2005/01/31 19:50:28 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.55 2005/03/25 02:52:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -179,7 +179,7 @@ ASPathAttribute::encode()
  */
 
 template <class A>
-NextHopAttribute<A>::NextHopAttribute<A>(const A& n)
+NextHopAttribute<A>::NextHopAttribute(const A& n)
 	: PathAttribute(Transitive, NEXT_HOP), _next_hop(n)
 {
     encode();
@@ -193,7 +193,7 @@ NextHopAttribute<A>::clone() const
 }
 
 template <class A>
-NextHopAttribute<A>::NextHopAttribute<A>(const uint8_t* d)
+NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 	throw(CorruptMessage)
 	: PathAttribute(d)
 {
@@ -1394,7 +1394,7 @@ PathAttribute::set_header(size_t payload_size)
 #define PARANOID
 
 template<class A>
-PathAttributeList<A>::PathAttributeList<A>() 
+PathAttributeList<A>::PathAttributeList() 
     : _nexthop_att(0), _aspath_att(0), _origin_att(0)
 {
     debug_msg("%p\n", this);
@@ -1404,9 +1404,9 @@ PathAttributeList<A>::PathAttributeList<A>()
 
 template<class A>
 PathAttributeList<A>::
-  PathAttributeList<A>(const NextHopAttribute<A> &nexthop_att,
-		       const ASPathAttribute &aspath_att,
-		       const OriginAttribute &origin_att)
+  PathAttributeList(const NextHopAttribute<A> &nexthop_att,
+		    const ASPathAttribute &aspath_att,
+		    const OriginAttribute &origin_att)
 {
     debug_msg("%p\n", this);
 

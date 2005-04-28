@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.26 2005/03/18 08:15:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.27 2005/03/25 02:52:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -68,7 +68,7 @@ BGPRouteFilter<A>::propagate_flags(const SubnetRoute<A>& route,
 /*************************************************************************/
 
 template<class A>
-SimpleASFilter<A>::SimpleASFilter<A>(const AsNum &as_num) 
+SimpleASFilter<A>::SimpleASFilter(const AsNum &as_num) 
     : _as_num(as_num)
 {
 }
@@ -92,7 +92,7 @@ SimpleASFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-ASPrependFilter<A>::ASPrependFilter<A>(const AsNum &as_num) 
+ASPrependFilter<A>::ASPrependFilter(const AsNum &as_num) 
     : _as_num(as_num)
 {
 }
@@ -139,7 +139,7 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-NexthopRewriteFilter<A>::NexthopRewriteFilter<A>(const A& local_nexthop) 
+NexthopRewriteFilter<A>::NexthopRewriteFilter(const A& local_nexthop) 
     : _local_nexthop(local_nexthop)
 {
 }
@@ -188,7 +188,7 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-IBGPLoopFilter<A>::IBGPLoopFilter<A>() 
+IBGPLoopFilter<A>::IBGPLoopFilter() 
 {
 }
 
@@ -212,7 +212,7 @@ IBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
 
 template<class A>
 LocalPrefInsertionFilter<A>::
-LocalPrefInsertionFilter<A>(uint32_t default_local_pref) 
+LocalPrefInsertionFilter(uint32_t default_local_pref) 
     : _default_local_pref(default_local_pref)
 {
 }
@@ -266,7 +266,7 @@ LocalPrefInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-LocalPrefRemovalFilter<A>::LocalPrefRemovalFilter<A>() 
+LocalPrefRemovalFilter<A>::LocalPrefRemovalFilter() 
 {
 }
 
@@ -311,7 +311,7 @@ LocalPrefRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 
 template<class A>
 MEDInsertionFilter<A>::
-MEDInsertionFilter<A>(NextHopResolver<A>& next_hop_resolver) 
+MEDInsertionFilter(NextHopResolver<A>& next_hop_resolver) 
     : _next_hop_resolver(next_hop_resolver)
 {
 }
@@ -365,7 +365,7 @@ MEDInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-MEDRemovalFilter<A>::MEDRemovalFilter<A>() 
+MEDRemovalFilter<A>::MEDRemovalFilter() 
 {
 }
 
@@ -409,7 +409,7 @@ MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-UnknownFilter<A>::UnknownFilter<A>() 
+UnknownFilter<A>::UnknownFilter() 
 {
 }
 
@@ -453,8 +453,8 @@ UnknownFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-OriginateRouteFilter<A>::OriginateRouteFilter<A>(const AsNum &as_num,
-						 const bool ibgp)
+OriginateRouteFilter<A>::OriginateRouteFilter(const AsNum &as_num,
+					      const bool ibgp)
     :  _as_num(as_num), _ibgp(ibgp)
 {
 }

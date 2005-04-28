@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.64 2005/03/20 23:56:30 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.65 2005/03/25 02:52:44 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1003,12 +1003,14 @@ BGPPlumbingAF<A>::lookup_route(const IPNet<A> &net) const
     return _ipc_rib_out_table->lookup_route(net, genid);
 }
 
+template <>
 const IPv4& 
 BGPPlumbingAF<IPv4>::get_local_nexthop(const PeerHandler *peerhandler) const 
 {
     return peerhandler->my_v4_nexthop();
 }
 
+template <>
 const IPv6& 
 BGPPlumbingAF<IPv6>::get_local_nexthop(const PeerHandler *peerhandler) const 
 {

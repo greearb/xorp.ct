@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.13 2005/03/18 08:15:03 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.14 2005/03/25 02:52:47 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -34,6 +34,7 @@ template<class A>
 class BGPRouteFilter {
 public:
     BGPRouteFilter() {};
+    virtual ~BGPRouteFilter() {}
 
     /* "modified" is needed because we need to know whether we should
        free the rtmsg or not if we modify the route. If this

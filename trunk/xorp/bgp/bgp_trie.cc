@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.15 2004/11/06 03:35:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.16 2005/03/25 02:52:39 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -21,8 +21,8 @@
 
 template<class A>
 ChainedSubnetRoute<A>::
-ChainedSubnetRoute<A>(const SubnetRoute<A>& route,
-		      const ChainedSubnetRoute<A>* prev)
+ChainedSubnetRoute(const SubnetRoute<A>& route,
+		   const ChainedSubnetRoute<A>* prev)
     : SubnetRoute<A>(route)
 {
     if (prev != NULL) {
@@ -38,7 +38,7 @@ ChainedSubnetRoute<A>(const SubnetRoute<A>& route,
 
 template<class A>
 ChainedSubnetRoute<A>::
-ChainedSubnetRoute<A>(const ChainedSubnetRoute<A>& original)
+ChainedSubnetRoute(const ChainedSubnetRoute<A>& original)
     : SubnetRoute<A>(original)
 {
     _prev = &original;
