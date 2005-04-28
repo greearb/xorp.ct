@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.37 2005/04/22 00:58:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.38 2005/04/22 01:23:55 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -813,16 +813,14 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
 	return (pim_mre_wc->compute_rpfp_nbr_wc());
     //
     // Return NBR(RPF_interface(RP(G)), MRIB.next_hop(RP(G)))
-    // XXX: note the indirection in the computation of RPF'(S,G,rpt) which
+    //
+    // XXX: Note the indirection in the computation of RPF'(S,G,rpt) which
     // uses internal knowledge about how RPF'(*,G) is computed. This
     // indirection is needed to compute RPF'(S,G,rpt) even if there is no
-    // (*,G) routing state.
-    // XXX: the computation of RPF'(S,G,rpt) when there is no (*,G) state
-    // might be needed only if the spec allows to send (S,G,rpt) Prune
-    // on the RPT tree when there is only (*,*,RP) state. This might
-    // not be true in case the "(S,G,rpt) Periodic Messages" section
-    // is modified such that (S,G,rpt) Prune are sent only when there is (*,G)
-    // state.
+    // (*,G) routing state. For example, it is possible for a triggered
+    // Prune(S,G,rpt) message to be sent when the router has no (*,G) Join
+    // state. See Section "Background: (*,*,RP) and (S,G,rpt) Interaction"
+    // for details.
     //
     return (compute_nbr_mrib_next_hop_rp());
 }
