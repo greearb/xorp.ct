@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.15 2005/03/05 01:31:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.16 2005/03/25 02:54:20 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 
@@ -87,6 +87,7 @@ NotifyQueue::xrl_done(const XrlError& e)
     }
 }
 
+template <>
 void
 NotifyQueueChangedEntry<IPv4>::send(ResponseSender* response_sender,
 				    const string& module_name,
@@ -99,6 +100,7 @@ NotifyQueueChangedEntry<IPv4>::send(ResponseSender* response_sender,
 					      _protocol_origin.c_str(), cb);
 }
 
+template <>
 void
 NotifyQueueChangedEntry<IPv6>::send(ResponseSender* response_sender,
 				    const string& module_name,
@@ -111,6 +113,7 @@ NotifyQueueChangedEntry<IPv6>::send(ResponseSender* response_sender,
 					      _protocol_origin.c_str(), cb);
 }
 
+template <>
 void
 NotifyQueueInvalidateEntry<IPv4>::send(ResponseSender* response_sender,
 				       const string& module_name,
@@ -122,6 +125,7 @@ NotifyQueueInvalidateEntry<IPv4>::send(ResponseSender* response_sender,
 					      _net.prefix_len(), cb);
 }
 
+template <>
 void
 NotifyQueueInvalidateEntry<IPv6>::send(ResponseSender* response_sender,
 				       const string& module_name,
