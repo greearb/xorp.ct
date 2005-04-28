@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.101 2005/04/27 08:40:58 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.102 2005/04/27 23:33:46 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -91,7 +91,7 @@
   The spec should clarify it and the implementation should follow
   the clarification.
 
-* PIM IMPL:
+* PIM IMPL + KERNEL IMPL:
   Check that the following is true for both the user-level and kernel-level
   implementation:
 
@@ -193,12 +193,6 @@ address.
   register messages as required, using an IPv6 fragmentation header
   between the outer IPv6 header and the PIM Register header.
 
-* IMPL+PIM KERNEL IMPL:
-  Make sure that the following is implemented:
-
-  The encapsulating packet uses the normal TTL that the router would use
-  for any locally-generated IP packet.
-
 * IMPL: If the IP address of an interface changes, and if the router
   has not sent yet a Hello message, then if a Join/Prune or Assert message
   message needs to be send, a Hello message must be sent first
@@ -259,22 +253,6 @@ address.
   about the new BSR. On the other hand, the BSR then generates
   new BSM for each new Cand-RP. Result: sudden explosion of
   Cand-RP and Bootstrap messages.
-
-* IMPL: Take care of the
-  (*,*,RP) Joins and AssertTrackingDesired(S,G,I) problem.
-   In the AssertTrackingDesired(S,G,I) definition,
-the line
-  "OR (RPF_interface(RP)==I AND JoinDesired(*,G)==TRUE"
-probably should be replaced with
-  "OR (RPF_interface(RP)==I AND RPTJoinDesired(G)"
-   (Note: it is already corrected in the spec).
-
-* IMPL: what to do when (S,G) packet received on wrong iif, and there
-  is no routing entry yet? Currently, PimMrt::receive_data() processing
-  returns in the following line (note that there is matching (*,*,RP)
-  PimMre entry if there is valid RP):
-     return;         // TODO: XXX: PAVPAVPAV: not in the spec (yet)
-  Maybe install MFC entry in the kernel to stop the kernel upcalls?
 
 * TESTSUITE: clean-up all test setup procedures: move all common stuff
   to "Test Setup".
