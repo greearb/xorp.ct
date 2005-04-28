@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.10 2004/06/10 22:41:05 hodson Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.11 2005/03/25 02:53:26 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER_HH__
 #define __LIBXIPC_FINDER_MESSENGER_HH__
@@ -30,6 +30,11 @@ class FinderMessengerBase;
  */
 class FinderMessengerManager {
 public:
+    /**
+     * Virtual destructor.
+     */
+    virtual ~FinderMessengerManager() {}
+
     /**
      * Method called by messenger constructor.
      */

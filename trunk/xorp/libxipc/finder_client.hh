@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.17 2004/12/18 03:24:36 pavlin Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.18 2005/03/25 02:53:26 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -58,6 +58,7 @@ protected:
 class FinderClientXrlCommandInterface
 {
 public:
+    virtual ~FinderClientXrlCommandInterface() {}
     virtual void uncache_xrl(const string& xrl) = 0;
     virtual void uncache_xrls_from_target(const string& target) = 0;
     virtual XrlCmdError dispatch_tunneled_xrl(const string& xrl) = 0;
