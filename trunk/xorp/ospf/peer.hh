@@ -157,6 +157,19 @@ template <typename A> class Neighbour;
 template <typename A>
 class Peer {
  public:
+    /**
+     * Interface as defined by OSPF not XORP.
+     */
+    enum InterfaceState {
+	Down,
+	Loopback,
+	Waiting,
+	Point2Point,
+	DR_other,
+	Backup,
+	DR,
+    };
+
     Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area,
 	 OspfTypes::AreaType area_type)
 	: _ospf(ospf), _peerout(peerout), _area(area), _area_type(area_type),
@@ -251,6 +264,25 @@ class Peer {
     void process_scheduled_events();
 
     /**
+     * @return the value that should be used for DR or BDR.
+     * In OSPFv2 its the source address of the interface.
+     * In OSPFv3 its the router ID.
+     */
+    static OspfTypes::RouterID get_candidate_id(A, OspfTypes::RouterID);
+
+    InterfaceState get_state() const { return _interface_state; }
+
+    /**
+     * @return the link type.
+     */
+    OspfTypes::LinkType get_linktype() const { return _peerout.get_linktype();}
+
+    /**
+     * Pretty print the interface state.
+     */
+    static string pp_interface_state(InterfaceState is);
+
+    /**
      * Set the network mask OSPFv2 only.
      */
     bool set_network_mask(uint32_t network_mask);
@@ -290,18 +322,6 @@ class Peer {
     XorpTimer _wait_timer;		// Wait to discover other DRs.
     XorpTimer _event_timer;		// Defer event timer.
 
-    /**
-     * Interface as defined by OSPF not XORP.
-     */
-    enum InterfaceState {
-	Down,
-	Loopback,
-	Waiting,
-	Point2Point,
-	DR_other,
-	Backup,
-	DR,
-    };
 
     InterfaceState _interface_state;
 
@@ -333,12 +353,6 @@ class Peer {
 
     bool send_hello_packet();
     
-    /**
-     * @return the value that should be used for DR or BDR.
-     * In OSPFv2 its the source address of the interface.
-     * In OSPFv3 its the router ID.
-     */
-    OspfTypes::RouterID get_candidate_id(A, OspfTypes::RouterID) const;
 
     /**
      * @return the value that should be used for DR or BDR for this router
@@ -361,10 +375,6 @@ class Peer {
      */
     void tear_down_state();
 
-    /**
-     * Pretty print the interface state.
-     */
-    string pp_interface_state(InterfaceState is);
 };
 
 /**
@@ -404,6 +414,11 @@ class Neighbour {
     void set_state(State state) {_state = state; }
 
     State get_state() const { return _state; }
+
+    /**
+     * Pretty print the neighbour state.
+     */
+    static string pp_state(State is);
 
     HelloPacket *get_hello_packet() { return _hello_packet; }
     HelloPacket *get_hello_packet() const { return _hello_packet; }

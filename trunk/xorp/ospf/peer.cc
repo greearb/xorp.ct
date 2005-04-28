@@ -677,14 +677,14 @@ Peer<A>::send_hello_packet()
 
 template <>
 OspfTypes::RouterID
-Peer<IPv4>::get_candidate_id(IPv4 source_address, OspfTypes::RouterID) const
+Peer<IPv4>::get_candidate_id(IPv4 source_address, OspfTypes::RouterID)
 {
     return source_address;
 }
 
 template <>
 OspfTypes::RouterID
-Peer<IPv6>::get_candidate_id(IPv6, OspfTypes::RouterID router_id) const
+Peer<IPv6>::get_candidate_id(IPv6, OspfTypes::RouterID router_id)
 {
     return router_id;
 }
@@ -966,6 +966,31 @@ Peer<A>::set_router_dead_interval(uint32_t router_dead_interval)
 
 /****************************************/
 
+template <typename A>
+string
+Neighbour<A>::pp_state(State ns)
+{
+    switch(ns) {
+    case Neighbour<A>::Down:
+	return "Down";
+    case Neighbour<A>::Attempt:
+	return "Attempt";
+    case Neighbour<A>::Init:
+	return "Init";
+    case Neighbour<A>::TwoWay:
+	return "TwoWay";
+    case Neighbour<A>::ExStart:
+	return "ExStart";
+    case Neighbour<A>::Exchange:
+	return "Exchange";
+    case Neighbour<A>::Loading:
+	return "Loading";
+    case Neighbour<A>::Full:
+	return "Full";
+    }
+    XLOG_UNREACHABLE();
+}
+
 /**
  * RFC 2328 Section 10.5 Receiving Hello Packets
  */
@@ -973,11 +998,22 @@ template <typename A>
 void
 Neighbour<A>::event_hello_received(HelloPacket *hello)
 {
+    debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
+	      cstring(Peer<A>::get_candidate_id(get_source_address(),
+						get_router_id())),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str(),
+	      cstring(*hello));
+
     bool first = 0 ==_hello_packet;
-    uint8_t router_priority;
+    uint8_t previous_router_priority;
+    OspfTypes::RouterID previous_dr;
+    OspfTypes::RouterID previous_bdr;
     if (first) {
     } else {
-	router_priority = _hello_packet->get_router_priority();
+	previous_router_priority = _hello_packet->get_router_priority();
+	previous_dr = _hello_packet->get_designated_router();
+	previous_bdr = _hello_packet->get_backup_designated_router();
 	delete _hello_packet;
     }
     _hello_packet = hello;
@@ -997,11 +1033,50 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     }
     event_2_way_received();
 
-    if (first || router_priority != hello->get_router_priority())
+    if (first || previous_router_priority != hello->get_router_priority())
 	_peer.schedule_event("NeighbourChange");
 
-    
 
+    bool is_dr = Peer<A>::get_candidate_id(get_source_address(),
+					   get_router_id())
+	== hello->get_designated_router();
+
+    bool was_dr;
+
+    if (first)
+	was_dr = false;
+    else
+	was_dr = Peer<A>::get_candidate_id(get_source_address(),
+						     get_router_id())
+	    == previous_dr;
+
+    if (is_dr && 
+	OspfTypes::RouterID("0.0.0.0") == 
+	hello->get_backup_designated_router() &&
+	_peer.get_state() == Peer<A>::Waiting) {
+	_peer.schedule_event("BackupSeen");
+    } else if(is_dr != was_dr)
+	_peer.schedule_event("NeighbourChange");
+
+    bool is_bdr = Peer<A>::get_candidate_id(get_source_address(),
+					   get_router_id())
+	== hello->get_backup_designated_router();
+	  
+    bool was_bdr;
+    if (first)
+	was_bdr = false;
+    else
+	was_bdr = Peer<A>::get_candidate_id(get_source_address(),
+						     get_router_id())
+	    == previous_bdr;
+
+    if (is_bdr && _peer.get_state() == Peer<A>::Waiting) {
+	_peer.schedule_event("BackupSeen");
+    } else  if(is_bdr != was_bdr)
+	_peer.schedule_event("NeighbourChange");
+
+    if (OspfTypes::NBMA ==_peer.get_linktype())
+	XLOG_WARNING("TBD");
 }
 
 template <typename A>
