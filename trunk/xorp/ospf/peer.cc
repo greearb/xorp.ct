@@ -401,7 +401,8 @@ template <typename A>
 void
 Peer<A>::event_interface_up()
 {
-    XLOG_TRACE(_ospf.trace()._interface_events, "InterfaceUp");
+    XLOG_TRACE(_ospf.trace()._interface_events, "%s (%s) InterfaceUp",
+	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     XLOG_ASSERT(Down == _interface_state);
 
@@ -438,7 +439,8 @@ template <typename A>
 void
 Peer<A>::event_wait_timer()
 {
-    XLOG_TRACE(_ospf.trace()._interface_events, "WaitTimer");
+    XLOG_TRACE(_ospf.trace()._interface_events, "%s (%s) WaitTimer",
+	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     event_backup_seen();
     // Start sending hello packets.
@@ -449,7 +451,8 @@ template <typename A>
 void
 Peer<A>::event_backup_seen()
 {
-    XLOG_TRACE(_ospf.trace()._interface_events, "BackupSeen");
+    XLOG_TRACE(_ospf.trace()._interface_events, "%s (%s) BackupSeen",
+	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     switch(_interface_state) {
     case Down:
@@ -479,7 +482,8 @@ template <typename A>
 void
 Peer<A>::event_neighbour_change()
 {
-    XLOG_TRACE(_ospf.trace()._interface_events, "NeighborChange");
+    XLOG_TRACE(_ospf.trace()._interface_events, "%s (%s) NeighborChange",
+	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     switch(_interface_state) {
     case Down:
@@ -505,7 +509,8 @@ template <typename A>
 void
 Peer<A>::event_loop_ind()
 {
-    XLOG_TRACE(_ospf.trace()._interface_events, "LoopInd");
+    XLOG_TRACE(_ospf.trace()._interface_events, "%s (%s) LoopInd",
+	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     _interface_state = Loopback;
 
@@ -516,7 +521,8 @@ template <typename A>
 void
 Peer<A>::event_unloop_ind()
 {
-    XLOG_TRACE(_ospf.trace()._interface_events, "UnLoopInd");
+    XLOG_TRACE(_ospf.trace()._interface_events, "%s (%s) UnLoopInd",
+	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     switch(_interface_state) {
     case Down:
@@ -542,7 +548,8 @@ template <typename A>
 void
 Peer<A>::event_interface_down()
 {
-    XLOG_TRACE(_ospf.trace()._interface_events, "InterfaceDown");
+    XLOG_TRACE(_ospf.trace()._interface_events, "%s (%s) InterfaceDown",
+	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     _interface_state = Down;
 
@@ -998,6 +1005,10 @@ template <typename A>
 void
 Neighbour<A>::event_hello_received(HelloPacket *hello)
 {
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "%s (%s) HelloReceived",
+	       _peer.get_if_name().c_str(), pp_state(get_state()).c_str());
+
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
 	      cstring(Peer<A>::get_candidate_id(get_source_address(),
 						get_router_id())),
@@ -1083,7 +1094,9 @@ template <typename A>
 void
 Neighbour<A>::event_1_way_received()
 {
-    XLOG_TRACE(_ospf.trace()._neighbour_events, "1-WayReceived");
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "%s (%s) 1-WayReceived",
+	       _peer.get_if_name().c_str(), pp_state(get_state()).c_str());
 
     switch(get_state()) {
     case Down:
@@ -1107,6 +1120,10 @@ template <typename A>
 void
 Neighbour<A>::event_2_way_received()
 {
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "%s (%s) 2-WayReceived",
+	       _peer.get_if_name().c_str(), pp_state(get_state()).c_str());
+
     XLOG_WARNING("TBD");
 }
 

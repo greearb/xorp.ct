@@ -46,11 +46,16 @@ class PeerOut {
     ~PeerOut();
 
     /**
+     * For debugging only printable rendition of this interface/vif.
+     */
+    string get_if_name() const { return _interface + "/" + _vif; }
+
+    /**
      * Address of this interface/vif.
      *
      * @return interface/vif address.
      */
-    A get_address() { return _address; }
+    A get_address() const { return _address; }
 
     /**
      * Add another Area for this peer to be in, should only be allowed
@@ -196,6 +201,11 @@ class Peer {
 	    delete (*n);
 	_neighbours.clear();
     }
+
+    /**
+     * For debugging only printable rendition of this interface/vif.
+     */
+    string get_if_name() const { return _peerout.get_if_name(); }
 
     /**
      * Packets for this peer are received here.
