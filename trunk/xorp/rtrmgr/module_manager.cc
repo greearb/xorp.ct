@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.41 2005/02/01 02:52:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.42 2005/03/25 02:54:36 pavlin Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -455,7 +455,8 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	    // Detach from the controlling terminal.
 	    setsid();
 	    if (_argv.empty()) {
-		if (execl(_expath.c_str(), _expath.c_str(), NULL) < 0) {
+		if (execl(_expath.c_str(), _expath.c_str(),
+			  static_cast<const char*>(NULL)) < 0) {
 		    XLOG_ERROR("Execution of %s failed", _expath.c_str());
 		    exit(1);
 		}
