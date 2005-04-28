@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.8 2005/03/25 02:53:11 pavlin Exp $
+// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.9 2005/03/25 05:41:55 pavlin Exp $
 
 #ifndef __FEA_NEXTHOP_PORT_MAPPER_HH__
 #define __FEA_NEXTHOP_PORT_MAPPER_HH__
@@ -221,6 +221,11 @@ private:
  */
 class NexthopPortMapperObserver {
 public:
+    /**
+     * Empty virtual destructor
+     */
+    virtual ~NexthopPortMapperObserver() {}
+
     /**
      * The next-hop port mapping has changed.
      *
