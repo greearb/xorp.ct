@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.10 2003/10/23 00:20:42 pavlin Exp $
+## $XORP: xorp/utils/Makefile.am,v 1.11 2004/11/12 02:44:50 bms Exp $
 ##
 
 SUBDIRS = . @FLOWER_MALLOC@
@@ -24,7 +24,11 @@ runit_SOURCES	      = runit.cc
 EXTRA_DIST	 = args.sh
 EXTRA_DIST	+= bogon-be-gone.sed
 EXTRA_DIST	+= bogon-be-gone.sh
+EXTRA_DIST	+= fig2dev-ps-anon.sed
+EXTRA_DIST	+= gen-pathconf.sh.in
 EXTRA_DIST	+= ndbg
+EXTRA_DIST	+= rcsid2ident.sh
+EXTRA_DIST	+= source_pathconf.sh
 EXTRA_DIST	+= xorpc.sh
 EXTRA_DIST	+= xrl_shell_lib.sh
 EXTRA_DIST	+= xrl_wrappers_generator.sh
