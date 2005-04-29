@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.48 2004/12/30 12:42:12 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.49 2005/01/13 00:53:06 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -337,10 +337,13 @@ lex:	.lex_generated_files
 	( cd $(srcdir);						\
 	yacc -d -p tplt -o y.tplt_tab.c template.yy;		\
 	mv y.tplt_tab.c y.tplt_tab.cc;				\
+	$(top_srcdir)/utils/rcsid2ident.sh y.tplt_tab.cc;	\
 	yacc -d -p boot -o y.boot_tab.c boot.yy;		\
 	mv y.boot_tab.c y.boot_tab.cc;				\
+	$(top_srcdir)/utils/rcsid2ident.sh y.boot_tab.cc;	\
 	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy;	\
 	mv y.opcmd_tab.c y.opcmd_tab.cc;			\
+	$(top_srcdir)/utils/rcsid2ident.sh y.opcmd_tab.cc;	\
 	touch .yacc_generated_files )
 
 .lex_generated_files: $(srcdir)/template.ll $(srcdir)/boot.ll $(srcdir)/op_commands.ll
