@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.5 2005/03/25 02:53:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.6 2005/04/29 15:16:30 bms Exp $"
 
 #include "fea_module.h"
 
@@ -132,23 +132,23 @@ PaTransactionManager::set_backend(const char* name)
 
     // Attempt to construct the new backend.
     try {
-	if (strcmp(name, "dummy" == 0)) {
+	if (strcmp(name, "dummy") == 0) {
 	    nbp = new PaDummyBackend();
 #ifdef notyet
 #ifdef HAVE_PACKETFILTER_IPF
-	} else if (strcmp(name, "ipf" == 0)) {
+	} else if (strcmp(name, "ipf") == 0) {
 	    nbp = new PaIpfBackend();
 #endif
 #endif
 
 #ifdef HAVE_PACKETFILTER_IPFW2
-	} else if (strcmp(name, "ipfw2" == 0)) {
+	} else if (strcmp(name, "ipfw2") == 0) {
 	    nbp = new PaIpfw2Backend();
 #endif
 
 #ifdef notyet
 #ifdef HAVE_PACKETFILTER_IPTABLES
-	} else if (strcmp(name, "iptables" == 0)) {
+	} else if (strcmp(name, "iptables") == 0) {
 	    nbp = new PaIptablesBackend();
 #endif
 #endif
