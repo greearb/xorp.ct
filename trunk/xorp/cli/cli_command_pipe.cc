@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.5 2005/02/27 20:46:55 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.6 2005/03/25 02:52:56 pavlin Exp $"
 
 
 //
@@ -64,7 +64,7 @@ CliPipe::CliPipe(const string& init_pipe_name)
 {
     _pipe_type = name2pipe_type(init_pipe_name);
     _counter = 0;
-    _flag_bool = false;
+    _bool_flag = false;
     _cli_client = NULL;
     
     CLI_PROCESS_CALLBACK _cb = callback(cli_pipe_dummy_func);
@@ -488,17 +488,17 @@ CliPipe::pipe_find_process(string& input_line)
     if (! input_line.size())
 	return (XORP_ERROR);
     
-    if (! _flag_bool) {
+    if (! _bool_flag) {
 	// Evaluate the line
 	ret_value = regexec(&_preg, input_line.c_str(), 0, NULL, 0);
 	if (ret_value == 0) {
 	    // Match
-	    _flag_bool = true;
+	    _bool_flag = true;
 	} else {
 	    // No-match
 	}
     }
-    if (! _flag_bool)
+    if (! _bool_flag)
 	input_line = "";	// Don't print yet
     
     return (XORP_OK);

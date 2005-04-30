@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command_pipe.hh,v 1.5 2004/06/10 22:40:42 hodson Exp $
+// $XORP: xorp/cli/cli_command_pipe.hh,v 1.6 2005/03/25 02:52:56 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_PIPE_HH__
@@ -162,7 +162,7 @@ private:
     vector<string>	_pipe_args_list; // The arguments for the pipe command
     int			_counter;	// Internal counter to keep state
     regex_t		_preg;		// Regular expression (internal form)
-    bool		_flag_bool;	// Internal bool flag to keep state
+    bool		_bool_flag;	// Internal bool flag to keep state
     
     CliClient		*_cli_client;	// The CliClient I belong to, or NULL
 };

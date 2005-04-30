@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.13 2004/07/26 03:46:10 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.14 2005/03/25 02:52:56 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -354,7 +354,7 @@ private:
     bool	is_pipe_mode() { return (_is_pipe_mode); }
     void	set_pipe_mode(bool v) { _is_pipe_mode = v; }
     
-    int		block_connection(bool block_bool);
+    int		block_connection(bool is_blocked);
     void	client_read(int fd, SelectorMask mask);
     
     static	CPL_MATCH_FN(command_completion_func);

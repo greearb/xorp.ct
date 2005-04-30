@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.26 2005/02/27 20:46:54 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.27 2005/03/25 02:52:55 pavlin Exp $"
 
 
 //
@@ -588,11 +588,11 @@ CliClient::cli_print(const string& msg)
 {
     int ret_value;
     string pipe_line, pipe_result;
-    bool eof_input_bool = false;
+    bool is_eof_input = false;
     bool is_incomplete_last_line = false;
 
     if (msg.size() == 0 || (msg[0] == '\0')) {
-	eof_input_bool = true;
+	is_eof_input = true;
     }
 
     // Test if the last line added to the page buffer was incomplete
@@ -625,7 +625,7 @@ CliClient::cli_print(const string& msg)
 
     if (pipe_line.size()) {
 	if (! _pipe_list.empty()) {
-	    if (eof_input_bool) {
+	    if (is_eof_input) {
 		process_line_through_pipes(pipe_line);
 	    } else {
 		_buffer_line += pipe_line;
@@ -1203,7 +1203,7 @@ CliClient::command_line_help(const char *line, int word_end)
 {
     CliCommand *curr_cli_command = _current_cli_command;
     string command_help_string = "";
-    bool found_bool = false;
+    bool is_found = false;
     
     word_end--;			// XXX: exclude the '?' character
     cli_print("\nPossible completions:\n");
@@ -1215,9 +1215,9 @@ CliClient::command_line_help(const char *line, int word_end)
 	CliCommand *tmp_cli_command = *iter;
 	if (tmp_cli_command->find_command_help(line, word_end,
 					       command_help_string))
-	    found_bool = true;
+	    is_found = true;
     }
-    if (found_bool)
+    if (is_found)
 	cli_print(command_help_string);
     
     gl_redisplay_line(gl());
@@ -1275,8 +1275,8 @@ CliClient::process_command(const string& command_line)
     if (parent_cli_command->has_cli_process_callback()) {
 	// Process the rest of the tokens as arguments for this function
 	vector<string> args_vector;
-	bool process_func_arguments_bool = true;
-	bool pipe_command_arguments_bool = false;
+	bool is_process_func_arguments = true;
+	bool is_pipe_command_arguments = false;
 	bool pipe_command_empty = false;	// true if empty pipe command
 	string pipe_command_name = "";
 	list<string> pipe_command_args_list;
@@ -1291,8 +1291,8 @@ CliClient::process_command(const string& command_line)
 		}
 		
 		// Start of a pipe command
-		process_func_arguments_bool = false;
-		pipe_command_arguments_bool = false;
+		is_process_func_arguments = false;
+		is_pipe_command_arguments = false;
 		pipe_command_empty = true;
 		if (pipe_command_name.size()) {
 		    // Add the previous pipe command
@@ -1302,14 +1302,14 @@ CliClient::process_command(const string& command_line)
 		}
 		continue;
 	    }
-	    if (process_func_arguments_bool) {
+	    if (is_process_func_arguments) {
 		// Arguments for the processing command
 		args_vector.push_back(token);
 		continue;
 	    }
-	    if (! pipe_command_arguments_bool) {
+	    if (! is_pipe_command_arguments) {
 		// The pipe command name
-		pipe_command_arguments_bool = true;
+		is_pipe_command_arguments = true;
 		pipe_command_empty = false;
 		pipe_command_name = token;
 		continue;

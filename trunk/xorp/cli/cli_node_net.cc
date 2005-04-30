@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.33 2005/03/24 02:49:26 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.34 2005/03/25 02:52:56 pavlin Exp $"
 
 
 //
@@ -500,18 +500,18 @@ CliClient::set_is_waiting_for_data(bool v)
 }
 
 //
-// If @block_bool is true, block the connection (by not select()-ing
+// If @is_blocked is true, block the connection (by not select()-ing
 // on its socket), otherwise add its socket back to the pool of select()-ed
 // sockets.
 //
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 int
-CliClient::block_connection(bool block_bool)
+CliClient::block_connection(bool is_blocked)
 {
     if (cli_fd() < 0)
 	return (XORP_ERROR);
     
-    if (block_bool) {
+    if (is_blocked) {
 	// Un-select()
 	cli_node().eventloop().remove_selector(cli_fd(), SEL_ALL);
 	return (XORP_OK);

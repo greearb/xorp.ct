@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.12 2005/02/27 20:46:55 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.13 2005/03/25 02:52:56 pavlin Exp $"
 
 
 //
@@ -468,7 +468,7 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     const char *cont_suffix = " "; // XXX: a space after a command is completed
     string token, token_line;
     const string name_string = cli_command->name();
-    bool completed_command_bool;	// 'true' if complete command typed
+    bool is_command_completed;	// 'true' if complete command typed
     
     if ((cpl == NULL) || (line == NULL) || (word_end < 0)) {
 	return (false);
@@ -481,12 +481,12 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     
     if (token_line.length()
 	&& (is_token_separator(token_line[0]) || (token == "|")))
-	completed_command_bool = true;
+	is_command_completed = true;
     else
-	completed_command_bool = false;
+	is_command_completed = false;
     
     // Check if a potential sub-prefix
-    if (! completed_command_bool) {
+    if (! is_command_completed) {
 	int name_end = token.length();
 	string name_complete = name_string.substr(name_end);
 	
@@ -511,7 +511,7 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     if (! cli_command->is_same_command(token))
 	return (false);
     
-    bool child_completion_bool = false;
+    bool is_child_completion = false;
     
     if (cli_command->can_complete()
 	&& ! has_more_tokens(token_line)) {
@@ -521,7 +521,7 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
 			   line_string1.size(),
 			   "",
 			   type_suffix, cont_suffix);
-	child_completion_bool = true;
+	is_child_completion = true;
     }
     
     if (cli_command->can_pipe() && (cli_command->cli_command_pipe() != NULL)) {
@@ -532,7 +532,7 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
 					      token_line.c_str(),
 					      token_line.length(),
 					      cli_command_match_list)) {
-	    child_completion_bool = true;
+	    is_child_completion = true;
 	}
     }
 
@@ -550,11 +550,11 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
 						    token_line.c_str(),
 						    token_line.length(),
 						    cli_command_match_list)) {
-	    child_completion_bool = true;
+	    is_child_completion = true;
 	}
     }
     
-    return (child_completion_bool);
+    return (is_child_completion);
 }
 
 CliCommand *
@@ -636,8 +636,8 @@ CliCommand::find_command_help(const char *line, int word_end,
 			      string& ret_string)
 {
     string token, token_line;
-    bool ret_bool = false;
-    bool no_space_at_end_bool;
+    bool ret_value = false;
+    bool is_no_space_at_end;
     
     if ((line == NULL) || (word_end < 0)) {
         return (false);
@@ -655,12 +655,12 @@ CliCommand::find_command_help(const char *line, int word_end,
 	return (false);
     }
     
-    no_space_at_end_bool = (token_line.empty()) ? (true) : (false);
+    is_no_space_at_end = (token_line.empty()) ? (true) : (false);
     
     // Get the token for the child's command (if any)
     token = pop_token(token_line);
     
-    if ((token.length() == 0) && no_space_at_end_bool) {
+    if ((token.length() == 0) && is_no_space_at_end) {
 	// The last token, and there is no space, so print my help.
 	ret_string += c_format("  %-15s %s\r\n",
 			       name().c_str(), help().c_str());
@@ -672,7 +672,7 @@ CliCommand::find_command_help(const char *line, int word_end,
 	// so print the "default" help.
 	ret_string += c_format("  %-15s %s\r\n",
 			       "<[Enter]>", "Execute this command");
-	ret_bool = true;
+	ret_value = true;
     }
     
     // Not the last token, so search down for help
@@ -682,21 +682,21 @@ CliCommand::find_command_help(const char *line, int word_end,
 	 ++iter) {
 	CliCommand *cli_command = *iter;
 	string tmp_token_line = copy_token(token) + token_line;
-	ret_bool |= cli_command->find_command_help(tmp_token_line.c_str(),
-						   tmp_token_line.length(),
-						   ret_string);
+	ret_value |= cli_command->find_command_help(tmp_token_line.c_str(),
+						    tmp_token_line.length(),
+						    ret_string);
     }
     
     if (can_pipe() && (cli_command_pipe() != NULL)) {
 	// Add the pipe completions
 	string tmp_token_line = copy_token(token) + token_line;
-	ret_bool |= cli_command_pipe()->find_command_help(
+	ret_value |= cli_command_pipe()->find_command_help(
 	    tmp_token_line.c_str(),
 	    tmp_token_line.length(),
 	    ret_string);
     }
     
-    return (ret_bool);
+    return (ret_value);
 }
 
 bool
