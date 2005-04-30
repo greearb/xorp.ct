@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.26 2005/04/20 09:44:45 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.27 2005/04/27 21:58:43 pavlin Exp $
 #
 
 #
@@ -1236,7 +1236,7 @@ pim_log_trace_all()
 pim_add_test_jp_entry4()
 {
     if [ $# -lt 7 ] ; then
-	echo "Usage: pim_add_test_jp_entry4 <source_addr:ipv4> <group_addr:ipv4> <group_mask_len:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
+	echo "Usage: pim_add_test_jp_entry4 <source_addr:ipv4> <group_addr:ipv4> <group_mask_len:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <is_new_group:bool>"
 	exit 1
     fi
     source_addr=$1
@@ -1245,18 +1245,18 @@ pim_add_test_jp_entry4()
     mrt_entry_type=$4	# Must be one of: SG, SG_RPT, WC, RP
     action_jp=$5	# Must be one of: JOIN, PRUNE
     holdtime=$6
-    new_group_bool=$7
+    is_new_group=$7
     
     echo "pim_add_test_jp_entry4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_jp_entry4"
-    XRL_ARGS="?source_addr:ipv4=$source_addr&group_addr:ipv4=$group_addr&group_mask_len:u32=$group_mask_len&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
+    XRL_ARGS="?source_addr:ipv4=$source_addr&group_addr:ipv4=$group_addr&group_mask_len:u32=$group_mask_len&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&is_new_group:bool=$is_new_group"
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 
 pim_add_test_jp_entry6()
 {
     if [ $# -lt 7 ] ; then
-	echo "Usage: pim_add_test_jp_entry6 <source_addr:ipv6> <group_addr:ipv6> <group_mask_len:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
+	echo "Usage: pim_add_test_jp_entry6 <source_addr:ipv6> <group_addr:ipv6> <group_mask_len:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <is_new_group:bool>"
 	exit 1
     fi
     source_addr=$1
@@ -1265,11 +1265,11 @@ pim_add_test_jp_entry6()
     mrt_entry_type=$4	# Must be one of: SG, SG_RPT, WC, RP
     action_jp=$5	# Must be one of: JOIN, PRUNE
     holdtime=$6
-    new_group_bool=$7
+    is_new_group=$7
     
     echo "pim_add_test_jp_entry6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_jp_entry6"
-    XRL_ARGS="?source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&group_mask_len:u32=$group_mask_len&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
+    XRL_ARGS="?source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&group_mask_len:u32=$group_mask_len&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&is_new_group:bool=$is_new_group"
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 

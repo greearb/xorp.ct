@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.19 2005/04/20 09:44:46 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.20 2005/04/27 21:58:44 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -316,13 +316,13 @@ interface pim/0.1 {
 				& mrt_entry_type:txt			\
 				& action_jp:txt				\
 				& holdtime:u32				\
-				& new_group_bool:bool
+				& is_new_group:bool
 	add_test_jp_entry6	? source_addr:ipv6 & group_addr:ipv6	\
 				& group_mask_len:u32			\
 				& mrt_entry_type:txt			\
 				& action_jp:txt				\
 				& holdtime:u32				\
-				& new_group_bool:bool
+				& is_new_group:bool
 	send_test_jp_entry4	? vif_name:txt & nbr_addr:ipv4
 	send_test_jp_entry6	? vif_name:txt & nbr_addr:ipv6
 

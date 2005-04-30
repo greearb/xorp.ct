@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.84 2005/04/27 21:58:43 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.85 2005/04/28 02:28:47 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -5951,7 +5951,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
     const string&	mrt_entry_type, 
     const string&	action_jp, 
     const uint32_t&	holdtime, 
-    const bool&		new_group_bool)
+    const bool&		is_new_group)
 {
     string error_msg;
     mrt_entry_type_t entry_type = MRT_ENTRY_UNKNOWN;
@@ -6032,7 +6032,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
 				   reinterpret_cast<const uint8_t&>(group_mask_len),
 				   entry_type, action_type,
 				   reinterpret_cast<const uint16_t&>(holdtime),
-				   new_group_bool)
+				   is_new_group)
 	< 0) {
 	error_msg = c_format("Failed to add Join/Prune test entry "
 			     "for (%s, %s)",
@@ -6053,7 +6053,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
     const string&	mrt_entry_type, 
     const string&	action_jp, 
     const uint32_t&	holdtime, 
-    const bool&		new_group_bool)
+    const bool&		is_new_group)
 {
     string error_msg;
     mrt_entry_type_t entry_type = MRT_ENTRY_UNKNOWN;
@@ -6128,7 +6128,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
 				   reinterpret_cast<const uint8_t&>(group_mask_len),
 				   entry_type, action_type,
 				   reinterpret_cast<const uint16_t&>(holdtime),
-				   new_group_bool)
+				   is_new_group)
 	< 0) {
 	error_msg = c_format("Failed to add Join/Prune test entry "
 			     "for (%s, %s)",

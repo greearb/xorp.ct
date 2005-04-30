@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.58 2005/04/20 09:44:45 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.59 2005/04/27 21:58:43 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1246,7 +1246,7 @@ protected:
 	const string&	mrt_entry_type, 
 	const string&	action_jp, 
 	const uint32_t&	holdtime, 
-	const bool&	new_group_bool);
+	const bool&	is_new_group);
 
     XrlCmdError pim_0_1_add_test_jp_entry6(
 	// Input values, 
@@ -1256,7 +1256,7 @@ protected:
 	const string&	mrt_entry_type, 
 	const string&	action_jp, 
 	const uint32_t&	holdtime, 
-	const bool&	new_group_bool);
+	const bool&	is_new_group);
 
     XrlCmdError pim_0_1_send_test_jp_entry4(
 	// Input values, 
