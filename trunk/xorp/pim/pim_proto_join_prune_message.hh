@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.6 2004/06/10 22:41:33 hodson Exp $
+// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.7 2005/03/25 02:54:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_PROTO_JOIN_PRUNE_MESSAGE_HH__
@@ -106,7 +106,7 @@ public:
 			     uint8_t group_mask_len,
 			     mrt_entry_type_t mrt_entry_type,
 			     action_jp_t action_jp, uint16_t holdtime,
-			     bool new_group_bool);
+			     bool is_new_group);
     int		mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr);
     int		network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr);
     int		network_send(PimVif *pim_vif, const IPvX& target_nbr_addr);

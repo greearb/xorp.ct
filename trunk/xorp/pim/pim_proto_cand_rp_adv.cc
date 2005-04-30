@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.16 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.17 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -317,12 +317,12 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	 ++iter_prefix) {
 	BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
 	const IPvXNet& group_prefix = bsr_group_prefix->group_prefix();
-	bool all_multicast_groups_bool, is_zbr;
+	bool is_all_multicast_groups, is_zbr;
     	
 	if (group_prefix == IPvXNet::ip_multicast_base_prefix(family())) {
-	    all_multicast_groups_bool = true;
+	    is_all_multicast_groups = true;
 	} else {
-	    all_multicast_groups_bool = false;
+	    is_all_multicast_groups = false;
 	}
 	
 	//
@@ -345,7 +345,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	    
 	    buffer = buffer_send_prepare();
 	    // Write all data to the buffer
-	    if (all_multicast_groups_bool)
+	    if (is_all_multicast_groups)
 		BUFFER_PUT_OCTET(0, buffer);	// XXX: default to all groups
 	    else
 		BUFFER_PUT_OCTET(1, buffer);	// XXX: send one group prefix
@@ -355,7 +355,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	    else
 		BUFFER_PUT_HOST_16(bsr_rp->rp_holdtime(), buffer);
 	    PUT_ENCODED_UNICAST_ADDR(family(), bsr_rp->rp_addr(), buffer);
-	    if (! all_multicast_groups_bool) {
+	    if (! is_all_multicast_groups) {
 		uint8_t group_addr_reserved_flags = 0;
 		if (is_zbr)
 		    group_addr_reserved_flags |= EGADDR_Z_BIT;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.31 2005/04/25 23:48:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.32 2005/04/26 01:15:41 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -422,7 +422,7 @@ PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
     uint16_t vif_index = pim_vif->vif_index();
     int ret_value;
     assert_state_t assert_state;
-    bool i_am_assert_winner_bool;
+    bool i_am_assert_winner;
     AssertMetric my_metric(pim_vif->primary_addr());
     
     if (! (is_sg() || is_wc()))
@@ -436,7 +436,7 @@ PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
 			 metric_s()
 			 : metric_rp());
     
-    i_am_assert_winner_bool = (my_metric > *assert_metric);
+    i_am_assert_winner = (my_metric > *assert_metric);
     
     assert_state = ASSERT_STATE_NOINFO;
     do {
@@ -453,11 +453,11 @@ PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
     ret_value = XORP_ERROR;
     if (is_sg()) {
 	ret_value = assert_process_sg(pim_vif, assert_metric, assert_state,
-				      i_am_assert_winner_bool);
+				      i_am_assert_winner);
     }
     if (is_wc()) {
 	ret_value = assert_process_wc(pim_vif, assert_metric, assert_state,
-				      i_am_assert_winner_bool);
+				      i_am_assert_winner);
     }
     
     return (ret_value);
@@ -468,7 +468,7 @@ int
 PimMre::assert_process_wc(PimVif *pim_vif,
 			  AssertMetric *assert_metric,
 			  assert_state_t assert_state,
-			  bool i_am_assert_winner_bool)
+			  bool i_am_assert_winner)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
@@ -478,11 +478,11 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     
     switch (assert_state) {
     case ASSERT_STATE_NOINFO:
-	if (i_am_assert_winner_bool && assert_metric->rpt_bit_flag()
+	if (i_am_assert_winner && assert_metric->rpt_bit_flag()
 	    && could_assert_wc().test(vif_index)) {
 	    goto a1;
 	}
-	if ( (! i_am_assert_winner_bool)
+	if ( (! i_am_assert_winner)
 	     && assert_metric->rpt_bit_flag()
 	     && assert_tracking_desired_wc().test(vif_index)) {
 	    goto a2;
@@ -490,7 +490,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 	break;
 	
     case ASSERT_STATE_WINNER:
-	if (i_am_assert_winner_bool) {
+	if (i_am_assert_winner) {
 	    // Whoever sent the assert is in error
 	    goto a3;
 	} else {
@@ -505,14 +505,14 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 	    // Receive preferred assert with RPTbit set
 	    goto a2;
 	}
-	if ((! i_am_assert_winner_bool)
+	if ((! i_am_assert_winner)
 	    && assert_metric->rpt_bit_flag()
 	    && (assert_winner_metric_wc(vif_index)->addr()
 		== assert_metric->addr())) {
 	    // Receive acceptable assert from current winner with RPTbit set
 	    goto a2;
 	}
-	if ((i_am_assert_winner_bool)
+	if ((i_am_assert_winner)
 	    && (assert_winner_metric_wc(vif_index)->addr()
 		== assert_metric->addr())) {
 	    // Receive inferior assert from current winner
@@ -582,7 +582,7 @@ int
 PimMre::assert_process_sg(PimVif *pim_vif,
 			  AssertMetric *assert_metric,
 			  assert_state_t assert_state,
-			  bool i_am_assert_winner_bool)
+			  bool i_am_assert_winner)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
@@ -592,7 +592,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     
     switch (assert_state) {
     case ASSERT_STATE_NOINFO:
-	if (i_am_assert_winner_bool && (! assert_metric->rpt_bit_flag())
+	if (i_am_assert_winner && (! assert_metric->rpt_bit_flag())
 	    && could_assert_sg().test(vif_index)) {
 	    goto a1;
 	}
@@ -600,7 +600,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	    && could_assert_sg().test(vif_index)) {
 	    goto a1;
 	}
-	if ( (! i_am_assert_winner_bool)
+	if ( (! i_am_assert_winner)
 	     && (! assert_metric->rpt_bit_flag())
 	     && assert_tracking_desired_sg().test(vif_index)) {
 	    goto a6;	// TODO: or probably a2??
@@ -608,7 +608,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	break;
 	
     case ASSERT_STATE_WINNER:
-	if (i_am_assert_winner_bool) {
+	if (i_am_assert_winner) {
 	    // Whoever sent the assert is in error
 	    goto a3;
 	} else {
@@ -623,14 +623,14 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	    // Receive preferred assert
 	    goto a2;
 	}
-	if ((! i_am_assert_winner_bool)
+	if ((! i_am_assert_winner)
 	    && (! assert_metric->rpt_bit_flag())
 	    && (assert_winner_metric_sg(vif_index)->addr()
 		== assert_metric->addr())) {
 	    // Receive acceptable assert with RPTbit clear from current winner
 	    goto a2;
 	}
-	if ((i_am_assert_winner_bool)
+	if ((i_am_assert_winner)
 	    && (assert_winner_metric_sg(vif_index)->addr()
 		== assert_metric->addr())) {
 	    // Receive inferior assert from current winner

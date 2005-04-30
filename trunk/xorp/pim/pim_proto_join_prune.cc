@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.10 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.11 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -82,7 +82,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
     uint8_t	group_addr_reserved_flags;
     int		groups_n, sources_n, sources_j_n, sources_p_n;
     uint8_t	source_flags;
-    bool	ignore_group_bool, rp_entry_bool, new_group_bool;
+    bool	is_group_ignored, is_rp_entry, is_new_group;
     action_jp_t	action_jp;
     mrt_entry_type_t mrt_entry_type;
     PimJpHeader jp_header(pim_node());
@@ -118,9 +118,9 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	BUFFER_GET_HOST_16(sources_j_n, buffer);
 	BUFFER_GET_HOST_16(sources_p_n, buffer);
 	// Check the group address
-	ignore_group_bool = true;
-	rp_entry_bool = false;
-	new_group_bool = true;
+	is_group_ignored = true;
+	is_rp_entry = false;
+	is_new_group = true;
 	
 	//
 	// Check the group address and mask length
@@ -129,8 +129,8 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	    if (group_mask_len == IPvX::ip_multicast_base_address_mask_len(family())
 		&& (group_addr == IPvX::MULTICAST_BASE(family()))) {
 		// XXX: (*,*,RP) Join/Prune
-		ignore_group_bool = false;
-		rp_entry_bool = true;
+		is_group_ignored = false;
+		is_rp_entry = true;
 		break;
 	    }
 	    if (! group_addr.is_multicast()) {
@@ -139,7 +139,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 			     PIMTYPE2ASCII(message_type),
 			     cstring(src), cstring(dst),
 			     cstring(group_addr));
-		ignore_group_bool = true;
+		is_group_ignored = true;
 		break;
 	    }
 	    if (group_addr.is_linklocal_multicast()
@@ -150,11 +150,11 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 			     PIMTYPE2ASCII(message_type),
 			     cstring(src), cstring(dst),
 			     cstring(group_addr));
-		ignore_group_bool = true;
+		is_group_ignored = true;
 		break;
 	    }
 	    if (group_mask_len != group_addr.addr_bitlen()) {
-		ignore_group_bool = true;
+		is_group_ignored = true;
 		XLOG_WARNING("RX %s from %s to %s: "
 			     "invalid group mask length for group %s: %d",
 			     PIMTYPE2ASCII(message_type),
@@ -163,7 +163,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 			     group_mask_len);
 		break;
 	    }
-	    ignore_group_bool = false;
+	    is_group_ignored = false;
 	    break;
 	} while (false);
 	
@@ -180,7 +180,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	    
 	    GET_ENCODED_SOURCE_ADDR(rcvd_family, source_addr,
 				    source_mask_len, source_flags, buffer);
-	    if (ignore_group_bool)
+	    if (is_group_ignored)
 		continue;
 	    
 	    // Check the source address and mask length
@@ -241,7 +241,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	    //
 	    mrt_entry_type = MRT_ENTRY_UNKNOWN;
 	    // (*,*,RP) entry
-	    if (rp_entry_bool) {
+	    if (is_rp_entry) {
 		if ((source_flags & (ESADDR_RPT_BIT | ESADDR_WC_BIT))
 		    != (ESADDR_RPT_BIT | ESADDR_WC_BIT)) {
 		    XLOG_WARNING("RX %s from %s to %s: "
@@ -310,8 +310,8 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	    // TODO: if error, then ignore the whole message??
 	    jp_header.jp_entry_add(source_addr, group_addr,
 				   group_mask_len, mrt_entry_type,
-				   action_jp, holdtime, new_group_bool);
-	    new_group_bool = false;
+				   action_jp, holdtime, is_new_group);
+	    is_new_group = false;
 	    // Keep statistics per entry type
 	    switch (mrt_entry_type) {
 	    case MRT_ENTRY_RP:

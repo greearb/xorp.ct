@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.51 2005/04/27 21:58:43 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.52 2005/04/27 22:14:07 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -1001,7 +1001,7 @@ public:
 				  uint8_t group_mask_len,
 				  mrt_entry_type_t mrt_entry_type,
 				  action_jp_t action_jp, uint16_t holdtime,
-				  bool new_group_bool);
+				  bool is_new_group);
     int		send_test_jp_entry(const string& vif_name,
 				   const IPvX& nbr_addr);
     // Assert test-related methods

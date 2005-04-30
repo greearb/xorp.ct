@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.12 2005/04/20 09:44:44 pavlin Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.13 2005/04/26 22:26:05 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -110,7 +110,7 @@ public:
 			     uint8_t group_mask_len,
 			     mrt_entry_type_t mrt_entry_type,
 			     action_jp_t action_jp, uint16_t holdtime,
-			     bool new_group_bool);
+			     bool is_new_group);
     
     const XorpTimer& const_neighbor_liveness_timer() const {
 	return (_neighbor_liveness_timer);

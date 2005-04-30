@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.38 2005/04/22 01:23:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.39 2005/04/28 03:00:45 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -858,13 +858,13 @@ PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
     // NBR(RPF_interface(RP), MRIB.next_hop(RP))
     //
     if (new_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (*,*,RP) entries
+	bool is_new_group = false;	// Group together all (*,*,RP) entries
 	new_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
 				  IPvX::ip_multicast_base_address_mask_len(family()),
 				  MRT_ENTRY_RP,
 				  ACTION_JOIN,
 				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
 	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
     }
     //
@@ -872,13 +872,13 @@ PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
     // NBR(RPF_interface(RP), MRIB.next_hop(RP))
     //
     if (old_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (*,*,RP) entries
+	bool is_new_group = false;	// Group together all (*,*,RP) entries
 	old_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
 				  IPvX::ip_multicast_base_address_mask_len(family()),
 				  MRT_ENTRY_RP,
 				  ACTION_PRUNE,
 				  old_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
     }
     // Set the new upstream neighbor.
     set_nbr_mrib_next_hop_rp(new_pim_nbr);
@@ -1064,7 +1064,7 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
 
     // Send Join(*,G) to the new value of RPF'(*,G)
     if (new_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (*,G) entries
+	bool is_new_group = false;	// Group together all (*,G) entries
 	my_rp_addr_ptr = rp_addr_ptr();
 	if (my_rp_addr_ptr == NULL) {
 	    XLOG_WARNING("Sending Join(*,G) to new upstream neighbor: "
@@ -1076,14 +1076,14 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
 				      MRT_ENTRY_WC,
 				      ACTION_JOIN,
 				      new_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				      new_group_bool);
+				      is_new_group);
 	}
 	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
     }
     
     // Send Prune(*,G) to the old value of RPF'(*,G)
     if (old_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (*,G) entries
+	bool is_new_group = false;	// Group together all (*,G) entries
 	my_rp_addr_ptr = rp_addr_ptr();
 	if (my_rp_addr_ptr == NULL) {
 	    XLOG_WARNING("Sending Prune(*,G) to old upstream neighbor: "
@@ -1095,7 +1095,7 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
 				      MRT_ENTRY_WC,
 				      ACTION_PRUNE,
 				      old_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				      new_group_bool);
+				      is_new_group);
 	}
     }
     // Set the new RPF'(*,G)
@@ -1240,25 +1240,25 @@ PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
 
     // Send Join(S,G) to the new value of RPF'(S,G)
     if (new_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (S,G) entries
+	bool is_new_group = false;	// Group together all (S,G) entries
 	new_pim_nbr->jp_entry_add(source_addr(), group_addr(),
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG,
 				  ACTION_JOIN,
 				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
 	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
     }
     
     // Send Prune(S,G) to the old value of RPF'(S,G)
     if (old_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (S,G) entries
+	bool is_new_group = false;	// Group together all (S,G) entries
 	old_pim_nbr->jp_entry_add(source_addr(), group_addr(),
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG,
 				  ACTION_PRUNE,
 				  old_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
     }
     // Set the new RPF'(S,G)
     set_rpfp_nbr_sg(new_pim_nbr);

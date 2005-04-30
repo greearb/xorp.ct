@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.44 2005/04/22 01:23:55 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.45 2005/04/27 02:09:50 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -339,7 +339,7 @@ public:
     void	receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime);
     // Note: applies only for (S,G,rpt)
     void	receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
-				     bool join_wc_received_bool);
+				     bool is_join_wc_received);
     // Note: applies only for (S,G,rpt)
     void	receive_end_of_message_sg_rpt(uint16_t vif_index);
     // Note: applies only for (*,*,RP)
@@ -669,12 +669,12 @@ public:
     int		assert_process_sg(PimVif *pim_vif,
 				  AssertMetric *assert_metric,
 				  assert_state_t assert_state,
-				  bool i_am_assert_winner_bool);
+				  bool i_am_assert_winner);
     // Note: applies only for (*,G)
     int		assert_process_wc(PimVif *pim_vif,
 				  AssertMetric *assert_metric,
 				  assert_state_t state,
-				  bool i_am_assert_winner_bool);
+				  bool i_am_assert_winner);
     // Note: applies for all entries
     int		data_arrived_could_assert(PimVif *pim_vif,
 					  const IPvX& src,

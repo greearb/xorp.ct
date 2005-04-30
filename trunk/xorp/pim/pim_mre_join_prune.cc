@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.33 2005/04/21 23:43:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.34 2005/04/22 01:23:55 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -865,11 +865,11 @@ PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
     UNUSED(holdtime);
 }
 
-// @join_wc_received_bool is true if there was a (*,G)Join together
+// @is_join_wc_received is true if there was a (*,G)Join together
 // with this (S,G,rpt)Prune message.
 void
 PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
-			     bool join_wc_received_bool)
+			     bool is_join_wc_received)
 {
     PimVif *pim_vif;
     TimeVal tv_left;
@@ -880,7 +880,7 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     if (! is_sg_rpt())
 	return;
     
-    if (join_wc_received_bool)
+    if (is_join_wc_received)
 	receive_join_wc_by_sg_rpt(vif_index);
     
     if (is_downstream_prune_state(vif_index))
@@ -1044,13 +1044,13 @@ PimMre::downstream_prune_pending_timer_timeout_rp(uint16_t vif_index)
 	return;
     if (pim_vif->pim_nbrs().size() > 1) {
 	pim_nbr_me = &pim_vif->pim_nbr_me();
-	bool new_group_bool = false;	// Group together all (*,*,RP) entries
+	bool is_new_group = false;	// Group together all (*,*,RP) entries
 	pim_nbr_me->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
 				 IPvX::ip_multicast_base_address_mask_len(family()),
 				 MRT_ENTRY_RP,
 				 ACTION_PRUNE,
 				 pim_nbr_me->pim_vif().join_prune_holdtime().get(),
-				 new_group_bool);
+				 is_new_group);
     }
     set_downstream_noinfo_state(vif_index);
 }
@@ -1102,7 +1102,7 @@ PimMre::downstream_prune_pending_timer_timeout_wc(uint16_t vif_index)
 	return;
     if (pim_vif->pim_nbrs().size() > 1) {
 	pim_nbr_me = &pim_vif->pim_nbr_me();
-	bool new_group_bool = false;	// Group together all (*,G) entries
+	bool is_new_group = false;	// Group together all (*,G) entries
 	my_rp_addr_ptr = rp_addr_ptr();
 	if (my_rp_addr_ptr == NULL) {
 	    XLOG_WARNING("Sending PruneEcho(*,G): "
@@ -1115,7 +1115,7 @@ PimMre::downstream_prune_pending_timer_timeout_wc(uint16_t vif_index)
 				     MRT_ENTRY_WC,
 				     ACTION_PRUNE,
 				     pim_nbr_me->pim_vif().join_prune_holdtime().get(),
-				     new_group_bool);
+				     is_new_group);
 	}
     }
     set_downstream_noinfo_state(vif_index);
@@ -1167,13 +1167,13 @@ PimMre::downstream_prune_pending_timer_timeout_sg(uint16_t vif_index)
 	return;
     if (pim_vif->pim_nbrs().size() > 1) {
 	pim_nbr_me = &pim_vif->pim_nbr_me();
-	bool new_group_bool = false;	// Group together all (S,G) entries
+	bool is_new_group = false;	// Group together all (S,G) entries
 	pim_nbr_me->jp_entry_add(source_addr(), group_addr(),
 				 IPvX::addr_bitlen(family()),
 				 MRT_ENTRY_SG,
 				 ACTION_PRUNE,
 				 pim_nbr_me->pim_vif().join_prune_holdtime().get(),
-				 new_group_bool);
+				 is_new_group);
     }
     set_downstream_noinfo_state(vif_index);
 }
@@ -1765,13 +1765,13 @@ PimMre::recompute_is_join_desired_rp()
 			 cstring(*rp_addr_ptr()));
 	}
     } else {
-	bool new_group_bool = false;	// Group together all (*,*,RP) entries
+	bool is_new_group = false;	// Group together all (*,*,RP) entries
 	pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
 			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
-			      new_group_bool);
+			      is_new_group);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set Join Timer to t_periodic
@@ -1796,13 +1796,13 @@ PimMre::recompute_is_join_desired_rp()
 			 cstring(*rp_addr_ptr()));
 	}
     } else {
-	bool new_group_bool = false;	// Group together all (*,*,RP) entries
+	bool is_new_group = false;	// Group together all (*,*,RP) entries
 	pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
 			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_PRUNE,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
-			      new_group_bool);
+			      is_new_group);
     }
     // Cancel Join Timer
     join_timer().unschedule();
@@ -1893,13 +1893,13 @@ PimMre::recompute_is_join_desired_wc()
 			     cstring(*my_rp_addr_ptr), cstring(group_addr()));
 	    }
 	} else {
-	    bool new_group_bool = false; // Allow merging entries for same G
+	    bool is_new_group = false;	// Allow merging entries for same G
 	    pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_WC,
 				  ACTION_JOIN,
 				  pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
 	    join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
 	}
     }
@@ -1932,13 +1932,13 @@ PimMre::recompute_is_join_desired_wc()
 			     rp_addr_string().c_str(), cstring(group_addr()));
 	    }
 	} else {
-	    bool new_group_bool = false; // Allow merging entries for same G
+	    bool is_new_group = false;	// Allow merging entries for same G
 	    pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_WC,
 				  ACTION_PRUNE,
 				  pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
 	}
     }
     // Cancel Join Timer
@@ -2017,13 +2017,13 @@ PimMre::recompute_is_join_desired_sg()
 			 cstring(source_addr()), cstring(group_addr()));
 	}
     } else {
-	bool new_group_bool = false; // Allow merging entries for same G
+	bool is_new_group = false;	// Allow merging entries for same G
 	pim_nbr->jp_entry_add(source_addr(), group_addr(),
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
-			      new_group_bool);
+			      is_new_group);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set Join Timer to t_periodic
@@ -2048,13 +2048,13 @@ PimMre::recompute_is_join_desired_sg()
 			 cstring(source_addr()), cstring(group_addr()));
 	}
     } else {
-	bool new_group_bool = false;	// Allow merging entries for same group
+	bool is_new_group = false;	// Allow merging entries for same group
 	pim_nbr->jp_entry_add(source_addr(), group_addr(),
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG,
 			      ACTION_PRUNE,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
-			      new_group_bool);
+			      is_new_group);
     }
     // Cancel Join Timer
     join_timer().unschedule();
@@ -2163,13 +2163,13 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 			     cstring(source_addr()), cstring(group_addr()));
 	    }
 	} else {
-	    bool new_group_bool = false; // Allow merging entries for same G
+	    bool is_new_group = false;	// Allow merging entries for same G
 	    pim_nbr->jp_entry_add(source_addr(), group_addr(),
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG_RPT,
 				  ACTION_JOIN,
 				  pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
 	}
     }
     set_not_pruned_state();
@@ -2199,13 +2199,13 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 			     cstring(source_addr()), cstring(group_addr()));
 	    }
 	} else {
-	    bool new_group_bool = false; // Allow merging entries for same G
+	    bool is_new_group = false;	// Allow merging entries for same G
 	    pim_nbr->jp_entry_add(source_addr(), group_addr(),
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG_RPT,
 				  ACTION_PRUNE,
 				  pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
 	}
     }
     // Cancel Override Timer
@@ -2373,13 +2373,13 @@ PimMre::join_timer_timeout()
 			 cstring(*rp_addr_ptr()));
 	}
     } else {
-	bool new_group_bool = false; // Group together all (*,*,RP) entries
+	bool is_new_group = false;	// Group together all (*,*,RP) entries
 	pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
 			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
-			      new_group_bool);
+			      is_new_group);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set Join Timer to t_periodic
@@ -2412,13 +2412,13 @@ PimMre::join_timer_timeout()
 			     cstring(group_addr()));
 	    }
 	} else {
-	    bool new_group_bool = false; // Allow merging entries for same G
+	    bool is_new_group = false;	// Allow merging entries for same G
 	    pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_WC,
 				  ACTION_JOIN,
 				  pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
+				  is_new_group);
 	    join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
 	}
     }
@@ -2445,13 +2445,13 @@ PimMre::join_timer_timeout()
 			 cstring(group_addr()));
 	}
     } else {
-	bool new_group_bool = false;	// Allow merging entries for same group
+	bool is_new_group = false;	// Allow merging entries for same group
 	pim_nbr->jp_entry_add(source_addr(), group_addr(),
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
-			      new_group_bool);
+			      is_new_group);
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set Join Timer to t_periodic
@@ -2497,13 +2497,13 @@ PimMre::override_timer_timeout()
     } else {
 	// RPF'(S,G,rpt) == RPF'(*,G)
 	// Send Join(S,G,rpt) to RPF'(S,G,rpt)
-	bool new_group_bool = false;	// Allow merging entries for same group
+	bool is_new_group = false;	// Allow merging entries for same group
 	pim_nbr->jp_entry_add(source_addr(), group_addr(),
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG_RPT,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
-			      new_group_bool);
+			      is_new_group);
     }
     
  return_label:

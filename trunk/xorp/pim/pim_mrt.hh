@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.13 2005/03/25 02:54:01 pavlin Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.14 2005/04/20 09:34:48 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -122,7 +122,7 @@ public:
     PimMre	*pim_mre_find(const IPvX& source, const IPvX& group,
 			      uint32_t lookup_flags, uint32_t create_flags);
     PimMfc	*pim_mfc_find(const IPvX& source, const IPvX& group,
-			      bool is_create_bool);
+			      bool is_creation_allowed);
     int		remove_pim_mre(PimMre *pim_mre);
     int		remove_pim_mfc(PimMfc *pim_mfc);
     

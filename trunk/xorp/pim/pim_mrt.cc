@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.8 2005/02/27 20:49:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.9 2005/03/25 02:54:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table implementation.
@@ -430,11 +430,11 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
     return (pim_mre);
 }
 
-// XXX: if @is_create_bool is true, the entry will be created if it did
+// XXX: if @is_creation_allowed is true, the entry will be created if it did
 // not exist before.
 PimMfc *
 PimMrt::pim_mfc_find(const IPvX& source, const IPvX& group,
-		     bool is_create_bool)
+		     bool is_creation_allowed)
 {
     PimMfc *pim_mfc = NULL;
     
@@ -448,7 +448,7 @@ PimMrt::pim_mfc_find(const IPvX& source, const IPvX& group,
     //
     // Lookup failed. Create the entry if creation is allowed.
     //
-    if (is_create_bool) {
+    if (is_creation_allowed) {
 	// Create and insert the entry
 	pim_mfc = new PimMfc(*this, source, group);
 	pim_mfc = _pim_mrt_mfc.insert(pim_mfc);
