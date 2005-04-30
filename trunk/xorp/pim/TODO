@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.102 2005/04/27 23:33:46 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.103 2005/04/28 03:07:57 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -263,17 +263,6 @@ address.
   Testing this scenario is pending spec-related clarification about
   changing RPF'(S,G,rpt) with (S,G)Asserts.
 
-* IMPL: whenever the iif changes, should we remove all matching
-  PimMfc, and reset the SPTbit?
-  (Maybe no?)
-
-* IMPL:
-  If (S,G,rpt) Prune (only) is received, but there is no (*,G) routing state,
-  then (S,G,rpt) routing state is created (in RPTNotJoined state).
-  This state is useless/harmless, and will be deleted after the downstream
-  pruned state timeout. However, is this acceptable, or shall we avoid
-  the temporary creation of such state?
-
 * BSR SPEC+IMPL:
   When accepting an unicast Bootstrap message, should accept
   it only if it comes from a neighbor on the RPF interface.
@@ -332,12 +321,12 @@ address.
   to it the Bootstrap message, the non-DR might unicast it back.
   Fix this so the Bootstrap message is not unicasted back.
 
-* IMPL+SPEC+TESTSUTE: if the MRIB.next_hop(RP) changes, should
+* TESTSUTE: if the MRIB.next_hop(RP) changes, should
   we send first the (*,*,RP) Join first, or the (*,*,RP) Prune first?
   The description in the text is different from the figure and the table.
   Same fix is needed for (*,G) and (S,G)
-  Note: the fix was applied to the spec. Take care of the implementation
-  and the testsuite
+  Note: the fix was applied to the spec and the implementation.
+  Take care of the testsuite.
 
 * IMPL+SPEC: Add this text somewhere else:
   ECN bits setup for PIM Registers.
@@ -370,10 +359,6 @@ address.
   However check the scenario when there will be data traffic for (S,G)
   on the IIF because of another router: in that case will the
   Keepalive Timer expire, so the (S,G) entry can be deleted?
-
-* SPEC+IMPL: if we ignore (*,G) Join/Prune entry because of RP mismatch,
-  do we ignore all other (S,G) and (S,G,rpt) entries within same group
-  and message?
 
 * TESTSUITE: in case when a Prune message is received, but
   the router has no (*,*,RP) or (*,G) or (S,G) or (S,G,rpt) matching
