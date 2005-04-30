@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.103 2005/04/28 03:07:57 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.104 2005/04/30 19:38:33 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -376,18 +376,12 @@ address.
 * IMPL: In all *.hh files, use same distance from return argument of a method
   and the method name (this applies everywhere not only PIM).
 
-* IMPL: rename all "bool foo_bool" variables to
-  "bool is_foo" (applies everywhere not only PIM).
-
 * IMPL BUG: if register_vif at the DR is started in PIM after NOCACHE signal
   is received for a group, then later when we receive the Bootstrap
   information, the RP for the group we received the NOCACHE signal
   is not set properly.
   Similar problem occurs at the RP as well: if the register_vif is
   started after IGMP Membership Join is received.
-
-* IMPL: keep a copy of installed kernel dataflow meters in PIM
-  and/or MFEA (OK?)
 
 * SPEC+IMPL+PIMKERN+TESTSUITE: How to set the outer TTL for PIM Register
   packets: 
