@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/token.cc,v 1.4 2004/06/10 22:41:22 hodson Exp $"
+#ident "$XORP: xorp/libxorp/token.cc,v 1.5 2005/03/25 02:53:48 pavlin Exp $"
 
 
 //
@@ -52,17 +52,17 @@ string
 copy_token(const string& token_org)
 {
     size_t i;
-    bool enclose_quotations_bool = false;
+    bool is_enclose_quotations = false;
     string token;
     
     for (i = 0; i < token_org.size(); i++) {
 	if (is_token_separator(token_org[i])) {
-	    enclose_quotations_bool = true;
+	    is_enclose_quotations = true;
 	    break;
 	}
     }
     
-    if (enclose_quotations_bool) {
+    if (is_enclose_quotations) {
 	token = "\"" + token_org + "\"";
     } else {
 	token = token_org;
@@ -77,8 +77,8 @@ pop_token(string& token_line)
 {
     size_t i = 0;
     string token;
-    bool escape_begin_bool = false;	// True if reached quotation mark
-    bool escape_end_bool = false;
+    bool is_escape_begin = false;	// True if reached quotation mark
+    bool is_escape_end = false;
     
     // Skip the spaces in front
     for (i = 0; i < token_line.length(); i++) {
@@ -89,24 +89,24 @@ pop_token(string& token_line)
     }
     
     if (token_line.size() && (token_line[i] == '"')) {
-	escape_begin_bool = true;
+	is_escape_begin = true;
 	i++;
     }
     // Get the substring until any other token separator
     for ( ; i < token_line.length(); i++) {
-	if (escape_end_bool) {
+	if (is_escape_end) {
 	    if (! is_token_separator(token_line[i])) {
 		// RETURN ERROR
 	    }
 	    break;
 	}
-	if (escape_begin_bool) {
+	if (is_escape_begin) {
 	    if (token_line[i] == '"') {
-		escape_end_bool = true;
+		is_escape_end = true;
 		continue;
 	    }
 	}
-	if (is_token_separator(token_line[i]) && !escape_begin_bool) {
+	if (is_token_separator(token_line[i]) && !is_escape_begin) {
 	    if ((token_line[i] == '|') && (token.empty())) {
 		// XXX: "|" with or without a space around it is a token itself
 		token += token_line[i];
@@ -119,7 +119,7 @@ pop_token(string& token_line)
     
     token_line = token_line.erase(0, i);
     
-    if (escape_begin_bool && !escape_end_bool) {
+    if (is_escape_begin && !is_escape_end) {
 	// RETURN ERROR
     }
     
