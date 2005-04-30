@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.9 2005/03/21 23:21:11 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.10 2005/03/25 02:53:11 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -134,10 +134,10 @@ public:
      * here; instead, we will use sendmsg() to specify the header's field
      * values.
      * 
-     * @param enable_bool if true, set the option, otherwise reset it.
+     * @param is_enabled if true, set the option, otherwise reset it.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		ip_hdr_include(bool enable_bool);
+    int		ip_hdr_include(bool is_enabled);
     
     /**
      * Enable/disable receiving information about some of the fields
@@ -149,10 +149,10 @@ public:
      * Note: used only for IPv6. In IPv4 we don't have this; the whole IP
      *  packet is passed to the application listening on a raw socket.
      * 
-     * @param enable_bool if true, set the option, otherwise reset it.
+     * @param is_enabled if true, set the option, otherwise reset it.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		recv_pktinfo(bool enable_bool);
+    int		recv_pktinfo(bool is_enabled);
     
     /**
      * Set the default TTL (or hop-limit in IPv6) for the outgoing multicast
@@ -170,10 +170,10 @@ public:
      * that socket will be delivered back to this host (assuming the host
      * is a member of the same multicast group).
      * 
-     * @param enable_bool if true, set the loopback, otherwise reset it.
+     * @param is_enabled if true, set the loopback, otherwise reset it.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		set_multicast_loop(bool enable_bool);
+    int		set_multicast_loop(bool is_enabled);
     
     /**
      * Set default interface for outgoing multicast on the protocol socket.

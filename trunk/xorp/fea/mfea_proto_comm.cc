@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.28 2005/03/21 23:21:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.29 2005/03/25 02:53:10 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -275,7 +275,7 @@ ProtoComm::stop()
 
 /**
  * ProtoComm::ip_hdr_include:
- * @enable_bool: If true, set the option, otherwise reset it.
+ * @is_enabled: If true, set the option, otherwise reset it.
  * 
  * Set/reset the "Header Included" option (for IPv4) on the protocol socket.
  * If set, the IP header of a raw packet should be created
@@ -290,14 +290,14 @@ ProtoComm::stop()
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::ip_hdr_include(bool enable_bool)
+ProtoComm::ip_hdr_include(bool is_enabled)
 {
     switch (family()) {
     case AF_INET:
     {
 #ifdef IP_HDRINCL
 	// XXX: the setsockopt() argument must be 'int'
-	int bool_flag = enable_bool; 
+	int bool_flag = is_enabled; 
 	
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_HDRINCL,
 		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
@@ -321,13 +321,13 @@ ProtoComm::ip_hdr_include(bool enable_bool)
     
     return (XORP_OK);
     
-    UNUSED(enable_bool);
+    UNUSED(is_enabled);
 }
 
 
 /**
  * ProtoComm::recv_pktinfo:
- * @enable_bool: If true, set the option, otherwise reset it.
+ * @is_enabled: If true, set the option, otherwise reset it.
  * 
  * Enable/disable receiving information about some of the fields
  * in the IP header on the protocol socket.
@@ -340,7 +340,7 @@ ProtoComm::ip_hdr_include(bool enable_bool)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::recv_pktinfo(bool enable_bool)
+ProtoComm::recv_pktinfo(bool is_enabled)
 {
     switch (family()) {
     case AF_INET:
@@ -350,7 +350,7 @@ ProtoComm::recv_pktinfo(bool enable_bool)
     case AF_INET6:
     {
 	// XXX: the setsockopt() argument must be 'int'
-	int bool_flag = enable_bool;
+	int bool_flag = is_enabled;
 	
 	//
 	// Interface index and address
@@ -433,7 +433,7 @@ ProtoComm::recv_pktinfo(bool enable_bool)
     
     return (XORP_OK);
     
-    UNUSED(enable_bool);
+    UNUSED(is_enabled);
 }
 
 
@@ -495,7 +495,7 @@ ProtoComm::set_multicast_ttl(int ttl)
 
 /**
  * ProtoComm::set_multicast_loop:
- * @enable_bool: If true, set the loopback, otherwise reset it.
+ * @is_enabled: If true, set the loopback, otherwise reset it.
  * 
  * Set/reset the "Multicast Loop" flag on the protocol socket.
  * If the multicast loopback flag is set, a multicast datagram sent on
@@ -505,12 +505,12 @@ ProtoComm::set_multicast_ttl(int ttl)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::set_multicast_loop(bool enable_bool)
+ProtoComm::set_multicast_loop(bool is_enabled)
 {
     switch (family()) {
     case AF_INET:
     {
-	u_char loop = enable_bool;
+	u_char loop = is_enabled;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_MULTICAST_LOOP,
 		       (void *)&loop, sizeof(loop)) < 0) {
@@ -529,7 +529,7 @@ ProtoComm::set_multicast_loop(bool enable_bool)
 		   "IPv6 multicast not supported");
 		return (XORP_ERROR);
 #else
-	uint loop6 = enable_bool;
+	uint loop6 = is_enabled;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       (void *)&loop6, sizeof(loop6)) < 0) {
