@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.18 2005/03/24 20:19:30 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.19 2005/03/25 03:23:32 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -157,6 +157,15 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       the reverse-path interface.
       For more information about Reverse Path Filtering see
       http://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.kernel.rpf.html
+
+    - Currently, the PIM-SM implementation does not support unnumbered
+      point-to-point links. Furthermore, even on numbered point-to-point
+      links the next-hop information should use IP addresses. For example,
+      if we have a GRE tunnel on Linux and if we want to add a route
+      that uses that tunnel, we should use a command like:
+        route add -net <target> gw <IP address of other side of GRE tunnel>
+      instead of
+        route add -net <target> <GRE interface name>
 
   FIB2MRIB:
     - No known issues.
