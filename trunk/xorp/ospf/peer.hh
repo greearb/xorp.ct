@@ -433,8 +433,13 @@ class Neighbour {
     Neighbour(Ospf<A>& ospf, Peer<A>& peer, OspfTypes::RouterID router_id,
 	      A src, State state = Init)
 	: _ospf(ospf), _peer(peer), _router_id(router_id), _src(src),
-	  _state(state), _hello_packet(0)
-    {}
+	  _state(state), _hello_packet(0),
+	  _data_description_packet(ospf.get_version())
+    {
+	TimeVal t;
+	_ospf.get_eventloop().current_time(t);
+	_data_description_packet.set_dd_seqno(t.sec());
+    }
 
     ~Neighbour() {
 	delete _hello_packet;
@@ -488,6 +493,9 @@ class Neighbour {
     State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbour.
+
+					// The DDP this neighbour sends.
+    DataDescriptionPacket _data_description_packet;
 };
 
 #endif // __OSPF_PEER_HH__
