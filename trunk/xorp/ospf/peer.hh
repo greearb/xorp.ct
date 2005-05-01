@@ -280,6 +280,15 @@ class Peer {
      */
     static OspfTypes::RouterID get_candidate_id(A, OspfTypes::RouterID);
 
+    /**
+     * @return the value that should be used for DR or BDR for this router
+     * In OSPFv2 its the source address of the interface.
+     * In OSPFv3 its the router ID.
+     * A dummy argument is used to force an IPv4 and an IPv6 instance
+     * of this method to be generated. Isn't C++ cool?
+     */
+    OspfTypes::RouterID get_candidate_id(A = A::ZERO()) const;
+
     InterfaceState get_state() const { return _interface_state; }
 
     /**
@@ -322,6 +331,16 @@ class Peer {
      */
     bool set_router_dead_interval(uint32_t router_dead_interval);
 
+    /**
+     * Get the designated router.
+     */
+    OspfTypes::RouterID get_designated_router() const;
+
+    /**
+     * Get the backup designated router.
+     */
+    OspfTypes::RouterID get_backup_designated_router() const;
+    
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
@@ -357,21 +376,22 @@ class Peer {
 
     list<string> _scheduled_events;	// List of deferred events.
 
+    /**
+     * Set the designated router.
+     */
+    bool set_designated_router(OspfTypes::RouterID dr);
+
+    /**
+     * Set the backup designated router.
+     */
+    bool set_backup_designated_router(OspfTypes::RouterID dr);
+
     void start_hello_timer();
 
     void start_wait_timer();
 
     bool send_hello_packet();
     
-
-    /**
-     * @return the value that should be used for DR or BDR for this router
-     * In OSPFv2 its the source address of the interface.
-     * In OSPFv3 its the router ID.
-     * A dummy argument is used to force an IPv4 and an IPv6 instance
-     * of this method to be generated. Isn't C++ cool?
-     */
-    OspfTypes::RouterID get_candidate_id(A = A::ZERO()) const;
 
     OspfTypes::RouterID
     backup_designated_router(list<Candidate>& candidates) const;
@@ -384,7 +404,6 @@ class Peer {
      * Stop all timers.
      */
     void tear_down_state();
-
 };
 
 /**
@@ -417,9 +436,24 @@ class Neighbour {
 	delete _hello_packet;
     }
 
+    /**
+     * Neighbours router ID.
+     */
     OspfTypes::RouterID get_router_id() const { return _router_id; }
 
+    /**
+     * Neighbours source address.
+     */
     A get_source_address() const { return _src; }
+
+    /**
+     * @return the value that should be used for DR or BDR for this neighbour
+     * In OSPFv2 its the source address of the interface.
+     * In OSPFv3 its the router ID.
+     */
+    OspfTypes::RouterID get_candidate_id() const {
+	return Peer<A>::get_candidate_id(_src, _router_id);
+    }
 
     void set_state(State state) {_state = state; }
 
@@ -432,6 +466,11 @@ class Neighbour {
 
     HelloPacket *get_hello_packet() { return _hello_packet; }
     HelloPacket *get_hello_packet() const { return _hello_packet; }
+
+    /**
+     * @return true if an adjacency should be established with this neighbour
+     */
+    bool establish_adjacency_p() const;
 
     void event_hello_received(HelloPacket *hello);
     void event_1_way_received();

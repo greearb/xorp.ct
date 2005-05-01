@@ -385,8 +385,8 @@ void
 Peer<A>::start()
 {
     //    _interface_state = Down;
-    _hello_packet.set_designated_router("0.0.0.0");
-    _hello_packet.set_backup_designated_router("0.0.0.0");
+    set_designated_router("0.0.0.0");
+    set_backup_designated_router("0.0.0.0");
     event_interface_up();
 }
 
@@ -792,8 +792,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     // Is this router a candidate?
     if (0 != _hello_packet.get_router_priority()) {
 	candidates.
-	    push_back(Candidate(get_candidate_id(_peerout.get_address(),
-						 _ospf.get_router_id()),
+	    push_back(Candidate(get_candidate_id(),
 				_hello_packet.get_designated_router(),
 				_hello_packet.get_backup_designated_router(),
 				_hello_packet.get_router_priority()));
@@ -808,9 +807,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 	if (0 != hello->get_router_priority() &&
 	    Neighbour<A>::TwoWay <= (*n)->get_state()) {
 	    candidates.
-		push_back(Candidate(get_candidate_id((*n)->
-						     get_source_address(),
-						     hello->get_router_id()),
+		push_back(Candidate((*n)->get_candidate_id(),
 				    hello->get_designated_router(),
 				    hello->get_backup_designated_router(),
 				    hello->get_router_priority()));
@@ -864,8 +861,8 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     }
     
     // Step(5)
-    _hello_packet.set_designated_router(dr);
-    _hello_packet.set_backup_designated_router(bdr);
+    set_designated_router(dr);
+    set_backup_designated_router(bdr);
 
     if (get_candidate_id() == dr)
 	_interface_state = DR;
@@ -971,6 +968,38 @@ Peer<A>::set_router_dead_interval(uint32_t router_dead_interval)
     return true;
 }
 
+template <typename A>
+bool
+Peer<A>::set_designated_router(OspfTypes::RouterID dr)
+{
+    _hello_packet.set_designated_router(dr);
+
+    return true;
+}
+
+template <typename A>
+OspfTypes::RouterID
+Peer<A>::get_designated_router() const
+{
+    return _hello_packet.get_designated_router();
+}
+
+template <typename A>
+bool
+Peer<A>::set_backup_designated_router(OspfTypes::RouterID dr)
+{
+    _hello_packet.set_backup_designated_router(dr);
+
+    return true;
+}
+
+template <typename A>
+OspfTypes::RouterID
+Peer<A>::get_backup_designated_router() const
+{
+    return _hello_packet.get_backup_designated_router();
+}
+
 /****************************************/
 
 template <typename A>
@@ -999,7 +1028,52 @@ Neighbour<A>::pp_state(State ns)
 }
 
 /**
- * RFC 2328 Section 10.5 Receiving Hello Packets
+ * RFC 2328 Section 10.4. Whether to become adjacent
+ */
+template <typename A>
+bool
+Neighbour<A>::establish_adjacency_p() const
+{
+    bool become_adjacent = false;
+
+    switch(_peer.get_linktype()) {
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA:
+	// The router itself is the Designated Router
+	if (_peer.get_candidate_id() == _peer.get_designated_router()) {
+	    become_adjacent = true;
+	    break;
+	}
+	// The router itself is the Backup Designated Router
+	if (_peer.get_candidate_id() == _peer.get_backup_designated_router()) {
+	    become_adjacent = true;
+	    break;
+	}
+	// The neighboring router is the Designated Router
+	if (get_candidate_id() == 
+	    get_hello_packet()->get_designated_router()) {
+	    become_adjacent = true;
+	    break;
+	}
+	// The neighboring router is the Backup Designated Router
+	if (get_candidate_id() == 
+	    get_hello_packet()->get_backup_designated_router()) {
+	    become_adjacent = true;
+	    break;
+	}
+	break;
+    case OspfTypes::PointToPoint:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	become_adjacent = true;
+	break;
+    }
+
+    return become_adjacent;
+}
+
+/**
+ * RFC 2328 Section 10.5 Receiving Hello Packets, neighbour component.
  */
 template <typename A>
 void
@@ -1124,8 +1198,29 @@ Neighbour<A>::event_2_way_received()
 	       "%s (%s) 2-WayReceived",
 	       _peer.get_if_name().c_str(), pp_state(get_state()).c_str());
 
-    set_state(TwoWay);	// XXX - temporary hack
     XLOG_WARNING("TBD");
+
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+	XLOG_WARNING("Unhandled state %s", pp_state(get_state()).c_str());
+	break;
+    case Init:
+	if (establish_adjacency_p()) {
+	    set_state(ExStart);
+	    XLOG_WARNING("TBD increment DD sequence number");
+	} else {
+	    set_state(TwoWay);
+	}
+	break;
+    case TwoWay:
+    case ExStart:
+    case Exchange:
+    case Loading:
+    case Full:
+	XLOG_WARNING("Unhandled state %s", pp_state(get_state()).c_str());
+	break;
+    }
 }
 
 template class PeerOut<IPv4>;
