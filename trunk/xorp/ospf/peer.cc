@@ -372,7 +372,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	// Verify that we got back the one that we put in.
 	XLOG_ASSERT((*n)->get_router_id() == hello->get_router_id());
 	XLOG_ASSERT((*n)->get_source_address() == src);
-	XLOG_ASSERT((*n)->get_state() == Neighbour<A>::Down);
+	XLOG_ASSERT((*n)->get_state() == Neighbour<A>::Init);
     }
 
     (*n)->event_hello_received(hello);
@@ -1202,8 +1202,10 @@ Neighbour<A>::event_2_way_received()
 
     switch(get_state()) {
     case Down:
-    case Attempt:
 	XLOG_WARNING("Unhandled state %s", pp_state(get_state()).c_str());
+	break;
+    case Attempt:
+	XLOG_ASSERT(_peer.get_linktype() == OspfTypes::NBMA);
 	break;
     case Init:
 	if (establish_adjacency_p()) {
@@ -1218,7 +1220,7 @@ Neighbour<A>::event_2_way_received()
     case Exchange:
     case Loading:
     case Full:
-	XLOG_WARNING("Unhandled state %s", pp_state(get_state()).c_str());
+	// Cool nothing to do.
 	break;
     }
 }

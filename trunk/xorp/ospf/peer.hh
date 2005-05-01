@@ -413,7 +413,7 @@ template <typename A>
 class Neighbour {
  public:
     /**
-     * NOTE: The ordering is important (used in the DR and BDR election).
+     * The ordering is important (used in the DR and BDR election).
      */
     enum State {
 	Down = 1,
@@ -426,10 +426,14 @@ class Neighbour {
 	Full = 8
     };
 
+    /**
+     * We start in Init not Down state as typically this class is
+     * created on demand when a hello packet arrives.
+     */
     Neighbour(Ospf<A>& ospf, Peer<A>& peer, OspfTypes::RouterID router_id,
-	      A src)
+	      A src, State state = Init)
 	: _ospf(ospf), _peer(peer), _router_id(router_id), _src(src),
-	  _state(Down), _hello_packet(0)
+	  _state(state), _hello_packet(0)
     {}
 
     ~Neighbour() {
