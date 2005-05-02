@@ -1,0 +1,15 @@
+TODO
+~~~~
+
+1) None of the packet decode routines check the type field in the header
+against their own type field. Could probably put the approriate check
+in the standard header decode code.
+
+2) I don't think that the LSA routines check their own type field either.
+
+3) The Network Mask field in OSPFv2 hello packets currently we seem to
+be setting an index not a mask, check the spec to see what we should
+be doing.
+
+4) The MTU is not being set in the data description packet.
+
