@@ -40,11 +40,11 @@
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
-		     const A address,
+		     const A address, const uint16_t interface_mtu,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 		     OspfTypes::AreaType area_type)
     : _ospf(ospf), _interface(interface), _vif(vif),
-      _address(address),
+      _address(address), _interface_mtu(interface_mtu),
       _linktype(linktype), _running(false)
 {
     _areas[area] = new Peer<A>(ospf, *this, area, area_type);
@@ -1164,6 +1164,7 @@ bool
 Neighbour<A>::send_data_description_packet()
 {
     _peer.populate_common_header(_data_description_packet);
+    _data_description_packet.set_interface_mtu(_peer.get_interface_mtu());
     _data_description_packet.set_options(_peer.send_options());
     
     vector<uint8_t> pkt;

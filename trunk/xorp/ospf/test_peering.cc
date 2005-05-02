@@ -254,6 +254,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     ospf.set_router_id("0.0.0.1");
 
     OspfTypes::AreaID area("128.16.64.16");
+    const uint16_t interface_mtu = 1500;
 
     // Create an area
     ospf.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
@@ -277,6 +278,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 
     PeerID peerid = ospf.get_peer_manager().create_peer(interface, vif,
 							src,
+							interface_mtu,
 							OspfTypes::BROADCAST,
 							area);
 
@@ -336,6 +338,8 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     ospf_1.set_router_id("192.150.187.1");
     ospf_2.set_router_id("192.150.187.2");
 
+    const uint16_t interface_mtu = 1500;
+
     OspfTypes::AreaID area("128.16.64.16");
 
     ospf_1.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
@@ -362,9 +366,11 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     }
     
     PeerID peerid_1 = ospf_1.get_peer_manager().
-	create_peer(interface_1, vif_1, src_1, OspfTypes::BROADCAST, area);
+	create_peer(interface_1, vif_1, src_1, interface_mtu, 
+		    OspfTypes::BROADCAST, area);
     PeerID peerid_2 = ospf_2.get_peer_manager().
-	create_peer(interface_2, vif_2, src_2, OspfTypes::BROADCAST, area);
+	create_peer(interface_2, vif_2, src_2, interface_mtu,
+		    OspfTypes::BROADCAST, area);
 
     switch(src_1.ip_version()) {
     case 4:
