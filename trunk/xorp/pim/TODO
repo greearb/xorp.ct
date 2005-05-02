@@ -1,6 +1,47 @@
 #
-# $XORP: xorp/pim/TODO,v 1.107 2005/05/02 20:01:39 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.108 2005/05/02 20:04:30 pavlin Exp $
 #
+
+* PIM SPEC:
+  In the lastest -11 I-D there are the following two paragraphs (in
+  Section 4.5.6 and 4.5.7 respectively):
+
+     RPF'(*,G) changes not due to an Assert
+          An event occurred which caused the next hop towards the RP for
+          G to change.  This may be caused by a change in the MRIB
+          routing database or the group-to-RP mapping.  Note that this
+          transition does not occur if an Assert is active and the
+          upstream interface does not change.
+ ...
+     RPF'(S,G) changes not due to an Assert
+          An event occurred which caused the next hop towards S to
+          change.  Note that this transition does not occur if an Assert
+          is active and the upstream interface does not change.
+
+  What is the formal definition of "Assert is active" in the above
+  context? My interpretation is that it is equivalent to:
+  I_Am_Assert_Loser(*, G, I) (or I_Am_Assert_Loser(S, G, I)
+  respectively) is true for the upstream interface.
+
+  In any case, the above text may be clearer if it is modified to use
+  a more formal description as it is done everywhere else in the
+  spec.
+
+* PIM SPEC + IMPL:
+  In the lastest -11 I-D, on page 71 (the PS version), Figure 11, two
+  of the transitions from the "I am Assert Loser" state are:
+   - "Receive acceptable assert from current winner with RPTbit set [A2]"
+   - "Receive preferred assert with RPTbit [A2]"
+
+  However, in the corresponding table on page 72, and in the text on
+  page 74, the "with RPTbit set" condition is missing. Indeed, the
+  text on page 74 describes those transitions by saying "We receive a
+  (*,G) assert..." which implies that the RPTbit is set.
+
+  What the original intention was (I presume the
+  "with RPTbit set" condition is suppose to be there)?
+  Note that currently the implementation assumes that the RPTbit is set,
+  but if this is invalid then the implementation needs to be fixed.
 
 * PIM IMPL:
   Implement the following from the BSR spec:
@@ -72,16 +113,6 @@
   - Edit Figure 10 (Per-interface (S,G) Assert State machine)
   so the text at the bottom of the figure doesn't overlap.
   - Fix the formatting for the PS table for Figure 10 above.
-
-* PIM SPEC + IMPL:
-  Edit Figure 11 (Per-interface (*,G) Assert State machine),
-  and remove the "with RPTbit" from the two events coming from
-  and point to the "I am Assert Loser" state, because the "with RPTbit"
-  is not in the tables and the text. If this is the case, then
-  modify the implementation to exclude this check.
-  However, the text itself says "We receive a (*,G) assert" which
-  implies that the RPTbit is set. Hence, if Figure 11 is correct, then
-  we must edit the text to include "with RPTbit".
 
 * PIM IMPL+SPEC:
   The spec says that the Unicast Upstream Neighbor Address in Join/Prune
