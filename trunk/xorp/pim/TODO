@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.108 2005/05/02 20:04:30 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.109 2005/05/02 20:18:50 pavlin Exp $
 #
 
 * PIM SPEC:
@@ -474,9 +474,6 @@ requried to fall back to v2, or refuse to communicate with v2, as they
 choose.  But I think a v2-only implementation should drop anything
 other than a Hello with version greater than 2, and log a warning."
 
-* SPEC+IMPL: what to do if message with unrecognized Type or Version is
-  received?
-
 * IMPL: the following ConfigParam in PimVif don't have XRL config interface:
   - join_prune_holdtime (indirectly set from join_prune_period)
   - assert_time
@@ -580,11 +577,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
     to send-out a Bootstrap and/or Cand-RP message with the old address,
     if the OS does not allow us (e.g, if it doesn't allow IP address spoofing).
 
-* SPEC+IMPL: If the IP address of an interface has been changed, a Hello
-  message with Holdtime=0 and the old IP address will be sent-out.
-  However, what about scheduling to send quickly a Hello message with the
-  new IP address?
-
 * BSR SPEC: PIM-SM spec Section 4.3.1 says that if no Hello message has been
   sent yet on an interface, but we must send Join/Prune or Assert message,
   then a Hello message MUST immediately be sent first without waiting
@@ -594,10 +586,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: when we start/stop/enable/disable an unit, is it OK or ERROR
   to perform the same action twice once after another?
   This applies to the XRL return result as well.
-
-* SPEC+IMPL: Add descrpiption of the RP behavior when the Border bit of
-  PIM Registers is set (see the RFC spec for that), and then implement
-  it.
 
 * IMPL: Rename '*delete*' and '*remove*' methods:
   Use '*remove*' when an element is removed from a container, but the
@@ -652,12 +640,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
    set when the Cand-RP is configured, hence no need for this?
    Or maybe we should allow configuration XRLs that don't
    setup the priority and the holdtime?)
-
-* IMPL: Instead of having one timer per task, have only one timer for
-  all tasks, and add a new class like TaskHeader to manage all tasks.
-  Thus, even if there is a large number of tasks scheduled one after another,
-  the CPU won't be "blocked" processing all those tasks without
-  giving-up control.
 
 * SPEC+IMPL: explicity specify not to route on link-local multicast groups
   and/or add a pointer to the document that says that.
