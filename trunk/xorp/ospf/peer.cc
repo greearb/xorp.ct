@@ -357,7 +357,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
 	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	    if ((*n)->get_source_address() == src)
+	    if ((*n)->get_neighbour_address() == src)
 		break;
 	break;
     case OspfTypes::VirtualLink:
@@ -376,7 +376,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	n = _neighbours.begin();
 	// Verify that we got back the one that we put in.
 	XLOG_ASSERT((*n)->get_router_id() == hello->get_router_id());
-	XLOG_ASSERT((*n)->get_source_address() == src);
+	XLOG_ASSERT((*n)->get_neighbour_address() == src);
 	XLOG_ASSERT((*n)->get_state() == Neighbour<A>::Init);
     }
 
@@ -1171,17 +1171,17 @@ Neighbour<A>::send_data_description_packet()
 
     switch(_peer.get_linktype()) {
     case OspfTypes::PointToPoint:
-	XLOG_UNFINISHED();
-	break;
-    case OspfTypes::BROADCAST:
 	transmit = new SimpleTransmit<A>(pkt,
 					 A::OSPFIGP_ROUTERS(), 
 					 _peer.get_address());
 	break;
+    case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
     case OspfTypes::VirtualLink:
-	XLOG_UNFINISHED();
+	transmit = new SimpleTransmit<A>(pkt,
+					 get_neighbour_address(),
+					 _peer.get_address());
 	break;
     }
 
@@ -1208,8 +1208,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
-	      cstring(Peer<A>::get_candidate_id(get_source_address(),
-						get_router_id())),
+	      cstring(get_candidate_id()),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str(),
 	      cstring(*hello));
@@ -1246,18 +1245,14 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	_peer.schedule_event("NeighbourChange");
 
 
-    bool is_dr = Peer<A>::get_candidate_id(get_source_address(),
-					   get_router_id())
-	== hello->get_designated_router();
+    bool is_dr = get_candidate_id() == hello->get_designated_router();
 
     bool was_dr;
 
     if (first)
 	was_dr = false;
     else
-	was_dr = Peer<A>::get_candidate_id(get_source_address(),
-						     get_router_id())
-	    == previous_dr;
+	was_dr = get_candidate_id() == previous_dr;
 
     if (is_dr && 
 	OspfTypes::RouterID("0.0.0.0") == 
@@ -1267,17 +1262,13 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     } else if(is_dr != was_dr)
 	_peer.schedule_event("NeighbourChange");
 
-    bool is_bdr = Peer<A>::get_candidate_id(get_source_address(),
-					   get_router_id())
-	== hello->get_backup_designated_router();
+    bool is_bdr = get_candidate_id() == hello->get_backup_designated_router();
 	  
     bool was_bdr;
     if (first)
 	was_bdr = false;
     else
-	was_bdr = Peer<A>::get_candidate_id(get_source_address(),
-						     get_router_id())
-	    == previous_bdr;
+	was_bdr = get_candidate_id() == previous_bdr;
 
     if (is_bdr && _peer.get_state() == Peer<A>::Waiting) {
 	_peer.schedule_event("BackupSeen");

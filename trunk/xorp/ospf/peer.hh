@@ -481,8 +481,9 @@ class Neighbour {
      * created on demand when a hello packet arrives.
      */
     Neighbour(Ospf<A>& ospf, Peer<A>& peer, OspfTypes::RouterID router_id,
-	      A src, State state = Init)
-	: _ospf(ospf), _peer(peer), _router_id(router_id), _src(src),
+	      A neighbour_address, State state = Init)
+	: _ospf(ospf), _peer(peer), _router_id(router_id),
+	  _neighbour_address(neighbour_address),
 	  _state(state), _hello_packet(0),
 	  _data_description_packet(ospf.get_version())
     {
@@ -503,7 +504,7 @@ class Neighbour {
     /**
      * Neighbours source address.
      */
-    A get_source_address() const { return _src; }
+    A get_neighbour_address() const { return _neighbour_address; }
 
     /**
      * @return the value that should be used for DR or BDR for this neighbour
@@ -511,7 +512,7 @@ class Neighbour {
      * In OSPFv3 its the router ID.
      */
     OspfTypes::RouterID get_candidate_id() const {
-	return Peer<A>::get_candidate_id(_src, _router_id);
+	return Peer<A>::get_candidate_id(_neighbour_address, _router_id);
     }
 
     /**
@@ -540,7 +541,7 @@ class Neighbour {
     Ospf<A>& _ospf;			// Reference to the controlling class.
     Peer<A>& _peer;			// Reference to Peer class.
     const OspfTypes::RouterID _router_id;// Neighbour's RouterID.
-    const A _src;			// Neighbour's source address.
+    const A _neighbour_address;		// Neighbour's address.
     State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbour.
