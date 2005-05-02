@@ -401,14 +401,14 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
 
     bool timeout = false;
-    XorpTimer t = eventloop.set_flag_after(TimeVal(10,0), &timeout);
+    XorpTimer t = eventloop.set_flag_after(TimeVal(15,0), &timeout);
     while (ospf_1.running() && ospf_2.running() && !timeout) {
-	if (2 < io_1.packets())
-	    break;
 	eventloop.run();
+	if (8 < io_1.packets())
+	    break;
     }
     if (timeout) {
-	DOUT(info) << "No packets sent, test timed out\n";
+	DOUT(info) << io_1.packets() << " packets sent, test timed out\n";
 	return false;
     }
 
