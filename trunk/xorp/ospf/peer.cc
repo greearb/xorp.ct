@@ -268,10 +268,15 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     XLOG_WARNING("TBD - Check this packet");
 
     HelloPacket *hello;
-    if (0 != (hello = dynamic_cast<HelloPacket *>(packet)))
-	return process_hello_packet(dst, src, hello);
+    DataDescriptionPacket *dd;
 
-    XLOG_WARNING("TBD - Process packet");
+    if (0 != (hello = dynamic_cast<HelloPacket *>(packet))) {
+	return process_hello_packet(dst, src, hello);
+    } else if(0 != (dd = dynamic_cast<DataDescriptionPacket *>(packet))) {
+	return process_data_description_packet(dst, src, dd);
+    } else {
+	XLOG_UNFINISHED();
+    }
 
     return false;
 }
@@ -376,6 +381,17 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
     }
 
     (*n)->event_hello_received(hello);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::process_data_description_packet(A dst,
+					 A src,
+					 DataDescriptionPacket *dd)
+{
+    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*dd));
 
     return true;
 }

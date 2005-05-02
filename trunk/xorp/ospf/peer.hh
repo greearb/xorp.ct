@@ -233,6 +233,12 @@ class Peer {
     bool process_hello_packet(A dst, A src, HelloPacket *hello);
 
     /**
+     * Process a data description packet.
+     */
+    bool process_data_description_packet(A dst, A src,
+					 DataDescriptionPacket *dd);
+
+    /**
      * Start the protocol machinery running
      */
     void start();
