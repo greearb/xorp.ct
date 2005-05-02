@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.105 2005/04/30 22:11:29 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.106 2005/05/02 19:12:32 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -410,19 +410,6 @@ address.
 * TESTSUITE:
   Take care ot the change in the processing of:
   "packet_arrives_on_rp_tunnel"
-
-* SPEC+IMPL: make sure that the following is implemented:
-"Additionally a router sets SPTbit(S,G) to TRUE when it receives an
-Assert(S,G) on RPF_interface(S)."
-However, the Assert-related text says that the SPTbit(S,G) is set to TRUE
-only in case of A6. Which one is accurate?
-
-* SPEC+IMPL:
-"Thus, at the RP, KeepaliveTimer(S,G) should be restarted to ( 3 *
-Register_Suppression_Time + Register_Probe_Time )."
-
-  At the RP, do we always restart with the above value, or only
-  when we restart because of a PIM Register?
 
 * IMPL: If there is a number of WRONGVIF signals back-to-back,
   and the first one completes the SPT switch, the rest of the signals
