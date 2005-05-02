@@ -61,10 +61,15 @@ class DebugIO : public IO<A> {
 		    << "," << dst.str() << "," << src.str()
 		    <<  "...)" << endl;
 
-	// Decode the packet in order to pretty print it.
-	Packet *packet = _dec.decode(data, len);
-	DOUT(_info) << packet->str() << endl;
-	delete packet;
+	try {
+	    // Decode the packet in order to pretty print it.
+	    Packet *packet = _dec.decode(data, len);
+	    DOUT(_info) << packet->str() << endl;
+	    delete packet;
+	} catch(BadPacket& e) {
+	    DOUT(_info) << "Probably no decoder provided: " << e.str() <<
+		endl;
+	}
 
 	_packets++;
 	DOUT(_info) << "packets sent " << _packets << endl;
