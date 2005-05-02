@@ -1,3 +1,7 @@
+#
+# $XORP$
+#
+
 TODO
 ~~~~
 
@@ -13,3 +17,10 @@ be doing.
 
 4) The MTU is not being set in the data description packet.
 
+Possible issues
+~~~~~~~~~~~~~~~
+
+1) Received hello packets are demultiplex on the source address of the
+packet or on the router ID, depending on the linktype that the packet
+arrived on. If a packet is being demultipled on the source address and
+the router ID changes is this likely to be a problem?
