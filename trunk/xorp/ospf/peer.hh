@@ -175,12 +175,12 @@ class Peer {
 	DR,
     };
 
-    Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area,
+    Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area_id,
 	 OspfTypes::AreaType area_type)
-	: _ospf(ospf), _peerout(peerout), _area(area), _area_type(area_type),
-	  _hello_packet(ospf.get_version())
+	: _ospf(ospf), _peerout(peerout), _area_id(area_id),
+	  _area_type(area_type), _hello_packet(ospf.get_version())
     {
-	_hello_packet.set_area_id(area);
+	_hello_packet.set_area_id(area_id);
 
 	// Some defaults taken from the Juniper manual. These values
 	// should be overriden by the values in the templates files.
@@ -191,6 +191,7 @@ class Peer {
 	// RFC 2328 Appendix C.3 Router Interface Parameters
 	_hello_packet.
 	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
+	_rxmt_interval = 5;
 
 	_interface_state = Down;
     }
@@ -206,6 +207,20 @@ class Peer {
      * For debugging only printable rendition of this interface/vif.
      */
     string get_if_name() const { return _peerout.get_if_name(); }
+
+    /**
+     * Address of this interface/vif.
+     *
+     * @return interface/vif address.
+     */
+    A get_address() const { return _peerout.get_address(); }
+
+    /**
+     * Used by external and internal entities to transmit packets.
+     */
+    bool transmit(typename Transmit<A>::TransmitRef tr) {
+	return _peerout.transmit(tr);
+    }
 
     /**
      * Packets for this peer are received here.
@@ -297,9 +312,25 @@ class Peer {
     OspfTypes::LinkType get_linktype() const { return _peerout.get_linktype();}
 
     /**
+     * @return the options field that is placed in some of outgoing
+     * packets.
+     */
+    uint32_t send_options();
+
+    /**
+     * Fill in the common header parts of the packet.
+     */
+    void populate_common_header(Packet& packet);
+
+    /**
      * Pretty print the interface state.
      */
     static string pp_interface_state(InterfaceState is);
+
+    /**
+     * @return the Area ID.
+     */
+    OspfTypes::AreaID get_area_id() const { return _area_id; }
 
     /**
      * Set the network mask OSPFv2 only.
@@ -332,6 +363,16 @@ class Peer {
     bool set_router_dead_interval(uint32_t router_dead_interval);
 
     /**
+     * Set RxmtInterval.
+     */
+    bool set_rxmt_interval(uint32_t rxmt_interval);
+
+    /**
+     * Get RxmtInterval.
+     */
+    uint32_t get_rxmt_interval();
+    
+    /**
      * Get the designated router.
      */
     OspfTypes::RouterID get_designated_router() const;
@@ -344,13 +385,16 @@ class Peer {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
-    const OspfTypes::AreaID _area;	// Area that is being represented.
+    const OspfTypes::AreaID _area_id;	// Area that is being represented.
     const OspfTypes::AreaType _area_type;// BORDER or STUB or NSSA.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
     XorpTimer _wait_timer;		// Wait to discover other DRs.
     XorpTimer _event_timer;		// Defer event timer.
 
+    uint32_t _rxmt_interval;		// The number of seconds
+					// between transmission for:
+					// LSAs, DDs and LSRPs.
 
     InterfaceState _interface_state;
 
@@ -390,9 +434,9 @@ class Peer {
 
     void start_wait_timer();
 
+
     bool send_hello_packet();
     
-
     OspfTypes::RouterID
     backup_designated_router(list<Candidate>& candidates) const;
     OspfTypes::RouterID
@@ -464,26 +508,27 @@ class Neighbour {
 	return Peer<A>::get_candidate_id(_src, _router_id);
     }
 
-    void set_state(State state) {_state = state; }
-
+    /**
+     * Get the state of this neighbour.
+     */
     State get_state() const { return _state; }
+
+    /**
+     * Get a copy of the last hello packet that was received.
+     */
+    HelloPacket *get_hello_packet() { return _hello_packet; }
+
+    /**
+     * Get a copy of the last hello packet that was received.
+     */
+    HelloPacket *get_hello_packet() const { return _hello_packet; }
+
+    void event_hello_received(HelloPacket *hello);
 
     /**
      * Pretty print the neighbour state.
      */
     static string pp_state(State is);
-
-    HelloPacket *get_hello_packet() { return _hello_packet; }
-    HelloPacket *get_hello_packet() const { return _hello_packet; }
-
-    /**
-     * @return true if an adjacency should be established with this neighbour
-     */
-    bool establish_adjacency_p() const;
-
-    void event_hello_received(HelloPacket *hello);
-    void event_1_way_received();
-    void event_2_way_received();
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
@@ -496,6 +541,39 @@ class Neighbour {
 
 					// The DDP this neighbour sends.
     DataDescriptionPacket _data_description_packet;
+    XorpTimer _rxmt_timer;		// Retransmit timer.
+
+    /**
+     * Set the state of this neighbour.
+     */
+    void set_state(State state) {_state = state; }
+
+    /**
+     * @return true if an adjacency should be established with this neighbour
+     */
+    bool establish_adjacency_p() const;
+
+    typedef XorpCallback0<bool>::RefPtr RxmtCallback;
+
+    /**
+     * Start the retransmit timer.
+     *
+     * @param RxmtCallback method to be called ever retransmit interval.
+     */
+    void start_rxmt_timer(RxmtCallback);
+
+    /**
+     * Stop the retransmit timer.
+     */
+    void stop_rxmt_timer();
+
+    /*
+     * Send data description packet.
+     */
+    bool send_data_description_packet();
+
+    void event_1_way_received();
+    void event_2_way_received();
 };
 
 #endif // __OSPF_PEER_HH__

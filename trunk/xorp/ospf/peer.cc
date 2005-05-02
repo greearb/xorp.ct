@@ -323,7 +323,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	return false;
     }
 
-    // Check the E-Bit
+    // Check the E-Bit in options.
     Options options(_ospf.get_version(), hello->get_options());
     switch(_area_type) {
     case OspfTypes::BORDER:
@@ -643,14 +643,9 @@ Peer<A>::start_wait_timer()
 }
 
 template <typename A>
-bool
-Peer<A>::send_hello_packet()
+uint32_t
+Peer<A>::send_options()
 {
-    vector<uint8_t> pkt;
-
-    // Fetch the router ID.
-    _hello_packet.set_router_id(_ospf.get_router_id());
-
     // Set/UnSet E-Bit.
     Options options(_ospf.get_version(), 0);
     switch(_area_type) {
@@ -662,7 +657,32 @@ Peer<A>::send_hello_packet()
 	options.set_e_bit(false);
 	break;
     }
-    _hello_packet.set_options(options.get_options());
+
+    return options.get_options();
+}
+
+template <typename A>
+void
+Peer<A>::populate_common_header(Packet& packet)
+{
+    // Fetch the router ID.
+    packet.set_router_id(_ospf.get_router_id());
+
+    // Set the Area ID
+    packet.set_area_id(get_area_id());
+}
+
+template <typename A>
+bool
+Peer<A>::send_hello_packet()
+{
+    vector<uint8_t> pkt;
+
+    // Fetch the router ID.
+    _hello_packet.set_router_id(_ospf.get_router_id());
+
+    // Options.
+    _hello_packet.set_options(send_options());
 
     // Put the neighbours into the hello packet.
     _hello_packet.get_neighbours().clear();
@@ -984,6 +1004,22 @@ Peer<A>::set_router_dead_interval(uint32_t router_dead_interval)
 
 template <typename A>
 bool
+Peer<A>::set_rxmt_interval(uint32_t rxmt_interval)
+{
+    _rxmt_interval = rxmt_interval;
+
+    return true;
+}
+
+template <typename A>
+uint32_t
+Peer<A>::get_rxmt_interval()
+{
+    return _rxmt_interval;
+}
+
+template <typename A>
+bool
 Peer<A>::set_designated_router(OspfTypes::RouterID dr)
 {
     _hello_packet.set_designated_router(dr);
@@ -1084,6 +1120,60 @@ Neighbour<A>::establish_adjacency_p() const
     }
 
     return become_adjacent;
+}
+
+template <typename A>
+void
+Neighbour<A>::start_rxmt_timer(RxmtCallback rcb)
+{
+    // Send one immediately.
+    rcb->dispatch();
+
+    // Schedule one for the future.
+    _rxmt_timer = _ospf.get_eventloop().
+	new_periodic(_peer.get_rxmt_interval() * 1000, rcb);
+}
+
+template <typename A>
+void
+Neighbour<A>::stop_rxmt_timer()
+{
+    _rxmt_timer.clear();
+}
+
+template <typename A>
+bool
+Neighbour<A>::send_data_description_packet()
+{
+    _peer.populate_common_header(_data_description_packet);
+    _data_description_packet.set_options(_peer.send_options());
+    
+    vector<uint8_t> pkt;
+    _data_description_packet.encode(pkt);
+
+    SimpleTransmit<A> *transmit;
+
+    switch(_peer.get_linktype()) {
+    case OspfTypes::PointToPoint:
+	XLOG_UNFINISHED();
+	break;
+    case OspfTypes::BROADCAST:
+	transmit = new SimpleTransmit<A>(pkt,
+					 A::OSPFIGP_ROUTERS(), 
+					 _peer.get_address());
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	XLOG_UNFINISHED();
+	break;
+    }
+
+    typename Transmit<A>::TransmitRef tr(transmit);
+
+    _peer.transmit(tr);
+    
+    return true;
 }
 
 /**
@@ -1235,7 +1325,15 @@ Neighbour<A>::event_2_way_received()
     case Init:
 	if (establish_adjacency_p()) {
 	    set_state(ExStart);
-	    XLOG_WARNING("TBD increment DD sequence number");
+	    uint32_t seqno = _data_description_packet.get_dd_seqno();
+	    _data_description_packet.set_dd_seqno(++seqno);
+	    _data_description_packet.set_i_bit(true);
+	    _data_description_packet.set_m_bit(true);
+	    _data_description_packet.set_ms_bit(true);
+
+	    start_rxmt_timer(callback(this,
+				      &Neighbour<A>::
+				      send_data_description_packet));
 	} else {
 	    set_state(TwoWay);
 	}
