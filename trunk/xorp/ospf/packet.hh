@@ -615,7 +615,7 @@ class Options {
      
      uint32_t get_options() { return _options; }
  private:
-     OspfTypes::Version _version;	// Version not currentlly used
+     OspfTypes::Version _version;	// Version not currently used
      uint32_t _options;
 };
 
