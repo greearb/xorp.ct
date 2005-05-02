@@ -1,0 +1,5 @@
+In the interface code currently Peer, Peerout and Neightbour classes
+never cache any state such as router ID or area. We use the hello
+packet to hold the definitive state for this peerings. If the router
+ID or some other state is changed then the new values should be
+adopted immediately in any outbound packets.
