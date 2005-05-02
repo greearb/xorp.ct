@@ -45,6 +45,7 @@ class DebugIO : public IO<A> {
 	: _info(info), _eventloop(eventloop), _packets(0)
     {
 	_dec.register_decoder(new HelloPacket(version));
+	_dec.register_decoder(new DataDescriptionPacket(version));
     }
 
     /**
