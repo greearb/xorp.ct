@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.104 2005/04/30 19:38:33 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.105 2005/04/30 22:11:29 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -403,42 +403,14 @@ address.
   be the neighbor that _WOULD_ had become the DR if the real DR
   was not there.
 
-* SPEC+IMPL+TESTSUITE:
-  Change from:
+* TESTSUITE:
+  Take care of the change in the processing of:
+  "On receipt of data from S to G on interface iif:"
 
- if( iif == RPF_interface(S) AND UpstreamJPState(S,G) == Joined ) {
+* TESTSUITE:
+  Take care ot the change in the processing of:
+  "packet_arrives_on_rp_tunnel"
 
- to:
-
- if( iif == RPF_interface(S)
-     AND ((UpstreamJPState(S,G) == Joined )
-          OR (DirectlyConnected(S) == TRUE )) {
-
- Note: the implementation has already taken care of it. If the
- spec change is not approved, then modify the implementation
- and the testsuite as well.
-
-* IMPL: Implement the lastest packet_arrives_on_rp_tunnel() processing.
-
-  Currently, the implementation replace the old spec:
-    if( I_am_RP( G ) && outer.dst == RP(G) ) {
-        restart KeepaliveTimer(S,G)
-        if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
-            send RegisterStop(S,G) to outer.src
-        } else {
-
-  with
-
-    if( I_am_RP( G ) && outer.dst == RP(G) ) {
-        if (SwitchToSptDesired(S,G))
-            restart KeepaliveTimer(S,G)
-        if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
-            restart KeepaliveTimer(S,G)
-            send RegisterStop(S,G) to outer.src
-        } else {
-
-     [Note: the newest -11 I-D spec uses Register-Stop instead of RegisterStop]
-  
 * SPEC+IMPL: make sure that the following is implemented:
 "Additionally a router sets SPTbit(S,G) to TRUE when it receives an
 Assert(S,G) on RPF_interface(S)."
