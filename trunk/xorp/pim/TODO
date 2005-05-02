@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.106 2005/05/02 19:12:32 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.107 2005/05/02 20:01:39 pavlin Exp $
 #
 
 * PIM IMPL:
@@ -410,14 +410,6 @@ address.
 * TESTSUITE:
   Take care ot the change in the processing of:
   "packet_arrives_on_rp_tunnel"
-
-* IMPL: If there is a number of WRONGVIF signals back-to-back,
-  and the first one completes the SPT switch, the rest of the signals
-  will be redundant. However, their processing inside PimMrt::receive_data()
-  would still trigger PimMfc::add_mfc_to_kernel() and friends.
-  Hence, probably things should be optimized such that
-  add_mfc_to_kernel() would be called only if something about the PimMfc
-  has changed.
 
 * IMPL+SPEC (Bootstrap): Should the triggered Bootstrap message be sent
   immediately,
