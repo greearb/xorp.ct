@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.110 2005/05/02 21:04:43 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.111 2005/05/03 02:43:19 pavlin Exp $
 #
 
 * PIM SPEC:
@@ -706,18 +706,13 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
   is destined to the primary IP address of that interface, but to
   any address.
 
-* SPEC+IMPL:
-  [ Note: the text is already in the spec]
-  When an interface goes down or changes IP address, a Hello message with
-  a zero Hold Time should be sent immediately (with the old IP address if
-  the IP address changed).  This will cause PIM neighbors to remove this
-  neighbor (or its old IP address) immediately.
-  ===
-  IMPLEMENTATION SUGGESTION:
-  Whenever the IP address changes, always take the interface DOWN, and then UP
-  Then, just make sure that taking the interface DOWN sends the Hello
-  message with the holdtime of 0. However, taking interface DOWN 
-  may send Prune messages, so need to be careful here...
+* IMPL:
+  If the primary IP address is changed (i.e., deleted and then immediately
+  set to a new address), make sure that in the process of deleting and
+  adding the address we don't end-up with a vif that is shutdown.
+  In other words, we need a new method that just updates the address
+  rather than deleting it and then adding it. Deleting the primary address
+  address will shutdown the vif hence we have to be careful.
 
 * IMPL: In PimVif::start(), add a timer for add_protocol_mld6igmp(), so if
   the PIM vif registration with MLD6IGMP fails, try again after some
