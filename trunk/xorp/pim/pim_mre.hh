@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.45 2005/04/27 02:09:50 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.46 2005/04/30 21:36:45 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -655,6 +655,8 @@ public:
     
     // Note: applies only for (S,G)
     AssertMetric *my_assert_metric_sg(uint16_t vif_index) const;
+    // Note: applies only for (S,G)
+    AssertMetric *my_assert_metric_wc(uint16_t vif_index) const;
     // Note: applies only for (S,G)
     AssertMetric *spt_assert_metric(uint16_t vif_index) const;
     // Note: applies only for (*,G) and (S,G)

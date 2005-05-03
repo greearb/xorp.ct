@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.32 2005/04/26 01:15:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.33 2005/04/30 21:36:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -423,20 +423,18 @@ PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
     int ret_value;
     assert_state_t assert_state;
     bool i_am_assert_winner;
-    AssertMetric my_metric(pim_vif->primary_addr());
+    AssertMetric *my_metric = NULL;
     
     if (! (is_sg() || is_wc()))
 	return (XORP_ERROR);
     
-    my_metric.set_rpt_bit_flag(! is_spt());
-    my_metric.set_metric_preference(is_spt()?
-				    metric_preference_s()
-				    : metric_preference_rp());
-    my_metric.set_metric(is_spt()?
-			 metric_s()
-			 : metric_rp());
-    
-    i_am_assert_winner = (my_metric > *assert_metric);
+    if (is_sg())
+	my_metric = my_assert_metric_sg(vif_index);
+    if (is_wc())
+	my_metric = my_assert_metric_wc(vif_index);
+
+    XLOG_ASSERT(my_metric != NULL);
+    i_am_assert_winner = (*my_metric > *assert_metric);
     
     assert_state = ASSERT_STATE_NOINFO;
     do {
@@ -1839,6 +1837,25 @@ PimMre::my_assert_metric_sg(uint16_t vif_index) const
     mifs = could_assert_sg();
     if (mifs.test(vif_index))
 	return (spt_assert_metric(vif_index));
+    
+    mifs = could_assert_wc();
+    if (mifs.test(vif_index))
+	return (rpt_assert_metric(vif_index));
+    
+    return (infinite_assert_metric());
+}
+
+// Note: applies only for (*,G)
+AssertMetric *
+PimMre::my_assert_metric_wc(uint16_t vif_index) const
+{
+    Mifset mifs;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (NULL);
+    
+    if (! is_wc())
+	return (NULL);
     
     mifs = could_assert_wc();
     if (mifs.test(vif_index))
