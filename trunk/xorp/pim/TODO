@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.111 2005/05/03 02:43:19 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.112 2005/05/03 02:47:03 pavlin Exp $
 #
 
 * PIM SPEC:
@@ -714,12 +714,6 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
   rather than deleting it and then adding it. Deleting the primary address
   address will shutdown the vif hence we have to be careful.
 
-* IMPL: In PimVif::start(), add a timer for add_protocol_mld6igmp(), so if
-  the PIM vif registration with MLD6IGMP fails, try again after some
-  period of time. Similar repeated trying should be done for
-  other registrations as well (e.g. with MFEA). Similar TODO applies
-  for other modules (e.g., MLD6IGMP).
-
 * IMPL: Check if multicast add_vif on Linux and Solaris allow
   VIF_REGISTER to have any address (e.g., 127.0.0.2). If allowed,
   then modify the MFEA to assign that address itself, and remove
@@ -785,12 +779,6 @@ for the kernel patches as well.
   our oifs, and if we don't care about it,
   disable the "wrong iif" signal from the kernel for that (S,G) state
   (assuming the kernel supports that API).
-
-* SPEC: If Override Timer expires, and RPF'(S,G,rpt) != RPF'(*,G)
-  it is unclear what exactly the spec suggests. Actually, it suggests
-  don't do anything explicit, and the rest of the machineries
-  will take care of everything. Hence, make sure that the implementation
-  is not really doing anything.
 
 * IMPL: All constants defined in pim_proto.h should be used as configurable
   variables inside the code.
