@@ -18,6 +18,8 @@ be doing.
 4) The LsaDecoder should have a method that can be used to check of LS
 types are valid. This method should be used by data_description_received.
 
+5) Are external-LSAs allowed in NSSAs?
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
