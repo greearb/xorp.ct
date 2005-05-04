@@ -1,6 +1,214 @@
 #
-# $XORP: xorp/pim/TODO,v 1.112 2005/05/03 02:47:03 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.113 2005/05/03 03:02:13 pavlin Exp $
 #
+
+* PIM BIDIR SPEC:
+  Apply the following comments based on an email to the PIM ML:
+
+  From: Teco Boot <teco.boot@logicacmg.com>
+  Date: Wed, 26 Jan 2005 18:04:28 +0100
+  Subject: [pim] PIM bidir Offer_Period on long delay links
+
+  The draft-ietf-pim-bidir-07.txt states an Offer_Period of 100ms.
+  Is bidir applicable on long delay links like satcom (RTT ~600ms)?
+
+  Another remark on the draft text, it doesn't define the tiebreaker on DF
+  election with equal metrics for the offered RPA.
+  The PIM-SM assert (section 4.6.3.) definition could be used in this case
+  also, but I think it's better to update the text in the bidir specification
+  specifying PIM-SM Assert rules in all cases.
+
+* PIM-SM SPEC:
+  Section 4.9.5.1.  "Group Set Source List Rules" of the PIM-SM spec
+  contains the following text.
+  "o The combination of a (S,G) Prune and a (S,G,rpt) Join could possibly
+    be used by a router to switch from receiving a particular source on
+    the shortest-path tree back to receiving it on the shared tree
+    (provided that the RPF neighbor for the shortest-path and shared trees
+    is common). However Sparse-Mode PIM does not provide a mechanism for
+    switching back to the shared tree."
+
+  However, in PIM-SM we can switch back to the shared tree once the
+  (S,G) state expires. Hence, the above text needs to clarify that.
+
+  [ Credit the following email to the PIM ML:
+
+  Date: Tue, 18 Jan 2005 17:59:53 -0800
+  From: "Loa, Kanchei" <Kanchei.Loa@boeing.com>
+  Subject: [pim] Patch the share tree ]
+
+* PIM-SM SPEC:
+  Have a look in the following email to the PIM ML.
+  The author has a point (and other people who have replied agree),
+  though this is not critical:
+
+  Date: Tue, 4 Jan 2005 11:14:14 -0500
+  From: "Nicholas, Jonathan" <Jonathan.Nicholas AT itt.com>
+  Subject: [pim] PIM-SM Nit
+    
+  I have been going over the PIM-SM spec in some detail, and I noticed that
+  in section 4.5.4 no action is taken in the Prune-Pending state when a
+  Prune(S,G,rpt) is recieved.
+
+  I believe in this case the Expiry Timer should be restarted in behaviour
+  identical to that in the Prune state.
+
+* PIM-SM SPEC:
+  Have a look in the following email to the PIM ML.
+  It looks like the observation is correct. However, it appears it doesn't
+  make any difference that we use pim_include(S,G) as is right now even
+  though it takes into account the lost (S,G) asserts.
+
+  From: Christopher Thomas Brown <ctbrown AT nexthop.com>
+  Date: Wed, 17 Nov 2004 17:19:42 -0500
+  Subject: [pim] Error in CouldAssert(S,G,I)?
+
+  In CouldAssert(S,G,I),
+  there is the following:
+          ... + joins(S,G) + pim_include(S,G) ) )
+
+  The textual description says this:
+  CouldAssert(S,G,I) is true for downstream interface which would be in the
+  inherited_list(S,G) if (S,G) assert information was not taken into account.
+
+  However, pim_include(S,G) takes into account (S,G) assert information. With
+  the above definition CouldAssert(S,G,I) will be false on an interface where
+  I have just a local receiver but have lost the assert.  It seems like the
+  text description is correct and the macro is incorrect. Should pim_include(S,G)
+  just be replaced with (local_receiver_include(S,G,I) AND I_am_DR(I))?
+
+* PIM-BIDIR SPEC:
+  Apply the following comments based on an email to the PIM ML:
+
+  Date: Thu, 02 Sep 2004 13:51:44 +0200
+  From: Mark Doll <doll AT tm.uka.de>
+  Subject: [pim] BIDIR-PIM: Win State: case "DFT Expires and MC =
+    Election_Robustness" missing
+
+  I think in draft-ietf-pim-bidir-07.txt section 3.5.3.5 the case "DFT
+  Expires and MC = Election_Robustness" in Win State is missing (actions
+  would be: -> Win; Send Winner).
+
+
+  P.S.: Some more syntactic comments:
+
+  3.5.3.5:
+  In change history section 6 you claim to follow the format of the new
+  PIM-SM spec. In PIM-SM "-> State" is also used for the cases where the
+  state remains unchanged. IMHO this is clearer than "-".
+
+  The terms "BOperiod", "Robustness", "Timer" and "OPlow_int" are
+  unspecified although it is clear that "Backoff_Period",
+  "Election_Robustness", "DFT" and "OPlow" are meant.
+
+  So maybe simply substitute s/OPlow_int/OPlow/ (2x), s/Timer/DFT/ (2x),
+  s/Robustness/Election_Robustness/ and add a note to the state tables
+  that BOperiod means Backoff_Period (since Backoff_Period does not
+  fit directly into the tables). Or alternatively change the value name to
+  BOPeriod (change in section 3.5.2.2 s/Backoff_Period/Backoff Period/
+  (3x) and in section 3.6: s/Backoff_Period/BOperiod/, s/Period
+  that/Backoff Period that/ (in Explanation))?!.
+
+  3.4.1: s/no the DF/not the DF/
+  3.5.3.1: s/Path message/Pass message/
+
+* PIM-SM SPEC + IMPL + TESTSUITE:
+  There is an issue with timer value computation for join suppression.
+  From Email exchange on the PIM mailing list:
+    Date: Thu, 12 Aug 2004 14:40:36 +0200
+    From: Mark Doll <doll AT tm.uka.de>
+    Subject: [pim] PIM-SM: timer value computation for join suppression
+    ...
+    From: James Lingard <James.Lingard AT dataconnection.com>
+    Subject: RE: [pim] PIM-SM: timer value computation for join suppression
+    Date: Thu, 14 Oct 2004 20:26:29 +0100
+    ...
+    Date: Fri, 15 Oct 2004 11:17:33 +0200
+    From: Mark Doll <doll AT tm.uka.de>
+    Subject: Re: [pim] PIM-SM: timer value computation for join suppression
+
+    The problem is with Join(*,*,RP)/(*,G)/(S,G) timer value computation
+    when suppressing joins.
+
+    The spec states:
+
+           Let t_joinsuppress be the minimum of t_suppressed and the
+           HoldTime from the Join/Prune message triggering this event.
+           If the Join Timer is set to expire in less than t_joinsuppress
+           seconds, reset it so that it expires after t_joinsuppress
+           seconds.  If the Join Timer is set to expire in more than
+           t_joinsuppress seconds, leave it unchanged.
+
+    This may result in Join implosion and/or upstream state loss if the
+    J/P Holdtime of the router that is originating the J/P messages is
+    very short and it suddenly stops sending the J/P messages.
+
+    The proposal by Mark Doll is to use the following solution:
+
+        Reset the Join Timer to the minimum of t_suppressed and
+        HoldTime/3.5*rand(1.1,1.4), where HoldTime is the HoldTime
+        from the Join/Prune message triggering this event.
+        If the Join Timer is set to expire in more
+        than t_joinsuppress seconds, leave it unchanged.
+
+* PIM-SM SPEC:
+  Change
+    6 = Graft (used in PIM-DM only)       Multicast to ALL-PIM-ROUTERS
+  to
+    6 = Graft (used in PIM-DM only)       Unicast to the the RPF'(S)
+
+  Noted in the following email to the PIM mailing list:
+    Date: Mon, 19 Jul 2004 22:01:31 -0700
+    From: PrashantJhingran 70625 <prashantj AT huawei.com>
+    Subject: Re: [pim] Changes from -09 to -10 in PIM-SM spec
+
+* PIM SPEC + TESTSUITE:
+  According to the spec, if we receive AssertCancel on the RPF interface,
+  then its metric will be compared against my_assert_metric().
+  However, given that CouldAssert for the RPF interface is false,
+  my_assert_metric() will return infinite_assert_metric(), therefore
+  AssertCancel will fail to perform its duty.
+  This is fixed in the implementation by testing first if the received
+  Assert message contains AssertCancel metric, and if yes, the local
+  router is automatically declared the winner.
+
+  Note: This fix is based on the following email to the PIM Working Group
+  mailing list:
+    Date: Fri, 9 Jul 2004 11:44:41 -0700 (PDT)
+    From: Venugopal Hemige <vhemige AT yahoo.com>
+    Subject: [pim] Hello HoldTime and Assert questions
+    http://www1.ietf.org/mail-archive/web/pim/current/msg00206.html
+
+* BSR SPEC + IMPL + TESTSUITE:
+  Check that the following comments from Stig to the PIM ML
+  (an email from 5 Jul 2004 Subject: Re: [pim] Doubt reg. BSR) are in
+  the spec, and if yes, then implement them
+
+  "We plan to add text saying that an empty BSM must not delete the current
+  RP-set. A new BSR would first send an empty BSM, and by the time it sends
+  the next BSM, it has hopefully received C-RP advs from all the C-RPs.
+
+  Currently the default periods for BSMs and C-RP advs are both 60s. So
+  it might be possible to send two BSMs and just missing an C-RP adv. I
+  see two possible solutions to that. One is making the C-RP adv period
+  shorter. The other would be to have C-RPs send C-RP adv immediately
+  (or with small random delay) when a new BSR is elected.
+
+  With the changes above the new BSR should have complete RP information
+  by the time it sends the second BSM, and the routers shouldn't lose
+  any RP information during the switchover."
+
+* BSR SPEC + IMPL + TESTSUITE:
+  - Why the lastest -05 I-D doesn't describe what to do with the BIDIR
+    flag if the router doesn't implement Bidir-PIM? There was text
+    about this in the -04 I-D.
+  - Implement the BIDIR flag.
+  
+* BSR IMPL + TESTSUITE:
+  Implement and test the following from the -05 I-D:
+  "If the mask length of the first group range in a
+  scoped IPv6 BSM is less than 16, the message MUST be dropped and a
+  warning SHOULD is logged."
 
 * PIM SPEC:
   In the lastest -11 I-D there are the following two paragraphs (in
@@ -131,6 +339,16 @@
   normal TTL that the router would use for any locally-generated IP
   packet.
 
+  The IP ECN bits should be copied from the original packet to the IP
+  header of the encapsulating packet.  They SHOULD NOT be set
+  independently by the encapsulating router.
+
+  The Diffserv Code Point (DSCP) should be copied from the original packet
+  to the IP header of the encapsulating packet.  It MAY be set
+  independently by the encapsulating router, based upon static
+  configuration or traffic classification.  See [10] for more discussion
+  on setting the DSCP on tunnels.
+
 * PIM SPEC:
   "Interface_Address_List Option" -> "interface Address_List Option"
 
@@ -174,7 +392,7 @@
 
 * PIM MIB SPEC:
   Look into the following emails from
-  "Nicholas, Jonathan" <Jonathan.Nicholas@itt.com>
+  "Nicholas, Jonathan" <Jonathan.Nicholas AT itt.com>
   Date: Mon, 4 Feb 2002
   Subject: [pim] PIM MIB
 
@@ -677,14 +895,14 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   (XXX: not need for this??)
 
 * IMPL: Check email message sent to snap-users@kame.net about IPv6 related
-  bug in pim6sd from  Alexandre Fenyo <fenyo@enst.fr> :
+  bug in pim6sd from  Alexandre Fenyo <fenyo AT enst.fr> :
    "(KAME-snap 6432) Bug in the bootstrap protocol..."
   and apply the fix to the IPv6 code.
-  Also, check earlier email from the kame list from pekkas@netcore.fi
-Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
+  Also, check earlier email from the kame list from pekkas AT netcore.fi
+Wed May 29 21:02:59 JST 2002  suz AT crl.hitachi.co.jp
         * kame/kame/pim6sd/config.c,vif.[ch],routesock.c: fixed RPF
         algorithm bugs for P2P connected routes and static interface
-        routes (reported from pekkas@netcore.fi)
+        routes (reported from pekkas AT netcore.fi)
 
 * SPEC: what about sending Assert based on an (S,G,rpt) or
   (S,G) that is pending SPT switch?
