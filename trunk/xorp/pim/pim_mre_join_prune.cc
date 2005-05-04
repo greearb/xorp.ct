@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.35 2005/04/30 21:36:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.36 2005/05/04 03:33:55 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -531,10 +531,11 @@ PimMre::receive_join_rp(uint16_t vif_index, uint16_t holdtime)
     _downstream_prune_pending_timers[vif_index].unschedule();
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
-	pim_node().eventloop().new_oneoff_after(
-	    TimeVal(holdtime, 0),
-	    callback(this, &PimMre::downstream_expiry_timer_timeout_rp,
-		     vif_index));
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().eventloop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_rp,
+			 vif_index));
     }
     set_downstream_join_state(vif_index);
     return;
