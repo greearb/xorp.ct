@@ -223,7 +223,7 @@ class Lsa {
      * information.
      * @return The type this lsa represents.
      */
-    virtual uint16_t get_lsa_type() const = 0;
+    virtual uint16_t get_ls_type() const = 0;
 
     /**
      * It is the responsibilty of the derived type to return this
@@ -508,7 +508,7 @@ class RouterLsa : public Lsa {
     RouterLsa(OspfTypes::Version version)
 	: Lsa(version)
     {
-	_header.set_ls_type(get_lsa_type());
+	_header.set_ls_type(get_ls_type());
     }
 
     RouterLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
@@ -531,7 +531,7 @@ class RouterLsa : public Lsa {
 	return 0;
     }
 
-    uint16_t get_lsa_type() const {
+    uint16_t get_ls_type() const {
 	switch(get_version()) {
 	case OspfTypes::V2:
 	    return 1;

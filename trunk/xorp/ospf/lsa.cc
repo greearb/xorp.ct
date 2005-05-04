@@ -250,10 +250,10 @@ LsaDecoder::register_decoder(Lsa *lsa)
 {
     switch(lsa->get_version()) {
     case OspfTypes::V2:
-	_lsa_decoders[lsa->get_lsa_type()] = lsa;
+	_lsa_decoders[lsa->get_ls_type()] = lsa;
 	break;
     case OspfTypes::V3:
-	_lsa_decoders[lsa->get_lsa_type()] = lsa;
+	_lsa_decoders[lsa->get_ls_type()] = lsa;
 	break;
     }
 
