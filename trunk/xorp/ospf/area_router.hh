@@ -59,7 +59,6 @@ class AreaRouter {
 
     /**
      * Receive LSA
-     * Callback registered with the peer manager.
      */
     void receive_lsa(PeerID peer, Lsa::LsaRef lsa);
  private:
