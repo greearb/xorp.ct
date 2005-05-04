@@ -42,7 +42,7 @@ void
 AreaRouter<A>::add_peer(PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
-    _peers[peerid] = peer_state(false /* UP */);
+    _peers[peerid] = peer_state(false /* Peer state down */);
 }
 
 template <typename A>
