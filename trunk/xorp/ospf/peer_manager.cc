@@ -99,7 +99,7 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
 {
     debug_msg("Area %s\n", area.str().c_str());
 
-    // Check this area doesn't already exist.
+    // Verify this area exists.
     if (0 == _areas.count(area)) {
 	XLOG_ERROR("Area %s doesn't exist\n", area.str().c_str());
 	return false;
