@@ -234,6 +234,8 @@ class Ospf {
      */
     void set_router_id(OspfTypes::RouterID id) { _router_id = id; }
 
+    LS_database_manager<A>& get_ls_database_manager() { return _database; }
+
     Trace& trace() { return _trace; }
 
  private:
