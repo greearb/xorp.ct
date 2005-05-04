@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.24 2005/04/25 23:42:56 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.25 2005/04/26 01:18:54 pavlin Exp $"
 
 
 //
@@ -423,4 +423,18 @@ AssertMetric::operator>(const AssertMetric& other) const
 	return (true);
     
     return (false);
+}
+
+// Return true if contains infinite metric sent by AssertCancel message
+bool
+AssertMetric::is_assert_cancel_metric() const
+{
+    //
+    // XXX: note that we don't check whether the address is zero.
+    // We need to ignore the address, because it won't be zero for
+    // AssertCancel messages.
+    //
+    return (_rpt_bit_flag
+	    && (_metric_preference == PIM_ASSERT_MAX_METRIC_PREFERENCE)
+	    && (_metric == PIM_ASSERT_MAX_METRIC));
 }

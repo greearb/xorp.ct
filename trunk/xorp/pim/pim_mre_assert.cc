@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.33 2005/04/30 21:36:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.34 2005/05/03 01:39:40 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -434,7 +434,28 @@ PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
 	my_metric = my_assert_metric_wc(vif_index);
 
     XLOG_ASSERT(my_metric != NULL);
-    i_am_assert_winner = (*my_metric > *assert_metric);
+
+    //
+    // XXX: According to the spec, if we receive AssertCancel on the RPF
+    // interface, then its metric will be compared against my_assert_metric().
+    // However, given that CouldAssert for the RPF interface is false,
+    // my_assert_metric() will return infinite_assert_metric(), therefore
+    // AssertCancel will fail to perform its duty.
+    // This is fixed in the implementation by testing first if the received
+    // Assert message contains AssertCancel metric, and if yes, the local
+    // router is automatically declared the winner.
+    //
+    // Note: This fix is based on the following email to the PIM Working Group
+    // mailing list:
+    //   Date: Fri, 9 Jul 2004 11:44:41 -0700 (PDT)
+    //   From: Venugopal Hemige <vhemige AT yahoo.com>
+    //   Subject: [pim] Hello HoldTime and Assert questions
+    //   http://www1.ietf.org/mail-archive/web/pim/current/msg00206.html
+    //
+    if (assert_metric->is_assert_cancel_metric())
+	i_am_assert_winner = true;
+    else
+	i_am_assert_winner = (*my_metric > *assert_metric);
     
     assert_state = ASSERT_STATE_NOINFO;
     do {

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/DEVNOTES,v 1.4 2005/04/20 09:37:43 pavlin Exp $
+# $XORP: xorp/pim/DEVNOTES,v 1.5 2005/04/21 11:07:53 pavlin Exp $
 #
 
 * Always call PimMre::entry_try_remove() for (S,G,rpt) routing entry
@@ -83,3 +83,19 @@
   a source of concern, because those are transient scenarios.
   A possible alternative would be to always send PruneEcho without
   suppressing it, because the suppression itself is just an optimization.
+
+* According to the spec, if we receive AssertCancel on the RPF interface,
+  then its metric will be compared against my_assert_metric().
+  However, given that CouldAssert for the RPF interface is false,
+  my_assert_metric() will return infinite_assert_metric(), therefore
+  AssertCancel will fail to perform its duty.
+  This is fixed in the implementation by testing first if the received
+  Assert message contains AssertCancel metric, and if yes, the local
+  router is automatically declared the winner.
+  
+  Note: This fix is based on the following email to the PIM Working Group
+  mailing list:
+    Date: Fri, 9 Jul 2004 11:44:41 -0700 (PDT)
+    From: Venugopal Hemige <vhemige AT yahoo.com>
+    Subject: [pim] Hello HoldTime and Assert questions
+    http://www1.ietf.org/mail-archive/web/pim/current/msg00206.html

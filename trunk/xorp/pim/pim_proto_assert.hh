@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_assert.hh,v 1.5 2004/06/10 22:41:33 hodson Exp $
+// $XORP: xorp/pim/pim_proto_assert.hh,v 1.6 2005/03/25 02:54:02 pavlin Exp $
 
 
 #ifndef __PIM_PIM_PROTO_ASSERT_HH__
@@ -48,6 +48,7 @@ public:
     const IPvX&	addr() const { return (_addr); }
     void	set_addr(const IPvX& v) { _addr = v; }
     bool	operator>(const AssertMetric& other) const;
+    bool	is_assert_cancel_metric() const;
     
 private:
     bool	_rpt_bit_flag;		// The SPT/RPT bit
