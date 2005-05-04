@@ -15,7 +15,8 @@ in the standard header decode code.
 be setting an index not a mask, check the spec to see what we should
 be doing.
 
-4) The MTU is not being set in the data description packet.
+4) The LsaDecoder should have a method that can be used to check of LS
+types are valid. This method should be used by data_description_received.
 
 Possible issues
 ~~~~~~~~~~~~~~~
