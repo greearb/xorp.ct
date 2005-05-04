@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.34 2005/04/22 01:23:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.35 2005/04/30 21:36:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -524,6 +524,10 @@ PimMre::receive_join_rp(uint16_t vif_index, uint16_t holdtime)
 
  prune_pending_state_label:
     // Prune-Pending state -> Join state
+    //
+    // XXX: canceling the Prune-Pending Timer is not in the spec, but it is
+    // better if we cleanup the state now.
+    //
     _downstream_prune_pending_timers[vif_index].unschedule();
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
@@ -628,6 +632,10 @@ PimMre::receive_join_wc(uint16_t vif_index, uint16_t holdtime)
 
  prune_pending_state_label:
     // Prune-Pending state -> Join state
+    //
+    // XXX: canceling the Prune-Pending Timer is not in the spec, but it is
+    // better if we cleanup the state now.
+    //
     _downstream_prune_pending_timers[vif_index].unschedule();
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
@@ -733,6 +741,10 @@ PimMre::receive_join_sg(uint16_t vif_index, uint16_t holdtime)
     
  prune_pending_state_label:
     // Prune-Pending state -> Join state
+    //
+    // XXX: canceling the Prune-Pending Timer is not in the spec, but it is
+    // better if we cleanup the state now.
+    //
     _downstream_prune_pending_timers[vif_index].unschedule();
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
@@ -850,6 +862,10 @@ PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
     
  prune_state_label:
     // Prune state -> NoInfo state
+    //
+    // XXX: canceling the Expiry Timer and the Prune-Pending Timer is not
+    // in the spec, but it is better if we cleanup the state now.
+    //
     _downstream_expiry_timers[vif_index].unschedule();
     _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
@@ -857,6 +873,10 @@ PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
     
  prune_pending_state_label:
     // Prune-Pending state -> NoInfo state
+    //
+    // XXX: canceling the Expiry Timer and the Prune-Pending Timer is not
+    // in the spec, but it is better if we cleanup the state now.
+    //
     _downstream_expiry_timers[vif_index].unschedule();
     _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
@@ -983,12 +1003,20 @@ PimMre::receive_end_of_message_sg_rpt(uint16_t vif_index)
     
  prune_tmp_state_label:
     // PruneTmp state -> NoInfo state
+    //
+    // XXX: canceling the Expiry Timer is not in the spec, but it is
+    // better if we cleanup the state now.
+    //
     _downstream_expiry_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
     
  prune_pending_tmp_state_label:
     // Prune-Pending-Tmp state -> NoInfo state
+    //
+    // XXX: canceling the Expiry Timer and the Prune-Pending Timer is not
+    // in the spec, but it is better if we cleanup the state now.
+    //
     _downstream_expiry_timers[vif_index].unschedule();
     _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
