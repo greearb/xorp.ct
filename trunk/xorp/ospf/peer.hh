@@ -242,6 +242,13 @@ class Peer {
      */
     bool receive(A dst, A src, Packet *packet);
 
+    /*
+     * Find neighbour that this packet should be associated with.
+     *
+     * @return neighbour or 0 if no match.
+     */
+    Neighbour<A> *find_neighbour(A src, Packet *packet);
+
     /**
      * Process a hello packet.
      */
@@ -352,6 +359,11 @@ class Peer {
      * @return the Area ID.
      */
     OspfTypes::AreaID get_area_id() const { return _area_id; }
+
+    /**
+     * @return the Area Type.
+     */
+    OspfTypes::AreaType get_area_type() const { return _area_type; }
 
     /**
      * Set the network mask OSPFv2 only.
@@ -500,6 +512,7 @@ class Neighbour {
 	: _ospf(ospf), _peer(peer), _router_id(router_id),
 	  _neighbour_address(neighbour_address),
 	  _state(state), _hello_packet(0),
+	  _last_dd(ospf.get_version()),
 	  _data_description_packet(ospf.get_version())
     {
 	TimeVal t;
@@ -547,6 +560,8 @@ class Neighbour {
 
     void event_hello_received(HelloPacket *hello);
 
+    void data_description_received(DataDescriptionPacket *dd);
+
     /**
      * Pretty print the neighbour state.
      */
@@ -560,9 +575,11 @@ class Neighbour {
     State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbour.
-
+    DataDescriptionPacket _last_dd;	// Saved state from Last DDP received.
 					// The DDP this neighbour sends.
     DataDescriptionPacket _data_description_packet;
+    bool _all_headers_sent;		// Tracking database transmssion
+
     XorpTimer _rxmt_timer;		// Retransmit timer.
 
     /**
@@ -590,12 +607,20 @@ class Neighbour {
     void stop_rxmt_timer();
 
     /*
-     * Send data description packet.
+     * Build database description packet.
+     */
+    void build_data_description_packet();
+
+    /*
+     * Send database description packet.
      */
     bool send_data_description_packet();
 
     void event_1_way_received();
     void event_2_way_received();
+    void event_negotiation_done();
+    void event_sequence_number_mismatch();
+    void event_exchange_done();
 };
 
 #endif // __OSPF_PEER_HH__

@@ -282,6 +282,30 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 }
 
 template <typename A>
+Neighbour<A> *
+Peer<A>::find_neighbour(A src, Packet *packet)
+{
+    typename list<Neighbour<A> *>::iterator n;
+    switch(_peerout.get_linktype()) {
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	    if ((*n)->get_neighbour_address() == src)
+		return *n;
+	break;
+    case OspfTypes::VirtualLink:
+    case OspfTypes::PointToPoint:
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	    if ((*n)->get_router_id() == packet->get_router_id())
+		return *n;
+	break;
+    }
+
+    return 0;
+}
+
+template <typename A>
 bool
 Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 {
@@ -350,37 +374,15 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	break;
     }
 
-    // Try and find this neighbour.
-    typename list<Neighbour<A> *>::iterator n;
-    switch(_peerout.get_linktype()) {
-    case OspfTypes::BROADCAST:
-    case OspfTypes::NBMA:
-    case OspfTypes::PointToMultiPoint:
-	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	    if ((*n)->get_neighbour_address() == src)
-		break;
-	break;
-    case OspfTypes::VirtualLink:
-    case OspfTypes::PointToPoint:
-	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	    if ((*n)->get_router_id() == hello->get_router_id())
-		break;
-	break;
-    }
+    Neighbour<A> *n = find_neighbour(src, hello);
 
-    if (_neighbours.end() == n) {
-	_neighbours.push_front(new Neighbour<A>(_ospf, *this,
-						hello->get_router_id(),
-						src));
+    if (0 == n) {
+	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src);
+	_neighbours.push_back(n);
 	// An iterator is required so push to the front and call begin.
-	n = _neighbours.begin();
-	// Verify that we got back the one that we put in.
-	XLOG_ASSERT((*n)->get_router_id() == hello->get_router_id());
-	XLOG_ASSERT((*n)->get_neighbour_address() == src);
-	XLOG_ASSERT((*n)->get_state() == Neighbour<A>::Init);
     }
 
-    (*n)->event_hello_received(hello);
+    n->event_hello_received(hello);
 
     return true;
 }
@@ -393,9 +395,29 @@ Peer<A>::process_data_description_packet(A dst,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*dd));
 
-    XLOG_WARNING("TBD");
+    Neighbour<A> *n = find_neighbour(src, dd);
 
-    return true;
+    if (0 == n) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "No matching neighbour found source %s %s",
+		   cstring(src),
+		   cstring(*dd));
+	
+	return false;
+    }
+
+    // Perform the MTU check.
+    if (dd->get_interface_mtu() > get_interface_mtu()) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "Received MTU larger than %d %s",
+		   get_interface_mtu(),
+		   cstring(*dd));
+	return false;
+    }
+
+    n->data_description_received(dd);
+
+    return false;	// Never keep a copy of the packet.
 }
 
 template <typename A>
@@ -1160,6 +1182,13 @@ Neighbour<A>::stop_rxmt_timer()
 }
 
 template <typename A>
+void
+Neighbour<A>::build_data_description_packet()
+{
+    XLOG_WARNING("TBD");
+}
+
+template <typename A>
 bool
 Neighbour<A>::send_data_description_packet()
 {
@@ -1282,6 +1311,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	XLOG_WARNING("TBD");
 }
 
+
 template <typename A>
 void
 Neighbour<A>::event_1_way_received()
@@ -1354,6 +1384,345 @@ Neighbour<A>::event_2_way_received()
     case Loading:
     case Full:
 	// Cool nothing to do.
+	break;
+    }
+}
+
+/**
+ * Save specific fields (not all) in Database Description Packets:
+ * initialize(I), more(M), master(MS), options, DD sequence number.
+ * Please turn this into "operator=".
+ */
+inline
+void
+assign(DataDescriptionPacket& lhs, const DataDescriptionPacket& rhs)
+{
+    if (&lhs == &rhs)
+	return;
+
+    lhs.set_i_bit(rhs.get_i_bit());
+    lhs.set_m_bit(rhs.get_m_bit());
+    lhs.set_ms_bit(rhs.get_ms_bit());
+    lhs.set_options(rhs.get_options());
+    lhs.set_dd_seqno(rhs.get_dd_seqno());
+}
+
+/**
+ * Compare specific fields (not all) in Database Description Packets:
+ * initialize(I), more(M), master(MS), options, DD sequence number.
+ */
+inline
+bool
+operator==(const DataDescriptionPacket& lhs, const DataDescriptionPacket& rhs)
+{
+    if (&lhs == &rhs)
+	return true;
+
+    if (lhs.get_i_bit() != rhs.get_i_bit())
+	return false;
+
+    if (lhs.get_m_bit() != rhs.get_m_bit())
+	return false;
+
+    if (lhs.get_ms_bit() != rhs.get_ms_bit())
+	return false;
+
+    if (lhs.get_options() != rhs.get_options())
+	return false;
+
+    if (lhs.get_dd_seqno() != rhs.get_dd_seqno())
+	return false;
+
+    return true;
+}
+
+/**
+ * RFC 2328 Section 10.6 Receiving Database Description Packets,
+ * neighbour component.
+ */
+template <typename A>
+void
+Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
+{
+    const char *event_name = "DataDescriptionReceived-pseudo-event";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       get_candidate_id().str().c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
+	      cstring(get_candidate_id()),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str(),
+	      cstring(*dd));
+
+    switch(get_state()) {
+    case Down:
+	// Reject Packet
+	break;
+    case Attempt:
+	// Reject Packet
+	break;
+    case Init:
+	event_2_way_received();
+	if (ExStart == get_state())
+	    ;// FALLTHROUGH
+	else
+	    break;
+    case ExStart:
+	{
+	bool negotiation_done = false;
+
+	// Save some fields for later duplicate detection.
+	assign(_last_dd, *dd);
+
+	_all_headers_sent = false;
+
+	if (dd->get_i_bit() && dd->get_m_bit() && dd->get_ms_bit() && 
+	    dd->get_lsa_headers().empty() && 
+	    dd->get_router_id() > _ospf.get_router_id()) { // Router is slave
+	    _last_dd.set_dd_seqno(dd->get_dd_seqno());
+	    negotiation_done = true;
+	}
+
+	
+	if (!dd->get_i_bit() && !dd->get_m_bit() && !dd->get_ms_bit() && 
+	    _last_dd.get_dd_seqno() == dd->get_dd_seqno() && 
+	    dd->get_router_id() < _ospf.get_router_id()) {  // Router is master
+	    negotiation_done = true;
+	}
+
+	if (negotiation_done)
+	    event_negotiation_done();
+	}
+	break;
+    case TwoWay:
+	// Ignore Packet
+	break;
+    case Exchange:
+	{
+	// Make sure the saved value is the same as the incoming.
+	if (_last_dd.get_ms_bit() != dd->get_ms_bit()) {
+	    event_sequence_number_mismatch();
+	    break;
+	}
+	
+	if (dd->get_i_bit())  {
+	    event_sequence_number_mismatch();
+	    break;
+	}
+
+	if (dd->get_options() != _last_dd.get_options())  {
+	    event_sequence_number_mismatch();
+	    break;
+	}
+	
+	bool in_sequence = false;
+	if (_last_dd.get_ms_bit()) { // Router is slave
+	    if (_last_dd.get_dd_seqno() + 1 == dd->get_dd_seqno())
+		in_sequence = true;
+	} else {		     // Router is master
+	    if (_last_dd.get_dd_seqno() == dd->get_dd_seqno())
+		in_sequence = true;
+	}
+
+	if (!in_sequence)  {
+	    event_sequence_number_mismatch();
+	    break;
+	}
+
+	list<Lsa_header> li = dd->get_lsa_headers();
+	list<Lsa_header>::const_iterator i;
+	for (i = li.begin(); i != li.end(); i++) {
+	    uint16_t ls_type = i->get_ls_type();
+
+	    // Do we recognise this LSA?
+	    // XXX - We should be making a call to the LsaDecoder to
+	    // determine if a LS type is valid.
+	    if (ls_type > 5) {
+		XLOG_TRACE(_ospf.trace()._input_errors,
+			   "LS type > 5 %s", cstring(*dd));
+		event_sequence_number_mismatch();
+		return;
+		break;
+	    }
+
+	    // Deal with external-LSAs.
+	    switch(_peer.get_area_type()) {
+	    case OspfTypes::BORDER:
+		break;
+	    case OspfTypes::STUB:
+		if (ls_type == 5) {
+		    XLOG_TRACE(_ospf.trace()._input_errors,
+			       "external-LSA not allowed in STUB arear %s",
+			       cstring(*dd));
+		    event_sequence_number_mismatch();
+		    return;
+		}
+		break;
+	    case OspfTypes::NSSA:
+		// XXX - Are external-LSAs allowed in NSSA.
+		XLOG_UNFINISHED();
+		break;
+	    }
+	    
+	    // Check to see if this is a newer LSA.
+	    if (_ospf.get_ls_database_manager().
+		newer_lsa(_peer.get_area_id(), *i))
+		XLOG_WARNING("TBD - Add to Link State Request List");
+	}
+
+	if (_last_dd.get_ms_bit()) { // Router is slave
+	    _last_dd.set_dd_seqno(dd->get_dd_seqno());
+	    build_data_description_packet();
+	    if (!_data_description_packet.get_m_bit() &&
+		!dd->get_m_bit()) {
+		event_exchange_done();
+	    }
+	    send_data_description_packet();
+	} else {		     // Router is master
+	    _last_dd.set_dd_seqno(_last_dd.get_dd_seqno() + 1);
+	    if (_all_headers_sent && !dd->get_m_bit()) {
+		event_exchange_done();
+	    } else {
+		build_data_description_packet();
+		send_data_description_packet();
+	    }
+	}
+	    
+	}
+	break;
+    case Loading:
+    case Full:
+	// Check for duplicates
+	if (_last_dd == *dd) {
+	    if (_last_dd.get_ms_bit()) { // Router is slave
+		send_data_description_packet();
+	    } else {		     // Router is master
+		// Discard
+	    }
+	} else {
+	    event_sequence_number_mismatch();
+	}
+	break;
+    }
+}
+
+template <typename A>
+void
+Neighbour<A>::event_negotiation_done()
+{
+    const char *event_name = "NegotiationDone";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       get_candidate_id().str().c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      cstring(get_candidate_id()),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    XLOG_WARNING("TBD");
+
+    switch(get_state()) {
+    case Down:
+	break;
+    case Attempt:
+	break;
+    case Init:
+	break;
+    case TwoWay:
+	break;
+    case ExStart:
+	break;
+    case Exchange:
+	break;
+    case Loading:
+	break;
+    case Full:
+	break;
+    }
+}
+
+template <typename A>
+void
+Neighbour<A>::event_sequence_number_mismatch()
+{
+    const char *event_name = "SequenceNumberMismatch";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       get_candidate_id().str().c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      cstring(get_candidate_id()),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    XLOG_WARNING("TBD");
+
+    switch(get_state()) {
+    case Down:
+	break;
+    case Attempt:
+	break;
+    case Init:
+	break;
+    case TwoWay:
+	break;
+    case ExStart:
+	break;
+    case Exchange:
+	break;
+    case Loading:
+	break;
+    case Full:
+	break;
+    }
+}
+
+template <typename A>
+void
+Neighbour<A>::event_exchange_done()
+{
+    const char *event_name = "ExchangeDone";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       get_candidate_id().str().c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      cstring(get_candidate_id()),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    XLOG_WARNING("TBD");
+
+    switch(get_state()) {
+    case Down:
+	break;
+    case Attempt:
+	break;
+    case Init:
+	break;
+    case TwoWay:
+	break;
+    case ExStart:
+	break;
+    case Exchange:
+	break;
+    case Loading:
+	break;
+    case Full:
 	break;
     }
 }
