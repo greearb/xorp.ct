@@ -125,7 +125,7 @@ test_checksum_SOURCES = test_checksum.cc
 test_peering_SOURCES = test_peering.cc
 
 # -- Library Sources
-libospf_la_SOURCES = area_router.hh exceptions.hh fletcher_checksum.hh lsa.hh ls_database_manager.hh ospf.hh packet.hh peer_manager.hh peer.hh xrl_io.hh xrl_target.hh area_router.cc ls_database_manager.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc xrl_io.cc xrl_target.cc
+libospf_la_SOURCES = area_router.hh exceptions.hh fletcher_checksum.hh lsa.hh ls_database.hh ls_database_manager.hh ospf.hh packet.hh peer_manager.hh peer.hh xrl_io.hh xrl_target.hh area_router.cc ls_database_manager.cc fletcher_checksum.cc lsa.cc ls_database.cc ls_database_manager.cc ospf.cc packet.cc peer_manager.cc peer.cc xrl_io.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = 
@@ -142,7 +142,8 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libospf_la_LDFLAGS =
 libospf_la_LIBADD =
 am_libospf_la_OBJECTS = area_router.lo ls_database_manager.lo \
-	fletcher_checksum.lo lsa.lo ospf.lo packet.lo peer_manager.lo \
+	fletcher_checksum.lo lsa.lo ls_database.lo \
+	ls_database_manager.lo ospf.lo packet.lo peer_manager.lo \
 	peer.lo xrl_io.lo xrl_target.lo
 libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
@@ -229,6 +230,7 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/area_router.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/fletcher_checksum.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ls_database.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/ls_database_manager.Plo $(DEPDIR)/lsa.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/ospf.Plo $(DEPDIR)/packet.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/peer.Plo $(DEPDIR)/peer_manager.Plo \
@@ -261,7 +263,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
 	install-exec-recursive installdirs-recursive install-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
-DIST_COMMON = Makefile.am Makefile.in
+DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
 SOURCES = $(libospf_la_SOURCES) $(test_checksum_SOURCES) $(test_packet_SOURCES) $(test_peering_SOURCES) $(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
 
@@ -341,6 +343,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/area_router.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fletcher_checksum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ls_database.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ls_database_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf.Plo@am__quote@
