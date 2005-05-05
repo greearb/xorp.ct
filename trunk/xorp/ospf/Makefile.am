@@ -36,6 +36,7 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
+LDADD		+= $(top_builddir)/libproto/libproto.la
 
 # -- Program Sources
 xorp_ospfv2_SOURCES		= xorp_ospfv2.cc
