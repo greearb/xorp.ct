@@ -759,6 +759,10 @@ ac_env_CXXCPP_set=${CXXCPP+set}
 ac_env_CXXCPP_value=$CXXCPP
 ac_cv_env_CXXCPP_set=${CXXCPP+set}
 ac_cv_env_CXXCPP_value=$CXXCPP
+ac_env_CPP_set=${CPP+set}
+ac_env_CPP_value=$CPP
+ac_cv_env_CPP_set=${CPP+set}
+ac_cv_env_CPP_value=$CPP
 
 #
 # Report the --help message.
@@ -864,7 +868,7 @@ Optional Packages:
   --with-path-to-snmpd=DIR         specify path to the snmpd executable
   --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree
   --with-snmp                   build XORP MIBs for Net-SNMP
-  --with-dmalloc=DIR    use dmalloc (http://www.dmalloc.com/) from DIR
+  --with-dmalloc=DIR      build using the dmalloc allocator in DIR
 
 Some influential environment variables:
   CC          C compiler command
@@ -876,6 +880,7 @@ Some influential environment variables:
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
   CXXCPP      C++ preprocessor
+  CPP         C preprocessor
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -2852,7 +2857,7 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$lt_target" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 2855 "configure"' > conftest.$ac_ext
+  echo '#line 2860 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4382,6 +4387,60 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
+cat >confcache <<\_ACEOF
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs, see configure's option --config-cache.
+# It is not useful on other systems.  If it contains results you don't
+# want to keep, you may remove or edit it.
+#
+# config.status only pays attention to the cache file if you give it
+# the --recheck option to rerun configure.
+#
+# `ac_cv_env_foo' variables (set or unset) will be overriden when
+# loading this file, other *unset* `ac_cv_foo' will be assigned the
+# following values.
+
+_ACEOF
+
+# The following way of writing the cache mishandles newlines in values,
+# but we know of no workaround that is simple, portable, and efficient.
+# So, don't put newlines in cache variables' values.
+# Ultrix sh set writes to stderr and can't be redirected directly,
+# and sets the high bit in the cache file unless we assign to the vars.
+{
+  (set) 2>&1 |
+    case `(ac_space=' '; set | grep ac_space) 2>&1` in
+    *ac_space=\ *)
+      # `set' does not quote correctly, so add quotes (double-quote
+      # substitution turns \\\\ into \\, and sed turns \\ into \).
+      sed -n \
+        "s/'/'\\\\''/g;
+    	  s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1='\\2'/p"
+      ;;
+    *)
+      # `set' quotes correctly as required by POSIX, so do not add quotes.
+      sed -n \
+        "s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1=\\2/p"
+      ;;
+    esac;
+} |
+  sed '
+     t clear
+     : clear
+     s/^\([^=]*\)=\(.*[{}].*\)$/test "${\1+set}" = set || &/
+     t end
+     /^ac_cv_env/!s/^\([^=]*\)=\(.*\)$/\1=${\1=\2}/
+     : end' >>confcache
+if cmp -s $cache_file confcache; then :; else
+  if test -w $cache_file; then
+    test "x$cache_file" != "x/dev/null" && echo "updating cache $cache_file"
+    cat confcache >$cache_file
+  else
+    echo "not updating unwritable cache $cache_file"
+  fi
+fi
+rm -f confcache
 
 
 
@@ -4389,6 +4448,62 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
+
+
+cat >confcache <<\_ACEOF
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs, see configure's option --config-cache.
+# It is not useful on other systems.  If it contains results you don't
+# want to keep, you may remove or edit it.
+#
+# config.status only pays attention to the cache file if you give it
+# the --recheck option to rerun configure.
+#
+# `ac_cv_env_foo' variables (set or unset) will be overriden when
+# loading this file, other *unset* `ac_cv_foo' will be assigned the
+# following values.
+
+_ACEOF
+
+# The following way of writing the cache mishandles newlines in values,
+# but we know of no workaround that is simple, portable, and efficient.
+# So, don't put newlines in cache variables' values.
+# Ultrix sh set writes to stderr and can't be redirected directly,
+# and sets the high bit in the cache file unless we assign to the vars.
+{
+  (set) 2>&1 |
+    case `(ac_space=' '; set | grep ac_space) 2>&1` in
+    *ac_space=\ *)
+      # `set' does not quote correctly, so add quotes (double-quote
+      # substitution turns \\\\ into \\, and sed turns \\ into \).
+      sed -n \
+        "s/'/'\\\\''/g;
+    	  s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1='\\2'/p"
+      ;;
+    *)
+      # `set' quotes correctly as required by POSIX, so do not add quotes.
+      sed -n \
+        "s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1=\\2/p"
+      ;;
+    esac;
+} |
+  sed '
+     t clear
+     : clear
+     s/^\([^=]*\)=\(.*[{}].*\)$/test "${\1+set}" = set || &/
+     t end
+     /^ac_cv_env/!s/^\([^=]*\)=\(.*\)$/\1=${\1=\2}/
+     : end' >>confcache
+if cmp -s $cache_file confcache; then :; else
+  if test -w $cache_file; then
+    test "x$cache_file" != "x/dev/null" && echo "updating cache $cache_file"
+    cat confcache >$cache_file
+  else
+    echo "not updating unwritable cache $cache_file"
+  fi
+fi
+rm -f confcache
 
 
 
@@ -5268,15 +5383,13 @@ while test "${net_snmp_found}" = "true"; do
 	for ac_flag in "-DNETSNMP_NO_INLINE"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CFLAGS"
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+  _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -5347,15 +5460,13 @@ echo "${ECHO_T}no" >&6
 	for ac_flag in "-DNETSNMP_NO_INLINE"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CXXFLAGS"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+  _save_flags="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -5428,15 +5539,13 @@ echo "${ECHO_T}no" >&6
     # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
     # the default compiler cannot compile.
       ac_safe=`echo "${NETSNMPCFLAGS}" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CFLAGS"
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+  _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS ${NETSNMPCFLAGS}"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"${NETSNMPCFLAGS}\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"${NETSNMPCFLAGS}\"... $ECHO_C" >&6
@@ -6195,6 +6304,349 @@ fi
 if test "${ipv6}" = "yes"; then
 
 
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+echo "$as_me:$LINENO: checking how to run the C preprocessor" >&5
+echo $ECHO_N "checking how to run the C preprocessor... $ECHO_C" >&6
+# On Suns, sometimes $CPP names a directory.
+if test -n "$CPP" && test -d "$CPP"; then
+  CPP=
+fi
+if test -z "$CPP"; then
+  if test "${ac_cv_prog_CPP+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+      # Double quotes because CPP needs to be expanded
+    for CPP in "$CC -E" "$CC -E -traditional-cpp" "/lib/cpp"
+    do
+      ac_preproc_ok=false
+for ac_c_preproc_warn_flag in '' yes
+do
+  # Use a header file that comes with gcc, so configuring glibc
+  # with a fresh cross-compiler works.
+  # On the NeXT, cc -E runs the code through the compiler's parser,
+  # not just through cpp. "Syntax error" is here to catch this case.
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <assert.h>
+                     Syntax error
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  egrep -v '^ *\+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  :
+else
+  echo "$as_me: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  # Broken: fails on valid input.
+continue
+fi
+rm -f conftest.err conftest.$ac_ext
+
+  # OK, works on sane cases.  Now check whether non-existent headers
+  # can be detected and how.
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <ac_nonexistent.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  egrep -v '^ *\+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  # Broken: success on invalid input.
+continue
+else
+  echo "$as_me: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  # Passes both tests.
+ac_preproc_ok=:
+break
+fi
+rm -f conftest.err conftest.$ac_ext
+
+done
+# Because of `break', _AC_PREPROC_IFELSE's cleaning code was skipped.
+rm -f conftest.err conftest.$ac_ext
+if $ac_preproc_ok; then
+  break
+fi
+
+    done
+    ac_cv_prog_CPP=$CPP
+
+fi
+  CPP=$ac_cv_prog_CPP
+else
+  ac_cv_prog_CPP=$CPP
+fi
+echo "$as_me:$LINENO: result: $CPP" >&5
+echo "${ECHO_T}$CPP" >&6
+ac_preproc_ok=false
+for ac_c_preproc_warn_flag in '' yes
+do
+  # Use a header file that comes with gcc, so configuring glibc
+  # with a fresh cross-compiler works.
+  # On the NeXT, cc -E runs the code through the compiler's parser,
+  # not just through cpp. "Syntax error" is here to catch this case.
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <assert.h>
+                     Syntax error
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  egrep -v '^ *\+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  :
+else
+  echo "$as_me: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  # Broken: fails on valid input.
+continue
+fi
+rm -f conftest.err conftest.$ac_ext
+
+  # OK, works on sane cases.  Now check whether non-existent headers
+  # can be detected and how.
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <ac_nonexistent.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  egrep -v '^ *\+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  # Broken: success on invalid input.
+continue
+else
+  echo "$as_me: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  # Passes both tests.
+ac_preproc_ok=:
+break
+fi
+rm -f conftest.err conftest.$ac_ext
+
+done
+# Because of `break', _AC_PREPROC_IFELSE's cleaning code was skipped.
+rm -f conftest.err conftest.$ac_ext
+if $ac_preproc_ok; then
+  :
+else
+  { { echo "$as_me:$LINENO: error: C preprocessor \"$CPP\" fails sanity check" >&5
+echo "$as_me: error: C preprocessor \"$CPP\" fails sanity check" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+
+
+
+
+for ac_header in netinet6/in6_var.h netinet6/nd6.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h
+do
+as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking $ac_header usability" >&5
+echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+$ac_includes_default
+#include <$ac_header>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_header_compiler=no
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking $ac_header presence" >&5
+echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <$ac_header>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  egrep -v '^ *\+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc in
+  yes:no )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;};;
+  no:yes )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
+echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: $ac_header: check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;};;
+esac
+echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  eval "$as_ac_Header=$ac_header_preproc"
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
+
+fi
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+
+if test "${ac_cv_header_windows_h}" = "yes"; then
+	test_ipv6_headers="
+		#define WIN32_LEAN_AND_MEAN
+		#include <windows.h>
+		#include <winsock2.h>
+		#include <ws2tcpip.h>
+	"
+else
+	test_ipv6_headers="
+		#include <sys/types.h>
+		#include <sys/socket.h>
+		#include <netinet/in.h>
+	"
+fi
 
 echo "$as_me:$LINENO: checking whether the system IPv6 stack implementation is reasonable" >&5
 echo $ECHO_N "checking whether the system IPv6 stack implementation is reasonable... $ECHO_C" >&6
@@ -6203,48 +6655,26 @@ if test "${enable_ipv6}" = "no"; then
   echo "$as_me:$LINENO: result: disabled" >&5
 echo "${ECHO_T}disabled" >&6
 else
-
-
-  ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-  if test "$cross_compiling" = yes; then
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-else
   cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/ip6.h>
-main()
-{
- /* XXX: check if the IPv6 implementation is not missing various pieces. */
-#if 0
- int dummy = IP6OPT_MINLEN;
- dummy = dummy;
-#endif
+	${test_ipv6_headers}
 
- if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
-   return (1);
- else
-   return (0);
-}
+	main()
+	{
+	 if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
+	   return (1);
+	 else
+	   return (0);
+	}
 
 _ACEOF
-rm -f conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -6259,21 +6689,12 @@ _ACEOF
 
    ipv6=yes
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
-  ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
+rm -f conftest.$ac_objext conftest.$ac_ext
 fi
 
 
@@ -6282,34 +6703,22 @@ if test "${ipv6}" = "yes"; then
   echo "$as_me:$LINENO: checking whether the system IPv6 stack supports IPv6 multicast" >&5
 echo $ECHO_N "checking whether the system IPv6 stack supports IPv6 multicast... $ECHO_C" >&6
   cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
 
-#include <sys/types.h>
-#include <netinet/in.h>
+	${test_ipv6_headers}
 
-#ifdef F77_DUMMY_MAIN
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int F77_DUMMY_MAIN() { return 1; }
-#endif
-int
-main ()
-{
+	main()
+	{
+		int dummy = 0;
+		/* Dummy integer values that must be defined
+		 * in some of the header files
+		 */
+		dummy += IPV6_MULTICAST_HOPS;
+		dummy += IPV6_MULTICAST_LOOP;
+		dummy += IPV6_MULTICAST_IF;
+		dummy += IPV6_JOIN_GROUP;
+		dummy += IPV6_LEAVE_GROUP;
+	}
 
-int dummy = 0;
-
-/* Dummy integer values that must be defined in some of the header files */
-dummy += IPV6_MULTICAST_HOPS;
-dummy += IPV6_MULTICAST_LOOP;
-dummy += IPV6_MULTICAST_IF;
-dummy += IPV6_JOIN_GROUP;
-dummy += IPV6_LEAVE_GROUP;
-
-  ;
-  return 0;
-}
 _ACEOF
 rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -6400,7 +6809,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } >/dev/null; then
   if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_c_preproc_warn_flag
   else
     ac_cpp_err=
   fi
@@ -6508,7 +6917,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } >/dev/null; then
   if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_c_preproc_warn_flag
   else
     ac_cpp_err=
   fi
@@ -6560,16 +6969,25 @@ fi
 
 
 
-  test_multicast_routing_header_files="
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/socket.h>
-#include <net/if.h>
-${test_net_if_var_h}
-#include <netinet/in.h>
-${test_netinet_in_var_h}
-#include <netinet6/ip6_mroute.h>
-"
+  if test "${ac_cv_header_windows_h}" = "yes"; then
+	test_multicast_routing_header_files="
+		#define WIN32_LEAN_AND_MEAN
+		#include <windows.h>
+		#include <winsock2.h>
+		#include <ws2tcpip.h>
+	"
+  else
+	test_multicast_routing_header_files="
+		#include <sys/types.h>
+		#include <sys/param.h>
+		#include <sys/socket.h>
+		#include <net/if.h>
+		${test_net_if_var_h}
+		#include <netinet/in.h>
+		${test_netinet_in_var_h}
+		#include <netinet6/ip6_mroute.h>
+	"
+  fi
 
   echo "$as_me:$LINENO: checking whether the system IPv6 stack supports IPv6 multicast routing" >&5
 echo $ECHO_N "checking whether the system IPv6 stack supports IPv6 multicast routing... $ECHO_C" >&6
@@ -6643,23 +7061,9 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 fi
 
 
-echo "$as_me:$LINENO: checking for RFC-3542 IPv6 advanced API" >&5
-echo $ECHO_N "checking for RFC-3542 IPv6 advanced API... $ECHO_C" >&6
-
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-if test "$cross_compiling" = yes; then
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
+echo "$as_me:$LINENO: checking for RFC 3542 IPv6 advanced API" >&5
+echo $ECHO_N "checking for RFC 3542 IPv6 advanced API... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -6674,12 +7078,13 @@ main()
 }
 
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -6693,24 +7098,15 @@ _ACEOF
    echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
-ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 
 
-
-pv6type=unknown
+ipv6type=unknown
 echo "$as_me:$LINENO: checking IPv6 stack type" >&5
 echo $ECHO_N "checking IPv6 stack type... $ECHO_C" >&6
 for i in KAME; do
@@ -6743,126 +7139,6 @@ rm -f conftest*
 done
 echo "$as_me:$LINENO: result: $ipv6type" >&5
 echo "${ECHO_T}$ipv6type" >&6
-
-
-
-
-
-
-
-for ac_header in netinet6/in6_var.h netinet6/nd6.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h
-do
-as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo "$as_me:$LINENO: checking for $ac_header" >&5
-echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking $ac_header usability" >&5
-echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
-$ac_includes_default
-#include <$ac_header>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-ac_header_compiler=no
-fi
-rm -f conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking $ac_header presence" >&5
-echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
-#include <$ac_header>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  egrep -v '^ *\+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc in
-  yes:no )
-    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;};;
-  no:yes )
-    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
-echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: $ac_header: check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;};;
-esac
-echo "$as_me:$LINENO: checking for $ac_header" >&5
-echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  eval "$as_ac_Header=$ac_header_preproc"
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
-
-fi
-if test `eval echo '${'$as_ac_Header'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
 
 if test "${ac_cv_header_netinet6_nd6_h}" = "yes"; then
   if test "${ac_cv_header_net_if_var_h+set}" = set; then
@@ -6922,7 +7198,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } >/dev/null; then
   if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_c_preproc_warn_flag
   else
     ac_cpp_err=
   fi
@@ -6988,8 +7264,6 @@ ${test_net_if_var_h}
 
   echo "$as_me:$LINENO: checking whether netinet6/nd6.h is C++ friendly" >&5
 echo $ECHO_N "checking whether netinet6/nd6.h is C++ friendly... $ECHO_C" >&6
-
-
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7045,23 +7319,29 @@ _ACEOF
 
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
-  ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 fi
 
 
-echo "$as_me:$LINENO: checking whether struct sockaddr_in6 has a sin6_len field" >&5
-echo $ECHO_N "checking whether struct sockaddr_in6 has a sin6_len field... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
+test_sin6_len_headers="
+	#include <sys/types.h>
+	#include <netinet/in.h>
+"
+
+echo "$as_me:$LINENO: checking for struct sockaddr_in6.sin6_len" >&5
+echo $ECHO_N "checking for struct sockaddr_in6.sin6_len... $ECHO_C" >&6
+if test "${ac_cv_member_struct_sockaddr_in6_sin6_len+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
-
-#include <sys/types.h>
-#include <netinet/in.h>
+${test_sin6_len_headers}
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
@@ -7072,10 +7352,9 @@ cat >conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-
-static struct sockaddr_in6 sockaddr_in6;
-int sin_len = sizeof(sockaddr_in6.sin6_len);
-
+static struct sockaddr_in6 ac_aggr;
+if (ac_aggr.sin6_len)
+return 0;
   ;
   return 0;
 }
@@ -7092,31 +7371,41 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
+  ac_cv_member_struct_sockaddr_in6_sin6_len=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_member_struct_sockaddr_in6_sin6_len=no
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_member_struct_sockaddr_in6_sin6_len" >&5
+echo "${ECHO_T}$ac_cv_member_struct_sockaddr_in6_sin6_len" >&6
+if test $ac_cv_member_struct_sockaddr_in6_sin6_len = yes; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_SIN6_LEN 1
 _ACEOF
 
-else
-  echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
 
 
-echo "$as_me:$LINENO: checking whether netinet/icmp6.h contains struct mld_hdr" >&5
-echo $ECHO_N "checking whether netinet/icmp6.h contains struct mld_hdr... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
+
+test_mld_hdr_headers="
+	#include <sys/types.h>
+	#include <netinet/in.h>
+	#include <netinet/icmp6.h>
+"
+
+echo "$as_me:$LINENO: checking for struct mld_hdr" >&5
+echo $ECHO_N "checking for struct mld_hdr... $ECHO_C" >&6
+if test "${ac_cv_type_struct_mld_hdr+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
-
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <netinet/icmp6.h>
+${test_mld_hdr_headers}
 
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
@@ -7127,9 +7416,10 @@ cat >conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-
-size_t size = sizeof(struct mld_hdr);
-
+if ((struct mld_hdr *) 0)
+  return 0;
+if (sizeof (struct mld_hdr))
+  return 0;
   ;
   return 0;
 }
@@ -7146,20 +7436,85 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
+  ac_cv_type_struct_mld_hdr=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_type_struct_mld_hdr=no
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_type_struct_mld_hdr" >&5
+echo "${ECHO_T}$ac_cv_type_struct_mld_hdr" >&6
+if test $ac_cv_type_struct_mld_hdr = yes; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_MLD_HDR 1
 _ACEOF
 
-else
-  echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+
+
+ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+cat >confcache <<\_ACEOF
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs, see configure's option --config-cache.
+# It is not useful on other systems.  If it contains results you don't
+# want to keep, you may remove or edit it.
+#
+# config.status only pays attention to the cache file if you give it
+# the --recheck option to rerun configure.
+#
+# `ac_cv_env_foo' variables (set or unset) will be overriden when
+# loading this file, other *unset* `ac_cv_foo' will be assigned the
+# following values.
+
+_ACEOF
+
+# The following way of writing the cache mishandles newlines in values,
+# but we know of no workaround that is simple, portable, and efficient.
+# So, don't put newlines in cache variables' values.
+# Ultrix sh set writes to stderr and can't be redirected directly,
+# and sets the high bit in the cache file unless we assign to the vars.
+{
+  (set) 2>&1 |
+    case `(ac_space=' '; set | grep ac_space) 2>&1` in
+    *ac_space=\ *)
+      # `set' does not quote correctly, so add quotes (double-quote
+      # substitution turns \\\\ into \\, and sed turns \\ into \).
+      sed -n \
+        "s/'/'\\\\''/g;
+    	  s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1='\\2'/p"
+      ;;
+    *)
+      # `set' quotes correctly as required by POSIX, so do not add quotes.
+      sed -n \
+        "s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1=\\2/p"
+      ;;
+    esac;
+} |
+  sed '
+     t clear
+     : clear
+     s/^\([^=]*\)=\(.*[{}].*\)$/test "${\1+set}" = set || &/
+     t end
+     /^ac_cv_env/!s/^\([^=]*\)=\(.*\)$/\1=${\1=\2}/
+     : end' >>confcache
+if cmp -s $cache_file confcache; then :; else
+  if test -w $cache_file; then
+    test "x$cache_file" != "x/dev/null" && echo "updating cache $cache_file"
+    cat confcache >$cache_file
+  else
+    echo "not updating unwritable cache $cache_file"
+  fi
+fi
+rm -f confcache
 
 fi
 
@@ -7174,15 +7529,13 @@ if test "${GCC}" = "yes" ; then
 		for ac_flag in "-g"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CFLAGS"
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+  _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -7253,15 +7606,13 @@ echo "${ECHO_T}no" >&6
 		for ac_flag in "-g"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CXXFLAGS"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+  _save_flags="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -7336,15 +7687,13 @@ echo "${ECHO_T}no" >&6
 	for ac_flag in $CPARANOIDFLAGS
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CFLAGS"
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+  _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -7415,15 +7764,13 @@ echo "${ECHO_T}no" >&6
 	for ac_flag in $CXXPARANOIDFLAGS
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CXXFLAGS"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+  _save_flags="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -7494,15 +7841,13 @@ echo "${ECHO_T}no" >&6
 	for ac_flag in "-ftemplate-depth-22"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CXXFLAGS"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+  _save_flags="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -7574,15 +7919,13 @@ echo "${ECHO_T}no" >&6
 					for ac_flag in "-pipe"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CFLAGS"
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+  _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -7653,15 +7996,13 @@ echo "${ECHO_T}no" >&6
 	for ac_flag in "-pipe"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
-
-
-  _save_flags="$CXXFLAGS"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+  _save_flags="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
@@ -8404,6 +8745,7 @@ s,@net_snmp_found@,$net_snmp_found,;t t
 s,@snmpd@,$snmpd,;t t
 s,@snmpd2@,$snmpd2,;t t
 s,@MIBS@,$MIBS,;t t
+s,@CPP@,$CPP,;t t
 CEOF
 
 _ACEOF
