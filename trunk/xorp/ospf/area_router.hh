@@ -27,7 +27,8 @@ class AreaRouter {
  public:
     AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 	       OspfTypes::AreaType area_type) 
-	: _ospf(ospf), _area(area), _area_type(area_type)
+	: _ospf(ospf), _area(area), _area_type(area_type),
+	  _database(ospf, area)
     {}
 
     /**
@@ -78,6 +79,8 @@ class AreaRouter {
     };
 
     map<PeerID, peer_state> _peers;	// Peers of this area.
+
+    LS_database<A> _database;
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__

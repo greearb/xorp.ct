@@ -34,7 +34,10 @@
 
 #include "libxorp/eventloop.hh"
 
+#include "libproto/spt.hh"
+
 #include "ospf.hh"
+#include "ls_database.hh"
 #include "area_router.hh"
 
 template <typename A>
