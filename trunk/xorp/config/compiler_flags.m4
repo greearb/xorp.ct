@@ -1,14 +1,9 @@
 dnl
-dnl $XORP: xorp/config/compiler_flags.m4,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+dnl $XORP: xorp/config/compiler_flags.m4,v 1.2 2004/12/17 00:44:35 pavlin Exp $
 dnl
 
 dnl
-dnl Checks for compiler-supported command-line options
-dnl
-
-
-dnl
-dnl Check for C complier command-line options
+dnl Check for C compiler command-line options
 dnl
 
 dnl
@@ -17,9 +12,8 @@ dnl
 AC_DEFUN([XR_CHECK_CFLAG],
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
   ac_safe=`echo "$1" | sed 'y%./+- %__p__%'`
-  AC_LANG_SAVE
+  AC_LANG_PUSH(C)
   _save_flags="$CFLAGS"
-  AC_LANG_C
   CFLAGS="$CFLAGS $1"
   AC_MSG_CHECKING([whether C compiler supports flag "$1"])
   AC_CACHE_VAL(ac_cv_prog_c_compiler_$ac_safe,
@@ -32,7 +26,7 @@ AC_DEFUN([XR_CHECK_CFLAG],
     ])
   ])
   CFLAGS="$_save_flags"
-  AC_LANG_RESTORE
+  AC_LANG_POP(C)
   if eval "test \"`echo '$ac_cv_prog_c_compiler_'$ac_safe`\" = yes"; then
     AC_MSG_RESULT(yes)
     ifelse([$2], , :, [$2])
@@ -76,9 +70,8 @@ dnl
 AC_DEFUN([XR_CHECK_CXXFLAG],
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
   ac_safe=`echo "$1" | sed 'y%./+- %__p__%'`
-  AC_LANG_SAVE
+  AC_LANG_PUSH(C++)
   _save_flags="$CXXFLAGS"
-  AC_LANG_CPLUSPLUS
   CXXFLAGS="$CXXFLAGS $1"
   AC_MSG_CHECKING([whether C++ compiler supports flag "$1"])
   AC_CACHE_VAL(ac_cv_prog_cxx_compiler_$ac_safe,
@@ -91,7 +84,7 @@ AC_DEFUN([XR_CHECK_CXXFLAG],
     ])
   ])
   CXXFLAGS="$_save_flags"
-  AC_LANG_RESTORE
+  AC_LANG_POP(C++)
   if eval "test \"`echo '$ac_cv_prog_cxx_compiler_'$ac_safe`\" = yes"; then
     AC_MSG_RESULT(yes)
     ifelse([$2], , :, [$2])
@@ -122,3 +115,6 @@ AC_DEFUN([XR_TRY_ADD_CXXFLAGS],
     XR_CHECK_CXXFLAG($ac_flag, [CXXFLAGS="$CXXFLAGS $ac_flag"])
   done
 ])
+
+
+AC_CACHE_SAVE

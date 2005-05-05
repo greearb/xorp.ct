@@ -6,14 +6,18 @@
 ##   - can specify dmalloc directory   ##
 ##   - `-ldmalloc' before `$LIBS'      ##
 ##   - correct dmalloc URL             ##
+## Modified by bms: use AC_HELP_STRING ##
 
+# serial 3
 
-# serial 1
+dnl Note: Don't use AC_LANG* macros here, they aren't ready when
+dnl this gets included.
 
 AC_DEFUN([XR_WITH_DMALLOC_DIR],
 [AC_MSG_CHECKING(if malloc debugging is wanted)
 AC_ARG_WITH(dmalloc,
-[  --with-dmalloc[=DIR]    use dmalloc (http://www.dmalloc.com/) from DIR],
+	    AC_HELP_STRING([--with-dmalloc=DIR],
+			   [build using the dmalloc allocator in DIR]),
 [if test "$withval" = no; then
   AC_MSG_RESULT(no)
 else
@@ -29,3 +33,5 @@ else
   LDFLAGS="$LDFLAGS -g"
 fi], [AC_MSG_RESULT(no)])
 ])
+
+AC_CACHE_SAVE

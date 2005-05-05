@@ -1,4 +1,16 @@
-/*  acconfig.h -- `autoheader' will generate config.h.in */
+dnl ---------------------------------------------------------------------------
+dnl
+dnl Autoheader definitions
+dnl XXX: Currently this should not be referenced. Do not use until
+dnl      we bump all of the autotools.
+dnl
+dnl $XORP$
+dnl
+dnl ---------------------------------------------------------------------------
+
+AC_CONFIG_HEADERS(config.h)
+
+AH_TOP([
 /*
  * This file is part of the XORP software.
  * See file `LICENSE.xorp' for copyright and license information.
@@ -6,44 +18,12 @@
 
 #ifndef __XORP_CONFIG_H__
 #define __XORP_CONFIG_H__
+])
 
+AH_BOTTOM([
 /*
- * XXX: everything above is unconditionally copied to the generated file
+ * XORP definitions
  */
-@TOP@
-
-/*
- * If you don't have these types in <inttypes.h>, #define these to be
- * the types you do have.
- */
-#undef int8_t
-#undef int16_t
-#undef int32_t
-#undef int64_t
-#undef uint8_t
-#undef uint16_t
-#undef uint32_t
-
-/*
- * Debugging:
- * DEBUG: general debugging
- * DEBUG_MEM: debug memory allocation
- */
-#undef DEBUG
-#undef DEBUG_MEM
-
-@BOTTOM@
-/*
- * XXX: everything below is unconditionally copied to the generated file
- */
-
-/*
- * XXX: Workaround a bug whereby the GNU autoconf tests will happily
- * go off and define their own fictional pid_t using the preprocessor.
- */
-#ifdef pid_t
-#undef pid_t
-#endif
 
 #ifndef HAVE_SIG_T
 typedef RETSIGTYPE (*sig_t)(int);
@@ -105,3 +85,4 @@ using namespace std;
 #endif /* __BEGIN_DECLS */
 
 #endif /* __XORP_CONFIG_H__ */
+])
