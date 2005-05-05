@@ -1569,7 +1569,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    }
 	    
 	    // Check to see if this is a newer LSA.
-	    if (_ospf.get_ls_database_manager().
+	    if (_ospf.get_link_state_database_manager().
 		newer_lsa(_peer.get_area_id(), *i))
 		XLOG_WARNING("TBD - Add to Link State Request List");
 	}

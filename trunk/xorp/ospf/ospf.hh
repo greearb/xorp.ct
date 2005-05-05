@@ -225,6 +225,13 @@ class Ospf {
     PeerManager<A>& get_peer_manager() { return _peer_manager; }
 
     /**
+     * @return a reference to the  LinkStateDatabaseManager.
+     */
+    LinkStateDatabaseManager<A>& get_link_state_database_manager() { 
+	return _lsdbm; 
+    }
+
+    /**
      * Get the Router ID.
      */
     OspfTypes::RouterID get_router_id() const { return _router_id; }
@@ -234,7 +241,6 @@ class Ospf {
      */
     void set_router_id(OspfTypes::RouterID id) { _router_id = id; }
 
-    LS_database_manager<A>& get_ls_database_manager() { return _database; }
 
     Trace& trace() { return _trace; }
 
@@ -250,7 +256,7 @@ class Ospf {
     PacketDecoder _packet_decoder;	// Packet decoders.
     LsaDecoder _lsa_decoder;		// LSA decoders.
     PeerManager<A> _peer_manager;
-    LS_database_manager<A> _database;	// Database manager.
+    LinkStateDatabaseManager<A> _lsdbm;	// Database manager.
 
     OspfTypes::RouterID _router_id;	// Router ID.
 
