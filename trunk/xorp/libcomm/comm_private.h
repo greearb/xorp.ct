@@ -31,7 +31,7 @@
  */
 
 /*
- *  $XORP: xorp/libcomm/comm_private.h,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+ *  $XORP: xorp/libcomm/comm_private.h,v 1.2 2004/03/21 03:14:08 hodson Exp $
  */
 
 #ifndef __LIBCOMM_COMM_PRIVATE_H__
@@ -61,6 +61,8 @@
  * Global variables
  */
 
+extern int _comm_serrno;
+
 /*
  * Global functions prototypes
  */
@@ -75,6 +77,15 @@ __BEGIN_DECLS
  * @param method ipv6 specific method to report.
  */
 void comm_sock_no_ipv6(const char* method, ...);
+
+/**
+ * Fetch and record the last socket layer error code.
+ *
+ * This is done using a function to facilitate using explicit
+ * Thread Local Storage (TLS) at a later time, but is currently
+ * single-threaded.
+ */
+void _comm_set_serrno(void);
 
 __END_DECLS
 

@@ -30,46 +30,32 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.10 2004/09/02 18:50:04 pavlin Exp $"
-
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.11 2005/03/15 07:37:09 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
  */
-
-
 #include "comm_module.h"
 #include "comm_private.h"
 
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
 #include <signal.h>
-
-
-/*
- * Exported variables
- */
-
-/*
- * Local constants definitions
- */
-
-/*
- * Local structures, typedefs and macros
- */
-
-/*
- * Local variables
- */
-
-/*
- * Local functions prototypes
- */
-
 
 /**
  * comm_init:
  * @void:
  *
- * Init stuff. Need to be called only once (during startup).
+ * Library initialization. Need be called only once, during startup.
+ * XXX: Not currently thread-safe.
  *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -81,15 +67,86 @@ comm_init(void)
     if (init_flag)
 	return (XORP_OK);
 
-#ifndef HOST_OS_SOLARIS
-    signal(SIGPIPE, SIG_IGN);	/* XXX */
-#else
-    sigignore(SIGPIPE); /* Solaris compilation warning workaround */
-#endif /* !HOST_OS_SOLARIS */
+#if defined(HOST_OS_WINDOWS)
+    {
+	int result;
+	WORD version;
+	WSADATA wsadata;
+
+	version = MAKEWORD(2, 2);
+	result = WSAStartup(version, &wsadata);
+	if (result != 0) {
+	    return (XORP_ERROR);
+	}
+	if (LOBYTE(wsadata.wVersion) != 2 || HIBYTE(wsadata.wVersion) != 2) {
+	    (void)WSACleanup();
+	    return (XORP_ERROR);
+	}
+    }
+#elif defined(HOST_OS_SOLARIS)
+    /* Solaris compilation warning workaround */
+    sigignore(SIGPIPE);
+#elif defined(SIGPIPE)
+    signal(SIGPIPE, SIG_IGN);
+#endif
 
     init_flag = 1;
 
     return (XORP_OK);
+}
+
+/**
+ * comm_exit:
+ * @void:
+ *
+ * Library termination/cleanup. Must be called at process exit.
+ * XXX: Not currently thread-safe.
+ *
+ **/
+void
+comm_exit(void)
+{
+#ifdef HOST_OS_WINDOWS
+    (void)WSACleanup();
+#endif
+}
+
+/**
+ * comm_get_last_error:
+ *
+ * Retrieve the most recently occured socket error.
+ * XXX: This is inherently single threaded.
+ *
+ * Return value: Operating system specific error code for this thread's
+ *               last socket operation.
+ */
+int
+comm_get_last_error(void)
+{
+    return _comm_serrno;
+}
+
+/**
+ * Retrieve a human readable string (in English) for the given error code.
+ * XXX: Not currently thread-safe.
+ *
+ * @param serrno the socket error number returned by comm_get_last_error().
+ * @return Pointer to a string giving more information about the error.
+ */
+char const *
+comm_get_error_str(int serrno)
+{
+#ifdef HOST_OS_WINDOWS
+    static char msgbuf[1024];
+
+    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
+		  FORMAT_MESSAGE_MAX_WIDTH_MASK, NULL, serrno,
+		  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		  (LPSTR)msgbuf, sizeof(msgbuf), NULL);
+    return (const char *)msgbuf;
+#else
+    return (const char *)strerror(serrno);
+#endif
 }
 
 /**
@@ -105,6 +162,9 @@ comm_ipv4_present(void)
 
 /**
  * comm_ipv6_present:
+ *
+ * XXX: Windows: This could be compiled on a system with IPv6 visible,
+ * but run on a system without IPv6 loaded.
  *
  * Return value: %XORP_OK if IPv6 support present, otherwise %XORP_ERROR
  */
@@ -128,14 +188,14 @@ comm_ipv6_present(void)
  *
  * Return value: The new socket on success, otherwsise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_open_tcp(int family, int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(family, SOCK_STREAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
 
     return (sock);
@@ -151,14 +211,14 @@ comm_open_tcp(int family, int is_blocking)
  *
  * Return value: The new socket on success, otherwsise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_open_udp(int family, int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(family, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
 
     return (sock);
@@ -173,7 +233,7 @@ comm_open_udp(int family, int is_blocking)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_close(int sock)
+comm_close(xsock_t sock)
 {
     if (comm_sock_close(sock) < 0)
 	return (XORP_ERROR);
@@ -193,24 +253,25 @@ comm_close(int sock)
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
 	       int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET, SOCK_STREAM, 0, is_blocking);
     comm_set_reuseaddr(sock, 1);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_bind4(sock, my_addr, my_port) < 0)
 	return (XORP_ERROR);
 
     if (listen(sock, 5) < 0) {
+	_comm_set_serrno();
 	XLOG_ERROR("Error listen() on socket %d: %s",
-		   sock, strerror(errno));
-	close(sock);
+		   sock, comm_get_error_str(comm_get_last_error()));
+	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -229,25 +290,26 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
 	       int is_blocking)
 {
 #ifdef HAVE_IPV6
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET6, SOCK_STREAM, 0, is_blocking);
     comm_set_reuseaddr(sock, 1);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_bind6(sock, my_addr, my_port) < 0)
 	return (XORP_ERROR);
 
     if (listen(sock, 5) < 0) {
+	_comm_set_serrno();
 	XLOG_ERROR("Error listen() on socket %d: %s",
-		   sock, strerror(errno));
-	close(sock);
+		   sock, comm_get_error_str(comm_get_last_error()));
+	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -271,15 +333,15 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
 	       int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_bind4(sock, my_addr, my_port) < 0)
 	return (XORP_ERROR);
@@ -300,16 +362,16 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port,
 	       int is_blocking)
 {
 #ifdef HAVE_IPV6
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_bind6(sock, my_addr, my_port) < 0)
 	return (XORP_ERROR);
@@ -348,24 +410,26 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_join_udp4(const struct in_addr *mcast_addr,
 		    const struct in_addr *join_if_addr,
 		    unsigned short my_port,
 		    int reuse_flag, int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
 
     if (reuse_flag) {
 	if (comm_set_reuseaddr(sock, 1) < 0)
-	    XLOG_ERROR("comm_set_reuseaddr() error: %s", strerror(errno));
+	    XLOG_ERROR("comm_set_reuseaddr() error: %s",
+			comm_get_error_str(comm_get_last_error()));
 	if (comm_set_reuseport(sock, 1) < 0)
-	    XLOG_ERROR("comm_set_reuseport() error: %s", strerror(errno));
+	    XLOG_ERROR("comm_set_reuseport() error: %s",
+			comm_get_error_str(comm_get_last_error()));
     }
     /* Bind the socket */
     if (comm_sock_bind4(sock, NULL, my_port) < 0)
@@ -402,25 +466,27 @@ comm_bind_join_udp4(const struct in_addr *mcast_addr,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 		    unsigned int join_if_index,
 		    unsigned short my_port,
 		    int reuse_flag, int is_blocking)
 {
 #ifdef HAVE_IPV6
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
 
     if (reuse_flag) {
 	if (comm_set_reuseaddr(sock, 1) < 0)
-	    XLOG_ERROR("comm_set_reuseaddr() error: %s", strerror(errno));
+	    XLOG_ERROR("comm_set_reuseaddr() error: %s",
+			comm_get_error_str(comm_get_last_error()));
 	if (comm_set_reuseport(sock, 1) < 0)
-	    XLOG_ERROR("comm_set_reuseport() error: %s", strerror(errno));
+	    XLOG_ERROR("comm_set_reuseport() error: %s",
+			comm_get_error_str(comm_get_last_error()));
     }
     /* Bind the socket */
     if (comm_sock_bind6(sock, NULL, my_port) < 0)
@@ -451,15 +517,15 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_connect_tcp4(const struct in_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET, SOCK_STREAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_connect4(sock, remote_addr, remote_port, is_blocking) < 0)
 	return (XORP_ERROR);
@@ -481,16 +547,16 @@ comm_connect_tcp4(const struct in_addr *remote_addr,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_connect_tcp6(const struct in6_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking)
 {
 #ifdef HAVE_IPV6
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET6, SOCK_STREAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_connect6(sock, remote_addr, remote_port, is_blocking) < 0)
 	return (XORP_ERROR);
@@ -514,15 +580,15 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_connect_udp4(const struct in_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_connect4(sock, remote_addr, remote_port, is_blocking) < 0)
 	return (XORP_ERROR);
@@ -541,16 +607,16 @@ comm_connect_udp4(const struct in_addr *remote_addr,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_connect_udp6(const struct in6_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking)
 {
 #ifdef HAVE_IPV6
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_connect6(sock, remote_addr, remote_port, is_blocking) < 0)
 	return (XORP_ERROR);
@@ -578,17 +644,17 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_connect_udp4(const struct in_addr *local_addr,
 		       unsigned short local_port,
 		       const struct in_addr *remote_addr,
 		       unsigned short remote_port, int is_blocking)
 {
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_bind4(sock, local_addr, local_port) < 0)
 	return (XORP_ERROR);
@@ -613,18 +679,18 @@ comm_bind_connect_udp4(const struct in_addr *local_addr,
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
-int
+xsock_t
 comm_bind_connect_udp6(const struct in6_addr *local_addr,
 		       unsigned short local_port,
 		       const struct in6_addr *remote_addr,
 		       unsigned short remote_port, int is_blocking)
 {
 #ifdef HAVE_IPV6
-    int sock;
+    xsock_t sock;
 
     comm_init();
     sock = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, is_blocking);
-    if (sock < 0)
+    if (sock == XORP_BAD_SOCKET)
 	return (XORP_ERROR);
     if (comm_sock_bind6(sock, local_addr, local_port) < 0)
 	return (XORP_ERROR);

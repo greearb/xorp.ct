@@ -31,21 +31,31 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.9 2004/09/02 02:34:40 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.10 2004/09/02 18:44:43 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
 #define __LIBCOMM_COMM_API_H__
 
+/* XXX: Remove these lines when the xorp_osdep headers are merged! */
+typedef int xsock_t;
+#ifndef XORP_BAD_SOCKET
+#define XORP_BAD_SOCKET		(-1)
+#endif
+#ifndef XORP_SOCKOPT_CAST
+#define XORP_SOCKOPT_CAST(x)	(x)
+#endif
+/* XXX */
 
 /*
  * COMM socket library API header.
  */
-
-
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-
+#endif
 
 /*
  * Constants definitions
@@ -101,6 +111,27 @@ __BEGIN_DECLS
 extern int	comm_init(void);
 
 /**
+ * Finalization. Must be called when client is finished with the library.
+ */
+extern void	comm_exit(void);
+
+/**
+ * Retrieve the most recently occured error for the current thread.
+ *
+ * @return Operating system specific error code for this thread's
+ *         last socket operation.
+ */
+extern int	comm_get_last_error(void);
+
+/**
+ * Retrieve a human readable string (in English) for the given error code.
+ *
+ * @param serrno the socket error number returned by comm_get_last_error().
+ * @return Pointer to a string giving more information about the error.
+ */
+extern char const *	comm_get_error_str(int serrno);
+
+/**
  * Indicate presence of IPv4 support.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -122,7 +153,7 @@ extern int	comm_ipv6_present(void);
  * non-blocking.
  * @return the new socket on success, otherwsise XORP_ERROR.
  */
-extern int	comm_open_tcp(int family, int is_blocking);
+extern xsock_t	comm_open_tcp(int family, int is_blocking);
 
 /**
  * Open an UDP socket.
@@ -132,7 +163,7 @@ extern int	comm_open_tcp(int family, int is_blocking);
  * non-blocking.
  * @return the new socket on success, otherwsise XORP_ERROR.
  */
-extern int	comm_open_udp(int family, int is_blocking);
+extern xsock_t	comm_open_udp(int family, int is_blocking);
 
 /**
  * Close a socket.
@@ -140,7 +171,7 @@ extern int	comm_open_udp(int family, int is_blocking);
  * @param sock the socket to close.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_close(int sock);
+extern int	comm_close(xsock_t sock);
 
 /**
  * Open an IPv4 TCP socket and bind it to a local address and a port.
@@ -152,7 +183,7 @@ extern int	comm_close(int sock);
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_tcp4(const struct in_addr *my_addr,
+extern xsock_t	comm_bind_tcp4(const struct in_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
 
 /**
@@ -165,7 +196,7 @@ extern int	comm_bind_tcp4(const struct in_addr *my_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_tcp6(const struct in6_addr *my_addr,
+extern xsock_t	comm_bind_tcp6(const struct in6_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
 
 /**
@@ -178,7 +209,7 @@ extern int	comm_bind_tcp6(const struct in6_addr *my_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_udp4(const struct in_addr *my_addr,
+extern xsock_t	comm_bind_udp4(const struct in_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
 
 /**
@@ -191,7 +222,7 @@ extern int	comm_bind_udp4(const struct in_addr *my_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_udp6(const struct in6_addr *my_addr,
+extern xsock_t	comm_bind_udp6(const struct in6_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
 
 /**
@@ -222,7 +253,7 @@ extern int	comm_bind_udp6(const struct in6_addr *my_addr,
  *
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
+extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
 				    const struct in_addr *join_if_addr,
 				    unsigned short my_port,
 				    int reuse_flag, int is_blocking);
@@ -255,7 +286,7 @@ extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  *
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
+extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 				    unsigned int join_if_index,
 				    unsigned short my_port,
 				    int reuse_flag, int is_blocking);
@@ -272,7 +303,7 @@ extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_tcp4(const struct in_addr *remote_addr,
+extern xsock_t	comm_connect_tcp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking);
 
@@ -289,7 +320,7 @@ extern int	comm_connect_tcp4(const struct in_addr *remote_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_tcp6(const struct in6_addr *remote_addr,
+extern xsock_t	comm_connect_tcp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking);
 
@@ -302,7 +333,7 @@ extern int	comm_connect_tcp6(const struct in6_addr *remote_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_udp4(const struct in_addr *remote_addr,
+extern xsock_t	comm_connect_udp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking);
 
@@ -315,7 +346,7 @@ extern int	comm_connect_udp4(const struct in_addr *remote_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_udp6(const struct in6_addr *remote_addr,
+extern xsock_t	comm_connect_udp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking);
 
@@ -332,7 +363,7 @@ extern int	comm_connect_udp6(const struct in6_addr *remote_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_connect_udp4(const struct in_addr *local_addr,
+extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
 				       unsigned short local_port,
 				       const struct in_addr *remote_addr,
 				       unsigned short remote_port,
@@ -351,7 +382,7 @@ extern int	comm_bind_connect_udp4(const struct in_addr *local_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_connect_udp6(const struct in6_addr *local_addr,
+extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       unsigned short local_port,
 				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port,
@@ -388,7 +419,7 @@ extern int	comm_sock_open(int domain, int type, int protocol,
  * @param my_port the port to bind to (in network order).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_bind4(int sock, const struct in_addr *my_addr,
+extern int	comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
 				unsigned short my_port);
 
 /**
@@ -400,7 +431,7 @@ extern int	comm_sock_bind4(int sock, const struct in_addr *my_addr,
  * @param my_port the port to bind to (in network order).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_bind6(int sock, const struct in6_addr *my_addr,
+extern int	comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 				unsigned short my_port);
 
 /**
@@ -412,7 +443,7 @@ extern int	comm_sock_bind6(int sock, const struct in6_addr *my_addr,
  * If it is NULL, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_join4(int sock, const struct in_addr *mcast_addr,
+extern int	comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
 				const struct in_addr *my_addr);
 
 /**
@@ -424,7 +455,7 @@ extern int	comm_sock_join4(int sock, const struct in_addr *mcast_addr,
  * If it is 0, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
+extern int	comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
 				unsigned int my_ifindex);
 
 /**
@@ -436,7 +467,7 @@ extern int	comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
  * If it is NULL, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
+extern int	comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
 				 const struct in_addr *my_addr);
 
 /**
@@ -448,7 +479,7 @@ extern int	comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
  * If it is 0, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
+extern int	comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
 				 unsigned int my_ifindex);
 
 /**
@@ -464,7 +495,8 @@ extern int	comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
  * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_connect4(int sock, const struct in_addr *remote_addr,
+extern int	comm_sock_connect4(xsock_t sock,
+				   const struct in_addr *remote_addr,
 				   unsigned short remote_port,
 				   int is_blocking);
 
@@ -481,7 +513,7 @@ extern int	comm_sock_connect4(int sock, const struct in_addr *remote_addr,
  * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_connect6(int sock,
+extern int	comm_sock_connect6(xsock_t sock,
 				   const struct in6_addr *remote_addr,
 				   unsigned short remote_port,
 				   int is_blocking);
@@ -492,7 +524,7 @@ extern int	comm_sock_connect6(int sock,
  * @param sock the listening socket to accept on.
  * @return the accepted socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_accept(int sock);
+extern xsock_t	comm_sock_accept(xsock_t sock);
 
 /**
  * Close a socket.
@@ -500,7 +532,7 @@ extern int	comm_sock_accept(int sock);
  * @param sock the socket to close.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_close(int sock);
+extern int	comm_sock_close(xsock_t sock);
 
 /**
  * Set/reset the TCP_NODELAY option on a TCP socket.
@@ -509,7 +541,7 @@ extern int	comm_sock_close(int sock);
  * @param val if non-zero, the option will be set, otherwise will be reset.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_nodelay(int sock, int val);
+extern int	comm_set_nodelay(xsock_t sock, int val);
 
 /**
  * Set/reset the SO_REUSEADDR option on a socket.
@@ -520,7 +552,7 @@ extern int	comm_set_nodelay(int sock, int val);
  * @param val if non-zero, the option will be set, otherwise will be reset.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_reuseaddr(int sock, int val);
+extern int	comm_set_reuseaddr(xsock_t sock, int val);
 
 /**
  * Set/reset the SO_REUSEPORT option on a socket.
@@ -531,7 +563,7 @@ extern int	comm_set_reuseaddr(int sock, int val);
  * @param val if non-zero, the option will be set, otherwise will be reset.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_reuseport(int sock, int val);
+extern int	comm_set_reuseport(xsock_t sock, int val);
 
 /**
  * Set/reset the multicast loopback option on a socket.
@@ -540,7 +572,7 @@ extern int	comm_set_reuseport(int sock, int val);
  * @param val if non-zero, the option will be set, otherwise will be reset.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_loopback(int sock, int val);
+extern int	comm_set_loopback(xsock_t sock, int val);
 
 /**
  * Set/reset the TCP_MD5SIG option on a socket.
@@ -551,7 +583,7 @@ extern int	comm_set_loopback(int sock, int val);
  * @param val if non-zero, the option will be set, otherwise will be reset.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_tcpmd5(int sock, int val);
+extern int	comm_set_tcpmd5(xsock_t sock, int val);
 
 /**
  * Set the TTL of the outgoing multicast packets on a socket.
@@ -560,7 +592,7 @@ extern int	comm_set_tcpmd5(int sock, int val);
  * @param val the TTL of the outgoing multicast packets.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_ttl(int sock, int val);
+extern int	comm_set_ttl(xsock_t sock, int val);
 
 /**
  * Set default interface for IPv4 outgoing multicast on a socket.
@@ -571,7 +603,7 @@ extern int	comm_set_ttl(int sock, int val);
  * a datagram is sent.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_iface4(int sock, const struct in_addr *in_addr);
+extern int	comm_set_iface4(xsock_t sock, const struct in_addr *in_addr);
 
 /**
  * Set default interface for IPv6 outgoing multicast on a socket.
@@ -582,7 +614,7 @@ extern int	comm_set_iface4(int sock, const struct in_addr *in_addr);
  * a datagram is sent.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_iface6(int sock, u_int ifindex);
+extern int	comm_set_iface6(xsock_t sock, u_int ifindex);
 
 /**
  * Set the sending buffer size of a socket.
@@ -593,7 +625,7 @@ extern int	comm_set_iface6(int sock, u_int ifindex);
  * @return the successfully set buffer size on success,
  * otherwise XORP_ERROR.
  */
-extern int	comm_sock_set_sndbuf(int sock, int desired_bufsize,
+extern int	comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize,
 				     int min_bufsize);
 
 /**
@@ -605,18 +637,28 @@ extern int	comm_sock_set_sndbuf(int sock, int desired_bufsize,
  * @return the successfully set buffer size on success,
  * otherwise XORP_ERROR.
  */
-extern int	comm_sock_set_rcvbuf(int sock, int desired_bufsize,
+extern int	comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize,
 				     int min_bufsize);
 
 /**
  * Get the address family of a socket.
- *
- * XXX: idea taken from W. Stevens' UNPv1, 2e (pp 109)
+ * Idea taken from W. Stevens' UNPv1, 2e (pp 109).
  *
  * @param sock the socket whose address family we need to get.
  * @return the address family on success, otherwise XORP_ERROR.
  */
-extern int	socket2family(int sock);
+extern int	comm_sock_get_family(xsock_t sock);
+
+/**
+ * comm_sock_set_blocking:
+ *
+ * Set the blocking or non-blocking mode of an existing socket.
+ * @param sock the socket whose blocking mode is to be set.
+ * @param is_blocking if non-zero, then set socket to blocking mode.
+ *
+ * @return XORP_OK if the operation was successful, otherwise XORP_ERROR.
+ **/
+extern int	comm_sock_set_blocking(xsock_t sock, int is_blocking);
 
 __END_DECLS
 

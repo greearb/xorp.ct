@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.7 2005/01/28 03:29:15 pavlin Exp $"
+#ident "$XORP$"
 
 
 /*
@@ -26,10 +26,18 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 
 #include "libcomm/comm_api.h"
 
@@ -144,6 +152,11 @@ main(int argc, char *argv[])
 	       inet_ntoa(mcast_addr), ntohs(port));
     }
 
+
+    /*
+     * Cleanup libcomm
+     */
+    comm_exit();
 
     /*
      * Gracefully stop and exit xlog
