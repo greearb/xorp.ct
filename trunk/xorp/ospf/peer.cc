@@ -41,11 +41,11 @@
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
-		     const A address, const uint16_t interface_mtu,
+		     const A source, const uint16_t interface_mtu,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 		     OspfTypes::AreaType area_type)
     : _ospf(ospf), _interface(interface), _vif(vif),
-      _address(address), _interface_mtu(interface_mtu),
+      _source(source), _interface_mtu(interface_mtu),
       _linktype(linktype), _running(false)
 {
     _areas[area] = new Peer<A>(ospf, *this, area, area_type);
@@ -741,7 +741,7 @@ Peer<A>::send_hello_packet()
 	break;
     case OspfTypes::BROADCAST:
 	transmit = new SimpleTransmit<A>(pkt, A::OSPFIGP_ROUTERS(), 
-					 _peerout.get_address());
+					 _peerout.get_source_address());
 	break;
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
@@ -775,7 +775,7 @@ template <>
 OspfTypes::RouterID
 Peer<IPv4>::get_candidate_id(IPv4) const
 {
-    return _peerout.get_address();
+    return _peerout.get_source_address();
 }
 
 template <>
@@ -1206,7 +1206,7 @@ Neighbour<A>::send_data_description_packet()
     case OspfTypes::PointToPoint:
 	transmit = new SimpleTransmit<A>(pkt,
 					 A::OSPFIGP_ROUTERS(), 
-					 _peer.get_address());
+					 _peer.get_source_address());
 	break;
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
@@ -1214,7 +1214,7 @@ Neighbour<A>::send_data_description_packet()
     case OspfTypes::VirtualLink:
 	transmit = new SimpleTransmit<A>(pkt,
 					 get_neighbour_address(),
-					 _peer.get_address());
+					 _peer.get_source_address());
 	break;
     }
 

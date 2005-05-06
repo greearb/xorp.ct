@@ -176,15 +176,15 @@ PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
 template <typename A>
 PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
-			    const A address,
+			    const A source,
 			    uint16_t  interface_mtu,
 			    OspfTypes::LinkType linktype, 
 			    OspfTypes::AreaID area)
     throw(BadPeer)
 {
-    debug_msg("Interface %s Vif %s address %s mtu %d linktype %u area %s\n",
+    debug_msg("Interface %s Vif %s source net %s mtu %d linktype %u area %s\n",
 	      interface.c_str(), vif.c_str(),
-	      cstring(address),  interface_mtu,
+	      cstring(source),  interface_mtu,
 	      linktype, area.str().c_str());
 
     AreaRouter<A> *area_router = get_area_router(area);
@@ -200,7 +200,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     // this interface/vif is unique.
 
     _peers[peerid] = new PeerOut<A>(_ospf, interface, vif, 
-				    address, interface_mtu, linktype,
+				    source, interface_mtu, linktype,
 				    area, area_router->get_area_type());
 
     area_router->add_peer(peerid);
