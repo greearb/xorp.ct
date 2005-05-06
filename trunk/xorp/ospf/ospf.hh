@@ -115,7 +115,6 @@ pp_area_type(OspfTypes::AreaType area_type)
 #include "packet.hh"
 #include "transmit.hh"
 #include "peer_manager.hh"
-#include "ls_database_manager.hh"
 #include "trace.hh"
 
 template <typename A>
@@ -225,13 +224,6 @@ class Ospf {
     PeerManager<A>& get_peer_manager() { return _peer_manager; }
 
     /**
-     * @return a reference to the  LinkStateDatabaseManager.
-     */
-    LinkStateDatabaseManager<A>& get_link_state_database_manager() { 
-	return _lsdbm; 
-    }
-
-    /**
      * Get the Router ID.
      */
     OspfTypes::RouterID get_router_id() const { return _router_id; }
@@ -256,7 +248,6 @@ class Ospf {
     PacketDecoder _packet_decoder;	// Packet decoders.
     LsaDecoder _lsa_decoder;		// LSA decoders.
     PeerManager<A> _peer_manager;
-    LinkStateDatabaseManager<A> _lsdbm;	// Database manager.
 
     OspfTypes::RouterID _router_id;	// Router ID.
 

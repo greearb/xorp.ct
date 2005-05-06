@@ -35,8 +35,7 @@
 template <typename A>
 Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
     : _version(version), _eventloop(eventloop), _io(io),
-      _lsa_decoder(version), _peer_manager(*this),
-      _lsdbm(*this)
+      _lsa_decoder(version), _peer_manager(*this)
 {
     // Register the LSAs and packets with the associated decoder.
     switch(get_version()) {
