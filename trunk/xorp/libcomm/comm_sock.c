@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.11 2004/09/02 18:44:43 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.13 2005/05/05 19:49:08 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -93,11 +93,11 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
     /* Create the kernel socket */
     sock = socket(domain, type, protocol);
     if (sock == XORP_BAD_SOCKET) {
+	_comm_set_serrno();
 	XLOG_ERROR("Error opening socket (domain = %d, type = %d, "
 		   "protocol = %d): %s",
 		   domain, type, protocol,
 		   comm_get_error_str(comm_get_last_error()));
-	_comm_set_serrno();
 	return (XORP_ERROR);
     }
 
@@ -603,8 +603,8 @@ comm_sock_accept(xsock_t sock)
     socklen_t socklen = sizeof(addr);
 
     sock_accept = accept(sock, (struct sockaddr *)&addr, &socklen);
-    _comm_set_serrno();
     if (sock_accept == XORP_BAD_SOCKET) {
+	_comm_set_serrno();
 	XLOG_ERROR("Error accepting socket %d: %s",
 		   sock, comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
@@ -638,9 +638,8 @@ comm_sock_close(xsock_t sock)
     ret = closesocket(sock);
 #endif
 
-    _comm_set_serrno();
-
     if (ret < 0) {
+	_comm_set_serrno();
 	XLOG_ERROR("Error closing socket (socket = %d) : %s",
 		   sock, comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
@@ -1079,8 +1078,8 @@ comm_sock_get_family(xsock_t sock)
     len = sizeof(wspinfo);
     err = getsockopt(sock, SOL_SOCKET, SO_PROTOCOL_INFO,
 			   XORP_SOCKOPT_CAST(&wspinfo), &len);
-    _comm_set_serrno();
     if (err != 0)  {
+	_comm_set_serrno();
 	XLOG_ERROR("Error getsockopt(SO_PROTOCOL_INFO) for socket %d: %s",
 		   sock, comm_get_error_str(comm_get_last_error()));
 	comm_sock_close(sock);
