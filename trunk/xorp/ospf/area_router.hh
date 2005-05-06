@@ -27,9 +27,11 @@ class AreaRouter {
  public:
     AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 	       OspfTypes::AreaType area_type) 
-	: _ospf(ospf), _area(area), _area_type(area_type),
-	  _lsdb(ospf, area)
-    {}
+	: _ospf(ospf), _area(area), _area_type(area_type)
+    {
+	_router_lsa = Lsa::LsaRef(new RouterLsa(_ospf.get_version()));
+	_db.push_back(_router_lsa);
+    }
 
     /**
      * Add peer
@@ -43,13 +45,11 @@ class AreaRouter {
 
     /**
      * Peer came up
-     * Callback registered with the peer manager.
      */
     void peer_up(PeerID peer);
 
     /**
      * Peer went down
-     * Callback registered with the peer manager.
      */
     void peer_down(PeerID peer);
 
@@ -62,12 +62,21 @@ class AreaRouter {
      * Receive LSA
      */
     void receive_lsa(PeerID peer, Lsa::LsaRef lsa);
+
+    /**
+     * @return true if this is a newer LSA than we already have.
+     */
+    bool newer_lsa(const Lsa_header&) const;
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
     OspfTypes::AreaID _area;		// Area: That is represented.
     OspfTypes::AreaType _area_type;	// Type of this area.
 
+    Lsa::LsaRef _router_lsa;		// This routers router LSA.
+    vector<Lsa::LsaRef> _db;		// Database of LSAs.
+    
     /**
      * Internal state that is required about this peer.
      */
@@ -79,8 +88,6 @@ class AreaRouter {
     };
 
     map<PeerID, peer_state> _peers;	// Peers of this area.
-
-    LinkStateDatabase<A> _lsdb;
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__

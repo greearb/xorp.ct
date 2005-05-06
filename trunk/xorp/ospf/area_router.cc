@@ -60,6 +60,16 @@ AreaRouter<A>::delete_peer(PeerID peerid)
     _peers.erase(_peers.find(peerid));
 }
 
+template <typename A>
+bool
+AreaRouter<A>::newer_lsa(const Lsa_header&) const
+{
+    XLOG_WARNING("TBD");
+
+    return true;
+}
+
+
 template class AreaRouter<IPv4>;
 template class AreaRouter<IPv6>;
 
