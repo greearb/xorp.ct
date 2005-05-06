@@ -141,7 +141,7 @@ class PeerOut {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
-    const string _interface;	   		// The interface and vif this peer is
+    const string _interface;	   	// The interface and vif this peer is
     const string _vif;			// responsible for.
     const A	_address;		// Address of this interface/vif.
     const uint16_t _interface_mtu;		// MTU of this interface.
@@ -581,6 +581,17 @@ class Neighbour {
     bool _all_headers_sent;		// Tracking database transmssion
 
     XorpTimer _rxmt_timer;		// Retransmit timer.
+
+    /**
+     * Get the area router.
+     */
+    AreaRouter<A> *get_area_router() {
+	AreaRouter<A> *area_router = 
+	    _ospf.get_peer_manager().get_area_router(_peer.get_area_id());
+	XLOG_ASSERT(area_router);
+	return area_router;
+    }
+      
 
     /**
      * Set the state of this neighbour.

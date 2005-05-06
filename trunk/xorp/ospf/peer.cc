@@ -37,6 +37,7 @@
 
 #include "ospf.hh"
 #include "peer.hh"
+#include "area_router.hh"
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
@@ -1569,8 +1570,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    }
 	    
 	    // Check to see if this is a newer LSA.
-	    if (_ospf.get_link_state_database_manager().
-		newer_lsa(_peer.get_area_id(), *i))
+	    if (get_area_router()->newer_lsa(*i))
 		XLOG_WARNING("TBD - Add to Link State Request List");
 	}
 
