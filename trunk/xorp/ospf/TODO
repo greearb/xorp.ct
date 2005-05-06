@@ -22,6 +22,9 @@ types are valid. This method should be used by data_description_received.
 
 6) Pretty print the options field in a packet.
 
+7) Can an interface a peer in our code have more than one subnet
+associated with it?
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
