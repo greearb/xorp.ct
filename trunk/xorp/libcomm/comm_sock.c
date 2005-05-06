@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.13 2005/05/05 19:49:08 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.14 2005/05/06 02:15:25 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -990,6 +990,8 @@ comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 			   sizeof(desired_bufsize)) < 0) {
 		_comm_set_serrno();
 		desired_bufsize -= delta;
+		if (desired_bufsize <= 0)
+		    break;
 	    } else {
 		if (delta < 1024)
 		    break;
@@ -1042,6 +1044,8 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 			   sizeof(desired_bufsize)) < 0) {
 		_comm_set_serrno();
 		desired_bufsize -= delta;
+		if (desired_bufsize <= 0)
+		    break;
 	    } else {
 		if (delta < 1024)
 		    break;
