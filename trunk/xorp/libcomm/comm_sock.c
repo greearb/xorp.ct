@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.14 2005/05/06 02:15:25 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.15 2005/05/06 02:18:41 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -83,9 +83,9 @@ int _comm_serrno;
  * The sending and receiving buffer size are set, and the socket
  * itself is set with %TCP_NODELAY (if a TCP socket).
  *
- * Return value: The open socket on success, otherwise %XORP_ERROR.
+ * Return value: The open socket on success, otherwise %XORP_BAD_SOCKET.
  **/
-int
+xsock_t
 comm_sock_open(int domain, int type, int protocol, int is_blocking)
 {
     xsock_t sock;
@@ -98,7 +98,7 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
 		   "protocol = %d): %s",
 		   domain, type, protocol,
 		   comm_get_error_str(comm_get_last_error()));
-	return (XORP_ERROR);
+	return (XORP_BAD_SOCKET);
     }
 
     /* Set the receiving and sending socket buffer size in the kernel */
@@ -106,27 +106,27 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
 	< SO_RCV_BUF_SIZE_MIN) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_ERROR);
+	return (XORP_BAD_SOCKET);
     }
     if (comm_sock_set_sndbuf(sock, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
 	< SO_SND_BUF_SIZE_MIN) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_ERROR);
+	return (XORP_BAD_SOCKET);
     }
 
     /* Enable TCP_NODELAY */
-    if (type == SOCK_STREAM && comm_set_nodelay(sock, 1) < 0) {
+    if (type == SOCK_STREAM && comm_set_nodelay(sock, 1) != XORP_OK) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_ERROR);
+	return (XORP_BAD_SOCKET);
     }
 
     /* Set blocking mode */
-    if (comm_sock_set_blocking(sock, is_blocking) == XORP_ERROR) {
+    if (comm_sock_set_blocking(sock, is_blocking) != XORP_OK) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_ERROR);
+	return (XORP_BAD_SOCKET);
     }
 
     return (sock);
@@ -176,7 +176,6 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
 		   (my_addr)? inet_ntoa(*my_addr) : "ANY",
 		   ntohs(my_port),
 		   comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -233,7 +232,6 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 		   inet_ntop(family, my_addr, addr_str, sizeof(addr_str))
 		   : "ANY",
 		   ntohs(my_port), comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -292,7 +290,6 @@ comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
 		   "mcast_addr = %s my_addr = %s): %s",
 		   family, mcast_addr_str, my_addr_str,
 		   comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -337,7 +334,6 @@ comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
 		   family,
 		   inet_ntop(family, mcast_addr, addr_str, sizeof(addr_str)),
 		   my_ifindex, comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -396,7 +392,6 @@ comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
 		   "mcast_addr = %s my_addr = %s): %s",
 		   family, mcast_addr_str, my_addr_str,
 		   comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -441,7 +436,6 @@ comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
 		   family,
 		   inet_ntop(family, mcast_addr, addr_str, sizeof(addr_str)),
 		   my_ifindex, comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -508,7 +502,6 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
 		   "remote_addr = %s, remote_port = %d): %s",
 		   family, inet_ntoa(*remote_addr), ntohs(remote_port),
 		   comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -575,7 +568,6 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 		   : "ANY",
 		   ntohs(remote_port),
 		   comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -593,7 +585,7 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
  *
  * Accept a connection on a listening socket.
  *
- * Return value: The accepted socket on success, otherwise %XORP_ERROR.
+ * Return value: The accepted socket on success, otherwise %XORP_BAD_SOCKET.
  **/
 xsock_t
 comm_sock_accept(xsock_t sock)
@@ -607,13 +599,13 @@ comm_sock_accept(xsock_t sock)
 	_comm_set_serrno();
 	XLOG_ERROR("Error accepting socket %d: %s",
 		   sock, comm_get_error_str(comm_get_last_error()));
-	return (XORP_ERROR);
+	return (XORP_BAD_SOCKET);
     }
 
     /* Enable TCP_NODELAY */
-    if (comm_set_nodelay(sock_accept, 1) < 0) {
-	comm_sock_close(sock);
-	return (XORP_ERROR);
+    if (comm_set_nodelay(sock_accept, 1) != XORP_OK) {
+	comm_sock_close(sock_accept);
+	return (XORP_BAD_SOCKET);
     }
 
     return (sock_accept);
@@ -1086,7 +1078,6 @@ comm_sock_get_family(xsock_t sock)
 	_comm_set_serrno();
 	XLOG_ERROR("Error getsockopt(SO_PROTOCOL_INFO) for socket %d: %s",
 		   sock, comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 
@@ -1107,7 +1098,6 @@ comm_sock_get_family(xsock_t sock)
 	_comm_set_serrno();
 	XLOG_ERROR("Error getsockname() for socket %d: %s",
 		   sock, comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
 	return (XORP_ERROR);
     }
 

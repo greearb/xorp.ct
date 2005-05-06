@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.9 2005/05/05 19:49:08 bms Exp $"
 
 
 /*
@@ -67,7 +67,7 @@
 int
 main(int argc, char *argv[])
 {
-    int sock;
+    xsock_t sock;
     unsigned short port = htons(12340);		/* XXX: the port to bind to */
     struct in_addr mcast_addr;
 
@@ -95,46 +95,46 @@ main(int argc, char *argv[])
      * Test `open TCP socket'
      */
     sock = comm_open_tcp(AF_INET, COMM_SOCK_BLOCKING);
-    if (sock >= 0) {
+    if (sock == XORP_BAD_SOCKET) {
+	printf("ERROR: cannot open TCP socket\n");
+    } else {
 	printf("OK: open TCP socket\n");
 	comm_close(sock);
-    } else {
-	printf("ERROR: cannot open TCP socket\n");
     }
 
     /*
      * Test `open UDP socket'
      */
     sock = comm_open_udp(AF_INET, COMM_SOCK_BLOCKING);
-    if (sock >= 0) {
+    if (sock == XORP_BAD_SOCKET) {
+	printf("ERROR: cannot open UDP socket\n");
+    } else {
 	printf("OK: open UDP socket\n");
 	comm_close(sock);
-    } else {
-	printf("ERROR: cannot open UDP socket\n");
     }
 
     /*
      * Test `bind TCP socket'
      */
     sock = comm_bind_tcp4(NULL, port, COMM_SOCK_BLOCKING);
-    if (sock >= 0) {
-	printf("OK: open and bind TCP socket to port %d\n", ntohs(port));
-	comm_close(sock);
-    } else {
+    if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open and bind TCP socket to port %d\n",
 	       ntohs(port));
+    } else {
+	printf("OK: open and bind TCP socket to port %d\n", ntohs(port));
+	comm_close(sock);
     }
 
     /*
      * Test `bind UDP socket'
      */
     sock = comm_bind_udp4(NULL, port, COMM_SOCK_BLOCKING);
-    if (sock >= 0) {
-	printf("OK: open and bind UDP socket to port %d\n", ntohs(port));
-	comm_close(sock);
-    } else {
+    if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open and bind UDP socket to port %d\n",
 	       ntohs(port));
+    } else {
+	printf("OK: open and bind UDP socket to port %d\n", ntohs(port));
+	comm_close(sock);
     }
 
     /*
@@ -143,12 +143,12 @@ main(int argc, char *argv[])
     sock = comm_bind_join_udp4(&mcast_addr, NULL, port,
 			       COMM_SOCK_ADDR_PORT_REUSE,
 			       COMM_SOCK_BLOCKING);
-    if (sock >= 0) {
-	printf("OK: open, bind and join UDP socket to group %s and port %d\n",
+    if (sock == XORP_BAD_SOCKET) {
+	printf("ERROR: cannot open, bind and join UDP socket to group %s and port %d\n",
 	       inet_ntoa(mcast_addr), ntohs(port));
 	comm_close(sock);
     } else {
-	printf("ERROR: cannot open, bind and join UDP socket to group %s and port %d\n",
+	printf("OK: open, bind and join UDP socket to group %s and port %d\n",
 	       inet_ntoa(mcast_addr), ntohs(port));
     }
 

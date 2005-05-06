@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.10 2004/09/02 18:44:43 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.11 2005/05/05 19:49:08 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -151,7 +151,7 @@ extern int	comm_ipv6_present(void);
  * @param family the address family.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwsise XORP_ERROR.
+ * @return the new socket on success, otherwsise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_open_tcp(int family, int is_blocking);
 
@@ -161,7 +161,7 @@ extern xsock_t	comm_open_tcp(int family, int is_blocking);
  * @param family the address family.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwsise XORP_ERROR.
+ * @return the new socket on success, otherwsise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_open_udp(int family, int is_blocking);
 
@@ -181,7 +181,7 @@ extern int	comm_close(xsock_t sock);
  * @param my_port the local port to bind to (in network order).
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_tcp4(const struct in_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
@@ -194,7 +194,7 @@ extern xsock_t	comm_bind_tcp4(const struct in_addr *my_addr,
  * @param my_port the local port to bind to (in network order).
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_tcp6(const struct in6_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
@@ -207,7 +207,7 @@ extern xsock_t	comm_bind_tcp6(const struct in6_addr *my_addr,
  * @param my_port the local port to bind to (in network order).
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_udp4(const struct in_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
@@ -220,7 +220,7 @@ extern xsock_t	comm_bind_udp4(const struct in_addr *my_addr,
  * @param my_port the local port to bind to (in network order).
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_udp6(const struct in6_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
@@ -251,7 +251,7 @@ extern xsock_t	comm_bind_udp6(const struct in6_addr *my_addr,
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
  *
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
 				    const struct in_addr *join_if_addr,
@@ -284,7 +284,7 @@ extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
  *
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 				    unsigned int join_if_index,
@@ -294,14 +294,13 @@ extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 /**
  * Open an IPv4 TCP socket, and connect it to a remote address and port.
  * TODO: XXX: because it may take time to connect on a TCP socket,
- * the return value actually is XORP_OK even though the connect did not
- * complete.
+ * we return success even though the connect did not complete.
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_tcp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
@@ -311,14 +310,13 @@ extern xsock_t	comm_connect_tcp4(const struct in_addr *remote_addr,
  * Open an IPv6 TCP socket, and connect it to a remote address and port.
  *
  * TODO: XXX: because it may take time to connect on a TCP socket,
- * the return value actually is XORP_OK even though the connect did not
- * complete.
+ * we return success even though the connect did not complete.
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_tcp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
@@ -331,7 +329,7 @@ extern xsock_t	comm_connect_tcp6(const struct in6_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_udp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
@@ -344,7 +342,7 @@ extern xsock_t	comm_connect_udp4(const struct in_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_udp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
@@ -361,7 +359,7 @@ extern xsock_t	comm_connect_udp6(const struct in6_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
 				       unsigned short local_port,
@@ -380,7 +378,7 @@ extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the new socket on success, otherwise XORP_ERROR.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       unsigned short local_port,
@@ -405,9 +403,9 @@ extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
  * @param protocol the particular protocol to be used with the socket.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- * @return the open socket on success, otherwise XORP_ERROR.
+ * @return the open socket on success, otherwise XORP_BAD_SOCKET.
  */
-extern int	comm_sock_open(int domain, int type, int protocol,
+extern xsock_t	comm_sock_open(int domain, int type, int protocol,
 			       int is_blocking);
 
 /**
@@ -522,7 +520,7 @@ extern int	comm_sock_connect6(xsock_t sock,
  * Accept a connection on a listening socket.
  *
  * @param sock the listening socket to accept on.
- * @return the accepted socket on success, otherwise XORP_ERROR.
+ * @return the accepted socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_sock_accept(xsock_t sock);
 
