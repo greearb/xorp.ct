@@ -43,7 +43,7 @@ template <typename A>
 class PeerManager {
  public:
     PeerManager(Ospf<A> &ospf)
-	: _ospf(ospf)
+	: _ospf(ospf), _next_peerid(0)
     {}
 
     ~PeerManager();
