@@ -41,10 +41,11 @@
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
+		     const PeerID peerid,
 		     const A source, const uint16_t interface_mtu,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 		     OspfTypes::AreaType area_type)
-    : _ospf(ospf), _interface(interface), _vif(vif),
+    : _ospf(ospf), _interface(interface), _vif(vif), _peerid(peerid),
       _source(source), _interface_mtu(interface_mtu),
       _linktype(linktype), _running(false)
 {
@@ -168,8 +169,14 @@ PeerOut<A>::bring_up_peering()
 
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
-    for(i = _areas.begin(); i != _areas.end(); i++)
+    for(i = _areas.begin(); i != _areas.end(); i++) {
 	(*i).second->start();
+	AreaRouter<A> *area_router = 
+	    _ospf.get_peer_manager().get_area_router((*i).first);
+	XLOG_ASSERT(area_router);
+	area_router->peer_up(_peerid);
+    }
+
 }
 
 template <typename A>
@@ -180,8 +187,13 @@ PeerOut<A>::take_down_peering()
 
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
-    for(i = _areas.begin(); i != _areas.end(); i++)
+    for(i = _areas.begin(); i != _areas.end(); i++) {
 	(*i).second->stop();
+	AreaRouter<A> *area_router = 
+	    _ospf.get_peer_manager().get_area_router((*i).first);
+	XLOG_ASSERT(area_router);
+	area_router->peer_down(_peerid);
+    }
 }
 
 template <typename A>

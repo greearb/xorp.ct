@@ -39,7 +39,8 @@ class PeerOut {
  public:
 
     PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
-	    const A source,  const uint16_t interface_mtu,
+	    PeerID peerid,
+	    const A source, const uint16_t interface_mtu,
 	    OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 	    OspfTypes::AreaType area_type);
 
@@ -143,6 +144,7 @@ class PeerOut {
 
     const string _interface;	   	// The interface and vif this peer is
     const string _vif;			// responsible for.
+    const PeerID _peerid;		// The peers ID.
     const A _source;			// Source address for packets.
     const uint16_t _interface_mtu;	// MTU of this interface.
 
