@@ -15,7 +15,7 @@ in the standard header decode code.
 be setting an index not a mask, check the spec to see what we should
 be doing.
 
-4) The LsaDecoder should have a method that can be used to check of LS
+4) The LsaDecoder should have a method that can be used to check if LS
 types are valid. This method should be used by data_description_received.
 
 5) Are external-LSAs allowed in NSSAs?
@@ -24,6 +24,11 @@ types are valid. This method should be used by data_description_received.
 
 7) Can an interface a peer in our code have more than one subnet
 associated with it?
+
+8) Constructor for the AreaRouter should take all the information to
+fill in the Router LSA.
+
+9) The add_peer method to AreaRouter should take a RouterLink.
 
 Possible issues
 ~~~~~~~~~~~~~~~
