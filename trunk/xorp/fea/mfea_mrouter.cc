@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.28 2005/03/19 23:26:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.29 2005/03/25 02:53:10 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1057,7 +1057,23 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
     
     oifs_ttl[iif_vif_index] = 0;		// Pre-caution
-    
+
+    if (mfea_node().is_log_trace()) {
+	string res;
+	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+	    if (oifs_ttl[i] > 0)
+		res += "O";
+	    else
+		res += ".";
+	}
+	XLOG_TRACE(mfea_node().is_log_trace(),
+		   "Add MFC entry: (%s,%s) iif = %d olist = %s",
+		   cstring(source),
+		   cstring(group),
+		   iif_vif_index,
+		   res.c_str());
+    }
+
     switch (family()) {
     case AF_INET:
     {
@@ -1158,6 +1174,11 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 int
 MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 {
+    XLOG_TRACE(mfea_node().is_log_trace(),
+	       "Delete MFC entry: (%s,%s)",
+	       cstring(source),
+	       cstring(group));
+
     switch (family()) {
     case AF_INET:
     {
@@ -1239,6 +1260,19 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 			   bool is_leq_upcall,
 			   string& error_msg)
 {
+    XLOG_TRACE(mfea_node().is_log_trace(),
+	       "Add dataflow monitor: "
+	       "source = %s group = %s "
+	       "threshold_interval_sec = %d threshold_interval_usec = %d "
+	       "threshold_packets = %d threshold_bytes = %d "
+	       "is_threshold_in_packets = %d is_threshold_in_bytes = %d "
+	       "is_geq_upcall = %d is_leq_upcall = %d",
+	       cstring(source), cstring(group),
+	       threshold_interval.sec(), threshold_interval.usec(),
+	       threshold_packets, threshold_bytes,
+	       is_threshold_in_packets, is_threshold_in_bytes,
+	       is_geq_upcall, is_leq_upcall);
+
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
@@ -1422,6 +1456,19 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 			      bool is_leq_upcall,
 			      string& error_msg)
 {
+    XLOG_TRACE(mfea_node().is_log_trace(),
+	       "Delete dataflow monitor: "
+	       "source = %s group = %s "
+	       "threshold_interval_sec = %d threshold_interval_usec = %d "
+	       "threshold_packets = %d threshold_bytes = %d "
+	       "is_threshold_in_packets = %d is_threshold_in_bytes = %d "
+	       "is_geq_upcall = %d is_leq_upcall = %d",
+	       cstring(source), cstring(group),
+	       threshold_interval.sec(), threshold_interval.usec(),
+	       threshold_packets, threshold_bytes,
+	       is_threshold_in_packets, is_threshold_in_bytes,
+	       is_geq_upcall, is_leq_upcall);
+
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
@@ -1589,6 +1636,11 @@ int
 MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
 				  string& error_msg)
 {
+    XLOG_TRACE(mfea_node().is_log_trace(),
+	       "Delete all dataflow monitors: "
+	       "source = %s group = %s",
+	       cstring(source), cstring(group));
+
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
