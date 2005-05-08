@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.29 2005/03/25 02:53:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.30 2005/04/30 21:59:57 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1047,7 +1047,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	if (nbytes < (ssize_t)sizeof(struct icmp6_hdr)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
-			 nbytes,
+			 XORP_INT_CAST(nbytes),
 			 XORP_UINT_CAST(sizeof(struct icmp6_hdr)));
 	    return;		// Error
 	}
