@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.16 2005/03/05 01:41:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.17 2005/03/25 02:53:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -247,7 +247,7 @@ nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
 	if (is_newlink || (mtu != fi.mtu()))
 	    fi.set_mtu(mtu);
     }
-    debug_msg("MTU: %d\n", fi.mtu());
+    debug_msg("MTU: %u\n", fi.mtu());
     
     //
     // Get the flags
@@ -459,9 +459,9 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 	const uint8_t* data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFA_LOCAL])));
 	if (RTA_PAYLOAD(rta_array[IFA_LOCAL]) != IPvX::addr_size(family)) {
 	    XLOG_FATAL("Invalid IFA_LOCAL address size payload: "
-		       "received %d expected %d",
-		       RTA_PAYLOAD(rta_array[IFA_LOCAL]),
-		       IPvX::addr_size(family));
+		       "received %d expected %u",
+		       XORP_INT_CAST(RTA_PAYLOAD(rta_array[IFA_LOCAL])),
+		       XORP_UINT_CAST(IPvX::addr_size(family)));
 	}
 	lcl_addr.copy_in(family, data);
     }
@@ -481,9 +481,9 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 		if (RTA_PAYLOAD(rta_array[IFA_BROADCAST])
 		    != IPvX::addr_size(family)) {
 		    XLOG_FATAL("Invalid IFA_BROADCAST address size payload: "
-			       "received %d expected %d",
-			       RTA_PAYLOAD(rta_array[IFA_BROADCAST]),
-			       IPvX::addr_size(family));
+			       "received %d expected %u",
+			       XORP_INT_CAST(RTA_PAYLOAD(rta_array[IFA_BROADCAST])),
+			       XORP_UINT_CAST(IPvX::addr_size(family)));
 		}
 		broadcast_addr.copy_in(family, data);
 		has_broadcast_addr = true;
@@ -508,9 +508,9 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 	    if (RTA_PAYLOAD(rta_array[IFA_ADDRESS])
 		!= IPvX::addr_size(family)) {
 		XLOG_FATAL("Invalid IFA_ADDRESS address size payload: "
-			   "received %d expected %d",
-			   RTA_PAYLOAD(rta_array[IFA_ADDRESS]),
-			   IPvX::addr_size(family));
+			   "received %d expected %u",
+			   XORP_INT_CAST(RTA_PAYLOAD(rta_array[IFA_ADDRESS])),
+			   XORP_UINT_CAST(IPvX::addr_size(family)));
 	    }
 	    peer_addr.copy_in(family, data);
 	    has_peer_addr = true;
