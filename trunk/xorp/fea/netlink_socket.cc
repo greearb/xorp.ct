@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.29 2005/03/05 01:41:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.30 2005/03/25 02:53:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -185,8 +185,9 @@ NetlinkSocket::start(int af, string& error_msg)
     }
     if (snl_len != sizeof(snl)) {
 	error_msg = c_format("Wrong address length of AF_NETLINK socket: "
-			     "%d instead of %d",
-			     snl_len, sizeof(snl));
+			     "%u instead of %u",
+			     XORP_UINT_CAST(snl_len),
+			     XORP_UINT_CAST(sizeof(snl)));
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
@@ -203,8 +204,9 @@ NetlinkSocket::start(int af, string& error_msg)
     // XXX: 'nl_pid' is supposed to be defined as 'pid_t'
     if ( (pid_t)snl.nl_pid != pid()) {
 	error_msg = c_format("Wrong nl_pid of AF_NETLINK socket: "
-			     "%d instead of %d",
-			     snl.nl_pid, pid());
+			     "%u instead of %u",
+			     XORP_UINT_CAST(snl.nl_pid),
+			     XORP_UINT_CAST(pid()));
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
@@ -293,7 +295,8 @@ NetlinkSocket::force_read(string& error_msg)
 				 "message truncated: "
 				 "received %d bytes instead of (at least) %u "
 				 "bytes",
-				 got, XORP_UINT_CAST(sizeof(struct nlmsghdr)));
+				 XORP_INT_CAST(got),
+				 XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
 	}
 	
@@ -369,7 +372,8 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 				 "message truncated: "
 				 "received %d bytes instead of (at least) %u "
 				 "bytes",
-				 got, XORP_UINT_CAST(sizeof(struct nlmsghdr)));
+				 XORP_INT_CAST(got),
+				 XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
 	}
 	
@@ -459,8 +463,9 @@ NetlinkSocket::force_recvmsg(int flags, string& error_msg)
 	}
 	if (msg.msg_namelen != sizeof(snl)) {
 	    error_msg = c_format("Netlink socket recvmsg error: "
-				 "sender address length %d instead of %u ",
-				 msg.msg_namelen, sizeof(snl));
+				 "sender address length %d instead of %u",
+				 XORP_INT_CAST(msg.msg_namelen),
+				 XORP_UINT_CAST(sizeof(snl)));
 	    return (XORP_ERROR);
 	}
 	message.resize(message.size() + got);
@@ -472,7 +477,8 @@ NetlinkSocket::force_recvmsg(int flags, string& error_msg)
 				 "message truncated: "
 				 "received %d bytes instead of (at least) %u "
 				 "bytes",
-				 got, XORP_UINT_CAST(sizeof(struct nlmsghdr)));
+				 XORP_INT_CAST(got),
+				 XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
 	}
 	

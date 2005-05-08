@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.20 2005/03/05 01:41:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.21 2005/03/25 02:53:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -472,8 +472,9 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     ifinfomsg->ifi_change = 0xffffffff;
 
     if (NLMSG_ALIGN(nlh->nlmsg_len) > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len));
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len)));
     }
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len);
 
@@ -612,8 +613,9 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     // Add the MAC address as an attribute
     rta_len = RTA_LENGTH(ETH_ALEN);
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
     rtattr = IFLA_RTA(ifinfomsg);
     rtattr->rta_type = IFLA_ADDRESS;
@@ -721,8 +723,9 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     unsigned int uint_mtu = mtu;
     rta_len = RTA_LENGTH(sizeof(unsigned int));
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
     rtattr = IFLA_RTA(ifinfomsg);
     rtattr->rta_type = IFLA_MTU;
@@ -876,8 +879,9 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     // Add the address as an attribute
     rta_len = RTA_LENGTH(addr.addr_size());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
     rtattr = IFA_RTA(ifaddrmsg);
     rtattr->rta_type = IFA_LOCAL;
@@ -890,8 +894,9 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 	// Set the p2p or broadcast address	
 	rta_len = RTA_LENGTH(dst_or_bcast.addr_size());
 	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	    XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		       sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		       XORP_UINT_CAST(sizeof(buffer)),
+		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
 	}
 	rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
 	rtattr->rta_type = IFA_UNSPEC;
@@ -1019,8 +1024,9 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     // Add the address as an attribute
     rta_len = RTA_LENGTH(addr.addr_size());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
     rtattr = IFA_RTA(ifaddrmsg);
     rtattr->rta_type = IFA_LOCAL;

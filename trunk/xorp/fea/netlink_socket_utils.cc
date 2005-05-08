@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.22 2005/03/05 01:41:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.23 2005/03/25 02:53:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -382,9 +382,9 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 	    break;
 
 	default:
-	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
+	    debug_msg("Unhandled type %s(%d) (%u bytes)\n",
 		      NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
-		      nlh->nlmsg_type, nlh->nlmsg_len);
+		      nlh->nlmsg_type, XORP_UINT_CAST(nlh->nlmsg_len));
 	    break;
 	}
     }

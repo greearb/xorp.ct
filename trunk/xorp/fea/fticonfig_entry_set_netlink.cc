@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.21 2005/03/05 01:41:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.22 2005/03/25 02:53:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -257,8 +257,9 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     // Add the destination address as an attribute
     rta_len = RTA_LENGTH(fte.net().masked_addr().addr_size());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
     rtattr = RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
@@ -271,8 +272,9 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     if (fte.nexthop() != IPvX::ZERO(family)) {
 	rta_len = RTA_LENGTH(fte.nexthop().addr_size());
 	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	    XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		       sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		       XORP_UINT_CAST(sizeof(buffer)),
+		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
 	}
 	rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
 	rtattr->rta_type = RTA_GATEWAY;
@@ -318,8 +320,9 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	int int_if_index = if_index;
 	rta_len = RTA_LENGTH(sizeof(int_if_index));
 	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	    XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		       sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		       XORP_UINT_CAST(sizeof(buffer)),
+		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
 	}
 	rtattr = (struct rtattr*)(((char*)(rtattr)) +
 	    RTA_ALIGN((rtattr)->rta_len));
@@ -334,8 +337,9 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     int int_priority = fte.metric();
     rta_len = RTA_LENGTH(sizeof(int_priority));
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
     rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
     rtattr->rta_type = RTA_PRIORITY;
@@ -454,8 +458,9 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     // Add the destination address as an attribute
     rta_len = RTA_LENGTH(fte.net().masked_addr().addr_size());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		   XORP_UINT_CAST(sizeof(buffer)),
+		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
     rtattr = RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
