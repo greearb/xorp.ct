@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.21 2004/12/18 03:48:52 atanu Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.22 2005/03/25 02:53:27 pavlin Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -264,7 +264,9 @@ FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
     int fd = comm_connect_tcp4(&host_ia, htons(_port), COMM_SOCK_NONBLOCKING);
     if (fd < 0) {
 	created_messenger = 0;
-	return errno;
+	int last_error = comm_get_last_error();
+	XLOG_ASSERT(0 != last_error);
+	return last_error;
     }
 
     created_messenger = new FinderTcpMessenger(_e, &_mm, fd, _cmds);
