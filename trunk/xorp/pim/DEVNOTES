@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/DEVNOTES,v 1.5 2005/04/21 11:07:53 pavlin Exp $
+# $XORP: xorp/pim/DEVNOTES,v 1.6 2005/05/04 01:53:01 pavlin Exp $
 #
 
 * Always call PimMre::entry_try_remove() for (S,G,rpt) routing entry
@@ -20,10 +20,6 @@
 * PimRpfTable::find(const IPvX& address)
   returns NULL if the RPF PimVif is not UP.
 
-* PimMre::check_switch_to_spt_sg() does NOT restart the KeepaliveTimer(S,G)
-  If necessary, this timer must be restarted by the function that calls
-  PimMre::check_switch_to_spt_sg()
-  
 * The SPT-bit is set only for (S,G) PimMre entry.
   Fortunately, needs to be set only after an (S,G) Join or (S,G) Assert
   message is received. Hence, the side effect of this is that
