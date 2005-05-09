@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.12 2005/05/05 19:49:08 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.13 2005/05/06 23:32:14 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -83,11 +83,6 @@ comm_init(void)
 	    return (XORP_ERROR);
 	}
     }
-#elif defined(HOST_OS_SOLARIS)
-    /* Solaris compilation warning workaround */
-    sigignore(SIGPIPE);
-#elif defined(SIGPIPE)
-    signal(SIGPIPE, SIG_IGN);
 #endif
 
     init_flag = 1;
