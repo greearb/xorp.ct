@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.13 2005/05/06 23:32:14 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.14 2005/05/09 08:52:20 atanu Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -142,6 +142,17 @@ comm_get_error_str(int serrno)
 #else
     return (const char *)strerror(serrno);
 #endif
+}
+
+/**
+ * comm_get_last_error_str:
+ *
+ * @return a human readable string of the last error.
+ */
+char const *
+comm_get_last_error_str(void)
+{
+    return comm_get_error_str(comm_get_last_error());
 }
 
 /**

@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.11 2005/05/05 19:49:08 bms Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.12 2005/05/06 23:32:14 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -130,6 +130,13 @@ extern int	comm_get_last_error(void);
  * @return Pointer to a string giving more information about the error.
  */
 extern char const *	comm_get_error_str(int serrno);
+
+/**
+ * Retrieve a human readable string (in English) for the last error.
+ *
+ * @return a human readable string of the last error.
+ */
+extern char const *comm_get_last_error_str(void);
 
 /**
  * Indicate presence of IPv4 support.
