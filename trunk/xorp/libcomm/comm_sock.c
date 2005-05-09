@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.15 2005/05/06 02:18:41 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.16 2005/05/06 23:32:14 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1189,6 +1189,8 @@ _comm_set_serrno(void)
     WSASetLastError(0);
 #else
     _comm_serrno = errno;
-    errno = 0;
+    /* XXX - Temporarily don't set errno to 0 we still have code
+       using errno 2005-05-09 Atanu. */
+/*     errno = 0; */
 #endif
 }
