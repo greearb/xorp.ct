@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.20 2005/04/21 09:15:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.21 2005/04/27 02:09:50 pavlin Exp $"
 
 
 //
@@ -365,25 +365,26 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 							    inner_dst,
 							    true);
 		if (is_sptbit_set) {
-		    pim_mfc->set_iif_vif_index(pim_mre_sg->rpf_interface_s());
-		    pim_mfc->set_olist(pim_mre->inherited_olist_sg());
+		    pim_mfc->update_mfc(pim_mre_sg->rpf_interface_s(),
+					pim_mre->inherited_olist_sg());
 		} else {
-		    pim_mfc->set_iif_vif_index(register_vif_index);
-		    pim_mfc->set_olist(pim_mre->inherited_olist_sg_rpt());
+		    pim_mfc->update_mfc(register_vif_index,
+					pim_mre->inherited_olist_sg_rpt());
 		}
-		pim_mfc->add_mfc_to_kernel();
 	    }
 	    //
 	    // Add a dataflow monitor to expire idle (S,G) PimMre state
 	    // and/or idle PimMfc+MFC state
 	    //
-	    pim_mfc->add_dataflow_monitor(keepalive_timer_sec, 0,
-					  0,		// threshold_packets
-					  0,		// threshold_bytes
-					  true,		// is_threshold_in_packets
-					  false,	// is_threshold_in_bytes
-					  false,	// is_geq_upcall ">="
-					  true);	// is_leq_upcall "<="
+	    if (! pim_mfc->has_idle_dataflow_monitor()) {
+		pim_mfc->add_dataflow_monitor(keepalive_timer_sec, 0,
+					      0,	// threshold_packets
+					      0,	// threshold_bytes
+					      true,	// is_threshold_in_packets
+					      false,	// is_threshold_in_bytes
+					      false,	// is_geq_upcall ">="
+					      true);	// is_leq_upcall "<="
+	    }
 	}
 	return (XORP_OK);
     }
@@ -399,7 +400,10 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     if (pim_mfc == NULL)
 	return (XORP_OK);
     if (pim_node().is_switch_to_spt_enabled().get()
+	&& (pim_mre != NULL)
+	&& (pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg))
 	&& (! pim_mfc->has_spt_switch_dataflow_monitor())) {
+	// Install the monitor
 	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
 	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
 	pim_mfc->add_dataflow_monitor(sec, 0,
