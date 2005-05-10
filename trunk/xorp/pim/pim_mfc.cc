@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.25 2005/04/16 02:04:26 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.26 2005/04/27 02:09:49 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -147,7 +147,7 @@ PimMfc::recompute_iif_olist_mfc()
     uint16_t old_iif_vif_index = iif_vif_index();
     Mifset old_olist = olist();
     uint32_t lookup_flags;
-    PimMre *pim_mre, *pim_mre_sg;
+    PimMre *pim_mre, *pim_mre_sg, *pim_mre_sg_rpt;
     
     lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
     pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
@@ -164,33 +164,53 @@ PimMfc::recompute_iif_olist_mfc()
 	return;
     }
     
-    // Get the (S,G) PimMre entry (if exists)
+    // Get the (S,G) and the (S,G,rpt) PimMre entries (if exist)
     pim_mre_sg = NULL;
+    pim_mre_sg_rpt = NULL;
     do {
 	if (pim_mre->is_sg()) {
 	    pim_mre_sg = pim_mre;
+	    pim_mre_sg_rpt = pim_mre->sg_rpt_entry();
 	    break;
 	}
 	if (pim_mre->is_sg_rpt()) {
 	    pim_mre_sg = pim_mre->sg_entry();
+	    pim_mre_sg_rpt = pim_mre;
 	    break;
 	}
 	break;
     } while (false);
     
     // Compute the new iif and the olist
-    if ((pim_mre_sg != NULL)
-	&& ((pim_mre_sg->is_spt() && pim_mre_sg->is_joined_state())
-	    || (pim_mre_sg->is_directly_connected_s()))) {
+    if ((pim_mre_sg != NULL) && pim_mre_sg->is_spt()) {
 	new_iif_vif_index = pim_mre_sg->rpf_interface_s();
+	new_olist = pim_mre->inherited_olist_sg();
     } else {
 	new_iif_vif_index = pim_mre->rpf_interface_rp();
+	new_olist = pim_mre->inherited_olist_sg_rpt();
+
+	//
+	// XXX: Test a special case when we are not forwarding multicast
+	// traffic, but we need the forwarding entry to prevent unnecessary
+	// "no cache" or "wrong iif" upcalls.
+	//
+	if (new_olist.none()) {
+	    uint16_t iif_vif_index_s = Vif::VIF_INDEX_INVALID;
+	    if (pim_mre_sg != NULL) {
+		iif_vif_index_s = pim_mre_sg->rpf_interface_s();
+	    } else if (pim_mre_sg_rpt != NULL) {
+		iif_vif_index_s = pim_mre_sg_rpt->rpf_interface_s();
+	    }
+	    if ((iif_vif_index_s != Vif::VIF_INDEX_INVALID)
+		&& (iif_vif_index_s == old_iif_vif_index)) {
+		new_iif_vif_index = iif_vif_index_s;
+	    }
+	}
     }
-    new_olist = pim_mre->inherited_olist_sg();
     if (new_iif_vif_index != Vif::VIF_INDEX_INVALID)
 	new_olist.reset(new_iif_vif_index);
     
-    // XXX: this check should be even if the iif and oifs didn't change
+    // XXX: this check should be used even if the iif and oifs didn't change
     // TODO: track the reason and explain it.
     if (new_iif_vif_index == Vif::VIF_INDEX_INVALID) {
 	//
@@ -381,7 +401,6 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 				 false,		// is_threshold_in_bytes
 				 false,		// is_geq_upcall ">="
 				 true);		// is_leq_upcall "<="
-				 
 	}
     }
     
@@ -393,7 +412,6 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 	       && (pim_mre_sg->is_keepalive_timer_running())))) {
 	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
 	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
-	
 	if (pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg)) {
 	    add_dataflow_monitor(sec, 0,
 				 0,		// threshold_packets
@@ -404,6 +422,35 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 				 false);	// is_leq_upcall "<="
 	}
     }
+}
+
+void
+PimMfc::update_mfc(uint16_t new_iif_vif_index, const Mifset& new_olist)
+{
+    bool is_changed = false;
+
+    if (new_iif_vif_index == Vif::VIF_INDEX_INVALID) {
+	//
+	// XXX: if the new iif is invalid, then we always unconditionally
+	// add the entry to the kernel. This is a work-around in case
+	// we just created a new PimMfc entry with invalid iif and empty
+	// olist and we want to install that entry.
+	//
+	is_changed = true;
+    }
+
+    if (new_iif_vif_index != iif_vif_index()) {
+	set_iif_vif_index(new_iif_vif_index);
+	is_changed = true;
+    }
+
+    if (new_olist != olist()) {
+	set_olist(new_olist);
+	is_changed = true;
+    }
+
+    if (is_changed)
+	add_mfc_to_kernel();
 }
 
 int
@@ -471,6 +518,19 @@ PimMfc::add_dataflow_monitor(uint32_t threshold_interval_sec,
 			     bool is_geq_upcall,
 			     bool is_leq_upcall)
 {
+    XLOG_TRACE(pim_node().is_log_trace(),
+	       "Add dataflow monitor: "
+	       "source = %s group = %s "
+	       "threshold_interval_sec = %d threshold_interval_usec = %d "
+	       "threshold_packets = %d threshold_bytes = %d "
+	       "is_threshold_in_packets = %d is_threshold_in_bytes = %d "
+	       "is_geq_upcall = %d is_leq_upcall = %d",
+	       cstring(source_addr()), cstring(group_addr()),
+	       threshold_interval_sec, threshold_interval_usec,
+	       threshold_packets, threshold_bytes,
+	       is_threshold_in_packets, is_threshold_in_bytes,
+	       is_geq_upcall, is_leq_upcall);
+
     if (pim_node().add_dataflow_monitor(source_addr(),
 					group_addr(),
 					threshold_interval_sec,
@@ -507,6 +567,19 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 				bool is_geq_upcall,
 				bool is_leq_upcall)
 {
+    XLOG_TRACE(pim_node().is_log_trace(),
+	       "Delete dataflow monitor: "
+	       "source = %s group = %s "
+	       "threshold_interval_sec = %d threshold_interval_usec = %d "
+	       "threshold_packets = %d threshold_bytes = %d "
+	       "is_threshold_in_packets = %d is_threshold_in_bytes = %d "
+	       "is_geq_upcall = %d is_leq_upcall = %d",
+	       cstring(source_addr()), cstring(group_addr()),
+	       threshold_interval_sec, threshold_interval_usec,
+	       threshold_packets, threshold_bytes,
+	       is_threshold_in_packets, is_threshold_in_bytes,
+	       is_geq_upcall, is_leq_upcall);
+
     if (pim_node().delete_dataflow_monitor(source_addr(),
 					   group_addr(),
 					   threshold_interval_sec,
@@ -536,6 +609,11 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 int
 PimMfc::delete_all_dataflow_monitor()
 {
+    XLOG_TRACE(pim_node().is_log_trace(),
+	       "Delete all dataflow monitors: "
+	       "source = %s group = %s",
+	       cstring(source_addr()), cstring(group_addr()));
+
     set_has_idle_dataflow_monitor(false);
     set_has_spt_switch_dataflow_monitor(false);
     
