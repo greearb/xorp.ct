@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.15 2005/03/25 02:53:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.16 2005/04/20 03:43:28 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -88,9 +88,7 @@ PimMre::update_sptbit_sg(uint16_t iif_vif_index)
 // Return true if monitoring switch to SPT is desired, otherwise false.
 // Note: this implements part of the CheckSwitchToSpt(S,G) macro
 // (i.e., check_switch_to_spt_sg()).
-// Note: applies for all entries
-// Note: by spec definition it should apply only for (*,G), (S,G), (S,G,rpt),
-// but the RP-based SPT switch extends it for (*,*,RP) entries as well.
+// Note: applies for (*,G), (S,G), (S,G,rpt)
 //
 bool
 PimMre::is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const
@@ -98,13 +96,7 @@ PimMre::is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const
     Mifset mifs;
     
     //
-    // The RP-based SPT switch
-    //
-    if (i_am_rp())
-	return (true);
-    
-    //
-    // The last-hop router SPT switch (as described in the spec)
+    // The last-hop router SPT switch
     //
     if (! (is_wc() || is_sg() || is_sg_rpt()))
 	return (false);
@@ -152,9 +144,8 @@ PimMre::is_switch_to_spt_desired_sg(uint32_t measured_interval_sec,
 // Return true if switch to SPT is desired, otherwise false.
 // Note: if switch to SPT is desired, then the (S,G) Keepalive Timer is
 // always restarted.
-// Note: applies for all entries
-// Note: by spec definition it should apply only for (*,G), (S,G), (S,G,rpt),
-// but the RP-based SPT switch extends it for (*,*,RP) entries as well.
+// Note: in theory applies for all entries, but in practice it could
+// be true only for (*,G), (S,G), (S,G,rpt).
 bool
 PimMre::check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
 			       PimMre*& pim_mre_sg,
