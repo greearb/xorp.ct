@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.23 2005/03/25 02:52:48 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.24 2005/05/10 15:23:58 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -448,7 +448,9 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
 	XLOG_ERROR("Failed to add socket %d to eventloop", sock);
     }
 
-    if (XORP_ERROR == comm_sock_set_blocking(sock, 0))
+    int blocking = 0;
+
+    if (XORP_ERROR == comm_sock_set_blocking(sock, blocking))
 	XLOG_FATAL("Failed to go non-blocking");
 
     // Given the file descriptor is now non-blocking we would expect a
@@ -456,7 +458,7 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
 
     XLOG_ASSERT(!_connecting);
     _connecting = true;
-    if (XORP_OK == comm_sock_connect(sock, servername, 1 /* blocking */)) {
+    if (XORP_OK == comm_sock_connect(sock, servername, blocking)) {
 #ifdef HOST_OS_WINDOWS
 	    if (comm_get_last_error() == WSAEWOULDBLOCK)
 #else
