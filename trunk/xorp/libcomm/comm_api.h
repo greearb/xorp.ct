@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.12 2005/05/06 23:32:14 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.13 2005/05/09 22:54:03 atanu Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -205,6 +205,18 @@ extern xsock_t	comm_bind_tcp4(const struct in_addr *my_addr,
  */
 extern xsock_t	comm_bind_tcp6(const struct in6_addr *my_addr,
 			       unsigned short my_port, int is_blocking);
+
+/**
+ * Open a TCP (IPv4 or IPv6) socket and bind it to a local address and a port.
+ *
+ * @param sin agnostic sockaddr containing the local address (If it is
+ * NULL, will bind to `any' local address.)  and the local port to
+ * bind to all in network order.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
+ */
+extern xsock_t	comm_bind_tcp(const struct sockaddr *sin, int is_blocking);
 
 /**
  * Open an IPv4 UDP socket and bind it to a local address and a port.
@@ -440,6 +452,17 @@ extern int	comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 				unsigned short my_port);
 
 /**
+ * Bind a socket (IPv4 or IPv6) to an address and a port.
+ *
+ * @param sock the socket to bind.
+ * @param sin agnostic sockaddr containing the local address (If it is
+ * NULL, will bind to `any' local address.)  and the local port to
+ * bind to all in network order.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern xsock_t	comm_sock_bind(xsock_t sock, const struct sockaddr *sin);
+
+/**
  * Join an IPv4 multicast group on a socket (and an interface).
  *
  * @param sock the socket to join the group.
@@ -522,6 +545,23 @@ extern int	comm_sock_connect6(xsock_t sock,
 				   const struct in6_addr *remote_addr,
 				   unsigned short remote_port,
 				   int is_blocking);
+
+/**
+ * Connect to a remote address (IPv4 or (IPv6).
+ *
+ * XXX: We can use this not only for TCP, but for UDP sockets as well.
+ * XXX: if the socket is non-blocking, and the connection cannot be
+ * completed immediately, then the return value may be %XORP_OK.
+ *
+ * @param sock the socket to use to connect.
+ * @param sin agnostic sockaddr containing the local address (If it is
+ * NULL, will bind to `any' local address.)  and the local port to
+ * bind to all in network order.
+ * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern xsock_t	comm_sock_connect(xsock_t sock, const struct sockaddr *sin,
+				  int is_blocking);
 
 /**
  * Accept a connection on a listening socket.

@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.14 2005/05/09 08:52:20 atanu Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.15 2005/05/09 22:54:03 atanu Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -336,6 +336,44 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
 #endif /* HAVE_IPV6 */
 }
 
+/**
+ * Open a TCP (IPv4 or IPv6) socket and bind it to a local address and a port.
+ *
+ * @param sin agnostic sockaddr containing the local address (If it is
+ * NULL, will bind to `any' local address.)  and the local port to
+ * bind to all in network order.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
+ * @return the new socket on success, otherwise XORP_BAD_SOCKET.
+ */
+xsock_t
+comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
+{
+    switch (sock->sa_family) {
+    case AF_INET:
+	{
+	    const struct sockaddr_in *sin = (const struct sockaddr_in *)sock;
+	    return comm_bind_tcp4(&sin->sin_addr, sin->sin_port, is_blocking);
+	}
+	break;
+#ifdef AF_INET6
+    case AF_INET6:
+	{
+	    const struct sockaddr_in6 *sin = (const struct sockaddr_in6 *)sock;
+	    return comm_bind_tcp6(&sin->sin6_addr, sin->sin6_port,
+				  is_blocking);
+	}
+	break;
+#endif
+    default:
+	XLOG_FATAL("Error comm_bind_tcp invalid family = %d", sock->sa_family);
+	return (XORP_ERROR);
+    }
+
+    XLOG_UNREACHABLE();
+
+    return XORP_ERROR;
+}
 
 /**
  * comm_bind_udp4:

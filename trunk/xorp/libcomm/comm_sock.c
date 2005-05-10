@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.16 2005/05/06 23:32:14 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.17 2005/05/09 22:23:32 atanu Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -240,6 +240,43 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
     comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_port);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
+
+/**
+ * Bind a socket (IPv4 or IPv6) to an address and a port.
+ *
+ * @param sock the socket to bind.
+ * @param sin agnostic sockaddr containing the local address (If it is
+ * NULL, will bind to `any' local address.)  and the local port to
+ * bind to all in network order.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+xsock_t
+comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
+{
+    switch (sin->sa_family) {
+    case AF_INET:
+	{
+	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)sin;
+	    return comm_sock_bind4(sock, &sin4->sin_addr, sin4->sin_port);
+	}
+	break;
+#ifdef AF_INET6
+    case AF_INET6:
+	{
+	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sin;
+	    return comm_sock_bind6(sock, &sin6->sin6_addr, sin6->sin6_port);
+	}
+	break;
+#endif
+    default:
+	XLOG_FATAL("Error comm_sock_bind invalid family = %d", sin->sa_family);
+	return (XORP_ERROR);
+    }
+
+    XLOG_UNREACHABLE();
+
+    return XORP_ERROR;
 }
 
 /**
@@ -577,6 +614,51 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 		      is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
+
+/**
+ * Connect to a remote address (IPv4 or (IPv6).
+ *
+ * XXX: We can use this not only for TCP, but for UDP sockets as well.
+ * XXX: if the socket is non-blocking, and the connection cannot be
+ * completed immediately, then the return value may be %XORP_OK.
+ *
+ * @param sock the socket to use to connect.
+ * @param sin agnostic sockaddr containing the local address (If it is
+ * NULL, will bind to `any' local address.)  and the local port to
+ * bind to all in network order.
+ * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+xsock_t
+comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking)
+{
+    switch (sin->sa_family) {
+    case AF_INET:
+	{
+	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)sin;
+	    return comm_sock_connect4(sock, &sin4->sin_addr, sin4->sin_port,
+				      is_blocking);
+	}
+	break;
+#ifdef AF_INET6
+    case AF_INET6:
+	{
+	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sin;
+	    return comm_sock_connect6(sock, &sin6->sin6_addr, sin6->sin6_port,
+				      is_blocking);
+	}
+	break;
+#endif
+    default:
+	XLOG_FATAL("Error comm_sock_connect invalid family = %d",
+		   sin->sa_family);
+	return (XORP_ERROR);
+    }
+
+    XLOG_UNREACHABLE();
+
+    return XORP_ERROR;
 }
 
 /**
