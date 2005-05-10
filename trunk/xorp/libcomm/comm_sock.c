@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.17 2005/05/09 22:23:32 atanu Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.18 2005/05/10 12:25:16 atanu Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1220,7 +1220,7 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
     }
 
     if (is_blocking)
-	flags &= O_NONBLOCK;
+	flags &= ~O_NONBLOCK;
     else
 	flags |= O_NONBLOCK;
 
