@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.9 2004/12/05 16:14:35 atanu Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.10 2005/03/25 02:52:48 pavlin Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -34,6 +34,7 @@
 #include "libxorp/selector.hh"
 #include "libxorp/asyncio.hh"
 #include "libxorp/callback.hh"
+#include "libcomm/comm_api.h"
 #include "packet.hh"
 #include "iptuple.hh"
 
@@ -73,12 +74,12 @@ public:
     const char  *get_remote_host() {return _remote_host.c_str();}
 
 protected:
-    static const int UNCONNECTED = -1;
+    static const xsock_t UNCONNECTED = -1;
 
     void set_sock(int s) {_s = s;}
 
     void close_socket();
-    void create_socket(const struct sockaddr *sin);
+    void create_socket(const struct sockaddr *sin, int is_blocking);
 
     const struct sockaddr *get_local_socket(size_t& len) {
 	return _iptuple.get_local_socket(len);
@@ -96,7 +97,7 @@ protected:
     string get_remote_addr() {return _iptuple.get_peer_addr();}
     uint16_t get_remote_port() {return _iptuple.get_peer_port();}
 private:
-    int _s;
+    xsock_t _s;
 
     /*
     ** All in network byte order.
@@ -278,7 +279,6 @@ class SocketServer : public Socket {
 public:
     SocketServer(EventLoop& e);
     SocketServer(const Iptuple& iptuple, EventLoop& e);
-    void listen();
 };
 
 #endif // __BGP_SOCKET_HH__

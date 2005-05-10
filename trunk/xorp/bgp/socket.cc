@@ -12,12 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.22 2005/01/31 22:25:12 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.23 2005/03/25 02:52:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
-
-#include <fcntl.h>
 
 #include "bgp_module.h"
 
@@ -31,7 +29,6 @@
 
 #include "socket.hh"
 #include "packet.hh"
-
 
 /* **************** BGPSocket - PUBLIC METHODS *********************** */
 
@@ -57,24 +54,12 @@ Socket::create_listener()
     size_t len;
     const struct sockaddr *sin = get_local_socket(len);
 
-    create_socket(sin);
+    XLOG_ASSERT(UNCONNECTED == _s);
 
-    int opt = 1;
-    if (::setsockopt(get_sock(), SOL_SOCKET, SO_REUSEADDR, &opt,
-		     sizeof(opt)) == -1) {
-	XLOG_WARNING("setsockopt failed: %s", strerror(errno));
-    }
-
-    if (::bind(get_sock(), sin, len) == -1) {
-	int saved_errno = errno;
-	try {
-	    IPvX addr(*sin);
-	    XLOG_ERROR("Failed to bind socket %d to address %s: %s",
-		get_sock(), addr.str().c_str(), strerror(saved_errno));
-	} catch (InvalidFamily e) {
-	    XLOG_ERROR("Failed to bind socket %d to address %s: %s",
-		get_sock(), "(unprintable)", strerror(saved_errno));
-	};
+    _s = comm_bind_tcp(sin, 0);
+    if (XORP_BAD_SOCKET == _s) {
+	XLOG_ERROR("comm_bind_tcp failed");
+	_s = UNCONNECTED;
     }
 }
 
@@ -85,19 +70,21 @@ Socket::close_socket()
 {
     debug_msg("Close socket %s %d\n", get_remote_host(), _s);
 
-    ::close(_s);
+    comm_sock_close(_s);
     _s = UNCONNECTED;
 }
 
 void
-Socket::create_socket(const struct sockaddr *sin)
+Socket::create_socket(const struct sockaddr *sin, int is_blocking)
 {
     debug_msg("create_socket called\n");
 
     XLOG_ASSERT(UNCONNECTED == _s);
 
-    if (UNCONNECTED == (_s = ::socket(sin->sa_family, SOCK_STREAM, 0))) {
-	XLOG_ERROR("socket() failed: %s", strerror(errno));
+    if (UNCONNECTED == (_s = comm_sock_open(sin->sa_family, SOCK_STREAM, 0,
+					    is_blocking))) {
+	XLOG_ERROR("comm_sock_open failed");
+	return;
     }
 
     debug_msg("BGPSocket socket created (sock - %d)\n", _s);
@@ -119,10 +106,16 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     // addr must be numeric so this can't fail.
-    if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0)))
+    if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) {
+#ifdef	HOST_OS_WINDOWS
+	char *error_string = "unknown reason";
+#else
+	char *error_string = gai_strerror(error);
+#endif
 	XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
 		   port.c_str(),
-		   gai_strerror(error));
+		   error_string);
+    }
 
     XLOG_ASSERT(res0->ai_addrlen <= len);
     memcpy(sin,res0->ai_addr, res0->ai_addrlen);
@@ -193,10 +186,10 @@ SocketClient::connect(ConnectCallback cb)
     XLOG_ASSERT(UNCONNECTED == get_sock());
 
     size_t len;
-    create_socket(get_local_socket(len));
+    create_socket(get_local_socket(len), 1 /* blocking */);
 
     if (_md5sig)
-	comm_set_tcpmd5(get_sock(), _md5sig);
+ 	comm_set_tcpmd5(get_sock(), _md5sig);
 
     return connect_socket(get_sock(), get_remote_addr(), get_remote_port(),
 			  get_local_addr(), cb);
@@ -321,7 +314,9 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 	break;
 
     case AsyncFileReader::ERROR_CHECK_ERRNO:
+#ifndef HOST_OS_WINDOWS
 	debug_msg("Read failed: %s\n", strerror(errno));
+#endif
 	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0);
 	break;
 
@@ -408,7 +403,8 @@ SocketClient::output_queue_busy() const
 }
 
 int
-SocketClient::output_queue_size() const {
+SocketClient::output_queue_size() const 
+{
     XLOG_ASSERT(_async_writer);
 
     return _async_writer->buffers_remaining();
@@ -422,14 +418,14 @@ void
 SocketClient::connect_socket(int sock, string raddr, uint16_t port,
 			     string laddr, ConnectCallback cb)
 {
-    debug_msg("laddr %s\n", laddr.c_str());
+    debug_msg("raddt %s port %d laddr %s\n", raddr.c_str(), port,
+	      laddr.c_str());
 
     size_t len;
     const struct sockaddr *local = get_bind_socket(len);
 
     /* Bind the local endpoint to the supplied address */
-    if(-1 == ::bind(sock, local, len)) {
-	XLOG_ERROR("Bind failed: %s", strerror(errno));
+    if (XORP_ERROR == comm_sock_bind(sock, local)) {
 
 	/*
 	** This endpoint is now screwed so shut it.
@@ -452,30 +448,31 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
 	XLOG_ERROR("Failed to add socket %d to eventloop", sock);
     }
 
-    if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-        XLOG_FATAL("Failed to go non-blocking: %s", strerror(errno));
-    }
+    if (XORP_ERROR == comm_sock_set_blocking(sock, 0))
+	XLOG_FATAL("Failed to go non-blocking");
 
     // Given the file descriptor is now non-blocking we would expect a
     // in progress error.
 
     XLOG_ASSERT(!_connecting);
     _connecting = true;
-    if (-1 == ::connect(sock, servername, len)) {
-	if (EINPROGRESS == errno)
-	    return;
-
-	debug_msg("Connect failed: %s raddr %s port %d\n",
-		  strerror(errno), raddr.c_str(), port);
-//  	XLOG_ERROR("Connect failed: %s raddr %s port %d",
-// 		   strerror(errno), inet_ntoa(raddr), ntohs(port));
-	// If the connect really failed still drop into complete code
-	// to tidy up. The completion code should be able to detect if
-	// there is an error.
+    if (XORP_OK == comm_sock_connect(sock, servername, 1 /* blocking */)) {
+#ifdef HOST_OS_WINDOWS
+	    if (comm_get_last_error() == WSAEWOULDBLOCK)
+#else
+	    if (comm_get_last_error() == EINPROGRESS)
+#endif
+		return;
     }
 
-    // Its possible that the connection completed immediately, this
-    // happens in the loopback case.
+    // The comm_sock_connect() function returns success if the connect
+    // call fails but the error is EINPROGRESS. In this case it is
+    // safe to return.
+
+    // If an error occurred or we actually made a connection (loopback
+    // case) then drop into the completion code and it will tidy
+    // it. The completion code will be able to detect errors.
+
     connect_socket_complete(sock, SEL_ALL, cb);
 }
 
@@ -517,7 +514,6 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 	debug_msg("connect failed (geetpeername) %d\n", sock);
 	goto failed;
     }
-
 
 #if	0
     // If we need to check the result of getpeername.
@@ -574,9 +570,8 @@ SocketClient::connect_socket_break()
 void 
 SocketClient::async_add(int sock)
 {
-    if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-        XLOG_FATAL("Failed to go non-blocking: %s", strerror(errno));
-    }
+    if (XORP_ERROR == comm_sock_set_blocking(sock, 0))
+	XLOG_FATAL("Failed to go non-blocking");
 
     XLOG_ASSERT(0 == _async_writer);
     _async_writer = new AsyncFileWriter(eventloop(), sock);
@@ -631,13 +626,4 @@ SocketServer::SocketServer(const Iptuple& iptuple, EventLoop& e) :
     Socket(iptuple, e)
 {
     debug_msg("SocketServer constructor called\n");	
-}
-
-void
-SocketServer::listen()
-{
-    if(::listen(get_sock(), MAX_LISTEN_QUEUE) == -1) {
-	debug_msg("listen failed\n");
-	return ;
-    }
 }

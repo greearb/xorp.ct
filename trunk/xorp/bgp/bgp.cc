@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.49 2005/01/31 23:14:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.50 2005/03/25 02:52:38 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -756,7 +756,6 @@ BGPMain::create_listener(const Iptuple& iptuple)
 {
     SocketServer s = SocketServer(iptuple, eventloop());
     s.create_listener();
-    s.listen();
     return s.get_sock();
 }
 
