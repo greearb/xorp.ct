@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.26 2005/04/27 02:09:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.27 2005/05/10 23:42:21 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -144,8 +144,6 @@ PimMfc::recompute_iif_olist_mfc()
 {
     uint16_t new_iif_vif_index = Vif::VIF_INDEX_INVALID;
     Mifset new_olist;
-    uint16_t old_iif_vif_index = iif_vif_index();
-    Mifset old_olist = olist();
     uint32_t lookup_flags;
     PimMre *pim_mre, *pim_mre_sg, *pim_mre_sg_rpt;
     
@@ -202,7 +200,7 @@ PimMfc::recompute_iif_olist_mfc()
 		iif_vif_index_s = pim_mre_sg_rpt->rpf_interface_s();
 	    }
 	    if ((iif_vif_index_s != Vif::VIF_INDEX_INVALID)
-		&& (iif_vif_index_s == old_iif_vif_index)) {
+		&& (iif_vif_index_s == iif_vif_index())) {
 		new_iif_vif_index = iif_vif_index_s;
 	    }
 	}
@@ -226,18 +224,12 @@ PimMfc::recompute_iif_olist_mfc()
 	entry_try_remove();
 	return;
     }
-    
-    if ((new_iif_vif_index == old_iif_vif_index) && (new_olist == old_olist)) {
-	return;			// Nothing changed
-    }
 
-    // Set the new iif and the olist
-    set_iif_vif_index(new_iif_vif_index);
-    set_olist(new_olist);
-    
-    add_mfc_to_kernel();
+    //
     // XXX: we just recompute the state, hence no need to add
     // a dataflow monitor.
+    //
+    update_mfc(new_iif_vif_index, new_olist, pim_mre_sg);
 }
 
 //
@@ -425,7 +417,8 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 }
 
 void
-PimMfc::update_mfc(uint16_t new_iif_vif_index, const Mifset& new_olist)
+PimMfc::update_mfc(uint16_t new_iif_vif_index, const Mifset& new_olist,
+		   const PimMre* pim_mre_sg)
 {
     bool is_changed = false;
 
@@ -446,6 +439,28 @@ PimMfc::update_mfc(uint16_t new_iif_vif_index, const Mifset& new_olist)
 
     if (new_olist != olist()) {
 	set_olist(new_olist);
+	is_changed = true;
+    }
+
+    //
+    // Calculate the set of outgoing interfaces for which the WRONGVIF signal
+    // is disabled.
+    //
+    Mifset new_olist_disable_wrongvif;
+    new_olist_disable_wrongvif.set();	// XXX: by default disable on all vifs
+    new_olist_disable_wrongvif ^= new_olist;	// Enable on all outgoing vifs
+    //
+    // If we are in process of switching to the SPT, then enable the WRONGVIF
+    // signal on the expected new incoming interface.
+    //
+    if ((pim_mre_sg != NULL)
+	&& (! pim_mre_sg->is_spt())
+	&& (pim_mre_sg->rpf_interface_s() != pim_mre_sg->rpf_interface_rp())) {
+	if (pim_mre_sg->rpf_interface_s() != Vif::VIF_INDEX_INVALID)
+	    new_olist_disable_wrongvif.reset(pim_mre_sg->rpf_interface_s());
+    }
+    if (new_olist_disable_wrongvif != olist_disable_wrongvif()) {
+	set_olist_disable_wrongvif(new_olist_disable_wrongvif);
 	is_changed = true;
     }
 

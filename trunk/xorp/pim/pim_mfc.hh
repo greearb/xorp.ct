@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mfc.hh,v 1.8 2005/03/25 02:53:59 pavlin Exp $
+// $XORP: xorp/pim/pim_mfc.hh,v 1.9 2005/05/10 23:42:21 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MFC_HH__
@@ -85,7 +85,8 @@ public:
     void	install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre);
     
     void	update_mfc(uint16_t new_iif_vif_index,
-			   const Mifset& new_olist);
+			   const Mifset& new_olist,
+			   const PimMre* pim_mre_sg);
     int		add_mfc_to_kernel();
     int		delete_mfc_from_kernel();
     

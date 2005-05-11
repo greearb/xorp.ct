@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.21 2005/04/27 02:09:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.22 2005/05/10 23:51:31 pavlin Exp $"
 
 
 //
@@ -347,9 +347,9 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	if (pim_mfc == NULL) {
 	    pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst,
 							true);
-	    pim_mfc->set_iif_vif_index(register_vif_index);
-	    pim_mfc->set_olist(pim_mre->inherited_olist_sg_rpt());
-	    pim_mfc->add_mfc_to_kernel();
+	    pim_mfc->update_mfc(register_vif_index,
+				pim_mre->inherited_olist_sg_rpt(),
+				pim_mre_sg);
 	}
     }
 
@@ -366,10 +366,12 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 							    true);
 		if (is_sptbit_set) {
 		    pim_mfc->update_mfc(pim_mre_sg->rpf_interface_s(),
-					pim_mre->inherited_olist_sg());
+					pim_mre->inherited_olist_sg(),
+					pim_mre_sg);
 		} else {
 		    pim_mfc->update_mfc(register_vif_index,
-					pim_mre->inherited_olist_sg_rpt());
+					pim_mre->inherited_olist_sg_rpt(),
+					pim_mre_sg);
 		}
 	    }
 	    //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.25 2005/04/27 02:09:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.26 2005/05/11 00:01:54 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -289,8 +289,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	pim_mfc = pim_mfc_find(src, dst, true);
 	XLOG_ASSERT(pim_mfc != NULL);
 	
-	pim_mfc->set_iif_vif_index(iif_vif_index);
-	pim_mfc->add_mfc_to_kernel();
+	pim_mfc->update_mfc(iif_vif_index, pim_mfc->olist(), pim_mre_sg);
 	if (! pim_mfc->has_idle_dataflow_monitor()) {
 	    // Add a dataflow monitor to expire idle (S,G) MFC state
 	    // XXX: strictly speaking, the period doesn't have
@@ -377,10 +376,9 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     
     if ((! is_wrong_iif)
 	|| (pim_mfc->iif_vif_index() == Vif::VIF_INDEX_INVALID)) {
-	pim_mfc->update_mfc(iif_vif_index, olist);
+	pim_mfc->update_mfc(iif_vif_index, olist, pim_mre_sg);
     } else {
-	pim_mfc->set_olist(olist);
-	pim_mfc->add_mfc_to_kernel();
+	pim_mfc->update_mfc(pim_mfc->iif_vif_index(), olist, pim_mre_sg);
     }
 
     if (is_keepalive_timer_restarted
