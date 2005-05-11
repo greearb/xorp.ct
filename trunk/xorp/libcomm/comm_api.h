@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.13 2005/05/09 22:54:03 atanu Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.14 2005/05/10 12:25:16 atanu Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -312,34 +312,41 @@ extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 
 /**
  * Open an IPv4 TCP socket, and connect it to a remote address and port.
- * TODO: XXX: because it may take time to connect on a TCP socket,
- * we return success even though the connect did not complete.
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is the new socket. If the non-blocking socket was connected,
+ * the referenced value is set to 0. If the return value is XORP_BAD_SOCKET
+ * or if the socket is blocking, then the return value is undefined.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_tcp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
-				  int is_blocking);
+				  int is_blocking,
+				  int *in_progress);
 
 /**
  * Open an IPv6 TCP socket, and connect it to a remote address and port.
- *
- * TODO: XXX: because it may take time to connect on a TCP socket,
- * we return success even though the connect did not complete.
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is the new socket. If the non-blocking socket was connected,
+ * the referenced value is set to 0. If the return value is XORP_BAD_SOCKET
+ * or if the socket is blocking, then the return value is undefined.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_tcp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
-				  int is_blocking);
+				  int is_blocking,
+				  int *in_progress);
 
 /**
  * Open an IPv4 UDP socket, and connect it to a remote address and port.
@@ -348,11 +355,17 @@ extern xsock_t	comm_connect_tcp6(const struct in6_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is the new socket. If the non-blocking socket was connected,
+ * the referenced value is set to 0. If the return value is XORP_BAD_SOCKET
+ * or if the socket is blocking, then the return value is undefined.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_udp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
-				  int is_blocking);
+				  int is_blocking,
+				  int *in_progress);
 
 /**
  * Open an IPv6 UDP socket, and connect it to a remote address and port.
@@ -361,11 +374,17 @@ extern xsock_t	comm_connect_udp4(const struct in_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is the new socket. If the non-blocking socket was connected,
+ * the referenced value is set to 0. If the return value is XORP_BAD_SOCKET
+ * or if the socket is blocking, then the return value is undefined.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_connect_udp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
-				  int is_blocking);
+				  int is_blocking,
+				  int *in_progress);
 
 /**
  * Open an IPv4 UDP socket, bind it to a local address and a port,
@@ -378,13 +397,19 @@ extern xsock_t	comm_connect_udp6(const struct in6_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is the new socket. If the non-blocking socket was connected,
+ * the referenced value is set to 0. If the return value is XORP_BAD_SOCKET
+ * or if the socket is blocking, then the return value is undefined.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
 				       unsigned short local_port,
 				       const struct in_addr *remote_addr,
 				       unsigned short remote_port,
-				       int is_blocking);
+				       int is_blocking,
+				       int *in_progress);
 
 /**
  * Open an IPv6 UDP socket, bind it to a local address and a port,
@@ -397,13 +422,19 @@ extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is the new socket. If the non-blocking socket was connected,
+ * the referenced value is set to 0. If the return value is XORP_BAD_SOCKET
+ * or if the socket is blocking, then the return value is undefined.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       unsigned short local_port,
 				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port,
-				       int is_blocking);
+				       int is_blocking,
+				       int *in_progress);
 
 
 /*
@@ -471,7 +502,8 @@ extern xsock_t	comm_sock_bind(xsock_t sock, const struct sockaddr *sin);
  * If it is NULL, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
+extern int	comm_sock_join4(xsock_t sock,
+				const struct in_addr *mcast_addr,
 				const struct in_addr *my_addr);
 
 /**
@@ -483,7 +515,8 @@ extern int	comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
  * If it is 0, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
+extern int	comm_sock_join6(xsock_t sock,
+				const struct in6_addr *mcast_addr,
 				unsigned int my_ifindex);
 
 /**
@@ -495,7 +528,8 @@ extern int	comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
  * If it is NULL, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
+extern int	comm_sock_leave4(xsock_t sock,
+				 const struct in_addr *mcast_addr,
 				 const struct in_addr *my_addr);
 
 /**
@@ -507,61 +541,76 @@ extern int	comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
  * If it is 0, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
+extern int	comm_sock_leave6(xsock_t sock,
+				 const struct in6_addr *mcast_addr,
 				 unsigned int my_ifindex);
 
 /**
  * Connect to a remote IPv4 address.
  *
- * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * XXX: if the socket is non-blocking, and the connection cannot be
- * completed immediately, then the return value may be %XORP_OK.
+ * Note that we can use this function not only for TCP, but for UDP sockets
+ * as well.
  *
  * @param sock the socket to use to connect.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is XORP_ERROR. For all other errors or if the non-blocking
+ * socket was connected, the referenced value is set to 0. If the return value
+ * is XORP_OK or if the socket is blocking, then the return value is undefined.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_sock_connect4(xsock_t sock,
 				   const struct in_addr *remote_addr,
 				   unsigned short remote_port,
-				   int is_blocking);
+				   int is_blocking,
+				   int *in_progress);
 
 /**
  * Connect to a remote IPv6 address.
  *
- * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * XXX: if the socket is non-blocking, and the connection cannot be
- * completed immediately, then the return value may be %XORP_OK.
+ * Note that we can use this function not only for TCP, but for UDP sockets
+ * as well.
  *
  * @param sock the socket to use to connect.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
  * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is XORP_ERROR. For all other errors or if the non-blocking
+ * socket was connected, the referenced value is set to 0. If the return value
+ * is XORP_OK or if the socket is blocking, then the return value is undefined.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_sock_connect6(xsock_t sock,
 				   const struct in6_addr *remote_addr,
 				   unsigned short remote_port,
-				   int is_blocking);
+				   int is_blocking,
+				   int *in_progress);
 
 /**
- * Connect to a remote address (IPv4 or (IPv6).
+ * Connect to a remote address (IPv4 or IPv6).
  *
- * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * XXX: if the socket is non-blocking, and the connection cannot be
- * completed immediately, then the return value may be %XORP_OK.
+ * Note that we can use this function not only for TCP, but for UDP sockets
+ * as well.
  *
  * @param sock the socket to use to connect.
  * @param sin agnostic sockaddr containing the local address (If it is
  * NULL, will bind to `any' local address.)  and the local port to
  * bind to all in network order.
  * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is XORP_ERROR. For all other errors or if the non-blocking
+ * socket was connected, the referenced value is set to 0. If the return value
+ * is XORP_OK or if the socket is blocking, then the return value is undefined.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern xsock_t	comm_sock_connect(xsock_t sock, const struct sockaddr *sin,
-				  int is_blocking);
+extern int	comm_sock_connect(xsock_t sock, const struct sockaddr *sin,
+				  int is_blocking, int *in_progress);
 
 /**
  * Accept a connection on a listening socket.

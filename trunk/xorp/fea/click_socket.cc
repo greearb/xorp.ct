@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.20 2005/03/05 01:41:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.21 2005/03/25 02:53:00 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -159,9 +159,10 @@ ClickSocket::start(string& error_msg)
 	    //
 	    TimerList::system_sleep(curr_wait_time);
 	    total_wait_time += curr_wait_time;
+	    int in_progress = 0;
 	    _user_fd = comm_connect_tcp4(&in_addr,
 					 htons(_user_click_control_socket_port),
-					 COMM_SOCK_BLOCKING);
+					 COMM_SOCK_BLOCKING, &in_progress);
 	    if (_user_fd >= 0)
 		break;
 	    if (total_wait_time < max_wait_time) {

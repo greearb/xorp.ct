@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.24 2005/05/10 15:23:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.25 2005/05/10 16:28:42 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -458,18 +458,12 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
 
     XLOG_ASSERT(!_connecting);
     _connecting = true;
-    if (XORP_OK == comm_sock_connect(sock, servername, blocking)) {
-#ifdef HOST_OS_WINDOWS
-	    if (comm_get_last_error() == WSAEWOULDBLOCK)
-#else
-	    if (comm_get_last_error() == EINPROGRESS)
-#endif
-		return;
+    int in_progress = 0;
+    if (XORP_ERROR == comm_sock_connect(sock, servername, blocking,
+					&in_progress)) {
+	if (blocking || (in_progress == 0))
+	    return;
     }
-
-    // The comm_sock_connect() function returns success if the connect
-    // call fails but the error is EINPROGRESS. In this case it is
-    // safe to return.
 
     // If an error occurred or we actually made a connection (loopback
     // case) then drop into the completion code and it will tidy

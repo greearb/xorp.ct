@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.21 2005/03/25 02:53:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.22 2005/04/28 02:31:24 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -801,10 +801,14 @@ XrlSocketServer::socket4_0_1_tcp_open_bind_connect(
 
     in_addr ra;
     remote_addr.copy_out(ra);
-    if (comm_sock_connect4(fd, &ra, htons(remote_port), is_blocking)
+    int in_progress = 0;
+    if (comm_sock_connect4(fd, &ra, htons(remote_port), is_blocking,
+			   &in_progress)
 	!= XORP_OK) {
-	comm_close(fd);
-	return XrlCmdError::COMMAND_FAILED("Connect failed.");
+	if (is_blocking || (in_progress == 0)) {
+	    comm_close(fd);
+	    return XrlCmdError::COMMAND_FAILED("Connect failed.");
+	}
     }
 
     RemoteSocketOwner* rso = find_or_create_owner(creator);
@@ -844,9 +848,10 @@ XrlSocketServer::socket4_0_1_udp_open_bind_connect(
     in_addr ra;
     remote_addr.copy_out(ra);
 
+    int in_progress = 0;
     int fd = comm_bind_connect_udp4(&ia, htons(local_port),
 				    &ra, htons(remote_port),
-				    is_blocking);
+				    is_blocking, &in_progress);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1435,10 +1440,14 @@ XrlSocketServer::socket6_0_1_tcp_open_bind_connect(
 
     in6_addr ra;
     remote_addr.copy_out(ra);
-    if (comm_sock_connect6(fd, &ra, htons(remote_port), is_blocking)
+    int in_progress = 0;
+    if (comm_sock_connect6(fd, &ra, htons(remote_port), is_blocking,
+			   &in_progress)
 	!= XORP_OK) {
-	comm_close(fd);
-	return XrlCmdError::COMMAND_FAILED("Connect failed.");
+	if (is_blocking || (in_progress == 0)) {
+	    comm_close(fd);
+	    return XrlCmdError::COMMAND_FAILED("Connect failed.");
+	}
     }
 
     RemoteSocketOwner* rso = find_or_create_owner(creator);
@@ -1481,9 +1490,10 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
     in6_addr ra;
     remote_addr.copy_out(ra);
 
+    int in_progress = 0;
     int fd = comm_bind_connect_udp6(&ia, htons(local_port),
 				    &ra, htons(remote_port),
-				    is_blocking);
+				    is_blocking, &in_progress);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }

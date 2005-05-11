@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.18 2005/05/10 12:25:16 atanu Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.19 2005/05/10 12:54:49 atanu Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -484,25 +484,32 @@ comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
 }
 
 /**
- * comm_sock_connect4:
- * @sock: The socket to use to connect.
- * @remote_addr: The remote address to connect to.
- * @remote_port: The remote port to connect to.
- * @is_blocking: If true, the socket is blocking, otherwise non-blocking.
- *
  * Connect to a remote IPv4 address.
- * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * XXX: if the socket is non-blocking, and the connection cannot be
- * completed immediately, then the return value may be %XORP_OK.
  *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
+ * Note that we can use this function not only for TCP, but for UDP sockets
+ * as well.
+ *
+ * @param sock the socket to use to connect.
+ * @param remote_addr the remote address to connect to.
+ * @param remote_port the remote port to connect to.
+ * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is XORP_ERROR. For all other errors or if the non-blocking
+ * socket was connected, the referenced value is set to 0. If the return value
+ * is XORP_OK or if the socket is blocking, then the return value is undefined.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
 int
 comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
-		   unsigned short remote_port, int is_blocking)
+		   unsigned short remote_port, int is_blocking,
+		   int *in_progress)
 {
     int family;
     struct sockaddr_in sin_addr;
+
+    if (in_progress != NULL)
+	*in_progress = 0;
 
     family = comm_sock_get_family(sock);
     if (family != AF_INET) {
@@ -529,9 +536,12 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
 #endif
 		/*
 		 * XXX: The connection is non-blocking, and the connection
-		 * cannot be completed immediately, therefore return success.
+		 * cannot be completed immediately, therefore set the
+		 * in_progress flag to 1 and return an error.
 		 */
-		return (XORP_OK);
+		if (in_progress != NULL)
+		    *in_progress = 1;
+		return (XORP_ERROR);
 	    }
 	}
 
@@ -546,26 +556,33 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
 }
 
 /**
- * comm_sock_connect6:
- * @sock: The socket to use to connect.
- * @remote_addr: The remote address to connect to.
- * @remote_port: The remote port to connect to.
- * @is_blocking: If true, the socket is blocking, otherwise non-blocking.
- *
  * Connect to a remote IPv6 address.
- * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * XXX: if the socket is non-blocking, and the connection cannot be
- * completed immediately, then the return value may be %XORP_OK.
  *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
+ * Note that we can use this function not only for TCP, but for UDP sockets
+ * as well.
+ *
+ * @param sock the socket to use to connect.
+ * @param remote_addr the remote address to connect to.
+ * @param remote_port the remote port to connect to.
+ * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is XORP_ERROR. For all other errors or if the non-blocking
+ * socket was connected, the referenced value is set to 0. If the return value
+ * is XORP_OK or if the socket is blocking, then the return value is undefined.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
 int
 comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
-		   unsigned short remote_port, int is_blocking)
+		   unsigned short remote_port, int is_blocking,
+		   int *in_progress)
 {
 #ifdef HAVE_IPV6
     int family;
     struct sockaddr_in6 sin6_addr;
+
+    if (in_progress != NULL)
+	*in_progress = 0;
 
     family = comm_sock_get_family(sock);
     if (family != AF_INET6) {
@@ -588,12 +605,19 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 	_comm_set_serrno();
 	if (! is_blocking) {
+#ifdef HOST_OS_WINDOWS
+	    if (comm_get_last_error() == WSAEWOULDBLOCK) {
+#else
 	    if (comm_get_last_error() == EINPROGRESS) {
+#endif
 		/*
 		 * XXX: The connection is non-blocking, and the connection
-		 * cannot be completed immediately, therefore return success.
+		 * cannot be completed immediately, therefore set the
+		 * in_progress flag to 1 and return an error.
 		 */
-		return (XORP_OK);
+		if (in_progress != NULL)
+		    *in_progress = 1;
+		return (XORP_ERROR);
 	    }
 	}
 
@@ -610,6 +634,9 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 
     return (XORP_OK);
 #else
+    if (in_progress != NULL)
+	*in_progress = 0;
+
     comm_sock_no_ipv6("comm_sock_connect6", sock, remote_addr, remote_port,
 		      is_blocking);
     return (XORP_ERROR);
@@ -617,28 +644,33 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 }
 
 /**
- * Connect to a remote address (IPv4 or (IPv6).
+ * Connect to a remote address (IPv4 or IPv6).
  *
- * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * XXX: if the socket is non-blocking, and the connection cannot be
- * completed immediately, then the return value may be %XORP_OK.
+ * Note that we can use this function not only for TCP, but for UDP sockets
+ * as well.
  *
  * @param sock the socket to use to connect.
  * @param sin agnostic sockaddr containing the local address (If it is
  * NULL, will bind to `any' local address.)  and the local port to
  * bind to all in network order.
  * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
+ * @param in_progress if the socket is non-blocking and the connect cannot be
+ * completed immediately, then the referenced value is set to 1, and the
+ * return value is XORP_ERROR. For all other errors or if the non-blocking
+ * socket was connected, the referenced value is set to 0. If the return value
+ * is XORP_OK or if the socket is blocking, then the return value is undefined.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-xsock_t
-comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking)
+int
+comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
+		  int *in_progress)
 {
     switch (sin->sa_family) {
     case AF_INET:
 	{
 	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)sin;
 	    return comm_sock_connect4(sock, &sin4->sin_addr, sin4->sin_port,
-				      is_blocking);
+				      is_blocking, in_progress);
 	}
 	break;
 #ifdef AF_INET6
@@ -646,7 +678,7 @@ comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking)
 	{
 	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sin;
 	    return comm_sock_connect6(sock, &sin6->sin6_addr, sin6->sin6_port,
-				      is_blocking);
+				      is_blocking, in_progress);
 	}
 	break;
 #endif
