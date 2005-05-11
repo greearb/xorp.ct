@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.50 2005/03/25 02:52:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.51 2005/05/10 15:23:58 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -82,6 +82,7 @@ BGPMain::BGPMain()
 						 &BGPMain::terminate));
 
     initialize_profiling_variables(_profile);
+    comm_init();
 }
 
 BGPMain::~BGPMain()
@@ -180,6 +181,8 @@ BGPMain::~BGPMain()
     debug_msg("-------------------------------------------\n");
     debug_msg("Delete BGPMain complete\n");
     debug_msg("-------------------------------------------\n");
+
+    comm_exit();
 }
 
 ProcessStatus

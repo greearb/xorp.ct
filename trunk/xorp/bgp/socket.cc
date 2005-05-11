@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.26 2005/05/11 00:32:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.27 2005/05/11 03:57:22 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -44,12 +44,6 @@ Socket::Socket(const Iptuple& iptuple, EventLoop& e)
 #ifdef	DEBUG_PEERNAME
     _remote_host = "unconnected socket";
 #endif
-    comm_init();
-}
-
-Socket::~Socket()
-{
-    comm_exit();
 }
 
 void

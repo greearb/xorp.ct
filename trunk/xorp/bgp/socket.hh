@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.11 2005/05/10 15:23:58 atanu Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.12 2005/05/11 03:57:23 atanu Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -50,8 +50,6 @@ public:
     static const int MAX_LISTEN_QUEUE = 5;
 
     Socket(const Iptuple& iptuple, EventLoop& e);
-
-    ~Socket();
 
     /**
      * Given an address (IPv4 or IPv6) symbolic or numeric fill in the
