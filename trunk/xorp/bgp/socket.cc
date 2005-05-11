@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.25 2005/05/10 16:28:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.26 2005/05/11 00:32:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -44,6 +44,12 @@ Socket::Socket(const Iptuple& iptuple, EventLoop& e)
 #ifdef	DEBUG_PEERNAME
     _remote_host = "unconnected socket";
 #endif
+    comm_init();
+}
+
+Socket::~Socket()
+{
+    comm_exit();
 }
 
 void
@@ -448,7 +454,7 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
 	XLOG_ERROR("Failed to add socket %d to eventloop", sock);
     }
 
-    int blocking = 0;
+    const int blocking = 0;
 
     if (XORP_ERROR == comm_sock_set_blocking(sock, blocking))
 	XLOG_FATAL("Failed to go non-blocking");
@@ -461,13 +467,15 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
     int in_progress = 0;
     if (XORP_ERROR == comm_sock_connect(sock, servername, blocking,
 					&in_progress)) {
-	if (blocking || (in_progress == 0))
+	if (in_progress)
 	    return;
     }
 
-    // If an error occurred or we actually made a connection (loopback
-    // case) then drop into the completion code and it will tidy
-    // it. The completion code will be able to detect errors.
+    // 1) If an error apart from in_progress occured call the completion
+    // method which will tidy up.
+    //
+    // 2) A connection may have been made already, this happens in the
+    // loopback case, again the completion method should deal with this.
 
     connect_socket_complete(sock, SEL_ALL, cb);
 }
