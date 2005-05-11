@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.24 2005/04/19 03:27:18 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.25 2005/04/27 02:09:50 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -367,7 +367,6 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	    if (is_new_entry)
 		pim_mre_wc->entry_try_remove();
 	}
-	return;		// XXX: a short-cut to avoid the rest of the processing
     }
     
     olist.reset(iif_vif_index);
@@ -378,10 +377,12 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     
     if ((! is_wrong_iif)
 	|| (pim_mfc->iif_vif_index() == Vif::VIF_INDEX_INVALID)) {
-	pim_mfc->set_iif_vif_index(iif_vif_index);
+	pim_mfc->update_mfc(iif_vif_index, olist);
+    } else {
+	pim_mfc->set_olist(olist);
+	pim_mfc->add_mfc_to_kernel();
     }
-    pim_mfc->set_olist(olist);
-    pim_mfc->add_mfc_to_kernel();
+
     if (is_keepalive_timer_restarted
 	|| (! pim_mfc->has_idle_dataflow_monitor())) {
 	//
@@ -414,9 +415,9 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     // If necessary, add a dataflow monitor to monitor whether it is
     // time to switch to the SPT.
     //
-    if ((pim_mre_wc != NULL)
-	&& (pim_mre_sg == NULL)
-	&& pim_node().is_switch_to_spt_enabled().get()
+    if (pim_node().is_switch_to_spt_enabled().get()
+	&& (pim_mre_wc != NULL)
+	&& (pim_mre_wc->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg))
 	&& (! pim_mfc->has_spt_switch_dataflow_monitor())) {
 	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
 	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
@@ -535,14 +536,16 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	       && (pim_node().switch_to_spt_threshold_bytes().get()
 		   == threshold_bytes)))) {
 	// This dataflow monitor is not needed, hence delete it.
-	pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
-					 threshold_interval_usec,
-					 threshold_packets,
-					 threshold_bytes,
-					 is_threshold_in_packets,
-					 is_threshold_in_bytes,
-					 is_geq_upcall,
-					 is_leq_upcall);
+	if (pim_mfc->has_spt_switch_dataflow_monitor()) {
+	    pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
+					     threshold_interval_usec,
+					     threshold_packets,
+					     threshold_bytes,
+					     is_threshold_in_packets,
+					     is_threshold_in_bytes,
+					     is_geq_upcall,
+					     is_leq_upcall);
+	}
 	return (XORP_ERROR);	// We don't need this dataflow monitor
     }
     
@@ -555,14 +558,16 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	// SPT switch is desired, and is initiated by check_switch_to_spt_sg().
 	// Remove the dataflow monitor, because we don't need it anymore.
 	//
-	pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
-					 threshold_interval_usec,
-					 threshold_packets,
-					 threshold_bytes,
-					 is_threshold_in_packets,
-					 is_threshold_in_bytes,
-					 is_geq_upcall,
-					 is_leq_upcall);
+	if (pim_mfc->has_spt_switch_dataflow_monitor()) {
+	    pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
+					     threshold_interval_usec,
+					     threshold_packets,
+					     threshold_bytes,
+					     is_threshold_in_packets,
+					     is_threshold_in_bytes,
+					     is_geq_upcall,
+					     is_leq_upcall);
+	}
 	return (XORP_OK);
     }
     
@@ -607,14 +612,16 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	XLOG_ASSERT(pim_mfc != NULL);
 	if (pim_mre_sg != NULL) {
 	    // First delete the old dataflow
-	    pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
-					     threshold_interval_usec,
-					     threshold_packets,
-					     threshold_bytes,
-					     is_threshold_in_packets,
-					     is_threshold_in_bytes,
-					     is_geq_upcall,
-					     is_leq_upcall);
+	    if (pim_mfc->has_idle_dataflow_monitor()) {
+		pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
+						 threshold_interval_usec,
+						 threshold_packets,
+						 threshold_bytes,
+						 is_threshold_in_packets,
+						 is_threshold_in_bytes,
+						 is_geq_upcall,
+						 is_leq_upcall);
+	    }
 	    pim_mfc->add_dataflow_monitor(expected_dataflow_monitor_sec, 0,
 					  0,	// threshold_packets
 					  0,	// threshold_bytes
@@ -632,15 +639,4 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     }
     
     return (XORP_OK);
-    
-    UNUSED(threshold_interval_usec);
-    UNUSED(measured_interval_sec);
-    UNUSED(measured_interval_usec);
-    UNUSED(threshold_packets);
-    UNUSED(threshold_bytes);
-    UNUSED(measured_bytes);
-    UNUSED(is_threshold_in_packets);
-    UNUSED(is_threshold_in_bytes);
-    UNUSED(is_geq_upcall);
-    UNUSED(is_leq_upcall);
 }
