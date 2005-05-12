@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.52 2005/04/20 09:44:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.53 2005/04/20 09:52:06 pavlin Exp $"
 
 
 //
@@ -65,6 +65,7 @@ static bool is_dummy = true;
 // Local functions prototypes
 //
 static	void usage(const char *argv0, int exit_value);
+static	int  print_debug_state_name(const string& debug_state_name);
 
 /**
  * usage:
@@ -95,10 +96,16 @@ usage(const char *argv0, int exit_value)
     else
 	output = stderr;
 
-    fprintf(output, "Usage: %s [-F <finder_hostname>[:<finder_port>]]\n",
+    fprintf(output, "Usage: %s [-F <finder_hostname>[:<finder_port>]] [-P <name>]\n",
 	    progname);
-    fprintf(output, "           -F <finder_hostname>[:<finder_port>]  : finder hostname and port\n");
-    fprintf(output, "           -h                                    : usage (this message)\n");
+    fprintf(output, "           -F <finder_hostname>[:<finder_port>]  : Set finder hostname and port\n");
+    fprintf(output, "           -P <name>                             : Print debug state by name.\n");
+    fprintf(output, "                                                   Valid names are:\n");
+    fprintf(output, "               -P track_state_name               : Print the state dependency\n");
+    fprintf(output, "                                                   graph by name\n");
+    fprintf(output, "               -P track_state_num                : Print the state dependency\n");
+    fprintf(output, "                                                   graph by number\n");
+    fprintf(output, "           -h                                    : Print usage (this message)\n");
     fprintf(output, "\n");
     fprintf(output, "Program name:   %s\n", progname);
     fprintf(output, "Module name:    %s\n", XORP_MODULE_NAME);
@@ -107,6 +114,40 @@ usage(const char *argv0, int exit_value)
     exit (exit_value);
 
     // NOTREACHED
+}
+
+static int
+print_debug_state_name(const string& debug_state_name)
+{
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+    EventLoop eventloop;
+
+    XrlPimNode xrl_pimsm_node4(
+	AF_INET,
+	XORP_MODULE_PIMSM,
+	eventloop,
+	xorp_module_name(AF_INET, XORP_MODULE_PIMSM),
+	finder_hostname,
+	finder_port,
+	"finder",
+	xorp_module_name(AF_INET, XORP_MODULE_MFEA),
+	xorp_module_name(AF_INET, XORP_MODULE_RIB),
+	xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
+
+    if (debug_state_name == "track_state_name") {
+	xrl_pimsm_node4.pim_mrt().track_state_print_actions_name();
+	return (XORP_OK);
+    }
+
+    if (debug_state_name == "track_state_num") {
+	xrl_pimsm_node4.pim_mrt().track_state_print_actions_num();
+	return (XORP_OK);
+    }
+
+    fprintf(stderr, "Invalid debug state name: %s\n",
+	    debug_state_name.c_str());
+    return (XORP_ERROR);
 }
 
 static void
@@ -373,6 +414,7 @@ main(int argc, char *argv[])
     const char *argv0 = argv[0];
     string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
     uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+    string debug_state_name;
 
     //
     // Initialize and start xlog
@@ -387,7 +429,7 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((ch = getopt(argc, argv, "F:h")) != -1) {
+    while ((ch = getopt(argc, argv, "F:P:h")) != -1) {
 	switch (ch) {
 	case 'F':
 	    // Finder hostname and port
@@ -403,6 +445,12 @@ main(int argc, char *argv[])
 		finder_port = static_cast<uint16_t>(atoi(p));
 		finder_hostname = finder_hostname.substr(0, idx);
 	    }
+	    break;
+	case 'P':
+	    // Print debug state by name
+	    debug_state_name = optarg;
+	    if (print_debug_state_name(debug_state_name) != XORP_OK)
+		usage(argv0, 1);
 	    break;
 	case 'h':
 	case '?':
@@ -423,6 +471,9 @@ main(int argc, char *argv[])
 	// NOTREACHED
     }
 
+    if (! debug_state_name.empty())
+	goto exit_label;
+
     //
     // Run everything
     //
@@ -432,6 +483,7 @@ main(int argc, char *argv[])
 	xorp_catch_standard_exceptions();
     }
 
+ exit_label:
     //
     // Gracefully stop and exit xlog
     //
