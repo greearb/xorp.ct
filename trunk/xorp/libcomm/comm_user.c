@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.16 2005/05/10 12:25:16 atanu Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.17 2005/05/11 00:32:35 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -609,7 +609,7 @@ comm_connect_tcp4(const struct in_addr *remote_addr,
 	 * If this is a non-blocking socket and the connect couldn't
 	 * complete, then return the socket.
 	 */
-	if (is_blocking && (in_progress != NULL) && (*in_progress == 1))
+	if ((! is_blocking) && (in_progress != NULL) && (*in_progress == 1))
 	    return (sock);
 
 	comm_sock_close(sock);
@@ -655,7 +655,7 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
 	 * If this is a non-blocking socket and the connect couldn't
 	 * complete, then return the socket.
 	 */
-	if (is_blocking && (in_progress != NULL) && (*in_progress == 1))
+	if ((! is_blocking) && (in_progress != NULL) && (*in_progress == 1))
 	    return (sock);
 
 	comm_sock_close(sock);
@@ -708,7 +708,7 @@ comm_connect_udp4(const struct in_addr *remote_addr,
 	 * If this is a non-blocking socket and the connect couldn't
 	 * complete, then return the socket.
 	 */
-	if (is_blocking && (in_progress != NULL) && (*in_progress == 1))
+	if ((! is_blocking) && (in_progress != NULL) && (*in_progress == 1))
 	    return (sock);
 
 	comm_sock_close(sock);
@@ -754,7 +754,7 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
 	 * If this is a non-blocking socket and the connect couldn't
 	 * complete, then return the socket.
 	 */
-	if (is_blocking && (in_progress != NULL) && (*in_progress == 1))
+	if ((! is_blocking) && (in_progress != NULL) && (*in_progress == 1))
 	    return (sock);
 
 	comm_sock_close(sock);
@@ -818,7 +818,7 @@ comm_bind_connect_udp4(const struct in_addr *local_addr,
 	 * If this is a non-blocking socket and the connect couldn't
 	 * complete, then return the socket.
 	 */
-	if (is_blocking && (in_progress != NULL) && (*in_progress == 1))
+	if ((! is_blocking) && (in_progress != NULL) && (*in_progress == 1))
 	    return (sock);
 
 	comm_sock_close(sock);
@@ -875,7 +875,7 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 	 * If this is a non-blocking socket and the connect couldn't
 	 * complete, then return the socket.
 	 */
-	if (is_blocking && (in_progress != NULL) && (*in_progress == 1))
+	if ((! is_blocking) && (in_progress != NULL) && (*in_progress == 1))
 	    return (sock);
 
 	comm_sock_close(sock);
