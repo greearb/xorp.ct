@@ -18,6 +18,8 @@
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
 
+class DataBaseHandle;
+
 /**
  * Area Router
  * 
@@ -26,12 +28,7 @@ template <typename A>
 class AreaRouter {
  public:
     AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
-	       OspfTypes::AreaType area_type) 
-	: _ospf(ospf), _area(area), _area_type(area_type)
-    {
-	_router_lsa = Lsa::LsaRef(new RouterLsa(_ospf.get_version()));
-	_db.push_back(_router_lsa);
-    }
+	       OspfTypes::AreaType area_type);
 
     /**
      * Add peer
@@ -46,12 +43,36 @@ class AreaRouter {
     /**
      * Peer came up
      */
-    void peer_up(PeerID peer);
+    bool peer_up(PeerID peer);
 
     /**
      * Peer went down
      */
-    void peer_down(PeerID peer);
+    bool peer_down(PeerID peer);
+
+    /**
+     * Add router link
+     *
+     * Advertise this router link.
+     */
+    bool add_router_link(PeerID peer, RouterLink& router_link);
+
+    /**
+     * Remove router link
+     *
+     * Stop advertising this router link.
+     */
+    bool remove_router_link(PeerID peer);
+
+    /**
+     * Add a network to be announced.
+     */
+//     void add_network(PeerID peer, IPNet<A> network);
+
+    /**
+     * Remove a network to be announced.
+     */
+//     void remove_network(PeerID peer, IPNet<A> network);
 
     /**
      * @return the type of this area.
@@ -68,6 +89,29 @@ class AreaRouter {
      */
     bool newer_lsa(const Lsa_header&) const;
 
+    /**
+     * Open data base
+     *
+     * @return Database Handle
+     */
+    DataBaseHandle open_database();
+
+    /**
+     * Next database entry
+     *
+     * @param last true if this is the last entry.
+     *
+     * @return The next LSA in the database.
+     */
+    Lsa::LsaRef get_entry_database(DataBaseHandle& dbh, bool& last);
+
+    /**
+     * Close the database
+     *
+     * @param dbd Database descriptor
+     */
+    void close_database(DataBaseHandle& dbh);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
@@ -76,18 +120,57 @@ class AreaRouter {
 
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
+    uint32_t _readers;			// Number of database readers.
     
     /**
      * Internal state that is required about this peer.
      */
-    struct peer_state {
-	peer_state() {}
-	peer_state(bool up) : _up(up)
+    struct PeerState {
+	PeerState(OspfTypes::Version version)
+	    : _up(false),
+	      _link_valid(false),
+	      _router_link(version)
 	{}
-	bool _up;	// True if peer is enabled.
+	bool _up;		// True if peer is enabled.
+	bool _link_valid;	// True if the router link is valid
+	RouterLink _router_link;// Router link for this peer
     };
 
-    map<PeerID, peer_state> _peers;	// Peers of this area.
+    typedef ref_ptr<PeerState> PeerStateRef;
+    typedef map<PeerID, PeerStateRef> PeerMap;
+    PeerMap _peers;		// Peers of this area.
+
+    /**
+     * Update router links.
+     *
+     * A peer has just changed state so update the router lsa and publish.
+     *
+     * @param peerid peer that changed state.
+     * @return true if something changed.
+     */
+    bool update_router_links(PeerStateRef psr);
+
+    /*
+     * Send this LSA to all our peers.
+     */
+    void publish(Lsa::LsaRef lsar);
+};
+
+/**
+ * DataBase Handle
+ *
+ * Holds state regarding position in the database
+ */
+class DataBaseHandle {
+ public:
+    DataBaseHandle() : _position(0)
+    {}
+
+    uint32_t position() const { return _position; }
+
+    void advance() { _position++; }
+ private:
+    uint32_t _position;	// Position in database.
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__
