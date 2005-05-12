@@ -197,7 +197,7 @@ class Lsa {
     typedef ref_ptr<Lsa> LsaRef;
 
     Lsa(OspfTypes::Version version)
-	:  _header(version), _version(version)
+	:  _header(version), _version(version), _valid(true)
     {}
 
     /**
@@ -265,6 +265,16 @@ class Lsa {
     Lsa_header& get_header() {return _header; }
 
     /**
+     * Is this LSA valid?
+     */
+    bool valid() const { return _valid; }
+
+    /**
+     * Mark this LSA as invalid.
+     */
+    void invalidate() { _valid = false; }
+
+    /**
      * Generate a printable representation of the LSA.
      */
     virtual string str() const = 0;
@@ -280,6 +290,7 @@ class Lsa {
 
  private:
     const OspfTypes::Version 	_version;
+    bool _valid;		// True if this LSA is still valid.
 
 //     AckList _ack_list;		// List of ACKs received for this LSA.
 //     XorpTimer _retransmit;	// Retransmit timer.
