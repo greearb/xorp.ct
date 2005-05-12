@@ -28,7 +28,7 @@ associated with it?
 8) Constructor for the AreaRouter should take all the information to
 fill in the Router LSA.
 
-9) The add_peer method to AreaRouter should take a RouterLink.
+9) Figure out under what conditions the E-bit should be set.
 
 Possible issues
 ~~~~~~~~~~~~~~~
