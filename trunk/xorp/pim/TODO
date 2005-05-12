@@ -1,6 +1,14 @@
 #
-# $XORP: xorp/pim/TODO,v 1.113 2005/05/03 03:02:13 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.114 2005/05/04 16:31:32 pavlin Exp $
 #
+
+* BSR SPEC + IMPL + TESTSUITE:
+  On startup, or after adding Cand-BSR configuration, the
+  Bootstrap Timer should be set to a small random value instead
+  of the fixed value of BS_Timeout (130s). If it is fixed value,
+  we want to reduce the syncronization and BSR trashing after, say,
+  a power failure. Also, the current value of 130s is a bit too long
+  because on startup we won't have BSR info for 130 seconds.
 
 * PIM BIDIR SPEC:
   Apply the following comments based on an email to the PIM ML:
