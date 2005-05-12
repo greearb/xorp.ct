@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.38 2005/04/27 07:57:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.39 2005/05/12 09:03:12 pavlin Exp $"
 
 
 //
@@ -1722,16 +1722,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 				   config_bsr_zone->bsr_addr(),
 				   config_bsr_zone->bsr_priority());
 	    // Set BS Timer to BS Timeout
-	    // TODO: XXX: PAVPAVPAV: send the very first Bootstrap message
-	    // after a very short random interval instead?
-	    // E.g. after 1/10th of the BS Timeout?
-	    // TODO: XXX: PAVPAVPAV: for testing purpose, the interval
-	    // is shorter: 1/10th	(XXX: before was 1/30th)
-	    // (Not in the spec).
-	    // TODO: XXX: PAVPAVPAV: temp. the interval is not shorter.
 	    TimeVal tv(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0);
-	    tv = tv / 1;
-	    tv = positive_random_uniform(tv, 0.5);
 	    _bsr_timer = pim_bsr().pim_node().eventloop().new_oneoff_after(
 		tv,
 		callback(this, &BsrZone::bsr_timer_timeout));
