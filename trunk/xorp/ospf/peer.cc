@@ -392,7 +392,6 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
     if (0 == n) {
 	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src);
 	_neighbours.push_back(n);
-	// An iterator is required so push to the front and call begin.
     }
 
     n->event_hello_received(hello);
