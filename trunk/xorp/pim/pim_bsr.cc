@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.37 2005/04/21 19:16:11 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.38 2005/04/27 07:57:06 pavlin Exp $"
 
 
 //
@@ -1530,7 +1530,17 @@ BsrZone::merge_rp_set(const BsrZone& bsr_zone)
 	    BsrGroupPrefix *new_bsr_group_prefix;
 	    new_bsr_group_prefix = new BsrGroupPrefix(*this,
 						      *bsr_group_prefix);
-	    _bsr_group_prefix_list.push_back(new_bsr_group_prefix);
+	    //
+	    // XXX: if a scope zone, and if there is a group-RP prefix for
+	    // the whole zone, this prefix must be in front.
+	    //
+	    if (new_bsr_group_prefix->is_scope_zone()
+		&& (new_bsr_group_prefix->group_prefix()
+		    == zone_id().scope_zone_prefix())) {
+		_bsr_group_prefix_list.push_front(new_bsr_group_prefix);
+	    } else {
+		_bsr_group_prefix_list.push_back(new_bsr_group_prefix);
+	    }
 	    continue;
 	}
 	// Add the information about the new RPs.
@@ -1639,7 +1649,18 @@ BsrZone::add_bsr_group_prefix(const IPvXNet& group_prefix_init,
 					  group_prefix_init,
 					  is_scope_zone_init,
 					  expected_rp_count);
-    _bsr_group_prefix_list.push_back(bsr_group_prefix);
+
+    //
+    // XXX: if a scope zone, and if there is a group-RP prefix for the whole
+    // zone, this prefix must be in front.
+    //
+    if (is_scope_zone_init
+	&& (bsr_group_prefix->group_prefix()
+	    == zone_id().scope_zone_prefix())) {
+	_bsr_group_prefix_list.push_front(bsr_group_prefix);
+    } else {
+	_bsr_group_prefix_list.push_back(bsr_group_prefix);
+    }
     
     return (bsr_group_prefix);
 }
