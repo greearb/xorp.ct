@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.17 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.18 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -584,13 +584,17 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& src_addr, const IPvX& dst_addr,
 	
 	list<BsrGroupPrefix *>::const_iterator iter_prefix
 	    = bsr_zone.bsr_group_prefix_list().begin();
-	if (iter_prefix == bsr_zone.bsr_group_prefix_list().end())
-	    break;
-	BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
-	if (is_first_fragment
-	    && (bsr_group_prefix->group_prefix()
-		== bsr_zone.zone_id().scope_zone_prefix()))
-	    break;	// XXX: the admin scope range will be added later
+	if (iter_prefix != bsr_zone.bsr_group_prefix_list().end()) {
+	    BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
+	    if (is_first_fragment
+		&& (bsr_group_prefix->group_prefix()
+		    == bsr_zone.zone_id().scope_zone_prefix()))
+		//
+		// XXX: the first prefix already covers the entire admin
+		// scope range.
+		//
+		break;
+	}
 	
 	//
 	// Add the entire admin scope range with no RPs.
