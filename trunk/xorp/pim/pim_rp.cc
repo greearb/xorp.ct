@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.13 2005/03/25 02:54:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.14 2005/04/27 07:59:14 pavlin Exp $"
 
 
 //
@@ -325,7 +325,7 @@ RpTable::add_rp(const IPvX& rp_addr,
 			 cstring(group_prefix),
 			 PimRp::rp_learned_method_str(rp_learned_method).c_str(),
 			 pim_rp->rp_learned_method_str().c_str());
-	    continue;
+	    return (NULL);
 	}
 	if ((pim_rp->rp_priority() == rp_priority)
 	    && (pim_rp->hash_mask_len() == hash_mask_len)) {
