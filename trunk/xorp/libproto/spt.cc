@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/spt.cc,v 1.3 2004/12/04 20:59:47 atanu Exp $"
+#ident "$XORP: xorp/libproto/spt.cc,v 1.4 2005/03/25 02:53:24 pavlin Exp $"
 
 // #define INCREMENTAL_SPT
 
@@ -24,7 +24,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipv4.hh"
+#include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/ipv6net.hh"
 #include "spt.hh"
 
 template <typename A>
@@ -287,6 +289,7 @@ Spt<A>::dijkstra()
 	else
 	    current->set_first_hop(prev->get_first_hop());
 
+	debug_msg("Previous: %s\n", prev->str().c_str());
 	debug_msg("Permanent: %s distance %d next hop %s\n",
 		  current->str().c_str(),
 		  weight,
@@ -443,31 +446,38 @@ Node<A>::set_adjacent_weights(NodeRef me, int delta_weight,
 	NodeRef n = i->second._dst;
 	debug_msg("Node: %s\n", n->str().c_str());
 	if (n->valid() && n->tentative()) {
-	    n->set_last_hop(me);
 	    // It is critial that the weight of a node is not changed
 	    // while it is in the PriorityQueue.
-	    tentative.add(n, delta_weight + i->second._weight);
+	    if (tentative.add(n, delta_weight + i->second._weight))
+		n->set_last_hop(me);
 	}
     }
 }
 
 template <typename A>
-void
+bool
 Node<A>::set_local_weight(int weight)
 {
     // If this node is no longer tentative we shouldn't be changing
     // its value.
     XLOG_ASSERT(_tentative);
 
+    bool accepted = false;
+
     // If no valid state exists just set the weight otherwise make
     // sure it's less than the value already present.
     if (!_current._valid) {
 	_current._path_length = weight;
 	_current._valid = true;
+	accepted = true;
     } else {
-	if (_current._path_length > weight)
+	if (_current._path_length > weight) {
 	    _current._path_length = weight;
+	    accepted = true;
+	}
     }
+
+    return accepted;
 }
 
 template <typename A>
@@ -599,7 +609,7 @@ Spt<A>::garbage_collect()
 }
 
 template <typename A> 
-void
+bool
 PriorityQueue<A>::add(typename Node<A>::NodeRef n, int weight)
 {
     // Find this node if its already in set and remove it.
@@ -613,9 +623,10 @@ PriorityQueue<A>::add(typename Node<A>::NodeRef n, int weight)
 	    }
 	}
     }
-    n->set_local_weight(weight);
+    bool accepted = n->set_local_weight(weight);
     _tentative.insert(n);
 
+    return accepted;
 //     debug_msg("Insert %s\n", n->str().c_str());
 }
 
@@ -642,5 +653,11 @@ template class Spt<string>;
 template class Node<IPv4>;
 template class Spt<IPv4>;
 
+template class Node<IPv4Net>;
+template class Spt<IPv4Net>;
+
 template class Node<IPv6>;
 template class Spt<IPv6>;
+
+template class Node<IPv6Net>;
+template class Spt<IPv6Net>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.2 2004/11/03 21:42:28 pavlin Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.3 2005/03/25 02:53:25 pavlin Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -254,8 +254,10 @@ class Node {
      * Set local weight.
      * Set the weight on this node if its tentative and less than the
      * previous value.
+     *
+     * @return true if its accepted.
      */
-    void set_local_weight(int weight);
+    bool set_local_weight(int weight);
 
     /**
      * get local weight.
@@ -372,8 +374,9 @@ class PriorityQueue {
  public:
     /**
      * Add or Update the weight of a node.
+     * @return true if the weight was used.
      */
-    void add(typename Node<A>::NodeRef n, int weight);
+    bool add(typename Node<A>::NodeRef n, int weight);
 
     /**
      * Pop the node with lowest weight.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.2 2005/02/08 01:33:13 atanu Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.3 2005/03/25 02:53:25 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -480,6 +480,64 @@ test7(TestInfo& /*info*/)
     return true;
 }
 
+/**
+ *  o ---10--> a
+ *  |          ^
+ *  |          |
+ *  3         12
+ *  |          |
+ *  V          |
+ *  b ----3--> c
+ *
+ *  Shortest path o->a is direct (nexthop: a)
+ *  However, nexthop of b is currently returned
+ *
+ * Provided by: Adam Barr
+ * Used to trigger a problem in the nexthop code.
+ */
+bool
+test8(TestInfo& info)
+{
+    Spt<string> spt;
+
+    spt.add_node("o");
+    spt.set_origin("o");
+
+    spt.add_node("a");
+    spt.add_node("b");
+    spt.add_node("c");
+
+    spt.add_edge("o", 10, "a");
+    spt.add_edge("o", 3, "b");
+    spt.add_edge("b", 3, "c");
+    spt.add_edge("c", 12, "a");
+
+    list<RouteCmd<string> > routes, expected_routes;
+     
+    if (!spt.compute(routes)) {
+	DOUT(info) << "spt compute failed" << endl;
+	return false;
+    }
+
+    for_each(routes.begin(), routes.end(), Pr<string>(info));
+
+    expected_routes.
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "a", "a"));
+
+    expected_routes.
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "b", "b"));
+
+    expected_routes.
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "c", "b"));
+
+    if (!verify(info, routes, expected_routes)) {
+	DOUT(info) << "verify failed" << endl;
+	return false;
+    }
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -511,6 +569,7 @@ main(int argc, char **argv)
 	{"test5", callback(test5, fname)},
 	{"test6", callback(test6)},
 	{"test7", callback(test7)},
+	{"test8", callback(test8)},
     };
 
     try {
