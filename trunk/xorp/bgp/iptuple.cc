@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.9 2005/03/25 02:52:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.10 2005/05/10 12:29:23 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -142,9 +142,9 @@ Iptuple::fill_address(const char *interface, uint16_t local_port,
     if ((error = getaddrinfo(interface, servname, &hints, &res0))) {
 	// XXX - Temporary hack to get around mising gai_strerror.
 #ifdef	HOST_OS_WINDOWS
-	char *error_string = "unknown reason";
+	const char *error_string = "unknown reason";
 #else
-	char *error_string = gai_strerror(error);
+	const char *error_string = gai_strerror(error);
 #endif
 	xorp_throw(UnresolvableHost,
 		   c_format("getaddrinfo(%s,%s,...) failed: %s",
@@ -168,9 +168,9 @@ Iptuple::fill_address(const char *interface, uint16_t local_port,
 			     0, 0, NI_NUMERICHOST))) {
 	// XXX - Temporary hack to get around mising gai_strerror.
 #ifdef	HOST_OS_WINDOWS
-	char *error_string = "unknown reason";
+	const char *error_string = "unknown reason";
 #else
-	char *error_string = gai_strerror(error);
+	const char *error_string = gai_strerror(error);
 #endif
 	xorp_throw(UnresolvableHost,
 		   c_format("getnameinfo() failed: %s", error_string));

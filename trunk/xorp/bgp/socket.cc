@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.27 2005/05/11 03:57:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.28 2005/05/11 07:28:51 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -108,9 +108,9 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
     // addr must be numeric so this can't fail.
     if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) {
 #ifdef	HOST_OS_WINDOWS
-	char *error_string = "unknown reason";
+	const char *error_string = "unknown reason";
 #else
-	char *error_string = gai_strerror(error);
+	const char *error_string = gai_strerror(error);
 #endif
 	XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
 		   port.c_str(),
