@@ -30,6 +30,16 @@ fill in the Router LSA.
 
 9) Figure out under what conditions the E-bit should be set.
 
+10) Section 3.3 Classification of routers. Add an OSPF enumeration for the
+four classifications. Note that the classifications are
+overlappying. Add four predicate methods to the peer manager that will
+return the status of the router. For example if the router is only
+configured with one area internal_router_p will return true.
+
+11) AreaRouter<A>::add_router_link
+Must be capable of supporting multiple router links. An example is for
+point to point interfaces.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
