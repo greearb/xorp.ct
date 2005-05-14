@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.69 2005/04/20 19:31:16 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.70 2005/04/27 02:48:38 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -12,7 +12,17 @@ Release 1.2 (2005/??/??)
     - 
 
   CONFIGURATION:
-    - 
+    - Addition of new PIM-SM related configuration statements:
+
+      cand-bsr-by-vif-addr: <IPv4 | IPv6>
+      and
+      cand-rp-by-vif-addr: <IPv4 | IPv6>
+
+      Those optional statements are used together with cand-bsr-by-vif-name
+      and cand-rp-by-vif-name respectively to specify the particular
+      IP address on the configured vif. If they are omitted, a domain-wide
+      address (if exists) that belongs to that interface is chosen by the
+      router itself.
 
   LIBXORP:
     - 
