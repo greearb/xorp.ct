@@ -673,6 +673,7 @@ protocols {
 		scope-zone 224.0.0.0/4 {
 		    /* is-scope-zone: false */
 		    cand-bsr-by-vif-name: "dc0"
+		    /* cand-bsr-by-vif-addr: 10.10.10.10 */
 		    /* bsr-priority: 1 */
 		    /* hash-mask-len: 30 */
 		}
@@ -682,6 +683,7 @@ protocols {
 		group-prefix 224.0.0.0/4 {
 		    /* is-scope-zone: false */
 		    cand-rp-by-vif-name: "dc0"
+		    /* cand-rp-by-vif-addr: 10.10.10.10 */
 		    /* rp-priority: 192 */
 		    /* rp-holdtime: 150 */
 		}
@@ -735,8 +737,9 @@ protocols {
 		scope-zone ff00::/8 {
 		    /* is-scope-zone: false */
 		    cand-bsr-by-vif-name: "dc0"
+		    /* cand-bsr-by-vif-addr: 10:10:10:10:10:10:10:10 */
 		    /* bsr-priority: 1 */
-		    /* hash-mask-len: 30 */
+		    /* hash-mask-len: 126 */
 		}
 	    }
 
@@ -744,6 +747,7 @@ protocols {
 		group-prefix ff00::/8 {
 		    /* is-scope-zone: false */
 		    cand-rp-by-vif-name: "dc0"
+		    /* cand-rp-by-vif-addr: 10:10:10:10:10:10:10:10 */
 		    /* rp-priority: 192 */
 		    /* rp-holdtime: 150 */
 		}
@@ -768,6 +772,8 @@ protocols {
 
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
+<P><U>Note</U>: The "cand-bsr-by-vif-addr" and "cand-rp-by-vif-addr"
+statements appeared after XORP Release-1.1.
 
 <P>
 A number of parameters have default values, therefore
@@ -806,6 +812,11 @@ The "cand-bsr" section should contain "scope-zone" statements for each
 multicast prefix address.
 The vif name with the address that is to be used as the Candidate-BSR
 is specified by the "cand-bsr-by-vif-name" statement.
+The particular vif's address can be specified by the
+"cand-bsr-by-vif-addr" statement. If the
+"cand-bsr-by-vif-addr" statement is omitted, a domain-wide
+address (if exists) that belongs to that interface is chosen by the router
+itself.
 The Candidate-BSR priority can be modified with the "bsr-priority"
 parameter.
 <P>
@@ -817,6 +828,11 @@ The "cand-rp" section should contain "group-prefix" statements for each
 multicast prefix address.
 The vif name with the address that is to be used as the Candidate-RP
 is specified by the "cand-rp-by-vif-name" statement.
+The particular vif's address can be specified by the
+"cand-rp-by-vif-addr" statement. If the
+"cand-rp-by-vif-addr" statement is omitted, a domain-wide
+address (if exists) that belongs to that interface is chosen by the router
+itself.
 The Candidate-RP priority can be modified with the
 "rp-priority" parameter; the Candidate-RP holdtime can be modified
 with the "rp-holdtime" parameter.
@@ -863,7 +879,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.12 2005/04/14 10:43:17 mjh Exp $.
-<br>Generated on 15/Apr/2005 at 11:46:59.</em>
+<br>Generated on 13/May/2005 at 21:07:50.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
