@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.12 2005/03/24 00:40:00 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.13 2005/03/25 02:53:58 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -88,7 +88,7 @@ public:
      */
     void	disable();
 
-    PimNode&	pim_node()		{ return (_pim_node); }
+    PimNode&	pim_node()	const	{ return (_pim_node); }
     
     int		unicast_pim_bootstrap(PimVif *pim_vif,
 				      const IPvX& nbr_addr) const;
@@ -261,9 +261,11 @@ public:
     void	set_bsm_originate(bool v) { _is_bsm_originate = v; }
     bool	i_am_candidate_bsr() const { return (_i_am_candidate_bsr); }
     void	set_i_am_candidate_bsr(bool i_am_candidate_bsr,
+				       uint16_t my_vif_index,
 				       const IPvX& my_bsr_addr,
 				       uint8_t my_bsr_priority);
     
+    uint16_t	my_vif_index() const	{ return (_my_vif_index);	}
     const IPvX&	my_bsr_addr() const	{ return (_my_bsr_addr);	}
     uint8_t	my_bsr_priority() const	{ return (_my_bsr_priority);	}
     
@@ -325,6 +327,8 @@ private:
     
     // State at a Candidate BSR
     bool	_i_am_candidate_bsr;	// True if I am Cand-BSR for this zone
+    uint16_t	_my_vif_index;		// The vif index with my address
+					// if a Cand-BSR
     IPvX	_my_bsr_addr;		// My address if a Cand-BSR
     uint8_t	_my_bsr_priority;	// My BSR priority if a Cand-BSR
     
@@ -397,6 +401,9 @@ public:
 	return (_candidate_rp_expiry_timer);
     }
     void	start_candidate_rp_expiry_timer();
+
+    uint16_t	my_vif_index() const	{ return (_my_vif_index);	}
+    void	set_my_vif_index(uint16_t v) { _my_vif_index = v; }
     
 private:
     void	candidate_rp_expiry_timer_timeout();
@@ -408,6 +415,8 @@ private:
     uint8_t	_rp_priority;		// RP priority (smaller is better)
     uint16_t	_rp_holdtime;		// RP holdtime (in seconds)
     XorpTimer	_candidate_rp_expiry_timer; // The C-RP Expiry Timer
+    uint16_t	_my_vif_index;		// The vif index with my address
+					// if a Cand-RP
 };
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.52 2005/04/27 22:14:07 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.53 2005/04/30 21:36:45 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -913,41 +913,28 @@ public:
 						     const IPvX& vif_addr,
 						     string& error_msg);
     //
-    int		add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
-						bool is_scope_zone,
-						const string& vif_name,
-						uint8_t bsr_priority,
-						uint8_t hash_mask_len,
-						string& error_msg);
-    int		add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
-					    bool is_scope_zone,
-					    const IPvX& my_cand_bsr_addr,
-					    uint8_t bsr_priority,
-					    uint8_t hash_mask_len,
-					    string& error_msg);
+    int		add_config_cand_bsr(const IPvXNet& scope_zone_id,
+				    bool is_scope_zone,
+				    const string& vif_name,
+				    const IPvX& vif_addr,
+				    uint8_t bsr_priority,
+				    uint8_t hash_mask_len,
+				    string& error_msg);
     int		delete_config_cand_bsr(const IPvXNet& scope_zone_id,
 				       bool is_scope_zone,
 				       string& error_msg);
-    int		add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
-					       bool is_scope_zone,
-					       const string& vif_name,
-					       uint8_t rp_priority,
-					       uint16_t rp_holdtime,
-					       string& error_msg);
-    int		add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
-					   bool is_scope_zone,
-					   const IPvX& my_cand_rp_addr,
-					   uint8_t rp_priority,
-					   uint16_t rp_holdtime,
-					   string& error_msg);
-    int		delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
-						  bool is_scope_zone,
-						  const string& vif_name,
-						  string& error_msg);
-    int		delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
-					      bool is_scope_zone,
-					      const IPvX& my_cand_rp_addr,
-					      string& error_msg);
+    int		add_config_cand_rp(const IPvXNet& group_prefix,
+				   bool is_scope_zone,
+				   const string& vif_name,
+				   const IPvX& vif_addr,
+				   uint8_t rp_priority,
+				   uint16_t rp_holdtime,
+				   string& error_msg);
+    int		delete_config_cand_rp(const IPvXNet& group_prefix,
+				      bool is_scope_zone,
+				      const string& vif_name,
+				      const IPvX& vif_addr,
+				      string& error_msg);
     int		add_config_static_rp(const IPvXNet& group_prefix,
 				     const IPvX& rp_addr,
 				     uint8_t rp_priority,

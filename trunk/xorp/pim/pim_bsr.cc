@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.39 2005/05/12 09:03:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.40 2005/05/12 10:19:02 pavlin Exp $"
 
 
 //
@@ -857,15 +857,25 @@ PimBsr::can_add_config_bsr_zone(const BsrZone& bsr_zone,
     error_msg = "";			// Reset the error message
     
     if (bsr_zone.i_am_candidate_bsr()) {
+	const PimVif *pim_vif = NULL;
+
 	if (! bsr_zone.my_bsr_addr().is_unicast()) {
 	    error_msg = c_format("BSR address %s is not an unicast address",
 				 cstring(bsr_zone.my_bsr_addr()));
 	    return (false);
 	}
-	
-	if (! _pim_node.is_my_addr(bsr_zone.my_bsr_addr())) {
-	    error_msg = c_format("BSR address %s is not my address",
-				 cstring(bsr_zone.my_bsr_addr()));
+
+	pim_vif = pim_node().vif_find_by_vif_index(bsr_zone.my_vif_index());
+	if (pim_vif == NULL) {
+	    error_msg = c_format("BSR vif index %d is not a valid index",
+				 bsr_zone.my_vif_index());
+	    return (false);
+	}
+
+	if (! pim_vif->is_my_addr(bsr_zone.my_bsr_addr())) {
+	    error_msg = c_format("BSR address %s is not my address on vif %s",
+				 cstring(bsr_zone.my_bsr_addr()),
+				 pim_vif->name().c_str());
 	    return (false);
 	}
     }
@@ -1172,6 +1182,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
       _unicast_message_src(bsr_zone.unicast_message_src()),
       _zone_id(bsr_zone.zone_id()),
       _i_am_candidate_bsr(bsr_zone.i_am_candidate_bsr()),
+      _my_vif_index(bsr_zone.my_vif_index()),
       _my_bsr_addr(bsr_zone.my_bsr_addr()),
       _my_bsr_priority(bsr_zone.my_bsr_priority()),
       _is_bsm_forward(bsr_zone.is_bsm_forward()),
@@ -1234,6 +1245,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
       _unicast_message_src(IPvX::ZERO(_pim_bsr.family())),
       _zone_id(zone_id),
       _i_am_candidate_bsr(false),		// XXX: disable by default
+      _my_vif_index(Vif::VIF_INDEX_INVALID),
       _my_bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _my_bsr_priority(0),			// XXX: lowest priority
       _is_bsm_forward(false),
@@ -1260,6 +1272,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const IPvX& bsr_addr, uint8_t bsr_priority,
       _zone_id(PimScopeZoneId(IPvXNet::ip_multicast_base_prefix(_pim_bsr.family()),
 			      false)), // XXX: no scope zone by default
       _i_am_candidate_bsr(false),		// XXX: disable by default
+      _my_vif_index(Vif::VIF_INDEX_INVALID),
       _my_bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _my_bsr_priority(0),			// XXX: lowest priority
       _is_bsm_forward(false),
@@ -1709,8 +1722,8 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	//
 	
 	//
-	// Set my_bsr_addr and my_bsr_priority if I am a Cand-BSR for this
-	// zone.
+	// Set my_vif_index, my_bsr_addr and my_bsr_priority
+	// if I am a Cand-BSR for this zone.
 	//
 	BsrZone *config_bsr_zone = pim_bsr().find_config_bsr_zone(zone_id());
 	if ((config_bsr_zone != NULL)
@@ -1719,6 +1732,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	    // -> P-BSR state
 	    set_bsr_zone_state(BsrZone::STATE_PENDING_BSR);
 	    set_i_am_candidate_bsr(config_bsr_zone->i_am_candidate_bsr(),
+				   config_bsr_zone->my_vif_index(),
 				   config_bsr_zone->bsr_addr(),
 				   config_bsr_zone->bsr_priority());
 	    // Set BS Timer to BS Timeout
@@ -2195,10 +2209,12 @@ BsrZone::scope_zone_expiry_timer_timeout()
 
 void
 BsrZone::set_i_am_candidate_bsr(bool i_am_candidate_bsr,
+				uint16_t my_vif_index,
 				const IPvX& my_bsr_addr,
 				uint8_t my_bsr_priority)
 {
     _i_am_candidate_bsr = i_am_candidate_bsr;
+    _my_vif_index = my_vif_index;
     _my_bsr_addr = my_bsr_addr;
     _my_bsr_priority = my_bsr_priority;
     
@@ -2564,7 +2580,8 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const IPvX& rp_addr,
     : _bsr_group_prefix(bsr_group_prefix),
       _rp_addr(rp_addr),
       _rp_priority(rp_priority),
-      _rp_holdtime(rp_holdtime)
+      _rp_holdtime(rp_holdtime),
+      _my_vif_index(Vif::VIF_INDEX_INVALID)
 {
     
 }
@@ -2573,7 +2590,8 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const BsrRp& bsr_rp)
     : _bsr_group_prefix(bsr_group_prefix),
       _rp_addr(bsr_rp.rp_addr()),
       _rp_priority(bsr_rp.rp_priority()),
-      _rp_holdtime(bsr_rp.rp_holdtime())
+      _rp_holdtime(bsr_rp.rp_holdtime()),
+      _my_vif_index(bsr_rp.my_vif_index())
 {
     // Conditionally set the Cand-RP Expiry Timer
     if (bsr_rp.const_candidate_rp_expiry_timer().scheduled()) {

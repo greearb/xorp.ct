@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.20 2005/04/27 21:58:44 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.21 2005/04/30 21:35:39 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -92,28 +92,20 @@ interface pim/0.1 {
 	 * zone.
 	 * @param vif_name the name of the vif to use its address as a
 	 * candidate-BSR.
-	 * @param cand_bsr_addr the address to use as a candidate-BSR.
+	 * @param vif_addr the address of the vif to use as a candidate-BSR.
 	 * @param bsr_priority the BSR priority (larger is better).
 	 * @param hash_mask_len the hash mask length.
 	 */
-	add_config_cand_bsr_by_vif_name4? scope_zone_id:ipv4net		\
+	add_config_cand_bsr4?		scope_zone_id:ipv4net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
+					& vif_addr:ipv4			\
 					& bsr_priority:u32		\
 					& hash_mask_len:u32
-	add_config_cand_bsr_by_vif_name6? scope_zone_id:ipv6net		\
+	add_config_cand_bsr6?		scope_zone_id:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
-					& bsr_priority:u32		\
-					& hash_mask_len:u32
-	add_config_cand_bsr_by_addr4	? scope_zone_id:ipv4net		\
-					& is_scope_zone:bool		\
-					& cand_bsr_addr:ipv4		\
-					& bsr_priority:u32		\
-					& hash_mask_len:u32
-	add_config_cand_bsr_by_addr6	? scope_zone_id:ipv6net		\
-					& is_scope_zone:bool		\
-					& cand_bsr_addr:ipv6		\
+					& vif_addr:ipv6			\
 					& bsr_priority:u32		\
 					& hash_mask_len:u32
 	delete_config_cand_bsr4		? scope_zone_id:ipv4net		\
@@ -129,42 +121,30 @@ interface pim/0.1 {
 	 * @param group_prefix the group prefix of the configured zone.
 	 * @param vif_name the name of the vif to use its address as a
 	 * candidate-RP.
-	 * @param cand_rp_addr the address to use as a candidate-RP.
+	 * @param vif_addr the address of the vif to use as a candidate-RP.
 	 * @param rp_priority the Cand-RP priority (smaller is better).
 	 * @param rp_holdtime the Cand-RP holdtime (in seconds).
 	 */
-	add_config_cand_rp_by_vif_name4	? group_prefix:ipv4net		\
+	add_config_cand_rp4		? group_prefix:ipv4net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
+					& vif_addr:ipv4			\
 					& rp_priority:u32		\
 					& rp_holdtime:u32
-	add_config_cand_rp_by_vif_name6	? group_prefix:ipv6net		\
+	add_config_cand_rp6		? group_prefix:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
+					& vif_addr:ipv6			\
 					& rp_priority:u32		\
 					& rp_holdtime:u32
-	add_config_cand_rp_by_addr4	? group_prefix:ipv4net		\
+	delete_config_cand_rp4?		group_prefix:ipv4net		\
 					& is_scope_zone:bool		\
-					& cand_rp_addr:ipv4		\
-					& rp_priority:u32		\
-					& rp_holdtime:u32
-	add_config_cand_rp_by_addr6	? group_prefix:ipv6net		\
+					& vif_name:txt			\
+					& vif_addr:ipv4
+	delete_config_cand_rp6?		group_prefix:ipv6net		\
 					& is_scope_zone:bool		\
-					& cand_rp_addr:ipv6		\
-					& rp_priority:u32		\
-					& rp_holdtime:u32
-	delete_config_cand_rp_by_vif_name4? group_prefix:ipv4net	\
-					& is_scope_zone:bool		\
-					& vif_name:txt
-	delete_config_cand_rp_by_vif_name6? group_prefix:ipv6net	\
-					& is_scope_zone:bool		\
-					& vif_name:txt
-	delete_config_cand_rp_by_addr4	? group_prefix:ipv4net		\
-					& is_scope_zone:bool		\
-					& cand_rp_addr:ipv4
-	delete_config_cand_rp_by_addr6	? group_prefix:ipv6net		\
-					& is_scope_zone:bool		\
-					& cand_rp_addr:ipv6
+					& vif_name:txt			\
+					& vif_addr:ipv6
 
 	/**
 	 * Add/delete/complete static RP configuration.

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.19 2005/03/23 10:53:12 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.20 2005/03/24 01:18:24 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -33,6 +33,7 @@ protocols {
 		scope-zone @: ipv4net {
 		    is-scope-zone:	bool = false;
 		    cand-bsr-by-vif-name: txt;
+		    cand-bsr-by-vif-addr: ipv4 = 0.0.0.0;
 		    bsr-priority:	u32 = 1;
 		    hash-mask-len:	u32 = 30;
 		}
@@ -42,6 +43,7 @@ protocols {
 		group-prefix @: ipv4net {
 		    is-scope-zone:	bool = false;
 		    cand-rp-by-vif-name: txt;
+		    cand-rp-by-vif-addr: ipv4 = 0.0.0.0;
 		    rp-priority:	u32 = 192;
 		    rp-holdtime:	u32 = 150;
 		}
@@ -202,9 +204,9 @@ protocols {
 		    %help:	short "Configure a scope zone in this Candidate-BSR";
 		    %mandatory: cand-bsr-by-vif-name;
 
-		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr_by_vif_name4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
+		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&vif_addr:ipv4=$(@.cand-bsr-by-vif-addr)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    /* TODO: currently the %update below probably doesn't work */
-		    %update:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr_by_vif_name4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
+		    %update:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&vif_addr:ipv4=$(@.cand-bsr-by-vif-addr)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_cand_bsr4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)";
 
 		    is-scope-zone {
@@ -214,6 +216,11 @@ protocols {
 
 		    cand-bsr-by-vif-name {
 			%help:	short "Specify the virtual interface with the address of the Candidate-BSR";
+			%set:;
+		    }
+
+		    cand-bsr-by-vif-addr {
+			%help:	short "Specify the virtual interface's address to use as the Candidate-BSR";
 			%set:;
 		    }
 
@@ -237,9 +244,9 @@ protocols {
 		    %help:	short "Configure a scope zone in this Candidate-RP";
 		    %mandatory: cand-rp-by-vif-name;
 
-		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp_by_vif_name4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
-		    %update:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp_by_vif_name4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
-		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_cand_rp_by_vif_name4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)";
+		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&vif_addr:ipv4=$(@.cand-rp-by-vif-addr)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
+		    %update:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&vif_addr:ipv4=$(@.cand-rp-by-vif-addr)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
+		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_cand_rp4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&vif_addr:ipv4=$(@.cand-rp-by-vif-addr)";
 
 		    is-scope-zone {
 			%help:	short "Flag to indicate a scoped or global zone";
@@ -248,6 +255,11 @@ protocols {
 
 		    cand-rp-by-vif-name {
 			%help:	short "Specify the virtual interface with the address of the Candidate-RP";
+			%set:;
+		    }
+
+		    cand-rp-by-vif-addr {
+			%help:	short "Specify the virtual interface's address to use as the Candidate-RP";
 			%set:;
 		    }
 

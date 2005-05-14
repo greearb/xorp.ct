@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.32 2005/04/27 21:58:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.33 2005/04/30 21:36:45 pavlin Exp $"
 
 
 //
@@ -1082,17 +1082,23 @@ PimNode::delete_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 }
 
 //
+// Add myself as a Cand-BSR
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
-					 bool is_scope_zone,
-					 const string& vif_name,
-					 uint8_t bsr_priority,
-					 uint8_t hash_mask_len,
-					 string& error_msg)
+PimNode::add_config_cand_bsr(const IPvXNet& scope_zone_id,
+			     bool is_scope_zone,
+			     const string& vif_name,
+			     const IPvX& vif_addr,
+			     uint8_t bsr_priority,
+			     uint8_t hash_mask_len,
+			     string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    IPvX my_cand_bsr_addr = vif_addr;
+    uint16_t fragment_tag = RANDOM(0xffff);
+    string local_error_msg = "";
+    PimScopeZoneId zone_id(scope_zone_id, is_scope_zone);
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -1106,42 +1112,31 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 	return (XORP_ERROR);
     }
     
-    if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot add configure BSR with vif %s: "
-			     "the vif has no configured address",
-			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);	// The vif has no address yet
+    if (my_cand_bsr_addr == IPvX::ZERO(family())) {
+	// Use the domain-wide address for the vif
+	if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
+	    end_config(error_msg);
+	    error_msg = c_format("Cannot add configure BSR with vif %s: "
+				 "the vif has no configured address",
+				 vif_name.c_str());
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);	// The vif has no address yet
+	}
+	my_cand_bsr_addr = pim_vif->domain_wide_addr();
+    } else {
+	// Test that the specified address belongs to the vif
+	if (! pim_vif->is_my_addr(my_cand_bsr_addr)) {
+	    end_config(error_msg);
+	    error_msg = c_format("Cannot add configure BSR with vif %s "
+				 "and address %s: "
+				 "the address does not belong to this vif",
+				 vif_name.c_str(),
+				 cstring(my_cand_bsr_addr));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);	// Invalid address
+	}
     }
-    
-    return (add_config_cand_bsr_by_addr(scope_zone_id,
-					is_scope_zone,
-					pim_vif->domain_wide_addr(),
-					bsr_priority,
-					hash_mask_len,
-					error_msg));
-}
 
-//
-// Add myself as a Cand-BSR.
-// Return: %XORP_OK on success, otherwise %XORP_ERROR.
-//
-int
-PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
-				     bool is_scope_zone,
-				     const IPvX& my_cand_bsr_addr,
-				     uint8_t bsr_priority,
-				     uint8_t hash_mask_len,
-				     string& error_msg)
-{
-    uint16_t fragment_tag = RANDOM(0xffff);
-    string local_error_msg = "";
-    PimScopeZoneId zone_id(scope_zone_id, is_scope_zone);
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
     // XXX: if hash_mask_len is 0, then set its value to default
     if (hash_mask_len == 0)
 	hash_mask_len = PIM_BOOTSTRAP_HASH_MASK_LEN_DEFAULT(family());
@@ -1149,14 +1144,17 @@ PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
     BsrZone new_bsr_zone(pim_bsr(), my_cand_bsr_addr, bsr_priority,
 			 hash_mask_len, fragment_tag);
     new_bsr_zone.set_zone_id(zone_id);
-    new_bsr_zone.set_i_am_candidate_bsr(true, my_cand_bsr_addr, bsr_priority);
+    new_bsr_zone.set_i_am_candidate_bsr(true, pim_vif->vif_index(),
+					my_cand_bsr_addr, bsr_priority);
     
     if (pim_bsr().add_config_bsr_zone(new_bsr_zone, local_error_msg) == NULL) {
 	string dummy_error_msg;
 	end_config(dummy_error_msg);
-	error_msg = c_format("Cannot add configure BSR with address %s "
+	error_msg = c_format("Cannot add configure BSR with vif %s address %s "
 			     "for zone %s: %s",
-			     cstring(my_cand_bsr_addr), cstring(zone_id),
+			     vif_name.c_str(),
+			     cstring(my_cand_bsr_addr),
+			     cstring(zone_id),
 			     local_error_msg.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
@@ -1208,7 +1206,8 @@ PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
     } else {
 	// There is Cand-RP configuration, therefore only reset the Cand-BSR
 	// configuration.
-	bsr_zone->set_i_am_candidate_bsr(false, IPvX::ZERO(family()), 0);
+	bsr_zone->set_i_am_candidate_bsr(false, Vif::VIF_INDEX_INVALID,
+					 IPvX::ZERO(family()), 0);
     }
     
     if (is_up)
@@ -1221,17 +1220,24 @@ PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
 }
 
 //
+// Add myself as a Cand-RP
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
-					bool is_scope_zone,
-					const string& vif_name,
-					uint8_t rp_priority,
-					uint16_t rp_holdtime,
-					string& error_msg)
+PimNode::add_config_cand_rp(const IPvXNet& group_prefix,
+			    bool is_scope_zone,
+			    const string& vif_name,
+			    const IPvX& vif_addr,
+			    uint8_t rp_priority,
+			    uint16_t rp_holdtime,
+			    string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    IPvX my_cand_rp_addr = vif_addr;
+    BsrZone *config_bsr_zone = NULL;
+    BsrRp *bsr_rp = NULL;
+    string local_error_msg = "";
+    bool is_new_zone = false;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -1244,51 +1250,31 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
-    
-    if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot add configure Cand-RP with vif %s: "
-			     "the vif has no configured address",
-			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);	// The vif has no address yet
-    }
-    
-    return (add_config_cand_rp_by_addr(group_prefix,
-				       is_scope_zone,
-				       pim_vif->domain_wide_addr(),
-				       rp_priority,
-				       rp_holdtime,
-				       error_msg));
-}
 
-//
-// Add myself as a Cand-RP
-// Return: %XORP_OK on success, otherwise %XORP_ERROR.
-//
-int
-PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
-				    bool is_scope_zone,
-				    const IPvX& my_cand_rp_addr,
-				    uint8_t rp_priority,
-				    uint16_t rp_holdtime,
-				    string& error_msg)
-{
-    BsrZone *config_bsr_zone = NULL;
-    string local_error_msg = "";
-    bool is_new_zone = false;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (! is_my_addr(my_cand_rp_addr)) {
-	string dummy_error_msg;
-	end_config(dummy_error_msg);
-	error_msg = c_format("Cannot add configure Cand-RP with address %s: "
-			     "not my address",
-			     cstring(my_cand_rp_addr));
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);
+    if (my_cand_rp_addr == IPvX::ZERO(family())) {
+	// Use the domain-wide address for the vif
+	if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
+	    end_config(error_msg);
+	    error_msg = c_format("Cannot add configure Cand-RP with vif %s: "
+				 "the vif has no configured address",
+				 vif_name.c_str());
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);	// The vif has no address yet
+	}
+	my_cand_rp_addr = pim_vif->domain_wide_addr();
+    } else {
+	// Test that the specified address belongs to the vif
+	if (! pim_vif->is_my_addr(my_cand_rp_addr)) {
+	    string error_msg;
+	    end_config(error_msg);
+	    error_msg = c_format("Cannot add configure Cand-RP with vif %s "
+				 "and address %s: "
+				 "the address does not belong to this vif",
+				 vif_name.c_str(),
+				 cstring(my_cand_rp_addr));
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);	// Invalid address
+	}
     }
     
     config_bsr_zone = pim_bsr().find_config_bsr_zone_by_prefix(group_prefix,
@@ -1318,10 +1304,10 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 	is_new_zone = true;
     }
     
-    if (config_bsr_zone->add_rp(group_prefix, is_scope_zone,
-				my_cand_rp_addr, rp_priority,
-				rp_holdtime, local_error_msg)
-	== NULL) {
+    bsr_rp = config_bsr_zone->add_rp(group_prefix, is_scope_zone,
+				     my_cand_rp_addr, rp_priority,
+				     rp_holdtime, local_error_msg);
+    if (bsr_rp == NULL) {
 	string dummy_error_msg;
 	end_config(dummy_error_msg);
 	error_msg = c_format("Cannot add configure Cand-RP address %s for "
@@ -1335,6 +1321,7 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 	    pim_bsr().delete_config_bsr_zone(config_bsr_zone);
 	return (XORP_ERROR);
     }
+    bsr_rp->set_my_vif_index(pim_vif->vif_index());
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -1347,12 +1334,18 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
-					   bool is_scope_zone,
-					   const string& vif_name,
-					   string& error_msg)
+PimNode::delete_config_cand_rp(const IPvXNet& group_prefix,
+			       bool is_scope_zone,
+			       const string& vif_name,
+			       const IPvX& vif_addr,
+			       string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    IPvX my_cand_rp_addr = vif_addr;
+    BsrZone *bsr_zone = NULL;
+    BsrGroupPrefix *bsr_group_prefix = NULL;
+    BsrRp *bsr_rp = NULL;
+    bool is_up = false;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -1365,39 +1358,25 @@ PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
-    
-    if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot delete configure Cand-RP with vif %s: "
-			     "the vif has no configured address",
-			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
-	return (XORP_ERROR);	// The vif has no address yet
-    }
-    
-    return (delete_config_cand_rp_by_addr(group_prefix,
-					  is_scope_zone,
-					  pim_vif->domain_wide_addr(),
-					  error_msg) < 0);
-}
 
-//
-// Delete myself as a Cand-RP
-// Return: %XORP_OK on success, otherwise %XORP_ERROR.
-//
-int
-PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
-				       bool is_scope_zone,
-				       const IPvX& my_cand_rp_addr,
-				       string& error_msg)
-{
-    BsrZone *bsr_zone;
-    BsrGroupPrefix *bsr_group_prefix;
-    BsrRp *bsr_rp;
-    bool is_up = false;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+    if (my_cand_rp_addr == IPvX::ZERO(family())) {
+	// Use the domain-wide address for the vif
+	if (pim_vif->domain_wide_addr() == IPvX::ZERO(family())) {
+	    end_config(error_msg);
+	    error_msg = c_format("Cannot delete configure Cand-RP with vif %s: "
+				 "the vif has no configured address",
+				 vif_name.c_str());
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);	// The vif has no address yet
+	}
+	my_cand_rp_addr = pim_vif->domain_wide_addr();
+    } else {
+	//
+	// XXX: don't test that the specified address belongs to the vif
+	// because the vif may have been reconfigured already and the
+	// address may have been deleted.
+	//
+    }
     
     //
     // Find the BSR zone

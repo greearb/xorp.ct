@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.59 2005/04/27 21:58:43 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.60 2005/04/30 21:35:37 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -833,39 +833,27 @@ protected:
      *  @param vif_name the name of the vif to use its address as a
      *  candidate-BSR.
      *  
+     *  @param vif_addr the address of the vif to use as a candidate-BSR.
+     *  
      *  @param bsr_priority the BSR priority (larger is better).
      *  
      *  @param hash_mask_len the hash mask length.
      */
-    XrlCmdError pim_0_1_add_config_cand_bsr_by_vif_name4(
+    XrlCmdError pim_0_1_add_config_cand_bsr4(
 	// Input values, 
 	const IPv4Net&	scope_zone_id, 
 	const bool&	is_scope_zone, 
 	const string&	vif_name, 
+	const IPv4&	vif_addr, 
 	const uint32_t&	bsr_priority, 
 	const uint32_t&	hash_mask_len);
 
-    XrlCmdError pim_0_1_add_config_cand_bsr_by_vif_name6(
+    XrlCmdError pim_0_1_add_config_cand_bsr6(
 	// Input values, 
 	const IPv6Net&	scope_zone_id, 
 	const bool&	is_scope_zone, 
 	const string&	vif_name, 
-	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_mask_len);
-
-    XrlCmdError pim_0_1_add_config_cand_bsr_by_addr4(
-	// Input values, 
-	const IPv4Net&	scope_zone_id, 
-	const bool&	is_scope_zone, 
-	const IPv4&	cand_bsr_addr, 
-	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_mask_len);
-
-    XrlCmdError pim_0_1_add_config_cand_bsr_by_addr6(
-	// Input values, 
-	const IPv6Net&	scope_zone_id, 
-	const bool&	is_scope_zone, 
-	const IPv6&	cand_bsr_addr, 
+	const IPv6&	vif_addr, 
 	const uint32_t&	bsr_priority, 
 	const uint32_t&	hash_mask_len);
 
@@ -889,65 +877,43 @@ protected:
      *  @param vif_name the name of the vif to use its address as a
      *  candidate-RP.
      *  
+     *  @param vif_addr the address of the vif to use as a candidate-RP.
+     *  
      *  @param rp_priority the Cand-RP priority (smaller is better).
      *  
      *  @param rp_holdtime the Cand-RP holdtime (in seconds).
      */
-    XrlCmdError pim_0_1_add_config_cand_rp_by_vif_name4(
+    XrlCmdError pim_0_1_add_config_cand_rp4(
 	// Input values, 
 	const IPv4Net&	group_prefix, 
 	const bool&	is_scope_zone, 
 	const string&	vif_name, 
+	const IPv4&	vif_addr, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	rp_holdtime);
 
-    XrlCmdError pim_0_1_add_config_cand_rp_by_vif_name6(
+    XrlCmdError pim_0_1_add_config_cand_rp6(
 	// Input values, 
 	const IPv6Net&	group_prefix, 
 	const bool&	is_scope_zone, 
 	const string&	vif_name, 
+	const IPv6&	vif_addr, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	rp_holdtime);
 
-    XrlCmdError pim_0_1_add_config_cand_rp_by_addr4(
+    XrlCmdError pim_0_1_delete_config_cand_rp4(
 	// Input values, 
 	const IPv4Net&	group_prefix, 
 	const bool&	is_scope_zone, 
-	const IPv4&	cand_rp_addr, 
-	const uint32_t&	rp_priority, 
-	const uint32_t&	rp_holdtime);
+	const string&	vif_name, 
+	const IPv4&	vif_addr);
 
-    XrlCmdError pim_0_1_add_config_cand_rp_by_addr6(
+    XrlCmdError pim_0_1_delete_config_cand_rp6(
 	// Input values, 
 	const IPv6Net&	group_prefix, 
 	const bool&	is_scope_zone, 
-	const IPv6&	cand_rp_addr, 
-	const uint32_t&	rp_priority, 
-	const uint32_t&	rp_holdtime);
-
-    XrlCmdError pim_0_1_delete_config_cand_rp_by_vif_name4(
-	// Input values, 
-	const IPv4Net&	group_prefix, 
-	const bool&	is_scope_zone, 
-	const string&	vif_name);
-
-    XrlCmdError pim_0_1_delete_config_cand_rp_by_vif_name6(
-	// Input values, 
-	const IPv6Net&	group_prefix, 
-	const bool&	is_scope_zone, 
-	const string&	vif_name);
-
-    XrlCmdError pim_0_1_delete_config_cand_rp_by_addr4(
-	// Input values, 
-	const IPv4Net&	group_prefix, 
-	const bool&	is_scope_zone, 
-	const IPv4&	cand_rp_addr);
-
-    XrlCmdError pim_0_1_delete_config_cand_rp_by_addr6(
-	// Input values, 
-	const IPv6Net&	group_prefix, 
-	const bool&	is_scope_zone, 
-	const IPv6&	cand_rp_addr);
+	const string&	vif_name, 
+	const IPv6&	vif_addr);
 
     /**
      *  Add/delete/complete static RP configuration.

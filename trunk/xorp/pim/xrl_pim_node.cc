@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.85 2005/04/28 02:28:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.86 2005/04/30 21:35:38 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -4494,11 +4494,12 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr6(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
+XrlPimNode::pim_0_1_add_config_cand_bsr4(
     // Input values, 
     const IPv4Net&	scope_zone_id, 
     const bool&		is_scope_zone, 
     const string&	vif_name, 
+    const IPv4&		vif_addr, 
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_mask_len)
 {
@@ -4525,12 +4526,13 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
-						 is_scope_zone,
-						 vif_name,
-						 reinterpret_cast<const uint8_t&>(bsr_priority),
-						 reinterpret_cast<const uint8_t&>(hash_mask_len),
-						 error_msg)
+    if (PimNode::add_config_cand_bsr(IPvXNet(scope_zone_id),
+				     is_scope_zone,
+				     vif_name,
+				     IPvX(vif_addr),
+				     reinterpret_cast<const uint8_t&>(bsr_priority),
+				     reinterpret_cast<const uint8_t&>(hash_mask_len),
+				     error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -4539,11 +4541,12 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
+XrlPimNode::pim_0_1_add_config_cand_bsr6(
     // Input values, 
     const IPv6Net&	scope_zone_id, 
     const bool&		is_scope_zone, 
     const string&	vif_name, 
+    const IPv6&		vif_addr, 
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_mask_len)
 {
@@ -4570,102 +4573,13 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
-						 is_scope_zone,
-						 vif_name,
-						 reinterpret_cast<const uint8_t&>(bsr_priority),
-						 reinterpret_cast<const uint8_t&>(hash_mask_len),
-						 error_msg)
-	< 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
-    // Input values, 
-    const IPv4Net&	scope_zone_id, 
-    const bool&		is_scope_zone, 
-    const IPv4&		cand_bsr_addr, 
-    const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_mask_len)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (bsr_priority > 0xff) {
-	error_msg = c_format("Invalid BSR priority = %d",
-			     bsr_priority);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (hash_mask_len > 0xff) {
-	error_msg = c_format("Invalid hash mask length = %d",
-			     hash_mask_len);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
-					     is_scope_zone,
-					     IPvX(cand_bsr_addr),
-					     reinterpret_cast<const uint8_t&>(bsr_priority),
-					     reinterpret_cast<const uint8_t&>(hash_mask_len),
-					     error_msg)
-	< 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
-    // Input values, 
-    const IPv6Net&	scope_zone_id, 
-    const bool&		is_scope_zone, 
-    const IPv6&		cand_bsr_addr, 
-    const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_mask_len)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (bsr_priority > 0xff) {
-	error_msg = c_format("Invalid BSR priority = %d",
-			     bsr_priority);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (hash_mask_len > 0xff) {
-	error_msg = c_format("Invalid hash mask length = %d",
-			     hash_mask_len);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
-					     is_scope_zone,
-					     IPvX(cand_bsr_addr),
-					     reinterpret_cast<const uint8_t&>(bsr_priority),
-					     reinterpret_cast<const uint8_t&>(hash_mask_len),
-					     error_msg)
+    if (PimNode::add_config_cand_bsr(IPvXNet(scope_zone_id),
+				     is_scope_zone,
+				     vif_name,
+				     IPvX(vif_addr),
+				     reinterpret_cast<const uint8_t&>(bsr_priority),
+				     reinterpret_cast<const uint8_t&>(hash_mask_len),
+				     error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -4726,11 +4640,12 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr6(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
+XrlPimNode::pim_0_1_add_config_cand_rp4(
     // Input values, 
     const IPv4Net&	group_prefix, 
     const bool&		is_scope_zone, 
     const string&	vif_name, 
+    const IPv4&		vif_addr, 
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime)
 {
@@ -4757,12 +4672,13 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
-						is_scope_zone,
-						vif_name,
-						reinterpret_cast<const uint8_t&>(rp_priority),
-						reinterpret_cast<const uint16_t&>(rp_holdtime),
-						error_msg)
+    if (PimNode::add_config_cand_rp(IPvXNet(group_prefix),
+				    is_scope_zone,
+				    vif_name,
+				    vif_addr,
+				    reinterpret_cast<const uint8_t&>(rp_priority),
+				    reinterpret_cast<const uint16_t&>(rp_holdtime),
+				    error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -4771,11 +4687,12 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
+XrlPimNode::pim_0_1_add_config_cand_rp6(
     // Input values, 
     const IPv6Net&	group_prefix, 
     const bool&		is_scope_zone, 
     const string&	vif_name, 
+    const IPv6&		vif_addr, 
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime)
 {
@@ -4802,12 +4719,13 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
-						is_scope_zone,
-						vif_name,
-						reinterpret_cast<const uint8_t&>(rp_priority),
-						reinterpret_cast<const uint16_t&>(rp_holdtime),
-						error_msg)
+    if (PimNode::add_config_cand_rp(IPvXNet(group_prefix),
+				    is_scope_zone,
+				    vif_name,
+				    vif_addr,
+				    reinterpret_cast<const uint8_t&>(rp_priority),
+				    reinterpret_cast<const uint16_t&>(rp_holdtime),
+				    error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -4816,13 +4734,12 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
+XrlPimNode::pim_0_1_delete_config_cand_rp4(
     // Input values, 
     const IPv4Net&	group_prefix, 
     const bool&		is_scope_zone, 
-    const IPv4&		cand_rp_addr, 
-    const uint32_t&	rp_priority, 
-    const uint32_t&	rp_holdtime)
+    const string&	vif_name, 
+    const IPv4&		vif_addr)
 {
     string error_msg;
 
@@ -4835,24 +4752,11 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (rp_priority > 0xff) {
-	error_msg = c_format("Invalid RP priority = %d",
-			     rp_priority);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (rp_holdtime > 0xffff) {
-	error_msg = c_format("Invalid RP holdtime = %d",
-			     rp_holdtime);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
-					    is_scope_zone,
-					    IPvX(cand_rp_addr),
-					    reinterpret_cast<const uint8_t&>(rp_priority),
-					    reinterpret_cast<const uint16_t&>(rp_holdtime),
-					    error_msg)
+    if (PimNode::delete_config_cand_rp(IPvXNet(group_prefix),
+				       is_scope_zone,
+				       vif_name,
+				       IPvX(vif_addr),
+				       error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -4861,13 +4765,12 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
 }
 
 XrlCmdError
-XrlPimNode::pim_0_1_add_config_cand_rp_by_addr6(
+XrlPimNode::pim_0_1_delete_config_cand_rp6(
     // Input values, 
     const IPv6Net&	group_prefix, 
     const bool&		is_scope_zone, 
-    const IPv6&		cand_rp_addr, 
-    const uint32_t&	rp_priority, 
-    const uint32_t&	rp_holdtime)
+    const string&	vif_name, 
+    const IPv6&		vif_addr)
 {
     string error_msg;
 
@@ -4880,140 +4783,11 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (rp_priority > 0xff) {
-	error_msg = c_format("Invalid RP priority = %d",
-			     rp_priority);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (rp_holdtime > 0xffff) {
-	error_msg = c_format("Invalid RP holdtime = %d",
-			     rp_holdtime);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
-					    is_scope_zone,
-					    IPvX(cand_rp_addr),
-					    reinterpret_cast<const uint8_t&>(rp_priority),
-					    reinterpret_cast<const uint16_t&>(rp_holdtime),
-					    error_msg)
-	< 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name4(
-    // Input values, 
-    const IPv4Net&	group_prefix, 
-    const bool&		is_scope_zone, 
-    const string&	vif_name)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::delete_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
-						   is_scope_zone,
-						   vif_name,
-						   error_msg)
-	< 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name6(
-    // Input values, 
-    const IPv6Net&	group_prefix, 
-    const bool&		is_scope_zone, 
-    const string&	vif_name)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::delete_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
-						   is_scope_zone,
-						   vif_name,
-						   error_msg)
-	< 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr4(
-    // Input values, 
-    const IPv4Net&	group_prefix, 
-    const bool&		is_scope_zone, 
-    const IPv4&		cand_rp_addr)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::delete_config_cand_rp_by_addr(IPvXNet(group_prefix),
-					       is_scope_zone,
-					       IPvX(cand_rp_addr),
-					       error_msg)
-	< 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr6(
-    // Input values, 
-    const IPv6Net&	group_prefix, 
-    const bool&		is_scope_zone, 
-    const IPv6&		cand_rp_addr)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::delete_config_cand_rp_by_addr(IPvXNet(group_prefix),
-					       is_scope_zone,
-					       IPvX(cand_rp_addr),
-					       error_msg)
+    if (PimNode::delete_config_cand_rp(IPvXNet(group_prefix),
+				       is_scope_zone,
+				       vif_name,
+				       IPvX(vif_addr),
+				       error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
