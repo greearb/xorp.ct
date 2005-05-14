@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.22 2005/01/22 06:59:42 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.23 2005/03/09 22:50:41 pavlin Exp $ */
 
 
 interfaces {
@@ -318,6 +318,7 @@ protocols {
 		scope-zone 224.0.0.0/4 {
 		    /* is-scope-zone: false */
 		    cand-bsr-by-vif-name: "dc0"
+		    /* cand-bsr-by-vif-addr: 10.10.10.10 */
 		    /* bsr-priority: 1 */
 		    /* hash-mask-len: 30 */
 		}
@@ -327,6 +328,7 @@ protocols {
 		group-prefix 224.0.0.0/4 {
 		    /* is-scope-zone: false */
 		    cand-rp-by-vif-name: "dc0"
+		    /* cand-rp-by-vif-addr: 10.10.10.10 */
 		    /* rp-priority: 192 */
 		    /* rp-holdtime: 150 */
 		}
@@ -378,8 +380,9 @@ protocols {
 		scope-zone ff00::/8 {
 		    is-scope-zone: false
 		    cand-bsr-by-vif-name: "dc0"
+		    cand-bsr-by-vif-addr: 10:10:10:10:10:10:10:10
 		    bsr-priority: 1
-		    hash-mask-len: 30
+		    hash-mask-len: 126
 		}
 	    }
 
@@ -387,6 +390,7 @@ protocols {
 		group-prefix ff00::/8 {
 		    is-scope-zone: false
 		    cand-rp-by-vif-name: "dc0"
+		    cand-rp-by-vif-addr: 10:10:10:10:10:10:10:10
 		    rp-priority: 192
 		    rp-holdtime: 150
 		}
