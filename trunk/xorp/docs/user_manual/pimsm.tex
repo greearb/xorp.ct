@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.14 2005/04/12 21:50:37 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.15 2005/04/27 02:45:39 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -459,6 +459,7 @@ protocols \{\\
 \>\>\>\>scope-zone  {\it IPv4Mcast}/{\it int(4..32)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-bsr-by-vif-addr: {\it IPv4}\\
 \>\>\>\>\>bsr-priority: {\it uint(0..255)}\\
 \>\>\>\>\>hash-mask-len: {\it uint(4..32)}\\
 \>\>\>\>\}\\
@@ -468,6 +469,7 @@ protocols \{\\
 \>\>\>\>group-prefix  {\it IPv4Mcast}/{\it int(4..32)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-rp-by-vif-addr: {\it IPv4}\\
 \>\>\>\>\>rp-priority: {\it uint(0..255)}\\
 \>\>\>\>\>rp-holdtime: {\it uint(0..65535)}\\
 \>\>\>\>\}\\
@@ -532,6 +534,7 @@ protocols \{\\
 \>\>\>\>scope-zone {\it IPv6Mcast}/{\it int(8..128)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-bsr-by-vif-addr: {\it IPv6}\\
 \>\>\>\>\>bsr-priority: {\it uint(0..255)}\\
 \>\>\>\>\>hash-mask-len: {\it uint(8..128)}\\
 \>\>\>\>\}\\
@@ -541,6 +544,7 @@ protocols \{\\
 \>\>\>\>group-prefix {\it IPv6Mcast}/{\it int(8..128)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
 \>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-rp-by-vif-addr: {\it IPv6}\\
 \>\>\>\>\>rp-priority: {\it uint(0..255)}\\
 \>\>\>\>\>rp-holdtime: {\it uint(0..65535)}\\
 \>\>\>\>\}\\
@@ -708,6 +712,12 @@ protocols \{\\
 \item{\tt cand-bsr-by-vif-name}: this specifies the name of the {\stt
   vif} whose IP address will be used in the PIM bootstrap messages.  It
   is a mandatory parameter.
+\item{\tt cand-bsr-by-vif-addr}: this specifies the address that will be used
+  in the PIM bootstrap messages. This address must belong to the vif
+  specified by {\tt cand-bsr-by-vif-name}. If it is omitted, a domain-wide
+  address (if exists) that belongs to that interface is chosen by the router
+  itself~\footnote{Note that the {\tt cand-bsr-by-vif-addr} statement
+  appeared after XORP Release-1.1.}.
 \item{\tt bsr-priority}: this specifies the BSR priority for this
   router.  It takes a positive integer value in the interval [0, 255],
   which is used in the
@@ -757,6 +767,13 @@ protocols \{\\
 \item{\tt cand-rp-by-vif-name}: this specifies the name of the {\stt
   vif} whose IP address will be used as the RP address if this router
   becomes an RP.  It is a mandatory parameter.
+\item{\tt cand-rp-by-vif-addr}: this specifies the address that will be used
+  as the RP address if this router becomes an RP.
+  This address must belong to the vif
+  specified by {\tt cand-rp-by-vif-name}. If it is omitted, a domain-wide
+  address (if exists) that belongs to that interface is chosen by the router
+  itself~\footnote{Note that the {\tt cand-rp-by-vif-addr} statement
+  appeared after XORP Release-1.1.}.
 \item{\tt rp-priority}: this specifies the RP priority of this router
   for this {\stt group-prefix}.  It takes the form of a non-negative
   integer in the interval [0, 255].
@@ -871,6 +888,7 @@ protocols \{\\
 \>\>\>\>scope-zone 224.0.0.0/4 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 10.10.10.10 */\\
 \>\>\>\>\>/* bsr-priority: 1 */\\
 \>\>\>\>\>/* hash-mask-len: 30 */\\
 \>\>\>\>\}\\
@@ -880,6 +898,7 @@ protocols \{\\
 \>\>\>\>group-prefix 224.0.0.0/4 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 10.10.10.10 */\\
 \>\>\>\>\>/* rp-priority: 192 */\\
 \>\>\>\>\>/* rp-holdtime: 150 */\\
 \>\>\>\>\}\\
@@ -946,8 +965,9 @@ protocols \{\\
 \>\>\>\>scope-zone ff00::/8 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 10:10:10:10:10:10:10:10 */\\
 \>\>\>\>\>/* bsr-priority: 1 */\\
-\>\>\>\>\>/* hash-mask-len: 30 */\\
+\>\>\>\>\>/* hash-mask-len: 126 */\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \\
@@ -955,6 +975,7 @@ protocols \{\\
 \>\>\>\>group-prefix ff00::/8 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 10:10:10:10:10:10:10:10 */\\
 \>\>\>\>\>/* rp-priority: 192 */\\
 \>\>\>\>\>/* rp-holdtime: 150 */\\
 \>\>\>\>\}\\

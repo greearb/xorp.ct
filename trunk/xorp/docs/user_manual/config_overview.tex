@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.6 2005/04/07 03:09:12 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.7 2005/04/07 03:28:05 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -523,6 +523,7 @@ protocols \{\\
 \>\>\>\>scope-zone 224.0.0.0/4 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 10.10.10.10 */\\
 \>\>\>\>\>/* bsr-priority: 1 */\\
 \>\>\>\>\>/* hash-mask-len: 30 */\\
 \>\>\>\>\}\\
@@ -532,6 +533,7 @@ protocols \{\\
 \>\>\>\>group-prefix 224.0.0.0/4 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 10.10.10.10 */\\
 \>\>\>\>\>/* rp-priority: 192 */\\
 \>\>\>\>\>/* rp-holdtime: 150 */\\
 \>\>\>\>\}\\
@@ -598,8 +600,9 @@ protocols \{\\
 \>\>\>\>scope-zone ff00::/8 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 10:10:10:10:10:10:10:10 */\\
 \>\>\>\>\>/* bsr-priority: 1 */\\
-\>\>\>\>\>/* hash-mask-len: 30 */\\
+\>\>\>\>\>/* hash-mask-len: 126 */\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \\
@@ -607,6 +610,7 @@ protocols \{\\
 \>\>\>\>group-prefix ff00::/8 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 10:10:10:10:10:10:10:10 */\\
 \>\>\>\>\>/* rp-priority: 192 */\\
 \>\>\>\>\>/* rp-holdtime: 150 */\\
 \>\>\>\>\}\\
@@ -681,6 +685,12 @@ The {\tt cand-bsr} section should contain {\tt scope-zone} statements for each
 multicast prefix address.
 The vif name with the address that is to be used as the Candidate-BSR
 is specified by the {\tt cand-bsr-by-vif-name} statement.
+The particular vif's address can be specified by the
+{\tt cand-bsr-by-vif-addr} statement. If the
+{\tt cand-bsr-by-vif-addr} statement is omitted, a domain-wide
+address (if exists) that belongs to that interface is chosen by the router
+itself~\footnote{Note that the {\tt cand-bsr-by-vif-addr} statement
+appeared after XORP Release-1.1.}.
 The Candidate-BSR priority can be modified with the {\tt bsr-priority}
 parameter.
 
@@ -692,6 +702,12 @@ The {\tt cand-rp} section should contain {\tt group-prefix} statements
 for each multicast prefix address.
 The vif name with the address that is to be used as the Candidate-RP
 is specified by the {\tt cand-rp-by-vif-name} statement.
+The particular vif's address can be specified by the
+{\tt cand-rp-by-vif-addr} statement. If the
+{\tt cand-rp-by-vif-addr} statement is omitted, a domain-wide
+address (if exists) that belongs to that interface is chosen by the router
+itself~\footnote{Note that the {\tt cand-rp-by-vif-addr} statement
+appeared after XORP Release-1.1.}.
 The Candidate-RP priority can be modified with the
 {\tt rp-priority} parameter; the Candidate-RP holdtime can be modified
 with the {\tt rp-holdtime} parameter.
