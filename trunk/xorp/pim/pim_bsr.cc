@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.40 2005/05/12 10:19:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.41 2005/05/14 03:18:39 pavlin Exp $"
 
 
 //
@@ -808,6 +808,139 @@ PimBsr::clean_expire_bsr_zones_timer_timeout()
     clean_expire_bsr_zones();
 }
 
+void
+PimBsr::add_vif_addr(uint16_t vif_index, const IPvX& vif_addr)
+{
+    bool old_is_up = is_up();
+    bool found = false;
+    list<BsrZone *>::iterator bsr_zone_iter;
+
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+
+    //
+    // Update the Cand-BSR info
+    //
+    for (bsr_zone_iter = config_bsr_zone_list().begin();
+	 bsr_zone_iter != config_bsr_zone_list().end();
+	 ++bsr_zone_iter) {
+	BsrZone *bsr_zone = *bsr_zone_iter;
+	if ((bsr_zone->my_vif_index() != vif_index)
+	    || (bsr_zone->is_my_bsr_addr_explicit())) {
+	    continue;
+	}
+	// XXX:  enable as a Cand-BSR, and set the IP address
+	bsr_zone->set_bsr_addr(vif_addr);
+	bsr_zone->set_i_am_candidate_bsr(true, vif_index,
+					 vif_addr,
+					 bsr_zone->my_bsr_priority());
+	found = true;
+    }
+
+    //
+    // Update the Cand-RP info
+    //
+    for (bsr_zone_iter = config_bsr_zone_list().begin();
+	 bsr_zone_iter != config_bsr_zone_list().end();
+	 ++bsr_zone_iter) {
+	BsrZone *bsr_zone = *bsr_zone_iter;
+	list<BsrGroupPrefix *>::iterator bsr_group_prefix_iter;
+	for (bsr_group_prefix_iter = bsr_zone->bsr_group_prefix_list().begin();
+	     bsr_group_prefix_iter != bsr_zone->bsr_group_prefix_list().end();
+	     ++bsr_group_prefix_iter) {
+	    BsrGroupPrefix *bsr_group_prefix = *bsr_group_prefix_iter;
+	    list<BsrRp *>::iterator bsr_rp_iter;
+	    for (bsr_rp_iter = bsr_group_prefix->rp_list().begin();
+		 bsr_rp_iter != bsr_group_prefix->rp_list().end();
+		 ++bsr_rp_iter) {
+		BsrRp *bsr_rp = *bsr_rp_iter;
+		if ((bsr_rp->my_vif_index() != vif_index)
+		    || (bsr_rp->is_my_rp_addr_explicit())) {
+		    continue;
+		}
+		// XXX: enable as a Cand-RP and set the IP address
+		bsr_rp->set_rp_addr(vif_addr);
+		found = true;
+	    }
+	}
+    }
+
+    //
+    // If the BSR is running, and we found a matching entry, then restart
+    //
+    if (found && old_is_up) {
+	stop();
+	start();
+    }
+}
+
+void
+PimBsr::delete_vif_addr(uint16_t vif_index, const IPvX& vif_addr)
+{
+    bool old_is_up = is_up();
+    bool found = false;
+    list<BsrZone *>::iterator bsr_zone_iter;
+
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+
+    //
+    // Update the Cand-BSR info
+    //
+    for (bsr_zone_iter = config_bsr_zone_list().begin();
+	 bsr_zone_iter != config_bsr_zone_list().end();
+	 ++bsr_zone_iter) {
+	BsrZone *bsr_zone = *bsr_zone_iter;
+	if ((bsr_zone->my_vif_index() != vif_index)
+	    || (bsr_zone->my_bsr_addr() != vif_addr)
+	    || (bsr_zone->is_my_bsr_addr_explicit())) {
+	    continue;
+	}
+	// XXX:  disable as a Cand-BSR, and reset the IP address
+	bsr_zone->set_i_am_candidate_bsr(false, vif_index,
+					 IPvX::ZERO(family()),
+					 bsr_zone->my_bsr_priority());
+	found = true;
+    }
+
+    //
+    // Update the Cand-RP info
+    //
+    for (bsr_zone_iter = config_bsr_zone_list().begin();
+	 bsr_zone_iter != config_bsr_zone_list().end();
+	 ++bsr_zone_iter) {
+	BsrZone *bsr_zone = *bsr_zone_iter;
+	list<BsrGroupPrefix *>::iterator bsr_group_prefix_iter;
+	for (bsr_group_prefix_iter = bsr_zone->bsr_group_prefix_list().begin();
+	     bsr_group_prefix_iter != bsr_zone->bsr_group_prefix_list().end();
+	     ++bsr_group_prefix_iter) {
+	    BsrGroupPrefix *bsr_group_prefix = *bsr_group_prefix_iter;
+	    list<BsrRp *>::iterator bsr_rp_iter;
+	    for (bsr_rp_iter = bsr_group_prefix->rp_list().begin();
+		 bsr_rp_iter != bsr_group_prefix->rp_list().end();
+		 ++bsr_rp_iter) {
+		BsrRp *bsr_rp = *bsr_rp_iter;
+		if ((bsr_rp->my_vif_index() != vif_index)
+		    || (bsr_rp->rp_addr() != vif_addr)
+		    || (bsr_rp->is_my_rp_addr_explicit())) {
+		    continue;
+		}
+		// XXX: disable as a Cand-RP and reset the IP address
+		bsr_rp->set_rp_addr(IPvX::ZERO(family()));
+		found = true;
+	    }
+	}
+    }
+
+    //
+    // If the BSR is running, and we found a matching entry, then restart
+    //
+    if (found && old_is_up) {
+	stop();
+	start();
+    }
+}
+
 // Find the BsrZone that corresponds to @is_scope_zone
 // and @group_prefix from the list of configured BSR zones.
 BsrZone	*
@@ -1185,6 +1318,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
       _my_vif_index(bsr_zone.my_vif_index()),
       _my_bsr_addr(bsr_zone.my_bsr_addr()),
       _my_bsr_priority(bsr_zone.my_bsr_priority()),
+      _is_my_bsr_addr_explicit(bsr_zone.is_my_bsr_addr_explicit()),
       _is_bsm_forward(bsr_zone.is_bsm_forward()),
       _is_bsm_originate(bsr_zone.is_bsm_originate()),
       _is_cancel(bsr_zone.is_cancel())
@@ -1248,6 +1382,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
       _my_vif_index(Vif::VIF_INDEX_INVALID),
       _my_bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _my_bsr_priority(0),			// XXX: lowest priority
+      _is_my_bsr_addr_explicit(false),
       _is_bsm_forward(false),
       _is_bsm_originate(false),
       _is_cancel(false)
@@ -1275,6 +1410,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const IPvX& bsr_addr, uint8_t bsr_priority,
       _my_vif_index(Vif::VIF_INDEX_INVALID),
       _my_bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _my_bsr_priority(0),			// XXX: lowest priority
+      _is_my_bsr_addr_explicit(false),
       _is_bsm_forward(false),
       _is_bsm_originate(false),
       _is_cancel(false)
@@ -2581,7 +2717,8 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const IPvX& rp_addr,
       _rp_addr(rp_addr),
       _rp_priority(rp_priority),
       _rp_holdtime(rp_holdtime),
-      _my_vif_index(Vif::VIF_INDEX_INVALID)
+      _my_vif_index(Vif::VIF_INDEX_INVALID),
+      _is_my_rp_addr_explicit(false)
 {
     
 }
@@ -2591,7 +2728,8 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const BsrRp& bsr_rp)
       _rp_addr(bsr_rp.rp_addr()),
       _rp_priority(bsr_rp.rp_priority()),
       _rp_holdtime(bsr_rp.rp_holdtime()),
-      _my_vif_index(bsr_rp.my_vif_index())
+      _my_vif_index(bsr_rp.my_vif_index()),
+      _is_my_rp_addr_explicit(bsr_rp.is_my_rp_addr_explicit())
 {
     // Conditionally set the Cand-RP Expiry Timer
     if (bsr_rp.const_candidate_rp_expiry_timer().scheduled()) {

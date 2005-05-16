@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.34 2005/05/14 03:18:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.35 2005/05/16 19:11:06 pavlin Exp $"
 
 
 //
@@ -1145,6 +1145,8 @@ PimNode::add_config_cand_bsr(const IPvXNet& scope_zone_id,
     new_bsr_zone.set_zone_id(zone_id);
     new_bsr_zone.set_i_am_candidate_bsr(true, pim_vif->vif_index(),
 					my_cand_bsr_addr, bsr_priority);
+    if (vif_addr != IPvX::ZERO(family()))
+	new_bsr_zone.set_is_my_bsr_addr_explicit(true);
     
     if (pim_bsr().add_config_bsr_zone(new_bsr_zone, local_error_msg) == NULL) {
 	string dummy_error_msg;
@@ -1321,6 +1323,8 @@ PimNode::add_config_cand_rp(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     }
     bsr_rp->set_my_vif_index(pim_vif->vif_index());
+    if (vif_addr != IPvX::ZERO(family()))
+	bsr_rp->set_is_my_rp_addr_explicit(true);
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);

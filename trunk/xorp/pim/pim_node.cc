@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.68 2005/03/25 02:54:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.69 2005/04/27 22:14:07 pavlin Exp $"
 
 
 //
@@ -666,6 +666,11 @@ PimNode::add_vif_addr(const string& vif_name,
     // Schedule the dependency-tracking tasks
     pim_mrt().add_task_my_ip_address(pim_vif->vif_index());
     pim_mrt().add_task_my_ip_subnet_address(pim_vif->vif_index());
+
+    //
+    // Inform the BSR about the change
+    //
+    pim_bsr().add_vif_addr(pim_vif->vif_index(), addr);
     
     return (XORP_OK);
 }
@@ -750,6 +755,11 @@ PimNode::delete_vif_addr(const string& vif_name,
     pim_mrt().add_task_my_ip_address(pim_vif->vif_index());
     pim_mrt().add_task_my_ip_subnet_address(pim_vif->vif_index());
     
+    //
+    // Inform the BSR about the change
+    //
+    pim_bsr().delete_vif_addr(pim_vif->vif_index(), addr);
+
     return (XORP_OK);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.13 2005/03/25 02:53:58 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.14 2005/05/14 03:18:39 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -121,7 +121,10 @@ public:
     void	schedule_rp_table_apply_rp_changes();
     void	clean_expire_bsr_zones();
     void	schedule_clean_expire_bsr_zones();
-    
+
+    void	add_vif_addr(uint16_t vif_index, const IPvX& vif_addr);
+    void	delete_vif_addr(uint16_t vif_index, const IPvX& vif_addr);
+
     //
     // Test-related methods
     //
@@ -191,6 +194,7 @@ public:
     void	set_test_bsr_zone(bool v);
     
     const IPvX&	bsr_addr() const	{ return (_bsr_addr);		}
+    void	set_bsr_addr(const IPvX& v) { _bsr_addr = v; }
     uint8_t	bsr_priority() const	{ return (_bsr_priority);	}
     uint8_t	hash_mask_len() const	{ return (_hash_mask_len);	}
     uint16_t	fragment_tag() const	{ return (_fragment_tag);	}
@@ -242,6 +246,9 @@ public:
     const list<BsrGroupPrefix *>& bsr_group_prefix_list() const {
 	return (_bsr_group_prefix_list);
     }
+    list<BsrGroupPrefix *>& bsr_group_prefix_list() {
+	return (_bsr_group_prefix_list);
+    }
     BsrGroupPrefix *add_bsr_group_prefix(const IPvXNet& group_prefix_init,
 					 bool is_scope_zone_init,
 					 uint8_t expected_rp_count);
@@ -268,6 +275,8 @@ public:
     uint16_t	my_vif_index() const	{ return (_my_vif_index);	}
     const IPvX&	my_bsr_addr() const	{ return (_my_bsr_addr);	}
     uint8_t	my_bsr_priority() const	{ return (_my_bsr_priority);	}
+    bool	is_my_bsr_addr_explicit() const { return (_is_my_bsr_addr_explicit); }
+    void	set_is_my_bsr_addr_explicit(bool v) { _is_my_bsr_addr_explicit = v; }
     
     //
     // Cand-RP related methods
@@ -331,6 +340,8 @@ private:
 					// if a Cand-BSR
     IPvX	_my_bsr_addr;		// My address if a Cand-BSR
     uint8_t	_my_bsr_priority;	// My BSR priority if a Cand-BSR
+    bool	_is_my_bsr_addr_explicit; // True if my Cand-BSR address was
+					// set explicitly
     
     // State at a Candidate RP
     XorpTimer	_candidate_rp_advertise_timer; // The C-RP Adv. Timer
@@ -356,6 +367,7 @@ public:
     void	set_received_rp_count(uint8_t v) { _received_rp_count = v; }
     void	set_expected_rp_count(uint8_t v) { _expected_rp_count = v; }
     const list<BsrRp *>& rp_list()	const	{ return (_rp_list);	}
+    list<BsrRp *>& rp_list()			{ return (_rp_list);	}
     BsrRp	*add_rp(const IPvX& rp_addr, uint8_t rp_priority,
 			uint16_t rp_holdtime);
     void	delete_rp(BsrRp *bsr_rp);
@@ -393,6 +405,7 @@ public:
     
     BsrGroupPrefix& bsr_group_prefix() { return (_bsr_group_prefix); }
     const IPvX&	rp_addr() const	{ return (_rp_addr);			}
+    void	set_rp_addr(const IPvX& v) { _rp_addr = v;		}
     uint8_t	rp_priority() const { return (_rp_priority);		}
     uint16_t	rp_holdtime() const { return (_rp_holdtime);		}
     void	set_rp_priority(uint8_t v)  { _rp_priority = v;		}
@@ -404,6 +417,8 @@ public:
 
     uint16_t	my_vif_index() const	{ return (_my_vif_index);	}
     void	set_my_vif_index(uint16_t v) { _my_vif_index = v; }
+    bool	is_my_rp_addr_explicit() const { return (_is_my_rp_addr_explicit); }
+    void	set_is_my_rp_addr_explicit(bool v) { _is_my_rp_addr_explicit = v; }
     
 private:
     void	candidate_rp_expiry_timer_timeout();
@@ -417,6 +432,8 @@ private:
     XorpTimer	_candidate_rp_expiry_timer; // The C-RP Expiry Timer
     uint16_t	_my_vif_index;		// The vif index with my address
 					// if a Cand-RP
+    bool	_is_my_rp_addr_explicit; // True if my Cand-RP address was
+					// set explicitly
 };
 
 //
