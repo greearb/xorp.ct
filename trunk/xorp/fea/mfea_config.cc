@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.10 2005/03/05 01:41:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.11 2005/03/25 02:53:09 pavlin Exp $"
 
 //
 // TODO: a temporary solution for various MFEA configuration
@@ -297,23 +297,6 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
     map<string, Vif>& configured_vifs = ProtoNode<MfeaVif>::configured_vifs();
     
     //
-    // Remove vifs that don't exist anymore
-    //
-    for (uint16_t i = 0; i < maxvifs(); i++) {
-	Vif* node_vif = vif_find_by_vif_index(i);
-	if (node_vif == NULL)
-	    continue;
-	if (node_vif->is_pim_register())
-	    continue;		// XXX: don't delete the PIM Register vif
-	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
-	    // Delete the interface
-	    string vif_name = node_vif->name();
-	    delete_vif(vif_name, err);
-	    continue;
-	}
-    }
-    
-    //
     // Add new vifs, and update existing ones
     //
     for (vif_iter = configured_vifs.begin();
@@ -338,7 +321,28 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 	node_vif->set_multicast_capable(vif->is_multicast_capable());
 	node_vif->set_broadcast_capable(vif->is_broadcast_capable());
 	node_vif->set_underlying_vif_up(vif->is_underlying_vif_up());
-	
+
+	//
+	// Add new vif addresses, and update existing ones
+	//
+	{
+	    list<VifAddr>::const_iterator vif_addr_iter;
+	    for (vif_addr_iter = vif->addr_list().begin();
+		 vif_addr_iter != vif->addr_list().end();
+		 ++vif_addr_iter) {
+		const VifAddr& vif_addr = *vif_addr_iter;
+		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
+		if (node_vif_addr == NULL) {
+		    node_vif->add_address(vif_addr);
+		    continue;
+		}
+		// Update the address
+		if (*node_vif_addr != vif_addr) {
+		    *node_vif_addr = vif_addr;
+		}
+	    }
+	}
+
 	//
 	// Delete vif addresses that don't exist anymore
 	//
@@ -361,26 +365,22 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 		node_vif->delete_address(ipvx);
 	    }
 	}
-	
-	//
-	// Add new vif addresses, and update existing ones
-	//
-	{
-	    list<VifAddr>::const_iterator vif_addr_iter;
-	    for (vif_addr_iter = vif->addr_list().begin();
-		 vif_addr_iter != vif->addr_list().end();
-		 ++vif_addr_iter) {
-		const VifAddr& vif_addr = *vif_addr_iter;
-		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
-		if (node_vif_addr == NULL) {
-		    node_vif->add_address(vif_addr);
-		    continue;
-		}
-		// Update the address
-		if (*node_vif_addr != vif_addr) {
-		    *node_vif_addr = vif_addr;
-		}
-	    }
+    }
+
+    //
+    // Remove vifs that don't exist anymore
+    //
+    for (uint16_t i = 0; i < maxvifs(); i++) {
+	Vif* node_vif = vif_find_by_vif_index(i);
+	if (node_vif == NULL)
+	    continue;
+	if (node_vif->is_pim_register())
+	    continue;		// XXX: don't delete the PIM Register vif
+	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
+	    // Delete the interface
+	    string vif_name = node_vif->name();
+	    delete_vif(vif_name, err);
+	    continue;
 	}
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.36 2005/02/12 08:09:09 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.37 2005/03/25 02:54:24 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -315,24 +315,6 @@ VifManager::updates_made()
     _iftree = ifmgr_iftree();
 
     //
-    // Remove vifs that don't exist anymore
-    //
-    for (ifmgr_iface_iter = _old_iftree.ifs().begin();
-	 ifmgr_iface_iter != _old_iftree.ifs().end();
-	 ++ifmgr_iface_iter) {
-	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
-	const string& ifmgr_iface_name = ifmgr_iface.name();
-	if (_iftree.find_vif(ifmgr_iface_name, ifmgr_iface_name) == NULL) {
-	    if (_rib_manager->delete_vif(ifmgr_iface_name, error_msg)
-		!= XORP_OK) {
-		XLOG_ERROR("Cannot delete vif %s from the set of configured "
-			   "vifs: %s",
-			   ifmgr_iface_name.c_str(), error_msg.c_str());
-	    }
-	}
-    }
-
-    //
     // Add new vifs, and update existing ones
     //
     for (ifmgr_iface_iter = _iftree.ifs().begin();
@@ -384,55 +366,6 @@ VifManager::updates_made()
 		vif.set_multicast_capable(ifmgr_vif.multicast_capable());
 		vif.set_broadcast_capable(ifmgr_vif.broadcast_capable());
 		vif.set_underlying_vif_up(ifmgr_vif.enabled());
-	    }
-
-	    //
-	    // Delete vif addresses that don't exist anymore
-	    //
-	    if (old_ifmgr_vif_ptr != NULL) {
-		for (a4_iter = old_ifmgr_vif_ptr->ipv4addrs().begin();
-		     a4_iter != old_ifmgr_vif_ptr->ipv4addrs().end();
-		     ++a4_iter) {
-		    const IfMgrIPv4Atom& a4 = a4_iter->second;
-		    const IPv4& addr = a4.addr();
-		    if (_iftree.find_addr(ifmgr_iface_name,
-					  ifmgr_vif_name,
-					  addr)
-			== NULL) {
-			if (_rib_manager->delete_vif_address(ifmgr_vif_name,
-							     addr,
-							     error_msg)
-			    != XORP_OK) {
-			    XLOG_ERROR("Cannot delete address %s "
-				       "for vif %s: %s",
-				       addr.str().c_str(),
-				       ifmgr_vif_name.c_str(),
-				       error_msg.c_str());
-			}
-		    }
-		}
-
-		for (a6_iter = old_ifmgr_vif_ptr->ipv6addrs().begin();
-		     a6_iter != old_ifmgr_vif_ptr->ipv6addrs().end();
-		     ++a6_iter) {
-		    const IfMgrIPv6Atom& a6 = a6_iter->second;
-		    const IPv6& addr = a6.addr();
-		    if (_iftree.find_addr(ifmgr_iface_name,
-					  ifmgr_vif_name,
-					  addr)
-			== NULL) {
-			if (_rib_manager->delete_vif_address(ifmgr_vif_name,
-							     addr,
-							     error_msg)
-			    != XORP_OK) {
-			    XLOG_ERROR("Cannot delete address %s "
-				       "for vif %s: %s",
-				       addr.str().c_str(),
-				       ifmgr_vif_name.c_str(),
-				       error_msg.c_str());
-			}
-		    }
-		}
 	    }
 
 	    //
@@ -554,6 +487,73 @@ VifManager::updates_made()
 			       "vifs: %s",
 			       ifmgr_vif_name.c_str(), error_msg.c_str());
 		}
+	    }
+
+	    //
+	    // Delete vif addresses that don't exist anymore
+	    //
+	    if (old_ifmgr_vif_ptr != NULL) {
+		for (a4_iter = old_ifmgr_vif_ptr->ipv4addrs().begin();
+		     a4_iter != old_ifmgr_vif_ptr->ipv4addrs().end();
+		     ++a4_iter) {
+		    const IfMgrIPv4Atom& a4 = a4_iter->second;
+		    const IPv4& addr = a4.addr();
+		    if (_iftree.find_addr(ifmgr_iface_name,
+					  ifmgr_vif_name,
+					  addr)
+			== NULL) {
+			if (_rib_manager->delete_vif_address(ifmgr_vif_name,
+							     addr,
+							     error_msg)
+			    != XORP_OK) {
+			    XLOG_ERROR("Cannot delete address %s "
+				       "for vif %s: %s",
+				       addr.str().c_str(),
+				       ifmgr_vif_name.c_str(),
+				       error_msg.c_str());
+			}
+		    }
+		}
+
+		for (a6_iter = old_ifmgr_vif_ptr->ipv6addrs().begin();
+		     a6_iter != old_ifmgr_vif_ptr->ipv6addrs().end();
+		     ++a6_iter) {
+		    const IfMgrIPv6Atom& a6 = a6_iter->second;
+		    const IPv6& addr = a6.addr();
+		    if (_iftree.find_addr(ifmgr_iface_name,
+					  ifmgr_vif_name,
+					  addr)
+			== NULL) {
+			if (_rib_manager->delete_vif_address(ifmgr_vif_name,
+							     addr,
+							     error_msg)
+			    != XORP_OK) {
+			    XLOG_ERROR("Cannot delete address %s "
+				       "for vif %s: %s",
+				       addr.str().c_str(),
+				       ifmgr_vif_name.c_str(),
+				       error_msg.c_str());
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    //
+    // Remove vifs that don't exist anymore
+    //
+    for (ifmgr_iface_iter = _old_iftree.ifs().begin();
+	 ifmgr_iface_iter != _old_iftree.ifs().end();
+	 ++ifmgr_iface_iter) {
+	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
+	const string& ifmgr_iface_name = ifmgr_iface.name();
+	if (_iftree.find_vif(ifmgr_iface_name, ifmgr_iface_name) == NULL) {
+	    if (_rib_manager->delete_vif(ifmgr_iface_name, error_msg)
+		!= XORP_OK) {
+		XLOG_ERROR("Cannot delete vif %s from the set of configured "
+			   "vifs: %s",
+			   ifmgr_iface_name.c_str(), error_msg.c_str());
 	    }
 	}
     }

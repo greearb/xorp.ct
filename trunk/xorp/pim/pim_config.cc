@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.33 2005/04/30 21:36:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.34 2005/05/14 03:18:39 pavlin Exp $"
 
 
 //
@@ -40,23 +40,6 @@ PimNode::set_config_all_vifs_done(string& error_msg)
     map<string, Vif>& configured_vifs = ProtoNode<PimVif>::configured_vifs();
     
     //
-    // Remove vifs that don't exist anymore
-    //
-    for (uint16_t i = 0; i < maxvifs(); i++) {
-	Vif* node_vif = vif_find_by_vif_index(i);
-	if (node_vif == NULL)
-	    continue;
-	if (node_vif->is_pim_register())
-	    continue;		// XXX: don't delete the PIM Register vif
-	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
-	    // Delete the interface
-	    string vif_name = node_vif->name();
-	    delete_vif(vif_name, err);
-	    continue;
-	}
-    }
-    
-    //
     // Add new vifs, and update existing ones
     //
     for (vif_iter = configured_vifs.begin();
@@ -82,6 +65,21 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 		      err);
 	
 	//
+	// Add new vif addresses, and update existing ones
+	//
+	{
+	    list<VifAddr>::const_iterator vif_addr_iter;
+	    for (vif_addr_iter = vif->addr_list().begin();
+		 vif_addr_iter != vif->addr_list().end();
+		 ++vif_addr_iter) {
+		const VifAddr& vif_addr = *vif_addr_iter;
+		add_vif_addr(vif->name(), vif_addr.addr(),
+			     vif_addr.subnet_addr(), vif_addr.broadcast_addr(),
+			     vif_addr.peer_addr(), err);
+	    }
+	}
+
+	//
 	// Delete vif addresses that don't exist anymore
 	//
 	{
@@ -103,23 +101,24 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 		delete_vif_addr(vif->name(), ipvx, err);
 	    }
 	}
-	
-	//
-	// Add new vif addresses, and update existing ones
-	//
-	{
-	    list<VifAddr>::const_iterator vif_addr_iter;
-	    for (vif_addr_iter = vif->addr_list().begin();
-		 vif_addr_iter != vif->addr_list().end();
-		 ++vif_addr_iter) {
-		const VifAddr& vif_addr = *vif_addr_iter;
-		add_vif_addr(vif->name(), vif_addr.addr(),
-			     vif_addr.subnet_addr(), vif_addr.broadcast_addr(),
-			     vif_addr.peer_addr(), err);
-	    }
-	}
     }
     
+    //
+    // Remove vifs that don't exist anymore
+    //
+    for (uint16_t i = 0; i < maxvifs(); i++) {
+	Vif* node_vif = vif_find_by_vif_index(i);
+	if (node_vif == NULL)
+	    continue;
+	if (node_vif->is_pim_register())
+	    continue;		// XXX: don't delete the PIM Register vif
+	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
+	    // Delete the interface
+	    string vif_name = node_vif->name();
+	    delete_vif(vif_name, err);
+	    continue;
+	}
+    }
     
     // TODO: XXX: PAVPAVPAV: remove it!!
     PimNode::set_vif_setup_completed(true);
