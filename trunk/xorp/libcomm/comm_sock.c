@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.19 2005/05/10 12:54:49 atanu Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.20 2005/05/11 00:32:35 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1267,6 +1267,30 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
 }
 
 /**
+ * comm_sock_is_connected:
+ *
+ * Determine if an existing socket is in the connected state.
+ *
+ * Return value: XORP_OK if the socket is in the connected state, otherwise
+ * if it is not, or any other error is encountered, XORP_ERROR.
+ **/
+int
+comm_sock_is_connected(xsock_t sock)
+{
+    struct sockaddr_storage ss;
+    int err, sslen;
+
+    sslen = sizeof(ss);
+    err = getpeername(sock, (struct sockaddr *)&ss, &sslen);
+    if (err != 0) {
+	_comm_set_serrno();
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+/*
  * comm_sock_no_ipv6:
  *
  * Log an error when an IPv6 specific method is called when IPv6 is

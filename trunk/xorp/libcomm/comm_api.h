@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.15 2005/05/11 00:32:35 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.16 2005/05/16 13:55:02 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -751,6 +751,15 @@ extern int	comm_sock_get_family(xsock_t sock);
  * @return XORP_OK if the operation was successful, otherwise XORP_ERROR.
  **/
 extern int	comm_sock_set_blocking(xsock_t sock, int is_blocking);
+
+/**
+ * Determine if an existing socket is in the connected state.
+ * @param sock the socket whose connected state is to be queried.
+ *
+ * @return XORP_OK if the socket is in the connected state, otherwise
+ * if it is not, or any other error is encountered, XORP_ERROR.
+ **/
+extern int	comm_sock_is_connected(xsock_t sock);
 
 __END_DECLS
 
