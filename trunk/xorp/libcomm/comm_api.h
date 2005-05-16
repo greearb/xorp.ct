@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.14 2005/05/10 12:25:16 atanu Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.15 2005/05/11 00:32:35 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -744,8 +744,6 @@ extern int	comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize,
 extern int	comm_sock_get_family(xsock_t sock);
 
 /**
- * comm_sock_set_blocking:
- *
  * Set the blocking or non-blocking mode of an existing socket.
  * @param sock the socket whose blocking mode is to be set.
  * @param is_blocking if non-zero, then set socket to blocking mode.
