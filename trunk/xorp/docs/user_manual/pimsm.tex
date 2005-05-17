@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.15 2005/04/27 02:45:39 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.16 2005/05/14 04:20:21 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -435,6 +435,7 @@ protocols \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
+\>\>\>\>hello-period: {\it uint(1..18724)}\\
 \>\>\>\>alternative-subnet {\it IPv4}/{\it int(0..32)}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -510,6 +511,7 @@ protocols \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
+\>\>\>\>hello-period: {\it uint(1..18724)}\\
 \>\>\>\>alternative-subnet  {\it IPv6}/{\it int(0..128)}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -616,6 +618,15 @@ protocols \{\\
   for this interface/vif.  The default is 1.  The PIM router on this
   subnet with the highest value of DR priority will become the DR for
   the subnet.
+\item{\tt hello-period}: this directive specifies the PIM Hello period
+  (in seconds) for this interface/vif~\footnote{Note that the {\tt
+  hello-period} statement appeared after XORP Release-1.1.}. It takes a
+  non-negative integer in the interval [1..18724].  The default is 30.
+  Every {\stt hello-period} seconds the PIM router will transmit a PIM
+  Hello message on the interface/vif. If the receivers of the PIM Hello
+  message do not receive another Hello message for 3.5 * {\stt
+  hello-period} seconds, they will timeout the neighbor state for this
+  router.
 \item{\tt alternative-subnet}: this directive is used to associate
   additional IP subnets with a network interface. The parameter value
   is an IPv4 subnet address in the {\it address/prefix-length} format.
@@ -863,6 +874,7 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* alternative-subnet 10.40.0.0/16 */\\
 \>\>\>\}\\
 \>\>\}\\
@@ -940,6 +952,7 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* alternative-subnet 40:40:40:40::/64 */\\
 \>\>\>\}\\
 \>\>\}\\

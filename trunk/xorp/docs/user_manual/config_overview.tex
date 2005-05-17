@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.7 2005/04/07 03:28:05 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.8 2005/05/14 04:20:20 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -498,6 +498,7 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* alternative-subnet 10.40.0.0/16 */\\
 \>\>\>\}\\
 \>\>\}\\
@@ -575,6 +576,7 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* alternative-subnet 40:40:40:40::/64 */\\
 \>\>\>\}\\
 \>\>\}\\
@@ -659,6 +661,10 @@ If PIM-SM is configured, then {\tt register\_vif} must be enabled.
 The {\tt dr-priority} parameter is used to configure the Designated Router
 priority per virtual interface (note that in case of {\tt register\_vif}
 it is not used).
+
+The {\tt hello-period} parameter is used to configure the PIM Hello messages
+period (in seconds)~\footnote{Note that the {\tt hello-period} statement
+appeared after XORP Release-1.1.}. It must be an integer between 1 and 18724.
 
 The {\tt alternative-subnet} statement is used to associate additional
 subnets with a network interface. For example, if you want to make
