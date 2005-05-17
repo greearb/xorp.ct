@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.35 2005/05/16 19:11:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.36 2005/05/16 19:17:28 pavlin Exp $"
 
 
 //
@@ -315,11 +315,15 @@ PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
     }
     
     pim_vif->hello_period().set(hello_period);
-    
-    // Send immediately a Hello message, and schedule the next one
-    // at random in the interval [0, hello_period)
-    pim_vif->pim_hello_send();
-    pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+
+    if (! pim_vif->is_pim_register()) {
+	//
+	// Send immediately a Hello message, and schedule the next one
+	// at random in the interval [0, hello_period)
+	//
+	pim_vif->pim_hello_send();
+	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -346,10 +350,14 @@ PimNode::reset_vif_hello_period(const string& vif_name, string& error_msg)
     
     pim_vif->hello_period().reset();
     
-    // Send immediately a Hello message, and schedule the next one
-    // at random in the interval [0, hello_period)
-    pim_vif->pim_hello_send();
-    pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+    if (! pim_vif->is_pim_register()) {
+	//
+	// Send immediately a Hello message, and schedule the next one
+	// at random in the interval [0, hello_period)
+	//
+	pim_vif->pim_hello_send();
+	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -397,10 +405,14 @@ PimNode::set_vif_hello_holdtime(const string& vif_name,
     
     pim_vif->hello_holdtime().set(hello_holdtime);
     
-    // Send immediately a Hello message, and schedule the next one
-    // at random in the interval [0, hello_period)
-    pim_vif->pim_hello_send();
-    pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+    if (! pim_vif->is_pim_register()) {
+	//
+	// Send immediately a Hello message, and schedule the next one
+	// at random in the interval [0, hello_period)
+	//
+	pim_vif->pim_hello_send();
+	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -427,10 +439,14 @@ PimNode::reset_vif_hello_holdtime(const string& vif_name, string& error_msg)
     
     pim_vif->hello_holdtime().reset();
     
-    // Send immediately a Hello message, and schedule the next one
-    // at random in the interval [0, hello_period)
-    pim_vif->pim_hello_send();
-    pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+    if (! pim_vif->is_pim_register()) {
+	//
+	// Send immediately a Hello message, and schedule the next one
+	// at random in the interval [0, hello_period)
+	//
+	pim_vif->pim_hello_send();
+	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -476,11 +492,13 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
     
     pim_vif->dr_priority().set(dr_priority);
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
-    
-    // (Re)elect the DR
-    pim_vif->pim_dr_elect();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+	
+	// (Re)elect the DR
+	pim_vif->pim_dr_elect();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -507,11 +525,13 @@ PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
     
     pim_vif->dr_priority().reset();
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
-
-    // (Re)elect the DR
-    pim_vif->pim_dr_elect();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+	
+	// (Re)elect the DR
+	pim_vif->pim_dr_elect();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -559,8 +579,10 @@ PimNode::set_vif_propagation_delay(const string& vif_name,
     
     pim_vif->propagation_delay().set(propagation_delay);
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -587,8 +609,10 @@ PimNode::reset_vif_propagation_delay(const string& vif_name, string& error_msg)
     
     pim_vif->propagation_delay().reset();
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -636,8 +660,10 @@ PimNode::set_vif_override_interval(const string& vif_name,
     
     pim_vif->override_interval().set(override_interval);
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -664,8 +690,10 @@ PimNode::reset_vif_override_interval(const string& vif_name, string& error_msg)
     
     pim_vif->override_interval().reset();
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -713,8 +741,10 @@ PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
     
     pim_vif->is_tracking_support_disabled().set(is_tracking_support_disabled);
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -742,8 +772,10 @@ PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
     
     pim_vif->is_tracking_support_disabled().reset();
     
-    // Send immediately a Hello message with the new value
-    pim_vif->pim_hello_send();
+    if (! pim_vif->is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_vif->pim_hello_send();
+    }
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
