@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.20 2005/03/24 01:18:24 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.21 2005/05/14 03:18:40 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -11,6 +11,7 @@ protocols {
 		disable:		toggle = false;
 		enabled:		bool;		/* %deprecated */
 		dr-priority:		u32 = 1;
+		hello-period:		u32 = 30;
 		alternative-subnet @: ipv4net {
 		}
 	    }
@@ -130,6 +131,14 @@ protocols {
 		    %create:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_dr_priority?vif_name:txt=$(vif.@)&dr_priority:u32=$(@)";
 		    %set:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_dr_priority?vif_name:txt=$(vif.@)&dr_priority:u32=$(@)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_dr_priority?vif_name:txt=$(vif.@)&dr_priority:u32=$(DEFAULT)";
+		}
+
+		hello-period {
+		    %help:	short "Set the Hello messages period (in seconds)";
+		    %allow-range: $(@) "1" "18724";
+		    %create:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(@)";
+		    %set:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(@)";
+		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(DEFAULT)";
 		}
 
 		alternative-subnet @ {
