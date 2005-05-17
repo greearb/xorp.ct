@@ -40,6 +40,12 @@ configured with one area internal_router_p will return true.
 Must be capable of supporting multiple router links. An example is for
 point to point interfaces.
 
+12) Point 2 Point and Point 2 Multipoint.
+When coding this we will need to be told neigbour addresses. When we
+are told them just create the neighbour structures and we should be
+done. Need to be careful that we don't destroy the neighbour
+structures when the timers expire.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
