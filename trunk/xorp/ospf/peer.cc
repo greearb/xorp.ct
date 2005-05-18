@@ -1567,7 +1567,34 @@ template <typename A>
 void
 Neighbour<A>::build_data_description_packet()
 {
-    XLOG_WARNING("TBD");
+    // Open the database if the handle is invalid.
+    if (!_database_handle.valid())
+	_database_handle = get_area_router()->open_database();
+
+    // Clear out previous LSA headers.
+    _data_description_packet.get_lsa_headers().clear();
+
+    bool last;
+    do {
+	Lsa::LsaRef lsa = get_area_router()->
+	    get_entry_database(_database_handle, last);
+	_data_description_packet.get_lsa_headers().
+	    push_back(lsa->get_header());
+
+	// XXX - We are testing to see if there is space left in the
+	// packet by repeatedly encoding, this is very inefficient. We
+	// should encode to find the base size of the packet and then
+	// compare against the constant LSA header length each time.
+	vector<uint8_t> pkt;
+	_data_description_packet.encode(pkt);
+	if (pkt.size() + Lsa_header::length() >= _peer.get_interface_mtu())
+	    return;
+    } while(last == false);
+
+    // No more headers.
+    _data_description_packet.set_m_bit(false);
+    
+    get_area_router()->close_database(_database_handle);
 }
 
 template <typename A>
@@ -1752,6 +1779,7 @@ Neighbour<A>::event_2_way_received()
 	    _data_description_packet.set_i_bit(true);
 	    _data_description_packet.set_m_bit(true);
 	    _data_description_packet.set_ms_bit(true);
+	    _data_description_packet.get_lsa_headers().clear();
 
 	    start_rxmt_timer(callback(this,
 				      &Neighbour<A>::
