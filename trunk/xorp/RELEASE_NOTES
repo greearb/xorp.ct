@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.71 2005/05/14 07:19:51 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.72 2005/05/17 03:43:22 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -28,6 +28,11 @@ Release 1.2 (2005/??/??)
 
       This optional statement is used to configure the PIM Hello messages
       period (in seconds).
+
+      * hello-triggered-delay: <u32>
+
+      This optional statement is used to configure the randomized triggered
+      delay of the PIM Hello messages (in seconds).
 
   LIBXORP:
     - 

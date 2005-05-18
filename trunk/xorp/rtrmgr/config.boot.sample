@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.24 2005/05/14 03:26:02 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.25 2005/05/17 03:39:33 pavlin Exp $ */
 
 
 interfaces {
@@ -294,6 +294,7 @@ protocols {
 		disable: false
 		/* dr-priority: 1 */
 		/* hello-period: 30 */
+		/* hello-triggered-delay: 5 */
 		/* alternative-subnet 10.40.0.0/16 */
 	    }
 	}
@@ -358,6 +359,7 @@ protocols {
 		disable: false
 		dr-priority: 1
 		hello-period: 30
+		hello-triggered-delay: 5
 		alternative-subnet 40:40:40:40::/64
 	    }
 	}

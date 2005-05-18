@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.21 2005/05/14 03:18:41 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.22 2005/05/17 03:33:50 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -12,6 +12,7 @@ protocols {
 		enabled:		bool;		/* %deprecated */
 		dr-priority:		u32 = 1;
 		hello-period:		u32 = 30;
+		hello-triggered-delay:	u32 = 5;
 		alternative-subnet @: ipv6net {
 		}
 	    }
@@ -139,6 +140,14 @@ protocols {
 		    %create:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(@)";
 		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(@)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(DEFAULT)";
+		}
+
+		hello-triggered-delay {
+		    %help:	short "Set the randomized triggered delay of the Hello messages (in seconds)";
+		    %allow-range: $(@) "1" "255";
+		    %create:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_triggered_delay?vif_name:txt=$(vif.@)&hello_triggered_delay:u32=$(@)";
+		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_triggered_delay?vif_name:txt=$(vif.@)&hello_triggered_delay:u32=$(@)";
+		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_triggered_delay?vif_name:txt=$(vif.@)&hello_triggered_delay:u32=$(DEFAULT)";
 		}
 
 		alternative-subnet @ {

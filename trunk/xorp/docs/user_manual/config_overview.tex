@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.8 2005/05/14 04:20:20 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.9 2005/05/17 03:42:36 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -499,6 +499,7 @@ protocols \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* hello-period: 30 */\\
+\>\>\>\>/* hello-triggered-delay: 5 */\\
 \>\>\>\>/* alternative-subnet 10.40.0.0/16 */\\
 \>\>\>\}\\
 \>\>\}\\
@@ -577,6 +578,7 @@ protocols \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* hello-period: 30 */\\
+\>\>\>\>/* hello-triggered-delay: 5 */\\
 \>\>\>\>/* alternative-subnet 40:40:40:40::/64 */\\
 \>\>\>\}\\
 \>\>\}\\
@@ -662,9 +664,16 @@ The {\tt dr-priority} parameter is used to configure the Designated Router
 priority per virtual interface (note that in case of {\tt register\_vif}
 it is not used).
 
-The {\tt hello-period} parameter is used to configure the PIM Hello messages
-period (in seconds)~\footnote{Note that the {\tt hello-period} statement
-appeared after XORP Release-1.1.}. It must be an integer between 1 and 18724.
+The {\tt hello-period} parameter is used to configure the PIM Hello
+messages period (in seconds)~\footnote{Note that the {\tt hello-period}
+statement appeared after XORP Release-1.1.}. It must be an integer
+between 1 and 18724.
+
+The {\tt hello-triggered-delay} parameter is used to configure the
+randomized triggered delay of the PIM Hello messages (in
+seconds)~\footnote{Note that the {\tt hello-triggered-delay} statement
+appeared after XORP Release-1.1.}. It must be an integer between 1 and
+255.
 
 The {\tt alternative-subnet} statement is used to associate additional
 subnets with a network interface. For example, if you want to make

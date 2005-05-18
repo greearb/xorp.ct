@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.16 2005/05/14 04:20:21 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.17 2005/05/17 03:42:36 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -436,6 +436,7 @@ protocols \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
 \>\>\>\>hello-period: {\it uint(1..18724)}\\
+\>\>\>\>hello-triggered-delay: {\it uint(1..255)}\\
 \>\>\>\>alternative-subnet {\it IPv4}/{\it int(0..32)}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -512,6 +513,7 @@ protocols \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
 \>\>\>\>hello-period: {\it uint(1..18724)}\\
+\>\>\>\>hello-triggered-delay: {\it uint(1..255)}\\
 \>\>\>\>alternative-subnet  {\it IPv6}/{\it int(0..128)}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -627,6 +629,15 @@ protocols \{\\
   message do not receive another Hello message for 3.5 * {\stt
   hello-period} seconds, they will timeout the neighbor state for this
   router.
+\item{\tt hello-triggered-delay}: this directive specifies the randomized
+  triggered delay of the PIM Hello messages (in seconds) for this
+  interface/vif~\footnote{Note that the {\tt hello-triggered-delay} statement
+  appeared after XORP Release-1.1.}. It takes a non-negative integer in the
+  interval [1..255].  The default is 5. When PIM is enabled on an interface
+  or a router first starts, the Hello Timer of that interface is set to a
+  random value between 0 and {\tt hello-triggered-delay}.  This prevents
+  synchronization of Hello messages if multiple routers are powered on
+  simultaneously.
 \item{\tt alternative-subnet}: this directive is used to associate
   additional IP subnets with a network interface. The parameter value
   is an IPv4 subnet address in the {\it address/prefix-length} format.
