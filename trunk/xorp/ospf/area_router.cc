@@ -187,13 +187,15 @@ AreaRouter<A>::open_database()
 {
     _readers++;
 
-    return DataBaseHandle();
+    return DataBaseHandle(true);
 }
 
 template <typename A>
 Lsa::LsaRef
 AreaRouter<A>::get_entry_database(DataBaseHandle& dbh, bool& last)
 {
+    XLOG_ASSERT(dbh.valid());
+
     uint32_t position = dbh.position();
 
     if (position >= _db.size())
@@ -209,11 +211,14 @@ template <typename A>
 void
 AreaRouter<A>::close_database(DataBaseHandle& dbh)
 {
+    XLOG_ASSERT(dbh.valid());
     XLOG_ASSERT(0 != _readers);
     _readers--;
 
+    dbh.invalidate();
+
     if (_db.size() != dbh.position())
-	XLOG_WARNING("Closing database prematurel: size = %d position = %d",
+	XLOG_WARNING("Closing database prematurely: size = %d position = %d",
 		     _db.size(), dbh.position());
 }
 

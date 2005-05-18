@@ -163,14 +163,23 @@ class AreaRouter {
  */
 class DataBaseHandle {
  public:
-    DataBaseHandle() : _position(0)
+    DataBaseHandle() : _position(0), _valid(false)
+    {}
+
+    DataBaseHandle(bool v) : _position(0), _valid(v)
     {}
 
     uint32_t position() const { return _position; }
 
     void advance() { _position++; }
+
+    bool valid() const { return _valid; }
+
+    void invalidate() { _valid = false; }
+
  private:
     uint32_t _position;	// Position in database.
+    bool _valid;	// True if this handle is valid.
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__
