@@ -591,6 +591,7 @@ protocols {
 		disable: false
 		/* dr-priority: 1 */
 		/* hello-period: 30 */
+		/* hello-triggered-delay: 5 */
 		/* alternative-subnet 10.40.0.0/16 */
 	    }
 	}
@@ -656,6 +657,7 @@ protocols {
 		disable: false
 		/* dr-priority: 1 */
 		/* hello-period: 30 */
+		/* hello-triggered-delay: 5 */
 		/* alternative-subnet 40:40:40:40::/64 */
 	    }
 	}
@@ -717,7 +719,8 @@ protocols {
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
 <P><U>Note</U>: The "cand-bsr-by-vif-addr", "cand-rp-by-vif-addr",
-and "hello-period" statements appeared after XORP Release-1.1.
+"hello-period" and "hello-triggered-delay" statements appeared after XORP
+Release-1.1.
 
 <P>
 A number of parameters have default values, therefore
@@ -733,6 +736,10 @@ it is not used).
 <P>
 The "hello-period" parameter is used to configure the PIM Hello messages period
 (in seconds). It must be an integer between 1 and 18724.
+<P>
+The "hello-triggered-delay" parameter is used to configure the randomized
+triggered delay of PIM Hello messages (in seconds). It must be an integer
+between 1 and 255.
 <P>
 The "alternative-subnet" statement is used to add "alternative subnets"
 to a network interface. For example, if you want to make incoming traffic
