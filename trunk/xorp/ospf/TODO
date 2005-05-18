@@ -46,6 +46,12 @@ are told them just create the neighbour structures and we should be
 done. Need to be careful that we don't destroy the neighbour
 structures when the timers expire.
 
+13) Provide a mechanism to set the interface prefix length. Checkout
+get_interface_prefix_length().
+
+14) Provide a mechanism to set the interface cost. Checkout
+get_interface_cost().
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
