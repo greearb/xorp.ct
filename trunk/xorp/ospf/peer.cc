@@ -2048,6 +2048,7 @@ Neighbour<A>::event_negotiation_done()
     case TwoWay:
 	break;
     case ExStart:
+	set_state(Exchange);
 	break;
     case Exchange:
 	break;
