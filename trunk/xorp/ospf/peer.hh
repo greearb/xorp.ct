@@ -663,6 +663,7 @@ class Neighbour {
     bool _all_headers_sent;		// Tracking database transmssion
 
     XorpTimer _rxmt_timer;		// Retransmit timer.
+    DataBaseHandle _database_handle;	// Handle to the Link State Database.
 
     /**
      * Get the area router.

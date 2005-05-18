@@ -38,8 +38,8 @@
 #include "libxorp/eventloop.hh"
 
 #include "ospf.hh"
-#include "peer.hh"
 #include "area_router.hh"
+#include "peer.hh"
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
