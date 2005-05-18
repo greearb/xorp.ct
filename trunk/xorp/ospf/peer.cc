@@ -31,7 +31,9 @@
 #include "libxorp/callback.hh"
 
 #include "libxorp/ipv4.hh"
+#include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/ipv6net.hh"
 
 #include "libxorp/eventloop.hh"
 
@@ -42,11 +44,11 @@
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
 		     const PeerID peerid,
-		     const A source, const uint16_t interface_mtu,
+		     const A interface_address, const uint16_t interface_mtu,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 		     OspfTypes::AreaType area_type)
     : _ospf(ospf), _interface(interface), _vif(vif), _peerid(peerid),
-      _source(source), _interface_mtu(interface_mtu),
+      _interface_address(interface_address), _interface_mtu(interface_mtu),
       _linktype(linktype), _running(false)
 {
     _areas[area] = new Peer<A>(ospf, *this, area, area_type);
@@ -485,7 +487,9 @@ Peer<A>::event_interface_up()
 	XLOG_UNFINISHED();
 	break;
     }
-    
+
+    update_router_links();
+
     XLOG_ASSERT(Down != _interface_state);
 }
 
@@ -534,6 +538,8 @@ Peer<A>::event_backup_seen()
 		     pp_interface_state(_interface_state).c_str());
 	break;
     }
+
+    update_router_links();
 }
 
 template <typename A>
@@ -563,6 +569,8 @@ Peer<A>::event_neighbour_change()
 
 	break;
     }
+
+    update_router_links();
 }
 
 template <typename A>
@@ -577,6 +585,7 @@ Peer<A>::event_loop_ind()
     _interface_state = Loopback;
 
     tear_down_state();
+    update_router_links();
 }
 
 template <typename A>
@@ -606,6 +615,8 @@ Peer<A>::event_unloop_ind()
 
 	break;
     }
+
+    update_router_links();
 }
 
 template <typename A>
@@ -620,6 +631,7 @@ Peer<A>::event_interface_down()
     _interface_state = Down;
 
     tear_down_state();
+    update_router_links();
 
     XLOG_WARNING("TBD - KillNbr");
 }
@@ -752,7 +764,7 @@ Peer<A>::send_hello_packet()
 	break;
     case OspfTypes::BROADCAST:
 	transmit = new SimpleTransmit<A>(pkt, A::OSPFIGP_ROUTERS(), 
-					 _peerout.get_source_address());
+					 _peerout.get_interface_address());
 	break;
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
@@ -786,7 +798,7 @@ template <>
 OspfTypes::RouterID
 Peer<IPv4>::get_candidate_id(IPv4) const
 {
-    return _peerout.get_source_address();
+    return _peerout.get_interface_address();
 }
 
 template <>
@@ -967,6 +979,357 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     XLOG_WARNING("TBD - Send AdjOK");
 }
 
+#if	0
+/**
+ * Utility function to extract a 32 quantity, basically an IPv4
+ * address. The code uses templates so sometimes code is generated to
+ * extract a 32 bit quantity from an IPv6 address.
+ *
+ */
+template <typename A> uint32_t get32(A a);
+
+template <>
+inline
+uint32_t
+get32<IPv4>(IPv4 a)
+{
+    return a.addr();
+}
+
+template <>
+inline
+uint32_t
+get32<IPv6>(IPv6)
+{
+    XLOG_FATAL("Only IPv4 not IPv6");
+    return 0;
+}
+#endif
+
+template <typename A>
+void
+Peer<A>::update_router_links()
+{
+    OspfTypes::Version version = _ospf.get_version();
+
+    switch(version) {
+    case OspfTypes::V2:
+	update_router_linksV2();	
+	break;
+    case OspfTypes::V3:
+	update_router_linksV3();
+	break;
+    }
+}
+
+template <>
+uint32_t
+Peer<IPv4>::get_designated_router_interface_id(IPv4) const
+{
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	XLOG_FATAL("OSPF V3 Only");
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+
+    XLOG_UNREACHABLE();
+
+    return 0;
+}
+
+template <>
+uint32_t
+Peer<IPv6>::get_designated_router_interface_id(IPv6) const
+{
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	XLOG_FATAL("OSPF V3 Only");
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+
+    switch(_interface_state) {
+    case Down:
+    case Loopback:
+    case Waiting:
+    case Point2Point:
+    case Backup:
+	break;
+    case DR_other: {
+	// Scan through the neighbours until we find the DR.
+	list<Neighbour<IPv6> *>::const_iterator n;
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	    if (get_designated_router() == (*n)->get_router_id()) {
+		return (*n)->get_hello_packet()->get_interface_id();
+		break;
+	    }
+	XLOG_FATAL("Designated router not found");
+    }
+	break;
+    case DR:
+	// If this is the DR simple.
+	return get_interface_id();
+	break;
+    }
+    XLOG_FATAL(
+	       "Designated router interface ID "
+	       "available in states DR and DR Other not %s",
+	       pp_interface_state(_interface_state).c_str());
+
+    return 0;
+}
+
+template <>
+void
+Peer<IPv4>::update_router_linksV2()
+{
+    OspfTypes::Version version = _ospf.get_version();
+    RouterLink router_link(version);
+
+    switch(_interface_state) {
+    case Down:
+	// Notify the area database this router link in no longer available
+	get_area_router()->remove_router_link(_peerout.get_peerid());
+	return;
+	break;
+    case Loopback:
+	// XXX - We should be checking to see if this is p2p unnumbered.
+	router_link.set_type(RouterLink::stub);
+	router_link.set_link_id(get_interface_address().addr());
+	router_link.set_link_data(0xffffffff);
+	router_link.set_metric(0);
+	goto done;
+	break;
+    case Waiting:
+	break;
+    case Point2Point:
+	// Unconditional
+	// Option 1
+	router_link.set_type(RouterLink::stub);
+	router_link.set_link_id(get_p2p_neighbour_address().addr());
+	router_link.set_link_data(0xffffffff);
+	router_link.set_metric(_peerout.get_interface_cost());
+	// Option 2
+	// ...
+	break;
+    case DR_other:
+	break;
+    case Backup:
+	break;
+    case DR:
+	break;
+    }
+    
+    switch(_peerout.get_linktype()) {
+    case OspfTypes::PointToPoint:
+	router_link.set_type(RouterLink::p2p);
+	router_link.set_link_id(get_interface_address().addr());
+	router_link.set_link_data(0xffffffff);
+	router_link.set_metric(0);
+	break;
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA: {
+	bool adjacent = false;
+	switch(_interface_state) {
+	case Down:
+	    break;
+	case Loopback:
+	    break;
+	case Waiting: {
+	    router_link.set_type(RouterLink::stub);
+	    IPNet<IPv4> net(get_interface_address(),
+			    _peerout.get_interface_prefix_length());
+	    router_link.set_link_id(net.masked_addr().addr());
+	    router_link.set_link_data(net.netmask().addr());
+	    router_link.set_metric(_peerout.get_interface_cost());
+	}
+	    break;
+	case Point2Point:
+	    XLOG_UNFINISHED();
+	    break;
+	case DR_other: {
+	    // Do we have an adjacency with the DR?
+	    list<Neighbour<IPv4> *>::iterator n;
+	    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+		if (get_designated_router() == (*n)->get_candidate_id()) {
+		    break;
+		}
+	    XLOG_ASSERT(n != _neighbours.end());
+	    if (Neighbour<IPv4>::Full == (*n)->get_state())
+		adjacent = true;
+	}
+	    /* FALLTHROUGH */
+	case DR: {
+	    // Try and find any adjacency.
+	    list<Neighbour<IPv4> *>::iterator n;
+	    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+		if (Neighbour<IPv4>::Full == (*n)->get_state()) {
+		    adjacent = true;
+		    break;
+		}
+	    if (adjacent) {
+		router_link.set_type(RouterLink::transit);
+
+		router_link.set_link_id(get_designated_router().addr());
+		router_link.set_link_data(get_interface_address().addr());
+
+	    } else {
+		router_link.set_type(RouterLink::stub);
+		IPNet<IPv4> net(get_interface_address(),
+			     _peerout.get_interface_prefix_length());
+		router_link.set_link_id(net.masked_addr().addr());
+		router_link.set_link_data(net.netmask().addr());
+
+	    }
+	    router_link.set_metric(_peerout.get_interface_cost());
+	}
+	    break;
+	case Backup:
+	    // Not clear what should be done here.
+	    XLOG_WARNING("TBD BACKUP");
+	    break;
+	}
+    }
+    
+	break;
+    case OspfTypes::PointToMultiPoint:
+	XLOG_UNFINISHED();
+	break;
+    case OspfTypes::VirtualLink:
+	XLOG_UNFINISHED();
+	break;
+    }
+
+ done:
+    // Notify the area database this router link in now available
+    get_area_router()->add_router_link(_peerout.get_peerid(), router_link);
+}
+
+template <>
+void
+Peer<IPv6>::update_router_linksV2()
+{
+    XLOG_FATAL("OSPFv2 can't carry IPv6 addresses");
+}
+
+template <>
+void
+Peer<IPv4>::update_router_linksV3()
+{
+    XLOG_FATAL("OSPFv3 can't carry IPv4 addresses yet!");
+}
+
+template <>
+void
+Peer<IPv6>::update_router_linksV3()
+{
+    RouterLink router_link(OspfTypes::V3);
+
+    switch(_interface_state) {
+    case Down:
+    case Loopback:
+	// Notify the area database this router link in no longer available
+	get_area_router()->remove_router_link(_peerout.get_peerid());
+	return;
+	break;
+    case Waiting:
+	break;
+    case Point2Point:
+	break;
+    case DR_other:
+	break;
+    case Backup:
+	break;
+    case DR:
+	break;
+    }
+
+    router_link.set_interface_id(get_interface_id());
+    router_link.set_metric(_peerout.get_interface_cost());
+
+    switch(_peerout.get_linktype()) {
+    case OspfTypes::PointToPoint: {
+	// Find the neighbour. If the neighbour is fully adjacent then
+	// configure a router link.
+	list<Neighbour<IPv6> *>::iterator n = _neighbours.begin();
+	if (n != _neighbours.end() &&
+	    Neighbour<IPv6>::Full == (*n)->get_state()) {
+	    router_link.set_type(RouterLink::p2p);
+	    router_link.set_neighbour_interface_id((*n)->get_hello_packet()->
+						   get_interface_id());
+	    router_link.set_neighbour_router_id((*n)->get_router_id().addr());
+
+	    get_area_router()->add_router_link(_peerout.get_peerid(),
+					       router_link);
+	}
+	
+    }
+	break;
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA: {
+	bool adjacent = false;
+	switch(_interface_state) {
+	case Down:
+	    break;
+	case Loopback:
+	    break;
+	case Waiting:
+	    break;
+	case Point2Point:
+	    break;
+	case DR_other: {
+	    // Do we have an adjacency with the DR?
+	    list<Neighbour<IPv6> *>::iterator n;
+	    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+		if (get_designated_router() == (*n)->get_candidate_id()) {
+		    break;
+		}
+	    XLOG_ASSERT(n != _neighbours.end());
+	    if (Neighbour<IPv6>::Full == (*n)->get_state())
+		adjacent = true;
+	}
+	    /* FALLTHROUGH */
+	case DR: {
+	    // Try and find any adjacency.
+	    list<Neighbour<IPv6> *>::iterator n;
+	    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+		if (Neighbour<IPv6>::Full == (*n)->get_state()) {
+		    adjacent = true;
+		    break;
+		}
+	    if (adjacent) {
+		router_link.set_type(RouterLink::transit);
+		// DR interface ID.
+		router_link.
+		    set_neighbour_interface_id(
+				       get_designated_router_interface_id());
+		// DR router ID.
+		router_link.set_neighbour_router_id(get_designated_router().
+						    addr());
+
+		get_area_router()->add_router_link(_peerout.get_peerid(),
+					       router_link);
+	    }
+	}
+	    break;
+	case Backup:
+	    break;
+	}
+    }
+	
+    	break;
+    case OspfTypes::PointToMultiPoint:
+	XLOG_UNFINISHED();
+	break;
+    case OspfTypes::VirtualLink:
+	XLOG_UNFINISHED();
+	break;
+    }
+}
+
 template <typename A>
 void
 Peer<A>::tear_down_state()
@@ -988,9 +1351,9 @@ Peer<A>::pp_interface_state(InterfaceState is)
     case Peer<A>::Waiting:
 	return "Waiting";
     case Peer<A>::Point2Point:
-	return "Point2Point";
+	return "Point-to-point";
     case Peer<A>::DR_other:
-	return "DR_other";
+	return "DR Other";
     case Peer<A>::Backup:
 	return "Backup";
     case Peer<A>::DR:
@@ -1016,6 +1379,13 @@ Peer<A>::set_interface_id(uint32_t interface_id)
     _hello_packet.set_interface_id(interface_id);
 
     return true;
+}
+
+template <typename A>
+uint32_t
+Peer<A>::get_interface_id() const
+{
+    return _hello_packet.get_interface_id();
 }
 
 template <typename A>
@@ -1217,7 +1587,7 @@ Neighbour<A>::send_data_description_packet()
     case OspfTypes::PointToPoint:
 	transmit = new SimpleTransmit<A>(pkt,
 					 A::OSPFIGP_ROUTERS(), 
-					 _peer.get_source_address());
+					 _peer.get_interface_address());
 	break;
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
@@ -1225,7 +1595,7 @@ Neighbour<A>::send_data_description_packet()
     case OspfTypes::VirtualLink:
 	transmit = new SimpleTransmit<A>(pkt,
 					 get_neighbour_address(),
-					 _peer.get_source_address());
+					 _peer.get_interface_address());
 	break;
     }
 

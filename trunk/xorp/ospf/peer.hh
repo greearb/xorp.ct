@@ -52,17 +52,39 @@ class PeerOut {
     string get_if_name() const { return _interface + "/" + _vif; }
 
     /**
+     * Get Peer ID.
+     *
+     */
+    PeerID get_peerid() const { return _peerid; }
+
+    /**
      * Address of this interface/vif.
      *
      * @return interface/vif address.
      */
-    A get_source_address() const { return _source; }
+    A get_interface_address() const { return _interface_address; }
+
+    /**
+     * @return prefix length of this interface.
+     */
+    uint16_t get_interface_prefix_length() const {
+	XLOG_WARNING("TBD");
+	return 1;
+    }
 
     /**
      * @return mtu of this interface.
      */
     uint16_t get_interface_mtu() const {
 	return _interface_mtu;
+    }
+
+    /**
+     * @return cost of this interface.
+     */
+    uint16_t get_interface_cost() const {
+	XLOG_WARNING("TBD");
+	return 1;
     }
 
     /**
@@ -145,7 +167,7 @@ class PeerOut {
     const string _interface;	   	// The interface and vif this peer is
     const string _vif;			// responsible for.
     const PeerID _peerid;		// The peers ID.
-    const A _source;			// Source address for packets.
+    const A _interface_address;		// Interface address.
     const uint16_t _interface_mtu;	// MTU of this interface.
 
     OspfTypes::LinkType _linktype;	// Type of this link.
@@ -223,7 +245,23 @@ class Peer {
      *
      * @return interface/vif address.
      */
-    A get_source_address() const { return _peerout.get_source_address(); }
+    A get_interface_address() const { 
+	return _peerout.get_interface_address();
+    }
+
+    
+    /**
+     * Adress of the p2p neighbour.
+     *
+     * @return p2p neighbour address.
+     */
+    A get_p2p_neighbour_address() const {
+	XLOG_ASSERT(OspfTypes::PointToPoint == get_linktype());
+	XLOG_UNFINISHED();
+	// When an P2P interface is configured a single neighbour will
+	// exist. Fetch the address from the neighbour structure.
+	return 0;
+    }
 
     /**
      * @return mtu of this interface.
@@ -319,6 +357,16 @@ class Peer {
     void process_scheduled_events();
 
     /**
+     * Get the area router.
+     */
+    AreaRouter<A> *get_area_router() {
+	AreaRouter<A> *area_router = 
+	    _ospf.get_peer_manager().get_area_router(get_area_id());
+	XLOG_ASSERT(area_router);
+	return area_router;
+    }
+
+    /**
      * @return the value that should be used for DR or BDR.
      * In OSPFv2 its the source address of the interface.
      * In OSPFv3 its the router ID.
@@ -378,6 +426,11 @@ class Peer {
     bool set_interface_id(uint32_t interface_id);
 
     /**
+     * Get the interface ID OSPFv3 only.
+     */
+    uint32_t get_interface_id() const;
+
+    /**
      * Set the hello interval in seconds.
      */
     bool set_hello_interval(uint16_t hello_interval);
@@ -417,6 +470,12 @@ class Peer {
      */
     OspfTypes::RouterID get_backup_designated_router() const;
     
+    /**
+     * Get the interface ID of the designated router.
+     * OSPFv3 only.
+     */
+    uint32_t get_designated_router_interface_id(A = A::ZERO()) const;
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
@@ -478,6 +537,27 @@ class Peer {
     designated_router(list<Candidate>& candidates) const;
 
     void compute_designated_router_and_backup_designated_router();
+
+    /**
+     * Compute the current router link.
+     *
+     * Typically called after a state transition.
+     */
+    void update_router_links();
+
+    /**
+     * Compute the current router link for OSPF V2
+     *
+     * Typically called after a state transition.
+     */
+    void update_router_linksV2();
+
+    /**
+     * Compute the current router link for OSPF V2
+     *
+     * Typically called after a state transition.
+     */
+    void update_router_linksV3();
 
     /**
      * Stop all timers.
@@ -587,14 +667,8 @@ class Neighbour {
     /**
      * Get the area router.
      */
-    AreaRouter<A> *get_area_router() {
-	AreaRouter<A> *area_router = 
-	    _ospf.get_peer_manager().get_area_router(_peer.get_area_id());
-	XLOG_ASSERT(area_router);
-	return area_router;
-    }
+    AreaRouter<A> *get_area_router() {return _peer.get_area_router(); }
       
-
     /**
      * Set the state of this neighbour.
      */
