@@ -1970,7 +1970,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    case OspfTypes::STUB:
 		if (ls_type == 5) {
 		    XLOG_TRACE(_ospf.trace()._input_errors,
-			       "external-LSA not allowed in STUB arear %s",
+			       "external-LSA not allowed in STUB area %s",
 			       cstring(*dd));
 		    event_sequence_number_mismatch();
 		    return;
