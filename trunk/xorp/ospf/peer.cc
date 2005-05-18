@@ -1915,16 +1915,19 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	{
 	// Make sure the saved value is the same as the incoming.
 	if (_last_dd.get_ms_bit() != dd->get_ms_bit()) {
+	    XLOG_TRACE(_ospf.trace()._neighbour_events, "MS mismatch");
 	    event_sequence_number_mismatch();
 	    break;
 	}
 	
 	if (dd->get_i_bit())  {
+	    XLOG_TRACE(_ospf.trace()._neighbour_events, "MS I-Bit set");
 	    event_sequence_number_mismatch();
 	    break;
 	}
 
 	if (dd->get_options() != _last_dd.get_options())  {
+	    XLOG_TRACE(_ospf.trace()._neighbour_events, "Option mismatch");
 	    event_sequence_number_mismatch();
 	    break;
 	}
@@ -1939,6 +1942,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	}
 
 	if (!in_sequence)  {
+	    XLOG_TRACE(_ospf.trace()._neighbour_events, "Out of sequence");
 	    event_sequence_number_mismatch();
 	    break;
 	}
