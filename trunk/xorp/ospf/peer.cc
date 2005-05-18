@@ -1898,7 +1898,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	}
 
 	
-	if (!dd->get_i_bit() && !dd->get_m_bit() && !dd->get_ms_bit() && 
+	if (!dd->get_i_bit() && !dd->get_ms_bit() &&
 	    _last_dd.get_dd_seqno() == dd->get_dd_seqno() && 
 	    dd->get_router_id() < _ospf.get_router_id()) {  // Router is master
 	    negotiation_done = true;
