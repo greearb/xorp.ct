@@ -1915,19 +1915,22 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	{
 	// Make sure the saved value is the same as the incoming.
 	if (_last_dd.get_ms_bit() != dd->get_ms_bit()) {
-	    XLOG_TRACE(_ospf.trace()._neighbour_events, "MS mismatch");
+	    XLOG_TRACE(_ospf.trace()._neighbour_events,
+		       "sequence mismatch: MS");
 	    event_sequence_number_mismatch();
 	    break;
 	}
 	
 	if (dd->get_i_bit())  {
-	    XLOG_TRACE(_ospf.trace()._neighbour_events, "MS I-Bit set");
+	    XLOG_TRACE(_ospf.trace()._neighbour_events,
+		       "sequence mismatch: I-Bit set");
 	    event_sequence_number_mismatch();
 	    break;
 	}
 
 	if (dd->get_options() != _last_dd.get_options())  {
-	    XLOG_TRACE(_ospf.trace()._neighbour_events, "Option mismatch");
+	    XLOG_TRACE(_ospf.trace()._neighbour_events,
+		       "sequence mismatch: (options)");
 	    event_sequence_number_mismatch();
 	    break;
 	}
@@ -1942,7 +1945,8 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	}
 
 	if (!in_sequence)  {
-	    XLOG_TRACE(_ospf.trace()._neighbour_events, "Out of sequence");
+	    XLOG_TRACE(_ospf.trace()._neighbour_events,
+		       "sequence mismatch: Out of sequence");
 	    event_sequence_number_mismatch();
 	    break;
 	}
@@ -2040,8 +2044,6 @@ Neighbour<A>::event_negotiation_done()
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str());
 
-    XLOG_WARNING("TBD");
-
     switch(get_state()) {
     case Down:
 	break;
@@ -2053,6 +2055,20 @@ Neighbour<A>::event_negotiation_done()
 	break;
     case ExStart:
 	set_state(Exchange);
+	// Inferred from the specification.
+	_data_description_packet.set_i_bit(false);
+	// If we are the master start sending description packets.
+	if (!_last_dd.get_ms_bit()) {
+	    build_data_description_packet();
+	    start_rxmt_timer(callback(this,
+				      &Neighbour<A>::
+				      send_data_description_packet));
+	} else {
+	    // This is the slave switch off the master slave bit.
+	    _data_description_packet.set_ms_bit(false);
+	    // We have now agreed we are the slave so stop retransmitting.
+	    stop_rxmt_timer();
+	}
 	break;
     case Exchange:
 	break;
