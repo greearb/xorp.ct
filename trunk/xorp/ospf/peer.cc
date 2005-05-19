@@ -1882,8 +1882,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    ;// FALLTHROUGH
 	else
 	    break;
-    case ExStart:
-	{
+    case ExStart: {
 	bool negotiation_done = false;
 
 	// Save some fields for later duplicate detection.
@@ -1907,13 +1906,12 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 
 	if (negotiation_done)
 	    event_negotiation_done();
-	}
+    }
 	break;
     case TwoWay:
 	// Ignore Packet
 	break;
-    case Exchange:
-	{
+    case Exchange: {
 	// Make sure the saved value is the same as the incoming.
 	if (_last_dd.get_ms_bit() != dd->get_ms_bit()) {
 	    XLOG_TRACE(_ospf.trace()._neighbour_events,
@@ -2010,7 +2008,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    }
 	}
 	    
-	}
+    }
 	break;
     case Loading:
     case Full:
