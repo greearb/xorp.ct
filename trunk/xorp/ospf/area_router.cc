@@ -127,7 +127,7 @@ template <typename A>
 bool
 AreaRouter<A>::add_router_link(PeerID peerid, RouterLink& router_link)
 {
-    debug_msg("PeerID %u\n", peerid);
+    debug_msg("PeerID %u %s\n", peerid, cstring(router_link));
 
     if (0 == _peers.count(peerid)) {
 	XLOG_WARNING("Peer not found %u", peerid);
