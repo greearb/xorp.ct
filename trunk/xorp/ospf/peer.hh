@@ -69,7 +69,7 @@ class PeerOut {
      */
     uint16_t get_interface_prefix_length() const {
 	XLOG_WARNING("TBD");
-	return 1;
+	return 16;
     }
 
     /**

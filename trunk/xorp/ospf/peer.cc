@@ -1190,6 +1190,7 @@ Peer<IPv4>::update_router_linksV2()
 	case Backup:
 	    // Not clear what should be done here.
 	    XLOG_WARNING("TBD BACKUP");
+	    return;
 	    break;
 	}
     }
