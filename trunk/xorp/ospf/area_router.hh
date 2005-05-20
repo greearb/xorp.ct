@@ -92,9 +92,10 @@ class AreaRouter {
     /**
      * Open data base
      *
+     * @param empty true if the database is empty.
      * @return Database Handle
      */
-    DataBaseHandle open_database();
+    DataBaseHandle open_database(bool& empty);
 
     /**
      * Next database entry
@@ -120,20 +121,18 @@ class AreaRouter {
 
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
+    uint32_t _last_entry;		// Last entry in database.
     uint32_t _readers;			// Number of database readers.
     
     /**
      * Internal state that is required about this peer.
      */
     struct PeerState {
-	PeerState(OspfTypes::Version version)
-	    : _up(false),
-	      _link_valid(false),
-	      _router_link(version)
+	PeerState()
+	    : _up(false)
 	{}
-	bool _up;		// True if peer is enabled.
-	bool _link_valid;	// True if the router link is valid
-	RouterLink _router_link;// Router link for this peer
+	bool _up;			// True if peer is enabled.
+	list<RouterLink> _router_links;	// Router link for this peer
     };
 
     typedef ref_ptr<PeerState> PeerStateRef;

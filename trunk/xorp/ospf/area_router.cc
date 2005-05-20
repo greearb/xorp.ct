@@ -50,6 +50,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     // Never need to delete this as the ref_ptr will tidy up.
     _router_lsa = Lsa::LsaRef(new RouterLsa(_ospf.get_version()));
     _db.push_back(_router_lsa);
+    _last_entry = 1;
 }
 
 template <typename A>
@@ -58,7 +59,7 @@ AreaRouter<A>::add_peer(PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
     // The peer starts in the down state.
-    _peers[peerid] = PeerStateRef(new PeerState(_ospf.get_version()));
+    _peers[peerid] = PeerStateRef(new PeerState);
 }
 
 template <typename A>
@@ -137,8 +138,7 @@ AreaRouter<A>::add_router_link(PeerID peerid, RouterLink& router_link)
     // Update the router link.
     typename PeerMap::iterator i = _peers.find(peerid);
     PeerStateRef psr = i->second;
-    psr->_link_valid = true;
-    psr->_router_link = router_link;
+    psr->_router_links.push_back(router_link);
 
     if (update_router_links(psr)) {
 	// publish the router LSA.
@@ -162,7 +162,7 @@ AreaRouter<A>::remove_router_link(PeerID peerid)
     // Mark the the router link as invalid.
     typename PeerMap::iterator i = _peers.find(peerid);
     PeerStateRef psr = i->second;
-    psr->_link_valid = false;
+    psr->_router_links.clear();
 
     if (update_router_links(psr)) {
 	// publish the router LSA.
@@ -183,9 +183,11 @@ AreaRouter<A>::newer_lsa(const Lsa_header&) const
 
 template <typename A>
 DataBaseHandle
-AreaRouter<A>::open_database()
+AreaRouter<A>::open_database(bool& empty)
 {
     _readers++;
+
+    empty = 0 == _last_entry;
 
     return DataBaseHandle(true);
 }
@@ -199,7 +201,7 @@ AreaRouter<A>::get_entry_database(DataBaseHandle& dbh, bool& last)
     uint32_t position = dbh.position();
 
     if (position >= _db.size())
-	XLOG_FATAL("Index too far %d lenght %d", position, _db.size());
+	XLOG_FATAL("Index too far %d length %d", position, _db.size());
 
     dbh.advance();
     last = dbh.position() == _db.size();
@@ -229,9 +231,9 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
     // We know exactly which peer transitioned state an optimisation
     // would be use this information to add or delete the specific
     // router link. For the moment rebuild the whole list every time
-    // there is only one router link per interface so we are looking
-    // at a handful of entries. If this ever changes use psr to do
-    // something more optimal.
+    // there is a maximum of two router links per interface so we are
+    // looking at a handful of entries. If this ever changes use psr
+    // to do something more optimal.
 
     RouterLsa *router_lsa = dynamic_cast<RouterLsa *>(_router_lsa.get());
     XLOG_ASSERT(router_lsa);
@@ -240,13 +242,19 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
     typename PeerMap::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	PeerStateRef temp_psr = i->second;
-	if (temp_psr->_up && temp_psr->_link_valid)
-	    router_lsa->get_router_links().push_back(temp_psr->_router_link);
+	if (temp_psr->_up) {
+	    typename list<RouterLink>::iterator j = 
+		temp_psr->_router_links.begin();
+	    for(; j != temp_psr->_router_links.end(); j++)
+		router_lsa->get_router_links().push_back(*j);
+	}
     }
 
     // If we weren't advertising and we still aren't
     if (empty && router_lsa->get_router_links().empty())
 	return false;
+
+    router_lsa->encode();
 
     return true;
 }

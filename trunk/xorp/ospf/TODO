@@ -36,10 +36,6 @@ overlappying. Add four predicate methods to the peer manager that will
 return the status of the router. For example if the router is only
 configured with one area internal_router_p will return true.
 
-11) AreaRouter<A>::add_router_link
-Must be capable of supporting multiple router links. An example is for
-point to point interfaces.
-
 12) Point 2 Point and Point 2 Multipoint.
 When coding this we will need to be told neigbour addresses. When we
 are told them just create the neighbour structures and we should be

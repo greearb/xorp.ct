@@ -1635,8 +1635,12 @@ Neighbour<A>::build_data_description_packet()
 	return;
 
     // Open the database if the handle is invalid.
+    bool empty;
     if (!_database_handle.valid())
-	_database_handle = get_area_router()->open_database();
+	_database_handle = get_area_router()->open_database(empty);
+
+    if (empty)
+	goto out;
 
     bool last;
     do {
@@ -1655,6 +1659,7 @@ Neighbour<A>::build_data_description_packet()
 	    return;
     } while(last == false);
 
+ out:
     // No more headers.
     _data_description_packet.set_m_bit(false);
     
