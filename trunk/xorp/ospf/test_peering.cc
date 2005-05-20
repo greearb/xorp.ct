@@ -409,13 +409,15 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after(TimeVal(15 * hello_interval, 0),
 					   &timeout);
+    const int expected = 10;
     while (ospf_1.running() && ospf_2.running() && !timeout) {
 	eventloop.run();
-	if (16 < io_1.packets())
+	if (expected <= io_1.packets())
 	    break;
     }
     if (timeout) {
-	DOUT(info) << io_1.packets() << " packets sent, test timed out\n";
+	DOUT(info) << io_1.packets() << " packets sent " << expected <<
+	    " expected test timed out\n";
 	return false;
     }
 
@@ -441,8 +443,6 @@ main(int argc, char **argv)
 
     if (!hello_interval_arg.empty())
 	hello_interval = atoi(hello_interval_arg.c_str());
-
-    printf("hello interval = %d seconds\n", hello_interval);
 
     struct test {
 	string test_name;
