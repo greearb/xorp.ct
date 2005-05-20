@@ -219,11 +219,11 @@ AreaRouter<A>::close_database(DataBaseHandle& dbh)
     XLOG_ASSERT(0 != _readers);
     _readers--;
 
-    dbh.invalidate();
-
-    if (_db.size() != dbh.position())
+    if (dbh.last() != dbh.position())
 	XLOG_WARNING("Closing database prematurely: size = %d position = %d",
-		     _db.size(), dbh.position());
+		     dbh.last(), dbh.position());
+
+    dbh.invalidate();
 }
 
 template <typename A>

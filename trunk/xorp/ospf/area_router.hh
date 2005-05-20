@@ -172,9 +172,18 @@ class DataBaseHandle {
 	: _position(0), _last_entry(last_entry), _valid(v)
     {}
 
-    uint32_t position() const { return _position; }
+    uint32_t position() const {
+	XLOG_ASSERT(valid());
+	return _position;
+    }
+
+    uint32_t last() const {
+	XLOG_ASSERT(valid());
+	return _last_entry;
+    }
 
     void advance(bool& last) { 
+	XLOG_ASSERT(valid());
 	XLOG_ASSERT(_last_entry != _position);
 	_position++; 
 	last = _last_entry == _position;
