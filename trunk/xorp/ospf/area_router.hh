@@ -121,7 +121,10 @@ class AreaRouter {
 
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
-    uint32_t _last_entry;		// Last entry in database.
+    uint32_t _last_entry;		// One past last entry in
+					// database. A value of 0 is
+					// an empty database.
+    
     uint32_t _readers;			// Number of database readers.
     
     /**
@@ -162,23 +165,30 @@ class AreaRouter {
  */
 class DataBaseHandle {
  public:
-    DataBaseHandle() : _position(0), _valid(false)
+    DataBaseHandle() : _position(0), _last_entry(0), _valid(false)
     {}
 
-    DataBaseHandle(bool v) : _position(0), _valid(v)
+    DataBaseHandle(bool v, uint32_t last_entry)
+	: _position(0), _last_entry(last_entry), _valid(v)
     {}
 
     uint32_t position() const { return _position; }
 
-    void advance() { _position++; }
+    void advance(bool& last) { 
+	XLOG_ASSERT(_last_entry != _position);
+	_position++; 
+	last = _last_entry == _position;
+    }
 
     bool valid() const { return _valid; }
 
     void invalidate() { _valid = false; }
 
  private:
-    uint32_t _position;	// Position in database.
-    bool _valid;	// True if this handle is valid.
+    uint32_t _position;		// Position in database.
+    uint32_t _last_entry;	// One past last entry, for an empty
+				// database value would be 0.
+    bool _valid;		// True if this handle is valid.
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__

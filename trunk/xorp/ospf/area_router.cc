@@ -189,7 +189,10 @@ AreaRouter<A>::open_database(bool& empty)
 
     empty = 0 == _last_entry;
 
-    return DataBaseHandle(true);
+    // Snapshot the current last entry position. While the database is
+    // open (_readers > 0) new entries will be added past _last_entry.
+
+    return DataBaseHandle(true, _last_entry);
 }
 
 template <typename A>
@@ -203,8 +206,7 @@ AreaRouter<A>::get_entry_database(DataBaseHandle& dbh, bool& last)
     if (position >= _db.size())
 	XLOG_FATAL("Index too far %d length %d", position, _db.size());
 
-    dbh.advance();
-    last = dbh.position() == _db.size();
+    dbh.advance(last);
 
     return _db[position];
 }
