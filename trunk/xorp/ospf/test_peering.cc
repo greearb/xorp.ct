@@ -237,6 +237,9 @@ class EmulateSubnet {
     map<const multiplex, DebugIO<A> *> _ios;
 };
 
+// Reduce the hello interval from 10 to 1 second to speed up the test.
+uint16_t hello_interval = 1;
+
 /**
  * Configure a single peering. Nothing is really expected to go wrong
  * but the test is useful to verify the normal path through the code.
@@ -293,8 +296,6 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 	break;
     }
 
-    // Reduce the hello interval from 10 to 1 second to speed up the test.
-    uint16_t hello_interval = 1;
     ospf.get_peer_manager().set_hello_interval(peerid, area, hello_interval);
     ospf.get_peer_manager().set_router_dead_interval(peerid, area,
 						     4 * hello_interval);
@@ -303,7 +304,8 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     ospf.get_peer_manager().set_state_peer(peerid, true);
 
     bool timeout = false;
-    XorpTimer t = eventloop.set_flag_after(TimeVal(10,0), &timeout);
+    XorpTimer t = eventloop.set_flag_after(TimeVal(10 * hello_interval ,0),
+					   &timeout);
     while (ospf.running() && !timeout) {
 	eventloop.run();
 	if (2 == io.packets())
@@ -387,8 +389,6 @@ two_peers(TestInfo& info, OspfTypes::Version version)
 	break;
     }
 
-    // Drop the hello interval from 10 to 1 second to speed up the test.
-    uint16_t hello_interval = 1;
     ospf_1.get_peer_manager().set_hello_interval(peerid_1, area,
 						 hello_interval);
     ospf_1.get_peer_manager().set_router_dead_interval(peerid_1, area,
@@ -407,10 +407,11 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
 
     bool timeout = false;
-    XorpTimer t = eventloop.set_flag_after(TimeVal(15,0), &timeout);
+    XorpTimer t = eventloop.set_flag_after(TimeVal(15 * hello_interval, 0),
+					   &timeout);
     while (ospf_1.running() && ospf_2.running() && !timeout) {
 	eventloop.run();
-	if (8 < io_1.packets())
+	if (16 < io_1.packets())
 	    break;
     }
     if (timeout) {
@@ -434,7 +435,14 @@ main(int argc, char **argv)
 
     string test =
 	t.get_optional_args("-t", "--test", "run only the specified test");
+    string hello_interval_arg = 
+	t.get_optional_args("-h", "--hello", "hello interval");
     t.complete_args_parsing();
+
+    if (!hello_interval_arg.empty())
+	hello_interval = atoi(hello_interval_arg.c_str());
+
+    printf("hello interval = %d seconds\n", hello_interval);
 
     struct test {
 	string test_name;
