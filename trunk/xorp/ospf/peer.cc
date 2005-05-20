@@ -1545,35 +1545,98 @@ Neighbour<A>::establish_adjacency_p() const
     return become_adjacent;
 }
 
+/**
+ * Simple wrapper for retransmission timers that simplified debugging.
+ */
+class RxmtWrapper {
+ public:
+    RxmtWrapper() {}
+    RxmtWrapper(Neighbour<IPv4>::RxmtCallback rcb, const char *diagnostic)
+	: _rcb(rcb), _diagnostic(diagnostic)
+    {}
+
+    RxmtWrapper(const RxmtWrapper& rhs) {
+	_rcb = rhs._rcb;
+	_diagnostic = rhs._diagnostic;
+    }
+	
+    RxmtWrapper operator=(const RxmtWrapper& rhs) {
+	if(&rhs == this)
+	    return *this;
+	_rcb = rhs._rcb;
+	_diagnostic = rhs._diagnostic;
+	return *this;
+    }
+
+    bool doit() {
+	debug_msg("retransmission: %s\n", str().c_str());
+	return  _rcb->dispatch();
+
+    }
+
+    string str() {
+	return _diagnostic;
+    }
+
+ private:
+    Neighbour<IPv4>::RxmtCallback _rcb;
+    string _diagnostic;
+};
+
+
 template <typename A>
 void
-Neighbour<A>::start_rxmt_timer(RxmtCallback rcb)
+Neighbour<A>::start_rxmt_timer(RxmtCallback rcb, const char *comment)
 {
-    // Send one immediately.
-    rcb->dispatch();
+    debug_msg("start_rxmt_timer: %p %s %s\n", this, 
+	      _peer.get_if_name().c_str(),
+	      comment);
 
-    // Schedule one for the future.
+
+    // Any outstanding timers should already have been cancelled.
+    XLOG_ASSERT(0 == _rxmt_wrapper);
+
+    _rxmt_wrapper = new RxmtWrapper(rcb, 
+				    c_format("%s %s",
+					     _peer.get_if_name().c_str(),
+					     comment).c_str());
+
     _rxmt_timer = _ospf.get_eventloop().
-	new_periodic(_peer.get_rxmt_interval() * 1000, rcb);
+ 	new_periodic(_peer.get_rxmt_interval() * 1000,
+		     callback(_rxmt_wrapper, &RxmtWrapper::doit));
+
+    // Send one immediately. Do this last so all state is set.
+    rcb->dispatch();
 }
 
 template <typename A>
 void
-Neighbour<A>::stop_rxmt_timer()
+Neighbour<A>::stop_rxmt_timer(const char *comment)
 {
-    _rxmt_timer.clear();
+    debug_msg("stop_rxmt_timer: %p %s %s\n", this,
+	      _peer.get_if_name().c_str(), comment);
+    if (_rxmt_wrapper) {
+	debug_msg("\tstopping %s\n", cstring(*_rxmt_wrapper));
+	delete _rxmt_wrapper;
+	_rxmt_wrapper = 0;
+    }
+
+    _rxmt_timer.unschedule();
 }
 
 template <typename A>
 void
 Neighbour<A>::build_data_description_packet()
 {
+    // Clear out previous LSA headers.
+    _data_description_packet.get_lsa_headers().clear();
+
+    if (_all_headers_sent)
+	return;
+
     // Open the database if the handle is invalid.
     if (!_database_handle.valid())
 	_database_handle = get_area_router()->open_database();
-
-    // Clear out previous LSA headers.
-    _data_description_packet.get_lsa_headers().clear();
 
     bool last;
     do {
@@ -1596,6 +1659,8 @@ Neighbour<A>::build_data_description_packet()
     _data_description_packet.set_m_bit(false);
     
     get_area_router()->close_database(_database_handle);
+
+    _all_headers_sent = true;
 }
 
 template <typename A>
@@ -1784,7 +1849,8 @@ Neighbour<A>::event_2_way_received()
 
 	    start_rxmt_timer(callback(this,
 				      &Neighbour<A>::
-				      send_data_description_packet));
+				      send_data_description_packet),
+			     "send_data_description from 2-WayReceived");
 	} else {
 	    set_state(TwoWay);
 	}
@@ -1893,7 +1959,10 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	if (dd->get_i_bit() && dd->get_m_bit() && dd->get_ms_bit() && 
 	    dd->get_lsa_headers().empty() && 
 	    dd->get_router_id() > _ospf.get_router_id()) { // Router is slave
-	    _last_dd.set_dd_seqno(dd->get_dd_seqno());
+	    // Use this sequence number to respond to the poll
+	    _data_description_packet.set_dd_seqno(dd->get_dd_seqno());
+	    // This is the slave switch off the master slave bit.
+	    _data_description_packet.set_ms_bit(false);
 	    negotiation_done = true;
 	}
 
@@ -1901,6 +1970,9 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	if (!dd->get_i_bit() && !dd->get_ms_bit() &&
 	    _last_dd.get_dd_seqno() == dd->get_dd_seqno() && 
 	    dd->get_router_id() < _ospf.get_router_id()) {  // Router is master
+	    // Bump the sequence number of the master.
+	    _last_dd.set_dd_seqno(dd->get_dd_seqno() + 1);
+	    _data_description_packet.set_dd_seqno(_last_dd.get_dd_seqno());
 	    negotiation_done = true;
 	}
 
@@ -1912,6 +1984,16 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	// Ignore Packet
 	break;
     case Exchange: {
+	// Check for duplicates
+	if (_last_dd == *dd) {
+	    if (_last_dd.get_ms_bit()) {// Router is slave
+		send_data_description_packet();
+	    } else {			// Router is master
+		// Discard
+	    }
+	    return;
+	}
+
 	// Make sure the saved value is the same as the incoming.
 	if (_last_dd.get_ms_bit() != dd->get_ms_bit()) {
 	    XLOG_TRACE(_ospf.trace()._neighbour_events,
@@ -1992,6 +2074,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 
 	if (_last_dd.get_ms_bit()) { // Router is slave
 	    _last_dd.set_dd_seqno(dd->get_dd_seqno());
+	    _data_description_packet.set_dd_seqno(_last_dd.get_dd_seqno());
 	    build_data_description_packet();
 	    if (!_data_description_packet.get_m_bit() &&
 		!dd->get_m_bit()) {
@@ -1999,15 +2082,18 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    }
 	    send_data_description_packet();
 	} else {		     // Router is master
-	    _last_dd.set_dd_seqno(_last_dd.get_dd_seqno() + 1);
 	    if (_all_headers_sent && !dd->get_m_bit()) {
 		event_exchange_done();
 	    } else {
+		_last_dd.set_dd_seqno(_last_dd.get_dd_seqno() + 1);
+		_data_description_packet.set_dd_seqno(_last_dd.get_dd_seqno());
 		build_data_description_packet();
 		send_data_description_packet();
 	    }
 	}
 	    
+	// Save some fields for later duplicate detection.
+	assign(_last_dd, *dd);
     }
 	break;
     case Loading:
@@ -2059,14 +2145,16 @@ Neighbour<A>::event_negotiation_done()
 	// If we are the master start sending description packets.
 	if (!_last_dd.get_ms_bit()) {
 	    build_data_description_packet();
+	    stop_rxmt_timer("NegotiationDone (master)");
 	    start_rxmt_timer(callback(this,
 				      &Neighbour<A>::
-				      send_data_description_packet));
+				      send_data_description_packet),
+			     "send_data_description from NegotiationDone");
 	} else {
-	    // This is the slave switch off the master slave bit.
-	    _data_description_packet.set_ms_bit(false);
 	    // We have now agreed we are the slave so stop retransmitting.
-	    stop_rxmt_timer();
+	    stop_rxmt_timer("NegotiationDone (slave)");
+	    // Send a response to the poll
+	    send_data_description_packet();
 	}
 	break;
     case Exchange:
@@ -2148,6 +2236,10 @@ Neighbour<A>::event_exchange_done()
     case ExStart:
 	break;
     case Exchange:
+	set_state(Loading);
+	// Stop any retransmissions, only the master should have any running.
+	if (!_last_dd.get_ms_bit())
+	    stop_rxmt_timer("ExchangeDone");
 	break;
     case Loading:
 	break;

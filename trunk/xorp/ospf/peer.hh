@@ -565,6 +565,8 @@ class Peer {
     void tear_down_state();
 };
 
+class RxmtWrapper;
+
 /**
  * Neighbour specific information.
  */
@@ -585,6 +587,8 @@ class Neighbour {
 	Full = 8
     };
 
+    typedef XorpCallback0<bool>::RefPtr RxmtCallback;
+
     /**
      * We start in Init not Down state as typically this class is
      * created on demand when a hello packet arrives.
@@ -595,15 +599,23 @@ class Neighbour {
 	  _neighbour_address(neighbour_address),
 	  _state(state), _hello_packet(0),
 	  _last_dd(ospf.get_version()),
-	  _data_description_packet(ospf.get_version())
+	  _data_description_packet(ospf.get_version()),
+	  _rxmt_wrapper(0)
     {
 	TimeVal t;
 	_ospf.get_eventloop().current_time(t);
+	// If we are debugging numbers starting from 0 are easier to
+	// deal with.
+#ifdef	DEBUG_LOGGING
+	_data_description_packet.set_dd_seqno(0);
+#else
 	_data_description_packet.set_dd_seqno(t.sec());
+#endif
     }
 
     ~Neighbour() {
 	delete _hello_packet;
+	delete _rxmt_wrapper;
     }
 
     /**
@@ -663,6 +675,8 @@ class Neighbour {
     bool _all_headers_sent;		// Tracking database transmssion
 
     XorpTimer _rxmt_timer;		// Retransmit timer.
+    RxmtWrapper *_rxmt_wrapper;		// Wrapper to retransmiter.
+
     DataBaseHandle _database_handle;	// Handle to the Link State Database.
 
     /**
@@ -680,19 +694,18 @@ class Neighbour {
      */
     bool establish_adjacency_p() const;
 
-    typedef XorpCallback0<bool>::RefPtr RxmtCallback;
-
     /**
      * Start the retransmit timer.
      *
      * @param RxmtCallback method to be called ever retransmit interval.
+     * @param comment to track the callbacks
      */
-    void start_rxmt_timer(RxmtCallback);
+    void start_rxmt_timer(RxmtCallback, const char *comment);
 
     /**
      * Stop the retransmit timer.
      */
-    void stop_rxmt_timer();
+    void stop_rxmt_timer(const char *comment);
 
     /*
      * Build database description packet.
