@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.29 2004/12/17 01:31:02 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.30 2005/03/09 02:48:01 atanu Exp $
 #
 
 #
@@ -910,7 +910,7 @@ test27()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
 
     sleep 2
-    coord peer1 trie recv lookup 10.10.10.0/24 aspath 65008
+    coord peer1 trie recv lookup 10.10.10.0/24 aspath empty
 
     coord peer1 assert queue 0
     coord peer1 assert established
@@ -930,7 +930,7 @@ test27_ipv6()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100 ipv6 true
 
     sleep 2
-    coord peer1 trie recv lookup 2000::/3 aspath 65008
+    coord peer1 trie recv lookup 2000::/3 aspath empty
 
     coord peer1 assert queue 0
     coord peer1 assert established

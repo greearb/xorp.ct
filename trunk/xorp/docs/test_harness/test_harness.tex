@@ -334,7 +334,8 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
 \item {\sf trie $<$recv/sent$>$ lookup $<$net$>$ aspath $<$path$>$}
 
   Test to see if this net is in the trie and associated with the
-  provided AS path.
+  provided AS path. The AS path can be to the value ``empty'' if a
+  check for an empty AS path is required.
 
 \item {\sf expect packet notify $<$error code$>$ $<$sub error code$>$}
 

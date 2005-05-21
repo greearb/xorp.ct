@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.59 2005/03/19 17:17:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.60 2005/03/25 02:52:53 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -635,7 +635,11 @@ Peer::trie(const string& line, const vector<string>& words)
 			   c_format("NO AS Path associated with route\n[%s]",
 				    line.c_str())); 
 		
-	    if(*aspath != AsPath(words[i + 1].c_str()))
+	    string aspath_search;
+	    if("empty" != words[i + 1])
+		aspath_search = words[i + 1];
+
+	    if(*aspath != AsPath(aspath_search.c_str()))
 		xorp_throw(InvalidString, 
 			   c_format("Looking for Path: <%s> Found: <%s>\n[%s]",
 				    words[i + 1].c_str(),

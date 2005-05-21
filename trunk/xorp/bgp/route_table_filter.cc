@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.27 2005/03/25 02:52:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.28 2005/04/28 02:35:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -462,7 +462,7 @@ OriginateRouteFilter<A>::OriginateRouteFilter(const AsNum &as_num,
 template<class A>
 const InternalMessage<A>* 
 OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
-				 bool &modified) const
+				bool &/*modified*/) const
 {
     debug_msg("Originate Route Filter\n");
 
@@ -470,6 +470,8 @@ OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
     if (!rtmsg->origin_peer()->originate_route_handler())
 	return rtmsg;
 
+    return rtmsg;
+#if	0
     // If this is an EBGP peering then assume the AS is already
     // present. Perhaps we should check.
     if (false == _ibgp)
@@ -508,6 +510,7 @@ OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
     new_rtmsg->set_changed();
 
     return new_rtmsg;
+#endif
 }
 
 /*************************************************************************/
