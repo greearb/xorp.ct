@@ -67,6 +67,76 @@ struct OspfTypes {
 	STUB,		// Stub Area
 	NSSA,		// Not-So-Stubby Area
     };
+
+    /**
+     *
+     * The maximum time between distinct originations of any particular
+     * LSA.  If the LS age field of one of the router's self-originated
+     * LSAs reaches the value LSRefreshTime, a new instance of the LSA
+     * is originated, even though the contents of the LSA (apart from
+     * the LSA header) will be the same.  The value of LSRefreshTime is
+     * set to 30 minutes.
+     */
+    static const uint32_t LSRefreshTime = 30 * 60;
+
+    /**
+     * The minimum time between distinct originations of any particular
+     * LSA.  The value of MinLSInterval is set to 5 seconds.
+     */
+    static const uint32_t MinLSInterval = 5;
+
+    /**
+     * For any particular LSA, the minimum time that must elapse
+     * between reception of new LSA instances during flooding. LSA
+     * instances received at higher frequencies are discarded. The
+     * value of MinLSArrival is set to 1 second.
+     */
+    static const uint32_t MinLSArrival = 1;
+
+    /**
+     * The maximum age that an LSA can attain. When an LSA's LS age
+     * field reaches MaxAge, it is reflooded in an attempt to flush the
+     * LSA from the routing domain. LSAs of age MaxAge
+     * are not used in the routing table calculation.	The value of
+     * MaxAge is set to 1 hour.
+     */
+    static const uint32_t MaxAge = 60 * 60;
+
+    /**
+     * When the age of an LSA in the link state database hits a
+     * multiple of CheckAge, the LSA's checksum is verified.  An
+     * incorrect checksum at this time indicates a serious error.  The
+     * value of CheckAge is set to 5 minutes.
+     */
+    static const uint32_t CheckAge = 5 * 60;
+
+    /*
+     * The maximum time dispersion that can occur, as an LSA is flooded
+     * throughout the AS.  Most of this time is accounted for by the
+     * LSAs sitting on router output queues (and therefore not aging)
+     * during the flooding process.  The value of MaxAgeDiff is set to
+     * 15 minutes.
+     */
+    static const uint32_t MaxAgeDiff = 15 * 60;
+
+    /*
+     * The metric value indicating that the destination described by an
+     * LSA is unreachable. Used in summary-LSAs and AS-external-LSAs as
+     * an alternative to premature aging. It is
+     * defined to be the 24-bit binary value of all ones: 0xffffff.
+     */
+    static const uint32_t LSInfinity = 0xffffff;
+
+    /*
+     * The value used for LS Sequence Number when originating the first
+     * instance of any LSA.
+     */
+    static const int32_t InitialSequenceNumber = 0x80000001;
+
+    /*
+     * The maximum value that LS Sequence Number can attain.
+     */
+    static const int32_t MaxSequenceNumber = 0x7fffffff;
 };
 
 /**
