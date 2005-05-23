@@ -138,11 +138,11 @@ class Lsa_header {
     }
 
     // LS sequence number
-    void set_ls_sequence_number(uint32_t ls_sequence_number) {
+    void set_ls_sequence_number(int32_t ls_sequence_number) {
 	_ls_sequence_number = ls_sequence_number;
     }
 
-    uint32_t get_ls_sequence_number() const {
+    int32_t get_ls_sequence_number() const {
 	return _ls_sequence_number;
     }
 
@@ -178,7 +178,7 @@ class Lsa_header {
     uint16_t	_ls_type;	// OSPF V2 1 byte OSPF V3 2 bytes.
     uint32_t	_link_state_id;
     uint32_t	_advertising_router;
-    uint32_t	_ls_sequence_number;
+    int32_t	_ls_sequence_number;
     uint16_t	_ls_checksum;
     uint16_t	_length;
 };
