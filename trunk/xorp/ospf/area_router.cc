@@ -44,11 +44,23 @@
 
 template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
-			  OspfTypes::AreaType area_type) 
-    : _ospf(ospf), _area(area), _area_type(area_type), _readers(0)
+			  OspfTypes::AreaType area_type, uint32_t options) 
+    : _ospf(ospf), _area(area), _area_type(area_type), _options(options),
+      _readers(0)
 {
     // Never need to delete this as the ref_ptr will tidy up.
-    _router_lsa = Lsa::LsaRef(new RouterLsa(_ospf.get_version()));
+    RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
+
+    switch (ospf.get_version()) {
+    case OspfTypes::V2:
+	rlsa->get_header().set_options(_options);
+	break;
+    case OspfTypes::V3:
+	rlsa->set_options(_options);
+	break;
+    }
+    
+    _router_lsa = Lsa::LsaRef(rlsa);
     _db.push_back(_router_lsa);
     _last_entry = 1;
 }

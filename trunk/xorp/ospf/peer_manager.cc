@@ -76,7 +76,8 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
 	return false;
     }
 
-    _areas[area] = new AreaRouter<A>(_ospf, area, area_type);
+    _areas[area] = new AreaRouter<A>(_ospf, area, area_type,
+				     compute_options(area_type));
     
     return true;
 }
@@ -203,6 +204,10 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 				    source, interface_mtu, linktype,
 				    area, area_router->get_area_type());
 
+    // Pass in the option to be sent by the hello packet.
+    _peers[peerid]->set_options(area,
+				compute_options(area_router->get_area_type()));
+
     area_router->add_peer(peerid);
 
     return peerid;
@@ -323,6 +328,26 @@ PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
     return _peers[peerid]->set_options(area, options);
 }
 #endif
+
+template <typename A> 
+uint32_t
+PeerManager<A>::compute_options(OspfTypes::AreaType area_type)
+
+{
+    // Set/UnSet E-Bit.
+    Options options(_ospf.get_version(), 0);
+    switch(area_type) {
+    case OspfTypes::BORDER:
+	options.set_e_bit(true);
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	options.set_e_bit(false);
+	break;
+    }
+
+    return options.get_options();
+}
 
 template <typename A> 
 bool

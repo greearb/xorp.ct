@@ -145,12 +145,10 @@ class PeerOut {
      */
     bool set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval);
 
-#if	0
     /**
      * Set options.
      */
     bool set_options(OspfTypes::AreaID area, uint32_t options);
-#endif
 
     /**
      * Set router priority.
@@ -391,11 +389,13 @@ class Peer {
      */
     OspfTypes::LinkType get_linktype() const { return _peerout.get_linktype();}
 
+#if	0
     /**
      * @return the options field that is placed in some of outgoing
      * packets.
      */
     uint32_t send_options();
+#endif
 
     /**
      * Fill in the common header parts of the packet.
@@ -437,12 +437,15 @@ class Peer {
      */
     bool set_hello_interval(uint16_t hello_interval);
 
-#if	0
     /**
      * Set options.
      */
     bool set_options(uint32_t options);
-#endif
+
+    /**
+     * Get options.
+     */
+    uint32_t get_options() const;
 
     /**
      * Set router priority.

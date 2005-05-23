@@ -137,6 +137,13 @@ class PeerManager {
     bool set_options(const PeerID, OspfTypes::AreaID area,
 		     uint32_t options);
 #endif
+    /**
+     * Compute the options that are sent in hello packets, data
+     * description packets, LSA headers (OSPFv2),  Router-LSAs
+     * (OSPFv3) and Network-LSAs (OSPFv3).
+     *
+     */
+    uint32_t compute_options(OspfTypes::AreaType area_type);
 
     /**
      * Set router priority.

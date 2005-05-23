@@ -28,7 +28,7 @@ template <typename A>
 class AreaRouter {
  public:
     AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
-	       OspfTypes::AreaType area_type);
+	       OspfTypes::AreaType area_type, uint32_t options);
 
     /**
      * Add peer
@@ -118,6 +118,7 @@ class AreaRouter {
 
     OspfTypes::AreaID _area;		// Area: That is represented.
     OspfTypes::AreaType _area_type;	// Type of this area.
+    const uint32_t _options;		// Options that we are sending.
 
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.

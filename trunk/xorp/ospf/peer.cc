@@ -234,7 +234,6 @@ PeerOut<A>::set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval)
     return _areas[area]->set_hello_interval(hello_interval);
 }
 
-#if	0
 template <typename A> 
 bool
 PeerOut<A>::set_options(OspfTypes::AreaID area,	uint32_t options)
@@ -246,7 +245,6 @@ PeerOut<A>::set_options(OspfTypes::AreaID area,	uint32_t options)
 
     return _areas[area]->set_options(options);
 }
-#endif
 
 template <typename A> 
 bool
@@ -369,26 +367,13 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	return false;
     }
 
-    // Check the E-Bit in options.
-    Options options(_ospf.get_version(), hello->get_options());
-    switch(_area_type) {
-    case OspfTypes::BORDER:
-	if (!options.get_e_bit()) {
+    // Compare our and the received E-Bit they must match.
+    if ((_hello_packet.get_options() & Options::E_bit) !=
+	(hello->get_options() & Options::E_bit)) {
 	    XLOG_TRACE(_ospf.trace()._input_errors,
-		       "BORDER router but the E-bit is not set %s",
+		       "E-bit does not match %s",
 		       hello->str().c_str());
 	    return false;
-	}
-	break;
-    case OspfTypes::STUB:
-    case OspfTypes::NSSA:
-	if (options.get_e_bit()) {
-	    XLOG_TRACE(_ospf.trace()._input_errors,
-		       "STUB/NSSA router but the E-bit is set %s",
-		       hello->str().c_str());
-	    return false;
-	}
-	break;
     }
 
     Neighbour<A> *n = find_neighbour(src, hello);
@@ -708,6 +693,7 @@ Peer<A>::start_wait_timer()
 			 callback(this, &Peer<A>::event_wait_timer));
 }
 
+#if	0
 template <typename A>
 uint32_t
 Peer<A>::send_options()
@@ -726,6 +712,7 @@ Peer<A>::send_options()
 
     return options.get_options();
 }
+#endif
 
 template <typename A>
 void
@@ -747,8 +734,10 @@ Peer<A>::send_hello_packet()
     // Fetch the router ID.
     _hello_packet.set_router_id(_ospf.get_router_id());
 
+#if	0
     // Options.
     _hello_packet.set_options(send_options());
+#endif
 
     // Put the neighbours into the hello packet.
     _hello_packet.get_neighbours().clear();
@@ -1400,7 +1389,6 @@ Peer<A>::set_hello_interval(uint16_t hello_interval)
     return true;
 }
 
-#if	0
 template <typename A>
 bool
 Peer<A>::set_options(uint32_t options)
@@ -1409,7 +1397,13 @@ Peer<A>::set_options(uint32_t options)
 
     return true;
 }
-#endif
+
+template <typename A>
+uint32_t
+Peer<A>::get_options() const
+{
+    return _hello_packet.get_options();
+}
 
 template <typename A>
 bool
@@ -1678,7 +1672,7 @@ Neighbour<A>::send_data_description_packet()
 {
     _peer.populate_common_header(_data_description_packet);
     _data_description_packet.set_interface_mtu(_peer.get_interface_mtu());
-    _data_description_packet.set_options(_peer.send_options());
+    _data_description_packet.set_options(_peer.get_options());
     
     vector<uint8_t> pkt;
     _data_description_packet.encode(pkt);
