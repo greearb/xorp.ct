@@ -234,6 +234,7 @@ PeerOut<A>::set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval)
     return _areas[area]->set_hello_interval(hello_interval);
 }
 
+#if	0
 template <typename A> 
 bool
 PeerOut<A>::set_options(OspfTypes::AreaID area,	uint32_t options)
@@ -245,6 +246,7 @@ PeerOut<A>::set_options(OspfTypes::AreaID area,	uint32_t options)
 
     return _areas[area]->set_options(options);
 }
+#endif
 
 template <typename A> 
 bool
@@ -1398,6 +1400,7 @@ Peer<A>::set_hello_interval(uint16_t hello_interval)
     return true;
 }
 
+#if	0
 template <typename A>
 bool
 Peer<A>::set_options(uint32_t options)
@@ -1406,6 +1409,7 @@ Peer<A>::set_options(uint32_t options)
 
     return true;
 }
+#endif
 
 template <typename A>
 bool

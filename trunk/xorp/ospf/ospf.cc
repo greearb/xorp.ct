@@ -192,6 +192,7 @@ Ospf<A>::set_hello_interval(const string& interface, const string& vif,
     return true;
 }
 
+#if	0
 template <typename A>
 bool 
 Ospf<A>::set_options(const string& interface, const string& vif,
@@ -207,6 +208,7 @@ Ospf<A>::set_options(const string& interface, const string& vif,
     }
     return true;
 }
+#endif
 
 template <typename A>
 bool

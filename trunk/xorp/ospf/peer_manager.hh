@@ -130,11 +130,13 @@ class PeerManager {
     bool set_hello_interval(const PeerID, OspfTypes::AreaID area,
 			    uint16_t hello_interval);
 
+#if	0
     /**
      * Set options.
      */
     bool set_options(const PeerID, OspfTypes::AreaID area,
 		     uint32_t options);
+#endif
 
     /**
      * Set router priority.

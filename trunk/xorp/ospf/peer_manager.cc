@@ -309,6 +309,7 @@ PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
     return _peers[peerid]->set_hello_interval(area, hello_interval);
 }
 
+#if	0
 template <typename A> 
 bool
 PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
@@ -321,6 +322,7 @@ PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
 
     return _peers[peerid]->set_options(area, options);
 }
+#endif
 
 template <typename A> 
 bool
