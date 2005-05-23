@@ -50,16 +50,21 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 {
     // Never need to delete this as the ref_ptr will tidy up.
     RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
+    Lsa_header& header = rlsa->get_header();
 
     switch (ospf.get_version()) {
     case OspfTypes::V2:
-	rlsa->get_header().set_options(_options);
+	header.set_options(_options);
 	break;
     case OspfTypes::V3:
 	rlsa->set_options(_options);
 	break;
     }
     
+    // This is a router LSA so the link state ID is the Router ID.
+    header.set_link_state_id(ntohl(_ospf.get_router_id().addr()));
+    header.set_advertising_router(ntohl(_ospf.get_router_id().addr()));
+
     _router_lsa = Lsa::LsaRef(rlsa);
     _db.push_back(_router_lsa);
     _last_entry = 1;
@@ -268,7 +273,12 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
     if (empty && router_lsa->get_router_links().empty())
 	return false;
 
+    XLOG_WARNING("TBD: Set/Unset V,E and B bits");
+
     router_lsa->encode();
+
+    XLOG_WARNING("Update LS age");
+    XLOG_WARNING("Update sequence number");
 
     return true;
 }
