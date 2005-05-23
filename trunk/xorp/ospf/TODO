@@ -20,8 +20,6 @@ types are valid. This method should be used by data_description_received.
 
 5) Are external-LSAs allowed in NSSAs?
 
-6) Pretty print the options field in a packet.
-
 7) Can an interface a peer in our code have more than one subnet
 associated with it?
 
@@ -47,6 +45,9 @@ get_interface_prefix_length().
 
 14) Provide a mechanism to set the interface cost. Checkout
 get_interface_cost().
+
+15) The checking of the options field in an incoming hello packet does
+not seem correct.
 
 Possible issues
 ~~~~~~~~~~~~~~~

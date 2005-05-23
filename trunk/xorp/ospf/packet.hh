@@ -579,6 +579,7 @@ class Options {
      static const uint32_t MC_bit = 0x4;
      static const uint32_t N_bit = 0x8;
      static const uint32_t R_bit = 0x10;
+     static const uint32_t EA_bit = 0x10;
      static const uint32_t DC_bit = 0x20;
 
      Options(OspfTypes::Version version, uint32_t options)
@@ -595,8 +596,14 @@ class Options {
      }
      bool get_bit(uint32_t bit) const { return _options & bit ? true : false; }
 
-     void set_v6_bit(bool set) { set_bit(set, V6_bit); }
-     bool get_v6_bit() const { return get_bit(V6_bit); }
+     void set_v6_bit(bool set) {
+	 XLOG_ASSERT(OspfTypes::V3 == _version);
+	 set_bit(set, V6_bit);
+     }
+     bool get_v6_bit() const {
+	 XLOG_ASSERT(OspfTypes::V3 == _version);
+	 return get_bit(V6_bit);
+     }
 
      void set_e_bit(bool set) { set_bit(set, E_bit); }
      bool get_e_bit() const { return get_bit(E_bit); }
@@ -607,15 +614,57 @@ class Options {
      void set_n_bit(bool set) { set_bit(set, N_bit); }
      bool get_n_bit() const { return get_bit(N_bit); }
 
-     void set_r_bit(bool set) { set_bit(set, R_bit); }
-     bool get_r_bit() const { return get_bit(R_bit); }
+     void set_r_bit(bool set) {
+	 XLOG_ASSERT(OspfTypes::V3 == _version);
+	 set_bit(set, R_bit);
+     }
+     bool get_r_bit() const {
+	 XLOG_ASSERT(OspfTypes::V3 == _version);
+	 return get_bit(R_bit);
+     }
+
+     void set_ea_bit(bool set) {
+	 XLOG_ASSERT(OspfTypes::V2 == _version);
+	 set_bit(set, EA_bit);
+     }
+     bool get_ea_bit() const {
+	 XLOG_ASSERT(OspfTypes::V2 == _version);
+	 return get_bit(EA_bit);
+     }
 
      void set_dc_bit(bool set) { set_bit(set, DC_bit); }
      bool get_dc_bit() const { return get_bit(DC_bit); }
      
      uint32_t get_options() { return _options; }
+
+     string pp_bool(bool val) const { return val ? "1" : "0"; }
+
+     string str() const {
+	 string out;
+
+	 switch(_version) {
+	 case OspfTypes::V2:
+	     out = "DC: " + pp_bool(get_dc_bit());
+	     out += " EA: " + pp_bool(get_ea_bit());
+	     out += " N/P: " + pp_bool(get_n_bit());
+	     out += " MC: " + pp_bool(get_mc_bit());
+	     out += " E: " + pp_bool(get_e_bit());
+	     break;
+	 case OspfTypes::V3:
+	     out = "DC: " + pp_bool(get_dc_bit());
+	     out += " R: " + pp_bool(get_r_bit());
+	     out += " N: " + pp_bool(get_n_bit());
+	     out += " MC: " + pp_bool(get_mc_bit());
+	     out += " E: " + pp_bool(get_e_bit());
+	     out += " V6: " + pp_bool(get_v6_bit());
+	     break;
+	 }
+
+	 return out;
+     }
+	
  private:
-     OspfTypes::Version _version;	// Version not currently used
+     OspfTypes::Version _version;
      uint32_t _options;
 };
 

@@ -495,7 +495,8 @@ HelloPacket::str() const
     }
 
     output += c_format("\tHello Interval %u\n", get_hello_interval());
-    output += c_format("\tOptions %#x\n", get_options());
+    output += c_format("\tOptions %#x %s\n", get_options(),
+		       cstring(Options(get_version(), get_options())));
     output += c_format("\tRouter Priority %u\n", get_router_priority());
     output += c_format("\tRouter Dead Interval %u\n",
 		       get_router_dead_interval());
@@ -654,7 +655,8 @@ DataDescriptionPacket::str() const
     // Data Description Packet Specifics
 
     output += c_format("\tInterface MTU %u\n", get_interface_mtu());
-    output += c_format("\tOptions %#x\n", get_options());
+    output += c_format("\tOptions %#x %s\n", get_options(),
+		       cstring(Options(get_version(), get_options())));
     output += c_format("\tI-bit %s\n", get_i_bit() ? "true" : "false");
     output += c_format("\tM-bit %s\n", get_m_bit() ? "true" : "false");
     output += c_format("\tMS-bit %s\n", get_ms_bit() ? "true" : "false");
