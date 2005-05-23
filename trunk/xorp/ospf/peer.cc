@@ -1089,7 +1089,7 @@ Peer<IPv4>::update_router_linksV2()
     case Loopback:
 	// XXX - We should be checking to see if this is p2p unnumbered.
 	router_link.set_type(RouterLink::stub);
-	router_link.set_link_id(get_interface_address().addr());
+	router_link.set_link_id(ntohl(get_interface_address().addr()));
 	router_link.set_link_data(0xffffffff);
 	router_link.set_metric(0);
 	goto done;
@@ -1100,7 +1100,7 @@ Peer<IPv4>::update_router_linksV2()
 	// Unconditional
 	// Option 1
 	router_link.set_type(RouterLink::stub);
-	router_link.set_link_id(get_p2p_neighbour_address().addr());
+	router_link.set_link_id(ntohl(get_p2p_neighbour_address().addr()));
 	router_link.set_link_data(0xffffffff);
 	router_link.set_metric(_peerout.get_interface_cost());
 	// Option 2
@@ -1117,7 +1117,7 @@ Peer<IPv4>::update_router_linksV2()
     switch(_peerout.get_linktype()) {
     case OspfTypes::PointToPoint:
 	router_link.set_type(RouterLink::p2p);
-	router_link.set_link_id(get_interface_address().addr());
+	router_link.set_link_id(ntohl(get_interface_address().addr()));
 	router_link.set_link_data(0xffffffff);
 	router_link.set_metric(0);
 	break;
@@ -1133,8 +1133,8 @@ Peer<IPv4>::update_router_linksV2()
 	    router_link.set_type(RouterLink::stub);
 	    IPNet<IPv4> net(get_interface_address(),
 			    _peerout.get_interface_prefix_length());
-	    router_link.set_link_id(net.masked_addr().addr());
-	    router_link.set_link_data(net.netmask().addr());
+	    router_link.set_link_id(ntohl(net.masked_addr().addr()));
+	    router_link.set_link_data(ntohl(net.netmask().addr()));
 	    router_link.set_metric(_peerout.get_interface_cost());
 	}
 	    break;
@@ -1164,15 +1164,16 @@ Peer<IPv4>::update_router_linksV2()
 	    if (adjacent) {
 		router_link.set_type(RouterLink::transit);
 
-		router_link.set_link_id(get_designated_router().addr());
-		router_link.set_link_data(get_interface_address().addr());
+		router_link.set_link_id(ntohl(get_designated_router().addr()));
+		router_link.set_link_data(ntohl(get_interface_address().
+						addr()));
 
 	    } else {
 		router_link.set_type(RouterLink::stub);
 		IPNet<IPv4> net(get_interface_address(),
 			     _peerout.get_interface_prefix_length());
-		router_link.set_link_id(net.masked_addr().addr());
-		router_link.set_link_data(net.netmask().addr());
+		router_link.set_link_id(ntohl(net.masked_addr().addr()));
+		router_link.set_link_data(ntohl(net.netmask().addr()));
 
 	    }
 	    router_link.set_metric(_peerout.get_interface_cost());
@@ -1252,7 +1253,8 @@ Peer<IPv6>::update_router_linksV3()
 	    router_link.set_type(RouterLink::p2p);
 	    router_link.set_neighbour_interface_id((*n)->get_hello_packet()->
 						   get_interface_id());
-	    router_link.set_neighbour_router_id((*n)->get_router_id().addr());
+	    router_link.set_neighbour_router_id(ntohl((*n)->
+						      get_router_id().addr()));
 
 	    get_area_router()->add_router_link(_peerout.get_peerid(),
 					       router_link);
@@ -1299,8 +1301,9 @@ Peer<IPv6>::update_router_linksV3()
 		    set_neighbour_interface_id(
 				       get_designated_router_interface_id());
 		// DR router ID.
-		router_link.set_neighbour_router_id(get_designated_router().
-						    addr());
+		router_link.
+		    set_neighbour_router_id(ntohl(get_designated_router().
+						  addr()));
 
 		get_area_router()->add_router_link(_peerout.get_peerid(),
 					       router_link);
