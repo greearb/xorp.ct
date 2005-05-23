@@ -25,7 +25,8 @@ class Lsa_header {
  public:
     Lsa_header(OspfTypes::Version version) :
 	_version(version), _LS_age(0), _options(0), _ls_type(0),
-	_link_state_id(0), _advertising_router(0), _ls_sequence_number(0),
+	_link_state_id(0), _advertising_router(0),
+	_ls_sequence_number(OspfTypes::InitialSequenceNumber),
 	_ls_checksum(0), _length(0)
     {}
 
