@@ -46,6 +46,12 @@ get_interface_prefix_length().
 14) Provide a mechanism to set the interface cost. Checkout
 get_interface_cost().
 
+15) The router ID and area ID are held as IPv4 this is fine but
+remember that IPv4::addr() returns in the network byte order not
+host. Therefore fields that are defined as uint32_t in packets that
+are set from a get_router_id() call need to have ntohl() called on
+them.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
