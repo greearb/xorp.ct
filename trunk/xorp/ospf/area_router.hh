@@ -90,7 +90,7 @@ class AreaRouter {
     bool newer_lsa(const Lsa_header&) const;
 
     /**
-     * Open data base
+     * Open database
      *
      * @param empty true if the database is empty.
      * @return Database Handle
