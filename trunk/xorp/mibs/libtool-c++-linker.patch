@@ -1,0 +1,16 @@
+Index: configure
+===================================================================
+RCS file: /usr/local/www/data/cvs/xorp/mibs/configure,v
+retrieving revision 1.12
+diff -u -r1.12 configure
+--- configure	5 May 2005 19:52:55 -0000	1.12
++++ configure	24 May 2005 20:12:59 -0000
+@@ -2994,7 +2994,7 @@
+ rm -f confcache
+ 
+ # Actually configure libtool.  ac_aux_dir is where install-sh is found.
+-CC="$CC" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" \
++CC="$CXX" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" \
+ LD="$LD" LDFLAGS="$LDFLAGS" LIBS="$LIBS" \
+ LN_S="$LN_S" NM="$NM" RANLIB="$RANLIB" \
+ DLLTOOL="$DLLTOOL" AS="$AS" OBJDUMP="$OBJDUMP" \
