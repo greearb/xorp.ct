@@ -137,7 +137,7 @@ test_xorpevents_LDADD = ../libxipc/libfinder.la ./libnetsnmpxorp.la
 
 
 # -- Libraries and library flags to link the libtoolized shared objects
-libnetsnmpxorp_la_LIBADD = -lstdc++ ../libxipc/libxipc.la ../libxorp/libxorp.la ../libcomm/libcomm.la
+libnetsnmpxorp_la_LIBADD = ../libxipc/libxipc.la ../libxorp/libxorp.la ../libcomm/libcomm.la
 libnetsnmpxorp_la_LDFLAGS = -avoid-version
 
 bgp4_mib_1657_la_LIBADD = ./libnetsnmpxorp.la ../xrl/targets/libbgp4mibbase.la ../xrl/interfaces/libbgpxif.la
