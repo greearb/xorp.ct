@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# $XORP: xorp/mibs/tests/test_bgpmib.sh.in,v 1.33 2005/03/16 02:03:06 pavlin Exp $
+# $XORP: xorp/mibs/tests/test_bgpmib.sh.in,v 1.34 2005/05/25 00:18:51 atanu Exp $
 #
 #
 # Test the BGP MIB
@@ -36,9 +36,9 @@ configure_snmp()
     SNMPDDBG="bgp4_mib_1657,xorp_if_mib_module,trap"
     echo 'rwcommunity xorp' > ${SNMPDCONF}
     echo "dlmod xorp_if_mib_module "					\
-	 "${XORP_TOP_BUILDDIR}/mibs/xorp_if_mib_module.so"		\
+	 "${XORP_TOP_BUILDDIR}/mibs/.libs/xorp_if_mib_module.so"	\
 	    >> ${SNMPDCONF}
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs/.libs
     export LD_LIBRARY_PATH
     MIBDIRS=+`(cd ${srcdir}/../textual; pwd)`
     export MIBDIRS
@@ -65,7 +65,7 @@ onexit()
 	echo "$0: Tests Failed"
     fi
 
-    trap '' 0 2
+    trap - 0 2
 
     # Unload MIB if not unloaded yet
     if [ "X${BGP_MIB_IDX}" != "X" ]; then
@@ -168,7 +168,7 @@ test1()
     add_peer  $LOCALHOST $PORT1 $FAKE_PEER3 $FPORT3 $PEER1_AS $NEXT_HOP $HTIME3
 
     # load the BGP mib
-    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+    ABS_PATH_TO_MIBS=${XORP_TOP_BUILDDIR}/mibs/.libs
 
     BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
 	sed -e 's/.*mib_index:u32=//'`
