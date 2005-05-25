@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# $XORP$
+# $XORP: xorp/mibs/tests/test_bgpmib.sh.in,v 1.33 2005/03/16 02:03:06 pavlin Exp $
 #
 #
 # Test the BGP MIB
@@ -81,7 +81,7 @@ onexit()
 trap onexit 0 2
 
 
-HOST=localhost
+HOST=127.0.0.1
 LOCALHOST=$HOST
 ID=192.150.187.78
 AS=65008
