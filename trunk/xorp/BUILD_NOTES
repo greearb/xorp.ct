@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.27 2005/04/01 19:42:24 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.28 2005/04/15 19:25:09 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -100,7 +100,7 @@ gmake check
     multicast_host=NO
     multicast_router=YES
 
-    Note that OpenBSD-3.6 and earlier don't have PIM multicast routing
+    Note that OpenBSD-3.7 is the first release that has PIM multicast routing
     support in the kernel.
 
   * OpenBSD-3.5:
