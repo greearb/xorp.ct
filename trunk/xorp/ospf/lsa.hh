@@ -335,6 +335,17 @@ class LsaDecoder {
 	return _min_lsa_length + Lsa_header::length();
     }
 
+    /**
+     * Validate type field.
+     * If we know how to decode an LSA of this type we must know how
+     * to decode it.
+     *
+     * @return true if we know about this type os LSA.
+     */
+    bool validate(uint16_t type) const {
+	return _lsa_decoders.end() != _lsa_decoders.find(type);
+    }
+
     OspfTypes::Version get_version() const {
 	return _version;
     }

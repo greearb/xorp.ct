@@ -296,6 +296,11 @@ class Ospf {
     PeerManager<A>& get_peer_manager() { return _peer_manager; }
 
     /**
+     * @return a reference to the LSA decoder.
+     */
+    LsaDecoder& get_lsa_decoder() { return _lsa_decoder; }
+
+    /**
      * Get the Router ID.
      */
     OspfTypes::RouterID get_router_id() const { return _router_id; }

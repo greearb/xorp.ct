@@ -2043,12 +2043,12 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	for (i = li.begin(); i != li.end(); i++) {
 	    uint16_t ls_type = i->get_ls_type();
 
-	    // Do we recognise this LSA?
-	    // XXX - We should be making a call to the LsaDecoder to
-	    // determine if a LS type is valid.
-	    if (ls_type > 5) {
+	    // Do we recognise this LS type?
+	    // If the LSA decoder knows about about the LSA then we
+	    // must be good.
+	    if (!_ospf.get_lsa_decoder().validate(ls_type)) {
 		XLOG_TRACE(_ospf.trace()._input_errors,
-			   "LS type > 5 %s", cstring(*dd));
+			   "Unknown LS type %u %s", ls_type, cstring(*dd));
 		event_sequence_number_mismatch();
 		return;
 		break;
