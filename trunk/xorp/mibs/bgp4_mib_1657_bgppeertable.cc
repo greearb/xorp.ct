@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgppeertable.cc,v 1.15 2004/12/05 22:28:36 atanu Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgppeertable.cc,v 1.16 2005/03/25 02:53:52 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -28,14 +28,15 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgppeertable.hh"
 
+const int MAX_IPvX_STRING_LENGTH = 255;
 
 // Local datatype
 typedef struct 
 {
     uint32_t peer_list_token;
-    string     peer_local_ip;
+    char     peer_local_ip[MAX_IPvX_STRING_LENGTH];
     uint32_t peer_local_port;
-    string     peer_remote_ip;
+    char     peer_remote_ip[MAX_IPvX_STRING_LENGTH];
     uint32_t peer_remote_port;
     bool     more;
     bool     valid;
@@ -233,14 +234,14 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
     // XXX - Atanu 2004-12-5
     // When this code was originally written the peer_local_ip and
     // peer_remote_ip variables were of type IPv4. Now that BGP can
-    // form IPv6 peerings its simpler to return a numeric version of
+    // form IPv6 peerings its simpler to return a string version of
     // the address that can be IPv4 or IPv6. Its not clear how to deal
     // with an IPv6 address being returned. Its clearly wrong to
-    // return anyting to the high level code. At the momement lets
+    // return anything to the high level code. At the momement lets
     // just return a value of zero and hope that the higher level code
     // sorts it out.
 
-    IPvX ip(data_context->peer_remote_ip.c_str());
+    IPvX ip(data_context->peer_remote_ip);
     uint32_t raw_ip = ip.is_ipv4() ? ip.get_ipv4().addr() : 0;
 
     //    uint32_t raw_ip = ntohl(data_context->peer_remote_ip.addr());
@@ -348,7 +349,7 @@ bgpPeerTable_handler(
 			    // XXX
 			    // See comment in bgpPeerTable_get_next_data_point
 
-			    IPvX ip(cntxt->peer_local_ip.c_str());
+			    IPvX ip(cntxt->peer_local_ip);
 			    uint32_t raw_ip = ip.is_ipv4() ?
 				ip.get_ipv4().addr() : 0;
 
@@ -371,7 +372,7 @@ bgpPeerTable_handler(
 			    // XXX
 			    // See comment in bgpPeerTable_get_next_data_point
 
-			    IPvX ip(cntxt->peer_remote_ip.c_str());
+			    IPvX ip(cntxt->peer_remote_ip);
 			    uint32_t raw_ip = ip.is_ipv4() ?
 				ip.get_ipv4().addr() : 0;
 //			uint32_t raw_ip = cntxt->peer_remote_ip.addr();
@@ -496,14 +497,16 @@ void get_peer_list_next_done(
     PeerDataContext* data_context)
 {
     if (e == XrlError::OKAY()) {
-	data_context->peer_local_ip = (*local_ip);
+	strncpy(data_context->peer_local_ip, local_ip->c_str(),
+		local_ip->length());
 	data_context->peer_local_port = (*local_port);
-	data_context->peer_remote_ip = (*remote_ip);
+	strncpy(data_context->peer_remote_ip, remote_ip->c_str(),
+		remote_ip->length());
 	data_context->peer_remote_port = (*remote_port); 
 	data_context->more = (*more);
 	data_context->valid = true;
 	DEBUGMSGTL((BgpMib::the_instance().name(),
-                "local_ip: %s more: %d\n", local_ip->c_str(), *more));		 
+		    "local_ip: %s more: %d\n", local_ip->c_str(), *more));
     } else {
     // XXX: deal with retries
     }
