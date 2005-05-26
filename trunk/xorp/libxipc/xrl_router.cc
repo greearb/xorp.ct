@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.44 2005/03/17 03:54:52 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.45 2005/03/25 02:53:34 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -146,6 +146,7 @@ XrlRouter::initialize(const char* class_name,
 		      IPv4	  finder_addr,
 		      uint16_t	  finder_port)
 {
+    /* set the finder address from the environment variable if it is set */
     char* value = getenv("XORP_FINDER_CLIENT_ADDRESS");
     if (value != NULL) {
 	try {
@@ -159,6 +160,18 @@ XrlRouter::initialize(const char* class_name,
 	} catch (const InvalidString& e) {
 	    XLOG_ERROR("Invalid \"XORP_FINDER_CLIENT_ADDRESS\": %s",
 		       e.str().c_str());
+	}
+    }
+
+    /* set the finder port from the environment variable if it is set */
+    value = getenv("XORP_FINDER_CLIENT_PORT");
+    if (value != NULL) {
+	int port = atoi(value);
+	if (port <=0 || port >65535) {
+	    XLOG_ERROR("Invalid \"XORP_FINDER_CLIENT_PORT\": %s",
+		       value);
+	} else {
+	    finder_port = port;
 	}
     }
 
