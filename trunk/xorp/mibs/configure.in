@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.6 2005/04/15 00:07:58 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.7 2005/04/15 00:16:31 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -10,20 +10,58 @@ dnl ---------------------------------------------------------------------------
 dnl Boilerplate
 dnl ---------------------------------------------------------------------------
 
-AC_PREREQ(2.13)
-
 AC_INIT
+AC_PREREQ(2.53)
+AC_REVISION([$XORP$])
 AC_CONFIG_AUX_DIR(../config)
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
+
+dnl ----------------------------
+dnl automake options
+dnl ----------------------------
 AM_INIT_AUTOMAKE(mibs, 1.1)
 AM_MAINTAINER_MODE
+
+dnl ---------------------------------------------------------------------------
+dnl Compiler probing and basic tools (libtool prerequisites)
+dnl ---------------------------------------------------------------------------
+
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+
+AC_LANG(C++)
+
+dnl
+dnl Include the macros for testing compiler-supported command-line options
+dnl
+builtin(include, ../config/compiler_flags.m4)
+
+dnl ----------------------------
+dnl  Get project-specific macros
+dnl ----------------------------
+
+builtin(include, ../config/acxorp.m4)
 
 dnl ----------------------------
 dnl libtool options
 dnl ----------------------------
 AC_DISABLE_STATIC
 AC_DISABLE_FAST_INSTALL
+
+dnl
+dnl A hack to fix the generation of shared libraries.
+dnl Apparently, libtool insists of using the C compiler to link the shared
+dnl libraries, but this doesn't work for C++ shared libraries.
+dnl Hence, we temporary replace the CC value with the CXX value.
+dnl
+_old_cc="${CC}"
+CC="${CXX}"
 AC_PROG_LIBTOOL
+CC="${_old_cc}"
 
 AC_VALIDATE_CACHED_SYSTEM_TUPLE(
 	echo "Removing stale config.cache and restarting configure"
@@ -135,29 +173,6 @@ AC_ARG_WITH(snmp,
 
 
 dnl ---------------------------------------------------------------------------
-dnl Compiler probing
-dnl ---------------------------------------------------------------------------
-
-AC_PROG_CC
-
-AC_PROG_CXX
-AC_PROG_CXXCPP
-
-AC_LANG_CPLUSPLUS
-
-dnl
-dnl Include the macros for testing compiler-supported command-line options
-dnl
-builtin(include, ../config/compiler_flags.m4)
-
-
-dnl ----------------------------
-dnl  Get project-specific macros
-dnl ----------------------------
-
-builtin(include, ../config/acxorp.m4)
-
-dnl ---------------------------------------------------------------------------
 dnl Additional tool probes
 dnl ---------------------------------------------------------------------------
 
@@ -181,9 +196,6 @@ if test "${xorp_cv_cpp_gnu_va_args}" = "yes" ; then
 	AC_DEFINE(CPP_SUPPORTS_GNU_VA_ARGS, 1,
  [Define to 1 if the preprocessor supports GNU style variable argument macros])
 fi
-
-AC_PROG_INSTALL
-AC_PROG_LN_S
 
 AC_CACHE_CHECK([if GNU make is installed], xorp_cv_gmake_name,
                 for g in ${GMAKE} make gmake gnumake; do

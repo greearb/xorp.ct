@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.24 2005/04/28 21:25:55 bms Exp $
+# $XORP: xorp/bootstrap,v 1.25 2005/05/24 20:31:59 jcardona Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -211,7 +211,6 @@ run cd ../..
 run cd mibs
 autoconf_options=`program_flags ${AUTOCONF} 2.50 "--include=../config" "-l ../config"`
 run ${AUTOCONF} ${autoconf_options}
-run patch < libtool-c++-linker.patch
 run cd ..
 
 # Clean-up autom4te.cache directories
