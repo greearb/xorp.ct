@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.20 2004/10/08 18:51:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.21 2005/03/25 02:53:48 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -61,7 +61,7 @@
 // TimerNode methods
 
 TimerNode::TimerNode(TimerList* l, BasicTimerCallback cb)
-    : _ref_cnt(0), _cb(cb), _list(l), _pos_in_heap(NOT_IN_HEAP)
+    : _ref_cnt(0), _cb(cb), _list(l)
 {
 }
 
@@ -213,7 +213,7 @@ TimerNode TimerList::_dummy_timer_node(0, 0);
 static TimerList* the_timerlist = NULL;
 
 TimerList::TimerList(ClockBase* clock)
-    : Heap(OFFSET_OF(_dummy_timer_node, _pos_in_heap)),
+    : Heap(true),
       _clock(clock), _observer(NULL)
 {
     assert(the_timerlist == NULL);
@@ -363,7 +363,7 @@ TimerList::run()
 		    "=======================================\n");
 	}
 
-	TimerNode *t = (TimerNode *)n->object;
+	TimerNode *t = static_cast<TimerNode *>(n->object);
 	pop();
 	// _hook() requires a XorpTimer as first argument, we have
 	// only a timernode, so we have to create a temporary
@@ -429,7 +429,7 @@ void
 TimerList::unschedule_node(TimerNode *n)
 {
     acquire_lock();
-    pop_obj((void *)n);
+    pop_obj(n);
     release_lock();
     if (_observer) _observer->notify_unscheduled(n->expiry());
 }

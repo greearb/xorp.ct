@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.6 2005/03/03 07:49:38 pavlin Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.7 2005/03/25 02:53:41 pavlin Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
@@ -35,33 +35,39 @@
  * @short Heap class
  *
  * Heap implements a priority queue, mostly used by @ref Timer
- * objects. This implementation supports removal of arbitrary
- * objects from the heap, even if they are not located at the top.
- * To support this, the objects must reserve an "int" field,
- * whose offset is passed to the heap constructor, and which is
- * is used to store the position of the object within the heap.
- * This offset can be computed using the @ref OFFSET_OF macro.
+ * objects. This implementation supports removal of arbitrary objects
+ * from the heap, even if they are not located at the top. To support
+ * this the objects must inherit from HeapBase which contains an index
+ * to its own positon within the heap.
  *
- * The OFFSET_OF macro is used to return the offset of a field within
- * a structure. It is used by the heap management routines.
  */
-#define OFFSET_OF(obj, field) ((int) ((ssize_t)(&((obj).field)) - (ssize_t)&(obj) ) )
-
 const int NOT_IN_HEAP =	-1 ;
+
+/**
+ * Objects stored on the heap should inherit from this class. If
+ * removal from arbitary positions (not just head) is required.
+ */
+class HeapBase {
+ public:
+    HeapBase() : _pos_in_heap(NOT_IN_HEAP)
+    {}
+    int		_pos_in_heap;	// position of this object in the heap
+};
 
 class Heap {
 private:
 typedef TimeVal Heap_Key ;
     struct heap_entry {
-	Heap_Key key ;    /* sorting key. Topmost element is smallest one */
-	void *object ;      /* object pointer */
+	Heap_Key key;	/* sorting key. Topmost element is smallest one */
+	HeapBase *object;      /* object pointer */
     } ;
 public:
     /**
      * Default constructor used to build a standard heap with no support for
      * removal from the middle.
      */
-    Heap() { Heap(0); }
+    Heap() : _intrude(false)
+    {}
     
     /**
      * Constructor used to build a standard heap with support for
@@ -73,7 +79,7 @@ public:
      * Heap *h = new Heap (OFFSET_OF(x, my_index));
      * </PRE>
      */
-    explicit Heap(int); // heap supporting removal from the middle
+    explicit Heap(bool); // heap supporting removal from the middle
     
     /**
      * Destructor
@@ -86,7 +92,7 @@ public:
      * @param k the sorting key.
      * @param p the object to push into the heap.
      */
-    void push(Heap_Key k, void *p) { push(k, p, 0); }
+    void push(Heap_Key k, HeapBase *p) { push(k, p, 0); }
 
     /**
      * Bubble-up an object in the heap.
@@ -104,7 +110,7 @@ public:
      * @param new_key the new key.
      * @param object the object to move.
      */
-    void move(Heap_Key new_key, void *object);
+    void move(Heap_Key new_key, HeapBase *object);
 
     /**
      * Get a pointer to the entry at the top of the heap.
@@ -137,7 +143,7 @@ public:
      * @param p the object to remove if not NULL, otherwise the top element
      * from the heap.
      */
-    void pop_obj(void *p);
+    void pop_obj(HeapBase *p);
 
     /**
      * Rebuild the heap structure.
@@ -150,13 +156,13 @@ public:
 #endif
     
 private:
-    void push(Heap_Key key, void *p, int son);
+    void push(Heap_Key key, HeapBase *p, int son);
     int resize(int new_size);
     void verify();
     
     int _size;
     int _elements ;
-    int _offset ; // XXX if > 0 this is the offset of direct ptr to obj
+    bool _intrude ; // True if the object holds the heap position
     struct heap_entry *_p ;   // really an array of "size" entries
 };
 

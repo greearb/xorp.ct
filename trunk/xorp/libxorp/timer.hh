@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.20 2004/10/06 20:32:53 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.21 2005/03/25 02:53:48 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -409,7 +409,7 @@ private:
 };
 
 
-class TimerNode {
+class TimerNode : public HeapBase {
 protected:
     TimerNode(TimerList*, BasicTimerCallback);
     virtual ~TimerNode();
@@ -438,7 +438,6 @@ protected:
     BasicTimerCallback _cb;
 
     TimerList*	_list;		// TimerList this node is associated w.
-    int		_pos_in_heap;	// position of this node in heap
 
     friend class XorpTimer;
     friend class TimerList;

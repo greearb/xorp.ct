@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_heap.cc,v 1.1 2004/07/13 01:53:50 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_heap.cc,v 1.2 2005/03/25 02:53:45 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -162,23 +162,26 @@ TestHeap::test_heap_push()
     int i2 = 2;
     int i3 = 3;
 
-    push(TimeVal(0, i1), &i1);
-    push(TimeVal(0, i2), &i2);
-    push(TimeVal(0, i3), &i3);
+    push(TimeVal(0, i1), reinterpret_cast<HeapBase *>(&i1));
+    push(TimeVal(0, i2), reinterpret_cast<HeapBase *>(&i2));
+    push(TimeVal(0, i3), reinterpret_cast<HeapBase *>(&i3));
 
     verbose_assert(size() == 3, "heap size");
     he = top();
-    verbose_assert(he->object == &i1, "heap top value 1");
+    verbose_assert(he->object == reinterpret_cast<HeapBase *>(&i1),
+		   "heap top value 1");
 
     pop();
     verbose_assert(size() == 2, "heap size");
     he = top();
-    verbose_assert(he->object == &i2, "heap top value 2");
+    verbose_assert(he->object == reinterpret_cast<HeapBase *>(&i2),
+		   "heap top value 2");
 
     pop();
     verbose_assert(size() == 1, "heap size");
     he = top();
-    verbose_assert(he->object == &i3, "heap top value 3");
+    verbose_assert(he->object == reinterpret_cast<HeapBase *>(&i3),
+		   "heap top value 3");
 
     pop();
     verbose_assert(size() == 0, "heap size");
@@ -191,17 +194,19 @@ TestHeap::test_heap_push_same_value()
     int i1_1 = 1;
     int i1_2 = 1;
 
-    push(TimeVal(0, i1_1), &i1_1);
-    push(TimeVal(0, i1_2), &i1_2);
+    push(TimeVal(0, i1_1), reinterpret_cast<HeapBase *>(&i1_1));
+    push(TimeVal(0, i1_2), reinterpret_cast<HeapBase *>(&i1_2));
 
     verbose_assert(size() == 2, "heap size");
     he = top();
-    verbose_assert(he->object == &i1_1, "heap top value 1_1");
+    verbose_assert(he->object == reinterpret_cast<HeapBase *>(&i1_1),
+		   "heap top value 1_1");
 
     pop();
     verbose_assert(size() == 1, "heap size");
     he = top();
-    verbose_assert(he->object == &i1_2, "Test heap top value 1_2");
+    verbose_assert(he->object == reinterpret_cast<HeapBase *>(&i1_2),
+		   "Test heap top value 1_2");
     pop();
     verbose_assert(size() == 0, "heap size");
 }

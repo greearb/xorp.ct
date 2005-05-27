@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.10 2004/07/13 01:53:17 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.11 2005/03/25 02:53:40 pavlin Exp $"
 
 #include <strings.h>
 #include "libxorp_module.h"
@@ -90,22 +90,22 @@ Heap::resize(int new_size)
  * If offset > 0 the position (index, int) of the element in the heap is
  * also stored in the element itself at the given offset in bytes.
  */
-#define SET_OFFSET(node) \
-    if (_offset > 0) \
-            *((int *)((char *)(_p[node].object) + _offset)) = node ;
+#define SET_OFFSET(node)				\
+    if (_intrude)					\
+	_p[node].object->_pos_in_heap = node ;
 /*
  * RESET_OFFSET is used for sanity checks. It sets offset to an invalid value.
  */
-#define RESET_OFFSET(node) \
-    if (_offset > 0) \
-            *((int *)((char *)(_p[node].object) + _offset)) = NOT_IN_HEAP ;
+#define RESET_OFFSET(node)					\
+    if (_intrude)						\
+	_p[node].object->_pos_in_heap = NOT_IN_HEAP ;
 
 // inner implementation of push -- if p == NULL, the element is already
 // there, so start bubbling up from 'son'. Otherwise, push in new element p
 // with key k
 
 void
-Heap::push(Heap_Key k, void *p, int son)
+Heap::push(Heap_Key k, HeapBase *p, int son)
 {
     if (p != 0) { /* insert new element at the end, possibly resize */
 	DBG(fprintf(stderr, "-- insert key %ld.%06ld ptr %p\n",
@@ -134,7 +134,7 @@ Heap::push(Heap_Key k, void *p, int son)
 
 // remove top element from heap, or obj if obj != NULL
 void
-Heap::pop_obj(void *obj)
+Heap::pop_obj(HeapBase *obj)
 {
     int child, father, max_entry = _elements - 1 ;
 
@@ -144,12 +144,12 @@ Heap::pop_obj(void *obj)
     }
     father = 0 ; /* default: move up smallest child */
     if (obj != NULL) { /* extract specific element, index is at offset */
-        if (_offset <= 0)
+        if (!_intrude)
             XLOG_FATAL(
 		       "*** heap_extract from middle "
 		       "not supported on this heap!!!");
 
-        father = *((int *)((char *)obj + _offset)) ;
+        father = obj->_pos_in_heap ;
         if (father < 0 || father >= _elements) {
             XLOG_FATAL("-- heap_extract, father %d out of bound 0..%d",
 			 father, _elements);
@@ -187,17 +187,17 @@ Heap::pop_obj(void *obj)
  * XXX this one is never used!
  */
 void
-Heap::move(Heap_Key new_key, void *object)
+Heap::move(Heap_Key new_key, HeapBase *object)
 {
     int temp;
     int i ;
     int max_entry = _elements-1 ;
     struct heap_entry buf ;
 
-    if (_offset <= 0)
+    if (!_intrude)
         XLOG_FATAL("cannot move items on this heap");
 
-    i = *((int *)((char *)object + _offset));
+    i = object->_pos_in_heap;
     if ( new_key < _p[i].key ) { /* must move up */
         _p[i].key = new_key ;
         for (; i>0 && new_key < _p[(temp = HEAP_FATHER(i))].key ;
@@ -234,10 +234,10 @@ Heap::heapify()
         push(i) ;
 }
 
-Heap::Heap(int ofs)
+Heap::Heap(bool intrude)
 {
     memset(this, 0, sizeof(*this) );
-    _offset = ofs ;
+    _intrude = intrude ;
     DBG(fprintf(stderr, "++ constructor for 0x%p\n", this););
 }
 
