@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.27 2005/05/10 23:42:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.28 2005/05/11 23:44:00 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -179,8 +179,17 @@ PimMfc::recompute_iif_olist_mfc()
 	break;
     } while (false);
     
+    //
     // Compute the new iif and the olist
-    if ((pim_mre_sg != NULL) && pim_mre_sg->is_spt()) {
+    //
+    // XXX: The computation is loosely based on the
+    // "On receipt of data from S to G on interface iif:" procedure.
+    //
+    // Note that the is_directly_connected_s() check is not in the
+    // spec, but for all practical purpose we want it here.
+    //
+    if ((pim_mre_sg != NULL)
+	&& (pim_mre_sg->is_spt() || pim_mre_sg->is_directly_connected_s())) {
 	new_iif_vif_index = pim_mre_sg->rpf_interface_s();
 	new_olist = pim_mre->inherited_olist_sg();
     } else {
@@ -455,7 +464,8 @@ PimMfc::update_mfc(uint16_t new_iif_vif_index, const Mifset& new_olist,
     //
     if ((pim_mre_sg != NULL)
 	&& (! pim_mre_sg->is_spt())
-	&& (pim_mre_sg->rpf_interface_s() != pim_mre_sg->rpf_interface_rp())) {
+	&& (pim_mre_sg->rpf_interface_s() != pim_mre_sg->rpf_interface_rp())
+	&& (pim_mre_sg->was_switch_to_spt_desired_sg())) {
 	if (pim_mre_sg->rpf_interface_s() != Vif::VIF_INDEX_INVALID)
 	    new_olist_disable_wrongvif.reset(pim_mre_sg->rpf_interface_s());
     }
@@ -472,19 +482,25 @@ int
 PimMfc::add_mfc_to_kernel()
 {
     if (pim_node().is_log_trace()) {
-	string res;
+	string res, res2;
 	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (olist().test(i))
 		res += "O";
 	    else
 		res += ".";
+	    if (olist_disable_wrongvif().test(i))
+		res2 += "O";
+	    else
+		res2 += ".";
 	}
 	XLOG_TRACE(pim_node().is_log_trace(),
-		   "Add MFC entry: (%s,%s) iif = %d olist = %s",
+		   "Add MFC entry: (%s,%s) iif = %d olist = %s "
+		   "olist_disable_wrongvif = %s",
 		   cstring(source_addr()),
 		   cstring(group_addr()),
 		   iif_vif_index(),
-		   res.c_str());
+		   res.c_str(),
+		   res2.c_str());
     }
     
     if (pim_node().add_mfc_to_kernel(*this) < 0)
