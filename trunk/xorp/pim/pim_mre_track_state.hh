@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.20 2005/03/25 02:54:00 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.21 2005/04/20 09:34:47 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -103,19 +103,20 @@ public:
 	INPUT_STATE_MY_IP_ADDRESS,				// 39
 	INPUT_STATE_MY_IP_SUBNET_ADDRESS,			// 40
 	INPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC,		// 41
-	INPUT_STATE_KEEPALIVE_TIMER_SG,				// 42
-	INPUT_STATE_SPTBIT_SG,					// 43
-	INPUT_STATE_IN_START_VIF,				// 44
-	INPUT_STATE_IN_STOP_VIF,				// 45
-	INPUT_STATE_IN_ADD_PIM_MRE_RP,				// 46
-	INPUT_STATE_IN_ADD_PIM_MRE_WC,				// 47
-	INPUT_STATE_IN_ADD_PIM_MRE_SG,				// 48
-	INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT,			// 49
-	INPUT_STATE_IN_REMOVE_PIM_MRE_RP,			// 50
-	INPUT_STATE_IN_REMOVE_PIM_MRE_WC,			// 51
-	INPUT_STATE_IN_REMOVE_PIM_MRE_SG,			// 52
-	INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT,			// 53
-	INPUT_STATE_IN_REMOVE_PIM_MFC,				// 54
+	INPUT_STATE_WAS_SWITCH_TO_SPT_DESIRED_SG,		// 42
+	INPUT_STATE_KEEPALIVE_TIMER_SG,				// 43
+	INPUT_STATE_SPTBIT_SG,					// 44
+	INPUT_STATE_IN_START_VIF,				// 45
+	INPUT_STATE_IN_STOP_VIF,				// 46
+	INPUT_STATE_IN_ADD_PIM_MRE_RP,				// 47
+	INPUT_STATE_IN_ADD_PIM_MRE_WC,				// 48
+	INPUT_STATE_IN_ADD_PIM_MRE_SG,				// 49
+	INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT,			// 50
+	INPUT_STATE_IN_REMOVE_PIM_MRE_RP,			// 51
+	INPUT_STATE_IN_REMOVE_PIM_MRE_WC,			// 52
+	INPUT_STATE_IN_REMOVE_PIM_MRE_SG,			// 53
+	INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT,			// 54
+	INPUT_STATE_IN_REMOVE_PIM_MFC,				// 55
 	//
 	// XXX: INPUT_STATE_IN_REMOVE_MISC is a special input state
 	// without output actions that is used only to remove various
@@ -260,6 +261,7 @@ public:
     void	input_state_my_ip_address(list<PimMreAction> action_list);
     void	input_state_my_ip_subnet_address(list<PimMreAction> action_list);
     void	input_state_spt_switch_threshold_changed_mfc(list<PimMreAction> action_list);
+    void	input_state_was_switch_to_spt_desired_sg(list<PimMreAction> action_list);
     void	input_state_keepalive_timer_sg(list<PimMreAction> action_list);
     void	input_state_sptbit_sg(list<PimMreAction> action_list);
     void	input_state_in_start_vif(list<PimMreAction> action_list);
@@ -490,6 +492,7 @@ private:
     void	track_state_monitoring_switch_to_spt_desired_mfc(list<PimMreAction> action_list);
     void	track_state_monitoring_switch_to_spt_desired_sg(list<PimMreAction> action_list);
     void	track_state_spt_switch_threshold_changed_mfc(list<PimMreAction> action_list);
+    void	track_state_was_switch_to_spt_desired_sg(list<PimMreAction> action_list);
     // MISC. timers
     void	track_state_keepalive_timer_sg(list<PimMreAction> action_list);
     // J/P state recomputation

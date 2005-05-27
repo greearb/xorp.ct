@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.18 2005/03/25 02:54:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.19 2005/04/20 09:34:48 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -938,6 +938,24 @@ PimMrt::add_task_spt_switch_threshold_changed()
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC);
 	pim_mre_task->set_source_addr_prefix_mfc(IPvXNet(family()));
+	
+	add_task(pim_mre_task);
+    } while (false);
+}
+
+void
+PimMrt::add_task_was_switch_to_spt_desired_sg(const IPvX& source_addr,
+					      const IPvX& group_addr)
+{
+    PimMreTask *pim_mre_task;
+    
+    do {
+	// Schedule the (S,G)-related changes
+	pim_mre_task
+	    = new PimMreTask(*this,
+			     PimMreTrackState::INPUT_STATE_WAS_SWITCH_TO_SPT_DESIRED_SG);
+	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
+	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
 	
 	add_task(pim_mre_task);
     } while (false);

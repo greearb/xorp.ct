@@ -368,6 +368,10 @@ Input = INPUT_STATE_MY_IP_SUBNET_ADDRESS
 Input = INPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC
         OUTPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC                 (MFC)
 
+Input = INPUT_STATE_WAS_SWITCH_TO_SPT_DESIRED_SG
+        OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
+        OUTPUT_STATE_UPDATE_SPTBIT_MFC                                (MFC)
+
 Input = INPUT_STATE_KEEPALIVE_TIMER_SG
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)

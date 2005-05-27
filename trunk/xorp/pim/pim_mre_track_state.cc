@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.38 2005/05/10 23:58:57 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.39 2005/05/11 23:01:29 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -489,20 +489,21 @@ do {									\
     INPUT_NAME(INPUT_STATE_MY_IP_ADDRESS);				// 39
     INPUT_NAME(INPUT_STATE_MY_IP_SUBNET_ADDRESS);			// 40
     INPUT_NAME(INPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC);		// 41
-    INPUT_NAME(INPUT_STATE_KEEPALIVE_TIMER_SG);				// 42
-    INPUT_NAME(INPUT_STATE_SPTBIT_SG);					// 43
-    INPUT_NAME(INPUT_STATE_IN_START_VIF);				// 44
-    INPUT_NAME(INPUT_STATE_IN_STOP_VIF);				// 45
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_RP);				// 46
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_WC);				// 47
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG);				// 48
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT);			// 49
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_RP);			// 50
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_WC);			// 51
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG);			// 52
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT);			// 53
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MFC);				// 54
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_MISC);				// 55
+    INPUT_NAME(INPUT_STATE_WAS_SWITCH_TO_SPT_DESIRED_SG);		// 42
+    INPUT_NAME(INPUT_STATE_KEEPALIVE_TIMER_SG);				// 43
+    INPUT_NAME(INPUT_STATE_SPTBIT_SG);					// 44
+    INPUT_NAME(INPUT_STATE_IN_START_VIF);				// 45
+    INPUT_NAME(INPUT_STATE_IN_STOP_VIF);				// 46
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_RP);				// 47
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_WC);				// 48
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG);				// 49
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT);			// 50
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_RP);			// 51
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_WC);			// 52
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG);			// 53
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT);			// 54
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MFC);				// 55
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_MISC);				// 56
     
     OUTPUT_NAME(OUTPUT_STATE_RP_WC);					// 0
     OUTPUT_NAME(OUTPUT_STATE_RP_SG);					// 1
@@ -962,6 +963,12 @@ void
 PimMreTrackState::input_state_spt_switch_threshold_changed_mfc(list<PimMreAction> action_list)
 {
     add_action_list(INPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC, action_list);
+}
+
+void
+PimMreTrackState::input_state_was_switch_to_spt_desired_sg(list<PimMreAction> action_list)
+{
+    add_action_list(INPUT_STATE_WAS_SWITCH_TO_SPT_DESIRED_SG, action_list);
 }
 
 void
@@ -2703,6 +2710,7 @@ PimMreTrackState::track_state_iif_olist_mfc(list<PimMreAction> action_list)
     track_state_inherited_olist_sg(action_list);
     track_state_rpf_interface_rp(action_list);
     track_state_inherited_olist_sg_rpt(action_list);
+    track_state_was_switch_to_spt_desired_sg(action_list);
 }
 
 void
@@ -2728,6 +2736,12 @@ PimMreTrackState::track_state_spt_switch_threshold_changed_mfc(list<PimMreAction
     action_list = output_state_spt_switch_threshold_changed_mfc(action_list);
     
     input_state_spt_switch_threshold_changed_mfc(action_list);
+}
+
+void
+PimMreTrackState::track_state_was_switch_to_spt_desired_sg(list<PimMreAction> action_list)
+{
+    input_state_was_switch_to_spt_desired_sg(action_list);
 }
 
 void
