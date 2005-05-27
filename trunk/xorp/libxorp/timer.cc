@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.21 2005/03/25 02:53:48 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.22 2005/05/27 20:01:01 atanu Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -193,18 +193,6 @@ private:
 	    t.reschedule_after_ms(_period_ms);
     }
 };
-
-// ----------------------------------------------------------------------------
-// Dummy TimerNode instance
-
-// Note: the dummy node is shared between lists and has no associated
-// callback.  Originally, having a callback that would abort if
-// invoked was considered.  However, callbacks use ref_ptrs and as a
-// result there can be a race in the static destruction code between
-// the destruction of the (static) data structure used by the ref_ptr
-// instances and the destruction of the dummy timer node.
-
-TimerNode TimerList::_dummy_timer_node(0, 0);
 
 
 // ----------------------------------------------------------------------------

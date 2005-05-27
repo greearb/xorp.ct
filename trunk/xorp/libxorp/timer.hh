@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.21 2005/03/25 02:53:48 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.22 2005/05/27 20:01:01 atanu Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -404,8 +404,6 @@ private:
 
     friend class TimerNode;
     friend class TimerListObserverBase;
-
-    static TimerNode _dummy_timer_node;
 };
 
 
