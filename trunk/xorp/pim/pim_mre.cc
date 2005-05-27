@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.36 2005/04/20 22:47:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.37 2005/04/27 02:09:50 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1166,8 +1166,12 @@ PimMre::recompute_stop_vif_wc(uint16_t vif_index)
     _downstream_prune_pending_timers[vif_index].unschedule();
     downstream_expiry_timer_timeout_wc(vif_index);
     _downstream_expiry_timers[vif_index].unschedule();
-    
-    assert_timer_timeout_wc(vif_index);
+
+    //
+    // XXX: don't call assert_timer_timeout_wc(vif_index)
+    // because it may transmit a regular Assert message.
+    //
+    process_could_assert_wc(vif_index, false);
     delete_assert_winner_metric_wc(vif_index);
     
     _assert_timers[vif_index].unschedule();
@@ -1194,8 +1198,12 @@ PimMre::recompute_stop_vif_sg(uint16_t vif_index)
     _downstream_prune_pending_timers[vif_index].unschedule();
     downstream_expiry_timer_timeout_sg(vif_index);
     _downstream_expiry_timers[vif_index].unschedule();
-    
-    assert_timer_timeout_sg(vif_index);
+
+    //
+    // XXX: don't call assert_timer_timeout_sg(vif_index)
+    // because it may transmit a regular Assert message.
+    //
+    process_could_assert_sg(vif_index, false);
     delete_assert_winner_metric_sg(vif_index);
     set_assert_winner_metric_is_better_than_spt_assert_metric_sg(vif_index,
 								 false);
