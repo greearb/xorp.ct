@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.37 2005/05/17 03:23:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.38 2005/05/20 08:16:17 pavlin Exp $"
 
 
 //
@@ -1729,7 +1729,7 @@ PimNode::remove_all_alternative_subnets(const string& vif_name,
 }
 
 //
-// Add a J/P entry to the _test_jp_header
+// Add a J/P entry to the _test_jp_headers_list
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
@@ -1741,31 +1741,43 @@ PimNode::add_test_jp_entry(const IPvX& source_addr, const IPvX& group_addr,
 {
     int ret_value;
     
-    ret_value = _test_jp_header.jp_entry_add(source_addr, group_addr,
-					     group_mask_len, mrt_entry_type,
-					     action_jp, holdtime,
-					     is_new_group);
+    if (_test_jp_headers_list.empty() || is_new_group)
+	_test_jp_headers_list.push_back(PimJpHeader(*this));
+
+    PimJpHeader& pim_jp_header = _test_jp_headers_list.back();
+    ret_value = pim_jp_header.jp_entry_add(source_addr, group_addr,
+					   group_mask_len, mrt_entry_type,
+					   action_jp, holdtime,
+					   is_new_group);
     
     return (ret_value);
 }
 
 //
-// Send the accumulated state in the _test_jp_header
-// XXX: the _test_jp_header is reset by the sending method
+// Send the accumulated state in the _test_jp_headers_list
+// XXX: the _test_jp_headers_list entries are reset by the sending method
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
 PimNode::send_test_jp_entry(const string& vif_name, const IPvX& nbr_addr)
 {
-    int ret_value;
+    int ret_value = XORP_OK;
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (pim_vif == NULL)
 	return (XORP_ERROR);
 
-    ret_value = _test_jp_header.network_commit(pim_vif, nbr_addr);
-    
-    _test_jp_header.reset();
+    list<PimJpHeader>::iterator iter;
+    for (iter = _test_jp_headers_list.begin();
+	 iter != _test_jp_headers_list.end();
+	 ++iter) {
+	PimJpHeader& pim_jp_header = *iter;
+	if (pim_jp_header.network_commit(pim_vif, nbr_addr) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    break;
+	}
+    }
+    _test_jp_headers_list.clear();
     
     return (ret_value);
 }

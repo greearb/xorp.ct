@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.69 2005/04/27 22:14:07 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.70 2005/05/16 19:17:28 pavlin Exp $"
 
 
 //
@@ -79,8 +79,7 @@ PimNode::PimNode(int family, xorp_module_id module_id,
       _is_switch_to_spt_enabled(false),	// XXX: disabled by defailt
       _switch_to_spt_threshold_interval_sec(0),
       _switch_to_spt_threshold_bytes(0),
-      _is_log_trace(false),
-      _test_jp_header(*this)
+      _is_log_trace(false)
 {
     // TODO: XXX: PIMDM not implemented yet
     XLOG_ASSERT(module_id == XORP_MODULE_PIMSM);

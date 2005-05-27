@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.53 2005/04/30 21:36:45 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.54 2005/05/14 03:18:39 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -1262,7 +1262,7 @@ private:
     // Debug and test-related state
     //
     bool	_is_log_trace;		// If true, enable XLOG_TRACE()
-    PimJpHeader	_test_jp_header;	// J/P header to send test J/P messages
+    list<PimJpHeader> _test_jp_headers_list; // J/P headers to send test J/P messages
 };
 
 
