@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.72 2005/05/17 03:43:22 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.73 2005/05/18 00:01:21 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -74,10 +74,16 @@ Release 1.2 (2005/??/??)
     - 
 
   PIM-SM:
-    - Bug fix related to the handling of the deleted MRIB entries.
-
     - Updated to support the lastest PIM-SM specification
       (draft-ietf-pim-sm-v2-new-11.{ps,txt}).
+
+    - Addition of support to disable the "wrong iif" kernel upcall on
+      interfaces we don't need to monitor.
+
+    - Bug fix related to the handling of the deleted MRIB entries.
+
+    - Bug fix related to transmitting AssertCancel message when
+      a PIM configured interface is gracefully shutdown.
 
   FIB2MRIB:
     - 
