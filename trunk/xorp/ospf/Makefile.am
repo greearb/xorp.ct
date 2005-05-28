@@ -52,6 +52,7 @@ test_peering_SOURCES		= test_peering.cc
 # -- Library Sources
 libospf_la_SOURCES  = area_router.hh
 libospf_la_SOURCES  += exceptions.hh
+libospf_la_SOURCES  += delay_queue.hh
 libospf_la_SOURCES  += fletcher_checksum.hh
 libospf_la_SOURCES  += lsa.hh
 libospf_la_SOURCES  += ospf.hh
