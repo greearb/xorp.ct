@@ -136,7 +136,7 @@ class AreaRouter {
 	    : _up(false)
 	{}
 	bool _up;			// True if peer is enabled.
-	list<RouterLink> _router_links;	// Router link for this peer
+	list<RouterLink> _router_links;	// Router links for this peer
     };
 
     typedef ref_ptr<PeerState> PeerStateRef;
