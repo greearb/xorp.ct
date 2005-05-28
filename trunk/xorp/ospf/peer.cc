@@ -70,7 +70,7 @@ PeerOut<A>::add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type)
 {
     debug_msg("Area %s\n", area.str().c_str());
 
-    // Only OSPFv3 is allows a peer to be connected to multiple areas.
+    // Only OSPFv3 allows a peer to be connected to multiple areas.
     XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
 
     Peer<A> *peer = _areas[area] = new Peer<A>(_ospf, *this, area, area_type);
