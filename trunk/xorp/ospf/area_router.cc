@@ -22,6 +22,7 @@
 #include <map>
 #include <list>
 #include <set>
+#include <deque>
 
 #include "ospf_module.h"
 
@@ -40,13 +41,16 @@
 
 #include "ospf.hh"
 #include "ls_database.hh"
+#include "delay_queue.hh"
 #include "area_router.hh"
 
 template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 			  OspfTypes::AreaType area_type, uint32_t options) 
     : _ospf(ospf), _area(area), _area_type(area_type), _options(options),
-      _readers(0)
+      _readers(0), _queue(ospf.get_eventloop(),
+			  OspfTypes::MinLSInterval,
+			  callback(this, &AreaRouter<A>::publish))
 {
     // Never need to delete this as the ref_ptr will tidy up.
     RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
@@ -111,7 +115,7 @@ AreaRouter<A>::peer_up(PeerID peerid)
 
     if (update_router_links(psr)) {
 	// publish the router LSA.
-	publish(_router_lsa);
+	_queue.add(_router_lsa);
     }
 
     return true;
@@ -135,7 +139,7 @@ AreaRouter<A>::peer_down(PeerID peerid)
 
     if (update_router_links(psr)) {
 	// publish the router LSA.
-	publish(_router_lsa);
+	_queue.add(_router_lsa);
     }
 		   
     return true;
@@ -159,7 +163,7 @@ AreaRouter<A>::add_router_link(PeerID peerid, RouterLink& router_link)
 
     if (update_router_links(psr)) {
 	// publish the router LSA.
-	publish(_router_lsa);
+	_queue.add(_router_lsa);
     }
 		   
     return true;
@@ -183,7 +187,7 @@ AreaRouter<A>::remove_router_link(PeerID peerid)
 
     if (update_router_links(psr)) {
 	// publish the router LSA.
-	publish(_router_lsa);
+	_queue.add(_router_lsa);
     }
 		   
     return true;
@@ -289,10 +293,8 @@ AreaRouter<A>::publish(Lsa::LsaRef lsar)
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
 
-
-    XLOG_WARNING("TBD");
+    XLOG_WARNING("TBD publish");
 }
 
 template class AreaRouter<IPv4>;
 template class AreaRouter<IPv6>;
-

@@ -55,7 +55,7 @@ void
 DelayQueue<_Entry>::add(_Entry entry)
 {
     // If this entry is already on the queue just return.
-    if (_queue.end() == find(_queue.begin(), _queue.end(), entry))
+    if (_queue.end() != find(_queue.begin(), _queue.end(), entry))
 	return;
 
 
@@ -73,7 +73,6 @@ DelayQueue<_Entry>::add(_Entry entry)
     _timer = _eventloop.new_oneoff_after(TimeVal(_delay, 0),
 					 callback(this, &DelayQueue::next));
     
-
     _forward->dispatch(entry);
 }
 

@@ -128,6 +128,8 @@ class AreaRouter {
     
     uint32_t _readers;			// Number of database readers.
     
+    DelayQueue<Lsa::LsaRef> _queue;	// Router LSA queue.
+
     /**
      * Internal state that is required about this peer.
      */

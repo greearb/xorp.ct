@@ -40,6 +40,7 @@
 #include "ospf.hh"
 #include "ls_database.hh"
 #include "packet.hh"
+#include "delay_queue.hh"
 #include "area_router.hh"
 #include "peer.hh"
 #include "peer_manager.hh"
