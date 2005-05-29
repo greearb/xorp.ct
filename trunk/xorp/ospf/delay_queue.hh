@@ -25,10 +25,10 @@
 template <typename _Entry>
 class DelayQueue {
 public:
-    typedef XorpCallback1<void, _Entry>::RefPtr DelayCallback;
+    typedef typename XorpCallback1<void, _Entry>::RefPtr DelayCallback;
 
     DelayQueue(EventLoop& eventloop, uint32_t delay, DelayCallback forward)
-	: _eventloop(eventloop), _forward(forward)
+	: _eventloop(eventloop), _delay(delay), _forward(forward)
     {}
 
     /**
@@ -88,7 +88,7 @@ DelayQueue<_Entry>::next()
 					 callback(this, &DelayQueue::next));
     
     _Entry entry = _queue.front();
-    _queue.pop_front()
+    _queue.pop_front();
 
     _forward->dispatch(entry);
 }
