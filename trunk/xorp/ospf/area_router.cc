@@ -256,7 +256,7 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
     // router link. For the moment rebuild the whole list every time
     // there is a maximum of two router links per interface so we are
     // looking at a handful of entries. If this ever changes use psr
-    // to do something more optimal.
+    // to do something more efficient.
 
     RouterLsa *router_lsa = dynamic_cast<RouterLsa *>(_router_lsa.get());
     XLOG_ASSERT(router_lsa);
@@ -273,7 +273,7 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
 	}
     }
 
-    // If we weren't advertising and we still aren't
+    // If we weren't advertising and we still aren't return.
     if (empty && router_lsa->get_router_links().empty())
 	return false;
 
