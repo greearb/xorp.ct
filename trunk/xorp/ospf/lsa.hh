@@ -198,7 +198,8 @@ class Lsa {
     typedef ref_ptr<Lsa> LsaRef;
 
     Lsa(OspfTypes::Version version)
-	:  _header(version), _version(version), _valid(true)
+	:  _header(version), _version(version), _valid(true),
+	   _self_originating(false),  _initial_age(0)
     {}
 
     /**
@@ -276,6 +277,16 @@ class Lsa {
     void invalidate() { _valid = false; }
 
     /**
+     * @return true of this is a self originating LSA.
+     */
+    bool get_self_originating() const { return _self_originating; }
+
+    /**
+     * Set the state of this LSA with respect to self originating or not.
+     */
+    void set_self_originating(bool orig) { _self_originating = orig; }
+
+    /**
      * Record the time of creation and initial age.
      * @param now the current time.
      */
@@ -324,6 +335,7 @@ class Lsa {
  private:
     const OspfTypes::Version 	_version;
     bool _valid;		// True if this LSA is still valid.
+    bool _self_originating;	// True if this LSA is self originating.
 
     uint16_t _initial_age;	// Age when this LSA was received.
     TimeVal _creation;		// Time when this LSA was received.
