@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.25 2005/05/17 03:39:33 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.26 2005/05/18 00:01:22 pavlin Exp $ */
 
 
 interfaces {
@@ -261,6 +261,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		/* version: 2 */
 	    }
 	}
 	traceoptions {
@@ -275,6 +276,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		version: 1
 	    }
 	}
 	traceoptions {

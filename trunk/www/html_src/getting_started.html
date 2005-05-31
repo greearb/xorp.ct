@@ -544,6 +544,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		/* version: 2 */
 	    }
 	}
 	traceoptions {
@@ -560,6 +561,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		/* version: 1 */
 	    }
 	}
 	traceoptions {
@@ -573,6 +575,14 @@ protocols {
 
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
+<P><U>Note</U>: The "version" statement appeared after XORP Release-1.1.
+
+A number of parameters have default values, therefore
+they don't have to be configured (those parameters are commented-out
+in the above sample configuration).
+<P>
+The "version" parameter is used to configure the MLD/IGMP protocol
+version per virtual interface.
 
 <H4>Protocol Independent Multicast - Sparse Mode</H4>
 
@@ -734,12 +744,13 @@ The "dr-priority" parameter is used to configure the Designated Router
 priority per virtual interface (note that in case of "register_vif"
 it is not used).
 <P>
-The "hello-period" parameter is used to configure the PIM Hello messages period
-(in seconds). It must be an integer between 1 and 18724.
+The "hello-period" parameter is used to configure the PIM Hello messages
+period (in seconds) per virtual interface.
+It must be an integer between 1 and 18724.
 <P>
 The "hello-triggered-delay" parameter is used to configure the randomized
-triggered delay of PIM Hello messages (in seconds). It must be an integer
-between 1 and 255.
+triggered delay of PIM Hello messages (in seconds) per virtual interface.
+It must be an integer between 1 and 255.
 <P>
 The "alternative-subnet" statement is used to add "alternative subnets"
 to a network interface. For example, if you want to make incoming traffic

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.9 2005/05/17 03:42:36 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.10 2005/05/18 00:01:21 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -441,6 +441,7 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
+\>\>\>\>/* version: 2 */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -457,6 +458,7 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
+\>\>\>\>/* version: 1 */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -471,6 +473,14 @@ protocols \{\\
 \end{minipage}
 }
 \vspace{0.1in}
+
+A number of parameters have default values, therefore
+they don't have to be configured (those parameters are commented-out
+in the above sample configuration).
+
+The {\tt version} parameter is used to configure the MLD/IGMP protocol
+version per virtual interface~\footnote{Note that the {\tt version}
+statement appeared after XORP Release-1.1.}.
 
 \newpage
 \subsection{Protocol Independent Multicast - Sparse Mode}
@@ -665,15 +675,15 @@ priority per virtual interface (note that in case of {\tt register\_vif}
 it is not used).
 
 The {\tt hello-period} parameter is used to configure the PIM Hello
-messages period (in seconds)~\footnote{Note that the {\tt hello-period}
-statement appeared after XORP Release-1.1.}. It must be an integer
-between 1 and 18724.
+messages period (in seconds) per virtual interface~\footnote{Note that the
+{\tt hello-period} statement appeared after XORP Release-1.1.}. It must
+be an integer between 1 and 18724.
 
 The {\tt hello-triggered-delay} parameter is used to configure the
 randomized triggered delay of the PIM Hello messages (in
-seconds)~\footnote{Note that the {\tt hello-triggered-delay} statement
-appeared after XORP Release-1.1.}. It must be an integer between 1 and
-255.
+seconds) per virtual interface~\footnote{Note that the
+{\tt hello-triggered-delay} statement appeared after XORP
+Release-1.1.}. It must be an integer between 1 and 255.
 
 The {\tt alternative-subnet} statement is used to associate additional
 subnets with a network interface. For example, if you want to make

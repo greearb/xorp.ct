@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/igmp.tex,v 1.11 2005/04/08 04:03:26 pavlin Exp $
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.12 2005/04/11 21:21:13 pavlin Exp $
 %
 
 \chapter{IGMP and MLD}
@@ -74,6 +74,7 @@ protocols \{\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
+\>\>\>\>version: {\it uint(1..2)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -91,6 +92,7 @@ protocols \{\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
+\>\>\>\>version: {\it uint(1..1)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -144,6 +146,12 @@ protocols \{\\
   that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
   {\tt disable}.}.
   The default value is {\stt false}.
+\item{\tt version}: this directive specifies the protocol version
+  for this interface/vif~\footnote{Note that the {\tt version} statement
+  appeared after XORP Release-1.1.}. In case of IGMP it takes a 
+  non-negative integer in the interval [1..2] with default value of 2.
+  In case of MLD the value must be in the interval [1..1] with default
+  value of 1.
 \end{description}
 \end{description}
 \item{\stt traceoptions}: this directive delimits the configuration of
@@ -179,10 +187,8 @@ xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>igmp \{\\
 \>\>interface dc0 \{\\
-\>\>\>vif dc0 \\
-\>\>\}\\
-\>\>interface dc1 \{\\
-\>\>\>vif dc1 \\
+\>\>\>vif dc0 \{\\
+\>\>\>\>/* version: 2 */\\
 \>\>\}\\
 \>\}\\
 \}\\
@@ -193,6 +199,7 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
+\>\>\>\>/* version: 1 */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
