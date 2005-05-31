@@ -301,6 +301,13 @@ class Lsa {
     void update_age(TimeVal now);
 
     /**
+     * Increment sequence number.
+     */
+    void increment_sequence_number() {
+	_header.set_ls_sequence_number(_header.get_ls_sequence_number() + 1);
+    }
+
+    /**
      * Generate a printable representation of the LSA.
      */
     virtual string str() const = 0;
