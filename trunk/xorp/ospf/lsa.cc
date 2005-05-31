@@ -172,6 +172,26 @@ Lsa_header::str() const
     return output;
 }
 
+void
+Lsa::update_age(TimeVal now)
+{
+    // Compute the new age value based on the current time.
+    TimeVal tdiff = now - _creation;
+    uint16_t age = _initial_age + tdiff.sec();
+
+    // Update the stored age value.
+    _header.set_ls_age(age);
+
+    // If a stored packet exists update it as well. The age field is
+    // not covered by the checksum so this is safe.
+    if (_pkt.size() < sizeof(uint16_t))
+	return;
+
+    // Update the age in the stored LSA itself.
+    uint8_t *ptr = &_pkt[0];
+    embed_16(&ptr[0], _header.get_ls_age());
+}
+
 /**
  * A link state request is a fixed length, the caller should have allocated
  * enough space by calling the length() method.

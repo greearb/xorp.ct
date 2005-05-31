@@ -276,6 +276,31 @@ class Lsa {
     void invalidate() { _valid = false; }
 
     /**
+     * Record the time of creation and initial age.
+     * @param now the current time.
+     */
+    void record_creation_time(TimeVal now) {
+	_creation = now;
+	_initial_age = _header.get_ls_age();
+    }
+
+    /**
+     * Get arrival time.
+     * @param now out parameter which will be contain the time the LSA
+     * arrived.
+     */
+    void get_creation_time(TimeVal& now) {
+	now = _creation;
+    }
+
+    /**
+     * Update the age field based on the current time.
+     *
+     * @param now the current time.
+     */
+    void update_age(TimeVal now);
+
+    /**
      * Generate a printable representation of the LSA.
      */
     virtual string str() const = 0;
@@ -293,10 +318,15 @@ class Lsa {
     const OspfTypes::Version 	_version;
     bool _valid;		// True if this LSA is still valid.
 
-//     AckList _ack_list;		// List of ACKs received for this LSA.
-//     XorpTimer _retransmit;	// Retransmit timer.
+    uint16_t _initial_age;	// Age when this LSA was received.
+    TimeVal _creation;		// Time when this LSA was received.
+    
+    XorpTimer _timer;		// If this is a self originated LSA
+				// this timer is used to retransmit
+				// the LSA, otherwise this timer fires
+				// when MaxAge is reached.
 
-//     XorpTimer _timeout;		// Timeout this LSA.
+//     AckList _ack_list;	// List of ACKs received for this LSA.
 };
 
 /**
