@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.9 2005/03/09 22:50:40 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.10 2005/03/20 00:04:40 pavlin Exp $ */
 
 protocols {
     mld {
@@ -10,6 +10,7 @@ protocols {
 	    vif @: txt {
 		disable:	toggle = false;
 		enabled:	bool;		/* %deprecated */
+		version:	u32 = 1;	/* Default to MLDv1 */
 	    }
 	}
 
@@ -75,6 +76,14 @@ protocols {
 		    %help:	short "Enable MLD on an interface";
 		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
 		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+
+		version {
+		    %help:	short "Set the MLD protocol version";
+		    %allow-range: $(@) "1" "1";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(DEFAULT)";
 		}
 	    }
 	}
