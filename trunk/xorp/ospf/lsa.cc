@@ -179,6 +179,9 @@ Lsa::update_age(TimeVal now)
     TimeVal tdiff = now - _creation;
     uint16_t age = _initial_age + tdiff.sec();
 
+    // The largest acceptable age for as LSA is MaxAge.
+    age = age < OspfTypes::MaxAge : age : OspfTypes::MaxAge;
+
     // Update the stored age value.
     _header.set_ls_age(age);
 
