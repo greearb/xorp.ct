@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.15 2004/06/09 19:02:13 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.16 2005/03/24 03:41:57 pavlin Exp $
 #
 
 * Implement RFC 3590 "Source Address Selection for the
@@ -15,9 +15,6 @@
   this node/vif is stopping operations (if there are such operations).
 
 * Add vif manager config similar to PIM.
-
-* Add configuration option to enable checking for Router Alert option
-  (NOTE: applies to PIM as well).
 
 * Add Mld6igmpConfig class to Mld6igmpNode.
 
