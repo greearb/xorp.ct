@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.74 2005/05/27 21:53:36 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.75 2005/05/31 21:28:28 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -13,6 +13,11 @@ Release 1.2 (2005/??/??)
 
   CONFIGURATION:
     - Addition of new PIM-SM related configuration statements:
+
+      * enable-ip-router-alert-option-check: <bool>
+
+      This optional statement is used to enable the IP Router Alert option
+      check per virtual interface.
 
       * cand-bsr-by-vif-addr: <IPv4 | IPv6>
         and
@@ -34,12 +39,17 @@ Release 1.2 (2005/??/??)
       This optional statement is used to configure the randomized triggered
       delay of the PIM Hello messages (in seconds).
 
-    - Addition of new MLD/IGMP related configuration statement:
+    - Addition of new MLD/IGMP related configuration statements:
 
       * version: <u32>
 
       This optional statement is used to configure the MLD/IGMP
       protocol version per virtual interface.
+
+      * enable-ip-router-alert-option-check: <bool>
+
+      This optional statement is used to enable the IP Router Alert option
+      check per virtual interface.
 
   LIBXORP:
     - 

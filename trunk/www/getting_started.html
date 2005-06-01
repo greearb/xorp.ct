@@ -603,6 +603,7 @@ protocols {
 	    vif dc0 {
 		disable: false
 		/* version: 2 */
+		/* enable-ip-router-alert-option-check: false */
 	    }
 	}
 	traceoptions {
@@ -620,6 +621,7 @@ protocols {
 	    vif dc0 {
 		disable: false
 		/* version: 1 */
+		/* enable-ip-router-alert-option-check: false */
 	    }
 	}
 	traceoptions {
@@ -633,7 +635,8 @@ protocols {
 
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
-<P><U>Note</U>: The "version" statement appeared after XORP Release-1.1.
+<P><U>Note</U>: The "version" and "enable-ip-router-alert-option-check"
+statements appeared after XORP Release-1.1.
 
 A number of parameters have default values, therefore
 they don't have to be configured (those parameters are commented-out
@@ -641,6 +644,10 @@ in the above sample configuration).
 <P>
 The "version" parameter is used to configure the MLD/IGMP protocol
 version per virtual interface.
+<P>
+The "enable-ip-router-alert-option-check" parameter is used to
+enable the IP Router Alert option check per virtual interface.
+
 
 <H4>Protocol Independent Multicast - Sparse Mode</H4>
 
@@ -657,6 +664,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		/* enable-ip-router-alert-option-check: false */
 		/* dr-priority: 1 */
 		/* hello-period: 30 */
 		/* hello-triggered-delay: 5 */
@@ -723,6 +731,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		/* enable-ip-router-alert-option-check: false */
 		/* dr-priority: 1 */
 		/* hello-period: 30 */
 		/* hello-triggered-delay: 5 */
@@ -786,7 +795,8 @@ protocols {
 
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
-<P><U>Note</U>: The "cand-bsr-by-vif-addr", "cand-rp-by-vif-addr",
+<P><U>Note</U>: The "enable-ip-router-alert-option-check",
+"cand-bsr-by-vif-addr", "cand-rp-by-vif-addr",
 "hello-period" and "hello-triggered-delay" statements appeared after XORP
 Release-1.1.
 
@@ -797,6 +807,9 @@ in the above sample configuration).
 <P>
 Note that the interface/vif named "register_vif" is special
 If PIM-SM is configured, then "register_vif" must be enabled.
+<P>
+The "enable-ip-router-alert-option-check" parameter is used to
+enable the IP Router Alert option check per virtual interface.
 <P>
 The "dr-priority" parameter is used to configure the Designated Router
 priority per virtual interface (note that in case of "register_vif"
@@ -902,7 +915,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.12 2005/04/14 10:43:17 mjh Exp $.
-<br>Generated on 27/May/2005 at 16:23:08.</em>
+<br>Generated on 31/May/2005 at 17:28:22.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->

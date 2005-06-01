@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.10 2005/05/18 00:01:21 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.11 2005/05/31 21:28:28 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -442,6 +442,7 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* version: 2 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -459,6 +460,7 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* version: 1 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -481,6 +483,11 @@ in the above sample configuration).
 The {\tt version} parameter is used to configure the MLD/IGMP protocol
 version per virtual interface~\footnote{Note that the {\tt version}
 statement appeared after XORP Release-1.1.}.
+
+The {\tt enable-ip-router-alert-option-check} parameter is used to
+enable the IP Router Alert option check per virtual interface~\footnote{Note
+that the {\tt enable-ip-router-alert-option-check} statement appeared after
+XORP Release-1.1.}.
 
 \newpage
 \subsection{Protocol Independent Multicast - Sparse Mode}
@@ -507,6 +514,7 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* hello-triggered-delay: 5 */\\
@@ -586,6 +594,7 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* hello-triggered-delay: 5 */\\
@@ -669,6 +678,11 @@ in the above sample configuration).
 
 Note that the interface/vif named {\tt register\_vif} is special.
 If PIM-SM is configured, then {\tt register\_vif} must be enabled.
+
+The {\tt enable-ip-router-alert-option-check} parameter is used to
+enable the IP Router Alert option check per virtual interface~\footnote{Note
+that the {\tt enable-ip-router-alert-option-check} statement appeared after
+XORP Release-1.1.}.
 
 The {\tt dr-priority} parameter is used to configure the Designated Router
 priority per virtual interface (note that in case of {\tt register\_vif}

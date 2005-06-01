@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/igmp.tex,v 1.12 2005/04/11 21:21:13 pavlin Exp $
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.13 2005/05/31 21:28:28 pavlin Exp $
 %
 
 \chapter{IGMP and MLD}
@@ -75,6 +75,7 @@ protocols \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>version: {\it uint(1..2)}\\
+\>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -93,6 +94,7 @@ protocols \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>version: {\it uint(1..1)}\\
+\>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -152,6 +154,11 @@ protocols \{\\
   non-negative integer in the interval [1..2] with default value of 2.
   In case of MLD the value must be in the interval [1..1] with default
   value of 1.
+\item{\tt enable-ip-router-alert-option-check}: this directive specifies
+  whether the router should check that the protocol packets received on
+  this interface/vif have the IP Router Alert option~\cite{RFC2213} in
+  them~\footnote{Note that the {\tt enable-ip-router-alert-option-check}
+  statement appeared after XORP Release-1.1.}.
 \end{description}
 \end{description}
 \item{\stt traceoptions}: this directive delimits the configuration of
@@ -189,6 +196,7 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>/* version: 2 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\}\\
 \>\}\\
 \}\\
@@ -200,6 +208,7 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* version: 1 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
