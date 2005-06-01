@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.10 2005/02/27 20:49:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.11 2005/03/25 02:53:54 pavlin Exp $"
 
 //
 // Multicast group membership information used by
@@ -152,29 +152,31 @@ MemberQuery::last_member_query_timer_timeout()
     //
     if (mld6igmp_vif().proto_is_igmp()) {
 	// TODO: XXX: ignore the fact that now there may be IGMPv1 routers?
+	TimeVal scaled_max_resp_time =
+	    mld6igmp_vif().query_last_member_interval().get() * IGMP_TIMER_SCALE;
 	mld6igmp_vif().mld6igmp_send(mld6igmp_vif().primary_addr(),
 				     group(),
 				     IGMP_MEMBERSHIP_QUERY,
-				     (IGMP_LAST_MEMBER_QUERY_INTERVAL
-				      * IGMP_TIMER_SCALE),
+				     scaled_max_resp_time.sec(),
 				     group());
 	_last_member_query_timer =
 	    mld6igmp_vif().mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL, 0),
+		mld6igmp_vif().query_last_member_interval().get(),
 		callback(this, &MemberQuery::last_member_query_timer_timeout));
     }
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (mld6igmp_vif().proto_is_mld6()) {
+	TimeVal scaled_max_resp_time =
+	    mld6igmp_vif().query_last_member_interval().get() * MLD_TIMER_SCALE;
 	mld6igmp_vif().mld6igmp_send(mld6igmp_vif().primary_addr(),
 				     group(),
 				     MLD_LISTENER_QUERY,
-				     (MLD_LAST_LISTENER_QUERY_INTERVAL
-				      * MLD_TIMER_SCALE),
+				     scaled_max_resp_time.sec(),
 				     group());
 	_last_member_query_timer =
 	    mld6igmp_vif().mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
+		mld6igmp_vif().query_last_member_interval().get(),
 		callback(this, &MemberQuery::last_member_query_timer_timeout));
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.45 2005/04/08 09:10:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.46 2005/06/01 00:36:58 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2468,6 +2468,222 @@ XrlMld6igmpNode::mld6igmp_0_1_reset_vif_ip_router_alert_option_check(
     
     if (Mld6igmpNode::reset_vif_ip_router_alert_option_check(vif_name,
 							     error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_get_vif_query_interval(
+    // Input values,
+    const string&	vif_name,
+    // Output values,
+    uint32_t&		interval_sec,
+    uint32_t&		interval_usec)
+{
+    string error_msg;
+    
+    TimeVal v;
+    if (Mld6igmpNode::get_vif_query_interval(vif_name, v, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    interval_sec = v.sec();
+    interval_usec = v.usec();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_set_vif_query_interval(
+    // Input values,
+    const string&	vif_name,
+    const uint32_t&	interval_sec,
+    const uint32_t&	interval_usec)
+{
+    string error_msg;
+
+    TimeVal interval(interval_sec, interval_usec);
+    if (Mld6igmpNode::set_vif_query_interval(vif_name, interval, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_reset_vif_query_interval(
+    // Input values,
+    const string&	vif_name)
+
+{
+    string error_msg;
+    
+    if (Mld6igmpNode::reset_vif_query_interval(vif_name, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_get_vif_query_last_member_interval(
+    // Input values,
+    const string&	vif_name,
+    // Output values,
+    uint32_t&		interval_sec,
+    uint32_t&		interval_usec)
+{
+    string error_msg;
+    
+    TimeVal v;
+    if (Mld6igmpNode::get_vif_query_last_member_interval(vif_name, v,
+							 error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    interval_sec = v.sec();
+    interval_usec = v.usec();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_set_vif_query_last_member_interval(
+    // Input values,
+    const string&	vif_name,
+    const uint32_t&	interval_sec,
+    const uint32_t&	interval_usec)
+{
+    string error_msg;
+
+    TimeVal interval(interval_sec, interval_usec);
+    if (Mld6igmpNode::set_vif_query_last_member_interval(vif_name, interval,
+							 error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_reset_vif_query_last_member_interval(
+    // Input values,
+    const string&	vif_name)
+{
+    string error_msg;
+    
+    if (Mld6igmpNode::reset_vif_query_last_member_interval(vif_name, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_get_vif_query_response_interval(
+    // Input values,
+    const string&	vif_name,
+    // Output values,
+    uint32_t&		interval_sec,
+    uint32_t&		interval_usec)
+{
+    string error_msg;
+    
+    TimeVal v;
+    if (Mld6igmpNode::get_vif_query_response_interval(vif_name, v, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    interval_sec = v.sec();
+    interval_usec = v.usec();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_set_vif_query_response_interval(
+    // Input values,
+    const string&	vif_name,
+    const uint32_t&	interval_sec,
+    const uint32_t&	interval_usec)
+{
+    string error_msg;
+
+    TimeVal interval(interval_sec, interval_usec);
+    if (Mld6igmpNode::set_vif_query_response_interval(vif_name, interval,
+						      error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_reset_vif_query_response_interval(
+    // Input values,
+    const string&	vif_name)
+{
+    string error_msg;
+    
+    if (Mld6igmpNode::reset_vif_query_response_interval(vif_name, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_get_vif_robust_count(
+    // Input values,
+    const string&	vif_name,
+    // Output values,
+    uint32_t&	robust_count)
+{
+    string error_msg;
+    
+    uint32_t v;
+    if (Mld6igmpNode::get_vif_robust_count(vif_name, v, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    robust_count = v;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_set_vif_robust_count(
+    // Input values,
+    const string&	vif_name,
+    const uint32_t&	robust_count)
+{
+    string error_msg;
+
+    if (Mld6igmpNode::set_vif_robust_count(vif_name, robust_count, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_reset_vif_robust_count(
+    // Input values,
+    const string&	vif_name)
+{
+    string error_msg;
+    
+    if (Mld6igmpNode::reset_vif_robust_count(vif_name, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

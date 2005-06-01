@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.12 2005/02/27 20:49:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.13 2005/03/25 02:53:55 pavlin Exp $"
 
 
 //
@@ -79,31 +79,34 @@ Mld6igmpVif::other_querier_timer_timeout()
     
     if (proto_is_igmp()) {
 	// Now I am the querier. Send a general membership query.
+	TimeVal scaled_max_resp_time =
+	    (query_response_interval().get() * IGMP_TIMER_SCALE);
 	mld6igmp_send(primary_addr(),
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
-		      is_igmpv1_mode() ? 0:
-		      (IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
+		      is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
 		      ipaddr_zero);
 	_startup_query_count = 0;		// XXX: not a startup case
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(IGMP_QUERY_INTERVAL, 0),
+		query_interval().get(),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	// Now I am the querier. Send a general membership query.
+	TimeVal scaled_max_resp_time =
+	    (query_response_interval().get() * MLD_TIMER_SCALE);
 	mld6igmp_send(primary_addr(),
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
-		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),
+		      scaled_max_resp_time.sec(),
 		      ipaddr_zero);
 	_startup_query_count = 0;		// XXX: not a startup case
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(MLD_QUERY_INTERVAL, 0),
+		query_interval().get(),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
@@ -118,29 +121,30 @@ void
 Mld6igmpVif::query_timer_timeout()
 {
     IPvX ipaddr_zero(family());			// XXX: ANY
-    int query_interval;
+    TimeVal interval;
 
     if (!(_proto_flags & MLD6IGMP_VIF_QUERIER))
 	return;		// I am not the querier anymore. Ignore.
 
     if (proto_is_igmp()) {
 	// Send a general membership query
+	TimeVal scaled_max_resp_time =
+	    (query_response_interval().get() * IGMP_TIMER_SCALE);
 	mld6igmp_send(primary_addr(),
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
-		      is_igmpv1_mode() ? 0:
-		      (IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
+		      is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
 		      ipaddr_zero);
 	if (_startup_query_count > 0)
 	    _startup_query_count--;
 	if (_startup_query_count > 0)
-	    query_interval = IGMP_STARTUP_QUERY_INTERVAL;
+	    interval = query_interval().get() / 4; // "Startup Query Interval"
 	else
-	    query_interval = IGMP_QUERY_INTERVAL;
+	    interval = query_interval().get();
 
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
-	        TimeVal(query_interval, 0),
+	        interval,
 		callback(this, &Mld6igmpVif::query_timer_timeout)
 		);
     }
@@ -148,22 +152,23 @@ Mld6igmpVif::query_timer_timeout()
 #if HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	// Send a general membership query
+	TimeVal scaled_max_resp_time =
+	    (query_response_interval().get() * MLD_TIMER_SCALE);
 	mld6igmp_send(primary_addr(),
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
-		      is_igmpv1_mode() ? 0:
-		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),
+		      is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
 		      ipaddr_zero);
 	if (_startup_query_count > 0)
 	    _startup_query_count--;
 	if (_startup_query_count > 0)
-	    query_interval = MLD_STARTUP_QUERY_INTERVAL;
+	    interval = query_interval().get() / 4; // "Startup Query Interval"
 	else
-	    query_interval = MLD_QUERY_INTERVAL;
+	    interval = query_interval().get();
 
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(query_interval, 0),
+		interval,
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING

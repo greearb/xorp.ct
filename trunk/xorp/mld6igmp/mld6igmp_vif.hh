@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.18 2005/03/25 02:53:55 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.19 2005/06/01 00:36:58 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -216,6 +216,34 @@ public:
      */
     ConfigParam<bool>& ip_router_alert_option_check() { return (_ip_router_alert_option_check); }
     
+    /**
+     * Optain a reference to the Query Interval.
+     *
+     * @return a reference to the Query Interval.
+     */
+    ConfigParam<TimeVal>& query_interval() { return (_query_interval); }
+
+    /**
+     * Optain a reference to the Last Member Query Interval.
+     *
+     * @return a reference to the Last Member Query Interval.
+     */
+    ConfigParam<TimeVal>& query_last_member_interval() { return (_query_last_member_interval); }
+
+    /**
+     * Optain a reference to the Query Response Interval.
+     *
+     * @return a reference to the Query Response Interval.
+     */
+    ConfigParam<TimeVal>& query_response_interval() { return (_query_response_interval); }
+
+    /**
+     * Optain a reference to the Robustness Variable count.
+     *
+     * @return a reference to the Robustness Variable count.
+     */
+    ConfigParam<uint32_t>& robust_count() { return (_robust_count); }
+
     //
     // Add/delete routing protocols that need to be notified for membership
     // changes.
@@ -287,6 +315,10 @@ private:
     // Misc configuration parameters
     //
     ConfigParam<bool> _ip_router_alert_option_check; // The IP Router Alert option check flag
+    ConfigParam<TimeVal> _query_interval;	// The Query Interval
+    ConfigParam<TimeVal> _query_last_member_interval;	// The Last Member Query Interval
+    ConfigParam<TimeVal> _query_response_interval;	// The Query Response Interval
+    ConfigParam<uint32_t> _robust_count;	// The Robustness Variable count
     
     //
     // Misc. other state

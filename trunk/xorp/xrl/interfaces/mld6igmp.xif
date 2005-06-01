@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.5 2003/12/20 01:43:36 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.6 2005/06/01 00:37:00 pavlin Exp $ */
 
 /*
  * Multicast Listener Discovery/Internet Group Management Protocol
@@ -99,6 +99,127 @@ interface mld6igmp/0.1 {
 	 * @param vif_name the name of the vif to apply to.
 	 */
 	reset_vif_ip_router_alert_option_check	? vif_name:txt
+
+	/**
+	 * Get the Query Interval per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param interval_sec the number of seconds in the interval.
+	 * @param interval_usec the number of microseconds (in addition
+	 * to interval_sec) in the interval.
+	 */
+	get_vif_query_interval			? vif_name:txt		\
+						-> interval_sec:u32	\
+						& interval_usec:u32
+
+	/**
+	 * Set the Query Interval per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param interval_sec the number of seconds in the interval.
+	 * @param interval_usec the number of microseconds (in addition
+	 * to interval_sec) in the interval.
+	 */
+	set_vif_query_interval			? vif_name:txt		\
+						& interval_sec:u32	\
+						& interval_usec:u32
+
+	/**
+	 * Reset the Query Interval per interface to its default value.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 */
+	reset_vif_query_interval		? vif_name:txt
+
+	/**
+	 * Get the Last Member Query Interval per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param interval_sec the number of seconds in the interval.
+	 * @param interval_usec the number of microseconds (in addition
+	 * to interval_sec) in the interval.
+	 */
+	get_vif_query_last_member_interval	? vif_name:txt		\
+						-> interval_sec:u32	\
+						& interval_usec:u32
+
+	/**
+	 * Set the Last Member Query Interval per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param interval_sec the number of seconds in the interval.
+	 * @param interval_usec the number of microseconds (in addition
+	 * to interval_sec) in the interval.
+	 */
+	set_vif_query_last_member_interval	? vif_name:txt		\
+						& interval_sec:u32	\
+						& interval_usec:u32
+
+	/**
+	 * Reset the Last Member Query Interval per interface to its
+	 * default value.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 */
+	reset_vif_query_last_member_interval	? vif_name:txt
+
+	/**
+	 * Get the Query Response Interval per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param interval_sec the number of seconds in the interval.
+	 * @param interval_usec the number of microseconds (in addition
+	 * to interval_sec) in the interval.
+	 */
+	get_vif_query_response_interval		? vif_name:txt		\
+						-> interval_sec:u32	\
+						& interval_usec:u32
+
+	/**
+	 * Set the Query Response Interval per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param interval_sec the number of seconds in the interval.
+	 * @param interval_usec the number of microseconds (in addition
+	 * to interval_sec) in the interval.
+	 */
+	set_vif_query_response_interval		? vif_name:txt		\
+						& interval_sec:u32	\
+						& interval_usec:u32
+
+	/**
+	 * Reset the Query Response Interval per interface to its
+	 * default value.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 */
+	reset_vif_query_response_interval	? vif_name:txt
+
+	/**
+	 * Get the Robustness Variable count per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param robust_count the count value.
+	 */
+	get_vif_robust_count			? vif_name:txt		\
+						-> robust_count:u32
+
+	/**
+	 * Set the Robustness Variable count per interface.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param robust_count the count value.
+	 */
+	set_vif_robust_count			? vif_name:txt		\
+						& robust_count:u32
+
+	/**
+	 * Reset the Robustness Variable count per interface to its
+	 * default value.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 */
+	reset_vif_robust_count			? vif_name:txt
 
 	/**
 	 * Enable/disable the MLD6IGMP trace log for all operations.

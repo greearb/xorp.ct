@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.31 2005/03/25 02:53:56 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.32 2005/06/01 00:36:58 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -581,6 +581,167 @@ protected:
      *  @param vif_name the name of the vif to apply to.
      */
     XrlCmdError mld6igmp_0_1_reset_vif_ip_router_alert_option_check(
+	// Input values,
+	const string&	vif_name);
+
+    /**
+     *  Get the Query Interval per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param interval_sec the number of seconds in the interval.
+     *
+     *  @param interval_usec the number of microseconds (in addition to
+     *  interval_sec) in the interval.
+     */
+    XrlCmdError mld6igmp_0_1_get_vif_query_interval(
+	// Input values,
+	const string&	vif_name,
+	// Output values,
+	uint32_t&	interval_sec,
+	uint32_t&	interval_usec);
+
+    /**
+     *  Set the Query Interval per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param interval_sec the number of seconds in the interval.
+     *
+     *  @param interval_usec the number of microseconds (in addition to
+     *  interval_sec) in the interval.
+     */
+    XrlCmdError mld6igmp_0_1_set_vif_query_interval(
+	// Input values,
+	const string&	vif_name,
+	const uint32_t&	interval_sec,
+	const uint32_t&	interval_usec);
+
+    /**
+     *  Reset the Query Interval per interface to its default value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
+    XrlCmdError mld6igmp_0_1_reset_vif_query_interval(
+	// Input values,
+	const string&	vif_name);
+
+    /**
+     *  Get the Last Member Query Interval per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param interval_sec the number of seconds in the interval.
+     *
+     *  @param interval_usec the number of microseconds (in addition to
+     *  interval_sec) in the interval.
+     */
+    XrlCmdError mld6igmp_0_1_get_vif_query_last_member_interval(
+	// Input values,
+	const string&	vif_name,
+	// Output values,
+	uint32_t&	interval_sec,
+	uint32_t&	interval_usec);
+
+    /**
+     *  Set the Last Member Query Interval per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param interval_sec the number of seconds in the interval.
+     *
+     *  @param interval_usec the number of microseconds (in addition to
+     *  interval_sec) in the interval.
+     */
+    XrlCmdError mld6igmp_0_1_set_vif_query_last_member_interval(
+	// Input values,
+	const string&	vif_name,
+	const uint32_t&	interval_sec,
+	const uint32_t&	interval_usec);
+
+    /**
+     *  Reset the Last Member Query Interval per interface to its default
+     *  value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
+    XrlCmdError mld6igmp_0_1_reset_vif_query_last_member_interval(
+	// Input values,
+	const string&	vif_name);
+
+    /**
+     *  Get the Query Response Interval per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param interval_sec the number of seconds in the interval.
+     *
+     *  @param interval_usec the number of microseconds (in addition to
+     *  interval_sec) in the interval.
+     */
+    XrlCmdError mld6igmp_0_1_get_vif_query_response_interval(
+	// Input values,
+	const string&	vif_name,
+	// Output values,
+	uint32_t&	interval_sec,
+	uint32_t&	interval_usec);
+
+    /**
+     *  Set the Query Response Interval per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param interval_sec the number of seconds in the interval.
+     *
+     *  @param interval_usec the number of microseconds (in addition to
+     *  interval_sec) in the interval.
+     */
+    XrlCmdError mld6igmp_0_1_set_vif_query_response_interval(
+	// Input values,
+	const string&	vif_name,
+	const uint32_t&	interval_sec,
+	const uint32_t&	interval_usec);
+
+    /**
+     *  Reset the Query Response Interval per interface to its default value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
+    XrlCmdError mld6igmp_0_1_reset_vif_query_response_interval(
+	// Input values,
+	const string&	vif_name);
+
+    /**
+     *  Get the Robustness Variable count per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param robust_count the count value.
+     */
+    XrlCmdError mld6igmp_0_1_get_vif_robust_count(
+	// Input values,
+	const string&	vif_name,
+	// Output values,
+	uint32_t&	robust_count);
+
+    /**
+     *  Set the Robustness Variable count per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param robust_count the count value.
+     */
+    XrlCmdError mld6igmp_0_1_set_vif_robust_count(
+	// Input values,
+	const string&	vif_name,
+	const uint32_t&	robust_count);
+
+    /**
+     *  Reset the Robustness Variable count per interface to its default value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
+    XrlCmdError mld6igmp_0_1_reset_vif_robust_count(
 	// Input values,
 	const string&	vif_name);
 

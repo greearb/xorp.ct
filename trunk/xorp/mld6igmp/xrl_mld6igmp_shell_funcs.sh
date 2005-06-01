@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.13 2004/03/05 13:59:43 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.14 2005/06/01 00:36:58 pavlin Exp $
 #
 
 #
@@ -257,6 +257,181 @@ mld6igmp_reset_vif_ip_router_alert_option_check()
     
     echo "mld6igmp_reset_vif_ip_router_alert_option_check" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_ip_router_alert_option_check"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_get_vif_query_interval()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_get_vif_query_interval <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+
+    echo "mld6igmp_get_vif_query_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/get_vif_query_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper -p interval_sec:u32 -p interval_usec:u32 $XRL$XRL_ARGS
+}
+
+mld6igmp_set_vif_query_interval()
+{
+    if [ $# -lt 3 ] ; then
+	echo "Usage: mld6igmp_set_vif_query_interval <vif_name:txt> <interval_sec:u32> <interval_usec:u32>"
+	exit 1
+    fi
+    vif_name=$1
+    interval_sec=$2
+    interval_usec=$3
+    
+    echo "mld6igmp_set_vif_query_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/set_vif_query_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name&interval_sec:u32=$interval_sec&interval_usec:u32=$interval_usec"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_reset_vif_query_interval()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_reset_vif_query_interval <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "mld6igmp_reset_vif_query_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_query_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_get_vif_query_last_member_interval()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_get_vif_query_last_member_interval <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+
+    echo "mld6igmp_get_vif_query_last_member_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/get_vif_query_last_member_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper -p interval_sec:u32 -p interval_usec:u32 $XRL$XRL_ARGS
+}
+
+mld6igmp_set_vif_query_last_member_interval()
+{
+    if [ $# -lt 3 ] ; then
+	echo "Usage: mld6igmp_set_vif_query_last_member_interval <vif_name:txt> <interval_sec:u32> <interval_usec:u32>"
+	exit 1
+    fi
+    vif_name=$1
+    interval_sec=$2
+    interval_usec=$3
+    
+    echo "mld6igmp_set_vif_query_last_member_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/set_vif_query_last_member_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name&interval_sec:u32=$interval_sec&interval_usec:u32=$interval_usec"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_reset_vif_query_last_member_interval()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_reset_vif_query_last_member_interval <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "mld6igmp_reset_vif_query_last_member_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_query_last_member_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_get_vif_query_response_interval()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_get_vif_query_response_interval <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+
+    echo "mld6igmp_get_vif_query_response_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/get_vif_query_response_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper -p interval_sec:u32 -p interval_usec:u32 $XRL$XRL_ARGS
+}
+
+mld6igmp_set_vif_query_response_interval()
+{
+    if [ $# -lt 3 ] ; then
+	echo "Usage: mld6igmp_set_vif_query_response_interval <vif_name:txt> <interval_sec:u32> <interval_usec:u32>"
+	exit 1
+    fi
+    vif_name=$1
+    interval_sec=$2
+    interval_usec=$3
+    
+    echo "mld6igmp_set_vif_query_response_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/set_vif_query_response_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name&interval_sec:u32=$interval_sec&interval_usec:u32=$interval_usec"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_reset_vif_query_response_interval()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_reset_vif_query_response_interval <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "mld6igmp_reset_vif_query_response_interval" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_query_response_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_get_vif_robust_count()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_get_vif_robust_count <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+
+    echo "mld6igmp_get_vif_robust_count" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/get_vif_robust_count"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper -p robust_count:u32 $XRL$XRL_ARGS
+}
+
+mld6igmp_set_vif_robust_count()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: mld6igmp_set_vif_robust_count <vif_name:txt> <robust_count:u32>"
+	exit 1
+    fi
+    vif_name=$1
+    robust_count=$2
+    
+    echo "mld6igmp_set_vif_robust_count" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/set_vif_robust_count"
+    XRL_ARGS="?vif_name:txt=$vif_name&robust_count:u32=$robust_count"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_reset_vif_robust_count()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_reset_vif_robust_count <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "mld6igmp_reset_vif_robust_count" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_robust_count"
     XRL_ARGS="?vif_name:txt=$vif_name"
     call_xrl_wrapper $XRL$XRL_ARGS
 }

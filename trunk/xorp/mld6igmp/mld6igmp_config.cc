@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.5 2005/03/25 02:53:54 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.6 2005/06/01 00:36:57 pavlin Exp $"
 
 
 //
@@ -175,6 +175,294 @@ Mld6igmpNode::reset_vif_ip_router_alert_option_check(const string& vif_name,
     }
     
     mld6igmp_vif->ip_router_alert_option_check().reset();
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::get_vif_query_interval(const string& vif_name,
+				     TimeVal& interval,
+				     string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot get Query Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    interval = mld6igmp_vif->query_interval().get();
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::set_vif_query_interval(const string& vif_name,
+				     const TimeVal& interval,
+				     string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot set Query Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->query_interval().set(interval);
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::reset_vif_query_interval(const string& vif_name,
+				       string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset Query Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->query_interval().reset();
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::get_vif_query_last_member_interval(const string& vif_name,
+						 TimeVal& interval,
+						 string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot get Last Member Query Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    interval = mld6igmp_vif->query_last_member_interval().get();
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::set_vif_query_last_member_interval(const string& vif_name,
+						 const TimeVal& interval,
+						 string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot set Last Member Query Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->query_last_member_interval().set(interval);
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::reset_vif_query_last_member_interval(const string& vif_name,
+						   string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset Last Member Query Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->query_last_member_interval().reset();
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::get_vif_query_response_interval(const string& vif_name,
+					      TimeVal& interval,
+					      string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot get Query Response Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    interval = mld6igmp_vif->query_response_interval().get();
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::set_vif_query_response_interval(const string& vif_name,
+					      const TimeVal& interval,
+					      string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot set Query Response Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->query_response_interval().set(interval);
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::reset_vif_query_response_interval(const string& vif_name,
+						string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset Query Response Interval for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->query_response_interval().reset();
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::get_vif_robust_count(const string& vif_name,
+				   uint32_t& robust_count,
+				   string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot get Robustness Variable count for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    robust_count = mld6igmp_vif->robust_count().get();
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::set_vif_robust_count(const string& vif_name,
+				   uint32_t robust_count,
+				   string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot set Robustness Variable count for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->robust_count().set(robust_count);
+    
+    if (end_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+Mld6igmpNode::reset_vif_robust_count(const string& vif_name,
+				     string& error_msg)
+{
+    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    
+    if (start_config(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+    
+    if (mld6igmp_vif == NULL) {
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset Robustness Variable count for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mld6igmp_vif->robust_count().reset();
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);

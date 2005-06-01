@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.33 2005/03/25 02:53:54 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.34 2005/06/01 00:36:57 pavlin Exp $"
 
 
 //
@@ -383,9 +383,12 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 	_query_timer.unschedule();
 	_querier_addr = src;
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
+	TimeVal other_querier_present_interval =
+	    static_cast<int>(robust_count().get()) * query_interval().get()
+	    + query_response_interval().get() / 2;
 	_other_querier_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(MLD_OTHER_QUERIER_PRESENT_INTERVAL, 0),
+		other_querier_present_interval,
 		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
     
@@ -412,11 +415,10 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 	    uint32_t sec, usec;
 	    TimeVal received_resp_tv;
 	    TimeVal left_resp_tv;
-	    
-	    sec = (MLD_LAST_LISTENER_QUERY_COUNT * max_resp_time)
-		/ MLD_TIMER_SCALE;
-	    usec = (MLD_LAST_LISTENER_QUERY_COUNT * max_resp_time)
-		% MLD_TIMER_SCALE;
+
+	    // "Last Listener Query Count"
+	    sec = (robust_count().get() * max_resp_time) / MLD_TIMER_SCALE;
+	    usec = (robust_count().get() * max_resp_time) % MLD_TIMER_SCALE;
 	    usec *= (1000000 / MLD_TIMER_SCALE); // microseconds
 	    received_resp_tv = TimeVal(sec, usec);
 	    member_query->_member_query_timer.time_remaining(left_resp_tv);
@@ -502,10 +504,13 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
 				  member_query->group(),
 				  ACTION_JOIN);
     }
-    
+
+    TimeVal group_membership_interval
+	= static_cast<int>(robust_count().get()) * query_interval().get()
+	+ query_response_interval().get();
     member_query->_member_query_timer =
 	mld6igmp_node().eventloop().new_oneoff_after(
-	    TimeVal(MLD_MULTICAST_LISTENER_INTERVAL, 0),
+	    group_membership_interval,
 	    callback(member_query, &MemberQuery::member_query_timer_timeout));
 
     return (XORP_OK);
@@ -558,21 +563,22 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 	if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
 	    member_query->_member_query_timer =
 		mld6igmp_node().eventloop().new_oneoff_after(
-		    TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL
-			    * MLD_LAST_LISTENER_QUERY_COUNT,
-			    0),
+		    (query_last_member_interval().get()
+		     * static_cast<int>(robust_count().get())), // "Last Listener Query Count"
 		    callback(member_query,
 			     &MemberQuery::member_query_timer_timeout));
 	    
 	    // Send group-specific query
+	    TimeVal scaled_max_resp_time =
+		query_last_member_interval().get() * MLD_TIMER_SCALE;
 	    mld6igmp_send(primary_addr(),
 			  member_query->group(),
 			  MLD_LISTENER_QUERY,
-			  (MLD_LAST_LISTENER_QUERY_INTERVAL * MLD_TIMER_SCALE),
+			  scaled_max_resp_time.sec(),
 			  member_query->group());
 	    member_query->_last_member_query_timer =
 		mld6igmp_node().eventloop().new_oneoff_after(
-		    TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
+		    query_last_member_interval().get(),
 		    callback(member_query,
 			     &MemberQuery::last_member_query_timer_timeout));
 	}

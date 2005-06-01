@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.22 2005/03/25 02:53:55 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.23 2005/06/01 00:36:57 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -604,6 +604,142 @@ public:
      */
     int		reset_vif_ip_router_alert_option_check(const string& vif_name,
 						       string& error_msg);
+
+    /**
+     * Get the Query Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param interval the return-by-reference interval.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		get_vif_query_interval(const string& vif_name,
+				       TimeVal& interval,
+				       string& error_msg);
+    
+    /**
+     * Set the Query Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param interval the interval.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_vif_query_interval(const string& vif_name,
+				       const TimeVal& interval,
+				       string& error_msg);
+    
+    /**
+     * Reset the Query Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		reset_vif_query_interval(const string& vif_name,
+					 string& error_msg);
+
+    /**
+     * Get the Last Member Query Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param interval the return-by-reference interval.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		get_vif_query_last_member_interval(const string& vif_name,
+						   TimeVal& interval,
+						   string& error_msg);
+    
+    /**
+     * Set the Last Member Query Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param interval the interval.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_vif_query_last_member_interval(const string& vif_name,
+						   const TimeVal& interval,
+						   string& error_msg);
+    
+    /**
+     * Reset the Last Member Query Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		reset_vif_query_last_member_interval(const string& vif_name,
+						     string& error_msg);
+
+    /**
+     * Get the Query Response Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param interval the return-by-reference interval.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		get_vif_query_response_interval(const string& vif_name,
+						TimeVal& interval,
+						string& error_msg);
+    
+    /**
+     * Set the Query Response Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param interval the interval.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_vif_query_response_interval(const string& vif_name,
+						const TimeVal& interval,
+						string& error_msg);
+    
+    /**
+     * Reset the Query Response Interval per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		reset_vif_query_response_interval(const string& vif_name,
+						  string& error_msg);
+
+    /**
+     * Get the Robustness Variable count per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param robust_count the return-by-reference count value.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		get_vif_robust_count(const string& vif_name,
+				     uint32_t& robust_count,
+				     string& error_msg);
+    
+    /**
+     * Set the Robustness Variable count per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param robust_count the count value.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_vif_robust_count(const string& vif_name,
+				     uint32_t robust_count,
+				     string& error_msg);
+    
+    /**
+     * Reset the  Robustness Variable count per interface.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		reset_vif_robust_count(const string& vif_name,
+				       string& error_msg);
     
     //
     // Debug-related methods

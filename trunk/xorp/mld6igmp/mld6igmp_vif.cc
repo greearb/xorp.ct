@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.37 2005/03/25 02:53:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.38 2005/06/01 00:36:58 pavlin Exp $"
 
 
 //
@@ -66,6 +66,10 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
       _primary_addr(IPvX::ZERO(mld6igmp_node.family())),
       _querier_addr(IPvX::ZERO(mld6igmp_node.family())),
       _ip_router_alert_option_check(false),
+      _query_interval(TimeVal(0, 0)),
+      _query_last_member_interval(TimeVal(0, 0)),
+      _query_response_interval(TimeVal(0, 0)),
+      _robust_count(0),
       _dummy_flag(false)
 {
     XLOG_ASSERT(proto_is_igmp() || proto_is_mld6());
@@ -79,10 +83,20 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     // Set the protocol version
     if (proto_is_igmp()) {
 	set_proto_version_default(IGMP_VERSION_DEFAULT);
+	_query_interval.set(TimeVal(IGMP_QUERY_INTERVAL, 0));
+	_query_last_member_interval.set(
+	    TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL, 0));
+	_query_response_interval.set(TimeVal(IGMP_QUERY_RESPONSE_INTERVAL, 0));
+	_robust_count = IGMP_ROBUSTNESS_VARIABLE;
     }
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	set_proto_version_default(MLD_VERSION_DEFAULT);
+	_query_interval.set(TimeVal(MLD_QUERY_INTERVAL, 0));
+	_query_last_member_interval.set(
+	    TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0));
+	_query_response_interval.set(TimeVal(MLD_QUERY_RESPONSE_INTERVAL, 0));
+	_robust_count = MLD_ROBUSTNESS_VARIABLE;
     }
 #endif
     set_proto_version(proto_version_default());
@@ -237,30 +251,34 @@ Mld6igmpVif::start(string& error_msg)
     // Query all members on startup
     //
     if (proto_is_igmp()) {
+	TimeVal scaled_max_resp_time =
+	    (query_response_interval().get() * IGMP_TIMER_SCALE);
 	mld6igmp_send(primary_addr(),
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
-		      is_igmpv1_mode() ?
-		      0
-		      : (IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
+		      is_igmpv1_mode() ? 0 : scaled_max_resp_time.sec(),
 		      IPvX::ZERO(family()));
-	_startup_query_count = MAX(IGMP_ROBUSTNESS_VARIABLE - 1, 0);
+	_startup_query_count = MAX(robust_count().get() - 1, 0);
+	TimeVal startup_query_interval = query_interval().get() / 4;
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(IGMP_STARTUP_QUERY_INTERVAL, 0),
+		startup_query_interval,
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
+	TimeVal scaled_max_resp_time =
+	    (query_response_interval().get() * MLD_TIMER_SCALE);
 	mld6igmp_send(primary_addr(),
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
-		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),
+		      scaled_max_resp_time.sec(),
 		      IPvX::ZERO(family()));
-	_startup_query_count = MAX(MLD_ROBUSTNESS_VARIABLE - 1, 0);
+	_startup_query_count = MAX(robust_count().get() - 1, 0);
+	TimeVal startup_query_interval = query_interval().get() / 4;
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
-		TimeVal(MLD_STARTUP_QUERY_INTERVAL, 0),
+		startup_query_interval,
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
