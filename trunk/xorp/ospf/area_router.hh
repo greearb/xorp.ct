@@ -121,6 +121,8 @@ class AreaRouter {
     const uint32_t _options;		// Options that we are sending.
 
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
+    bool _router_lsa_transmitted;	// True if the router LSA has
+					// been transmitted. 
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
     uint32_t _last_entry;		// One past last entry in
 					// database. A value of 0 is
