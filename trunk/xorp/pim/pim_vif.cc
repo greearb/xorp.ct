@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.52 2005/04/26 22:40:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.53 2005/05/17 03:22:41 pavlin Exp $"
 
 
 //
@@ -68,6 +68,7 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
       _dr_addr(pim_node.family()),
       _pim_nbr_me(*this, IPvX::ZERO(pim_node.family()), PIM_VERSION_DEFAULT),
       _domain_wide_addr(IPvX::ZERO(pim_node.family())),
+      _ip_router_alert_option_check(false),
       _hello_triggered_delay(PIM_HELLO_HELLO_TRIGGERED_DELAY_DEFAULT),
       _hello_period(PIM_HELLO_HELLO_PERIOD_DEFAULT,
 		    callback(this, &PimVif::set_hello_period_callback)),
@@ -987,47 +988,52 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     }
     
     //
-    // TODO: if we are running in secure mode, then check ip_ttl, ip_tos and
-    // @is_router_alert (e.g. (ip_ttl == MINTTL) && (is_router_alert))
+    // IP Router Alert option check
     //
-    UNUSED(ip_ttl);
-    UNUSED(ip_tos);
-    UNUSED(is_router_alert);
+    if (_ip_router_alert_option_check.get()) {
+	switch (message_type) {
+	case PIM_HELLO:
+	case PIM_JOIN_PRUNE:
+	case PIM_ASSERT:
+	case PIM_GRAFT:
+	case PIM_GRAFT_ACK:
+	case PIM_BOOTSTRAP:
+	    if (! is_router_alert) {
+		XLOG_WARNING("RX %s from %s to %s on vif %s: "
+			     "missing IP Router Alert option",
+			     PIMTYPE2ASCII(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+		ret_value = XORP_ERROR;
+		goto ret_label;
+	    }
+	    //
+	    // TODO: check the TTL and TOS if we are running in secure mode
+	    //
+	    UNUSED(ip_ttl);
+	    UNUSED(ip_tos);
 #if 0
-    //
-    // TTL (aka. Hop-limit in IPv6) and Router Alert option checks.
-    //
-    switch (message_type) {
-    case PIM_HELLO:
-    case PIM_JOIN_PRUNE:
-    case PIM_ASSERT:
-    case PIM_GRAFT:
-    case PIM_GRAFT_ACK:
-    case PIM_BOOTSTRAP:
-	if (ip_ttl != 1) {
-	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			 "ip_ttl is %d instead of %d",
-			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst),
-			 name().c_str(),
-			 ip_ttl, 1);
-	    ret_value = XORP_ERROR;
-	    goto ret_label;
+	    if (ip_ttl != MINTTL) {
+		XLOG_WARNING("RX %s from %s to %s on vif %s: "
+			     "ip_ttl = %d instead of %d",
+			     PIMTYPE2ASCII(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str(),
+			     ip_ttl, MINTTL);
+		ret_value = XORP_ERROR;
+		goto ret_label;
+	    }
+#endif // 0
+	    break;
+	case PIM_REGISTER:
+	case PIM_REGISTER_STOP:
+	case PIM_CAND_RP_ADV:
+	    // Destination should be unicast. No TTL and RA check needed.
+	    break;
+	default:
+	    break;
 	}
-	//
-	// TODO: check for Router Alert option and ignore the message
-	// if the option is missing and we are running in secure mode.
-	//
-	break;
-    case PIM_REGISTER:
-    case PIM_REGISTER_STOP:
-    case PIM_CAND_RP_ADV:
-	// Destination should be unicast. No TTL and RA check needed.
-	break;
-    default:
-	break;
     }
-#endif // 0/1
     
     //
     // Source address check.

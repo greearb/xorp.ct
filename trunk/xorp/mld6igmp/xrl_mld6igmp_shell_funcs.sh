@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.12 2003/12/20 01:43:35 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.13 2004/03/05 13:59:43 pavlin Exp $
 #
 
 #
@@ -214,6 +214,49 @@ mld6igmp_reset_vif_proto_version()
     
     echo "mld6igmp_reset_vif_proto_version" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_proto_version"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_get_vif_ip_router_alert_option_check()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_get_vif_ip_router_alert_option_check <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+
+    echo "mld6igmp_get_vif_ip_router_alert_option_check" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/get_vif_ip_router_alert_option_check"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl_wrapper -p enabled:bool $XRL$XRL_ARGS
+}
+
+mld6igmp_set_vif_ip_router_alert_option_check()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: mld6igmp_set_vif_ip_router_alert_option_check <vif_name:txt> <enable:bool>"
+	exit 1
+    fi
+    vif_name=$1
+    enable=$2
+    
+    echo "mld6igmp_set_vif_ip_router_alert_option_check" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/set_vif_ip_router_alert_option_check"
+    XRL_ARGS="?vif_name:txt=$vif_name&enable:bool=$enable"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+mld6igmp_reset_vif_ip_router_alert_option_check()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_reset_vif_ip_router_alert_option_check <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "mld6igmp_reset_vif_ip_router_alert_option_check" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_ip_router_alert_option_check"
     XRL_ARGS="?vif_name:txt=$vif_name"
     call_xrl_wrapper $XRL$XRL_ARGS
 }

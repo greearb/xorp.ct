@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.60 2005/04/30 21:35:37 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.61 2005/05/14 03:18:39 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -965,12 +965,10 @@ protected:
     XrlCmdError pim_0_1_config_static_rp_done();
 
     /**
-     *  Configure PIM Hello-related metrics. The 'set_foo' XRLs set the
-     *  particular values. The 'reset_foo' XRLs reset the metrics to their
-     *  default values.
-     *  
-     *  @param vif_name the name of the vif to configure.
-     *  
+     *  Get the configured protocol version per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
      *  @param proto_version the protocol version.
      */
     XrlCmdError pim_0_1_get_vif_proto_version(
@@ -979,15 +977,75 @@ protected:
 	// Output values, 
 	uint32_t&	proto_version);
 
+    /**
+     *  Set the protocol version per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param proto_version the protocol version.
+     */
     XrlCmdError pim_0_1_set_vif_proto_version(
 	// Input values, 
 	const string&	vif_name, 
 	const uint32_t&	proto_version);
 
+    /**
+     *  Reset the protocol version per interface to its default value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
     XrlCmdError pim_0_1_reset_vif_proto_version(
 	// Input values, 
 	const string&	vif_name);
 
+    /**
+     *  Get the IP Router Alert option check per interface for received
+     *  packets.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param enabled if true, then the IP Router Alert option check was
+     *  enabled, otherwise it was disabled.
+     */
+    XrlCmdError pim_0_1_get_vif_ip_router_alert_option_check(
+	// Input values,
+	const string&	vif_name,
+	// Output values,
+	bool&	enabled);
+
+    /**
+     *  Set the IP Router Alert option check per interface for received
+     *  packets.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param enable if true, then enable the IP Router Alert option check,
+     *  otherwise disable it.
+     */
+    XrlCmdError pim_0_1_set_vif_ip_router_alert_option_check(
+	// Input values,
+	const string&	vif_name,
+	const bool&	enable);
+
+    /**
+     *  Reset the IP Router Alert option check per interface for received
+     *  packets to its default value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
+    XrlCmdError pim_0_1_reset_vif_ip_router_alert_option_check(
+	// Input values,
+	const string&	vif_name);
+
+    /**
+     *  Configure PIM Hello-related metrics. The 'set_foo' XRLs set the
+     *  particular values. The 'reset_foo' XRLs reset the metrics to their
+     *  default values.
+     *  
+     *  @param vif_name the name of the vif to configure.
+     *  
+     *  @param proto_version the protocol version.
+     */
     XrlCmdError pim_0_1_get_vif_hello_triggered_delay(
 	// Input values, 
 	const string&	vif_name, 

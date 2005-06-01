@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.29 2005/03/20 00:21:11 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.30 2005/03/25 02:53:54 pavlin Exp $"
 
 
 //
@@ -149,45 +149,49 @@ Mld6igmpVif::igmp_process(const IPvX& src, const IPvX& dst,
 	       proto_message_type2ascii(message_type),
 	       cstring(src), cstring(dst),
 	       name().c_str());
-    
+
     //
-    // TODO: if we are running in secure mode, then check ip_ttl, ip_tos and
-    // @is_router_alert (e.g. (ip_ttl == MINTTL) && (is_router_alert))
+    // IP Router Alert option check
     //
-    UNUSED(ip_ttl);
-    UNUSED(ip_tos);
-    UNUSED(is_router_alert);
+    if (_ip_router_alert_option_check.get()) {
+	switch (message_type) {
+	case IGMP_MEMBERSHIP_QUERY:
+	case IGMP_V1_MEMBERSHIP_REPORT:
+	case IGMP_V2_MEMBERSHIP_REPORT:
+	case IGMP_V2_LEAVE_GROUP:
+	    if (! is_router_alert) {
+		XLOG_WARNING("RX %s from %s to %s on vif %s: "
+			     "missing IP Router Alert option",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+		return (XORP_ERROR);
+	    }
+	    //
+	    // TODO: check the TTL and TOS if we are running in secure mode
+	    //
+	    UNUSED(ip_ttl);
+	    UNUSED(ip_tos);
 #if 0
-    //
-    // TTL (aka. Hop-limit in IPv6) and Router Alert option check.
-    //
-    switch (message_type) {
-    case IGMP_MEMBERSHIP_QUERY:
-    case IGMP_V1_MEMBERSHIP_REPORT:
-    case IGMP_V2_MEMBERSHIP_REPORT:
-    case IGMP_V2_LEAVE_GROUP:
-	if (ip_ttl != 1) {
-	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			 "ip_ttl = %d instead of %d",
-			 proto_message_type2ascii(message_type),
-			 cstring(src), cstring(dst),
-			 name().c_str(),
-			 ip_ttl, 1);
-	    return (XORP_ERROR);
+	    if (ip_ttl != MINTTL) {
+		XLOG_WARNING("RX %s from %s to %s on vif %s: "
+			     "ip_ttl = %d instead of %d",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str(),
+			     ip_ttl, MINTTL);
+		return (XORP_ERROR);
+	    }
+#endif // 0
+	    break;
+	case IGMP_DVMRP:
+	case IGMP_MTRACE:
+	    // TODO: perform the appropriate checks
+	    break;
+	default:
+	    break;
 	}
-	//
-	// TODO: check for Router Alert option and ignore message
-	// if the option is missing and we are running in secure mode.
-	//
-	break;
-    case IGMP_DVMRP:
-    case IGMP_MTRACE:
-	// TODO: perform the appropriate checks
-	break;
-    default:
-	break;
     }
-#endif // 0/1
     
     //
     // Source address check.

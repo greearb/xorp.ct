@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.44 2005/03/25 02:53:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.45 2005/04/08 09:10:50 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2418,6 +2418,59 @@ XrlMld6igmpNode::mld6igmp_0_1_reset_vif_proto_version(
     
     if (Mld6igmpNode::reset_vif_proto_version(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_get_vif_ip_router_alert_option_check(
+    // Input values,
+    const string&	vif_name,
+    // Output values,
+    bool&	enabled)
+{
+    string error_msg;
+    
+    bool v;
+    if (Mld6igmpNode::get_vif_ip_router_alert_option_check(vif_name, v,
+							   error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    enabled = v;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_set_vif_ip_router_alert_option_check(
+    // Input values,
+    const string&	vif_name,
+    const bool&		enable)
+{
+    string error_msg;
+    
+    if (Mld6igmpNode::set_vif_ip_router_alert_option_check(vif_name, enable,
+							   error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_reset_vif_ip_router_alert_option_check(
+    // Input values,
+    const string&	vif_name)
+{
+    string error_msg;
+    
+    if (Mld6igmpNode::reset_vif_ip_router_alert_option_check(vif_name,
+							     error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }

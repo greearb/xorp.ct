@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.54 2005/05/14 03:18:39 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.55 2005/05/27 20:32:48 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -799,15 +799,80 @@ public:
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_all_vifs_done(string& error_msg);
-    //
+
+    /**
+     * Get the protocol version on an interface.
+     * 
+     * @param vif_name the name of the vif to get the protocol version of.
+     * @param proto_version the return-by-reference protocol version.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     int		get_vif_proto_version(const string& vif_name,
 				      int& proto_version,
 				      string& error_msg);
+    
+    /**
+     * Set the protocol version on an interface.
+     * 
+     * @param vif_name the name of the vif to set the protocol version of.
+     * @param proto_version the new protocol version.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     int		set_vif_proto_version(const string& vif_name,
 				      int proto_version,
 				      string& error_msg);
+    
+    /**
+     * Reset the protocol version on an interface to its default value.
+     * 
+     * @param vif_name the name of the vif to reset the protocol version of
+     * to its default value.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     int		reset_vif_proto_version(const string& vif_name,
 					string& error_msg);
+
+    /**
+     * Get the value of the flag that enables/disables the IP Router Alert
+     * option check per interface for received packets.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param enabled the return-by-reference flag value.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		get_vif_ip_router_alert_option_check(const string& vif_name,
+						     bool& enabled,
+						     string& error_msg);
+    
+    /**
+     * Enable/disable the IP Router Alert option check per interface for
+     * received packets.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param enable if true, then enable the IP Router Alert option check,
+     * otherwise disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_vif_ip_router_alert_option_check(const string& vif_name,
+						     bool enable,
+						     string& error_msg);
+    
+    /**
+     * Reset the value of the flag that enables/disables the IP Router Alert
+     * option check per interface for received packets to its default value.
+     * 
+     * @param vif_name the name of the vif to apply to.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		reset_vif_ip_router_alert_option_check(const string& vif_name,
+						       string& error_msg);
+
     //
     int		get_vif_hello_triggered_delay(const string& vif_name,
 					      uint16_t& hello_triggered_delay,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.30 2005/03/19 23:43:25 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.31 2005/03/25 02:53:56 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -512,12 +512,10 @@ protected:
     XrlCmdError mld6igmp_0_1_stop_cli();
 
     /**
-     *  Configure MLD6IGMP interface-related metrics. The 'set_foo' XRLs set
-     *  the particular values. The 'reset_foo' XRLs reset the metrics to their
-     *  default values.
-     *  
-     *  @param vif_name the name of the vif to configure.
-     *  
+     *  Get the configured protocol version per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
      *  @param proto_version the protocol version.
      */
     XrlCmdError mld6igmp_0_1_get_vif_proto_version(
@@ -526,13 +524,64 @@ protected:
 	// Output values, 
 	uint32_t&	proto_version);
 
+    /**
+     *  Set the protocol version per interface.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param proto_version the protocol version.
+     */
     XrlCmdError mld6igmp_0_1_set_vif_proto_version(
 	// Input values, 
 	const string&	vif_name, 
 	const uint32_t&	proto_version);
 
+    /**
+     *  Reset the protocol version per interface to its default value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
     XrlCmdError mld6igmp_0_1_reset_vif_proto_version(
 	// Input values, 
+	const string&	vif_name);
+
+    /**
+     *  Get the IP Router Alert option check per interface for received
+     *  packets.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param enabled if true, then the IP Router Alert option check was
+     *  enabled, otherwise it was disabled.
+     */
+    XrlCmdError mld6igmp_0_1_get_vif_ip_router_alert_option_check(
+	// Input values,
+	const string&	vif_name,
+	// Output values,
+	bool&	enabled);
+
+    /**
+     *  Set the IP Router Alert option check per interface for received
+     *  packets.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     *
+     *  @param enable if true, then enable the IP Router Alert option check,
+     *  otherwise disable it.
+     */
+    XrlCmdError mld6igmp_0_1_set_vif_ip_router_alert_option_check(
+	// Input values,
+	const string&	vif_name,
+	const bool&	enable);
+
+    /**
+     *  Reset the IP Router Alert option check per interface for received
+     *  packets to its default value.
+     *
+     *  @param vif_name the name of the vif to apply to.
+     */
+    XrlCmdError mld6igmp_0_1_reset_vif_ip_router_alert_option_check(
+	// Input values,
 	const string&	vif_name);
 
     /**

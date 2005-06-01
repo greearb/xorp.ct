@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.17 2005/03/20 00:21:11 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.18 2005/03/25 02:53:55 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -26,6 +26,7 @@
 #include <list>
 #include <utility>
 
+#include "libxorp/config_param.hh"
 #include "libxorp/timer.hh"
 #include "libxorp/vif.hh"
 #include "libproto/proto_unit.hh"
@@ -180,7 +181,7 @@ public:
      * @param v the value of the MLD/IGMP querier address.
      */
     void	set_querier_addr(const IPvX& v) { _querier_addr = v;	}
-    
+
     /**
      * Get the list with the multicast membership
      * information (@ref MemberQuery).
@@ -207,6 +208,13 @@ public:
      *
      */
     const XorpTimer& const_other_querier_timer() const { return (_other_querier_timer); }
+
+    /**
+     * Optain a reference to the "IP Router Alert option check" flag.
+     *
+     * @return a reference to the "IP Router Alert option check" flag.
+     */
+    ConfigParam<bool>& ip_router_alert_option_check() { return (_ip_router_alert_option_check); }
     
     //
     // Add/delete routing protocols that need to be notified for membership
@@ -274,6 +282,11 @@ private:
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
     list<MemberQuery *> _members;	// List of all groups with members
+
+    //
+    // Misc configuration parameters
+    //
+    ConfigParam<bool> _ip_router_alert_option_check; // The IP Router Alert option check flag
     
     //
     // Misc. other state

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.34 2005/04/20 19:35:22 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.35 2005/04/26 22:26:05 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -261,6 +261,13 @@ public:
      * @return the address of the Designated Router on this interface.
      */
     const IPvX&	dr_addr() const		{ return (_dr_addr);		}
+
+    /**
+     * Optain a reference to the "IP Router Alert option check" flag.
+     *
+     * @return a reference to the "IP Router Alert option check" flag.
+     */
+    ConfigParam<bool>& ip_router_alert_option_check() { return (_ip_router_alert_option_check); }
     
     //
     // Hello-related configuration parameters
@@ -534,6 +541,11 @@ private:
     // The alternative subnets on a vif. Used to make incoming traffic with a
     // non-local source address to appear as it is coming from a local subnet.
     list<IPvXNet> _alternative_subnet_list;
+
+    //
+    // Misc configuration parameters
+    //
+    ConfigParam<bool> _ip_router_alert_option_check; // The IP Router Alert option check flag
 
     //
     // Hello-related configuration parameters

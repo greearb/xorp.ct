@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.10 2005/03/20 00:04:40 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.11 2005/05/31 21:24:58 pavlin Exp $ */
 
 protocols {
     mld {
@@ -11,6 +11,7 @@ protocols {
 		disable:	toggle = false;
 		enabled:	bool;		/* %deprecated */
 		version:	u32 = 1;	/* Default to MLDv1 */
+		enable-ip-router-alert-option-check:	bool = false;
 	    }
 	}
 
@@ -84,6 +85,13 @@ protocols {
 		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(DEFAULT)";
+		}
+
+		enable-ip-router-alert-option-check {
+		    %help:	short "Enable the IP Router Alert option check";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(DEFAULT)";
 		}
 	    }
 	}

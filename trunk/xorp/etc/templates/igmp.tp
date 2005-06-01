@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.10 2005/03/20 00:04:40 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.11 2005/05/31 21:24:58 pavlin Exp $ */
 
 protocols {
     igmp {
@@ -11,6 +11,7 @@ protocols {
 		disable:	toggle = false;
 		enabled:	bool;		/* %deprecated */
 		version:	u32 = 2;	/* Default to IGMPv2 */
+		enable-ip-router-alert-option-check:	bool = false;
 	    }
 	}
 
@@ -84,6 +85,13 @@ protocols {
 		    %create:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(DEFAULT)";
+		}
+
+		enable-ip-router-alert-option-check {
+		    %help:	short "Enable the IP Router Alert option check";
+		    %create:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(DEFAULT)";
 		}
 	    }
 	}

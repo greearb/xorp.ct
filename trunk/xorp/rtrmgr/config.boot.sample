@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.26 2005/05/18 00:01:22 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.27 2005/05/31 21:28:28 pavlin Exp $ */
 
 
 interfaces {
@@ -262,6 +262,7 @@ protocols {
 	    vif dc0 {
 		disable: false
 		/* version: 2 */
+		/* enable-ip-router-alert-option-check: false */
 	    }
 	}
 	traceoptions {
@@ -277,6 +278,7 @@ protocols {
 	    vif dc0 {
 		disable: false
 		version: 1
+		enable-ip-router-alert-option-check: false
 	    }
 	}
 	traceoptions {
@@ -294,6 +296,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		/* enable-ip-router-alert-option-check: false */
 		/* dr-priority: 1 */
 		/* hello-period: 30 */
 		/* hello-triggered-delay: 5 */
@@ -359,6 +362,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		disable: false
+		enable-ip-router-alert-option-check: false
 		dr-priority: 1
 		hello-period: 30
 		hello-triggered-delay: 5

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.86 2005/04/30 21:35:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.87 2005/05/14 03:18:40 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -5050,6 +5050,57 @@ XrlPimNode::pim_0_1_reset_vif_proto_version(
     
     if (PimNode::reset_vif_proto_version(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_get_vif_ip_router_alert_option_check(
+    // Input values,
+    const string&	vif_name,
+    // Output values,
+    bool&	enabled)
+{
+    string error_msg;
+    
+    bool v;
+    if (PimNode::get_vif_ip_router_alert_option_check(vif_name, v, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    enabled = v;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_set_vif_ip_router_alert_option_check(
+    // Input values,
+    const string&	vif_name,
+    const bool&		enable)
+{
+    string error_msg;
+    
+    if (PimNode::set_vif_ip_router_alert_option_check(vif_name, enable,
+						      error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_reset_vif_ip_router_alert_option_check(
+    // Input values,
+    const string&	vif_name)
+{
+    string error_msg;
+    
+    if (PimNode::reset_vif_ip_router_alert_option_check(vif_name, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }

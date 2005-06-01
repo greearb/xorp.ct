@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.21 2005/04/30 21:35:39 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.22 2005/05/14 03:18:41 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -174,6 +174,57 @@ interface pim/0.1 {
 	config_static_rp_done
 
 	/**
+	 * Get the configured protocol version per interface.
+	 * 
+	 * @param vif_name the name of the vif to apply to.
+	 * @param proto_version the protocol version.
+	 */
+	get_vif_proto_version		? vif_name:txt -> proto_version:u32
+
+	/**
+	 * Set the protocol version per interface.
+	 * 
+	 * @param vif_name the name of the vif to apply to.
+	 * @param proto_version the protocol version.
+	 */
+	set_vif_proto_version		? vif_name:txt & proto_version:u32
+
+	/**
+	 * Reset the protocol version per interface to its default value.
+	 * 
+	 * @param vif_name the name of the vif to apply to.
+	 */
+	reset_vif_proto_version		? vif_name:txt
+
+	/**
+	 * Get the IP Router Alert option check per interface for received
+	 * packets.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param enabled if true, then the IP Router Alert option check was
+	 * enabled, otherwise it was disabled.
+	 */
+	get_vif_ip_router_alert_option_check	? vif_name:txt -> enabled:bool
+
+	/**
+	 * Set the IP Router Alert option check per interface for received
+	 * packets.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 * @param enable if true, then enable the IP Router Alert option check,
+	 * otherwise disable it.
+	 */
+	set_vif_ip_router_alert_option_check	? vif_name:txt & enable:bool
+
+	/**
+	 * Reset the IP Router Alert option check per interface for received
+	 * packets to its default value.
+	 *
+	 * @param vif_name the name of the vif to apply to.
+	 */
+	reset_vif_ip_router_alert_option_check	? vif_name:txt
+
+	/**
 	 * Configure PIM Hello-related metrics.
 	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
 	 * XRLs reset the metrics to their default values.
@@ -196,9 +247,6 @@ interface pim/0.1 {
 	 * @param accept_nohello_neighbors if true, accept neighbors that
 	 * didn't send a Hello message first.
 	 */
-	get_vif_proto_version		? vif_name:txt -> proto_version:u32
-	set_vif_proto_version		? vif_name:txt  & proto_version:u32
-	reset_vif_proto_version		? vif_name:txt
 	get_vif_hello_triggered_delay	? vif_name:txt -> hello_triggered_delay:u32
 	set_vif_hello_triggered_delay	? vif_name:txt  & hello_triggered_delay:u32
 	reset_vif_hello_triggered_delay	? vif_name:txt
