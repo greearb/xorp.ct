@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/igmp.tex,v 1.13 2005/05/31 21:28:28 pavlin Exp $
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.14 2005/06/01 00:39:10 pavlin Exp $
 %
 
 \chapter{IGMP and MLD}
@@ -155,10 +155,12 @@ protocols \{\\
   In case of MLD the value must be in the interval [1..1] with default
   value of 1.
 \item{\tt enable-ip-router-alert-option-check}: this directive specifies
-  whether the router should check that the protocol packets received on
-  this interface/vif have the IP Router Alert option~\cite{RFC2213} in
-  them~\footnote{Note that the {\tt enable-ip-router-alert-option-check}
-  statement appeared after XORP Release-1.1.}.
+  whether the router should check that the link-local protocol packets
+  received on this interface/vif have the IP Router Alert option (see
+  RFC-2213) in them~\footnote{Note that the {\tt
+  enable-ip-router-alert-option-check} statement appeared after XORP
+  Release-1.1.}. If it is enabled, all link-local protocol packets that
+  do not contain the IP Router Alert option will be dropped.
 \end{description}
 \end{description}
 \item{\stt traceoptions}: this directive delimits the configuration of
