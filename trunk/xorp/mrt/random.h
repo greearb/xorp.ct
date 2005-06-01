@@ -1,37 +1,21 @@
-/* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
+/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+
 /*
- * Copyright (c) 2001
- * YOID Project.
- * University of Southern California/Information Sciences Institute.
- * All rights reserved.
+ * Copyright (c) 2001-2005 International Computer Science Institute
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software")
+ * to deal in the Software without restriction, subject to the conditions
+ * listed in the XORP LICENSE file. These conditions include: you must
+ * preserve this copyright notice, and you cannot mention the copyright
+ * holders in advertising related to the Software without their permission.
+ * The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+ * notice is a summary of the XORP LICENSE file; the license in that file is
+ * legally binding.
  */
 
 /*
- * $XORP: xorp/mrt/random.h,v 1.9 2002/12/09 11:49:08 pavlin Exp $
+ * $XORP: xorp/mrt/random.h,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
  */
 
 
@@ -87,7 +71,8 @@ typedef bool bool_t;
 __BEGIN_DECLS
 extern void		my_srandom(unsigned long seed);
 extern unsigned long	my_random(unsigned long max_value);
-extern char *		my_initstate(unsigned long seed, char *state, long n);
+extern char *		my_initstate(unsigned long seed, char *state,
+				     size_t n);
 extern char *		my_setstate(char *state);
 __END_DECLS
 
