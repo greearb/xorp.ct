@@ -330,8 +330,7 @@ class Lsa {
     /**
      * Add the LSA type bindings.
      */
-//     void install_type(LsaType type, Lsa *lsa); 
-    
+//     void install_type(LsaType type, Lsa *lsa);
  protected:
     Lsa_header _header;		// Common LSA header.
     vector<uint8_t> _pkt;	// Raw LSA.
