@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.27 2005/05/31 21:28:28 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.28 2005/06/01 00:37:00 pavlin Exp $ */
 
 
 interfaces {
@@ -263,6 +263,10 @@ protocols {
 		disable: false
 		/* version: 2 */
 		/* enable-ip-router-alert-option-check: false */
+		/* query-interval: 125 */
+		/* query-last-member-interval: 1 */
+		/* query-response-interval: 10 */
+		/* robust-count: 2 */
 	    }
 	}
 	traceoptions {
@@ -279,6 +283,10 @@ protocols {
 		disable: false
 		version: 1
 		enable-ip-router-alert-option-check: false
+		query-interval: 125
+		query-last-member-interval: 1
+		query-response-interval: 10
+		robust-count: 2
 	    }
 	}
 	traceoptions {

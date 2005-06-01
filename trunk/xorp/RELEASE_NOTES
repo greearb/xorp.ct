@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.75 2005/05/31 21:28:28 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.76 2005/06/01 00:39:09 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -50,6 +50,28 @@ Release 1.2 (2005/??/??)
 
       This optional statement is used to enable the IP Router Alert option
       check per virtual interface.
+
+      * query-interval: <u32>
+
+      This optional statement is used to specify (per virtual interface)
+      the interval between general queries.
+
+      * query-last-member-interval: <u32>
+
+      This optional statement is used to specify (per virtual interface)
+      the maximum response time inserted into group-specific queries sent
+      in response to leave group messages.
+
+      * query-response-interval: <u32>
+
+      This optional statement is used to specify (per virtual interface)
+      the maximum response time inserted into the periodic general queries.
+
+      * robust-count: <u32>
+
+      This optional statement is used to specify (per virtual interface)
+      the robustness variable count that allows tuning for the expected
+      packet loss on a subnet.
 
   LIBXORP:
     - 

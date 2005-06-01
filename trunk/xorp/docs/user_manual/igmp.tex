@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/igmp.tex,v 1.14 2005/06/01 00:39:10 pavlin Exp $
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.15 2005/06/01 00:58:04 pavlin Exp $
 %
 
 \chapter{IGMP and MLD}
@@ -76,6 +76,10 @@ protocols \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>version: {\it uint(1..2)}\\
 \>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
+\>\>\>\>query-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-last-member-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-response-interval: {\it uint(1..1024)}\\
+\>\>\>\>robust-count: {\it uint(2..10)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -95,6 +99,10 @@ protocols \{\\
 \>\>\>\>disable: {\it bool}\\
 \>\>\>\>version: {\it uint(1..1)}\\
 \>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
+\>\>\>\>query-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-last-member-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-response-interval: {\it uint(1..1024)}\\
+\>\>\>\>robust-count: {\it uint(2..10)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -148,12 +156,11 @@ protocols \{\\
   that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
   {\tt disable}.}.
   The default value is {\stt false}.
-\item{\tt version}: this directive specifies the protocol version
-  for this interface/vif~\footnote{Note that the {\tt version} statement
-  appeared after XORP Release-1.1.}. In case of IGMP it takes a 
-  non-negative integer in the interval [1..2] with default value of 2.
-  In case of MLD the value must be in the interval [1..1] with default
-  value of 1.
+\item{\tt version}: this directive specifies the protocol version for this
+  interface/vif~\footnote{Note that the {\tt version} statement appeared after
+  XORP Release-1.1.}. In case of IGMP it takes a non-negative integer in the
+  interval [1..2] with default value of {\stt 2}.  In case of MLD the value
+  must be in the interval [1..1] with default value of {\stt 1}.
 \item{\tt enable-ip-router-alert-option-check}: this directive specifies
   whether the router should check that the link-local protocol packets
   received on this interface/vif have the IP Router Alert option (see
@@ -161,6 +168,39 @@ protocols \{\\
   enable-ip-router-alert-option-check} statement appeared after XORP
   Release-1.1.}. If it is enabled, all link-local protocol packets that
   do not contain the IP Router Alert option will be dropped.
+
+\item{\tt query-interval}: this directive specifies the interval (in seconds)
+  between general queries sent by the querier on this
+  interface/vif~\footnote{Note that the {\tt query-interval} statement
+  appeared after XORP Release-1.1.}.
+  The default value is {\stt 125} seconds.
+
+\item {\tt query-last-member-interval}: this directive specifies the maximum
+  response time (in seconds) inserted into group-specific queries sent in
+  response to leave group messages on this interface/vif. It is also the
+  interval between group-specific query messages~\footnote{Note that the {\tt
+  query-last-member-interval} statement appeared after XORP Release-1.1.}.
+  The default value is {\stt 1} second.
+
+\item {\tt query-response-interval}: this directive specifies the maximum
+  response time (in seconds) inserted into the periodic general queries on
+  this interface/vif~\footnote{Note that the {\tt query-response-interval}
+  statement appeared after XORP Release-1.1.}.
+  The {\tt query-response-interval} must be less than the {\tt
+  query-interval}.
+  The default value is {\stt 10} seconds.
+
+\item {\tt robust-count}: this directive specifies the robustness
+  variable count that allows tuning for the expected packet loss on a
+  subnet for this interface/vif~\footnote{Note that the {\tt robust-count}
+  statement appeared after XORP Release-1.1.}.
+  The {\tt robust-count} specifies the startup query count, and the last
+  member query count.
+  It is also used in the computation of the group membership interval and the
+  other querier present interval.
+  The IGMP/MLD protocol is robust to {\tt robust-count} packet losses.
+  The default value is {\stt 2}.
+
 \end{description}
 \end{description}
 \item{\stt traceoptions}: this directive delimits the configuration of
@@ -199,6 +239,10 @@ protocols \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>/* version: 2 */\\
 \>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
 \>\>\}\\
 \>\}\\
 \}\\
@@ -211,6 +255,10 @@ protocols \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* version: 1 */\\
 \>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.11 2005/05/31 21:28:28 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.12 2005/06/01 00:39:10 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -443,6 +443,10 @@ protocols \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* version: 2 */\\
 \>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -461,6 +465,10 @@ protocols \{\\
 \>\>\>\>disable: false\\
 \>\>\>\>/* version: 1 */\\
 \>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
@@ -488,6 +496,29 @@ The {\tt enable-ip-router-alert-option-check} parameter is used to
 enable the IP Router Alert option check per virtual interface~\footnote{Note
 that the {\tt enable-ip-router-alert-option-check} statement appeared after
 XORP Release-1.1.}.
+
+The {\tt query-interval} parameter is used to configure (per virtual
+interface) the interval (in seconds) between general queries sent by the
+querier~\footnote{Note that the {\tt query-interval} statement appeared
+after XORP Release-1.1.}.
+
+The {\tt query-last-member-interval} parameter is used to configure (per
+virtual interface) the maximum response time (in seconds) inserted into
+group-specific queries sent in response to leave group messages. It is
+also the interval between group-specific query messages~\footnote{Note
+that the {\tt query-last-member-interval} statement appeared after XORP
+Release-1.1.}.
+
+The {\tt query-response-interval} parameter is used to configure (per
+virtual interface) the maximum response time (in seconds) inserted into
+the periodic general queries~\footnote{Note that the {\tt
+query-response-interval} statement appeared after XORP Release-1.1.}.
+
+The {\tt robust-count} parameter is used to configure the robustness
+variable count that allows tuning for the expected packet loss on a
+subnet~\footnote{Note that the {\tt robust-count} statement appeared
+after XORP Release-1.1.}.
+
 
 \newpage
 \subsection{Protocol Independent Multicast - Sparse Mode}

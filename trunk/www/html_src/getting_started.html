@@ -546,6 +546,10 @@ protocols {
 		disable: false
 		/* version: 2 */
 		/* enable-ip-router-alert-option-check: false */
+		/* query-interval: 125 */
+		/* query-last-member-interval: 1 */
+		/* query-response-interval: 10 */
+		/* robust-count: 2 */
 	    }
 	}
 	traceoptions {
@@ -564,6 +568,10 @@ protocols {
 		disable: false
 		/* version: 1 */
 		/* enable-ip-router-alert-option-check: false */
+		/* query-interval: 125 */
+		/* query-last-member-interval: 1 */
+		/* query-response-interval: 10 */
+		/* robust-count: 2 */
 	    }
 	}
 	traceoptions {
@@ -577,8 +585,9 @@ protocols {
 
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
-<P><U>Note</U>: The "version" and "enable-ip-router-alert-option-check"
-statements appeared after XORP Release-1.1.
+<P><U>Note</U>: The "version", "enable-ip-router-alert-option-check",
+"query-interval", "query-last-member-interval", "query-response-interval",
+and "robust-count" statements appeared after XORP Release-1.1.
 
 A number of parameters have default values, therefore
 they don't have to be configured (those parameters are commented-out
@@ -589,7 +598,23 @@ version per virtual interface.
 <P>
 The "enable-ip-router-alert-option-check" parameter is used to
 enable the IP Router Alert option check per virtual interface.
-
+<P>
+The "query-interval" parameter is used to configure (per virtual
+interface) the interval (in seconds) between general queries sent by the
+querier.
+<P>
+The "query-last-member-interval" parameter is used to configure (per
+virtual interface) the maximum response time (in seconds) inserted into
+group-specific queries sent in response to leave group messages. It is
+also the interval between group-specific query messages.
+<P>
+The "query-response-interval" parameter is used to configure (per
+virtual interface) the maximum response time (in seconds) inserted into
+the periodic general queries.
+<P>
+The "robust-count" parameter is used to configure the robustness
+variable count that allows tuning for the expected packet loss on a
+subnet.
 
 <H4>Protocol Independent Multicast - Sparse Mode</H4>
 
