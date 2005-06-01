@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/igmp.tex,v 1.15 2005/06/01 00:58:04 pavlin Exp $
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.16 2005/06/01 09:36:10 pavlin Exp $
 %
 
 \chapter{IGMP and MLD}
@@ -90,6 +90,19 @@ protocols \{\\
 \>\}\\
 \}\\
 \\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>mld \{\\
 \>\>targetname: {\it text}\\
@@ -186,8 +199,7 @@ protocols \{\\
   response time (in seconds) inserted into the periodic general queries on
   this interface/vif~\footnote{Note that the {\tt query-response-interval}
   statement appeared after XORP Release-1.1.}.
-  The {\tt query-response-interval} must be less than the {\tt
-  query-interval}.
+  It must be less than the {\tt query-interval}.
   The default value is {\stt 10} seconds.
 
 \item {\tt robust-count}: this directive specifies the robustness
