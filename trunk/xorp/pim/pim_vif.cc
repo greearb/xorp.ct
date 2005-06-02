@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.53 2005/05/17 03:22:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.54 2005/06/01 00:36:59 pavlin Exp $"
 
 
 //
@@ -1514,23 +1514,30 @@ PimVif::update_primary_and_domain_wide_address(string& error_msg)
 	// address.
 	domain_wide_a = addr;
     }
+
     //
-    // XXX: if there is no link-local address to serve as a primary address,
-    // then use the domain-wide address as a primary address.
+    // XXX: In case of IPv6 if there is no link-local address we may try
+    // to use the the domain-wide address as a primary address,
+    // but the PIM-SM spec is clear that the multicast PIM messages are
+    // to be originated from a link-local address.
+    // Hence, only in case of IPv4 we assign the domain-wide address
+    // to the primary address.
     //
-    if (primary_a == IPvX::ZERO(family()))
-	primary_a = domain_wide_a;
+    if (is_ipv4()) {
+	if (primary_a == IPvX::ZERO(family()))
+	    primary_a = domain_wide_a;
+    }
 
     //
     // Check that the interface has a primary and a domain-wide reachable
     // addresses.
     //
-    if ((primary_a == IPvX::ZERO(family()))
-	|| (domain_wide_a == IPvX::ZERO(family()))) {
-	if (primary_a == IPvX::ZERO(family()))
-	    error_msg = "invalid primary address";
-	else
-	    error_msg = "invalid domain-wide address";
+    if (primary_a == IPvX::ZERO(family())) {
+	error_msg = "invalid primary address";
+	return (XORP_ERROR);
+    }
+    if (domain_wide_a == IPvX::ZERO(family())) {
+	error_msg = "invalid domain-wide address";
 	return (XORP_ERROR);
     }
 
