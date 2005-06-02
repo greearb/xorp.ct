@@ -615,6 +615,10 @@ the periodic general queries.
 The "robust-count" parameter is used to configure the robustness
 variable count that allows tuning for the expected packet loss on a
 subnet.
+<P>
+Note that in case of IGMP each enabled interface must have a valid IPv4
+address. In case of MLD each enabled interface must have a valid
+link-local IPv6 address.
 
 <H4>Protocol Independent Multicast - Sparse Mode</H4>
 
@@ -860,6 +864,10 @@ forwarded, then "bytes" should be set to 0.
 <P>
 The "traceoptions" section is used to explicitly enable log information
 that can be used for debugging purpose.
+<P>
+Note that in case of PIM-SM for IPv4 each enabled interface must have a
+valid IPv4 address. In case of PIM-SM for IPv6 each enabled interface
+must have a valid link-local and a valid domain-wide IPv6 addresses.
 
 <H4>FIB2MRIB</H4>
 

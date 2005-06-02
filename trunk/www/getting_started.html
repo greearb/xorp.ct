@@ -673,6 +673,10 @@ the periodic general queries.
 The "robust-count" parameter is used to configure the robustness
 variable count that allows tuning for the expected packet loss on a
 subnet.
+<P>
+Note that in case of IGMP each enabled interface must have a valid IPv4
+address. In case of MLD each enabled interface must have a valid
+link-local IPv6 address.
 
 <H4>Protocol Independent Multicast - Sparse Mode</H4>
 
@@ -918,6 +922,10 @@ forwarded, then "bytes" should be set to 0.
 <P>
 The "traceoptions" section is used to explicitly enable log information
 that can be used for debugging purpose.
+<P>
+Note that in case of PIM-SM for IPv4 each enabled interface must have a
+valid IPv4 address. In case of PIM-SM for IPv6 each enabled interface
+must have a valid link-local and a valid domain-wide IPv6 addresses.
 
 <H4>FIB2MRIB</H4>
 
@@ -940,7 +948,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.12 2005/04/14 10:43:17 mjh Exp $.
-<br>Generated on 01/Jun/2005 at 02:36:19.</em>
+<br>Generated on 02/Jun/2005 at 11:59:24.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->

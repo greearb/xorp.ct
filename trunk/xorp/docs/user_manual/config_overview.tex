@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.12 2005/06/01 00:39:10 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.13 2005/06/01 09:36:10 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -519,6 +519,9 @@ variable count that allows tuning for the expected packet loss on a
 subnet~\footnote{Note that the {\tt robust-count} statement appeared
 after XORP Release-1.1.}.
 
+Note that in case of IGMP each enabled interface must have a valid IPv4
+address. In case of MLD each enabled interface must have a valid
+link-local IPv6 address.
 
 \newpage
 \subsection{Protocol Independent Multicast - Sparse Mode}
@@ -801,6 +804,10 @@ interval is not too small, and should be on the order of tens of seconds.
 
 The {\tt traceoptions} section is used to explicitly enable log information
 that can be used for debugging purpose.
+
+Note that in case of PIM-SM for IPv4 each enabled interface must have a
+valid IPv4 address. In case of PIM-SM for IPv6 each enabled interface
+must have a valid link-local and a valid domain-wide IPv6 addresses.
 
 \newpage
 \subsection{FIB2MRIB}

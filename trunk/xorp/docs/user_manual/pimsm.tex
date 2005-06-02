@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.19 2005/06/01 00:39:10 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.20 2005/06/01 00:58:04 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -865,17 +865,22 @@ protocols \{\\
 \end{description}
 \end{description}
 
-The configuration parameters for PIM-SM for IPv6 are the same as those
-for IPv4, except for the following:
+Note that in case of PIM-SM for IPv4 each enabled interface must have a
+valid IPv4 address.
+
+The configuration for PIM-SM for IPv6 is identical to PIM-SM for IPv4,
+except for the following:
 \begin{itemize}
-\item The {\stt pimsm6} directive for IPv6 is used in place of the
-  {\stt pimsm4} directive for IPv4.
-\item The default value of {\stt targetname} is ``{\stt PIMSM\_6}''
-  instead of ``{\stt PIMSM\_4}''
-\item All IP addresses used in configuration are IPv6 addresses
+\item The {\stt pimsm6} directive is used in place of the
+  {\stt pimsm4} directive.
+\item The default value of {\stt targetname} is {\stt ``PIMSM\_6''}
+  instead of {\stt ``PIMSM\_4''}.
+\item All IP addresses used in the configuration are IPv6 addresses
   instead of IPv4 addresses.
 \item The {\stt hash-mask-len} value must be in the interval [8, 128],
   and defaults to 126.
+\item Each enabled interface must have a valid link-local and a valid
+  domain-wide IPv6 addresses.
 \end{itemize}
 
 \newpage

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/igmp.tex,v 1.16 2005/06/01 09:36:10 pavlin Exp $
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.17 2005/06/01 09:45:50 pavlin Exp $
 %
 
 \chapter{IGMP and MLD}
@@ -233,9 +233,20 @@ protocols \{\\
 \end{description}
 \end{description}
 
-The configuration parameters for MLD are identical to those for IGMP,
-except that they are delimited by an {\stt mld} directive rather than
-an {\stt igmp} directive.
+Note that in case of IGMP each enabled interface must have a valid IPv4
+address.
+
+The configuration for MLD is identical to IGMP, except for the
+following:
+\begin{itemize}
+  \item The {\stt mld} directive is used in place of the {\stt igmp}
+  directive.
+  \item The default value of {\stt targetname} is {\stt ``MLD''}
+  instead of {\stt ``IGMP''}.
+  \item Each enabled interface must have a valid link-local IPv6
+  address.
+\end{itemize}
+
 
 \vfill\eject
 \subsection{Example Configurations}
