@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.45 2005/03/25 02:53:34 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.46 2005/05/26 10:58:50 mjh Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -146,8 +146,10 @@ XrlRouter::initialize(const char* class_name,
 		      IPv4	  finder_addr,
 		      uint16_t	  finder_port)
 {
-    /* set the finder address from the environment variable if it is set */
-    char* value = getenv("XORP_FINDER_CLIENT_ADDRESS");
+    char* value;
+
+    // Set the finder client address from the environment variable if it is set
+    value = getenv("XORP_FINDER_CLIENT_ADDRESS");
     if (value != NULL) {
 	try {
 	    struct in_addr addr;
@@ -163,13 +165,29 @@ XrlRouter::initialize(const char* class_name,
 	}
     }
 
-    /* set the finder port from the environment variable if it is set */
-    value = getenv("XORP_FINDER_CLIENT_PORT");
+    // Set the finder server address from the environment variable if it is set
+    value = getenv("XORP_FINDER_SERVER_ADDRESS");
+    if (value != NULL) {
+	try {
+	    IPv4 ipv4(value);
+	    if (! ipv4.is_unicast()) {
+		XLOG_ERROR("Failed to change the Finder server address to %s",
+			   ipv4.str().c_str());
+	    } else {
+		finder_addr = ipv4;
+	    }
+	} catch (const InvalidString& e) {
+	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
+		       e.str().c_str());
+	}
+    }
+
+    // Set the finder server port from the environment variable if it is set
+    value = getenv("XORP_FINDER_SERVER_PORT");
     if (value != NULL) {
 	int port = atoi(value);
-	if (port <=0 || port >65535) {
-	    XLOG_ERROR("Invalid \"XORP_FINDER_CLIENT_PORT\": %s",
-		       value);
+	if (port <= 0 || port > 65535) {
+	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_PORT\": %s", value);
 	} else {
 	    finder_port = port;
 	}

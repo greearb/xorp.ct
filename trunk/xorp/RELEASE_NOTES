@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.76 2005/06/01 00:39:09 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.77 2005/06/01 09:36:10 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -221,8 +221,11 @@ Release 1.1 (2005/04/13)
     - Addition of XRL pipelining support.
 
     - The Finder client address can be defined by the following variable
-      in the environment: XORP_FINDER_CLIENT_ADDRESS. This re-enables
-      communicating with remote XORP processes.
+      in the environment: XORP_FINDER_CLIENT_ADDRESS.
+      The Finder server address and port can be defined by the following
+      variables in the environment: XORP_FINDER_SERVER_ADDRESS and
+      XORP_FINDER_SERVER_PORT respectively.
+      Those changes re-enable communicating with remote XORP processes.
 
     - Various other improvements (including performance) and bug fixes.
 
