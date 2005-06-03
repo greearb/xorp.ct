@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP$
+dnl $XORP: xorp/configure.in,v 1.135 2005/05/05 19:38:31 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [Report configure problems to feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP$])
+AC_REVISION([$XORP: xorp/configure.in,v 1.135 2005/05/05 19:38:31 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -839,6 +839,16 @@ if test "${GCC}" = "yes" ; then
 	if test "${enable_stl_debug}" = "yes" ; then
 		CXXFLAGS="${CXXFLAGS} -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC"
 	fi
+
+	dnl
+	dnl Conditionally add the user-specified flags that must be after
+	dnl all other compiler flags.
+	dnl
+	dnl Those are specified in the "CFLAGS_END" and "CXXFLAGS_END"
+	dnl environmental variables (for the C and C++ compiler respectively).
+	dnl
+	XR_TRY_ADD_CFLAGS($CFLAGS_END)
+	XR_TRY_ADD_CXXFLAGS($CXXFLAGS_END)
 fi
 
 dnl
