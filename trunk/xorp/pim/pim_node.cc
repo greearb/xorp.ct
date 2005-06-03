@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.70 2005/05/16 19:17:28 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.71 2005/05/27 20:32:48 pavlin Exp $"
 
 
 //
@@ -568,9 +568,13 @@ PimNode::add_vif_addr(const string& vif_name,
 		      const IPvXNet& subnet_addr,
 		      const IPvX& broadcast_addr,
 		      const IPvX& peer_addr,
+		      bool& should_send_hello,
 		      string &error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+
+    should_send_hello = false;
+
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot add address on vif %s: no such vif",
 			     vif_name.c_str());
@@ -659,8 +663,10 @@ PimNode::add_vif_addr(const string& vif_name,
     // a Hello message with an updated Address_List option and a
     // non-zero HoldTime should be sent immediately."
     //
-    if (pim_vif->is_up())
-	pim_vif->pim_hello_send();
+    if (pim_vif->is_up()) {
+	// pim_vif->pim_hello_send();
+	should_send_hello = true;
+    }
 
     // Schedule the dependency-tracking tasks
     pim_mrt().add_task_my_ip_address(pim_vif->vif_index());
@@ -677,9 +683,13 @@ PimNode::add_vif_addr(const string& vif_name,
 int
 PimNode::delete_vif_addr(const string& vif_name,
 			 const IPvX& addr,
+			 bool& should_send_hello,
 			 string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+
+    should_send_hello = false;
+
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot delete address on vif %s: no such vif",
 			     vif_name.c_str());
@@ -747,8 +757,10 @@ PimNode::delete_vif_addr(const string& vif_name,
     // a Hello message with an updated Address_List option and a
     // non-zero HoldTime should be sent immediately."
     //
-    if (pim_vif->is_up())
-	pim_vif->pim_hello_send();
+    if (pim_vif->is_up()) {
+	// pim_vif->pim_hello_send();
+	should_send_hello = true;
+    }
     
     // Schedule the dependency-tracking tasks
     pim_mrt().add_task_my_ip_address(pim_vif->vif_index());

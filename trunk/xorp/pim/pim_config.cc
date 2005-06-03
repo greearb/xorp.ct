@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.39 2005/05/27 20:32:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.40 2005/06/01 00:36:58 pavlin Exp $"
 
 
 //
 // TODO: a temporary solution for various PIM configuration
 //
 
+#include <set>
 
 #include "pim_module.h"
 #include "libxorp/xorp.h"
@@ -38,6 +39,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
     map<string, Vif>::iterator vif_iter;
     string err;
     map<string, Vif>& configured_vifs = ProtoNode<PimVif>::configured_vifs();
+    set<string> send_pim_hello_vifs;
     
     //
     // Add new vifs, and update existing ones
@@ -73,9 +75,15 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 		 vif_addr_iter != vif->addr_list().end();
 		 ++vif_addr_iter) {
 		const VifAddr& vif_addr = *vif_addr_iter;
+		bool should_send_pim_hello = false;
 		add_vif_addr(vif->name(), vif_addr.addr(),
-			     vif_addr.subnet_addr(), vif_addr.broadcast_addr(),
-			     vif_addr.peer_addr(), err);
+			     vif_addr.subnet_addr(),
+			     vif_addr.broadcast_addr(),
+			     vif_addr.peer_addr(),
+			     should_send_pim_hello,
+			     err);
+		if (should_send_pim_hello)
+		    send_pim_hello_vifs.insert(vif->name());
 	    }
 	}
 
@@ -98,7 +106,10 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 		 ipvx_iter != delete_addresses_list.end();
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
-		delete_vif_addr(vif->name(), ipvx, err);
+		bool should_send_pim_hello = false;
+		delete_vif_addr(vif->name(), ipvx, should_send_pim_hello, err);
+		if (should_send_pim_hello)
+		    send_pim_hello_vifs.insert(vif->name());
 	    }
 	}
     }
@@ -117,6 +128,24 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 	    string vif_name = node_vif->name();
 	    delete_vif(vif_name, err);
 	    continue;
+	}
+    }
+
+    //
+    // Spec:
+    // "If an interface changes one of its secondary IP addresses,
+    // a Hello message with an updated Address_List option and a
+    // non-zero HoldTime should be sent immediately."
+    //
+    set<string>::iterator set_iter;
+    for (set_iter = send_pim_hello_vifs.begin();
+	 set_iter != send_pim_hello_vifs.end();
+	 ++set_iter) {
+	string vif_name = *set_iter;
+	PimVif *pim_vif = vif_find_by_name(vif_name);
+	if ((pim_vif != NULL) && pim_vif->is_up()) {
+	    if (! pim_vif->is_pim_register())
+		pim_vif->pim_hello_send();
 	}
     }
     

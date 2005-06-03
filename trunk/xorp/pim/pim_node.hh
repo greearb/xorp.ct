@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.55 2005/05/27 20:32:48 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.56 2005/06/01 00:36:59 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -198,6 +198,8 @@ public:
      * @param subnet_addr the subnet address to add.
      * @param broadcast_addr the broadcast address (when applicable).
      * @param peer_addr the peer address (when applicable).
+     * @param should_send_pim_hello a return-by-reference flag that is set to
+     * true if the caller should send a PIM Hello message.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -206,6 +208,7 @@ public:
 			     const IPvXNet& subnet_addr,
 			     const IPvX& broadcast_addr,
 			     const IPvX& peer_addr,
+			     bool& should_send_pim_hello,
 			     string& error_msg);
     
     /**
@@ -213,11 +216,14 @@ public:
      * 
      * @param vif_name the name of the vif.
      * @param addr the unicast address to delete.
+     * @param should_send_pim_hello a return-by-reference flag that is set to
+     * true if the caller should send a PIM Hello message.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_vif_addr(const string& vif_name,
 				const IPvX& addr,
+				bool& should_send_pim_hello,
 				string& error_msg);
     
     /**
