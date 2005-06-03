@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.28 2005/04/15 19:25:09 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.29 2005/05/25 01:37:28 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -15,6 +15,21 @@ run the following commands in the top-level directory:
 ./configure
 gmake
 
+To change the default C and C++ compilers, then assign the binary
+names to the CC and CXX user environmental variables respectively.
+E.g., if you want to use the gcc34/g++34 compilers, then use (in case
+of csh/tcsh) the following commands before running "./configure":
+
+setenv CC gcc34
+setenv CXX g++34
+
+To compile XORP with additional user-specified compiler flags, assign
+those flags to the CFLAGS and CXXFLAGS environmental variables (for the
+C and C++ compiler respectively) before running "./configure".
+If the flags must be after all other compiler flags (e.g., if they
+are suppose to overwrite some internally added flags), then use
+environmental variables CFLAGS_END and CXXFLAGS_END (for the C and C++
+compiler respectively).
 
 2. Internal tests
 =================
