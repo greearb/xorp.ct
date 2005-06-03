@@ -195,11 +195,53 @@ AreaRouter<A>::remove_router_link(PeerID peerid)
     return true;
 }
 
+/**
+ * RFC 2328 Section 13.1 Determining which LSA is newer
+ */
 template <typename A>
 bool
-AreaRouter<A>::newer_lsa(const Lsa_header&) const
+AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
 {
-    XLOG_WARNING("TBD");
+    for(size_t i = 0 ; i < _last_entry; i++) {
+	Lsa_header& dblsah = _db[i]->get_header();
+	if (dblsah.get_ls_type() != lsah.get_ls_type())
+	    continue;
+
+	if (dblsah.get_link_state_id() != lsah.get_link_state_id())
+	    continue;
+
+	if (dblsah.get_advertising_router() != lsah.get_advertising_router())
+	    continue;
+
+	if (dblsah.get_ls_sequence_number() > lsah.get_ls_sequence_number())
+	    return false;
+	if (dblsah.get_ls_sequence_number() < lsah.get_ls_sequence_number())
+	    return true;
+
+	if (dblsah.get_ls_checksum() > lsah.get_ls_checksum())
+	    return false;
+	if (dblsah.get_ls_checksum() < lsah.get_ls_checksum())
+	    return true;
+
+	// Update the age before checking this field.
+	TimeVal now;
+	_ospf.get_eventloop().current_time(now);
+	_db[i]->update_age(now);
+	if (dblsah.get_ls_age() == OspfTypes::MaxAge)
+	    return false;
+	if (lsah.get_ls_age() == OspfTypes::MaxAge)
+	    return true;
+	
+	if(abs(dblsah.get_ls_age() - lsah.get_ls_age()) > 
+	   OspfTypes::MaxAgeDiff) {
+	    return lsah.get_ls_age() < dblsah.get_ls_age();
+	}
+	
+	// These two LSAs are identical.
+	return false;
+    }
+
+    // If we didn't find a match then this must be a newer LSA.
 
     return true;
 }
