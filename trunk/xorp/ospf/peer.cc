@@ -1847,6 +1847,10 @@ Neighbour<A>::event_2_way_received()
     case Init:
 	if (establish_adjacency_p()) {
 	    set_state(ExStart);
+
+	    // Clear out the request list.
+	    _ls_request_list.clear();
+
 	    uint32_t seqno = _data_description_packet.get_dd_seqno();
 	    _data_description_packet.set_dd_seqno(++seqno);
 	    _data_description_packet.set_i_bit(true);
@@ -2076,7 +2080,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    
 	    // Check to see if this is a newer LSA.
 	    if (get_area_router()->newer_lsa(*i))
-		XLOG_WARNING("TBD - Add to Link State Request List");
+		_ls_request_list.push_back(*i);
 	}
 
 	if (_last_dd.get_ms_bit()) { // Router is slave
