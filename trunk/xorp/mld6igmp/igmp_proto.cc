@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.31 2005/06/01 00:36:57 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.32 2005/06/01 09:34:00 pavlin Exp $"
 
 
 //
@@ -413,7 +413,7 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
     if (src < primary_addr()) {
 	// Eventually a new querier
 	_query_timer.unschedule();
-	_querier_addr = src;
+	set_querier_addr(src);
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
 	TimeVal other_querier_present_interval =
 	    static_cast<int>(robust_count().get()) * query_interval().get()
