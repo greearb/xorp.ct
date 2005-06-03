@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.77 2005/06/01 09:36:10 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.78 2005/06/03 21:33:06 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -72,6 +72,11 @@ Release 1.2 (2005/??/??)
       This optional statement is used to specify (per virtual interface)
       the robustness variable count that allows tuning for the expected
       packet loss on a subnet.
+
+    - Addition of support for user environmental variables CFLAGS_END and
+      CXXFLAGS_END. Those variables can be used to specify the compiler
+      flags (for the C and C++ compiler respectively) that must be after
+      all other flags.
 
   LIBXORP:
     - 
