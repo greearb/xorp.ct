@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.38 2005/06/01 00:36:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.39 2005/06/01 09:34:00 pavlin Exp $"
 
 
 //
@@ -219,7 +219,7 @@ Mld6igmpVif::start(string& error_msg)
     }
 
     // On startup, assume I am the MLD6IGMP Querier
-    _querier_addr = primary_addr();
+    set_querier_addr(primary_addr());
     _proto_flags |= MLD6IGMP_VIF_QUERIER;
     
     //
@@ -327,7 +327,7 @@ Mld6igmpVif::stop(string& error_msg)
     }
     
     _proto_flags &= ~MLD6IGMP_VIF_QUERIER;
-    _querier_addr = IPvX(family());			// XXX: ANY
+    set_querier_addr(IPvX::ZERO(family()));		// XXX: ANY
     _other_querier_timer.unschedule();
     _query_timer.unschedule();
     _igmpv1_router_present_timer.unschedule();
@@ -555,11 +555,22 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 int
 Mld6igmpVif::update_primary_address(string& error_msg)
 {
+    bool i_was_querier = false;
     IPvX primary_a(IPvX::ZERO(family()));
     IPvX domain_wide_a(IPvX::ZERO(family()));
 
-    // Reset the primary address
-    set_primary_addr(IPvX::ZERO(family()));
+    //
+    // Reset the primary address if it is not valid anymore.
+    //
+    if (Vif::find_address(primary_addr()) == NULL) {
+	if (primary_addr() == querier_addr()) {
+	    // Reset the querier address
+	    set_querier_addr(IPvX::ZERO(family()));
+	    _proto_flags &= ~MLD6IGMP_VIF_QUERIER;
+	    i_was_querier = true;
+	}
+	set_primary_addr(IPvX::ZERO(family()));
+    }
 
     list<VifAddr>::const_iterator iter;
     for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
@@ -568,12 +579,15 @@ Mld6igmpVif::update_primary_address(string& error_msg)
 	if (! addr.is_unicast())
 	    continue;
 	if (addr.is_linklocal_unicast()) {
-	    primary_a = addr;
+	    if (primary_a.is_zero())
+		primary_a = addr;
 	    continue;
 	}
+	//
 	// XXX: assume that everything else can be a domain-wide reachable
 	// address.
-	domain_wide_a = addr;
+	if (domain_wide_a.is_zero())
+	    domain_wide_a = addr;
     }
 
     //
@@ -585,20 +599,27 @@ Mld6igmpVif::update_primary_address(string& error_msg)
     // to the primary address.
     //
     if (is_ipv4()) {
-	if (primary_a == IPvX::ZERO(family()))
+	if (primary_a.is_zero())
 	    primary_a = domain_wide_a;
     }
 
     //
     // Check that the interface has a primary address.
     //
-    if (primary_a == IPvX::ZERO(family())) {
+    if (primary_addr().is_zero() && primary_a.is_zero()) {
 	error_msg = "invalid primary address";
 	return (XORP_ERROR);
     }
     
-    set_primary_addr(primary_a);
-    
+    if (primary_addr().is_zero())
+	set_primary_addr(primary_a);
+
+    if (i_was_querier) {
+	// Assume again that I am the MLD6IGMP Querier
+	set_querier_addr(primary_addr());
+	_proto_flags |= MLD6IGMP_VIF_QUERIER;
+    }
+
     return (XORP_OK);
 }
 
