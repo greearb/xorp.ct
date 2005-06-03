@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.23 2005/06/01 00:36:57 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.24 2005/06/01 09:34:00 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -531,6 +531,14 @@ public:
     //
     // Configuration methods
     //
+
+    /**
+     * Complete the set of vif configuration changes.
+     * 
+     * @param error_msg the error message (if error).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_config_all_vifs_done(string& error_msg);
 
     /**
      * Get the protocol version on an interface.

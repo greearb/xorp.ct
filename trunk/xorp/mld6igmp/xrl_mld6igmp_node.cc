@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.46 2005/06/01 00:36:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.47 2005/06/01 09:34:00 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1873,8 +1873,10 @@ XrlMld6igmpNode::mfea_client_0_1_new_vif(
 {
     string error_msg;
     
-    if (Mld6igmpNode::add_vif(vif_name, vif_index, error_msg) != XORP_OK)
+    if (Mld6igmpNode::add_config_vif(vif_name, vif_index, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -1886,7 +1888,7 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif(
 {
     string error_msg;
     
-    if (Mld6igmpNode::delete_vif(vif_name, error_msg) != XORP_OK)
+    if (Mld6igmpNode::delete_config_vif(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -1912,12 +1914,12 @@ XrlMld6igmpNode::mfea_client_0_1_add_vif_addr4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (Mld6igmpNode::add_vif_addr(vif_name,
-				   IPvX(addr),
-				   IPvXNet(subnet),
-				   IPvX(broadcast),
-				   IPvX(peer),
-				   error_msg)
+    if (Mld6igmpNode::add_config_vif_addr(vif_name,
+					  IPvX(addr),
+					  IPvXNet(subnet),
+					  IPvX(broadcast),
+					  IPvX(peer),
+					  error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1945,12 +1947,12 @@ XrlMld6igmpNode::mfea_client_0_1_add_vif_addr6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (Mld6igmpNode::add_vif_addr(vif_name,
-				   IPvX(addr),
-				   IPvXNet(subnet),
-				   IPvX(broadcast),
-				   IPvX(peer),
-				   error_msg)
+    if (Mld6igmpNode::add_config_vif_addr(vif_name,
+					  IPvX(addr),
+					  IPvXNet(subnet),
+					  IPvX(broadcast),
+					  IPvX(peer),
+					  error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1975,9 +1977,9 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (Mld6igmpNode::delete_vif_addr(vif_name,
-				      IPvX(addr),
-				      error_msg)
+    if (Mld6igmpNode::delete_config_vif_addr(vif_name,
+					     IPvX(addr),
+					     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2002,9 +2004,9 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (Mld6igmpNode::delete_vif_addr(vif_name,
-				      IPvX(addr),
-				      error_msg)
+    if (Mld6igmpNode::delete_config_vif_addr(vif_name,
+					     IPvX(addr),
+					     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2025,14 +2027,14 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
 {
     string error_msg;
     
-    if (Mld6igmpNode::set_vif_flags(vif_name,
-				    is_pim_register,
-				    is_p2p,
-				    is_loopback,
-				    is_multicast,
-				    is_broadcast,
-				    is_up,
-				    error_msg)
+    if (Mld6igmpNode::set_config_vif_flags(vif_name,
+					   is_pim_register,
+					   is_p2p,
+					   is_loopback,
+					   is_multicast,
+					   is_broadcast,
+					   is_up,
+					   error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2043,9 +2045,11 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
 XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_set_all_vifs_done()
 {
+    string error_msg;
     bool old_is_vif_setup_completed = Mld6igmpNode::is_vif_setup_completed();
 
-    Mld6igmpNode::set_vif_setup_completed(true);
+    if (Mld6igmpNode::set_config_all_vifs_done(error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     if (Mld6igmpNode::is_vif_setup_completed()
 	&& ! old_is_vif_setup_completed) {
