@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.54 2005/06/01 00:36:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.55 2005/06/02 18:37:20 pavlin Exp $"
 
 
 //
@@ -1493,12 +1493,24 @@ PimVif::buffer_send_prepare(buffer_t *buffer)
 int
 PimVif::update_primary_and_domain_wide_address(string& error_msg)
 {
+    bool i_was_dr = false;
     IPvX primary_a(IPvX::ZERO(family()));
     IPvX domain_wide_a(IPvX::ZERO(family()));
 
-    // Reset the primary and the domain-wide addresses
-    pim_nbr_me().set_primary_addr(IPvX::ZERO(family()));
-    set_domain_wide_addr(IPvX::ZERO(family()));
+    //
+    // Reset the primary and the domain-wide addresses if they are not
+    // valid anymore.
+    //
+    if (Vif::find_address(primary_addr()) == NULL) {
+	if (primary_addr() == dr_addr()) {
+	    // Reset the DR address
+	    _dr_addr = IPvX::ZERO(family());
+	    i_was_dr = true;
+	}
+	pim_nbr_me().set_primary_addr(IPvX::ZERO(family()));
+    }
+    if (Vif::find_address(domain_wide_addr()) == NULL)
+	set_domain_wide_addr(IPvX::ZERO(family()));
 
     list<VifAddr>::const_iterator iter;
     for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
@@ -1507,12 +1519,16 @@ PimVif::update_primary_and_domain_wide_address(string& error_msg)
 	if (! addr.is_unicast())
 	    continue;
 	if (addr.is_linklocal_unicast()) {
-	    primary_a = addr;
+	    if (primary_a.is_zero())
+		primary_a = addr;
 	    continue;
 	}
+	//
 	// XXX: assume that everything else can be a domain-wide reachable
 	// address.
-	domain_wide_a = addr;
+	//
+	if (domain_wide_a.is_zero())
+	    domain_wide_a = addr;
     }
 
     //
@@ -1524,7 +1540,7 @@ PimVif::update_primary_and_domain_wide_address(string& error_msg)
     // to the primary address.
     //
     if (is_ipv4()) {
-	if (primary_a == IPvX::ZERO(family()))
+	if (primary_a.is_zero())
 	    primary_a = domain_wide_a;
     }
 
@@ -1532,17 +1548,22 @@ PimVif::update_primary_and_domain_wide_address(string& error_msg)
     // Check that the interface has a primary and a domain-wide reachable
     // addresses.
     //
-    if (primary_a == IPvX::ZERO(family())) {
+    if (primary_addr().is_zero() && primary_a.is_zero()) {
 	error_msg = "invalid primary address";
 	return (XORP_ERROR);
     }
-    if (domain_wide_a == IPvX::ZERO(family())) {
+    if (domain_wide_addr().is_zero() && domain_wide_a.is_zero()) {
 	error_msg = "invalid domain-wide address";
 	return (XORP_ERROR);
     }
 
-    pim_nbr_me().set_primary_addr(primary_a);	// Set my PimNbr address
-    set_domain_wide_addr(domain_wide_a);
+    if (primary_addr().is_zero())
+	pim_nbr_me().set_primary_addr(primary_a); // Set my PimNbr address
+    if (domain_wide_addr().is_zero())
+	set_domain_wide_addr(domain_wide_a);
+
+    if (i_was_dr)
+	pim_dr_elect();
 
     return (XORP_OK);
 }
