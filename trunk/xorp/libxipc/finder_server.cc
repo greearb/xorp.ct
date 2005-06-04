@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_server.cc,v 1.10 2004/12/09 07:54:36 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_server.cc,v 1.11 2005/03/25 02:53:27 pavlin Exp $"
 
 #include "finder_module.h"
 #include "finder_server.hh"
@@ -23,7 +23,48 @@ FinderServer::FinderServer(EventLoop& e,
     throw (InvalidAddress, InvalidPort)
     : _e(e), _f(e), _fxt(_f)
 {
-    add_binding(default_interface, default_port);
+    char* value;
+    IPv4 finder_addr = default_interface;
+    uint16_t finder_port = default_port;
+
+    // Set the finder server address from the environment variable if it is set
+    value = getenv("XORP_FINDER_SERVER_ADDRESS");
+    if (value != NULL) {
+	try {
+	    IPv4 ipv4(value);
+	    if (! ipv4.is_unicast()) {
+		XLOG_ERROR("Failed to change the Finder server address to %s",
+			   ipv4.str().c_str());
+	    } else {
+		finder_addr = ipv4;
+	    }
+	} catch (const InvalidString& e) {
+	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
+		       e.str().c_str());
+	}
+    }
+
+    // Set the finder server port from the environment variable if it is set
+    value = getenv("XORP_FINDER_SERVER_PORT");
+    if (value != NULL) {
+	int port = atoi(value);
+	if (port <= 0 || port > 65535) {
+	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_PORT\": %s", value);
+	} else {
+	    finder_port = port;
+	}
+    }
+
+    add_binding(finder_addr, finder_port);
+
+    //
+    // XXX: if we want to bind to the command-line specified (or the default)
+    // values as well, then uncomment the following.
+    //
+    // if ((finder_addr != default_interface) || (finder_port != default_port))
+    //	  add_binding(default_interface, default_port);
+
+    // Permit connections from local addresses
     uint32_t n = if_count();
     for (uint32_t i = 1; i <= n; i++) {
 	string name;
