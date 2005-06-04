@@ -1066,8 +1066,7 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
 	return get_interface_id();
 	break;
     }
-    XLOG_FATAL(
-	       "Designated router interface ID "
+    XLOG_FATAL("Designated router interface ID "
 	       "available in states DR and DR Other not %s",
 	       pp_interface_state(_interface_state).c_str());
 
