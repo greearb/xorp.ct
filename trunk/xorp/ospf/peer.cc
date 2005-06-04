@@ -2251,6 +2251,23 @@ Neighbour<A>::event_exchange_done()
 	// Stop any retransmissions, only the master should have any running.
 	if (!_last_dd.get_ms_bit())
 	    stop_rxmt_timer("ExchangeDone");
+
+	// The protocol allows link state request packets to be sent
+	// before the database exchange has taken place. For the time
+	// being wait until the exchange is over before sending
+	// requests. Currently we only have a single retransmit timer
+	// although this isn't really an issue.
+	if (_ls_request_list.empty()) {
+	    // XXX - This should probably be done through an
+	    // event. Its important that the area router knows when
+	    // the databases are in sync.
+	    set_state(Full);
+	    XLOG_UNFINISHED();
+	    return;
+	}
+	XLOG_WARNING("TBD - Start sending link state request packets");
+	debug_msg("link state request list count: %d\n",
+		  _ls_request_list.size());
 	break;
     case Loading:
 	break;
