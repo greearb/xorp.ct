@@ -73,6 +73,12 @@ struct OspfTypes {
      */
     typedef uint32_t NeighbourID;
 
+    /** 
+     * An identifier meaning all neighbours. No single neighbour can
+     * have this identifier.
+     */
+    static const NeighbourID ALLNEIGHBOURS = 0;
+
     /**
      *
      * The maximum time between distinct originations of any particular
@@ -122,7 +128,7 @@ struct OspfTypes {
      * during the flooding process.  The value of MaxAgeDiff is set to
      * 15 minutes.
      */
-    static const uint32_t MaxAgeDiff = 15 * 60;
+    static const int32_t MaxAgeDiff = 15 * 60;
 
     /*
      * The metric value indicating that the destination described by an
