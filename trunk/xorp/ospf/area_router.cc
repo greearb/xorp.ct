@@ -196,16 +196,16 @@ AreaRouter<A>::remove_router_link(PeerID peerid)
 }
 
 /**
- * RFC 2328 Section 13.1 Determining which LSA is newer
+ * RFC 2328 Section 13.1 Determining which LSA is newer.
  */
 template <typename A>
-bool
-AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
+typename AreaRouter<A>::LsaSearch
+AreaRouter<A>::find_lsa(const Lsa_header& lsah, size_t& index) const
 {
-    for(size_t i = 0 ; i < _last_entry; i++) {
-	if (!_db[i]->valid())
+    for(index = 0 ; index < _last_entry; index++) {
+	if (!_db[index]->valid())
 	    continue;
-	Lsa_header& dblsah = _db[i]->get_header();
+	Lsa_header& dblsah = _db[index]->get_header();
 	if (dblsah.get_ls_type() != lsah.get_ls_type())
 	    continue;
 
@@ -216,35 +216,51 @@ AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
 	    continue;
 
 	if (dblsah.get_ls_sequence_number() > lsah.get_ls_sequence_number())
-	    return false;
+	    return OLDER;
 	if (dblsah.get_ls_sequence_number() < lsah.get_ls_sequence_number())
-	    return true;
+	    return NEWER;
 
 	if (dblsah.get_ls_checksum() > lsah.get_ls_checksum())
-	    return false;
+	    return OLDER;
 	if (dblsah.get_ls_checksum() < lsah.get_ls_checksum())
-	    return true;
+	    return NEWER;
 
 	// Update the age before checking this field.
 	TimeVal now;
 	_ospf.get_eventloop().current_time(now);
-	_db[i]->update_age(now);
+	_db[index]->update_age(now);
 	if (dblsah.get_ls_age() == OspfTypes::MaxAge)
-	    return false;
+	    return OLDER;
 	if (lsah.get_ls_age() == OspfTypes::MaxAge)
-	    return true;
+	    return NEWER;
 	
 	if(abs(dblsah.get_ls_age() - lsah.get_ls_age()) > 
 	   OspfTypes::MaxAgeDiff) {
-	    return lsah.get_ls_age() < dblsah.get_ls_age();
+	    return lsah.get_ls_age() < dblsah.get_ls_age() ? NEWER : OLDER;
 	}
 	
 	// These two LSAs are identical.
+	return EQUIVALENT;
+    }
+
+    return NOMATCH;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
+{
+    size_t index;
+    switch(find_lsa(lsah, index)) {
+    case NOMATCH:
+    case NEWER:
+	return true;
+    case EQUIVALENT:
+    case OLDER:
 	return false;
     }
 
-    // If we didn't find a match then this must be a newer LSA.
-
+    XLOG_UNREACHABLE();
     return true;
 }
 

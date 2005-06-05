@@ -85,6 +85,26 @@ class AreaRouter {
     void receive_lsa(PeerID peer, Lsa::LsaRef lsa);
 
     /**
+     * Returned by find_lsa.
+     */
+    enum LsaSearch {
+	NOMATCH,	// No matching LSA was found.
+	EQUIVALENT,	// The two LSAs are considered equivalent.
+	NEWER,		// The offered LSA is newer than the database copy.
+	OLDER,		// The offered LSA is older than the database copy.
+    };
+
+    /**
+     * Find matching LSA.
+     *
+     * @param Lsa_header that is being sought.
+     * @param index into LSA database if LsaSearch does not equal NOMATCH.
+     * 
+     * @return LsaSearch that describes the type of match.
+     */
+    LsaSearch find_lsa(const Lsa_header&, size_t& index) const;
+
+    /**
      * @return true if this is a newer LSA than we already have.
      */
     bool newer_lsa(const Lsa_header&) const;
