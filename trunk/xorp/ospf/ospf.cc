@@ -18,6 +18,7 @@
 #include "config.h"
 #include <map>
 #include <list>
+#include <set>
 
 #include "ospf_module.h"
 

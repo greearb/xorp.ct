@@ -16,6 +16,8 @@
 #ident "$XORP$"
 
 #include "config.h"
+#include <set>
+
 #include "ospf_module.h"
 
 #include "libxorp/debug.h"

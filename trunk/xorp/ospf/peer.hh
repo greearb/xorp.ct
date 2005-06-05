@@ -601,9 +601,11 @@ class Neighbour {
      * created on demand when a hello packet arrives.
      */
     Neighbour(Ospf<A>& ospf, Peer<A>& peer, OspfTypes::RouterID router_id,
-	      A neighbour_address, State state = Init)
+	      A neighbour_address, OspfTypes::NeighbourID neighbourid,
+	      State state = Init)
 	: _ospf(ospf), _peer(peer), _router_id(router_id),
 	  _neighbour_address(neighbour_address),
+	  _neighbourid(neighbourid),
 	  _state(state), _hello_packet(0),
 	  _last_dd(ospf.get_version()),
 	  _data_description_packet(ospf.get_version()),
@@ -668,11 +670,13 @@ class Neighbour {
      */
     static string pp_state(State is);
 
+    static OspfTypes::NeighbourID _ticket;	// Allocator for NeighbourID's
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     Peer<A>& _peer;			// Reference to Peer class.
     const OspfTypes::RouterID _router_id;// Neighbour's RouterID.
     const A _neighbour_address;		// Neighbour's address.
+    const OspfTypes::NeighbourID _neighbourid;	// The neighbours ID.
     State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbour.

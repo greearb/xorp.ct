@@ -348,7 +348,9 @@ class Lsa {
 				// the LSA, otherwise this timer fires
 				// when MaxAge is reached.
 
-//     AckList _ack_list;	// List of ACKs received for this LSA.
+    // List of neightbours that have not yet acknowledged this LSA.
+
+    set<OspfTypes::NeighbourID> _nack_list;	
 };
 
 /**

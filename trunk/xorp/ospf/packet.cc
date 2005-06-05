@@ -22,6 +22,7 @@
 #include "config.h"
 #include <map>
 #include <list>
+#include <set>
 #include <vector>
 
 #include "ospf_module.h"

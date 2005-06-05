@@ -380,7 +380,8 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
     Neighbour<A> *n = find_neighbour(src, hello);
 
     if (0 == n) {
-	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src);
+	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src,
+			     Neighbour<A>::_ticket++);
 	_neighbours.push_back(n);
     }
 
@@ -1475,6 +1476,12 @@ Peer<A>::get_backup_designated_router() const
 }
 
 /****************************************/
+/**
+ * Initialise the static variables that are used to generate unique
+ * NeighbourIDs.
+ */
+template <> OspfTypes::NeighbourID Neighbour<IPv4>::_ticket = 0;
+template <> OspfTypes::NeighbourID Neighbour<IPv6>::_ticket = 0;
 
 template <typename A>
 string

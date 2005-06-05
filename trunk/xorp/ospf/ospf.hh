@@ -69,6 +69,11 @@ struct OspfTypes {
     };
 
     /**
+     * An opaque handle that identifies a neighbour.
+     */
+    typedef uint32_t NeighbourID;
+
+    /**
      *
      * The maximum time between distinct originations of any particular
      * LSA.  If the LS age field of one of the router's self-originated
