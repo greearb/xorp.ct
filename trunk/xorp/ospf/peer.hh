@@ -611,6 +611,9 @@ class Neighbour {
 	  _data_description_packet(ospf.get_version()),
 	  _rxmt_wrapper(0)
     {
+	// No neigbhour should ever have this ID.
+	XLOG_ASSERT(OspfTypes::ALLNEIGHBOURS != neighbourid);
+
 	TimeVal t;
 	_ospf.get_eventloop().current_time(t);
 	// If we are debugging numbers starting from 0 are easier to

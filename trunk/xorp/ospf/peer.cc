@@ -1480,8 +1480,10 @@ Peer<A>::get_backup_designated_router() const
  * Initialise the static variables that are used to generate unique
  * NeighbourIDs.
  */
-template <> OspfTypes::NeighbourID Neighbour<IPv4>::_ticket = 0;
-template <> OspfTypes::NeighbourID Neighbour<IPv6>::_ticket = 0;
+template <> OspfTypes::NeighbourID Neighbour<IPv4>::_ticket = 
+    OspfTypes::ALLNEIGHBOURS + 1;
+template <> OspfTypes::NeighbourID Neighbour<IPv6>::_ticket =
+    OspfTypes::ALLNEIGHBOURS + 1;
 
 template <typename A>
 string
