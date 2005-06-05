@@ -203,6 +203,8 @@ bool
 AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
 {
     for(size_t i = 0 ; i < _last_entry; i++) {
+	if (!_db[i]->valid())
+	    continue;
 	Lsa_header& dblsah = _db[i]->get_header();
 	if (dblsah.get_ls_type() != lsah.get_ls_type())
 	    continue;
