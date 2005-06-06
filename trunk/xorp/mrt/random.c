@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/mrt/random.c,v 1.2 2005/06/01 23:45:45 pavlin Exp $"
+#ident "$XORP: xorp/mrt/random.c,v 1.3 2005/06/06 15:25:25 bms Exp $"
 
 
 /*
@@ -26,8 +26,6 @@
  * The rest is a front-end for it.
  */
 
-
-#include "libxorp/xorp.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -197,11 +195,6 @@ my_setstate(char *state)
  * SUCH DAMAGE.
  */
 
-#include "config.h"
-
-#ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
-#endif
 #if defined(LIBC_SCCS) && !defined(lint)
 #if 0
 static char sccsid[] = "@(#)random.c	8.2 (Berkeley) 5/19/95";
