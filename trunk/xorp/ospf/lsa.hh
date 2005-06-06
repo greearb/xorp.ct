@@ -323,6 +323,27 @@ class Lsa {
     }
 
     /**
+     * Add a neighbour ID to the NACK list.
+     */
+    void add_nack(OspfTypes::NeighbourID nid) {
+	_nack_list.insert(nid);
+    }
+
+    /**
+     * Remove a neighbour ID from the NACK list.
+     */
+    void remove_nack(OspfTypes::NeighbourID nid) {
+	_nack_list.erase(nid);
+    }
+
+    /**
+     * Does this neighbour exist on the NACK list.
+     */
+    bool exists_nack(OspfTypes::NeighbourID nid) {
+	return _nack_list.end() != _nack_list.find(nid);
+    }
+
+    /**
      * Generate a printable representation of the LSA.
      */
     virtual string str() const = 0;
@@ -348,7 +369,7 @@ class Lsa {
 				// the LSA, otherwise this timer fires
 				// when MaxAge is reached.
 
-    // List of neightbours that have not yet acknowledged this LSA.
+    // List of neighbours that have not yet acknowledged this LSA.
 
     set<OspfTypes::NeighbourID> _nack_list;	
 };
