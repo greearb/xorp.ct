@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.18 2005/02/01 04:01:54 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.19 2005/03/25 02:54:32 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -736,6 +736,7 @@ XrlRipCommonTarget<A>::ripx_0_1_advertise_default_route(
 // RIP ports.
 
 #define PORT_TIMER_SET_HANDLER(field, min_val, max_val)			\
+do {									\
     pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);	\
     if (pp.first == 0)							\
 	return pp.second;						\
@@ -752,15 +753,18 @@ XrlRipCommonTarget<A>::ripx_0_1_advertise_default_route(
     if (p->constants().set_##field (t) == false)			\
 	return XrlCmdError::COMMAND_FAILED(				\
 	    "Failed to set value.");					\
-    return XrlCmdError::OKAY();
+    return XrlCmdError::OKAY();						\
+} while (0)
 
 #define PORT_TIMER_GET_HANDLER(field)					\
+do {									\
     pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);	\
     if (pp.first == 0)							\
 	return pp.second;						\
     Port<A>* p = pp.first;						\
     t = p->constants(). field ();					\
-    return XrlCmdError::OKAY();
+    return XrlCmdError::OKAY();						\
+} while (0)
 
 
 template <typename A>
