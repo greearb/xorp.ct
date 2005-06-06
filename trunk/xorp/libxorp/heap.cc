@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.11 2005/03/25 02:53:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.12 2005/05/27 20:01:01 atanu Exp $"
 
 #include <strings.h>
 #include "libxorp_module.h"
@@ -91,14 +91,18 @@ Heap::resize(int new_size)
  * also stored in the element itself at the given offset in bytes.
  */
 #define SET_OFFSET(node)				\
+do {							\
     if (_intrude)					\
-	_p[node].object->_pos_in_heap = node ;
+	_p[node].object->_pos_in_heap = node ;		\
+} while (0)
 /*
  * RESET_OFFSET is used for sanity checks. It sets offset to an invalid value.
  */
 #define RESET_OFFSET(node)					\
+do {								\
     if (_intrude)						\
-	_p[node].object->_pos_in_heap = NOT_IN_HEAP ;
+	_p[node].object->_pos_in_heap = NOT_IN_HEAP ;		\
+} while (0)
 
 // inner implementation of push -- if p == NULL, the element is already
 // there, so start bubbling up from 'son'. Otherwise, push in new element p
