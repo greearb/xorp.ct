@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.28 2005/03/29 20:14:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.29 2005/03/31 19:32:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -139,9 +139,9 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& )
 // structures to begin on the boundary of (long) words.
 //
 #define LONG_ROUNDUP_SIZEOF(type)					\
-	(sizeof(type) % sizeof(long)) ?					\
+	((sizeof(type) % sizeof(long)) ?				\
 	(sizeof(type) + sizeof(long) - (sizeof(type) % sizeof(long)))	\
-	: (sizeof(type))
+	: (sizeof(type)))
 static const size_t SOCKADDR_IN_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockaddr_in);
 #ifdef HAVE_IPV6
 static const size_t SOCKADDR_IN6_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockaddr_in6);
