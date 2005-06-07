@@ -1554,6 +1554,18 @@ Neighbour<A>::establish_adjacency_p() const
 
     return become_adjacent;
 }
+template <typename A>
+bool
+Neighbour<A>::is_designated_router_or_backup_designated_router() const
+{
+    if (get_candidate_id() == _peer.get_designated_router())
+	return true;
+
+    if (get_candidate_id() == _peer.get_backup_designated_router())
+	return true;
+
+    return false;
+}
 
 /**
  * Simple wrapper for retransmission timers that simplified debugging.
@@ -1596,7 +1608,8 @@ class RxmtWrapper {
 
 template <typename A>
 void
-Neighbour<A>::start_rxmt_timer(RxmtCallback rcb, const char *comment)
+Neighbour<A>::start_rxmt_timer(RxmtCallback rcb, bool immediate, 
+			       const char *comment)
 {
     debug_msg("start_rxmt_timer: %p %s %s\n", this, 
 	      _peer.get_if_name().c_str(),
@@ -1616,7 +1629,8 @@ Neighbour<A>::start_rxmt_timer(RxmtCallback rcb, const char *comment)
 		     callback(_rxmt_wrapper, &RxmtWrapper::doit));
 
     // Send one immediately. Do this last so all state is set.
-    rcb->dispatch();
+    if (immediate)
+	rcb->dispatch();
 }
 
 template <typename A>
@@ -1632,6 +1646,94 @@ Neighbour<A>::stop_rxmt_timer(const char *comment)
     }
 
     _rxmt_timer.unschedule();
+}
+
+template <typename A>
+void
+Neighbour<A>::restart_retransmitter()
+{
+    if (_rxmt_wrapper)
+	return;	// Already running.
+
+    start_rxmt_timer(callback(this, &Neighbour<A>::retransmitter),
+		     false,
+		     "restart retransmitter");
+}
+
+// template <typename A>
+// void
+// Neighbour<A>::stop_retransmitter()
+// {
+//     stop_rxmt_timer("stop retransmitter");
+// }
+
+template <typename A>
+bool
+Neighbour<A>::retransmitter()
+{
+    // When there is nothing left to retransmit stop the timer 
+    bool more = false;
+
+    if (!_ls_request_list.empty()) {
+
+	LinkStateRequestPacket lsrp(_ospf.get_version());
+
+	size_t lsr_len = 0;
+	list<Ls_request>::iterator i;
+	for (i = _ls_request_list.begin(); i != _ls_request_list.end(); i++) {
+	    if (lsrp.get_standard_header_length() +
+		Ls_request::length() + lsr_len < 
+		_peer.get_interface_mtu()) {
+		lsr_len += Ls_request::length();
+		lsrp.get_ls_request().push_back(*i);
+	    } else {
+		send_link_state_request_packet(lsrp);
+		lsrp.get_ls_request().clear();
+		lsr_len = 0;
+	    }
+	}
+
+	if (!lsrp.get_ls_request().empty())
+	    send_link_state_request_packet(lsrp);
+	
+	more = true;
+    }
+
+    if (!_lsa_rxmt.empty()) {
+	TimeVal now;
+	_ospf.get_eventloop().current_time(now);
+
+	LinkStateUpdatePacket lsup(_ospf.get_version(),
+				   _ospf.get_lsa_decoder());
+	size_t lsas_len = 0;
+	list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
+	while (i != _lsa_rxmt.end()) {
+	    if ((*i)->valid() && (*i)->exists_nack(_neighbourid)) {
+		(*i)->update_age(now);
+		size_t len;
+		(*i)->lsa(len);
+		if (lsup.get_standard_header_length() + len + lsas_len < 
+		    _peer.get_interface_mtu()) {
+		    lsas_len += len;
+		    lsup.get_lsas().push_back(*i);
+		} else {
+		    send_link_state_update_packet(lsup);
+		    lsup.get_lsas().clear();
+		    lsas_len = 0;
+		}
+		i++;
+	    } else {
+		_lsa_rxmt.erase(i++);
+	    }
+	}
+
+	if (!lsup.get_lsas().empty())
+	    send_link_state_update_packet(lsup);
+
+	more = true;
+    }
+
+    return more;
 }
 
 template <typename A>
@@ -1712,6 +1814,105 @@ Neighbour<A>::send_data_description_packet()
     _peer.transmit(tr);
     
     return true;
+}
+
+template <typename A>
+bool
+Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
+{
+    _peer.populate_common_header(lsrp);
+    
+    vector<uint8_t> pkt;
+    lsrp.encode(pkt);
+
+    SimpleTransmit<A> *transmit;
+
+    switch(_peer.get_linktype()) {
+    case OspfTypes::PointToPoint:
+	transmit = new SimpleTransmit<A>(pkt,
+					 A::OSPFIGP_ROUTERS(), 
+					 _peer.get_interface_address());
+	break;
+    case OspfTypes::BROADCAST:
+	if (is_designated_router_or_backup_designated_router()) {
+	    transmit = new SimpleTransmit<A>(pkt,
+					     A::OSPFIGP_ROUTERS(), 
+					     _peer.get_interface_address());
+	    break;
+	}
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	transmit = new SimpleTransmit<A>(pkt,
+					 get_neighbour_address(),
+					 _peer.get_interface_address());
+	break;
+    }
+
+    typename Transmit<A>::TransmitRef tr(transmit);
+
+    _peer.transmit(tr);
+    
+    return true;
+}
+
+template <typename A>
+bool
+Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
+{
+    _peer.populate_common_header(lsup);
+    
+    vector<uint8_t> pkt;
+    lsup.encode(pkt);
+
+    SimpleTransmit<A> *transmit;
+
+    switch(_peer.get_linktype()) {
+    case OspfTypes::PointToPoint:
+	transmit = new SimpleTransmit<A>(pkt,
+					 A::OSPFIGP_ROUTERS(), 
+					 _peer.get_interface_address());
+	break;
+    case OspfTypes::BROADCAST:
+	if (is_designated_router_or_backup_designated_router()) {
+	    transmit = new SimpleTransmit<A>(pkt,
+					     A::OSPFIGP_ROUTERS(), 
+					     _peer.get_interface_address());
+	    break;
+	}
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	transmit = new SimpleTransmit<A>(pkt,
+					 get_neighbour_address(),
+					 _peer.get_interface_address());
+	break;
+    }
+
+    typename Transmit<A>::TransmitRef tr(transmit);
+
+    _peer.transmit(tr);
+    
+    return true;
+}
+
+template <typename A>
+void
+Neighbour<A>::tear_down_state()
+{
+    stop_rxmt_timer("Tear Down State");
+    _all_headers_sent = false;
+    _ls_request_list.clear();
+    // If this assertion ever occurs then the nack list on the LSAs on
+    // the queue must be cleared. The top of push_lsas shows how this
+    // can be done. If the current state is less than exchange just
+    // call push_lsas will do the trick.
+    XLOG_ASSERT(_lsa_queue.empty());
+
+    list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
+    for (i = _lsa_rxmt.begin(); i != _lsa_rxmt.end(); i++)
+	(*i)->remove_nack(_neighbourid);
+    _lsa_rxmt.clear();
 }
 
 /**
@@ -1827,7 +2028,7 @@ Neighbour<A>::event_1_way_received()
     case Exchange:
     case Loading:
     case Full:
-	set_state(Init);
+	change_state(Init);
 	break;
     }
 }
@@ -1854,7 +2055,7 @@ Neighbour<A>::event_2_way_received()
 	break;
     case Init:
 	if (establish_adjacency_p()) {
-	    set_state(ExStart);
+	    change_state(ExStart);
 
 	    // Clear out the request list.
 	    _ls_request_list.clear();
@@ -1869,9 +2070,10 @@ Neighbour<A>::event_2_way_received()
 	    start_rxmt_timer(callback(this,
 				      &Neighbour<A>::
 				      send_data_description_packet),
+			     true,
 			     "send_data_description from 2-WayReceived");
 	} else {
-	    set_state(TwoWay);
+	    change_state(TwoWay);
 	}
 	break;
     case TwoWay:
@@ -2088,7 +2290,11 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    
 	    // Check to see if this is a newer LSA.
 	    if (get_area_router()->newer_lsa(*i))
-		_ls_request_list.push_back(*i);
+		_ls_request_list.
+		    push_back(Ls_request(i->get_version(),
+					 i->get_ls_type(),
+					 i->get_link_state_id(),
+					 i->get_advertising_router()));
 	}
 
 	if (_last_dd.get_ms_bit()) { // Router is slave
@@ -2133,6 +2339,82 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 
 template <typename A>
 void
+Neighbour<A>::queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid)
+{
+    // If the neighbour IDs match then this is the neighbour that this
+    // LSA was originally received on.
+    if (_neighbourid == nid)
+	return;
+
+    // If the Neighbour state is Exchange or better the this LSA can
+    // be queued for transmission.
+    if (get_state() < Exchange)
+	return;
+
+    // Add this neighbour ID to the set of unacknowledged neighbours.
+    lsa->add_nack(_neighbourid);
+
+    _lsa_queue.push_back(lsa);
+}
+
+template <typename A>
+void
+Neighbour<A>::push_lsas()
+{
+    if (get_state() < Exchange) {
+	list<Lsa::LsaRef>::iterator i;
+	for (i = _lsa_queue.begin(); i != _lsa_queue.end(); i++)
+	    (*i)->remove_nack(_neighbourid);
+	_lsa_queue.clear();
+	return;
+    }
+
+    LinkStateUpdatePacket lsup(_ospf.get_version(), _ospf.get_lsa_decoder());
+    size_t lsas_len = 0;
+    list<Lsa::LsaRef>::iterator i;
+    for (i = _lsa_queue.begin(); i != _lsa_queue.end(); i++) {
+	if ((*i)->valid() && (*i)->exists_nack(_neighbourid)) {
+	    size_t len;
+	    (*i)->lsa(len);
+	    if (lsup.get_standard_header_length() + len + lsas_len < 
+		_peer.get_interface_mtu()) {
+		lsas_len += len;
+		lsup.get_lsas().push_back(*i);
+		_lsa_rxmt.push_back(*i);	// Move to the retransmit queue
+	    } else {
+		send_link_state_update_packet(lsup);
+		lsup.get_lsas().clear();
+		lsas_len = 0;
+	    }
+	}
+    }
+
+    if (!lsup.get_lsas().empty())
+	send_link_state_update_packet(lsup);
+
+    // All the LSAs on the queue should now be scheduled for
+    // sending. Zap the queue.
+    _lsa_queue.clear();
+
+    restart_retransmitter();
+}
+
+template <typename A>
+void
+Neighbour<A>::change_state(State state)
+{
+    // If we are dropping down states tear down any higher level state.
+    if (get_state() > state) {
+	set_state(state);
+
+	tear_down_state();
+    } else {
+	set_state(state);
+    }
+}
+
+template <typename A>
+void
 Neighbour<A>::event_negotiation_done()
 {
     const char *event_name = "NegotiationDone";
@@ -2158,7 +2440,7 @@ Neighbour<A>::event_negotiation_done()
     case TwoWay:
 	break;
     case ExStart:
-	set_state(Exchange);
+	change_state(Exchange);
 	// Inferred from the specification.
 	_data_description_packet.set_i_bit(false);
 	// If we are the master start sending description packets.
@@ -2168,6 +2450,7 @@ Neighbour<A>::event_negotiation_done()
 	    start_rxmt_timer(callback(this,
 				      &Neighbour<A>::
 				      send_data_description_packet),
+			     true,
 			     "send_data_description from NegotiationDone");
 	} else {
 	    // We have now agreed we are the slave so stop retransmitting.
@@ -2255,7 +2538,7 @@ Neighbour<A>::event_exchange_done()
     case ExStart:
 	break;
     case Exchange:
-	set_state(Loading);
+	change_state(Loading);
 	// Stop any retransmissions, only the master should have any running.
 	if (!_last_dd.get_ms_bit())
 	    stop_rxmt_timer("ExchangeDone");
@@ -2269,11 +2552,11 @@ Neighbour<A>::event_exchange_done()
 	    // XXX - This should probably be done through an
 	    // event. Its important that the area router knows when
 	    // the databases are in sync.
-	    set_state(Full);
+	    change_state(Full);
 	    XLOG_UNFINISHED();
 	    return;
 	}
-	XLOG_WARNING("TBD - Start sending link state request packets");
+	restart_retransmitter();
 	debug_msg("link state request list count: %d\n",
 		  _ls_request_list.size());
 	break;

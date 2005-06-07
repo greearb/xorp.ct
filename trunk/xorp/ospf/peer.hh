@@ -669,6 +669,19 @@ class Neighbour {
     void data_description_received(DataDescriptionPacket *dd);
 
     /**
+     * Queue a LSA for later transmission.
+     *
+     * @param lsa to be queued.
+     * @param nid if the neighbour ID matches this neighbour ID don't queue.
+     */
+    void queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid);
+
+    /**
+     * Send (push) any queued LSAs.
+     */
+    void push_lsas();
+
+    /**
      * Pretty print the neighbour state.
      */
     static string pp_state(State is);
@@ -692,13 +705,22 @@ class Neighbour {
     RxmtWrapper *_rxmt_wrapper;		// Wrapper to retransmiter.
 
     DataBaseHandle _database_handle;	// Handle to the Link State Database.
-    list<Lsa_header> _ls_request_list;	// Link state request list.
+    list<Ls_request> _ls_request_list;	// Link state request list.
+
+    list<Lsa::LsaRef> _lsa_queue;	// Queue of LSAs waiting to be sent.
+    list<Lsa::LsaRef> _lsa_rxmt;	// Unacknowledged LSAs
+					// awaiting retransmission.
 
     /**
      * Get the area router.
      */
     AreaRouter<A> *get_area_router() {return _peer.get_area_router(); }
       
+    /**
+     * Change state, use this not set_state when changing states.
+     */
+    void change_state(State state);
+
     /**
      * Set the state of this neighbour.
      */
@@ -710,27 +732,67 @@ class Neighbour {
     bool establish_adjacency_p() const;
 
     /**
+     * @return true if this router is the DR or BDR.
+     */
+    bool is_designated_router_or_backup_designated_router() const;
+
+    /**
      * Start the retransmit timer.
      *
      * @param RxmtCallback method to be called ever retransmit interval.
+     * @param immediate don't wait for the retransmit interval send
+     * one now.
      * @param comment to track the callbacks
      */
-    void start_rxmt_timer(RxmtCallback, const char *comment);
+    void start_rxmt_timer(RxmtCallback, bool immediate, const char *comment);
 
     /**
      * Stop the retransmit timer.
      */
     void stop_rxmt_timer(const char *comment);
 
-    /*
+    /**
+     * restart transmitter.
+     */
+    void restart_retransmitter();
+
+    /**
+     * Stop the transmitter.
+     */
+//     void stop_retransmitter();
+
+    /**
+     * Retransmit link state request and link state update packets.
+     *
+     * @return true if there are more retransmissions to perform.
+     */
+    bool retransmitter();
+
+    /**
      * Build database description packet.
      */
     void build_data_description_packet();
 
-    /*
+    /**
      * Send database description packet.
      */
     bool send_data_description_packet();
+
+    /**
+     * Send link state request packet.
+     */
+    bool send_link_state_request_packet(LinkStateRequestPacket& lsrp);
+
+    /**
+     * Send link state update packet.
+     */
+    bool send_link_state_update_packet(LinkStateUpdatePacket& lsup);
+
+    /**
+     * The state has just dropped so pull out any state associated
+     * with a higher state. 
+     */
+    void tear_down_state();
 
     void event_1_way_received();
     void event_2_way_received();
