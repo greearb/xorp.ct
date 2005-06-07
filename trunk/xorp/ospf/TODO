@@ -46,6 +46,9 @@ get_interface_prefix_length().
 14) Provide a mechanism to set the interface cost. Checkout
 get_interface_cost().
 
+15) I think the age needs to have the link cost added to it as well as
+updating the time.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
