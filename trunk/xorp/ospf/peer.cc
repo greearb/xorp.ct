@@ -2432,11 +2432,15 @@ Neighbour<A>::push_lsas()
 	if ((*i)->valid() && (*i)->exists_nack(_neighbourid)) {
 	    size_t len;
 	    (*i)->lsa(len);
+	    (*i)->set_transmitted(true);
 	    if (lsup.get_standard_header_length() + len + lsas_len < 
 		_peer.get_interface_mtu()) {
 		lsas_len += len;
 		lsup.get_lsas().push_back(*i);
-		_lsa_rxmt.push_back(*i);	// Move to the retransmit queue
+		// If this LSA isn't already on the retransmit queue add it.
+		if (find(_lsa_rxmt.begin(), _lsa_rxmt.end(), *i) ==
+		    _lsa_rxmt.end())
+		    _lsa_rxmt.push_back(*i);
 	    } else {
 		send_link_state_update_packet(lsup);
 		lsup.get_lsas().clear();
