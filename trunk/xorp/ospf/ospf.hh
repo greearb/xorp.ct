@@ -142,7 +142,7 @@ struct OspfTypes {
      * The value used for LS Sequence Number when originating the first
      * instance of any LSA.
      */
-    static const int32_t InitialSequenceNumber = 0x80000001;
+    static const uint32_t InitialSequenceNumber = 0x80000001;
 
     /*
      * The maximum value that LS Sequence Number can attain.
