@@ -199,7 +199,7 @@ class Lsa {
 
     Lsa(OspfTypes::Version version)
 	:  _header(version), _version(version), _valid(true),
-	   _self_originating(false),  _initial_age(0)
+	   _self_originating(false),  _initial_age(0), _transmitted(false)
     {}
 
     /**
@@ -346,6 +346,16 @@ class Lsa {
     }
 
     /**
+     * @return true if this LSA has been transmitted.
+     */
+    bool get_transmitted() { return _transmitted; }
+
+    /**
+     * Set the transmitted state of this LSA.
+     */
+    void set_transmitted(bool t) { _transmitted = t; }
+
+    /**
      * Generate a printable representation of the LSA.
      */
     virtual string str() const = 0;
@@ -370,6 +380,8 @@ class Lsa {
 				// this timer is used to retransmit
 				// the LSA, otherwise this timer fires
 				// when MaxAge is reached.
+
+    bool _transmitted;		// Set to true when this LSA is transmitted.
 
     // List of neighbours that have not yet acknowledged this LSA.
 
@@ -479,6 +491,27 @@ class RouterLink {
     }
 #undef	routerlink_copy
     
+#define	routerlink_compare(var)	if (var != rhs.var) return false;
+    bool operator==(const RouterLink& rhs) {
+	routerlink_compare(_type);
+	routerlink_compare(_metric);
+	switch (get_version()) {
+	case OspfTypes::V2:
+	    routerlink_compare(_link_id);
+	    routerlink_compare(_link_data);
+	    break;
+	case OspfTypes::V3:
+	    routerlink_compare(_interface_id);
+	    routerlink_compare(_neighbour_interface_id);
+	    routerlink_compare(_neighbour_router_id);
+	    break;
+	}
+
+
+	return true;
+    }
+#undef	routerlink_compare
+
     /**
      * @return the number of bytes the encoded data will occupy.
      */

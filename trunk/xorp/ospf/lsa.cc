@@ -164,7 +164,7 @@ Lsa_header::str() const
     }
 
     output += c_format(" LS type %#x", get_ls_type());
-    output += c_format(" Link State ID %u", get_link_state_id());
+    output += c_format(" Link State ID %#x", get_link_state_id());
     output += c_format(" Advertising Router %#x", get_advertising_router());
     output += c_format(" LS sequence number %#x", get_ls_sequence_number());
     output += c_format(" LS checksum %#x", get_ls_checksum());
@@ -252,7 +252,7 @@ Ls_request::str() const
     string output;
 
     output = c_format(" LS type %u", get_ls_type());
-    output += c_format(" Link State ID %u", get_link_state_id());
+    output += c_format(" Link State ID %#x", get_link_state_id());
     output += c_format(" Advertising Router %#x", get_advertising_router());
     
     return output;
