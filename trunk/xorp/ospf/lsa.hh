@@ -319,7 +319,9 @@ class Lsa {
      * Increment sequence number.
      */
     void increment_sequence_number() {
-	_header.set_ls_sequence_number(_header.get_ls_sequence_number() + 1);
+	uint32_t seqno = _header.get_ls_sequence_number();
+	seqno = seqno == OspfTypes::InitialSequenceNumber ? 0 : seqno + 1;
+	_header.set_ls_sequence_number(seqno);
     }
 
     /**
