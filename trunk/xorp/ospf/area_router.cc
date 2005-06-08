@@ -55,7 +55,6 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     // Never need to delete this as the ref_ptr will tidy up.
     RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
     rlsa->set_self_originating(true);
-    _router_lsa_transmitted = false;
     Lsa_header& header = rlsa->get_header();
 
     switch (ospf.get_version()) {
@@ -161,6 +160,10 @@ AreaRouter<A>::add_router_link(PeerID peerid, RouterLink& router_link)
     // Update the router link.
     typename PeerMap::iterator i = _peers.find(peerid);
     PeerStateRef psr = i->second;
+    if (find(psr->_router_links.begin(), psr->_router_links.end(),
+	     router_link) == psr->_router_links.end()) {
+	return true;
+    }
     psr->_router_links.push_back(router_link);
 
     if (update_router_links(psr)) {
@@ -346,8 +349,8 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
 
     // If this LSA has been transmitted then its okay to bump the
     // sequence number.
-    if (_router_lsa_transmitted) {
-	_router_lsa_transmitted = false;
+    if (router_lsa->get_transmitted()) {
+	router_lsa->set_transmitted(false);
 	router_lsa->increment_sequence_number();
 	router_lsa->get_header().set_ls_age(0);
     }
@@ -368,8 +371,6 @@ AreaRouter<A>::publish(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
 
     // Update the age field unless its self originating.
     if (lsar->get_self_originating()) {
-	if (lsar == _router_lsa)
-	    _router_lsa_transmitted = true;
 	if (OspfTypes::MaxSequenceNumber == lsar->get_ls_sequence_number())
 	    XLOG_FATAL("TBD: Flush this LSA and generate a new LSA");
     } else {
