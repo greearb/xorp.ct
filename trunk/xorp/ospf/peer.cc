@@ -164,6 +164,34 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
 }
 
 template <typename A>
+bool
+PeerOut<A>::queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
+{
+    typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
+
+    for(i = _areas.begin(); i != _areas.end(); i++) {
+	if (!(*i).second->queue_lsa(lsar, nid))
+	    return false;
+    }
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerOut<A>::push_lsas()
+{
+    typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
+
+    for(i = _areas.begin(); i != _areas.end(); i++) {
+	if (!(*i).second->push_lsas())
+	    return false;
+    }
+
+    return true;
+}
+
+template <typename A>
 void
 PeerOut<A>::bring_up_peering()
 {
@@ -179,7 +207,6 @@ PeerOut<A>::bring_up_peering()
 	XLOG_ASSERT(area_router);
 	area_router->peer_up(_peerid);
     }
-
 }
 
 template <typename A>
@@ -295,6 +322,33 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     }
 
     return false;
+}
+
+template <typename A>
+bool
+Peer<A>::queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
+{
+    debug_msg("lsa %s nid %d \n", cstring(*lsar), nid);
+
+    typename list<Neighbour<A> *>::iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if (!(*n)->queue_lsa(lsar, nid))
+	    return false;
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::push_lsas()
+{
+
+    typename list<Neighbour<A> *>::iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if (!(*n)->push_lsas())
+	    return false;
+
+    return true;
 }
 
 template <typename A>
@@ -2338,27 +2392,29 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 }
 
 template <typename A>
-void
+bool
 Neighbour<A>::queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid)
 {
     // If the neighbour IDs match then this is the neighbour that this
     // LSA was originally received on.
     if (_neighbourid == nid)
-	return;
+	return true;
 
     // If the Neighbour state is Exchange or better the this LSA can
     // be queued for transmission.
     if (get_state() < Exchange)
-	return;
+	return true;
 
     // Add this neighbour ID to the set of unacknowledged neighbours.
     lsa->add_nack(_neighbourid);
 
     _lsa_queue.push_back(lsa);
+
+    return true;
 }
 
 template <typename A>
-void
+bool
 Neighbour<A>::push_lsas()
 {
     if (get_state() < Exchange) {
@@ -2366,7 +2422,7 @@ Neighbour<A>::push_lsas()
 	for (i = _lsa_queue.begin(); i != _lsa_queue.end(); i++)
 	    (*i)->remove_nack(_neighbourid);
 	_lsa_queue.clear();
-	return;
+	return true;
     }
 
     LinkStateUpdatePacket lsup(_ospf.get_version(), _ospf.get_lsa_decoder());
@@ -2397,6 +2453,8 @@ Neighbour<A>::push_lsas()
     _lsa_queue.clear();
 
     restart_retransmitter();
+
+    return true;
 }
 
 template <typename A>

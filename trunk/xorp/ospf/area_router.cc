@@ -50,7 +50,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     : _ospf(ospf), _area(area), _area_type(area_type), _options(options),
       _readers(0), _queue(ospf.get_eventloop(),
 			  OspfTypes::MinLSInterval,
-			  callback(this, &AreaRouter<A>::publish))
+			  callback(this, &AreaRouter<A>::publish_all))
 {
     // Never need to delete this as the ref_ptr will tidy up.
     RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
@@ -359,7 +359,7 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
 
 template <typename A>
 void
-AreaRouter<A>::publish(Lsa::LsaRef lsar)
+AreaRouter<A>::publish(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
 
@@ -376,7 +376,38 @@ AreaRouter<A>::publish(Lsa::LsaRef lsar)
 	lsar->update_age(now);
     }
 
-    XLOG_WARNING("TBD publish");
+    typename PeerMap::iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	PeerStateRef temp_psr = i->second;
+	if (temp_psr->_up) {
+	    if (!_ospf.get_peer_manager().queue_lsa(i->first, lsar, nid))
+		XLOG_FATAL("Unable to queue LSA");
+	}
+    }
+}
+
+template <typename A>
+void
+AreaRouter<A>::publish_all(Lsa::LsaRef lsar)
+{
+    debug_msg("Publish: %s\n", cstring(*lsar));
+    publish(lsar, OspfTypes::ALLNEIGHBOURS);
+
+    push_lsas();	// NOTE: a push after every LSA.
+}
+
+template <typename A>
+void
+AreaRouter<A>::push_lsas()
+{
+    typename PeerMap::iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	PeerStateRef temp_psr = i->second;
+	if (temp_psr->_up) {
+	    if (!_ospf.get_peer_manager().push_lsas(i->first))
+		XLOG_FATAL("Unable to push LSAs");
+	}
+    }
 }
 
 template class AreaRouter<IPv4>;

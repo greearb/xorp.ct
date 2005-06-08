@@ -179,8 +179,23 @@ class AreaRouter {
 
     /*
      * Send this LSA to all our peers.
+     *
+     * @param lsar The LSA to publish
+     * @param nid The neighbour this LSA arrived on so don't reflect.
      */
-    void publish(Lsa::LsaRef lsar);
+    void publish(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid);
+
+    /*
+     * Send this LSA to all our peers.
+     *
+     * @param lsar The LSA to publish
+     */
+    void publish_all(Lsa::LsaRef lsar);
+
+    /**
+     * Send (push) any queued LSAs.
+     */
+    void push_lsas();
 };
 
 /**

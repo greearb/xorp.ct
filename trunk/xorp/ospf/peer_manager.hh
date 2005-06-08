@@ -110,6 +110,22 @@ class PeerManager {
 		 Packet *packet)
 	throw(BadPeer);
 
+    /**
+     * Queue an LSA for transmission.
+     *
+     * @param peerid to queue to LSA on.
+     * @param lsar the lsa
+     * @param nid not to send to LSA on.
+     * @return true on success.
+     */
+    bool queue_lsa(const PeerID peerid, Lsa::LsaRef lsar,
+		   OspfTypes::NeighbourID nid);
+
+    /**
+     * Send (push) any queued LSAs.
+     */
+    bool push_lsas(const PeerID peerid);
+
     // Configure the peering.
 
     /**

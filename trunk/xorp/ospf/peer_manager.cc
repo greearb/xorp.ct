@@ -275,6 +275,30 @@ PeerManager<A>::receive(const string& interface, const string& vif,
     return _peers[peerid]->receive(dst, src, packet);
 }
 
+template <typename A>
+bool
+PeerManager<A>::queue_lsa(const PeerID peerid, Lsa::LsaRef lsar,
+			  OspfTypes::NeighbourID nid)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->queue_lsa(lsar, nid);    
+}
+
+template <typename A>
+bool
+PeerManager<A>::push_lsas(const PeerID peerid)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->push_lsas();    
+}
 
 template <typename A>
 bool 

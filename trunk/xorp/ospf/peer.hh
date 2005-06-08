@@ -124,6 +124,20 @@ class PeerOut {
     bool receive(A dst, A src, Packet *packet) throw(BadPeer);
 
     /**
+     * Queue an LSA for transmission.
+     *
+     * @param lsar the lsa
+     * @param nid not to send to LSA on.
+     * @return true on success.
+     */
+    bool queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid);
+    
+    /**
+     * Send (push) any queued LSAs.
+     */
+    bool push_lsas();
+
+    /**
      * @return the link type.
      */
     OspfTypes::LinkType get_linktype() const { return _linktype; }
@@ -281,6 +295,20 @@ class Peer {
      * Packets for this peer are received here.
      */
     bool receive(A dst, A src, Packet *packet);
+
+    /**
+     * Queue an LSA for transmission.
+     *
+     * @param lsar the lsa
+     * @param nid not to send to LSA on.
+     * @return true on success.
+     */
+    bool queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid);
+
+    /**
+     * Send (push) any queued LSAs.
+     */
+    bool push_lsas();
 
     /*
      * Find neighbour that this packet should be associated with.
@@ -674,12 +702,12 @@ class Neighbour {
      * @param lsa to be queued.
      * @param nid if the neighbour ID matches this neighbour ID don't queue.
      */
-    void queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid);
+    bool queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid);
 
     /**
      * Send (push) any queued LSAs.
      */
-    void push_lsas();
+    bool push_lsas();
 
     /**
      * Pretty print the neighbour state.
