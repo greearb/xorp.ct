@@ -81,7 +81,7 @@ populate_helloV2(HelloPacket *hello)
     hello->set_area_id(IPv4("4.3.2.1"));
     hello->set_auth_type(5);
 
-    hello->set_network_mask(0x12345678);
+    hello->set_network_mask(0xffff0000);
     hello->set_hello_interval(9876);
     hello->set_options(0xfe);
     hello->set_router_priority(42);

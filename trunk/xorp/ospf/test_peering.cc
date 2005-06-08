@@ -294,7 +294,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 
     switch(src.ip_version()) {
     case 4:
-	ospf.get_peer_manager().set_network_mask(peerid, area, 16);
+	ospf.get_peer_manager().set_network_mask(peerid, area, 0xffff0000);
 	break;
     case 6:
 	break;
@@ -384,7 +384,7 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     switch(src_1.ip_version()) {
     case 4:
 	{
-	    uint32_t mask = 16;
+	    uint32_t mask = 0xffff0000;
 	    ospf_1.get_peer_manager().set_network_mask(peerid_1, area, mask);
 	    ospf_2.get_peer_manager().set_network_mask(peerid_2, area, mask);
 	}
