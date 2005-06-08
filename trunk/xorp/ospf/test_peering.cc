@@ -43,10 +43,15 @@ template <typename A>
 class DebugIO : public IO<A> {
  public:
     DebugIO(TestInfo& info, OspfTypes::Version version, EventLoop& eventloop)
-	: _info(info), _eventloop(eventloop), _packets(0)
+	: _info(info), _eventloop(eventloop), _packets(0),
+	  _lsa_decoder(version)
     {
+	_lsa_decoder.register_decoder(new RouterLsa(version));
+
 	_dec.register_decoder(new HelloPacket(version));
 	_dec.register_decoder(new DataDescriptionPacket(version));
+	_dec.register_decoder(new LinkStateRequestPacket(version));
+	_dec.register_decoder(new LinkStateUpdatePacket(version,_lsa_decoder));
     }
 
     /**
@@ -162,6 +167,7 @@ class DebugIO : public IO<A> {
     EventLoop& _eventloop;
     PacketDecoder _dec;
     int _packets;
+    LsaDecoder _lsa_decoder;
 
     typename IO<A>::ReceiveCallback _forward_cb;
     typename IO<A>::ReceiveCallback _receive_cb;
