@@ -160,9 +160,10 @@ AreaRouter<A>::add_router_link(PeerID peerid, RouterLink& router_link)
     // Update the router link.
     typename PeerMap::iterator i = _peers.find(peerid);
     PeerStateRef psr = i->second;
-    if (find(psr->_router_links.begin(), psr->_router_links.end(),
-	     router_link) == psr->_router_links.end()) {
-	return true;
+    list<RouterLink>::const_iterator r;
+    for (r = psr->_router_links.begin(); r != psr->_router_links.end(); r++) {
+	if (router_link == (*r))
+	    return true;
     }
     psr->_router_links.push_back(router_link);
 
