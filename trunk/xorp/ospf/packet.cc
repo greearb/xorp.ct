@@ -817,7 +817,11 @@ LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
     list<Lsa::LsaRef> &lsas = get_lsas();
     list<Lsa::LsaRef>::iterator i = lsas.begin();
     for(; i != lsas.end(); i++, n_lsas++) {
-	(*i)->encode();
+	// Don't encode the LSA it should already be encoded. 
+	// If this is a self originating LSA then we will have encoded
+	// the LSA. If we received it from a neighbour then we are not
+	// supposed to mess with it apart from updating the age field.
+// 	(*i)->encode();
 	size_t lsa_len;
 	(*i)->lsa(lsa_len);
 	len += lsa_len;
