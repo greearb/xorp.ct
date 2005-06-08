@@ -1744,6 +1744,10 @@ Neighbour<A>::retransmitter()
 		send_link_state_request_packet(lsrp);
 		lsrp.get_ls_request().clear();
 		lsr_len = 0;
+		// RFC 2328 Section 10.9
+		// There should be at most one Link State Request packet
+		// outstanding at any one time.
+		break;
 	    }
 	}
 
