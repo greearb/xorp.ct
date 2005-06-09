@@ -1,3 +1,5 @@
+*** THIS CODE IS STILL UNDER DEVELOPMENT AND CANNOT BE USED FOR ROUTING. ***
+
 * In the interface code currently Peer, Peerout and Neightbour classes
   never cache any state such as router ID or area. We use the hello
   packet to hold the definitive state for this peerings. If the router
