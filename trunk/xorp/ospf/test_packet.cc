@@ -243,6 +243,19 @@ populate_link_state_update(LinkStateUpdatePacket *lsup,
     populate_router_lsa(rlsa, version);
     lsup->get_lsas().push_back(Lsa::LsaRef(rlsa));
 }
+
+inline
+void
+populate_link_state_acknowledgement(LinkStateAcknowledgementPacket *lsack,
+				    OspfTypes::Version version)
+{
+    populate_standard_header(lsack, version);
+
+    // Create a LSA Header to add
+    Lsa_header header(version);
+    populate_lsa_header(header, version);
+    lsack->get_lsa_headers().push_back(header);
+}
 			   
 bool
 hello_packet_print(TestInfo& info)
@@ -476,6 +489,66 @@ link_state_request_packet_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+link_state_acknowledgement_packet_print(TestInfo& info)
+{
+    LinkStateAcknowledgementPacket *lsrp = 
+	new LinkStateAcknowledgementPacket(OspfTypes::V2);
+    populate_link_state_acknowledgement(lsrp, OspfTypes::V2);
+
+    DOUT(info) << lsrp->str() << endl;
+
+    delete lsrp;
+
+    lsrp = new LinkStateAcknowledgementPacket(OspfTypes::V3);
+    populate_link_state_acknowledgement(lsrp, OspfTypes::V3);
+
+    DOUT(info) << lsrp->str() << endl;
+
+    delete lsrp;
+
+    return true;
+}
+
+bool
+link_state_acknowledgement_packet_compare(TestInfo& info,
+					  OspfTypes::Version version)
+{
+    LinkStateAcknowledgementPacket *lsrp1 = 
+	new LinkStateAcknowledgementPacket(version);
+    populate_link_state_acknowledgement(lsrp1, version);
+
+    DOUT(info) << lsrp1->str() << endl;
+
+    // Encode the Link State Acknowledgement Packet.
+    vector<uint8_t> pkt1;
+    lsrp1->encode(pkt1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    LinkStateAcknowledgementPacket *lsrp2 = 
+	new LinkStateAcknowledgementPacket(version);
+
+    LinkStateAcknowledgementPacket *lsrp3 =
+	dynamic_cast<LinkStateAcknowledgementPacket *>(lsrp2->
+					       decode(&pkt1[0], pkt1.size()));
+
+    DOUT(info) << lsrp3->str() << endl;
+
+    // Encode the second packet and compare.
+    vector<uint8_t> pkt2;
+    lsrp3->encode(pkt2);
+    
+    if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    delete lsrp1;
+    delete lsrp2;
+    delete lsrp3;
+
+    return true;
+}
+
+bool
 packet_decoder1(TestInfo& info, OspfTypes::Version version)
 {
     PacketDecoder dec;
@@ -659,6 +732,8 @@ main(int argc, char **argv)
 	{"data_description_print", callback(data_description_packet_print)},
 	{"link_state_update_print", callback(link_state_update_packet_print)},
 	{"link_state_request_print",callback(link_state_request_packet_print)},
+	{"link_state_acknowledgement_print",
+	 callback(link_state_acknowledgement_packet_print)},
 	{"router_lsa_print", callback(router_lsa_print)},
 
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
@@ -677,6 +752,11 @@ main(int argc, char **argv)
 	{"lsrp_compareV2", callback(link_state_request_packet_compare,
 				   OspfTypes::V2)},
 	{"lsrp_compareV3", callback(link_state_request_packet_compare,
+				   OspfTypes::V3)},
+
+	{"lsap_compareV2", callback(link_state_acknowledgement_packet_compare,
+				   OspfTypes::V2)},
+	{"lsap_compareV3", callback(link_state_acknowledgement_packet_compare,
 				   OspfTypes::V3)},
 
 	{"packet_decoder1V2", callback(packet_decoder1, OspfTypes::V2)},
