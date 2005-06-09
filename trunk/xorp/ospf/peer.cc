@@ -312,13 +312,23 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 
     HelloPacket *hello;
     DataDescriptionPacket *dd;
+    LinkStateRequestPacket *lsrp;
+    LinkStateUpdatePacket *lsup;
+    LinkStateAcknowledgementPacket *lsap;
 
     if (0 != (hello = dynamic_cast<HelloPacket *>(packet))) {
 	return process_hello_packet(dst, src, hello);
     } else if(0 != (dd = dynamic_cast<DataDescriptionPacket *>(packet))) {
 	return process_data_description_packet(dst, src, dd);
+    } else if(0 != (lsrp = dynamic_cast<LinkStateRequestPacket *>(packet))) {
+	return process_link_state_request_packet(dst, src, lsrp);
+    } else if(0 != (lsup = dynamic_cast<LinkStateUpdatePacket *>(packet))) {
+	return process_link_state_update_packet(dst, src, lsup);
+    } else if(0 != (lsap = dynamic_cast<LinkStateAcknowledgementPacket *>
+		    (packet))) {
+	return process_link_state_acknowledgement_packet(dst, src, lsap);
     } else {
-	XLOG_UNFINISHED();
+	XLOG_FATAL("Unknown packet type %u", packet->get_type());
     }
 
     return false;
@@ -474,6 +484,42 @@ Peer<A>::process_data_description_packet(A dst,
 
     n->data_description_received(dd);
 
+    return false;	// Never keep a copy of the packet.
+}
+
+template <typename A>
+bool
+Peer<A>::process_link_state_request_packet(A dst, A src,
+					   LinkStateRequestPacket *lsrp)
+{
+    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsrp));
+
+    XLOG_WARNING("TBD");
+    
+    return false;	// Never keep a copy of the packet.
+}
+
+template <typename A>
+bool
+Peer<A>::process_link_state_update_packet(A dst, A src,
+					  LinkStateUpdatePacket *lsup)
+{
+    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsup));
+
+    XLOG_WARNING("TBD");
+    
+    return false;	// Never keep a copy of the packet.
+}
+
+template <typename A>
+bool
+Peer<A>::process_link_state_acknowledgement_packet(A dst, A src,
+				     LinkStateAcknowledgementPacket *lsap)
+{
+    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsap));
+
+    XLOG_WARNING("TBD");
+    
     return false;	// Never keep a copy of the packet.
 }
 

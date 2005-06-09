@@ -329,6 +329,26 @@ class Peer {
 					 DataDescriptionPacket *dd);
 
     /**
+     * Process a link state request packet.
+     */
+    bool process_link_state_request_packet(A dst, A src,
+					   LinkStateRequestPacket *lsrp);
+
+    /**
+     * Process a link state update packet.
+     */
+    bool process_link_state_update_packet(A dst, A src,
+					   LinkStateUpdatePacket *lsup);
+
+    /**
+     * Process a link state acknowledgement packet.
+     */
+    bool
+    process_link_state_acknowledgement_packet(A dst, A src,
+					      LinkStateAcknowledgementPacket
+					      *lsap);
+
+    /**
      * Start the protocol machinery running
      */
     void start();
