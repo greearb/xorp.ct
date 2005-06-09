@@ -51,6 +51,8 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
 						       _lsa_decoder));
 	_packet_decoder.
 	    register_decoder(new LinkStateRequestPacket(OspfTypes::V2));
+	_packet_decoder.
+	   register_decoder(new LinkStateAcknowledgementPacket(OspfTypes::V2));
 	break;
     case OspfTypes::V3:
 	_lsa_decoder.register_decoder(new RouterLsa(OspfTypes::V3));
@@ -63,6 +65,8 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
 						       _lsa_decoder));
 	_packet_decoder.
 	    register_decoder(new LinkStateRequestPacket(OspfTypes::V3));
+	_packet_decoder.
+	   register_decoder(new LinkStateAcknowledgementPacket(OspfTypes::V3));
 	break;
     }
 

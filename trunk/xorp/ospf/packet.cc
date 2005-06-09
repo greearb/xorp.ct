@@ -874,3 +874,93 @@ LinkStateUpdatePacket::str() const
 
     return output;
 }
+
+/* Link State Acknowledgement Packet */
+
+Packet *
+LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len) const
+    throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    LinkStateAcknowledgementPacket *packet = 
+	new LinkStateAcknowledgementPacket(version);
+
+    size_t offset = packet->decode_standard_header(ptr, len);
+    
+    // Verify that this packet is large enough to hold the at least
+    // one LSA header.
+    if ((len - offset) < Lsa_header::length())
+	xorp_throw(BadPacket,
+		   c_format("Packet too short %u, must be at least %u",
+			    len,
+			    offset + Lsa_header::length()));
+
+#ifdef	DEBUG_RAW_PACKETS
+    debug_msg("\n%s", dump_packet(ptr, len).c_str());
+#endif
+
+    Lsa_header lsa_header(version);
+
+    // How many LSA header are there, there should be at least 1.
+    int lsas = (len - offset) / lsa_header.length();
+
+    // XXX - Should we be checking for multiples of 20 here?
+    for(int i = 0; i < lsas; i++) {
+	packet->get_lsa_headers().
+	    push_back(lsa_header.decode(&ptr[offset + i*lsa_header.length()]));
+    }
+
+    return packet;
+}
+
+bool
+LinkStateAcknowledgementPacket::encode(vector<uint8_t>& pkt)
+{
+    size_t offset = get_standard_header_length();
+    size_t len = offset + get_lsa_headers().size() * Lsa_header::length();
+
+    pkt.resize(len);
+    uint8_t *ptr = &pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Put the specific Link State Acknowledgement Packet information first as
+    // the standard header code will also add the checksum. This must
+    // be done last.
+
+    /**************************************/
+    size_t lsa_offset = offset;
+
+    list<Lsa_header> &li = get_lsa_headers();
+    list<Lsa_header>::iterator i = li.begin();
+    for(size_t index = 0; i != li.end(); i++, index += Lsa_header::length()) {
+	(*i).copy_out(&ptr[lsa_offset + index]);
+    }
+	
+    if (offset != encode_standard_header(ptr, len)) {
+	XLOG_ERROR("Encode of %s failed", str().c_str());
+	return false;
+    }
+
+    return true;
+}
+
+string
+LinkStateAcknowledgementPacket::str() const
+{
+    string output;
+
+    output = "Link State Acknowledgement Packet:\n";
+    // Standard Header
+    output += standard() + "\n";
+    // Link State Acknowledgement Packet Specifics
+
+    list<Lsa_header> li = _lsa_headers;
+    list<Lsa_header>::iterator i = li.begin();
+    for (; i != li.end(); i++) {
+	output += "\n\t" + (*i).str();
+    }
+
+    return output;
+}

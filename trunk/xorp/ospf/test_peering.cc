@@ -52,6 +52,7 @@ class DebugIO : public IO<A> {
 	_dec.register_decoder(new DataDescriptionPacket(version));
 	_dec.register_decoder(new LinkStateRequestPacket(version));
 	_dec.register_decoder(new LinkStateUpdatePacket(version,_lsa_decoder));
+	_dec.register_decoder(new LinkStateAcknowledgementPacket(version));
     }
 
     /**

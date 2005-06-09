@@ -531,7 +531,7 @@ class LinkStateRequestPacket : public Packet {
 };
 
 /**
- * Link State Upate Packet
+ * Link State Update Packet
  */
 class LinkStateUpdatePacket : public Packet {
  public:
@@ -567,6 +567,40 @@ class LinkStateUpdatePacket : public Packet {
     // contains there is no point in storing it.
 
     list<Lsa::LsaRef> _lsas;	// The list of LSAs in the packet.
+};
+
+/**
+ * Link State Acknowledgement Packet
+ */
+class LinkStateAcknowledgementPacket : public Packet {
+ public:
+    LinkStateAcknowledgementPacket(OspfTypes::Version version)
+	: Packet(version)
+    {}
+
+    OspfTypes::Type get_type() const { return 5; }
+
+    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
+
+    /**
+     * Encode the packet.
+     *
+     * @param pkt vector into which the packet should be placed.
+     * @return true if the encoding succeeded.
+     */
+    bool encode(vector<uint8_t>& pkt);
+
+    list<Lsa_header>& get_lsa_headers() {
+	return _lsa_headers;
+    }
+    
+    /**
+     * Generate a printable representation of the packet.
+     */
+    string str() const;
+    
+ private:
+    list<Lsa_header> _lsa_headers;
 };
 
 /**
