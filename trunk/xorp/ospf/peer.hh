@@ -716,6 +716,8 @@ class Neighbour {
 
     void data_description_received(DataDescriptionPacket *dd);
 
+    void link_state_request_received(LinkStateRequestPacket *lsrp);
+
     /**
      * Queue a LSA for later transmission.
      *

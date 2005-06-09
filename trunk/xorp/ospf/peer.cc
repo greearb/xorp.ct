@@ -494,7 +494,18 @@ Peer<A>::process_link_state_request_packet(A dst, A src,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsrp));
 
-    XLOG_WARNING("TBD");
+    Neighbour<A> *n = find_neighbour(src, lsrp);
+
+    if (0 == n) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "No matching neighbour found source %s %s",
+		   cstring(src),
+		   cstring(*lsrp));
+	
+	return false;
+    }
+
+    n->link_state_request_received(lsrp);
     
     return false;	// Never keep a copy of the packet.
 }
@@ -2441,6 +2452,46 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
     }
 }
 
+/**
+ * RFC 2328 Section 10.7. Receiving Link State Request Packets
+ */
+template <typename A>
+void
+Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
+{
+    const char *event_name = "LinkStateRequestReceived-pseudo-event";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       get_candidate_id().str().c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
+	      cstring(get_candidate_id()),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str(),
+	      cstring(*lsrp));
+
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+	// Ignore
+	return;
+    case Exchange:
+    case Loading:
+    case Full:
+	XLOG_WARNING("TBD - Send Link State Update Packet in response");
+	break;
+    }
+
+    
+
+}
+
 template <typename A>
 bool
 Neighbour<A>::queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid)
@@ -2467,6 +2518,10 @@ template <typename A>
 bool
 Neighbour<A>::push_lsas()
 {
+    // Typically push_lsas will be called immediately after one or
+    // more calls to queue_lsa, it therefore shouldn't be possible for
+    // the state to change. If the state was less than exchange then
+    // queue_lsa shouldn't have queued anything.
     if (get_state() < Exchange) {
 	list<Lsa::LsaRef>::iterator i;
 	for (i = _lsa_queue.begin(); i != _lsa_queue.end(); i++)
