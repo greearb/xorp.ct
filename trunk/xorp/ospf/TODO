@@ -49,6 +49,12 @@ get_interface_cost().
 15) I think the age needs to have the link cost added to it as well as
 updating the time.
 
+16) A data description packet carries a number of LSA headers. There
+is a count in the packet of the number of LSA header. We don't store
+this information as its unnecessary. Need to verify that we actually
+write this information out when encoding a packet. Should perhaps also
+check it on input rather than just stepping over it.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
