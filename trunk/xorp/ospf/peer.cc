@@ -2725,7 +2725,7 @@ Neighbour<A>::event_exchange_done()
 	}
 	restart_retransmitter();
 	debug_msg("link state request list count: %d\n",
-		  _ls_request_list.size());
+		  XORP_INT_CAST(_ls_request_list.size()));
 	break;
     case Loading:
 	break;

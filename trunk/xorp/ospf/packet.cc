@@ -155,7 +155,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
 	xorp_throw(BadPacket,
 		   c_format("Packet length mismatch expected %u received %u",
 			    packet_length,
-			    len));
+			    XORP_UINT_CAST(len)));
 
     set_router_id(IPv4(&ptr[4]));
     set_area_id(IPv4(&ptr[8]));
@@ -210,7 +210,8 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
 
     if (len < get_standard_header_length()) {
 	XLOG_ERROR("Request to put a header of size %u in space %u",
-		   get_standard_header_length(), len);
+		   XORP_UINT_CAST(get_standard_header_length()),
+		   XORP_UINT_CAST(len));
 	return 0;
     }
 
@@ -383,8 +384,8 @@ HelloPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     if ((len - offset) < MINIMUM_LENGTH)
 	xorp_throw(BadPacket,
 		   c_format("Packet too short %u, must be at least %u",
-			    len,
-			    offset + MINIMUM_LENGTH));
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(offset + MINIMUM_LENGTH)));
 
 #ifdef	DEBUG_RAW_PACKETS
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
@@ -531,8 +532,8 @@ DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     if ((len - offset) < minimum_length())
 	xorp_throw(BadPacket,
 		   c_format("Packet too short %u, must be at least %u",
-			    len,
-			    offset + minimum_length()));
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(offset + minimum_length())));
 
 #ifdef	DEBUG_RAW_PACKETS
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
@@ -690,8 +691,8 @@ LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     if ((len - offset) < ls.length())
 	xorp_throw(BadPacket,
 		   c_format("Packet too short %u, must be at least %u",
-			    len,
-			    offset + ls.length()));
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(offset + ls.length())));
 
 #ifdef	DEBUG_RAW_PACKETS
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
@@ -779,8 +780,8 @@ LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     if ((len - offset) < min_length)
 	xorp_throw(BadPacket,
 		   c_format("Packet too short %u, must be at least %u",
-			    len,
-			    offset + min_length));
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(offset + min_length)));
 
 #ifdef	DEBUG_RAW_PACKETS
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
@@ -893,8 +894,8 @@ LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len) const
     if ((len - offset) < Lsa_header::length())
 	xorp_throw(BadPacket,
 		   c_format("Packet too short %u, must be at least %u",
-			    len,
-			    offset + Lsa_header::length()));
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(offset + Lsa_header::length())));
 
 #ifdef	DEBUG_RAW_PACKETS
     debug_msg("\n%s", dump_packet(ptr, len).c_str());

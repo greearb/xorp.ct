@@ -291,7 +291,8 @@ AreaRouter<A>::get_entry_database(DataBaseHandle& dbh, bool& last)
     uint32_t position = dbh.position();
 
     if (position >= _db.size())
-	XLOG_FATAL("Index too far %d length %d", position, _db.size());
+	XLOG_FATAL("Index too far %d length %d", position,
+		   XORP_INT_CAST(_db.size()));
 
     dbh.advance(last);
 

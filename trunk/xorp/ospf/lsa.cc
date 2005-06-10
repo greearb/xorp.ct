@@ -532,8 +532,9 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			   c_format(
 				    "RouterLSA mismatch in router links"
 				    " expected %u received %u",
-				    nlinks,
-				    lsa->get_router_links().size()));
+				    XORP_UINT_CAST(nlinks),
+				    XORP_UINT_CAST(lsa->
+						   get_router_links().size())));
 	    break;
 	case OspfTypes::V3:
 	    break;
