@@ -77,8 +77,8 @@ end
 
 %%EndIdrawPrologue
 
-/arrowHeight 8 def
-/arrowWidth 4 def
+/arrowHeight 9 def
+/arrowWidth 5 def
 
 /IdrawDict 51 dict def
 IdrawDict begin
@@ -210,6 +210,7 @@ end
 /Circ {
 newpath
 0 360 arc
+closepath
 patternNone not { ifill } if
 brushNone not { istroke } if
 } def
@@ -241,6 +242,7 @@ newpath
 translate
 scale
 0 0 1 0 360 arc
+closepath
 patternNone not { ifill } if
 brushNone not { istroke } if
 end
@@ -360,7 +362,7 @@ grestore
 gsave
 fgred fggreen fgblue setrgbcolor
 /fontDict printFont printSize scalefont dup setfont def
-/descender fontDict begin 0 [FontBBox] 1 get FontMatrix end
+/descender fontDict begin 0 /FontBBox load 1 get FontMatrix end
 transform exch pop def
 /vertoffset 1 printSize sub descender sub def {
 0 vertoffset moveto show
@@ -490,7 +492,7 @@ exch dup 3 1 roll 1 0 0 -1 0 6 -1 roll matrix astore
 
 %%EndProlog
 
-%I Idraw 10 Grid 4 4 
+%I Idraw 13 Grid 8 8 
 
 %%Page: 1 1
 
@@ -501,8 +503,17 @@ Begin
 %I f u
 %I p u
 %I t
-[ 0.957041 0 0 0.957041 0 0 ] concat
+[ 0.842804 0 0 0.842804 0 0 ] concat
 /originalCTM matrix currentmatrix def
+
+Begin %I Pict
+%I b u
+%I cfg u
+%I cbg u
+%I f u
+%I p u
+%I t
+[ 1.13554 0 0 1.13554 0 0 ] concat
 
 Begin %I Rect
 none SetB %I b n
@@ -1481,6 +1492,8 @@ Helvetica 14 SetF
 (Click Elements)
 ] Text
 End
+
+End %I eop
 
 End %I eop
 
