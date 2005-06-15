@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.30 2005/04/12 08:27:59 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.31 2005/04/13 21:08:20 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -11,7 +11,7 @@
 \usepackage{setspace}
 \usepackage{times}
 \usepackage{latexsym}
-\usepackage{psfig}
+%\usepackage{psfig} obsolete
 \usepackage{graphicx}
 \usepackage{xspace}
 \usepackage{color}
@@ -34,14 +34,14 @@
 
 \title{XORP Router Manager Process (rtrmgr) \\
 \vspace{1ex}
-Version 1.1}
+Version 1.1 \\{\small(document revision 2)}}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{April 13, 2005}
+\date{June 15, 2005}
 
 %\twocolumn
 \begin{document}
@@ -665,7 +665,6 @@ certain nodes to specific values.
 
   \item The remaining parameters are a list of possible allowed values for
 this variable.
-
 \end{itemize}
 
 For example, a node might specify an address family, which is intended
@@ -736,8 +735,6 @@ If, however, somehow the xorpsh sends to the rtrmgr configuration
 that contains a deprecated statement, the rtrmgr returns an error to xorpsh,
 and the error message will contain the string with the reason.
 
-\newpage
-
 An example of use appears in the interface address prefix
 specification:
 
@@ -754,6 +751,98 @@ specification:
          }
        }
 \end{verbatim}
+
+\newpage
+
+\subsubsection{The {\tt \%order} Command.}
+
+The {\tt \%order} command provides a way to specify the ordering of
+multiple nodes of the same type in the configuration.  For example, if
+no ordering is specified in the template file, such as with interfaces:
+
+\begin{verbatim}
+      interfaces {
+        interface @: txt {
+        }
+      }
+\end{verbatim}
+
+\noindent Then this template would allow the configuration for each
+{\tt interface} to be displayed and configured in the order they were
+entered.  For example, the configuration might be:
+
+\begin{verbatim}
+      interfaces {
+        interface fxp1 {
+          vif fxp1 {
+             address: 10.0.0.1
+          }
+        }
+        interface dc0 {
+          vif dc0 {
+             address: 10.0.1.1
+          }
+        }
+        interface fxp0 {
+          vif fxp0 {
+             address: 10.0.2.1
+          }
+        }
+      }
+\end{verbatim}
+
+\noindent The ordering of the {\tt interface} sections here is
+arbitrary, in the order they were entered by the user.
+
+\noindent In many cases this is what is desired, but in some cases such as
+firewall rules, this is not desired, and the {\tt \%order} command
+provides a way to enforce an ordering.
+
+\noindent For example, a simple firewall (not the actual XORP firewall) might
+use a template such as:
+\begin{verbatim}
+      firewall {
+        interface @: txt {
+           rule @: u32 {
+             %order: sorted-numeric;
+             permit @: txt;
+             deny @:txt;
+           }
+         }
+       }
+\end{verbatim}
+
+\newpage
+\noindent Thus, some configured firewall rules might be:
+\begin{verbatim}
+      firewall {
+        interface fxp0 {
+          rule 100 {
+            permit "net 10.0.0.0/24"
+          }
+          rule 300 {
+            deny "all"
+          }
+        }
+      }
+\end{verbatim}
+
+\noindent The ordering here is now dictated by {\tt rule} number, in accordance
+with the {tt \%order} command.  If a new {\tt rule 200} was
+subsequently inserted, it would always be displayed and configured
+after {\tt rule 100} and before {\tt rule 300}.
+
+\noindent The available parameters for the {\tt \%order} command are:
+\begin{itemize}
+\item {\tt unsorted} - the default, ordered in the order of entry.
+\item {\tt sorted-numeric} - sorted in increasing numeric interger
+  order.
+\item {\tt sorted-alphabetic} - sorted in increasing alphabetic order.
+\end{itemize}
+
+\noindent Note that if {\tt sorted-numeric} is applied to a {\tt txt}
+field, the sort order for non-numeric values is undefined, but numeric
+values will be sorted correctly.
 
 \newpage
 
