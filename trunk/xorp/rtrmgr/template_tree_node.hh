@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.22 2005/01/22 09:34:24 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.23 2005/03/25 02:54:39 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -43,6 +43,12 @@ enum TTNodeType {
     NODE_IPV6		= 7,
     NODE_IPV6NET	= 8,
     NODE_MACADDR	= 9
+};
+
+enum TTSortOrder {
+    ORDER_UNSORTED,
+    ORDER_SORTED_NUMERIC,
+    ORDER_SORTED_ALPHABETIC
 };
 
 class BaseCommand;
@@ -111,6 +117,9 @@ public:
 
     int child_number() const { return _child_number;}
 
+    TTSortOrder order() const { return _order; }
+    void set_order(TTSortOrder o) { _order = o; }
+
     bool is_deprecated() const { return _is_deprecated; }
     void set_deprecated(bool v) { _is_deprecated = v; }
     const string& deprecated_reason() const { return _deprecated_reason; }
@@ -163,6 +172,8 @@ private:
     list<string>	_mandatory_children;
 
     int _child_number;
+
+    TTSortOrder _order;
 
     bool		_verbose;	 // Set to true if output is verbose
     bool		_is_deprecated;	// True if node's usage is deprecated

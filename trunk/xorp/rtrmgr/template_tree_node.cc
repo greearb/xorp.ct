@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.34 2005/02/01 02:59:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.35 2005/03/25 02:54:39 pavlin Exp $"
 
 
 #include <glob.h>
@@ -44,6 +44,7 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _varname(varname),
       _has_default(false),
       _is_tag(false),
+      _order(ORDER_UNSORTED),
       _verbose(template_tree.verbose()),
       _is_deprecated(false)
 {
@@ -106,6 +107,8 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	// Nothing to do - the work is done by add_action
     } else if (cmd == "%deprecated") {
 	// Nothing to do - the work is done by add_action
+    } else if (cmd == "%order") {
+	// Nothing to do - the work is done by add_action
     } else if ((cmd == "%create")
 	       || (cmd == "%activate")
 	       || (cmd == "%update")
@@ -128,7 +131,8 @@ TemplateTreeNode::add_cmd(const string& cmd)
     } else {
 	string err = "Invalid command \"" + cmd + "\"\n";
 	err += "Valid commands are %create, %delete, %set, %unset, %get, ";
-	err += "%default, %modinfo, %activate, %update, %allow, %allow-range, %mandatory, %deprecated\n";
+	err += "%default, %modinfo, %activate, %update, %allow, %allow-range, %mandatory, ";
+	err += "%deprecated, %order\n";
 	xorp_throw(ParseError, err);
     }
 }
@@ -202,6 +206,28 @@ TemplateTreeNode::add_action(const string& cmd,
 	} else {
 	    // XXX really should say why it's bad.
 	    XLOG_WARNING("Bad %%deprecated specification in template file ignored\n");
+	}
+    } else if (cmd == "%order") {
+	if (action_list.size() == 1) {
+	    list<string>::const_iterator li = action_list.begin();
+	    TTSortOrder order;
+	    if (*li == "unsorted") {
+		order = ORDER_UNSORTED;
+	    } else if (*li == "sorted-numeric") {
+		order = ORDER_SORTED_NUMERIC;
+	    } else if (*li == "sorted-alphabetic") {
+		order = ORDER_SORTED_ALPHABETIC;
+	    } else {
+		XLOG_WARNING("Bad %%order specification in template file ignored - should be unsorted, sorted-numeric, or sorted-alphabetic");
+	    }
+	    set_order(order);
+
+	    if ((_parent != NULL) && (_parent->is_tag())) {
+		_parent->set_order(order);
+	    }
+	} else {
+	    // XXX really should say why it's bad.
+	    XLOG_WARNING("Bad %%order specification in template file ignored\n");
 	}
     } else if (cmd == "%mandatory") {
 	// Add all new mandatory variables

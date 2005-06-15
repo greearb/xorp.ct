@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.30 2005/01/10 02:58:18 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.31 2005/03/25 02:54:35 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -32,7 +32,17 @@ class CommandTree;
 class RouterCLI;
 class TaskManager;
 class TemplateTreeNode;
+class ConfigTreeNode;
 
+class CTN_Compare {
+public:
+    bool operator() (ConfigTreeNode* a, ConfigTreeNode *b);
+};
+
+class CTN_CompareValue {
+public:
+    bool operator() (ConfigTreeNode* a, ConfigTreeNode *b);
+};
 
 class ConfigTreeNode {
 public:
@@ -84,6 +94,7 @@ public:
     string typestr() const;
     const string& segname() const { return _segname; }
     const string& value() const;
+    bool has_value() const {return _has_value;}
     uid_t user_id() const { return _user_id; }
     void set_existence_committed(bool v) { _existence_committed = v; }
     bool existence_committed() const { return _existence_committed; }
@@ -127,6 +138,7 @@ protected:
 					     VarType& type);
     ConfigTreeNode* find_child_varname_node(const list<string>& var_parts,
 					    VarType& type);
+    void sort_by_value(list <ConfigTreeNode*>& children) const;
 
 
     const TemplateTreeNode* _template_tree_node;
