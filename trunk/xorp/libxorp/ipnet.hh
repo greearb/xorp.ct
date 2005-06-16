@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.12 2004/12/18 03:40:30 atanu Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.13 2005/03/25 02:53:41 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -369,6 +369,13 @@ IPNet<A>::initialize_from_string(const char *cp)
 
     if (*(slash + 1) == 0)
 	xorp_throw(InvalidString, "Missing prefix length");
+    char *n = slash + 1;
+    while (*n != 0) {
+	if (*n < '0' || *n > '9') {
+	    xorp_throw(InvalidString, "Bad prefix length");
+	}
+	n++;
+    }
     _prefix_len = atoi(slash + 1);
 
     string addr = string(cp, slash - cp);
