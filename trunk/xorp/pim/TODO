@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.114 2005/05/04 16:31:32 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.115 2005/05/12 10:21:24 pavlin Exp $
 #
+
+* PIM IMPL:
+  If the PIM-SM module doesn't know the RP address, then it shouldn't
+  include the register_vif in the MFC entry's outgoing interface set.
 
 * BSR SPEC + IMPL + TESTSUITE:
   On startup, or after adding Cand-BSR configuration, the
