@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.23 2005/03/25 02:54:39 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.24 2005/06/15 19:14:53 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -70,7 +70,7 @@ public:
     virtual string str() const;
     virtual string typestr() const { return string("void"); }
     virtual string default_str() const { return string(""); }
-    virtual bool type_match(const string& s) const;
+    virtual bool type_match(const string& s, string& errmsg) const;
     BaseCommand* command(const string& cmd_name);
     const BaseCommand* const_command(const string& cmd_name) const;
     set<string> commands() const;
@@ -190,7 +190,7 @@ public:
     TTNodeType type() const { return NODE_UINT; }
     unsigned int default_value() const { return _default; }
     string default_str() const;
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     unsigned int _default;
@@ -205,7 +205,7 @@ public:
     TTNodeType type() const { return NODE_INT; }
     int default_value() const { return _default; }
     string default_str() const;
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     int _default;
@@ -221,7 +221,7 @@ public:
     TTNodeType type() const { return NODE_TEXT; }
     string default_value() const { return _default; }
     string default_str() const { return _default; }
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     string _default;
@@ -237,7 +237,7 @@ public:
     TTNodeType type() const { return NODE_BOOL; }
     bool default_value() const { return _default; }
     string default_str() const;
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     bool _default;
@@ -254,7 +254,7 @@ public:
     TTNodeType type() const { return NODE_IPV4; }
     IPv4 default_value() const { return *_default; }
     string default_str() const { return _default->str(); }
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     IPv4* _default;
@@ -271,7 +271,7 @@ public:
     TTNodeType type() const { return NODE_IPV4NET; }
     IPv4Net default_value() const { return *_default; }
     string default_str() const { return _default->str(); }
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     IPv4Net* _default;
@@ -288,7 +288,7 @@ public:
     TTNodeType type() const { return NODE_IPV6; }
     IPv6 default_value() const { return *_default; }
     string default_str() const { return _default->str(); }
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     IPv6* _default;
@@ -305,7 +305,7 @@ public:
     TTNodeType type() const { return NODE_IPV6NET; }
     IPv6Net default_value() const { return *_default; }
     string default_str() const { return _default->str(); }
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     IPv6Net* _default;
@@ -322,7 +322,7 @@ public:
     TTNodeType type() const { return NODE_MACADDR; }
     Mac default_value() const { return *_default; }
     string default_str() const { return _default->str(); }
-    bool type_match(const string& s) const;
+    bool type_match(const string& s, string& errmsg) const;
 
 private:
     // XXX: really should be a MAC not an EtherMAC, but we'll fix this later

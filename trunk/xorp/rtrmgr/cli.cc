@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.63 2005/02/01 07:41:15 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.64 2005/03/25 02:54:34 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -1743,13 +1743,14 @@ RouterCLI::text_entry_func(const string& ,
 	    // take the first that has valid syntax.
 	    //
 	    // TODO: we really ought to check the allow commands here
+	    string errhelp;
 	    for (iter = tag_ttn->children().begin();
 		 iter != tag_ttn->children().end();
 		 ++iter) {
 		// XXX: ignore deprecated subtrees
 		if ((*iter)->is_deprecated())
 		    continue;
-		if ((*iter)->type_match(argv[0])) {
+		if ((*iter)->type_match(argv[0], errhelp)) {
 		    data_ttn = (*iter);
 		    break;
 		}
@@ -1759,6 +1760,9 @@ RouterCLI::text_entry_func(const string& ,
 					 "is not a valid \"%s\".\n",
 					 argv[0].c_str(),
 					 tag_ttn->typestr().c_str());
+		if (!errhelp.empty()) {
+		    errmsg += errhelp + "\n"; 
+		}
 		_cli_client.cli_print(errmsg);
 		return (XORP_ERROR);
 	    }
@@ -2062,6 +2066,7 @@ RouterCLI::text_entry_func(const string& ,
 		//
 		// TODO: we really ought to check the allow commands here
 		string cand_types;
+		string errhelp;
 		list<TemplateTreeNode*>::const_iterator tti;
 		for (tti = ttn->children().begin();
 		     tti != ttn->children().end();
@@ -2069,7 +2074,7 @@ RouterCLI::text_entry_func(const string& ,
 		    // XXX: ignore deprecated subtrees
 		    if ((*tti)->is_deprecated())
 			continue;
-		    if ((*tti)->type_match(value)) {
+		    if ((*tti)->type_match(value, errhelp)) {
 			data_ttn = (*tti);
 			break;
 		    }
@@ -2087,6 +2092,9 @@ RouterCLI::text_entry_func(const string& ,
 					     "is not a valid %s.\n",
 					     value.c_str(),
 					     cand_types.c_str());
+		    if (!errhelp.empty()) {
+			errmsg += errhelp + "\n"; 
+		    }
 		    _cli_client.cli_print(errmsg);
 		    goto cleanup;
 		}
@@ -2100,7 +2108,8 @@ RouterCLI::text_entry_func(const string& ,
 		value_expected = false;
 	    } else if (ctn->is_leaf()) {
 		// It must be a leaf, and we're expecting a value
-		if (ttn->type_match(value)) {
+		string errhelp;
+		if (ttn->type_match(value, errhelp)) {
 		    XLOG_TRACE(_verbose, "setting node %s to %s\n", 
 			       ctn->segname().c_str(),
 			       value.c_str());
@@ -2111,6 +2120,9 @@ RouterCLI::text_entry_func(const string& ,
 					     "is not a valid \"%s\".\n",
 					     value.c_str(),
 					     ttn->typestr().c_str());
+		    if (!errhelp.empty()) {
+			errmsg += errhelp + "\n"; 
+		    }
 		    _cli_client.cli_print(errmsg);
 		    goto cleanup;
 		}
@@ -2457,11 +2469,15 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	return result;
     }
 
-    if (ttn->type_match(argv[0]) == false) {
+    string errhelp;
+    if (ttn->type_match(argv[0], errhelp) == false) {
 	string result = c_format("ERROR: argument \"%s\" "
 				 "is not a valid \"%s\".",
 				 argv[0].c_str(),
 				 ttn->typestr().c_str());
+	if (!errhelp.empty()) {
+	    result += "\n" + errhelp; 
+	}
 	return result;
     }
 

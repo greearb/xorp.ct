@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.35 2005/03/25 02:54:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.36 2005/06/15 19:14:52 mjh Exp $"
 
 
 #include <glob.h>
@@ -314,7 +314,7 @@ TemplateTreeNode::subtree_str() const
 }
 
 bool
-TemplateTreeNode::type_match(const string& ) const
+TemplateTreeNode::type_match(const string&, string& ) const
 {
     return true;
 }
@@ -749,8 +749,13 @@ TextTemplate::TextTemplate(TemplateTree& template_tree,
     if (initializer == "")
 	return;
 
-    if (! type_match(initializer)) {
+    string errmsg;
+    if (! type_match(initializer, errmsg)) {
 	string err = "Bad Text type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
 	xorp_throw(ParseError, err);
     }
 
@@ -760,7 +765,7 @@ TextTemplate::TextTemplate(TemplateTree& template_tree,
 }
 
 bool
-TextTemplate::type_match(const string& ) const
+TextTemplate::type_match(const string&, string&) const
 {
     //
     // If the lexical analyser passed it to us, we can assume its a
@@ -784,8 +789,13 @@ UIntTemplate::UIntTemplate(TemplateTree& template_tree,
 	return;
 
     string s = strip_quotes(initializer);
-    if (! type_match(s)) {
+    string errmsg;
+    if (! type_match(s, errmsg)) {
 	string err = "Bad UInt type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
 	xorp_throw(ParseError, err);
     }
     _default = atoi(s.c_str());
@@ -793,13 +803,21 @@ UIntTemplate::UIntTemplate(TemplateTree& template_tree,
 }
 
 bool
-UIntTemplate::type_match(const string& orig) const
+UIntTemplate::type_match(const string& orig, string& errmsg) const
 {
     string s = strip_quotes(orig);
 
     for (size_t i = 0; i < s.length(); i++)
-	if (s[i] < '0' || s[i] > '9')
+	if (s[i] < '0' || s[i] > '9') {
+	    if (s[i]=='-') {
+		errmsg = "Value cannot be negative.";
+	    } if (s[i]=='.') {
+		errmsg = "Value must be an integer.";
+	    } else {
+		errmsg = "Value must be numeric.";
+	    }
 	    return false;
+	}
     return true;
 }
 
@@ -824,8 +842,13 @@ IntTemplate::IntTemplate(TemplateTree& template_tree,
 	return;
 
     string s = strip_quotes(initializer);
-    if (! type_match(s)) {
+    string errmsg;
+    if (! type_match(s, errmsg)) {
 	string err = "Bad Int type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
 	xorp_throw(ParseError, err);
     }
     _default = atoi(s.c_str());
@@ -833,18 +856,26 @@ IntTemplate::IntTemplate(TemplateTree& template_tree,
 }
 
 bool
-IntTemplate::type_match(const string& orig) const
+IntTemplate::type_match(const string& orig, string& errmsg) const
 {
     string s = strip_quotes(orig);
     size_t start = 0;
     if (s[0] == '-') {
-	if (s.length() == 1)
+	if (s.length() == 1) {
+	    errmsg = "Value must be an integer.";
 	    return false;
+	}
 	start = 1;
     }
     for (size_t i = start; i < s.length(); i++)
-	if (s[i] < '0' || s[i] > '9')
+	if (s[i] < '0' || s[i] > '9') {
+	    if (s[i]=='.') {
+		errmsg = "Value must be an integer.";
+	    } else {
+		errmsg = "Value must be numeric.";
+	    }	    
 	    return false;
+	}
     return true;
 }
 
@@ -867,9 +898,14 @@ BoolTemplate::BoolTemplate(TemplateTree& template_tree,
 {
     if (initializer == "")
 	return;
-
-    if (! type_match(initializer)) {
+    
+    string errmsg;
+    if (! type_match(initializer, errmsg)) {
 	string err = "Bad Bool type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
 	xorp_throw(ParseError, err);
     }
     if (initializer == string("false"))
@@ -880,12 +916,13 @@ BoolTemplate::BoolTemplate(TemplateTree& template_tree,
 }
 
 bool
-BoolTemplate::type_match(const string& s) const
+BoolTemplate::type_match(const string& s, string& errmsg) const
 {
     if (s == "true")
 	return true;
     else if (s == "false")
 	return true;
+    errmsg = "Value must be \"true\" or \"false\".";
     return false;
 }
 
@@ -923,17 +960,20 @@ IPv4Template::~IPv4Template()
 }
 
 bool
-IPv4Template::type_match(const string& s) const
+IPv4Template::type_match(const string& s, string& errmsg) const
 {
     string tmp = strip_quotes(s);
 
-    if (tmp.empty())
+    if (tmp.empty()) {
+	errmsg = "Value must be an IP address in dotted decimal form.";
 	return false;
+    }
 
     try {
 	IPv4* ipv4 = new IPv4(tmp.c_str());
 	delete ipv4;
     } catch (InvalidString) {
+	errmsg = "Value must be an IP address in dotted decimal form.";
 	return false;
     }
     return true;
@@ -965,17 +1005,20 @@ IPv6Template::~IPv6Template()
 }
 
 bool
-IPv6Template::type_match(const string& s) const
+IPv6Template::type_match(const string& s, string& errmsg) const
 {
     string tmp = strip_quotes(s);
 
-    if (tmp.empty())
+    if (tmp.empty()) {
+	errmsg = "Value must be an IPv4 address.";
 	return false;
+    }
 
     try {
 	IPv6* ipv6 = new IPv6(tmp.c_str());
 	delete ipv6;
     } catch (InvalidString) {
+	errmsg = "Value must be an IPv6 address.";
 	return false;
     }
     return true;
@@ -995,6 +1038,10 @@ IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
 	} catch (InvalidString) {
 	    string err = "Bad IPv4Net type value: " + initializer;
 	    xorp_throw(ParseError, err);
+	} catch (InvalidNetmaskLength) {
+	    string err = "Illegal IPv4 prefix length in subnet: " 
+		+ initializer; 
+	    xorp_throw(ParseError, err);
 	}
 	set_has_default();
     }
@@ -1007,17 +1054,23 @@ IPv4NetTemplate::~IPv4NetTemplate()
 }
 
 bool
-IPv4NetTemplate::type_match(const string& s) const
+IPv4NetTemplate::type_match(const string& s, string& errmsg) const
 {
     string tmp = strip_quotes(s);
 
-    if (tmp.empty())
+    if (tmp.empty()) {
+	errmsg = "Value must be a subnet in address/prefix-length form.";
 	return false;
+    }
 
     try {
 	IPv4Net* ipv4net = new IPv4Net(tmp.c_str());
 	delete ipv4net;
     } catch (InvalidString) {
+	errmsg = "Value must be a subnet in address/prefix-length form.";
+	return false;
+    } catch (InvalidNetmaskLength) {
+	errmsg = "Prefix length must be an integer between 0 and 32.";
 	return false;
     }
     return true;
@@ -1037,6 +1090,10 @@ IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
 	} catch (InvalidString) {
 	    string err = "Bad IPv6Net type value: " + initializer;
 	    xorp_throw(ParseError, err);
+	} catch (InvalidNetmaskLength) {
+	    string err = "Illegal IPv6 prefix length in subnet: " 
+		+ initializer; 
+	    xorp_throw(ParseError, err);
 	}
 	set_has_default();
     }
@@ -1049,17 +1106,23 @@ IPv6NetTemplate::~IPv6NetTemplate()
 }
 
 bool
-IPv6NetTemplate::type_match(const string& s) const
+IPv6NetTemplate::type_match(const string& s, string& errmsg) const
 {
     string tmp = strip_quotes(s);
 
-    if (tmp.empty())
+    if (tmp.empty()) {
+	errmsg = "Value must be an IPv6 subnet in address/prefix-length form.";
 	return false;
+    }
 
     try {
 	IPv6Net* ipv6net = new IPv6Net(tmp.c_str());
 	delete ipv6net;
     } catch (InvalidString) {
+	errmsg = "Value must be an IPv6 subnet in address/prefix-length form.";
+	return false;
+    } catch (InvalidNetmaskLength) {
+	errmsg = "Prefix length must be an integer between 0 and 128.";
 	return false;
     }
     return true;
@@ -1091,17 +1154,20 @@ MacaddrTemplate::~MacaddrTemplate()
 }
 
 bool
-MacaddrTemplate::type_match(const string& s) const
+MacaddrTemplate::type_match(const string& s, string& errmsg) const
 {
     string tmp = strip_quotes(s);
 
-    if (tmp.empty())
+    if (tmp.empty()) {
+	errmsg = "Value must be an MAC address (six hex digits separated by colons)";
 	return false;
+    }
 
     try {
 	EtherMac* mac = new EtherMac(tmp.c_str());
 	delete mac;
     } catch (InvalidString) {
+	errmsg = "Value must be an MAC address (six hex digits separated by colons)";
 	return false;
     }
     return true;

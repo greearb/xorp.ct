@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.25 2004/12/11 21:29:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.26 2005/03/25 02:54:39 pavlin Exp $"
 
 
 #include <glob.h>
@@ -368,7 +368,8 @@ TemplateTree::find_node(const list<string>& path_segments) const
 		continue;
 	    if ((t->parent() == NULL) || (! t->parent()->is_tag()))
 		continue;
-	    if (t->type_match(*iter))
+	    string s;
+	    if (t->type_match(*iter, s))
 		matches.push_back(t);
 	}
 	if (matches.size() == 0)
