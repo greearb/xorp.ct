@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.29 2005/03/24 02:19:26 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.30 2005/03/24 03:07:06 pavlin Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -63,6 +63,9 @@
 
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
+
+* The MFEA should call MRT_ADD_VIF on an interface only after a multicast
+  routing protocol expresses interest in using that interface.
 
 * The IPv4 raw packet input in case of OpenBSD has changed between versions.
   E.g., if (defined(__OpenBSD__) && (OpenBSD < 200311))
