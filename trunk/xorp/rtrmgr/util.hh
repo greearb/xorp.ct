@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/util.hh,v 1.5 2004/06/10 22:41:55 hodson Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.6 2005/03/25 02:54:40 pavlin Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
@@ -112,6 +112,7 @@ const char* xorp_basename(const char* argv0);
 
 /**
  * Remove enclosing quotes from string.
+ *
  * @param s string that may have enclosing quotes.
  * @return string with quotes removed.
  */
@@ -119,9 +120,18 @@ string& unquote(string& s);
 
 /**
  * Remove enclosing quotes from string value.
+ *
  * @param s string that may have enclosing quotes.
  * @return copy of string with quotes removed.
  */
 string unquote(const string& s);
+
+/**
+ * Remove the heading and trailing empty spaces from string value.
+ *
+ * @param s string that may have heading and trailing empty spaces.
+ * @return copy of the string with heading and trailing empty spaces removed.
+ */
+string strip_empty_spaces(const string& s);
 
 #endif // __RTRMGR_UTIL_HH__
