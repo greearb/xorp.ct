@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.49 2005/01/13 00:53:06 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.50 2005/04/29 21:45:33 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -49,6 +49,7 @@ xorp_rtrmgr_SOURCES	+= template_base_command.hh
 xorp_rtrmgr_SOURCES	+= template_commands.hh
 xorp_rtrmgr_SOURCES	+= template_tree.hh
 xorp_rtrmgr_SOURCES	+= template_tree_node.hh
+xorp_rtrmgr_SOURCES	+= unexpanded_program.hh
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.hh
 xorp_rtrmgr_SOURCES	+= userdb.hh
 xorp_rtrmgr_SOURCES	+= util.hh
@@ -74,6 +75,7 @@ xorp_rtrmgr_SOURCES	+= template_base_command.cc
 xorp_rtrmgr_SOURCES	+= template_commands.cc
 xorp_rtrmgr_SOURCES	+= template_tree.cc
 xorp_rtrmgr_SOURCES	+= template_tree_node.cc
+xorp_rtrmgr_SOURCES	+= unexpanded_program.cc
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
 xorp_rtrmgr_SOURCES	+= userdb.cc
 xorp_rtrmgr_SOURCES	+= util.cc
@@ -202,6 +204,7 @@ test_sample_config_SOURCES	+= template_base_command.hh
 test_sample_config_SOURCES	+= template_commands.hh
 test_sample_config_SOURCES	+= template_tree.hh
 test_sample_config_SOURCES	+= template_tree_node.hh
+test_sample_config_SOURCES	+= unexpanded_program.hh
 test_sample_config_SOURCES	+= unexpanded_xrl.hh
 test_sample_config_SOURCES	+= util.hh
 test_sample_config_SOURCES	+= xorp_client.hh
@@ -226,6 +229,7 @@ test_sample_config_SOURCES	+= template_commands.cc
 test_sample_config_SOURCES	+= template_tree.cc
 test_sample_config_SOURCES	+= template_tree_node.cc
 test_sample_config_SOURCES	+= test_sample_config.cc
+test_sample_config_SOURCES	+= unexpanded_program.cc
 test_sample_config_SOURCES	+= unexpanded_xrl.cc
 test_sample_config_SOURCES	+= util.cc
 test_sample_config_SOURCES	+= xorp_client.cc
@@ -258,6 +262,7 @@ test_module_manager_SOURCES	+= template_commands.hh
 test_module_manager_SOURCES	+= template_tree.hh
 test_module_manager_SOURCES	+= template_tree_node.hh
 test_module_manager_SOURCES	+= test_module_manager.hh
+test_module_manager_SOURCES	+= unexpanded_program.hh
 test_module_manager_SOURCES	+= unexpanded_xrl.hh
 test_module_manager_SOURCES	+= util.hh
 test_module_manager_SOURCES	+= xorp_client.hh
@@ -278,6 +283,7 @@ test_module_manager_SOURCES	+= template_commands.cc
 test_module_manager_SOURCES	+= template_tree.cc
 test_module_manager_SOURCES	+= template_tree_node.cc
 test_module_manager_SOURCES	+= test_module_manager.cc
+test_module_manager_SOURCES	+= unexpanded_program.cc
 test_module_manager_SOURCES	+= unexpanded_xrl.cc
 test_module_manager_SOURCES	+= util.cc
 test_module_manager_SOURCES	+= xorp_client.cc

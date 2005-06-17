@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.30 2004/12/11 21:29:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.31 2005/03/25 02:54:36 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -119,7 +119,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     if (cmd == "provides") {
 	_module_name = strip_quotes(cmd, value);
 	_tt.register_module(_module_name, this);
-	template_tree_node().set_module_name(_module_name);
+	template_tree_node().set_subtree_module_name(_module_name);
     } else if (cmd == "depends") {
 	if (_module_name.empty()) {
 	    xorp_throw(ParseError,
@@ -141,7 +141,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 		       "\"default_targetname\" must be preceded by \"provides\"");
 	}
 	_default_target_name = strip_quotes(cmd, value);
-	template_tree_node().set_default_target_name(_default_target_name);
+	template_tree_node().set_subtree_default_target_name(_default_target_name);
     } else if (cmd == "start_commit") {
 	debug_msg("start_commit:\n");
 	list<string>::const_iterator iter;
@@ -151,72 +151,110 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 
 	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front() == "xrl") {
-	    _start_commit = new XrlAction(template_tree_node(), newaction,
-					  xrldb);
-	} else {
+	do {
+	    if (newaction.front() == "xrl") {
+		_start_commit = new XrlAction(template_tree_node(), newaction,
+					      xrldb);
+		break;
+	    }
+	    if (newaction.front() == "program") {
+		_start_commit = new ProgramAction(template_tree_node(),
+						  newaction);
+		break;
+	    }
 	    _start_commit = new Action(template_tree_node(), newaction);
-	}
+	    break;
+	} while (false);
     } else if (cmd == "end_commit") {
 	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front() == "xrl") {
-	    _end_commit = new XrlAction(template_tree_node(), newaction,
-					xrldb);
-	} else {
+	do {
+	    if (newaction.front() == "xrl") {
+		_end_commit = new XrlAction(template_tree_node(), newaction,
+					    xrldb);
+		break;
+	    }
+	    if (newaction.front() == "program") {
+		_end_commit = new ProgramAction(template_tree_node(),
+						newaction);
+		break;
+	    }
 	    _end_commit = new Action(template_tree_node(), newaction);
-	}
+	    break;
+	} while (false);
     } else if (cmd == "status_method") {
 	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front() == "xrl") {
-	    _status_method = new XrlAction(template_tree_node(), newaction,
-					   xrldb);
-	} else {
+	do {
+	    if (newaction.front() == "xrl") {
+		_status_method = new XrlAction(template_tree_node(), newaction,
+					       xrldb);
+		break;
+	    }
+	    if (newaction.front() == "program") {
+		_status_method = new ProgramAction(template_tree_node(),
+						   newaction);
+		break;
+	    }
 	    _status_method = new Action(template_tree_node(), newaction);
-	}
+	    break;
+	} while (false);
     } else if (cmd == "startup_method") {
 	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front() == "xrl") {
-	    _startup_method = new XrlAction(template_tree_node(), newaction,
-					    xrldb);
-	} else {
+	do {
+	    if (newaction.front() == "xrl") {
+		_startup_method = new XrlAction(template_tree_node(),
+						newaction,
+						xrldb);
+		break;
+	    }
+	    if (newaction.front() == "program") {
+		_startup_method = new ProgramAction(template_tree_node(),
+						    newaction);
+		break;
+	    }
 	    _startup_method = new Action(template_tree_node(), newaction);
-	}
+	    break;
+	} while (false);
     } else if (cmd == "shutdown_method") {
 	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front() == "xrl") {
-	    _shutdown_method = new XrlAction(template_tree_node(), newaction,
-					     xrldb);
-	} else {
+	do {
+	    if (newaction.front() == "xrl") {
+		_shutdown_method = new XrlAction(template_tree_node(),
+						 newaction,
+						 xrldb);
+		break;
+	    }
+	    if (newaction.front() == "program") {
+		_shutdown_method = new ProgramAction(template_tree_node(),
+						     newaction);
+		break;
+	    }
 	    _shutdown_method = new Action(template_tree_node(), newaction);
-	}
+	    break;
+	} while (false);
     } else {
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
 	xorp_throw(ParseError, err);
     }
 }
 
-#if 0
-int
-ModuleCommand::execute(TaskManager& taskmgr) const
-{
-    return taskmgr.add_module(*this);
-}
-#endif // 0
-
 Validation*
 ModuleCommand::startup_validation(TaskManager& taskmgr) const
 {
     if ((_status_method != NULL) && (_startup_method != NULL)) {
-	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
-	if (xa != NULL)
-	    return new StatusStartupValidation(_module_name, *xa, taskmgr);
-	else
-	    return NULL;
+	if (xa != NULL) {
+	    return new XrlStatusStartupValidation(_module_name, *xa, taskmgr);
+	}
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(_status_method);
+	if (pa != NULL) {
+	    return new ProgramStatusStartupValidation(_module_name, *pa,
+						      taskmgr);
+	}
+	return NULL;
     } else {
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
@@ -227,12 +265,16 @@ Validation*
 ModuleCommand::config_validation(TaskManager& taskmgr) const
 {
     if (_status_method != NULL) {
-	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
-	if (xa != NULL)
-	    return new StatusConfigMeValidation(_module_name, *xa, taskmgr);
-	else
-	    return NULL;
+	if (xa != NULL) {
+	    return new XrlStatusConfigMeValidation(_module_name, *xa, taskmgr);
+	}
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(_status_method);
+	if (pa != NULL) {
+	    return new ProgramStatusConfigMeValidation(_module_name, *pa,
+						       taskmgr);
+	}
+	return NULL;
     } else {
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
@@ -243,12 +285,16 @@ Validation*
 ModuleCommand::ready_validation(TaskManager& taskmgr) const
 {
     if (_status_method != NULL) {
-	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
-	if (xa != NULL)
-	    return new StatusReadyValidation(_module_name, *xa, taskmgr);
-	else
-	    return NULL;
+	if (xa != NULL) {
+	    return new XrlStatusReadyValidation(_module_name, *xa, taskmgr);
+	}
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(_status_method);
+	if (pa != NULL) {
+	    return new ProgramStatusReadyValidation(_module_name, *pa,
+						    taskmgr);
+	}
+	return NULL;
     } else {
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
@@ -259,12 +305,16 @@ Validation*
 ModuleCommand::shutdown_validation(TaskManager& taskmgr) const
 {
     if (_status_method != NULL) {
-	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
-	if (xa != NULL)
-	    return new StatusShutdownValidation(_module_name, *xa, taskmgr);
-	else
-	    return NULL;
+	if (xa != NULL) {
+	    return new XrlStatusShutdownValidation(_module_name, *xa, taskmgr);
+	}
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(_status_method);
+	if (pa != NULL) {
+	    return new ProgramStatusShutdownValidation(_module_name, *pa,
+						       taskmgr);
+	}
+	return NULL;
     } else {
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
@@ -275,12 +325,15 @@ Startup*
 ModuleCommand::startup_method(TaskManager& taskmgr) const
 {
     if (_startup_method != NULL) {
-	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_startup_method);
-	if (xa != NULL)
+	if (xa != NULL) {
 	    return new XrlStartup(_module_name, *xa, taskmgr);
-	else
-	    return NULL;
+	}
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(_startup_method);
+	if (pa != NULL) {
+	    return new ProgramStartup(_module_name, *pa, taskmgr);
+	}
+	return NULL;
     } else {
 	// The startup method is optional
 	return NULL;
@@ -291,12 +344,15 @@ Shutdown*
 ModuleCommand::shutdown_method(TaskManager& taskmgr) const
 {
     if (_shutdown_method != NULL) {
-	// TODO: for now we can handle only XRL actions
 	XrlAction* xa = dynamic_cast<XrlAction*>(_shutdown_method);
-	if (xa != NULL)
+	if (xa != NULL) {
 	    return new XrlShutdown(_module_name, *xa, taskmgr);
-	else
-	    return NULL;
+	}
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(_shutdown_method);
+	if (pa != NULL) {
+	    return new ProgramShutdown(_module_name, *pa, taskmgr);
+	}
+	return NULL;
     } else {
 	// We can always kill it from the module manager.
 	return NULL;
@@ -310,14 +366,29 @@ ModuleCommand::start_transaction(MasterConfigTreeNode& ctn,
     if (_start_commit == NULL)
 	return XORP_OK;
 
-    XrlRouter::XrlCallback cb = callback(this,
-					 &ModuleCommand::action_complete,
-					 &ctn, _start_commit,
-					 string("start transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_start_commit);
-    XLOG_ASSERT(xa != NULL);
+    if (xa != NULL) {
+	XrlRouter::XrlCallback cb = callback(
+	    this,
+	    &ModuleCommand::xrl_action_complete,
+	    &ctn,
+	    _start_commit,
+	    string("start transaction"));
+	return xa->execute(ctn, task_manager, cb);
+    }
 
-    return xa->execute(ctn, task_manager, cb);
+    ProgramAction *pa = dynamic_cast<ProgramAction*>(_start_commit);
+    if (pa != NULL) {
+	TaskProgramItem::ProgramCallback cb = callback(
+	    this,
+	    &ModuleCommand::program_action_complete,
+	    &ctn,
+	    _start_commit,
+	    string("start transaction"));
+	return pa->execute(ctn, task_manager, cb);
+    }
+
+    XLOG_UNREACHABLE();
 }
 
 int
@@ -327,14 +398,29 @@ ModuleCommand::end_transaction(MasterConfigTreeNode& ctn,
     if (_end_commit == NULL)
 	return XORP_OK;
 
-    XrlRouter::XrlCallback cb = callback(this,
-					 &ModuleCommand::action_complete,
-					 &ctn, _end_commit,
-					 string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_end_commit);
-    XLOG_ASSERT(xa != NULL);
+    if (xa != NULL) {
+	XrlRouter::XrlCallback cb = callback(
+	    this,
+	    &ModuleCommand::xrl_action_complete,
+	    &ctn,
+	    _end_commit,
+	    string("end transaction"));
+	return xa->execute(ctn, task_manager, cb);
+    }
 
-    return xa->execute(ctn, task_manager, cb);
+    ProgramAction *pa = dynamic_cast<ProgramAction*>(_end_commit);
+    if (pa != NULL) {
+	TaskProgramItem::ProgramCallback cb = callback(
+	    this,
+	    &ModuleCommand::program_action_complete,
+	    &ctn,
+	    _end_commit,
+	    string("end transaction"));
+	return pa->execute(ctn, task_manager, cb);
+    }
+
+    XLOG_UNREACHABLE();
 }
 
 string
@@ -353,35 +439,20 @@ ModuleCommand::str() const
     return tmp;
 }
 
-#if 0
-bool
-ModuleCommand::execute_completed() const
-{
-    return _execute_done;
-}
-
 void
-ModuleCommand::exec_complete(const XrlError& /* err */,
-			     XrlArgs*)
+ModuleCommand::xrl_action_complete(const XrlError& err,
+				   XrlArgs* xrl_args,
+				   MasterConfigTreeNode *ctn,
+				   Action* action,
+				   string cmd) const
 {
-    debug_msg("ModuleCommand::exec_complete\n");
-    _execute_done = true;
-}
-#endif // 0
-
-void
-ModuleCommand::action_complete(const XrlError& err,
-			       XrlArgs* xrl_args,
-			       MasterConfigTreeNode *ctn,
-			       Action* action,
-			       string cmd) const
-{
-    debug_msg("ModuleCommand::action_complete\n");
+    debug_msg("ModuleCommand::xrl_action_complete\n");
 
     if (err != XrlError::OKAY()) {
-	UNUSED(cmd);
+	//
 	// There was an error.  There's nothing we can so here - errors
 	// are handled in the TaskManager.
+	//
 	return;
     }
 
@@ -431,4 +502,42 @@ ModuleCommand::action_complete(const XrlError& err,
 	debug_msg("found value = %s\n", value.c_str());
 	ctn->set_variable(varname, value);
     }
+
+    UNUSED(cmd);
+}
+
+void
+ModuleCommand::program_action_complete(bool success,
+				       const string& stdout_output,
+				       const string& stderr_output,
+				       bool do_exec,
+				       MasterConfigTreeNode *ctn,
+				       Action *action,
+				       string cmd) const
+{
+    debug_msg("ModuleCommand::program_action_complete\n");
+
+    if (! success) {
+	//
+	// There was an error.  There's nothing we can so here - errors
+	// are handled in the TaskManager.
+	//
+	return;
+    }
+
+    if (do_exec) {
+	// Obtain the names of the variables to set
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(action);
+	XLOG_ASSERT(pa != NULL);
+	string stdout_variable_name = pa->stdout_variable_name();
+	string stderr_variable_name = pa->stderr_variable_name();
+
+	// Set the values
+	if (! stdout_variable_name.empty())
+	    ctn->set_variable(stdout_variable_name, stdout_output);
+	if (! stderr_variable_name.empty())
+	    ctn->set_variable(stderr_variable_name, stderr_output);
+    }
+
+    UNUSED(cmd);
 }

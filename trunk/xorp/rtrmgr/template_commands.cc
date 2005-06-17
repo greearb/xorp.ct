@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.49 2005/02/01 02:58:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.50 2005/03/25 02:54:38 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -165,12 +165,12 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
 	int j = 0;
 	UNUSED(j);
 
-	for (si = xrl_parts.begin(); si!= xrl_parts.end(); ++si)
+	for (si = xrl_parts.begin(); si != xrl_parts.end(); ++si)
 	    debug_msg("Seg %d: >%s< \n", j++, si->c_str());
 	debug_msg("\n");
     }
 
-    // Trim off the "xrl" command part.
+    // Trim off the "xrl" command part
     xrl_parts.pop_front();
     if (xrl_parts.empty())
 	xorp_throw(ParseError, "bad XrlAction syntax");
@@ -258,8 +258,8 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	return false;
     }
 
-    const string& xrlstr = *xrl_pos;
-    debug_msg("checking XRL: %s\n", xrlstr.c_str());
+    const string& xrl_str = *xrl_pos;
+    debug_msg("checking XRL: %s\n", xrl_str.c_str());
 
     //
     // We need to go through the XRL template, and remove the "=$(VARNAME)"
@@ -272,8 +272,8 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 
     // Trim quotes from around the XRL
     size_t start = 0;
-    size_t stop = xrlstr.length();
-    if (xrlstr[start] == '"' && xrlstr[stop - 1] == '"') {
+    size_t stop = xrl_str.length();
+    if (xrl_str[start] == '"' && xrl_str[stop - 1] == '"') {
 	start++;
 	stop--;
     }
@@ -282,18 +282,18 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
     // If the target name is a variable, then replace the target name
     // with the default target name (for verification purpose only).
     //
-    if (xrlstr[start] == '$') {
+    if (xrl_str[start] == '$') {
 	// Find the target name variable
-	string::size_type target_name_end = xrlstr.find("/", start);
+	string::size_type target_name_end = xrl_str.find("/", start);
 	if (target_name_end == string::npos) {
 	    errmsg = c_format("Syntax error in XRL %s: no target name",
-			      xrlstr.c_str());
+			      xrl_str.c_str());
 	    return false;
 	}
-	string target_name_var = xrlstr.substr(start, target_name_end - 1);
+	string target_name_var = xrl_str.substr(start, target_name_end - 1);
 	if (target_name_var.empty()) {
 	    errmsg = c_format("Syntax error in XRL %s: empty XRL target",
-			      xrlstr.c_str());
+			      xrl_str.c_str());
 	    return false;
 	}
 
@@ -303,7 +303,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	if (default_target_name.empty()) {
 	    errmsg = c_format("Syntax error in XRL %s: "
 			      "the module has no default target name",
-			      xrlstr.c_str());
+			      xrl_str.c_str());
 	    return false;
 	}
 
@@ -312,7 +312,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 
 	// Advance the start pointer to point to the first symbol after
 	// the target name, which should be '/'.
-	while (xrlstr[start] != '/') {
+	while (xrl_str[start] != '/') {
 	    start++;
 	    XLOG_ASSERT(start < stop);
 	}
@@ -325,28 +325,28 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
     for (size_t i = start; i < stop; i++) {
 	switch (mode) {
 	case VAR:
-	    if (xrlstr[i] == '$' || xrlstr[i] == '`') {
+	    if (xrl_str[i] == '$' || xrl_str[i] == '`') {
 		errmsg = c_format("Syntax error in XRL %s: "
 				  "bad variable definition",
-				  xrlstr.c_str());
+				  xrl_str.c_str());
 		return false;
 	    }
-	    if (xrlstr[i] == ')')
+	    if (xrl_str[i] == ')')
 		mode = NON_VAR;
 	    break;
 	case NON_VAR:
-	    if (xrlstr[i] == '=') {
+	    if (xrl_str[i] == '=') {
 		mode = ASSIGN;
 		break;
 	    }
-	    cleaned_xrl += xrlstr[i];
+	    cleaned_xrl += xrl_str[i];
 	    // FALLTHROUGH
 	case QUOTE:
-	    if (xrlstr[i] == '`')
+	    if (xrl_str[i] == '`')
 		mode = NON_VAR;
 	    break;
 	case ASSIGN:
-	    if (xrlstr[i] == '$') {
+	    if (xrl_str[i] == '$') {
 		//
 		// Get the variable name and add it to the list of referred
 		// variables.
@@ -355,8 +355,8 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 		    string varname;
 		    bool varname_end_found = false;
 		    for (size_t j = i; j < stop; j++) {
-			varname += xrlstr[j];
-			if (xrlstr[j] == ')') {
+			varname += xrl_str[j];
+			if (xrl_str[j] == ')') {
 			    varname_end_found = true;
 			    break;
 			}
@@ -364,7 +364,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 		    if (! varname_end_found) {
 			errmsg = c_format("Syntax error in XRL %s: "
 					  "bad variable syntax",
-					  xrlstr.c_str());
+					  xrl_str.c_str());
 			return false;
 		    }
 		    list<string>::const_iterator iter;
@@ -378,13 +378,13 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 		mode = VAR;
 		break;
 	    }
-	    if (xrlstr[i] == '`') {
+	    if (xrl_str[i] == '`') {
 		mode = QUOTE;
 		break;
 	    }
-	    if (xrlstr[i] == '&') {
+	    if (xrl_str[i] == '&') {
 		mode = NON_VAR;
-		cleaned_xrl += xrlstr[i];
+		cleaned_xrl += xrl_str[i];
 		break;
 	    }
 	    break;
@@ -470,9 +470,9 @@ XrlAction::execute(const MasterConfigTreeNode& ctn,
 	    XLOG_WARNING("%s", err.c_str());
 	}
 
-	string xrlstr = unquote(args[1]);
+	string xrl_str = unquote(args[1]);
 
-	debug_msg("CALL XRL: %s\n", xrlstr.c_str());
+	debug_msg("CALL XRL: %s\n", xrl_str.c_str());
 
 	UnexpandedXrl uxrl(ctn, *this);
 	task_manager.add_xrl(affected_module(), uxrl, cb);
@@ -592,6 +592,431 @@ XrlAction::affected_module() const
     return target_name;
 }
 
+/***********************************************************************/
+
+ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
+			     const list<string>& action) throw (ParseError)
+    : Action(template_tree_node, action)
+{
+    string errmsg;
+    list<string> program_parts = _split_cmd;
+
+    debug_msg("ProgramAction constructor\n");
+    XLOG_ASSERT(action.front() == "program");
+
+    _module_name = template_tree_node.module_name();
+    if (_module_name.empty()) {
+	errmsg = "Empty module name";
+	xorp_throw(ParseError, errmsg);
+    }
+
+    if (check_program_is_valid(action, errmsg) != true)
+	xorp_throw(ParseError, errmsg);
+
+    // Print debug info
+    {
+	list<string>::const_iterator si;
+	int j = 0;
+	UNUSED(j);
+
+	for (si = program_parts.begin(); si != program_parts.end(); ++si)
+	    debug_msg("Seg %d: >%s< \n", j++, si->c_str());
+	debug_msg("\n");
+    }
+
+    // Trim off the "program" command part
+    program_parts.pop_front();
+    if (program_parts.empty())
+	xorp_throw(ParseError, "bad ProgramAction syntax");
+
+    bool request_done = false;
+    size_t seg_count = 0;
+    while (program_parts.empty() == false) {
+	if (program_parts.front().size() == 0) {
+	    program_parts.pop_front();
+	    continue;
+	}
+
+	string segment = program_parts.front();
+	debug_msg("segment: %s\n", segment.c_str());
+	string orig_segment = segment;
+
+	if (orig_segment[0] == '\n') {
+	    // Strip the magic "\n" off
+	    if (seg_count == 0)
+		segment = segment.substr(1, segment.size() - 1);
+	    else
+		segment = " " + segment.substr(1, segment.size() - 1);
+	}
+	string::size_type start = segment.find("->");
+	debug_msg("start=%u\n", XORP_UINT_CAST(start));
+	if (start != string::npos) {
+	    debug_msg("found return spec\n");
+	    string::size_type orig_start = orig_segment.find("->");
+	    if (request_done)
+		xorp_throw(ParseError, "Two responses in one program");
+	    request_done = true;
+	    _request += segment.substr(0, start);
+	    if (orig_start != 0)
+		_split_request.push_back(orig_segment.substr(0, orig_start));
+	    segment = segment.substr(start + 2, segment.size() - (start + 2));
+	    orig_segment = orig_segment.substr(orig_start + 2,
+					       orig_segment.size()
+					       - (orig_start + 2));
+	}
+	if (request_done) {
+	    _response += segment;
+	    if (!orig_segment.empty())
+		_split_response.push_back(orig_segment);
+	} else {
+	    _request += segment;
+	    if (!orig_segment.empty())
+		_split_request.push_back(orig_segment);
+	}
+	program_parts.pop_front();
+	seg_count++;
+    }
+
+    //
+    // Find the variable names that will contain the stdout and the stderr
+    // of the program.
+    //
+    if (! _response.empty()) {
+	string part1, part2;
+	string::size_type pos = _response.find("&");
+	part1 = _response.substr(0, pos);
+	if (pos != string::npos)
+	    part2 = _response.substr(pos + 1);
+	part1 = strip_empty_spaces(part1);
+	part2 = strip_empty_spaces(part2);
+	if (part2.find("&") != string::npos) {
+	    xorp_throw(ParseError,
+		       "Too many components in the program response");
+	}
+	parse_program_response(part1);
+	parse_program_response(part2);
+    }
+
+    // Print debug output
+    {
+	list<string>::const_iterator iter;
+
+	debug_msg("ProgramAction:\n");
+	debug_msg("Request: >%s<\n", _request.c_str());
+	for (iter = _split_request.begin();
+	     iter != _split_request.end();
+	     ++iter) {
+	    debug_msg(">%s< ", (*iter).c_str());
+	}
+	debug_msg("\n");
+
+	debug_msg("Response: >%s<\n", _response.c_str());
+	for (iter = _split_response.begin();
+	     iter != _split_response.end();
+	     ++iter) {
+	    debug_msg(">%s< ", (*iter).c_str());
+	}
+	debug_msg("\n");
+    }
+}
+
+void
+ProgramAction::parse_program_response(const string& part) throw (ParseError)
+{
+    string::size_type pos;
+
+    if (part.empty())
+	return;
+
+    pos = part.find("=");
+    if (pos == string::npos) {
+	xorp_throw(ParseError,
+		   "Missing '=' in program response specification");
+    }
+
+    string l, r;
+    l = part.substr(0, pos);
+    r = part.substr(pos + 1);
+
+    if ((l != "stdout") && (l != "stderr")) {
+	string error_msg = c_format("Unrecognized keyword in program "
+				    "response specification: %s", l.c_str());
+	xorp_throw(ParseError, error_msg);
+    }
+
+    if (l == "stdout") {
+	if (! _stdout_variable_name.empty()) {
+	    xorp_throw(ParseError,
+		       "Repeated \"stdout\" keyword in program response "
+		       "specification");
+	}
+	_stdout_variable_name = r;
+    }
+    if (l == "stderr") {
+	if (! _stderr_variable_name.empty()) {
+	    xorp_throw(ParseError,
+		       "Repeated \"stderr\" keyword in program response "
+		       "specification");
+	}
+	_stderr_variable_name = r;
+    }
+}
+
+bool
+ProgramAction::check_program_is_valid(const list<string>& action,
+				      string& errmsg)
+{
+    XLOG_ASSERT(action.front() == "program");
+
+    list<string>::const_iterator program_pos = ++action.begin();
+    if (program_pos == action.end()) {
+	errmsg = "Expected program but none supplied";
+	return false;
+    }
+
+    const string& program_str = *program_pos;
+    debug_msg("checking program: %s\n", program_str.c_str());
+
+    //
+    // We need to go through the program template and perform some basic
+    // validations.
+    // Note that we cannot verify that the program is valid and exists,
+    // because it may contain variable names and we don't know the values
+    // of those variables yet.
+    //
+    enum char_type { VAR, NON_VAR, QUOTE };
+    char_type mode = NON_VAR;
+    string cleaned_program;
+
+    // Trim quotes from around the program
+    size_t start = 0;
+    size_t stop = program_str.length();
+    if (program_str[start] == '"' && program_str[stop - 1] == '"') {
+	start++;
+	stop--;
+    }
+
+    //
+    // Copy the program and perform some basic validations.
+    // In the mean time, build the list of encountered "$(VARNAME)" variables.
+    //
+    for (size_t i = start; i < stop; i++) {
+	switch (mode) {
+	case VAR:
+	    if (program_str[i] == '$' || program_str[i] == '`') {
+		errmsg = c_format("Syntax error in program %s: "
+				  "bad variable definition",
+				  program_str.c_str());
+		return false;
+	    }
+	    if (program_str[i] == ')')
+		mode = NON_VAR;
+	    break;
+	case NON_VAR:
+	    if (program_str[i] == '$') {
+		//
+		// Get the variable name and add it to the list of referred
+		// variables.
+		//
+		{
+		    string varname;
+		    bool varname_end_found = false;
+		    for (size_t j = i; j < stop; j++) {
+			varname += program_str[j];
+			if (program_str[j] == ')') {
+			    varname_end_found = true;
+			    break;
+			}
+		    }
+		    if (! varname_end_found) {
+			errmsg = c_format("Syntax error in program %s: "
+					  "bad variable syntax",
+					  program_str.c_str());
+			return false;
+		    }
+		    list<string>::const_iterator iter;
+		    iter = find(_referred_variables.begin(),
+				_referred_variables.end(),
+				varname);
+		    if (iter == _referred_variables.end()) {
+			_referred_variables.push_back(varname);
+		    }
+		}
+		mode = VAR;
+		break;
+	    }
+	    if (program_str[i] == '`') {
+		mode = QUOTE;
+		break;
+	    }
+	    cleaned_program += program_str[i];
+	    break;
+	case QUOTE:
+	    if (program_str[i] == '`')
+		mode = NON_VAR;
+	    break;
+	}
+    }
+
+    if (cleaned_program.empty()) {
+	errmsg = c_format("Syntax error in program specification %s: "
+			  "empty program",
+			  program_str.c_str());
+	return false;
+    }
+
+    return true;
+}
+
+int
+ProgramAction::execute(const MasterConfigTreeNode&	ctn,
+		       TaskManager&			task_manager,
+		       TaskProgramItem::ProgramCallback	program_cb) const
+{
+    list<string> expanded_cmd;
+    list<string>::const_iterator iter;
+    string word;
+
+    //
+    // First, go back through and merge all the separate words in the
+    // command back together.
+    //
+    for (iter = _split_cmd.begin(); iter != _split_cmd.end(); ++iter) {
+	string segment = *iter;
+	// "\n" at start of segment indicates start of a word
+	if (segment[0] == '\n') {
+	    // Store the previous word
+	    if (word != "") {
+		expanded_cmd.push_back(word);
+		word = "";
+	    }
+	    // Strip the magic "\n" off
+	    segment = segment.substr(1, segment.size() - 1);
+	}
+	word += segment;
+    }
+    // Store the last word
+    if (word != "")
+	expanded_cmd.push_back(word);
+
+    // Go through the expanded version and copy to an array
+    string args[expanded_cmd.size()];
+    size_t words = 0;
+    for (iter = expanded_cmd.begin(); iter != expanded_cmd.end(); ++iter) {
+	args[words] = *iter;
+	++words;
+    }
+    if (words == 0)
+	return (XORP_ERROR);
+
+    // Now we're ready to begin...
+    int result;
+    if (args[0] == "program") {
+	if (words < 2) {
+	    string err = c_format("Program command is missing the program "
+				  "on node %s",
+				  ctn.path().c_str());
+	    XLOG_WARNING("%s", err.c_str());
+	}
+
+	string program_str = unquote(args[1]);
+
+	debug_msg("CALL program: %s\n", program_str.c_str());
+
+	UnexpandedProgram uprogram(ctn, *this);
+	task_manager.add_program(affected_module(), uprogram, program_cb);
+	result = XORP_OK;
+	debug_msg("result = %d\n", result);
+    } else {
+	XLOG_ERROR("Bad command: %s\n", args[0].c_str());
+	return XORP_ERROR;
+    }
+    return result;
+}
+
+template<class TreeNode>
+int
+ProgramAction::expand_program_variables(const TreeNode& tn,
+					string& result,
+					string& errmsg) const
+{
+    string word;
+    string expanded_var;
+    list<string> expanded_cmd;
+
+    debug_msg("expand_program_variables() node %s program %s\n",
+	      tn.segname().c_str(), _request.c_str());
+
+    //
+    // Go through the split command, doing variable substitution
+    // put split words back together, and remove special "\n" characters
+    //
+    list<string>::const_iterator iter = _split_request.begin();
+    while (iter != _split_request.end()) {
+	string segment = *iter;
+	// "\n" at start of segment indicates start of a word
+	if (segment[0] == '\n') {
+	    // Store the previous word
+	    if (word != "") {
+		expanded_cmd.push_back(word);
+		word = "";
+	    }
+	    // Strip the magic "\n" off
+	    segment = segment.substr(1, segment.size() - 1);
+	    if (segment.empty()) {
+		++iter;
+		continue;
+	    }
+	}
+
+	// Do variable expansion
+	bool expand_done = false;
+	if (segment[0] == '`') {
+	    expand_done = tn.expand_expression(segment, expanded_var);
+	    if (expand_done) {
+		word += unquote(expanded_var);
+	    } else {
+		// Error
+		errmsg = c_format("failed to expand expression \"%s\" "
+				  "associated with node \"%s\"",
+				  segment.c_str(), tn.path().c_str());
+		return (XORP_ERROR);
+	    }
+	} else if (segment[0] == '$') {
+	    expand_done = tn.expand_variable(segment, expanded_var);
+	    if (expand_done) {
+		word += unquote(expanded_var);
+	    } else {
+		// Error
+		errmsg = c_format("failed to expand variable \"%s\" "
+				  "associated with node \"%s\"",
+				  segment.c_str(), tn.segname().c_str());
+		return (XORP_ERROR);
+	    }
+	} else {
+	    word += segment;
+	}
+	++iter;
+    }
+    // Store the last word
+    if (word != "")
+	expanded_cmd.push_back(word);
+
+    XLOG_ASSERT(expanded_cmd.size() >= 1);
+
+    result = unquote(expanded_cmd.front());
+
+    return (XORP_OK);
+}
+
+string
+ProgramAction::affected_module() const
+{
+    return (_module_name);
+}
+
+/***********************************************************************/
+
 Command::Command(TemplateTreeNode& template_tree_node, const string& cmd_name)
     : BaseCommand(template_tree_node, cmd_name) 
 {
@@ -611,9 +1036,15 @@ Command::add_action(const list<string>& action, const XRLdb& xrldb)
 {
     if (action.front() == "xrl") {
 	_actions.push_back(new XrlAction(_template_tree_node, action, xrldb));
-    } else {
-	_actions.push_back(new Action(_template_tree_node, action));
+	return;
     }
+
+    if (action.front() == "program") {
+	_actions.push_back(new ProgramAction(_template_tree_node, action));
+	return;
+    }
+
+    _actions.push_back(new Action(_template_tree_node, action));
 }
 
 int
@@ -624,16 +1055,28 @@ Command::execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const
 
     list<Action*>::const_iterator iter;
     for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
-	const XrlAction* xa = dynamic_cast<const XrlAction*>(*iter);
-	if (xa != NULL) {
-	    result = xa->execute(ctn, task_manager,
-				 callback(this,
-					  &Command::action_complete, &ctn));
-	} else {
-	    // Current we only implement XRL commands
-	    XLOG_FATAL(("execute on unimplemented action type on node " +
-		       ctn.str()).c_str());
-	}
+	do {
+	    const XrlAction* xa = dynamic_cast<const XrlAction*>(*iter);
+	    if (xa != NULL) {
+		result = xa->execute(
+		    ctn, task_manager,
+		    callback(this, &Command::xrl_action_complete, &ctn));
+		break;
+	    }
+	    const ProgramAction* pa = dynamic_cast<const ProgramAction*>(*iter);
+	    if (pa != NULL) {
+		result = pa->execute(
+		    ctn, task_manager,
+		    callback(this, &Command::program_action_complete, &ctn,
+			     pa->stdout_variable_name(),
+			     pa->stderr_variable_name()));
+		break;
+	    }
+	    // Unrecognized command
+	    XLOG_FATAL("Execute on unimplemented action type on node %s",
+		       ctn.str().c_str());
+	    break;
+	} while (false);
 	if (result < 0) {
 	    debug_msg("command execute returning %d\n", result);
 	    // XXX: how do we communicate this error back up
@@ -646,11 +1089,11 @@ Command::execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const
 }
 
 void
-Command::action_complete(const XrlError& err,
-			 XrlArgs* ,
-			 MasterConfigTreeNode* ctn) const
+Command::xrl_action_complete(const XrlError& err,
+			     XrlArgs* ,
+			     MasterConfigTreeNode* ctn) const
 {
-    debug_msg("Command::action_complete\n");
+    debug_msg("Command::xrl_action_complete\n");
 
     if (err == XrlError::OKAY()) {
 	ctn->command_status_callback(this, true);
@@ -659,10 +1102,44 @@ Command::action_complete(const XrlError& err,
     }
 }
 
-set<string>
-Command::affected_xrl_modules() const
+void
+Command::program_action_complete(bool success,
+				 const string& command_stdout,
+				 const string& command_stderr,
+				 bool do_exec,
+				 MasterConfigTreeNode* ctn,
+				 string stdout_variable_name,
+				 string stderr_variable_name) const
 {
-    set<string> affected_modules;
+    debug_msg("Command::program_action_complete\n");
+
+    if (do_exec) {
+	if (! stdout_variable_name.empty())
+	    if (ctn->set_variable(stdout_variable_name, command_stdout)
+		!= true) {
+		XLOG_ERROR("Failed to write the stdout of a program action "
+			   "to variable %s", stdout_variable_name.c_str());
+	    }
+	if (! stderr_variable_name.empty()) {
+	    if (ctn->set_variable(stderr_variable_name, command_stderr)
+		!= true) {
+		XLOG_ERROR("Failed to write the stderr of a program action "
+			   "to variable %s", stderr_variable_name.c_str());
+	    }
+	}
+    }
+
+    if (success) {
+	ctn->command_status_callback(this, true);
+    } else {
+	ctn->command_status_callback(this, false);
+    }
+}
+
+set<string>
+Command::affected_modules() const
+{
+    set<string> modules_set;
     list<Action*>::const_iterator iter;
 
     for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
@@ -670,10 +1147,17 @@ Command::affected_xrl_modules() const
 	XrlAction* xa = dynamic_cast<XrlAction*>(a);
 	if (xa != NULL) {
 	    string affected = xa->affected_module();
-	    affected_modules.insert(affected);
+	    modules_set.insert(affected);
+	    continue;
+	}
+	ProgramAction* pa = dynamic_cast<ProgramAction*>(a);
+	if (pa != NULL) {
+	    string affected = pa->affected_module();
+	    modules_set.insert(affected);
+	    continue;
 	}
     }
-    return affected_modules;
+    return modules_set;
 }
 
 bool
@@ -683,8 +1167,8 @@ Command::affects_module(const string& module) const
     if (module == "")
 	return true;
 
-    set<string> affected_modules = affected_xrl_modules();
-    if (affected_modules.find(module) == affected_modules.end()) {
+    set<string> modules_set = affected_modules();
+    if (modules_set.find(module) == modules_set.end()) {
 	return false;
     }
     return true;
@@ -725,6 +1209,14 @@ template int XrlAction::expand_xrl_variables<class MasterConfigTreeNode>(
     string& result,
     string& errmsg) const;
 template int XrlAction::expand_xrl_variables<class TemplateTreeNode>(
+    const TemplateTreeNode& ttn,
+    string& result,
+    string& errmsg) const;
+template int ProgramAction::expand_program_variables<class MasterConfigTreeNode>(
+    const MasterConfigTreeNode& ctn,
+    string& result,
+    string& errmsg) const;
+template int ProgramAction::expand_program_variables<class TemplateTreeNode>(
     const TemplateTreeNode& ttn,
     string& result,
     string& errmsg) const;

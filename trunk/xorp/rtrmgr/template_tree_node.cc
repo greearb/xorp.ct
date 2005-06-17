@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.36 2005/06/15 19:14:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.37 2005/06/16 23:12:43 mjh Exp $"
 
 
 #include <glob.h>
@@ -425,6 +425,36 @@ TemplateTreeNode::expand_expression(const string& expression,
 	return false;
 
     return true;
+}
+
+void
+TemplateTreeNode::set_subtree_module_name(const string& module_name)
+{
+    //
+    // Recursively set the module name to the subtree below this node
+    //
+    _module_name = module_name;
+
+    list<TemplateTreeNode *>::iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	TemplateTreeNode* child = *iter;
+	child->set_subtree_module_name(module_name);
+    }
+}
+
+void
+TemplateTreeNode::set_subtree_default_target_name(const string& default_target_name)
+{
+    //
+    // Recursively set the default target name to the subtree below this node
+    //
+    _default_target_name = default_target_name;
+
+    list<TemplateTreeNode *>::iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	TemplateTreeNode* child = *iter;
+	child->set_subtree_default_target_name(default_target_name);
+    }
 }
 
 string

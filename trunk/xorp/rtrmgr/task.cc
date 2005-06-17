@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.46 2005/03/23 22:00:26 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.47 2005/03/25 02:54:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -22,6 +22,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.hh"
 
 #include "master_conf_tree.hh"
 #include "module_command.hh"
@@ -230,18 +231,155 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 
 
 // ----------------------------------------------------------------------------
-// StatusStartupValidation implementation
+// ProgramStatusValidation implementation
 
-StatusStartupValidation::StatusStartupValidation(const string& module_name,
-						 const XrlAction& xrl_action,
-						 TaskManager& taskmgr)
+ProgramStatusValidation::ProgramStatusValidation(
+    const string& module_name,
+    const ProgramAction& program_action,
+    TaskManager& taskmgr)
+    : Validation(module_name, taskmgr.verbose()),
+      _program_action(program_action),
+      _task_manager(taskmgr),
+      _run_command(NULL)
+{
+}
+
+EventLoop&
+ProgramStatusValidation::eventloop()
+{
+    return _task_manager.eventloop();
+}
+
+void
+ProgramStatusValidation::validate(CallBack cb)
+{
+    debug_msg("validate\n");
+
+    _cb = cb;
+    if (_task_manager.do_exec()) {
+	string program_request, errmsg;
+	do {
+	    // Try to expand using the configuration tree
+	    const MasterConfigTreeNode* ctn;
+	    ctn = _task_manager.config_tree().find_config_module(_module_name);
+	    if (ctn != NULL) {
+		if (_program_action.expand_program_variables(*ctn,
+							     program_request,
+							     errmsg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Cannot expand program validation action %s "
+			       "for module %s: %s",
+			       _program_action.str().c_str(),
+			       _module_name.c_str(),
+			       errmsg.c_str());
+		}
+		break;
+	    }
+
+	    // Try to expand using the template tree
+	    const TemplateTreeNode& ttn = _program_action.template_tree_node();
+	    if (_program_action.expand_program_variables(ttn, program_request,
+							 errmsg)
+		!= XORP_OK) {
+		XLOG_FATAL("Cannot expand program validation action %s "
+			   "for module %s: %s",
+			   _program_action.str().c_str(),
+			   _module_name.c_str(),
+			   errmsg.c_str());
+	    }
+	    break;
+	} while (false);
+	if (program_request.empty()) {
+	    XLOG_FATAL("Cannot expand program validation action %s for "
+		       "module %s",
+		       _program_action.str().c_str(), _module_name.c_str());
+	}
+
+	// Run the program
+	XLOG_TRACE(_verbose, "Validating with program: >%s<\n",
+		   program_request.c_str());
+	XLOG_ASSERT(_run_command == NULL);
+	_run_command = new RunCommand(
+	    eventloop(),
+	    program_request,
+	    "",
+	    callback(this, &ProgramStatusValidation::stdout_cb),
+	    callback(this, &ProgramStatusValidation::stderr_cb),
+	    callback(this, &ProgramStatusValidation::done_cb));
+	if (_run_command->execute() != XORP_OK) {
+	    delete _run_command;
+	    _run_command = NULL;
+	    XLOG_ERROR("Could not execute program %s",
+		       program_request.c_str());
+	    return;
+	}
+    } else {
+	//
+        // When we're running with do_exec == false, we want to
+        // exercise most of the same machinery, hence we schedule
+        // a dummy callback as if the program was called.
+        //
+	_delay_timer = eventloop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &ProgramStatusValidation::execute_done, true));
+    }
+}
+
+void
+ProgramStatusValidation::stdout_cb(RunCommand* run_command,
+				   const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stdout += output;
+}
+
+void
+ProgramStatusValidation::stderr_cb(RunCommand* run_command,
+				   const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stderr += output;
+}
+
+void
+ProgramStatusValidation::done_cb(RunCommand* run_command,
+				 bool success,
+				 const string& error_msg)
+{
+    XLOG_ASSERT(run_command == _run_command);
+
+    if (! success)
+	_command_stderr += error_msg;
+
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+
+    execute_done(success);
+}
+
+void
+ProgramStatusValidation::execute_done(bool success)
+{
+    handle_status_response(success, _command_stdout, _command_stderr);
+}
+
+
+// ----------------------------------------------------------------------------
+// XrlStatusStartupValidation implementation
+
+XrlStatusStartupValidation::XrlStatusStartupValidation(
+    const string& module_name,
+    const XrlAction& xrl_action,
+    TaskManager& taskmgr)
     : XrlStatusValidation(module_name, xrl_action, taskmgr)
 {
 }
 
 void
-StatusStartupValidation::handle_status_response(ProcessStatus status,
-						const string& reason)
+XrlStatusStartupValidation::handle_status_response(ProcessStatus status,
+						   const string& reason)
 {
     switch (status) {
     case PROC_NULL:
@@ -266,18 +404,45 @@ StatusStartupValidation::handle_status_response(ProcessStatus status,
 
 
 // ----------------------------------------------------------------------------
-// StatusReadyValidation implementation
+// ProgramStatusStartupValidation implementation
 
-StatusReadyValidation::StatusReadyValidation(const string& module_name,
-					     const XrlAction& xrl_action,
-					     TaskManager& taskmgr)
+ProgramStatusStartupValidation::ProgramStatusStartupValidation(
+    const string& module_name,
+    const ProgramAction& program_action,
+    TaskManager& taskmgr)
+    : ProgramStatusValidation(module_name, program_action, taskmgr)
+{
+}
+
+void
+ProgramStatusStartupValidation::handle_status_response(
+    bool success,
+    const string& stdout_output,
+    const string& stderr_output)
+{
+    if (! _cb.is_empty()) {
+	_cb->dispatch(success);
+    }
+
+    UNUSED(stdout_output);
+    UNUSED(stderr_output);
+}
+
+
+// ----------------------------------------------------------------------------
+// XrlStatusReadyValidation implementation
+
+XrlStatusReadyValidation::XrlStatusReadyValidation(
+    const string& module_name,
+    const XrlAction& xrl_action,
+    TaskManager& taskmgr)
     : XrlStatusValidation(module_name, xrl_action, taskmgr)
 {
 }
 
 void
-StatusReadyValidation::handle_status_response(ProcessStatus status,
-					      const string& reason)
+XrlStatusReadyValidation::handle_status_response(ProcessStatus status,
+						 const string& reason)
 {
     switch (status) {
     case PROC_NULL:
@@ -307,18 +472,45 @@ StatusReadyValidation::handle_status_response(ProcessStatus status,
 
 
 // ----------------------------------------------------------------------------
-// StatusConfigMeValidation implementation
+// ProgramStatusReadyValidation implementation
 
-StatusConfigMeValidation::StatusConfigMeValidation(const string& module_name,
-						   const XrlAction& xrl_action,
-						   TaskManager& taskmgr)
+ProgramStatusReadyValidation::ProgramStatusReadyValidation(
+    const string& module_name,
+    const ProgramAction& program_action,
+    TaskManager& taskmgr)
+    : ProgramStatusValidation(module_name, program_action, taskmgr)
+{
+}
+
+void
+ProgramStatusReadyValidation::handle_status_response(
+    bool success,
+    const string& stdout_output,
+    const string& stderr_output)
+{
+    if (! _cb.is_empty()) {
+	_cb->dispatch(success);
+    }
+
+    UNUSED(stdout_output);
+    UNUSED(stderr_output);
+}
+
+
+// ----------------------------------------------------------------------------
+// XrlStatusConfigMeValidation implementation
+
+XrlStatusConfigMeValidation::XrlStatusConfigMeValidation(
+    const string& module_name,
+    const XrlAction& xrl_action,
+    TaskManager& taskmgr)
     : XrlStatusValidation(module_name, xrl_action, taskmgr)
 {
 }
 
 void
-StatusConfigMeValidation::handle_status_response(ProcessStatus status,
-						 const string& reason)
+XrlStatusConfigMeValidation::handle_status_response(ProcessStatus status,
+						    const string& reason)
 {
     switch (status) {
     case PROC_NULL:
@@ -346,19 +538,46 @@ StatusConfigMeValidation::handle_status_response(ProcessStatus status,
     XLOG_UNREACHABLE();
 }
 
+
 // ----------------------------------------------------------------------------
-// StatusShutdownValidation implementation
+// ProgramStatusConfigMeValidation implementation
 
-StatusShutdownValidation::StatusShutdownValidation(const string& module_name,
-						   const XrlAction& xrl_action,
-						   TaskManager& taskmgr)
+ProgramStatusConfigMeValidation::ProgramStatusConfigMeValidation(
+    const string& module_name,
+    const ProgramAction& program_action,
+    TaskManager& taskmgr)
+    : ProgramStatusValidation(module_name, program_action, taskmgr)
+{
+}
+
+void
+ProgramStatusConfigMeValidation::handle_status_response(
+    bool success,
+    const string& stdout_output,
+    const string& stderr_output)
+{
+    if (! _cb.is_empty()) {
+	_cb->dispatch(success);
+    }
+
+    UNUSED(stdout_output);
+    UNUSED(stderr_output);
+}
+
+// ----------------------------------------------------------------------------
+// XrlStatusShutdownValidation implementation
+
+XrlStatusShutdownValidation::XrlStatusShutdownValidation(
+    const string& module_name,
+    const XrlAction& xrl_action,
+    TaskManager& taskmgr)
     : XrlStatusValidation(module_name, xrl_action, taskmgr)
 {
 }
 
 void
-StatusShutdownValidation::handle_status_response(ProcessStatus status,
-						 const string& reason)
+XrlStatusShutdownValidation::handle_status_response(ProcessStatus status,
+						    const string& reason)
 {
     switch (status) {
     case PROC_NULL:
@@ -389,7 +608,7 @@ StatusShutdownValidation::handle_status_response(ProcessStatus status,
 }
 
 void
-StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
+XrlStatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 {
     switch (e.error_code()) {
     case OKAY:
@@ -443,6 +662,31 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
     }
 }
 
+// ----------------------------------------------------------------------------
+// ProgramStatusShutdownValidation implementation
+
+ProgramStatusShutdownValidation::ProgramStatusShutdownValidation(
+    const string& module_name,
+    const ProgramAction& program_action,
+    TaskManager& taskmgr)
+    : ProgramStatusValidation(module_name, program_action, taskmgr)
+{
+}
+
+void
+ProgramStatusShutdownValidation::handle_status_response(
+    bool success,
+    const string& stdout_output,
+    const string& stderr_output)
+{
+    if (! _cb.is_empty()) {
+	_cb->dispatch(success);
+    }
+
+    UNUSED(stdout_output);
+    UNUSED(stderr_output);
+}
+
 
 // ----------------------------------------------------------------------------
 // Startup implementation
@@ -493,6 +737,7 @@ XrlStartup::startup(CallBack cb)
 			       _module_name.c_str(),
 			       errmsg.c_str());
 		}
+		break;
 	    }
 
 	    // Try to expand using the template tree
@@ -567,6 +812,143 @@ XrlStartup::startup_done(const XrlError& err, XrlArgs* xrl_args)
 
 
 // ----------------------------------------------------------------------------
+// ProgramStartup implementation
+
+ProgramStartup::ProgramStartup(const string& module_name,
+			       const ProgramAction& program_action,
+			       TaskManager& taskmgr)
+    : Startup(module_name, taskmgr.verbose()),
+      _program_action(program_action),
+      _task_manager(taskmgr),
+      _run_command(NULL)
+{
+}
+
+EventLoop&
+ProgramStartup::eventloop() const
+{
+    return _task_manager.eventloop();
+}
+
+void
+ProgramStartup::startup(CallBack cb)
+{
+    _cb = cb;
+    if (_task_manager.do_exec()) {
+	string program_request, errmsg;
+	do {
+	    // Try to expand using the configuration tree
+	    const MasterConfigTreeNode* ctn;
+	    ctn = _task_manager.config_tree().find_config_module(_module_name);
+	    if (ctn != NULL) {
+		if (_program_action.expand_program_variables(*ctn,
+							     program_request,
+							     errmsg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Cannot expand program startup action %s "
+			       "for module %s: %s",
+			       _program_action.str().c_str(),
+			       _module_name.c_str(),
+			       errmsg.c_str());
+		}
+		break;
+	    }
+
+	    // Try to expand using the template tree
+	    const TemplateTreeNode& ttn = _program_action.template_tree_node();
+	    if (_program_action.expand_program_variables(ttn, program_request,
+							 errmsg)
+		!= XORP_OK) {
+		XLOG_FATAL("Cannot expand program startup action %s "
+			   "for module %s: %s",
+			   _program_action.str().c_str(),
+			   _module_name.c_str(),
+			   errmsg.c_str());
+	    }
+	    break;
+	} while (false);
+	if (program_request.empty()) {
+	    XLOG_ERROR("Cannot expand program startup action %s for "
+		       "module %s",
+		       _program_action.str().c_str(), _module_name.c_str());
+	    return;
+	}
+
+	// Run the program
+	XLOG_TRACE(_verbose, "Startup with program: >%s<\n",
+		   program_request.c_str());
+	XLOG_ASSERT(_run_command == NULL);
+	_run_command = new RunCommand(
+	    eventloop(),
+	    program_request,
+	    "",
+	    callback(this, &ProgramStartup::stdout_cb),
+	    callback(this, &ProgramStartup::stderr_cb),
+	    callback(this, &ProgramStartup::done_cb));
+	if (_run_command->execute() != XORP_OK) {
+	    delete _run_command;
+	    _run_command = NULL;
+	    XLOG_ERROR("Could not execute program %s",
+		       program_request.c_str());
+	    return;
+	}
+    } else {
+	//
+        // When we're running with do_exec == false, we want to
+        // exercise most of the same machinery, hence we schedule
+        // a dummy callback as if the program was called.
+        //
+	XLOG_TRACE(_verbose, "Program: dummy call to %s\n",
+		   _program_action.request().c_str());
+	_delay_timer = eventloop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &ProgramStartup::execute_done, true));
+    }
+}
+
+void
+ProgramStartup::stdout_cb(RunCommand* run_command,
+			  const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stdout += output;
+}
+
+void
+ProgramStartup::stderr_cb(RunCommand* run_command,
+			  const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stderr += output;
+}
+
+void
+ProgramStartup::done_cb(RunCommand* run_command,
+			bool success,
+			const string& error_msg)
+{
+    XLOG_ASSERT(run_command == _run_command);
+
+    if (! success)
+	_command_stderr += error_msg;
+
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+
+    execute_done(success);
+}
+
+void
+ProgramStartup::execute_done(bool success)
+{
+    if (! _cb.is_empty()) {
+	_cb->dispatch(success);
+    }
+}
+
+// ----------------------------------------------------------------------------
 // Shutdown implementation
 
 Shutdown::Shutdown(const string& module_name, bool verbose)
@@ -617,6 +999,7 @@ XrlShutdown::shutdown(CallBack cb)
 			       _module_name.c_str(),
 			       errmsg.c_str());
 		}
+		break;
 	    }
 
 	    // Try to expand using the template tree
@@ -706,6 +1089,145 @@ XrlShutdown::shutdown_done(const XrlError& err, XrlArgs* xrl_args)
 
 
 // ----------------------------------------------------------------------------
+// ProgramShutdown implementation
+
+ProgramShutdown::ProgramShutdown(const string& module_name,
+				 const ProgramAction& program_action,
+				 TaskManager& taskmgr)
+    : Shutdown(module_name, taskmgr.verbose()),
+      _program_action(program_action),
+      _task_manager(taskmgr)
+{
+}
+
+EventLoop&
+ProgramShutdown::eventloop() const
+{
+    return _task_manager.eventloop();
+}
+
+void
+ProgramShutdown::shutdown(CallBack cb)
+{
+    XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
+
+    _cb = cb;
+    if (_task_manager.do_exec()) {
+	string program_request, errmsg;
+	do {
+	    // Try to expand using the configuration tree
+	    const MasterConfigTreeNode* ctn;
+	    ctn = _task_manager.config_tree().find_config_module(_module_name);
+	    if (ctn != NULL) {
+		if (_program_action.expand_program_variables(*ctn,
+							     program_request,
+							     errmsg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Cannot expand program shutdown action %s "
+			       "for module %s: %s",
+			       _program_action.str().c_str(),
+			       _module_name.c_str(),
+			       errmsg.c_str());
+		}
+		break;
+	    }
+
+	    // Try to expand using the template tree
+	    const TemplateTreeNode& ttn = _program_action.template_tree_node();
+	    if (_program_action.expand_program_variables(ttn, program_request,
+							 errmsg)
+		!= XORP_OK) {
+		XLOG_FATAL("Cannot expand program shutdown action %s "
+			   "for module %s: %s",
+			   _program_action.str().c_str(),
+			   _module_name.c_str(),
+			   errmsg.c_str());
+	    }
+	    break;
+	} while (false);
+	if (program_request.empty()) {
+	    XLOG_ERROR("Cannot expand program shutdown action %s for "
+		       "module %s",
+		       _program_action.str().c_str(), _module_name.c_str());
+	    return;
+	}
+
+	// Run the program
+	XLOG_TRACE(_verbose, "Shutdown with program: >%s<\n",
+		   program_request.c_str());
+	XLOG_ASSERT(_run_command == NULL);
+	_run_command = new RunCommand(
+	    eventloop(),
+	    program_request,
+	    "",
+	    callback(this, &ProgramShutdown::stdout_cb),
+	    callback(this, &ProgramShutdown::stderr_cb),
+	    callback(this, &ProgramShutdown::done_cb));
+	if (_run_command->execute() != XORP_OK) {
+	    delete _run_command;
+	    _run_command = NULL;
+	    XLOG_ERROR("Could not execute program %s",
+		       program_request.c_str());
+	    return;
+	}
+    } else {
+	//
+        // When we're running with do_exec == false, we want to
+        // exercise most of the same machinery, hence we schedule
+        // a dummy callback as if the program was called.
+        //
+	XLOG_TRACE(_verbose, "Program: dummy call to %s\n",
+		   _program_action.request().c_str());
+	_delay_timer = eventloop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &ProgramShutdown::execute_done, true));
+    }
+}
+
+void
+ProgramShutdown::stdout_cb(RunCommand* run_command,
+			   const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stdout += output;
+}
+
+void
+ProgramShutdown::stderr_cb(RunCommand* run_command,
+			   const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stderr += output;
+}
+
+void
+ProgramShutdown::done_cb(RunCommand* run_command,
+			 bool success,
+			 const string& error_msg)
+{
+    XLOG_ASSERT(run_command == _run_command);
+
+    if (! success)
+	_command_stderr += error_msg;
+
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+
+    execute_done(success);
+}
+
+void
+ProgramShutdown::execute_done(bool success)
+{
+    if (! _cb.is_empty()) {
+	_cb->dispatch(success);
+    }
+}
+
+
+// ----------------------------------------------------------------------------
 // TaskXrlItem implementation
 
 const uint32_t	TaskXrlItem::DEFAULT_RESEND_COUNT = 10;
@@ -716,9 +1238,9 @@ TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 			 Task& task,
 			 uint32_t xrl_resend_count,
 			 int xrl_resend_delay_ms)
-    : _unexpanded_xrl(uxrl),
+    : TaskBaseItem(task),
+      _unexpanded_xrl(uxrl),
       _xrl_callback(cb),
-      _task(task),
       _xrl_resend_count_limit(xrl_resend_count),
       _xrl_resend_count(_xrl_resend_count_limit),
       _xrl_resend_delay_ms(xrl_resend_delay_ms),
@@ -727,9 +1249,9 @@ TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 }
 
 TaskXrlItem::TaskXrlItem(const TaskXrlItem& them)
-    : _unexpanded_xrl(them._unexpanded_xrl),
+    : TaskBaseItem(them),
+      _unexpanded_xrl(them._unexpanded_xrl),
       _xrl_callback(them._xrl_callback),
-      _task(them._task),
       _xrl_resend_count_limit(them._xrl_resend_count_limit),
       _xrl_resend_count(_xrl_resend_count_limit),
       _xrl_resend_delay_ms(them._xrl_resend_delay_ms),
@@ -740,7 +1262,7 @@ TaskXrlItem::TaskXrlItem(const TaskXrlItem& them)
 bool
 TaskXrlItem::execute(string& errmsg)
 {
-    if (_task.do_exec())
+    if (task().do_exec())
 	XLOG_TRACE(_verbose, "Expanding %s\n", _unexpanded_xrl.str().c_str());
 
     Xrl* xrl = _unexpanded_xrl.expand(errmsg);
@@ -749,19 +1271,16 @@ TaskXrlItem::execute(string& errmsg)
 			  _unexpanded_xrl.str().c_str(), errmsg.c_str());
 	return false;
     }
-    if (_task.do_exec())
+    if (task().do_exec())
 	XLOG_TRACE(_verbose, "Executing XRL: >%s<\n", xrl->str().c_str());
 
     string xrl_return_spec = _unexpanded_xrl.return_spec();
 
-    // For debugging purposes, record what we were doing
-    errmsg = _unexpanded_xrl.str();
-
     _xrl_resend_count = _xrl_resend_count_limit;
-    _task.xorp_client().send_now(*xrl,
-				 callback(this, &TaskXrlItem::execute_done),
-				 xrl_return_spec,
-				 _task.do_exec());
+    task().xorp_client().send_now(*xrl,
+				  callback(this, &TaskXrlItem::execute_done),
+				  xrl_return_spec,
+				  task().do_exec());
     return true;
 }
 
@@ -772,8 +1291,10 @@ TaskXrlItem::unschedule()
 
     debug_msg("TaskXrlItem::unschedule()\n");
 
+    //
     // We need to dispatch the callbacks, or the accounting of which
     // actions were taken will be incorrect.
+    //
     _xrl_callback->dispatch(XrlError::OKAY(), &xrl_args);
 }
 
@@ -791,10 +1312,10 @@ TaskXrlItem::resend()
 
     string xrl_return_spec = _unexpanded_xrl.return_spec();
 
-    _task.xorp_client().send_now(*xrl,
-				 callback(this, &TaskXrlItem::execute_done),
-				 xrl_return_spec,
-				 _task.do_exec());
+    task().xorp_client().send_now(*xrl,
+				  callback(this, &TaskXrlItem::execute_done),
+				  xrl_return_spec,
+				  task().do_exec());
 }
 
 void
@@ -840,7 +1361,7 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 	// functioning before we declare it dead.
 	if (--_xrl_resend_count > 0) {
 	    // Re-send the Xrl after a short delay.
-	    _xrl_resend_timer = _task.eventloop().new_oneoff_after_ms(
+	    _xrl_resend_timer = task().eventloop().new_oneoff_after_ms(
 		_xrl_resend_delay_ms,
 		callback(this, &TaskXrlItem::resend));
 	    return;
@@ -864,7 +1385,7 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 	break;
     }
 
-    if (!_xrl_callback.is_empty())
+    if (! _xrl_callback.is_empty())
 	_xrl_callback->dispatch(err, xrl_args);
 
     bool success = true;
@@ -873,7 +1394,163 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 	success = false;
 	errmsg = err.str();
     }
-    _task.xrl_done(success, fatal, errmsg);
+    task().item_done(success, fatal, errmsg);
+}
+
+
+// ----------------------------------------------------------------------------
+// TaskProgramItem implementation
+
+TaskProgramItem::TaskProgramItem(const UnexpandedProgram&	program,
+				 TaskProgramItem::ProgramCallback program_cb,
+				 Task&				task)
+    : TaskBaseItem(task),
+      _unexpanded_program(program),
+      _run_command(NULL),
+      _program_cb(program_cb),
+      _verbose(task.verbose())
+{
+}
+
+TaskProgramItem::TaskProgramItem(const TaskProgramItem& them)
+    : TaskBaseItem(them),
+      _unexpanded_program(them._unexpanded_program),
+      _run_command(NULL),
+      _program_cb(them._program_cb),
+      _verbose(them._verbose)
+{
+}
+
+TaskProgramItem::~TaskProgramItem()
+{
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+}
+
+bool
+TaskProgramItem::execute(string& errmsg)
+{
+    if (task().do_exec())
+	XLOG_TRACE(_verbose, "Expanding %s\n",
+		   _unexpanded_program.str().c_str());
+
+    string program = _unexpanded_program.expand(errmsg);
+    if (program.empty()) {
+	errmsg = c_format("Failed to expand program %s: %s",
+			  _unexpanded_program.str().c_str(), errmsg.c_str());
+	return false;
+    }
+
+    if (_run_command != NULL)
+	return (true);		// XXX: already running
+
+    if (task().do_exec()) {
+	XLOG_TRACE(_verbose, "Executing program: >%s<\n", program.c_str());
+	_run_command = new RunCommand(
+	    task().eventloop(),
+	    program,
+	    "",
+	    callback(this, &TaskProgramItem::stdout_cb),
+	    callback(this, &TaskProgramItem::stderr_cb),
+	    callback(this, &TaskProgramItem::done_cb));
+	if (_run_command->execute() != XORP_OK) {
+	    delete _run_command;
+	    _run_command = NULL;
+	    errmsg = c_format("Could not execute program %s", program.c_str());
+	    return (false);
+	}
+    } else {
+	//
+	// When we're running with do_exec == false, we want to
+	// exercise most of the same machinery, hence we schedule
+	// a dummy callback as if the program was called.
+	//
+	_delay_timer = task().eventloop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &TaskProgramItem::execute_done, true));
+    }
+
+    return (true);
+}
+
+void
+TaskProgramItem::unschedule()
+{
+    debug_msg("TaskProgramItem::unschedule()\n");
+
+    if (_run_command != NULL)
+	_run_command->terminate();
+
+    //
+    // We need to dispatch the callbacks, or the accounting of which
+    // actions were taken will be incorrect.
+    //
+    string error_msg = c_format("The execution of program %s is terminated",
+				_unexpanded_program.str().c_str());
+    if (! _program_cb.is_empty()) {
+	_program_cb->dispatch(false, _command_stdout, error_msg,
+			      task().do_exec());
+    }
+
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+}
+
+void
+TaskProgramItem::stdout_cb(RunCommand* run_command, const string& output)
+{
+    debug_msg("TaskProgramItem::stdout_cb\n");
+
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stdout += output;
+}
+
+void
+TaskProgramItem::stderr_cb(RunCommand* run_command, const string& output)
+{
+    debug_msg("TaskProgramItem::stderr_cb\n");
+
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stderr += output;
+}
+
+void
+TaskProgramItem::done_cb(RunCommand* run_command,
+			 bool success,
+			 const string& error_msg)
+{
+    debug_msg("TaskProgramItem::done_cb\n");
+
+    XLOG_ASSERT(run_command == _run_command);
+
+    if (! success)
+	_command_stderr += error_msg;
+
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+
+    execute_done(success);
+}
+
+void
+TaskProgramItem::execute_done(bool success)
+{
+    bool fatal = false;
+
+    debug_msg("TaskProgramItem::execute_done\n");
+
+    if (! _program_cb.is_empty()) {
+	_program_cb->dispatch(success, _command_stdout, _command_stderr,
+			      task().do_exec());
+    }
+
+    task().item_done(success, fatal, _command_stderr);
 }
 
 
@@ -910,6 +1587,8 @@ Task::~Task()
 	delete _startup_method;
     if (_shutdown_method != NULL)
 	delete _shutdown_method;
+
+    delete_pointers_list(_task_items);
 }
 
 void
@@ -918,7 +1597,7 @@ Task::start_module(const string& module_name,
 		   Validation* config_validation,
 		   Startup* startup)
 {
-    XLOG_ASSERT(!module_name.empty());
+    XLOG_ASSERT(! module_name.empty());
     XLOG_ASSERT(_start_module == false);
     XLOG_ASSERT(_stop_module == false);
     XLOG_ASSERT(_startup_validation == NULL);
@@ -936,7 +1615,7 @@ void
 Task::shutdown_module(const string& module_name, Validation* validation,
 		      Shutdown* shutdown)
 {
-    XLOG_ASSERT(!module_name.empty());
+    XLOG_ASSERT(! module_name.empty());
     XLOG_ASSERT(_start_module == false);
     XLOG_ASSERT(_stop_module == false);
     XLOG_ASSERT(_shutdown_validation == NULL);
@@ -951,7 +1630,14 @@ Task::shutdown_module(const string& module_name, Validation* validation,
 void
 Task::add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb)
 {
-    _xrls.push_back(TaskXrlItem(xrl, cb, *this));
+    _task_items.push_back(new TaskXrlItem(xrl, cb, *this));
+}
+
+void
+Task::add_program(const UnexpandedProgram&		program,
+		  TaskProgramItem::ProgramCallback	program_cb)
+{
+    _task_items.push_back(new TaskProgramItem(program, program_cb, *this));
 }
 
 void
@@ -1068,18 +1754,20 @@ Task::step3_config()
 {
     debug_msg("step3 (%s)\n", _module_name.c_str());
 
-    if (_xrls.empty()) {
+    if (_task_items.empty()) {
 	step4_wait();
     } else {
 	if (_stop_module) {
 	    //
-	    // We don't call any XRLs on a module if we are going to
+	    // We don't call any task items on a module if we are going to
 	    // shut it down immediately afterwards, but we do need to
-	    // unschedule the XRLs.
+	    // unschedule the task items.
 	    //
-	    while (!_xrls.empty()) {
-		_xrls.front().unschedule();
-		_xrls.pop_front();
+	    while (! _task_items.empty()) {
+		TaskBaseItem* task_base_item = _task_items.front();
+		task_base_item->unschedule();
+		delete task_base_item;
+		_task_items.pop_front();
 	    }
 	    // Skip step4 and go directly to stopping the process
 	    step5_stop();
@@ -1087,8 +1775,9 @@ Task::step3_config()
 	    string errmsg;
 	    debug_msg("step3: execute\n");
 
-	    if (_xrls.front().execute(errmsg) == false) {
-		XLOG_WARNING("Failed to execute XRL: %s", errmsg.c_str());
+	    if (_task_items.front()->execute(errmsg) == false) {
+		XLOG_WARNING("Failed to execute task item: %s",
+			     errmsg.c_str());
 		task_fail(errmsg, false);
 		return;
 	    }
@@ -1097,12 +1786,14 @@ Task::step3_config()
 }
 
 void
-Task::xrl_done(bool success, bool fatal, string errmsg)
+Task::item_done(bool success, bool fatal, string errmsg)
 {
-    debug_msg("xrl_done (%s)\n", _module_name.c_str());
+    debug_msg("item_done (%s)\n", _module_name.c_str());
 
     if (success) {
-	_xrls.pop_front();
+	TaskBaseItem* task_base_item = _task_items.front();
+	_task_items.pop_front();
+	delete task_base_item;
 	_config_done = true;
 	step3_config();
     } else {
@@ -1277,7 +1968,7 @@ TaskManager::set_do_exec(bool do_exec)
 void
 TaskManager::reset()
 {
-    while (!_tasks.empty()) {
+    while (! _tasks.empty()) {
 	delete _tasks.begin()->second;
 	_tasks.erase(_tasks.begin());
     }
@@ -1302,7 +1993,7 @@ TaskManager::add_module(const ModuleCommand& module_command)
 	    return XORP_OK;
 	}
     } else {
-	if (!_module_manager.new_module(module_name, module_exec_path)) {
+	if (! _module_manager.new_module(module_name, module_exec_path)) {
 	    fail_tasklist_initialization("Can't create module");
 	    return XORP_ERROR;
 	}
@@ -1324,6 +2015,21 @@ TaskManager::add_xrl(const string& module_name, const UnexpandedXrl& xrl,
 {
     Task& t(find_task(module_name));
     t.add_xrl(xrl, cb);
+
+    if (t.ready_validation() != NULL)
+	return;
+
+    XLOG_ASSERT(_module_commands.find(module_name) != _module_commands.end());
+    t.set_ready_validation(_module_commands[module_name]->ready_validation(*this));
+}
+
+void
+TaskManager::add_program(const string&			module_name,
+			 const UnexpandedProgram&	program,
+			 TaskProgramItem::ProgramCallback program_cb)
+{
+    Task& t(find_task(module_name));
+    t.add_program(program, program_cb);
 
     if (t.ready_validation() != NULL)
 	return;
@@ -1386,7 +2092,7 @@ TaskManager::reorder_tasks()
     // We re-order the task list so that process shutdowns (which are
     // irreversable) occur last.
     list<Task*> configs;
-    while (!_tasklist.empty()) {
+    while (! _tasklist.empty()) {
 	Task* t = _tasklist.front();
 	if (t->will_shutdown_module()) {
 	    // We already have a list of the correct order to shutdown
@@ -1398,7 +2104,7 @@ TaskManager::reorder_tasks()
     }
 
     // Re-build the tasklist
-    while (!configs.empty()) {
+    while (! configs.empty()) {
 	_tasklist.push_back(configs.front());
 	configs.pop_front();
     }
@@ -1429,7 +2135,7 @@ TaskManager::task_done(bool success, string errmsg)
 {
     debug_msg("TaskManager::task_done\n");
 
-    if (!success) {
+    if (! success) {
 	debug_msg("task failed\n");
 	_completion_cb->dispatch(false, errmsg);
 	reset();

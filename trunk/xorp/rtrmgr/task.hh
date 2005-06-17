@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.29 2005/02/10 04:54:42 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.30 2005/03/25 02:54:38 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -21,10 +21,12 @@
 #include <map>
 #include <vector>
 
+#include "libxorp/run_command.hh"
 #include "libxorp/status_codes.h"
 
 #include "libxipc/xrl_router.hh"
 
+#include "unexpanded_program.hh"
 #include "unexpanded_xrl.hh"
 
 
@@ -88,29 +90,63 @@ protected:
     uint32_t		_retries;
 };
 
-class StatusStartupValidation : public XrlStatusValidation {
+class ProgramStatusValidation : public Validation {
 public:
-    StatusStartupValidation(const string& module_name,
-			    const XrlAction& xrl_action,
+    ProgramStatusValidation(const string& module_name,
+			    const ProgramAction& program_action,
 			    TaskManager& taskmgr);
+    virtual ~ProgramStatusValidation() {}
+
+    void validate(CallBack cb);
+
+protected:
+    virtual void handle_status_response(bool success,
+					const string& stdout_output,
+					const string& stderr_output) = 0;
+    EventLoop& eventloop();
+
+    const ProgramAction& _program_action;
+    TaskManager&	_task_manager;
+    CallBack		_cb;
+
+private:
+    void stdout_cb(RunCommand* run_command, const string& output);
+    void stderr_cb(RunCommand* run_command, const string& output);
+    void done_cb(RunCommand* run_command, bool success,
+		 const string& error_msg);
+    void execute_done(bool success);
+
+    RunCommand*		_run_command;
+    string		_command_stdout;
+    string		_command_stderr;
+    XorpTimer		_delay_timer;
+};
+
+class XrlStatusStartupValidation : public XrlStatusValidation {
+public:
+    XrlStatusStartupValidation(const string& module_name,
+			       const XrlAction& xrl_action,
+			       TaskManager& taskmgr);
 
 private:
     void handle_status_response(ProcessStatus status, const string& reason);
 };
 
-class StatusReadyValidation : public XrlStatusValidation {
+class ProgramStatusStartupValidation : public ProgramStatusValidation {
 public:
-    StatusReadyValidation(const string& module_name,
-			  const XrlAction& xrl_action,
-			  TaskManager& taskmgr);
+    ProgramStatusStartupValidation(const string& module_name,
+				   const ProgramAction& program_action,
+				   TaskManager& taskmgr);
 
 private:
-    void handle_status_response(ProcessStatus status, const string& reason);
+    void handle_status_response(bool success,
+				const string& stdout_output,
+				const string& stderr_output);
 };
 
-class StatusConfigMeValidation : public XrlStatusValidation {
+class XrlStatusReadyValidation : public XrlStatusValidation {
 public:
-    StatusConfigMeValidation(const string& module_name,
+    XrlStatusReadyValidation(const string& module_name,
 			     const XrlAction& xrl_action,
 			     TaskManager& taskmgr);
 
@@ -118,15 +154,61 @@ private:
     void handle_status_response(ProcessStatus status, const string& reason);
 };
 
-class StatusShutdownValidation : public XrlStatusValidation {
+class ProgramStatusReadyValidation : public ProgramStatusValidation {
 public:
-    StatusShutdownValidation(const string& module_name,
-			     const XrlAction& xrl_action,
-			     TaskManager& taskmgr);
+    ProgramStatusReadyValidation(const string& module_name,
+				 const ProgramAction& program_action,
+				 TaskManager& taskmgr);
+
+private:
+    void handle_status_response(bool success,
+				const string& stdout_output,
+				const string& stderr_output);
+};
+
+class XrlStatusConfigMeValidation : public XrlStatusValidation {
+public:
+    XrlStatusConfigMeValidation(const string& module_name,
+				const XrlAction& xrl_action,
+				TaskManager& taskmgr);
+
+private:
+    void handle_status_response(ProcessStatus status, const string& reason);
+};
+
+class ProgramStatusConfigMeValidation : public ProgramStatusValidation {
+public:
+    ProgramStatusConfigMeValidation(const string& module_name,
+				    const ProgramAction& program_action,
+				    TaskManager& taskmgr);
+
+private:
+    void handle_status_response(bool success,
+				const string& stdout_output,
+				const string& stderr_output);
+};
+
+class XrlStatusShutdownValidation : public XrlStatusValidation {
+public:
+    XrlStatusShutdownValidation(const string& module_name,
+				const XrlAction& xrl_action,
+				TaskManager& taskmgr);
 
 private:
     void xrl_done(const XrlError& e, XrlArgs* xrl_args);
     void handle_status_response(ProcessStatus status, const string& reason);
+};
+
+class ProgramStatusShutdownValidation : public ProgramStatusValidation {
+public:
+    ProgramStatusShutdownValidation(const string& module_name,
+				    const ProgramAction& program_action,
+				    TaskManager& taskmgr);
+
+private:
+    void handle_status_response(bool success,
+				const string& stdout_output,
+				const string& stderr_output);
 };
 
 class Startup {
@@ -161,6 +243,33 @@ private:
     XorpTimer		_dummy_timer;
 };
 
+class ProgramStartup : public Startup {
+public:
+    ProgramStartup(const string& module_name,
+		   const ProgramAction& program_action,
+		   TaskManager& taskmgr);
+    virtual ~ProgramStartup() {}
+
+    void startup(CallBack cb);
+    EventLoop& eventloop() const;
+
+private:
+    void stdout_cb(RunCommand* run_command, const string& output);
+    void stderr_cb(RunCommand* run_command, const string& output);
+    void done_cb(RunCommand* run_command, bool success,
+		 const string& error_msg);
+    void execute_done(bool success);
+
+    const ProgramAction& _program_action;
+    TaskManager&	_task_manager;
+    CallBack		_cb;
+
+    RunCommand*		_run_command;
+    string		_command_stdout;
+    string		_command_stderr;
+    XorpTimer		_delay_timer;
+};
+
 class Shutdown {
 public:
     typedef XorpCallback1<void, bool>::RefPtr CallBack;
@@ -193,13 +302,55 @@ private:
     XorpTimer		_dummy_timer;
 };
 
-class TaskXrlItem {
+class ProgramShutdown : public Shutdown {
+public:
+    ProgramShutdown(const string& module_name,
+		    const ProgramAction& program_action,
+		    TaskManager& taskmgr);
+    virtual ~ProgramShutdown() {}
+
+    void shutdown(CallBack cb);
+    EventLoop& eventloop() const;
+
+private:
+    void stdout_cb(RunCommand* run_command, const string& output);
+    void stderr_cb(RunCommand* run_command, const string& output);
+    void done_cb(RunCommand* run_command, bool success,
+		 const string& error_msg);
+    void execute_done(bool success);
+
+    const ProgramAction& _program_action;
+    TaskManager&	_task_manager;
+    CallBack		_cb;
+
+    RunCommand*		_run_command;
+    string		_command_stdout;
+    string		_command_stderr;
+    XorpTimer		_delay_timer;
+};
+
+class TaskBaseItem {
+public:
+    TaskBaseItem(Task& task) : _task(task) {}
+    TaskBaseItem(const TaskBaseItem& them) : _task(them._task) {}
+    virtual ~TaskBaseItem() {}
+
+    virtual bool execute(string& errmsg) = 0;
+    virtual void unschedule() = 0;
+
+    Task& task() { return (_task); }
+
+private:
+    Task&	_task;
+};
+
+class TaskXrlItem : public TaskBaseItem {
 public:
     TaskXrlItem(const UnexpandedXrl& uxrl, const XrlRouter::XrlCallback& cb,
 		Task& task,
 		uint32_t xrl_resend_count = TaskXrlItem::DEFAULT_RESEND_COUNT,
 		int xrl_resend_delay_ms = TaskXrlItem::DEFAULT_RESEND_DELAY_MS);
-    TaskXrlItem::TaskXrlItem(const TaskXrlItem& them);
+    TaskXrlItem(const TaskXrlItem& them);
 
     bool execute(string& errmsg);
     void execute_done(const XrlError& err, XrlArgs* xrl_args);
@@ -212,11 +363,39 @@ private:
 
     UnexpandedXrl		_unexpanded_xrl;
     XrlRouter::XrlCallback	_xrl_callback;
-    Task&			_task;
     uint32_t			_xrl_resend_count_limit;
     uint32_t			_xrl_resend_count;
     int				_xrl_resend_delay_ms;
     XorpTimer			_xrl_resend_timer;
+    bool			_verbose;   // Set to true if output is verbose
+};
+
+class TaskProgramItem : public TaskBaseItem {
+public:
+    typedef XorpCallback4<void, bool, const string&, const string&, bool>::RefPtr ProgramCallback;
+
+    TaskProgramItem(const UnexpandedProgram&		program,
+		    TaskProgramItem::ProgramCallback	program_cb,
+		    Task&				task);
+    TaskProgramItem(const TaskProgramItem& them);
+    ~TaskProgramItem();
+
+    bool execute(string& errmsg);
+    void execute_done(bool success);
+    void unschedule();
+
+private:
+    void stdout_cb(RunCommand* run_command, const string& output);
+    void stderr_cb(RunCommand* run_command, const string& output);
+    void done_cb(RunCommand* run_command, bool success,
+		 const string& error_msg);
+
+    UnexpandedProgram		_unexpanded_program;
+    RunCommand*			_run_command;
+    string			_command_stdout;
+    string			_command_stderr;
+    TaskProgramItem::ProgramCallback _program_cb;
+    XorpTimer			_delay_timer;
     bool			_verbose;   // Set to true if output is verbose
 };
 
@@ -232,11 +411,13 @@ public:
     void shutdown_module(const string& mod_name, Validation* validation,
 			 Shutdown* shutdown);
     void add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb);
+    void add_program(const UnexpandedProgram&		program,
+		     TaskProgramItem::ProgramCallback	program_cb);
     void set_ready_validation(Validation* validation);
     Validation* ready_validation() const { return _ready_validation; }
     bool will_shutdown_module() const { return _stop_module; }
     void run(CallBack cb);
-    void xrl_done(bool success, bool fatal, string errmsg); 
+    void item_done(bool success, bool fatal, string errmsg); 
     bool do_exec() const;
     XorpClient& xorp_client() const;
 
@@ -292,7 +473,7 @@ private:
                                        // module shutdown
     Startup*	_startup_method;
     Shutdown*	_shutdown_method;
-    list<TaskXrlItem> _xrls;
+    list<TaskBaseItem *> _task_items;
     bool	_config_done;	// True if we changed the module's config
     CallBack	_task_complete_cb; // The task completion callback
     XorpTimer	_wait_timer;
@@ -314,6 +495,9 @@ public:
     int add_module(const ModuleCommand& mod_cmd);
     void add_xrl(const string& module_name, const UnexpandedXrl& xrl, 
 		 XrlRouter::XrlCallback& cb);
+    void add_program(const string&			module_name,
+		     const UnexpandedProgram&		program,
+		     TaskProgramItem::ProgramCallback	program_cb);
     void shutdown_module(const string& module_name);
     void run(CallBack cb);
     XorpClient& xorp_client() const { return _xorp_client; }
@@ -328,8 +512,8 @@ public:
      *
      * kill_process is used to kill a fatally wounded process. This
      * does not politely ask the process to die, because if we get
-     * here we can't communicate with the process using XRLs, so we
-     * just kill it outright.
+     * here we can't communicate with the process using XRLs or any other
+     * mechanism, so we just kill it outright.
      * 
      * @param module_name the module name of the process to be killed.  
      */

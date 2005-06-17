@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.9 2005/01/19 00:08:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.10 2005/03/25 02:54:35 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -133,7 +133,7 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 		return;
 	    }
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		changed_modules.insert(*iter);
@@ -146,14 +146,14 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 	    base_cmd = _template_tree_node->const_command("%create");
 	    if (base_cmd != NULL) {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
-		modules = cmd->affected_xrl_modules();
+		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
 	    base_cmd = _template_tree_node->const_command("%activate");
 	    if (base_cmd != NULL) {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
-		modules = cmd->affected_xrl_modules();
+		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
@@ -161,14 +161,14 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 	    base_cmd = _template_tree_node->const_command("%set");
 	    if (base_cmd != NULL) {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
-		modules = cmd->affected_xrl_modules();
+		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
 	    base_cmd = _template_tree_node->const_command("%update");
 	    if (base_cmd != NULL) {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
-		modules = cmd->affected_xrl_modules();
+		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
@@ -200,28 +200,28 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 	base_cmd = _template_tree_node->const_command("%create");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%activate");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%update");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%set");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
@@ -253,28 +253,28 @@ MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 	base_cmd = _template_tree_node->const_command("%create");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%activate");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%update");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%set");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.20 2004/12/11 21:29:58 mjh Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.21 2005/03/25 02:54:36 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -35,15 +35,12 @@ public:
 
     void add_action(const list<string>& action,
 		    const XRLdb& xrldb) throw (ParseError);
-    // int execute(TaskManager& taskmgr) const;
     Validation* startup_validation(TaskManager& taskmgr) const;
     Validation* config_validation(TaskManager& taskmgr) const;
     Validation* ready_validation(TaskManager& taskmgr) const;
     Validation* shutdown_validation(TaskManager& taskmgr) const;
     Startup*	startup_method(TaskManager& taskmgr) const;
     Shutdown*	shutdown_method(TaskManager& taskmgr) const;
-
-    // bool execute_completed() const;
 
     const string& module_name() const { return _module_name; }
     const string& module_exec_path() const { return _module_exec_path; }
@@ -54,12 +51,22 @@ public:
 			TaskManager& task_manager) const;
     string str() const;
 
-protected:
-    // void exec_complete(const XrlError& err, XrlArgs* xrl_args);
+    typedef XorpCallback3<void, bool, const string&, const string&>::RefPtr ProgramCallback;
 
-    void action_complete(const XrlError& err, XrlArgs* xrl_args,
-			 MasterConfigTreeNode *ctn, Action *action,
-			 string cmd) const;
+protected:
+    void xrl_action_complete(const XrlError& err,
+			     XrlArgs* xrl_args,
+			     MasterConfigTreeNode *ctn,
+			     Action *action,
+			     string cmd) const;
+
+    void program_action_complete(bool success,
+				 const string& stdout_output,
+				 const string& stderr_output,
+				 bool do_exec,
+				 MasterConfigTreeNode *ctn,
+				 Action *action,
+				 string cmd) const;
 
 private:
     TemplateTree&	_tt;
