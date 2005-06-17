@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.42 2005/03/25 02:54:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.43 2005/04/28 02:24:57 pavlin Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -78,7 +78,10 @@ child_handler(int x)
 
     XLOG_ASSERT(pid > 0);
     pid_iter = module_pids.find(pid);
-    XLOG_ASSERT(pid_iter != module_pids.end());
+    if (pid_iter == module_pids.end()) {
+	// XXX: the program that has exited is not a module process
+	return;
+    }
 
     if (WIFEXITED(child_wait_status)) {
 	debug_msg("process exited with value %d\n",
@@ -215,6 +218,13 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
 
     XLOG_INFO("Terminating module: %s", _name.c_str());
 
+    if (_expath.empty()) {
+	// Nothing to terminate
+	new_status(MODULE_NOT_STARTED);
+	cb->dispatch();
+	return;
+    }
+
     //
     // Find whether this is the last module running within this process
     //
@@ -288,6 +298,14 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
 	return;
     }
 
+    if (_expath.empty()) {
+	// Nothing to terminate
+	new_status(MODULE_NOT_STARTED);
+	_pid = 0;
+	cb->dispatch();
+	return;
+    }
+
     // Remove the module from the multimap with all running modules
     for (path_iter = module_paths.begin();
 	 path_iter != module_paths.end();
@@ -321,8 +339,12 @@ int
 Module::set_execution_path(const string& path)
 {
     if (path.empty()) {
-	// The path is missing.
-	return XORP_ERROR;
+	// Empty path: no program should be executed
+	_path = path;
+	_expath = path;
+	XLOG_TRACE(_verbose, "New module: %s (%s)",
+		   _name.c_str(), _path.c_str());
+	return XORP_OK;
     }
 
     if (path[0] == '~' || path[0] == '/') {
@@ -410,6 +432,13 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	return XORP_OK;
     }
 
+    if (_expath.empty()) {
+	// Nothing to run
+	new_status(MODULE_STARTUP);
+	cb->dispatch(true);
+	return XORP_OK;
+    }
+
     // Check if a process with the same path is running already
     multimap<string, Module*>::iterator path_iter;
     path_iter = module_paths.find(_expath);
@@ -461,7 +490,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 		    exit(1);
 		}
 	    } else {
-		//convert argv from strings to char*
+		// Convert argv from strings to char*
 		const char* argv[_argv.size() + 1];
 		size_t i;
 		for (i = 0; i < _argv.size(); i++) {
@@ -716,7 +745,7 @@ ModuleManager::shell_execute(uid_t userid, const vector<string>& argv,
     module->set_argv(argv);
     XorpCallback1<void, bool>::RefPtr run_cb 
 	= callback(module, &Module::module_run_done);
-    if (module->run(do_exec, run_cb)<0) {
+    if (module->run(do_exec, run_cb) != XORP_OK) {
 	cb->dispatch(false, "Failed to execute" + argv[0]);
 	return XORP_ERROR;
     }
