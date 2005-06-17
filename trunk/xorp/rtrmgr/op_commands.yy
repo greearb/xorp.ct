@@ -10,6 +10,7 @@
 #include "libxorp/xorp.h"
 
 #include "op_commands.hh"
+#include "util.hh"
 
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize opcmdstacksize
@@ -148,21 +149,10 @@ strip_quotes_and_empty_space(const string& s)
 				 s.c_str());
 	opcmderror(errmsg.c_str());
     }
-    res = s.substr(1, s.length() - 2);
+    res = unquote(s);
 
-    // Strip the heading and trailing empty space
-    while (!res.empty()) {
-	size_t len = res.length();
-	if ((res[0] == ' ') || (res[0] == '\t')) {
-	    res = res.substr(1, len - 1);
-	    continue;
-	}
-	if ((res[len - 1] == ' ') || (res[len - 1] == '\t')) {
-	    res = res.substr(0, res.length() - 1);
-	    continue;
-	}
-	break;
-    }
+    // Strip the heading and trailing empty spaces
+    res = strip_empty_spaces(res);
 
     return res;
 }
