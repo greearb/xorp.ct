@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.31 2005/03/25 02:54:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.32 2005/06/15 19:14:52 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -94,7 +94,7 @@ public:
     string typestr() const;
     const string& segname() const { return _segname; }
     const string& value() const;
-    bool has_value() const {return _has_value;}
+    bool has_value() const { return _has_value; }
     uid_t user_id() const { return _user_id; }
     void set_existence_committed(bool v) { _existence_committed = v; }
     bool existence_committed() const { return _existence_committed; }
@@ -122,7 +122,7 @@ public:
     bool expand_expression(const string& expression, string& value) const;
     void expand_varname_to_matchlist(const vector<string>& v, size_t depth,
 				     list<string>& matches) const;
-    bool set_variable(const string& varname, string& value);
+    bool set_variable(const string& varname, const string& value);
     const string& named_value(const string& varname) const;
     void set_named_value(const string& varname, const string& value);
 

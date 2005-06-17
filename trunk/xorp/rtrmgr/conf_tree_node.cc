@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.62 2005/03/25 02:54:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.63 2005/06/15 19:14:52 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -591,7 +591,8 @@ ConfigTreeNode::is_tag() const
 bool 
 ConfigTreeNode::is_leaf() const
 {
-    if (_has_value) return true;
+    if (_has_value)
+	return true;
     if (_template_tree_node == NULL)
 	return false;
     if ((_template_tree_node->type() != NODE_VOID)
@@ -607,7 +608,7 @@ ConfigTreeNode::depth() const
     if (is_root_node())
 	return 0;
     else
-	return 1+_parent->depth();
+	return (1 + _parent->depth());
 }
 
 const string& 
@@ -1005,8 +1006,7 @@ ConfigTreeNode::retain_common_nodes(const ConfigTreeNode& them)
 
 
 bool
-ConfigTreeNode::expand_variable(const string& varname, 
-				      string& value) const
+ConfigTreeNode::expand_variable(const string& varname, string& value) const
 {
 
     VarType type = NONE;
@@ -1351,7 +1351,7 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
 }
 
 bool
-ConfigTreeNode::set_variable(const string& varname, string& value)
+ConfigTreeNode::set_variable(const string& varname, const string& value)
 {
     //
     // The variable name should be in the form "nodename.varname".
@@ -1413,8 +1413,7 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	return false;
     }
     var_parts.pop_back();
-    string parent_varname = join_up_varname(var_parts);
-    node = find_varname_node(parent_varname, type);
+    node = find_parent_varname_node(var_parts, type);
     if (node != NULL) {
 	switch (type) {
 	case NONE:
