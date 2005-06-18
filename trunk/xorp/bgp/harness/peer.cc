@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.60 2005/03/25 02:52:53 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.61 2005/05/21 01:06:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1506,6 +1506,8 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		bgpupdate->add_pathatt(oa);
 	    } else if("aspath" == words[i]) {
 		string aspath = words[i+1];
+		if ("empty" == aspath)
+		    aspath = "";
 		ASPathAttribute aspa(AsPath(aspath.c_str()));
 		bgpupdate->add_pathatt(aspa);
 		debug_msg("aspath: %s\n", 
