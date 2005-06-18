@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.45 2005/02/24 20:39:55 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.46 2005/03/25 02:54:36 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -644,55 +644,6 @@ OpCommandList::add_op_command(const OpCommand& op_command)
     new_command = new OpCommand(op_command);
     _op_commands.push_back(new_command);
     return new_command;
-}
-
-bool
-OpCommandList::find_executable_filename(const string& command_filename,
-					string& executable_filename)
-    const
-{
-    struct stat statbuf;
-
-    if (command_filename.size() == 0) {
-	return false;
-    }
-
-    if (command_filename[0] == '/') {
-	// Absolute path name
-	if (stat(command_filename.c_str(), &statbuf) == 0 &&
-	    //access(command_filename.c_str(), X_OK) == 0 &&
-	    S_ISREG(statbuf.st_mode)) {
-	    executable_filename = command_filename;
-	    return true;
-	}
-	return false;
-    }
-
-    // Relative path name
-    string xorp_root_dir = _template_tree->xorp_root_dir();
-
-    list<string> path;
-    path.push_back(xorp_root_dir);
-
-    // Expand path
-    const char* p = getenv("PATH");
-    if (p != NULL) {
-	list <string> l2 = split(p, ':');
-	path.splice(path.end(), l2);
-    }
-
-    // Search each path component
-    while (!path.empty()) {
-	string full_path_executable = path.front() + "/" + command_filename;
-	if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
-	    //access(command_filename.c_str(), X_OK) == 0 &&
-	    S_ISREG(statbuf.st_mode)) {
-	    executable_filename = full_path_executable;
-	    return true;
-	}
-	path.pop_front();
-    }
-    return false;
 }
 
 map<string, string>

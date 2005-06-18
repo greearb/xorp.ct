@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.23 2004/12/21 16:16:50 mjh Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.24 2005/03/25 02:54:37 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -164,8 +164,6 @@ public:
     map<string, string> childlist(const string& path,
 				  bool& is_executable,
 				  bool& can_pipe) const;
-    bool find_executable_filename(const string& command_filename,
-				  string& executable_filename) const;
 
 private:
     list<OpCommand*>	_op_commands;

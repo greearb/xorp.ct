@@ -315,11 +315,13 @@ add_cmd_command(char *s)
 
     // Find the executable filename
     string executable_filename;
-    if ( (! command.empty())
-	&& (! ocl->find_executable_filename(filename, executable_filename))) {
-	string errmsg = c_format("Executable file not found: %s",
-				 filename.c_str());
-	opcmderror(errmsg.c_str());
+    if (! filename.empty()) {
+	executable_filename = find_executable_filename(filename);
+	if (executable_filename.empty()) {
+	    string errmsg = c_format("Executable file not found: %s",
+				     filename.c_str());
+	    opcmderror(errmsg.c_str());
+	}
     }
 
     // Get a reference to the OpCommand instance

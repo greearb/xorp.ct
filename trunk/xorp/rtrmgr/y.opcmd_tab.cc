@@ -409,11 +409,13 @@ add_cmd_command(char *s)
 
     // Find the executable filename
     string executable_filename;
-    if ( (! command.empty())
-	&& (! ocl->find_executable_filename(filename, executable_filename))) {
-	string errmsg = c_format("Executable file not found: %s",
-				 filename.c_str());
-	opcmderror(errmsg.c_str());
+    if (! filename.empty()) {
+	executable_filename = find_executable_filename(filename);
+	if (executable_filename.empty()) {
+	    string errmsg = c_format("Executable file not found: %s",
+				     filename.c_str());
+	    opcmderror(errmsg.c_str());
+	}
     }
 
     // Get a reference to the OpCommand instance
@@ -589,7 +591,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 594 "y.opcmd_tab.c"
+#line 596 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -856,7 +858,7 @@ case 28:
 #line 111 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 861 "y.opcmd_tab.c"
+#line 863 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
