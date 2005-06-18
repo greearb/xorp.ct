@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.47 2005/03/25 02:54:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.48 2005/06/17 21:15:12 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,6 +30,7 @@
 #include "task.hh"
 #include "unexpanded_xrl.hh"
 #include "xorp_client.hh"
+#include "util.hh"
 
 
 #define MAX_STATUS_RETRIES 30
@@ -295,14 +296,27 @@ ProgramStatusValidation::validate(CallBack cb)
 		       _program_action.str().c_str(), _module_name.c_str());
 	}
 
+	// Expand the executable program name
+	string executable_filename, program_arguments;
+	find_executable_filename_and_arguments(program_request,
+					       executable_filename,
+					       program_arguments);
+	program_request = executable_filename;
+	if (! program_arguments.empty())
+	    program_request = program_request + " " + program_arguments;
+	if (executable_filename.empty()) {
+	    XLOG_ERROR("Could not find program %s", program_request.c_str());
+	    return;
+	}
+
 	// Run the program
 	XLOG_TRACE(_verbose, "Validating with program: >%s<\n",
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunCommand(
 	    eventloop(),
-	    program_request,
-	    "",
+	    executable_filename,
+	    program_arguments,
 	    callback(this, &ProgramStatusValidation::stdout_cb),
 	    callback(this, &ProgramStatusValidation::stderr_cb),
 	    callback(this, &ProgramStatusValidation::done_cb));
@@ -874,14 +888,27 @@ ProgramStartup::startup(CallBack cb)
 	    return;
 	}
 
+	// Expand the executable program name
+	string executable_filename, program_arguments;
+	find_executable_filename_and_arguments(program_request,
+					       executable_filename,
+					       program_arguments);
+	program_request = executable_filename;
+	if (! program_arguments.empty())
+	    program_request = program_request + " " + program_arguments;
+	if (executable_filename.empty()) {
+	    XLOG_ERROR("Could not find program %s", program_request.c_str());
+	    return;
+	}
+
 	// Run the program
 	XLOG_TRACE(_verbose, "Startup with program: >%s<\n",
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunCommand(
 	    eventloop(),
-	    program_request,
-	    "",
+	    executable_filename,
+	    program_arguments,
 	    callback(this, &ProgramStartup::stdout_cb),
 	    callback(this, &ProgramStartup::stderr_cb),
 	    callback(this, &ProgramStartup::done_cb));
@@ -1152,14 +1179,27 @@ ProgramShutdown::shutdown(CallBack cb)
 	    return;
 	}
 
+	// Expand the executable program name
+	string executable_filename, program_arguments;
+	find_executable_filename_and_arguments(program_request,
+					       executable_filename,
+					       program_arguments);
+	program_request = executable_filename;
+	if (! program_arguments.empty())
+	    program_request = program_request + " " + program_arguments;
+	if (executable_filename.empty()) {
+	    XLOG_ERROR("Could not find program %s", program_request.c_str());
+	    return;
+	}
+
 	// Run the program
 	XLOG_TRACE(_verbose, "Shutdown with program: >%s<\n",
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunCommand(
 	    eventloop(),
-	    program_request,
-	    "",
+	    executable_filename,
+	    program_arguments,
 	    callback(this, &ProgramShutdown::stdout_cb),
 	    callback(this, &ProgramShutdown::stderr_cb),
 	    callback(this, &ProgramShutdown::done_cb));
@@ -1436,8 +1476,8 @@ TaskProgramItem::execute(string& errmsg)
 	XLOG_TRACE(_verbose, "Expanding %s\n",
 		   _unexpanded_program.str().c_str());
 
-    string program = _unexpanded_program.expand(errmsg);
-    if (program.empty()) {
+    string program_request = _unexpanded_program.expand(errmsg);
+    if (program_request.empty()) {
 	errmsg = c_format("Failed to expand program %s: %s",
 			  _unexpanded_program.str().c_str(), errmsg.c_str());
 	return false;
@@ -1447,18 +1487,34 @@ TaskProgramItem::execute(string& errmsg)
 	return (true);		// XXX: already running
 
     if (task().do_exec()) {
-	XLOG_TRACE(_verbose, "Executing program: >%s<\n", program.c_str());
+	// Expand the executable program name
+	string executable_filename, program_arguments;
+	find_executable_filename_and_arguments(program_request,
+					       executable_filename,
+					       program_arguments);
+	program_request = executable_filename;
+	if (! program_arguments.empty())
+	    program_request = program_request + " " + program_arguments;
+	if (executable_filename.empty()) {
+	    errmsg = c_format("Could not find program %s",
+			      program_request.c_str());
+	    return (false);
+	}
+
+	XLOG_TRACE(_verbose, "Executing program: >%s<\n",
+		   program_request.c_str());
 	_run_command = new RunCommand(
 	    task().eventloop(),
-	    program,
-	    "",
+	    executable_filename,
+	    program_arguments,
 	    callback(this, &TaskProgramItem::stdout_cb),
 	    callback(this, &TaskProgramItem::stderr_cb),
 	    callback(this, &TaskProgramItem::done_cb));
 	if (_run_command->execute() != XORP_OK) {
 	    delete _run_command;
 	    _run_command = NULL;
-	    errmsg = c_format("Could not execute program %s", program.c_str());
+	    errmsg = c_format("Could not execute program %s",
+			      program_request.c_str());
 	    return (false);
 	}
     } else {
