@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/util.hh,v 1.6 2005/03/25 02:54:40 pavlin Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.7 2005/06/17 20:27:21 pavlin Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
@@ -26,20 +26,6 @@
  * @return list of tokens.
  */
 list<string> split(const string& s, char sep);
-
-/**
- * Attempt to find path of named executable.
- *
- * If the supplied string looks like a qualified path then this
- * function returns the directory component, otherwise it tries to
- * locate the named program name in the directories listed in the PATH
- * environment variable.
- *
- * @param progname program to find (typically the argv[0] supplied to main()).
- *
- * @return path of executable on success, empty string on failure.
- */
-string find_exec_path_name(const char* progname);
 
 /**
  * Initialize paths.
@@ -133,5 +119,39 @@ string unquote(const string& s);
  * @return copy of the string with heading and trailing empty spaces removed.
  */
 string strip_empty_spaces(const string& s);
+
+/**
+ * Find the name (including the path) of an executable program.
+ * 
+ * If the filename contains an absolute pathname, then we return the
+ * program filename or an error if the program is not executable.
+ * If the pathname is relative, then first we consider the XORP binary
+ * root directory, and then the directories in the user's PATH environment.
+ * 
+ * @param program_filename the name of the program to find.
+ * @return the name of the executable program on success, empty string
+ * on failure.
+ */
+string find_executable_filename(const string& program_filename);
+
+/**
+ * Find the name (including the path) and the arguments of an executable
+ * program and return them by reference.
+ * 
+ * If the filename contains an absolute pathname, then we return-by-reference
+ * the program filename or an error if the program is not executable.
+ * If the pathname is relative, then first we consider the XORP binary
+ * root directory, and then the directories in the user's PATH environment.
+ * 
+ * @param program_request a string with the name of the program to find
+ * and its arguments.
+ * @param executable_filename the return-by-reference name of the executable
+ * program on success, empty string on failure.
+ * @param program_arguments the return-by-reference program arguments,
+ * or an empty string if no arguments were supplied.
+ */
+void find_executable_filename_and_arguments(const string& program_request,
+					    string& executable_filename,
+					    string& program_arguments);
 
 #endif // __RTRMGR_UTIL_HH__

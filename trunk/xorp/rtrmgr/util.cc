@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.11 2005/03/25 02:54:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.12 2005/06/17 20:27:21 pavlin Exp $"
 
 
 #include <list>
@@ -48,27 +48,40 @@ split(const string& s, char ch)
     return parts;
 }
 
-string
-find_exec_path_name(const char* progname)
+/**
+ * Find the directory of executable program.
+ *
+ * If the supplied string looks like a qualified path then this
+ * function returns the directory component, otherwise it tries to
+ * locate the named program name in the directories listed in the PATH
+ * environment variable.
+ * Note that in our search we do not consider the XORP root directory.
+ *
+ * @param program_name the name of the program to find.
+ *
+ * @return directory name of executable program on success, empty string
+ * on failure.
+ */
+static string
+find_executable_program_dir(const string& program_name)
 {
-    debug_msg("%s\n", progname);
+    debug_msg("%s\n", program_name.c_str());
 
-    XLOG_ASSERT(strlen(progname) <= MAXPATHLEN);
+    if (program_name.size() > MAXPATHLEN)
+	return string("");		// Error: invalid program name
 
     //
-    // Look for trailing slash in progname
+    // Look for trailing slash in program_name
     //
-    const char* p = strrchr(progname, '/');
-    if (p != NULL) {
-	debug_msg("%s\n",  string(progname, p).c_str());
-	return string(progname, p);
+    string::size_type slash = program_name.rfind('/');
+    if (slash != string::npos) {
+	string path = program_name.substr(0, slash);
+	return path;
     }
 
     //
     // Go through the PATH environment variable and find the program location
     //
-    string slash_progname("/");
-    slash_progname += progname;
     const char* s = getenv("PATH");
     while (s != NULL && *s != '\0') {
 	const char* e = strchr(s, ':');
@@ -80,12 +93,13 @@ find_exec_path_name(const char* progname)
 	    path = string(s);
 	    s = NULL;
 	}
-	string complete_path = path + slash_progname;
+	string complete_path = path + "/" + program_name;
 	if (access(complete_path.c_str(), X_OK) == 0) {
 	    return path;
 	}
     }
-    return string("");
+
+    return string("");			// Error: nothing found
 }
 
 static string
@@ -115,7 +129,9 @@ xorp_path_init(const char* argv0)
 	return;
     }
 
-    string current_root = find_exec_path_name(argv0) + "/..";
+    string current_root = find_executable_program_dir(string(argv0));
+    XLOG_ASSERT(! current_root.empty());
+    current_root += "/..";
     current_root = xorp_real_path(current_root);
 
     debug_msg("current_root: %s\n", current_root.c_str());
@@ -222,4 +238,84 @@ strip_empty_spaces(const string& s)
     }
 
     return res;
+}
+
+string
+find_executable_filename(const string& program_filename)
+{
+    string executable_filename;
+    struct stat statbuf;
+
+    if (program_filename.size() == 0) {
+	return string("");			// Error
+    }
+
+    //
+    // TODO: take care of the commented-out access() calls below (by BMS).
+    //
+    // Comment out the access() calls for now -- xorpsh does not
+    // like them, when running under sudo -u xorp (euid?) and
+    // as a result xorpsh fails to start up.
+    // Consider checking for it in configure.in and shipping
+    // our own if we can't find it on the system.
+    //
+    if (program_filename[0] == '/') {
+	// Absolute path name
+	if (stat(program_filename.c_str(), &statbuf) == 0 &&
+	    // access(program_filename.c_str(), X_OK) == 0 &&
+	    S_ISREG(statbuf.st_mode)) {
+	    executable_filename = program_filename;
+	    return executable_filename;
+	}
+	return string("");			// Error
+    }
+
+    // Relative path name
+    string xorp_root_dir = xorp_binary_root_dir();
+
+    list<string> path;
+    path.push_back(xorp_root_dir);
+
+    // Expand path
+    const char* p = getenv("PATH");
+    if (p != NULL) {
+	list<string> l2 = split(p, ':');
+	path.splice(path.end(), l2);
+    }
+
+    // Search each path component
+    while (!path.empty()) {
+	string full_path_executable = path.front() + "/" + program_filename;
+	if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
+	    // access(program_filename.c_str(), X_OK) == 0 &&
+	    S_ISREG(statbuf.st_mode)) {
+	    executable_filename = full_path_executable;
+	    return executable_filename;
+	}
+	path.pop_front();
+    }
+    return string("");				// Error
+}
+
+void
+find_executable_filename_and_arguments(const string& program_request,
+				       string& executable_filename,
+				       string& program_arguments)
+{
+    executable_filename = strip_empty_spaces(program_request);
+    program_arguments = "";
+
+    string::size_type space;
+    space = executable_filename.find(' ');
+    if (space == string::npos)
+	space = executable_filename.find('\t');
+
+    if (space != string::npos) {
+	program_arguments = executable_filename.substr(space + 1);
+	executable_filename = executable_filename.substr(0, space);
+    }
+
+    executable_filename = find_executable_filename(executable_filename);
+    if (executable_filename.empty())
+	program_arguments = "";
 }
