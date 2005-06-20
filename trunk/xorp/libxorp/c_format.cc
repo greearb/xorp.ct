@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/c_format.cc,v 1.5 2005/03/12 04:33:35 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/c_format.cc,v 1.6 2005/03/25 02:53:37 pavlin Exp $"
 
 #include <stdio.h>
 #include <vector>
 
+#include "libxorp_module.h"
 #include "xorp.h"
+#include "xlog.h"
 #include "c_format.hh"
 
 void
@@ -95,6 +97,8 @@ do_c_format(const char* fmt, ...)
 	buf_size = ret + 1;		// Add space for the extra '\0'
 	b.resize(buf_size);
     } while (true);
+
+    XLOG_UNREACHABLE();
 }
 
 #ifdef TESTING_C_FORMAT_123
