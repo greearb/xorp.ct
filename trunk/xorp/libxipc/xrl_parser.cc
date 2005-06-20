@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.9 2004/12/18 03:48:52 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.10 2005/03/25 02:53:32 pavlin Exp $"
 
 #include <stdio.h>
 
@@ -620,9 +620,8 @@ XrlParser::get(string& r) throw (XrlParseError)
 	Xrl x(target, command, args);
 	r = x.str();
 	return true;
-    } else {
-	return false;
     }
+    return false;
 }
 
 bool
