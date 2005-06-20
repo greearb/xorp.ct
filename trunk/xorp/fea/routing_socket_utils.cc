@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.25 2005/03/05 01:41:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.26 2005/03/25 02:53:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -113,7 +113,7 @@ RtmUtils::rtm_msg_type(uint32_t m)
 #ifdef RTM_IFANNOUNCE
 	RTM_MSG_ENTRY(RTM_IFANNOUNCE),
 #endif
-	{ ~0, "Unknown" }
+	{ ~0U, "Unknown" }
     };
     const size_t n_rtm_msgs = sizeof(rtm_msg_types) / sizeof(rtm_msg_types[0]);
     const char* ret = 0;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.29 2005/03/25 02:53:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.30 2005/05/07 03:03:45 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1762,9 +1762,9 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 		&& (sgreq.wrong_if == 0xffffffffU))) {
 	    XLOG_ERROR("ioctl(SIOCGETSGCNT, (%s %s)) failed: %s",
 		       cstring(source), cstring(group), strerror(errno));
-	    sg_count.set_pktcnt(~0);
-	    sg_count.set_bytecnt(~0);
-	    sg_count.set_wrong_if(~0);
+	    sg_count.set_pktcnt(~0U);
+	    sg_count.set_bytecnt(~0U);
+	    sg_count.set_wrong_if(~0U);
 	    return (XORP_ERROR);
 	}
 	sg_count.set_pktcnt(sgreq.pktcnt);
@@ -1789,9 +1789,9 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 	if (ioctl(_mrouter_socket, SIOCGETSGCNT_IN6, &sgreq) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGETSGCNT_IN6, (%s %s)) failed: %s",
 		       cstring(source), cstring(group), strerror(errno));
-	    sg_count.set_pktcnt(~0);
-	    sg_count.set_bytecnt(~0);
-	    sg_count.set_wrong_if(~0);
+	    sg_count.set_pktcnt(~0U);
+	    sg_count.set_bytecnt(~0U);
+	    sg_count.set_wrong_if(~0U);
 	    return (XORP_ERROR);
 	}
 	sg_count.set_pktcnt(sgreq.pktcnt);
@@ -1841,10 +1841,10 @@ MfeaMrouter::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 	if (ioctl(_mrouter_socket, SIOCGETVIFCNT, &vreq) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGETVIFCNT, vif %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
-	    vif_count.set_icount(~0);
-	    vif_count.set_ocount(~0);
-	    vif_count.set_ibytes(~0);
-	    vif_count.set_obytes(~0);
+	    vif_count.set_icount(~0U);
+	    vif_count.set_ocount(~0U);
+	    vif_count.set_ibytes(~0U);
+	    vif_count.set_obytes(~0U);
 	    return (XORP_ERROR);
 	}
 	vif_count.set_icount(vreq.icount);
@@ -1869,10 +1869,10 @@ MfeaMrouter::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 	if (ioctl(_mrouter_socket, SIOCGETMIFCNT_IN6, &mreq) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGETMIFCNT_IN6, vif %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
-	    vif_count.set_icount(~0);
-	    vif_count.set_ocount(~0);
-	    vif_count.set_ibytes(~0);
-	    vif_count.set_obytes(~0);
+	    vif_count.set_icount(~0U);
+	    vif_count.set_ocount(~0U);
+	    vif_count.set_ibytes(~0U);
+	    vif_count.set_obytes(~0U);
 	    return (XORP_ERROR);
 	}
 	vif_count.set_icount(mreq.icount);
