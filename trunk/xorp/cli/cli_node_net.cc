@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.34 2005/03/25 02:52:56 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.35 2005/04/30 21:58:29 pavlin Exp $"
 
 
 //
@@ -230,7 +230,7 @@ CliNode::add_connection(int client_socket)
     // Set session id
     //
     {
-	uint32_t session_id = ~0;	// XXX: ~0 has no particular meaning
+	uint32_t session_id = ~0U;	// XXX: ~0U has no particular meaning
 	uint32_t i = 0;
 	
 	for (i = 0; i < CLI_MAX_CONNECTIONS; i++) {
