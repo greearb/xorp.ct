@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.31 2005/04/13 21:08:20 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.32 2005/06/15 20:38:43 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -126,16 +126,17 @@ starting the required processes that satisfies all their dependencies.
 started.
 
   \item If no error occurs, the rtrmgr traverses the configuration tree to
-build the list of XRLs that need to be called to configure the process
-just started.  These XRLs are then called, one after another, with the
-successful completion of one XRL triggering the calling of the next.
-The XRLs are ordered according to the semantics of the commands
-used to specify the XRLs (\eg see below the description of commands
+build the list of commands that need to be executed to configure the process
+just started.  A command can be either an XRL or an external program.
+These commands are then called, one after another, with the
+successful completion of one command triggering the calling of the next.
+The commands are ordered according to the command semantics
+(\eg see below the description of commands
 \%create, \%activate, etc). If the semantics of the commands
-do not specify the ordering, then the XRLs follow the order they
+do not specify the ordering, then the commands follow the order they
 are defined in the rtrmgr template files.
-Some processes may require calling a transaction start XRL before
-configuration, and a transaction complete XRL after configuration -
+Some processes may require calling a transaction start command before
+configuration, and a transaction complete command after configuration -
 the rtrmgr can do this if required.
 
   \item If no error occurred during configuration, the next process is started,
@@ -422,14 +423,16 @@ inside that module to specify the XRL target name).
 The {\tt start\_commit} subcommand takes two or more additional parameters,
 that
 are used to specify the mechanism to be call before performing any change to
-the configuration of the module. The only method currently supported is
-{\tt xrl} which takes an XRL specification as an argument.
+the configuration of the module. The only methods currently supported are
+{\tt xrl} which takes an XRL specification as an argument, and
+{\tt program} which takes an executable program as an argument.
 
 \item {{\tt \%modinfo: end\_commit }{\it method }{\it argument}}  \\
 The {\tt end\_commit} subcommand takes two or more additional parameters, that
 are used to specify the mechanism to be called to complete any change to the
-configuration of the module. The only method currently supported is {\tt xrl}
-which takes an XRL specification as an argument.
+configuration of the module. The only methods currently supported are {\tt xrl}
+which takes an XRL specification as an argument, and {\tt program}
+which takes an executable program as an argument.
 Both {\tt start\_commit} and {\tt end\_commit} are optional. They provide a way
 to make batch changes to a module configuration as an atomic operation.
 
@@ -437,14 +440,17 @@ to make batch changes to a module configuration as an atomic operation.
 The {\tt status\_method} subcommand takes two or more additional parameters,
 that are used to specify the mechanism to be used to discover the status of
 the module.
-The only method current supported is {\tt xrl} which takes an XRL
-specification as an argument.
+The only methods current supported are {\tt xrl} which takes an XRL
+specification as an argument, and {\tt program} which takes an executable
+program as an argument.
 
 \item {{\tt \%modinfo: startup\_method }{\it method }{\it argument}}  \\
 The {\tt startup\_method} subcommand takes two or more additional parameters,
 that are used to specify the mechanism to be used to gracefully startup the
-module. The only method current supported is {\tt xrl} which takes an XRL
-specification as an argument.
+module. The only methods current supported are {\tt xrl} which takes an XRL
+specification as an argument, and {\tt program} which takes an executable
+program as an argument.
+
 Before the {\tt startup\_method} subcommand is called, it is expected
 that the process is in {\tt PROC\_STARTUP} state; after the subcommand
 is called the process should transition to the {\tt PROC\_READY} state.
@@ -455,8 +461,9 @@ it is expected that the process will transition on its own to the
 \item {{\tt \%modinfo: shutdown\_method }{\it method }{\it argument}}  \\
 The {\tt shutdown\_method} subcommand takes two or more additional parameters,
 that are used to specify the mechanism to be used to gracefully shutdown the
-module. The only method current supported is {\tt xrl} which takes an XRL
-specification as an argument.
+module. The only methods current supported are {\tt xrl} which takes an XRL
+specification as an argument, and {\tt program} which takes an executable
+program as an argument.
 If the process does not then transition to {\tt PROC\_SHUTDOWN} state, the
 rtrmgr will then kill the process.
 
@@ -476,12 +483,17 @@ the configuration tree.
 \begin{itemize}
 
   \item The first parameter indicates the form of
-action to take to perform this action - typically it is {\tt xrl}
-which indicates an XRL should be called.
+   action to take to perform this action - typically it is {\tt xrl}
+   which indicates an XRL should be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to create the new configuration tree instance of this template
-tree node.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to create the new configuration tree instance of this template
+   tree node.
+
+  \item If the action is {\tt program}, then the second parameter specifies the
+   program to execute to create the new configuration tree instance of this
+   template tree node. 
 
 Note that if a node has no {\tt \%create} command, then the {\tt \%set}
 command (if exists) for that node is used instead (see below).
@@ -500,12 +512,17 @@ configured.  A particular interior node might have either {\tt
 \begin{itemize}
 
   \item The first parameter indicates the form of action to take to perform
-this action - typically it is {\tt xrl} which indicates an XRL should
-be called.
+   this action - typically it is {\tt xrl} which indicates an XRL should
+   be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to activate the new configuration tree instance of this template
-tree node.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to activate the new configuration tree instance of this template
+   tree node.
+
+  \item If the action is {\tt program}, then the second parameter specifies the
+   program to execute to activate the new configuration tree instance of this
+   template tree node.
 
 \end{itemize}
 
@@ -535,12 +552,17 @@ have been modified (\eg via xorpsh).
 \begin{itemize}
 
   \item The first parameter indicates the form of action to take to perform
-this action - typically it is {\tt xrl} which indicates an XRL should
-be called.
+   this action - typically it is {\tt xrl} which indicates an XRL should
+   be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to update the configuration tree instance of this template
-tree node.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to update the configuration tree instance of this template tree
+   node.
+
+  \item If the action is {\tt program}, then the second parameter specifies
+   the program to execute to update the configuration tree instance of this
+   template tree node.
 
 \end{itemize}
 
@@ -579,11 +601,15 @@ command on this node would then return the list of interfaces.
 
 \begin{itemize}
   \item The first parameter indicates the form of action to take to perform
-this action - typically it is {\tt xrl} which indicates an XRL should
-be called.
+   this action - typically it is {\tt xrl} which indicates an XRL should
+   be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to return the list.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to return the list.
+
+  \item If the action is {\tt program}, then the second parameter specifies the
+   program to execute to return the list.
 
 \end{itemize}
 
@@ -594,11 +620,17 @@ command should also have a {\tt \%delete} command.
 
 \begin{itemize}
   \item The first parameter indicates the form of action to take to perform
-this action - typically it is {\tt xrl} which indicates an XRL should
-be called.
+   this action - typically it is {\tt xrl} which indicates an XRL should
+   be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to delete the configuration tree instance of this template tree node.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to delete the configuration tree instance of this template
+   tree node.
+
+  \item If the action is {\tt program}, then the second parameter specifies the
+   program to execute to delete the configuration tree instance of this
+   template tree node.
 
 \end{itemize}
 
@@ -609,12 +641,17 @@ configuration tree.
 \begin{itemize}
 
   \item The first parameter indicates the form of action to take to perform
-this action - typically it is {\tt xrl} which indicates an XRL should
-be called.
+   this action - typically it is {\tt xrl} which indicates an XRL should
+   be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to set the value of configuration tree instance of this template
-tree node.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to set the value of configuration tree instance of this template
+   tree node.
+
+  \item If the action is {\tt program}, then the second parameter specifies the
+   program to execute to set the value of configuration tree instance of this
+   template tree node.
 
 \end{itemize}
 
@@ -629,12 +666,17 @@ default value is specified.
 
 \begin{itemize}
   \item The first parameter indicates the form of action to take to perform
-this action - typically it is {\tt xrl} which indicates an XRL should
-be called.
+   this action - typically it is {\tt xrl} which indicates an XRL should
+   be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to unset the value of configuration tree instance of this template
-tree node.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to unset the value of configuration tree instance of this
+   template tree node.
+
+  \item If the action is {\tt program}, then the second parameter specifies the
+   program to execute to unset the value of configuration tree instance of this
+   template tree node.
 
 \end{itemize}
 
@@ -646,12 +688,17 @@ provides a way for the rtrmgr to re-sync if the value has changed.
 
 \begin{itemize}
   \item The first parameter indicates the form of action to take to perform
-this action - typically it is {\tt xrl} which indicates an XRL should
-be called.
+   this action - typically it is {\tt xrl} which indicates an XRL should
+   be called.
+   To execute an external program instead, the action should be {\tt program}.
 
-  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
-call to get the value of configuration tree instance of this template
-tree node.
+  \item If the action is {\tt xrl}, then the second parameter specifies the
+   XRL to call to get the value of configuration tree instance of this template
+   tree node.
+
+  \item If the action is {\tt program}, then the second parameter specifies the
+   program to execute to get the value of configuration tree instance of this
+   template tree node.
 
 \end{itemize}
 
@@ -752,8 +799,6 @@ specification:
        }
 \end{verbatim}
 
-\newpage
-
 \subsubsection{The {\tt \%order} Command.}
 
 The {\tt \%order} command provides a way to specify the ordering of
@@ -812,7 +857,6 @@ use a template such as:
        }
 \end{verbatim}
 
-\newpage
 \noindent Thus, some configured firewall rules might be:
 \begin{verbatim}
       firewall {
@@ -843,6 +887,133 @@ after {\tt rule 100} and before {\tt rule 300}.
 \noindent Note that if {\tt sorted-numeric} is applied to a {\tt txt}
 field, the sort order for non-numeric values is undefined, but numeric
 values will be sorted correctly.
+
+\newpage
+
+\subsection{Template Tree Command Actions}
+
+Template tree commands such as {\tt \%modinfo: start\_commit},
+{\tt \%modinfo: end\_commit}, {\tt \%modinfo: status\_method},
+{\tt \%modinfo: startup\_method}, and {\tt \%modinfo: shutdown\_method}
+are used to specify the mechanism to be call before any configuration
+change of a module, the mechanism to discover the status of a module, and so
+on.
+Template tree commands such as {\tt \%create}, {\tt \%activate} and
+{\tt \%set} are used to specify the actions that need to be performed
+when the router configuration is created or modified.
+
+This section provides a complete listing of all the template tree
+actions that the rtrmgr supports.
+
+\subsubsection{Template Tree {\tt xrl} Action}
+
+The {\tt xrl} command action specifies the XRL to be executed. The XRL
+and its arguments must be inside quotes and it may contains variables
+that will be substituted with the particular values at execution time.
+For example, if the template tree held the following:
+
+\begin{verbatim}
+    bgp-id {
+        %set: xrl "$(bgp.targetname)/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
+    }
+\end{verbatim}
+
+Then when we set the value of {\tt bgp-id}, first the rtrmgr will substitute
+{\tt \$(bgp.targetname)} with the particular value of that variable, and
+{\tt \$(@)} with the value of {\tt bgp-id}. After the substitution it will
+call XRL {\tt bgp/0.2/set\_bgp\_id} with argument {\tt id:ipv4} set to the
+value of {\tt bgp-id}.
+
+We could use {\tt xrl} actions to get the value of a particular variable,
+store the value inside the rtrmgr and then use that value by other actions.
+For example, if the template tree held the following:
+
+\begin{verbatim}
+interface {
+    ...
+    %modinfo: start_commit xrl "$(interface.targetname)/ifmgr/0.1/
+                           start_transaction->tid:u32=$(interface.TID)";
+    %modinfo: end_commit   xrl "$(interface.targetname)/ifmgr/0.1/
+                           commit_transaction?tid:u32=$(interface.TID)";
+    ...
+    TID {
+        %create:;
+    }
+
+    interface @: txt {
+        %create: xrl "$(interface.targetname)/ifmgr/0.1/
+                 create_interface?tid:u32=$(interface.TID)&ifname:txt=$(@)";
+    }
+
+    ...
+}
+\end{verbatim}
+
+Then whenever the interface configuration is changed the {\tt start\_commit}
+and {\tt end\_commit} XRLs will be call before and after performing any change
+to the configuration of the module. The {\tt start\_commit} XRL will return
+the transaction ID {\tt tid} of type {\tt u32}. The rtrmgr will store
+that value internally in the {\tt \$(interface.TID)} local variable
+(note that this variable should be declared as a leaf node without type).
+Then this value can be used by other actions such as the
+{\tt \%create} and the {\tt end\_commit} XRL actions in the above example.
+
+\subsubsection{Template Tree {\tt program} Action}
+
+The {\tt xrl} command action specifies the external program to be executed.
+The program and its arguments must be inside quotes and it may contains
+variables that will be substituted with the particular values at execution
+time.
+For example, if the template tree held the following:
+
+\begin{verbatim}
+    foo {
+        %set: program "/bin/echo -n '$(@)' >> /tmp/file.txt";
+    }
+\end{verbatim}
+
+Then when we set the value of {\tt foo}, first the rtrmgr will substitute
+{\tt \$(@)} with the value of {\tt foo}. After the substitution it will
+call program {\tt /bin/echo} with argument {\tt -n} and the value
+of {\tt foo}. The result of this command will be appended to file
+{\tt /tmp/file.txt}.
+
+We could use {\tt program} actions to store the {\tt stdout} and {\tt stderr}
+output of a command inside the rtrmgr and then use those values by other
+actions.
+For example, if the template tree held the following:
+
+\begin{verbatim}
+rtrmgr {
+    ...
+    CONFIG {
+        %create:;
+    }
+    CONFIG_STDERR {
+        %create:;
+    }
+
+    load {
+        %create:;
+        %set: program "/bin/cat '$(@)' ->
+              stdout=$(rtrmgr.CONFIG)&stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+    save {
+        %create:;
+        %set: program "/bin/echo -n '$(rtrmgr.CONFIG)' > '$(@)'";
+    }
+    ...
+}
+\end{verbatim}
+
+Then whenever we change the value of variable {\tt load}, the external
+program {\tt /bin/cat} will be executed with the value of that variable as
+its argument. The rtrmgr will store the stdout and stderr output of
+that program internally inside local variables {\tt \$(rtrmgr.CONFIG)}
+and {\tt \$(rtrmgr.CONFIG\_STDERR)} respectively (note that those variables
+should be declared as leaf nodes without type).
+Then those values can be used by other actions such as the {\tt \%set}
+action for the {\tt save} node in the above example.
 
 \newpage
 
