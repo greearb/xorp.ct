@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.11 2005/03/25 02:53:57 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.12 2005/04/20 09:20:32 pavlin Exp $"
 
 
 //
@@ -588,8 +588,8 @@ Mrib::Mrib(int family)
     : _dest_prefix(family),
       _next_hop_router_addr(family),
       _next_hop_vif_index(Vif::VIF_INDEX_INVALID),
-      _metric_preference(~0),
-      _metric(~0)
+      _metric_preference(~0U),
+      _metric(~0U)
 {
 }
 
@@ -597,8 +597,8 @@ Mrib::Mrib(const IPvXNet& dest_prefix)
     : _dest_prefix(dest_prefix),
       _next_hop_router_addr(dest_prefix.af()),
       _next_hop_vif_index(Vif::VIF_INDEX_INVALID),
-      _metric_preference(~0),
-      _metric(~0)
+      _metric_preference(~0U),
+      _metric(~0U)
 {
 }
 
