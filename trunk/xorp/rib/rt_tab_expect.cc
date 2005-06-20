@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.11 2005/03/05 01:31:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.12 2005/03/25 02:54:22 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -24,8 +24,8 @@
 
 
 template<class A>
-ExpectedRouteChange<A>::ExpectedRouteChange<A>(bool add,
-					       const IPRouteEntry<A>& route)
+ExpectedRouteChange<A>::ExpectedRouteChange(bool add,
+					    const IPRouteEntry<A>& route)
     : _add(add),
       _route(route)
 {
