@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.23 2005/03/25 02:53:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.24 2005/05/08 19:27:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -129,7 +129,7 @@ NlmUtils::nlm_msg_type(uint32_t m)
 #ifdef RTM_MAX
 	RTM_MSG_ENTRY(RTM_MAX),
 #endif
-	{ ~0, "Unknown" }
+	{ ~0U, "Unknown" }
     };
     const size_t n_nlm_msgs = sizeof(nlm_msg_types) / sizeof(nlm_msg_types[0]);
     const char* ret = 0;
