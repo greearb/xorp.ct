@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.20 2005/05/11 00:32:35 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.21 2005/05/16 14:00:38 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1278,7 +1278,8 @@ int
 comm_sock_is_connected(xsock_t sock)
 {
     struct sockaddr_storage ss;
-    int err, sslen;
+    int err;
+    socklen_t sslen;
 
     sslen = sizeof(ss);
     err = getpeername(sock, (struct sockaddr *)&ss, &sslen);
