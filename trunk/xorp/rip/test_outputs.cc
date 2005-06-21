@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.17 2005/02/01 09:26:43 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.18 2005/03/25 02:54:30 pavlin Exp $"
 
 #include <set>
 
@@ -230,7 +230,7 @@ struct ResponseReader {
     {
 	if (_rp->header()->command != RipPacketHeader::RESPONSE) {
 	    verbose_log("Bad packet!\n");
-	    _pe = ~0;
+	    _pe = ~0U;
 	}
     }
 

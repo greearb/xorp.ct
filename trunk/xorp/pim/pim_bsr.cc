@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.41 2005/05/14 03:18:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.42 2005/05/16 19:17:28 pavlin Exp $"
 
 
 //
@@ -2416,7 +2416,7 @@ BsrZone::add_rp(const IPvXNet& group_prefix,
     // Create state for the new BsrRp
     if (bsr_group_prefix->expected_rp_count()
 	== bsr_group_prefix->received_rp_count()) {
-	if (bsr_group_prefix->expected_rp_count() == ((uint8_t)~0)) {
+	if (bsr_group_prefix->expected_rp_count() == ((uint8_t)~0U)) {
 	    // XXX: too many RPs already
 	    // TODO: if the BSR, it should perform more intelligent
 	    // selection about which RPs to keep and which to remove

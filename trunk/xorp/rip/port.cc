@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.39 2005/02/01 02:15:40 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.40 2005/03/25 02:54:27 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -482,7 +482,7 @@ Port<A>::route_policy(const RouteEntry<A>& r) const
 {
     if (r.net() == RIP_AF_CONSTANTS<A>::DEFAULT_ROUTE() &&
 	advertise_default_route() == false) {
-	return make_pair(A::ZERO(), ~0);
+	return make_pair(A::ZERO(), ~0U);
     }
 
     uint16_t cost = r.cost();
@@ -507,7 +507,7 @@ Port<A>::route_policy(const RouteEntry<A>& r) const
 	break;
     case SPLIT:
 	// Don't advertise route back to source
-	cost = ~0;
+	cost = ~0U;
 	break;
     case SPLIT_POISON_REVERSE:
 	// Advertise back at cost of infinity
