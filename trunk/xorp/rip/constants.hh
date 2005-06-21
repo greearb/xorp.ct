@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.14 2004/06/10 22:41:44 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.15 2005/03/25 02:54:26 pavlin Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -59,6 +59,12 @@ static const uint32_t DEFAULT_INTERQUERY_GAP_MS = 250;
  * host or network.
  */
 static const uint32_t RIP_INFINITY = 16;
+
+/**
+ * The maximum cost of a routing entry.
+ * Note that it must be larger than the protocol defined RIP_INFINITY.
+ */
+static const uint32_t RIP_MAX_COST = 0xffff;
 
 /**
  * Time-To-Live value that should be used for multicast packets.
