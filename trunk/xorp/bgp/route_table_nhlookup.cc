@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.15 2004/07/09 07:16:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.16 2005/03/25 02:52:47 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "route_table_nhlookup.hh"
@@ -231,6 +231,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	}
 	return success;
     }
+    XLOG_UNREACHABLE();
 }
 
 template <class A>
