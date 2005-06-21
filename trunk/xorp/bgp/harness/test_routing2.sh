@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.14 2005/03/01 22:47:24 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.15 2005/03/04 03:59:04 atanu Exp $
 #
 
 #
@@ -764,7 +764,69 @@ test10()
     coord peer3 assert established
 }
 
-TESTS_NOT_FIXED=''
+test11()
+{
+    echo "TEST11 - Bugzilla BUG #139"
+    echo "	1) On two I-BGP peerings send an update with an empty aspath"
+    echo "	2) Used to cause a the BGP decision process to fail."
+
+    coord reset
+
+    coord target $HOST $PORT1
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER1_AS \
+	holdtime 0 \
+	id 10.10.10.1 \
+	keepalive false
+
+    coord peer1 assert established
+
+    coord target $HOST $PORT2
+    coord initialise attach peer2
+
+    coord peer2 establish AS $PEER2_AS \
+	holdtime 0 \
+	id 10.10.10.2 \
+	keepalive false
+
+    coord peer2 assert established
+
+    coord target $HOST $PORT3
+    coord initialise attach peer3
+
+    coord peer3 establish AS $PEER3_AS \
+	holdtime 0 \
+	id 10.10.10.3 \
+	keepalive false
+
+    coord peer3 assert established
+
+    PACKET1="packet update
+	origin 1
+	aspath empty
+	nexthop $IF1
+	med 1
+	nlri 10.10.10.0/24"
+ 
+    PACKET2="packet update
+	origin 1
+	aspath empty
+	nexthop $IF2
+	med 1
+	nlri 10.10.10.0/24"
+   
+    coord peer1 send $PACKET1
+    coord peer2 send $PACKET1
+
+    sleep 2
+
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
+TESTS_NOT_FIXED='test11'
 TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8 test9 test10'
 
 # Include command line
