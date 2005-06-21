@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.15 2003/11/05 06:32:44 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.16 2004/12/17 01:31:02 atanu Exp $
 #
 
 #
@@ -798,8 +798,58 @@ test6()
     coord peer3 assert established
 }
 
+test7()
+{
+    echo "TEST7 On an I-BGP peering send an update with an empty aspath"
+    coord reset
+
+    coord target $HOST $PORT1
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER1_AS \
+	holdtime 0 \
+	id 10.10.10.1 \
+	keepalive false
+
+    coord peer1 assert established
+
+    coord target $HOST $PORT2
+    coord initialise attach peer2
+
+    coord peer2 establish AS $PEER2_AS \
+	holdtime 0 \
+	id 10.10.10.2 \
+	keepalive false
+
+    coord peer2 assert established
+
+    coord target $HOST $PORT3
+    coord initialise attach peer3
+
+    coord peer3 establish AS $PEER3_AS \
+	holdtime 0 \
+	id 10.10.10.3 \
+	keepalive false
+
+    coord peer3 assert established
+
+    PACKET="packet update
+	origin 1
+	aspath empty
+	nexthop $NH1 
+	nlri 10.10.10.0/24"
+    
+    coord peer3 send $PACKET
+
+    sleep 2
+
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6'
+TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6 test7'
 
 # Include command line
 . ${srcdir}/args.sh
