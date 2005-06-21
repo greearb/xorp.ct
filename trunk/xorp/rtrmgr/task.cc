@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.48 2005/06/17 21:15:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.49 2005/06/18 01:19:21 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -329,10 +329,10 @@ ProgramStatusValidation::validate(CallBack cb)
 	}
     } else {
 	//
-        // When we're running with do_exec == false, we want to
-        // exercise most of the same machinery, hence we schedule
-        // a dummy callback as if the program was called.
-        //
+	// When we're running with do_exec == false, we want to
+	// exercise most of the same machinery, hence we schedule
+	// a dummy callback as if the program was called.
+	//
 	_delay_timer = eventloop().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &ProgramStatusValidation::execute_done, true));
@@ -921,10 +921,10 @@ ProgramStartup::startup(CallBack cb)
 	}
     } else {
 	//
-        // When we're running with do_exec == false, we want to
-        // exercise most of the same machinery, hence we schedule
-        // a dummy callback as if the program was called.
-        //
+	// When we're running with do_exec == false, we want to
+	// exercise most of the same machinery, hence we schedule
+	// a dummy callback as if the program was called.
+	//
 	XLOG_TRACE(_verbose, "Program: dummy call to %s\n",
 		   _program_action.request().c_str());
 	_delay_timer = eventloop().new_oneoff_after(
@@ -1212,10 +1212,10 @@ ProgramShutdown::shutdown(CallBack cb)
 	}
     } else {
 	//
-        // When we're running with do_exec == false, we want to
-        // exercise most of the same machinery, hence we schedule
-        // a dummy callback as if the program was called.
-        //
+	// When we're running with do_exec == false, we want to
+	// exercise most of the same machinery, hence we schedule
+	// a dummy callback as if the program was called.
+	//
 	XLOG_TRACE(_verbose, "Program: dummy call to %s\n",
 		   _program_action.request().c_str());
 	_delay_timer = eventloop().new_oneoff_after(
