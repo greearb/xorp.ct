@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.30 2005/04/30 21:59:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.31 2005/05/08 23:58:56 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1776,8 +1776,10 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	if (errno == ENETDOWN) {
 	    // TODO: check the interface status. E.g. vif_state_check(family);
 	} else {
-	    XLOG_ERROR("sendmsg(proto %d from %s to %s on vif %s) failed: %s",
-		       _ipproto, cstring(src), cstring(dst),
+	    XLOG_ERROR("sendmsg(proto %d size %u from %s to %s on vif %s) "
+		       "failed: %s",
+		       _ipproto, XORP_UINT_CAST(datalen),
+		       cstring(src), cstring(dst),
 		       mfea_vif->name().c_str(), strerror(errno));
 	}
     }
