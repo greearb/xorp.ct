@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.38 2005/02/01 07:48:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.39 2005/03/25 02:54:40 pavlin Exp $"
 
 
 #include <sys/types.h>
@@ -337,8 +337,8 @@ XorpShell::receive_config(const XrlError& e, const bool* ready,
 void
 XorpShell::lock_config(LOCK_CALLBACK cb)
 {
-    // Lock for 30 seconds - this should be overkill
-    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 30000, cb);
+    // Lock for 60 seconds - this should be sufficient
+    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, cb);
 }
 
 void
@@ -401,7 +401,7 @@ XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
     _commit_callback = final_cb;
     LOCK_CALLBACK locked_cb 
 	= callback(this, &XorpShell::load_lock_achieved, filename, cb);
-    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 30000, locked_cb);
+    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, locked_cb);
 }
 
 void
