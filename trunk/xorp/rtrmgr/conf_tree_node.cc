@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.63 2005/06/15 19:14:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.64 2005/06/17 20:29:51 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -1050,7 +1050,7 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 
 bool
 ConfigTreeNode::expand_expression(const string& expression,
-					string& value) const
+				  string& value) const
 {
     // Expect string of form: "`" opchar + name + "`"
     // and the only definition of opchar supported is "~".
@@ -1106,7 +1106,7 @@ ConfigTreeNode::find_const_varname_node(const string& varname,
 ConfigTreeNode*
 ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 {
-    debug_msg("ConfigTreeNode::expand_variable at %s: >%s<\n",
+    debug_msg("ConfigTreeNode::find_varname_node at %s: >%s<\n",
 	      _segname.c_str(), varname.c_str());
 
     if (varname == "$(@)" || (varname == "$(" + _segname + ")") ) {
@@ -1132,7 +1132,7 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
     }
 
     ConfigTreeNode* found_node = NULL;
-    if (var_parts.front() == "@") {
+    if ((var_parts.front() == "@") || (_parent == NULL)) {
 	_on_parent_path = true;
 	found_node = find_child_varname_node(var_parts, type);
 	_on_parent_path = false;
@@ -1208,6 +1208,21 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     if ((var_parts.front() == "@") && _on_parent_path == false) {
 	type = NONE;
 	debug_msg("no on parent path\n");
+	return NULL;
+    }
+
+    if (_parent == NULL) {
+	// We have reached the root node
+	// The name should refer to a child of ours
+	ConfigTreeNode *found_child, *child;
+	list<ConfigTreeNode *>::iterator ci;
+	for (ci = _children.begin(); ci != _children.end(); ++ci) {
+	    child = (ConfigTreeNode*)(*ci);
+	    found_child = child->find_child_varname_node(var_parts, type);
+	    if (found_child != NULL)
+		return found_child;
+	}
+	type = NONE;
 	return NULL;
     }
 
