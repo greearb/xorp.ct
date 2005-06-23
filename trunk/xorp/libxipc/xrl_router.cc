@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.46 2005/05/26 10:58:50 mjh Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.47 2005/06/03 21:33:06 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -55,7 +55,7 @@ protected:
 
 #define trace_xrl(p, x) 						      \
 do {									      \
-    if (xrl_trace.on()) XLOG_INFO(string((p) + (x).str()).c_str());	      \
+    if (xrl_trace.on()) XLOG_INFO("%s", string((p) + (x).str()).c_str());     \
 } while (0)
 
 
