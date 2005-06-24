@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.27 2005/05/11 23:44:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.28 2005/05/27 20:07:54 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -101,9 +101,11 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     PimVif *pim_vif = NULL;
     
     XLOG_TRACE(pim_node().is_log_trace(),
-	       "RX WHOLEPKT signal from %s: vif_index = %d src = %s dst = %s",
+	       "RX WHOLEPKT signal from %s: vif_index = %d "
+	       "src = %s dst = %s len = %u",
 	       src_module_instance_name.c_str(),
-	       vif_index, cstring(src), cstring(dst));
+	       vif_index, cstring(src), cstring(dst),
+	       XORP_UINT_CAST(rcvlen));
     
     //
     // Find the corresponding (S,G) multicast routing entry
@@ -114,10 +116,11 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
 	// we must have installed first the appropriate (S,G) MFC entry
 	// that matches a (S,G) PimMre entry.
 	XLOG_ERROR("RX WHOLEPKT signal from %s: vif_index = %d "
-		   "src = %s dst = %s: "
+		   "src = %s dst = %s len = %u: "
 		   "no matching (S,G) multicast routing entry",
 		   src_module_instance_name.c_str(),
-		   vif_index, cstring(src), cstring(dst));
+		   vif_index, cstring(src), cstring(dst),
+		   XORP_UINT_CAST(rcvlen));
 	return (XORP_ERROR);
     }
     
@@ -127,10 +130,11 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     rp_addr_ptr = pim_mre_sg->rp_addr_ptr();
     if (rp_addr_ptr == NULL) {
 	XLOG_WARNING("RX WHOLEPKT signal from %s: vif_index = %d "
-		     "src = %s dst = %s: "
+		     "src = %s dst = %s len = %u: "
 		     "no RP address for this group",
 		     src_module_instance_name.c_str(),
-		     vif_index, cstring(src), cstring(dst));
+		     vif_index, cstring(src), cstring(dst),
+		     XORP_UINT_CAST(rcvlen));
 	return (XORP_ERROR);
     }
     
@@ -148,10 +152,11 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     pim_vif = pim_node().vif_find_by_vif_index(vif_index);
     if (! ((pim_vif != NULL) && (pim_vif->is_up()))) {
 	XLOG_WARNING("RX WHOLEPKT signal from %s: vif_index = %d "
-		     "src = %s dst = %s: "
+		     "src = %s dst = %s len = %u: "
 		     "no interface directly connected to source",
 		     src_module_instance_name.c_str(),
-		     vif_index, cstring(src), cstring(dst));
+		     vif_index, cstring(src), cstring(dst),
+		     XORP_UINT_CAST(rcvlen));
 	return (XORP_ERROR);
     }
 
