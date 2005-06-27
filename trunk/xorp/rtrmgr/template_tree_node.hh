@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.25 2005/06/16 23:12:44 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.26 2005/06/17 21:15:13 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -42,7 +42,11 @@ enum TTNodeType {
     NODE_IPV4NET	= 6,
     NODE_IPV6		= 7,
     NODE_IPV6NET	= 8,
-    NODE_MACADDR	= 9
+    NODE_MACADDR	= 9,
+    NODE_URL_FILE	= 10,
+    NODE_URL_FTP	= 11,
+    NODE_URL_HTTP	= 12,
+    NODE_URL_TFTP	= 13
 };
 
 enum TTSortOrder {
@@ -327,6 +331,70 @@ public:
 private:
     // XXX: really should be a MAC not an EtherMAC, but we'll fix this later
     EtherMac* _default;
+};
+
+class UrlFileTemplate : public TemplateTreeNode {
+public:
+    UrlFileTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+		    const string& path, const string& varname,
+		    const string& initializer) throw (ParseError);
+
+    string typestr() const { return string("URL_FILE"); }
+    TTNodeType type() const { return NODE_URL_FILE; }
+    string default_value() const { return _default; }
+    string default_str() const { return _default; }
+    bool type_match(const string& s, string& errmsg) const;
+
+private:
+    string _default;
+};
+
+class UrlFtpTemplate : public TemplateTreeNode {
+public:
+    UrlFtpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+		   const string& path, const string& varname,
+		   const string& initializer) throw (ParseError);
+
+    string typestr() const { return string("URL_FTP"); }
+    TTNodeType type() const { return NODE_URL_FTP; }
+    string default_value() const { return _default; }
+    string default_str() const { return _default; }
+    bool type_match(const string& s, string& errmsg) const;
+
+private:
+    string _default;
+};
+
+class UrlHttpTemplate : public TemplateTreeNode {
+public:
+    UrlHttpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+		    const string& path, const string& varname,
+		    const string& initializer) throw (ParseError);
+
+    string typestr() const { return string("URL_HTTP"); }
+    TTNodeType type() const { return NODE_URL_HTTP; }
+    string default_value() const { return _default; }
+    string default_str() const { return _default; }
+    bool type_match(const string& s, string& errmsg) const;
+
+private:
+    string _default;
+};
+
+class UrlTftpTemplate : public TemplateTreeNode {
+public:
+    UrlTftpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+		    const string& path, const string& varname,
+		    const string& initializer) throw (ParseError);
+
+    string typestr() const { return string("URL_TFTP"); }
+    TTNodeType type() const { return NODE_URL_TFTP; }
+    string default_value() const { return _default; }
+    string default_str() const { return _default; }
+    bool type_match(const string& s, string& errmsg) const;
+
+private:
+    string _default;
 };
 
 #endif // __RTRMGR_TEMPLATE_TREE_NODE_HH__

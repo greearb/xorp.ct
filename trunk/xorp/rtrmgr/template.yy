@@ -35,6 +35,10 @@ extern void add_cmd_action_adaptor(const string& cmd,
 %token IPV6_TYPE
 %token IPV6NET_TYPE
 %token MACADDR_TYPE
+%token URL_FILE_TYPE
+%token URL_FTP_TYPE
+%token URL_HTTP_TYPE
+%token URL_TFTP_TYPE
 %token BOOL_VALUE
 %token INTEGER_VALUE
 %token IPV4_VALUE
@@ -42,6 +46,10 @@ extern void add_cmd_action_adaptor(const string& cmd,
 %token IPV6_VALUE
 %token IPV6NET_VALUE
 %token MACADDR_VALUE
+%token URL_FILE_VALUE
+%token URL_FTP_VALUE
+%token URL_HTTP_VALUE
+%token URL_TFTP_VALUE
 %token VARDEF
 %token COMMAND
 %token VARIABLE
@@ -89,6 +97,10 @@ type:		TEXT_TYPE { tplt_type = NODE_TEXT; }
 		| IPV6_TYPE { tplt_type = NODE_IPV6; }
 		| IPV6NET_TYPE { tplt_type = NODE_IPV6NET; }
 		| MACADDR_TYPE { tplt_type = NODE_MACADDR; }
+		| URL_FILE_TYPE { tplt_type = NODE_URL_FILE; }
+		| URL_FTP_TYPE { tplt_type = NODE_URL_FTP; }
+		| URL_HTTP_TYPE { tplt_type = NODE_URL_HTTP; }
+		| URL_TFTP_TYPE { tplt_type = NODE_URL_TFTP; }
 		;
 
 init_type:	TEXT_TYPE ASSIGN_DEFAULT STRING {
@@ -129,6 +141,22 @@ init_type:	TEXT_TYPE ASSIGN_DEFAULT STRING {
 		}
 		| MACADDR_TYPE ASSIGN_DEFAULT MACADDR_VALUE {
 			tplt_type = NODE_MACADDR;
+			tplt_initializer = $3;
+		}
+		| URL_FILE_TYPE ASSIGN_DEFAULT URL_FILE_VALUE {
+			tplt_type = NODE_URL_FILE;
+			tplt_initializer = $3;
+		}
+		| URL_FTP_TYPE ASSIGN_DEFAULT URL_FTP_VALUE {
+			tplt_type = NODE_URL_FTP;
+			tplt_initializer = $3;
+		}
+		| URL_HTTP_TYPE ASSIGN_DEFAULT URL_HTTP_VALUE {
+			tplt_type = NODE_URL_HTTP;
+			tplt_initializer = $3;
+		}
+		| URL_TFTP_TYPE ASSIGN_DEFAULT URL_TFTP_VALUE {
+			tplt_type = NODE_URL_TFTP;
 			tplt_initializer = $3;
 		}
 		;

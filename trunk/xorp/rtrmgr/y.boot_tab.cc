@@ -71,75 +71,88 @@ static int yygrowstack();
 #define IPV6_VALUE 265
 #define IPV6NET_VALUE 266
 #define MACADDR_VALUE 267
-#define LITERAL 268
-#define STRING 269
-#define SYNTAX_ERROR 270
+#define URL_FILE_VALUE 268
+#define URL_FTP_VALUE 269
+#define URL_HTTP_VALUE 270
+#define URL_TFTP_VALUE 271
+#define LITERAL 272
+#define STRING 273
+#define SYNTAX_ERROR 274
 const short bootlhs[] = {                                        -1,
     0,    0,    0,    0,    1,    1,    6,    4,    8,    9,
-    9,    9,    9,    9,    9,    9,    9,    9,    5,    5,
-    7,   10,   10,   11,   11,   11,    2,   12,   12,   12,
-   12,   12,   12,   12,   12,   12,    3,
+    9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+    9,    9,    5,    5,    7,   10,   10,   11,   11,   11,
+    2,   12,   12,   12,   12,   12,   12,   12,   12,   12,
+   12,   12,   12,   12,    3,
 };
 const short bootlen[] = {                                         2,
     0,    2,    2,    1,    2,    2,    1,    1,    1,    2,
-    2,    2,    2,    2,    2,    2,    2,    2,    1,    1,
-    3,    0,    2,    1,    1,    1,    1,    2,    4,    4,
-    4,    4,    4,    4,    4,    4,    1,
+    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
+    2,    2,    1,    1,    3,    0,    2,    1,    1,    1,
+    1,    2,    4,    4,    4,    4,    4,    4,    4,    4,
+    4,    4,    4,    4,    1,
 };
 const short bootdefred[] = {                                      0,
-   27,    9,   37,    0,    0,    0,    4,    0,    0,    0,
-    0,    2,    3,    0,   20,    5,   19,    6,   12,   13,
-   14,   15,   16,   17,   18,   11,   10,    0,   25,   26,
-    0,    0,   24,   28,    0,   21,   23,    0,    0,    0,
-    0,    0,    0,    0,    0,   30,   31,   32,   33,   34,
-   35,   36,   29,
+   31,    9,   45,    0,    0,    0,    4,    0,    0,    0,
+    0,    2,    3,    0,   24,    5,   23,    6,   12,   13,
+   14,   15,   16,   17,   18,   19,   20,   21,   22,   11,
+   10,    0,   29,   30,    0,    0,   28,   32,    0,   25,
+   27,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,   34,   35,   36,   37,   38,   39,   40,
+   41,   42,   43,   44,   33,
 };
 const short bootdgoto[] = {                                       4,
-    5,    6,    7,    8,   16,    9,   17,   10,   11,   31,
-   32,   33,
+    5,    6,    7,    8,   16,    9,   17,   10,   11,   35,
+   36,   37,
 };
 const short bootsindex[] = {                                   -254,
-    0,    0,    0,    0, -254, -254,    0, -237, -240, -227,
- -247,    0,    0, -244,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0, -256,    0,    0,
- -235, -244,    0,    0, -236,    0,    0, -216, -212, -211,
- -210, -209, -208, -207, -206,    0,    0,    0,    0,    0,
-    0,    0,    0,
-};
-const short bootrindex[] = {                                     32,
-    0,    0,    0,    0,   32,   32,    0,    0,    0, -203,
- -215,    0,    0, -202,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0, -255,    0,    0,
-    0, -202,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0, -254, -254,    0, -233, -236, -215,
+ -242,    0,    0, -240,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,
+    0, -256,    0,    0, -227, -240,    0,    0, -228,    0,
+    0, -201, -200, -199, -198, -197, -196, -195, -194, -193,
+ -192, -191, -190,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,
 };
-const short bootgindex[] = {                                     40,
-  -14,  -13,    0,    0,    0,    0,   46,   47,    0,   25,
+const short bootrindex[] = {                                     44,
+    0,    0,    0,    0,   44,   44,    0,    0,    0, -187,
+ -232,    0,    0, -186,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0, -255,    0,    0,    0, -186,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,
+};
+const short bootgindex[] = {                                     23,
+  -14,  -13,    0,    0,    0,    0,   62,   63,    0,   37,
     0,    0,
 };
-#define YYTABLESIZE 58
-const short boottable[] = {                                      29,
-   30,    9,   34,   35,    1,    9,    9,    9,    9,    9,
-    9,    9,    9,    2,    1,    3,   14,   29,   30,   14,
-    2,   15,   36,   28,   38,   39,   40,   41,   42,   43,
-   44,    1,   45,   19,   20,   21,   22,   23,   24,   25,
-   26,    8,   46,    8,   12,   13,   47,   48,   49,   50,
-   51,   52,   53,    7,   18,   22,   37,   27,
+#define YYTABLESIZE 74
+const short boottable[] = {                                      33,
+   34,    9,   38,   39,    1,    9,    9,    9,    9,    9,
+    9,    9,    9,    9,    9,    9,    9,    2,    1,    3,
+   14,   33,   34,   14,    8,   15,    8,   12,   13,    2,
+   40,   32,   42,   43,   44,   45,   46,   47,   48,   49,
+   50,   51,   52,    1,   53,   19,   20,   21,   22,   23,
+   24,   25,   26,   27,   28,   29,   30,   54,   55,   56,
+   57,   58,   59,   60,   61,   62,   63,   64,   65,    7,
+   18,   26,   41,   31,
 };
 const short bootcheck[] = {                                      14,
    14,  257,  259,  260,  259,  261,  262,  263,  264,  265,
-  266,  267,  268,  268,  259,  270,  257,   32,   32,  257,
-  268,  259,  258,  268,  261,  262,  263,  264,  265,  266,
-  267,    0,  269,  261,  262,  263,  264,  265,  266,  267,
-  268,  257,  259,  259,    5,    6,  259,  259,  259,  259,
-  259,  259,  259,  257,    9,  258,   32,   11,
+  266,  267,  268,  269,  270,  271,  272,  272,  259,  274,
+  257,   36,   36,  257,  257,  259,  259,    5,    6,  272,
+  258,  272,  261,  262,  263,  264,  265,  266,  267,  268,
+  269,  270,  271,    0,  273,  261,  262,  263,  264,  265,
+  266,  267,  268,  269,  270,  271,  272,  259,  259,  259,
+  259,  259,  259,  259,  259,  259,  259,  259,  259,  257,
+    9,  258,   36,   11,
 };
 #define YYFINAL 4
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 270
+#define YYMAXTOKEN 274
 #if YYDEBUG
 const char * const bootname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -150,7 +163,8 @@ const char * const bootname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"UPLEVEL","DOWNLEVEL","END",
 "ASSIGN_OPERATOR","BOOL_VALUE","UINT_VALUE","IPV4_VALUE","IPV4NET_VALUE",
-"IPV6_VALUE","IPV6NET_VALUE","MACADDR_VALUE","LITERAL","STRING","SYNTAX_ERROR",
+"IPV6_VALUE","IPV6NET_VALUE","MACADDR_VALUE","URL_FILE_VALUE","URL_FTP_VALUE",
+"URL_HTTP_VALUE","URL_TFTP_VALUE","LITERAL","STRING","SYNTAX_ERROR",
 };
 const char * const bootrule[] = {
 "$accept : input",
@@ -172,6 +186,10 @@ const char * const bootrule[] = {
 "literals : literal IPV6_VALUE",
 "literals : literal IPV6NET_VALUE",
 "literals : literal MACADDR_VALUE",
+"literals : literal URL_FILE_VALUE",
+"literals : literal URL_FTP_VALUE",
+"literals : literal URL_HTTP_VALUE",
+"literals : literal URL_TFTP_VALUE",
 "nodegroup : long_nodegroup",
 "nodegroup : END",
 "long_nodegroup : UPLEVEL statements DOWNLEVEL",
@@ -190,6 +208,10 @@ const char * const bootrule[] = {
 "terminal : LITERAL ASSIGN_OPERATOR IPV6_VALUE END",
 "terminal : LITERAL ASSIGN_OPERATOR IPV6NET_VALUE END",
 "terminal : LITERAL ASSIGN_OPERATOR MACADDR_VALUE END",
+"terminal : LITERAL ASSIGN_OPERATOR URL_FILE_VALUE END",
+"terminal : LITERAL ASSIGN_OPERATOR URL_FTP_VALUE END",
+"terminal : LITERAL ASSIGN_OPERATOR URL_HTTP_VALUE END",
+"terminal : LITERAL ASSIGN_OPERATOR URL_TFTP_VALUE END",
 "syntax_error : SYNTAX_ERROR",
 };
 #endif
@@ -223,7 +245,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 122 "boot.yy"
+#line 142 "boot.yy"
 
 extern void boot_scan_string(const char *configuration);
 extern int boot_linenum;
@@ -304,7 +326,7 @@ parse_bootfile() throw (ParseError)
     if (bootparse() != 0)
 	booterror("unknown error");
 }
-#line 309 "y.boot_tab.c"
+#line 331 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -500,118 +522,158 @@ yyreduce:
     switch (yyn)
     {
 case 7:
-#line 47 "boot.yy"
+#line 51 "boot.yy"
 { push_path(); }
 break;
 case 8:
-#line 50 "boot.yy"
+#line 54 "boot.yy"
 { push_path(); }
 break;
 case 9:
-#line 53 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 11:
 #line 57 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 12:
-#line 58 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 13:
-#line 59 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 14:
-#line 60 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 15:
+case 11:
 #line 61 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 16:
+case 12:
 #line 62 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 17:
+case 13:
 #line 63 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 18:
+case 14:
 #line 64 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 20:
+case 15:
+#line 65 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 16:
+#line 66 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 17:
+#line 67 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 18:
 #line 68 "boot.yy"
-{ pop_path(); }
+{ extend_path(yyvsp[0]); }
+break;
+case 19:
+#line 69 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 20:
+#line 70 "boot.yy"
+{ extend_path(yyvsp[0]); }
 break;
 case 21:
 #line 71 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 22:
+#line 72 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 24:
+#line 76 "boot.yy"
 { pop_path(); }
 break;
-case 28:
-#line 86 "boot.yy"
+case 25:
+#line 79 "boot.yy"
+{ pop_path(); }
+break;
+case 32:
+#line 94 "boot.yy"
 {
 			terminal(yyvsp[-1], strdup(""), NODE_VOID);
 		}
 break;
-case 29:
-#line 89 "boot.yy"
+case 33:
+#line 97 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_TEXT);
 		}
 break;
-case 30:
-#line 92 "boot.yy"
+case 34:
+#line 100 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_BOOL);
 		}
 break;
-case 31:
-#line 95 "boot.yy"
+case 35:
+#line 103 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_UINT);
 		}
 break;
-case 32:
-#line 98 "boot.yy"
+case 36:
+#line 106 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4);
 		}
 break;
-case 33:
-#line 101 "boot.yy"
+case 37:
+#line 109 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4NET);
 		}
 break;
-case 34:
-#line 104 "boot.yy"
+case 38:
+#line 112 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6);
 		}
 break;
-case 35:
-#line 107 "boot.yy"
+case 39:
+#line 115 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6NET);
 		}
 break;
-case 36:
-#line 110 "boot.yy"
+case 40:
+#line 118 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_MACADDR);
 		}
 break;
-case 37:
-#line 115 "boot.yy"
+case 41:
+#line 121 "boot.yy"
+{
+			terminal(yyvsp[-3], yyvsp[-1], NODE_URL_FILE);
+		}
+break;
+case 42:
+#line 124 "boot.yy"
+{
+			terminal(yyvsp[-3], yyvsp[-1], NODE_URL_FTP);
+		}
+break;
+case 43:
+#line 127 "boot.yy"
+{
+			terminal(yyvsp[-3], yyvsp[-1], NODE_URL_HTTP);
+		}
+break;
+case 44:
+#line 130 "boot.yy"
+{
+			terminal(yyvsp[-3], yyvsp[-1], NODE_URL_TFTP);
+		}
+break;
+case 45:
+#line 135 "boot.yy"
 {
 			booterror("syntax error");
 		}
 break;
-#line 616 "y.boot_tab.c"
+#line 678 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

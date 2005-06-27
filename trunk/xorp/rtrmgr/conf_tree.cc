@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.25 2005/02/01 02:44:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.26 2005/03/25 02:54:34 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -311,6 +311,12 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 	    } catch (InvalidString) {
 		goto parse_error;
 	    }
+	    break;
+	case NODE_URL_FILE:
+	case NODE_URL_FTP:
+	case NODE_URL_HTTP:
+	case NODE_URL_TFTP:
+	    // TODO: we cannot do easily a secondary parsing of URLs
 	    break;
 	default:
 	    // Did we forget to add a new type?

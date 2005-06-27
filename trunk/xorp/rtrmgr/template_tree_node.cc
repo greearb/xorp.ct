@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.37 2005/06/16 23:12:43 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.38 2005/06/17 21:15:13 pavlin Exp $"
 
 
 #include <glob.h>
@@ -965,6 +965,11 @@ BoolTemplate::default_str() const
 	return "false";
 }
 
+
+/**************************************************************************
+ * IPv4Template
+ **************************************************************************/
+
 IPv4Template::IPv4Template(TemplateTree& template_tree,
 			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
@@ -1010,6 +1015,10 @@ IPv4Template::type_match(const string& s, string& errmsg) const
 }
 
 
+/**************************************************************************
+ * IPv6Template
+ **************************************************************************/
+
 IPv6Template::IPv6Template(TemplateTree& template_tree,
 			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
@@ -1054,6 +1063,10 @@ IPv6Template::type_match(const string& s, string& errmsg) const
     return true;
 }
 
+
+/**************************************************************************
+ * IPv4NetTemplate
+ **************************************************************************/
 
 IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
 				 TemplateTreeNode* parent,
@@ -1107,6 +1120,10 @@ IPv4NetTemplate::type_match(const string& s, string& errmsg) const
 }
 
 
+/**************************************************************************
+ * IPv6NetTemplate
+ **************************************************************************/
+
 IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
 				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
@@ -1159,6 +1176,10 @@ IPv6NetTemplate::type_match(const string& s, string& errmsg) const
 }
 
 
+/**************************************************************************
+ * MacaddrTemplate
+ **************************************************************************/
+
 MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
 				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
@@ -1200,5 +1221,165 @@ MacaddrTemplate::type_match(const string& s, string& errmsg) const
 	errmsg = "Value must be an MAC address (six hex digits separated by colons)";
 	return false;
     }
+    return true;
+}
+
+
+/**************************************************************************
+ * UrlFileTemplate
+ **************************************************************************/
+
+UrlFileTemplate::UrlFileTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
+				 const string& path, const string& varname,
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default("")
+{
+    if (initializer == "")
+	return;
+
+    string errmsg;
+    if (! type_match(initializer, errmsg)) {
+	string err = "Bad UrlFile type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
+	xorp_throw(ParseError, err);
+    }
+
+    string s = strip_quotes(initializer);
+    _default = s;
+    set_has_default();
+}
+
+bool
+UrlFileTemplate::type_match(const string&, string&) const
+{
+    //
+    // If the lexical analyser passed it to us, we can assume its a
+    // text value.
+    //
+    return true;
+}
+
+
+/**************************************************************************
+ * UrlFtpTemplate
+ **************************************************************************/
+
+UrlFtpTemplate::UrlFtpTemplate(TemplateTree& template_tree,
+			       TemplateTreeNode* parent,
+			       const string& path, const string& varname,
+			       const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default("")
+{
+    if (initializer == "")
+	return;
+
+    string errmsg;
+    if (! type_match(initializer, errmsg)) {
+	string err = "Bad UrlFtp type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
+	xorp_throw(ParseError, err);
+    }
+
+    string s = strip_quotes(initializer);
+    _default = s;
+    set_has_default();
+}
+
+bool
+UrlFtpTemplate::type_match(const string&, string&) const
+{
+    //
+    // If the lexical analyser passed it to us, we can assume its a
+    // text value.
+    //
+    return true;
+}
+
+
+/**************************************************************************
+ * UrlHttpTemplate
+ **************************************************************************/
+
+UrlHttpTemplate::UrlHttpTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
+				 const string& path, const string& varname,
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default("")
+{
+    if (initializer == "")
+	return;
+
+    string errmsg;
+    if (! type_match(initializer, errmsg)) {
+	string err = "Bad UrlHttp type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
+	xorp_throw(ParseError, err);
+    }
+
+    string s = strip_quotes(initializer);
+    _default = s;
+    set_has_default();
+}
+
+bool
+UrlHttpTemplate::type_match(const string&, string&) const
+{
+    //
+    // If the lexical analyser passed it to us, we can assume its a
+    // text value.
+    //
+    return true;
+}
+
+
+/**************************************************************************
+ * UrlTftpTemplate
+ **************************************************************************/
+
+UrlTftpTemplate::UrlTftpTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
+				 const string& path, const string& varname,
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default("")
+{
+    if (initializer == "")
+	return;
+
+    string errmsg;
+    if (! type_match(initializer, errmsg)) {
+	string err = "Bad UrlTftp type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
+	xorp_throw(ParseError, err);
+    }
+
+    string s = strip_quotes(initializer);
+    _default = s;
+    set_has_default();
+}
+
+bool
+UrlTftpTemplate::type_match(const string&, string&) const
+{
+    //
+    // If the lexical analyser passed it to us, we can assume its a
+    // text value.
+    //
     return true;
 }

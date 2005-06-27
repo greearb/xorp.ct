@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.26 2005/03/25 02:54:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.27 2005/06/16 23:12:43 mjh Exp $"
 
 
 #include <glob.h>
@@ -217,6 +217,18 @@ TemplateTree::new_node(TemplateTreeNode* parent,
 	break;
     case NODE_MACADDR:
 	ttn = new MacaddrTemplate(*this, parent, path, varname, initializer);
+	break;
+    case NODE_URL_FILE:
+	ttn = new UrlFileTemplate(*this, parent, path, varname, initializer);
+	break;
+    case NODE_URL_FTP:
+	ttn = new UrlFtpTemplate(*this, parent, path, varname, initializer);
+	break;
+    case NODE_URL_HTTP:
+	ttn = new UrlHttpTemplate(*this, parent, path, varname, initializer);
+	break;
+    case NODE_URL_TFTP:
+	ttn = new UrlTftpTemplate(*this, parent, path, varname, initializer);
 	break;
     default:
 	XLOG_UNREACHABLE();

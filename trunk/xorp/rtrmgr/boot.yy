@@ -27,6 +27,10 @@
 %token IPV6_VALUE
 %token IPV6NET_VALUE
 %token MACADDR_VALUE
+%token URL_FILE_VALUE
+%token URL_FTP_VALUE
+%token URL_HTTP_VALUE
+%token URL_TFTP_VALUE
 %token LITERAL
 %token STRING
 %token SYNTAX_ERROR
@@ -62,6 +66,10 @@ literals:	literals literal
 		| literal IPV6_VALUE { extend_path($2); }
 		| literal IPV6NET_VALUE { extend_path($2); }
 		| literal MACADDR_VALUE { extend_path($2); }
+		| literal URL_FILE_VALUE { extend_path($2); }
+		| literal URL_FTP_VALUE { extend_path($2); }
+		| literal URL_HTTP_VALUE { extend_path($2); }
+		| literal URL_TFTP_VALUE { extend_path($2); }
 		;
 
 nodegroup:	long_nodegroup
@@ -109,6 +117,18 @@ terminal:	LITERAL END {
 		}
 		| LITERAL ASSIGN_OPERATOR MACADDR_VALUE END {
 			terminal($1, $3, NODE_MACADDR);
+		}
+		| LITERAL ASSIGN_OPERATOR URL_FILE_VALUE END {
+			terminal($1, $3, NODE_URL_FILE);
+		}
+		| LITERAL ASSIGN_OPERATOR URL_FTP_VALUE END {
+			terminal($1, $3, NODE_URL_FTP);
+		}
+		| LITERAL ASSIGN_OPERATOR URL_HTTP_VALUE END {
+			terminal($1, $3, NODE_URL_HTTP);
+		}
+		| LITERAL ASSIGN_OPERATOR URL_TFTP_VALUE END {
+			terminal($1, $3, NODE_URL_TFTP);
 		}
 		;
 
