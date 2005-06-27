@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.2 2004/11/29 03:26:40 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.3 2005/03/25 02:53:44 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -122,10 +122,11 @@ private:
     FILE*		_stderr_stream;
     uint8_t		_stdout_buffer[BUF_SIZE];
     uint8_t		_stderr_buffer[BUF_SIZE];
+    size_t		_last_stdout_offset;
+    size_t		_last_stderr_offset;
     pid_t		_pid;
     bool		_is_error;
     string		_error_msg;
-    size_t		_last_offset;
     bool		_is_running;
 
     bool		_command_is_exited;

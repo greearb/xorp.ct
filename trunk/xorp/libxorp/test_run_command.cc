@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.3 2005/03/24 10:14:18 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.4 2005/03/25 02:53:47 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -469,7 +469,7 @@ test_command_stderr_reading()
     string args = c_format("'BEGIN { "
 			   "printf(\"%s\") > \"/dev/stdout\"; "
 			   "printf(\"%s\") > \"/dev/stderr\"; "
-			   "exit 0;}'",
+			   "exit 1;}'",
 			   stdout_msg_in.c_str(),
 			   stderr_msg_in.c_str());
 
@@ -512,19 +512,11 @@ test_command_stderr_reading()
 	    break;
 	if (! test_run_command.is_done_failed())
 	    break;
-#if 0
-	//
-	// XXX: if there is output on stderr, this is an error and
-	// we have to check TestRunCommand::done_error_msg()
-	//
 	if (! test_run_command.is_stdout_received())
 	    break;
 	if (! test_run_command.is_stderr_received())
 	    break;
 	if (test_run_command.stderr_msg() != stderr_msg_out)
-	    break;
-#endif
-	if (test_run_command.done_error_msg() != stderr_msg_out)
 	    break;
 	success = true;
 	break;

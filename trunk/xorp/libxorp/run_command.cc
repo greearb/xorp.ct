@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.3 2004/12/18 03:40:30 atanu Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.4 2005/03/25 02:53:44 pavlin Exp $
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -43,9 +43,10 @@ RunCommand::RunCommand(EventLoop&			eventloop,
       _stderr_file_reader(NULL),
       _stdout_stream(NULL),
       _stderr_stream(NULL),
+      _last_stdout_offset(0),
+      _last_stderr_offset(0),
       _pid(0),
       _is_error(false),
-      _last_offset(0),
       _is_running(false),
       _command_is_exited(false),
       _command_is_signaled(false),
@@ -170,39 +171,34 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
 			size_t				/* buffer_bytes */,
 			size_t				offset)
 {
+    size_t* last_offset_ptr = NULL;
     if (buffer == _stderr_buffer) {
-	if (_is_error == false) {
+	if (_last_stderr_offset == 0) {
 	    // We hadn't previously seen any error output
 	    if (event == AsyncFileOperator::END_OF_FILE) {
 		// We just got EOF on stderr - ignore this and wait for
 		// EOF on stdout
 		return;
 	    }
-	    _is_error = true;
-	    // Reset for reading error response
-	    _error_msg = "";
-	    _last_offset = 0;
 	}
+	last_offset_ptr = &_last_stderr_offset;
     } else {
 	XLOG_ASSERT(buffer == _stdout_buffer);
-	if (_is_error == true) {
-	    // Discard further output on stdout
-	    return;
-	}
+	last_offset_ptr = &_last_stdout_offset;
     }
 
     if ((event == AsyncFileOperator::DATA)
 	|| (event == AsyncFileOperator::END_OF_FILE)) {
-	XLOG_ASSERT(offset >= _last_offset);
-	if (offset == _last_offset) {
+	XLOG_ASSERT(offset >= *last_offset_ptr);
+	if (offset == *last_offset_ptr) {
 	    XLOG_ASSERT(event == AsyncFileOperator::END_OF_FILE);
 	    done(event);
 	    return;
 	}
 
-	if (offset != _last_offset) {
-	    const char* p   = (const char*)buffer + _last_offset;
-	    size_t      len = offset - _last_offset;
+	if (offset != *last_offset_ptr) {
+	    const char* p   = (const char*)buffer + *last_offset_ptr;
+	    size_t      len = offset - *last_offset_ptr;
 	    debug_msg("len = %u\n", XORP_UINT_CAST(len));
 	    if (!_is_error) {
 		if (buffer == _stdout_buffer)
@@ -212,7 +208,7 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
 	    } else {
 		_error_msg.append(p, p + len);
 	    }
-	    _last_offset = offset;
+	    *last_offset_ptr = offset;
 	}
 
 	if (event == AsyncFileOperator::END_OF_FILE) {
@@ -222,17 +218,17 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
 
 	if (offset == BUF_SIZE) {
 	    // The buffer is exhausted
-	    _last_offset = 0;
-	    if (_is_error) {
-		memset(_stderr_buffer, 0, BUF_SIZE);
-		_stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
-						callback(this, &RunCommand::append_data));
-		_stderr_file_reader->start();
-	    } else {
+	    *last_offset_ptr = 0;
+	    if (buffer == _stdout_buffer) {
 		memset(_stdout_buffer, 0, BUF_SIZE);
 		_stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
 						callback(this, &RunCommand::append_data));
 		_stdout_file_reader->start();
+	    } else {
+		memset(_stderr_buffer, 0, BUF_SIZE);
+		_stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
+						callback(this, &RunCommand::append_data));
+		_stderr_file_reader->start();
 	    }
 	}
     } else {
@@ -257,7 +253,7 @@ RunCommand::done(AsyncFileOperator::Event event)
 	_is_error = true;
     if (_command_is_coredump)
 	_is_error = true;
-    
+
     _done_cb->dispatch(this, !_is_error, _error_msg);
 
     // XXX: the callback will delete us. Don't do anything more in this method.
