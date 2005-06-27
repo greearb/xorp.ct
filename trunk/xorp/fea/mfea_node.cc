@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.52 2005/03/24 00:36:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.53 2005/03/25 02:53:10 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -714,8 +714,8 @@ MfeaNode::add_pim_register_vif()
     // address instead (otherwise we may always have to keep track
     // whether the underlying address has changed).
     //
-    IPvX pim_register_vif_addr(IPvX::ZERO(family()));
-    uint16_t pif_index = 0;
+    bool mfea_vif_found = false;
+    MfeaVif *mfea_vif = NULL;
     for (uint16_t i = 0; i < maxvifs(); i++) {
 	MfeaVif *mfea_vif = vif_find_by_vif_index(i);
 	if (mfea_vif == NULL)
@@ -732,26 +732,30 @@ MfeaNode::add_pim_register_vif()
 	    continue;
 	if (! mfea_vif->is_multicast_capable())
 	    continue;
-	// Found appropriate local address.
-	pim_register_vif_addr = *(mfea_vif->addr_ptr());
-	pif_index = mfea_vif->pif_index();
+	// Found appropriate vif
+	mfea_vif_found = true;
 	break;
     }
-    if (pim_register_vif_addr != IPvX::ZERO(family())) {
+    if (mfea_vif_found) {
 	// Add the Register vif
 	uint16_t vif_index = find_unused_config_vif_index();
 	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	// TODO: XXX: the Register vif name is hardcoded here!
 	MfeaVif register_vif(*this, Vif("register_vif"));
 	register_vif.set_vif_index(vif_index);
-	register_vif.set_pif_index(pif_index);
+	register_vif.set_pif_index(mfea_vif->pif_index());
 	register_vif.set_underlying_vif_up(true); // XXX: 'true' to allow creation
 	register_vif.set_pim_register(true);
-	register_vif.add_address(pim_register_vif_addr,
-				 IPvXNet(pim_register_vif_addr,
-					 pim_register_vif_addr.addr_bitlen()),
-				 pim_register_vif_addr,
-				 IPvX::ZERO(family()));
+	// Add all addresses, but ignore subnets, broadcast and p2p addresses
+	list<VifAddr>::const_iterator vif_addr_iter;
+	for (vif_addr_iter = mfea_vif->addr_list().begin();
+	     vif_addr_iter != mfea_vif->addr_list().end();
+	     ++vif_addr_iter) {
+	    const VifAddr& vif_addr = *vif_addr_iter;
+	    const IPvX& ipvx = vif_addr.addr();
+	    register_vif.add_address(ipvx, IPvXNet(ipvx, ipvx.addr_bitlen()),
+				     ipvx, IPvX::ZERO(family()));
+	}
 	if (add_vif(register_vif, error_msg) < 0) {
 	    XLOG_ERROR("Cannot add Register vif: %s", error_msg.c_str());
 	    return (XORP_ERROR);
