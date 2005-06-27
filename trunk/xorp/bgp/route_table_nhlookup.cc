@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.16 2005/03/25 02:52:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.17 2005/06/21 00:01:17 pavlin Exp $"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "route_table_nhlookup.hh"
@@ -44,7 +47,7 @@ MessageQueueEntry<A>::copy_in(const InternalMessage<A>* add_msg,
        count on the SubnetRoutes from the add and delete message, so
        that the original won't go away before we've finished using it */
 
-    assert(add_msg != NULL);
+    XLOG_ASSERT(add_msg != NULL);
     debug_msg("MessageQueueEntry: add_msg: %p\n%s\n", add_msg, add_msg->str().c_str());
 
     // Copy the add_msg.  We can't assume it will still be around.
@@ -53,7 +56,7 @@ MessageQueueEntry<A>::copy_in(const InternalMessage<A>* add_msg,
 				      add_msg->genid());
     // changed must be false - we don't store new routes here, so the
     // plumbing has to ensure that there's a cache upstream.
-    assert(add_msg->changed() == false);
+    XLOG_ASSERT(add_msg->changed() == false);
 
     if (delete_msg == NULL) {
 	_delete_msg = NULL;
@@ -99,7 +102,14 @@ int
 NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller) 
 {
-    assert(caller == this->_parent);
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      this->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+
+    XLOG_ASSERT(caller == this->_parent);
 
     if (_next_hop_resolver->register_nexthop(rtmsg.route()->nexthop(),
 					     rtmsg.net(), this)) {
@@ -129,7 +139,22 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 				const InternalMessage<A> &new_rtmsg,
 				BGPRouteTable<A> *caller) 
 {
-    assert(caller == this->_parent);
+    debug_msg("\n         %s\n"
+	      "caller: %s\n"
+	      "old rtmsg: %p new rtmsg: %p "
+	      "old route: %p"
+	      "new route: %p"
+	      "old: %s\n new: %s\n",
+	      this->tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &old_rtmsg,
+	      &new_rtmsg,
+	      old_rtmsg.route(),
+	      new_rtmsg.route(),
+	      old_rtmsg.str().c_str(),
+	      new_rtmsg.str().c_str());
+
+    XLOG_ASSERT(caller == this->_parent);
     debug_msg("NhLookupTable::replace_route\n");
 
     IPNet<A> net = new_rtmsg.net();
@@ -192,9 +217,9 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    = _queue_by_nexthop.find(original_nexthop);
 	while (nh_iter->second->net() != net) {
 	    nh_iter++;
-	    assert(nh_iter != _queue_by_nexthop.end());
+	    XLOG_ASSERT(nh_iter != _queue_by_nexthop.end());
 	}
-	assert(nh_iter->first == original_nexthop);
+	XLOG_ASSERT(nh_iter->first == original_nexthop);
 	_queue_by_nexthop.erase(nh_iter);
 	_queue_by_net.erase(i);
     }
@@ -239,7 +264,14 @@ int
 NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			       BGPRouteTable<A> *caller) 
 {
-    assert(caller == this->_parent);
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      this->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+
+    XLOG_ASSERT(caller == this->_parent);
     IPNet<A> net = rtmsg.net();
 
     // Are we still waiting for the old_rtmsg to resolve?
@@ -289,9 +321,9 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    = _queue_by_nexthop.find(original_nexthop);
 	while (nh_iter->second->net() != net) {
 	    nh_iter++;
-	    assert(nh_iter != _queue_by_nexthop.end());
+	    XLOG_ASSERT(nh_iter != _queue_by_nexthop.end());
 	}
-	assert(nh_iter->first == original_nexthop);
+	XLOG_ASSERT(nh_iter->first == original_nexthop);
 	_queue_by_nexthop.erase(nh_iter);
 	_queue_by_net.erase(i);
 
@@ -312,7 +344,7 @@ template <class A>
 int
 NhLookupTable<A>::push(BGPRouteTable<A> *caller) 
 {
-    assert(caller == this->_parent);
+    XLOG_ASSERT(caller == this->_parent);
 
     // Always propagate a push - we'll add new pushes each time a
     // nexthop resolves.
