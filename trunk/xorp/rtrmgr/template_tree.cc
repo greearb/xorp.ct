@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.28 2005/06/27 17:05:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.29 2005/06/28 07:01:50 pavlin Exp $"
 
 
 #include <glob.h>
@@ -426,17 +426,37 @@ TemplateTree::find_node_by_type(const list<pair<string, int> >& path_segments) c
 	    XLOG_UNREACHABLE();
 	}
 
+	//
 	// There's no exact name match, so we're probably looking for a
 	// match of a value against a typed variable.
+	//
+	list<TemplateTreeNode*> matches_text_type;
 	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
 	    TemplateTreeNode* t = *ti;
 	    if (t->type() == NODE_VOID)
 		continue;
 	    if ((t->parent() == NULL) || (! t->parent()->is_tag()))
 		continue;
-	    if (t->type() == type)
+	    if (t->type() == type) {
 		matches.push_back(t);
+		continue;
+	    }
+	    //
+	    // XXX: the type check failed.
+	    // If there is a matching template node type of type NODE_TEXT,
+	    // then we accept this node.
+	    // 
+	    // The upside of this is that we can use a single template
+	    // node like "foo @: txt" that can be used with, say,
+	    // IPv4 or IPv6 addresses, a host name, or any other text string.
+	    // The downside is that we lose the strict type checking
+	    // when our template tree contains such nodes.
+	    //
+	    if (t->type() == NODE_TEXT)
+		matches_text_type.push_back(t);
 	}
+	if (matches.size() == 0)
+	    matches = matches_text_type;
 	if (matches.size() == 0)
 	    return NULL;
 	if (matches.size() > 1) {
