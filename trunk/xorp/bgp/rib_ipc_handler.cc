@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.63 2005/03/25 02:52:44 pavlin Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.64 2005/04/15 02:41:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -177,7 +177,7 @@ int
 RibIpcHandler::start_packet(bool ibgp) 
 {
     _ibgp = ibgp;
-    debug_msg("RibIpcHandler::start packet\n");
+    debug_msg("RibIpcHandler::start packet %s\n", ibgp ? "ibgp" : "ebgp");
     return 0;
 }
 
