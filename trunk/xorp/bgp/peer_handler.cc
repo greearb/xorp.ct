@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.37 2005/03/03 07:29:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.38 2005/03/25 02:52:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -388,24 +388,22 @@ PeerHandler::multiprotocol<IPv6>(Safi safi, BGPPeerData::Direction d) const
 }
 
 int
-PeerHandler::start_packet(bool ibgp)
+PeerHandler::start_packet()
 {
-    // if a router came from IBGP, it shouldn't go to IBGP (unless
-    // we're a route reflector)
-    if (ibgp)
-	XLOG_ASSERT(!_peer->ibgp());
-    _ibgp = ibgp;
-
     XLOG_ASSERT(_packet == NULL);
     _packet = new UpdatePacket();
     return 0;
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
+PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv4) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
+    // if a route came from IBGP, it shouldn't go to IBGP (unless
+    // we're a route reflector)
+    if (ibgp)
+	XLOG_ASSERT(!_peer->ibgp());
 
     // Check this peer wants this NLRI
     if (!multiprotocol<IPv4>(safi, BGPPeerData::NEGOTIATED))
@@ -413,7 +411,7 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 
     if (_packet->big_enough()) {
 	push_packet();
-	start_packet(_ibgp);
+	start_packet();
     }
 
     // did we already add the packet attribute list?
@@ -460,10 +458,14 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
+PeerHandler::add_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
+    // if a route came from IBGP, it shouldn't go to IBGP (unless
+    // we're a route reflector)
+    if (ibgp)
+	XLOG_ASSERT(!_peer->ibgp());
 
     // Check this peer wants this NLRI
     if (!multiprotocol<IPv6>(safi, BGPPeerData::NEGOTIATED))
@@ -471,7 +473,7 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
 
     if (_packet->big_enough()) {
 	push_packet();
-	start_packet(_ibgp);
+	start_packet();
     }
 
     // did we already add the packet attribute list?
@@ -504,28 +506,33 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
 
 int
 PeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
-			   const SubnetRoute<IPv4> &new_rt, Safi safi)
+			   bool /*old_ibgp*/, 
+			   const SubnetRoute<IPv4> &new_rt, 
+			   bool new_ibgp, Safi safi)
 {
     // in the basic PeerHandler, we can ignore the old route, because
     // to change a route, the BGP protocol just sends the new
     // replacement route
     UNUSED(old_rt);
-    return add_route(new_rt, safi);
+    return add_route(new_rt, new_ibgp, safi);
 }
 
 int
 PeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
-			   const SubnetRoute<IPv6> &new_rt, Safi safi)
+			   bool /*old_ibgp*/, 
+			   const SubnetRoute<IPv6> &new_rt, 
+			   bool new_ibgp, Safi safi)
 {
     // in the basic PeerHandler, we can ignore the old route, because
     // to change a route, the BGP protocol just sends the new
     // replacement route
     UNUSED(old_rt);
-    return add_route(new_rt, safi);
+    return add_route(new_rt, new_ibgp, safi);
 }
 
 int
-PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
+PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, 
+			  Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv4) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
@@ -536,7 +543,7 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
 
     if (_packet->big_enough()) {
 	push_packet();
-	start_packet(_ibgp);
+	start_packet();
     }
 
     if (SAFI_MULTICAST == safi && 0 == _packet->mpunreach<IPv4>(safi)) {
@@ -561,7 +568,8 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
 }
 
 int
-PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
+PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, bool /*ibgp*/, 
+			  Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
@@ -572,7 +580,7 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
 
     if (_packet->big_enough()) {
 	push_packet();
-	start_packet(_ibgp);
+	start_packet();
     }
 
     if (0 == _packet->mpunreach<IPv6>(safi)) {

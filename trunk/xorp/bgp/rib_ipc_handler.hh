@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.35 2005/03/25 02:52:45 pavlin Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.36 2005/04/14 09:42:58 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -82,7 +82,7 @@ private:
      * The specialised method called by sendit to deal with IPv4/IPv6.
      *
      * @param q the queued command.
-     * @param bgp "ibgp" or "ebgp".
+     * @param bgp "ibg"p or "ebgp".
      * @return True if the add/delete was queued.
      */
     bool sendit_spec(Queued& q, const char *bgp);
@@ -108,17 +108,19 @@ public:
     * a RIB at all.
     */ 
     bool register_ribname(const string& r);
-    int start_packet(bool ibgp);
+    int start_packet();
     /* add_route and delete_route are called to propagate a route *to*
        the RIB. */
-    int add_route(const SubnetRoute<IPv4> &rt, Safi safi);
-    int add_route(const SubnetRoute<IPv6> &rt, Safi safi);
-    int replace_route(const SubnetRoute<IPv4> &old_rt,
-		      const SubnetRoute<IPv4> &new_rt, Safi safi);
-    int replace_route(const SubnetRoute<IPv6> &old_rt,
-		      const SubnetRoute<IPv6> &new_rt, Safi safi);
-    int delete_route(const SubnetRoute<IPv4> &rt, Safi safi);
-    int delete_route(const SubnetRoute<IPv6> &rt, Safi safi);
+    int add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
+    int add_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
+    int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp, 
+		      const SubnetRoute<IPv4> &new_rt, bool new_ibgp, 
+		      Safi safi);
+    int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp, 
+		      const SubnetRoute<IPv6> &new_rt, bool old_ibgp, 
+		      Safi safi);
+    int delete_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
+    int delete_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
     void rib_command_done(const XrlError& error, const char *comment);
     PeerOutputState push_packet();
 
@@ -219,8 +221,6 @@ private:
 
     string _ribname;
     XrlStdRouter& _xrl_router;
-
-    bool _ibgp; //did the current update message originate in IBGP?
 
     XrlQueue<IPv4> _v4_queue;
     XrlQueue<IPv6> _v6_queue;

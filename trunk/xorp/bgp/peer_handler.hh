@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.15 2004/12/04 21:08:17 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.16 2005/03/25 02:52:43 pavlin Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -80,18 +80,22 @@ public:
      * add_route and delete_route are called by the plumbing to
      * propagate a route *to* the peer.
      */
-    virtual int start_packet(bool ibgp);
+    virtual int start_packet();
 
-    virtual int add_route(const SubnetRoute<IPv4> &rt, Safi safi);
-    virtual int add_route(const SubnetRoute<IPv6> &rt, Safi safi);
-    virtual int replace_route(const SubnetRoute<IPv4> &old_rt,
-			      const SubnetRoute<IPv4> &new_rt,
+    virtual int add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
+    virtual int add_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
+    virtual int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp,
+			      const SubnetRoute<IPv4> &new_rt, bool new_ibgp,
 			      Safi safi);
-    virtual int replace_route(const SubnetRoute<IPv6> &old_rt,
-			      const SubnetRoute<IPv6> &new_rt,
+    virtual int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp,
+			      const SubnetRoute<IPv6> &new_rt, bool new_ibgp,
 			      Safi safi);
-    virtual int delete_route(const SubnetRoute<IPv4> &rt, Safi safi);
-    virtual int delete_route(const SubnetRoute<IPv6> &rt, Safi safi);
+    virtual int delete_route(const SubnetRoute<IPv4> &rt,  
+			     bool new_ibgp,
+			     Safi safi);
+    virtual int delete_route(const SubnetRoute<IPv6> &rt,  
+			     bool new_ibgp,
+			     Safi safi);
     virtual PeerOutputState push_packet();
     virtual void output_no_longer_busy();
 
@@ -136,7 +140,6 @@ public:
 protected:
     BGPPlumbing *_plumbing_unicast;
     BGPPlumbing *_plumbing_multicast;
-    bool _ibgp; // did the current update message originate in IBGP?
 private:
     string _peername;
     BGPPeer *_peer;

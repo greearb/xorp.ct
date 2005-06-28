@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.22 2005/03/20 23:56:30 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.23 2005/03/25 02:52:50 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -41,11 +41,17 @@ test_ribout(TestInfo& /*info*/)
     //    EventLoop* eventloop = bgpmain.eventloop();
     LocalData localdata;
     Iptuple iptuple;
-    BGPPeerData *peer_data
+    BGPPeerData *peer_data1
 	= new BGPPeerData(iptuple, AsNum(1), IPv4("2.0.0.1"), 30);
-    peer_data->set_internal_peer(true);
-    BGPPeer peer1(&localdata, peer_data, NULL, &bgpmain);
+    peer_data1->set_internal_peer(true);
+    BGPPeer peer1(&localdata, peer_data1, NULL, &bgpmain);
     DebugPeerHandler handler(&peer1);
+
+    BGPPeerData *peer_data2
+	= new BGPPeerData(iptuple, AsNum(2), IPv4("2.0.0.2"), 30);
+    peer_data2->set_internal_peer(false);
+    BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
+    DebugPeerHandler ebgp_handler(&peer2);
 
     //trivial plumbing
     DebugTable<IPv4>* debug_table
@@ -191,6 +197,35 @@ test_ribout(TestInfo& /*info*/)
     ribout_table->add_route(*msg, debug_table);
     sr1->unref();
     delete msg;
+
+    ribout_table->push(debug_table);
+
+    debug_table->write_separator();
+
+    debug_table->write_comment("PEER_GOES IDLE");
+    handler.set_canned_response(PEER_OUTPUT_OK);
+    debug_table->set_next_messages(2);
+    ribout_table->output_no_longer_busy();
+
+    //================================================================
+    //Test5: replace from IBGP peer to EBGP peer
+    //================================================================
+    //add a route
+    debug_table->write_comment("TEST 5");
+    debug_table->write_comment("SWITCH FROM IBGP PEER TO EBGP PEER");
+    handler.set_canned_response(PEER_OUTPUT_BUSY);
+
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler, 0);
+    SubnetRoute<IPv4> *sr2;
+    InternalMessage<IPv4>* msg2;
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
+    msg2 = new InternalMessage<IPv4>(sr2, &ebgp_handler, 0);
+    ribout_table->replace_route(*msg, *msg2, debug_table);
+    sr1->unref();
+    delete msg;
+    sr2->unref();
+    delete msg2;
 
     ribout_table->push(debug_table);
 

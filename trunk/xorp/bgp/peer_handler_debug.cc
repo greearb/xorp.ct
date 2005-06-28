@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.8 2005/03/03 07:29:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.9 2005/03/25 02:52:43 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -29,76 +29,108 @@ DebugPeerHandler::~DebugPeerHandler()
 }
 
 int 
-DebugPeerHandler::start_packet(bool ibgp) 
+DebugPeerHandler::start_packet() 
 {
-    _ibgp = ibgp;
     debug_msg("DebugPeerHandler::start packet\n");
-    if (ibgp)
-	fprintf(_ofile, "[PEER: START_PACKET, IBGP]\n");
-    else
-	fprintf(_ofile, "[PEER: START_PACKET, EBGP]\n");
+    fprintf(_ofile, "[PEER: START_PACKET]\n");
     return 0;
 }
 
 int 
-DebugPeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi) 
+DebugPeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi) 
 {
     debug_msg("DebugPeerHandler::add_route(IPv4) %p\n", &rt);
-    fprintf(_ofile, "[PEER: ADD_ROUTE]\n");
+    fprintf(_ofile, "[PEER: ADD_ROUTE, ");
+    if (ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
     fprintf(_ofile, "%s\n", rt.str().c_str());
     return 0;
 }
 
 int 
-DebugPeerHandler::add_route(const SubnetRoute<IPv6>& rt, Safi) {
+DebugPeerHandler::add_route(const SubnetRoute<IPv6>& rt, bool ibgp, Safi) {
     debug_msg("DebugPeerHandler::add_route(IPv6) %p\n", &rt);
-    fprintf(_ofile, "[PEER: ADD_ROUTE]\n");
+    fprintf(_ofile, "[PEER: ADD_ROUTE, ");
+    if (ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
     fprintf(_ofile, "%s\n", rt.str().c_str());
     return 0;
 }
 
 int 
-DebugPeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
-			     const SubnetRoute<IPv4> &new_rt, Safi) {
+DebugPeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt, 
+				bool old_ibgp, 
+				const SubnetRoute<IPv4> &new_rt, 
+				bool new_ibgp, Safi) {
     debug_msg("DebugPeerHandler::replace_route(IPv4) %p %p\n", &old_rt, &new_rt);
     UNUSED(new_rt);
 
     fprintf(_ofile, "[PEER: REPLACE_ROUTE]\n");
-    fprintf(_ofile, "[PEER: OLD]\n");
+    fprintf(_ofile, "[PEER: OLD, ");
+    if (old_ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
     fprintf(_ofile, "%s\n", old_rt.str().c_str());
-    fprintf(_ofile, "[PEER: NEW]\n");
-    fprintf(_ofile, "%s\n", old_rt.str().c_str());
+    fprintf(_ofile, "[PEER: NEW, ");
+    if (new_ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
+    fprintf(_ofile, "%s\n", new_rt.str().c_str());
     return 0;
 }
 
 int 
 DebugPeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
-			     const SubnetRoute<IPv6> &new_rt, Safi) {
+				bool old_ibgp, 
+				const SubnetRoute<IPv6> &new_rt, 
+				bool new_ibgp, Safi) {
     debug_msg("DebugPeerHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
     UNUSED(new_rt);
 
     fprintf(_ofile, "[PEER: REPLACE_ROUTE]\n");
-    fprintf(_ofile, "[PEER: OLD]\n");
+    fprintf(_ofile, "[PEER: OLD, ");
+    if (old_ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
     fprintf(_ofile, "%s\n", old_rt.str().c_str());
-    fprintf(_ofile, "[PEER: NEW]\n");
-    fprintf(_ofile, "%s\n", old_rt.str().c_str());
+    fprintf(_ofile, "[PEER: NEW, ");
+    if (new_ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
+    fprintf(_ofile, "%s\n", new_rt.str().c_str());
     return 0;
 }
 
 int 
-DebugPeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
+DebugPeerHandler::delete_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi)
 {
     debug_msg("DebugPeerHandler::delete_route(IPv4) %p\n", &rt);
-    fprintf(_ofile, "[PEER: DELETE_ROUTE]\n");
+    fprintf(_ofile, "[PEER: DELETE_ROUTE, ");
+    if (ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
     fprintf(_ofile, "%s\n", rt.str().c_str());
     return 0;
 }
 
 int 
-DebugPeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi)
+DebugPeerHandler::delete_route(const SubnetRoute<IPv6>& rt, bool ibgp, Safi)
 {
     debug_msg("DebugPeerHandler::delete_route(IPv6) %p\n", &rt);
-    fprintf(_ofile, "[PEER: DELETE_ROUTE]\n");
+    fprintf(_ofile, "[PEER: DELETE_ROUTE, ");
+    if (ibgp)
+	fprintf(_ofile, "IBGP]\n");
+    else
+	fprintf(_ofile, "EBGP]\n");
     fprintf(_ofile, "%s\n", rt.str().c_str());
     return 0;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler_debug.hh,v 1.4 2004/06/10 22:40:32 hodson Exp $
+// $XORP: xorp/bgp/peer_handler_debug.hh,v 1.5 2005/03/25 02:52:43 pavlin Exp $
 
 #ifndef __BGP_PEER_HANDLER_DEBUG_HH__
 #define __BGP_PEER_HANDLER_DEBUG_HH__
@@ -27,17 +27,19 @@ public:
 
     ~DebugPeerHandler();
 
-    int start_packet(bool ibgp);
+    int start_packet();
     /* add_route and delete_route are called to propagate a route *to*
        the RIB. */
-    int add_route(const SubnetRoute<IPv4> &rt, Safi safi);
-    int add_route(const SubnetRoute<IPv6> &rt, Safi safi);
-    int replace_route(const SubnetRoute<IPv4> &old_rt,
-		      const SubnetRoute<IPv4> &new_rt, Safi safi);
-    int replace_route(const SubnetRoute<IPv6> &old_rt,
-		      const SubnetRoute<IPv6> &new_rt, Safi safi);
-    int delete_route(const SubnetRoute<IPv4> &rt, Safi safi);
-    int delete_route(const SubnetRoute<IPv6> &rt, Safi safi);
+    int add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
+    int add_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
+    int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp, 
+		      const SubnetRoute<IPv4> &new_rt, bool new_ibgp,
+		      Safi safi);
+    int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp, 
+		      const SubnetRoute<IPv6> &new_rt, bool new_ibgp, 
+		      Safi safi);
+    int delete_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
+    int delete_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
     PeerOutputState push_packet();
 
     void set_output_file(FILE *file) {_ofile = file;}
@@ -45,7 +47,6 @@ public:
 	_canned_response = state;
     }
 private:
-    bool _ibgp; //did the current update message originate in IBGP?
     FILE *_ofile;
     PeerOutputState _canned_response;
 };

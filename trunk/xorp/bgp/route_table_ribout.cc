@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.26 2005/03/20 23:56:30 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.27 2005/03/25 02:52:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -304,29 +304,34 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	debug_msg("* Outputting route to BGP peer\n");
 	debug_msg("* Attributes: %s\n", attributes->str().c_str());
 	i = tmp_queue.begin();
-	bool ibgp = (*i)->origin_peer()->ibgp();
-	_peer->start_packet(ibgp);
+	_peer->start_packet();
 	while (i != tmp_queue.end()) {
 	    debug_msg("* Subnet: %s\n", (*i)->net().str().c_str());
 	    if ((*i)->op() == RTQUEUE_OP_ADD ) {
 		debug_msg("* Announce\n");
 		// the sanity checking was done in add_route...
-		_peer->add_route(*((*i)->route()), this->safi());
+		_peer->add_route(*((*i)->route()), 
+				 (*i)->origin_peer()->ibgp(), this->safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {
 		// the sanity checking was done in delete_route...
 		debug_msg("* Withdraw\n");
-		_peer->delete_route(*((*i)->route()), this->safi());
+		_peer->delete_route(*((*i)->route()), 
+				    (*i)->origin_peer()->ibgp(), this->safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {
 		debug_msg("* Replace\n");
 		const SubnetRoute<A> *old_route = (*i)->route();
+		bool old_ibgp = (*i)->origin_peer()->ibgp();
 		const RouteQueueEntry<A> *old_queue_entry = (*i);
 		i++;
 		XLOG_ASSERT(i != tmp_queue.end());
 		XLOG_ASSERT((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 		const SubnetRoute<A> *new_route = (*i)->route();
-		_peer->replace_route(*old_route, *new_route, this->safi());
+		bool new_ibgp = (*i)->origin_peer()->ibgp();
+		_peer->replace_route(*old_route, old_ibgp,
+				     *new_route, new_ibgp,
+				     this->safi());
 		delete old_queue_entry;
 		delete (*i);
 	    } else {

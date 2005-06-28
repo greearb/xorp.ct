@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.64 2005/04/15 02:41:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.65 2005/06/28 01:50:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -174,36 +174,35 @@ RibIpcHandler::unregister_rib(string ribname)
 }
 
 int 
-RibIpcHandler::start_packet(bool ibgp) 
+RibIpcHandler::start_packet() 
 {
-    _ibgp = ibgp;
-    debug_msg("RibIpcHandler::start packet %s\n", ibgp ? "ibgp" : "ebgp");
+    debug_msg("RibIpcHandler::start packet\n");
     return 0;
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
+RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv4) %p\n", &rt);
 
     if (_ribname.empty())
 	return 0;
 
-    _v4_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(),
+    _v4_queue.queue_add_route(_ribname, ibgp, safi, rt.net(),
 			      rt.nexthop(), rt.policytags());
 
     return 0;
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, Safi safi)
+RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv6) %p\n", &rt);
 
     if (_ribname.empty())
 	return 0;
 
-    _v6_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(), rt.nexthop(),
+    _v6_queue.queue_add_route(_ribname, ibgp, safi, rt.net(), rt.nexthop(),
 			      rt.policytags());
 
     return 0;
@@ -211,48 +210,54 @@ RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, Safi safi)
 
 int 
 RibIpcHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
+			     bool old_ibgp, 
 			     const SubnetRoute<IPv4> &new_rt,
+			     bool new_ibgp, 
 			     Safi safi)
 {
     debug_msg("RibIpcHandler::replace_route(IPv4) %p %p\n", &old_rt, &new_rt);
-    delete_route(old_rt, safi);
-    add_route(new_rt, safi);
+    delete_route(old_rt, old_ibgp, safi);
+    add_route(new_rt, new_ibgp, safi);
     return 0;
 }
 
 int 
 RibIpcHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
+			     bool old_ibgp, 
 			     const SubnetRoute<IPv6> &new_rt,
+			     bool new_ibgp, 
 			     Safi safi)
 {
     debug_msg("RibIpcHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
-    delete_route(old_rt, safi);
-    add_route(new_rt, safi);
+    delete_route(old_rt, old_ibgp, safi);
+    add_route(new_rt, new_ibgp, safi);
     return 0;
 }
 
 int 
-RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
+RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, 
+			    bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv4) %p\n", &rt);
 
     if (_ribname.empty())
 	return 0;
 
-    _v4_queue.queue_delete_route(_ribname, _ibgp, safi, rt.net());
+    _v4_queue.queue_delete_route(_ribname, ibgp, safi, rt.net());
 
     return 0;
 }
 
 int 
-RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
+RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, 
+			    bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv6) %p\n", &rt);
     UNUSED(rt);
     if (_ribname.empty())
 	return 0;
 
-    _v6_queue.queue_delete_route(_ribname, _ibgp, safi, rt.net());
+    _v6_queue.queue_delete_route(_ribname, ibgp, safi, rt.net());
 
     return 0;
 }
