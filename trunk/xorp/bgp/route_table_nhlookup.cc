@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.17 2005/06/21 00:01:17 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.18 2005/06/27 08:14:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -187,6 +187,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	new_msg_needs_queuing = true;
     }
 
+    debug_msg("need queuing %s\n", new_msg_needs_queuing ? "true" : "false");
 
     const InternalMessage<A>* real_old_msg = &old_rtmsg;
     bool propagate_as_add = false;
@@ -355,6 +356,8 @@ template <class A>
 const SubnetRoute<A> *
 NhLookupTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
 {
+    debug_msg("net: %s\n", cstring(net));
+
     // Are we still waiting for the old_rtmsg to resolve?
     const MessageQueueEntry<A>* mqe = NULL;
     typename RefTrie<A, const MessageQueueEntry<A> >::iterator i;
@@ -368,10 +371,12 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
 
     switch (mqe->type()) {
     case MessageQueueEntry<A>::ADD:
+	debug_msg("ADD\n");
 	// although there is a route, we don't know the true nexthop
 	// yet, so we act as though we don't know the answer
 	return NULL;
     case MessageQueueEntry<A>::REPLACE:
+	debug_msg("REPLACE\n");
 	// although there is a route, we don't know the true nexthop
 	// for it yet, so we act as though we only know the old answer.
 	genid = mqe->delete_msg()->genid();
