@@ -8614,7 +8614,6 @@ YY_RULE_SETUP
 #line 357 "boot.ll"
 {
 			BEGIN(arith);
-			printf(">> (\n");
 			parsebuf = "";
 			arith_nesting = 0;
 			arith_op_allowed = true;
@@ -8622,28 +8621,25 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 365 "boot.ll"
+#line 364 "boot.ll"
 {
 			parsebuf += "(";
-			printf(">> arith(\n");
 			arith_nesting++;
 			arith_op_allowed = false;
 			}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 372 "boot.ll"
+#line 370 "boot.ll"
 {
-			printf(">> arith[0-9]*\n");
 			parsebuf += boottext;
 			arith_op_allowed = true;
 			}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 378 "boot.ll"
+#line 375 "boot.ll"
 {
-			printf(">> arithop\n");
 			if (arith_op_allowed) {
 				parsebuf += boottext;	
 				arith_op_allowed = false;
@@ -8654,14 +8650,11 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 388 "boot.ll"
+#line 384 "boot.ll"
 {
-			printf(">> arith)\n");
-			printf("arith_nesting=%d\n", arith_nesting);
 			if (arith_nesting == 0) {
 				BEGIN(INITIAL);
 				bootlval = strdup(parsebuf.c_str());
-				printf("ARITH=%s\n", bootlval);
 				return ARITH;
 			} else {
 				arith_nesting--;
@@ -8672,7 +8665,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 403 "boot.ll"
+#line 396 "boot.ll"
 {
 			/* everything else is a syntax error */
 			return SYNTAX_ERROR;
@@ -8680,32 +8673,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 408 "boot.ll"
+#line 401 "boot.ll"
 BEGIN(comment);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 410 "boot.ll"
+#line 403 "boot.ll"
 /* eat up anything that's not a '*' */
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 412 "boot.ll"
+#line 405 "boot.ll"
 /* eat up '*'s not followed by "/"s */
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 414 "boot.ll"
+#line 407 "boot.ll"
 boot_linenum++;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 416 "boot.ll"
+#line 409 "boot.ll"
 BEGIN(INITIAL);
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 418 "boot.ll"
+#line 411 "boot.ll"
 {
 	/* everything else is a syntax error */
 	return SYNTAX_ERROR;
@@ -8713,10 +8706,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 424 "boot.ll"
+#line 417 "boot.ll"
 ECHO;
 	YY_BREAK
-#line 8720 "lex.boot.cc"
+#line 8713 "lex.boot.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(string):
@@ -9605,5 +9598,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 424 "boot.ll"
+#line 417 "boot.ll"
 

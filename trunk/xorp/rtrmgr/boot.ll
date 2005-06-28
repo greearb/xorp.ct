@@ -356,7 +356,6 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 
 \(			{
 			BEGIN(arith);
-			printf(">> (\n");
 			parsebuf = "";
 			arith_nesting = 0;
 			arith_op_allowed = true;
@@ -364,19 +363,16 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 
 <arith>\(		{
 			parsebuf += "(";
-			printf(">> arith(\n");
 			arith_nesting++;
 			arith_op_allowed = false;
 			}
 
 <arith>[0-9]* 		{
-			printf(">> arith[0-9]*\n");
 			parsebuf += boottext;
 			arith_op_allowed = true;
 			}
 
 <arith>{RE_ARITH_OPERATOR}	{
-			printf(">> arithop\n");
 			if (arith_op_allowed) {
 				parsebuf += boottext;	
 				arith_op_allowed = false;
@@ -386,12 +382,9 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 			}
 
 <arith>\)		{
-			printf(">> arith)\n");
-			printf("arith_nesting=%d\n", arith_nesting);
 			if (arith_nesting == 0) {
 				BEGIN(INITIAL);
 				bootlval = strdup(parsebuf.c_str());
-				printf("ARITH=%s\n", bootlval);
 				return ARITH;
 			} else {
 				arith_nesting--;
