@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.64 2005/06/17 20:29:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.65 2005/06/23 22:47:32 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -1144,11 +1144,13 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 	return (found_node);
 
     // Test if we can match a template node
-    const TemplateTreeNode* ttn;
-    ttn = _template_tree_node->find_varname_node(varname);
-    if ((ttn != NULL) && ttn->has_default()) {
+    if (_template_tree_node != NULL) {
+	const TemplateTreeNode* ttn;
+	ttn = _template_tree_node->find_varname_node(varname);
+	if ((ttn != NULL) && ttn->has_default()) {
 	    type = TEMPLATE_DEFAULT;
 	    return NULL;
+	}
     }
 
     //
@@ -1428,7 +1430,14 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 	return false;
     }
     var_parts.pop_back();
-    node = find_parent_varname_node(var_parts, type);
+    if ((var_parts.front() == "@") || (_parent == NULL)) {
+        _on_parent_path = true;
+        node = find_child_varname_node(var_parts, type);
+        _on_parent_path = false;
+    } else {
+        // It's a parent node, or a child of a parent node
+        node = find_parent_varname_node(var_parts, type);
+    }
     if (node != NULL) {
 	switch (type) {
 	case NONE:
