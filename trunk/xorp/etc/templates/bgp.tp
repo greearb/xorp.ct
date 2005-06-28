@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.38 2005/03/09 22:50:39 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.39 2005/03/11 23:19:01 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -45,7 +45,6 @@ protocols {
 
         import: txt;
         export: txt;
-
     }
 }
 
@@ -197,6 +196,15 @@ protocols {
 		%set:;
 	    }
 	}
+
+	import {
+                %delete: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
+                %set: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
+        }
+        export {
+                %delete: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=";
+                %set: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
+        }
     }
 }
 
@@ -277,14 +285,5 @@ protocols {
 		%help: short "IPv6 Multicast";
 	    }
 	}
-        
-	import {
-                %delete: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
-                %set: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
-        }
-        export {
-                %delete: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=";
-                %set: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
-        }
     }
 }
