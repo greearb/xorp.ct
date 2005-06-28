@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.18 2005/03/25 02:54:34 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.19 2005/06/28 07:01:49 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -54,10 +54,14 @@ public:
 					ConfigTreeNode* parent_node, 
 					uid_t user_id, bool verbose) = 0;
     virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose) = 0;
-    void terminal_value(char* value, int type) throw (ParseError);
+    void terminal_value(const char* value,
+			int type, 
+			ConfigOperator op) throw (ParseError);
     list<SegmentType> path_as_segments() const;
-    const TemplateTreeNode* find_template(const list<string>& path_segments) const;
-    const TemplateTreeNode* find_template_by_type(const list<SegmentType>& path_segments) const;
+    const TemplateTreeNode* 
+        find_template(const list<string>& path_segments) const;
+    const TemplateTreeNode* 
+        find_template_by_type(const list<SegmentType>& path_segments) const;
     virtual ConfigTreeNode& root_node() = 0;
     virtual const ConfigTreeNode& const_root_node() const = 0;
     ConfigTreeNode* find_node(const list<string>& path);

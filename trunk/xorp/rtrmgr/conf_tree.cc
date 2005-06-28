@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.27 2005/06/27 17:05:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.28 2005/06/28 07:01:50 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -187,6 +187,25 @@ ConfigTree::add_node(const string& segment, int type) throw (ParseError)
     list<ConfigTreeNode*>::const_iterator iter;
     ConfigTreeNode *found = NULL;
 
+    if (_current_node->template_tree_node() != NULL
+	&& _current_node->template_tree_node()->children().empty()) {
+	// the current node's template has no children, and we've been
+	// asked to add a node as a child of it.  Either this is an
+	// error, or this current node is a terminal node, and this
+	// segment is actually a value.
+	terminal_value(segment.c_str(), _current_node->type(), OP_ASSIGN);
+
+	//if we're still here, we didn't throw a parse error.  one
+	//minor glitch is that need to decrement the path segments
+	//before poppping, because this has become infated due to
+	//counting the final value.
+	size_t segments_to_pop = _segment_lengths.front();
+	_segment_lengths.pop_front();
+	segments_to_pop--;
+	_segment_lengths.push_front(segments_to_pop);
+	return;
+    }
+
     iter = _current_node->children().begin();
     while (iter != _current_node->children().end()) {
 	if ((*iter)->segname() == segment) {
@@ -228,23 +247,10 @@ ConfigTree::add_node(const string& segment, int type) throw (ParseError)
     }
 }
 
-#if 0
-ConfigTreeNode*
-ConfigTree::create_node(const string& segment, const string& path,
-			const TemplateTreeNode* ttn, 
-			ConfigTreeNode* parent_node, 
-			uid_t user_id, bool verbose)
-{
-    printf("ConfigTree::create_node\n");
-    ConfigTreeNode* ctn;
-    ctn = new ConfigTreeNode(segment, path, ttn, parent_node, 
-			     user_id, verbose);
-    return ctn;
-}
-#endif
 
 void
-ConfigTree::terminal_value(char* value, int type) throw (ParseError)
+ConfigTree::terminal_value(const char* value, int type, ConfigOperator op) 
+    throw (ParseError)
 {
     string path(current_path_as_string());
     string svalue(value);
@@ -336,6 +342,7 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 	booterror(err.c_str());
     }
     ctn->set_value(svalue, /* userid */ 0);
+    ctn->set_operator(op, /* userid */ 0);
     return;
 
  parse_error:

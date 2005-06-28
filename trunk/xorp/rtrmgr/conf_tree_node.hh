@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.32 2005/06/15 19:14:52 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.33 2005/06/17 20:29:50 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -33,6 +33,21 @@ class RouterCLI;
 class TaskManager;
 class TemplateTreeNode;
 class ConfigTreeNode;
+
+/* Configuration file operators.  Comparators must be less than modifiers */
+enum ConfigOperator {
+    OP_NONE = 0,
+    OP_EQ = 1,
+    OP_LT = 2,
+    OP_LTE = 3,
+    OP_GT = 4,
+    OP_GTE = 5,
+    OP_ASSIGN = 101,
+    OP_ADD = 102,
+    OP_SUB = 103
+};
+#define MAX_COMPARATOR 5
+#define MAX_MODIFIER 8
 
 class CTN_Compare {
 public:
@@ -67,6 +82,7 @@ public:
     void add_default_children();
     void recursive_add_default_children();
     void set_value(const string& value, uid_t user_id);
+    void set_operator(ConfigOperator op, uid_t user_id);
     void mark_subtree_as_committed();
     void mark_subtree_as_uncommitted();
 
@@ -95,6 +111,7 @@ public:
     const string& segname() const { return _segname; }
     const string& value() const;
     bool has_value() const { return _has_value; }
+    ConfigOperator get_operator() const;
     uid_t user_id() const { return _user_id; }
     void set_existence_committed(bool v) { _existence_committed = v; }
     bool existence_committed() const { return _existence_committed; }
@@ -139,6 +156,7 @@ protected:
     ConfigTreeNode* find_child_varname_node(const list<string>& var_parts,
 					    VarType& type);
     void sort_by_value(list <ConfigTreeNode*>& children) const;
+    string show_operator() const;
 
 
     const TemplateTreeNode* _template_tree_node;
@@ -147,6 +165,8 @@ protected:
     bool _has_value;
     string _value;
     string _committed_value;
+    ConfigOperator _operator;
+    ConfigOperator _committed_operator;
     string _segname;
     string _path;
     ConfigTreeNode* _parent;

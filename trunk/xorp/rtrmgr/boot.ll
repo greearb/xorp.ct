@@ -5,10 +5,13 @@
 	int boot_linenum = 1;
 	extern char* bootlval;
 	string parsebuf;
+	int arith_nesting;
+	bool arith_op_allowed;
 %option noyywrap
 %option nounput
 %x comment
 %x string
+%x arith
 
 
 /*
@@ -210,6 +213,13 @@ RE_URL_XCHAR	{RE_URL_UNRESERVED}|{RE_URL_RESERVED}|{RE_URL_ESCAPE}
 RE_URL_DIGITS	{RE_URL_DIGIT}{1,}
 RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 
+/*
+ * operators for arithmetic expressions
+ */
+RE_COMPARATORS		"<"|">"|("<"+"=")|(">"+"=")|("="+"=") 
+RE_BIN_OPERATORS	"+"|"-"|"*"|"/"
+RE_MODIFIERS		"add"|"sub"|"set"|"="
+RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 
 %%
 
@@ -296,6 +306,16 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 	return URL_TFTP_VALUE;
 	}
 
+{RE_COMPARATORS} {
+	bootlval = strdup(boottext);
+	return COMPARATOR;
+	}
+
+{RE_MODIFIERS} {
+	bootlval = strdup(boottext);
+	return MODIFIER;
+	}
+
 [a-zA-Z][a-zA-Z0-9"\-""_"\.]*	{
 	bootlval = strdup(boottext);
 	return LITERAL;
@@ -332,6 +352,57 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 			BEGIN(INITIAL);
 			bootlval = strdup(parsebuf.c_str());
 			return STRING;
+			}
+
+\(			{
+			BEGIN(arith);
+			printf(">> (\n");
+			parsebuf = "";
+			arith_nesting = 0;
+			arith_op_allowed = true;
+			}
+
+<arith>\(		{
+			parsebuf += "(";
+			printf(">> arith(\n");
+			arith_nesting++;
+			arith_op_allowed = false;
+			}
+
+<arith>[0-9]* 		{
+			printf(">> arith[0-9]*\n");
+			parsebuf += boottext;
+			arith_op_allowed = true;
+			}
+
+<arith>{RE_ARITH_OPERATOR}	{
+			printf(">> arithop\n");
+			if (arith_op_allowed) {
+				parsebuf += boottext;	
+				arith_op_allowed = false;
+			} else {
+				return SYNTAX_ERROR;
+			}
+			}
+
+<arith>\)		{
+			printf(">> arith)\n");
+			printf("arith_nesting=%d\n", arith_nesting);
+			if (arith_nesting == 0) {
+				BEGIN(INITIAL);
+				bootlval = strdup(parsebuf.c_str());
+				printf("ARITH=%s\n", bootlval);
+				return ARITH;
+			} else {
+				arith_nesting--;
+				parsebuf += ")";
+				arith_op_allowed = true;
+			}
+			}
+
+<arith>.		{
+			/* everything else is a syntax error */
+			return SYNTAX_ERROR;
 			}
 
 "/*"			BEGIN(comment);

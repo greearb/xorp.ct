@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.65 2005/06/23 22:47:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.66 2005/06/28 02:05:27 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -115,6 +115,8 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
     : _template_tree_node(NULL),
       _deleted(false),
       _has_value(false),
+      _operator(OP_NONE),
+      _committed_operator(OP_NONE),
       _parent(NULL),
       _user_id(0),
       _committed_user_id(0),
@@ -135,6 +137,8 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
     : _template_tree_node(ttn),
       _deleted(false),
       _has_value(false),
+      _operator(OP_NONE),
+      _committed_operator(OP_NONE),
       _segname(nodename),
       _path(path),
       _parent(parent),
@@ -156,6 +160,8 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _has_value(ctn._has_value),
       _value(ctn._value),
       _committed_value(ctn._committed_value),
+      _operator(ctn._operator),
+      _committed_operator(ctn._committed_operator),
       _segname(ctn._segname),
       _path(ctn._path),
       _parent(NULL),
@@ -196,6 +202,9 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 	if (is_tag() != them.is_tag())
 	    return false;
 	if (_has_value && (_value != them.value())) {
+	    return false;
+	}
+	if (_operator != them.get_operator()) {
 	    return false;
 	}
     }
@@ -269,6 +278,7 @@ ConfigTreeNode::add_default_children()
 						       this, _user_id,
 						       _verbose);
 		new_node->set_value((*tci)->default_str(), _user_id);
+		new_node->set_operator(OP_ASSIGN, _user_id);
 	    }
 	}
     }
@@ -295,6 +305,17 @@ ConfigTreeNode::set_value(const string &value, uid_t user_id)
     TimerList::system_gettimeofday(&_modification_time);
 }
 
+void
+ConfigTreeNode::set_operator(ConfigOperator op, uid_t user_id)
+{
+    if (_operator != op) {
+	_operator = op;
+	_value_committed = false;
+	_user_id = user_id;
+	TimerList::system_gettimeofday(&_modification_time);
+    }
+}
+
 bool
 ConfigTreeNode::merge_deltas(uid_t user_id,
 			     const ConfigTreeNode& delta_node, 
@@ -307,11 +328,14 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 	XLOG_ASSERT(type() == delta_node.type());
 
 	if (delta_node.is_leaf()) {
-	    if (_value != delta_node.value()) {
+	    if (_value != delta_node.value() 
+		|| _operator != delta_node.get_operator()) {
 		_has_value = true;
 		if (provisional_change) {
 		    _committed_value = _value;
 		    _value = delta_node.value();
+		    _committed_operator = _operator;
+		    _operator = delta_node.get_operator();
 		    _committed_user_id = _user_id;
 		    _user_id = user_id;
 		    _committed_modification_time = _modification_time;
@@ -320,6 +344,8 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		} else {
 		    _committed_value = delta_node.value();
 		    _value = delta_node.value();
+		    _committed_operator = delta_node.get_operator();
+		    _operator = delta_node.get_operator();
 		    _committed_user_id = delta_node.user_id();
 		    _user_id = delta_node.user_id();
 		    _committed_modification_time =
@@ -545,6 +571,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 	    _value_committed = true;
 	    _user_id = _committed_user_id;
 	    _value = _committed_value;
+	    _operator = _committed_operator;
 	    _modification_time = _committed_modification_time;
 	    _deleted = false;
 	    result = node_str();
@@ -623,6 +650,17 @@ ConfigTreeNode::value() const
     }
 
     return _segname;
+}
+
+ConfigOperator
+ConfigTreeNode::get_operator() const
+{
+    if (is_tag()) {
+	// We should never ask a tag for its operator
+	XLOG_UNREACHABLE();
+    }
+
+    return _operator;
 }
 
 string 
@@ -704,7 +742,13 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	    if (_parent != NULL && _parent->is_tag()) {
 		s += " " + value;
 	    } else {
-		s += ": " + value;
+		if (_operator == OP_NONE) {
+		    //no-op;
+		} else if (_operator == OP_ASSIGN) {
+		    s += show_operator() + " " + value;
+		} else {
+		    s += " " + show_operator() + " " + value;
+		}
 	    }
 	}
 	if (_children.size() == 0 
@@ -1506,3 +1550,29 @@ ConfigTreeNode::sort_by_value(list <ConfigTreeNode*>& children) const
     children.sort(CTN_CompareValue());
 } 
 
+
+string
+ConfigTreeNode::show_operator() const
+{
+    switch(_operator) {
+    case OP_NONE:
+	XLOG_UNREACHABLE();
+    case OP_EQ:
+	return string("==");
+    case OP_LT:
+	return string("<");
+    case OP_LTE:
+	return string("<=");
+    case OP_GT:
+	return string(">");
+    case OP_GTE:
+	return string(">=");
+    case OP_ASSIGN:
+	return string(":");
+    case OP_ADD:
+	return string("add");
+    case OP_SUB:
+	return string("sub");
+    }
+    XLOG_UNREACHABLE();
+}

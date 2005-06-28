@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.26 2005/06/17 21:15:13 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.27 2005/06/27 17:05:14 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -46,7 +46,8 @@ enum TTNodeType {
     NODE_URL_FILE	= 10,
     NODE_URL_FTP	= 11,
     NODE_URL_HTTP	= 12,
-    NODE_URL_TFTP	= 13
+    NODE_URL_TFTP	= 13,
+    NODE_ARITH		= 14
 };
 
 enum TTSortOrder {
@@ -213,6 +214,21 @@ public:
 
 private:
     int _default;
+};
+
+class ArithTemplate : public TemplateTreeNode {
+public:
+    ArithTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+		  const string& path, const string& varname, 
+		  const string& initializer) throw (ParseError);
+    string typestr() const { return string("uint"); }
+    TTNodeType type() const { return NODE_ARITH; }
+    string default_value() const { return _default; }
+    string default_str() const { return _default; };
+    bool type_match(const string& s, string& errmsg) const;
+
+private:
+    string _default;
 };
 
 class TextTemplate : public TemplateTreeNode {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.38 2005/06/17 21:15:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.39 2005/06/27 17:05:14 pavlin Exp $"
 
 
 #include <glob.h>
@@ -800,6 +800,46 @@ TextTemplate::type_match(const string&, string&) const
     //
     // If the lexical analyser passed it to us, we can assume its a
     // text value.
+    //
+    return true;
+}
+
+
+/**************************************************************************
+ * ArithTemplate
+ **************************************************************************/
+
+ArithTemplate::ArithTemplate(TemplateTree& template_tree,
+			     TemplateTreeNode* parent,
+			     const string& path, const string& varname,
+			     const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default("")
+{
+    if (initializer == "")
+	return;
+
+    string errmsg;
+    if (! type_match(initializer, errmsg)) {
+	string err = "Bad arith type value: " + initializer;
+	if (!errmsg.empty()) {
+	    err += "\n";
+	    err += errmsg;
+	}
+	xorp_throw(ParseError, err);
+    }
+
+    string s = strip_quotes(initializer);
+    _default = s;
+    set_has_default();
+}
+
+bool
+ArithTemplate::type_match(const string&, string&) const
+{
+    //
+    // If the lexical analyser passed it to us, we can assume its a
+    // arith value.
     //
     return true;
 }

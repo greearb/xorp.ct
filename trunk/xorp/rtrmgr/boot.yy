@@ -8,6 +8,7 @@
 #include "libxorp/xorp.h"
 
 #include "conf_tree.hh"
+#include "conf_tree_node.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 
@@ -33,6 +34,9 @@
 %token URL_TFTP_VALUE
 %token LITERAL
 %token STRING
+%token ARITH
+%token COMPARATOR
+%token MODIFIER
 %token SYNTAX_ERROR
 
 
@@ -92,43 +96,55 @@ emptystatement:	END
 		;
 
 terminal:	LITERAL END {
-			terminal($1, strdup(""), NODE_VOID);
+			terminal($1, strdup(""), NODE_VOID, OP_NONE);
 		}
 		| LITERAL ASSIGN_OPERATOR STRING END {
-			terminal($1, $3, NODE_TEXT);
+			terminal($1, $3, NODE_TEXT, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR BOOL_VALUE END {
-			terminal($1, $3, NODE_BOOL);
+			terminal($1, $3, NODE_BOOL, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR UINT_VALUE END {
-			terminal($1, $3, NODE_UINT);
+			terminal($1, $3, NODE_UINT, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR IPV4_VALUE END {
-			terminal($1, $3, NODE_IPV4);
+			terminal($1, $3, NODE_IPV4, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR IPV4NET_VALUE END {
-			terminal($1, $3, NODE_IPV4NET);
+			terminal($1, $3, NODE_IPV4NET, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR IPV6_VALUE END {
-			terminal($1, $3, NODE_IPV6);
+			terminal($1, $3, NODE_IPV6, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR IPV6NET_VALUE END {
-			terminal($1, $3, NODE_IPV6NET);
+			terminal($1, $3, NODE_IPV6NET, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR MACADDR_VALUE END {
-			terminal($1, $3, NODE_MACADDR);
+			terminal($1, $3, NODE_MACADDR, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR URL_FILE_VALUE END {
-			terminal($1, $3, NODE_URL_FILE);
+			terminal($1, $3, NODE_URL_FILE, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR URL_FTP_VALUE END {
-			terminal($1, $3, NODE_URL_FTP);
+			terminal($1, $3, NODE_URL_FTP, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR URL_HTTP_VALUE END {
-			terminal($1, $3, NODE_URL_HTTP);
+			terminal($1, $3, NODE_URL_HTTP, OP_ASSIGN);
 		}
 		| LITERAL ASSIGN_OPERATOR URL_TFTP_VALUE END {
-			terminal($1, $3, NODE_URL_TFTP);
+			terminal($1, $3, NODE_URL_TFTP, OP_ASSIGN);
+		}
+		| LITERAL COMPARATOR ARITH END {
+			terminal($1, $3, NODE_ARITH, lookup_comparator($2));
+		}
+		| LITERAL COMPARATOR UINT_VALUE END{
+			terminal($1, $3, NODE_UINT, lookup_comparator($2));
+		}
+		| LITERAL MODIFIER ARITH END{
+			terminal($1, $3, NODE_ARITH, lookup_modifier($2));
+		}
+		| LITERAL MODIFIER UINT_VALUE END{
+			terminal($1, $3, NODE_UINT, lookup_modifier($2));
 		}
 		;
 
@@ -172,14 +188,14 @@ pop_path()
 }
 
 static void
-terminal(char *segment, char *value, int type)
+terminal(char *segment, char *value, int type, ConfigOperator op)
 {
     extend_path(segment, type);
     push_path();
 
     lastsymbol = value;
 
-    config_tree->terminal_value(value, type);
+    config_tree->terminal_value(value, type, op);
     free(value);
     pop_path();
 }
@@ -218,4 +234,84 @@ parse_bootfile() throw (ParseError)
 {
     if (bootparse() != 0)
 	booterror("unknown error");
+}
+
+ConfigOperator lookup_comparator(char *s)
+{
+    char *s1, *s2;
+
+    /* skip leading spaces */
+    s1 = s;
+    while (*s1 != '\0' && *s1 == ' ') {
+	s1++;
+    }
+
+    /* trim trailing spaces */
+    s2 = s1;
+    while (*s2 != '\0') {
+	if (*s2 == ' ') {
+	    *s2 = 0;
+	    break;
+	}
+	s2++;
+    }
+
+    if (strcmp(s1, "==")==0) {
+	return OP_EQ;
+    } else if (strcmp(s1, "<")==0) {
+	return OP_LT;
+    } else if (strcmp(s1, "<=")==0) {
+	return OP_LTE;
+    } else if (strcmp(s1, ">")==0) {
+	return OP_GT;
+    } else if (strcmp(s1, ">=")==0) {
+	return OP_GTE;
+    } 
+
+    /*something's wrong*/
+    string errmsg;
+    errmsg = c_format("Bad comparator %s [Line %d]", s1, boot_linenum);
+    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+    xorp_throw(ParseError, errmsg);
+}
+
+ConfigOperator lookup_modifier(char *s)
+{
+    char *s1, *s2;
+
+    /* skip leading spaces */
+    s1 = s;
+    while (*s1 != '\0' && *s1 == ' ') {
+	s1++;
+    }
+
+    /* trim trailing spaces */
+    s2 = s1;
+    while (*s2 != '\0') {
+	if (*s2 == ' ') {
+	    *s2 = 0;
+	    break;
+	}
+	s2++;
+    }
+
+    if (strcmp(s1, ":")==0) {
+	return OP_ASSIGN;
+    } else if (strcmp(s1, "=")==0) {
+	return OP_ASSIGN;
+    } else if (strcmp(s1, "+")==0) {
+	return OP_ADD;
+    } else if (strcmp(s1, "add")==0) {
+	return OP_ADD;
+    } else if (strcmp(s1, "-")==0) {
+	return OP_SUB;
+    } else if (strcmp(s1, "sub")==0) {
+	return OP_SUB;
+    }
+
+    /*something's wrong*/
+    string errmsg;
+    errmsg = c_format("Bad modifier %s [Line %d]", s1, boot_linenum);
+    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+    xorp_throw(ParseError, errmsg);
 }

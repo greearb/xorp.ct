@@ -19,4 +19,7 @@
 #define URL_TFTP_VALUE 271
 #define LITERAL 272
 #define STRING 273
-#define SYNTAX_ERROR 274
+#define ARITH 274
+#define COMPARATOR 275
+#define MODIFIER 276
+#define SYNTAX_ERROR 277
