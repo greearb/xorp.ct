@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.17 2005/06/21 00:10:57 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.18 2005/06/28 01:56:19 atanu Exp $
 #
 
 #
@@ -932,8 +932,8 @@ test8()
     coord peer3 assert established
 }
 
-TESTS_NOT_FIXED='test8'
-TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6 test7'
+TESTS_NOT_FIXED=''
+TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6 test7 test8'
 
 # Include command line
 . ${srcdir}/args.sh
