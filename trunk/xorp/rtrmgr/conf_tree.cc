@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.26 2005/03/25 02:54:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.27 2005/06/27 17:05:13 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -88,17 +88,25 @@ ConfigTree::find_template(const list<string>& path_segments) const
 
     ttn = _template_tree->find_node(path_segments);
     return ttn;
-
 }
 
-list<string>
+const TemplateTreeNode*
+ConfigTree::find_template_by_type(const list<SegmentType>& path_segments) const
+{
+    const TemplateTreeNode *ttn;
+
+    ttn = _template_tree->find_node_by_type(path_segments);
+    return ttn;
+}
+
+list<ConfigTree::SegmentType>
 ConfigTree::path_as_segments() const
 {
-    list<string> path_segments;
+    list<SegmentType> path_segments;
     ConfigTreeNode* ctn = _current_node;
 
     while (ctn->parent() != NULL) {
-	path_segments.push_front(ctn->segname());
+	path_segments.push_front(make_pair(ctn->segname(), ctn->type()));
 	ctn = ctn->parent();
     }
     return path_segments;
@@ -136,9 +144,9 @@ ConfigTree::path_as_string(const list<string>& path_segments) const
 }
 
 void
-ConfigTree::extend_path(const string& segment)
+ConfigTree::extend_path(const string& segment, int type)
 {
-    _path_segments.push_back(segment);
+    _path_segments.push_back(make_pair(segment, type));
 }
 
 void
@@ -156,7 +164,7 @@ void
 ConfigTree::push_path()
 {
     string path = current_path_as_string();
-    string nodename = _path_segments.back();
+    string nodename = _path_segments.back().first;
 
     //
     // Keep track of how many segments comprise this frame so we can
@@ -165,16 +173,16 @@ ConfigTree::push_path()
     size_t len = _path_segments.size();
     _segment_lengths.push_front(len);
 
-    list<string>::const_iterator iter;
+    list<SegmentType>::const_iterator iter;
     for (iter = _path_segments.begin(); iter != _path_segments.end(); ++iter) {
-	add_node(*iter);
+	add_node(iter->first, iter->second);
     }
 
     _path_segments.clear();
 }
 
 void
-ConfigTree::add_node(const string& segment) throw (ParseError)
+ConfigTree::add_node(const string& segment, int type) throw (ParseError)
 {
     list<ConfigTreeNode*>::const_iterator iter;
     ConfigTreeNode *found = NULL;
@@ -202,9 +210,9 @@ ConfigTree::add_node(const string& segment) throw (ParseError)
     if (found != NULL) {
 	_current_node = found;
     } else {
-	list<string> path_segments = path_as_segments();
-	path_segments.push_back(segment);
-	const TemplateTreeNode* ttn = find_template(path_segments);
+	list<SegmentType> path_segments = path_as_segments();
+	path_segments.push_back(make_pair(segment, type));
+	const TemplateTreeNode* ttn = find_template_by_type(path_segments);
 	if (ttn == NULL) {
 	    booterror("No template found in template map");
 	}

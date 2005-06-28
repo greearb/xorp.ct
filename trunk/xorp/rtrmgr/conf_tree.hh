@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.17 2004/12/18 02:08:11 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.18 2005/03/25 02:54:34 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -34,6 +34,8 @@ class ConfTemplate;
 
 class ConfigTree {
 public:
+    typedef pair<string, int> SegmentType;
+
     ConfigTree(TemplateTree *tt, bool verbose);
     virtual ~ConfigTree();
 
@@ -43,9 +45,9 @@ public:
     bool parse(const string& configuration, const string& config_file,
 	       string& errmsg);
     void push_path();
-    void extend_path(const string& segment);
+    void extend_path(const string& segment, int type);
     void pop_path();
-    void add_node(const string& nodename) throw (ParseError);
+    void add_node(const string& nodename, int type) throw (ParseError);
     virtual ConfigTreeNode* create_node(const string& segment, 
 					const string& path,
 					const TemplateTreeNode* ttn, 
@@ -53,9 +55,9 @@ public:
 					uid_t user_id, bool verbose) = 0;
     virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose) = 0;
     void terminal_value(char* value, int type) throw (ParseError);
-    list<string> path_as_segments() const;
-    const TemplateTreeNode* 
-        find_template(const list<string>& path_segments) const;
+    list<SegmentType> path_as_segments() const;
+    const TemplateTreeNode* find_template(const list<string>& path_segments) const;
+    const TemplateTreeNode* find_template_by_type(const list<SegmentType>& path_segments) const;
     virtual ConfigTreeNode& root_node() = 0;
     virtual const ConfigTreeNode& const_root_node() const = 0;
     ConfigTreeNode* find_node(const list<string>& path);
@@ -87,7 +89,7 @@ protected:
     TemplateTree*	_template_tree;
     //ConfigTreeNode	_root_node;
     ConfigTreeNode*	_current_node;
-    list<string>	_path_segments;
+    list<SegmentType>	_path_segments;
     list<size_t>	_segment_lengths;
     bool		_verbose;
 };

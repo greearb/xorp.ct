@@ -258,11 +258,11 @@ static string lastsymbol;
 
 
 static void
-extend_path(char *segment)
+extend_path(char *segment, int type)
 {
     lastsymbol = segment;
 
-    config_tree->extend_path(string(segment));
+    config_tree->extend_path(string(segment), type);
     free(segment);
 }
 
@@ -281,7 +281,7 @@ pop_path()
 static void
 terminal(char *segment, char *value, int type)
 {
-    extend_path(segment);
+    extend_path(segment, type);
     push_path();
 
     lastsymbol = value;
@@ -531,55 +531,55 @@ case 8:
 break;
 case 9:
 #line 57 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_VOID); }
 break;
 case 11:
 #line 61 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_TEXT); }
 break;
 case 12:
 #line 62 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_BOOL); }
 break;
 case 13:
 #line 63 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_UINT); }
 break;
 case 14:
 #line 64 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_IPV4); }
 break;
 case 15:
 #line 65 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_IPV4NET); }
 break;
 case 16:
 #line 66 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_IPV6); }
 break;
 case 17:
 #line 67 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_IPV6NET); }
 break;
 case 18:
 #line 68 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_MACADDR); }
 break;
 case 19:
 #line 69 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_URL_FILE); }
 break;
 case 20:
 #line 70 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_URL_FTP); }
 break;
 case 21:
 #line 71 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_URL_HTTP); }
 break;
 case 22:
 #line 72 "boot.yy"
-{ extend_path(yyvsp[0]); }
+{ extend_path(yyvsp[0], NODE_URL_TFTP); }
 break;
 case 24:
 #line 76 "boot.yy"

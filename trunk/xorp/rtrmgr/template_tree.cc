@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.27 2005/06/16 23:12:43 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.28 2005/06/27 17:05:14 pavlin Exp $"
 
 
 #include <glob.h>
@@ -353,12 +353,13 @@ TemplateTree::find_node(const list<string>& path_segments) const
 
     list<string>::const_iterator iter;
     for (iter = path_segments.begin(); iter != path_segments.end(); ++iter) {
+	const string& segname = *iter;
 	list<TemplateTreeNode*> matches;
 	list<TemplateTreeNode*>::const_iterator ti;
 
 	// First look for an exact name match
 	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
-	    if ((*ti)->segname() == *iter) {
+	    if ((*ti)->segname() == segname) {
 		matches.push_back(*ti);
 	    }
 	}
@@ -368,7 +369,7 @@ TemplateTree::find_node(const list<string>& path_segments) const
 	}
 	if (matches.size() > 1) {
 	    // This shouldn't be possible
-	    XLOG_ERROR("Multiple match at node %s\n", (*iter).c_str());
+	    XLOG_ERROR("Multiple match at node %s\n", segname.c_str());
 	    XLOG_UNREACHABLE();
 	}
 
@@ -381,13 +382,65 @@ TemplateTree::find_node(const list<string>& path_segments) const
 	    if ((t->parent() == NULL) || (! t->parent()->is_tag()))
 		continue;
 	    string s;
-	    if (t->type_match(*iter, s))
+	    if (t->type_match(segname, s))
 		matches.push_back(t);
 	}
 	if (matches.size() == 0)
 	    return NULL;
 	if (matches.size() > 1) {
-	    string err = "Ambiguous value for node " + (*iter) +
+	    string err = "Ambiguous value for node " + segname +
+		" - I can't tell which type this is.\n";
+	    debug_msg("%s", err.c_str());
+	    return NULL;
+	}
+	ttn = matches.front();
+    }
+    return ttn;
+}
+
+const TemplateTreeNode*
+TemplateTree::find_node_by_type(const list<pair<string, int> >& path_segments) const
+{
+    TemplateTreeNode* ttn = _root_node;
+
+    list<pair<string, int> >::const_iterator iter;
+    for (iter = path_segments.begin(); iter != path_segments.end(); ++iter) {
+	const string& segname = iter->first;
+	int type = iter->second;
+	list<TemplateTreeNode*> matches;
+	list<TemplateTreeNode*>::const_iterator ti;
+
+	// First look for an exact name match
+	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
+	    if ((*ti)->segname() == segname) {
+		matches.push_back(*ti);
+	    }
+	}
+	if (matches.size() == 1) {
+	    ttn = matches.front();
+	    continue;
+	}
+	if (matches.size() > 1) {
+	    // This shouldn't be possible
+	    XLOG_ERROR("Multiple match at node %s\n", segname.c_str());
+	    XLOG_UNREACHABLE();
+	}
+
+	// There's no exact name match, so we're probably looking for a
+	// match of a value against a typed variable.
+	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
+	    TemplateTreeNode* t = *ti;
+	    if (t->type() == NODE_VOID)
+		continue;
+	    if ((t->parent() == NULL) || (! t->parent()->is_tag()))
+		continue;
+	    if (t->type() == type)
+		matches.push_back(t);
+	}
+	if (matches.size() == 0)
+	    return NULL;
+	if (matches.size() > 1) {
+	    string err = "Ambiguous value for node " + segname +
 		" - I can't tell which type this is.\n";
 	    debug_msg("%s", err.c_str());
 	    return NULL;

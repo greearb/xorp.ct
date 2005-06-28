@@ -54,22 +54,22 @@ short_nodename:	literal { push_path(); }
 long_nodename:	literals { push_path(); }
 		;
 
-literal:	LITERAL { extend_path($1); }
+literal:	LITERAL { extend_path($1, NODE_VOID); }
 		;
 
 literals:	literals literal
-		| literal LITERAL { extend_path($2); }
-		| literal BOOL_VALUE { extend_path($2); }
-		| literal UINT_VALUE { extend_path($2); }
-		| literal IPV4_VALUE { extend_path($2); }
-		| literal IPV4NET_VALUE { extend_path($2); }
-		| literal IPV6_VALUE { extend_path($2); }
-		| literal IPV6NET_VALUE { extend_path($2); }
-		| literal MACADDR_VALUE { extend_path($2); }
-		| literal URL_FILE_VALUE { extend_path($2); }
-		| literal URL_FTP_VALUE { extend_path($2); }
-		| literal URL_HTTP_VALUE { extend_path($2); }
-		| literal URL_TFTP_VALUE { extend_path($2); }
+		| literal LITERAL { extend_path($2, NODE_TEXT); }
+		| literal BOOL_VALUE { extend_path($2, NODE_BOOL); }
+		| literal UINT_VALUE { extend_path($2, NODE_UINT); }
+		| literal IPV4_VALUE { extend_path($2, NODE_IPV4); }
+		| literal IPV4NET_VALUE { extend_path($2, NODE_IPV4NET); }
+		| literal IPV6_VALUE { extend_path($2, NODE_IPV6); }
+		| literal IPV6NET_VALUE { extend_path($2, NODE_IPV6NET); }
+		| literal MACADDR_VALUE { extend_path($2, NODE_MACADDR); }
+		| literal URL_FILE_VALUE { extend_path($2, NODE_URL_FILE); }
+		| literal URL_FTP_VALUE { extend_path($2, NODE_URL_FTP); }
+		| literal URL_HTTP_VALUE { extend_path($2, NODE_URL_HTTP); }
+		| literal URL_TFTP_VALUE { extend_path($2, NODE_URL_TFTP); }
 		;
 
 nodegroup:	long_nodegroup
@@ -151,11 +151,11 @@ static string lastsymbol;
 
 
 static void
-extend_path(char *segment)
+extend_path(char *segment, int type)
 {
     lastsymbol = segment;
 
-    config_tree->extend_path(string(segment));
+    config_tree->extend_path(string(segment), type);
     free(segment);
 }
 
@@ -174,7 +174,7 @@ pop_path()
 static void
 terminal(char *segment, char *value, int type)
 {
-    extend_path(segment);
+    extend_path(segment, type);
     push_path();
 
     lastsymbol = value;
