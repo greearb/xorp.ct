@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.10 2004/10/06 20:38:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.11 2005/03/25 02:52:38 pavlin Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
+#include "bgp_module.h"
 #include "aspath.hh"
 
 int
