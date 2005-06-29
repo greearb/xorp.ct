@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.17 2004/12/18 02:47:25 atanu Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.18 2005/03/25 02:52:38 pavlin Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -251,7 +251,7 @@ public:
     }
 
     const AsNum& first_asnum() const			{
-	assert(!_segments.empty());
+	XLOG_ASSERT(!_segments.empty());
 	return _segments.front().first_asnum();
     }
 
@@ -265,7 +265,7 @@ public:
 		++iter;
 	    return (*iter);
         }
-	assert("Segment doesn't exist.\n"); // XXX eh ?
+	XLOG_FATAL("Segment doesn't exist.");
 	xorp_throw(InvalidString, "segment invalid n\n");
     }
 
