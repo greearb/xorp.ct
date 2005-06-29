@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.18 2005/03/25 02:52:38 pavlin Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.19 2005/06/29 18:04:43 atanu Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -25,6 +25,7 @@
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
+#include "libxorp/xlog.h"
 #include "libxorp/asnum.hh"
 #include "libxorp/exceptions.hh"
 #include "exceptions.hh"
