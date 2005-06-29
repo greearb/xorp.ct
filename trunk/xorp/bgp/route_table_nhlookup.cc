@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.18 2005/06/27 08:14:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.19 2005/06/28 01:52:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -171,8 +171,22 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	mqe = &(i.payload());
     }
 
-    _next_hop_resolver->deregister_nexthop(old_rtmsg.route()->nexthop(),
-					   old_rtmsg.net(), this);
+    // The correct behaviour is to deregister interest in this
+    // nexthop. If the nexthop for the old route is the same as in the
+    // new route then we may have done a horrible thing. We have told
+    // the resolver that we are no longer interested in this nexthop,
+    // if this is the last reference we will remove all state related
+    // to this nexthop. The next thing we do is register interest in
+    // this nexthop which will not resolve, thus requiring us to
+    // queue the request. Not deregistering saves the extra queing.
+    //
+    // If the nexthops of the old and new route are different we need
+    // to keep the old nexthop resolution around so that lookups can
+    // be satisfied.
+    //
+
+//     _next_hop_resolver->deregister_nexthop(old_rtmsg.route()->nexthop(),
+// 					   old_rtmsg.net(), this);
 
     bool new_msg_needs_queuing;
     if (_next_hop_resolver->register_nexthop(new_rtmsg.nexthop(),
@@ -225,6 +239,8 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	_queue_by_net.erase(i);
     }
 
+    bool deregister = true;
+    int retval;
     if (new_msg_needs_queuing) {
 	typename RefTrie<A, const MessageQueueEntry<A> >::iterator inserted;
 	if (propagate_as_add) {
@@ -237,13 +253,14 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 		= _queue_by_net.insert(net,
 				       MessageQueueEntry<A>(&new_rtmsg,
 							    real_old_msg));
+	    deregister = false;
 	}
 	const MessageQueueEntry<A>* mqe = &(inserted.payload());
 	_queue_by_nexthop.insert(make_pair(new_rtmsg.nexthop(), mqe));
 	if (real_old_msg != &old_rtmsg) {
 	    delete real_old_msg;
 	}
-	return ADD_USED;
+	retval = ADD_USED;
     } else {
 	bool success;
 	if (propagate_as_add) {
@@ -255,9 +272,17 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	if (real_old_msg != &old_rtmsg) {
 	    delete real_old_msg;
 	}
-	return success;
+	retval = success;
     }
-    XLOG_UNREACHABLE();
+
+    if (deregister) {
+	_next_hop_resolver->deregister_nexthop(old_rtmsg.route()->nexthop(),
+					       old_rtmsg.net(), this);
+    } else {
+	debug_msg("Deferring deregistration\n");
+    }
+
+    return retval;
 }
 
 template <class A>
@@ -376,6 +401,7 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
 	// yet, so we act as though we don't know the answer
 	return NULL;
     case MessageQueueEntry<A>::REPLACE:
+	debug_msg("********** JACKPOT **********\n");
 	debug_msg("REPLACE\n");
 	// although there is a route, we don't know the true nexthop
 	// for it yet, so we act as though we only know the old answer.
@@ -412,6 +438,12 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 	    mqe->add_msg()->route()->set_nexthop_resolved(lookup_succeeded);
 	    this->_next_table->replace_route(*(mqe->delete_msg()),
 				       *(mqe->add_msg()), this);
+	    // Perform the deferred deregistration.
+	    debug_msg("Performing deferred deregistration\n");
+	    _next_hop_resolver->
+		deregister_nexthop(mqe->delete_msg()->route()->nexthop(),
+				   mqe->delete_msg()->net(), this);
+
 	    break;
 	}
 	nh_iter2 = nh_iter;
