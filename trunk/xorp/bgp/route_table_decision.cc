@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.36 2005/03/19 20:40:34 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.37 2005/03/25 02:52:45 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -682,14 +682,17 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     */
     typename list <RouteData<A> >::iterator j;
     for (i=alternatives.begin(); i!=alternatives.end();) {
-	AsNum asnum1 = (i->route()->attributes()->aspath().first_asnum());
+	AsPath aspath1 = i->route()->attributes()->aspath();
+ 	AsNum asnum1 = (0 == aspath1.path_length()) ? 
+ 	    AsNum(AsNum::AS_INVALID) : aspath1.first_asnum();
 	int med1 = med(i->route());
 	bool del_i = false;
 	for (j=alternatives.begin(); j!=alternatives.end();) {
 	    bool del_j = false;
 	    if (i != j) {
-		AsNum asnum2 
-		    = (j->route()->attributes()->aspath().first_asnum());
+		AsPath aspath2 = j->route()->attributes()->aspath();
+		AsNum asnum2 = (0 == aspath2.path_length()) ? 
+		    AsNum(AsNum::AS_INVALID) : aspath2.first_asnum();
 		int med2 = med(j->route());
 		if (asnum1 == asnum2) {
 		    if (med1 > med2) {
