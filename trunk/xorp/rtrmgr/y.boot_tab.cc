@@ -1,10 +1,7 @@
-#include <stdlib.h>
 #ifndef lint
-#ifdef __unused
-__unused
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
 #endif
-#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $"
-#endif
+#include <stdlib.h>
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
@@ -62,7 +59,7 @@ static int yygrowstack();
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim
-#line 67 "y.boot_tab.c"
+#line 64 "y.boot_tab.c"
 #define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
@@ -423,7 +420,7 @@ ConfigOperator lookup_modifier(char *s)
     errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
     xorp_throw(ParseError, errmsg);
 }
-#line 428 "y.boot_tab.c"
+#line 425 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -485,9 +482,9 @@ int
 yyparse (YYPARSE_PARAM_ARG)
     YYPARSE_PARAM_DECL
 {
-    int yym, yyn, yystate;
+    register int yym, yyn, yystate;
 #if YYDEBUG
-    const char *yys;
+    register const char *yys;
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -794,7 +791,7 @@ case 49:
 			booterror("syntax error");
 		}
 break;
-#line 799 "y.boot_tab.c"
+#line 796 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

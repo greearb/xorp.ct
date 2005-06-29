@@ -1,10 +1,7 @@
-#include <stdlib.h>
 #ifndef lint
-#ifdef __unused
-__unused
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
 #endif
-#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $"
-#endif
+#include <stdlib.h>
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
@@ -63,7 +60,7 @@ extern void add_cmd_action_adaptor(const string& cmd,
 /* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim
-#line 68 "y.tplt_tab.c"
+#line 65 "y.tplt_tab.c"
 #define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
@@ -467,7 +464,7 @@ parse_template() throw (ParseError)
     if (tpltparse() != 0)
 	tplterror("unknown error");
 }
-#line 472 "y.tplt_tab.c"
+#line 469 "y.tplt_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -529,9 +526,9 @@ int
 yyparse (YYPARSE_PARAM_ARG)
     YYPARSE_PARAM_DECL
 {
-    int yym, yyn, yystate;
+    register int yym, yyn, yystate;
 #if YYDEBUG
-    const char *yys;
+    register const char *yys;
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -950,7 +947,7 @@ case 68:
 			tplterror("syntax error");
 		}
 break;
-#line 955 "y.tplt_tab.c"
+#line 952 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
