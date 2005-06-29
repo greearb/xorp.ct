@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.19 2005/06/28 01:52:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.20 2005/06/29 00:52:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -146,7 +146,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      "new route: %p"
 	      "old: %s\n new: %s\n",
 	      this->tablename().c_str(),
-	      caller->tablename().c_str(),
+	      caller == 0 ? "NULL" : caller->tablename().c_str(),
 	      &old_rtmsg,
 	      &new_rtmsg,
 	      old_rtmsg.route(),
