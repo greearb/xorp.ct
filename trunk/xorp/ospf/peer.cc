@@ -2488,6 +2488,8 @@ Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
 	break;
     }
 
+    // If we got this far we are going to send one or more update
+    // packets with the requested LSAs.
     
 
 }
