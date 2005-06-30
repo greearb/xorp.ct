@@ -393,7 +393,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 
     // Sanity check this hello packet.
 
-    // Check the network masks - OSPF V2 only.
+    // Check the network masks - OSPFv2 only.
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
 	if (OspfTypes::PointToPoint == _peerout.get_linktype() ||
@@ -1132,7 +1132,7 @@ Peer<IPv4>::get_designated_router_interface_id(IPv4) const
 {
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
-	XLOG_FATAL("OSPF V3 Only");
+	XLOG_FATAL("OSPFv3 Only");
 	break;
     case OspfTypes::V3:
 	break;
@@ -1149,7 +1149,7 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
 {
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
-	XLOG_FATAL("OSPF V3 Only");
+	XLOG_FATAL("OSPFv3 Only");
 	break;
     case OspfTypes::V3:
 	break;

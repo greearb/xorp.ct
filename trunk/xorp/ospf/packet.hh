@@ -180,9 +180,9 @@ class Packet {
      */
     OspfTypes::RouterID	_router_id;
     OspfTypes::AreaID	_area_id;
-    OspfTypes::AuType	_auth_type;	// OSPF V2 Only
-    uint8_t 		_auth[8];	// OSPF V2 Only
-    uint8_t		_instance_id;	// OSPF V3 Only
+    OspfTypes::AuType	_auth_type;	// OSPFv2 Only
+    uint8_t 		_auth[8];	// OSPFv2 Only
+    uint8_t		_instance_id;	// OSPFv3 Only
 };
 
 /**
@@ -222,8 +222,8 @@ class PacketDecoder {
      */
     Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket);
  private:
-    map<OspfTypes::Type , Packet *> _ospfv2;	// OSPF V2 Packet decoders
-    map<OspfTypes::Type , Packet *> _ospfv3;	// OSPF V3 Packet decoders
+    map<OspfTypes::Type , Packet *> _ospfv2;	// OSPFv2 Packet decoders
+    map<OspfTypes::Type , Packet *> _ospfv3;	// OSPFv3 Packet decoders
 };
 
 /**
@@ -233,8 +233,9 @@ class HelloPacket : public Packet {
  public:
     static const size_t MINIMUM_LENGTH = 20;	// The minumum length
 						// of a hello packet.
-						// The same for OSPF V2 and V3
-						// How did that happen?
+						// The same for OSPFv2
+						// and OSPFv3. How did
+						// that happen?
 
     HelloPacket(OspfTypes::Version version)
 	: Packet(version), _network_mask(0), _interface_id(0),

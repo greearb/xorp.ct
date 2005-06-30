@@ -55,7 +55,7 @@ struct OspfTypes {
     };
 
     /**
-     * Authentication type: OSPF V2 standard header.
+     * Authentication type: OSPFv2 standard header.
      */
     typedef uint16_t AuType;
 

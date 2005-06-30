@@ -237,7 +237,7 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
 
     embed_16(&ptr[12], checksum(ptr, len));
 
-    // OSPF V2 only copy the authentication data out.
+    // OSPFv2 only copy the authentication data out.
     switch(version) {
     case OspfTypes::V2:
 	memcpy(&ptr[16], &_auth[0], sizeof(_auth));

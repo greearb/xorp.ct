@@ -175,8 +175,8 @@ class Lsa_header {
 
     OspfTypes::Version _version;
     uint16_t 	_LS_age;
-    uint8_t	_options;	// OSPF V2 Only  
-    uint16_t	_ls_type;	// OSPF V2 1 byte OSPF V3 2 bytes.
+    uint8_t	_options;	// OSPFv2 Only  
+    uint16_t	_ls_type;	// OSPFv2 1 byte, OSPFv3 2 bytes.
     uint32_t	_link_state_id;
     uint32_t	_advertising_router;
     uint32_t	_ls_sequence_number;
@@ -454,7 +454,7 @@ class RouterLink {
     enum type {
 	p2p = 1,	// Point-to-point connection to another router
 	transit = 2,	// Connection to a transit network
-	stub = 3,	// Connection to a stub network OSPF V2 only
+	stub = 3,	// Connection to a stub network OSPFv2 only
 	vlink = 4	// Virtual link
     };
 
@@ -628,12 +628,12 @@ class RouterLink {
     type	_type;
     uint16_t	_metric;		// Only store TOS 0 metric
 
-    uint32_t	_link_id;		// OSPF V2 Only
-    uint32_t	_link_data;		// OSPF V2 Only
+    uint32_t	_link_id;		// OSPFv2 Only
+    uint32_t	_link_data;		// OSPFv2 Only
 
-    uint32_t	_interface_id;		// OSPF V3 Only
-    uint32_t	_neighbour_interface_id;// OSPF V3 Only
-    uint32_t	_neighbour_router_id;	// OSPF V3 Only
+    uint32_t	_interface_id;		// OSPFv3 Only
+    uint32_t	_neighbour_interface_id;// OSPFv3 Only
+    uint32_t	_neighbour_router_id;	// OSPFv3 Only
 };
 
 class RouterLsa : public Lsa {
@@ -689,7 +689,7 @@ class RouterLsa : public Lsa {
 
     bool encode();
 
-    // Wildcard multicast receiver! OSPFV3 Only
+    // Wildcard multicast receiver! OSPFv3 Only
     void set_w_bit(bool bit) {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	_w_bit = bit;
@@ -749,12 +749,12 @@ class RouterLsa : public Lsa {
     string str() const;
 
  private:
-    bool _w_bit;	// Wildcard multicast receiver! OSPFV3 Only
+    bool _w_bit;	// Wildcard multicast receiver! OSPFv3 Only
     bool _v_bit;	// Virtual link endpoint
     bool _e_bit;	// AS boundary router (E for external)
     bool _b_bit;	// Area border router.
 
-    uint32_t _options;	// OSPF V3 only.
+    uint32_t _options;	// OSPFv3 only.
 
     list<RouterLink> _router_links;
 };
@@ -877,7 +877,7 @@ class Ls_request {
     
  private:
     OspfTypes::Version _version;
-    uint32_t 	_ls_type;	// OSPF V2 4 bytes OSPF V3 2 bytes.
+    uint32_t 	_ls_type;	// OSPFv2 4 bytes, OSPFv3 2 bytes.
     uint32_t 	_link_state_id;
     uint32_t	_advertising_router;
 };

@@ -492,7 +492,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     RouterLsa *lsa;
     try {
 	lsa = new RouterLsa(version, buf, len);
-	size_t nlinks = 0;	// Number of Links OSPF V2 Only
+	size_t nlinks = 0;	// Number of Links OSPFv2 Only
 
 	// Decode the LSA Header.
 	lsa->_header.decode_inline(buf);

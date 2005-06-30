@@ -23,8 +23,8 @@ template <typename A> class Peer;
 
 /**
  * In OSPF terms this class represents an interface/link; interface is
- * too overloaded a term. The Peer class is also associated with an area. In
- * OSPF v2 there is a one-to-one correspondence. In OSPF v3 an
+ * too overloaded a term. The Peer class is also associated with an
+ * area. In OSPFv2 there is a one-to-one correspondence. In OSPFv3 an
  * interface/link can belong to multiple areas.
  *
  * Responsibilities:
@@ -601,14 +601,14 @@ class Peer {
     void update_router_links();
 
     /**
-     * Compute the current router link for OSPF V2
+     * Compute the current router link for OSPFv2
      *
      * Typically called after a state transition.
      */
     void update_router_linksV2();
 
     /**
-     * Compute the current router link for OSPF V2
+     * Compute the current router link for OSPFv3
      *
      * Typically called after a state transition.
      */
