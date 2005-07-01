@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.33 2004/11/23 22:43:44 bms Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.34 2004/11/25 03:23:29 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -31,6 +31,7 @@ TESTS		+= test_timer
 TESTS		+= test_timeval
 TESTS		+= test_trie
 TESTS		+= test_types
+TESTS		+= test_utils
 TESTS		+= test_vif
 
 # -- No-install Programs
@@ -58,6 +59,7 @@ check_PROGRAMS	+= test_timer
 check_PROGRAMS	+= test_timeval
 check_PROGRAMS	+= test_trie
 check_PROGRAMS	+= test_types
+check_PROGRAMS	+= test_utils
 check_PROGRAMS	+= test_vif
 
 # -- No-install Libraries
@@ -91,6 +93,7 @@ test_timer_SOURCES	= test_timer.cc
 test_timeval_SOURCES	= test_timeval.cc
 test_trie_SOURCES	= test_trie.cc
 test_types_SOURCES	= test_types.cc
+test_utils_SOURCES	= test_utils.cc
 test_vif_SOURCES	= test_vif.cc
 
 # -- Library Sources
@@ -171,6 +174,7 @@ libxorp_la_SOURCES += time_slice.cc
 libxorp_la_SOURCES += timer.cc
 libxorp_la_SOURCES += token.cc
 libxorp_la_SOURCES += transaction.cc
+libxorp_la_SOURCES += utils.cc
 libxorp_la_SOURCES += vif.cc
 
 BUILT_SOURCES	   = callback_nodebug.hh callback_debug.hh

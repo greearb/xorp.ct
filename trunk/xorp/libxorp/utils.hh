@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.3 2004/06/10 22:41:23 hodson Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.4 2005/03/25 02:53:49 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -68,5 +68,46 @@ delete_pointers_vector(vector<T *>& delete_vector)
     }
     tmp_vector.clear();
 }
+
+/**
+ * Create a temporary file with unique name.
+ * 
+ * This function takes the given file name template, and adds a suffix
+ * to it to create an unique file name in a chosen temporary directory.
+ * The temporary directory is selected from the following list by choosing
+ * the first directory that allows us the create the temporary file
+ * (in the given order):
+ * (a) The value of one of the following environment variables if defined
+ *     (in the given order):
+ *     - "TMPDIR"
+ *     - "TEMP"   (Windows only)
+ *     - "TMP"    (Windows only)
+ * (b) Argument @ref tmp_dir if it is not an empty string.
+ * (c) The "P_tmpdir" directory if this macro is defined (typically in
+ *     the <stdio.h> include file).
+ * (d) The first directory from the following list we can write to:
+ *     - "C:\TEMP" (Windows only)
+ *     - "/tmp"
+ *     - "/usr/tmp"
+ *     - "/var/tmp"
+ *
+ * For example, if the file name template is "foo", and if the chosen
+ * temporary directory is "/tmp", then the temporary file name would be
+ * like "/tmp/foo.XXXXXX" where "XXXXXX" is alpha-numerical suffix
+ * chosen automatically to compose the unique file name. The created file
+ * has mode 0600 (i.e., readable and writable only by the owner).
+ *
+ * @param tmp_dir the preferred directory to store the file.
+ * @param filename_template the file name template.
+ * @param final_filename a return-by-reference argument that on success
+ * returns the final name of the temporary file (including the directory name).
+ * @param errmsg the error message (if error).
+ * @return a file descriptor for the temporary file opened for reading and
+ * writing on success, otherwise XORP_BAD_SOCKET.
+ */
+xsock_t	xorp_make_temporary_file(const string& tmp_dir,
+				 const string& filename_template,
+				 string& final_filename,
+				 string& errmsg);
 
 #endif // __LIBXORP_UTILS_HH__

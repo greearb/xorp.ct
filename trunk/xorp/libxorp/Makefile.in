@@ -93,10 +93,10 @@ install_sh = @install_sh@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_run_command test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
+TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_run_command test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_utils test_vif
 
 # -- No-install Programs
-check_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_run_command test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
+check_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_run_command test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_utils test_vif
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libxorp.la
@@ -129,11 +129,12 @@ test_timer_SOURCES = test_timer.cc
 test_timeval_SOURCES = test_timeval.cc
 test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
+test_utils_SOURCES = test_utils.cc
 test_vif_SOURCES = test_vif.cc
 
 # -- Library Sources
 # libxorp_la_SOURCES += ether_compat.c
-libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh popen.hh profile.hh ref_ptr.hh run_command.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc profile.cc ref_ptr.cc run_command.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
+libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh popen.hh profile.hh ref_ptr.hh run_command.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc profile.cc ref_ptr.cc run_command.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc utils.cc vif.cc
 
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
@@ -156,7 +157,7 @@ am_libxorp_la_OBJECTS = debug.lo utility.lo xlog.lo asyncio.lo \
 	eventloop.lo exceptions.lo heap.lo ipv4.lo ipv6.lo ipvx.lo \
 	mac.lo nexthop.lo popen.lo profile.lo ref_ptr.lo run_command.lo \
 	safe_callback_obj.lo selector.lo service.lo time_slice.lo \
-	timer.lo token.lo transaction.lo vif.lo
+	timer.lo token.lo transaction.lo utils.lo vif.lo
 libxorp_la_OBJECTS = $(am_libxorp_la_OBJECTS)
 bin_PROGRAMS =
 check_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
@@ -169,7 +170,7 @@ check_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_service$(EXEEXT) test_test_main$(EXEEXT) \
 	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
 	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
-	test_vif$(EXEEXT)
+	test_utils$(EXEEXT) test_vif$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
@@ -292,6 +293,11 @@ test_types_OBJECTS = $(am_test_types_OBJECTS)
 test_types_LDADD = $(LDADD)
 test_types_DEPENDENCIES = libxorp.la
 test_types_LDFLAGS =
+am_test_utils_OBJECTS = test_utils.$(OBJEXT)
+test_utils_OBJECTS = $(am_test_utils_OBJECTS)
+test_utils_LDADD = $(LDADD)
+test_utils_DEPENDENCIES = libxorp.la
+test_utils_LDFLAGS =
 am_test_vif_OBJECTS = test_vif.$(OBJEXT)
 test_vif_OBJECTS = $(am_test_vif_OBJECTS)
 test_vif_LDADD = $(LDADD)
@@ -332,9 +338,10 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_time_slice.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timer.Po $(DEPDIR)/test_timeval.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_trie.Po $(DEPDIR)/test_types.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_vif.Po $(DEPDIR)/time_slice.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/timer.Plo $(DEPDIR)/token.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/transaction.Plo $(DEPDIR)/utility.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/test_utils.Po $(DEPDIR)/test_vif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/time_slice.Plo $(DEPDIR)/timer.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/token.Plo $(DEPDIR)/transaction.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/utility.Plo $(DEPDIR)/utils.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/vif.Plo $(DEPDIR)/xlog.Plo
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -364,9 +371,10 @@ DIST_SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_run_command_SOURCES) $(test_service_SOURCES) \
 	$(test_test_main_SOURCES) $(test_time_slice_SOURCES) \
 	$(test_timer_SOURCES) $(test_timeval_SOURCES) \
-	$(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+	$(test_trie_SOURCES) $(test_types_SOURCES) \
+	$(test_utils_SOURCES) $(test_vif_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_profile_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_run_command_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_profile_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_run_command_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_utils_SOURCES) $(test_vif_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -493,6 +501,9 @@ test_trie$(EXEEXT): $(test_trie_OBJECTS) $(test_trie_DEPENDENCIES)
 test_types$(EXEEXT): $(test_types_OBJECTS) $(test_types_DEPENDENCIES) 
 	@rm -f test_types$(EXEEXT)
 	$(CXXLINK) $(test_types_LDFLAGS) $(test_types_OBJECTS) $(test_types_LDADD) $(LIBS)
+test_utils$(EXEEXT): $(test_utils_OBJECTS) $(test_utils_DEPENDENCIES) 
+	@rm -f test_utils$(EXEEXT)
+	$(CXXLINK) $(test_utils_LDFLAGS) $(test_utils_OBJECTS) $(test_utils_LDADD) $(LIBS)
 test_vif$(EXEEXT): $(test_vif_OBJECTS) $(test_vif_DEPENDENCIES) 
 	@rm -f test_vif$(EXEEXT)
 	$(CXXLINK) $(test_vif_LDFLAGS) $(test_vif_OBJECTS) $(test_vif_LDADD) $(LIBS)
@@ -548,12 +559,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_timeval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_trie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_types.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_vif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/time_slice.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/timer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/token.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utility.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xlog.Plo@am__quote@
 
