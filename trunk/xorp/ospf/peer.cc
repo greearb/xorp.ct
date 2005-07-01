@@ -1114,6 +1114,11 @@ template <typename A>
 void
 Peer<A>::update_router_links()
 {
+    debug_msg("Interface(%s) State(%s) Linktype(%s)\n",
+	      get_if_name().c_str(),
+	      pp_interface_state(get_state()).c_str(),
+	      pp_link_type(_peerout.get_linktype()).c_str());
+
     OspfTypes::Version version = _ospf.get_version();
 
     switch(version) {
