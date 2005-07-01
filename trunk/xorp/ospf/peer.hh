@@ -829,6 +829,12 @@ class Neighbour {
     bool send_data_description_packet();
 
     /**
+     * Start sending data description packets.
+     * Should only be called in state ExStart.
+     */
+    void start_sending_data_description_packets(const char *event_name);
+
+    /**
      * Send link state request packet.
      */
     bool send_link_state_request_packet(LinkStateRequestPacket& lsrp);
@@ -849,6 +855,13 @@ class Neighbour {
     void event_negotiation_done();
     void event_sequence_number_mismatch();
     void event_exchange_done();
+    void event_bad_link_state_request();
+
+    /**
+     * Common code for:
+     * Sequence Number Mismatch and Bad Link State Request.
+     */
+    void event_SequenceNumberMismatch_or_BadLSReq(const char *event_name);
 };
 
 #endif // __OSPF_PEER_HH__

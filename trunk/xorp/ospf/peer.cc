@@ -1931,6 +1931,32 @@ Neighbour<A>::send_data_description_packet()
     return true;
 }
 
+/**
+ * RFC 2328 Section 10.8. Sending Database Description Packets. (ExStart)
+ */
+template <typename A>
+void
+Neighbour<A>::start_sending_data_description_packets(const char *event_name)
+{
+    XLOG_ASSERT(ExStart == get_state());
+
+    // Clear out the request list.
+    _ls_request_list.clear();
+
+    uint32_t seqno = _data_description_packet.get_dd_seqno();
+    _data_description_packet.set_dd_seqno(++seqno);
+    _data_description_packet.set_i_bit(true);
+    _data_description_packet.set_m_bit(true);
+    _data_description_packet.set_ms_bit(true);
+    _data_description_packet.get_lsa_headers().clear();
+
+    start_rxmt_timer(callback(this,
+			      &Neighbour<A>::send_data_description_packet),
+		     true,
+		     c_format("send_data_description from %s",
+			      event_name).c_str());
+}
+
 template <typename A>
 bool
 Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
@@ -2172,21 +2198,7 @@ Neighbour<A>::event_2_way_received()
 	if (establish_adjacency_p()) {
 	    change_state(ExStart);
 
-	    // Clear out the request list.
-	    _ls_request_list.clear();
-
-	    uint32_t seqno = _data_description_packet.get_dd_seqno();
-	    _data_description_packet.set_dd_seqno(++seqno);
-	    _data_description_packet.set_i_bit(true);
-	    _data_description_packet.set_m_bit(true);
-	    _data_description_packet.set_ms_bit(true);
-	    _data_description_packet.get_lsa_headers().clear();
-
-	    start_rxmt_timer(callback(this,
-				      &Neighbour<A>::
-				      send_data_description_packet),
-			     true,
-			     "send_data_description from 2-WayReceived");
+	    start_sending_data_description_packets(event_name);
 	} else {
 	    change_state(TwoWay);
 	}
@@ -2484,14 +2496,36 @@ Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
     case Exchange:
     case Loading:
     case Full:
-	XLOG_WARNING("TBD - Send Link State Update Packet in response");
 	break;
     }
 
-    // If we got this far we are going to send one or more update
-    // packets with the requested LSAs.
-    
+    list<Lsa::LsaRef> lsas;
+    if (!get_area_router()->get_lsas(lsrp->get_ls_request(), lsas)) {
+	event_bad_link_state_request();
+	return;
+    }
 
+    LinkStateUpdatePacket lsup(_ospf.get_version(), _ospf.get_lsa_decoder());
+    size_t lsas_len = 0;
+    list<Lsa::LsaRef>::iterator i;
+    for (i = lsas.begin(); i != lsas.end(); i++) {
+	XLOG_ASSERT((*i)->valid());
+	size_t len;
+	(*i)->lsa(len);
+	(*i)->set_transmitted(true);
+	if (lsup.get_standard_header_length() + len + lsas_len < 
+	    _peer.get_interface_mtu()) {
+	    lsas_len += len;
+	    lsup.get_lsas().push_back(*i);
+	} else {
+	    send_link_state_update_packet(lsup);
+	    lsup.get_lsas().clear();
+	    lsas_len = 0;
+	}
+    }
+
+    if (!lsup.get_lsas().empty())
+	send_link_state_update_packet(lsup);
 }
 
 template <typename A>
@@ -2642,38 +2676,7 @@ void
 Neighbour<A>::event_sequence_number_mismatch()
 {
     const char *event_name = "SequenceNumberMismatch";
-    XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
-	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      cstring(get_candidate_id()),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
-
-    XLOG_WARNING("TBD");
-
-    switch(get_state()) {
-    case Down:
-	break;
-    case Attempt:
-	break;
-    case Init:
-	break;
-    case TwoWay:
-	break;
-    case ExStart:
-	break;
-    case Exchange:
-	break;
-    case Loading:
-	break;
-    case Full:
-	break;
-    }
+    event_SequenceNumberMismatch_or_BadLSReq(event_name);
 }
 
 template <typename A>
@@ -2732,6 +2735,49 @@ Neighbour<A>::event_exchange_done()
     case Loading:
 	break;
     case Full:
+	break;
+    }
+}
+
+template <typename A>
+void
+Neighbour<A>::event_bad_link_state_request()
+{
+    const char *event_name = "BadLSReq";
+    event_SequenceNumberMismatch_or_BadLSReq(event_name);
+}
+
+template <typename A>
+void
+Neighbour<A>::event_SequenceNumberMismatch_or_BadLSReq(const char *event_name)
+{
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       get_candidate_id().str().c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      cstring(get_candidate_id()),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+	XLOG_WARNING("Event %s in state %s not possible",
+		     event_name,
+		     pp_state(get_state()).c_str());
+	break;
+    case Exchange:
+    case Loading:
+    case Full:
+	change_state(ExStart);
+	start_sending_data_description_packets(event_name);
 	break;
     }
 }
