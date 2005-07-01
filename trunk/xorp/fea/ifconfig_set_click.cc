@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.22 2005/03/25 02:53:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.23 2005/06/28 18:37:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/run_command.hh"
+#include "libxorp/utils.hh"
 
 #include "ifconfig.hh"
 #include "ifconfig_set.hh"
@@ -1037,44 +1038,16 @@ int
 IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
 						string& error_msg)
 {
-    char tmp_filename[L_tmpnam + 1];
+    string tmp_filename;
 
     //
     // Create a temporary file
     //
-    do {
-	char tmp_dir[L_tmpnam + 1];
-	size_t maxsize;
-	char* value;
-	int p;
-
-	// Get the name of the temporary directory
-	maxsize = sizeof(tmp_dir) / sizeof(tmp_dir[0]);
-	value = getenv("TMPDIR");
-	if (value != NULL)
-	    p = snprintf(tmp_dir, maxsize, "%s", value);
-	else
-	    p = snprintf(tmp_dir, maxsize, "%s", P_tmpdir);
-
-	// Remove the trailing '/' from the directory name
-	if (p <= 0) {
-	    error_msg = c_format("Cannot create a temporary file: "
-				 "cannot select a temporary directory");
-	    return (XORP_ERROR);
-	}
-	if (tmp_dir[p - 1] == '/')
-	    tmp_dir[p - 1] = '\0';
-
-	maxsize = sizeof(tmp_filename);
-	maxsize /= sizeof(tmp_filename[0]);
-	snprintf(tmp_filename, maxsize, "%s/%s", tmp_dir,
-		 "xorp_fea_click.XXXXXXXX");
-	break;
-    } while (false);
-    int s = mkstemp(tmp_filename);
-    if (s < 0) {
+    xsock_t s = xorp_make_temporary_file("", "xorp_fea_click",
+					 tmp_filename, error_msg);
+    if (s == XORP_BAD_SOCKET) {
 	error_msg = c_format("Cannot create a temporary file: %s",
-			     strerror(errno));
+			     error_msg.c_str());
 	return (XORP_ERROR);
     }
 
