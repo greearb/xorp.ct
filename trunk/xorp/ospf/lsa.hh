@@ -265,6 +265,20 @@ class Lsa {
 	return &_pkt[0];
     }
 
+    /**
+     * Is a wire format version available?
+     *
+     * For all non self orignating LSAs there should be a wire version
+     * available.
+     *
+     * Self originating LSAs such as Router LSAs can exist that do not
+     * yet have any valid fields (no interfaces to describe). Use this
+     * field to check if this LSA is available.
+     *
+     * @return true is a wire format version is available.
+     */
+    bool available() const { return 0 != _pkt.size(); }
+
     Lsa_header& get_header() {return _header; }
 
     /**

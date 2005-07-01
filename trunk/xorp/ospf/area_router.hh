@@ -133,6 +133,15 @@ class AreaRouter {
     DataBaseHandle open_database(bool& empty);
 
     /**
+     * Is there another database entry following this one.
+     *
+     * This method is for internal use and its use is not recommended.
+     *
+     * @return true if there is a subsequent entry.
+     */
+    bool subsequent(DataBaseHandle& dbh) const;
+
+    /**
      * Next database entry
      *
      * @param last true if this is the last entry.

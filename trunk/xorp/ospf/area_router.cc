@@ -313,14 +313,34 @@ template <typename A>
 DataBaseHandle
 AreaRouter<A>::open_database(bool& empty)
 {
-    _readers++;
+    // While there are readers no entries can be add to the database
+    // before the _last_entry.
 
-    empty = 0 == _last_entry;
+    _readers++;
 
     // Snapshot the current last entry position. While the database is
     // open (_readers > 0) new entries will be added past _last_entry.
 
-    return DataBaseHandle(true, _last_entry);
+    DataBaseHandle dbh = DataBaseHandle(true, _last_entry);
+
+    empty = !subsequent(dbh);
+
+    return dbh;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::subsequent(DataBaseHandle& dbh) const
+{
+    bool another = false;
+    for (size_t index = dbh.position(); index < dbh.last(); index++) {
+	if (!_db[index]->valid() || !_db[index]->available())
+	    continue;
+	another = true;
+	break;
+    }
+
+    return another;
 }
 
 template <typename A>
@@ -329,13 +349,22 @@ AreaRouter<A>::get_entry_database(DataBaseHandle& dbh, bool& last)
 {
     XLOG_ASSERT(dbh.valid());
 
-    uint32_t position = dbh.position();
+    uint32_t position;
 
-    if (position >= _db.size())
-	XLOG_FATAL("Index too far %d length %d", position,
-		   XORP_INT_CAST(_db.size()));
+    do {
+	position = dbh.position();
 
-    dbh.advance(last);
+	if (position >= _db.size())
+	    XLOG_FATAL("Index too far %d length %d", position,
+		       XORP_INT_CAST(_db.size()));
+
+	dbh.advance(last);
+    } while(!_db[position]->valid() || !_db[position]->available());
+
+    // If this is not the last entry make sure there is a subsequent
+    // valid entry.
+    if (!last)
+	last = !subsequent(dbh);
 
     return _db[position];
 }
@@ -348,9 +377,8 @@ AreaRouter<A>::close_database(DataBaseHandle& dbh)
     XLOG_ASSERT(0 != _readers);
     _readers--;
 
-    if (dbh.last() != dbh.position())
-	XLOG_WARNING("Closing database prematurely: size = %d position = %d",
-		     dbh.last(), dbh.position());
+    if (subsequent(dbh))
+	XLOG_WARNING("Database closed with entries remaining");
 
     dbh.invalidate();
 }
