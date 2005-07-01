@@ -718,6 +718,8 @@ class Neighbour {
 
     void link_state_request_received(LinkStateRequestPacket *lsrp);
 
+    void link_state_update_received(LinkStateUpdatePacket *lsup);
+
     /**
      * Queue a LSA for later transmission.
      *

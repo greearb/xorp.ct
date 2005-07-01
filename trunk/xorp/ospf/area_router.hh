@@ -80,9 +80,13 @@ class AreaRouter {
     OspfTypes::AreaType get_area_type() const { return _area_type; }
 
     /**
-     * Receive LSA
+     * Receive LSAs
+     * 
+     * @param nid neighbourID that the LSAs arrived on.
+     * @param lsas list of lsas.
+     *
      */
-    void receive_lsa(PeerID peer, Lsa::LsaRef lsa);
+    void receive_lsas(OspfTypes::NeighbourID nid, list<Lsa::LsaRef>& lsas);
 
     /**
      * Returned by compare_lsa.

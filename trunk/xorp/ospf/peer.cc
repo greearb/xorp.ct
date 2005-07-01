@@ -517,7 +517,18 @@ Peer<A>::process_link_state_update_packet(A dst, A src,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsup));
 
-    XLOG_WARNING("TBD");
+    Neighbour<A> *n = find_neighbour(src, lsup);
+
+    if (0 == n) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "No matching neighbour found source %s %s",
+		   cstring(src),
+		   cstring(*lsup));
+	
+	return false;
+    }
+
+    n->link_state_update_received(lsup);
     
     return false;	// Never keep a copy of the packet.
 }
@@ -2531,6 +2542,41 @@ Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
 
     if (!lsup.get_lsas().empty())
 	send_link_state_update_packet(lsup);
+}
+
+template <typename A>
+void
+Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
+{
+    const char *event_name = "LinkStateUpdateReceived-pseudo-event";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       get_candidate_id().str().c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
+	      cstring(get_candidate_id()),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str(),
+	      cstring(*lsup));
+
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+	// Ignore
+	return;
+    case Exchange:
+    case Loading:
+    case Full:
+	break;
+    }
+
+    get_area_router()->receive_lsas(_neighbourid, lsup->get_lsas());
 }
 
 template <typename A>

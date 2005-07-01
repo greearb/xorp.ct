@@ -203,6 +203,30 @@ AreaRouter<A>::remove_router_link(PeerID peerid)
     return true;
 }
 
+inline
+string
+pp_lsas(const list<Lsa::LsaRef>& lsas)
+{
+    string output;
+
+    list<Lsa::LsaRef>::const_iterator i;
+    for (i = lsas.begin(); i != lsas.end(); i++) {
+	output += "\n\t" + (*i)->str();
+    }
+    
+    return output;
+}
+
+template <typename A>
+void
+AreaRouter<A>::receive_lsas(OspfTypes::NeighbourID nid,
+			    list<Lsa::LsaRef>& lsas)
+{
+    debug_msg("NeighbourID %u %s\n", nid, pp_lsas(lsas).c_str());
+    
+    XLOG_WARNING("TBD process received LSAs");
+}
+
 template <typename A>
 bool
 AreaRouter<A>::find_lsa(const Ls_request& lsr, size_t& index) const
