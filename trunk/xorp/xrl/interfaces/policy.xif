@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.1 2004/09/17 14:05:09 abittau Exp $ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.2 2004/09/18 00:28:45 pavlin Exp $ */
 
 /**
  * Policy manager XRL interface.
@@ -10,9 +10,10 @@ interface policy/0.1 {
 	 * The term will be the last term in the policy statement.
 	 *
 	 * @param policy the name of the policy.
+	 * @param order position of term.
 	 * @param term the name of the term.
 	 */
-	create_term ? policy:txt & term:txt
+	create_term ? policy:txt & order:u32 & term:txt
 
 	/**
 	 * Delete a term in a policy.
@@ -25,15 +26,20 @@ interface policy/0.1 {
 	/**
 	 * Update the source/dest/action block of a term in a policy.
 	 *
+	 * Note: if variable, op and arg are all empty, the previous statement
+	 * in that position will be deleted.
+	 *
 	 * @param policy the name of the policy.
 	 * @param term the name of the term.
-	 *
-	 * source/dest/action the un-parsed user configuration of the block.
+	 * @param block the block to update (0:source, 1:dest, 2:action).
+	 * @param order numerical position (local) of statement.
+	 * @param variable the attribute (such as metric) to operate on.
+	 * @param op specific operation to perform on variable.
+	 * @param arg the argument to the operator.
 	 */
-	update_term_source 	? policy:txt & term:txt & source:txt
-	update_term_dest 	? policy:txt & term:txt & dest:txt
-	update_term_action 	? policy:txt & term:txt & action:txt
-
+	update_term_block ? policy:txt & term:txt & block:u32 & order:u32 \
+			  & variable:txt & op:txt & arg:txt
+	
 	/**
 	 * Create a policy.
 	 *
@@ -87,8 +93,19 @@ interface policy/0.1 {
 	export ? protocol:txt & policies:txt
 
 	/**
-	 * Get current configuration of all policies.
+	 * Add a variable to the varmap configuration.
 	 *
+	 * @param protocol the protocol this variable is available to.
+	 * @param variable name of the variable.
+	 * @param type the type of the variable.
+	 * @param access the permissions on the variable (r/rw).
 	 */
-	get_conf -> conf:txt
+	add_varmap ? protocol:txt & variable:txt & type:txt & access:txt
+
+	/**
+	 * Dump state of policy manager.  To be used ONLY for debugging.
+	 *
+	 * @param id which aspect of the internal state to dump.
+	 */
+	dump_state ? id:u32 -> state:txt
 }
