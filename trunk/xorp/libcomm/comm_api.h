@@ -31,21 +31,11 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.16 2005/05/16 13:55:02 bms Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.17 2005/05/16 14:00:38 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
 #define __LIBCOMM_COMM_API_H__
-
-/* XXX: Remove these lines when the xorp_osdep headers are merged! */
-typedef int xsock_t;
-#ifndef XORP_BAD_SOCKET
-#define XORP_BAD_SOCKET		(-1)
-#endif
-#ifndef XORP_SOCKOPT_CAST
-#define XORP_SOCKOPT_CAST(x)	(x)
-#endif
-/* XXX */
 
 /*
  * COMM socket library API header.

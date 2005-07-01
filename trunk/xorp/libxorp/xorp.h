@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.8 2005/01/28 03:30:15 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.9 2005/03/25 02:53:50 pavlin Exp $
  */
 
 
@@ -109,5 +109,15 @@ typedef bool bool_t;
 #endif
 #define XORP_OK		 (0)
 #define XORP_ERROR	(-1)
+
+/* XXX: Remove these lines when the xorp_osdep headers are merged! */
+typedef int xsock_t;
+#ifndef XORP_BAD_SOCKET
+#define XORP_BAD_SOCKET		(-1)
+#endif
+#ifndef XORP_SOCKOPT_CAST
+#define XORP_SOCKOPT_CAST(x)	(x)
+#endif
+/* XXX */
 
 #endif /* __LIBXORP_XORP_H__ */
