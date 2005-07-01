@@ -373,8 +373,8 @@ class Lsa {
     bool _valid;		// True if this LSA is still valid.
     bool _self_originating;	// True if this LSA is self originating.
 
-    uint16_t _initial_age;	// Age when this LSA was received.
-    TimeVal _creation;		// Time when this LSA was received.
+    uint16_t _initial_age;	// Age when this LSA was created.
+    TimeVal _creation;		// Time when this LSA was created.
     
     XorpTimer _timer;		// If this is a self originated LSA
 				// this timer is used to retransmit
