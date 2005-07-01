@@ -261,6 +261,7 @@ class Lsa {
      */
     uint8_t *lsa(size_t &len) {
 	len = _pkt.size();
+	XLOG_ASSERT(0 != len);
 	return &_pkt[0];
     }
 
