@@ -55,6 +55,10 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     // Never need to delete this as the ref_ptr will tidy up.
     RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
     rlsa->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    rlsa->record_creation_time(now);
+
     Lsa_header& header = rlsa->get_header();
 
     switch (ospf.get_version()) {
@@ -199,26 +203,42 @@ AreaRouter<A>::remove_router_link(PeerID peerid)
     return true;
 }
 
-/**
- * RFC 2328 Section 13.1 Determining which LSA is newer.
- */
 template <typename A>
-typename AreaRouter<A>::LsaSearch
-AreaRouter<A>::find_lsa(const Lsa_header& lsah, size_t& index) const
+bool
+AreaRouter<A>::find_lsa(const Ls_request& lsr, size_t& index) const
 {
     for(index = 0 ; index < _last_entry; index++) {
 	if (!_db[index]->valid())
 	    continue;
 	Lsa_header& dblsah = _db[index]->get_header();
-	if (dblsah.get_ls_type() != lsah.get_ls_type())
+	if (dblsah.get_ls_type() != lsr.get_ls_type())
 	    continue;
 
-	if (dblsah.get_link_state_id() != lsah.get_link_state_id())
+	if (dblsah.get_link_state_id() != lsr.get_link_state_id())
 	    continue;
 
-	if (dblsah.get_advertising_router() != lsah.get_advertising_router())
+	if (dblsah.get_advertising_router() != lsr.get_advertising_router())
 	    continue;
 
+	return true;
+    }
+
+    return false;
+}
+
+/**
+ * RFC 2328 Section 13.1 Determining which LSA is newer.
+ */
+template <typename A>
+typename AreaRouter<A>::LsaSearch
+AreaRouter<A>::compare_lsa(const Lsa_header& lsah) const
+{
+    Ls_request lsr(_ospf.get_version(), lsah.get_ls_type(),
+		   lsah.get_link_state_id(), lsah.get_advertising_router());
+
+    size_t index;
+    if (find_lsa(lsr, index)) {
+ 	Lsa_header& dblsah = _db[index]->get_header();
 	if (dblsah.get_ls_sequence_number() > lsah.get_ls_sequence_number())
 	    return OLDER;
 	if (dblsah.get_ls_sequence_number() < lsah.get_ls_sequence_number())
@@ -254,8 +274,7 @@ template <typename A>
 bool
 AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
 {
-    size_t index;
-    switch(find_lsa(lsah, index)) {
+    switch(compare_lsa(lsah)) {
     case NOMATCH:
     case NEWER:
 	return true;
@@ -265,6 +284,28 @@ AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
     }
 
     XLOG_UNREACHABLE();
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::get_lsas(const list<Ls_request>& reqs,
+			list<Lsa::LsaRef>& lsas) const
+{
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+
+    list<Ls_request>::const_iterator i;
+    for(i = reqs.begin(); i != reqs.end(); i++) {
+	size_t index;
+	if (!find_lsa(*i, index)) {
+	    XLOG_WARNING("Unable to find %s", cstring(*i));
+	    return false;
+	}
+	_db[index]->update_age(now);
+	lsas.push_back(_db[index]);
+    }
+    
     return true;
 }
 
@@ -355,6 +396,9 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
 	router_lsa->set_transmitted(false);
 	router_lsa->increment_sequence_number();
 	router_lsa->get_header().set_ls_age(0);
+	TimeVal now;
+	_ospf.get_eventloop().current_time(now);
+	router_lsa->record_creation_time(now);
     }
 
     router_lsa->encode();

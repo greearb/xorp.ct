@@ -85,7 +85,7 @@ class AreaRouter {
     void receive_lsa(PeerID peer, Lsa::LsaRef lsa);
 
     /**
-     * Returned by find_lsa.
+     * Returned by compare_lsa.
      */
     enum LsaSearch {
 	NOMATCH,	// No matching LSA was found.
@@ -95,19 +95,34 @@ class AreaRouter {
     };
 
     /**
-     * Find matching LSA.
+     * Compare this LSA to 
      *
      * @param Lsa_header that is being sought.
-     * @param index into LSA database if LsaSearch does not equal NOMATCH.
      * 
      * @return LsaSearch that describes the type of match.
      */
-    LsaSearch find_lsa(const Lsa_header&, size_t& index) const;
+    LsaSearch compare_lsa(const Lsa_header&) const;
 
     /**
      * @return true if this is a newer LSA than we already have.
      */
     bool newer_lsa(const Lsa_header&) const;
+
+    /**
+     * Fetch a list of lsas given a list of requests.
+     *
+     * The age fields of the returned LSAs will be correctly set.
+     *
+     * @param requests list of requests
+     * @param lsas list of LSAs
+     *
+     * @return True if *all* the requests have been satisfied. If an LSA
+     * can not be found False is returned and the state of the lsas
+     * list is undefined; hence should not be used.
+     * 
+     */
+    bool get_lsas(const list<Ls_request>& requests,
+		  list<Lsa::LsaRef>& lsas) const;
 
     /**
      * Open database
@@ -164,6 +179,16 @@ class AreaRouter {
     typedef ref_ptr<PeerState> PeerStateRef;
     typedef map<PeerID, PeerStateRef> PeerMap;
     PeerMap _peers;		// Peers of this area.
+
+    /**
+     * Find LSA matching this request.
+     *
+     * @param lsr that is being sought.
+     * @param index into LSA database if search succeeded.
+     *
+     * @return true if an LSA was found. 
+     */
+    bool find_lsa(const Ls_request& lsr, size_t& index) const;
 
     /**
      * Update router links.
