@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.1 2004/09/17 13:48:48 abittau Exp $"
+#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.2 2005/03/25 02:54:06 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -27,10 +27,10 @@ ExportCodeGenerator::ExportCodeGenerator(const string& proto,
 const Element* 
 ExportCodeGenerator::visit_term(Term& term) {
     // ignore source [done by source match]
-    vector<Node*>& dest = term.dest_nodes();
-    vector<Node*>& actions = term.action_nodes();
+    Term::Nodes& dest = term.dest_nodes();
+    Term::Nodes& actions = term.action_nodes();
 
-    vector<Node*>::iterator i;
+    Term::Nodes::iterator i;
 
     // tags are linear.. for each term, match the tag in the source block.
     _os << "TERM_START " << term.name() << endl ;
@@ -42,13 +42,13 @@ ExportCodeGenerator::visit_term(Term& term) {
 
     // do dest block
     for(i = dest.begin(); i != dest.end(); ++i) {
-        (*i)->accept(*this);
+        (i->second)->accept(*this);
         _os << "ONFALSE_EXIT" << endl;
     }
 
     // do actions
     for(i = actions.begin(); i != actions.end(); ++i) {
-        (*i)->accept(*this);
+        (i->second)->accept(*this);
     }
 
     _os << "TERM_END\n";

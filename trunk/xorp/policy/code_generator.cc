@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.1 2004/09/17 13:48:47 abittau Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.2 2005/03/25 02:54:06 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -49,7 +49,7 @@ CodeGenerator::visit_policy(PolicyStatement& policy) {
     for(PolicyStatement::TermContainer::iterator i = terms.begin(); 
 	i != terms.end(); ++i) {
 	
-	(*i)->accept(*this);
+	(i->second)->accept(*this);
     }	    
 
     _os << "POLICY_END\n";
@@ -60,17 +60,17 @@ CodeGenerator::visit_policy(PolicyStatement& policy) {
 
 const Element* 
 CodeGenerator::visit_term(Term& term) {
-    vector<Node*>& source = term.source_nodes();
-    vector<Node*>& dest = term.dest_nodes();
-    vector<Node*>& actions = term.action_nodes();
+    Term::Nodes& source = term.source_nodes();
+    Term::Nodes& dest = term.dest_nodes();
+    Term::Nodes& actions = term.action_nodes();
 
-    vector<Node*>::iterator i;
+    Term::Nodes::iterator i;
 
     _os << "TERM_START " << term.name() << endl ;
 
     // do the source block
     for(i = source.begin(); i != source.end(); ++i) {
-	(*i)->accept(*this);
+	(i->second)->accept(*this);
         _os << "ONFALSE_EXIT" << endl;
     }
 
@@ -81,7 +81,7 @@ CodeGenerator::visit_term(Term& term) {
 
     // do the action block
     for(i = actions.begin(); i != actions.end(); ++i) {
-        (*i)->accept(*this);
+        (i->second)->accept(*this);
     }
 
     _os << "TERM_END\n";

@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.1 2004/09/17 13:48:53 abittau Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.2 2005/03/25 02:54:11 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "xrl_target.hh"
+#include "common/policy_utils.hh"
 #include "libxorp/status_codes.h"
+
+using namespace policy_utils;
 
 XrlPolicyTarget::XrlPolicyTarget(XrlStdRouter* r, PolicyTarget& ptarget) : 
 	    XrlPolicyTargetBase(r),
@@ -30,8 +32,8 @@ XrlPolicyTarget::XrlPolicyTarget(XrlStdRouter* r, PolicyTarget& ptarget) :
 XrlCmdError 
 XrlPolicyTarget::common_0_1_get_target_name(
         // Output values,
-        string& name) {
-
+        string& name) 
+{
     name = PolicyTarget::policy_target_name;
     return XrlCmdError::OKAY();
 }	
@@ -39,8 +41,8 @@ XrlPolicyTarget::common_0_1_get_target_name(
 XrlCmdError 
 XrlPolicyTarget::common_0_1_get_version(
         // Output values,
-        string& version) {
-
+        string& version)
+{
     version = "0.1";
     return XrlCmdError::OKAY();
 }	
@@ -49,8 +51,8 @@ XrlCmdError
 XrlPolicyTarget::common_0_1_get_status(
         // Output values,
         uint32_t&       status,
-        string& reason) {
-
+        string& reason) 
+{
     if(_policy_target.running()) {
         status = PROC_READY;
 	reason = "running";
@@ -64,7 +66,8 @@ XrlPolicyTarget::common_0_1_get_status(
 }	
 
 XrlCmdError 
-XrlPolicyTarget::common_0_1_shutdown() {
+XrlPolicyTarget::common_0_1_shutdown()
+{
     _policy_target.shutdown();
     return XrlCmdError::OKAY();
 }
@@ -72,10 +75,11 @@ XrlPolicyTarget::common_0_1_shutdown() {
 
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
-				        const string&   term) {
-    
+					const uint32_t& order,
+				        const string&   term)
+{
     try {
-	_policy_target.create_term(policy,term);
+	_policy_target.create_term(policy, order, term);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("create_term failed: " + e.str());
     }
@@ -84,9 +88,8 @@ XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
 
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_delete_term(const string&   policy,
-					const string&   term) {
-
-
+					const string&   term)
+{
     try {
 	_policy_target.delete_term(policy,term);
     } catch(const PolicyException& e) {
@@ -98,57 +101,29 @@ XrlPolicyTarget::policy_0_1_delete_term(const string&   policy,
     
 
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_update_term_source(const string&   policy,
-					       const string&   term,
-					       const string&   source) {
-
+XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
+					      const string&   term,
+					      const uint32_t& block,
+					      const uint32_t& order,
+					      const string&   variable,
+					      const string&   op,
+					      const string&   arg)
+{
     try {
-	_policy_target.update_term_source(policy,term,source);
+	_policy_target.update_term_block(policy, term, block, order,
+					 variable, op, arg);
     } catch(const PolicyException& e) {
-        return XrlCmdError::COMMAND_FAILED("Update source of policy " + 
-					   policy + " term " + term + 
-					   " failed: " + e.str());
+        return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
+					   + " term " + term + " failed: "
+					   + e.str());
     }
 
     return XrlCmdError::OKAY();
 }	
 
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_update_term_dest(const string&   policy,
-					     const string&   term,
-					     const string&   dest) {
-
-    try {
-	_policy_target.update_term_dest(policy,term,dest);
-    } catch(const PolicyException& e) {
-	return XrlCmdError::COMMAND_FAILED("Update dest of policy " 
-					   + policy + " term " + term + 
-					   " failed: " + e.str());
-    }
-
-    return XrlCmdError::OKAY();
-}	
-
-XrlCmdError 
-XrlPolicyTarget::policy_0_1_update_term_action(const string&   policy,
-					       const string&   term,
-					       const string&   action) {
-
-    try {
-	_policy_target.update_term_action(policy,term,action);
-    } catch(const PolicyException& e) {
-	return XrlCmdError::COMMAND_FAILED("Update action of policy " +
-					   policy + " term " + term + 
-					   " failed: " + e.str());
-    }
-
-    return XrlCmdError::OKAY();
-}	
-
-
-
-XrlCmdError 
-XrlPolicyTarget::policy_0_1_create_policy(const string&   policy) {
+XrlPolicyTarget::policy_0_1_create_policy(const string&   policy)
+{
     
     try {
 	_policy_target.create_policy(policy);
@@ -159,10 +134,9 @@ XrlPolicyTarget::policy_0_1_create_policy(const string&   policy) {
     return XrlCmdError::OKAY();
 }	
 
-    
-
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_delete_policy(const string&   policy) {
+XrlPolicyTarget::policy_0_1_delete_policy(const string&   policy)
+{
 
     try {
 	_policy_target.delete_policy(policy);
@@ -174,7 +148,8 @@ XrlPolicyTarget::policy_0_1_delete_policy(const string&   policy) {
 }	
 
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_create_set(const string&   set) {
+XrlPolicyTarget::policy_0_1_create_set(const string&   set)
+{
 
     try {
 	_policy_target.create_set(set);
@@ -185,11 +160,10 @@ XrlPolicyTarget::policy_0_1_create_set(const string&   set) {
     return XrlCmdError::OKAY();
 }	
 
-
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_update_set(const string&   set,
-				       const string&   elements) {
-
+				       const string&   elements)
+{
     try {
 	_policy_target.update_set(set,elements);
     } catch(const PolicyException& e) {
@@ -199,10 +173,9 @@ XrlPolicyTarget::policy_0_1_update_set(const string&   set,
     return XrlCmdError::OKAY();
 }	
 
-
-
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_delete_set(const string&   set) {
+XrlPolicyTarget::policy_0_1_delete_set(const string&   set)
+{
 
     try {
 	_policy_target.delete_set(set);
@@ -213,10 +186,9 @@ XrlPolicyTarget::policy_0_1_delete_set(const string&   set) {
     return XrlCmdError::OKAY();
 }	
 
-
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_done_global_policy_conf() {
-
+XrlPolicyTarget::policy_0_1_done_global_policy_conf()
+{
     try {
 	_policy_target.commit(0);
     } catch(const PolicyException& e) {
@@ -229,8 +201,8 @@ XrlPolicyTarget::policy_0_1_done_global_policy_conf() {
 
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_import(const string&   protocol,
-				   const string&   policies) {
-
+				   const string&   policies) 
+{
     try {
 	_policy_target.update_import(protocol,policies);
     } catch(const PolicyException& e) {
@@ -241,11 +213,10 @@ XrlPolicyTarget::policy_0_1_import(const string&   protocol,
     return XrlCmdError::OKAY();
 }	
  
-
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_export(const string&   protocol,
-				   const string&   policies) {
-
+				   const string&   policies)
+{
     try {
 	_policy_target.update_export(protocol,policies);
     } catch(const PolicyException& e) {
@@ -254,24 +225,44 @@ XrlPolicyTarget::policy_0_1_export(const string&   protocol,
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-
-XrlCmdError 
-XrlPolicyTarget::policy_0_1_get_conf(string& conf) {
-
-    conf = _policy_target.get_conf();
+XrlCmdError
+XrlPolicyTarget::policy_0_1_add_varmap(const string& protocol,
+				       const string& variable,
+				       const string& type,
+				       const string& access)
+{
+    try {
+	_policy_target.add_varmap(protocol, variable, type, access);
+    } catch(const PolicyException& e) {
+        return XrlCmdError::COMMAND_FAILED("Adding varmap failed for protocol: " 
+					   + protocol + " var: " + variable
+					   + " :" + e.str());
+    }
 
     return XrlCmdError::OKAY();
+
+}
+
+XrlCmdError 
+XrlPolicyTarget::policy_0_1_dump_state(const uint32_t& id,
+				       string& state)
+{
+    try {
+        state = _policy_target.dump_state(id);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Unable to dump state, id: " 
+					   + to_str(id));
+    }
+    return XrlCmdError::OKAY();
 }	
-
-
 
 XrlCmdError 
 XrlPolicyTarget::finder_event_observer_0_1_xrl_target_birth(
 			    const string&   target_class,
-			    const string&   target_instance) {
-
+			    const string&   target_instance)
+{
     try {
 	_policy_target.birth(target_class,target_instance);
     } catch(const PolicyException& e) {
@@ -286,8 +277,8 @@ XrlPolicyTarget::finder_event_observer_0_1_xrl_target_birth(
 XrlCmdError 
 XrlPolicyTarget::finder_event_observer_0_1_xrl_target_death(
 			    const string&   target_class,
-			    const string&   target_instance) {
-
+			    const string&   target_instance)
+{
     try {
 	_policy_target.death(target_class,target_instance);
     } catch(const PolicyException& e) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.1 2004/09/17 13:48:51 abittau Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.2 2005/03/25 02:54:09 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -37,7 +37,7 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy) {
 	_os.str("");
 	_code._sets.clear();
 
-	(*i)->accept(*this);
+	(i->second)->accept(*this);
 
 	// term may be for a new target, so deal with that.
 	addTerm(policy.name());
@@ -87,9 +87,9 @@ SourceMatchCodeGenerator::addTerm(const string& pname) {
 
 const Element* 
 SourceMatchCodeGenerator::visit_term(Term& term) {
-    vector<Node*>& source = term.source_nodes();
+    Term::Nodes& source = term.source_nodes();
 
-    vector<Node*>::iterator i;
+    Term::Nodes::iterator i;
 
     _os << "TERM_START " << term.name() << endl ;
 
@@ -97,7 +97,7 @@ SourceMatchCodeGenerator::visit_term(Term& term) {
 
     // generate code for source block
     for(i = source.begin(); i != source.end(); ++i) {
-	(*i)->accept(*this);
+	(i->second)->accept(*this);
     
         // if it was a protocol statement, no need for "ONFALSE_EXIT", if its
 	// any other statement, then yes. The protocol is not read as a variable

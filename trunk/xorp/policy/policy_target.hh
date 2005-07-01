@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.1 2004/09/17 13:48:50 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.2 2005/03/25 02:54:08 pavlin Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -33,7 +33,6 @@
 class PolicyTarget {
 public:
     static string policy_target_name;
-
 
     /**
      * @param rtr Xrl router used by this XORP process.
@@ -58,9 +57,11 @@ public:
      * Exception is thrown on error.
      *
      * @param policy policy in which term should be created.
+     * @param order position of term.
      * @param term name of term to create.
      */
-    void create_term(const string& policy, const string& term);
+    void create_term(const string& policy, const uint32_t& order,
+		     const string& term);
 
     /**
      * Attempts to delete a term.
@@ -73,44 +74,25 @@ public:
     void delete_term(const string& policy, const string& term);
 
     /**
-     * Updates the source block of a term.
+     * Update the source/dest/action block of a term in a policy.
      *
-     * Exception is thrown on error.
+     * Exception is thrown on error
      *
-     * @param policy policy in which term should be updated.
-     * @param term term which should be updated.
-     * @param source un-parsed source configuration block of term.
+     * @param policy the name of the policy.
+     * @param term the name of the term.
+     * @param block the block to update (0:source, 1:dest, 2:action).
+     * @param order numerical position (local) of statement.
+     * @param variable the attribute (such as metric) to operate on.
+     * @param op specific operation to perform on variable.
+     * @param arg the argument to the operator.
      */
-    void update_term_source(const string& policy,
-			    const string& term,
-			    const string& source);
-    
-    /**
-     * Updates the source block of a term.
-     *
-     * Exception is thrown on error.
-     *
-     * @param policy policy in which term should be updated.
-     * @param term term which should be updated.
-     * @param dest un-parsed dest configuration block of term.
-     */
-    void update_term_dest(const string& policy,
-			  const string& term,
-			  const string& dest);
-    
-    /**
-     * Updates the source block of a term.
-     *
-     * Exception is thrown on error.
-     *
-     * @param policy policy in which term should be updated.
-     * @param term term which should be updated.
-     * @param action un-parsed action configuration block of term.
-     */
-    void update_term_action(const string& policy,
-			    const string& term,
-			    const string& action);
-
+    void update_term_block(const string& policy,
+			   const string& term,
+			   const uint32_t& block,
+			   const uint32_t& order,
+			   const string& variable,
+			   const string& op,
+			   const string& arg);
     
     /**
      * Attempts to create a policy.
@@ -178,6 +160,24 @@ public:
      */
     void update_export(const string& protocol, const string& policies);
 
+    /* 
+     * Configure the variable map used for semantic checking.
+     * This should be initialized only once at startup.
+     *
+     * Dynamic configuration may easily be implemented by invalidiating policies
+     * in the configuration class.
+     *
+     * Dynamic addition of variables should be safe. It is the removal and
+     * update which needs to trigger a policy to be flagged as modified.
+     *
+     * @param protocol the protocol for which the variable is available.
+     * @param variable the name of the variable.
+     * @param type the type of the variable.
+     * @param access the permissions on the variable (r/rw).
+     */
+    void add_varmap(const string& protocol, const string& variable,
+		    const string& type, const string& access);
+
     /**
      * Commit all configuration changes, but trigger a delayed update to the
      * actual policy filters.
@@ -187,9 +187,12 @@ public:
     void commit(uint32_t msec);
 
     /**
-     * @return string representation of configuration.
+     * Dump internal state.  Use only for debugging.
+     *
+     * @param id which part of the state to dump.
+     * @return string representation of internal state.
      */
-    string get_conf(); 
+    string dump_state(uint32_t id); 
 
     /**
      * Announce birth of a XORP process.
@@ -206,20 +209,6 @@ public:
      * @param tinstance target instance of class.
      */
     void death(const string& tclass, const string& tinstance);
-
-    /**
-     * Configure the variable map used for semantic checking.
-     * This should be initialized only once at startup.
-     *
-     * Dynamic configuration may easily be implemented by invalidiating policies
-     * in the configuration class.
-     *
-     * Dynamic addition of variables should be safe. It is the removal and
-     * update which needs to trigger a policy to be flagged as modified.
-     *
-     * @param conf un-parsed configuration of variable map.
-     */
-    void configure_varmap(const string& conf);
 
 private:
     bool _running;

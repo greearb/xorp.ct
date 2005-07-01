@@ -1,2 +1,3 @@
 policytags	set 123
-aspath		str 7865
+aspath		txt 7865
+metric		u32 1

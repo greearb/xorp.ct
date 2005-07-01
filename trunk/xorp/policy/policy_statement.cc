@@ -12,39 +12,46 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.1 2004/09/17 13:48:50 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.2 2005/03/25 02:54:08 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "policy_statement.hh"   
 #include "policy/common/policy_utils.hh"
+
+using namespace policy_utils;
 
 PolicyStatement::PolicyStatement(const string& name, SetMap& smap) : 
     _name(name), _smap(smap) 
 {
 }
 
-PolicyStatement::~PolicyStatement() {
+PolicyStatement::~PolicyStatement()
+{
     del_dependancies();
-    policy_utils::clear_container(_terms);
+    policy_utils::clear_map(_terms);
 }
    
-
 void 
-PolicyStatement::add_term(Term* term) {
-    _terms.push_back(term);
+PolicyStatement::add_term(uint32_t order, Term* term)
+{
+    if(_terms.find(order) != _terms.end()) {
+	throw PolicyException("Term already present in position: " +
+			      to_str(order));
+    }
+
+    _terms[order] = term;
 }
 
-
 PolicyStatement::TermContainer::iterator 
-PolicyStatement::get_term_iter(const string& name) {
+PolicyStatement::get_term_iter(const string& name)
+{
     TermContainer::iterator i;
 
     for(i = _terms.begin();
 	i != _terms.end(); ++i) {
 
-        if( (*i)->name() == name) {
+        if( (i->second)->name() == name) {
 	    return i;
 	}
     }    
@@ -53,13 +60,14 @@ PolicyStatement::get_term_iter(const string& name) {
 }
 
 PolicyStatement::TermContainer::const_iterator 
-PolicyStatement::get_term_iter(const string& name) const {
+PolicyStatement::get_term_iter(const string& name) const 
+{
     TermContainer::const_iterator i;
 
     for(i = _terms.begin();
 	i != _terms.end(); ++i) {
 
-        if( (*i)->name() == name) {
+        if( (i->second)->name() == name) {
 	    return i;
 	}
     }    
@@ -68,25 +76,27 @@ PolicyStatement::get_term_iter(const string& name) const {
 }
 
 Term& 
-PolicyStatement::find_term(const string& name) const {
+PolicyStatement::find_term(const string& name) const 
+{
     TermContainer::const_iterator i = get_term_iter(name);
     if(i == _terms.end()) 
 	throw PolicyStatementErr("Term " + name + " not found in policy " + 
 				 _name);
 
 
-    Term* t = *i;
+    Term* t = i->second;
     return *t;    
 }
 
 bool 
-PolicyStatement::delete_term(const string& name) {
+PolicyStatement::delete_term(const string& name)
+{
     TermContainer::iterator i = get_term_iter(name);
 
     if(i == _terms.end())
 	return false;
 
-    Term* t = *i;
+    Term* t = i->second;
 
     _terms.erase(i);
 
@@ -94,39 +104,27 @@ PolicyStatement::delete_term(const string& name) {
     return true;
 }
 
-string 
-PolicyStatement::str() {
-    string ret = "policy-statement " + _name + " {\n";
-
-    for(TermContainer::iterator i = _terms.begin();
-	i != _terms.end(); ++i) {
-
-	ret += (*i)->str();
-    }    
-
-    ret += "}\n";
-
-    return ret;
-}
-
 const string& 
-PolicyStatement::name() const {
+PolicyStatement::name() const 
+{
     return _name; 
 }
 
-
 bool 
-PolicyStatement::accept(Visitor& v) {
+PolicyStatement::accept(Visitor& v) 
+{
     return v.visit(*this);
 }
 
 PolicyStatement::TermContainer& 
-PolicyStatement::terms() { 
+PolicyStatement::terms()
+{ 
     return _terms; 
 }
 
 void 
-PolicyStatement::set_dependancy(const set<string>& sets) {
+PolicyStatement::set_dependancy(const set<string>& sets)
+{
     // replace all dependancies
 
     // delete them all
@@ -150,10 +148,10 @@ PolicyStatement::del_dependancies() {
 }
 
 bool
-PolicyStatement::term_exists(const string& name) const {
+PolicyStatement::term_exists(const string& name) const 
+{
     if(get_term_iter(name)  == _terms.end())
 	return false;
 
     return true;
 }
-

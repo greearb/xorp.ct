@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.4 2004/09/17 13:48:51 abittau Exp $
+// $XORP: xorp/policy/term.hh,v 1.5 2005/03/25 02:54:10 pavlin Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
@@ -21,7 +21,7 @@
 
 #include "parser.hh"
 
-#include <vector>
+#include <map>
 #include <string>
 
 /**
@@ -32,7 +32,9 @@
  */
 class Term {
 public:
-    typedef vector<Node*> Nodes;
+    // the integer is the "line number", the node is the parsed structure [AST]
+    // of the statement(s) in that line.
+    typedef map<uint32_t, Node*> Nodes;
 
     /**
      * @short Exception thrown on a syntax error while parsing configuration.
@@ -41,7 +43,6 @@ public:
     public:
 	term_syntax_error(const string& r) : PolicyException(r) {}
     };
-
 
     /**
      * @param name term name.
@@ -55,40 +56,24 @@ public:
     const string& name() const { return _name; }
     
     /**
-     * @return the original user source block configuration.
+     * Updates the source/dest/action block of a term.
+     *
+     * @param block the block to update (0:source, 1:dest, 2:action).
+     * @param order numerical position (local) of statement.
+     * @param variable the attribute (such as metric) to operate on.
+     * @param op specific operation to perform on variable.
+     * @param arg the argument to the operator.
      */
-    const string& source() const { return _source; }
+    void set_block(const uint32_t& block, const uint32_t& order, 
+		   const string& variable, const string& op, const string& arg);
 
     /**
-     * @return the original user dest block configuration.
+     * Deletes statements in the location specified by order and block.
+     *
+     * @param block the block to update (0:source, 1:dest, 2:action).
+     * @param order numerical position (local) of statement.
      */
-    const string& dest() const { return _dest; }
-
-    /**
-     * @return the original user action block configuration.
-     */
-    const string& action() const { return _action; }
-   
-
-    /**
-     * @param src the un-parsed source block configuration.
-     */
-    void set_source(const string& src);
-
-    /**
-     * @param dst the un-parsed dest block configuration.
-     */
-    void set_dest(const string& dst); 
-
-    /**
-     * @param act the un-parsed action block configuration.
-     */
-    void set_action(const string& act); 
-
-    /**
-     * @return string representation of term.
-     */
-    string str(); 
+    void del_block(const uint32_t& block, const uint32_t& order); 
 
     /**
      * Visitor implementation.
@@ -98,7 +83,6 @@ public:
     const Element* accept(Visitor& v) {
 	return v.visit(*this);
     }
-
 
     /**
      * @return parse tree of source block.
@@ -116,16 +100,22 @@ public:
     Nodes& action_nodes() { return *_action_nodes; }
 
 private:
+    enum BLOCKS {
+	SOURCE = 0,
+	DEST,
+	ACTION,
+
+	// keep this last
+	LAST_BLOCK
+    };
+
     string _name;
-    
-    string _source;
-    Nodes* _source_nodes; 
-    
-    string _dest;
-    Nodes* _dest_nodes;
-    
-    string _action;
-    Nodes* _action_nodes;
+   
+    Nodes* _block_nodes[3];
+
+    Nodes*& _source_nodes; 
+    Nodes*& _dest_nodes;
+    Nodes*& _action_nodes;
 
     Parser _parser;
 

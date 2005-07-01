@@ -126,8 +126,6 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "\-"		return YY_SUB;
 "*"		return YY_MUL;
 
-
-"modify"	return YY_MODIFY;
 "="		return YY_ASSIGN;
 
 "accept"	return YY_ACCEPT;

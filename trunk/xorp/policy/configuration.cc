@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.1 2004/09/17 13:48:48 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.2 2005/03/25 02:54:06 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -29,7 +29,8 @@ Configuration::Configuration(ProcessWatchBase& pw) :
 {
 }
 
-Configuration::~Configuration() {
+Configuration::~Configuration()
+{
     clear_map(_imports);
     clear_map(_exports);
 
@@ -41,13 +42,15 @@ Configuration::~Configuration() {
 }
   
 Term& 
-Configuration::find_term(const string& policy, const string& term) {
+Configuration::find_term(const string& policy, const string& term)
+{
     const PolicyStatement& ps = _policies.find(policy);
     return ps.find_term(term);
 }
 
 void 
-Configuration::delete_term(const string& policy, const string& term) {
+Configuration::delete_term(const string& policy, const string& term)
+{
     PolicyStatement& ps = _policies.find(policy);
 
     if(ps.delete_term(term)) {
@@ -59,15 +62,18 @@ Configuration::delete_term(const string& policy, const string& term) {
     throw ConfError("TERM NOT FOUND " + policy + " " + term);
 }
    
-
 void 
-Configuration::update_term_source(const string& policy, const string& term,
-				  const string& source) {
-
+Configuration::update_term_block(const string& policy,
+                                 const string& term,
+	                         const uint32_t& block,
+	                         const uint32_t& order,
+		                 const string& variable,
+		                 const string& op,
+			         const string& arg)
+{
     Term& t = find_term(policy,term);
-
     try {
-	t.set_source(source);
+	t.set_block(block, order, variable, op, arg);
         _modified_policies.insert(policy); // recompile on commit.
     } catch(const Term::term_syntax_error& e) {
         string err = "In policy " + policy + ": " + e.str();
@@ -75,41 +81,9 @@ Configuration::update_term_source(const string& policy, const string& term,
     }
 } 
 
-
 void 
-Configuration::update_term_dest(const string& policy, const string& term,
-				const string& dest) {
-
-    Term& t = find_term(policy,term);
-
-    try {
-        t.set_dest(dest);
-        _modified_policies.insert(policy); // recompile on commit.
-    } catch(const Term::term_syntax_error& e) {
-        string err = "In policy " + policy + ": " + e.str();
-        throw ConfError(err);
-    }
-
-} 
-  
-void 
-Configuration::update_term_action(const string& policy, const string& term,
-				  const string& action) {
-
-    Term& t = find_term(policy,term);
-
-    try {
-        t.set_action(action);
-        _modified_policies.insert(policy); // recompile on commit.
-    } catch(const Term::term_syntax_error& e) {
-        string err = "In policy " + policy + ": " + e.str();
-        throw ConfError(err);
-    }
-} 
-
-    
-void 
-Configuration::create_term(const string& policy, const string& term) {
+Configuration::create_term(const string& policy, const uint32_t& order,
+			   const string& term) {
     PolicyStatement& ps = _policies.find(policy);
 
     if(ps.term_exists(term)) {
@@ -119,7 +93,7 @@ Configuration::create_term(const string& policy, const string& term) {
 
     Term* t = new Term(term);
 
-    ps.add_term(t);
+    ps.add_term(order, t);
     _modified_policies.insert(policy);
 }
    
@@ -197,9 +171,9 @@ Configuration::update_exports(const string& protocol,
     _modified_targets.insert(Code::Target(protocol,filter::EXPORT));
 }
 
-
 string 
-Configuration::str() {
+Configuration::str() 
+{
     ostringstream conf;
 /*
 for(PolicyMap::iterator i = _policies.begin();
@@ -458,8 +432,21 @@ Configuration::commit(uint32_t msec) {
 }
 
 void 
-Configuration::configure_varmap(const string& conf) { 
-    _varmap.configure(conf); 
+Configuration::add_varmap(const string& protocol, const string& variable,
+			  const string& type, const string& access) 
+{
+    // figure out access...
+    VarMap::Access acc = VarMap::READ;
+
+    if(access == "rw")
+	acc = VarMap::READ_WRITE;
+    else if(access == "r")
+	acc = VarMap::READ;
+    else
+	throw PolicyException("Unknown access (" + access + ") for protocol: " 
+			      + protocol + " variable: " + variable);
+
+    _varmap.add_protocol_variable(protocol, variable, type, acc); 
 }
 
 void
@@ -549,4 +536,23 @@ Configuration::codemap_str(CodeMap& cm) {
         ret += "CODE: " + c->str() + "\n";
     }
     return ret;
+}
+
+string
+Configuration::dump_state(uint32_t id)
+{
+    switch(id) {
+	// dump policies
+	case 0:
+	    return _policies.str();
+	    break;
+
+	// dump varmap
+	case 1:
+	    return _varmap.str();
+	    break;
+
+	default:
+	    throw PolicyException("Unknown state id: " + to_str(id));
+    }
 }

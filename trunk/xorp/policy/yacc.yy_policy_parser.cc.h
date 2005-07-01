@@ -26,13 +26,12 @@
 #define YY_SEMICOLON 278
 #define YY_LPAR 279
 #define YY_RPAR 280
-#define YY_MODIFY 281
-#define YY_ASSIGN 282
-#define YY_SET 283
-#define YY_REGEX 284
-#define YY_ACCEPT 285
-#define YY_REJECT 286
-#define YY_PROTOCOL 287
+#define YY_ASSIGN 281
+#define YY_SET 282
+#define YY_REGEX 283
+#define YY_ACCEPT 284
+#define YY_REJECT 285
+#define YY_PROTOCOL 286
 typedef union {
 	char *c_str;
 	Node *node;

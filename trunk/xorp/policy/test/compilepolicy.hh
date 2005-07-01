@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,21 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.2 2005/03/25 02:54:15 pavlin Exp $"
+// $XORP$
 
-#include "element.hh"
-#include "elem_null.hh"
+#ifndef __POLICY_TEST_COMPILEPOLICY_HH__
+#define __POLICY_TEST_COMPILEPOLICY_HH__
 
-// Initialization of static members.
-// Remember to be unique in id's.
-const char* ElemInt32::id = "i32";
-const char* ElemU32::id = "u32";
-const char* ElemStr::id = "txt";
-const char* ElemBool::id = "bool";
+#include <string>
+#include <vector>
 
-template<> const char* ElemIPv4::id = "ipv4";
-template<> const char* ElemIPv6::id = "ipv6";
-template<> const char* ElemIPv4Net::id = "ipv4net";
-template<> const char* ElemIPv6Net::id = "ipv6net";
+struct yy_statement {
+        string var;
+        string op;
+        string arg;
+};
 
-const char* ElemNull::id = "null";
+typedef vector<yy_statement*> yy_statements; 
+
+#endif // __POLICY_TEST_COMPILEPOLICY_HH__

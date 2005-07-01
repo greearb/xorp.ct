@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.1 2004/09/17 13:48:52 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.2 2005/03/25 02:54:10 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -42,7 +42,7 @@ VisitorSemantic::visit(PolicyStatement& policy) {
 
     // go through all terms
     for(i = terms.begin(); i != terms.end(); ++i) {
-	(*i)->accept(*this);
+	(i->second)->accept(*this);
     }
 
     // helps for garbage gollection in varrw
@@ -52,11 +52,11 @@ VisitorSemantic::visit(PolicyStatement& policy) {
 
 const Element* 
 VisitorSemantic::visit(Term& term) {
-    vector<Node*>& source = term.source_nodes();
-    vector<Node*>& dest = term.dest_nodes();
-    vector<Node*>& actions = term.action_nodes();
+    Term::Nodes& source = term.source_nodes();
+    Term::Nodes& dest = term.dest_nodes();
+    Term::Nodes& actions = term.action_nodes();
 
-    vector<Node*>::iterator i;
+    Term::Nodes::iterator i;
 
     _current_protocol = "";
     // assume import policy, so set protocol to whatever protocol instantiated
@@ -65,7 +65,7 @@ VisitorSemantic::visit(Term& term) {
 
     // go through the source block
     for(i = source.begin(); i != source.end(); ++i) {
-        (*i)->accept(*this);
+        (i->second)->accept(*this);
     }
 
     // if it was an export policy maybe varrw was switched to some other
@@ -91,13 +91,13 @@ VisitorSemantic::visit(Term& term) {
 
     // check dest block
     for(i = dest.begin(); i != dest.end(); ++i) {
-        (*i)->accept(*this);
+        (i->second)->accept(*this);
 
     }
 
     // check actions
     for(i = actions.begin(); i != actions.end(); ++i) {
-        (*i)->accept(*this);
+        (i->second)->accept(*this);
     }
     return NULL;
 }

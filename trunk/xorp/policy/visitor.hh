@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor.hh,v 1.1 2004/09/17 13:48:52 abittau Exp $
+// $XORP: xorp/policy/visitor.hh,v 1.2 2005/03/25 02:54:10 pavlin Exp $
 
 #ifndef __POLICY_VISITOR_HH__
 #define __POLICY_VISITOR_HH__
@@ -23,7 +23,7 @@
 
 template<class T> class NodeAny;
 
-typedef NodeAny<string>	    NodeVar;
+typedef NodeAny<string>	NodeVar;
 
 class NodeElem;
 class NodeBin;
@@ -56,19 +56,12 @@ public:
     virtual const Element* visit(NodeVar&) = 0;
     virtual const Element* visit(NodeAssign&) = 0;
     virtual const Element* visit(NodeSet&) = 0;
-    
     virtual const Element* visit(NodeAccept&) = 0;
     virtual const Element* visit(NodeReject&) = 0;
-  
     virtual const Element* visit(Term&) = 0;
-
-
     virtual const Element* visit(PolicyStatement&) = 0;
-
     virtual const Element* visit(NodeElem&) = 0;
-
     virtual const Element* visit(NodeRegex&) = 0;
-
     virtual const Element* visit(NodeProto&) = 0;
 };
 

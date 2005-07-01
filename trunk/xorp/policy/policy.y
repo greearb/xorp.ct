@@ -49,7 +49,7 @@ static ElementFactory _ef;
 
 %token YY_SEMICOLON YY_LPAR YY_RPAR
 
-%token YY_MODIFY YY_ASSIGN
+%token YY_ASSIGN
 %token YY_SET YY_REGEX
 
 %token YY_ACCEPT YY_REJECT
@@ -66,8 +66,8 @@ statement:
 	;
 
 actionstatement:
-	  YY_MODIFY YY_ID YY_ASSIGN expr YY_SEMICOLON { 
-	  			$$ = new NodeAssign($2,$4,_parser_lineno); free($2); }  
+	  YY_ID YY_ASSIGN expr YY_SEMICOLON 
+	  { $$ = new NodeAssign($1,$3,_parser_lineno); free($1); }
 	| YY_ACCEPT YY_SEMICOLON { $$ = new NodeAccept(_parser_lineno); }
 	| YY_REJECT YY_SEMICOLON { $$ = new NodeReject(_parser_lineno); }
 	; 
@@ -78,7 +78,7 @@ boolstatement:
 
 
 boolexpr:
-	  YY_PROTOCOL YY_ID { $$ = new NodeProto($2,_parser_lineno); free($2); }
+	  YY_PROTOCOL YY_EQ YY_ID { $$ = new NodeProto($3,_parser_lineno); free($3); }
 	| YY_NOT boolexpr { $$ = new NodeUn(new OpNot,$2,_parser_lineno); }
 	| boolexpr YY_AND boolexpr { $$ = new NodeBin(new OpAnd,$1,$3,_parser_lineno); }
 	| boolexpr YY_XOR boolexpr { $$ = new NodeBin(new OpXor,$1,$3,_parser_lineno); }

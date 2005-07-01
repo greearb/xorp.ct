@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/xrl_target.hh,v 1.1 2004/09/17 13:48:53 abittau Exp $
+// $XORP: xorp/policy/xrl_target.hh,v 1.2 2005/03/25 02:54:11 pavlin Exp $
 
 #ifndef __POLICY_XRL_TARGET_HH__
 #define __POLICY_XRL_TARGET_HH__
@@ -29,7 +29,6 @@
  */
 class XrlPolicyTarget : public XrlPolicyTargetBase {
 public:
-
     /**
      * @param r XrlRouter to use.
      * @param ptarget the main PolicyTarget.
@@ -54,6 +53,7 @@ public:
     XrlCmdError policy_0_1_create_term(
         // Input values,
         const string&   policy,
+	const uint32_t& order,
         const string&   term);
 
     XrlCmdError policy_0_1_delete_term(
@@ -61,27 +61,16 @@ public:
         const string&   policy,
         const string&   term);
    
-    XrlCmdError policy_0_1_update_term_source(
+    XrlCmdError policy_0_1_update_term_block(
         // Input values,
         const string&   policy,
         const string&   term,
-        const string&   source);
-  
-
-    XrlCmdError policy_0_1_update_term_dest(
-        // Input values,
-        const string&   policy,
-        const string&   term,
-        const string&   dest);
+	const uint32_t& block,
+        const uint32_t& order,
+        const string&   variable,
+        const string&   op,
+        const string&   arg);
     
-    XrlCmdError policy_0_1_update_term_action(
-        // Input values,
-        const string&   policy,
-        const string&   term,
-        const string&   action);
-    
-
-
     XrlCmdError policy_0_1_create_policy(
         // Input values,
         const string&   policy);
@@ -89,7 +78,6 @@ public:
     XrlCmdError policy_0_1_delete_policy(
         // Input values,
         const string&   policy);
-    
 
     XrlCmdError policy_0_1_create_set(
         // Input values,
@@ -100,31 +88,35 @@ public:
         const string&   set,
         const string&   elements);
     
-
     XrlCmdError policy_0_1_delete_set(
         // Input values,
         const string&   set);
     
-
     XrlCmdError policy_0_1_done_global_policy_conf();
-
 
     XrlCmdError policy_0_1_import(
         // Input values,
         const string&   protocol,
         const string&   policies);
 	
- 
-
     XrlCmdError policy_0_1_export(
         // Input values,
         const string&   protocol,
         const string&   policies);
-    
-    XrlCmdError policy_0_1_get_conf(
+   
+    XrlCmdError policy_0_1_add_varmap(
+        // Input values,
+        const string&   protocol,
+        const string&   variable,
+        const string&   type,
+        const string&   access);
+   
+    XrlCmdError policy_0_1_dump_state(
+        // Input values,
+        const uint32_t& id,
         // Output values,
-        string& conf);
-	
+        string& state);
+    
     XrlCmdError finder_event_observer_0_1_xrl_target_birth(
         // Input values,
         const string&   target_class,

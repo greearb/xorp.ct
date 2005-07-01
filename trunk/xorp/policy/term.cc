@@ -12,98 +12,90 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.5 2005/03/25 02:54:09 pavlin Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.6 2005/04/15 03:46:03 atanu Exp $"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "policy_module.h"
 #include "config.h"
-
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "term.hh"
 #include "policy/common/policy_utils.hh"
 
 using namespace policy_utils;
 
-Term::Term(const string& name) : _name(name) {
-    _source_nodes = new vector<Node*>;
-    _dest_nodes = new vector<Node*>;
-    _action_nodes = new vector<Node*>;
+Term::Term(const string& name) : _name(name), 
+				 _source_nodes(_block_nodes[SOURCE]),
+				 _dest_nodes(_block_nodes[DEST]),
+				 _action_nodes(_block_nodes[ACTION])
+{
+    for(unsigned int i = 0; i < LAST_BLOCK; i++)
+	_block_nodes[i] = new Nodes;
 }
 
-Term::~Term() {
-    delete_vector(_source_nodes);
-    delete_vector(_dest_nodes);
-    delete_vector(_action_nodes);
+Term::~Term()
+{
+    for(unsigned int i = 0; i < LAST_BLOCK; i++) {
+	clear_map(*_block_nodes[i]);
+	delete _block_nodes[i];
+    }
 }
 
-void 
-Term::set_source(const string& src) {
+void
+Term::set_block(const uint32_t& block, const uint32_t& order,
+		const string& variable, const string& op, const string& arg)
+{
+    if (block >= LAST_BLOCK) {
+	throw term_syntax_error("Unknown block: " + to_str(block));
+    }
+
+    // check if we want to delete
+    if (variable.empty() && op.empty() && arg.empty()) {
+	del_block(block, order);
+	return;
+    }
+
+    // check that position is empty
+    Nodes& conf_block = *_block_nodes[block];
+    if (conf_block.find(order) != conf_block.end()) {
+	throw term_syntax_error("A statement is already present in position: " 
+				+ to_str(order));
+    }
+
+    // XXX: rebuild original statement
+    // FIXME: no need to rebuild original statement + reparse... be smart...
+    // rtrmgr is "helping" us... well we have less freedom on syntax though...
+    // XXX: when we know what the front end syntax should be, and who does the
+    // parsing, we should fix all this...
+    string statement = variable + " " + op + " " + arg + ";";
+    debug_msg("[POLICY] Statement= (%s)\n", statement.c_str());
 
     // parse and check syntax error
-    Nodes* nodes = _parser.parse(src);
-    if(!nodes) {
+    Parser::Nodes* nodes = _parser.parse(statement);
+    if (!nodes) {
 	string err = _parser.last_error();
-	
+	// XXX convert block from int to string... [human readable]
 	throw term_syntax_error("Syntax error in term " + _name + 
-				" source: " + err);
+				" block " + to_str(block) + " " + err);
     }
+    XLOG_ASSERT(nodes->size() == 1); // XXX a single statement!
 
-    // replace configuration [successful parse]
-    delete_vector(_source_nodes);
-
-    _source = src;
-    _source_nodes = nodes;
-    
+    conf_block[order] = nodes->front();
 }
 
-void 
-Term::set_dest(const string& dst) {
-    
-    // parse and check syntax errors
-    Nodes* nodes = _parser.parse(dst);
-    if(!nodes) {
-	string err = _parser.last_error();
-        throw term_syntax_error("Syntax error in term " + _name + 
-				" dest: " + err);
+void
+Term::del_block(const uint32_t& block, const uint32_t& order)
+{
+    XLOG_ASSERT (block < LAST_BLOCK);
+
+    Nodes& conf_block = *_block_nodes[block];
+
+    Nodes::iterator i = conf_block.find(order);
+    if (i == conf_block.end()) {
+	throw term_syntax_error("Want to delete an empty position: " 
+				+ to_str(order));
     }
-
-    // replace conf
-    delete_vector(_dest_nodes);
-
-    _dest = dst;
-    _dest_nodes = nodes;
-}
-
-void 
-Term::set_action(const string& act) {
-
-    // parse and error check
-    Nodes* nodes = _parser.parse(act);
-    if(!nodes) {
-	throw term_syntax_error("Syntax error in term " + _name + 
-				" action: " + _parser.last_error());
-    }
-    
-    // replace conf
-    _action = act;
-    _action_nodes = nodes;
-}
-
-
-string 
-Term::str() {
-    ostringstream oss;
-
-    oss << "term " << _name << " {" << endl;
-
-    oss << "source {" << endl;
-    oss << _source << "}" << endl;
-
-    oss << "dest {" << endl;
-    oss << _dest << "}" << endl;
-
-    oss << "action {" << endl;
-    oss << _action << "}" << endl;
-
-    oss << "}" << endl;
-
-    return oss.str();
+    conf_block.erase(i);
 }

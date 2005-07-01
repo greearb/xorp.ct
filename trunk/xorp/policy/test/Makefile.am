@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.2 2004/09/17 19:42:03 pavlin Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.3 2004/11/12 02:44:47 bms Exp $
 ##
 
 # -- Test Programs
@@ -15,6 +15,7 @@ noinst_PROGRAMS += execpolicy
 compilepolicy_SOURCES		 = compilepolicy.cc
 compilepolicy_SOURCES		+= filter_manager_fake.hh
 compilepolicy_SOURCES		+= process_watch_fake.hh
+compilepolicy_SOURCES		+= compilepolicy.hh
 
 compilepolicy_SOURCES		+= filter_manager_fake.cc
 compilepolicy_SOURCES		+= process_watch_fake.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_map.hh,v 1.1 2004/09/17 13:48:49 abittau Exp $
+// $XORP: xorp/policy/policy_map.hh,v 1.2 2005/03/25 02:54:08 pavlin Exp $
 
 #ifndef __POLICY_POLICY_MAP_HH__
 #define __POLICY_POLICY_MAP_HH__
@@ -37,7 +37,6 @@ public:
     public:
 	PolicyMapError(const string& err) : PolicyException(err) {}
     };
-
 
     /**
      * Find a policy.
@@ -91,10 +90,19 @@ public:
      * @param protocol name of protocol which no longer uses policy.
      */
     void del_dependancy(const string& policyname, const string& protocol);
-   
+
+    /**
+     * Dumps all policies in human readable format.
+     *
+     * @return string representation of all policies.
+     */
+    string str();
+
 private:
     // internally, policystatements are held as pointers.
-    Dependancy<PolicyStatement>    _deps;
+    typedef Dependancy<PolicyStatement> Dep;
+
+    Dep _deps;
 };
 
 #endif // __POLICY_POLICY_MAP_HH__

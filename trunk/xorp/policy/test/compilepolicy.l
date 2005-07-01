@@ -1,9 +1,8 @@
 %{
 #include "config.h"
-
+#include "policy/test/compilepolicy.hh"
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
-
 #include <sstream>
 
 
@@ -27,9 +26,7 @@ namespace {
 %option noyywrap
 %option nounput
 %x STR
-%x SOURCE_BLOCK
-%x DEST_BLOCK
-%x ACTION_BLOCK
+%x PAR
 
 RE_IPV4_BYTE 25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?
 RE_IPV4 {RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}
@@ -64,41 +61,22 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 "}"		return YY_RBRACE;
 
-
-"source {"	BEGIN(SOURCE_BLOCK);
-<SOURCE_BLOCK>[^\}]+	{
-	  		  yylval.c_str = strdup(yytext);
-
-			  _yy_lineno += policy_utils::count_nl(yytext);
-	  		  return YY_SOURCEBLOCK;
-			}
-<SOURCE_BLOCK>\}	BEGIN(INITIAL);
-
-
-
-"dest {"	BEGIN(DEST_BLOCK);
-<DEST_BLOCK>[^\}]+	{
-			  yylval.c_str = strdup(yytext);
-			  _yy_lineno += policy_utils::count_nl(yytext);
-			  return YY_DESTBLOCK;
-			}  
-<DEST_BLOCK>\}		BEGIN(INITIAL);
-
-
-"action {"	BEGIN(ACTION_BLOCK);
-<ACTION_BLOCK>[^\}]+	{
-			  yylval.c_str = strdup(yytext);
-			  _yy_lineno += policy_utils::count_nl(yytext);
-			  return YY_ACTIONBLOCK;
-			}  
-<ACTION_BLOCK>\}		BEGIN(INITIAL);
-
-
+"source"	return YY_SOURCE;
+"dest"		return YY_DEST;
+"action"	return YY_ACTION;
 
 <STR>\"		BEGIN(INITIAL);
 <STR>[^\"]+	{ yylval.c_str = strdup(yytext); 
 		  _yy_lineno += policy_utils::count_nl(yytext);
 		  return YY_STR;
+		}
+
+\(		BEGIN(PAR);
+
+<PAR>\)		BEGIN(INITIAL);
+<PAR>[^\)]+	{ yylval.c_str = strdup(yytext); 
+		  _yy_lineno += policy_utils::count_nl(yytext);
+		  return YY_PAR;
 		}
 
 {RE_IPV4}	{

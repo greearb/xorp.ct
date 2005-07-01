@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,140 +13,142 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.2 2005/03/25 02:54:10 pavlin Exp $"
+#ident "$XORP$"
 
 #include "policy_module.h"
 #include "config.h"
+#include "visitor_printer.hh"
 
-#include "visitor_setdep.hh"
-
-#include <vector>
-#include <string>
-
-VisitorSetDep::VisitorSetDep(SetMap& setmap) : _setmap(setmap) 
+VisitorPrinter::VisitorPrinter(ostream& out) : _out(out)
 {
 }
 
-
-    
-const Element* 
-VisitorSetDep::visit(PolicyStatement& policy)
+const Element*
+VisitorPrinter::visit(PolicyStatement& ps)
 {
-    PolicyStatement::TermContainer& terms = policy.terms();
-
+    PolicyStatement::TermContainer& terms = ps.terms();
     PolicyStatement::TermContainer::iterator i;
 
+    _out << "policy-statement " << ps.name() << " {" << endl;
     // go throgh all terms
     for(i = terms.begin(); i != terms.end(); ++i) {
         (i->second)->accept(*this);
-    }	    
+    }
+    _out << "}" << endl;
+
     return NULL;
 }
 
-const Element* 
-VisitorSetDep::visit(Term& term)
+const Element*
+VisitorPrinter::visit(Term& term)
 {
     Term::Nodes& source = term.source_nodes();
     Term::Nodes& dest = term.dest_nodes();
     Term::Nodes& actions = term.action_nodes();
-
     Term::Nodes::iterator i;
 
+    _out << "term " << term.name() << " {" << endl;
+
+    _out << "source {" << endl;
     // do source block
     for(i = source.begin(); i != source.end(); ++i) {
         (i->second)->accept(*this);
+	_out << ";" << endl;
     }
+    _out << "}" << endl;
 
+    _out << "dest {" << endl;
     // do dest block
     for(i = dest.begin(); i != dest.end(); ++i) {
         (i->second)->accept(*this);
-
+	_out << ";" << endl;
     }
+    _out << "}" << endl;
 
+    _out << "action {" << endl;
     // do action block
     for(i = actions.begin(); i != actions.end(); ++i) {
         (i->second)->accept(*this);
+	_out << ";" << endl;
     }
+    _out << "}" << endl;
+
     return NULL;
 }
-    
 
-
-const Element* 
-VisitorSetDep::visit(NodeUn& node) {
-    // check arg
+const Element*
+VisitorPrinter::visit(NodeUn& node) 
+{
+    _out << node.op().str() << " ";
     node.node().accept(*this);
     return NULL;
 }
 
-const Element* 
-VisitorSetDep::visit(NodeBin& node) {
-    // check args
+const Element*
+VisitorPrinter::visit(NodeBin& node) 
+{
     node.left().accept(*this);
+    _out << " " << node.op().str() << " ";
     node.right().accept(*this);
     return NULL;
 }
 
-
-const Element* 
-VisitorSetDep::visit(NodeAssign& node) {
-    // check arg
+const Element*
+VisitorPrinter::visit(NodeAssign& node) 
+{
+    _out << node.varid() << " = ";
     node.rvalue().accept(*this);
     return NULL;
 }
 
+const Element*
+VisitorPrinter::visit(NodeVar& node) 
+{
+    _out << node.val();
+    return NULL;
+}
 
-const Element* 
-VisitorSetDep::visit(NodeVar& /* node */) {
+const Element*
+VisitorPrinter::visit(NodeSet& node) 
+{
+    _out << node.setid();
+    return NULL;
+}
+
+const Element*
+VisitorPrinter::visit(NodeElem& node) 
+{
+    _out << node.val().str();
     return NULL;
 }
 
 
-const Element* 
-VisitorSetDep::visit(NodeSet& node) {
-    // Only useful part of this visitor...
-    // see if set exists
-    try {
-	_setmap.getSet(node.setid());
-
-	// track sets this policy uses
-	_sets.insert(node.setid());
-    } 
-    // it doesn't
-    catch(const PolicyException& e) {	
-        ostringstream error;
-        error << "Set not found: " << node.setid() << " at line " << node.line();
-    
-        throw sem_error(error.str());
-    }
-    return NULL;
-}
-
-const Element* 
-VisitorSetDep::visit(NodeElem& /* node */) {
-    return NULL;
-}
-
-const Element* 
-VisitorSetDep::visit(NodeRegex& node) {
-    // check arg
+const Element*
+VisitorPrinter::visit(NodeRegex& node) 
+{
     node.arg().accept(*this);
-
+    _out << " REGEX " << node.reg();
     return NULL;
 }
 
-const Element* 
-VisitorSetDep::visit(NodeAccept& /* node */) {
+const Element*
+VisitorPrinter::visit(NodeAccept& /* node */) 
+{
+    _out << "accept";
     return NULL;
 }
 
-const Element* 
-VisitorSetDep::visit(NodeReject& /* node */) {
+const Element*
+VisitorPrinter::visit(NodeReject& /*node */)
+{
+    _out << "reject";
     return NULL;
 }
 
 
-const Element* 
-VisitorSetDep::visit(NodeProto& /* node */) {
+const Element*
+VisitorPrinter::visit(NodeProto& node) 
+{
+    _out << "protocol " << node.proto();
     return NULL;
 }

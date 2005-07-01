@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.1 2004/09/17 13:48:48 abittau Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.2 2005/03/25 02:54:06 pavlin Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -69,41 +69,28 @@ public:
     void delete_term(const string& policy, const string& term);
 
     /**
+     * Update the source/dest/action block of a term.
+     *
      * Throws an exception on failure.
-     * Checks for non-existant policy/term conditions. Also tries to parse the
+     * Checks for non-existent policy/term conditions. Also tries to parse the
      * configuration. No compilation / semantic check is performed now.
      *
-     * @param policy policy in which term should be updated.
-     * @param term term which should be updated.
-     * @param source un-parsed user configuration of the source {} block.
+     * @param policy the name of the policy.
+     * @param term the name of the term.
+     * @param block the block to update (0:source, 1:dest, 2:action).
+     * @param order numerical position (local) of statement.
+     * @param variable the attribute (such as metric) to operate on.
+     * @param op specific operation to perform on variable.
+     * @param arg the argument to the operator.
      */
-    void update_term_source(const string& policy, const string& term,
-			    const string& source);
-
-    /**
-     * Throws an exception on failure.
-     * Checks for non-existant policy/term conditions. Also tries to parse the
-     * configuration. No compilation / semantic check is performed now.
-     *
-     * @param policy policy in which term should be updated.
-     * @param term term which should be updated.
-     * @param dest un-parsed user configuration of the dest {} block.
-     */
-    void update_term_dest(const string& policy, const string& term,
-			  const string& dest);
-  
-    /**
-     * Throws an exception on failure.
-     * Checks for non-existant policy/term conditions. Also tries to parse the
-     * configuration. No compilation / semantic check is performed now.
-     *
-     * @param policy policy in which term should be updated.
-     * @param term term which should be updated.
-     * @param action un-parsed user configuration of the action {} block.
-     */
-    void update_term_action(const string& policy, const string& term,
-			    const string& action);
-   
+    void update_term_block(const string& policy,
+                           const string& term,
+                           const uint32_t& block,
+                           const uint32_t& order,
+                           const string& variable,
+                           const string& op,
+                           const string& arg);
+    
     /**
      * Append a term to a policy.
      *
@@ -111,9 +98,11 @@ public:
      * Checks if term already exists.
      *
      * @param policy policy in which term should be created.
+     * @param order position of term.
      * @param term term name which should be created.
      */
-    void create_term(const string& policy, const string& term);
+    void create_term(const string& policy, const uint32_t& order, 
+		     const string& term);
   
     /**
      * Throws an exception on failure.
@@ -196,11 +185,15 @@ public:
     void commit(uint32_t msec);
 
     /**
-     * Initialize the VarMap needed for semantic checking.
+     * Add a variable to the VarMap, needed for semantic checking.
      *
-     * @param conf un-parsed user configuration of varmap.
+     * @param protocol the protocol this variable is available to.
+     * @param variable name of the variable.
+     * @param type the type of the variable.
+     * @param access the permissions on the variable (r/rw).
      */
-    void configure_varmap(const string& conf);
+    void add_varmap(const string& protocol, const string& name,
+		    const string& type, const string& access);
 
     /**
      * This method should be called once at initialization to set the
@@ -238,6 +231,14 @@ public:
      * @return the policy tag map relating policytags to destination protocols.
      */
     TagMap&  tagmap() { return _tagmap; }
+
+    /**
+     * Dump internal state.  Debugging only.
+     *
+     * @param id specifies which aspect of state to dump.
+     * @return human readable state information.
+     */
+    string dump_state(uint32_t id);
 
 private:
     typedef map<string,PolicyList*> IEMap;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_statement.hh,v 1.1 2004/09/17 13:48:50 abittau Exp $
+// $XORP: xorp/policy/policy_statement.hh,v 1.2 2005/03/25 02:54:08 pavlin Exp $
 
 #ifndef __POLICY_POLICY_STATEMENT_HH__
 #define __POLICY_POLICY_STATEMENT_HH__
@@ -21,7 +21,7 @@
 
 #include "set_map.hh"
 #include "term.hh"
-#include <list>
+#include <map>
 #include <set>
 #include <string>
 
@@ -41,7 +41,7 @@ public:
     };
 
     
-    typedef list<Term*> TermContainer;
+    typedef map<uint32_t, Term*> TermContainer;
 
     /**
      * @param name the name of the policy.
@@ -55,9 +55,10 @@ public:
      *
      * Caller must not delete / modify pointer.
      *
+     * @param order position of term.
      * @param term term to append to policy.
      */
-    void add_term(Term* term);
+    void add_term(uint32_t order, Term* term);
   
     /**
      * Throws exception if no term is found.
@@ -82,11 +83,6 @@ public:
      * @param name name of term to delete.
      */
     bool delete_term(const string& name);
-
-    /**
-     * @return string representation of policy.
-     */
-    string str();
 
     /**
      * @return name of policy.

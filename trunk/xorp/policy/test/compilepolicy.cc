@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.2 2004/10/05 22:40:34 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.3 2005/03/25 02:54:18 pavlin Exp $"
 
 /*
  * EXIT CODES:
@@ -178,6 +178,36 @@ void print_target(int filterid, const string& protocol) {
     print_code(*c);
 }
 
+void configure_varmap(const string& conf) {
+    istringstream iss(conf);
+
+    unsigned state = 0;
+
+    // protocol, variable, type, access
+    string tokens[4];
+
+    while(!iss.eof()) {
+	string token;
+
+	// lex =D
+	iss >> token;
+
+	if(!token.length())
+	    continue;
+	
+	tokens[state] = token;
+
+	state++;
+	
+	// yacc =D
+	if(state == 4) {
+	    _yy_configuration.add_varmap(tokens[0], tokens[1], 
+					 tokens[2], tokens[3]);
+	    state = 0;
+	}
+    }
+}
+
 void go(const string& fsrc, const string& fvarmap, 
 	int filterid, const string& protocol) {
 
@@ -193,12 +223,12 @@ void go(const string& fsrc, const string& fvarmap,
     }
    
     _yy_configuration.set_filter_manager(fm); 
-    _yy_configuration.configure_varmap(varmapconf);
+    configure_varmap(varmapconf);
 
     string err;
 
     if(do_parsing(src,err)) {
-	cout << err;
+	cout << err << endl;
 	exit(2);
     }
 
@@ -229,7 +259,7 @@ void usage(const char* x) {
     
     cout << "-h\t\tthis help message\n";
     cout << "-s <file>\tsource file of policy\n";
-    cout << "-m <policy_var_map_file>\tfile with policy variables mapping\n";
+    cout << "-m <varmap>\tfile with policy variables mapping\n";
     cout << "-f <filterid>\ttarget filter to produce code for\n";
     cout << "-p <protocol>\ttarget protocol to produce code for\n";
     cout << "-o <outfile>\tfile where generated code should be stored\n";

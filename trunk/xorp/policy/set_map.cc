@@ -12,20 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.1 2004/09/17 13:48:51 abittau Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.2 2005/03/25 02:54:09 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "set_map.hh"    
 
 const Element&
-SetMap::getSet(const string& name) const {
+SetMap::getSet(const string& name) const
+{
     return _deps.find(name);
 }
 
 void
-SetMap::create(const string& name) {
+SetMap::create(const string& name)
+{
     // initially, set is empty [null object is fine].
     Element* e = NULL;
     if(!_deps.create(name,e))
@@ -34,7 +35,8 @@ SetMap::create(const string& name) {
 
 void 
 SetMap::update_set(const string& name, const string& elements, 
-    set<string>& modified) {
+		   set<string>& modified)
+{
 
     // create the object, _deps will own it...
     Element* e = _ef.create(ElemSet::id,elements.c_str());
@@ -48,22 +50,26 @@ SetMap::update_set(const string& name, const string& elements,
 }
 
 void 
-SetMap::delete_set(const string& name) {
+SetMap::delete_set(const string& name)
+{
     _deps.remove(name);
 }
 
 void 
-SetMap::add_dependancy(const string& setname, const string& policyname) {
+SetMap::add_dependancy(const string& setname, const string& policyname)
+{
     _deps.add_dependancy(setname,policyname);
 }
 
 void 
-SetMap::del_dependancy(const string& setname, const string& policyname) {
+SetMap::del_dependancy(const string& setname, const string& policyname)
+{
     _deps.del_dependancy(setname,policyname);
 }
 
 string
-SetMap::str() const {
+SetMap::str() const
+{
     Dep::Map::const_iterator i = _deps.get_iterator();
 
     string ret;
@@ -78,5 +84,4 @@ SetMap::str() const {
     }
 
     return ret;
-
 }

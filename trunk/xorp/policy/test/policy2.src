@@ -1,18 +1,15 @@
 policy-statement rejected {
 	term a {
 		source {
-			protocol static_routes;
-			123 == 123;
-
-			123 != 1;
-
-			1 == 1 + 1 - 1 + 1 - 1;
+			protocol "==" (static_routes);
+			
+			metric "==" (1 + 1 - 1 + 1 - 1);
 		}
 		dest {
 		}
 		action {
-			modify aspath = "6234" + aspath;
-			reject;
+			aspath "=" ("6234" + aspath);
+			reject " " ( );
 		}
 	}
 }

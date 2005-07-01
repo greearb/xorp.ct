@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/var_map.hh,v 1.1 2004/09/17 13:48:52 abittau Exp $
+// $XORP: xorp/policy/var_map.hh,v 1.2 2005/03/25 02:54:10 pavlin Exp $
 
 #ifndef __POLICY_VAR_MAP_HH__
 #define __POLICY_VAR_MAP_HH__
@@ -121,12 +121,13 @@ public:
     void add_protocol_variable(const string& protocol, const string& varname, 
 			       const string& type, Access acc);
 
+    
     /**
-     * Configure the VarMap from an unparsed configuration.
+     * String representation of varmap.  Use only for debugging.
      *
-     * @param conf un-parsed configuration file of the VarMap.
+     * @return string representation of varmap.
      */
-    void configure(const string& conf);
+    string str(); 
 
 private:
     /**
@@ -139,8 +140,6 @@ private:
      * @param protocol protocol name for which variable map is requested.
      */
     const VariableMap& variablemap(const string& protocol) const;
-
-
 
     ProtoMap _protocols;
 

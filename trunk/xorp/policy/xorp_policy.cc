@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xorp_policy.cc,v 1.2 2004/12/09 07:54:40 pavlin Exp $"
+#ident "$XORP: xorp/policy/xorp_policy.cc,v 1.3 2005/03/25 02:54:10 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -25,7 +25,8 @@
 #include <string>
 
 
-void go() {
+void go()
+{
     EventLoop e;
 
     XrlStdRouter rtr(e,PolicyTarget::policy_target_name.c_str(),
@@ -34,22 +35,15 @@ void go() {
     PolicyTarget policy_target(rtr);
     XrlPolicyTarget xrl_policy_target(&rtr,policy_target);
 
-    while(!rtr.ready())
+    while (!rtr.ready())
 	e.run();
 
-    string varmap_conf = "";
-
-    // FIXME: how to load varmap ?
-    policy_utils::read_file("policyvarmap.conf",varmap_conf);
-
-    policy_target.configure_varmap(varmap_conf);
-
-    while(policy_target.running())
+    while (policy_target.running())
 	e.run();
-
 }
 
-int main(int /* argc */, char* argv[]) {
+int main(int /* argc */, char* argv[])
+{
     xlog_init(argv[0], 0);
     xlog_set_verbose(XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
@@ -57,7 +51,7 @@ int main(int /* argc */, char* argv[]) {
 
     try {
 	go();
-    } catch(const PolicyException& e) {
+    } catch (const PolicyException& e) {
 	XLOG_FATAL("PolicyException: %s",e.str().c_str());
     }
    

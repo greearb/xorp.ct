@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.1 2004/09/17 13:48:52 abittau Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.2 2005/03/25 02:54:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,7 +27,8 @@
 using namespace policy_utils;
 
 const VarMap::VariableMap&
-VarMap::variablemap(const string& protocol) const {
+VarMap::variablemap(const string& protocol) const
+{
 
     ProtoMap::const_iterator i = _protocols.find(protocol);
     if(i == _protocols.end()) 
@@ -39,7 +40,8 @@ VarMap::variablemap(const string& protocol) const {
 }
 
 const VarMap::Variable&
-VarMap::variable(const string& protocol, const string& varname) const {
+VarMap::variable(const string& protocol, const string& varname) const
+{
     const VariableMap& vmap = variablemap(protocol);
 
     VariableMap::const_iterator i = vmap.find(varname);
@@ -58,7 +60,8 @@ VarMap::VarMap(ProcessWatchBase& pw) : _process_watch(pw)
 {
 }
 
-VarMap::~VarMap() {
+VarMap::~VarMap()
+{
     for(ProtoMap::iterator i = _protocols.begin();
 	i != _protocols.end(); ++i) {
 	
@@ -71,13 +74,15 @@ VarMap::~VarMap() {
 
 
 bool 
-VarMap::protocol_known(const string& protocol) {
+VarMap::protocol_known(const string& protocol)
+{
     return _protocols.find(protocol) != _protocols.end();
 }
 
 void 
 VarMap::add_variable(VariableMap& vm, const string& varname, 
-		     const string& type, Access acc) {
+		     const string& type, Access acc)
+{
 
     VariableMap::iterator i = vm.find(varname);
 
@@ -91,7 +96,8 @@ VarMap::add_variable(VariableMap& vm, const string& varname,
 void 
 VarMap::add_protocol_variable(const string& protocol, 
 			      const string& varname, 
-			      const string& type, Access acc) {
+			      const string& type, Access acc)
+{
 
     debug_msg("[POLICY] VarMap added proto: %s, var: %s, type: %s, R/W: %d\n",
 	      protocol.c_str(), varname.c_str(), type.c_str(), acc);
@@ -115,39 +121,29 @@ VarMap::add_protocol_variable(const string& protocol,
 
 }
 
-void 
-VarMap::configure(const string& conf) {
-    istringstream iss(conf);
+string
+VarMap::str()
+{
+    ostringstream out;
 
-    unsigned state = 0;
+    // go through protocols
+    for (ProtoMap::iterator i = _protocols.begin(); 
+	 i != _protocols.end(); ++i) {
 
-    // protocol, variable, type, access
-    string tokens[4];
+	const string& proto = i->first;
+	VariableMap* vm = i->second;
 
-    while(!iss.eof()) {
-	string token;
+	for(VariableMap::iterator j = vm->begin(); j != vm->end(); ++j) {
+	    Variable* v = j->second;
 
-	// lex =D
-	iss >> token;
-
-	if(!token.length())
-	    continue;
-	
-	tokens[state] = token;
-
-	state++;
-	
-	// yacc =D
-	if(state == 4) {
-	    Access a = READ;
-
-	    if(tokens[3] == "rw")
-		a = READ_WRITE;
-	
-	    add_protocol_variable(tokens[0],tokens[1],tokens[2],a);
-	    state = 0;
+	    out << proto << " " << v->name << " " << v->type << " ";
+	    if(v->access == READ)
+		out << "r";
+	    else
+		out << "rw";
+	    out << endl;	
 	}
     }
 
-
+    return out.str();
 }

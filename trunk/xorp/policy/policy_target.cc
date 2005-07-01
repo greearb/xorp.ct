@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.1 2004/09/17 13:48:50 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.2 2005/03/25 02:54:08 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -44,77 +44,77 @@ PolicyTarget::PolicyTarget(XrlStdRouter& rtr) :
 }
 
 bool
-PolicyTarget::running() {
+PolicyTarget::running()
+{
     return _running;
 }
 
 void
-PolicyTarget::shutdown() {
+PolicyTarget::shutdown()
+{
     _running = false;
 }
 
 
 void
-PolicyTarget::create_term(const string& policy, const string& term) {
-    _conf.create_term(policy,term);
+PolicyTarget::create_term(const string& policy, const uint32_t& order,
+			  const string& term)
+{
+    _conf.create_term(policy, order, term);
 }
 
 void
-PolicyTarget::delete_term(const string& policy, const string& term) {
+PolicyTarget::delete_term(const string& policy, const string& term)
+{
     _conf.delete_term(policy,term);
 }
 
 void
-PolicyTarget::update_term_source(const string& policy,
-				 const string& term,
-				 const string& source) {
-    _conf.update_term_source(policy,term,source);
-}
-
-void 
-PolicyTarget::update_term_dest(const string& policy, 
-			       const string& term,
-			       const string& dest) {
-    _conf.update_term_dest(policy,term,dest);
-}
-
-void
-PolicyTarget::update_term_action(const string& policy,
-				 const string& term,
-				 const string& action) {
-    _conf.update_term_action(policy,term,action);
+PolicyTarget::update_term_block(const string& policy,
+				const string& term,
+				const uint32_t& block,
+				const uint32_t& order,
+				const string& variable,
+				const string& op,
+				const string& arg)
+{
+    _conf.update_term_block(policy, term, block, order, variable, op, arg);
 }
 
 void
-PolicyTarget::create_policy(const string& policy) {
+PolicyTarget::create_policy(const string& policy)
+{
     _conf.create_policy(policy);
 }
 
 void
-PolicyTarget::delete_policy(const string& policy) {
+PolicyTarget::delete_policy(const string& policy)
+{
     _conf.delete_policy(policy);
 }
 
 void
-PolicyTarget::create_set(const string& name) {
+PolicyTarget::create_set(const string& name)
+{
     _conf.create_set(name);
 }
 
 void
-PolicyTarget::update_set(const string& name, const string& element) {
+PolicyTarget::update_set(const string& name, const string& element)
+{
     _conf.update_set(name,element);
 }
 
 void
-PolicyTarget::delete_set(const string& name) {
-
+PolicyTarget::delete_set(const string& name)
+{
     _conf.delete_set(name);
 }
 
 void
 PolicyTarget::update_import(const string& protocol,
-			    const string& policies) {
-
+			    const string& policies)
+{
     // convert the policies to a list
     list<string> pols;
     policy_utils::str_to_list(policies,pols);
@@ -126,11 +126,10 @@ PolicyTarget::update_import(const string& protocol,
     _conf.commit(_commit_delay);
 }
 
-
 void
 PolicyTarget::update_export(const string& protocol,
-			    const string& policies) {
-
+			    const string& policies)
+{
     // convert policies to a list
     list<string> pols;
     policy_utils::str_to_list(policies,pols);
@@ -142,26 +141,32 @@ PolicyTarget::update_export(const string& protocol,
 }
 
 void
-PolicyTarget::commit(uint32_t msec) {
+PolicyTarget::add_varmap(const string& protocol, const string& variable,
+			 const string& type, const string& access)
+{
+    _conf.add_varmap(protocol, variable, type, access);
+}
+
+void
+PolicyTarget::commit(uint32_t msec)
+{
     _conf.commit(msec);
 }
 
 string
-PolicyTarget::get_conf() {
-    return _conf.str();
+PolicyTarget::dump_state(uint32_t id)
+{
+    return _conf.dump_state(id);
 }
 
 void
-PolicyTarget::configure_varmap(const string& conf) {
-    _conf.configure_varmap(conf);
-}
-
-void
-PolicyTarget::birth(const string& tclass, const string& /* tinstance */) {
+PolicyTarget::birth(const string& tclass, const string& /* tinstance */)
+{
     _process_watch.birth(tclass);
 }
 
 void
-PolicyTarget::death(const string& tclass, const string& /* tinstance */) {
+PolicyTarget::death(const string& tclass, const string& /* tinstance */)
+{
     _process_watch.death(tclass);
 }
