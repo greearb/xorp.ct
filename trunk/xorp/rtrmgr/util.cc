@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.12 2005/06/17 20:27:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.13 2005/06/18 01:14:57 pavlin Exp $"
 
 
 #include <list>
@@ -67,7 +67,7 @@ find_executable_program_dir(const string& program_name)
 {
     debug_msg("%s\n", program_name.c_str());
 
-    if (program_name.size() > MAXPATHLEN)
+    if (program_name.size() >= MAXPATHLEN)
 	return string("");		// Error: invalid program name
 
     //
@@ -107,7 +107,7 @@ xorp_real_path(const string& path)
 {
     debug_msg("path: %s\n", path.c_str());
 
-    char rp[MAXPATHLEN + 1];
+    char rp[MAXPATHLEN];
     const char* prp = realpath(path.c_str(), rp);
     if (prp != NULL) {
 	debug_msg("return %s\n", prp);
