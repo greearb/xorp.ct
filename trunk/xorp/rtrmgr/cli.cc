@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.64 2005/03/25 02:54:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.65 2005/06/16 23:12:43 mjh Exp $"
 
 #include <pwd.h>
 
@@ -2500,6 +2500,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 					  _verbose);
 	ctn = newnode;
 	ctn->set_value(argv[0], getuid());
+	ctn->set_operator(OP_ASSIGN, getuid());
     } else {
 	ctn->set_value(argv[0], getuid());
     }
