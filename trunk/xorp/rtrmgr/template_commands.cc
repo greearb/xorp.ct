@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.50 2005/03/25 02:54:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.51 2005/06/17 21:15:13 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -250,11 +250,14 @@ bool
 XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 			      string& errmsg)
 {
+    const string module_name = template_tree_node().module_name();
+
     XLOG_ASSERT(action.front() == "xrl");
 
     list<string>::const_iterator xrl_pos = ++action.begin();
     if (xrl_pos == action.end()) {
-	errmsg = "Expected XRL but none supplied";
+	errmsg = c_format("Expected XRL in module %s but none supplied",
+			  module_name.c_str());
 	return false;
     }
 
@@ -286,14 +289,16 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	// Find the target name variable
 	string::size_type target_name_end = xrl_str.find("/", start);
 	if (target_name_end == string::npos) {
-	    errmsg = c_format("Syntax error in XRL %s: no target name",
-			      xrl_str.c_str());
+	    errmsg = c_format("Syntax error in module %s XRL %s: "
+			      "no target name",
+			      module_name.c_str(), xrl_str.c_str());
 	    return false;
 	}
 	string target_name_var = xrl_str.substr(start, target_name_end - 1);
 	if (target_name_var.empty()) {
-	    errmsg = c_format("Syntax error in XRL %s: empty XRL target",
-			      xrl_str.c_str());
+	    errmsg = c_format("Syntax error in module %s XRL %s: "
+			      "empty XRL target",
+			      module_name.c_str(), xrl_str.c_str());
 	    return false;
 	}
 
@@ -301,9 +306,9 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	string default_target_name;
 	default_target_name = template_tree_node().get_default_target_name_by_variable(target_name_var);
 	if (default_target_name.empty()) {
-	    errmsg = c_format("Syntax error in XRL %s: "
+	    errmsg = c_format("Syntax error in module %s XRL %s: "
 			      "the module has no default target name",
-			      xrl_str.c_str());
+			      module_name.c_str(), xrl_str.c_str());
 	    return false;
 	}
 
@@ -326,9 +331,9 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	switch (mode) {
 	case VAR:
 	    if (xrl_str[i] == '$' || xrl_str[i] == '`') {
-		errmsg = c_format("Syntax error in XRL %s: "
+		errmsg = c_format("Syntax error in module %s XRL %s: "
 				  "bad variable definition",
-				  xrl_str.c_str());
+				  module_name.c_str(), xrl_str.c_str());
 		return false;
 	    }
 	    if (xrl_str[i] == ')')
@@ -362,8 +367,9 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 			}
 		    }
 		    if (! varname_end_found) {
-			errmsg = c_format("Syntax error in XRL %s: "
+			errmsg = c_format("Syntax error in module %s XRL %s: "
 					  "bad variable syntax",
+					  module_name.c_str(),
 					  xrl_str.c_str());
 			return false;
 		    }
@@ -392,25 +398,26 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
     }
 
     if (xrldb.check_xrl_syntax(cleaned_xrl) == false) {
-	errmsg = c_format("Syntax error in XRL %s: invalid XRL syntax",
-			  cleaned_xrl.c_str());
+	errmsg = c_format("Syntax error in module %s XRL %s: "
+			  "invalid XRL syntax",
+			  module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }
     XRLMatchType match = xrldb.check_xrl_exists(cleaned_xrl);
     switch (match) {
     case MATCH_FAIL:
     case MATCH_RSPEC: {
-	errmsg = c_format("Error in XRL %s: "
+	errmsg = c_format("Error in module %s XRL %s: "
 			  "the XRL is not specified in the XRL targets "
 			  "directory",
-			  cleaned_xrl.c_str());
+			  module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }
     case MATCH_XRL: {
-	errmsg = c_format("Error in XRL %s: "
+	errmsg = c_format("Error in module %s XRL %s: "
 			  "the XRL has different return specification from "
 			  "that in the XRL targets directory",
-			  cleaned_xrl.c_str());
+			  module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }
     case MATCH_ALL:
