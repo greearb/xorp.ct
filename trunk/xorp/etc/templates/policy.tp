@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.1 2004/09/17 14:14:24 abittau Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.2 2004/09/17 19:39:20 pavlin Exp $ */
 
 policy {
 	targetname: txt = "policy";
@@ -41,21 +41,21 @@ policy {
 		%create: xrl "$(policy.targetname)/policy/0.1/create_policy?policy:txt=$(@)";
 		%delete: xrl "$(policy.targetname)/policy/0.1/delete_policy?policy:txt=$(@)";
 		term @: txt {
-			%create: xrl "$(policy.targetname)/policy/0.1/create_term?policy:txt=$(policy-statement.@)&term:txt=$(@)";
+			/* %create: xrl "$(policy.targetname)/policy/0.1/create_term?policy:txt=$(policy-statement.@)&term:txt=$(@)"; */
 			%delete: xrl "$(policy.targetname)/policy/0.1/delete_term?policy:txt=$(policy-statement.@)&term:txt=$(@)";
 			source {
 				match {
-					%set: xrl "$(policy.targetname)/policy/0.1/update_term_source?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&source:txt=$(@)";
+					/* %set: xrl "$(policy.targetname)/policy/0.1/update_term_source?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&source:txt=$(@)"; */
 				}
 			}
 			dest {
 				match {
-					%set: xrl "$(policy.targetname)/policy/0.1/update_term_dest?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&dest:txt=$(@)";
+					/* %set: xrl "$(policy.targetname)/policy/0.1/update_term_dest?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&dest:txt=$(@)"; */
 				}
 			}
 			action {
 				action {
-					%set: xrl "$(policy.targetname)/policy/0.1/update_term_action?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&action:txt=$(@)";
+					/* %set: xrl "$(policy.targetname)/policy/0.1/update_term_action?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&action:txt=$(@)"; */
 				}
 			}
 		}
