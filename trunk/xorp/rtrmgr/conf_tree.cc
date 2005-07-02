@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.29 2005/06/28 20:33:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.30 2005/07/02 00:08:33 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -189,16 +189,24 @@ ConfigTree::add_node(const string& segment, int type) throw (ParseError)
 
     if (_current_node->template_tree_node() != NULL
 	&& _current_node->template_tree_node()->children().empty()) {
-	// the current node's template has no children, and we've been
+	//
+	// The current node's template has no children, and we've been
 	// asked to add a node as a child of it.  Either this is an
 	// error, or this current node is a terminal node, and this
 	// segment is actually a value.
-	terminal_value(segment.c_str(), _current_node->type(), OP_ASSIGN);
+	//
+	if (_current_node->is_leaf()) {
+	    terminal_value(segment.c_str(), _current_node->type(), OP_ASSIGN);
+	} else {
+	    booterror("Invalid child node");
+	}
 
-	//if we're still here, we didn't throw a parse error.  one
-	//minor glitch is that need to decrement the path segments
-	//before poppping, because this has become infated due to
-	//counting the final value.
+	//
+	// If we're still here, we didn't throw a parse error.  One
+	// minor glitch is that need to decrement the path segments
+	// before poppping, because this has become infated due to
+	// counting the final value.
+	//
 	size_t segments_to_pop = _segment_lengths.front();
 	_segment_lengths.pop_front();
 	segments_to_pop--;
