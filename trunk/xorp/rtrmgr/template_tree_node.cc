@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.39 2005/06/27 17:05:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.40 2005/06/28 20:33:25 mjh Exp $"
 
 
 #include <glob.h>
@@ -557,6 +557,17 @@ const TemplateTreeNode*
 TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts) const
 {
     if (_parent == NULL) {
+	//
+	// We have reached the root node.
+	// Search among the children.
+	//
+	list<TemplateTreeNode* >::const_iterator iter;
+	for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	    const TemplateTreeNode* found_child;
+	    found_child = (*iter)->find_child_varname_node(var_parts);
+	    if (found_child != NULL)
+		return found_child;
+	}
 	return NULL;
     }
     if (is_tag() || (type() == NODE_VOID)) {
