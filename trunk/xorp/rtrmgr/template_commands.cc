@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.51 2005/06/17 21:15:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.52 2005/07/02 00:15:38 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -155,6 +155,12 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
 
     debug_msg("XrlAction constructor\n");
     XLOG_ASSERT(action.front() == "xrl");
+
+    _module_name = template_tree_node.module_name();
+    if (_module_name.empty()) {
+	errmsg = "Empty module name";
+	xorp_throw(ParseError, errmsg);
+    }
 
     if (check_xrl_is_valid(action, xrldb, errmsg) != true)
 	xorp_throw(ParseError, errmsg);
@@ -482,7 +488,7 @@ XrlAction::execute(const MasterConfigTreeNode& ctn,
 	debug_msg("CALL XRL: %s\n", xrl_str.c_str());
 
 	UnexpandedXrl uxrl(ctn, *this);
-	task_manager.add_xrl(affected_module(), uxrl, cb);
+	task_manager.add_xrl(related_module(), uxrl, cb);
 	result = XORP_OK;
 	debug_msg("result = %d\n", result);
     } else {
@@ -567,6 +573,12 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
     result = unquote(expanded_cmd.front());
 
     return (XORP_OK);
+}
+
+string
+XrlAction::related_module() const
+{
+    return (_module_name);
 }
 
 string
@@ -931,7 +943,7 @@ ProgramAction::execute(const MasterConfigTreeNode&	ctn,
 	debug_msg("CALL program: %s\n", program_str.c_str());
 
 	UnexpandedProgram uprogram(ctn, *this);
-	task_manager.add_program(affected_module(), uprogram, program_cb);
+	task_manager.add_program(related_module(), uprogram, program_cb);
 	result = XORP_OK;
 	debug_msg("result = %d\n", result);
     } else {
@@ -1014,6 +1026,12 @@ ProgramAction::expand_program_variables(const TreeNode& tn,
     result = unquote(expanded_cmd.front());
 
     return (XORP_OK);
+}
+
+string
+ProgramAction::related_module() const
+{
+    return (_module_name);
 }
 
 string

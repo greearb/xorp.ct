@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.24 2005/03/25 02:54:39 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.25 2005/06/17 21:15:13 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -63,11 +63,14 @@ public:
 						      string& errmsg) const;
     inline const string& request() const { return _request; }
     const string& xrl_return_spec() const { return _response; }
+    string related_module() const;
     string affected_module() const;
 
 private:
     bool check_xrl_is_valid(const list<string>& action,
 			    const XRLdb& xrldb, string& errmsg);
+
+    string		_module_name;
     list<string>	_split_request;
     string		_request;
     list<string>	_split_response;
@@ -85,6 +88,7 @@ public:
     template<class TreeNode> int expand_program_variables(const TreeNode& tn,
 							  string& result,
 							  string& errmsg) const;
+    string related_module() const;
     string affected_module() const;
     inline const string& request() const { return _request; }
     const string& stdout_variable_name() const { return _stdout_variable_name; }
