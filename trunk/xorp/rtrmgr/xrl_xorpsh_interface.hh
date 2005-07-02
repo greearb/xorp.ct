@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.10 2004/12/06 00:31:05 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.11 2005/03/25 02:54:41 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
@@ -50,6 +50,11 @@ public:
     XrlCmdError rtrmgr_client_0_2_new_config_user(
 	// Input values, 
 	const uint32_t&	user_id);
+
+    XrlCmdError rtrmgr_client_0_2_config_saved_done(
+	// Input values,
+	const bool&	success,
+	const string&	errmsg);
 
     XrlCmdError rtrmgr_client_0_2_config_change_done(
 	// Input values, 

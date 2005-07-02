@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.19 2004/12/30 12:42:13 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.20 2005/03/25 02:54:41 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -39,6 +39,8 @@ class Rtrmgr;
 
 class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+    typedef XorpCallback2<void, bool, string>::RefPtr ConfigSaveCallBack;
+    typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigLoadCallBack;
 
 public:
     XrlRtrmgrInterface(XrlRouter& r, UserDB& db, EventLoop& eventloop,
@@ -122,6 +124,7 @@ public:
 				  string deltas,
 				  string deletions);
 
+    void config_saved_done_cb(const XrlError&);
     void apply_config_change_done_cb(const XrlError&);
     void client_updated(const XrlError& e, uid_t user_id, UserInstance* user);
 
@@ -157,6 +160,7 @@ public:
     XrlCmdError rtrmgr_0_1_save_config(
 	// Input values, 
 	const string& token, 
+	const string& target, 
 	const string& filename);
 
     XrlCmdError rtrmgr_0_1_load_config(
@@ -180,6 +184,11 @@ public:
 private:
     typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
 
+    void save_config_done(bool success, string errmsg, string filename,
+			  uid_t user_id, string target);
+    void load_config_done(bool success, string errmsg, string deltas,
+			  string deletions, string filename, uid_t user_id,
+			  string target);
     UserInstance* find_user_instance(uint32_t user_id,
 				     const string& clientname);
     string generate_auth_token(const uint32_t& user_id, 

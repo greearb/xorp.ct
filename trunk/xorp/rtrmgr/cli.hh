@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.26 2004/06/12 00:37:05 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.27 2005/03/25 02:54:34 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -134,7 +134,9 @@ public:
 		  uint32_t ,
 		  const string& command_global_name,
 		  const vector<string>& argv);
-    void save_done(const XrlError& e);
+    void save_communicated(const XrlError& e);
+    void save_done(bool success, string errmsg);
+
     int load_func(const string& ,
 		  const string& ,
 		  uint32_t ,

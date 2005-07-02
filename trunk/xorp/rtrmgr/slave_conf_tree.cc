@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.25 2005/01/19 00:01:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.26 2005/03/25 02:54:37 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -220,6 +220,36 @@ SlaveConfigTree::commit_phase5(const XrlError& /* e */,
 	cb->dispatch(true, "");
     } else {
 	cb->dispatch(false, _commit_errmsg);
+    }
+}
+
+void
+SlaveConfigTree::save_phase4(bool success, const string& errmsg, CallBack cb,
+			     XorpShell *xorpsh)
+{
+    XLOG_TRACE(_verbose, "save_phase4\n");
+
+    //
+    // We get here when we're called back by the rtrmgr with the
+    // results of our save.
+    //
+    _save_errmsg = errmsg;
+    xorpsh->unlock_config(callback(this, &SlaveConfigTree::save_phase5,
+				   success, cb, xorpsh));
+}
+
+void
+SlaveConfigTree::save_phase5(const XrlError& /* e */,
+			     bool success,
+			     CallBack cb,
+			     XorpShell* /* xorpsh */)
+{
+    XLOG_TRACE(_verbose, "save_phase5\n");
+
+    if (success) {
+	cb->dispatch(true, "");
+    } else {
+	cb->dispatch(false, _save_errmsg);
     }
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.19 2005/02/01 07:51:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.20 2005/03/25 02:54:41 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -77,15 +77,31 @@ XrlXorpshInterface::rtrmgr_client_0_2_new_config_user(// Input values,
 }
 
 XrlCmdError 
+XrlXorpshInterface::rtrmgr_client_0_2_config_saved_done(// Input values, 
+							 const bool& success, 
+							 const string& errmsg)
+{
+    if (success) {
+	XLOG_TRACE(_verbose, "Configuration saved: success");
+    } else {
+	XLOG_TRACE(_verbose, "Failure saving the configuration: %s",
+		   errmsg.c_str());
+    }
+    _xorpsh.config_saved_done(success, errmsg);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_2_config_change_done(// Input values, 
 							 const bool& success, 
 							 const string& errmsg)
 {
-    XLOG_TRACE(_verbose, "received cfg change done\n");
-    if (success)
-	XLOG_TRACE(_verbose, "success\n");
-    else
-	XLOG_TRACE(_verbose, "%s\n", errmsg.c_str());
+    if (success) {
+	XLOG_TRACE(_verbose, "Configuration changed: success");
+    } else {
+	XLOG_TRACE(_verbose, "Failure changing the configuration: %s",
+		   errmsg.c_str());
+    }
     _xorpsh.commit_done(success, errmsg);
     return XrlCmdError::OKAY();
 }

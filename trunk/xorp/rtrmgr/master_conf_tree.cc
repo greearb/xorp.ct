@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.46 2005/02/28 08:54:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.47 2005/03/25 02:54:35 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -23,6 +23,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.hh"
 
 #include "master_conf_tree.hh"
 #include "module_command.hh"
@@ -31,6 +32,17 @@
 #include "master_template_tree.hh"
 #include "master_template_tree_node.hh"
 #include "util.hh"
+
+//
+// The strings that are used to add and delete a load or save file, to
+// access the content of the loaded file, etc.
+//
+// XXX: sigh, hard-coding the strings here is bad...
+static string RTRMGR_CONFIG_NODE = "rtrmgr";
+static string RTRMGR_CONFIG = "rtrmgr {\n}\n";
+static string RTRMGR_SAVE_FILE_CONFIG = "rtrmgr {\n    save %s\n}\n";
+static string RTRMGR_LOAD_FILE_CONFIG = "rtrmgr {\n    load %s\n}\n";
+static string RTRMGR_CONFIG_FILENAME_VARNAME = "$(rtrmgr.CONFIG_FILENAME)";
 
 
 /*************************************************************************
@@ -46,7 +58,8 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     : ConfigTree(tt, verbose),
       _root_node(verbose),
       _commit_in_progress(false),
-      _config_failed(false)
+      _config_failed(false),
+      _rtrmgr_config_node_found(false)
 {
     _current_node = &_root_node;
     _task_manager = new TaskManager(*this, mmgr, xclient, 
@@ -870,6 +883,705 @@ MasterConfigTree::save_hook_complete(bool success, const string errmsg) const
 }
 
 bool
+MasterConfigTree::remove_tmp_config_file(string& errmsg)
+{
+    string tmp_config_filename_value;
+
+    if (root_node().expand_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
+				    tmp_config_filename_value)
+	!= true) {
+	errmsg = c_format("internal variable %s not found",
+			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
+	errmsg = c_format("Failed to remove temporary configuration file: %s",
+			  errmsg.c_str());
+	return false;
+    }
+
+    // Unlink the file
+    if (! tmp_config_filename_value.empty())
+	unlink(tmp_config_filename_value.c_str());
+
+    return true;
+}
+
+bool
+MasterConfigTree::save_config(const string& filename, uid_t user_id,
+			      const string& save_hook, string& errmsg,
+			      ConfigSaveCallBack cb)
+{
+    string tmp_config_filename;
+    string save_file_config;
+
+    XLOG_TRACE(_verbose, "Saving to file %s", filename.c_str());
+
+    //
+    // Create the string that is used to temporary add a save file to the
+    // configuration.
+    //
+    save_file_config = c_format(RTRMGR_SAVE_FILE_CONFIG.c_str(),
+				filename.c_str());
+
+    //
+    // Test whether the file name matches an entry in the template tree.
+    // If yes, then add a save file to the configuration so the appropriate
+    // external program will be invoked.
+    // Otherwise, assume that the user tries to save to a local file.
+    //
+    do {
+	MasterConfigTree new_tree(_template_tree, _verbose);
+	if (new_tree.parse(save_file_config, "", errmsg) == true) {
+	    //
+	    // The file name is recognizable by the parser, hence
+	    // invoke the corresponding external methods for processing.
+	    //
+	    break;
+	}
+
+	//
+	// Assume that the user tries to save to a local file
+	//
+	if (save_to_file(filename, user_id, save_hook, errmsg) != true) {
+	    XLOG_TRACE(_verbose, "Failed to save file %s: %s",
+		       filename.c_str(), errmsg.c_str());
+	    return false;
+	}
+
+	XLOG_TRACE(_verbose, "Saved file %s", filename.c_str());
+
+	//
+	// Schedule a timer to dispatch immediately the callback
+	//
+	EventLoop& eventloop = xorp_client().eventloop();
+	_save_config_completed_timer = eventloop.new_oneoff_after(
+	    TimeVal::ZERO(),
+	    callback(this,
+		     &MasterConfigTree::save_config_done_cb,
+		     true,		// success
+		     string(""),	// errmsg
+		     cb));
+	return true;
+    } while (false);
+
+    //
+    // Create a temporary file that would be used by the external
+    // program to copy the configuration from.
+    //
+    do {
+	xsock_t s;
+
+	s = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
+				     tmp_config_filename, errmsg);
+	if (s == XORP_BAD_SOCKET) {
+	    errmsg = c_format("Cannot save the configuration file: "
+			      "cannot create a temporary filename: %s",
+			      errmsg.c_str());
+	    return false;
+	}
+
+	//
+	// Save the current configuration
+	//
+	string config = show_unannotated_tree();
+	if (write(s, config.c_str(), config.size())
+	    != static_cast<ssize_t>(config.size())) {
+	    errmsg = c_format("Cannot save the configuration file: "
+			      "error writing to a temporary file: %s",
+			      strerror(errno));
+	    // Close and unlink the file
+	    close(s);
+	    unlink(tmp_config_filename.c_str());
+	    return false;
+	}
+
+	//
+	// Close the file descriptor, because we don't need it.
+	// Note, that the created file remains on the filesystem,
+	// so it is guaranteed to be unique when we need to use it again.
+	//
+	close(s);
+	break;
+    } while (false);
+
+    //
+    // Check whether the current configuration already contains
+    // rtrmgr configuration.
+    //
+    list<string> path;
+    path.push_back(RTRMGR_CONFIG_NODE);
+    if (find_node(path) != NULL) {
+	_rtrmgr_config_node_found = true;
+    } else {
+	_rtrmgr_config_node_found = false;
+    }
+
+    //
+    // Add the temporary save file to the configuration
+    //
+    if (apply_deltas(user_id, save_file_config,
+		     /* provisional change */ true, errmsg)
+	!= true) {
+	errmsg = c_format("Cannot save the configuration file: %s",
+			  errmsg.c_str());
+	discard_changes();
+	unlink(tmp_config_filename.c_str());
+	return false;
+    }
+
+    //
+    // Go through the config tree, and create nodes for any defaults
+    // specified in the template tree that aren't already configured.
+    //
+    add_default_children();
+
+    // Save the name of the temporary file in the local variable
+    if (root_node().set_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
+				 tmp_config_filename.c_str())
+	!= true) {
+	errmsg = c_format("Cannot save the configuration file: cannot store "
+			  "temporary filename %s in internal variable %s",
+			  tmp_config_filename.c_str(),
+			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
+	unlink(tmp_config_filename.c_str());
+	return false;
+    }
+
+    //
+    // Specify the callback that will be invoked after we have saved the new
+    // configuration file so we can continue from there.
+    //
+    CallBack save_cb;
+    save_cb = callback(this, &MasterConfigTree::save_config_file_sent_cb,
+		       filename, user_id, cb);
+    commit_changes_pass1(save_cb);
+    if (config_failed()) {
+	errmsg = config_failed_msg();
+	discard_changes();
+	unlink(tmp_config_filename.c_str());
+	return false;
+    }
+
+    return true;
+}
+
+void
+MasterConfigTree::save_config_file_sent_cb(bool success,
+					   string errmsg,
+					   string filename,
+					   uid_t user_id,
+					   ConfigSaveCallBack cb)
+{
+    string dummy_errmsg;
+
+    //
+    // Remove the temporary file with the configuration
+    //
+    remove_tmp_config_file(dummy_errmsg);
+
+    if (! success) {
+	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
+		   filename.c_str(), errmsg.c_str());
+	discard_changes();
+	cb->dispatch(success, errmsg);
+	return;
+    }
+
+    //
+    // Check everything really worked, and finalize the commit when
+    // the file was saved.
+    //
+    if (check_commit_status(errmsg) == false) {
+	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
+		   errmsg.c_str());
+	discard_changes();
+	cb->dispatch(false, errmsg);
+	return;
+    }
+
+    XLOG_TRACE(_verbose, "Saved file %s", filename.c_str());
+
+    //
+    // Create the string that is used to delete the temporary added
+    // save file from the configuration.
+    //
+    string delete_save_file_config;
+    if (_rtrmgr_config_node_found) {
+	delete_save_file_config = c_format(RTRMGR_SAVE_FILE_CONFIG.c_str(),
+					   filename.c_str());
+    } else {
+	delete_save_file_config = RTRMGR_CONFIG;
+    }
+    if (apply_deletions(user_id, delete_save_file_config,
+			/* provisional change */ true, errmsg)
+	!= true) {
+	errmsg = c_format("Cannot save the configuration file because of "
+			  "internal error: %s", errmsg.c_str());
+	discard_changes();
+	cb->dispatch(false, errmsg);
+	return;
+    }
+
+    //
+    // Go through the config tree, and create nodes for any defaults
+    // specified in the template tree that aren't already configured.
+    //
+    add_default_children();
+
+    //
+    // Specify the callback that will be invoked after we have cleaned-up
+    // so we can continue from there.
+    //
+    bool orig_success = success;
+    string orig_errmsg = errmsg;
+    CallBack cleanup_cb;
+    cleanup_cb = callback(this, &MasterConfigTree::save_config_file_cleanup_cb,
+			  orig_success, orig_errmsg, filename, user_id, cb);
+    commit_changes_pass1(cleanup_cb);
+    if (config_failed()) {
+	errmsg = config_failed_msg();
+	discard_changes();
+	cb->dispatch(false, errmsg);
+	return;
+    }
+}
+
+void
+MasterConfigTree::save_config_file_cleanup_cb(bool success,
+					      string errmsg,
+					      bool orig_success,
+					      string orig_errmsg,
+					      string filename,
+					      uid_t user_id,
+					      ConfigSaveCallBack cb)
+{
+    if (! orig_success) {
+	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
+		   filename.c_str(), orig_errmsg.c_str());
+	discard_changes();
+	cb->dispatch(orig_success, orig_errmsg);
+	return;
+    }
+
+    if (! success) {
+	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
+		   filename.c_str(), errmsg.c_str());
+	discard_changes();
+	cb->dispatch(success, errmsg);
+	return;
+    }
+
+    //
+    // Check everything really worked, and finalize the commit when
+    // we cleaned up the file that was temporarily added.
+    //
+    if (check_commit_status(errmsg) == false) {
+	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
+		   errmsg.c_str());
+	discard_changes();
+	cb->dispatch(false, errmsg);
+	return;
+    }
+
+    XLOG_TRACE(_verbose, "Cleanup completed after saving file %s",
+	       filename.c_str());
+
+    save_config_done_cb(success, errmsg, cb);
+
+    UNUSED(user_id);
+}
+
+void
+MasterConfigTree::save_config_done_cb(bool success, string errmsg,
+				      ConfigSaveCallBack cb)
+{
+    cb->dispatch(success, errmsg);
+}
+
+bool
+MasterConfigTree::load_config(const string& filename, uid_t user_id,
+			      string& errmsg, ConfigLoadCallBack cb)
+{
+    string tmp_config_filename;
+
+    XLOG_TRACE(_verbose, "Loading file %s", filename.c_str());
+
+    //
+    // Create the string that is used to temporary add a load file to the
+    // configuration.
+    //
+    string load_file_config = c_format(RTRMGR_LOAD_FILE_CONFIG.c_str(),
+				       filename.c_str());
+
+    //
+    // Test whether the file name matches an entry in the template tree.
+    // If yes, then add a load file to the configuration so the appropriate
+    // external program will be invoked.
+    // Otherwise, assume that the user tries to load from a local file.
+    //
+    do {
+	MasterConfigTree new_tree(_template_tree, _verbose);
+	if (new_tree.parse(load_file_config, "", errmsg) == true) {
+	    //
+	    // The file name is recognizable by the parser, hence
+	    // invoke the corresponding external methods for processing.
+	    //
+	    break;
+	}
+
+	//
+	// Assume that the user tries to load from a local file
+	//
+	string deltas, deletions;
+	if (load_from_file(filename, user_id, errmsg, deltas, deletions)
+	    != true) {
+	    XLOG_TRACE(_verbose, "Failed to load file %s: %s",
+		       filename.c_str(), errmsg.c_str());
+	    return false;
+	}
+
+	XLOG_TRACE(_verbose, "Loading file %s", filename.c_str());
+
+	//
+	// Commit the changes
+	//
+	CallBack cb2 = callback(this,
+				&MasterConfigTree::load_config_commit_changes_cb,
+				deltas, deletions, cb);
+	commit_changes_pass1(cb2);
+	if (config_failed()) {
+	    errmsg = config_failed_msg();
+	    discard_changes();
+	    return false;
+	}
+
+	return true;
+    } while (false);
+
+    //
+    // Create a temporary file that would be used by the external
+    // program to copy the configuration to.
+    //
+    do {
+	xsock_t s;
+
+	s = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
+				     tmp_config_filename, errmsg);
+	if (s == XORP_BAD_SOCKET) {
+	    errmsg = c_format("Cannot load the configuration file: "
+			      "cannot create a temporary filename: %s",
+			      errmsg.c_str());
+	    return false;
+	}
+
+	//
+	// Close the file descriptor, because we don't need it.
+	// Note, that the created file remains on the filesystem,
+	// so it is guaranteed to be unique when we need to use it again.
+	//
+	close(s);
+	break;
+    } while (false);
+
+    //
+    // Check whether the current configuration already contains
+    // rtrmgr configuration.
+    //
+    list<string> path;
+    path.push_back(RTRMGR_CONFIG_NODE);
+    if (find_node(path) != NULL) {
+	_rtrmgr_config_node_found = true;
+    } else {
+	_rtrmgr_config_node_found = false;
+    }
+
+    //
+    // Add the temporary load file to the configuration
+    //
+    if (apply_deltas(user_id, load_file_config,
+		     /* provisional change */ true, errmsg)
+	!= true) {
+	errmsg = c_format("Cannot load the configuration file: %s",
+			  errmsg.c_str());
+	discard_changes();
+	unlink(tmp_config_filename.c_str());
+	return false;
+    }
+
+    //
+    // Go through the config tree, and create nodes for any defaults
+    // specified in the template tree that aren't already configured.
+    //
+    add_default_children();
+
+    // Save the name of the temporary file in the local variable
+    if (root_node().set_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
+				 tmp_config_filename.c_str())
+	!= true) {
+	errmsg = c_format("Cannot load the configuration file: cannot store "
+			  "temporary filename %s in internal variable %s",
+			  tmp_config_filename.c_str(),
+			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
+	unlink(tmp_config_filename.c_str());
+	return false;
+    }
+
+    //
+    // Specify the callback that will be invoked after we have read the new
+    // configuration file so we can continue from there.
+    //
+    CallBack load_cb;
+    load_cb = callback(this, &MasterConfigTree::load_config_file_received_cb,
+		       filename, user_id, cb);
+    commit_changes_pass1(load_cb);
+    if (config_failed()) {
+	errmsg = config_failed_msg();
+	discard_changes();
+	unlink(tmp_config_filename.c_str());
+	return false;
+    }
+
+    return true;
+}
+
+void
+MasterConfigTree::load_config_file_received_cb(bool success,
+					       string errmsg,
+					       string filename,
+					       uid_t user_id,
+					       ConfigLoadCallBack cb)
+{
+    string dummy_errmsg, dummy_deltas, dummy_deletions;
+
+    if (! success) {
+	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
+		   filename.c_str(), errmsg.c_str());
+	remove_tmp_config_file(dummy_errmsg);
+	discard_changes();
+	cb->dispatch(success, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    //
+    // Check everything really worked, and finalize the commit when
+    // the file was loaded.
+    //
+    if (check_commit_status(errmsg) == false) {
+	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
+		   errmsg.c_str());
+	remove_tmp_config_file(dummy_errmsg);
+	discard_changes();
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    XLOG_TRACE(_verbose, "Received file %s", filename.c_str());
+
+    //
+    // Get the string with the name of the temporary file with the
+    // new configuration.
+    //
+    string tmp_config_filename;
+    if (root_node().expand_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
+				    tmp_config_filename)
+	!= true) {
+	success = false;
+	errmsg = c_format("internal variable %s not found",
+			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
+	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
+		   filename.c_str(), errmsg.c_str());
+	errmsg = c_format("Cannot load configuration file %s because of "
+			  "internal error: %s",
+			  filename.c_str(), errmsg.c_str());
+	remove_tmp_config_file(dummy_errmsg);
+	discard_changes();
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    //
+    // Read the configuration from the temporary file
+    //
+    string rtrmgr_config_value;
+    if (read_file(rtrmgr_config_value, tmp_config_filename, errmsg) != true) {
+	success = false;
+	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
+		   filename.c_str(), errmsg.c_str());
+	errmsg = c_format("Cannot load configuration file %s because cannot "
+			  "read temporary file %s with the configuration: %s",
+			  filename.c_str(), tmp_config_filename.c_str(),
+			  errmsg.c_str());
+	remove_tmp_config_file(dummy_errmsg);
+	discard_changes();
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    //
+    // Remove the temporary file with the configuration
+    //
+    remove_tmp_config_file(dummy_errmsg);
+
+    //
+    // Create the string that is used to delete the temporary added
+    // load file from the configuration.
+    //
+    string delete_load_file_config;
+    if (_rtrmgr_config_node_found) {
+	delete_load_file_config = c_format(RTRMGR_LOAD_FILE_CONFIG.c_str(),
+					   filename.c_str());
+    } else {
+	delete_load_file_config = RTRMGR_CONFIG;
+    }
+    if (apply_deletions(user_id, delete_load_file_config,
+			/* provisional change */ true, errmsg)
+	!= true) {
+	errmsg = c_format("Cannot load the configuration file because of "
+			  "internal error: %s", errmsg.c_str());
+	discard_changes();
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    //
+    // Go through the config tree, and create nodes for any defaults
+    // specified in the template tree that aren't already configured.
+    //
+    add_default_children();
+
+    //
+    // Specify the callback that will be invoked after we have cleaned-up
+    // so we can continue from there.
+    //
+    bool orig_success = success;
+    string orig_errmsg = errmsg;
+    CallBack cleanup_cb;
+    cleanup_cb = callback(this, &MasterConfigTree::load_config_file_cleanup_cb,
+			  orig_success, orig_errmsg, rtrmgr_config_value,
+			  filename, user_id, cb);
+    commit_changes_pass1(cleanup_cb);
+    if (config_failed()) {
+	errmsg = config_failed_msg();
+	discard_changes();
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+}
+
+void
+MasterConfigTree::load_config_file_cleanup_cb(bool success,
+					      string errmsg,
+					      bool orig_success,
+					      string orig_errmsg,
+					      string rtrmgr_config_value,
+					      string filename,
+					      uid_t user_id,
+					      ConfigLoadCallBack cb)
+{
+    string deltas, deletions;
+    string dummy_deltas, dummy_deletions;
+
+    if (! orig_success) {
+	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
+		   filename.c_str(), orig_errmsg.c_str());
+	discard_changes();
+	cb->dispatch(orig_success, orig_errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    if (! success) {
+	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
+		   filename.c_str(), errmsg.c_str());
+	discard_changes();
+	cb->dispatch(success, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    //
+    // Check everything really worked, and finalize the commit when
+    // we cleaned up the file that was temporarily added.
+    //
+    if (check_commit_status(errmsg) == false) {
+	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
+		   errmsg.c_str());
+	discard_changes();
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    XLOG_TRACE(_verbose, "Cleanup completed after receiving file %s",
+	       filename.c_str());
+
+    //
+    // Test out parsing the config on a new config tree to detect any
+    // parse errors before we reconfigure ourselves with the new config.
+    //
+    MasterConfigTree new_tree(_template_tree, _verbose);
+    if (new_tree.parse(rtrmgr_config_value, filename, errmsg) != true) {
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    //
+    // Go through the config tree, and create nodes for any defaults
+    // specified in the template tree that aren't already configured.
+    //
+    new_tree.add_default_children();
+
+    //
+    // Ok, so the new config parses.  Now we need to figure out how it
+    // differs from the existing config so we don't need to modify
+    // anything that hasn't changed.
+    //
+    MasterConfigTree delta_tree(_template_tree, _verbose);
+    MasterConfigTree deletion_tree(_template_tree, _verbose);
+    diff_configs(new_tree, delta_tree, deletion_tree);
+
+    string response;
+    if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
+				  /* provisional change */ true, response)) {
+	discard_changes();
+	errmsg = response;
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+    if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
+				      /* provisional change */ true,
+				      response)) {
+	discard_changes();
+	errmsg = response;
+	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	return;
+    }
+
+    // Pass these back out so we can notify other users of the change
+    deltas = delta_tree.show_unannotated_tree();
+    deletions = deletion_tree.show_unannotated_tree();
+
+    //
+    // Commit the changes
+    //
+    CallBack cb2 = callback(this,
+			    &MasterConfigTree::load_config_commit_changes_cb,
+			    deltas, deletions, cb);
+    commit_changes_pass1(cb2);
+    if (config_failed()) {
+	errmsg = config_failed_msg();
+	discard_changes();
+	cb->dispatch(false, errmsg, deltas, deletions);
+	return;
+    }
+}
+
+void
+MasterConfigTree::load_config_commit_changes_cb(bool success,
+						string errmsg,
+						string deltas,
+						string deletions,
+						ConfigLoadCallBack cb)
+{
+    cb->dispatch(success, errmsg, deltas, deletions);
+}
+
+bool
 MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 				 string& errmsg, string& deltas,
 				 string& deletions)
@@ -1033,5 +1745,3 @@ MasterConfigTree::module_shutdown(const string& module_name,
 }
 
 #endif // 0
-
-

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/etc/templates/Makefile.am,v 1.12 2004/09/17 19:38:50 pavlin Exp $
+## $XORP: xorp/etc/templates/Makefile.am,v 1.13 2005/03/11 23:19:01 pavlin Exp $
 ##
 
 # Redefine the data installation directory
@@ -25,6 +25,7 @@ data_DATA	 += protocols.tp
 data_DATA	 += rib.cmds rib.tp
 data_DATA	 += rip.cmds rip.tp
 data_DATA	 += ripng.tp
+data_DATA	 += rtrmgr.tp
 data_DATA	 += snmp.tp
 data_DATA	 += static_routes.tp
 data_DATA	 += xorpsh.cmds

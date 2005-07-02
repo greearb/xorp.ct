@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.39 2005/03/25 02:54:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.40 2005/06/23 22:51:29 pavlin Exp $"
 
 
 #include <sys/types.h>
@@ -351,6 +351,14 @@ XorpShell::commit_changes(const string& deltas, const string& deletions,
 }
 
 void
+XorpShell::config_saved_done(bool success, const string& errmsg)
+{
+    // Call unlock_config. The callback from unlock will finally clear
+    // things up.
+    _ct->save_phase4(success, errmsg, _config_save_callback, this);
+}
+
+void
 XorpShell::commit_done(bool success, const string& errmsg)
 {
     // Call unlock_config. The callback from unlock will finally clear
@@ -389,9 +397,31 @@ XorpShell::new_config_user(uid_t user_id)
 }
 
 void
-XorpShell::save_to_file(const string& filename, GENERIC_CALLBACK cb)
+XorpShell::save_to_file(const string& filename, GENERIC_CALLBACK cb,
+			CallBack final_cb)
 {
-    _rtrmgr_client.send_save_config("rtrmgr", _authtoken, filename, cb);
+    _config_save_callback = final_cb;
+    LOCK_CALLBACK locked_cb = callback(this,
+				       &XorpShell::save_lock_achieved,
+				       filename,
+				       cb);
+    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, locked_cb);
+}
+
+void
+XorpShell::save_lock_achieved(const XrlError& e, const bool* locked,
+			      const uint32_t* /* lock_holder */,
+			      const string filename,
+			      GENERIC_CALLBACK cb)
+{
+    if (!locked || (e != XrlError::OKAY())) {
+	_config_save_callback->dispatch(false,
+					"Failed to get configuration lock");
+	return;
+    }
+
+    _rtrmgr_client.send_save_config("rtrmgr", _authtoken, _ipc_name,
+				    filename, cb);
 }
 
 void
@@ -399,8 +429,10 @@ XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
 			  CallBack final_cb)
 {
     _commit_callback = final_cb;
-    LOCK_CALLBACK locked_cb 
-	= callback(this, &XorpShell::load_lock_achieved, filename, cb);
+    LOCK_CALLBACK locked_cb = callback(this,
+				       &XorpShell::load_lock_achieved,
+				       filename,
+				       cb);
     _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, locked_cb);
 }
 

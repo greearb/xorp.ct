@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.33 2005/02/01 03:06:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.34 2005/03/25 02:54:41 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -266,7 +266,7 @@ XrlRtrmgrInterface::initialize_client_state(uint32_t user_id,
     _background_tasks.push_front(t);
 }
 
-void 
+void
 XrlRtrmgrInterface::finder_register_done(const XrlError& e, string clientname) 
 {
     if (e != XrlError::OKAY()) {
@@ -498,16 +498,16 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     return XrlCmdError::OKAY();
 }
 
-void 
+void
 XrlRtrmgrInterface::apply_config_change_done(bool success,
-					     string errmsg, 
+					     string errmsg,
 					     uid_t user_id,
 					     string target,
 					     string deltas,
 					     string deletions)
 {
     XLOG_TRACE(_verbose,
-	       "XRL apply_config_change_done:\n  status:%d\n  response: %s\n  target: %s\n",
+	       "apply_config_change_done: status: %d response: %s target: %s",
 	       success, errmsg.c_str(), target.c_str());
 
     if (success) {
@@ -516,7 +516,7 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 	    XLOG_TRACE(_verbose,
 		       "check commit status indicates failure: >%s<\n",
 		       errmsg.c_str());
-	    success = false;;
+	    success = false;
 	}
     }  else {
 	XLOG_TRACE(_verbose, "request failed: >%s<\n", errmsg.c_str());
@@ -551,16 +551,25 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
     }
 }
 
-void 
-XrlRtrmgrInterface::apply_config_change_done_cb(const XrlError& e)
+void
+XrlRtrmgrInterface::config_saved_done_cb(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to notify client that config change was done: %s\n",
+	XLOG_ERROR("Failed to notify client that config change was saved: %s",
 		   e.error_msg());
     }
 }
 
-void 
+void
+XrlRtrmgrInterface::apply_config_change_done_cb(const XrlError& e)
+{
+    if (e != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to notify client that config change was done: %s",
+		   e.error_msg());
+    }
+}
+
+void
 XrlRtrmgrInterface::client_updated(const XrlError& e, uid_t user_id, 
 				   UserInstance* user)
 {
@@ -584,7 +593,7 @@ XrlRtrmgrInterface::client_updated(const XrlError& e, uid_t user_id,
     }
 }
 
-void 
+void
 XrlRtrmgrInterface::module_status_changed(const string& modname,
 					  GenericModule::ModuleStatus status)
 {
@@ -636,7 +645,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
     }
 }
 
-void XrlRtrmgrInterface::lock_timeout()
+void
+XrlRtrmgrInterface::lock_timeout()
 {
     _config_locked = false;
     _lock_holder_token = "";
@@ -682,7 +692,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
 	return XrlCmdError::COMMAND_FAILED(err);
     }
     uint32_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config")==false) {
+    if (_userdb.has_capability(user_id, "config") == false) {
 	string err = "You do not have permission to lock the configuration.";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
@@ -721,7 +731,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values: 
-					   const string& token, 
+					   const string& token,
+					   const string& target,
 					   const string& filename)
 {
     string response;
@@ -731,31 +742,37 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 	return XrlCmdError::COMMAND_FAILED(response);
     }
     uint32_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config")==false) {
+    if (_userdb.has_capability(user_id, "config") == false) {
 	response = "You do not have permission to save the configuration.";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
-    if (_config_locked) {
+    if (_config_locked && (token != _lock_holder_token)) {
 	uint32_t uid = get_user_id_from_token(_lock_holder_token);
 	string holder = _userdb.find_user_by_user_id(uid)->username();
 	response = "ERROR: The config is currently locked by user " +
 	    holder + 
-	    ", and so may be in an inconsistent state.  \n" + 
+	    "\n" + 
 	    "Save was NOT performed.\n";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
-    if (_master_config_tree->save_to_file(filename, user_id, 
-					  _rtrmgr.save_hook(), response)) {
-	return XrlCmdError::OKAY();
-    } else {
+
+    ConfigSaveCallBack cb;
+    cb = callback(this, &XrlRtrmgrInterface::save_config_done,
+		  filename, user_id, target);
+    if (_master_config_tree->save_config(filename, user_id,
+					 _rtrmgr.save_hook(),
+					 response, cb)
+	!= true) {
 	return XrlCmdError::COMMAND_FAILED(response);
     }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
                                            const string& token,
-					   const string& target, 
+					   const string& target,
 					   const string& filename)
 {
     string response;
@@ -771,8 +788,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
     }
     if (_config_locked && (token != _lock_holder_token)) {
 	uint32_t uid = get_user_id_from_token(_lock_holder_token);
-	string holder = 
-	    _userdb.find_user_by_user_id(uid)->username();
+	string holder = _userdb.find_user_by_user_id(uid)->username();
 	response = "ERROR: The config is currently locked by user " +
 	    holder + 
 	    "\n" + 
@@ -780,24 +796,48 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 	return XrlCmdError::COMMAND_FAILED(response);
     }
 
-    string deltas, deletions;	// These are filled in by load_from_file
-    if (_master_config_tree->load_from_file(filename, user_id, response,
-					    deltas, deletions)) {
-	CallBack cb;
-	cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
-		      user_id, string(target), 
-		      string(deltas), string(deletions));
-	debug_msg("here1: success\n");
-	response = "";
-	_master_config_tree->commit_changes_pass1(cb);
-	if (_master_config_tree->config_failed()) {
-	    string err = _master_config_tree->config_failed_msg();
-	    return XrlCmdError::COMMAND_FAILED(err);
-	}
-    } else {
+    ConfigLoadCallBack cb;
+    cb = callback(this, &XrlRtrmgrInterface::load_config_done,
+		  filename, user_id, target);
+    if (_master_config_tree->load_config(filename, user_id, response, cb)
+	!= true) {
 	return XrlCmdError::COMMAND_FAILED(response);
     }
+
     return XrlCmdError::OKAY();
+}
+
+void
+XrlRtrmgrInterface::save_config_done(bool success,
+				     string errmsg,
+				     string filename,
+				     uid_t user_id,
+				     string target)
+{
+    GENERIC_CALLBACK cb1;
+
+    cb1 = callback(this, &XrlRtrmgrInterface::config_saved_done_cb);
+    _client_interface.send_config_saved_done(target.c_str(), success,
+					     errmsg, cb1);
+
+    UNUSED(filename);
+    UNUSED(user_id);
+}
+
+void
+XrlRtrmgrInterface::load_config_done(bool success,
+				     string errmsg,
+				     string deltas,
+				     string deletions,
+				     string filename,
+				     uid_t user_id,
+				     string target)
+{
+    // Propagate the changes to all clients
+    apply_config_change_done(success, errmsg, user_id, target,
+			     deltas, deletions);
+
+    UNUSED(filename);
 }
 
 UserInstance *

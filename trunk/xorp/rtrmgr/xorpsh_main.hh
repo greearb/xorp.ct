@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.19 2004/12/21 23:43:15 mjh Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.20 2005/03/25 02:54:41 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -55,6 +55,7 @@ public:
 	MODE_IDLE, 
 	MODE_COMMITTING, 
 	MODE_LOADING,
+	MODE_SAVING,
 	MODE_SHUTDOWN
     };
 
@@ -77,6 +78,7 @@ public:
 			  const uint32_t*>::RefPtr LOCK_CALLBACK;
     void lock_config(LOCK_CALLBACK cb);
 
+    void config_saved_done(bool success, const string& errmsg);
     void commit_changes(const string& deltas, const string& deletions,
 			GENERIC_CALLBACK cb,
 			CallBack final_cb);
@@ -90,7 +92,13 @@ public:
 
     void new_config_user(uid_t user_id);
 
-    void save_to_file(const string& filename, GENERIC_CALLBACK cb);
+    void save_to_file(const string& filename, GENERIC_CALLBACK cb,
+			CallBack final_cb);
+
+    void save_lock_achieved(const XrlError& e, const bool* locked,
+			    const uint32_t* lock_holder,
+			    const string filename,
+			    GENERIC_CALLBACK cb);
 
     void load_from_file(const string& filename, GENERIC_CALLBACK cb,
 			CallBack final_cb);
@@ -149,6 +157,12 @@ private:
     CallBack		_commit_callback;
     string		_commit_status;	// Used for transient storage of error
 					// messages from commit
+
+    // Used to store the callback during saving a file until we get called
+    // with the response
+    CallBack		_config_save_callback;
+    string		_save_status;	// Used for transient storage of error
+					// messages from saving the config
 
     uint32_t		_rtrmgr_pid;
 

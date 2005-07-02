@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.15 2004/12/18 02:08:12 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.16 2005/03/25 02:54:37 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -59,6 +59,10 @@ public:
 		       XorpShell* xorpsh);
     void commit_phase5(const XrlError& e, bool success, CallBack cb,
 		       XorpShell* xorpsh);
+    void save_phase4(bool success, const string& errmsg, CallBack cb,
+		     XorpShell* xorpsh);
+    void save_phase5(const XrlError& e, bool success, CallBack cb,
+		     XorpShell* xorpsh);
     string discard_changes();
     string mark_subtree_for_deletion(const list<string>& path_segments, 
 				     uid_t user_id);
@@ -90,6 +94,7 @@ private:
     XorpShell::LOCK_CALLBACK _stage2_cb;
 
     string	_commit_errmsg;
+    string	_save_errmsg;
     bool	_verbose;	// Set to true if output is verbose
 };
 

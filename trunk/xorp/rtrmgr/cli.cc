@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.65 2005/06/16 23:12:43 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.66 2005/07/01 23:35:59 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2759,18 +2759,22 @@ RouterCLI::save_func(const string& ,
     }
 
     XLOG_ASSERT(command_global_name == "save");
-    _cli_client.cli_print(c_format("save, filename = %s\n", argv[0].c_str()));
-    _xorpsh.save_to_file(argv[0], callback(this, &RouterCLI::save_done));
+    XLOG_TRACE(_verbose, "save, filename = %s\n", argv[0].c_str());
+    _xorpsh.save_to_file(argv[0],
+			 callback(this, &RouterCLI::save_communicated),
+			 callback(this, &RouterCLI::save_done));
     idle_ui();
 
     return (XORP_OK);
 }
 
+//
+// Method save_communicated() is called when the request for the save has been
+// communicated to the rtrmgr, or when this communication has failed.
+//
 void
-RouterCLI::save_done(const XrlError& e)
+RouterCLI::save_communicated(const XrlError& e)
 {
-    debug_msg("in save done\n");
-
     if (e != XrlError::OKAY()) {
 	_cli_client.cli_print("ERROR: Save failed.\n");
 	if (e == XrlError::COMMAND_FAILED()) {
@@ -2778,18 +2782,39 @@ RouterCLI::save_done(const XrlError& e)
 		check_for_rtrmgr_restart();
 		return;
 	    }  else {
-		_cli_client.cli_print(e.note());
+		_cli_client.cli_print(c_format("%s\n", e.note().c_str()));
 	    }
 	} else {
-	    _cli_client.cli_print("Failed to communicate save command to rtrmgr\n");
+	    _cli_client.cli_print("Failed to communicate save command to rtrmgr.\n");
 	    _cli_client.cli_print(c_format("%s\n", e.error_msg()));
 	}
+	_xorpsh.set_mode(XorpShell::MODE_IDLE);
 	reenable_ui();
 	return;
     }
-    _cli_client.cli_print("Save done\n");
+    _xorpsh.set_mode(XorpShell::MODE_SAVING);
+    //
+    // Don't enable the UI - we'll get called back when the saving has
+    // completed.
+    //
+}
+
+//
+// Method save_done() is called when the save has completed,
+// or when something goes wrong during this process.
+//
+void
+RouterCLI::save_done(bool success, string errmsg)
+{
+    if (! success) {
+	_cli_client.cli_print("ERROR: Save failed.\n");
+	_cli_client.cli_print(errmsg);
+    } else {
+	_cli_client.cli_print("Save done.\n");
+    }
+    _xorpsh.set_mode(XorpShell::MODE_IDLE);
     reenable_ui();
-};
+}
 
 int
 RouterCLI::load_func(const string& ,
@@ -2842,7 +2867,7 @@ RouterCLI::load_communicated(const XrlError& e)
     // Don't enable the UI - we'll get called back when the commit has
     // completed.
     //
-};
+}
 
 //
 // Method load_done() is called when the load has successfully been applied to
@@ -2859,7 +2884,7 @@ RouterCLI::load_done(bool success, string errmsg)
     }
     _xorpsh.set_mode(XorpShell::MODE_IDLE);
     reenable_ui();
-};
+}
 
 //
 // Just to make the code more readable:

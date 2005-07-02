@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.25 2004/12/18 02:08:12 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.26 2005/03/25 02:54:35 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -35,6 +35,8 @@ class MasterTemplateTree;
 
 class MasterConfigTree : public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+    typedef XorpCallback2<void, bool, string>::RefPtr ConfigSaveCallBack;
+    typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigLoadCallBack;
 
 public:
     MasterConfigTree(const string& config_file, MasterTemplateTree* tt,
@@ -76,6 +78,33 @@ public:
 		   uint32_t& holder);
     bool unlock_node(const string& node, uid_t user_id);
 
+    bool save_config(const string& filename, uid_t user_id,
+		     const string& save_hook, string& errmsg,
+		     ConfigSaveCallBack cb);
+    void save_config_file_sent_cb(bool success, string errmsg,
+				  string filename, uid_t user_id,
+				  ConfigSaveCallBack cb);
+    void save_config_file_cleanup_cb(bool success, string errmsg,
+				     bool orig_success, string orig_errmsg,
+				     string filename, uid_t user_id,
+				     ConfigSaveCallBack cb);
+    void save_config_done_cb(bool success, string errmsg,
+			     ConfigSaveCallBack cb);
+
+    bool load_config(const string& filename, uid_t user_id, string& errmsg,
+		     ConfigLoadCallBack cb);
+    void load_config_file_received_cb(bool success, string errmsg,
+				      string filename, uid_t user_id,
+				      ConfigLoadCallBack cb);
+    void load_config_file_cleanup_cb(bool success, string errmsg,
+				     bool orig_success, string orig_errmsg,
+				     string rtrmgr_config_value,
+				     string filename, uid_t user_id,
+				     ConfigLoadCallBack cb);
+    void load_config_commit_changes_cb(bool success, string errmsg,
+				       string deltas, string deletions,
+				       ConfigLoadCallBack cb);
+
     bool save_to_file(const string& filename, uid_t user_id, 
 		      const string& save_hook, string& errmsg);
     bool load_from_file(const string& filename, uid_t user_id, string& errmsg,
@@ -108,6 +137,8 @@ public:
     
 
 private:
+    bool remove_tmp_config_file(string& errmsg);
+
     void diff_configs(const MasterConfigTree& new_tree, 
 		      MasterConfigTree& delta_tree,
 		      MasterConfigTree& deletion_tree);
@@ -147,6 +178,8 @@ private:
     bool		_commit_in_progress;
     bool		_config_failed;
     string		_config_failed_msg;
+    bool		_rtrmgr_config_node_found;
+    XorpTimer		_save_config_completed_timer;
 };
 
 #endif // __RTRMGR_MASTER_CONF_TREE_HH__
