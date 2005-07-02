@@ -13,8 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.67 2005/06/28 20:33:24 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.68 2005/07/02 00:08:33 pavlin Exp $"
 
+//#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"
@@ -1068,6 +1069,11 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 	XLOG_ASSERT(varname_node != NULL);
 	value = varname_node->value();
 	return true;
+    case NODE_OPERATOR:
+	XLOG_ASSERT(varname_node != NULL);
+	value = varname_node->show_operator();
+	debug_msg("variable %s at %s, value is \"%s\"\n",  varname.c_str(), _segname.c_str(), value.c_str());
+	return true;
     case NAMED:
     {
 	list<string> var_parts;
@@ -1156,6 +1162,13 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
     if (varname == "$(@)" || (varname == "$(" + _segname + ")") ) {
 	XLOG_ASSERT(!_template_tree_node->is_tag());
 	type = NODE_VALUE;
+	debug_msg("varname node is >%s<\n", _segname.c_str());
+	return this;
+    }
+
+    if (varname == "$(<>)") {
+	XLOG_ASSERT(!_template_tree_node->is_tag());
+	type = NODE_OPERATOR;
 	debug_msg("varname node is >%s<\n", _segname.c_str());
 	return this;
     }
@@ -1274,6 +1287,7 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 
     if ((var_parts.front() != "@")
 	&& (var_parts.front() != _segname) 
+	&& (var_parts.front() != "<>") 
 	&& ((!_has_value) || (var_parts.front() != _value))) {
 	// varname doesn't match us.
 	type = NONE;
@@ -1285,6 +1299,15 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
 	    type = NODE_VALUE;
+	    debug_msg("varname V node is >%s<\n", _segname.c_str());
+	    return this;
+	}
+    }
+
+    // The name might refer to this node for an operator
+    if (var_parts.size() == 1) {
+	if ((var_parts.front() == "<>")) {
+	    type = NODE_OPERATOR;
 	    debug_msg("varname V node is >%s<\n", _segname.c_str());
 	    return this;
 	}
@@ -1439,6 +1462,12 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
+	case NODE_OPERATOR: 
+	    errmsg = c_format("Attempt to set variable operator \"%s\" "
+			      "which is the name of a configuration node",
+			      varname.c_str());
+	    XLOG_ERROR("%s", errmsg.c_str());
+	    return false;
 	case NAMED:
 	{
 	    list<string> var_parts;
@@ -1494,6 +1523,12 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 	    }
 	    node->set_named_value(var_parts.back(), value);
 	    return true;
+	case NODE_OPERATOR:
+	    errmsg = c_format("Attempt to set operator \"%s\" "
+			      "which is the child of a named variable",
+			      varname.c_str());
+	    XLOG_ERROR("%s", errmsg.c_str());
+	    return false;
 	case NAMED:
 	    errmsg = c_format("Attempt to set variable \"%s\" "
 			      "which is the child of a named variable",

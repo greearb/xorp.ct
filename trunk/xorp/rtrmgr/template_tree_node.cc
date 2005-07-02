@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.40 2005/06/28 20:33:25 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.41 2005/07/02 00:19:57 pavlin Exp $"
 
 
 #include <glob.h>
@@ -520,8 +520,9 @@ TemplateTreeNode::split_up_varname(const string& varname,
 const TemplateTreeNode*
 TemplateTreeNode::find_varname_node(const string& varname) const
 {
-    if (varname == "$(@)"
-	|| (varname == "$(DEFAULT)")
+    if (varname == "$(@)" /* current value of a node */
+	|| (varname == "$(DEFAULT)") /* default value of a node */
+	|| (varname == "$(<>)") /* operator for a terminal node */
 	|| (varname == "$(" + _segname + ")") ) {
 	XLOG_ASSERT(! is_tag());
 	if (varname == "$(DEFAULT)") {
@@ -591,7 +592,9 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
 
     // The name might refer to this node
     if (var_parts.size() == 1) {
-	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
+	if ((var_parts.front() == "@") 
+	    || (var_parts.front() == _segname)
+	    || (var_parts.front() == "<>")) {
 	    return this;
 	}
     }
@@ -602,6 +605,13 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
 	    // The name refers to the default value of this node
 	    if (! has_default())
 		return NULL;	// The template tree node has no default value
+	    return this;
+	}
+    }
+
+    // The name might refer to the operator value of this node
+    if ((var_parts.size() == 2) && (var_parts.back() == "<>")) {
+	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
 	    return this;
 	}
     }
