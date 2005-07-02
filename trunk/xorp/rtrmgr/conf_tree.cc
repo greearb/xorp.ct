@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.28 2005/06/28 07:01:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.29 2005/06/28 20:33:23 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -384,8 +384,8 @@ ConfigTree::show_subtree(const list<string>& path_segments) const
     if (found == NULL)
 	return "ERROR";
 
-    string s= found->show_subtree(/* depth */ 0, /* indent */ 0,
-				  /* do_indent */ true, /* annotate */ true);
+    string s = found->show_subtree(/* depth */ 0, /* indent */ 0,
+				   /* do_indent */ true, /* annotate */ true);
     return s;
 }
 

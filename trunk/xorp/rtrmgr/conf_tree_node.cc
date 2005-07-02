@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.66 2005/06/28 02:05:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.67 2005/06/28 20:33:24 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -1554,7 +1554,7 @@ ConfigTreeNode::sort_by_value(list <ConfigTreeNode*>& children) const
 string
 ConfigTreeNode::show_operator() const
 {
-    switch(_operator) {
+    switch (_operator) {
     case OP_NONE:
 	XLOG_UNREACHABLE();
     case OP_EQ:
