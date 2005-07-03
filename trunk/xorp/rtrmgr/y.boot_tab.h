@@ -23,3 +23,4 @@
 #define COMPARATOR 275
 #define MODIFIER 276
 #define SYNTAX_ERROR 277
+#define LINENUM 278

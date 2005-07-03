@@ -1,7 +1,10 @@
-#ifndef lint
-#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
-#endif
 #include <stdlib.h>
+#ifndef lint
+#ifdef __unused
+__unused
+#endif
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $"
+#endif
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
@@ -59,7 +62,7 @@ static int yygrowstack();
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize opcmdstacksize
 #define yysslim opcmdsslim
-#line 64 "y.opcmd_tab.c"
+#line 67 "y.opcmd_tab.c"
 #define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
@@ -591,7 +594,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 596 "y.opcmd_tab.c"
+#line 599 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -653,9 +656,9 @@ int
 yyparse (YYPARSE_PARAM_ARG)
     YYPARSE_PARAM_DECL
 {
-    register int yym, yyn, yystate;
+    int yym, yyn, yystate;
 #if YYDEBUG
-    register const char *yys;
+    const char *yys;
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -858,7 +861,7 @@ case 28:
 #line 111 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 863 "y.opcmd_tab.c"
+#line 866 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

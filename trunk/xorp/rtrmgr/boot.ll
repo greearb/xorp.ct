@@ -321,6 +321,12 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 	return LITERAL;
 	}
 
+\%[0-9]+\% {
+	bootlval = strdup(boottext+1);
+	bootlval[strlen(bootlval)-1]=0;
+	return LINENUM;
+}
+
 \"			{
 			BEGIN(string);
 			parsebuf="";

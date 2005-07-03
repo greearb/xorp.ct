@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.30 2005/07/02 00:08:33 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.31 2005/07/02 02:53:12 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -144,8 +144,9 @@ ConfigTree::path_as_string(const list<string>& path_segments) const
 }
 
 void
-ConfigTree::extend_path(const string& segment, int type)
+ConfigTree::extend_path(const string& segment, int type, uint64_t nodenum)
 {
+   debug_msg("extend_path: %s, %llu\n", segment.c_str(), nodenum);
     _path_segments.push_back(make_pair(segment, type));
 }
 

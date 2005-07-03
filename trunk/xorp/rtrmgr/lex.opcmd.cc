@@ -20,8 +20,14 @@
 
 /* Scanner skeleton version:
  * $Header$
- * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.4 1999/10/27 07:56:44 obrien Exp $
+ * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.8 2004/01/06 19:03:44 nectar Exp $
  */
+
+#if defined(__FreeBSD__)
+#include <sys/cdefs.h>
+#else
+#define __unused
+#endif
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
@@ -259,7 +265,7 @@ YY_BUFFER_STATE yy_scan_string YY_PROTO(( yyconst char *yy_str ));
 YY_BUFFER_STATE yy_scan_bytes YY_PROTO(( yyconst char *bytes, int len ));
 
 static void *yy_flex_alloc YY_PROTO(( yy_size_t ));
-static void *yy_flex_realloc YY_PROTO(( void *, yy_size_t ));
+static void *yy_flex_realloc YY_PROTO(( void *, yy_size_t )) __unused;
 static void yy_flex_free YY_PROTO(( void * ));
 
 #define yy_new_buffer yy_create_buffer
@@ -450,7 +456,7 @@ extern char* opcmdlval;
 #define YY_NO_UNPUT 1
 #define comment 1
 
-#line 454 "lex.opcmd.cc"
+#line 460 "lex.opcmd.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -604,7 +610,7 @@ YY_DECL
 #line 12 "op_commands.ll"
 
 
-#line 608 "lex.opcmd.cc"
+#line 614 "lex.opcmd.cc"
 
 	if ( yy_init )
 		{
@@ -833,7 +839,7 @@ YY_RULE_SETUP
 #line 93 "op_commands.ll"
 ECHO;
 	YY_BREAK
-#line 837 "lex.opcmd.cc"
+#line 843 "lex.opcmd.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 	yyterminate();
