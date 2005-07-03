@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree_node.hh,v 1.9 2005/03/25 02:54:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree_node.hh,v 1.10 2005/06/15 19:14:52 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_NODE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_NODE_HH__
@@ -34,13 +34,16 @@ public:
     MasterConfigTreeNode(bool verbose);
     MasterConfigTreeNode(const MasterConfigTreeNode& ctn);
     MasterConfigTreeNode(const string& node_name, const string& path, 
-		   const TemplateTreeNode* ttn, MasterConfigTreeNode* parent,
-		   uid_t user_id, bool verbose);
+			 const TemplateTreeNode* ttn, 
+			 MasterConfigTreeNode* parent,
+			 uint64_t nodenum,
+			 uid_t user_id, bool verbose);
 
     virtual ConfigTreeNode* create_node(const string& segment, 
 					const string& path,
 					const TemplateTreeNode* ttn, 
 					ConfigTreeNode* parent_node, 
+					uint64_t nodenum,
 					uid_t user_id, bool verbose);
     virtual ConfigTreeNode* create_node(const ConfigTreeNode& ctn);
     void command_status_callback(const Command* cmd, bool success);

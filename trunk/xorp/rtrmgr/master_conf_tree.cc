@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.47 2005/03/25 02:54:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.48 2005/07/02 04:20:20 pavlin Exp $"
 
-
+//#define DEBUG_LOGGING
 #include <sys/stat.h>
 #include <grp.h>
 
@@ -157,7 +157,7 @@ MasterConfigTree::parse(const string& configuration,
     if (ConfigTree::parse(configuration, config_file, errmsg) != true)
 	return false;
 
-    string s = show_tree();
+    string s = show_tree(/*numbered*/ true);
     debug_msg("== MasterConfigTree::parse yields ==\n%s\n"
 	      "====================================\n", s.c_str());
 
@@ -216,13 +216,14 @@ ConfigTreeNode*
 MasterConfigTree::create_node(const string& segment, const string& path,
 			      const TemplateTreeNode* ttn, 
 			      ConfigTreeNode* parent_node, 
+			      uint64_t nodenum,
 			      uid_t user_id, bool verbose)
 {
     MasterConfigTreeNode *ctn, *parent;
     parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
     if (parent_node != NULL)
 	XLOG_ASSERT(parent != NULL);
-    ctn = new MasterConfigTreeNode(segment, path, ttn, parent, 
+    ctn = new MasterConfigTreeNode(segment, path, ttn, parent, nodenum,
 				   user_id, verbose);
     return reinterpret_cast<ConfigTreeNode*>(ctn);
 }
@@ -813,7 +814,7 @@ MasterConfigTree::save_to_file(const string& filename,
     }
 
     // Write the config to the file
-    string config = show_unannotated_tree();
+    string config = show_unannotated_tree(/*numbered*/ false);
     bytes = fwrite(config.c_str(), 1, config.size(), file);
     if (bytes < config.size()) {
 	fclose(file);
@@ -981,7 +982,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	//
 	// Save the current configuration
 	//
-	string config = show_unannotated_tree();
+	string config = show_unannotated_tree(/*numbered*/ false);
 	if (write(s, config.c_str(), config.size())
 	    != static_cast<ssize_t>(config.size())) {
 	    errmsg = c_format("Cannot save the configuration file: "
@@ -1553,8 +1554,8 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     }
 
     // Pass these back out so we can notify other users of the change
-    deltas = delta_tree.show_unannotated_tree();
-    deletions = deletion_tree.show_unannotated_tree();
+    deltas = delta_tree.show_unannotated_tree(/*numbered*/ true);
+    deletions = deletion_tree.show_unannotated_tree(/*numbered*/ true);
 
     //
     // Commit the changes
@@ -1673,8 +1674,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     }
 
     // Pass these back out so we can notify other users of the change
-    deltas = delta_tree.show_unannotated_tree();
-    deletions = deletion_tree.show_unannotated_tree();
+    deltas = delta_tree.show_unannotated_tree(/*numbered*/ true);
+    deletions = deletion_tree.show_unannotated_tree(/*numbered*/ true);
 
     //
     // The config is loaded.  We haven't yet committed it, but that

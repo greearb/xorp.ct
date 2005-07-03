@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.31 2005/07/02 02:53:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.32 2005/07/03 14:24:26 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -91,7 +91,7 @@ ConfigTree::find_template(const list<string>& path_segments) const
 }
 
 const TemplateTreeNode*
-ConfigTree::find_template_by_type(const list<SegmentType>& path_segments) const
+ConfigTree::find_template_by_type(const list<ConfPathSegment>& path_segments) const
 {
     const TemplateTreeNode *ttn;
 
@@ -99,14 +99,15 @@ ConfigTree::find_template_by_type(const list<SegmentType>& path_segments) const
     return ttn;
 }
 
-list<ConfigTree::SegmentType>
+list<ConfPathSegment>
 ConfigTree::path_as_segments() const
 {
-    list<SegmentType> path_segments;
+    list<ConfPathSegment> path_segments;
     ConfigTreeNode* ctn = _current_node;
 
     while (ctn->parent() != NULL) {
-	path_segments.push_front(make_pair(ctn->segname(), ctn->type()));
+	path_segments.push_front(ConfPathSegment(ctn->segname(), 
+						 ctn->type(), ctn->nodenum()));
 	ctn = ctn->parent();
     }
     return path_segments;
@@ -147,7 +148,7 @@ void
 ConfigTree::extend_path(const string& segment, int type, uint64_t nodenum)
 {
    debug_msg("extend_path: %s, %llu\n", segment.c_str(), nodenum);
-    _path_segments.push_back(make_pair(segment, type));
+    _path_segments.push_back(ConfPathSegment(segment, type, nodenum));
 }
 
 void
@@ -165,7 +166,7 @@ void
 ConfigTree::push_path()
 {
     string path = current_path_as_string();
-    string nodename = _path_segments.back().first;
+    string nodename = _path_segments.back().segname();
 
     //
     // Keep track of how many segments comprise this frame so we can
@@ -174,16 +175,17 @@ ConfigTree::push_path()
     size_t len = _path_segments.size();
     _segment_lengths.push_front(len);
 
-    list<SegmentType>::const_iterator iter;
+    list<ConfPathSegment>::const_iterator iter;
     for (iter = _path_segments.begin(); iter != _path_segments.end(); ++iter) {
-	add_node(iter->first, iter->second);
+	add_node(iter->segname(), iter->type(), iter->nodenum());
     }
 
     _path_segments.clear();
 }
 
 void
-ConfigTree::add_node(const string& segment, int type) throw (ParseError)
+ConfigTree::add_node(const string& segment, int type, uint64_t nodenum) 
+    throw (ParseError)
 {
     list<ConfigTreeNode*>::const_iterator iter;
     ConfigTreeNode *found = NULL;
@@ -238,8 +240,8 @@ ConfigTree::add_node(const string& segment, int type) throw (ParseError)
     if (found != NULL) {
 	_current_node = found;
     } else {
-	list<SegmentType> path_segments = path_as_segments();
-	path_segments.push_back(make_pair(segment, type));
+	list<ConfPathSegment> path_segments = path_as_segments();
+	path_segments.push_back(ConfPathSegment(segment, type, nodenum));
 	const TemplateTreeNode* ttn = find_template_by_type(path_segments);
 	if (ttn == NULL) {
 	    booterror("No template found in template map");
@@ -250,7 +252,7 @@ ConfigTree::add_node(const string& segment, int type) throw (ParseError)
 	    path = segment;
 	else
 	    path += " " + segment;
-	found = create_node(segment, path, ttn, _current_node,
+	found = create_node(segment, path, ttn, _current_node, nodenum, 
 			    /* user_id */ 0, _verbose);
 	_current_node = found;
     }
@@ -386,7 +388,8 @@ ConfigTree::find_config_node(const list<string>& path_segments) const
 
 
 string
-ConfigTree::show_subtree(const list<string>& path_segments) const
+ConfigTree::show_subtree(const list<string>& path_segments, 
+			 bool numbered) const
 {
     const ConfigTreeNode *found = find_config_node(path_segments);
 
@@ -394,24 +397,27 @@ ConfigTree::show_subtree(const list<string>& path_segments) const
 	return "ERROR";
 
     string s = found->show_subtree(/* depth */ 0, /* indent */ 0,
-				   /* do_indent */ true, /* annotate */ true);
+				   /* do_indent */ true, numbered,
+				   /* annotate */ true);
     return s;
 }
 
 string
-ConfigTree::show_tree() const
+ConfigTree::show_tree(bool numbered) const
 {
     return const_root_node().show_subtree(/* depth */ 0, /* indent */ 0,
-					   /* do_indent */ true, 
-					   /* annotate */ true);
+					  /* do_indent */ true, 
+					  numbered,
+					  /* annotate */ true);
 }
 
 string
-ConfigTree::show_unannotated_tree() const
+ConfigTree::show_unannotated_tree(bool numbered) const
 {
     return const_root_node().show_subtree(/* depth */ 0, /* indent */ 0,
-					   /* do_indent */ true, 
-					   /* annotate */ false);
+					  /* do_indent */ true, 
+					  numbered,
+					  /* annotate */ false);
 }
 
 ConfigTreeNode*

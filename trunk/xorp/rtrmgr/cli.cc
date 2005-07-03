@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.66 2005/07/01 23:35:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.67 2005/07/02 04:20:20 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2102,7 +2102,9 @@ RouterCLI::text_entry_func(const string& ,
 		XLOG_TRACE(_verbose, "creating node %s\n", value.c_str());
 		ctn = new SlaveConfigTreeNode(value, 
 					      makepath(path_segments),
-					      data_ttn, ctn, getuid(),
+					      data_ttn, ctn, 
+					      /* XXX nodenum */ 0,
+					      getuid(),
 					      _verbose);
 		_changes_made = true;
 		value_expected = false;
@@ -2211,7 +2213,9 @@ RouterCLI::text_entry_func(const string& ,
 	    XLOG_TRACE(_verbose, "creating node %s\n", ttn->segname().c_str());
 	    ctn = new SlaveConfigTreeNode(ttn->segname(), 
 					  makepath(path_segments),
-					  ttn, ctn, getuid(),
+					  ttn, ctn,
+					  /* XXX nodenum */ 0,
+					  getuid(),
 					  _verbose);
 	    _changes_made = true;
 	    if (ttn->is_tag() || ctn->is_leaf()) {
@@ -2375,7 +2379,7 @@ RouterCLI::delete_func(const string& ,
 	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
-    string result = config_tree()->show_subtree(path_segments);
+    string result = config_tree()->show_subtree(path_segments, false);
     _cli_client.cli_print("Deleting: \n");
     _cli_client.cli_print(result + "\n");
 
@@ -2496,6 +2500,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	newnode = new SlaveConfigTreeNode(path_parts.back(),
 					  newpath, ttn,
 					  ctn,
+					  /* XXX nodenum */ 0,
 					  getuid(),
 					  _verbose);
 	ctn = newnode;
@@ -2626,7 +2631,7 @@ RouterCLI::show_func(const string& ,
 	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
-    string result = config_tree()->show_subtree(path_segments);
+    string result = config_tree()->show_subtree(path_segments, false);
     _cli_client.cli_print(result + "\n");
     config_mode_prompt();
 

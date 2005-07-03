@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.16 2005/03/25 02:54:37 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.17 2005/07/02 04:20:21 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -44,6 +44,7 @@ public:
 					const string& path,
 					const TemplateTreeNode* ttn, 
 					ConfigTreeNode* parent_node, 
+					uint64_t nodenum,
 					uid_t user_id, bool verbose);
     virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose);
 

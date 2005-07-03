@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.34 2005/03/25 02:54:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.35 2005/07/02 04:20:21 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -286,7 +286,7 @@ XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
 	return;
     }
 
-    string config = _master_config_tree->show_tree();
+    string config = _master_config_tree->show_tree(/*numbered*/ true);
     string client = user->clientname();
     GENERIC_CALLBACK cb2;
     cb2 = callback(this, &XrlRtrmgrInterface::client_updated, 
@@ -436,7 +436,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
     }
     if (_rtrmgr.ready()) {
 	ready = true;
-	config = _master_config_tree->show_tree();
+	config = _master_config_tree->show_tree(/*numbered*/ true);
     } else {
 	ready = false;
 	config = "";

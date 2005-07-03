@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.18 2005/02/01 07:45:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.19 2005/03/25 02:54:38 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -40,9 +40,10 @@ SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 					 const string &path, 
 					 const TemplateTreeNode *ttn,
 					 SlaveConfigTreeNode *parent,
+					 uint64_t nodenum,
 					 uid_t user_id,
 					 bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, user_id, verbose)
+    : ConfigTreeNode(nodename, path, ttn, parent, nodenum, user_id, verbose)
 {
 
 }
@@ -51,6 +52,7 @@ ConfigTreeNode*
 SlaveConfigTreeNode::create_node(const string& segment, const string& path,
 				  const TemplateTreeNode* ttn, 
 				  ConfigTreeNode* parent_node, 
+				 uint64_t nodenum,
 				  uid_t user_id, bool verbose)
 {
     SlaveConfigTreeNode *new_node, *parent;
@@ -61,7 +63,7 @@ SlaveConfigTreeNode::create_node(const string& segment, const string& path,
 	XLOG_ASSERT(parent != NULL);
 
     new_node = new SlaveConfigTreeNode(segment, path, ttn, parent, 
-				   user_id, verbose);
+				       nodenum, user_id, verbose);
     return reinterpret_cast<ConfigTreeNode*>(new_node);
 }
 

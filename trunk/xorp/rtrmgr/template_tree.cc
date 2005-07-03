@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.30 2005/06/28 17:55:49 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.31 2005/06/28 20:33:25 mjh Exp $"
 
 
 #include <glob.h>
@@ -402,14 +402,15 @@ TemplateTree::find_node(const list<string>& path_segments) const
 }
 
 const TemplateTreeNode*
-TemplateTree::find_node_by_type(const list<pair<string, int> >& path_segments) const
+TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments) 
+    const
 {
     TemplateTreeNode* ttn = _root_node;
 
-    list<pair<string, int> >::const_iterator iter;
+    list<ConfPathSegment>::const_iterator iter;
     for (iter = path_segments.begin(); iter != path_segments.end(); ++iter) {
-	const string& segname = iter->first;
-	int type = iter->second;
+	const string& segname = iter->segname();
+	int type = iter->type();
 	list<TemplateTreeNode*> matches;
 	list<TemplateTreeNode*>::const_iterator ti;
 

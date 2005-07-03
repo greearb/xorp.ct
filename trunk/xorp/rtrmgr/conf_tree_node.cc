@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.68 2005/07/02 00:08:33 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.69 2005/07/02 16:53:52 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -133,6 +133,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 			       const string& path, 
 			       const TemplateTreeNode* ttn,
 			       ConfigTreeNode* parent,
+			       uint64_t nodenum,
 			       uid_t user_id,
 			       bool verbose)
     : _template_tree_node(ttn),
@@ -143,6 +144,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _segname(nodename),
       _path(path),
       _parent(parent),
+      _nodenum(nodenum),
       _user_id(user_id),
       _committed_user_id(0),
       _committed_modification_time(TimeVal::ZERO()),
@@ -166,6 +168,7 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _segname(ctn._segname),
       _path(ctn._path),
       _parent(NULL),
+      _nodenum(ctn._nodenum),
       _user_id(ctn._user_id),
       _committed_user_id(ctn._committed_user_id),
       _modification_time(ctn._modification_time),
@@ -206,6 +209,9 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 	    return false;
 	}
 	if (_operator != them.get_operator()) {
+	    return false;
+	}
+	if (_nodenum != them.nodenum()) {
 	    return false;
 	}
     }
@@ -276,7 +282,9 @@ ConfigTreeNode::add_default_children()
 		string name = (*tci)->segname();
 		string path = _path + " " + name;
 		ConfigTreeNode *new_node = create_node(name, path, *tci,
-						       this, _user_id,
+						       this, 
+						       /* XXX: nodenum */ 0,
+						       _user_id,
 						       _verbose);
 		new_node->set_value((*tci)->default_str(), _user_id);
 		new_node->set_operator(OP_ASSIGN, _user_id);
@@ -337,6 +345,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _value = delta_node.value();
 		    _committed_operator = _operator;
 		    _operator = delta_node.get_operator();
+		    _nodenum = delta_node.nodenum();
 		    _committed_user_id = _user_id;
 		    _user_id = user_id;
 		    _committed_modification_time = _modification_time;
@@ -347,6 +356,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _value = delta_node.value();
 		    _committed_operator = delta_node.get_operator();
 		    _operator = delta_node.get_operator();
+		    _nodenum = delta_node.nodenum();
 		    _committed_user_id = delta_node.user_id();
 		    _user_id = delta_node.user_id();
 		    _committed_modification_time =
@@ -392,6 +402,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 				   delta_child->path(),
 				   delta_child->template_tree_node(),
 				   this,
+				   delta_child->nodenum(),
 				   user_id,
 				   _verbose);
 	    if (!provisional_change)
@@ -563,7 +574,8 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
     // The root node has a NULL template
     if (_template_tree_node != NULL) {
 	if (_existence_committed == false) {
-	    result =  show_subtree(depth, /* XXX */ depth * 2, true, false);
+	    result =  show_subtree(depth, /* XXX */ depth * 2, true, 
+				   /* numbered */ false, false);
 	    delete_subtree_silently();
 	    return result;
 	} else if (_value_committed == false) {
@@ -653,6 +665,13 @@ ConfigTreeNode::value() const
     return _segname;
 }
 
+uint64_t 
+ConfigTreeNode::nodenum() const
+{
+    return _nodenum;
+}
+
+
 ConfigOperator
 ConfigTreeNode::get_operator() const
 {
@@ -666,7 +685,7 @@ ConfigTreeNode::get_operator() const
 
 string 
 ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
-			     bool annotate) const
+			     bool numbered, bool annotate) const
 {
 
     string s;
@@ -697,8 +716,10 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 		    else
 			s += ">   ";
 		}
-		s += my_in + _segname + " " +
-		    (*iter)->show_subtree(depth, indent, false, annotate);
+		s += my_in + show_nodenum(numbered, (*iter)->nodenum()) 
+		    + _segname + " " +
+		    (*iter)->show_subtree(depth, indent, false, 
+					  numbered, annotate);
 	    }
 	}
     } else if (is_a_tag && (show_me == false)) {
@@ -717,9 +738,13 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	}
 
 	if (do_indent) {
-	    s = s2 + my_in + _segname;
-	} else
+	    s = s2 + my_in + show_nodenum(numbered, nodenum())
+		+ _segname;
+	} else {
+	    /* no need to show the node number here */
+	    XLOG_ASSERT(_parent->is_tag());
 	    s += _segname; 
+	}
 	if ((type() != NODE_VOID) && (_has_value)) {
 	    string value;
 	    if ((type() == NODE_TEXT) /* && annotate */ ) {
@@ -766,14 +791,16 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	s += " {\n";
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(depth+1, new_indent, true, annotate);
+	    s += (*iter)->show_subtree(depth+1, new_indent, true, 
+				       numbered, annotate);
 	}
 	s += s2 + my_in + "}\n";
     } else if ((is_a_tag == false) && (show_me == false)) {
 	new_indent = indent;
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(depth+1, new_indent, true, annotate);
+	    s += (*iter)->show_subtree(depth+1, new_indent, true, 
+				       numbered, annotate);
 	}
     }
     return s;
@@ -1585,6 +1612,14 @@ ConfigTreeNode::sort_by_value(list <ConfigTreeNode*>& children) const
     children.sort(CTN_CompareValue());
 } 
 
+string
+ConfigTreeNode::show_nodenum(bool numbered, uint64_t nodenum) const {
+    string s;
+    if (numbered) {
+	s = c_format("%%%llu%% ", nodenum);
+    }
+    return s;
+}
 
 string
 ConfigTreeNode::show_operator() const

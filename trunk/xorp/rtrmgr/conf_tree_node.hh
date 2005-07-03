@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.34 2005/06/28 20:33:24 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.35 2005/07/02 16:53:52 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -65,6 +65,7 @@ public:
     ConfigTreeNode(const ConfigTreeNode& ctn);
     ConfigTreeNode(const string& node_name, const string& path, 
 		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
+		   uint64_t nodenum,
 		   uid_t user_id, bool verbose);
     virtual ~ConfigTreeNode();
 
@@ -74,6 +75,7 @@ public:
 					const string& path,
 					const TemplateTreeNode* ttn, 
 					ConfigTreeNode* parent_node, 
+					uint64_t nodenum,
 					uid_t user_id, bool verbose) = 0;
     virtual ConfigTreeNode* create_node(const ConfigTreeNode& ctn) = 0;
 
@@ -110,6 +112,7 @@ public:
     string typestr() const;
     const string& segname() const { return _segname; }
     const string& value() const;
+    uint64_t nodenum() const;
     bool has_value() const { return _has_value; }
     ConfigOperator get_operator() const;
     uid_t user_id() const { return _user_id; }
@@ -125,7 +128,7 @@ public:
     list<ConfigTreeNode*>& children() { return _children; }
     const list<ConfigTreeNode*>& const_children() const { return _children; }
     string show_subtree(int depth, int indent, bool do_indent,
-			bool annotate) const;
+			bool numbered, bool annotate) const;
     void mark_subtree_for_deletion(uid_t user_id);
     void delete_subtree_silently();
     void clone_subtree(const ConfigTreeNode& orig_node);
@@ -156,6 +159,7 @@ protected:
     ConfigTreeNode* find_child_varname_node(const list<string>& var_parts,
 					    VarType& type);
     void sort_by_value(list <ConfigTreeNode*>& children) const;
+    string show_nodenum(bool numbered, uint64_t nodenum) const;
     string show_operator() const;
 
 
@@ -171,6 +175,7 @@ protected:
     string _path;
     ConfigTreeNode* _parent;
     list<ConfigTreeNode *> _children;
+    uint64_t _nodenum;
     uid_t _user_id;	// the user ID of the user who last changed this node
     uid_t _committed_user_id;	// The user ID of the user who last changed
 				// this node before the last commit

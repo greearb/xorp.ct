@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.26 2005/03/25 02:54:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.27 2005/07/02 04:20:21 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -77,16 +77,17 @@ ConfigTree* SlaveConfigTree::create_tree(TemplateTree *tt, bool verbose)
 
 ConfigTreeNode*
 SlaveConfigTree::create_node(const string& segment, const string& path,
-			      const TemplateTreeNode* ttn, 
-			      ConfigTreeNode* parent_node, 
-			      uid_t user_id, bool verbose)
+			     const TemplateTreeNode* ttn, 
+			     ConfigTreeNode* parent_node, 
+			     uint64_t nodenum,
+			     uid_t user_id, bool verbose)
 {
     SlaveConfigTreeNode *ctn, *parent;
     parent = dynamic_cast<SlaveConfigTreeNode *>(parent_node);
     if (parent_node != NULL)
 	XLOG_ASSERT(parent != NULL);
     ctn = new SlaveConfigTreeNode(segment, path, ttn, parent, 
-				   user_id, verbose);
+				  nodenum, user_id, verbose);
     return reinterpret_cast<ConfigTreeNode*>(ctn);
 }
 
@@ -158,11 +159,11 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
     // We managed to get the master lock
     SlaveConfigTree delta_tree(_xclient, _verbose);
     delta_tree.get_deltas(*this);
-    string deltas = delta_tree.show_unannotated_tree();
+    string deltas = delta_tree.show_unannotated_tree(/*numbered*/ true);
 
     SlaveConfigTree withdraw_tree(_xclient, _verbose);
     withdraw_tree.get_deletions(*this);
-    string deletions = withdraw_tree.show_unannotated_tree();
+    string deletions = withdraw_tree.show_unannotated_tree(/*numbered*/ true);
 
     XLOG_TRACE(_verbose, "deletions = >>>\n%s<<<\n", deletions.c_str());
 
