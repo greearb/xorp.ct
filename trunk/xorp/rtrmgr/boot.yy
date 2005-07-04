@@ -60,7 +60,7 @@ long_nodename:	literals { push_path(); }
 
 literal:	LITERAL { nodenum += 100;
                           extend_path($1, NODE_VOID, nodenum); }
-		| LINENUM LITERAL { nodenum = atoll($1);
+		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
 				    extend_path($2, NODE_VOID, nodenum); }
 		;
 
@@ -100,7 +100,7 @@ emptystatement:	END
 
 term_literal:	LITERAL { nodenum += 100; 
 			  extend_path($1, NODE_VOID, nodenum); }
-		| LINENUM LITERAL { nodenum = atoll($1);
+		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
 				    extend_path($2, NODE_VOID, nodenum);}
 		;
 
