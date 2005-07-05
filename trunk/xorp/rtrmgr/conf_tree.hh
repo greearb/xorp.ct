@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.21 2005/07/03 14:24:26 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.22 2005/07/03 21:05:59 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -67,7 +67,7 @@ public:
 					uint64_t nodenum,
 					uid_t user_id, bool verbose) = 0;
     virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose) = 0;
-    void terminal_value(const char* value,
+    void terminal_value(const string& value,
 			int type, 
 			ConfigOperator op) throw (ParseError);
     list<ConfPathSegment> path_as_segments() const;

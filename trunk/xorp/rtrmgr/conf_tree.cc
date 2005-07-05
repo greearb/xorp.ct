@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.33 2005/07/03 21:05:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.34 2005/07/05 08:29:20 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -199,7 +199,7 @@ ConfigTree::add_node(const string& segment, int type, uint64_t nodenum)
 	// segment is actually a value.
 	//
 	if (_current_node->is_leaf()) {
-	    terminal_value(segment.c_str(), _current_node->type(), OP_ASSIGN);
+	    terminal_value(segment, _current_node->type(), OP_ASSIGN);
 	} else {
 	    booterror("Invalid child node");
 	}
@@ -263,11 +263,11 @@ ConfigTree::add_node(const string& segment, int type, uint64_t nodenum)
 
 
 void
-ConfigTree::terminal_value(const char* value, int type, ConfigOperator op) 
+ConfigTree::terminal_value(const string& value, int type, ConfigOperator op) 
     throw (ParseError)
 {
     string path(current_path_as_string());
-    string svalue(value);
+    string svalue = value;
     ConfigTreeNode *ctn = _current_node;
 
     XLOG_ASSERT(ctn != NULL);

@@ -304,14 +304,13 @@ pop_path()
 }
 
 static void
-terminal(char *value, int type, ConfigOperator op)
+terminal(const string& value, int type, ConfigOperator op)
 {
     push_path();
 
     lastsymbol = value;
 
     config_tree->terminal_value(value, type, op);
-    free(value);
     pop_path();
 }
 
@@ -430,7 +429,7 @@ ConfigOperator lookup_modifier(char *s)
     errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
     xorp_throw(ParseError, errmsg);
 }
-#line 435 "y.boot_tab.c"
+#line 434 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -712,103 +711,103 @@ break;
 case 35:
 #line 107 "boot.yy"
 {
-			terminal(strdup(""), NODE_VOID, OP_NONE);
+			terminal(string(""), NODE_VOID, OP_NONE);
 		}
 break;
 case 36:
 #line 110 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_TEXT, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_TEXT, OP_ASSIGN);
 		}
 break;
 case 37:
 #line 113 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_BOOL, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_BOOL, OP_ASSIGN);
 		}
 break;
 case 38:
 #line 116 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_UINT, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_UINT, OP_ASSIGN);
 		}
 break;
 case 39:
 #line 119 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_IPV4, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_IPV4, OP_ASSIGN);
 		}
 break;
 case 40:
 #line 122 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_IPV4NET, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_IPV4NET, OP_ASSIGN);
 		}
 break;
 case 41:
 #line 125 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_IPV6, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_IPV6, OP_ASSIGN);
 		}
 break;
 case 42:
 #line 128 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_IPV6NET, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_IPV6NET, OP_ASSIGN);
 		}
 break;
 case 43:
 #line 131 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_MACADDR, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_MACADDR, OP_ASSIGN);
 		}
 break;
 case 44:
 #line 134 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_URL_FILE, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_URL_FILE, OP_ASSIGN);
 		}
 break;
 case 45:
 #line 137 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_URL_FTP, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_URL_FTP, OP_ASSIGN);
 		}
 break;
 case 46:
 #line 140 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_URL_HTTP, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_URL_HTTP, OP_ASSIGN);
 		}
 break;
 case 47:
 #line 143 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_URL_TFTP, OP_ASSIGN);
+			terminal(string(yyvsp[-2]), NODE_URL_TFTP, OP_ASSIGN);
 		}
 break;
 case 48:
 #line 146 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_ARITH, lookup_comparator(yyvsp[-2]));
+			terminal(string(yyvsp[-2]), NODE_ARITH, lookup_comparator(yyvsp[-2]));
 		}
 break;
 case 49:
 #line 149 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_UINT, lookup_comparator(yyvsp[-2]));
+			terminal(string(yyvsp[-2]), NODE_UINT, lookup_comparator(yyvsp[-2]));
 		}
 break;
 case 50:
 #line 152 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_ARITH, lookup_modifier(yyvsp[-2]));
+			terminal(string(yyvsp[-2]), NODE_ARITH, lookup_modifier(yyvsp[-2]));
 		}
 break;
 case 51:
 #line 155 "boot.yy"
 {
-			terminal(strdup(yyvsp[-2]), NODE_UINT, lookup_modifier(yyvsp[-2]));
+			terminal(string(yyvsp[-2]), NODE_UINT, lookup_modifier(yyvsp[-2]));
 		}
 break;
 case 52:
@@ -817,7 +816,7 @@ case 52:
 			booterror("syntax error");
 		}
 break;
-#line 822 "y.boot_tab.c"
+#line 821 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

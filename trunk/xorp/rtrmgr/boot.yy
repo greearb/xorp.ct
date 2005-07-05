@@ -105,55 +105,55 @@ term_literal:	LITERAL { nodenum += 100;
 		;
 
 terminal:	term_literal END {
-			terminal(strdup(""), NODE_VOID, OP_NONE);
+			terminal(string(""), NODE_VOID, OP_NONE);
 		}
 		| term_literal ASSIGN_OPERATOR STRING END {
-			terminal(strdup($2), NODE_TEXT, OP_ASSIGN);
+			terminal(string($2), NODE_TEXT, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR BOOL_VALUE END {
-			terminal(strdup($2), NODE_BOOL, OP_ASSIGN);
+			terminal(string($2), NODE_BOOL, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR UINT_VALUE END {
-			terminal(strdup($2), NODE_UINT, OP_ASSIGN);
+			terminal(string($2), NODE_UINT, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV4_VALUE END {
-			terminal(strdup($2), NODE_IPV4, OP_ASSIGN);
+			terminal(string($2), NODE_IPV4, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV4NET_VALUE END {
-			terminal(strdup($2), NODE_IPV4NET, OP_ASSIGN);
+			terminal(string($2), NODE_IPV4NET, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV6_VALUE END {
-			terminal(strdup($2), NODE_IPV6, OP_ASSIGN);
+			terminal(string($2), NODE_IPV6, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV6NET_VALUE END {
-			terminal(strdup($2), NODE_IPV6NET, OP_ASSIGN);
+			terminal(string($2), NODE_IPV6NET, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR MACADDR_VALUE END {
-			terminal(strdup($2), NODE_MACADDR, OP_ASSIGN);
+			terminal(string($2), NODE_MACADDR, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_FILE_VALUE END {
-			terminal(strdup($2), NODE_URL_FILE, OP_ASSIGN);
+			terminal(string($2), NODE_URL_FILE, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_FTP_VALUE END {
-			terminal(strdup($2), NODE_URL_FTP, OP_ASSIGN);
+			terminal(string($2), NODE_URL_FTP, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_HTTP_VALUE END {
-			terminal(strdup($2), NODE_URL_HTTP, OP_ASSIGN);
+			terminal(string($2), NODE_URL_HTTP, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_TFTP_VALUE END {
-			terminal(strdup($2), NODE_URL_TFTP, OP_ASSIGN);
+			terminal(string($2), NODE_URL_TFTP, OP_ASSIGN);
 		}
 		| term_literal COMPARATOR ARITH END {
-			terminal(strdup($2), NODE_ARITH, lookup_comparator($2));
+			terminal(string($2), NODE_ARITH, lookup_comparator($2));
 		}
 		| term_literal COMPARATOR UINT_VALUE END{
-			terminal(strdup($2), NODE_UINT, lookup_comparator($2));
+			terminal(string($2), NODE_UINT, lookup_comparator($2));
 		}
 		| term_literal MODIFIER ARITH END{
-			terminal(strdup($2), NODE_ARITH, lookup_modifier($2));
+			terminal(string($2), NODE_ARITH, lookup_modifier($2));
 		}
 		| term_literal MODIFIER UINT_VALUE END{
-			terminal(strdup($2), NODE_UINT, lookup_modifier($2));
+			terminal(string($2), NODE_UINT, lookup_modifier($2));
 		}
 		;
 
@@ -198,14 +198,13 @@ pop_path()
 }
 
 static void
-terminal(char *value, int type, ConfigOperator op)
+terminal(const string& value, int type, ConfigOperator op)
 {
     push_path();
 
     lastsymbol = value;
 
     config_tree->terminal_value(value, type, op);
-    free(value);
     pop_path();
 }
 
