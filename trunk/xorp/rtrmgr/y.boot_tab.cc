@@ -718,97 +718,97 @@ break;
 case 36:
 #line 110 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_TEXT, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_TEXT, OP_ASSIGN);
 		}
 break;
 case 37:
 #line 113 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_BOOL, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_BOOL, OP_ASSIGN);
 		}
 break;
 case 38:
 #line 116 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_UINT, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_UINT, OP_ASSIGN);
 		}
 break;
 case 39:
 #line 119 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_IPV4, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_IPV4, OP_ASSIGN);
 		}
 break;
 case 40:
 #line 122 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_IPV4NET, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_IPV4NET, OP_ASSIGN);
 		}
 break;
 case 41:
 #line 125 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_IPV6, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_IPV6, OP_ASSIGN);
 		}
 break;
 case 42:
 #line 128 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_IPV6NET, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_IPV6NET, OP_ASSIGN);
 		}
 break;
 case 43:
 #line 131 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_MACADDR, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_MACADDR, OP_ASSIGN);
 		}
 break;
 case 44:
 #line 134 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_URL_FILE, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_URL_FILE, OP_ASSIGN);
 		}
 break;
 case 45:
 #line 137 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_URL_FTP, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_URL_FTP, OP_ASSIGN);
 		}
 break;
 case 46:
 #line 140 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_URL_HTTP, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_URL_HTTP, OP_ASSIGN);
 		}
 break;
 case 47:
 #line 143 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_URL_TFTP, OP_ASSIGN);
+			terminal(strdup(yyvsp[-2]), NODE_URL_TFTP, OP_ASSIGN);
 		}
 break;
 case 48:
 #line 146 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_ARITH, lookup_comparator(yyvsp[-2]));
+			terminal(strdup(yyvsp[-2]), NODE_ARITH, lookup_comparator(yyvsp[-2]));
 		}
 break;
 case 49:
 #line 149 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_UINT, lookup_comparator(yyvsp[-2]));
+			terminal(strdup(yyvsp[-2]), NODE_UINT, lookup_comparator(yyvsp[-2]));
 		}
 break;
 case 50:
 #line 152 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_ARITH, lookup_modifier(yyvsp[-2]));
+			terminal(strdup(yyvsp[-2]), NODE_ARITH, lookup_modifier(yyvsp[-2]));
 		}
 break;
 case 51:
 #line 155 "boot.yy"
 {
-			terminal(yyvsp[-2], NODE_UINT, lookup_modifier(yyvsp[-2]));
+			terminal(strdup(yyvsp[-2]), NODE_UINT, lookup_modifier(yyvsp[-2]));
 		}
 break;
 case 52:
