@@ -61,6 +61,7 @@ long_nodename:	literals { push_path(); }
 literal:	LITERAL { nodenum += 100;
                           extend_path($1, NODE_VOID, nodenum); }
 		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
+		                    free($1);
 				    extend_path($2, NODE_VOID, nodenum); }
 		;
 
@@ -98,62 +99,67 @@ statement:	terminal
 emptystatement:	END
 		;
 
-term_literal:	LITERAL { nodenum += 100; 
+term_literal:	LITERAL { nodenum += 100;
 			  extend_path($1, NODE_VOID, nodenum); }
 		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
+		                    free($1);
 				    extend_path($2, NODE_VOID, nodenum);}
 		;
 
 terminal:	term_literal END {
-			terminal(string(""), NODE_VOID, OP_NONE);
+			terminal(strdup(""), NODE_VOID, OP_NONE);
 		}
 		| term_literal ASSIGN_OPERATOR STRING END {
-			terminal(string($2), NODE_TEXT, OP_ASSIGN);
+			terminal($3, NODE_TEXT, OP_ASSIGN); 
 		}
 		| term_literal ASSIGN_OPERATOR BOOL_VALUE END {
-			terminal(string($2), NODE_BOOL, OP_ASSIGN);
+			terminal($3, NODE_BOOL, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR UINT_VALUE END {
-			terminal(string($2), NODE_UINT, OP_ASSIGN);
+			terminal($3, NODE_UINT, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV4_VALUE END {
-			terminal(string($2), NODE_IPV4, OP_ASSIGN);
+			terminal($3, NODE_IPV4, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV4NET_VALUE END {
-			terminal(string($2), NODE_IPV4NET, OP_ASSIGN);
+			terminal($3, NODE_IPV4NET, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV6_VALUE END {
-			terminal(string($2), NODE_IPV6, OP_ASSIGN);
+			terminal($3, NODE_IPV6, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR IPV6NET_VALUE END {
-			terminal(string($2), NODE_IPV6NET, OP_ASSIGN);
+			terminal($3, NODE_IPV6NET, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR MACADDR_VALUE END {
-			terminal(string($2), NODE_MACADDR, OP_ASSIGN);
+			terminal($3, NODE_MACADDR, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_FILE_VALUE END {
-			terminal(string($2), NODE_URL_FILE, OP_ASSIGN);
+			terminal($3, NODE_URL_FILE, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_FTP_VALUE END {
-			terminal(string($2), NODE_URL_FTP, OP_ASSIGN);
+			terminal($3, NODE_URL_FTP, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_HTTP_VALUE END {
-			terminal(string($2), NODE_URL_HTTP, OP_ASSIGN);
+			terminal($3, NODE_URL_HTTP, OP_ASSIGN);
 		}
 		| term_literal ASSIGN_OPERATOR URL_TFTP_VALUE END {
-			terminal(string($2), NODE_URL_TFTP, OP_ASSIGN);
+			terminal($3, NODE_URL_TFTP, OP_ASSIGN);
 		}
 		| term_literal COMPARATOR ARITH END {
-			terminal(string($2), NODE_ARITH, lookup_comparator($2));
+			terminal($3, NODE_ARITH, lookup_comparator($2));
+			free($2);
 		}
 		| term_literal COMPARATOR UINT_VALUE END{
-			terminal(string($2), NODE_UINT, lookup_comparator($2));
+			terminal($3, NODE_UINT, lookup_comparator($2));
+			free($2);
 		}
 		| term_literal MODIFIER ARITH END{
-			terminal(string($2), NODE_ARITH, lookup_modifier($2));
+			terminal($3, NODE_ARITH, lookup_modifier($2));
+			free($2);
 		}
 		| term_literal MODIFIER UINT_VALUE END{
-			terminal(string($2), NODE_UINT, lookup_modifier($2));
+			terminal($3, NODE_UINT, lookup_modifier($2));
+			free($2);
 		}
 		;
 
@@ -177,10 +183,9 @@ static uint64_t nodenum;
 
 
 static void
-extend_path(char *segment, int type, uint64_t node_num)
+extend_path(char* segment, int type, uint64_t node_num)
 {
     lastsymbol = segment;
-
     config_tree->extend_path(string(segment), type, node_num);
     free(segment);
 }
@@ -198,13 +203,14 @@ pop_path()
 }
 
 static void
-terminal(const string& value, int type, ConfigOperator op)
+terminal(char* value, int type, ConfigOperator op)
 {
     push_path();
 
     lastsymbol = value;
 
-    config_tree->terminal_value(value, type, op);
+    config_tree->terminal_value(string(value), type, op);
+    free(value);
     pop_path();
 }
 
