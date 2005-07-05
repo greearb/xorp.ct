@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.69 2005/07/02 16:53:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.70 2005/07/03 21:05:59 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1101,6 +1101,11 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 	value = varname_node->show_operator();
 	debug_msg("variable %s at %s, value is \"%s\"\n",  varname.c_str(), _segname.c_str(), value.c_str());
 	return true;
+    case NODE_NUMBER:
+	XLOG_ASSERT(varname_node != NULL);
+	value = c_format("%llu", varname_node->nodenum());
+	debug_msg("variable %s at %s, value is \"%s\"\n",  varname.c_str(), _segname.c_str(), value.c_str());
+	return true;
     case NAMED:
     {
 	list<string> var_parts;
@@ -1196,6 +1201,13 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
     if (varname == "$(<>)") {
 	XLOG_ASSERT(!_template_tree_node->is_tag());
 	type = NODE_OPERATOR;
+	debug_msg("varname node is >%s<\n", _segname.c_str());
+	return this;
+    }
+
+    if (varname == "$(#)") {
+	XLOG_ASSERT(!_template_tree_node->is_tag());
+	type = NODE_NUMBER;
 	debug_msg("varname node is >%s<\n", _segname.c_str());
 	return this;
     }
@@ -1315,6 +1327,7 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     if ((var_parts.front() != "@")
 	&& (var_parts.front() != _segname) 
 	&& (var_parts.front() != "<>") 
+	&& (var_parts.front() != "#") 
 	&& ((!_has_value) || (var_parts.front() != _value))) {
 	// varname doesn't match us.
 	type = NONE;
@@ -1335,7 +1348,16 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "<>")) {
 	    type = NODE_OPERATOR;
-	    debug_msg("varname V node is >%s<\n", _segname.c_str());
+	    debug_msg("varname O node is >%s<\n", _segname.c_str());
+	    return this;
+	}
+    }
+
+    // The name might refer to this node for a node number
+    if (var_parts.size() == 1) {
+	if ((var_parts.front() == "#")) {
+	    type = NODE_NUMBER;
+	    debug_msg("varname # node is >%s<\n", _segname.c_str());
 	    return this;
 	}
     }
@@ -1495,6 +1517,12 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
+	case NODE_NUMBER: 
+	    errmsg = c_format("Attempt to set variable node number \"%s\" "
+			      "which is not user-settable",
+			      varname.c_str());
+	    XLOG_ERROR("%s", errmsg.c_str());
+	    return false;
 	case NAMED:
 	{
 	    list<string> var_parts;
@@ -1553,6 +1581,12 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 	case NODE_OPERATOR:
 	    errmsg = c_format("Attempt to set operator \"%s\" "
 			      "which is the child of a named variable",
+			      varname.c_str());
+	    XLOG_ERROR("%s", errmsg.c_str());
+	    return false;
+	case NODE_NUMBER:
+	    errmsg = c_format("Attempt to set node number \"%s\" "
+			      "which is not user-settable",
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
