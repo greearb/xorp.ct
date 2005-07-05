@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.18 2005/02/10 03:51:58 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.19 2005/03/09 22:50:40 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -16,8 +16,8 @@ protocols {
 		    enabled:			bool;	/* %deprecated */
 		    passive:			bool	= false ;
 		    accept-non-rip-requests:	bool	= true ;
-		    accept-default-route:	bool	= false ;
-		    advertise-default-route:	bool	= false ;
+		    accept-default-route:	bool	= true ;
+		    advertise-default-route:	bool	= true ;
 		    route-expiry-secs:		u32	= 180 ;
 		    route-deletion-secs:	u32	= 120 ;
 		    triggered-update-min-secs:	u32	=   1 ;

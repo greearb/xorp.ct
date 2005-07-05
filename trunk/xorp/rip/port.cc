@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.41 2005/06/21 00:03:59 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.42 2005/06/21 18:11:08 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -95,8 +95,8 @@ Port<A>::Port(PortManagerBase<A>& pm)
        _cost(1),
        _horizon(SPLIT_POISON_REVERSE),
        _advertise(false),
-       _adv_def_rt(false),
-       _acc_def_rt(false),
+       _adv_def_rt(true),
+       _acc_def_rt(true),
        _passive(false),
        _acc_non_rip_reqs(true),
        _ur_out(0),
