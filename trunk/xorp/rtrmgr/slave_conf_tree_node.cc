@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.19 2005/03/25 02:54:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.20 2005/07/03 21:06:00 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -68,10 +68,12 @@ SlaveConfigTreeNode::create_node(const string& segment, const string& path,
 }
 
 ConfigTreeNode*
-SlaveConfigTreeNode::create_node(const ConfigTreeNode& ctn) {
-    printf("SlaveConfigTreeNode::create_node 2\n");
+SlaveConfigTreeNode::create_node(const ConfigTreeNode& ctn)
+{
     SlaveConfigTreeNode *new_node;
     const SlaveConfigTreeNode *orig;
+
+    debug_msg("SlaveConfigTreeNode::create_node\n");
 
     // sanity check - all nodes in this tree should be Slave nodes
     orig = dynamic_cast<const SlaveConfigTreeNode *>(&ctn);

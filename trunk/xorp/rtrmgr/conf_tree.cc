@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.34 2005/07/05 08:29:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.35 2005/07/05 08:55:52 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -251,8 +251,8 @@ ConfigTree::add_node(const string& segment, int type, uint64_t nodenum)
 	if (path.empty())
 	    path = segment;
 	else {
-	    printf("path: >%s<\n", path.c_str());
-	    printf("segment: >%s<\n", segment.c_str());
+	    debug_msg("path: >%s<\n", path.c_str());
+	    debug_msg("segment: >%s<\n", segment.c_str());
 	    path += " " + segment;
 	}
 	found = create_node(segment, path, ttn, _current_node, nodenum, 
