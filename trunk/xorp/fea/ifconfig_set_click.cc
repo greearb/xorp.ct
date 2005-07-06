@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.24 2005/07/01 19:06:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.25 2005/07/06 00:11:20 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1019,8 +1019,7 @@ IfConfigSetClick::ClickConfigGenerator::ClickConfigGenerator(
     : _ifc_set_click(ifc_set_click),
       _eventloop(ifc_set_click.ifc().eventloop()),
       _command_name(command_name),
-      _run_command(NULL),
-      _tmp_fp(NULL)
+      _run_command(NULL)
 {
 }
 
@@ -1028,23 +1027,21 @@ IfConfigSetClick::ClickConfigGenerator::~ClickConfigGenerator()
 {
     if (_run_command != NULL)
 	delete _run_command;
-    if (_tmp_fp != NULL) {
-	fclose(_tmp_fp);
+    if (! _tmp_filename.empty())
 	unlink(_tmp_filename.c_str());
-    }
 }
 
 int
 IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
 						string& error_msg)
 {
-    string tmp_filename;
+    XLOG_ASSERT(_tmp_filename.empty());
 
     //
     // Create a temporary file
     //
     FILE* fp = xorp_make_temporary_file("", "xorp_fea_click",
-					tmp_filename, error_msg);
+					_tmp_filename, error_msg);
     if (fp == NULL) {
 	error_msg = c_format("Cannot create a temporary file: %s",
 			     error_msg.c_str());
@@ -1058,10 +1055,9 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
 	fclose(fp);
 	return (XORP_ERROR);
     }
+    fclose(fp);
 
-    _command_arguments = tmp_filename;	// XXX: the filename is the argument
-    _tmp_fp = fp;
-    _tmp_filename = tmp_filename;
+    _command_arguments = _tmp_filename;	// XXX: the filename is the argument
 
     _run_command = new RunCommand(
 	_eventloop,
@@ -1073,8 +1069,6 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
     if (_run_command->execute() != XORP_OK) {
 	delete _run_command;
 	_run_command = NULL;
-	fclose(_tmp_fp);
-	_tmp_fp = NULL;
 	unlink(_tmp_filename.c_str());
 	error_msg = c_format("Could not execute the Click "
 			     "configuration generator");
