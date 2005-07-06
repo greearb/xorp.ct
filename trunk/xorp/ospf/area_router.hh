@@ -170,9 +170,11 @@ class AreaRouter {
 
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
+    deque<size_t> _empty_slots;		// Available slots in the Database.
     uint32_t _last_entry;		// One past last entry in
 					// database. A value of 0 is
 					// an empty database.
+    uint32_t _allocated_entries;	// Number of allocated entries.
     
     uint32_t _readers;			// Number of database readers.
     
@@ -192,6 +194,32 @@ class AreaRouter {
     typedef ref_ptr<PeerState> PeerStateRef;
     typedef map<PeerID, PeerStateRef> PeerMap;
     PeerMap _peers;		// Peers of this area.
+
+    /**
+     * Add this LSA to the database.
+     *
+     * @param lsar LSA to add.
+     * @return true on success
+     */
+    bool add_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * Delete this LSA from the database.
+     *
+     * @param lsar LSA to delete.
+     * @param index into database.
+     * @return true on success
+     */
+    bool delete_lsa(Lsa::LsaRef lsar, size_t index);
+
+    /**
+     * Update this LSA in the database.
+     *
+     * @param lsar LSA to update.
+     * @param index into database.
+     * @return true on success
+     */
+    bool update_lsa(Lsa::LsaRef lsar, size_t index);
 
     /**
      * Find LSA matching this request.

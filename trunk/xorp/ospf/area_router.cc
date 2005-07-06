@@ -48,7 +48,8 @@ template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 			  OspfTypes::AreaType area_type, uint32_t options) 
     : _ospf(ospf), _area(area), _area_type(area_type), _options(options),
-      _readers(0), _queue(ospf.get_eventloop(),
+      _last_entry(0), _allocated_entries(0), _readers(0),
+      _queue(ospf.get_eventloop(),
 			  OspfTypes::MinLSInterval,
 			  callback(this, &AreaRouter<A>::publish_all))
 {
@@ -75,8 +76,9 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     header.set_advertising_router(ntohl(_ospf.get_router_id().addr()));
 
     _router_lsa = Lsa::LsaRef(rlsa);
-    _db.push_back(_router_lsa);
-    _last_entry = 1;
+    add_lsa(_router_lsa);
+//     _db.push_back(_router_lsa);
+//     _last_entry = 1;
 }
 
 template <typename A>
@@ -282,6 +284,78 @@ AreaRouter<A>::receive_lsas(OspfTypes::NeighbourID nid,
     push_lsas();
 
     XLOG_WARNING("TBD process received LSAs");
+}
+
+template <typename A>
+bool
+AreaRouter<A>::add_lsa(Lsa::LsaRef lsar)
+{
+    // If there are no readers we can put this LSA into an empty slot.
+    if (0 == _readers && !_empty_slots.empty()) {
+	_db[_empty_slots.front()] = lsar;
+	_empty_slots.pop_front();
+	return true;
+    }
+
+    if (_last_entry < _allocated_entries) {
+	_db[_last_entry] = lsar;
+    } else {
+	_db.push_back(lsar);
+	_allocated_entries++;
+    }
+    _last_entry++;
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::delete_lsa(Lsa::LsaRef lsar, size_t index)
+{
+    Lsa_header& dblsah = _db[index]->get_header();
+    XLOG_ASSERT(dblsah.get_ls_type() == lsar->get_header().get_ls_type());
+    XLOG_ASSERT(dblsah.get_link_state_id() == 
+		lsar->get_header().get_link_state_id());
+    XLOG_ASSERT(dblsah.get_advertising_router() ==
+		lsar->get_header().get_advertising_router());
+
+    XLOG_ASSERT(_db[index]->valid());
+    _db[index]->invalidate();
+    _empty_slots.push_back(index);
+
+    // _last_entry points one past the last entry, if the deleted LSA
+    // was at the end of the array then the _last_entry pointer can be
+    // decreased.
+    while(index + 1 == _last_entry && !_db[index]->valid() && 
+	  0 != _last_entry) {
+	_last_entry--;
+	index--;
+    }
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::update_lsa(Lsa::LsaRef lsar, size_t index)
+{
+    Lsa_header& dblsah = _db[index]->get_header();
+    XLOG_ASSERT(dblsah.get_ls_type() == lsar->get_header().get_ls_type());
+    XLOG_ASSERT(dblsah.get_link_state_id() == 
+		lsar->get_header().get_link_state_id());
+    XLOG_ASSERT(dblsah.get_advertising_router() ==
+		lsar->get_header().get_advertising_router());
+
+    XLOG_ASSERT(_db[index]->valid());
+    if (0 == _readers) {
+	_db[index]->invalidate();
+	_db[index] = lsar;
+    } else {
+	delete_lsa(lsar, index);
+	add_lsa(lsar);
+    }
+
+    return true;
 }
 
 template <typename A>
