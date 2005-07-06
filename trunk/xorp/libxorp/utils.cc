@@ -13,23 +13,33 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.5 2005/03/25 02:52:59 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.1 2005/07/01 18:39:20 pavlin Exp $"
 
 #include "xorp.h"
 #include "utils.hh"
 
-xsock_t
+
+#ifdef HOST_OS_WINDOWS
+#define PATH_SEPARATOR		"\\"
+#else
+#define PATH_SEPARATOR		"/"
+#endif
+
+FILE*
 xorp_make_temporary_file(const string& tmp_dir,
 			 const string& filename_template,
 			 string& final_filename,
 			 string& errmsg)
 {
+    char dirname[MAXPATHLEN];
+    char filename[MAXPATHLEN];
     list<string> cand_tmp_dirs;
     char* value;
+    FILE* fp;
 
     if (filename_template.empty()) {
 	errmsg = "Empty file name template";
-	return (XORP_BAD_SOCKET);
+	return (NULL);
     }
 
     //
@@ -53,6 +63,22 @@ xorp_make_temporary_file(const string& tmp_dir,
     if (! tmp_dir.empty())
 	cand_tmp_dirs.push_back(tmp_dir);
 
+    // The system-specific path of the directory designated for temporary files
+#ifdef HOST_OS_WINDOWS
+    size_t size;
+    size = GetTempPath(sizeof(dirname), dirname);
+    if (size >= sizeof(dirname)) {
+	errmsg = c_format("Internal error: directory name buffer size is too "
+			  "small (allocated %u required %u)",
+			  XORP_UINT_CAST(sizeof(dirname)),
+			  XORP_UINT_CAST(size + 1));
+	return (NULL);
+    }
+    if (size != 0) {
+	cand_tmp_dirs.push_back(dirname);
+    }
+#endif // HOST_OS_WINDOWS
+
     // The "P_tmpdir" directory if this macro is defined
 #ifdef P_tmpdir
     cand_tmp_dirs.push_back(P_tmpdir);
@@ -60,11 +86,12 @@ xorp_make_temporary_file(const string& tmp_dir,
 
     // A list of hard-coded directory names
 #ifdef HOST_OS_WINDOWS
-    cand_tmp_dirs.push_back("C:\TEMP");
-#endif
+    cand_tmp_dirs.push_back("C:\\TEMP");
+#else
     cand_tmp_dirs.push_back("/tmp");
     cand_tmp_dirs.push_back("/usr/tmp");
     cand_tmp_dirs.push_back("/var/tmp");
+#endif
 
     //
     // Find the first directory that allows us to create the temporary file
@@ -74,24 +101,48 @@ xorp_make_temporary_file(const string& tmp_dir,
 	string tmp_dir = *iter;
 	if (tmp_dir.empty())
 	    continue;
-	// Remove the trailing '/' from the directory name
-	if (tmp_dir[tmp_dir.size() - 1] == '/')
+	// Remove the trailing '/' (or '\') from the directory name
+	if (tmp_dir.substr(tmp_dir.size() - 1, 1) == PATH_SEPARATOR)
 	    tmp_dir.erase(tmp_dir.size() - 1);
 
+	filename[0] = '\0';
+
+#ifdef HOST_OS_WINDOWS
+	// Get the temporary filename and open the file
+	snprintf(dirname, sizeof(dirname)/sizeof(dirname[0]), tmp_dir.c_str());
+	if (GetTempFileName(dirname, filename_template.c_str(), filename) == 0)
+	    continue;
+	fp = fopen(filename, "w+");
+	if (fp == NULL)
+	    continue;
+
+#else
+
 	// Compose the temporary file name and try to create the file
-	char filename[MAXPATHLEN];
-	string tmp_filename = tmp_dir + "/" + filename_template + ".XXXXXX";
+	string tmp_filename = tmp_dir + PATH_SEPARATOR + filename_template
+	    + ".XXXXXX";
 	snprintf(filename, sizeof(filename)/sizeof(filename[0]),
 		 tmp_filename.c_str());
-	xsock_t s = mkstemp(filename);
-	if (s == XORP_BAD_SOCKET)
+
+	int fd = mkstemp(filename);
+	if (fd == -1)
 	    continue;
+
+	// Associate a stream with the file descriptor
+	fp = fdopen(fd, "w+");
+	if (fp == NULL) {
+	    close(fd);
+	    continue;
+	}
+#endif // ! HOST_OS_WINDOWS
 
 	// Success
 	final_filename = filename;
-	return (s);
+	return (fp);
     }
 
     errmsg = "Cannot find a directory to create the temporary file";
-    return (XORP_BAD_SOCKET);
+    return (NULL);
+
+    UNUSED(dirname);
 }

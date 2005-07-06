@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.48 2005/07/02 04:20:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.49 2005/07/03 21:06:00 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -968,11 +968,11 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     // program to copy the configuration from.
     //
     do {
-	xsock_t s;
+	FILE* fp;
 
-	s = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
-				     tmp_config_filename, errmsg);
-	if (s == XORP_BAD_SOCKET) {
+	fp = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
+				      tmp_config_filename, errmsg);
+	if (fp == NULL) {
 	    errmsg = c_format("Cannot save the configuration file: "
 			      "cannot create a temporary filename: %s",
 			      errmsg.c_str());
@@ -983,13 +983,13 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	// Save the current configuration
 	//
 	string config = show_unannotated_tree(/*numbered*/ false);
-	if (write(s, config.c_str(), config.size())
+	if (write(fileno(fp), config.c_str(), config.size())
 	    != static_cast<ssize_t>(config.size())) {
 	    errmsg = c_format("Cannot save the configuration file: "
 			      "error writing to a temporary file: %s",
 			      strerror(errno));
 	    // Close and unlink the file
-	    close(s);
+	    fclose(fp);
 	    unlink(tmp_config_filename.c_str());
 	    return false;
 	}
@@ -999,7 +999,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	// Note, that the created file remains on the filesystem,
 	// so it is guaranteed to be unique when we need to use it again.
 	//
-	close(s);
+	fclose(fp);
 	break;
     } while (false);
 
@@ -1262,11 +1262,11 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     // program to copy the configuration to.
     //
     do {
-	xsock_t s;
+	FILE* fp;
 
-	s = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
-				     tmp_config_filename, errmsg);
-	if (s == XORP_BAD_SOCKET) {
+	fp = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
+				      tmp_config_filename, errmsg);
+	if (fp == NULL) {
 	    errmsg = c_format("Cannot load the configuration file: "
 			      "cannot create a temporary filename: %s",
 			      errmsg.c_str());
@@ -1278,7 +1278,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 	// Note, that the created file remains on the filesystem,
 	// so it is guaranteed to be unique when we need to use it again.
 	//
-	close(s);
+	fclose(fp);
 	break;
     } while (false);
 

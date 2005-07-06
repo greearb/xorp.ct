@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.23 2005/06/28 18:37:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.24 2005/07/01 19:06:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1020,7 +1020,7 @@ IfConfigSetClick::ClickConfigGenerator::ClickConfigGenerator(
       _eventloop(ifc_set_click.ifc().eventloop()),
       _command_name(command_name),
       _run_command(NULL),
-      _tmp_socket(-1)
+      _tmp_fp(NULL)
 {
 }
 
@@ -1028,8 +1028,8 @@ IfConfigSetClick::ClickConfigGenerator::~ClickConfigGenerator()
 {
     if (_run_command != NULL)
 	delete _run_command;
-    if (_tmp_socket >= 0) {
-	close(_tmp_socket);
+    if (_tmp_fp != NULL) {
+	fclose(_tmp_fp);
 	unlink(_tmp_filename.c_str());
     }
 }
@@ -1043,24 +1043,24 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
     //
     // Create a temporary file
     //
-    xsock_t s = xorp_make_temporary_file("", "xorp_fea_click",
-					 tmp_filename, error_msg);
-    if (s == XORP_BAD_SOCKET) {
+    FILE* fp = xorp_make_temporary_file("", "xorp_fea_click",
+					tmp_filename, error_msg);
+    if (fp == NULL) {
 	error_msg = c_format("Cannot create a temporary file: %s",
 			     error_msg.c_str());
 	return (XORP_ERROR);
     }
 
-    if (::write(s, xorp_config.c_str(), xorp_config.size())
+    if (::write(fileno(fp), xorp_config.c_str(), xorp_config.size())
 	!= static_cast<ssize_t>(xorp_config.size())) {
 	error_msg = c_format("Error writing to temporary file: %s",
 			     strerror(errno));
-	close(s);
+	fclose(fp);
 	return (XORP_ERROR);
     }
 
     _command_arguments = tmp_filename;	// XXX: the filename is the argument
-    _tmp_socket = s;
+    _tmp_fp = fp;
     _tmp_filename = tmp_filename;
 
     _run_command = new RunCommand(
@@ -1073,8 +1073,8 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
     if (_run_command->execute() != XORP_OK) {
 	delete _run_command;
 	_run_command = NULL;
-	close(_tmp_socket);
-	_tmp_socket = -1;
+	fclose(_tmp_fp);
+	_tmp_fp = NULL;
 	unlink(_tmp_filename.c_str());
 	error_msg = c_format("Could not execute the Click "
 			     "configuration generator");

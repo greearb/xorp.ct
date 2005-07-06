@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.4 2005/03/25 02:53:49 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.5 2005/07/01 18:39:20 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -83,13 +83,16 @@ delete_pointers_vector(vector<T *>& delete_vector)
  *     - "TEMP"   (Windows only)
  *     - "TMP"    (Windows only)
  * (b) Argument @ref tmp_dir if it is not an empty string.
- * (c) The "P_tmpdir" directory if this macro is defined (typically in
+ * (c) The system-specific path of the directory designated for
+ *     temporary files:
+ *     - GetTempPath() (Windows only)
+ * (d) The "P_tmpdir" directory if this macro is defined (typically in
  *     the <stdio.h> include file).
- * (d) The first directory from the following list we can write to:
- *     - "C:\TEMP" (Windows only)
- *     - "/tmp"
- *     - "/usr/tmp"
- *     - "/var/tmp"
+ * (e) The first directory from the following list we can write to:
+ *     - "C:\TEMP"  (Windows only)
+ *     - "/tmp"     (UNIX only)
+ *     - "/usr/tmp" (UNIX only)
+ *     - "/var/tmp" (UNIX only)
  *
  * For example, if the file name template is "foo", and if the chosen
  * temporary directory is "/tmp", then the temporary file name would be
@@ -102,10 +105,10 @@ delete_pointers_vector(vector<T *>& delete_vector)
  * @param final_filename a return-by-reference argument that on success
  * returns the final name of the temporary file (including the directory name).
  * @param errmsg the error message (if error).
- * @return a file descriptor for the temporary file opened for reading and
- * writing on success, otherwise XORP_BAD_SOCKET.
+ * @return a file descriptor pointer for the temporary file (opened for
+ * reading and writing) on success, otherwise NULL.
  */
-xsock_t	xorp_make_temporary_file(const string& tmp_dir,
+FILE*	xorp_make_temporary_file(const string& tmp_dir,
 				 const string& filename_template,
 				 string& final_filename,
 				 string& errmsg);

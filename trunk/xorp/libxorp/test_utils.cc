@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/test_utils.cc,v 1.1 2005/07/01 18:39:20 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -139,17 +139,17 @@ test_xorp_make_temporary_file()
 
     tmp_dir = "";	// Use default directory
     filename_template = "test_xorp_make_temporary_file";
-    xsock_t s = xorp_make_temporary_file(tmp_dir, filename_template,
-					 final_filename, errmsg);
-    verbose_assert(s != XORP_BAD_SOCKET,
+    FILE* fp = xorp_make_temporary_file(tmp_dir, filename_template,
+					final_filename, errmsg);
+    verbose_assert(fp != NULL,
 		   "Creating a temporary file");
 
     //
     // Cleanup
     //
-    if (s != XORP_BAD_SOCKET) {
+    if (fp != NULL) {
 	// Close and unlink the temporary file
-	close(s);
+	fclose(fp);
 	unlink(final_filename.c_str());
     }
 }
