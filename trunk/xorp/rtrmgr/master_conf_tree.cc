@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.50 2005/07/06 00:11:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.51 2005/07/06 16:17:25 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -667,6 +667,7 @@ MasterConfigTree::delete_entire_config()
     root_node().undelete();
 
     // We don't need a verification pass - this isn't allowed to fail.
+    _commit_cb = callback(this, &MasterConfigTree::config_done);
     commit_changes_pass2();
 }
 
