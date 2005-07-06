@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.21 2005/05/16 14:00:38 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.22 2005/06/20 21:37:49 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -130,6 +130,138 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
     }
 
     return (sock);
+}
+
+/**
+ * comm_sock_pair:
+ *
+ * Create a pair of connected sockets. The sockets will be created in
+ * the blocking state by default, and with no additional socket options set.
+ *
+ * Currently a domain of AF_UNIX and a type of SOCK_STREAM must be
+ * specified. On Windows platforms, the sockets created will actually
+ * be in the AF_INET domain. On UNIX, this function simply wraps the
+ * socketpair() system call.
+ *
+ * XXX: There may be UNIX platforms lacking socketpair() where we
+ * have to emulate it.
+ *
+ * @param domain the domain of the socket (e.g., AF_INET, AF_INET6).
+ * @param type the type of the socket (e.g., SOCK_STREAM, SOCK_DGRAM).
+ * @param protocol the particular protocol to be used with the socket.
+ * @param sv pointer to an array of two xsock_t handles to receive the
+ *        allocated socket pair.
+ *
+ * @return XORP_OK if the socket pair was created, otherwise if any error
+ * is encountered, XORP_ERROR.
+ **/
+int
+comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
+{
+#ifndef HOST_OS_WINDOWS
+    if (socketpair(domain, type, protocol, sv) == -1) {
+	_comm_set_serrno();
+	return (XORP_ERROR);
+    }
+    return (XORP_OK);
+#else
+    SOCKET		st[3];
+    struct sockaddr_in	sin;
+    int			numtries, error;
+    long		optval;
+    static const int	MY_IN_LOWPORT = 40000;
+    static const int	MY_IN_HIGHPORT = 65536;
+
+    UNUSED(protocol);
+
+    if (domain != AF_UNIX || type != SOCK_STREAM) {
+	_comm_serrno = WSAEAFNOSUPPORT;	/* XXX */
+	return (XORP_ERROR);
+    }
+
+    st[0] = st[1] = st[2] = INVALID_SOCKET;
+
+    st[2] = socket(AF_INET, SOCK_STREAM, 0);
+    if (st[2] == INVALID_SOCKET)
+	goto error;
+
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+    numtries = 3;
+    do {
+	sin.sin_port = htons((rand() % (MY_IN_LOWPORT - MY_IN_HIGHPORT)) +
+			     MY_IN_LOWPORT);
+	error = bind(st[2], (struct sockaddr *)&sin, sizeof(sin));
+	if (error == 0)
+	    break;
+	if ((error != 0) &&
+	    ((WSAGetLastError() != WSAEADDRNOTAVAIL) ||
+	     (WSAGetLastError() != WSAEADDRINUSE)))
+	    break;
+    } while (--numtries > 0);
+
+    if (error != 0)
+	goto error;
+
+    error = listen(st[2], 5);
+    if (error != 0)
+	goto error;
+
+    st[0] = socket(AF_INET, SOCK_STREAM, 0);
+    if (st[0] == INVALID_SOCKET)
+	goto error;
+
+    optval = 1L;
+    error = ioctlsocket(st[0], FIONBIO, &optval);
+    if (error != 0)
+	goto error;
+
+    error = connect(st[0], (struct sockaddr *)&sin, sizeof(sin));
+    if (error != 0 && WSAGetLastError() != WSAEWOULDBLOCK)
+	goto error;
+
+    numtries = 3;
+    do {
+	st[1] = accept(st[2], NULL, NULL);
+	if (st[1] != INVALID_SOCKET) {
+	    break;
+	} else {
+	    if (WSAGetLastError() == WSAEWOULDBLOCK) {
+		SleepEx(100, TRUE);
+	    } else {
+		break;
+	    }
+	}
+    } while (--numtries > 0);
+
+    if (st[1] == INVALID_SOCKET)
+	goto error;
+
+    /*
+     * XXX: Should use getsockname() here to verify that the client socket
+     * is connected.
+     */
+    optval = 0L;
+    error = ioctlsocket(st[0], FIONBIO, &optval);
+    if (error != 0)
+	goto error;
+
+    closesocket(st[2]);
+    sv[0] = st[0];
+    sv[1] = st[1];
+    return (XORP_OK);
+
+error:
+    if (st[0] != INVALID_SOCKET)
+	closesocket(st[0]);
+    if (st[1] != INVALID_SOCKET)
+	closesocket(st[1]);
+    if (st[2] != INVALID_SOCKET)
+	closesocket(st[2]);
+    return (XORP_ERROR);
+#endif /* HOST_OS_WINDOWS */
 }
 
 /**
@@ -1234,8 +1366,15 @@ int
 comm_sock_set_blocking(xsock_t sock, int is_blocking)
 {
 #ifdef HOST_OS_WINDOWS
-    u_long opt = (is_blocking == 0 ? 0 : 1);
-    int flags = ioctlsocket(sock, FIONBIO, &opt);
+    u_long opt;
+    int flags;
+
+    if (is_blocking)
+	opt = 0;
+    else
+	opt = 1;
+
+    flags = ioctlsocket(sock, FIONBIO, &opt);
     if (flags != 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("FIONBIO error: %s",
@@ -1282,6 +1421,7 @@ comm_sock_is_connected(xsock_t sock)
     socklen_t sslen;
 
     sslen = sizeof(ss);
+    memset(&ss, 0, sslen);
     err = getpeername(sock, (struct sockaddr *)&ss, &sslen);
     if (err != 0) {
 	_comm_set_serrno();

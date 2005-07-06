@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.17 2005/05/16 14:00:38 bms Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.18 2005/07/01 16:57:25 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -447,6 +447,28 @@ extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
  */
 extern xsock_t	comm_sock_open(int domain, int type, int protocol,
 			       int is_blocking);
+
+/**
+ * Create a pair of connected sockets.
+ *
+ * The sockets will be created in the blocking state by default, and
+ * with no additional socket options set.
+ *
+ * Currently a domain of AF_UNIX and a type of SOCK_STREAM must be
+ * specified. On Windows platforms, the sockets created will actually
+ * be in the AF_INET domain.
+ *
+ * @param domain the domain of the socket (e.g., AF_INET, AF_INET6).
+ * @param type the type of the socket (e.g., SOCK_STREAM, SOCK_DGRAM).
+ * @param protocol the particular protocol to be used with the socket.
+ * @param sv pointer to an array of two xsock_t handles to receive the
+ *        allocated socket pair.
+ *
+ * @return XORP_OK if the socket pair was created, otherwise if any error
+ * is encountered, XORP_ERROR.
+ **/
+extern int	comm_sock_pair(int domain, int type, int protocol,
+			       xsock_t sv[2]);
 
 /**
  * Bind an IPv4 socket to an address and a port.
