@@ -223,7 +223,64 @@ AreaRouter<A>::receive_lsas(OspfTypes::NeighbourID nid,
 			    list<Lsa::LsaRef>& lsas)
 {
     debug_msg("NeighbourID %u %s\n", nid, pp_lsas(lsas).c_str());
+
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
     
+    // RFC 2328 Section 13. The Flooding Procedure
+    // Validate the incoming LSAs.
+    
+    list<Lsa::LsaRef>::const_iterator i;
+    for (i = lsas.begin(); i != lsas.end(); i++) {
+	// (1) Validate the LSA's LS checksum. 
+	// (2) Check that the LSA's LS type is known.
+	// Both checks already performed in the packet/LSA decoding process.
+
+	// (3) In stub areas discard AS-external-LSA's (LS type = 5).
+	switch(_area_type) {
+	case OspfTypes::BORDER:
+	    break;
+	case OspfTypes::STUB:
+	    XLOG_WARNING("TBD: ignore External LSA's in stub areas");
+	    // XXX - As soon as we have External LSA's enable this code.
+// 	    if (dynamic_cast<ExternalLsa>(*i))
+// 		continue;
+	    break;
+	case OspfTypes::NSSA:
+	    break;
+	}
+	const Lsa_header& lsah = (*i)->get_header();
+
+	// (4) MaxAge
+	if (OspfTypes::MaxAge == lsah.get_ls_age()) {
+	    if (NOMATCH == compare_lsa(lsah)) {
+		if (neighbours_exchange_or_loading()) {
+		    XLOG_WARNING("TBD: Acknowledge LSA");
+		    continue;
+		}
+	    }
+	}
+	
+	// (5) New or newer LSA.
+	size_t index;
+	LsaSearch search = compare_lsa(lsah, index);
+	if (NOMATCH == search || NEWER == search) {
+	    // (a) If this LSA is too recent drop it.
+	    if (NEWER == search) {
+		TimeVal then;
+		_db[index]->get_creation_time(then);
+		if ((now - then) < TimeVal(OspfTypes::MinLSArrival))
+		    continue;
+	    }
+	    // (b) Flood this LSA to all of our neighbours.
+	    publish((*i), nid);
+	}
+	
+    }
+
+ out:
+    push_lsas();
+
     XLOG_WARNING("TBD process received LSAs");
 }
 
@@ -255,12 +312,11 @@ AreaRouter<A>::find_lsa(const Ls_request& lsr, size_t& index) const
  */
 template <typename A>
 typename AreaRouter<A>::LsaSearch
-AreaRouter<A>::compare_lsa(const Lsa_header& lsah) const
+AreaRouter<A>::compare_lsa(const Lsa_header& lsah, size_t& index) const
 {
     Ls_request lsr(_ospf.get_version(), lsah.get_ls_type(),
 		   lsah.get_link_state_id(), lsah.get_advertising_router());
 
-    size_t index;
     if (find_lsa(lsr, index)) {
  	Lsa_header& dblsah = _db[index]->get_header();
 	if (dblsah.get_ls_sequence_number() > lsah.get_ls_sequence_number())
@@ -292,6 +348,14 @@ AreaRouter<A>::compare_lsa(const Lsa_header& lsah) const
     }
 
     return NOMATCH;
+}
+
+template <typename A>
+typename AreaRouter<A>::LsaSearch
+AreaRouter<A>::compare_lsa(const Lsa_header& lsah) const
+{
+    size_t index;
+    return compare_lsa(lsah, index);
 }
 
 template <typename A>
@@ -507,6 +571,13 @@ AreaRouter<A>::push_lsas()
 		XLOG_FATAL("Unable to push LSAs");
 	}
     }
+}
+
+template <typename A>
+bool
+AreaRouter<A>::neighbours_exchange_or_loading() const
+{
+    XLOG_UNFINISHED();
 }
 
 template class AreaRouter<IPv4>;

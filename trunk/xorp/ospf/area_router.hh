@@ -204,6 +204,16 @@ class AreaRouter {
     bool find_lsa(const Ls_request& lsr, size_t& index) const;
 
     /**
+     * Compare this LSA to 
+     *
+     * @param Lsa_header that is being sought.
+     * @param index into LSA database if search succeeded.
+     * 
+     * @return LsaSearch that describes the type of match.
+     */
+    LsaSearch compare_lsa(const Lsa_header&, size_t& index) const;
+
+    /**
      * Update router links.
      *
      * A peer has just changed state so update the router lsa and publish.
@@ -232,6 +242,12 @@ class AreaRouter {
      * Send (push) any queued LSAs.
      */
     void push_lsas();
+
+    /**
+     *
+     * @return true if any of the neigbours are in state Exchange or Loading.
+     */
+    bool neighbours_exchange_or_loading() const;
 };
 
 /**
