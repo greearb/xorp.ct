@@ -55,6 +55,11 @@ this information as its unnecessary. Need to verify that we actually
 write this information out when encoding a packet. Should perhaps also
 check it on input rather than just stepping over it.
 
+17) When decoding a link state update packet if an LSA is not
+decodable either due to being an unknown type or some other problem
+the whole packet is discarded. Only the bad LSA should be dropped. See
+section 13 of the RFC.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
