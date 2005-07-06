@@ -278,7 +278,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::NeighbourID nid,
 	
     }
 
- out:
+//  out:
     push_lsas();
 
     XLOG_WARNING("TBD process received LSAs");
