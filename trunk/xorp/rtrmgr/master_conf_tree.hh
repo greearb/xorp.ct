@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.27 2005/07/02 04:20:21 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.28 2005/07/03 21:06:00 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -138,7 +138,8 @@ public:
     
 
 private:
-    bool remove_tmp_config_file(string& errmsg);
+    void remove_tmp_config_file();
+    bool set_config_file_permissions(FILE* fp, uid_t user_id, string& errmsg);
 
     void diff_configs(const MasterConfigTree& new_tree, 
 		      MasterConfigTree& delta_tree,
@@ -181,6 +182,7 @@ private:
     string		_config_failed_msg;
     bool		_rtrmgr_config_node_found;
     XorpTimer		_save_config_completed_timer;
+    string		_tmp_config_filename;
 };
 
 #endif // __RTRMGR_MASTER_CONF_TREE_HH__

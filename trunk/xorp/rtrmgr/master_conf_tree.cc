@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.49 2005/07/03 21:06:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.50 2005/07/06 00:11:20 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -104,6 +104,8 @@ MasterConfigTree::MasterConfigTree(TemplateTree* tt, bool verbose)
 
 MasterConfigTree::~MasterConfigTree()
 {
+    remove_tmp_config_file();
+
     delete _task_manager;
 }
 
@@ -699,8 +701,7 @@ MasterConfigTree::save_to_file(const string& filename,
     // XXX: set the effective group to "xorp"
     struct group* grp = getgrnam("xorp");
     if (grp == NULL) {
-	errmsg = "ERROR: config files are saved as group \"xorp\".";
-	errmsg = "Group \"xorp\" does not exist on this system.\n";
+	errmsg = "Group \"xorp\" does not exist on this system";
 	return false;
     }
 
@@ -883,24 +884,63 @@ MasterConfigTree::save_hook_complete(bool success, const string errmsg) const
 	XLOG_ERROR("save hook completed with error %s", errmsg.c_str());
 }
 
-bool
-MasterConfigTree::remove_tmp_config_file(string& errmsg)
+void
+MasterConfigTree::remove_tmp_config_file()
 {
     string tmp_config_filename_value;
 
     if (root_node().expand_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
 				    tmp_config_filename_value)
 	!= true) {
-	errmsg = c_format("internal variable %s not found",
-			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
-	errmsg = c_format("Failed to remove temporary configuration file: %s",
-			  errmsg.c_str());
+	tmp_config_filename_value = "";
+    } else {
+	// Reset the variable
+	root_node().set_variable(RTRMGR_CONFIG_FILENAME_VARNAME, "");
+    }
+
+    //
+    // Unlink the file(s). Typically, the _tmp_config_filename value
+    // should be same as the expand_variable(RTRMGR_CONFIG_FILENAME_VARNAME)
+    // value. However, some of the template actions may explicitly set
+    // the value of that variable to something else, hence we need to cover
+    // that case.
+    //
+    if (! _tmp_config_filename.empty())
+	unlink(_tmp_config_filename.c_str());
+    if ((! tmp_config_filename_value.empty())
+	&& (tmp_config_filename_value != _tmp_config_filename)) {
+	unlink(tmp_config_filename_value.c_str());
+    }
+    _tmp_config_filename = "";
+}
+
+bool
+MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
+					      string& errmsg)
+{
+    //
+    // Set the user and group owner of the file, and change its permissions
+    // so it is group-writable.
+    //
+    struct group *grp = getgrnam("xorp");
+    if (grp == NULL) {
+	errmsg = c_format("group \"xorp\" does not exist on this system");
+	return false;
+    }
+    gid_t group_id = grp->gr_gid;
+
+    if (fchown(fileno(fp), user_id, group_id) != 0) {
+	errmsg = c_format("error changing the owner and group of the file: %s",
+			  strerror(errno));
 	return false;
     }
 
-    // Unlink the file
-    if (! tmp_config_filename_value.empty())
-	unlink(tmp_config_filename_value.c_str());
+    if (fchmod(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH)
+	!= 0) {
+	errmsg = c_format("error changing the mode of the file: %s",
+			  strerror(errno));
+	return false;
+    }
 
     return true;
 }
@@ -910,7 +950,6 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 			      const string& save_hook, string& errmsg,
 			      ConfigSaveCallBack cb)
 {
-    string tmp_config_filename;
     string save_file_config;
 
     XLOG_TRACE(_verbose, "Saving to file %s", filename.c_str());
@@ -970,12 +1009,24 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     do {
 	FILE* fp;
 
+	// Create the file
 	fp = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
-				      tmp_config_filename, errmsg);
+				      _tmp_config_filename, errmsg);
 	if (fp == NULL) {
 	    errmsg = c_format("Cannot save the configuration file: "
 			      "cannot create a temporary filename: %s",
 			      errmsg.c_str());
+	    _tmp_config_filename = "";
+	    return false;
+	}
+
+	// Set the file permissions
+	if (set_config_file_permissions(fp, user_id, errmsg) != true) {
+	    errmsg = c_format("Cannot save the configuration file: %s",
+			      errmsg.c_str());
+	    // Close and remove the file
+	    fclose(fp);
+	    remove_tmp_config_file();
 	    return false;
 	}
 
@@ -988,9 +1039,9 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	    errmsg = c_format("Cannot save the configuration file: "
 			      "error writing to a temporary file: %s",
 			      strerror(errno));
-	    // Close and unlink the file
+	    // Close and remove the file
 	    fclose(fp);
-	    unlink(tmp_config_filename.c_str());
+	    remove_tmp_config_file();
 	    return false;
 	}
 
@@ -1024,7 +1075,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	errmsg = c_format("Cannot save the configuration file: %s",
 			  errmsg.c_str());
 	discard_changes();
-	unlink(tmp_config_filename.c_str());
+	remove_tmp_config_file();
 	return false;
     }
 
@@ -1036,13 +1087,13 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 
     // Save the name of the temporary file in the local variable
     if (root_node().set_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
-				 tmp_config_filename.c_str())
+				 _tmp_config_filename.c_str())
 	!= true) {
 	errmsg = c_format("Cannot save the configuration file: cannot store "
 			  "temporary filename %s in internal variable %s",
-			  tmp_config_filename.c_str(),
+			  _tmp_config_filename.c_str(),
 			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
-	unlink(tmp_config_filename.c_str());
+	remove_tmp_config_file();
 	return false;
     }
 
@@ -1057,7 +1108,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     if (config_failed()) {
 	errmsg = config_failed_msg();
 	discard_changes();
-	unlink(tmp_config_filename.c_str());
+	remove_tmp_config_file();
 	return false;
     }
 
@@ -1076,7 +1127,7 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
     //
     // Remove the temporary file with the configuration
     //
-    remove_tmp_config_file(dummy_errmsg);
+    remove_tmp_config_file();
 
     if (! success) {
 	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
@@ -1201,8 +1252,6 @@ bool
 MasterConfigTree::load_config(const string& filename, uid_t user_id,
 			      string& errmsg, ConfigLoadCallBack cb)
 {
-    string tmp_config_filename;
-
     XLOG_TRACE(_verbose, "Loading file %s", filename.c_str());
 
     //
@@ -1264,12 +1313,24 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     do {
 	FILE* fp;
 
+	// Create the file
 	fp = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
-				      tmp_config_filename, errmsg);
+				      _tmp_config_filename, errmsg);
 	if (fp == NULL) {
 	    errmsg = c_format("Cannot load the configuration file: "
 			      "cannot create a temporary filename: %s",
 			      errmsg.c_str());
+	    _tmp_config_filename = "";
+	    return false;
+	}
+
+	// Set the file permissions
+	if (set_config_file_permissions(fp, user_id, errmsg) != true) {
+	    errmsg = c_format("Cannot load the configuration file: %s",
+			      errmsg.c_str());
+	    // Close and remove the file
+	    fclose(fp);
+	    remove_tmp_config_file();
 	    return false;
 	}
 
@@ -1303,7 +1364,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 	errmsg = c_format("Cannot load the configuration file: %s",
 			  errmsg.c_str());
 	discard_changes();
-	unlink(tmp_config_filename.c_str());
+	remove_tmp_config_file();
 	return false;
     }
 
@@ -1315,13 +1376,13 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 
     // Save the name of the temporary file in the local variable
     if (root_node().set_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
-				 tmp_config_filename.c_str())
+				 _tmp_config_filename.c_str())
 	!= true) {
 	errmsg = c_format("Cannot load the configuration file: cannot store "
 			  "temporary filename %s in internal variable %s",
-			  tmp_config_filename.c_str(),
+			  _tmp_config_filename.c_str(),
 			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
-	unlink(tmp_config_filename.c_str());
+	remove_tmp_config_file();
 	return false;
     }
 
@@ -1336,7 +1397,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     if (config_failed()) {
 	errmsg = config_failed_msg();
 	discard_changes();
-	unlink(tmp_config_filename.c_str());
+	remove_tmp_config_file();
 	return false;
     }
 
@@ -1355,7 +1416,7 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     if (! success) {
 	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
 		   filename.c_str(), errmsg.c_str());
-	remove_tmp_config_file(dummy_errmsg);
+	remove_tmp_config_file();
 	discard_changes();
 	cb->dispatch(success, errmsg, dummy_deltas, dummy_deletions);
 	return;
@@ -1368,7 +1429,7 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     if (check_commit_status(errmsg) == false) {
 	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
 		   errmsg.c_str());
-	remove_tmp_config_file(dummy_errmsg);
+	remove_tmp_config_file();
 	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
@@ -1380,9 +1441,9 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     // Get the string with the name of the temporary file with the
     // new configuration.
     //
-    string tmp_config_filename;
+    string rtrmgr_config_filename;
     if (root_node().expand_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
-				    tmp_config_filename)
+				    rtrmgr_config_filename)
 	!= true) {
 	success = false;
 	errmsg = c_format("internal variable %s not found",
@@ -1392,7 +1453,7 @@ MasterConfigTree::load_config_file_received_cb(bool success,
 	errmsg = c_format("Cannot load configuration file %s because of "
 			  "internal error: %s",
 			  filename.c_str(), errmsg.c_str());
-	remove_tmp_config_file(dummy_errmsg);
+	remove_tmp_config_file();
 	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
@@ -1402,15 +1463,16 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     // Read the configuration from the temporary file
     //
     string rtrmgr_config_value;
-    if (read_file(rtrmgr_config_value, tmp_config_filename, errmsg) != true) {
+    if (read_file(rtrmgr_config_value, rtrmgr_config_filename, errmsg)
+	!= true) {
 	success = false;
 	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
 		   filename.c_str(), errmsg.c_str());
 	errmsg = c_format("Cannot load configuration file %s because cannot "
 			  "read temporary file %s with the configuration: %s",
-			  filename.c_str(), tmp_config_filename.c_str(),
+			  filename.c_str(), rtrmgr_config_filename.c_str(),
 			  errmsg.c_str());
-	remove_tmp_config_file(dummy_errmsg);
+	remove_tmp_config_file();
 	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
@@ -1419,7 +1481,7 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     //
     // Remove the temporary file with the configuration
     //
-    remove_tmp_config_file(dummy_errmsg);
+    remove_tmp_config_file();
 
     //
     // Create the string that is used to delete the temporary added
@@ -1599,8 +1661,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // Set the effective group to "xorp"
     struct group *grp = getgrnam("xorp");
     if (grp == NULL) {
-	errmsg = "ERROR: config files are saved as group \"xorp\".";
-	errmsg = "Group \"xorp\" does not exist on this system.\n";
+	errmsg = "Group \"xorp\" does not exist on this system";
 	return false;
     }
     gid_t gid, orig_gid;
