@@ -1,7 +1,22 @@
 #
-# $XORP: xorp/pim/TODO,v 1.115 2005/05/12 10:21:24 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.116 2005/06/16 19:40:40 pavlin Exp $
 #
 
+* PIM-SM SPEC:
+  Fix the following:
+  OLD:
+  inherited_olist(S,G,rpt) is the outgoing interface for packets forwarded
+  on (*,*,RP) or (*,G) state taking into account (S,G,rpt) prune state,
+  and asserts, etc.
+
+  NEW: "is the outgoing interface" -> "is the outgoing interface list"
+
+  OLD:  A secondary
+        function of the MRIB is to provide routing metrics for destination
+        addresses, these metrics are used when sending and processing
+        Assert messages.
+  NEW:  [add ; after "addresses"]
+  
 * PIM IMPL:
   If the PIM-SM module doesn't know the RP address, then it shouldn't
   include the register_vif in the MFC entry's outgoing interface set.
