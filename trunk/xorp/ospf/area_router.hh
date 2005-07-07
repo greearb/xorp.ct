@@ -298,6 +298,18 @@ class AreaRouter {
      */
     void event_bad_link_state_request(const PeerID peerid,
 				      const OspfTypes::NeighbourID nid) const;
+
+    /**
+     * Send this LSA directly to the neighbour.
+     *
+     * @param peerid
+     * @param nid
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(const PeerID peerid, const OspfTypes::NeighbourID nid,
+		  Lsa::LsaRef lsar) const;
 };
 
 /**

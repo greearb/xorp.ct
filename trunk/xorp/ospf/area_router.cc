@@ -254,10 +254,12 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    break;
 	}
 	const Lsa_header& lsah = (*i)->get_header();
+	size_t index;
+	LsaSearch search = compare_lsa(lsah, index);
 
 	// (4) MaxAge
 	if (OspfTypes::MaxAge == lsah.get_ls_age()) {
-	    if (NOMATCH == compare_lsa(lsah)) {
+	    if (NOMATCH == search) {
 		if (neighbours_exchange_or_loading()) {
 		    XLOG_WARNING("TBD: Acknowledge LSA");
 		    continue;
@@ -265,8 +267,6 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    }
 	}
 	
-	size_t index;
-	LsaSearch search = compare_lsa(lsah, index);
 	switch(search) {
 	case NOMATCH:
 	case NEWER:
@@ -305,7 +305,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    XLOG_WARNING("TBD Section 13.4");
 	    break;
 	case OLDER:
-	    // XXX - Is this really where this case belongs?
+	    // XXX - Is this really where case (6) belongs?
 	    // (6) If this LSA is on the sending neighbours request
 	    // list something has gone wrong.
 
@@ -315,19 +315,27 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    }
 
 	    // (8) The database copy is more recent than the received LSA.
-	    HERE 
+	    // The LSA's LS sequence number is wrapping.
+	    if (_db[index]->get_header().get_ls_age() == OspfTypes::MaxAge &&
+		_db[index]->get_header().get_ls_sequence_number() == 
+		OspfTypes::MaxSequenceNumber)
+		continue;
+	    // We have a more upto date copy of this LSA than our
+	    // neighbour so blast this LSA directly back to this neighbour.
+	    send_lsa(peerid, nid, _db[index]);
 	    break;
 	case EQUIVALENT:
 	    // (7) The LSAs are equivalent.
-	    AND HERE
+	    // (a) This might be an "implied acknowledgement".
+	    _db[index]->remove_nack(nid);
+	    // (b) 
+	    XLOG_WARNING("TBD: Possibly acknowledge receipt of the LSA");
 	    break;
 	}
     }
 
  out:
     push_lsas();
-
-    XLOG_WARNING("TBD process received LSAs");
 }
 
 template <typename A>
@@ -711,6 +719,15 @@ template <typename A>
 void
 AreaRouter<A>::event_bad_link_state_request(const PeerID /*peerid*/,
 				    const OspfTypes::NeighbourID/*nid*/) const
+{
+    XLOG_UNFINISHED();
+}
+
+template <typename A>
+bool
+AreaRouter<A>::send_lsa(const PeerID /*peerid*/,
+			const OspfTypes::NeighbourID /*nid*/,
+			Lsa::LsaRef /*lsar*/) const
 {
     XLOG_UNFINISHED();
 }
