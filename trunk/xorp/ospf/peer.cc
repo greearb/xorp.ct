@@ -1211,7 +1211,7 @@ Peer<IPv4>::update_router_linksV2()
     switch(_interface_state) {
     case Down:
 	// Notify the area database this router link in no longer available
-	get_area_router()->remove_router_link(_peerout.get_peerid());
+	get_area_router()->remove_router_link(get_peerid());
 	return;
 	break;
     case Loopback:
@@ -1326,7 +1326,7 @@ Peer<IPv4>::update_router_linksV2()
 
  done:
     // Notify the area database this router link in now available
-    get_area_router()->add_router_link(_peerout.get_peerid(), router_link);
+    get_area_router()->add_router_link(get_peerid(), router_link);
 }
 
 template <>
@@ -1353,7 +1353,7 @@ Peer<IPv6>::update_router_linksV3()
     case Down:
     case Loopback:
 	// Notify the area database this router link in no longer available
-	get_area_router()->remove_router_link(_peerout.get_peerid());
+	get_area_router()->remove_router_link(get_peerid());
 	return;
 	break;
     case Waiting:
@@ -1384,8 +1384,7 @@ Peer<IPv6>::update_router_linksV3()
 	    router_link.set_neighbour_router_id(ntohl((*n)->
 						      get_router_id().addr()));
 
-	    get_area_router()->add_router_link(_peerout.get_peerid(),
-					       router_link);
+	    get_area_router()->add_router_link(get_peerid(), router_link);
 	}
 	
     }
@@ -1433,8 +1432,7 @@ Peer<IPv6>::update_router_linksV3()
 		    set_neighbour_router_id(ntohl(get_designated_router().
 						  addr()));
 
-		get_area_router()->add_router_link(_peerout.get_peerid(),
-					       router_link);
+		get_area_router()->add_router_link(get_peerid(), router_link);
 	    }
 	}
 	    break;
@@ -2576,7 +2574,9 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	break;
     }
 
-    get_area_router()->receive_lsas(_neighbourid, lsup->get_lsas());
+    get_area_router()->receive_lsas(_peer.get_peerid(),
+				    _neighbourid,
+				    lsup->get_lsas());
 }
 
 template <typename A>

@@ -255,6 +255,12 @@ class Peer {
     string get_if_name() const { return _peerout.get_if_name(); }
 
     /**
+     * Get Peer ID.
+     *
+     */
+    PeerID get_peerid() const { return _peerout.get_peerid(); }
+
+    /**
      * Address of this interface/vif.
      *
      * @return interface/vif address.
