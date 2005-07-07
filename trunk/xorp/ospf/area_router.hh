@@ -82,11 +82,13 @@ class AreaRouter {
     /**
      * Receive LSAs
      * 
+     * @param peerid that the LSAs arrived on.
      * @param nid neighbourID that the LSAs arrived on.
      * @param lsas list of lsas.
      *
      */
-    void receive_lsas(OspfTypes::NeighbourID nid, list<Lsa::LsaRef>& lsas);
+    void receive_lsas(PeerID peerid, OspfTypes::NeighbourID nid,
+		      list<Lsa::LsaRef>& lsas);
 
     /**
      * Returned by compare_lsa.
@@ -276,6 +278,26 @@ class AreaRouter {
      * @return true if any of the neigbours are in state Exchange or Loading.
      */
     bool neighbours_exchange_or_loading() const;
+
+    /**
+     * Is this LSA on this neighbours link state request list.
+     * @param peerid
+     * @param nid
+     *
+     * @return true if it is.
+     */
+    bool on_link_state_request_list(const PeerID peerid,
+				    const OspfTypes::NeighbourID nid,
+				    Lsa::LsaRef lsar) const;
+
+    /**
+     * Genearate a BadLSReq event.
+     *
+     * @param peerid
+     * @param nid
+     */
+    void event_bad_link_state_request(const PeerID peerid,
+				      const OspfTypes::NeighbourID nid) const;
 };
 
 /**

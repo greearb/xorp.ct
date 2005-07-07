@@ -221,10 +221,12 @@ pp_lsas(const list<Lsa::LsaRef>& lsas)
 
 template <typename A>
 void
-AreaRouter<A>::receive_lsas(OspfTypes::NeighbourID nid,
+AreaRouter<A>::receive_lsas(PeerID peerid,
+			    OspfTypes::NeighbourID nid,
 			    list<Lsa::LsaRef>& lsas)
 {
-    debug_msg("NeighbourID %u %s\n", nid, pp_lsas(lsas).c_str());
+    debug_msg("PeerID %u NeighbourID %u %s\n", peerid, nid,
+	      pp_lsas(lsas).c_str());
 
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
@@ -263,10 +265,12 @@ AreaRouter<A>::receive_lsas(OspfTypes::NeighbourID nid,
 	    }
 	}
 	
-	// (5) New or newer LSA.
 	size_t index;
 	LsaSearch search = compare_lsa(lsah, index);
-	if (NOMATCH == search || NEWER == search) {
+	switch(search) {
+	case NOMATCH:
+	case NEWER:
+	    // (5) New or newer LSA.
 	    // (a) If this LSA is too recent drop it.
 	    if (NEWER == search) {
 		TimeVal then;
@@ -275,12 +279,52 @@ AreaRouter<A>::receive_lsas(OspfTypes::NeighbourID nid,
 		    continue;
 	    }
 	    // (b) Flood this LSA to all of our neighbours.
+	    // RFC 2328 Section 13.3. Next step in the flooding procedure
 	    publish((*i), nid);
+
+	    XLOG_WARNING("TBD Section 13.3");
+
+	    // (c) Remove the current copy from neighbours
+	    // retransmission lists.
+	    // (d) Install the new LSA.
+	    if (NOMATCH == search)
+		add_lsa((*i));
+	    else
+		update_lsa((*i), index);
+
+	    XLOG_WARNING("TBD Section 13.2");
+	    
+	    // (e) Possibly acknowledge this LSA.
+	    // RFC 2328 Section 13.5 Sending Link State Acknowledgment Packets
+
+	    XLOG_WARNING("TBD Section 13.5");
+	    
+	    // (f) Self orignating LSAs 
+	    // RFC 2328 Section 13.4. Receiving self-originated LSAs
+
+	    XLOG_WARNING("TBD Section 13.4");
+	    break;
+	case OLDER:
+	    // XXX - Is this really where this case belongs?
+	    // (6) If this LSA is on the sending neighbours request
+	    // list something has gone wrong.
+
+	    if (on_link_state_request_list(peerid, nid, (*i))) {
+		event_bad_link_state_request(peerid, nid);
+		goto out;
+	    }
+
+	    // (8) The database copy is more recent than the received LSA.
+	    HERE 
+	    break;
+	case EQUIVALENT:
+	    // (7) The LSAs are equivalent.
+	    AND HERE
+	    break;
 	}
-	
     }
 
-//  out:
+ out:
     push_lsas();
 
     XLOG_WARNING("TBD process received LSAs");
@@ -650,6 +694,23 @@ AreaRouter<A>::push_lsas()
 template <typename A>
 bool
 AreaRouter<A>::neighbours_exchange_or_loading() const
+{
+    XLOG_UNFINISHED();
+}
+
+template <typename A>
+bool
+AreaRouter<A>::on_link_state_request_list(const PeerID /*peerid*/,
+					  const OspfTypes::NeighbourID /*nid*/,
+					  Lsa::LsaRef /*lsar*/) const
+{
+    XLOG_UNFINISHED();
+}
+
+template <typename A>
+void
+AreaRouter<A>::event_bad_link_state_request(const PeerID /*peerid*/,
+				    const OspfTypes::NeighbourID/*nid*/) const
 {
     XLOG_UNFINISHED();
 }
