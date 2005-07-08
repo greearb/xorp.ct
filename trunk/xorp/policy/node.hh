@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.1 2004/09/17 13:48:48 abittau Exp $
+// $XORP: xorp/policy/node.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
@@ -322,7 +322,7 @@ private:
 
     // not impl
     NodeRegex(const NodeRegex&);
-    NodeRegex operator=(const NodeRegex&);
+    NodeRegex& operator=(const NodeRegex&);
 };
 
 #endif // __POLICY_NODE_HH__

@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.22 2005/05/27 20:01:01 atanu Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.23 2005/05/27 22:17:24 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -396,7 +396,7 @@ private:
 
 private:
     TimerList(const TimerList&);		// not implemented
-    TimerList operator=(const TimerList&);	// not implemented
+    TimerList& operator=(const TimerList&);	// not implemented
 
 private:
     ClockBase* 			_clock;
