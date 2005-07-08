@@ -232,6 +232,8 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
+
+    list<Lsa_header> delayed_ack, direct_ack;
     
     // RFC 2328 Section 13. The Flooding Procedure
     // Validate the incoming LSAs.
@@ -247,12 +249,11 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	case OspfTypes::BORDER:
 	    break;
 	case OspfTypes::STUB:
-	    XLOG_WARNING("TBD: ignore External LSA's in stub areas");
-	    // XXX - As soon as we have External LSA's enable this code.
-// 	    if (dynamic_cast<ExternalLsa>(*i))
-// 		continue;
+ 	    if ((*i)->external())
+ 		continue;
 	    break;
 	case OspfTypes::NSSA:
+	    XLOG_WARNING("TBD Check RFC 3101");
 	    break;
 	}
 	const Lsa_header& lsah = (*i)->get_header();
@@ -263,7 +264,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	if (OspfTypes::MaxAge == lsah.get_ls_age()) {
 	    if (NOMATCH == search) {
 		if (!neighbours_exchange_or_loading()) {
-		    XLOG_WARNING("TBD: Acknowledge LSA");
+		    delayed_ack.push_back(lsah);
 		    continue;
 		}
 	    }
@@ -329,15 +330,23 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	case EQUIVALENT:
 	    // (7) The LSAs are equivalent.
 	    // (a) This might be an "implied acknowledgement".
-	    _db[index]->remove_nack(nid);
-	    // (b) 
-	    XLOG_WARNING("TBD: Possibly acknowledge receipt of the LSA");
+	    if (_db[index]->exists_nack(nid)) { 
+
+		_db[index]->remove_nack(nid);
+		// (b) An "implied acknowledgement".
+		if (backup && dr)
+		    delayed_ack.push_back(lsah);
+	    } else {
+		// (b) Not an "implied acknowledgement".
+		direct_ack.push_back(lsah);
+	    }
 	    break;
 	}
     }
 
  out:
     push_lsas();
+    XLOG_WARNING("TBD process direct and delayed acks");
 }
 
 template <typename A>
