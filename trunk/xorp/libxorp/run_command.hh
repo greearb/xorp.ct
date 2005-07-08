@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.3 2005/03/25 02:53:44 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.4 2005/06/27 08:38:07 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -32,6 +32,7 @@ class RunCommand {
 public:
     typedef XorpCallback2<void, RunCommand*, const string&>::RefPtr OutputCallback;
     typedef XorpCallback3<void, RunCommand*, bool, const string&>::RefPtr DoneCallback;
+    class ExecId;
 
     /**
      * Constructor for a given command and its arguments.
@@ -83,6 +84,135 @@ public:
      */
     const string& arguments() const { return _arguments; }
 
+    /**
+     * Get a reference to the ExecId object.
+     * 
+     * @return a reference to the ExecId object that is used
+     * for setting the execution ID when running the command.
+     */
+    ExecId& exec_id() { return (_exec_id); }
+
+    /**
+     * Set the execution ID for executing the command.
+     * 
+     * @param v the execution ID.
+     */
+    void set_exec_id(const ExecId& v);
+
+    /**
+     * @short Class for setting the execution ID when running the command.
+     */
+    class ExecId {
+    public:
+	/**
+	 * Default constructor.
+	 */
+	ExecId();
+
+	/**
+	 * Constructor for a given user ID.
+	 * 
+	 * @param uid the user ID.
+	 */
+	ExecId(uid_t uid);
+
+	/**
+	 * Constructor for a given user ID and group ID.
+	 * 
+	 * @param uid the user ID.
+	 * @param gid the group ID.
+	 */
+	ExecId(uid_t uid, gid_t gid);
+
+	/**
+	 * Save the current execution ID.
+	 */
+	void save_current_exec_id();
+
+	/**
+	 * Restore the previously saved execution ID.
+	 * 
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int restore_saved_exec_id(string& error_msg) const;
+
+	/**
+	 * Set the effective execution ID.
+	 * 
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int set_effective_exec_id(string& error_msg);
+
+	/**
+	 * Test if the execution ID is set.
+	 * 
+	 * @return true if the execution ID is set, otherwise false.
+	 */
+	bool is_set() const;
+
+	/**
+	 * Get the user ID.
+	 * 
+	 * @return the user ID.
+	 */
+	uid_t	uid() const { return (_uid); }
+
+	/**
+	 * Get the group ID.
+	 * 
+	 * @return the group ID.
+	 */
+	gid_t	gid() const { return (_gid); }
+
+	/**
+	 * Set the user ID.
+	 * 
+	 * @param v the user ID.
+	 */
+	void	set_uid(uid_t v) { _uid = v; _is_uid_set = true; }
+
+	/**
+	 * Set the group ID.
+	 * 
+	 * @param v the group ID.
+	 */
+	void	set_gid(gid_t v) { _gid = v; _is_gid_set = true; }
+
+	/**
+	 * Test if the user ID was assigned.
+	 * 
+	 * @return true if the user ID was assigned, otherwise false.
+	 */
+	bool	is_uid_set() const { return (_is_uid_set); }
+
+	/**
+	 * Test if the group ID was assigned.
+	 * 
+	 * @return true if the group ID was assigned, otherwise false.
+	 */
+	bool	is_gid_set() const { return (_is_gid_set); }
+
+	/**
+	 * Reset the assigned user ID and group ID.
+	 */
+	void	reset();
+
+    private:
+	uid_t	saved_uid() const { return (_saved_uid); }
+	uid_t	saved_gid() const { return (_saved_gid); }
+
+	uid_t	_uid;
+	gid_t	_gid;
+	bool	_is_uid_set;
+	bool	_is_gid_set;
+
+	uid_t	_saved_uid;
+	gid_t	_saved_gid;
+	bool	_is_exec_id_saved;
+    };
+
 private:
     /**
      * Close the output for the command.
@@ -128,6 +258,7 @@ private:
     bool		_is_error;
     string		_error_msg;
     bool		_is_running;
+    ExecId		_exec_id;
 
     bool		_command_is_exited;
     bool		_command_is_signaled;

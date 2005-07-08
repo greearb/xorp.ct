@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.4 2005/03/25 02:53:44 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.5 2005/06/27 08:38:06 pavlin Exp $
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -69,6 +69,8 @@ RunCommand::~RunCommand()
 int
 RunCommand::execute()
 {
+    string error_msg;
+
     if (_is_running)
 	return (XORP_OK);	// XXX: already running
 
@@ -76,11 +78,23 @@ RunCommand::execute()
     if (! _arguments.empty())
 	final_command += " " + _arguments;
 
+    //
+    // Save the current execution ID, and set the new execution ID
+    //
+    _exec_id.save_current_exec_id();
+    if (_exec_id.set_effective_exec_id(error_msg) != XORP_OK) {
+	XLOG_ERROR("Failed to set effective execution ID: %s",
+		   error_msg.c_str());
+	_exec_id.restore_saved_exec_id(error_msg);
+	return (XORP_ERROR);
+    }
+
     // Run the command
     _pid = popen2(final_command, _stdout_stream, _stderr_stream);
     if (_stdout_stream == NULL) {
 	XLOG_ERROR("Failed to execute command %s", final_command.c_str());
 	terminate();
+	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
 
@@ -93,6 +107,7 @@ RunCommand::execute()
 	XLOG_ERROR("Failed to start a stdout reader for command %s",
 		   final_command.c_str());
 	terminate();
+	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
 
@@ -104,10 +119,16 @@ RunCommand::execute()
 	XLOG_ERROR("Failed to start a stderr reader for command %s",
 		   final_command.c_str());
 	terminate();
+	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
 
     _is_running = true;
+
+    //
+    // Restore the saved execution ID
+    //
+    _exec_id.restore_saved_exec_id(error_msg);
 
     return (XORP_OK);
 }
@@ -258,4 +279,124 @@ RunCommand::done(AsyncFileOperator::Event event)
 
     // XXX: the callback will delete us. Don't do anything more in this method.
     // delete this;
+}
+
+void
+RunCommand::set_exec_id(const ExecId& v)
+{
+    _exec_id = v;
+}
+
+RunCommand::ExecId::ExecId()
+    : _uid(0),
+      _gid(0),
+      _is_uid_set(false),
+      _is_gid_set(false),
+      _saved_uid(0),
+      _saved_gid(0),
+      _is_exec_id_saved(false)
+{
+
+}
+
+RunCommand::ExecId::ExecId(uid_t uid)
+    : _uid(uid),
+      _gid(0),
+      _is_uid_set(true),
+      _is_gid_set(false),
+      _saved_uid(0),
+      _saved_gid(0),
+      _is_exec_id_saved(false)
+{
+
+}
+
+RunCommand::ExecId::ExecId(uid_t uid, gid_t gid)
+    : _uid(uid),
+      _gid(gid),
+      _is_uid_set(true),
+      _is_gid_set(true),
+      _saved_uid(0),
+      _saved_gid(0),
+      _is_exec_id_saved(false)
+{
+
+}
+
+void
+RunCommand::ExecId::save_current_exec_id()
+{
+    _saved_uid = getuid();
+    _saved_gid = getgid();
+    _is_exec_id_saved = true;
+}
+
+int
+RunCommand::ExecId::restore_saved_exec_id(string& error_msg) const
+{
+    if (! _is_exec_id_saved)
+	return (XORP_OK);	// Nothing to do, because nothing was saved
+
+    if (seteuid(saved_uid()) != 0) {
+	error_msg = c_format("Cannot restore saved user ID to %u: %s",
+			     XORP_UINT_CAST(saved_uid()), strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    if (setegid(saved_gid()) != 0) {
+	error_msg = c_format("Cannot restore saved group ID to %u: %s",
+			     XORP_UINT_CAST(saved_gid()), strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+RunCommand::ExecId::set_effective_exec_id(string& error_msg)
+{
+    if (! is_set())
+	return (XORP_OK);
+
+    //
+    // Set the effective group ID
+    //
+    if (is_gid_set() && (gid() != saved_gid())) {
+	if (setegid(gid()) != 0) {
+	    error_msg = c_format("Cannot set the effective group ID to %u: %s",
+				 XORP_UINT_CAST(gid()), strerror(errno));
+	    return (XORP_ERROR);
+	}
+    }
+
+    //
+    // Set the effective user ID
+    //
+    if (is_uid_set() && (uid() != saved_uid())) {
+	if (seteuid(uid()) != 0) {
+	    error_msg = c_format("Cannot set effective user ID to %u: %s",
+				 XORP_UINT_CAST(uid()), strerror(errno));
+	    return (XORP_ERROR);
+	}
+    }
+
+    return (XORP_OK);
+}
+
+bool
+RunCommand::ExecId::is_set() const
+{
+    return (is_uid_set() || is_gid_set());
+}
+
+void
+RunCommand::ExecId::reset()
+{
+    _uid = 0;
+    _gid = 0;
+    _is_uid_set = false;
+    _is_gid_set = false;
+    _saved_uid = 0;
+    _saved_gid = 0;
+    _is_exec_id_saved = false;
 }
