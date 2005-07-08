@@ -223,10 +223,12 @@ template <typename A>
 void
 AreaRouter<A>::receive_lsas(PeerID peerid,
 			    OspfTypes::NeighbourID nid,
-			    list<Lsa::LsaRef>& lsas)
+			    list<Lsa::LsaRef>& lsas, bool backup, bool dr)
 {
-    debug_msg("PeerID %u NeighbourID %u %s\n", peerid, nid,
-	      pp_lsas(lsas).c_str());
+    debug_msg("PeerID %u NeighbourID %u %s backup %s dr %s\n", peerid, nid,
+	      pp_lsas(lsas).c_str(),
+	      backup ? "true" : "false",
+	      dr ? "true" : "false");
 
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
@@ -260,7 +262,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	// (4) MaxAge
 	if (OspfTypes::MaxAge == lsah.get_ls_age()) {
 	    if (NOMATCH == search) {
-		if (neighbours_exchange_or_loading()) {
+		if (!neighbours_exchange_or_loading()) {
 		    XLOG_WARNING("TBD: Acknowledge LSA");
 		    continue;
 		}

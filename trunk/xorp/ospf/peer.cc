@@ -2574,9 +2574,12 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	break;
     }
 
-    get_area_router()->receive_lsas(_peer.get_peerid(),
-				    _neighbourid,
-				    lsup->get_lsas());
+    get_area_router()->
+	receive_lsas(_peer.get_peerid(),
+		     _neighbourid,
+		     lsup->get_lsas(),
+		     _peer.get_state() == Peer<A>::Backup,
+		     _peer.get_designated_router() == get_candidate_id());
 }
 
 template <typename A>
