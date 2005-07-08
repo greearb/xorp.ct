@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.52 2005/07/08 02:17:44 abittau Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.53 2005/07/08 20:51:15 mjh Exp $
 ##
 
 # -- Real Programs
@@ -34,6 +34,7 @@ xorp_rtrmgr_SOURCES	+= y.tplt_tab.h
 xorp_rtrmgr_SOURCES	+= command_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree_node.hh
+xorp_rtrmgr_SOURCES	+= config_operators.hh
 xorp_rtrmgr_SOURCES	+= generic_module_manager.hh
 xorp_rtrmgr_SOURCES	+= master_conf_tree.hh
 xorp_rtrmgr_SOURCES	+= master_conf_tree_node.hh
@@ -56,10 +57,10 @@ xorp_rtrmgr_SOURCES	+= util.hh
 xorp_rtrmgr_SOURCES	+= xorp_client.hh
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.hh
 xorp_rtrmgr_SOURCES	+= xrldb.hh
-xorp_rtrmgr_SOURCES	+= config_operators.hh
 
 xorp_rtrmgr_SOURCES	+= conf_tree.cc
 xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
+xorp_rtrmgr_SOURCES	+= config_operators.cc
 xorp_rtrmgr_SOURCES	+= generic_module_manager.cc
 xorp_rtrmgr_SOURCES	+= lex.boot.cc
 xorp_rtrmgr_SOURCES	+= lex.tplt.cc
@@ -83,7 +84,6 @@ xorp_rtrmgr_SOURCES	+= util.cc
 xorp_rtrmgr_SOURCES	+= xorp_client.cc
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
 xorp_rtrmgr_SOURCES	+= xrldb.cc
-xorp_rtrmgr_SOURCES	+= config_operators.cc
 xorp_rtrmgr_SOURCES	+= y.boot_tab.cc
 xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
 
@@ -104,6 +104,7 @@ xorpsh_SOURCES	+= cli.hh
 xorpsh_SOURCES	+= command_tree.hh
 xorpsh_SOURCES	+= conf_tree.hh
 xorpsh_SOURCES	+= conf_tree_node.hh
+xorpsh_SOURCES	+= config_operators.hh
 xorpsh_SOURCES	+= generic_module_manager.hh
 xorpsh_SOURCES	+= op_commands.hh
 xorpsh_SOURCES	+= path_segment.hh
@@ -118,12 +119,12 @@ xorpsh_SOURCES	+= util.hh
 xorpsh_SOURCES	+= xorp_client.hh
 xorpsh_SOURCES	+= xorpsh_main.hh
 xorpsh_SOURCES	+= xrl_xorpsh_interface.hh
-xorpsh_SOURCES	+= config_operators.hh
 
 xorpsh_SOURCES	+= cli.cc
 xorpsh_SOURCES	+= command_tree.cc
 xorpsh_SOURCES	+= conf_tree.cc
 xorpsh_SOURCES	+= conf_tree_node.cc
+xorpsh_SOURCES	+= config_operators.cc
 xorpsh_SOURCES	+= generic_module_manager.cc
 xorpsh_SOURCES	+= lex.boot.cc
 xorpsh_SOURCES	+= lex.opcmd.cc
@@ -140,7 +141,6 @@ xorpsh_SOURCES	+= xorp_client.cc
 xorpsh_SOURCES	+= xorpsh_main.cc
 xorpsh_SOURCES	+= xrl_xorpsh_interface.cc
 xorpsh_SOURCES	+= y.boot_tab.cc
-xorpsh_SOURCES	+= config_operators.cc
 xorpsh_SOURCES	+= y.opcmd_tab.cc
 xorpsh_SOURCES	+= y.tplt_tab.cc
 
@@ -168,12 +168,14 @@ test_templates_SOURCES	 = rtrmgr_module.h
 test_templates_SOURCES	+= y.tplt_tab.h
 
 test_templates_SOURCES	+= conf_tree_node.hh
+test_templates_SOURCES	+= config_operators.hh
 test_templates_SOURCES	+= template_base_command.hh
 test_templates_SOURCES	+= template_tree.hh
 test_templates_SOURCES	+= template_tree_node.hh
 test_templates_SOURCES	+= util.hh
 
 test_templates_SOURCES	+= conf_tree_node.cc
+test_templates_SOURCES	+= config_operators.cc
 test_templates_SOURCES	+= lex.tplt.cc
 test_templates_SOURCES	+= template_base_command.cc
 test_templates_SOURCES	+= template_tree.cc
@@ -194,6 +196,7 @@ test_sample_config_SOURCES	+= y.tplt_tab.h
 test_sample_config_SOURCES	+= command_tree.hh
 test_sample_config_SOURCES	+= conf_tree.hh
 test_sample_config_SOURCES	+= conf_tree_node.hh
+test_sample_config_SOURCES	+= config_operators.hh
 test_sample_config_SOURCES	+= generic_module_manager.hh
 test_sample_config_SOURCES	+= master_conf_tree.hh
 test_sample_config_SOURCES	+= master_conf_tree_node.hh
@@ -218,6 +221,7 @@ test_sample_config_SOURCES	+= xrldb.hh
 test_sample_config_SOURCES	+= command_tree.cc
 test_sample_config_SOURCES	+= conf_tree.cc
 test_sample_config_SOURCES	+= conf_tree_node.cc
+test_sample_config_SOURCES	+= config_operators.cc
 test_sample_config_SOURCES	+= generic_module_manager.cc
 test_sample_config_SOURCES	+= lex.boot.cc
 test_sample_config_SOURCES	+= lex.tplt.cc
@@ -253,6 +257,7 @@ test_module_manager_SOURCES	+= y.tplt_tab.h
 # test_module_manager_SOURCES	+= command_tree.hh
 test_module_manager_SOURCES	+= conf_tree.hh
 test_module_manager_SOURCES	+= conf_tree_node.hh
+test_module_manager_SOURCES	+= config_operators.hh
 test_module_manager_SOURCES	+= generic_module_manager.hh
 test_module_manager_SOURCES	+= master_conf_tree.hh
 test_module_manager_SOURCES	+= master_conf_tree_node.hh
@@ -274,6 +279,7 @@ test_module_manager_SOURCES	+= xrldb.hh
 
 test_module_manager_SOURCES	+= conf_tree.cc
 test_module_manager_SOURCES	+= conf_tree_node.cc
+test_module_manager_SOURCES	+= config_operators.cc
 test_module_manager_SOURCES	+= generic_module_manager.cc
 test_module_manager_SOURCES	+= lex.boot.cc
 test_module_manager_SOURCES	+= lex.tplt.cc
