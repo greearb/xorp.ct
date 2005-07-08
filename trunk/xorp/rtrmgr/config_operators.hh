@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.37 2005/07/05 20:28:04 mjh Exp $
+// $XORP: xorp/rtrmgr/config_operators.hh,v 1.1 2005/07/08 20:54:20 mjh Exp $
 
 #ifndef __RTRMGR_CONFIG_OPERATORS_HH__
 #define __RTRMGR_CONFIG_OPERATORS_HH__
+
 #include <string>
 #include "libxorp/xlog.h"
 
@@ -39,4 +40,4 @@ extern string operator_to_str(ConfigOperator op);
 extern "C" ConfigOperator lookup_modifier(const string& s);
 extern "C" ConfigOperator lookup_comparator(const string& s);
 
-#endif
+#endif // __RTRMGR_CONFIG_OPERATORS_HH__

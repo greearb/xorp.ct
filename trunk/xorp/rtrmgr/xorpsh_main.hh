@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.21 2005/07/02 04:20:21 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.22 2005/07/08 20:51:17 mjh Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -166,8 +166,7 @@ private:
 					// messages from saving the config
 
     uint32_t		_rtrmgr_pid;
-    uint32_t            _clientid
-;
+    uint32_t            _clientid;
 
     XorpTimer           _repeat_request_timer;
 };
