@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.39 2005/04/11 05:57:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.40 2005/07/08 02:06:18 abittau Exp $"
 
- #define DEBUG_LOGGING
- #define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
