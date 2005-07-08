@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.51 2005/07/06 16:17:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.52 2005/07/06 16:33:52 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -59,14 +59,30 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
       _root_node(verbose),
       _commit_in_progress(false),
       _config_failed(false),
-      _rtrmgr_config_node_found(false)
+      _rtrmgr_config_node_found(false),
+      _xorp_gid(0),
+      _is_xorp_gid_set(false),
+      //
+      // XXX: set _enable_program_exec_id to true to enable
+      // setting the user and group ID when executing external helper
+      // programs during (re)configuration. Note that this doesn't apply
+      // for running the XORP processes themselves.
+      //
+      _enable_program_exec_id(false)
 {
+    string configuration;
+    string errmsg;
+
     _current_node = &_root_node;
     _task_manager = new TaskManager(*this, mmgr, xclient, 
 				    global_do_exec, verbose);
 
-    string configuration;
-    string errmsg;
+    // Get the group ID for group "xorp"
+    struct group* grp = getgrnam("xorp");
+    if (grp != NULL) {
+	_xorp_gid = grp->gr_gid;
+	_is_xorp_gid_set = true;
+    }
 
     if (read_file(configuration, config_file, errmsg) != true) {
 	xorp_throw(InitError, errmsg);
@@ -116,7 +132,8 @@ MasterConfigTree::operator=(const MasterConfigTree& orig_tree)
     return *this;
 }
 
-ConfigTree* MasterConfigTree::create_tree(TemplateTree *tt, bool verbose)
+ConfigTree*
+MasterConfigTree::create_tree(TemplateTree *tt, bool verbose)
 {
     MasterConfigTree *mct;
     mct = new MasterConfigTree(tt, verbose);
@@ -474,6 +491,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 
     _task_manager->reset();
     _task_manager->set_do_exec(false);
+    _task_manager->set_exec_id(_exec_id);
     _commit_cb = cb;
 
     master_root_node().initialize_commit();
@@ -565,6 +583,7 @@ MasterConfigTree::commit_changes_pass2()
 
     _task_manager->reset();
     _task_manager->set_do_exec(true);
+    _task_manager->set_exec_id(_exec_id);
 
     master_root_node().initialize_commit();
     // Sort the changes in order of module dependencies
@@ -581,10 +600,10 @@ MasterConfigTree::commit_changes_pass2()
 
     bool needs_update = false;
     if (!master_root_node().commit_changes(*_task_manager,
-				   /* do_commit = */ true,
-				   0, 0,
-				   result,
-				   needs_update)) {
+					   /* do_commit = */ true,
+					   0, 0,
+					   result,
+					   needs_update)) {
 	// Abort the commit
 	XLOG_ERROR("Commit failed in config tree");
 	_commit_in_progress = false;
@@ -693,35 +712,27 @@ MasterConfigTree::save_to_file(const string& filename,
 			       const string& save_hook,
 			       string& errmsg)
 {
+    string dummy_errmsg;
+
     errmsg = "";
 
     //
     // TODO: there are lots of hard-coded values below. Fix this!
     //
 
-    // XXX: set the effective group to "xorp"
-    struct group* grp = getgrnam("xorp");
-    if (grp == NULL) {
+    //
+    // Set the effective group to "xorp" and the effective user ID to the
+    // uid of the user that sent the request.
+    //
+    if (! _is_xorp_gid_set) {
 	errmsg = "Group \"xorp\" does not exist on this system";
 	return false;
     }
-
-    gid_t gid, orig_gid;
-    orig_gid = getgid();
-    gid = grp->gr_gid;
-    if (setegid(gid) < 0) {
-	errmsg = c_format("Failed to seteuid to group \"xorp\", gid %u\n",
-			  XORP_UINT_CAST(gid));
-	return false;
-    }
-
-    // Set effective user ID to the uid of the user that requested the save
-    uid_t orig_uid;
-    orig_uid = getuid();
-    if (seteuid(user_id) < 0) {
-	errmsg = c_format("Failed to seteuid to uid %u\n",
-			  XORP_UINT_CAST(user_id));
-	setegid(orig_gid);
+    _exec_id.set_uid(user_id);
+    _exec_id.set_gid(_xorp_gid);
+    _exec_id.save_current_exec_id();
+    if (_exec_id.set_effective_exec_id(errmsg) != XORP_OK) {
+	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	return false;
     }
 
@@ -744,8 +755,7 @@ MasterConfigTree::save_to_file(const string& filename,
 		errmsg = c_format("File %s is a directory.\n",
 				  filename.c_str());
 	    }
-	    seteuid(orig_uid);
-	    setegid(orig_gid);
+	    _exec_id.restore_saved_exec_id(dummy_errmsg);
 	    umask(orig_mask);
 	    return false;
 	}
@@ -758,8 +768,7 @@ MasterConfigTree::save_to_file(const string& filename,
 		errmsg = "File " + filename + " exists, but an error occured when trying to check that it was OK to overwrite it\n";
 		errmsg += "File was NOT overwritten\n";
 		fclose(file);
-		seteuid(orig_uid);
-		setegid(orig_gid);
+		_exec_id.restore_saved_exec_id(dummy_errmsg);
 		umask(orig_mask);
 		return false;
 	    }
@@ -767,8 +776,7 @@ MasterConfigTree::save_to_file(const string& filename,
 		errmsg = "File " + filename + " exists, but it is not an existing XORP config file.\n";
 		errmsg += "File was NOT overwritten\n";
 		fclose(file);
-		seteuid(orig_uid);
-		setegid(orig_gid);
+		_exec_id.restore_saved_exec_id(dummy_errmsg);
 		umask(orig_mask);
 		return false;
 	    }
@@ -779,8 +787,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	    errmsg = "File " + filename + " exists, and can not be overwritten.\n";
 	    errmsg += strerror(errno);
 	    fclose(file);
-	    seteuid(orig_uid);
-	    setegid(orig_gid);
+	    _exec_id.restore_saved_exec_id(dummy_errmsg);
 	    umask(orig_mask);
 	    return false;
 	}
@@ -790,8 +797,7 @@ MasterConfigTree::save_to_file(const string& filename,
     if (file == NULL) {
 	errmsg = "Could not create file \"" + filename + "\"";
 	errmsg += strerror(errno);
-	seteuid(orig_uid);
-	setegid(orig_gid);
+	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	umask(orig_mask);
 	return false;
     }
@@ -809,8 +815,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	} else {
 	    errmsg += "Save aborted; truncated file may exist\n";
 	}
-	seteuid(orig_uid);
-	setegid(orig_gid);
+	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	umask(orig_mask);
 	return false;
     }
@@ -829,14 +834,13 @@ MasterConfigTree::save_to_file(const string& filename,
 	} else {
 	    errmsg += "Save aborted; truncated file may exist\n";
 	}
-	seteuid(orig_uid);
-	setegid(orig_gid);
+	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	umask(orig_mask);
 	return false;
     }
 
     // Set file group correctly
-    if (fchown(fileno(file), user_id, gid) < 0) {
+    if (fchown(fileno(file), user_id, _xorp_gid) < 0) {
 	// This shouldn't be able to happen, but if it does, it
 	// shouldn't be fatal.
 	errmsg = "WARNING: failed to set saved file to be group \"xorp\"\n";
@@ -847,16 +851,14 @@ MasterConfigTree::save_to_file(const string& filename,
 	errmsg = "Error closing file \"" + filename + "\"\n";
 	errmsg += strerror(errno);
 	errmsg += "\nFile may not have been written correctly\n";
-	seteuid(orig_uid);
-	setegid(orig_gid);
+	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	return false;
     }
 
     run_save_hook(user_id, save_hook, filename);
 
     errmsg += "Save complete\n";
-    seteuid(orig_uid);
-    setegid(orig_gid);
+    _exec_id.restore_saved_exec_id(dummy_errmsg);
     umask(orig_mask);
     return true;
 }
@@ -940,6 +942,29 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
 	!= 0) {
 	errmsg = c_format("error changing the mode of the file: %s",
 			  strerror(errno));
+	return false;
+    }
+
+    return true;
+}
+
+bool
+MasterConfigTree::apply_config_change(uid_t user_id, CallBack cb,
+				      string& errmsg)
+{
+    string dummy_errmsg;
+
+    // Initialize the execution ID
+    if (_enable_program_exec_id) {
+	_exec_id.set_uid(user_id);
+	if (_is_xorp_gid_set)
+	    _exec_id.set_gid(_xorp_gid);
+    }
+
+    commit_changes_pass1(cb);
+
+    if (config_failed()) {
+	errmsg = config_failed_msg();
 	return false;
     }
 
@@ -1075,8 +1100,8 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	!= true) {
 	errmsg = c_format("Cannot save the configuration file: %s",
 			  errmsg.c_str());
-	discard_changes();
 	remove_tmp_config_file();
+	discard_changes();
 	return false;
     }
 
@@ -1105,11 +1130,9 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     CallBack save_cb;
     save_cb = callback(this, &MasterConfigTree::save_config_file_sent_cb,
 		       filename, user_id, cb);
-    commit_changes_pass1(save_cb);
-    if (config_failed()) {
-	errmsg = config_failed_msg();
-	discard_changes();
+    if (apply_config_change(user_id, save_cb, errmsg) != true) {
 	remove_tmp_config_file();
+	discard_changes();
 	return false;
     }
 
@@ -1188,9 +1211,7 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
     CallBack cleanup_cb;
     cleanup_cb = callback(this, &MasterConfigTree::save_config_file_cleanup_cb,
 			  orig_success, orig_errmsg, filename, user_id, cb);
-    commit_changes_pass1(cleanup_cb);
-    if (config_failed()) {
-	errmsg = config_failed_msg();
+    if (apply_config_change(user_id, cleanup_cb, errmsg) != true) {
 	discard_changes();
 	cb->dispatch(false, errmsg);
 	return;
@@ -1297,9 +1318,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 	CallBack cb2 = callback(this,
 				&MasterConfigTree::load_config_commit_changes_cb,
 				deltas, deletions, cb);
-	commit_changes_pass1(cb2);
-	if (config_failed()) {
-	    errmsg = config_failed_msg();
+	if (apply_config_change(user_id, cb2, errmsg) != true) {
 	    discard_changes();
 	    return false;
 	}
@@ -1364,8 +1383,8 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 	!= true) {
 	errmsg = c_format("Cannot load the configuration file: %s",
 			  errmsg.c_str());
-	discard_changes();
 	remove_tmp_config_file();
+	discard_changes();
 	return false;
     }
 
@@ -1394,11 +1413,9 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     CallBack load_cb;
     load_cb = callback(this, &MasterConfigTree::load_config_file_received_cb,
 		       filename, user_id, cb);
-    commit_changes_pass1(load_cb);
-    if (config_failed()) {
-	errmsg = config_failed_msg();
-	discard_changes();
+    if (apply_config_change(user_id, load_cb, errmsg) != true) {
 	remove_tmp_config_file();
+	discard_changes();
 	return false;
     }
 
@@ -1521,9 +1538,7 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     cleanup_cb = callback(this, &MasterConfigTree::load_config_file_cleanup_cb,
 			  orig_success, orig_errmsg, rtrmgr_config_value,
 			  filename, user_id, cb);
-    commit_changes_pass1(cleanup_cb);
-    if (config_failed()) {
-	errmsg = config_failed_msg();
+    if (apply_config_change(user_id, cleanup_cb, errmsg) != true) {
 	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
@@ -1602,16 +1617,16 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     string response;
     if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
 				  /* provisional change */ true, response)) {
-	discard_changes();
 	errmsg = response;
+	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
     }
     if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
 				      /* provisional change */ true,
 				      response)) {
-	discard_changes();
 	errmsg = response;
+	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
     }
@@ -1626,9 +1641,7 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     CallBack cb2 = callback(this,
 			    &MasterConfigTree::load_config_commit_changes_cb,
 			    deltas, deletions, cb);
-    commit_changes_pass1(cb2);
-    if (config_failed()) {
-	errmsg = config_failed_msg();
+    if (apply_config_change(user_id, cb2, errmsg) != true) {
 	discard_changes();
 	cb->dispatch(false, errmsg, deltas, deletions);
 	return;
@@ -1650,6 +1663,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 				 string& errmsg, string& deltas,
 				 string& deletions)
 {
+    string dummy_errmsg;
+
     //
     // We run load_from_file as the UID of the user making the request
     // and as group xorp.  This prevents users using the rtrmgr to
@@ -1659,41 +1674,30 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // protected files reported to them in error messages.
     //
 
-    // Set the effective group to "xorp"
-    struct group *grp = getgrnam("xorp");
-    if (grp == NULL) {
+    //
+    // Set the effective group to "xorp" and the effective user ID to the
+    // uid of the user that sent the request.
+    //
+    if (! _is_xorp_gid_set) {
 	errmsg = "Group \"xorp\" does not exist on this system";
 	return false;
     }
-    gid_t gid, orig_gid;
-    orig_gid = getgid();
-    gid = grp->gr_gid;
-    if (setegid(gid) < 0) {
-	errmsg = c_format("Failed to seteuid to group \"xorp\", gid %u\n",
-			  XORP_UINT_CAST(gid));
-	return false;
-    }
-
-    // Set effective user ID to the user_id of the user that requested the load
-    uid_t orig_uid;
-    orig_uid = getuid();
-    if (seteuid(user_id) < 0) {
-	errmsg = c_format("Failed to seteuid to user_id %u\n",
-			  XORP_UINT_CAST(user_id));
-	setegid(orig_gid);
+    _exec_id.set_uid(user_id);
+    _exec_id.set_gid(_xorp_gid);
+    _exec_id.save_current_exec_id();
+    if (_exec_id.set_effective_exec_id(errmsg) != XORP_OK) {
+	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	return false;
     }
 
     string configuration;
     if (! read_file(configuration, filename, errmsg)) {
-	seteuid(orig_uid);
-	setegid(orig_gid);
+	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	return false;
     }
 
     // Revert UID and GID now we've done reading the file
-    seteuid(orig_uid);
-    setegid(orig_gid);
+    _exec_id.restore_saved_exec_id(dummy_errmsg);
 
     //
     // Test out parsing the config on a new config tree to detect any
@@ -1723,15 +1727,15 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     string response;
     if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
 				  /* provisional change */ true, response)) {
-	discard_changes();
 	errmsg = response;
+	discard_changes();
 	return false;
     }
     if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
 				     /* provisional change */ true,
 				     response)) {
-	discard_changes();
 	errmsg = response;
+	discard_changes();
 	return false;
     }
 

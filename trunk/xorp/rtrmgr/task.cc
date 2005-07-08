@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.49 2005/06/18 01:19:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.50 2005/06/21 20:33:46 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -50,11 +50,12 @@ DelayValidation::DelayValidation(const string& module_name,
 }
 
 void
-DelayValidation::validate(CallBack cb)
+DelayValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 {
     _cb = cb;
     _timer = _eventloop.new_oneoff_after_ms(_delay_in_ms,
 			callback(this, &DelayValidation::timer_expired));
+    UNUSED(exec_id);
 }
 
 void
@@ -84,11 +85,13 @@ XrlStatusValidation::eventloop()
 }
 
 void
-XrlStatusValidation::validate(CallBack cb)
+XrlStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 {
     debug_msg("validate\n");
 
+    _exec_id = exec_id;
     _cb = cb;
+
     if (_task_manager.do_exec()) {
 	string xrl_request, errmsg;
 	Xrl* xrl = NULL;
@@ -214,7 +217,8 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	    _cb->dispatch(false);
 	}
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
-			callback(this, &XrlStatusValidation::validate, _cb));
+			callback(this, &XrlStatusValidation::validate,
+				 _exec_id, _cb));
 	break;
 
     case INTERNAL_ERROR:
@@ -252,7 +256,7 @@ ProgramStatusValidation::eventloop()
 }
 
 void
-ProgramStatusValidation::validate(CallBack cb)
+ProgramStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 {
     debug_msg("validate\n");
 
@@ -320,6 +324,7 @@ ProgramStatusValidation::validate(CallBack cb)
 	    callback(this, &ProgramStatusValidation::stdout_cb),
 	    callback(this, &ProgramStatusValidation::stderr_cb),
 	    callback(this, &ProgramStatusValidation::done_cb));
+	_run_command->set_exec_id(exec_id);
 	if (_run_command->execute() != XORP_OK) {
 	    delete _run_command;
 	    _run_command = NULL;
@@ -474,7 +479,8 @@ XrlStatusReadyValidation::handle_status_response(ProcessStatus status,
 	// Got a valid response saying we should wait.
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
-				 &XrlStatusValidation::validate, _cb));
+				 &XrlStatusValidation::validate,
+				 _exec_id, _cb));
 	return;
     case PROC_READY:
 	// The process is ready
@@ -541,7 +547,8 @@ XrlStatusConfigMeValidation::handle_status_response(ProcessStatus status,
 	// Got a valid response saying we should wait.
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
-				 &XrlStatusValidation::validate, _cb));
+				 &XrlStatusValidation::validate,
+				 _exec_id, _cb));
 	return;
     case PROC_NOT_READY:
     case PROC_READY:
@@ -615,7 +622,8 @@ XrlStatusShutdownValidation::handle_status_response(ProcessStatus status,
 	// Got a valid response saying we should wait.
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
-				 &XrlStatusValidation::validate, _cb));
+				 &XrlStatusValidation::validate,
+				 _exec_id, _cb));
 	return;
     }
     XLOG_UNREACHABLE();
@@ -731,7 +739,7 @@ XrlStartup::eventloop() const
 }
 
 void
-XrlStartup::startup(CallBack cb)
+XrlStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
@@ -799,6 +807,8 @@ XrlStartup::startup(CallBack cb)
 	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
 			callback(this, &XrlStartup::dummy_response));
     }
+
+    UNUSED(exec_id);
 }
 
 void
@@ -845,7 +855,7 @@ ProgramStartup::eventloop() const
 }
 
 void
-ProgramStartup::startup(CallBack cb)
+ProgramStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
@@ -912,6 +922,7 @@ ProgramStartup::startup(CallBack cb)
 	    callback(this, &ProgramStartup::stdout_cb),
 	    callback(this, &ProgramStartup::stderr_cb),
 	    callback(this, &ProgramStartup::done_cb));
+	_run_command->set_exec_id(exec_id);
 	if (_run_command->execute() != XORP_OK) {
 	    delete _run_command;
 	    _run_command = NULL;
@@ -1004,7 +1015,7 @@ XrlShutdown::eventloop() const
 }
 
 void
-XrlShutdown::shutdown(CallBack cb)
+XrlShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
 {
     XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
 
@@ -1074,6 +1085,8 @@ XrlShutdown::shutdown(CallBack cb)
 	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
 			callback(this, &XrlShutdown::dummy_response));
     }
+
+    UNUSED(exec_id);
 }
 
 void
@@ -1134,7 +1147,7 @@ ProgramShutdown::eventloop() const
 }
 
 void
-ProgramShutdown::shutdown(CallBack cb)
+ProgramShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
 {
     XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
 
@@ -1203,6 +1216,7 @@ ProgramShutdown::shutdown(CallBack cb)
 	    callback(this, &ProgramShutdown::stdout_cb),
 	    callback(this, &ProgramShutdown::stderr_cb),
 	    callback(this, &ProgramShutdown::done_cb));
+	_run_command->set_exec_id(exec_id);
 	if (_run_command->execute() != XORP_OK) {
 	    delete _run_command;
 	    _run_command = NULL;
@@ -1472,6 +1486,8 @@ TaskProgramItem::~TaskProgramItem()
 bool
 TaskProgramItem::execute(string& errmsg)
 {
+    const RunCommand::ExecId& exec_id = task().exec_id();
+
     if (task().do_exec())
 	XLOG_TRACE(_verbose, "Expanding %s\n",
 		   _unexpanded_program.str().c_str());
@@ -1510,6 +1526,7 @@ TaskProgramItem::execute(string& errmsg)
 	    callback(this, &TaskProgramItem::stdout_cb),
 	    callback(this, &TaskProgramItem::stderr_cb),
 	    callback(this, &TaskProgramItem::done_cb));
+	_run_command->set_exec_id(exec_id);
 	if (_run_command->execute() != XORP_OK) {
 	    delete _run_command;
 	    _run_command = NULL;
@@ -1625,6 +1642,7 @@ Task::Task(const string& name, TaskManager& taskmgr)
       _startup_method(NULL),
       _shutdown_method(NULL),
       _config_done(false),
+      _exec_id(taskmgr.exec_id()),
       _verbose(taskmgr.verbose())
 {
 }
@@ -1741,7 +1759,8 @@ Task::step2_wait()
     debug_msg("step2 (%s)\n", _module_name.c_str());
 
     if (_start_module && (_startup_validation != NULL)) {
-	_startup_validation->validate(callback(this, &Task::step2_done));
+	_startup_validation->validate(_exec_id,
+				      callback(this, &Task::step2_done));
     } else {
 	step2_2_wait();
     }
@@ -1764,7 +1783,8 @@ Task::step2_2_wait()
     debug_msg("step2_2 (%s)\n", _module_name.c_str());
 
     if (_start_module && (_startup_method != NULL)) {
-	_startup_method->startup(callback(this, &Task::step2_2_done));
+	_startup_method->startup(_exec_id,
+				 callback(this, &Task::step2_2_done));
     } else {
 	step2_3_wait();
     }
@@ -1787,7 +1807,8 @@ Task::step2_3_wait()
     debug_msg("step2_3 (%s)\n", _module_name.c_str());
 
     if (_start_module && (_config_validation != NULL)) {
-	_config_validation->validate(callback(this, &Task::step2_3_done));
+	_config_validation->validate(_exec_id,
+				     callback(this, &Task::step2_3_done));
     } else {
 	step3_config();
     }
@@ -1863,7 +1884,8 @@ Task::step4_wait()
     debug_msg("step4 (%s)\n", _module_name.c_str());
 
     if (_ready_validation && _config_done) {
-	_ready_validation->validate(callback(this, &Task::step4_done));
+	_ready_validation->validate(_exec_id,
+				    callback(this, &Task::step4_done));
     } else {
 	step5_stop();
     }
@@ -1889,7 +1911,8 @@ Task::step5_stop()
 
     if (_stop_module) {
 	if (_shutdown_method != NULL) {
-	    _shutdown_method->shutdown(callback(this, &Task::step5_done));
+	    _shutdown_method->shutdown(_exec_id,
+				       callback(this, &Task::step5_done));
 	} else {
 	    step6_wait();
 	}
@@ -1918,7 +1941,8 @@ Task::step6_wait()
     debug_msg("step6 (%s)\n", _module_name.c_str());
 
     if (_stop_module && (_shutdown_validation != NULL)) {
-	_shutdown_validation->validate(callback(this, &Task::step6_done));
+	_shutdown_validation->validate(_exec_id,
+				       callback(this, &Task::step6_done));
     } else {
 	step8_report();
     }
@@ -2030,6 +2054,7 @@ TaskManager::reset()
     }
     _shutdown_order.clear();
     _tasklist.clear();
+    _exec_id.reset();
 }
 
 int
@@ -2113,11 +2138,12 @@ TaskManager::shutdown_module(const string& module_name)
 void
 TaskManager::run(CallBack cb)
 {
+    list<Task*>::iterator iter;
+
     debug_msg("TaskManager::run, tasks (old order): ");
 
     if (_verbose) {
 	string debug_output;
-	list<Task*>::const_iterator iter;
 	for (iter = _tasklist.begin(); iter != _tasklist.end(); ++iter) {
 	    debug_output += c_format("%s ", (*iter)->name().c_str());
 	}
@@ -2127,10 +2153,17 @@ TaskManager::run(CallBack cb)
 
     reorder_tasks();
 
+    //
+    // Set the execution ID of the tasks
+    //
+    for (iter = _tasklist.begin(); iter != _tasklist.end(); ++iter) {
+	Task* task = *iter;
+	task->set_exec_id(exec_id());
+    }
+
     debug_msg("TaskManager::run, tasks: ");
     if (_verbose) {
 	string debug_output;
-	list<Task*>::const_iterator iter;
 	for (iter = _tasklist.begin(); iter != _tasklist.end(); ++iter) {
 	    debug_output += c_format("%s ", (*iter)->name().c_str());
 	}

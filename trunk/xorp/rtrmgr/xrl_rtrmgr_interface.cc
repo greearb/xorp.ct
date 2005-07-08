@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.35 2005/07/02 04:20:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.36 2005/07/03 21:06:00 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -104,12 +104,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_pid(// Output values,
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_register_client(
-	// Input values, 
-	const uint32_t&	user_id, 
-	const string&	clientname, 
-	// Output values, 
-	string&	filename,
-	uint32_t& pid)
+    // Input values, 
+    const uint32_t&	user_id, 
+    const string&	clientname, 
+    // Output values, 
+    string&		filename,
+    uint32_t&		pid)
 {
     pid = getpid();
     const User* user;
@@ -153,7 +153,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     newuser->set_clientname(clientname);
     newuser->set_authtoken(generate_auth_token(user_id, clientname));
     newuser->set_authenticated(false);
-    _users.insert(pair<uint32_t, UserInstance*>(user_id,newuser));
+    _users.insert(pair<uint32_t, UserInstance*>(user_id, newuser));
 
     //
     // Be careful here - if for any reason we fail to create, write to,
@@ -210,10 +210,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_unregister_client(const string& token)
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_authenticate_client(
-	// Input values, 
-	const uint32_t&	user_id, 
-	const string&	clientname, 
-	const string&	token) {
+    // Input values, 
+    const uint32_t&	user_id, 
+    const string&	clientname, 
+    const string&	token)
+{
     UserInstance *user;
     user = find_user_instance(user_id, clientname);
     if (user == NULL) {
@@ -313,9 +314,9 @@ XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
 
 XrlCmdError 
 XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
-	// Input values, 
-	const string& token, 
-	const bool& exclusive)
+    // Input values, 
+    const string&	token, 
+    const bool&		exclusive)
 {
     string response;
 
@@ -365,8 +366,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
 
 XrlCmdError 
 XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
-	// Input values, 
-        const string& token)
+    // Input values, 
+    const string&	token)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
@@ -387,10 +388,10 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
-	// Input values, 
-	const string&	token, 
-	// Output values, 
-	XrlAtomList&	users)
+    // Input values, 
+    const string&	token, 
+    // Output values, 
+    XrlAtomList&	users)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
@@ -424,11 +425,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
 */
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
-	// Input values, 
-	const string&	token, 
-	// Output values, 
-	bool& ready,
-	string&	config)
+    // Input values, 
+    const string&	token, 
+    // Output values, 
+    bool&		ready,
+    string&		config)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
@@ -446,11 +447,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
-	// Input values, 
-	const string&	token, 
-	const string&	target, 
-	const string&	deltas,
-	const string&	deletions)
+    // Input values, 
+    const string&	token, 
+    const string&	target, 
+    const string&	deltas,
+    const string&	deletions)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
@@ -490,11 +491,10 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
 		  user_id, string(target), string(deltas), string(deletions));
 
-    _master_config_tree->commit_changes_pass1(cb);
-    if (_master_config_tree->config_failed()) {
-	string err = _master_config_tree->config_failed_msg();
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
+    string errmsg;
+    if (_master_config_tree->apply_config_change(user_id, cb, errmsg) != true)
+	return XrlCmdError::COMMAND_FAILED(errmsg);
+
     return XrlCmdError::OKAY();
 }
 
@@ -612,12 +612,12 @@ XrlRtrmgrInterface::module_status_changed(const string& modname,
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
-	// Input values, 
-	const string&	token, 
-	const uint32_t&	timeout /* in milliseconds */, 
-	// Output values, 
-	bool& success,
-	uint32_t& holder)
+    // Input values, 
+    const string&	token, 
+    const uint32_t&	timeout /* in milliseconds */, 
+    // Output values, 
+    bool&		success,
+    uint32_t&		holder)
 {
 
     if (!verify_token(token)) {
@@ -654,8 +654,8 @@ XrlRtrmgrInterface::lock_timeout()
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_unlock_config(
-	// Input values
-        const string&	token)
+    // Input values
+    const string&	token)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
@@ -679,13 +679,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_config(
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
-	// Input values, 
-	const string&	token, 
-	const string&	node, 
-	const uint32_t&	timeout, 
-	// Output values, 
-	bool& success, 
-	uint32_t& holder)
+    // Input values, 
+    const string&	token, 
+    const string&	node, 
+    const uint32_t&	timeout, 
+    // Output values, 
+    bool&		success, 
+    uint32_t&		holder)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
@@ -706,9 +706,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
-	// Input values, 
-	const string&	token, 
-	const string&	node)
+    // Input values, 
+    const string&	token, 
+    const string&	node)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
@@ -919,8 +919,8 @@ XrlRtrmgrInterface::generate_auth_token(const uint32_t& user_id,
 
 XrlCmdError 
 XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_birth(
-        const string&	target_class,
-	const string&	target_instance)
+    const string&	target_class,
+    const string&	target_instance)
 {
     XLOG_TRACE(_verbose, "XRL Birth: class %s instance %s\n",
 	       target_class.c_str(), target_instance.c_str());
@@ -930,8 +930,8 @@ XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_birth(
 
 XrlCmdError 
 XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_death(
-	const string&	target_class,
-	const string&	target_instance)
+    const string&	target_class,
+    const string&	target_instance)
 {
     XLOG_TRACE(_verbose, "XRL Death: class %s instance %s\n",
 	       target_class.c_str(), target_instance.c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.30 2005/03/25 02:54:38 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.31 2005/06/17 21:15:13 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -45,11 +45,12 @@ public:
 	: _module_name(module_name), _verbose(verbose) {};
     virtual ~Validation() {};
 
-    virtual void validate(CallBack cb) = 0;
+    virtual void validate(RunCommand::ExecId exec_id, CallBack cb) = 0;
 
 protected:
-    const string _module_name;
-    bool	_verbose;	 // Set to true if output is verbose
+    const string	_module_name;
+    RunCommand::ExecId	_exec_id;
+    bool		_verbose;	 // Set to true if output is verbose
 };
 
 class DelayValidation : public Validation {
@@ -57,7 +58,7 @@ public:
     DelayValidation(const string& module_name, EventLoop& eventloop,
 		    uint32_t ms, bool verbose);
 
-    void validate(CallBack cb);
+    void validate(RunCommand::ExecId exec_id, CallBack cb);
 
 private:
     void timer_expired();
@@ -74,7 +75,7 @@ public:
 			TaskManager& taskmgr);
     virtual ~XrlStatusValidation() {}
 
-    void validate(CallBack cb);
+    void validate(RunCommand::ExecId exec_id, CallBack cb);
 
 protected:
     void dummy_response();
@@ -97,7 +98,7 @@ public:
 			    TaskManager& taskmgr);
     virtual ~ProgramStatusValidation() {}
 
-    void validate(CallBack cb);
+    void validate(RunCommand::ExecId exec_id, CallBack cb);
 
 protected:
     virtual void handle_status_response(bool success,
@@ -217,7 +218,7 @@ public:
     Startup(const string& module_name, bool verbose);
     virtual ~Startup() {}
 
-    virtual void startup(CallBack cb) = 0;
+    virtual void startup(const RunCommand::ExecId& exec_id, CallBack cb) = 0;
 
 protected:
     const string _module_name;
@@ -230,7 +231,7 @@ public:
 	       TaskManager& taskmgr);
     virtual ~XrlStartup() {}
 
-    void startup(CallBack cb);
+    void startup(const RunCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
@@ -250,7 +251,7 @@ public:
 		   TaskManager& taskmgr);
     virtual ~ProgramStartup() {}
 
-    void startup(CallBack cb);
+    void startup(const RunCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
@@ -276,7 +277,7 @@ public:
     Shutdown(const string& module_name, bool verbose);
     virtual ~Shutdown() {}
 
-    virtual void shutdown(CallBack cb) = 0;
+    virtual void shutdown(const RunCommand::ExecId& exec_id, CallBack cb) = 0;
 
 protected:
     const string _module_name;
@@ -289,7 +290,7 @@ public:
 		TaskManager& taskmgr);
     virtual ~XrlShutdown() {}
 
-    void shutdown(CallBack cb);
+    void shutdown(const RunCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
@@ -309,7 +310,7 @@ public:
 		    TaskManager& taskmgr);
     virtual ~ProgramShutdown() {}
 
-    void shutdown(CallBack cb);
+    void shutdown(const RunCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
@@ -421,6 +422,21 @@ public:
     bool do_exec() const;
     XorpClient& xorp_client() const;
 
+    /**
+     * Get a reference to the ExecId object.
+     * 
+     * @return a reference to the ExecId object that is used
+     * for setting the execution ID when running the task.
+     */
+    const RunCommand::ExecId& exec_id() const { return _exec_id; }
+
+    /**
+     * Set the execution ID for executing the task.
+     * 
+     * @param v the execution ID.
+     */
+    void set_exec_id(const RunCommand::ExecId& v) { _exec_id = v; }
+
     const string& name() const { return _name; }
     EventLoop& eventloop() const;
 
@@ -477,6 +493,7 @@ private:
     bool	_config_done;	// True if we changed the module's config
     CallBack	_task_complete_cb; // The task completion callback
     XorpTimer	_wait_timer;
+    RunCommand::ExecId _exec_id;
     bool	_verbose;	 // Set to true if output is verbose
 };
 
@@ -533,6 +550,22 @@ public:
     int shell_execute(uid_t userid, const vector<string>& argv, 
 		      TaskManager::CallBack cb);
 
+    /**
+     * Get a reference to the ExecId object.
+     * 
+     * @return a reference to the ExecId object that is used
+     * for setting the execution ID when running the tasks.
+     */
+    const RunCommand::ExecId& exec_id() const { return _exec_id; }
+
+    /**
+     * Set the execution ID for executing the tasks.
+     * 
+     * @param v the execution ID.
+     */
+    void set_exec_id(const RunCommand::ExecId& v) { _exec_id = v; }
+
+
 private:
     void reorder_tasks();
     void run_task();
@@ -560,6 +593,8 @@ private:
     list<Task*> _shutdown_order;
 
     map<string, const ModuleCommand*> _module_commands;
+
+    RunCommand::ExecId _exec_id;
 
     CallBack _completion_cb;
 };
