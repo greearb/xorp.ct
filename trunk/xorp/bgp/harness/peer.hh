@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.15 2004/09/09 18:26:06 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.16 2005/03/25 02:52:54 pavlin Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -35,7 +35,7 @@ public:
 	 const string& target_port);
 
     Peer::Peer(const Peer& rhs);
-    Peer operator=(const Peer& rhs);
+    Peer& operator=(const Peer& rhs);
     void copy(const Peer& rhs);
 
     ~Peer();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.10 2005/05/10 12:29:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.11 2005/05/13 16:24:35 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -66,7 +66,7 @@ Iptuple::Iptuple(const Iptuple& rhs)
     copy(rhs);
 }
 
-Iptuple
+Iptuple&
 Iptuple::operator=(const Iptuple& rhs)
 {
     if (&rhs == this)

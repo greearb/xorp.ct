@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/iptuple.hh,v 1.6 2004/12/15 04:30:04 atanu Exp $
+// $XORP: xorp/bgp/iptuple.hh,v 1.7 2005/03/25 02:52:40 pavlin Exp $
 
 #ifndef __BGP_IPTUPLE_HH__
 #define __BGP_IPTUPLE_HH__
@@ -64,7 +64,7 @@ public:
 	throw(UnresolvableHost,AddressFamilyMismatch);
 
     Iptuple(const Iptuple&);
-    Iptuple operator=(const Iptuple&);
+    Iptuple& operator=(const Iptuple&);
     void copy(const Iptuple&);
 
     bool operator==(const Iptuple&) const;

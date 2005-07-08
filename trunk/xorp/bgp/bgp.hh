@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.39 2005/01/31 22:57:58 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.40 2005/03/25 02:52:39 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -455,7 +455,7 @@ private:
 	    _serverfd = rhs._serverfd;
 	    _tuples = rhs._tuples;
 	}
-	Server operator=(const Server& rhs) {
+	Server& operator=(const Server& rhs) {
 	    if (&rhs == this)
 		return *this;
 

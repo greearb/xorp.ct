@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.61 2005/05/21 01:06:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.62 2005/06/18 23:17:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -76,7 +76,7 @@ Peer::Peer(const Peer& rhs)
     copy(rhs);
 }
 
-Peer::Peer
+Peer::Peer&
 Peer::operator=(const Peer& rhs)
 {
     debug_msg("= operator\n");

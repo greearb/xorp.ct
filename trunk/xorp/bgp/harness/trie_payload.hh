@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.5 2004/06/10 22:40:41 hodson Exp $
+// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.6 2005/03/25 02:52:54 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TRIE_PAYLOAD_HH__
 #define __BGP_HARNESS_TRIE_PAYLOAD_HH__
@@ -116,7 +116,7 @@ public:
 	copy(rhs);
     }
 
-    TriePayload operator=(const TriePayload& rhs) {
+    TriePayload& operator=(const TriePayload& rhs) {
 	if(&rhs == this)
 	    return *this;
 	zap();
