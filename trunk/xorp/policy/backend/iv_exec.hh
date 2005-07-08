@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,12 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.1 2004/09/17 13:48:55 abittau Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.2 2005/03/25 02:54:12 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
 
-#include "policy/common/dispatcher.hh"
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
 #include "instruction.hh"
@@ -26,7 +26,7 @@
 #include "term_instr.hh"
 #include "policy_instr.hh"
 #include <stack>
-
+#include "policy/common/dispatcher.hh"
 
 /**
  * @short Visitor that executes instructions
@@ -56,7 +56,6 @@ public:
     public:
 	RuntimeError(const string& err) : PolicyException(err) {}
     };
-
 
     /**
      * Execute the give policies with the given varrw [i.e. route].
@@ -151,22 +150,15 @@ private:
     stack<const Element*> _stack;
     SetManager& _sman;
     VarRW& _varrw;
-
     bool _finished;
-
     Dispatcher _disp;
-
     FlowAction _fa;
-
-
     set<Element*> _trash;
-
     ostream* _os;
 
     // not impelmented
     IvExec(const IvExec&);
     IvExec& operator=(const IvExec&);
 };
-
 
 #endif // __POLICY_BACKEND_IV_EXEC_HH__
