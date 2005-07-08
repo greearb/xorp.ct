@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.9 2004/06/10 22:41:20 hodson Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.10 2005/03/25 02:53:46 pavlin Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -20,7 +20,6 @@
 #include <string>
 #include <list>
 
-#include "config.h"
 #include "xorp.h"
 #include "xlog.h"
 #include "callback.hh"
@@ -30,7 +29,7 @@
  * enabled.
  */
 #define DOUT(info)						\
-		if(info.verbose()) 				\
+		if (info.verbose()) 				\
 			info.out() << __FUNCTION__ << ":"	\
 				   << __LINE__ << ":"		\
 				   << info.test_name() << ": "
@@ -41,7 +40,7 @@
  * threshold.
  */
 #define DOUT_LEVEL(info, level)						\
-		if(info.verbose() && info.verbose_level() >= level)	\
+		if (info.verbose() && info.verbose_level() >= level)	\
 			info.out() << __FUNCTION__ << ":"		\
 				   << __LINE__ << ":"			\
 				   << info.test_name() << ": "
@@ -124,31 +123,31 @@ public:
 
 	xlog_begin(argv[0]);
 
-	for(int i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 	    string argname;
 	    string argvalue = "";
 	    Arg a;
 	    // Argument flag
-	    if(argv[i][0] == '-') {
+	    if (argv[i][0] == '-') {
 		// Long form argument.
-		if(argv[i][1] == '-') {
+		if (argv[i][1] == '-') {
 		    argname = argv[i];
 		} else {
 		    argname = argv[i][1];
 		    argname = "-" + argname;
-		    if('\0' != argv[i][2]) {
+		    if ('\0' != argv[i][2]) {
 			argvalue = &argv[i][2];
 		    }
 		}
 		// Try and get the argument value if we don't already
 		// have it.
-		if("" == argvalue && (i + 1) < argc) {
-		    if(argv[i + 1][0] != '-') {
+		if ("" == argvalue && (i + 1) < argc) {
+		    if (argv[i + 1][0] != '-') {
 			i++;
 			argvalue = argv[i];
 		    }
 		}
-		if("" == argvalue)
+		if ("" == argvalue)
 		    a = Arg(Arg::FLAG, argname);
 		else
 		    a = Arg(Arg::VALUE, argname, argvalue);
@@ -176,15 +175,15 @@ public:
     {
 	_usage += short_form + "|" + long_form + " arg\t" + description + "\n";
 
-	if(false == _exit_status)
+	if (false == _exit_status)
 	    return "";
 	list<Arg>::iterator i;
-	for(i = _args.begin(); i != _args.end(); i++) {
-	    if(short_form == i->name() || long_form == i->name()) {
+	for (i = _args.begin(); i != _args.end(); i++) {
+	    if (short_form == i->name() || long_form == i->name()) {
 		bool has_value;
 		string value;
 		value = i->value(has_value);
-		if(!has_value) {
+		if (!has_value) {
 		    _exit_status = false;
 		    return "";
 		}
@@ -212,11 +211,11 @@ public:
     {
 	_usage += short_form + "|" + long_form + " arg\t" + description + "\n";
 
-	if(false == _exit_status)
+	if (false == _exit_status)
 	    return false;
 	list<Arg>::iterator i;
-	for(i = _args.begin(); i != _args.end(); i++) {
-	    if(short_form == i->name() || long_form == i->name()) {
+	for (i = _args.begin(); i != _args.end(); i++) {
+	    if (short_form == i->name() || long_form == i->name()) {
 		_args.erase(i);
 		return true;
 	    }
@@ -237,21 +236,21 @@ public:
 
 	string level = get_optional_args("-l",
 					 "--verbose-level","Verbose level");
-	if("" != level)
+	if ("" != level)
 	    _verbose_level = atoi(level.c_str());
 
 	bool h = get_optional_flag("-h", "--help","Print help information");
 	bool q = get_optional_flag("-?", "--help","Print help information");
 
-	if(h || q) {
+	if (h || q) {
 	    cerr << usage();
 	    xlog_end();
 	    ::exit(0);
 	}
 
-	if(!_args.empty()) {
+	if (!_args.empty()) {
 	    list<Arg>::iterator i;
-	    for(i = _args.begin(); i != _args.end(); i++) {
+	    for (i = _args.begin(); i != _args.end(); i++) {
 		cerr << "Unused argument: " << i->name() << endl;
 	    }
 	    cerr << usage();
@@ -260,7 +259,6 @@ public:
     }
 
     /**
-     *
      * Run a test function/method. The test function/method is passed
      * a TestInfo. The test function/method should return
      * true for success and "false for
@@ -275,12 +273,12 @@ public:
     void
     run(string test_name, XorpCallback1<bool, TestInfo&>::RefPtr cb)
     {
- 	if(false == _exit_status)
+ 	if (false == _exit_status)
  	    return;
-//  	if(_verbose)
+//  	if (_verbose)
 	    cout << "Running: " << test_name << endl;
 	TestInfo info(test_name, _verbose, _verbose_level, cout);
-	switch(cb->dispatch(info)) {
+	switch (cb->dispatch(info)) {
 	case true:
 	    break;
 	case false:
@@ -320,7 +318,7 @@ public:
     int
     exit()
     {
-	if("" != _error_string)
+	if ("" != _error_string)
 	    cerr << _error_string;
 
 	xlog_end();
@@ -380,9 +378,9 @@ private:
 	    copy(rhs);
 	}
 
-	Arg operator=(const Arg& rhs)
+	Arg& operator=(const Arg& rhs)
 	{
-	    if(&rhs == this)
+	    if (&rhs == this)
 		return *this;
 	    copy(rhs);
 
@@ -406,7 +404,7 @@ private:
 	const string&
 	value(bool& has_value)
 	{
-	    if(VALUE != _arg_type) {
+	    if (VALUE != _arg_type) {
 		cerr << "Argument " << _name <<
 		    " was not provided with a value\n";
 		has_value = false;
