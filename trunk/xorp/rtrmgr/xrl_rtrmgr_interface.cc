@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.36 2005/07/03 21:06:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.37 2005/07/08 16:42:35 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -104,12 +104,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_pid(// Output values,
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_register_client(
-    // Input values, 
-    const uint32_t&	user_id, 
-    const string&	clientname, 
-    // Output values, 
-    string&		filename,
-    uint32_t&		pid)
+	// Input values, 
+	const uint32_t&	user_id, 
+	const string&	clientname, 
+	// Output values, 
+	string&	filename,
+	uint32_t& pid,
+	uint32_t& clientid)
 {
     pid = getpid();
     const User* user;
@@ -153,6 +154,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     newuser->set_clientname(clientname);
     newuser->set_authtoken(generate_auth_token(user_id, clientname));
     newuser->set_authenticated(false);
+    clientid = allocate_clientid();
+    newuser->set_clientid(clientid);
     _users.insert(pair<uint32_t, UserInstance*>(user_id, newuser));
 
     //
@@ -199,6 +202,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unregister_client(const string& token)
     }
     for (iter = _users.begin(); iter != _users.end(); ++iter) {
 	if (iter->second->authtoken() == token) {
+	    deallocate_clientid(iter->second->clientid());
 	    delete iter->second;
 	    _users.erase(iter);
 	    return XrlCmdError::OKAY();
@@ -956,4 +960,29 @@ XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_death(
 	}
     }
     return XrlCmdError::OKAY();
+}
+
+uint32_t 
+XrlRtrmgrInterface::allocate_clientid()
+{
+    /* find the first unused client ID number */
+    uint32_t expected = 1;
+    set<uint32_t>::iterator i;
+    for (i = _clientids.begin();; i++) {
+	if ((*i > expected) || (i== _clientids.end())) {
+	    _clientids.insert(expected);
+	    return expected;
+	}
+	expected++;
+    }
+    XLOG_UNREACHABLE();
+}
+
+void
+XrlRtrmgrInterface::deallocate_clientid(uint32_t clientid)
+{
+    set<uint32_t>::iterator i;
+    i = _clientids.find(clientid);
+    XLOG_ASSERT(i != _clientids.end());
+    _clientids.erase(i);
 }

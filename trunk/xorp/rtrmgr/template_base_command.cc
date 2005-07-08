@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.2 2005/02/01 02:56:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.3 2005/03/25 02:54:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -28,6 +28,9 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 #include "util.hh"
+#include "config_operators.hh"
+extern "C" ConfigOperator lookup_comparator(const string& s);
+extern "C" ConfigOperator lookup_modifier(const string& s);
 
 BaseCommand::BaseCommand(TemplateTreeNode& template_tree_node, 
 			 const string& cmd_name)
@@ -91,7 +94,7 @@ AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
 }
 
 bool
-AllowOptionsCommand::verify_variable_value(const ConfigTreeNode& ctn,
+AllowOptionsCommand::verify_variable(const ConfigTreeNode& ctn,
 					   string& errmsg) const
 {
     string value;
@@ -152,6 +155,92 @@ AllowOptionsCommand::str() const
 }
 
 // ----------------------------------------------------------------------------
+// AllowOperatorsCommand implementation
+
+AllowOperatorsCommand::AllowOperatorsCommand(TemplateTreeNode& 	ttn,
+					 const string&		cmd_name)
+    : AllowCommand(ttn, cmd_name)
+{
+}
+
+void
+AllowOperatorsCommand::add_action(const list<string>& action) throw (ParseError)
+{
+    debug_msg("AllowOperatorsCommand::add_action\n");
+
+    if (action.size() < 2) {
+	xorp_throw(ParseError, "Allow command with less than two parameters");
+    }
+
+    list<string>::const_iterator iter;
+    
+    for (iter = action.begin(); iter != action.end(); iter++) {
+	ConfigOperator op;
+	try {
+	    op = lookup_comparator(unquote(*iter));
+	} catch (ParseError) {
+	    op = lookup_modifier(unquote(*iter));
+	} 
+	_allowed_operators.push_back(op);
+    }
+}
+
+bool
+AllowOperatorsCommand::verify_variable(const ConfigTreeNode& ctn,
+				       string& errmsg) const
+{
+    ConfigOperator op = ctn.get_operator();
+    list<ConfigOperator>::const_iterator iter;
+    for (iter = _allowed_operators.begin();
+	iter != _allowed_operators.end();
+	++iter) {
+	if (op == *iter)
+	    return true;		// OK
+    }
+
+    // Error: variable value is not allowed
+    string opstr = ctn.show_operator();
+    errmsg = c_format("Operator \"%s\" is not a valid value for node %s. ",
+		      opstr.c_str(), ctn.segname().c_str());
+    list<ConfigOperator> values = _allowed_operators;
+    if (values.size() == 1) {
+	errmsg += c_format("The only value allowed is %s.",
+			   operator_to_str(values.front()).c_str());
+    } else {
+	errmsg += "Allowed values are: ";
+	errmsg += operator_to_str(values.front()).c_str();
+	values.pop_front();
+	while (! values.empty()) {
+	    if (values.size() == 1)
+		errmsg += " and ";
+	    else
+		errmsg += ", ";
+	    errmsg += operator_to_str(values.front()).c_str();
+	    values.pop_front();
+	}
+	errmsg += ".";
+    }
+    return false;
+}
+
+string
+AllowOperatorsCommand::str() const
+{
+    string tmp;
+
+    tmp = "AllowOperatorsCommand: Allowed values: ";
+
+    list<ConfigOperator>::const_iterator iter;
+    for (iter = _allowed_operators.begin();
+	 iter != _allowed_operators.end();
+	 ++iter) {
+	tmp += "  " + operator_to_str(*iter);
+    }
+    tmp += "\n";
+    return tmp;
+}
+
+// ----------------------------------------------------------------------------
 // AllowRangeCommand implementation
 
 AllowRangeCommand::AllowRangeCommand(TemplateTreeNode& 	ttn,
@@ -187,7 +276,7 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
 }
 
 bool
-AllowRangeCommand::verify_variable_value(const ConfigTreeNode&	ctn,
+AllowRangeCommand::verify_variable(const ConfigTreeNode&	ctn,
 					 string& errmsg) const
 {
     string value;

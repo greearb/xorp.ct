@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.67 2005/07/02 04:20:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.68 2005/07/03 21:05:59 mjh Exp $"
 
 #include <pwd.h>
 
@@ -1829,7 +1829,8 @@ RouterCLI::text_entry_func(const string& ,
 	    }
 	    ctn = new SlaveConfigTreeNode(path_segments.back(), newpath,
 					  tag_ttn, _current_config_node,
-					  getuid());
+					  getuid(), clientid(), 
+					  _verbose);
 	}
 
 	if (tag_ttn->is_tag()) {
@@ -1838,7 +1839,8 @@ RouterCLI::text_entry_func(const string& ,
 	    //
 	    newpath += " " + argv[0];
 	    newnode = new SlaveConfigTreeNode(argv[0], newpath, data_ttn,
-					      ctn, getuid());
+					      ctn, getuid(), clientid(), 
+					      _verbose);
 
 	    // Check that the value was OK
 	    string errmsg;
@@ -2103,8 +2105,9 @@ RouterCLI::text_entry_func(const string& ,
 		ctn = new SlaveConfigTreeNode(value, 
 					      makepath(path_segments),
 					      data_ttn, ctn, 
-					      /* XXX nodenum */ 0,
+					      /* nodenum */ 0,
 					      getuid(),
+					      clientid(),
 					      _verbose);
 		_changes_made = true;
 		value_expected = false;
@@ -2116,6 +2119,8 @@ RouterCLI::text_entry_func(const string& ,
 			       ctn->segname().c_str(),
 			       value.c_str());
 		    ctn->set_value(value, getuid());
+		    // default operator
+		    ctn->set_operator(OP_ASSIGN, getuid());
 		    value_expected = false;
 		} else {
 		    string errmsg = c_format("ERROR: argument \"%s\" "
@@ -2214,8 +2219,9 @@ RouterCLI::text_entry_func(const string& ,
 	    ctn = new SlaveConfigTreeNode(ttn->segname(), 
 					  makepath(path_segments),
 					  ttn, ctn,
-					  /* XXX nodenum */ 0,
+					  /* nodenum */ 0,
 					  getuid(),
+					  clientid(),
 					  _verbose);
 	    _changes_made = true;
 	    if (ttn->is_tag() || ctn->is_leaf()) {
@@ -2500,14 +2506,17 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	newnode = new SlaveConfigTreeNode(path_parts.back(),
 					  newpath, ttn,
 					  ctn,
-					  /* XXX nodenum */ 0,
+					  /* nodenum */ 0,
 					  getuid(),
+					  clientid(),
 					  _verbose);
 	ctn = newnode;
 	ctn->set_value(argv[0], getuid());
 	ctn->set_operator(OP_ASSIGN, getuid());
     } else {
 	ctn->set_value(argv[0], getuid());
+	if (ctn->get_operator() == OP_NONE)
+	    ctn->set_operator(OP_ASSIGN, getuid());
     }
 
     //
@@ -2916,6 +2925,15 @@ OpCommandList*
 RouterCLI::op_cmd_list() const
 {
     return _xorpsh.op_cmd_list();
+}
+
+//
+// Just to make the code more readable:
+//
+uint32_t
+RouterCLI::clientid() const
+{
+    return _xorpsh.clientid();
 }
 
 void

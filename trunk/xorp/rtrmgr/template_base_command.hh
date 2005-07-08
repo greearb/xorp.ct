@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.1 2004/12/11 21:29:59 mjh Exp $
+// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.2 2005/03/25 02:54:38 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
 #define __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
@@ -24,6 +24,7 @@
 
 #include "libxorp/callback.hh"
 #include "rtrmgr_error.hh"
+#include "config_operators.hh"
 
 class TemplateTree;
 class TemplateTreeNode;
@@ -46,19 +47,19 @@ public:
     AllowCommand(TemplateTreeNode& template_tree_node, const string& cmd_name);
 
     virtual void add_action(const list<string>& action) throw (ParseError) = 0;
-    virtual bool verify_variable_value(const ConfigTreeNode& ctn,
+    virtual bool verify_variable(const ConfigTreeNode& ctn,
 				       string& errmsg) const = 0;
     virtual string str() const = 0;
 };
 
 class AllowOptionsCommand : public AllowCommand {
 public:
-    AllowOptionsCommand(TemplateTreeNode&	template_tree_node,
-			const string&		cmd_name);
+    AllowOptionsCommand(TemplateTreeNode& template_tree_node,
+			const string& cmd_name);
 
     virtual void add_action(const list<string>& action) throw (ParseError);
-    virtual bool verify_variable_value(const ConfigTreeNode& 	ctn,
-				       string&			errmsg) const;
+    virtual bool verify_variable(const ConfigTreeNode& 	ctn,
+				 string& errmsg) const;
 
     virtual string str() const;
 
@@ -67,14 +68,30 @@ private:
     list<string>	_allowed_values;
 };
 
+class AllowOperatorsCommand : public AllowCommand {
+public:
+    AllowOperatorsCommand(TemplateTreeNode& template_tree_node,
+			  const string& cmd_name);
+
+    virtual void add_action(const list<string>& action) throw (ParseError);
+    virtual bool verify_variable(const ConfigTreeNode& 	ctn,
+				 string& errmsg) const;
+
+    virtual string str() const;
+
+private:
+    string		_varname;
+    list<ConfigOperator>	_allowed_operators;
+};
+
 class AllowRangeCommand : public AllowCommand {
 public:
     AllowRangeCommand(TemplateTreeNode&	template_tree_node,
-		      const string&	cmd_name);
+		      const string& cmd_name);
 
     virtual void add_action(const list<string>& action) throw (ParseError);
-    virtual bool verify_variable_value(const ConfigTreeNode& 	ctn,
-				       string&			errmsg) const;
+    virtual bool verify_variable(const ConfigTreeNode& ctn,
+				 string& errmsg) const;
 
     virtual string str() const;
 

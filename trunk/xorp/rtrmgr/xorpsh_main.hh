@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.20 2005/03/25 02:54:41 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.21 2005/07/02 04:20:21 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -62,7 +62,7 @@ public:
     void set_mode(Mode mode) { _mode = mode; }
     
     void register_done(const XrlError& e, const string* token,
-		       const uint32_t* pid);
+		       const uint32_t* pid, const uint32_t* clientid);
     void generic_done(const XrlError& e);
     void request_config();
     void receive_config(const XrlError& e, const bool* ready,
@@ -126,6 +126,7 @@ public:
     const string& xorp_root_dir() const	{ return _xorp_root_dir; }
     bool verbose() const		{ return _verbose; }
     uint32_t rtrmgr_pid() const		{ return _rtrmgr_pid; }
+    uint32_t clientid() const		{ return _clientid; }
 
 private:
     EventLoop		_eventloop; 
@@ -165,6 +166,8 @@ private:
 					// messages from saving the config
 
     uint32_t		_rtrmgr_pid;
+    uint32_t            _clientid
+;
 
     XorpTimer           _repeat_request_timer;
 };

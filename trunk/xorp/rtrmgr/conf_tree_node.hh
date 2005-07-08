@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.36 2005/07/03 21:06:00 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.37 2005/07/05 20:28:04 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -25,6 +25,7 @@
 
 #include <sys/time.h>
 #include "libxorp/timeval.hh"
+#include "config_operators.hh"
 
 
 class Command;
@@ -33,21 +34,6 @@ class RouterCLI;
 class TaskManager;
 class TemplateTreeNode;
 class ConfigTreeNode;
-
-/* Configuration file operators.  Comparators must be less than modifiers */
-enum ConfigOperator {
-    OP_NONE = 0,
-    OP_EQ = 1,
-    OP_LT = 2,
-    OP_LTE = 3,
-    OP_GT = 4,
-    OP_GTE = 5,
-    OP_ASSIGN = 101,
-    OP_ADD = 102,
-    OP_SUB = 103
-};
-#define MAX_COMPARATOR 5
-#define MAX_MODIFIER 8
 
 class CTN_Compare {
 public:
@@ -66,7 +52,7 @@ public:
     ConfigTreeNode(const string& node_name, const string& path, 
 		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
 		   uint64_t nodenum,
-		   uid_t user_id, bool verbose);
+		   uid_t user_id, uint32_t clientid, bool verbose);
     virtual ~ConfigTreeNode();
 
     bool operator==(const ConfigTreeNode& them) const;
@@ -76,7 +62,9 @@ public:
 					const TemplateTreeNode* ttn, 
 					ConfigTreeNode* parent_node, 
 					uint64_t nodenum,
-					uid_t user_id, bool verbose) = 0;
+					uid_t user_id, 
+					uint32_t clientid, 
+					bool verbose) = 0;
     virtual ConfigTreeNode* create_node(const ConfigTreeNode& ctn) = 0;
 
     void add_child(ConfigTreeNode* child);
@@ -113,6 +101,7 @@ public:
     const string& segname() const { return _segname; }
     const string& value() const;
     uint64_t nodenum() const;
+    uint32_t clientid() const { return _clientid; }
     bool has_value() const { return _has_value; }
     ConfigOperator get_operator() const;
     uid_t user_id() const { return _user_id; }
@@ -145,6 +134,7 @@ public:
     bool set_variable(const string& varname, const string& value);
     const string& named_value(const string& varname) const;
     void set_named_value(const string& varname, const string& value);
+    string show_operator() const;
 
 protected:
     bool split_up_varname(const string& varname,
@@ -161,7 +151,7 @@ protected:
 					    VarType& type);
     void sort_by_value(list <ConfigTreeNode*>& children) const;
     string show_nodenum(bool numbered, uint64_t nodenum) const;
-    string show_operator() const;
+    virtual void allocate_unique_nodenum();
 
 
     const TemplateTreeNode* _template_tree_node;
@@ -180,6 +170,7 @@ protected:
     uid_t _user_id;	// the user ID of the user who last changed this node
     uid_t _committed_user_id;	// The user ID of the user who last changed
 				// this node before the last commit
+    uint32_t _clientid;
     TimeVal _modification_time;	// When the node was last changed
     TimeVal _committed_modification_time; // When the node was last changed
 					  // before the last commit

@@ -1,5 +1,10 @@
+#include <sys/cdefs.h>
 #ifndef lint
-#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
+#if 0
+static char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
+#else
+__IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $");
+#endif
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -9,12 +14,7 @@
 #define YYEMPTY -1
 #define yyclearin (yychar=(YYEMPTY))
 #define yyerrok (yyerrflag=0)
-#define YYRECOVERING() (yyerrflag!=0)
-#if defined(__cplusplus) || __STDC__
-static int yygrowstack(void);
-#else
-static int yygrowstack();
-#endif
+#define YYRECOVERING (yyerrflag!=0)
 #define yyparse bootparse
 #define yylex bootlex
 #define yyerror booterror
@@ -25,9 +25,11 @@ static int yygrowstack();
 #define yynerrs bootnerrs
 #define yyerrflag booterrflag
 #define yyss bootss
+#define yysslim bootsslim
 #define yyssp bootssp
 #define yyvs bootvs
 #define yyvsp bootvsp
+#define yystacksize bootstacksize
 #define yylhs bootlhs
 #define yylen bootlen
 #define yydefred bootdefred
@@ -39,14 +41,13 @@ static int yygrowstack();
 #define yycheck bootcheck
 #define yyname bootname
 #define yyrule bootrule
-#define yysslim bootsslim
-#define yystacksize bootstacksize
 #define YYPREFIX "boot"
 #line 2 "boot.yy"
 #define YYSTYPE char*
 
 #include <assert.h>
 #include <stdio.h>
+#include <string>
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -55,12 +56,12 @@ static int yygrowstack();
 #include "conf_tree_node.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
+#include "config_operators.hh"
 
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim
-#line 64 "y.boot_tab.c"
-#define YYERRCODE 256
+#line 65 "y.boot_tab.c"
 #define UPLEVEL 257
 #define DOWNLEVEL 258
 #define END 259
@@ -83,7 +84,8 @@ static int yygrowstack();
 #define MODIFIER 276
 #define SYNTAX_ERROR 277
 #define LINENUM 278
-const short bootlhs[] = {                                        -1,
+#define YYERRCODE 256
+short bootlhs[] = {                                        -1,
     0,    0,    0,    0,    1,    1,    6,    4,    8,    8,
     9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
     9,    9,    9,    5,    5,    7,   10,   10,   11,   11,
@@ -91,7 +93,7 @@ const short bootlhs[] = {                                        -1,
    12,   12,   12,   12,   12,   12,   12,   12,   12,   12,
    12,    3,
 };
-const short bootlen[] = {                                         2,
+short bootlen[] = {                                         2,
     0,    2,    2,    1,    2,    2,    1,    1,    1,    2,
     2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
     2,    2,    2,    1,    1,    3,    0,    2,    1,    1,
@@ -99,7 +101,7 @@ const short bootlen[] = {                                         2,
     4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
     4,    1,
 };
-const short bootdefred[] = {                                      0,
+short bootdefred[] = {                                      0,
    32,    9,   52,    0,    0,    0,    0,    4,    0,    0,
     0,    0,   10,    2,    3,    0,   25,    5,   24,    6,
    13,   14,   15,   16,   17,   18,   19,   20,   21,   22,
@@ -109,11 +111,11 @@ const short bootdefred[] = {                                      0,
     0,    0,    0,    0,   37,   38,   39,   40,   41,   42,
    43,   44,   45,   46,   47,   36,   49,   48,   51,   50,
 };
-const short bootdgoto[] = {                                       5,
+short bootdgoto[] = {                                       5,
     6,    7,    8,    9,   18,   10,   19,   11,   12,   38,
    39,   40,   41,
 };
-const short bootsindex[] = {                                   -218,
+short bootsindex[] = {                                   -218,
     0,    0,    0, -269,    0, -218, -218,    0, -209, -235,
  -171, -227,    0,    0,    0, -217,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -123,7 +125,7 @@ const short bootsindex[] = {                                   -218,
  -156, -155, -154, -153,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
-const short bootrindex[] = {                                     53,
+short bootrindex[] = {                                     53,
     0,    0,    0,    0,    0,   53,   53,    0,    0,    0,
  -169, -201,    0,    0,    0, -151,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -133,12 +135,12 @@ const short bootrindex[] = {                                     53,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
-const short bootgindex[] = {                                     12,
+short bootgindex[] = {                                     12,
   -16,  -15,    0,    0,    0,    0,   98,   97,    0,   71,
     0,    0,    0,
 };
 #define YYTABLESIZE 110
-const short boottable[] = {                                      36,
+short boottable[] = {                                      36,
    37,    9,   13,   33,   33,    9,    9,    9,    9,    9,
     9,    9,    9,    9,    9,    9,    9,   14,   15,   33,
    33,   16,   36,   37,   10,   42,   34,   34,   10,   10,
@@ -151,7 +153,7 @@ const short boottable[] = {                                      36,
    22,   23,   24,   25,   26,   27,   28,   29,   30,   31,
    32,   76,   77,   78,   79,   80,   27,   20,   33,   44,
 };
-const short bootcheck[] = {                                      16,
+short bootcheck[] = {                                      16,
    16,  257,  272,  259,  260,  261,  262,  263,  264,  265,
   266,  267,  268,  269,  270,  271,  272,    6,    7,  275,
   276,  257,   39,   39,  257,  272,  259,  260,  261,  262,
@@ -170,7 +172,7 @@ const short bootcheck[] = {                                      16,
 #endif
 #define YYMAXTOKEN 278
 #if YYDEBUG
-const char * const bootname[] = {
+char *bootname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -183,7 +185,7 @@ const char * const bootname[] = {
 "URL_HTTP_VALUE","URL_TFTP_VALUE","LITERAL","STRING","ARITH","COMPARATOR",
 "MODIFIER","SYNTAX_ERROR","LINENUM",
 };
-const char * const bootrule[] = {
+char *bootrule[] = {
 "$accept : input",
 "input :",
 "input : definition input",
@@ -242,9 +244,6 @@ const char * const bootrule[] = {
 #ifndef YYSTYPE
 typedef int YYSTYPE;
 #endif
-#if YYDEBUG
-#include <stdio.h>
-#endif
 #ifdef YYSTACKSIZE
 #undef YYMAXDEPTH
 #define YYMAXDEPTH YYSTACKSIZE
@@ -269,7 +268,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 173 "boot.yy"
+#line 175 "boot.yy"
 
 extern void boot_scan_string(const char *configuration);
 extern int boot_linenum;
@@ -350,87 +349,81 @@ parse_bootfile() throw (ParseError)
 	booterror("unknown error");
 }
 
-ConfigOperator lookup_comparator(char *s)
+ConfigOperator boot_lookup_comparator(const char* s)
 {
-    char *s1, *s2;
+    char *s0, *s1, *s2;
 
     /* skip leading spaces */
-    s1 = s;
+    s0 = strdup(s);
+    s1 = s0;
     while (*s1 != '\0' && *s1 == ' ') {
-	s1++;
+        s1++;
     }
 
     /* trim trailing spaces */
     s2 = s1;
     while (*s2 != '\0') {
-	if (*s2 == ' ') {
-	    *s2 = 0;
-	    break;
-	}
-	s2++;
+        if (*s2 == ' ') {
+            *s2 = 0;
+            break;
+        }
+        s2++;
     }
 
-    if (strcmp(s1, "==")==0) {
-	return OP_EQ;
-    } else if (strcmp(s1, "<")==0) {
-	return OP_LT;
-    } else if (strcmp(s1, "<=")==0) {
-	return OP_LTE;
-    } else if (strcmp(s1, ">")==0) {
-	return OP_GT;
-    } else if (strcmp(s1, ">=")==0) {
-	return OP_GTE;
-    } 
-
-    /*something's wrong*/
-    string errmsg;
-    errmsg = c_format("Bad comparator %s [Line %d]", s1, boot_linenum);
-    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
-    xorp_throw(ParseError, errmsg);
+    ConfigOperator op;
+    string str = s1;
+    free(s1);
+    try {
+        op = lookup_comparator(str);
+	return op;
+    } catch (const ParseError& pe) {
+        string errmsg = pe.why();
+	errmsg += c_format("\n[Line %d]\n", boot_linenum);
+	errmsg += c_format("Last symbol parsed was \"%s\"", lastsymbol.c_str());
+	xorp_throw(ParseError, errmsg);
+    }
+    XLOG_UNREACHABLE();
 }
 
-ConfigOperator lookup_modifier(char *s)
+ConfigOperator boot_lookup_modifier(const char* s)
 {
-    char *s1, *s2;
+    char *s0, *s1, *s2;
 
     /* skip leading spaces */
-    s1 = s;
+    s0 = strdup(s);
+    s1 = s0;
     while (*s1 != '\0' && *s1 == ' ') {
-	s1++;
+        s1++;
     }
 
     /* trim trailing spaces */
     s2 = s1;
     while (*s2 != '\0') {
-	if (*s2 == ' ') {
-	    *s2 = 0;
-	    break;
-	}
-	s2++;
+        if (*s2 == ' ') {
+            *s2 = 0;
+            break;
+        }
+        s2++;
     }
 
-    if (strcmp(s1, ":")==0) {
-	return OP_ASSIGN;
-    } else if (strcmp(s1, "=")==0) {
-	return OP_ASSIGN;
-    } else if (strcmp(s1, "+")==0) {
-	return OP_ADD;
-    } else if (strcmp(s1, "add")==0) {
-	return OP_ADD;
-    } else if (strcmp(s1, "-")==0) {
-	return OP_SUB;
-    } else if (strcmp(s1, "sub")==0) {
-	return OP_SUB;
+    ConfigOperator op;
+    string str = s1;
+    free(s1);
+    try {
+        op = lookup_modifier(str);
+	return op;
+    } catch (const ParseError& pe) {
+        string errmsg = pe.why();
+	errmsg += c_format("\n[Line %d]\n", boot_linenum);
+	errmsg += c_format("Last symbol parsed was \"%s\"", lastsymbol.c_str());
+	xorp_throw(ParseError, errmsg);
     }
-
-    /*something's wrong*/
-    string errmsg;
-    errmsg = c_format("Bad modifier %s [Line %d]", s1, boot_linenum);
-    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
-    xorp_throw(ParseError, errmsg);
+    XLOG_UNREACHABLE();
 }
-#line 434 "y.boot_tab.c"
+#line 424 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
+int yyparse __P((void));
+static int yygrowstack __P((void));
 static int yygrowstack()
 {
     int newsize, i;
@@ -444,15 +437,11 @@ static int yygrowstack()
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
     i = yyssp - yyss;
-    newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
-      (short *)malloc(newsize * sizeof *newss);
-    if (newss == NULL)
+    if ((newss = (short *)realloc(yyss, newsize * sizeof *newss)) == NULL)
         return -1;
     yyss = newss;
     yyssp = newss + i;
-    newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
-      (YYSTYPE *)malloc(newsize * sizeof *newvs);
-    if (newvs == NULL)
+    if ((newvs = (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs)) == NULL)
         return -1;
     yyvs = newvs;
     yyvsp = newvs + i;
@@ -465,37 +454,14 @@ static int yygrowstack()
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
-
-#ifndef YYPARSE_PARAM
-#if defined(__cplusplus) || __STDC__
-#define YYPARSE_PARAM_ARG void
-#define YYPARSE_PARAM_DECL
-#else	/* ! ANSI-C/C++ */
-#define YYPARSE_PARAM_ARG
-#define YYPARSE_PARAM_DECL
-#endif	/* ANSI-C/C++ */
-#else	/* YYPARSE_PARAM */
-#ifndef YYPARSE_PARAM_TYPE
-#define YYPARSE_PARAM_TYPE void *
-#endif
-#if defined(__cplusplus) || __STDC__
-#define YYPARSE_PARAM_ARG YYPARSE_PARAM_TYPE YYPARSE_PARAM
-#define YYPARSE_PARAM_DECL
-#else	/* ! ANSI-C/C++ */
-#define YYPARSE_PARAM_ARG YYPARSE_PARAM
-#define YYPARSE_PARAM_DECL YYPARSE_PARAM_TYPE YYPARSE_PARAM;
-#endif	/* ANSI-C/C++ */
-#endif	/* ! YYPARSE_PARAM */
-
 int
-yyparse (YYPARSE_PARAM_ARG)
-    YYPARSE_PARAM_DECL
+yyparse()
 {
-    register int yym, yyn, yystate;
+    int yym, yyn, yystate;
 #if YYDEBUG
-    register const char *yys;
+    char *yys;
 
-    if ((yys = getenv("YYDEBUG")))
+    if ((yys = getenv("YYDEBUG")) != NULL)
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
@@ -513,7 +479,7 @@ yyparse (YYPARSE_PARAM_ARG)
     *yyssp = yystate = 0;
 
 yyloop:
-    if ((yyn = yydefred[yystate])) goto yyreduce;
+    if ((yyn = yydefred[yystate]) != 0) goto yyreduce;
     if (yychar < 0)
     {
         if ((yychar = yylex()) < 0) yychar = 0;
@@ -553,14 +519,10 @@ yyloop:
         goto yyreduce;
     }
     if (yyerrflag) goto yyinrecovery;
-#if defined(lint) || defined(__GNUC__)
     goto yynewerror;
-#endif
 yynewerror:
     yyerror("syntax error");
-#if defined(lint) || defined(__GNUC__)
     goto yyerrlab;
-#endif
 yyerrlab:
     ++yynerrs;
 yyinrecovery:
@@ -625,204 +587,204 @@ yyreduce:
     switch (yyn)
     {
 case 7:
-#line 55 "boot.yy"
+#line 57 "boot.yy"
 { push_path(); }
 break;
 case 8:
-#line 58 "boot.yy"
+#line 60 "boot.yy"
 { push_path(); }
 break;
 case 9:
-#line 61 "boot.yy"
-{ nodenum += 100;
+#line 63 "boot.yy"
+{ nodenum = 0;
                           extend_path(yyvsp[0], NODE_VOID, nodenum); }
 break;
 case 10:
-#line 63 "boot.yy"
+#line 65 "boot.yy"
 { nodenum = strtoll(yyvsp[-1], (char **)NULL, 10);
 		                    free(yyvsp[-1]);
 				    extend_path(yyvsp[0], NODE_VOID, nodenum); }
 break;
 case 12:
-#line 69 "boot.yy"
+#line 71 "boot.yy"
 { extend_path(yyvsp[0], NODE_TEXT, nodenum); }
 break;
 case 13:
-#line 70 "boot.yy"
+#line 72 "boot.yy"
 { extend_path(yyvsp[0], NODE_BOOL, nodenum); }
 break;
 case 14:
-#line 71 "boot.yy"
+#line 73 "boot.yy"
 { extend_path(yyvsp[0], NODE_UINT, nodenum); }
 break;
 case 15:
-#line 72 "boot.yy"
+#line 74 "boot.yy"
 { extend_path(yyvsp[0], NODE_IPV4, nodenum); }
 break;
 case 16:
-#line 73 "boot.yy"
+#line 75 "boot.yy"
 { extend_path(yyvsp[0], NODE_IPV4NET, nodenum); }
 break;
 case 17:
-#line 74 "boot.yy"
+#line 76 "boot.yy"
 { extend_path(yyvsp[0], NODE_IPV6, nodenum); }
 break;
 case 18:
-#line 75 "boot.yy"
+#line 77 "boot.yy"
 { extend_path(yyvsp[0], NODE_IPV6NET, nodenum); }
 break;
 case 19:
-#line 76 "boot.yy"
+#line 78 "boot.yy"
 { extend_path(yyvsp[0], NODE_MACADDR, nodenum); }
 break;
 case 20:
-#line 77 "boot.yy"
+#line 79 "boot.yy"
 { extend_path(yyvsp[0], NODE_URL_FILE, nodenum); }
 break;
 case 21:
-#line 78 "boot.yy"
+#line 80 "boot.yy"
 { extend_path(yyvsp[0], NODE_URL_FTP, nodenum); }
 break;
 case 22:
-#line 79 "boot.yy"
+#line 81 "boot.yy"
 { extend_path(yyvsp[0], NODE_URL_HTTP, nodenum); }
 break;
 case 23:
-#line 80 "boot.yy"
+#line 82 "boot.yy"
 { extend_path(yyvsp[0], NODE_URL_TFTP, nodenum); }
 break;
 case 25:
-#line 84 "boot.yy"
+#line 86 "boot.yy"
 { pop_path(); }
 break;
 case 26:
-#line 87 "boot.yy"
+#line 89 "boot.yy"
 { pop_path(); }
 break;
 case 33:
-#line 102 "boot.yy"
-{ nodenum += 100;
+#line 104 "boot.yy"
+{ nodenum = 0;
 			  extend_path(yyvsp[0], NODE_VOID, nodenum); }
 break;
 case 34:
-#line 104 "boot.yy"
+#line 106 "boot.yy"
 { nodenum = strtoll(yyvsp[-1], (char **)NULL, 10);
 		                    free(yyvsp[-1]);
 				    extend_path(yyvsp[0], NODE_VOID, nodenum);}
 break;
 case 35:
-#line 109 "boot.yy"
+#line 111 "boot.yy"
 {
 			terminal(strdup(""), NODE_VOID, OP_NONE);
 		}
 break;
 case 36:
-#line 112 "boot.yy"
+#line 114 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_TEXT, OP_ASSIGN); 
 		}
 break;
 case 37:
-#line 115 "boot.yy"
+#line 117 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_BOOL, OP_ASSIGN);
 		}
 break;
 case 38:
-#line 118 "boot.yy"
+#line 120 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_UINT, OP_ASSIGN);
 		}
 break;
 case 39:
-#line 121 "boot.yy"
+#line 123 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV4, OP_ASSIGN);
 		}
 break;
 case 40:
-#line 124 "boot.yy"
+#line 126 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV4NET, OP_ASSIGN);
 		}
 break;
 case 41:
-#line 127 "boot.yy"
+#line 129 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV6, OP_ASSIGN);
 		}
 break;
 case 42:
-#line 130 "boot.yy"
+#line 132 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV6NET, OP_ASSIGN);
 		}
 break;
 case 43:
-#line 133 "boot.yy"
+#line 135 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_MACADDR, OP_ASSIGN);
 		}
 break;
 case 44:
-#line 136 "boot.yy"
+#line 138 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_FILE, OP_ASSIGN);
 		}
 break;
 case 45:
-#line 139 "boot.yy"
+#line 141 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_FTP, OP_ASSIGN);
 		}
 break;
 case 46:
-#line 142 "boot.yy"
+#line 144 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_HTTP, OP_ASSIGN);
 		}
 break;
 case 47:
-#line 145 "boot.yy"
+#line 147 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_TFTP, OP_ASSIGN);
 		}
 break;
 case 48:
-#line 148 "boot.yy"
+#line 150 "boot.yy"
 {
-			terminal(yyvsp[-1], NODE_ARITH, lookup_comparator(yyvsp[-2]));
+			terminal(yyvsp[-1], NODE_ARITH, boot_lookup_comparator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 49:
-#line 152 "boot.yy"
+#line 154 "boot.yy"
 {
-			terminal(yyvsp[-1], NODE_UINT, lookup_comparator(yyvsp[-2]));
+			terminal(yyvsp[-1], NODE_UINT, boot_lookup_comparator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 50:
-#line 156 "boot.yy"
+#line 158 "boot.yy"
 {
-			terminal(yyvsp[-1], NODE_ARITH, lookup_modifier(yyvsp[-2]));
+			terminal(yyvsp[-1], NODE_ARITH, boot_lookup_modifier(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 51:
-#line 160 "boot.yy"
+#line 162 "boot.yy"
 {
-			terminal(yyvsp[-1], NODE_UINT, lookup_modifier(yyvsp[-2]));
+			terminal(yyvsp[-1], NODE_UINT, boot_lookup_modifier(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 52:
-#line 166 "boot.yy"
+#line 168 "boot.yy"
 {
 			booterror("syntax error");
 		}
 break;
-#line 827 "y.boot_tab.c"
+#line 788 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

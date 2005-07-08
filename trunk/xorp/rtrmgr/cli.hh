@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.27 2005/03/25 02:54:34 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.28 2005/07/02 04:20:20 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -283,6 +283,7 @@ private:
     const TemplateTree*	template_tree() const;
     SlaveConfigTree*	config_tree();
     OpCommandList*	op_cmd_list() const;
+    uint32_t clientid() const;
 
     XorpShell&		_xorpsh;
 

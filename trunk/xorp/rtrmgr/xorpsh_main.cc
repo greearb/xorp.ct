@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.40 2005/06/23 22:51:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.41 2005/07/02 04:20:21 pavlin Exp $"
 
 
 #include <sys/types.h>
@@ -236,7 +236,8 @@ XorpShell::run()
 	       "==========================================================\n");
 
     try {
-	_ct = new SlaveConfigTree(_configuration, _tt, _xclient, _verbose);
+	_ct = new SlaveConfigTree(_configuration, _tt, _xclient, _clientid,
+				  _verbose);
 
 	_ocl->set_slave_config_tree(_ct);
 
@@ -266,11 +267,12 @@ XorpShell::run()
 
 void
 XorpShell::register_done(const XrlError& e, const string* file,
-			 const uint32_t* pid)
+			 const uint32_t* pid, const uint32_t* clientid)
 {
     if (e == XrlError::OKAY()) {
 	_authfile = *file;
 	_rtrmgr_pid = *pid;
+	_clientid = *clientid;
 	XLOG_TRACE(_verbose, "rtrmgr PID=%u\n", XORP_UINT_CAST(_rtrmgr_pid));
 	return;
     } else {

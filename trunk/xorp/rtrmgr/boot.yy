@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string>
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -11,6 +12,7 @@
 #include "conf_tree_node.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
+#include "config_operators.hh"
 
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
@@ -58,7 +60,7 @@ short_nodename:	literal { push_path(); }
 long_nodename:	literals { push_path(); }
 		;
 
-literal:	LITERAL { nodenum += 100;
+literal:	LITERAL { nodenum = 0;
                           extend_path($1, NODE_VOID, nodenum); }
 		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
 		                    free($1);
@@ -99,7 +101,7 @@ statement:	terminal
 emptystatement:	END
 		;
 
-term_literal:	LITERAL { nodenum += 100;
+term_literal:	LITERAL { nodenum = 0;
 			  extend_path($1, NODE_VOID, nodenum); }
 		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
 		                    free($1);
@@ -146,19 +148,19 @@ terminal:	term_literal END {
 			terminal($3, NODE_URL_TFTP, OP_ASSIGN);
 		}
 		| term_literal COMPARATOR ARITH END {
-			terminal($3, NODE_ARITH, lookup_comparator($2));
+			terminal($3, NODE_ARITH, boot_lookup_comparator($2));
 			free($2);
 		}
 		| term_literal COMPARATOR UINT_VALUE END{
-			terminal($3, NODE_UINT, lookup_comparator($2));
+			terminal($3, NODE_UINT, boot_lookup_comparator($2));
 			free($2);
 		}
 		| term_literal MODIFIER ARITH END{
-			terminal($3, NODE_ARITH, lookup_modifier($2));
+			terminal($3, NODE_ARITH, boot_lookup_modifier($2));
 			free($2);
 		}
 		| term_literal MODIFIER UINT_VALUE END{
-			terminal($3, NODE_UINT, lookup_modifier($2));
+			terminal($3, NODE_UINT, boot_lookup_modifier($2));
 			free($2);
 		}
 		;
@@ -250,82 +252,74 @@ parse_bootfile() throw (ParseError)
 	booterror("unknown error");
 }
 
-ConfigOperator lookup_comparator(char *s)
+ConfigOperator boot_lookup_comparator(const char* s)
 {
-    char *s1, *s2;
+    char *s0, *s1, *s2;
 
     /* skip leading spaces */
-    s1 = s;
+    s0 = strdup(s);
+    s1 = s0;
     while (*s1 != '\0' && *s1 == ' ') {
-	s1++;
+        s1++;
     }
 
     /* trim trailing spaces */
     s2 = s1;
     while (*s2 != '\0') {
-	if (*s2 == ' ') {
-	    *s2 = 0;
-	    break;
-	}
-	s2++;
+        if (*s2 == ' ') {
+            *s2 = 0;
+            break;
+        }
+        s2++;
     }
 
-    if (strcmp(s1, "==")==0) {
-	return OP_EQ;
-    } else if (strcmp(s1, "<")==0) {
-	return OP_LT;
-    } else if (strcmp(s1, "<=")==0) {
-	return OP_LTE;
-    } else if (strcmp(s1, ">")==0) {
-	return OP_GT;
-    } else if (strcmp(s1, ">=")==0) {
-	return OP_GTE;
-    } 
-
-    /*something's wrong*/
-    string errmsg;
-    errmsg = c_format("Bad comparator %s [Line %d]", s1, boot_linenum);
-    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
-    xorp_throw(ParseError, errmsg);
+    ConfigOperator op;
+    string str = s1;
+    free(s1);
+    try {
+        op = lookup_comparator(str);
+	return op;
+    } catch (const ParseError& pe) {
+        string errmsg = pe.why();
+	errmsg += c_format("\n[Line %d]\n", boot_linenum);
+	errmsg += c_format("Last symbol parsed was \"%s\"", lastsymbol.c_str());
+	xorp_throw(ParseError, errmsg);
+    }
+    XLOG_UNREACHABLE();
 }
 
-ConfigOperator lookup_modifier(char *s)
+ConfigOperator boot_lookup_modifier(const char* s)
 {
-    char *s1, *s2;
+    char *s0, *s1, *s2;
 
     /* skip leading spaces */
-    s1 = s;
+    s0 = strdup(s);
+    s1 = s0;
     while (*s1 != '\0' && *s1 == ' ') {
-	s1++;
+        s1++;
     }
 
     /* trim trailing spaces */
     s2 = s1;
     while (*s2 != '\0') {
-	if (*s2 == ' ') {
-	    *s2 = 0;
-	    break;
-	}
-	s2++;
+        if (*s2 == ' ') {
+            *s2 = 0;
+            break;
+        }
+        s2++;
     }
 
-    if (strcmp(s1, ":")==0) {
-	return OP_ASSIGN;
-    } else if (strcmp(s1, "=")==0) {
-	return OP_ASSIGN;
-    } else if (strcmp(s1, "+")==0) {
-	return OP_ADD;
-    } else if (strcmp(s1, "add")==0) {
-	return OP_ADD;
-    } else if (strcmp(s1, "-")==0) {
-	return OP_SUB;
-    } else if (strcmp(s1, "sub")==0) {
-	return OP_SUB;
+    ConfigOperator op;
+    string str = s1;
+    free(s1);
+    try {
+        op = lookup_modifier(str);
+	return op;
+    } catch (const ParseError& pe) {
+        string errmsg = pe.why();
+	errmsg += c_format("\n[Line %d]\n", boot_linenum);
+	errmsg += c_format("Last symbol parsed was \"%s\"", lastsymbol.c_str());
+	xorp_throw(ParseError, errmsg);
     }
-
-    /*something's wrong*/
-    string errmsg;
-    errmsg = c_format("Bad modifier %s [Line %d]", s1, boot_linenum);
-    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
-    xorp_throw(ParseError, errmsg);
+    XLOG_UNREACHABLE();
 }

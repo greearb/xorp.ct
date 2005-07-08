@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.20 2005/07/03 21:06:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.21 2005/07/05 18:08:27 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -42,18 +42,21 @@ SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 					 SlaveConfigTreeNode *parent,
 					 uint64_t nodenum,
 					 uid_t user_id,
+					 uint32_t clientid,
 					 bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, nodenum, user_id, verbose)
+    : ConfigTreeNode(nodename, path, ttn, parent, nodenum, user_id, 
+		     clientid, verbose)
 {
 
 }
 
 ConfigTreeNode*
 SlaveConfigTreeNode::create_node(const string& segment, const string& path,
-				  const TemplateTreeNode* ttn, 
-				  ConfigTreeNode* parent_node, 
+				 const TemplateTreeNode* ttn, 
+				 ConfigTreeNode* parent_node, 
 				 uint64_t nodenum,
-				  uid_t user_id, bool verbose)
+				 uid_t user_id, 
+				 uint32_t clientid, bool verbose)
 {
     SlaveConfigTreeNode *new_node, *parent;
     parent = dynamic_cast<SlaveConfigTreeNode *>(parent_node);
@@ -63,7 +66,7 @@ SlaveConfigTreeNode::create_node(const string& segment, const string& path,
 	XLOG_ASSERT(parent != NULL);
 
     new_node = new SlaveConfigTreeNode(segment, path, ttn, parent, 
-				       nodenum, user_id, verbose);
+				       nodenum, user_id, clientid, verbose);
     return reinterpret_cast<ConfigTreeNode*>(new_node);
 }
 
@@ -326,7 +329,7 @@ SlaveConfigTreeNode::check_allowed_value(string& errmsg) const
     const AllowCommand* cmd = dynamic_cast<const AllowCommand *>(c);
     if (cmd != NULL) {
 	string tmpmsg;
-	if (cmd->verify_variable_value(*this, tmpmsg) != true) {
+	if (cmd->verify_variable(*this, tmpmsg) != true) {
 	    string errpath;
 	    if (_parent != NULL && _parent->is_tag())
 		errpath = _parent->path();
@@ -385,5 +388,4 @@ SlaveConfigTreeNode::finalize_commit()
 	child->finalize_commit();
     }
 }
-
 

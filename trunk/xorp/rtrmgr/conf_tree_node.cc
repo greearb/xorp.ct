@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.70 2005/07/03 21:05:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.71 2005/07/05 20:28:04 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -121,6 +121,7 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
       _parent(NULL),
       _user_id(0),
       _committed_user_id(0),
+      _clientid(0),
       _committed_modification_time(TimeVal::ZERO()),
       _existence_committed(false),
       _value_committed(false),
@@ -135,6 +136,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 			       ConfigTreeNode* parent,
 			       uint64_t nodenum,
 			       uid_t user_id,
+			       uint32_t clientid,
 			       bool verbose)
     : _template_tree_node(ttn),
       _deleted(false),
@@ -147,6 +149,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _nodenum(nodenum),
       _user_id(user_id),
       _committed_user_id(0),
+      _clientid(clientid),
       _committed_modification_time(TimeVal::ZERO()),
       _existence_committed(false),
       _value_committed(false),
@@ -155,6 +158,9 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 {
     TimerList::system_gettimeofday(&_modification_time);
     parent->add_child(this);
+    if (nodenum == 0) {
+	allocate_unique_nodenum();
+    }
 }
 
 ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
@@ -171,6 +177,7 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _nodenum(ctn._nodenum),
       _user_id(ctn._user_id),
       _committed_user_id(ctn._committed_user_id),
+      _clientid(ctn._clientid),
       _modification_time(ctn._modification_time),
       _committed_modification_time(ctn._committed_modification_time),
       _existence_committed(ctn._existence_committed),
@@ -285,6 +292,7 @@ ConfigTreeNode::add_default_children()
 						       this, 
 						       /* XXX: nodenum */ 0,
 						       _user_id,
+						       _clientid,
 						       _verbose);
 		new_node->set_value((*tci)->default_str(), _user_id);
 		new_node->set_operator(OP_ASSIGN, _user_id);
@@ -348,6 +356,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _nodenum = delta_node.nodenum();
 		    _committed_user_id = _user_id;
 		    _user_id = user_id;
+		    _clientid = delta_node.clientid();
 		    _committed_modification_time = _modification_time;
 		    TimerList::system_gettimeofday(&_modification_time);
 		    _value_committed = false;
@@ -359,6 +368,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _nodenum = delta_node.nodenum();
 		    _committed_user_id = delta_node.user_id();
 		    _user_id = delta_node.user_id();
+		    _clientid = delta_node.clientid();
 		    _committed_modification_time =
 			delta_node.modification_time();
 		    _modification_time = delta_node.modification_time();
@@ -404,6 +414,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 				   this,
 				   delta_child->nodenum(),
 				   user_id,
+				   delta_child->clientid(),
 				   _verbose);
 	    if (!provisional_change)
 		new_node->set_existence_committed(true);
@@ -1647,7 +1658,8 @@ ConfigTreeNode::sort_by_value(list <ConfigTreeNode*>& children) const
 } 
 
 string
-ConfigTreeNode::show_nodenum(bool numbered, uint64_t nodenum) const {
+ConfigTreeNode::show_nodenum(bool numbered, uint64_t nodenum) const 
+{
     string s;
     if (numbered) {
 	s = c_format("%%%llu%% ", nodenum);
@@ -1655,28 +1667,111 @@ ConfigTreeNode::show_nodenum(bool numbered, uint64_t nodenum) const {
     return s;
 }
 
+/* minimum offset between two nodes - this is to allow for using the
+   least significant bits to avoid collisions when two xorpsh instances
+   simultaneously edit the config */
+#define MIN_NODENUM_INTERVAL ((uint64_t)10000)
+
+/* what the initial distance is between two neighbouring nodes*/
+#define NODENUM_INCREMENT (((uint64_t)10000)*MIN_NODENUM_INTERVAL)
+
+/* initial nodenuum when we don't yet have any children of a node */
+#define INITIAL_NODENUM (((uint64_t)100)*NODENUM_INCREMENT)
+
+void
+ConfigTreeNode::allocate_unique_nodenum() 
+{
+    XLOG_ASSERT(_nodenum == 0);
+    /* node numbers are guaranteed to be unique among the children of
+       the same parent node.  If the parent node is a tag, they're
+       guaranteed to be unique among the children of the tag's parent
+       node */
+    ConfigTreeNode *prev = NULL, *next = NULL;
+    if (_parent == NULL) return;
+    debug_msg("finding order (phase 1)...\n");
+    list<ConfigTreeNode *> sorted_children = _parent->children();
+    sort_by_value(sorted_children);
+    bool found_this = false;
+    list<ConfigTreeNode*>::iterator iter;
+    for (iter = sorted_children.begin(); 
+	 iter != sorted_children.end(); ++iter) {
+	if ((*iter) == this) {
+	    /* we found this node */
+	    found_this = true;
+	    debug_msg("found this: %s\n", _segname.c_str());
+	    continue;
+	}
+	if (found_this) {
+	    if (next == NULL)
+		next = *iter;
+	    debug_msg("next: %s %llu\n", next->segname().c_str(), next->nodenum());
+	} else {
+	    prev = *iter;
+	    debug_msg("prev: %s %llu\n", prev->segname().c_str(), prev->nodenum());
+	}
+    }
+	
+    bool found_prev = false;
+    if (prev != NULL)
+	found_prev = true;
+
+    if (_parent->is_tag() && (!is_tag()) && (_parent->parent() != NULL)) {
+	ConfigTreeNode *effective_parent = _parent->parent();
+
+	debug_msg("node: %s effective parent: %s\n", _segname.c_str(), effective_parent->segname().c_str());
+	found_this = false;
+	debug_msg("finding order (phase 2)...\n");
+	list<ConfigTreeNode *> sorted_children = effective_parent->children();
+	sort_by_value(sorted_children);
+	for (iter = sorted_children.begin(); 
+	     iter != sorted_children.end(); ++iter) {
+	    if ((*iter) == _parent) {
+		/* we found the tag parent) */
+		found_this = true;
+		debug_msg("found this: %s\n", _segname.c_str());
+		if (next != NULL)
+		    break;
+		continue;
+	    }
+	    if (found_this) {
+		next = *iter;
+		debug_msg("next: %s %llu\n", next->segname().c_str(), next->nodenum());
+		break;
+	    } else {
+		if (!found_prev) {
+		    prev = *iter;
+		    debug_msg("prev: %s %llu\n", prev->segname().c_str(), prev->nodenum());
+		}
+	    }
+	}
+    }
+    
+    if (prev == NULL && next == NULL) {
+	_nodenum = INITIAL_NODENUM; /* arbitrary large value */
+	debug_msg("1 node %s initial: %llu", _segname.c_str(), _nodenum);
+    } else if (prev == NULL && next != NULL) {
+	_nodenum = next->nodenum() - NODENUM_INCREMENT;
+	debug_msg("2 node %s: %llu (next: %llu)", _segname.c_str(), _nodenum, next->nodenum());
+    } else if (prev != NULL && next == NULL) {
+	_nodenum = prev->nodenum() + NODENUM_INCREMENT;
+	debug_msg("3 node %s: %llu (prev: %llu)", _segname.c_str(), _nodenum, prev->nodenum());
+    } else if (prev != NULL && next != NULL) {
+	XLOG_ASSERT((next->nodenum() - prev->nodenum()) >= (2*MIN_NODENUM_INTERVAL));
+	_nodenum = (next->nodenum() + prev->nodenum())/2;
+	debug_msg("4 node %s: %llu (prev: %llu) (next: %llu)", _segname.c_str(), _nodenum, prev->nodenum(), next->nodenum());
+    }
+
+    // blank out the least significant bits
+    _nodenum -= _nodenum % MIN_NODENUM_INTERVAL;
+
+    // set the LSBs according to our client ID
+    _nodenum += _clientid;
+
+    return;
+}
+
 string
 ConfigTreeNode::show_operator() const
 {
-    switch (_operator) {
-    case OP_NONE:
-	XLOG_UNREACHABLE();
-    case OP_EQ:
-	return string("==");
-    case OP_LT:
-	return string("<");
-    case OP_LTE:
-	return string("<=");
-    case OP_GT:
-	return string(">");
-    case OP_GTE:
-	return string(">=");
-    case OP_ASSIGN:
-	return string(":");
-    case OP_ADD:
-	return string("add");
-    case OP_SUB:
-	return string("sub");
-    }
-    XLOG_UNREACHABLE();
+    return operator_to_str(_operator);
 }

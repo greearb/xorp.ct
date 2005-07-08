@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/userdb.hh,v 1.7 2004/11/30 15:35:28 mjh Exp $
+// $XORP: xorp/rtrmgr/userdb.hh,v 1.8 2005/03/25 02:54:40 pavlin Exp $
 
 #ifndef __RTRMGR_USERDB_HH__
 #define __RTRMGR_USERDB_HH__
@@ -48,6 +48,9 @@ public:
     const string& clientname() const { return _clientname; }
     void set_clientname(const string& clientname) { _clientname = clientname; }
 
+    uint32_t clientid() const { return _clientid; }
+    void set_clientid(uint32_t clientid) { _clientid = clientid; }
+
     const string& authtoken() const { return _authtoken; }
     void set_authtoken(const string& authtoken) { _authtoken = authtoken; }
 
@@ -66,6 +69,10 @@ public:
 
 private:
     string _clientname;
+    uint32_t	_clientid;  /* client ID is a unique number for every
+			       connected client at any moment in time,
+			       but not guaranteed to be unique over
+			       time */
     string _authtoken;
     bool _authenticated;
     bool _config_mode;

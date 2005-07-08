@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.42 2005/07/02 16:53:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.43 2005/07/05 20:28:04 mjh Exp $"
 
 
 #include <glob.h>
@@ -103,6 +103,13 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	    command = new AllowRangeCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
+    } else if (cmd == "%allow-operator") {
+	// If the command already exists, no need to create it again.
+	// The command action will simply be added to the existing command.
+	if (_cmd_map.find(cmd) == _cmd_map.end()) {
+	    command = new AllowOperatorsCommand(*this, cmd);
+	    _cmd_map[cmd] = command;
+	}
     } else if (cmd == "%help") {
 	// Nothing to do - the work is done by add_action
     } else if (cmd == "%deprecated") {
@@ -167,6 +174,13 @@ TemplateTreeNode::add_action(const string& cmd,
 	allow_command->add_action(action_list);
     } else if (cmd == "%allow-range") {
 	iter = _cmd_map.find("%allow-range");
+	XLOG_ASSERT(iter != _cmd_map.end());
+	command = iter->second;
+	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);
+	XLOG_ASSERT(allow_command != NULL);
+	allow_command->add_action(action_list);
+    } else if (cmd == "%allow-operator") {
+	iter = _cmd_map.find("%allow-operator");
 	XLOG_ASSERT(iter != _cmd_map.end());
 	command = iter->second;
 	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);

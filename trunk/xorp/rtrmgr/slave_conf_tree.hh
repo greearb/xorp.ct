@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.17 2005/07/02 04:20:21 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.18 2005/07/03 21:06:00 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -39,7 +39,8 @@ class SlaveConfigTree : public ConfigTree {
 public:
     SlaveConfigTree(XorpClient& xclient, bool verbose);
     SlaveConfigTree(const string& configuration, TemplateTree *tt,
-		    XorpClient& xclient, bool verbose) throw (InitError);
+		    XorpClient& xclient, uint32_t clientid, 
+		    bool verbose) throw (InitError);
     virtual ConfigTreeNode* create_node(const string& segment, 
 					const string& path,
 					const TemplateTreeNode* ttn, 
@@ -96,6 +97,7 @@ private:
 
     string	_commit_errmsg;
     string	_save_errmsg;
+    uint32_t    _clientid;
     bool	_verbose;	// Set to true if output is verbose
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.20 2005/03/25 02:54:41 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.21 2005/07/02 04:20:21 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -77,7 +77,8 @@ public:
 	const string& clientname, 
 	// Output values, 
 	string&	filename,
-	uint32_t& pid);
+	uint32_t& pid,
+	uint32_t& clientid);
 
     XrlCmdError rtrmgr_0_1_unregister_client(
         // Input values
@@ -198,12 +199,15 @@ private:
     void lock_timeout();
     void initialize_client_state(uint32_t user_id, UserInstance *user);
     void send_client_state(uint32_t user_id, UserInstance *user);
+    uint32_t allocate_clientid();
+    void deallocate_clientid(uint32_t clientid);
 
     XrlRouter& _xrl_router;
     XrlRtrmgrClientV0p2Client _client_interface;
     XrlFinderEventNotifierV0p1Client _finder_notifier_interface;
     multimap<uint32_t, UserInstance*> _users;
     multimap<uint32_t, UserInstance*> _config_users;
+    set<uint32_t> _clientids;
     UserDB&		_userdb;
     MasterConfigTree*	_master_config_tree;
     EventLoop&		_eventloop;

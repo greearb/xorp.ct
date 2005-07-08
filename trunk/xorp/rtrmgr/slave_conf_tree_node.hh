@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.10 2005/03/25 02:54:38 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.11 2005/07/03 21:06:00 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
 #define __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
@@ -43,6 +43,7 @@ public:
 			SlaveConfigTreeNode* parent, 
 			uint64_t nodenum,
 			uid_t user_id,
+			uint32_t clientid,
 			bool verbose);
 
     virtual ConfigTreeNode* create_node(const string& segment, 
@@ -50,7 +51,9 @@ public:
 					const TemplateTreeNode* ttn, 
 					ConfigTreeNode* parent_node, 
 					uint64_t nodenum,
-					uid_t user_id, bool verbose);
+					uid_t user_id, 
+					uint32_t clientid,
+					bool verbose);
     virtual ConfigTreeNode* create_node(const ConfigTreeNode& ctn);
 
     void create_command_tree(CommandTree& cmd_tree,

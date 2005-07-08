@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.51 2005/06/17 21:15:12 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.52 2005/07/08 02:17:44 abittau Exp $
 ##
 
 # -- Real Programs
@@ -56,6 +56,7 @@ xorp_rtrmgr_SOURCES	+= util.hh
 xorp_rtrmgr_SOURCES	+= xorp_client.hh
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.hh
 xorp_rtrmgr_SOURCES	+= xrldb.hh
+xorp_rtrmgr_SOURCES	+= config_operators.hh
 
 xorp_rtrmgr_SOURCES	+= conf_tree.cc
 xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
@@ -82,6 +83,7 @@ xorp_rtrmgr_SOURCES	+= util.cc
 xorp_rtrmgr_SOURCES	+= xorp_client.cc
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
 xorp_rtrmgr_SOURCES	+= xrldb.cc
+xorp_rtrmgr_SOURCES	+= config_operators.cc
 xorp_rtrmgr_SOURCES	+= y.boot_tab.cc
 xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
 
@@ -116,6 +118,7 @@ xorpsh_SOURCES	+= util.hh
 xorpsh_SOURCES	+= xorp_client.hh
 xorpsh_SOURCES	+= xorpsh_main.hh
 xorpsh_SOURCES	+= xrl_xorpsh_interface.hh
+xorpsh_SOURCES	+= config_operators.hh
 
 xorpsh_SOURCES	+= cli.cc
 xorpsh_SOURCES	+= command_tree.cc
@@ -137,6 +140,7 @@ xorpsh_SOURCES	+= xorp_client.cc
 xorpsh_SOURCES	+= xorpsh_main.cc
 xorpsh_SOURCES	+= xrl_xorpsh_interface.cc
 xorpsh_SOURCES	+= y.boot_tab.cc
+xorpsh_SOURCES	+= config_operators.cc
 xorpsh_SOURCES	+= y.opcmd_tab.cc
 xorpsh_SOURCES	+= y.tplt_tab.cc
 

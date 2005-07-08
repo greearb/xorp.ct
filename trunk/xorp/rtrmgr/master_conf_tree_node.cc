@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.11 2005/06/17 21:15:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.12 2005/07/03 21:06:00 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -47,7 +47,8 @@ MasterConfigTreeNode::MasterConfigTreeNode(const string& nodename,
 					   uint64_t nodenum,
 					   uid_t user_id,
 					   bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, nodenum, user_id, verbose),
+    : ConfigTreeNode(nodename, path, ttn, parent, nodenum, user_id, 
+		     /* clientid */ 0, verbose),
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL)
@@ -67,8 +68,10 @@ MasterConfigTreeNode::create_node(const string& segment, const string& path,
 				  const TemplateTreeNode* ttn, 
 				  ConfigTreeNode* parent_node, 
 				  uint64_t nodenum,
+				  uint32_t clientid,
 				  uid_t user_id, bool verbose)
 {
+    UNUSED(clientid);
     MasterConfigTreeNode *new_node, *parent;
     parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
 
@@ -419,7 +422,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
 		    string errmsg;
-		    if (allow_cmd->verify_variable_value(*this, errmsg)
+		    if (allow_cmd->verify_variable(*this, errmsg)
 			!= true) {
 			//
 			// Commit_changes should always be run first
