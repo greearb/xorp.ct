@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rtrmgr.xif,v 1.2 2004/03/09 05:51:02 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/rtrmgr.xif,v 1.3 2005/07/02 04:20:22 pavlin Exp $ */
  
 /*
  * Router Manager XRL interface.
@@ -10,7 +10,8 @@ interface rtrmgr/0.1 {
      * @param clientname name of xrl entity supporting
      * rtrmgr_client.xif methods.  
      */
-    register_client ? userid:u32 & clientname:txt -> filename:txt & pid:u32
+    register_client ? userid:u32 & clientname:txt \
+	-> filename:txt & pid:u32 & clientid:u32
     
     unregister_client ? token:txt
 
