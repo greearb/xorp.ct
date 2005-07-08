@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/utils.cc,v 1.1 2005/07/01 18:39:20 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.2 2005/07/06 00:11:19 pavlin Exp $"
 
 #include "xorp.h"
 #include "utils.hh"
@@ -31,7 +31,9 @@ xorp_make_temporary_file(const string& tmp_dir,
 			 string& final_filename,
 			 string& errmsg)
 {
+#ifdef HOST_OS_WINDOWS
     char dirname[MAXPATHLEN];
+#endif // HOST_OS_WINDOWS
     char filename[MAXPATHLEN];
     list<string> cand_tmp_dirs;
     char* value;
@@ -143,6 +145,4 @@ xorp_make_temporary_file(const string& tmp_dir,
 
     errmsg = "Cannot find a directory to create the temporary file";
     return (NULL);
-
-    UNUSED(dirname);
 }
