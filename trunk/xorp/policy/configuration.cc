@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.2 2005/03/25 02:54:06 pavlin Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -438,10 +438,12 @@ Configuration::add_varmap(const string& protocol, const string& variable,
     // figure out access...
     VarMap::Access acc = VarMap::READ;
 
-    if(access == "rw")
+    if (access == "rw")
 	acc = VarMap::READ_WRITE;
-    else if(access == "r")
+    else if (access == "r")
 	acc = VarMap::READ;
+    else if (access == "w")
+	acc = VarMap::WRITE;
     else
 	throw PolicyException("Unknown access (" + access + ") for protocol: " 
 			      + protocol + " variable: " + variable);

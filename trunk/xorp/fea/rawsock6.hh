@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.6 2004/11/29 09:36:27 bms Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.7 2005/03/25 02:53:14 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -114,7 +114,7 @@ protected:
 
 private:
     IoRawSocket6(const IoRawSocket6&);			// Not implemented.
-    IoRawSocket6 operator=(const IoRawSocket6&);	// Not implemented.
+    IoRawSocket6& operator=(const IoRawSocket6&);	// Not implemented.
 
 private:
     EventLoop&		_eventloop;

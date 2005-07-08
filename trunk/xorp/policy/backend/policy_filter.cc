@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,23 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.1 2004/09/17 13:48:55 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.2 2005/03/25 02:54:12 pavlin Exp $"
 
+#include "policy/policy_module.h"
 #include "config.h"
 #include "policy_filter.hh"
 #include "policy_backend_parser.hh"
 #include "set_manager.hh"
 #include "iv_exec.hh"
 #include "policy/common/policy_utils.hh"
+#include "libxorp/xlog.h"
 
 using namespace policy_utils;
 using policy_backend_parser::policy_backend_parse;
 
+PolicyFilter::PolicyFilter() : _policies(NULL) 
+{
+}
 
-PolicyFilter::PolicyFilter() : _policies(NULL) {}
-
-void PolicyFilter::configure(const string& str) {
-    
+void PolicyFilter::configure(const string& str) 
+{
     vector<PolicyInstr*>* policies = new vector<PolicyInstr*>();
     map<string,Element*>* sets = new map<string,Element*>();
     string err;
@@ -50,11 +54,13 @@ void PolicyFilter::configure(const string& str) {
     _sman.replace_sets(sets);
 }
 
-PolicyFilter::~PolicyFilter() {
+PolicyFilter::~PolicyFilter()
+{
     reset();
 }
 
-void PolicyFilter::reset() {
+void PolicyFilter::reset()
+{
     if(_policies) {
 	delete_vector(_policies);
 	_policies = NULL;
@@ -62,7 +68,8 @@ void PolicyFilter::reset() {
     _sman.clear();
 }
 
-bool PolicyFilter::acceptRoute(VarRW& varrw, ostream* os) {
+bool PolicyFilter::acceptRoute(VarRW& varrw)
+{
     bool default_action = true;
 
     // no configuration done yet.
@@ -70,9 +77,46 @@ bool PolicyFilter::acceptRoute(VarRW& varrw, ostream* os) {
 	return default_action;
 
     // run policies
-    IvExec ive(*_policies,_sman,varrw,os);
+    ostringstream os;
+    IvExec ive(*_policies, _sman, varrw, &os);
 
     IvExec::FlowAction fa = ive.run();
+
+    // print any trace data...
+    uint32_t level = varrw.trace();
+    if (level) {
+	string trace = "";
+
+	// basic, one line [hopefully!] info...
+	if (level > 0) {
+	    trace += varrw.more_tracelog();
+
+	    switch (fa) {
+		case IvExec::REJ:
+		    trace += ": rejected";
+		    break;
+	    
+		case IvExec::DEFAULT:
+		    trace += ": default action";
+		    break;
+
+		case IvExec::ACCEPT:
+		    trace += ": accepted";
+		    break;
+	    }
+	}
+
+	if (level > 1) {
+	    trace += "\nBasic VarRW trace:\n";
+	    trace += varrw.tracelog();
+	}    
+	if (level > 2) {
+	    trace += "Execution trace:\n";
+	    trace += os.str();
+	    trace += "End of trace\n";
+	}
+	XLOG_TRACE(true, "Policy filter result: %s", trace.c_str());
+    }
 
     // decide what to do
     switch(fa) {

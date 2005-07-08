@@ -103,7 +103,7 @@ compilepolicy_LDADD = ../libpolicy.la ../common/libpolicycommon.la $(top_builddi
 # execpolicy
 execpolicy_SOURCES = execpolicy.cc file_varrw.hh file_varrw.cc
 
-execpolicy_LDADD = ../backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libxorp/libxorp.la
+execpolicy_LDADD = ../backend/libpolicybackend.la ../common/libpolicycommon.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libxorp/libxorp.la
 
 
 ################################################################
@@ -128,7 +128,7 @@ compilepolicy_LDFLAGS =
 am_execpolicy_OBJECTS = execpolicy.$(OBJEXT) file_varrw.$(OBJEXT)
 execpolicy_OBJECTS = $(am_execpolicy_OBJECTS)
 execpolicy_DEPENDENCIES = ../backend/libpolicybackend.la \
-	$(top_builddir)/libxipc/libxipc.la \
+	../common/libpolicycommon.la $(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la
 execpolicy_LDFLAGS =
 

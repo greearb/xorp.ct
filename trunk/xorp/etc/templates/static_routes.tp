@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.15 2005/01/21 20:44:56 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.16 2005/03/09 22:50:40 pavlin Exp $ */
 
 protocols {
     static {
@@ -58,16 +58,25 @@ protocols {
     }
 }
 
+policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=network4&type:txt=ipv4net&access:txt=r";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=metric&type:txt=u32&access:txt=rw";
+
+    policy-statement @: txt {
+        term @: txt {
+            source {
+		metric: u32;
+	    }
+	}
+    }
+}
+
 protocols {
     static {
 	%help:		short	"Configure static routes";
 	%modinfo:	provides	static_routes;
 	%modinfo:	depends		rib;
-	/*
-	 * TODO: temporary comment-out the policy stuff until the
-	 * policy-based config is fixed.
-	 */
-	/* %modinfo:	depends		policy; */
+	%modinfo:	depends		policy;
 	%modinfo:	path		"static_routes/xorp_static_routes";
 	%modinfo:	default_targetname "static_routes";
 	%modinfo:	status_method	xrl "$(static.targetname)/common/0.1/get_status->status:u32&reason:txt";
@@ -305,6 +314,19 @@ protocols {
         import {
                 %delete: xrl "policy/policy/0.1/import?protocol:txt=$(static.targetname)&policies:txt=";
                 %set: xrl "policy/policy/0.1/import?protocol:txt=$(static.targetname)&policies:txt=$(@)";
-        }       
+        }
+    }
+}
+
+policy {
+    policy-statement @: txt {
+	term @: txt {
+	    source {
+		metric {
+		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=metric&op:txt=$(<>)&arg:txt=$(@)";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+		}
+	    }
+	}
     }
 }

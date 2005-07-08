@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.21 2005/03/25 02:53:21 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.22 2005/04/02 11:48:24 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -1147,8 +1147,6 @@ bool
 Fib2mribNode::do_filtering(Fib2mribRoute& route)
 {
     try {
-	ostringstream trace;
-
 	Fib2mribVarRW varrw(route);
 
 	// Import filtering
@@ -1157,13 +1155,7 @@ Fib2mribNode::do_filtering(Fib2mribRoute& route)
 	debug_msg("[FIB2MRIB] Running filter: %s on route: %s\n",
 		  filter::filter2str(filter::IMPORT).c_str(),
 		  route.network().str().c_str());
-	accepted = _policy_filters.run_filter(filter::IMPORT, varrw, &trace);
-
-	debug_msg("[FIB2MRIB] filter trace:\n%s\nEnd of trace.\n",
-		  trace.str().c_str());
-
-	// clear trace
-	trace.str("");
+	accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
 
 	route.set_filtered(!accepted);
 
@@ -1178,11 +1170,7 @@ Fib2mribNode::do_filtering(Fib2mribRoute& route)
 		  filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
 		  route.network().str().c_str());
 
-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
-				   varrw2, &trace);
-
-	debug_msg("[FIB2MRIB] filter trace:\n%s\nEnd of trace.\n",
-		  trace.str().c_str());
+	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
 
 	return accepted;
     } catch(const PolicyException& e) {

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.3 2004/11/12 02:44:47 bms Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.4 2005/07/01 22:54:37 abittau Exp $
 ##
 
 # -- Test Programs
@@ -39,6 +39,7 @@ execpolicy_SOURCES		+= file_varrw.hh
 execpolicy_SOURCES		+= file_varrw.cc
 
 execpolicy_LDADD		 = ../backend/libpolicybackend.la
+execpolicy_LDADD		+= ../common/libpolicycommon.la
 execpolicy_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 

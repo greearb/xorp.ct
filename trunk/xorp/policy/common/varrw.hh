@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/varrw.hh,v 1.1 2004/09/17 13:48:59 abittau Exp $
+// $XORP: xorp/policy/common/varrw.hh,v 1.2 2005/03/25 02:54:17 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_VARRW_HH__
 #define __POLICY_BACKEND_VARRW_HH__
@@ -34,7 +35,8 @@ using std::string;
  */
 class VarRW {
 public:
-    virtual ~VarRW() {}
+    VarRW();
+    virtual ~VarRW();
    
     /**
      * Read a variable from a route [such as nexthop].
@@ -77,6 +79,51 @@ public:
      *
      */
     virtual void sync() = 0;
+
+    /**
+     * Support for tracing reads.  Executor will call this.
+     * This call will then call read()
+     *
+     * @param id variable to read.
+     * @return variable desired.
+     */
+    const Element& read_trace(const string& id); 
+
+    /**
+     * Support for tracing writes.  Executor will call this.
+     * This will then call write()
+     *
+     * @ param id variable to write to.
+     * @param e value to write.
+     */
+    void write_trace(const string& id, const Element& e);
+
+    /**
+     * Obtain the final trace value.  Should be called after executing the
+     * policy in case it changes.
+     *
+     * @return trace value.
+     *
+     */
+    uint32_t trace();
+
+    /**
+     * Obtain the actual trace from the varrw.
+     *
+     * @return string representation of what was read and written.
+     */
+    string tracelog();
+
+    /**
+     * Obtain any VarRW specific traces.
+     *
+     * @return string representation of specific VarRW traces.
+     */
+    virtual string more_tracelog();
+
+private:
+    uint32_t _trace;
+    ostringstream _tracelog;
 };
 
 #endif // __POLICY_BACKEND_VARRW_HH__

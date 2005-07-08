@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.55 2005/03/25 02:52:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.56 2005/04/28 02:35:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1621,6 +1622,15 @@ PathAttributeList<A>::replace_nexthop(const A& new_nexthop)
     debug_msg("%p\n", this);
 
     replace_attribute(new NextHopAttribute<A>(new_nexthop));
+}
+
+template<class A>
+void
+PathAttributeList<A>::replace_origin(const OriginType& new_origin)
+{
+    debug_msg("%p\n", this);
+
+    replace_attribute(new OriginAttribute(new_origin));
 }
 
 template<class A>

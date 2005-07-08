@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.39 2005/03/11 23:19:01 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.40 2005/06/28 18:01:39 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -16,7 +16,7 @@ protocols {
 	    holdtime: u32 = 120;
 	    disable: bool = false;
 	    enabled: bool;			/* %deprecated */
-	
+
 	    ipv4-unicast: bool = true;
 	    ipv4-multicast: bool = false;
 	    ipv6-unicast: bool = false;
@@ -42,9 +42,6 @@ protocols {
 	    unicast:bool = true;		/* Default unicast */
 	    multicast:bool = false;
 	}
-
-        import: txt;
-        export: txt;
     }
 }
 
@@ -52,11 +49,7 @@ protocols {
     bgp {
 	%modinfo: provides bgp;
 	%modinfo: depends rib; 
-	/*
-	 * TODO: temporary comment-out the policy stuff until the
-	 * policy-based config is fixed.
-	 */
-	/* %modinfo: depends policy; */
+	%modinfo: depends policy; 
 	%modinfo: path "bgp/xorp_bgp";
 	%modinfo: default_targetname "bgp";
 	%modinfo: status_method xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
@@ -196,15 +189,6 @@ protocols {
 		%set:;
 	    }
 	}
-
-	import {
-                %delete: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
-                %set: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
-        }
-        export {
-                %delete: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=";
-                %set: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
-        }
     }
 }
 

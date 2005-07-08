@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/var_map.hh,v 1.2 2005/03/25 02:54:10 pavlin Exp $
+// $XORP: xorp/policy/var_map.hh,v 1.3 2005/07/01 22:54:35 abittau Exp $
 
 #ifndef __POLICY_VAR_MAP_HH__
 #define __POLICY_VAR_MAP_HH__
@@ -35,6 +35,8 @@
  */
 class VarMap {
 public:
+    static const string TRACE;
+
     /**
      * @short Exception thrown on VarMap errors such as on unknown variables.
      */
@@ -48,7 +50,8 @@ public:
      */
     enum Access {
 	READ,
-	READ_WRITE
+	READ_WRITE,
+	WRITE
     };
 
     /**
@@ -62,6 +65,11 @@ public:
 	Variable(const string& n, const string& t, Access a) : 
 		    access(a), name(n), type(t) 
 	{
+	}
+
+	bool writable() const 
+	{ 
+	    return access == READ_WRITE || access == WRITE; 
 	}
     };
 
@@ -100,17 +108,6 @@ public:
     bool protocol_known(const string& protocol);
 
     /**
-     * Add a variable to a specific protocol.
-     *
-     * @param vm VariableMap where variable should be added.
-     * @param varname name of the variable.
-     * @param type the type [id] of the variable/element.
-     * @param acc the access of the variable.
-     */
-    void add_variable(VariableMap& vm, const string& varname, 
-		      const string& type, Access acc);
-
-    /**
      * Add a variable to a protocol.
      *
      * @param protocol protocol for which variable should be added.
@@ -131,6 +128,26 @@ public:
 
 private:
     /**
+     * Use this if you want a variable to be present for all protocols.
+     *
+     * @param varname the name of the variable.  Watch out for clashes!
+     * @param type type of variable.
+     * @param acc access of variable.
+     */
+    void add_metavariable(const string& varname, const string& type, Access acc);
+
+    /**
+     * Add a variable to a specific protocol.
+     *
+     * @param vm VariableMap where variable should be added.
+     * @param varname name of the variable.
+     * @param type the type [id] of the variable/element.
+     * @param acc the access of the variable.
+     */
+    void add_variable(VariableMap& vm, const string& varname, 
+		      const string& type, Access acc);
+
+    /**
      * A VariableMap relates a variable name to its Variable information [access
      * and type].
      *
@@ -142,8 +159,11 @@ private:
     const VariableMap& variablemap(const string& protocol) const;
 
     ProtoMap _protocols;
-
     ProcessWatchBase& _process_watch;
+
+    typedef map<string, Variable*> MetaVarContainer;
+    MetaVarContainer _metavars;
+    
 
     // not impl
     VarMap(const VarMap&);

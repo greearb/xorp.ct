@@ -13,20 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.6 2004/10/04 18:38:32 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.7 2005/03/25 02:52:39 pavlin Exp $"
 
 #include "bgp_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "policy/common/policy_utils.hh"
-
+#include "peer_handler.hh"
 #include "bgp_varrw.hh"
 
+using namespace policy_utils;
+
 template <class A>
-BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify)
-    : _orig_rtmsg(rtmsg), _filtered_rtmsg(NULL), _got_fmsg(false),
-      _wrote_ptags(false), 
+BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify, 
+		      const string& name)
+    : _name(name), _orig_rtmsg(rtmsg), _filtered_rtmsg(NULL), 
+      _got_fmsg(false), _wrote_ptags(false), 
       _palist(*(rtmsg.route()->attributes())), // XXX: pointer deref in ctr
       _no_modify(no_modify),
       _modified(false)
@@ -56,36 +57,37 @@ BGPVarRW<A>::start_read()
 
     initialize("aspath",
 	       _ef.create(ElemStr::id, attr->aspath().short_str().c_str()));
-
-    initialize("origin",
-	       _ef.create(ElemU32::id,
-			  policy_utils::to_str(attr->origin()).c_str()));
+    
+    uint32_t origin = attr->origin();
+    initialize("origin", _ef.create(ElemU32::id, to_str(origin).c_str()));
 
     const LocalPrefAttribute* lpref = attr->local_pref_att();
+    Element* e = NULL;
+    if (lpref)
+	e = _ef.create(ElemU32::id, to_str(lpref->localpref()).c_str());
+    initialize("localpref", e);
 
-    if (lpref) {
-	initialize("localpref",
-		   _ef.create(ElemU32::id, lpref->str().c_str()));
-    } else {
-	initialize("localpref", NULL);
-    }
+    // XXX don't support community yet
+    initialize("community", NULL);
 
+    initialize("neighbor", read_neighbor());
 
-    const AtomicAggAttribute* atomagg = attr->atomic_aggregate_att();
-    if (atomagg) {
-	initialize("atomicagg",
-		   _ef.create(ElemStr::id, atomagg->str().c_str()));
-    } else {
-	initialize("atomicagg", NULL);
-    }
+    e = NULL;
+    const MEDAttribute* med = attr->med_att();
+    if(med) 
+	e = _ef.create(ElemU32::id, to_str(med->med()).c_str());
+    initialize("med", e);
+}
 
-    const AggregatorAttribute* aggregator = attr->aggregator_att();
-    if (aggregator) {
-	initialize("aggregator",
-		   _ef.create(ElemStr::id, aggregator->str().c_str()));
-    } else {
-	initialize("aggregator", NULL);
-    }
+template <class A>
+Element*
+BGPVarRW<A>::read_neighbor()
+{
+    Element* e = NULL;
+    const PeerHandler* ph = _orig_rtmsg.origin_peer();
+    if(ph)
+	e = _ef.create(ElemIPv4::id, ph->id().str().c_str());
+    return e;
 }
 
 template<>
@@ -134,6 +136,7 @@ BGPVarRW<A>::single_write(const string& id, const Element& e)
     if (id == "policytags") {
 	_ptags = e;
 	_wrote_ptags = true;
+	return;
     }
     if (write_nexthop(id, e))
 	return;
@@ -170,7 +173,26 @@ BGPVarRW<A>::single_write(const string& id, const Element& e)
 	_palist.add_path_attribute(lpref);
 	return;
     }
+    if (id == "community") {
+	XLOG_WARNING("Don't support writing community yet!");
+	return;
+    }
+    if (id == "origin") {
+	XLOG_ASSERT(u32 != NULL);
 
+	OriginType origin = INCOMPLETE;
+
+	if (u32->val() > INCOMPLETE)
+		XLOG_FATAL("Unknown origin: %d\n", u32->val());
+	
+	origin = static_cast<OriginType>(u32->val());
+    
+	_palist.replace_origin(origin);
+	return;
+    }
+
+    // XXX: writing a variable we don't know about!
+    XLOG_FATAL("Don't know how to write: %s\n", id.c_str());
 }
 
 template <class A>
@@ -258,6 +280,23 @@ bool
 BGPVarRW<A>::modified()
 {
     return _modified;
+}
+
+template <class A>
+string
+BGPVarRW<A>::more_tracelog()
+{
+    string x = "BGP " + _name + " route: ";
+    uint32_t level = trace();
+
+    if (level > 0) {
+	if (modified())
+	    x += _filtered_rtmsg->net().str();
+	else
+	    x += _orig_rtmsg.net().str();
+    }
+
+    return x;
 }
 
 template class BGPVarRW<IPv4>;

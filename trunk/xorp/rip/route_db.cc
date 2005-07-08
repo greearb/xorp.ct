@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.20 2005/02/12 05:54:57 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.21 2005/03/25 02:54:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -151,35 +151,20 @@ RouteDB<A>::do_filtering(Route* r)
     try {
 	RIPVarRW<A> varrw(*r);
 
-	ostringstream trace;
-
 	debug_msg("[RIP] Running import filter on route %s\n",
 		  r->net().str().c_str());
 
-	bool accepted = _policy_filters.run_filter(filter::IMPORT,
-						   varrw, &trace);
-
-	debug_msg("[RIP] Filter trace:\n%s\nDone.. Accepted: %d\n",
-		  trace.str().c_str(),accepted);
-
-	// clear trace
-	trace.str("");
-
+	bool accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
+	
 	if (!accepted)
 	    return false;
-
 
 	RIPVarRW<A> varrw2(*r);
 
 
 	debug_msg("[RIP] Running source match filter on route %s\n",
 		  r->net().str().c_str());
-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
-				   varrw2, &trace);
-
-
-	debug_msg("[RIP] Filter trace:\n%s\nDone..\n",
-		  trace.str().c_str());
+	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
 
 	return true;
     } catch(const PolicyException& e) {

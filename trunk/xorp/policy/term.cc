@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.6 2005/04/15 03:46:03 atanu Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.7 2005/07/01 22:54:34 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -64,13 +64,30 @@ Term::set_block(const uint32_t& block, const uint32_t& order,
 				+ to_str(order));
     }
 
+    string oper = op;
     // XXX: rebuild original statement
     // FIXME: no need to rebuild original statement + reparse... be smart...
     // rtrmgr is "helping" us... well we have less freedom on syntax though...
     // XXX: when we know what the front end syntax should be, and who does the
     // parsing, we should fix all this...
-    string statement = variable + " " + op + " " + arg + ";";
-    debug_msg("[POLICY] Statement= (%s)\n", statement.c_str());
+    if (oper == ":") { // default operator... [most of the times]
+	switch(block) {
+	    case SOURCE:
+	    case DEST:
+		oper = "==";
+		break;
+		
+	    case ACTION:
+		oper = "=";
+		break;
+
+	    default:
+		XLOG_ASSERT(false);
+		break;
+	}
+    }
+    string statement = variable + " " + oper + " " + arg + ";";
+    debug_msg("[POLICY] Statement=(%s)\n", statement.c_str());
 
     // parse and check syntax error
     Parser::Nodes* nodes = _parser.parse(statement);

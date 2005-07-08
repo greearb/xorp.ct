@@ -93,7 +93,7 @@ install_sh = @install_sh@
 noinst_LTLIBRARIES = libpolicycommon.la
 
 # Common policy library
-libpolicycommon_la_SOURCES = dispatcher.hh elem_null.hh elem_set.hh element.hh element_base.hh element_factory.hh filter.hh operator.hh operator_base.hh policy_exception.hh policy_utils.hh register_elements.hh register_operations.hh varrw.hh dispatcher.cc elem_set.cc element.cc element_factory.cc filter.cc policy_utils.cc register_elements.cc register_operations.cc
+libpolicycommon_la_SOURCES = dispatcher.hh elem_null.hh elem_set.hh element.hh element_base.hh element_factory.hh filter.hh operator.hh operator_base.hh policy_exception.hh policy_utils.hh register_elements.hh register_operations.hh varrw.hh dispatcher.cc elem_set.cc element.cc element_factory.cc filter.cc policy_utils.cc register_elements.cc register_operations.cc varrw.cc
 
 
 ################################################################
@@ -108,7 +108,7 @@ libpolicycommon_la_LDFLAGS =
 libpolicycommon_la_LIBADD =
 am_libpolicycommon_la_OBJECTS = dispatcher.lo elem_set.lo element.lo \
 	element_factory.lo filter.lo policy_utils.lo \
-	register_elements.lo register_operations.lo
+	register_elements.lo register_operations.lo varrw.lo
 libpolicycommon_la_OBJECTS = $(am_libpolicycommon_la_OBJECTS)
 
 DEFS = @DEFS@
@@ -121,7 +121,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/element.Plo $(DEPDIR)/element_factory.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/filter.Plo $(DEPDIR)/policy_utils.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/register_elements.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/register_operations.Plo
+@AMDEP_TRUE@	$(DEPDIR)/register_operations.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/varrw.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -183,6 +184,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_elements.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_operations.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/varrw.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.5 2004/10/04 17:55:06 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.6 2005/03/25 02:52:39 pavlin Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -39,10 +39,10 @@ public:
      *
      * @param rtmsg the message to filter and possibly modify.
      * @param no_modify if true, the route will not be modified.
+     * @param name the name of the filter to print in case of tracing.
      */
-     
-    BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify);
-    ~BGPVarRW();
+    BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify, const string& name);
+    virtual ~BGPVarRW();
 
     /**
      * Caller owns the message [responsible for delete].
@@ -64,6 +64,25 @@ public:
      * @return true if route was modified. False otherwise.
      */
     bool modified();
+   
+
+    /**
+     * Output basic BGP specific information.
+     *
+     * @return BGP trace based on verbosity level returned from trace().
+     */
+   virtual string more_tracelog();
+
+protected:
+    /**
+     * Reads the neighbor variable.  This is different on input/output branch.
+     *
+     * @return the neighbor variable.
+     */
+    virtual Element* read_neighbor();
+
+    ElementFactory		_ef;
+    string			_name;
 
 private:
     /**
@@ -81,24 +100,15 @@ private:
      * @return true if value was written. False otherwise.
      */
     bool write_nexthop(const string& id, const Element& e);
-
-
-
+    
     const InternalMessage<A>&	_orig_rtmsg;
-
-    ElementFactory		_ef;
-
     InternalMessage<A>*		_filtered_rtmsg;
     bool			_got_fmsg;
-
     PolicyTags			_ptags;
     bool			_wrote_ptags;
-
     PathAttributeList<A>	_palist;
-
     bool			_no_modify;
     bool			_modified;
-
 
     // not impl
     BGPVarRW(const BGPVarRW&);

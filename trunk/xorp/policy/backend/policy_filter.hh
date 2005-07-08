@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filter.hh,v 1.1 2004/09/17 13:48:55 abittau Exp $
+// $XORP: xorp/policy/backend/policy_filter.hh,v 1.2 2005/03/25 02:54:12 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_FILTER_HH__
 #define __POLICY_BACKEND_POLICY_FILTER_HH__
@@ -22,10 +22,8 @@
 #include "policy/common/policy_exception.hh"
 #include "policy_instr.hh"
 #include "set_manager.hh"
-
 #include <string>
 #include <map>
-
 
 /**
  * @short A generic policy filter.
@@ -66,9 +64,8 @@ public:
      *
      * @return true if the route is accepted, false otherwise.
      * @param varrw the VarRW associated with the route being filtered.
-     * @param os if not null, an execution trace will be output to stream. 
      */
-    bool acceptRoute(VarRW& varrw, ostream* os);
+    bool acceptRoute(VarRW& varrw);
 
 private:
     vector<PolicyInstr*>* _policies;
@@ -78,6 +75,5 @@ private:
     PolicyFilter(const PolicyFilter&);
     PolicyFilter& operator=(const PolicyFilter&);
 };
-
 
 #endif // __POLICY_BACKEND_POLICY_FILTER_HH__

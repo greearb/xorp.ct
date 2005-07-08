@@ -12,40 +12,39 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.1 2004/09/17 13:48:55 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.2 2005/03/25 02:54:12 pavlin Exp $"
 
 #include "config.h"
 #include "policy_filters.hh"
 
-
-PolicyFilters::PolicyFilters() {
+PolicyFilters::PolicyFilters()
+{
 }
 
 bool
-PolicyFilters::run_filter(const uint32_t& ftype, VarRW& varrw,
-			  ostream* os) {
-
+PolicyFilters::run_filter(const uint32_t& ftype, VarRW& varrw)
+{
     PolicyFilter& pf = whichFilter(ftype);
-    return pf.acceptRoute(varrw,os);
+    return pf.acceptRoute(varrw);
 }
 
 void
-PolicyFilters::configure(const uint32_t& ftype, const string& conf) {
-    
+PolicyFilters::configure(const uint32_t& ftype, const string& conf)
+{
     PolicyFilter& pf = whichFilter(ftype);
     pf.configure(conf);
 }
 
 void
-PolicyFilters::reset(const uint32_t& ftype) {
-
+PolicyFilters::reset(const uint32_t& ftype)
+{
     PolicyFilter& pf = whichFilter(ftype);
     pf.reset();
 }
 
-
 PolicyFilter& 
-PolicyFilters::whichFilter(const uint32_t& ftype) {
+PolicyFilters::whichFilter(const uint32_t& ftype)
+{
     switch(ftype) {
 	case 1:
 	    return _import_filter;

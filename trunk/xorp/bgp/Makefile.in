@@ -128,7 +128,7 @@ isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filte
 test_peer_data_SOURCES = test_peer_data.cc
 
 # -- Library Sources
-libbgp_la_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh bgp_varrw.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh profile_vars.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_policy.hh route_table_policy_im.hh route_table_policy_sm.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc bgp_varrw.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc profile_vars.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_policy.cc route_table_policy_im.cc route_table_policy_sm.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
+libbgp_la_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh bgp_varrw.hh bgp_varrw_export.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh profile_vars.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_policy.hh route_table_policy_im.hh route_table_policy_ex.hh route_table_policy_sm.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc bgp_varrw.cc bgp_varrw_export.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc profile_vars.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_policy.cc route_table_policy_im.cc route_table_policy_ex.cc route_table_policy_sm.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests test_cache.reference test_decision.reference test_deletion.reference test_dump.reference test_fanout.reference test_filter.reference test_nhlookup.reference test_ribin.reference test_ribout.reference xrl_shell_funcs.sh
@@ -145,19 +145,20 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libbgp_la_LDFLAGS =
 libbgp_la_LIBADD =
 am_libbgp_la_OBJECTS = aspath.lo attribute_manager.lo bgp_trie.lo \
-	bgp_varrw.lo dump_iterators.lo internal_message.lo iptuple.lo \
-	local_data.lo next_hop_resolver.lo notification_packet.lo \
-	open_packet.lo packet.lo parameter.lo path_attribute.lo peer.lo \
-	peer_data.lo peer_handler.lo peer_list.lo plumbing.lo \
-	process_watch.lo profile_vars.lo rib_ipc_handler.lo \
-	route_queue.lo route_table_base.lo route_table_cache.lo \
+	bgp_varrw.lo bgp_varrw_export.lo dump_iterators.lo \
+	internal_message.lo iptuple.lo local_data.lo \
+	next_hop_resolver.lo notification_packet.lo open_packet.lo \
+	packet.lo parameter.lo path_attribute.lo peer.lo peer_data.lo \
+	peer_handler.lo peer_list.lo plumbing.lo process_watch.lo \
+	profile_vars.lo rib_ipc_handler.lo route_queue.lo \
+	route_table_base.lo route_table_cache.lo \
 	route_table_decision.lo route_table_deletion.lo \
 	route_table_dump.lo route_table_fanout.lo route_table_filter.lo \
 	route_table_nhlookup.lo route_table_policy.lo \
-	route_table_policy_im.lo route_table_policy_sm.lo \
-	route_table_ribin.lo route_table_ribout.lo \
-	route_table_reader.lo socket.lo subnet_route.lo \
-	update_attrib.lo update_packet.lo xrl_target.lo
+	route_table_policy_im.lo route_table_policy_ex.lo \
+	route_table_policy_sm.lo route_table_ribin.lo \
+	route_table_ribout.lo route_table_reader.lo socket.lo \
+	subnet_route.lo update_attrib.lo update_packet.lo xrl_target.lo
 libbgp_la_OBJECTS = $(am_libbgp_la_OBJECTS)
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_plumbing$(EXEEXT) \
@@ -285,6 +286,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/aspath.Plo $(DEPDIR)/aspath_test.Po \
 @AMDEP_TRUE@	$(DEPDIR)/attribute_manager.Plo $(DEPDIR)/bgp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/bgp_trie.Plo $(DEPDIR)/bgp_varrw.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/bgp_varrw_export.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/dummy_main.Po \
 @AMDEP_TRUE@	$(DEPDIR)/dummy_next_hop_resolver.Po \
 @AMDEP_TRUE@	$(DEPDIR)/dump_iterators.Plo \
@@ -312,6 +314,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/route_table_filter.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/route_table_nhlookup.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/route_table_policy.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_policy_ex.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/route_table_policy_im.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/route_table_policy_sm.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/route_table_reader.Plo \
@@ -452,6 +455,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_trie.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_varrw.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_varrw_export.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_next_hop_resolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dump_iterators.Plo@am__quote@
@@ -485,6 +489,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_filter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_nhlookup.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy_ex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy_im.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy_sm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_reader.Plo@am__quote@

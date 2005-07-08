@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.4 2005/03/05 01:31:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.5 2005/03/25 02:54:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -233,12 +233,7 @@ PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route)
 	RIBVarRW<A> varrw(route);
 
 	// only source match filtering!
-	ostringstream trace;
-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
-				   varrw, &trace);
-
-	debug_msg("[RIB] Filter trace:\n%s\n[RIB] end of trace.\n",
-		  trace.str().c_str());
+	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw);
 
     } catch(const PolicyException& e) {
 	XLOG_FATAL("PolicyException: %s", e.str().c_str());

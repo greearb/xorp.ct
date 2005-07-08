@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filters.hh,v 1.1 2004/09/17 13:48:56 abittau Exp $
+// $XORP: xorp/policy/backend/policy_filters.hh,v 1.2 2005/03/25 02:54:12 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_FILTERS_HH__
 #define __POLICY_BACKEND_POLICY_FILTERS_HH__
@@ -46,9 +46,8 @@ public:
      * @return true if route is accepted, false otherwise.
      * @param type which filter should be executed.
      * @param varrw the VarRW associated with the route to be filtered.
-     * @param os if not null, an execution trace will be output to stream.
      */
-    bool run_filter(const uint32_t& type, VarRW& varrw, ostream* os);
+    bool run_filter(const uint32_t& type, VarRW& varrw);
 
     /**
      * Configure a filter.

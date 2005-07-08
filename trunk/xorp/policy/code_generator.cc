@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.2 2005/03/25 02:54:06 pavlin Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -122,7 +122,7 @@ const Element*
 CodeGenerator::visit(NodeRegex& node) {
     node.arg().accept(*this);
 
-    _os << "REGEX " << node.reg() << endl;
+    _os << "REGEX \"" << node.reg() << "\"" << endl;
     return NULL;
 }
 

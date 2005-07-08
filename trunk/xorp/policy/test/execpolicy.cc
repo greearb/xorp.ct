@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.1 2004/09/17 13:49:00 abittau Exp $"
+#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.2 2005/03/25 02:54:18 pavlin Exp $"
 
 /*
  * EXIT CODES:
@@ -24,20 +24,17 @@
  *
  */
 
+#include "policy/policy_module.h"
 #include "config.h"
-
 #include <sys/time.h>
 #include <string>
 #include <iostream>
-
 #include "policy/backend/policy_filter.hh"
 #include "policy/common/policy_utils.hh"
-
+#include "libxorp/xlog.h"
 #include "file_varrw.hh"
 
-
 using namespace policy_utils;
-
 
 int main(int argc, char *argv[]) {
 
@@ -51,6 +48,11 @@ int main(int argc, char *argv[]) {
     bool accepted = true;
 
     struct timeval tv_start;
+
+    xlog_init(argv[0], 0);
+    xlog_set_verbose(XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
 
     if(gettimeofday(&tv_start,NULL)) {
 	perror("gettimeofday()");
@@ -75,7 +77,7 @@ try {
 
   
     cout << "Running filter..." << endl;
-    accepted = filter.acceptRoute(varrw,&cout);
+    accepted = filter.acceptRoute(varrw);
 
     cout << "Filter " << ( accepted ? "accepted" : "rejected") 
 	 << " route" << endl;
@@ -102,6 +104,9 @@ try {
     double speed = ((double)usec/1000) + ((double)sec*1000);
 
     printf("Execution successful in %.3f milliseconds\n",speed);
+
+    xlog_stop();
+    xlog_exit();
  
     if(accepted)
 	exit(1);

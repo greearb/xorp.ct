@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.4 2005/03/18 08:15:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.5 2005/03/25 02:52:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,8 +33,8 @@ PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
 			    BGPRouteTable<A>* parent,
 			    PolicyFilters& pfs, 
 			    const filter::Filter& type)
-    : BGPRouteTable<A>(tablename, safi),
-      _policy_filters(pfs), _filter_type(type)
+    : BGPRouteTable<A>(tablename, safi), _filter_type(type),
+      _policy_filters(pfs)
 {
     this->_parent = parent;		
 }
@@ -49,43 +49,54 @@ const InternalMessage<A>*
 PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg, 
 			     bool no_modify) const
 {
+    BGPVarRW<A>* varrw = get_varrw(rtmsg, no_modify);
+
+    XLOG_ASSERT(varrw);
     try {
-	BGPVarRW<A> varrw(rtmsg, no_modify);
-
-	ostringstream trace;
-
 	bool accepted = true;
 
 	debug_msg("[BGP] running filter %s on route: %s\n",
 		  filter::filter2str(_filter_type).c_str(),
 		  rtmsg.str().c_str());
 
-	accepted = _policy_filters.run_filter(_filter_type, varrw, &trace);
+	accepted = _policy_filters.run_filter(_filter_type, *varrw);
 
-	debug_msg("[BGP] filter trace:\n%s\nEnd of trace. Accepted: %d\n",
-		  trace.str().c_str(), accepted);
-
-	if (!accepted)
+	if (!accepted) {
+	    delete varrw;
 	    return NULL;
+	}
 
 	// we only want to check if filter accepted / rejecd route
 	// [for route lookups]
-	if (no_modify)
+	if (no_modify) {
+	    delete varrw;
 	    return &rtmsg;
+	}    
 
-	if (!varrw.modified())
+	if (!varrw->modified()) {
+	    delete varrw;
 	    return &rtmsg;
+	}    
 
 
-	InternalMessage<A>* fmsg = varrw.filtered_message();
+	InternalMessage<A>* fmsg = varrw->filtered_message();
 
 	debug_msg("[BGP] filter modified message: %s\n", fmsg->str().c_str());
 
+	delete varrw;
 	return fmsg;
     } catch(const PolicyException& e) {
 	XLOG_FATAL("Policy filter error %s", e.str().c_str());
 	XLOG_UNFINISHED();
+	delete varrw;
     }
+}
+
+template <class A>
+BGPVarRW<A>*
+PolicyTable<A>::get_varrw(const InternalMessage<A>& rtmsg, bool no_modify) const
+{
+    return new BGPVarRW<A>(rtmsg, no_modify, filter::filter2str(_filter_type));
 }
 
 template <class A>

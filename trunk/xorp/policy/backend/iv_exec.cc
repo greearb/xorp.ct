@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.1 2004/09/17 13:48:55 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.2 2005/03/25 02:54:12 pavlin Exp $"
 
 #include "config.h"
 #include "iv_exec.hh"
@@ -136,7 +136,8 @@ IvExec::visit(PushSet& ps) {
 }
 
 void 
-IvExec::visit(OnFalseExit& /* x */) {
+IvExec::visit(OnFalseExit& /* x */)
+{
     if(_stack.empty())
 	throw RuntimeError("Got empty stack on ON_FALSE_EXIT");
 
@@ -149,6 +150,7 @@ IvExec::visit(OnFalseExit& /* x */) {
 	    if(_os)
 		*_os << "GOT NULL ON TOP OF STACK, GOING TO NEXT TERM" << endl;
 	    _finished = true;
+	    return;
         }
 
 	// if it is anything else, its an error
@@ -172,8 +174,6 @@ IvExec::visit(OnFalseExit& /* x */) {
 
     if(_os)
 	*_os << "ONFALSE_EXIT: " << t->str() << endl;
-
-	
 }
 
 void 
@@ -198,10 +198,10 @@ IvExec::visit(Regex& re) {
 
 void 
 IvExec::visit(Load& l) {
-    const Element& x = _varrw.read(l.var());
+    const Element& x = _varrw.read_trace(l.var());
 
     if(_os)
-	*_os << "LOAD " << l.var() << endl;
+	*_os << "LOAD " << l.var() << ": " << x.str() << endl;
     // varrw owns element [do not trash]
     _stack.push(&x);
 }
@@ -224,9 +224,9 @@ IvExec::visit(Store& s) {
     // if it had to be trashed, it would have been trashed on creation, so do
     // NOT trash now. And yes, it likely is an element we do not have to
     // trash anyway.
-    _varrw.write(s.var(),*arg);
+    _varrw.write_trace(s.var(),*arg);
     if(_os)
-	*_os << "STORE " << s.var() << endl;
+	*_os << "STORE " << s.var() << ": " << arg->str() << endl;
 }
 
 void 

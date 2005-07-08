@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/common/Makefile.am,v 1.2 2004/09/17 19:42:03 pavlin Exp $
+## $XORP: xorp/policy/common/Makefile.am,v 1.3 2004/11/12 02:44:47 bms Exp $
 ##
 
 # -- No-install Libraries
@@ -30,6 +30,7 @@ libpolicycommon_la_SOURCES             += filter.cc
 libpolicycommon_la_SOURCES             += policy_utils.cc
 libpolicycommon_la_SOURCES             += register_elements.cc
 libpolicycommon_la_SOURCES             += register_operations.cc
+libpolicycommon_la_SOURCES             += varrw.cc
 
 
 ################################################################

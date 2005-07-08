@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/backend/Makefile.am,v 1.2 2004/09/17 19:42:02 pavlin Exp $
+## $XORP: xorp/policy/backend/Makefile.am,v 1.3 2004/11/12 02:44:46 bms Exp $
 ##
 
 # -- No-install Libraries
@@ -43,6 +43,7 @@ libpolicybackend_la_LIBADD		+= ../common/filter.lo
 libpolicybackend_la_LIBADD		+= ../common/policy_utils.lo
 libpolicybackend_la_LIBADD		+= ../common/register_elements.lo
 libpolicybackend_la_LIBADD		+= ../common/register_operations.lo
+libpolicybackend_la_LIBADD		+= ../common/varrw.lo
 
 
 ################################################################

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/single_varrw.hh,v 1.2 2004/10/04 17:55:06 abittau Exp $
+// $XORP: xorp/policy/backend/single_varrw.hh,v 1.3 2005/03/25 02:54:13 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_SINGLE_VARRW_HH__
 #define __POLICY_BACKEND_SINGLE_VARRW_HH__
@@ -132,7 +132,7 @@ private:
 
     // not impl
     SingleVarRW(const SingleVarRW&);
-    SingleVarRW operator=(const SingleVarRW&);
+    SingleVarRW& operator=(const SingleVarRW&);
 };
 
 #endif // __POLICY_BACKEND_SINGLE_VARRW_HH__

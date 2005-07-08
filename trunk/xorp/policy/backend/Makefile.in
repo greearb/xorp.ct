@@ -96,7 +96,7 @@ noinst_LTLIBRARIES = libpolicybackend.la
 libpolicybackend_la_SOURCES = instr_visitor.hh instruction.hh instruction_base.hh iv_exec.hh policy_backend_parser.hh policy_filter.hh policy_filters.hh policy_instr.hh policy_redist_map.hh policytags.hh set_manager.hh single_varrw.hh term_instr.hh iv_exec.cc policy_filter.cc policy_filters.cc policy_redist_map.cc policytags.cc set_manager.cc single_varrw.cc lex.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.h
 
 # XXX find a way to link libpolicycommon
-libpolicybackend_la_LIBADD = ../common/dispatcher.lo ../common/elem_set.lo ../common/element.lo ../common/element_factory.lo ../common/filter.lo ../common/policy_utils.lo ../common/register_elements.lo ../common/register_operations.lo
+libpolicybackend_la_LIBADD = ../common/dispatcher.lo ../common/elem_set.lo ../common/element.lo ../common/element_factory.lo ../common/filter.lo ../common/policy_utils.lo ../common/register_elements.lo ../common/register_operations.lo ../common/varrw.lo
 
 
 ################################################################
@@ -112,7 +112,7 @@ libpolicybackend_la_DEPENDENCIES = ../common/dispatcher.lo \
 	../common/elem_set.lo ../common/element.lo \
 	../common/element_factory.lo ../common/filter.lo \
 	../common/policy_utils.lo ../common/register_elements.lo \
-	../common/register_operations.lo
+	../common/register_operations.lo ../common/varrw.lo
 am_libpolicybackend_la_OBJECTS = iv_exec.lo policy_filter.lo \
 	policy_filters.lo policy_redist_map.lo policytags.lo \
 	set_manager.lo single_varrw.lo lex.yy_policy_backend_parser.lo \

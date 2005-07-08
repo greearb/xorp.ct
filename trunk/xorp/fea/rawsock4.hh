@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.5 2004/11/23 00:53:20 pavlin Exp $
+// $XORP: xorp/fea/rawsock4.hh,v 1.6 2005/03/25 02:53:14 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK4_HH__
 #define __FEA_RAWSOCK4_HH__
@@ -99,7 +99,7 @@ protected:
 
 private:
     IoRawSocket4(const IoRawSocket4&);			// Not implemented.
-    IoRawSocket4 operator=(const IoRawSocket4&);	// Not implemented.
+    IoRawSocket4& operator=(const IoRawSocket4&);	// Not implemented.
 
 private:
     enum { RECVBUF_BYTES = 65536 };

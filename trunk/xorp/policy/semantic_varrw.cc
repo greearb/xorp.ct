@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.1 2004/09/17 13:48:50 abittau Exp $"
+#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.2 2005/03/25 02:54:09 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -45,7 +45,7 @@ SemanticVarRW::write(const string& id, const Element& elem) {
     const VarMap::Variable& var = _vars.variable(_protocol,id);
 
     // check the rw access
-    if(var.access != VarMap::READ_WRITE) {
+    if(!var.writable()) {
 	string error = "Trying to write on read-only variable ";
         error += id;
         throw var_error(error);

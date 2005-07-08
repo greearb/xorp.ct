@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.31 2004/06/10 22:40:31 hodson Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.32 2005/03/25 02:52:43 pavlin Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -547,6 +547,7 @@ public:
 
     void replace_nexthop(const A& nexthop);
     void replace_AS_path(const AsPath& as_path);
+    void replace_origin(const OriginType& origin);
     void remove_attribute_by_type(PathAttType type);
     void remove_attribute_by_pointer(PathAttribute*);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.1 2004/09/17 13:48:58 abittau Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.2 2005/03/25 02:54:15 pavlin Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
@@ -62,7 +62,7 @@ public:
      * @param L concrete class of first argument
      * @param R concrete class of second argument
      * @param funct function to be called to perform operation.
-     * @param op cinary operation to be registered.
+     * @param op binary operation to be registered.
      */
     template<class L, class R, Element* (*funct)(const L&,const R&)>
     void 

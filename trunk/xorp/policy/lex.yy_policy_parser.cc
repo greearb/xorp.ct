@@ -2795,7 +2795,11 @@ int main()
 void yyerror(const char *m) {
         ostringstream oss;
 
-        oss << "Error on line " <<  _parser_lineno << ": " << m;
+        oss << "Error on line " <<  _parser_lineno << " near (";
+
+	for(int i = 0; i < yyleng; i++)
+		oss << yytext[i];
+	oss << "): " << m;
 
         _last_error = oss.str();
 }

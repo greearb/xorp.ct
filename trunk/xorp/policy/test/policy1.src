@@ -6,6 +6,7 @@ policy-statement accepted {
 		dest {
 		}
 		action {
+			trace "=" (1);
 			aspath "=" ("6234" + aspath);
 		}
 	}

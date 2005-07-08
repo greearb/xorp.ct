@@ -1,72 +1,92 @@
 /* $XORP: xorp/etc/templates/policy.tp,v 1.2 2004/09/17 19:39:20 pavlin Exp $ */
 
 policy {
-	targetname: txt = "policy";
-	policy-statement @: txt {
-		term @: txt {
-			source {
-				match: txt;
-			}
-			dest {
-				match: txt;
-			}
-			action {
-				action: txt;
-			}
-		}
-	}
+    targetname: txt = "policy";
+    policy-statement @: txt {
+        term @: txt {
+            source {
+		protocol: txt;
 
-	set @: txt {
-		elements: txt;
-	}
+		network4: ipv4net;
+		network6: ipv6net;
+            }
+            dest {
+            }
+            action {
+	    	trace: u32;
+            }
+        }
+    }
+
+    set @: txt {
+        elements: txt;
+    }
 }
 
 policy {
-	%help:		short "Configure policies";
-	%modinfo:	provides policy;
-	%modinfo:	depends rib;
-	%modinfo:	path "policy/xorp_policy";
-	%modinfo:	default_targetname "policy";
-	%modinfo:	status_method xrl "$(policy.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo:	shutdown_method xrl "$(policy.targetname)/common/0.1/shutdown";
-	%modinfo:	end_commit xrl "$(policy.targetname)/policy/0.1/done_global_policy_conf";
-	%mandatory:	targetname;
+    %help:      short "Configure policies";
+    %modinfo:   provides policy;
+    %modinfo:   depends rib;
+    %modinfo:   path "policy/xorp_policy";
+    %modinfo:   default_targetname "policy";
+    %modinfo:   status_method xrl "$(policy.targetname)/common/0.1/get_status->status:u32&reason:txt";
+    %modinfo:   shutdown_method xrl "$(policy.targetname)/common/0.1/shutdown";
+    %modinfo:   end_commit xrl "$(policy.targetname)/policy/0.1/done_global_policy_conf";
+    %mandatory: targetname;
 
-	targetname {
-		%help: short "set target name";
-		%set:;
-	}
+    targetname {
+        %help: short "set target name";
+        %set:;
+    }
 
-	policy-statement @: txt {
-		%create: xrl "$(policy.targetname)/policy/0.1/create_policy?policy:txt=$(@)";
-		%delete: xrl "$(policy.targetname)/policy/0.1/delete_policy?policy:txt=$(@)";
-		term @: txt {
-			/* %create: xrl "$(policy.targetname)/policy/0.1/create_term?policy:txt=$(policy-statement.@)&term:txt=$(@)"; */
-			%delete: xrl "$(policy.targetname)/policy/0.1/delete_term?policy:txt=$(policy-statement.@)&term:txt=$(@)";
-			source {
-				match {
-					/* %set: xrl "$(policy.targetname)/policy/0.1/update_term_source?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&source:txt=$(@)"; */
-				}
-			}
-			dest {
-				match {
-					/* %set: xrl "$(policy.targetname)/policy/0.1/update_term_dest?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&dest:txt=$(@)"; */
-				}
-			}
-			action {
-				action {
-					/* %set: xrl "$(policy.targetname)/policy/0.1/update_term_action?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&action:txt=$(@)"; */
-				}
-			}
+    policy-statement @: txt {
+        %create: xrl "$(policy.targetname)/policy/0.1/create_policy?policy:txt=$(@)";
+        %delete: xrl "$(policy.targetname)/policy/0.1/delete_policy?policy:txt=$(@)";
+
+        term @: txt {
+            %create: xrl "$(policy.targetname)/policy/0.1/create_term?policy:txt=$(policy-statement.@)&order:u32=$(#)&term:txt=$(@)";
+            %delete: xrl "$(policy.targetname)/policy/0.1/delete_term?policy:txt=$(policy-statement.@)&term:txt=$(@)";
+	    
+	    source {
+                protocol {
+                        %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=protocol&op:txt=$(<>)&arg:txt=$(@)";
+                        %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+                }
+
+                network4 {
+                        %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=network4&op:txt=$(<>)&arg:txt=$(@)";
+                        %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+                }
+                network6 {
+                        %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=network6&op:txt=$(<>)&arg:txt=$(@)";
+                        %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+                }
+	    }	
+
+
+            action {
+		trace {
+		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=trace&op:txt=:&arg:txt=$(@)";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
-	}
 
-	set @: txt {
-		%delete: xrl "$(policy.targetname)/policy/0.1/delete_set?set:txt=$(@)";
-		%create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
-		elements {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_set?set:txt=$(set.@)&elements:txt=$(@)";
+		accept {
+		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=accept&op:txt=&arg:txt=";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
-	}
+		reject {
+		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=reject&op:txt=&arg:txt=";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+		}
+	    }	
+        }
+    }
 
+    set @: txt {
+        %delete: xrl "$(policy.targetname)/policy/0.1/delete_set?set:txt=$(@)";
+        %create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
+        elements {
+            %set: xrl "$(policy.targetname)/policy/0.1/update_set?set:txt=$(set.@)&elements:txt=$(@)";
+        }
+    }
 }

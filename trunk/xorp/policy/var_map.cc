@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.2 2005/03/25 02:54:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.3 2005/07/01 22:54:34 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,6 +25,8 @@
 #include "policy/common/policy_utils.hh"
 
 using namespace policy_utils;
+
+const string VarMap::TRACE = "trace";
 
 const VarMap::VariableMap&
 VarMap::variablemap(const string& protocol) const
@@ -58,6 +60,7 @@ VarMap::variable(const string& protocol, const string& varname) const
 
 VarMap::VarMap(ProcessWatchBase& pw) : _process_watch(pw) 
 {
+    add_metavariable(TRACE, "u32", WRITE);
 }
 
 VarMap::~VarMap()
@@ -70,6 +73,7 @@ VarMap::~VarMap()
 	clear_map(*vm);	
     }
     clear_map(_protocols);
+    clear_map(_metavars);
 }
 
 
@@ -112,6 +116,14 @@ VarMap::add_protocol_variable(const string& protocol,
         _protocols[protocol] = vm;
     
         _process_watch.add_interest(protocol);
+
+	// add the metavars
+	for (MetaVarContainer::iterator i = _metavars.begin(); i !=
+	     _metavars.end(); ++i) {
+	    
+	    Variable* v = i->second;
+	    add_variable(*vm, v->name, v->type, v->access);
+	}
     }
     // or else just update existing one
     else 
@@ -119,6 +131,17 @@ VarMap::add_protocol_variable(const string& protocol,
 
     add_variable(*vm,varname,type,acc);
 
+}
+
+void
+VarMap::add_metavariable(const string& variable, const string& type, Access acc)
+{
+    if (_metavars.find(variable) != _metavars.end()) {
+	throw VarMapErr("Metavar: " + variable + " exists already");
+    }
+
+    Variable* v = new Variable(variable, type, acc);
+    _metavars[variable] = v;
 }
 
 string

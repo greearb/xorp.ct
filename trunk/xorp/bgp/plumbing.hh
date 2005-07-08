@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.29 2004/09/21 18:05:08 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.30 2005/03/25 02:52:44 pavlin Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -31,6 +31,7 @@
 #include "route_table_policy.hh"
 #include "route_table_policy_sm.hh"
 #include "route_table_policy_im.hh"
+#include "route_table_policy_ex.hh"
 #include "peer.hh"
 #include "rib_ipc_handler.hh"
 #include "next_hop_resolver.hh"

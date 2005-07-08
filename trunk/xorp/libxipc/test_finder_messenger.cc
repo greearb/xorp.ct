@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.10 2004/06/10 22:41:08 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.11 2005/03/25 02:53:29 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -102,8 +102,16 @@ public:
     DummyFinder() : _messenger(0) {}
 
     virtual ~DummyFinder() {
+    /* XXX TODO: something strange happens here... calling of a pure virtual
+     * function or something.  Need to fix and then uncomment.  It shouldn't be
+     * too much a problem if it's commented as DummyFinder is used only in the
+     * test and is destroyed at the end of the test.  Thus there is no real mem
+     * leak, as memory would be free once the process exits [which would occur
+     * right after this destructor anyway].
+
 	if (_messenger)
 	    delete _messenger;
+    */	    
     }
 
     XrlCmdMap& commands() { return _commands; }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.65 2005/03/25 02:52:44 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.66 2005/04/28 02:35:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -378,12 +378,13 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			   _next_hop_resolver);
     _tables.insert(filter_out);
 
+    XLOG_ASSERT(_master.rib_handler());
     PolicyTable<A>* policy_filter_out =
-	new PolicyTable<A>(ribname + "IpcChannelOutputPolicyFilter",
-			   _master.safi(),
-			   filter_out,
-			   _master.policy_filters(),
-			   filter::EXPORT);
+	new PolicyTableExport<A>(ribname + "IpcChannelOutputPolicyFilter",
+			         _master.safi(),
+				 filter_out,
+				 _master.policy_filters(),
+				 _master.rib_handler()->id().str());
     filter_out->set_next_table(policy_filter_out);
     _tables.insert(policy_filter_out);
 
@@ -525,11 +526,11 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			   _next_hop_resolver);
 
     PolicyTable<A>* policy_filter_out =
-	new PolicyTable<A>(_ribname + "PeerOutputPolicyFilter" + peername,
-			   _master.safi(),
-			   filter_out,
-			   _master.policy_filters(),
-			   filter::EXPORT);
+	new PolicyTableExport<A>(_ribname + "PeerOutputPolicyFilter" + peername,
+			         _master.safi(),
+				 filter_out,
+				 _master.policy_filters(),
+				 peer_handler->id().str());
     filter_out->set_next_table(policy_filter_out);
    
     CacheTable<A>* cache_out = 

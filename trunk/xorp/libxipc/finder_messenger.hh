@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.13 2005/04/28 02:29:04 pavlin Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.14 2005/04/28 10:16:20 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER_HH__
 #define __LIBXIPC_FINDER_MESSENGER_HH__
@@ -35,7 +35,7 @@ public:
      */
     // TODO: the destructor is temporary commented-out, otherwise
     // test_finder_messenger crashes.
-    // virtual ~FinderMessengerManager() {}
+    virtual ~FinderMessengerManager() {}
 
     /**
      * Method called by messenger constructor.

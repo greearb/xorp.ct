@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.24 2005/03/05 02:08:27 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.25 2005/03/25 02:54:42 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -979,8 +979,6 @@ bool
 StaticRoutesNode::do_filtering(StaticRoute& route)
 {
     try {
-	ostringstream trace;
-
 	StaticRoutesVarRW varrw(route);
 
 	// Import filtering
@@ -989,13 +987,7 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
 	debug_msg("[STATIC] Running filter: %s on route: %s\n",
 		  filter::filter2str(filter::IMPORT).c_str(),
 		  route.network().str().c_str());
-	accepted = _policy_filters.run_filter(filter::IMPORT, varrw, &trace);
-
-	debug_msg("[STATIC] filter trace:\n%s\nEnd of trace.\n",
-		  trace.str().c_str());
-
-	// clear trace
-	trace.str("");
+	accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
 
 	route.set_filtered(!accepted);
 
@@ -1010,11 +1002,7 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
 		  filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
 		  route.network().str().c_str());
 
-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
-				   varrw2, &trace);
-
-	debug_msg("[STATIC] filter trace:\n%s\nEnd of trace.\n",
-		  trace.str().c_str());
+	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
 
 	return accepted;
     } catch(const PolicyException& e) {
