@@ -106,14 +106,14 @@ LDADD = $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la 
 #
 # xorp_rtrmgr
 #
-xorp_rtrmgr_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh generic_module_manager.hh master_conf_tree.hh master_conf_tree_node.hh master_template_tree.hh master_template_tree_node.hh module_commands.hh module_manager.hh path_segment.hh randomness.hh rtrmgr_error.hh task.hh template_base_command.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_program.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh conf_tree.cc conf_tree_node.cc generic_module_manager.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc master_conf_tree_node.cc master_template_tree.cc master_template_tree_node.cc module_command.cc module_manager.cc randomness.cc task.cc template_base_command.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_program.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
+xorp_rtrmgr_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh generic_module_manager.hh master_conf_tree.hh master_conf_tree_node.hh master_template_tree.hh master_template_tree_node.hh module_commands.hh module_manager.hh path_segment.hh randomness.hh rtrmgr_error.hh task.hh template_base_command.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_program.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh config_operators.hh conf_tree.cc conf_tree_node.cc generic_module_manager.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc master_conf_tree_node.cc master_template_tree.cc master_template_tree_node.cc module_command.cc module_manager.cc randomness.cc task.cc template_base_command.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_program.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc config_operators.cc y.boot_tab.cc y.tplt_tab.cc
 
 xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.la $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(LDADD)
 
 #
 # xorpsh
 #
-xorpsh_SOURCES = rtrmgr_module.h y.boot_tab.h y.opcmd_tab.h y.tplt_tab.h cli.hh command_tree.hh conf_tree.hh conf_tree_node.hh generic_module_manager.hh op_commands.hh path_segment.hh rtrmgr_error.hh slave_conf_tree.hh slave_conf_tree_node.hh slave_module_manager.hh template_base_commands.hh template_tree.hh template_tree_node.hh util.hh xorp_client.hh xorpsh_main.hh xrl_xorpsh_interface.hh cli.cc command_tree.cc conf_tree.cc conf_tree_node.cc generic_module_manager.cc lex.boot.cc lex.opcmd.cc lex.tplt.cc op_commands.cc slave_conf_tree.cc slave_conf_tree_node.cc slave_module_manager.cc template_base_command.cc template_tree.cc template_tree_node.cc util.cc xorp_client.cc xorpsh_main.cc xrl_xorpsh_interface.cc y.boot_tab.cc y.opcmd_tab.cc y.tplt_tab.cc
+xorpsh_SOURCES = rtrmgr_module.h y.boot_tab.h y.opcmd_tab.h y.tplt_tab.h cli.hh command_tree.hh conf_tree.hh conf_tree_node.hh generic_module_manager.hh op_commands.hh path_segment.hh rtrmgr_error.hh slave_conf_tree.hh slave_conf_tree_node.hh slave_module_manager.hh template_base_commands.hh template_tree.hh template_tree_node.hh util.hh xorp_client.hh xorpsh_main.hh xrl_xorpsh_interface.hh config_operators.hh cli.cc command_tree.cc conf_tree.cc conf_tree_node.cc generic_module_manager.cc lex.boot.cc lex.opcmd.cc lex.tplt.cc op_commands.cc slave_conf_tree.cc slave_conf_tree_node.cc slave_module_manager.cc template_base_command.cc template_tree.cc template_tree_node.cc util.cc xorp_client.cc xorpsh_main.cc xrl_xorpsh_interface.cc y.boot_tab.cc config_operators.cc y.opcmd_tab.cc y.tplt_tab.cc
 
 xorpsh_LDADD = $(top_builddir)/cli/libcli.la $(top_builddir)/libproto/libproto.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/librtrmgrxif.la $(top_builddir)/xrl/targets/libxorpshbase.la $(LDADD)
 
@@ -233,7 +233,8 @@ am_xorp_rtrmgr_OBJECTS = conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 	unexpanded_program.$(OBJEXT) unexpanded_xrl.$(OBJEXT) \
 	userdb.$(OBJEXT) util.$(OBJEXT) xorp_client.$(OBJEXT) \
 	xrl_rtrmgr_interface.$(OBJEXT) xrldb.$(OBJEXT) \
-	y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
+	config_operators.$(OBJEXT) y.boot_tab.$(OBJEXT) \
+	y.tplt_tab.$(OBJEXT)
 xorp_rtrmgr_OBJECTS = $(am_xorp_rtrmgr_OBJECTS)
 xorp_rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.la \
 	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la \
@@ -252,7 +253,8 @@ am_xorpsh_OBJECTS = cli.$(OBJEXT) command_tree.$(OBJEXT) \
 	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
 	util.$(OBJEXT) xorp_client.$(OBJEXT) xorpsh_main.$(OBJEXT) \
 	xrl_xorpsh_interface.$(OBJEXT) y.boot_tab.$(OBJEXT) \
-	y.opcmd_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
+	config_operators.$(OBJEXT) y.opcmd_tab.$(OBJEXT) \
+	y.tplt_tab.$(OBJEXT)
 xorpsh_OBJECTS = $(am_xorpsh_OBJECTS)
 xorpsh_DEPENDENCIES = $(top_builddir)/cli/libcli.la \
 	$(top_builddir)/libproto/libproto.la \
@@ -273,6 +275,7 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/cli.Po $(DEPDIR)/command_tree.Po \
 @AMDEP_TRUE@	$(DEPDIR)/conf_tree.Po $(DEPDIR)/conf_tree_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/config_operators.Po \
 @AMDEP_TRUE@	$(DEPDIR)/generic_module_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/lex.boot.Po $(DEPDIR)/lex.opcmd.Po \
 @AMDEP_TRUE@	$(DEPDIR)/lex.tplt.Po $(DEPDIR)/main_rtrmgr.Po \
@@ -402,6 +405,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/command_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/conf_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/conf_tree_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/config_operators.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/generic_module_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.boot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.opcmd.Po@am__quote@
