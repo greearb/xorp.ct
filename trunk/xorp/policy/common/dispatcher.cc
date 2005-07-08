@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.2 2005/03/25 02:54:15 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.3 2005/07/08 02:53:24 abittau Exp $"
 
 #include "config.h"
 #include "dispatcher.hh"
@@ -123,51 +123,4 @@ Dispatcher::run(const BinOper& op,
     args.push_back(&right);
 
     return run(op,args);
-}
-
-template<class L, class R, Element* (*funct)(const L&,const R&)>
-void
-Dispatcher::add(const BinOper& op)
-{
-    // XXX: do it in a better way
-    L arg1;
-    R arg2;
-
-    ArgList args;
-
-    args.push_back(&arg1);
-    args.push_back(&arg2);
-
-    Key key = makeKey(op,args);
-
-    struct Local {
-        static Element* Trampoline(const Element& left, const Element& right) {
-            return funct(dynamic_cast<const L&>(left),
-                         dynamic_cast<const R&>(right));
-        }
-    };
-
-    _map[key].bin = &Local::Trampoline;
-}
-
-template<class T, Element* (*funct)(const T&)>
-void 
-Dispatcher::add(const UnOper& op)
-{
-    // XXX: ugly
-    T arg;
-
-    ArgList args;
-
-    args.push_back(&arg);
-
-    Key key = makeKey(op,args);
-
-    struct Local {
-	static Element* Trampoline(const Element& arg) {
-	    return funct(dynamic_cast<const T&>(arg));
-        }
-    };
-
-    _map[key].un = &Local::Trampoline;
 }

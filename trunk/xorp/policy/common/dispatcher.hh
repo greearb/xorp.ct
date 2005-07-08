@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.3 2005/07/08 02:06:22 abittau Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.4 2005/07/08 02:53:24 abittau Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
@@ -64,7 +64,28 @@ public:
      * @param op binary operation to be registered.
      */
     template<class L, class R, Element* (*funct)(const L&,const R&)>
-    void add(const BinOper& op);
+    void add(const BinOper& op) {
+        // XXX: do it in a better way
+        L arg1;
+        R arg2;
+
+        ArgList args;
+
+        args.push_back(&arg1);
+        args.push_back(&arg2);
+    
+        Key key = makeKey(op,args);
+
+        struct Local {
+            static Element* Trampoline(const Element& left, const Element& right) {
+                return funct(dynamic_cast<const L&>(left),
+                             dynamic_cast<const R&>(right));
+            }
+        };
+
+        _map[key].bin = &Local::Trampoline;
+
+    }
 
     /**
      * Method to register a unary operation callback with dispatcher.
@@ -74,7 +95,24 @@ public:
      * @param op unary operation to be registered.
      */
     template<class T, Element* (*funct)(const T&)>
-    void add(const UnOper& op);
+    void add(const UnOper& op) {
+	// XXX: ugly
+	T arg;
+
+	ArgList args;
+
+        args.push_back(&arg);
+
+        Key key = makeKey(op,args);
+
+        struct Local {
+	    static Element* Trampoline(const Element& arg) {
+                return funct(dynamic_cast<const T&>(arg));
+            }
+        };
+
+        _map[key].un = &Local::Trampoline;
+    }
 
     /**
      * Execute an n-ary operation.
