@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.35 2004/11/23 22:43:41 bms Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.36 2005/07/08 02:06:17 abittau Exp $
 ##
 
 # -- Subdirectories
@@ -119,8 +119,8 @@ libbgp_la_SOURCES += route_table_fanout.hh
 libbgp_la_SOURCES += route_table_filter.hh
 libbgp_la_SOURCES += route_table_nhlookup.hh
 libbgp_la_SOURCES += route_table_policy.hh
-libbgp_la_SOURCES += route_table_policy_im.hh
 libbgp_la_SOURCES += route_table_policy_ex.hh
+libbgp_la_SOURCES += route_table_policy_im.hh
 libbgp_la_SOURCES += route_table_policy_sm.hh
 libbgp_la_SOURCES += route_table_ribin.hh
 libbgp_la_SOURCES += route_table_ribout.hh
@@ -164,8 +164,8 @@ libbgp_la_SOURCES += route_table_fanout.cc
 libbgp_la_SOURCES += route_table_filter.cc
 libbgp_la_SOURCES += route_table_nhlookup.cc
 libbgp_la_SOURCES += route_table_policy.cc
-libbgp_la_SOURCES += route_table_policy_im.cc
 libbgp_la_SOURCES += route_table_policy_ex.cc
+libbgp_la_SOURCES += route_table_policy_im.cc
 libbgp_la_SOURCES += route_table_policy_sm.cc
 libbgp_la_SOURCES += route_table_ribin.cc
 libbgp_la_SOURCES += route_table_ribout.cc
