@@ -223,9 +223,18 @@ class Lsa {
     /**
      * It is the responsibilty of the derived type to return this
      * information.
+     *
      * @return The type this lsa represents.
      */
     virtual uint16_t get_ls_type() const = 0;
+
+    /**
+     * It is the responsibilty of the derived type to return this
+     * information.
+     *
+     * @return True if this is an AS-external-LSA.
+     */
+    virtual bool external() const = 0;
 
     /**
      * It is the responsibilty of the derived type to return this
@@ -691,6 +700,11 @@ class RouterLsa : public Lsa {
 	XLOG_UNREACHABLE();
 	return 0;
     }
+
+    /**
+     * @return False this is not an AS-external-LSA.
+     */
+    bool external() const {return false; };
 
     /**
      * Decode an LSA.
