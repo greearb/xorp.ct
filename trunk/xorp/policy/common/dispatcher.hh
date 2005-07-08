@@ -12,22 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.2 2005/03/25 02:54:15 pavlin Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.3 2005/07/08 02:06:22 abittau Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
 
+#include "policy/policy_module.h"
 #include <string>
 #include <sstream>
 #include <map>
 #include <vector>
-#include <assert.h>
-
+#include "libxorp/xlog.h"
 #include "element_base.hh"
 #include "operator_base.hh"
 #include "register_operations.hh"
 #include "policy_exception.hh"
-
 
 /**
  * @short Link between elements and operations. Executes operations on elments.
@@ -65,29 +64,7 @@ public:
      * @param op binary operation to be registered.
      */
     template<class L, class R, Element* (*funct)(const L&,const R&)>
-    void 
-    add(const BinOper& op) {
-
-	// XXX: do it in a better way
-	L arg1;
-	R arg2;
-
-	ArgList args;
-
-	args.push_back(&arg1);
-	args.push_back(&arg2);
-
-	Key key = makeKey(op,args);
-
-        struct Local {
-	    static Element* Trampoline(const Element& left, const Element& right) {
-		return funct(dynamic_cast<const L&>(left),
-		             dynamic_cast<const R&>(right));
-	    }
-	};
-
-	_map[key].bin = &Local::Trampoline;
-    }
+    void add(const BinOper& op);
 
     /**
      * Method to register a unary operation callback with dispatcher.
@@ -97,26 +74,7 @@ public:
      * @param op unary operation to be registered.
      */
     template<class T, Element* (*funct)(const T&)>
-    void add(const UnOper& op) {
-
-	// XXX: ugly
-	T arg;
-
-	ArgList args;
-
-	args.push_back(&arg);
-
-	Key key = makeKey(op,args);
-
-	struct Local {
-	    static Element* Trampoline(const Element& arg) {
-		return funct(dynamic_cast<const T&>(arg));
-	    }
-	};
-
-	_map[key].un = &Local::Trampoline;
-    }
-
+    void add(const UnOper& op);
 
     /**
      * Execute an n-ary operation.
@@ -169,8 +127,6 @@ private:
     // Hashtable would be better
     typedef map<Key,Value> Map;
 
-
-
     /**
      * Create a key for the callback table based on operation and arguments.
      *
@@ -189,8 +145,9 @@ private:
      * @param op operation to perform.
      * @param args the arguments of the operation.
      */
-    Value lookup(const Oper& op, const ArgList& args) const {
-	assert(op.arity() == args.size());
+    Value lookup(const Oper& op, const ArgList& args) const
+    {
+	XLOG_ASSERT(op.arity() == args.size());
   
         // find callback
         Key key = makeKey(op,args);
@@ -216,17 +173,12 @@ private:
         return (*i).second;
     }
 
-
-
-
     // Only one global map. Creating multiple dispatcher is thus harmless.
     // However, we may not have different dispatchers.
     static Map _map;
 
     // Do initial registration of callbacks.
     static RegisterOperations _regops;
-
 };
-
 
 #endif // __POLICY_COMMON_DISPATCHER_HH__

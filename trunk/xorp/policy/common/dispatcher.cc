@@ -12,26 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.1 2004/09/17 13:48:58 abittau Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.2 2005/03/25 02:54:15 pavlin Exp $"
 
 #include "config.h"
 #include "dispatcher.hh"
 #include "elem_null.hh"
 #include "policy_utils.hh"
 
-
 // init static members
 Dispatcher::Map Dispatcher::_map;
 RegisterOperations Dispatcher::_regops;
 
-
-Dispatcher::Dispatcher() {
+Dispatcher::Dispatcher()
+{
 }
 
 Dispatcher::Key
-Dispatcher::makeKey(const Oper& op, const ArgList& args) const {
-
-    assert(op.arity() == args.size());
+Dispatcher::makeKey(const Oper& op, const ArgList& args) const
+{
+    XLOG_ASSERT(op.arity() == args.size());
    
     // XXX: key has to be fast to compute!!!
     string key("");
@@ -55,7 +54,8 @@ Dispatcher::makeKey(const Oper& op, const ArgList& args) const {
 }   
 
 Element*
-Dispatcher::run(const Oper& op, const ArgList& args) const {
+Dispatcher::run(const Oper& op, const ArgList& args) const
+{
     unsigned arity = op.arity();
 
     // make sure we got correct # of args
@@ -96,15 +96,13 @@ Dispatcher::run(const Oper& op, const ArgList& args) const {
 			     policy_utils::to_str(arity) + 
 			     " not supported");
     }
-
     // unreach
-
 }
 
 
 Element* 
-Dispatcher::run(const UnOper& op, const Element& arg) const {
-
+Dispatcher::run(const UnOper& op, const Element& arg) const
+{
     // prepare arglist
     ArgList args;
     args.push_back(&arg);
@@ -116,8 +114,8 @@ Dispatcher::run(const UnOper& op, const Element& arg) const {
 Element* 
 Dispatcher::run(const BinOper& op, 
 		const Element& left, 
-		const Element& right) const {
-
+		const Element& right) const
+{
     // prepare arglist and execute generic run
     ArgList args;
 
@@ -125,4 +123,51 @@ Dispatcher::run(const BinOper& op,
     args.push_back(&right);
 
     return run(op,args);
+}
+
+template<class L, class R, Element* (*funct)(const L&,const R&)>
+void
+Dispatcher::add(const BinOper& op)
+{
+    // XXX: do it in a better way
+    L arg1;
+    R arg2;
+
+    ArgList args;
+
+    args.push_back(&arg1);
+    args.push_back(&arg2);
+
+    Key key = makeKey(op,args);
+
+    struct Local {
+        static Element* Trampoline(const Element& left, const Element& right) {
+            return funct(dynamic_cast<const L&>(left),
+                         dynamic_cast<const R&>(right));
+        }
+    };
+
+    _map[key].bin = &Local::Trampoline;
+}
+
+template<class T, Element* (*funct)(const T&)>
+void 
+Dispatcher::add(const UnOper& op)
+{
+    // XXX: ugly
+    T arg;
+
+    ArgList args;
+
+    args.push_back(&arg);
+
+    Key key = makeKey(op,args);
+
+    struct Local {
+	static Element* Trampoline(const Element& arg) {
+	    return funct(dynamic_cast<const T&>(arg));
+        }
+    };
+
+    _map[key].un = &Local::Trampoline;
 }
