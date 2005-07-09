@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.52 2005/07/02 00:15:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.53 2005/07/02 02:06:07 pavlin Exp $"
 
 
+#include <list>
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"
@@ -275,8 +276,6 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
     // instances to produce a generic version of the XRL.
     // Then we can check it is a valid XRL as known by the XRLdb.
     //
-    enum char_type { VAR, NON_VAR, QUOTE, ASSIGN };
-    char_type mode = NON_VAR;
     string cleaned_xrl;
 
     // Trim quotes from around the XRL
@@ -329,12 +328,15 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	}
     }
 
+    debug_msg("before cleaning:\n%s\n", xrl_str.c_str());
     //
     // Copy the XRL, omitting the "=$(VARNAME)" parts.
     // In the mean time, build the list of encountered "$(VARNAME)" variables.
     //
+    list <XrlCharType> mode_stack;
+    mode_stack.push_front(NON_VAR);
     for (size_t i = start; i < stop; i++) {
-	switch (mode) {
+	switch (mode_stack.front()) {
 	case VAR:
 	    if (xrl_str[i] == '$' || xrl_str[i] == '`') {
 		errmsg = c_format("Syntax error in module %s XRL %s: "
@@ -342,19 +344,21 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 				  module_name.c_str(), xrl_str.c_str());
 		return false;
 	    }
-	    if (xrl_str[i] == ')')
-		mode = NON_VAR;
+	    if (xrl_str[i] == ')') {
+		mode_stack.pop_front();
+	    }
 	    break;
 	case NON_VAR:
 	    if (xrl_str[i] == '=') {
-		mode = ASSIGN;
+		mode_stack.push_front(ASSIGN);
 		break;
 	    }
 	    cleaned_xrl += xrl_str[i];
 	    // FALLTHROUGH
 	case QUOTE:
-	    if (xrl_str[i] == '`')
-		mode = NON_VAR;
+	    if (xrl_str[i] == '`') {
+		mode_stack.pop_front();
+	    }
 	    break;
 	case ASSIGN:
 	    if (xrl_str[i] == '$') {
@@ -387,21 +391,40 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 			_referred_variables.push_back(varname);
 		    }
 		}
-		mode = VAR;
+		mode_stack.push_front(VAR);
 		break;
 	    }
 	    if (xrl_str[i] == '`') {
-		mode = QUOTE;
+		mode_stack.push_front(QUOTE);
 		break;
 	    }
 	    if (xrl_str[i] == '&') {
-		mode = NON_VAR;
+		mode_stack.pop_front();
+		if (mode_stack.front() != NON_VAR) {
+		    errmsg = c_format("Syntax error in module %s XRL %s: "
+				      "invalid XRL syntax",
+				      module_name.c_str(), xrl_str.c_str());
+		    return false;
+		}
 		cleaned_xrl += xrl_str[i];
 		break;
+	    }
+	    if ((xrl_str.size() > i) 
+		&& (xrl_str[i] == '-') && (xrl_str[i+1] == '>')) {
+		/* it's the start of the return spec */
+		cleaned_xrl += xrl_str[i];
+		mode_stack.pop_front();
+		if (mode_stack.front() != NON_VAR) {
+		    errmsg = c_format("Syntax error in module %s XRL %s: "
+				      "invalid XRL syntax",
+				      module_name.c_str(), xrl_str.c_str());
+		    return false;
+		}
 	    }
 	    break;
 	}
     }
+    debug_msg("after cleaning:\n%s\n", cleaned_xrl.c_str());
 
     if (xrldb.check_xrl_syntax(cleaned_xrl) == false) {
 	errmsg = c_format("Syntax error in module %s XRL %s: "
