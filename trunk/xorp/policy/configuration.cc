@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,15 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.4 2005/07/08 02:06:21 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "configuration.hh"
 #include "visitor_setdep.hh"
 #include "policy/common/policy_utils.hh"
-
 
 using namespace policy_utils;
 
@@ -66,7 +65,7 @@ void
 Configuration::update_term_block(const string& policy,
                                  const string& term,
 	                         const uint32_t& block,
-	                         const uint32_t& order,
+	                         const uint64_t& order,
 		                 const string& variable,
 		                 const string& op,
 			         const string& arg)
@@ -82,8 +81,9 @@ Configuration::update_term_block(const string& policy,
 } 
 
 void 
-Configuration::create_term(const string& policy, const uint32_t& order,
-			   const string& term) {
+Configuration::create_term(const string& policy, const uint64_t& order,
+			   const string& term)
+{
     PolicyStatement& ps = _policies.find(policy);
 
     if(ps.term_exists(term)) {
@@ -98,13 +98,15 @@ Configuration::create_term(const string& policy, const uint32_t& order,
 }
    
 void 
-Configuration::create_policy(const string&   policy) {
+Configuration::create_policy(const string&   policy)
+{
     _policies.create(policy,_sets);
     _modified_policies.insert(policy);
 }  
 
 void 
-Configuration::delete_policy(const string&   policy) {
+Configuration::delete_policy(const string&   policy)
+{
     _policies.delete_policy(policy);
     // if we manage to delete a policy, it means it is not in use... so we do
     // not need to send updates to filters.
@@ -112,30 +114,30 @@ Configuration::delete_policy(const string&   policy) {
 }  
 
 void 
-Configuration::create_set(const string& set) {
+Configuration::create_set(const string& set)
+{
     _sets.create(set);
 }  
 
-
 void 
-Configuration::update_set(const string& set, const string& elements) {
+Configuration::update_set(const string& set, const string& elements)
+{
     // policies affected will be marked as modified.
     _sets.update_set(set,elements,_modified_policies);
 }  
 
-
-
 void 
-Configuration::delete_set(const string& set) {
+Configuration::delete_set(const string& set)
+{
     // if we manage to delete a set, it is not in use, so no updates are
     // necessary to filters / configuration.
     _sets.delete_set(set);
 }  
    
-   
 void 
 Configuration::update_imports(const string& protocol, 
-			      const list<string>& imports) {
+			      const list<string>& imports)
+{
    
     // check if protocol exists
     if(!_varmap.protocol_known(protocol))
@@ -145,11 +147,10 @@ Configuration::update_imports(const string& protocol,
     _modified_targets.insert(Code::Target(protocol,filter::IMPORT));
 }
 
-
 void 
 Configuration::update_exports(const string& protocol, 
-			      const list<string>& exports) {
-
+			      const list<string>& exports)
+{
     // check if protocol exists
     if(!_varmap.protocol_known(protocol))
 	throw ConfError("exports: Protocol " + protocol + " unknown");
@@ -228,7 +229,8 @@ return conf;
 }
 
 void 
-Configuration::update_set_dependancy(PolicyStatement& policy) {
+Configuration::update_set_dependancy(PolicyStatement& policy)
+{
     // check if sets exist and remeber which ones are used
     VisitorSetDep setdep(_sets);
 
@@ -240,9 +242,9 @@ Configuration::update_set_dependancy(PolicyStatement& policy) {
     policy.set_dependancy(sets);
 }
 
-
 void 
-Configuration::compile_policy(const string& name) {
+Configuration::compile_policy(const string& name)
+{
     PolicyStatement& policy = _policies.find(name);
 
     // probably is a fresh / modified policy, so update dependancies with sets.
@@ -281,8 +283,8 @@ Configuration::compile_policy(const string& name) {
 }
 
 void 
-Configuration::compile_policies() {
-
+Configuration::compile_policies()
+{
     // integer overflow check
     uint32_t old_currtag = _currtag; 
 
@@ -323,7 +325,8 @@ Configuration::compile_policies() {
 }
 
 void 
-Configuration::link_sourcematch_code(const Code::Target& target) {
+Configuration::link_sourcematch_code(const Code::Target& target)
+{
     // create empty code but only with target set.
     // This will allow the += operator of Code to behave properly. [i.e. link
     // only stuff we really are interested in].
@@ -355,7 +358,8 @@ Configuration::link_sourcematch_code(const Code::Target& target) {
 }
    
 void 
-Configuration::update_tagmap(const string& protocol) {
+Configuration::update_tagmap(const string& protocol)
+{
     // delete previous tags if present
     TagMap::iterator tmi = _tagmap.find(protocol);
     if(tmi != _tagmap.end()) {
@@ -385,7 +389,8 @@ Configuration::update_tagmap(const string& protocol) {
 }
    
 void 
-Configuration::link_code() {
+Configuration::link_code()
+{
     // go through all modified targets and relink them.
     for(Code::TargetSet::iterator i = _modified_targets.begin();
 	i != _modified_targets.end(); ++i) {
@@ -419,7 +424,8 @@ Configuration::link_code() {
 }
 
 void 
-Configuration::commit(uint32_t msec) {
+Configuration::commit(uint32_t msec)
+{
     // recompile and link
     compile_policies();
     link_code();
@@ -452,7 +458,8 @@ Configuration::add_varmap(const string& protocol, const string& variable,
 }
 
 void
-Configuration::set_filter_manager(FilterManagerBase& fm) { 
+Configuration::set_filter_manager(FilterManagerBase& fm)
+{ 
     // cannot reassign
     XLOG_ASSERT(!_filter_manager);
 
@@ -463,8 +470,8 @@ void
 Configuration::update_ie(const string& protocol, 
 			 const list<string>& policies, 
 			 IEMap& iemap, 
-			 PolicyList::PolicyType pt) {
-
+			 PolicyList::PolicyType pt)
+{
     // create a new policy list
     PolicyList* pl = new PolicyList(protocol,pt,_policies,_sets,_varmap);
 
@@ -493,8 +500,8 @@ Configuration::update_ie(const string& protocol,
 void 
 Configuration::link_code(const Code::Target& target, 
 			 IEMap& iemap, 
-			 CodeMap& codemap) {
-    
+			 CodeMap& codemap)
+{
     // find the policy list for the target
     IEMap::iterator i = iemap.find(target.protocol);
 
@@ -524,9 +531,9 @@ Configuration::link_code(const Code::Target& target,
 	codemap[target.protocol] = code;
 }
     
-    
 string 
-Configuration::codemap_str(CodeMap& cm) {
+Configuration::codemap_str(CodeMap& cm)
+{
     string ret = "";
     for(CodeMap::iterator i = cm.begin();
 	i != cm.end(); ++i) {

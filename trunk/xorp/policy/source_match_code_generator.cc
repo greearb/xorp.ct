@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.2 2005/03/25 02:54:09 pavlin Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.3 2005/07/01 22:54:34 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -24,28 +25,35 @@ SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart) :
 {
 }
 
-
 const Element* 
-SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy) {
+SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
+{
     PolicyStatement::TermContainer& terms = policy.terms();
 
     PolicyStatement::TermContainer::iterator i;
 
     // go through all the terms
-    for(i = terms.begin(); i != terms.end(); ++i) {
+    for (i = terms.begin(); i != terms.end(); ++i) {
 	// reset code and sets
 	_os.str("");
 	_code._sets.clear();
 
-	(i->second)->accept(*this);
+	Term* term = i->second;
+	// make sure the source of the term has something [non empty source]
+	if (term->source_nodes().size()) {
+	    term->accept(*this);
 
-	// term may be for a new target, so deal with that.
-	addTerm(policy.name());
+	    // term may be for a new target, so deal with that.
+	    addTerm(policy.name());
+	}
+	else {
+	    _tags.push_back(Taginfo(false, _currtag));
+	}
     }
 
     // mark the end for all policies
-    for(CodeMap::iterator i = _codes.begin();
-	i != _codes.end(); ++i) {
+    for (CodeMap::iterator i = _codes.begin();
+ 	 i != _codes.end(); ++i) {
 
         Code* c = (*i).second;
         c->_code += "POLICY_END\n";
@@ -57,7 +65,8 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy) {
 }
 
 void 
-SourceMatchCodeGenerator::addTerm(const string& pname) {
+SourceMatchCodeGenerator::addTerm(const string& pname)
+{
     // copy the code for the term
     Code* term = new Code();
 
@@ -69,7 +78,7 @@ SourceMatchCodeGenerator::addTerm(const string& pname) {
     CodeMap::iterator i = _codes.find(_protocol);
 
     // if so link it
-    if(i != _codes.end()) {
+    if (i != _codes.end()) {
 	Code* existing = (*i).second;
 
 	// link "raw" code
@@ -86,7 +95,8 @@ SourceMatchCodeGenerator::addTerm(const string& pname) {
 }
 
 const Element* 
-SourceMatchCodeGenerator::visit_term(Term& term) {
+SourceMatchCodeGenerator::visit_term(Term& term)
+{
     Term::Nodes& source = term.source_nodes();
 
     Term::Nodes::iterator i;
@@ -127,6 +137,8 @@ SourceMatchCodeGenerator::visit_term(Term& term) {
 
     _os << "TERM_END\n";
 
+    _tags.push_back(Taginfo(true, _currtag));
+
     // FIXME: integer overflow
     _currtag++;
 
@@ -134,7 +146,8 @@ SourceMatchCodeGenerator::visit_term(Term& term) {
 }
 
 const Element* 
-SourceMatchCodeGenerator::visit_proto(NodeProto& node) {
+SourceMatchCodeGenerator::visit_proto(NodeProto& node)
+{
     // check for protocol redifinition
     if(_protocol != "") {
 	ostringstream err; 
@@ -147,10 +160,22 @@ SourceMatchCodeGenerator::visit_proto(NodeProto& node) {
     _protocol = node.proto();
 
     return NULL;
-
 }
 
 vector<Code*>& 
-SourceMatchCodeGenerator::codes() { 
+SourceMatchCodeGenerator::codes()
+{ 
     return _codes_vect; 
+}
+
+const SourceMatchCodeGenerator::Tags&
+SourceMatchCodeGenerator::tags() const
+{
+    return _tags;
+}
+
+uint32_t
+SourceMatchCodeGenerator::next_tag() const
+{
+    return _currtag;
 }

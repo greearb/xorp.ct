@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.2 2005/03/25 02:54:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.3 2005/07/01 22:54:34 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -57,7 +57,7 @@ PolicyTarget::shutdown()
 
 
 void
-PolicyTarget::create_term(const string& policy, const uint32_t& order,
+PolicyTarget::create_term(const string& policy, const uint64_t& order,
 			  const string& term)
 {
     _conf.create_term(policy, order, term);
@@ -73,7 +73,7 @@ void
 PolicyTarget::update_term_block(const string& policy,
 				const string& term,
 				const uint32_t& block,
-				const uint32_t& order,
+				const uint64_t& order,
 				const string& variable,
 				const string& op,
 				const string& arg)

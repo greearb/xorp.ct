@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.2 2004/09/18 00:28:45 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.3 2005/07/01 22:55:09 abittau Exp $ */
 
 /**
  * Policy manager XRL interface.
@@ -13,7 +13,7 @@ interface policy/0.1 {
 	 * @param order position of term.
 	 * @param term the name of the term.
 	 */
-	create_term ? policy:txt & order:u32 & term:txt
+	create_term ? policy:txt & order:txt & term:txt
 
 	/**
 	 * Delete a term in a policy.
@@ -37,7 +37,7 @@ interface policy/0.1 {
 	 * @param op specific operation to perform on variable.
 	 * @param arg the argument to the operator.
 	 */
-	update_term_block ? policy:txt & term:txt & block:u32 & order:u32 \
+	update_term_block ? policy:txt & term:txt & block:u32 & order:txt \
 			  & variable:txt & op:txt & arg:txt
 	
 	/**

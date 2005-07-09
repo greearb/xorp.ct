@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/export_code_generator.hh,v 1.1 2004/09/17 13:48:48 abittau Exp $
+// $XORP: xorp/policy/export_code_generator.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
 
 #ifndef __POLICY_EXPORT_CODE_GENERATOR_HH__
 #define __POLICY_EXPORT_CODE_GENERATOR_HH__
 
 #include "code_generator.hh"
+#include "source_match_code_generator.hh"
 
 /**
  * @short Generates export filter code from a node structure.
@@ -31,20 +33,16 @@ class ExportCodeGenerator : public CodeGenerator {
 public:
     /**
      * @param proto Protocol for which code will be generated.
-     * @param tagstart The first policy tag to use. Tags are incremental.
+     * @param t information on which tags should be used.
      */
-    ExportCodeGenerator(const string& proto, uint32_t tagstart);
+    ExportCodeGenerator(const string& proto, 
+			const SourceMatchCodeGenerator::Tags& t);
 
     const Element* visit_term(Term& term);
 
-    /**
-     * @return The current policy-tag. Which is 1 + last tag used.
-     *
-     */
-    uint32_t currtag();
-
 private:
-    uint32_t _currtag;
+    const SourceMatchCodeGenerator::Tags& _tags;
+    SourceMatchCodeGenerator::Tags::const_iterator _tags_iter;
 };
 
 #endif // __POLICY_EXPORT_CODE_GENERATOR_HH__

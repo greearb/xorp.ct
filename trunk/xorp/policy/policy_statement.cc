@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.2 2005/03/25 02:54:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -33,7 +33,7 @@ PolicyStatement::~PolicyStatement()
 }
    
 void 
-PolicyStatement::add_term(uint32_t order, Term* term)
+PolicyStatement::add_term(uint64_t order, Term* term)
 {
     if(_terms.find(order) != _terms.end()) {
 	throw PolicyException("Term already present in position: " +

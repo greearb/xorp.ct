@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.16 2005/03/09 22:50:40 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.17 2005/07/08 02:06:19 abittau Exp $ */
 
 protocols {
     static {
@@ -59,9 +59,6 @@ protocols {
 }
 
 policy {
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=network4&type:txt=ipv4net&access:txt=r";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=metric&type:txt=u32&access:txt=rw";
-
     policy-statement @: txt {
         term @: txt {
             source {
@@ -319,12 +316,15 @@ protocols {
 }
 
 policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=network4&type:txt=ipv4net&access:txt=r";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=metric&type:txt=u32&access:txt=rw";
+
     policy-statement @: txt {
 	term @: txt {
 	    source {
 		metric {
-		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=metric&op:txt=$(<>)&arg:txt=$(@)";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=metric&op:txt=$(<>)&arg:txt=$(@)";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 	    }
 	}

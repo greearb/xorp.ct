@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.19 2005/03/09 22:50:40 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.20 2005/07/05 21:37:27 zec Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -217,4 +217,10 @@ protocols {
         }
 */
     }
+}
+
+policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=network4&type:txt=ipv4net&access:txt=r";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=metric&type:txt=u32&access:txt=rw";
+
 }

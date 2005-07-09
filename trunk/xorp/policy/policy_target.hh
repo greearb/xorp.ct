@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.2 2005/03/25 02:54:08 pavlin Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.3 2005/07/01 22:54:34 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -60,7 +60,7 @@ public:
      * @param order position of term.
      * @param term name of term to create.
      */
-    void create_term(const string& policy, const uint32_t& order,
+    void create_term(const string& policy, const uint64_t& order,
 		     const string& term);
 
     /**
@@ -89,7 +89,7 @@ public:
     void update_term_block(const string& policy,
 			   const string& term,
 			   const uint32_t& block,
-			   const uint32_t& order,
+			   const uint64_t& order,
 			   const string& variable,
 			   const string& op,
 			   const string& arg);

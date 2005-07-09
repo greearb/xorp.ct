@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/source_match_code_generator.hh,v 1.1 2004/09/17 13:48:51 abittau Exp $
+// $XORP: xorp/policy/source_match_code_generator.hh,v 1.2 2005/03/25 02:54:09 pavlin Exp $
 
 #ifndef __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
 #define __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
@@ -33,6 +33,11 @@
  */
 class SourceMatchCodeGenerator : public CodeGenerator {
 public:
+    // bool == tag used
+    // uint32_t actual tag
+    typedef pair<bool, uint32_t> Taginfo;
+    typedef vector<Taginfo> Tags;
+
     /**
      * @short Exception thrown if no protocol was specified in source block.
      */
@@ -71,6 +76,20 @@ public:
      */
     vector<Code*>& codes();
 
+    /**
+     * The source match code generator will map source blocks to tags.  If a
+     * source block is empty, a tag will not be used.
+     *
+     * @return information about tags used.
+     */
+    const Tags& tags() const;
+
+    /**
+     * @return The next available policy tag.
+     *
+     */
+    uint32_t next_tag() const;
+
 private:
     typedef map<string,Code*> CodeMap;
     
@@ -81,10 +100,6 @@ private:
      */
     void addTerm(const string& pname);
 
-
-
-
-
     uint32_t _currtag;
     string _protocol;
 
@@ -92,6 +107,8 @@ private:
 
     // FIXME: who deletes these on exception ?
     vector<Code*> _codes_vect; 
+
+    Tags _tags;
 
     // not impl
     SourceMatchCodeGenerator(const SourceMatchCodeGenerator&);

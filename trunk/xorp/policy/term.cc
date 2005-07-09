@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.7 2005/07/01 22:54:34 abittau Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.8 2005/07/08 02:06:21 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -44,7 +44,7 @@ Term::~Term()
 }
 
 void
-Term::set_block(const uint32_t& block, const uint32_t& order,
+Term::set_block(const uint32_t& block, const uint64_t& order,
 		const string& variable, const string& op, const string& arg)
 {
     if (block >= LAST_BLOCK) {
@@ -103,7 +103,7 @@ Term::set_block(const uint32_t& block, const uint32_t& order,
 }
 
 void
-Term::del_block(const uint32_t& block, const uint32_t& order)
+Term::del_block(const uint32_t& block, const uint64_t& order)
 {
     XLOG_ASSERT (block < LAST_BLOCK);
 

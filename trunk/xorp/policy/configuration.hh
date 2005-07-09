@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,21 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.2 2005/03/25 02:54:06 pavlin Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.3 2005/07/01 22:54:33 abittau Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
 
 #include "policy/common/policy_exception.hh"
-
 #include "process_watch_base.hh"
 #include "set_map.hh"
 #include "policy_map.hh"
 #include "policy_list.hh"
-
 #include "filter_manager_base.hh"
 #include "var_map.hh"
-
 
 /**
  * @short Class that contains all configuration and generated code state.
@@ -86,7 +84,7 @@ public:
     void update_term_block(const string& policy,
                            const string& term,
                            const uint32_t& block,
-                           const uint32_t& order,
+                           const uint64_t& order,
                            const string& variable,
                            const string& op,
                            const string& arg);
@@ -101,7 +99,7 @@ public:
      * @param order position of term.
      * @param term term name which should be created.
      */
-    void create_term(const string& policy, const uint32_t& order, 
+    void create_term(const string& policy, const uint64_t& order, 
 		     const string& term);
   
     /**
@@ -303,8 +301,6 @@ private:
     
     string codemap_str(CodeMap& cm);
 
-
-
     PolicyMap _policies;
 
     IEMap _imports;
@@ -319,13 +315,11 @@ private:
 
     ElementFactory _ef;
 
-
     CodeMap _import_filters;
     CodeMap _sourcematch_filters;
     CodeMap _export_filters;
 
     uint32_t _currtag;
-
 
     TagMap _tagmap;
 
@@ -333,7 +327,6 @@ private:
 
     // do not delete
     FilterManagerBase* _filter_manager;
-
 
     // not impl
     Configuration(const Configuration&);

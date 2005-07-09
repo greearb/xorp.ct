@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/policy_bgp.tp,v 1.1 2005/07/08 02:06:19 abittau Exp $ */
 
 /* XXX this file should be merged into bgp.tp once there is a mechanism of
  * assuring that "policy.tp" is loaded before bgp.tp... or at least checked
@@ -77,124 +77,124 @@ policy {
         term @: txt {
             source {
 		nexthop4 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=nexthop4&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=nexthop4&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		nexthop6 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=nexthop6&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=nexthop6&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		aspath {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=aspath&op:txt=REGEX&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=aspath&op:txt=REGEX&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		community {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=community&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=community&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		neighbor {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=neighbor&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=neighbor&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		origin {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=origin&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=origin&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		med {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=med&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=med&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		localpref {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=localpref&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=localpref&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
             } /* source */
 
 	    dest {
 		protocol {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=protocol&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=protocol&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		network4 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=network4&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=network4&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		network6 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=network6&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=network6&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		nexthop4 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=nexthop4&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=nexthop4&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		nexthop6 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=nexthop6&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=nexthop6&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		aspath {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=aspath&op:txt=REGEX&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=aspath&op:txt=REGEX&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		community {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=community&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=community&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		neighbor {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=neighbor&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=neighbor&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		origin {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=origin&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=origin&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		med {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=med&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=med&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		localpref {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=localpref&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=localpref&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 	    } /* dest */
 
 	    action {
 		nexthop4 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=nexthop4&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=nexthop4&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		nexthop6 {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=nexthop6&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=nexthop6&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 
 		aspath {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=aspath&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=aspath&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		community {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=community&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=community&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		
 		origin {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=origin&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=origin&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		med {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=med&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=med&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 		localpref {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=localpref&op:txt=$(<>)&arg:txt=$(@)";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:u32=$(#)&variable:txt=&op:txt=&arg:txt=";
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=localpref&op:txt=$(<>)&arg:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&variable:txt=&op:txt=&arg:txt=";
 		}
 	    } /* action */
         } /* term */

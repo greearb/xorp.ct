@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.5 2005/03/25 02:54:10 pavlin Exp $
+// $XORP: xorp/policy/term.hh,v 1.6 2005/07/01 22:54:34 abittau Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
@@ -34,7 +34,7 @@ class Term {
 public:
     // the integer is the "line number", the node is the parsed structure [AST]
     // of the statement(s) in that line.
-    typedef map<uint32_t, Node*> Nodes;
+    typedef map<uint64_t, Node*> Nodes;
 
     /**
      * @short Exception thrown on a syntax error while parsing configuration.
@@ -64,7 +64,7 @@ public:
      * @param op specific operation to perform on variable.
      * @param arg the argument to the operator.
      */
-    void set_block(const uint32_t& block, const uint32_t& order, 
+    void set_block(const uint32_t& block, const uint64_t& order, 
 		   const string& variable, const string& op, const string& arg);
 
     /**
@@ -73,7 +73,7 @@ public:
      * @param block the block to update (0:source, 1:dest, 2:action).
      * @param order numerical position (local) of statement.
      */
-    void del_block(const uint32_t& block, const uint32_t& order); 
+    void del_block(const uint32_t& block, const uint64_t& order); 
 
     /**
      * Visitor implementation.

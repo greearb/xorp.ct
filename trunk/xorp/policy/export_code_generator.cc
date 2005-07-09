@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,33 +13,46 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.2 2005/03/25 02:54:06 pavlin Exp $"
+#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
+#include "libxorp/xlog.h"
 #include "export_code_generator.hh"
 
 ExportCodeGenerator::ExportCodeGenerator(const string& proto, 
-					 uint32_t tagstart) : 
-	CodeGenerator(proto, filter::EXPORT), _currtag(tagstart) {
+					 const SourceMatchCodeGenerator::Tags& t
+					 ) : 
+	CodeGenerator(proto, filter::EXPORT), _tags(t)
+{
+    _tags_iter = _tags.begin();
 }
 
 const Element* 
-ExportCodeGenerator::visit_term(Term& term) {
+ExportCodeGenerator::visit_term(Term& term)
+{
+    XLOG_ASSERT(_tags_iter != _tags.end());
+
     // ignore source [done by source match]
     Term::Nodes& dest = term.dest_nodes();
     Term::Nodes& actions = term.action_nodes();
 
     Term::Nodes::iterator i;
 
-    // tags are linear.. for each term, match the tag in the source block.
     _os << "TERM_START " << term.name() << endl ;
 
-    _os << "LOAD policytags\n";
-    _os << "PUSH u32 " << _currtag << endl;
-    _os << "<=\n";
-    _os << "ONFALSE_EXIT" << endl;
+    // make sure source block was not empty:
+    // tags are linear.. for each term, match the tag in the source block.
+    const SourceMatchCodeGenerator::Taginfo& ti = *_tags_iter;
+    if (ti.first) {
+        _os << "LOAD policytags\n";
+        _os << "PUSH u32 " << (ti.second) << endl;
+        _os << "<=\n";
+        _os << "ONFALSE_EXIT" << endl;
+    
+	// update tags used by the code
+	_code._tags.insert(ti.second);
+    }
 
     // do dest block
     for(i = dest.begin(); i != dest.end(); ++i) {
@@ -53,15 +67,8 @@ ExportCodeGenerator::visit_term(Term& term) {
 
     _os << "TERM_END\n";
 
-    // update tags used by the code
-    _code._tags.insert(_currtag);
+    // go to next tag information
+    ++_tags_iter;
 
-    // FIXME: integer overflow hopefully will never occur.
-    _currtag++;
     return NULL;
 }
-
-uint32_t 
-ExportCodeGenerator::currtag() { 
-    return _currtag; 
-} 

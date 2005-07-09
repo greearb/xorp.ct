@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,30 +13,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.2 2005/03/25 02:54:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.3 2005/07/01 22:54:35 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "visitor_semantic.hh"
-
 #include <sstream>
 
 VisitorSemantic::VisitorSemantic(SemanticVarRW& varrw, 
 				 SetMap& setmap,
 				 const string& protocol, 
 				 PolicyType ptype) : 
-		
 		_varrw(varrw), _setmap(setmap), 
 		_protocol(protocol), _ptype(ptype) 
-
 {
 }
 
-
-    
 const Element* 
-VisitorSemantic::visit(PolicyStatement& policy) {
+VisitorSemantic::visit(PolicyStatement& policy)
+{
     PolicyStatement::TermContainer& terms = policy.terms();
 
     PolicyStatement::TermContainer::iterator i;
@@ -51,7 +47,8 @@ VisitorSemantic::visit(PolicyStatement& policy) {
 }
 
 const Element* 
-VisitorSemantic::visit(Term& term) {
+VisitorSemantic::visit(Term& term)
+{
     Term::Nodes& source = term.source_nodes();
     Term::Nodes& dest = term.dest_nodes();
     Term::Nodes& actions = term.action_nodes();
@@ -64,48 +61,52 @@ VisitorSemantic::visit(Term& term) {
     _varrw.set_protocol(_protocol);
 
     // go through the source block
-    for(i = source.begin(); i != source.end(); ++i) {
+    bool empty_source = true;
+    for (i = source.begin(); i != source.end(); ++i) {
         (i->second)->accept(*this);
+	empty_source = false;
     }
 
     // if it was an export policy maybe varrw was switched to some other
     // protocol during source match, so replace it with original protocol.
     _varrw.set_protocol(_protocol);
 
-
     // if it is an export policy, a source protocol must be specified [XXX: need
     // to fix this]
-    if(_ptype == EXPORT && _current_protocol == "") {
-	string err = "No protocol specified in source match of export policy";
+    if (_ptype == EXPORT && _current_protocol == "") {
+	// Currently, allow empty source blocks... which means:
+	// if something manages to get to the export filter, then match it.
+	if (!empty_source) {
+	    string err = "No protocol specified in source match of export policy";
 
-	err += " in term: " + term.name();
+	    err += " in term: " + term.name();
 
-	throw sem_error(err);
+	    throw sem_error(err);
+	}
     }
 
     // import policies should not have dest blocks
-    if(_ptype == IMPORT && !(dest.empty())) {
+    if (_ptype == IMPORT && !(dest.empty())) {
 	throw sem_error("Invalid use of dest in import policy in term " + 
 		       term.name());
     }
 
     // check dest block
-    for(i = dest.begin(); i != dest.end(); ++i) {
-        (i->second)->accept(*this);
+    for (i = dest.begin(); i != dest.end(); ++i) {
+         (i->second)->accept(*this);
 
     }
 
     // check actions
-    for(i = actions.begin(); i != actions.end(); ++i) {
-        (i->second)->accept(*this);
+    for (i = actions.begin(); i != actions.end(); ++i) {
+         (i->second)->accept(*this);
     }
     return NULL;
 }
     
-
-
 const Element* 
-VisitorSemantic::visit(NodeUn& node) {
+VisitorSemantic::visit(NodeUn& node)
+{
     // check argument
     const Element* arg = node.node().accept(*this);
 
@@ -126,9 +127,9 @@ VisitorSemantic::visit(NodeUn& node) {
     }
 }
 
-
 const Element* 
-VisitorSemantic::visit(NodeBin& node) {
+VisitorSemantic::visit(NodeBin& node)
+{
     // check arguments
     const Element* left = node.left().accept(*this);
     const Element* right = node.right().accept(*this);
@@ -150,9 +151,9 @@ VisitorSemantic::visit(NodeBin& node) {
     }
 }
 
-    
 const Element* 
-VisitorSemantic::visit(NodeAssign& node) {
+VisitorSemantic::visit(NodeAssign& node)
+{
     // check argument
     const Element* rvalue = node.rvalue().accept(*this);
 
@@ -169,9 +170,9 @@ VisitorSemantic::visit(NodeAssign& node) {
     return NULL;
 }
 
-
 const Element* 
-VisitorSemantic::visit(NodeVar& node) {
+VisitorSemantic::visit(NodeVar& node)
+{
     // try reading a variable
     try {
     return &_varrw.read(node.val());
@@ -185,7 +186,8 @@ VisitorSemantic::visit(NodeVar& node) {
 }
     
 const Element* 
-VisitorSemantic::visit(NodeSet& node) {
+VisitorSemantic::visit(NodeSet& node)
+{
     // try getting a set [setdep should have caught there errors]
     try {
 	const Element& e = _setmap.getSet(node.setid());
@@ -200,12 +202,14 @@ VisitorSemantic::visit(NodeSet& node) {
 }
 
 const Element* 
-VisitorSemantic::visit(NodeElem& node) {
+VisitorSemantic::visit(NodeElem& node)
+{
     return &node.val();
 }
 
 const Element* 
-VisitorSemantic::visit(NodeRegex& node) {
+VisitorSemantic::visit(NodeRegex& node)
+{
     // check arg
     node.arg().accept(*this);
 
@@ -230,17 +234,20 @@ VisitorSemantic::visit(NodeRegex& node) {
 }
 
 const Element* 
-VisitorSemantic::visit(NodeAccept& /* node */) {
+VisitorSemantic::visit(NodeAccept& /* node */)
+{
     return NULL;
 }
 
 const Element* 
-VisitorSemantic::visit(NodeReject& /* node */) {
+VisitorSemantic::visit(NodeReject& /* node */)
+{
     return NULL;
 }
 
 const Element* 
-VisitorSemantic::visit(NodeProto& node) {
+VisitorSemantic::visit(NodeProto& node)
+{
     ostringstream err;
 
     // import policies may not use protocol directive

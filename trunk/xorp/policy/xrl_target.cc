@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.2 2005/03/25 02:54:11 pavlin Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.3 2005/07/01 22:54:35 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -75,11 +75,12 @@ XrlPolicyTarget::common_0_1_shutdown()
 
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
-					const uint32_t& order,
+					const string&   order,
 				        const string&   term)
 {
     try {
-	_policy_target.create_term(policy, order, term);
+	uint64_t o = strtoll(order.c_str(), NULL, 10);
+	_policy_target.create_term(policy, o, term);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("create_term failed: " + e.str());
     }
@@ -104,13 +105,14 @@ XrlCmdError
 XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
 					      const string&   term,
 					      const uint32_t& block,
-					      const uint32_t& order,
+					      const string&   order,
 					      const string&   variable,
 					      const string&   op,
 					      const string&   arg)
 {
     try {
-	_policy_target.update_term_block(policy, term, block, order,
+	uint64_t o = strtoll(order.c_str(), NULL, 10);
+	_policy_target.update_term_block(policy, term, block, o,
 					 variable, op, arg);
     } catch(const PolicyException& e) {
         return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
