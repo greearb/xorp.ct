@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.12 2005/07/08 02:06:20 abittau Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.13 2005/07/08 07:10:04 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -102,19 +102,12 @@ public:
     DummyFinder() : _messenger(0) {}
 
     virtual ~DummyFinder() {
-	//
-	// XXX TODO: something strange happens here... calling of a pure
-	// virtual function or something.  Need to fix and then uncomment.
-	// It shouldn't be too much a problem if it's commented as DummyFinder
-	// is used only in the test and is destroyed at the end of the test.
-	// Thus there is no real memory leak, as memory would be free once
-	// the process exits [which would occur right after this destructor
-	// anyway].
-	//
-#if 0
-	if (_messenger)
+	if (_messenger) {
+	    // XXX: unhook the manager, because it may be gone
+	    _messenger->unhook_manager();
 	    delete _messenger;
-#endif
+	}
+
     }
 
     XrlCmdMap& commands() { return _commands; }
