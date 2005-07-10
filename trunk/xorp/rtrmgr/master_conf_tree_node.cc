@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.12 2005/07/03 21:06:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.13 2005/07/08 20:51:16 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -431,6 +431,37 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			//
 			// XLOG_ASSERT(do_commit == false);
 			result = c_format("Bad value for \"%s\": %s; ",
+					  path().c_str(), errmsg.c_str());
+			result += "No changes have been committed. ";
+			result += "Correct this error and try again.";
+			XLOG_WARNING("%s\n", result.c_str());
+			return false;
+		    }
+		}
+		/* check that the operator is OK */
+		base_cmd = 
+		    _template_tree_node->const_command("%allow-operator");
+		if (base_cmd == NULL) {
+		    /* no explicit command, so only ":" is allowed */
+		    if (_operator != OP_NONE && _operator != OP_ASSIGN) {
+			result = c_format("Bad operator for \"%s\": operator %s was specified, only ':' is allowed\n",
+					  path().c_str(), 
+					  operator_to_str(_operator).c_str());
+			result += "No changes have been committed. ";
+			result += "Correct this error and try again.";
+			XLOG_WARNING("%s\n", result.c_str());
+			return false;
+		    }
+		} else {
+		    const AllowCommand* allow_cmd;
+		    debug_msg("found ALLOW command: %s\n",
+			      cmd->str().c_str());
+		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
+		    XLOG_ASSERT(allow_cmd != NULL);
+		    string errmsg;
+		    if (allow_cmd->verify_variable(*this, errmsg)
+			!= true) {
+			result = c_format("Bad operator for \"%s\": %s; ",
 					  path().c_str(), errmsg.c_str());
 			result += "No changes have been committed. ";
 			result += "Correct this error and try again.";
