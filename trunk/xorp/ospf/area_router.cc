@@ -244,7 +244,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	// (2) Check that the LSA's LS type is known.
 	// Both checks already performed in the packet/LSA decoding process.
 
-	// (3) In stub areas discard AS-external-LSA's (LS type = 5).
+	// (3) In stub areas discard AS-external-LSA's (LS type = 5, 0x4005).
 	switch(_area_type) {
 	case OspfTypes::BORDER:
 	    break;
@@ -283,6 +283,11 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    }
 	    // (b) Flood this LSA to all of our neighbours.
 	    // RFC 2328 Section 13.3. Next step in the flooding procedure
+
+	    // If this is an AS-external-LSA send it to all area's
+	    if ((*i)->external())
+		flood_all_areas((*i));
+
 	    publish((*i), nid);
 
 	    XLOG_WARNING("TBD Section 13.3");
@@ -449,39 +454,47 @@ AreaRouter<A>::find_lsa(const Ls_request& lsr, size_t& index) const
  */
 template <typename A>
 typename AreaRouter<A>::LsaSearch
+AreaRouter<A>::compare_lsa(const Lsa_header& candidate,
+			   const Lsa_header& current) const
+{
+    if (current.get_ls_sequence_number() > candidate.get_ls_sequence_number())
+	return OLDER;
+    if (current.get_ls_sequence_number() < candidate.get_ls_sequence_number())
+	return NEWER;
+
+    if (current.get_ls_checksum() > candidate.get_ls_checksum())
+	return OLDER;
+    if (current.get_ls_checksum() < candidate.get_ls_checksum())
+	return NEWER;
+
+    if (current.get_ls_age() == OspfTypes::MaxAge)
+	return OLDER;
+    if (candidate.get_ls_age() == OspfTypes::MaxAge)
+	return NEWER;
+	
+    if(abs(current.get_ls_age() - candidate.get_ls_age()) > 
+       OspfTypes::MaxAgeDiff) {
+	return candidate.get_ls_age() < current.get_ls_age() ? NEWER : OLDER;
+    }
+	
+    // These two LSAs are identical.
+    return EQUIVALENT;
+}
+
+template <typename A>
+typename AreaRouter<A>::LsaSearch
 AreaRouter<A>::compare_lsa(const Lsa_header& lsah, size_t& index) const
 {
     Ls_request lsr(_ospf.get_version(), lsah.get_ls_type(),
 		   lsah.get_link_state_id(), lsah.get_advertising_router());
 
     if (find_lsa(lsr, index)) {
- 	Lsa_header& dblsah = _db[index]->get_header();
-	if (dblsah.get_ls_sequence_number() > lsah.get_ls_sequence_number())
-	    return OLDER;
-	if (dblsah.get_ls_sequence_number() < lsah.get_ls_sequence_number())
-	    return NEWER;
-
-	if (dblsah.get_ls_checksum() > lsah.get_ls_checksum())
-	    return OLDER;
-	if (dblsah.get_ls_checksum() < lsah.get_ls_checksum())
-	    return NEWER;
-
 	// Update the age before checking this field.
 	TimeVal now;
 	_ospf.get_eventloop().current_time(now);
 	_db[index]->update_age(now);
-	if (dblsah.get_ls_age() == OspfTypes::MaxAge)
-	    return OLDER;
-	if (lsah.get_ls_age() == OspfTypes::MaxAge)
-	    return NEWER;
-	
-	if(abs(dblsah.get_ls_age() - lsah.get_ls_age()) > 
-	   OspfTypes::MaxAgeDiff) {
-	    return lsah.get_ls_age() < dblsah.get_ls_age() ? NEWER : OLDER;
-	}
-	
-	// These two LSAs are identical.
-	return EQUIVALENT;
+
+	return compare_lsa(lsah, _db[index]->get_header());
     }
 
     return NOMATCH;
@@ -708,6 +721,22 @@ AreaRouter<A>::push_lsas()
 		XLOG_FATAL("Unable to push LSAs");
 	}
     }
+}
+
+template <typename A>
+void
+AreaRouter<A>::flood_all_areas(Lsa::LsaRef lsar)
+{
+    debug_msg("Flood all areas: %s\n", cstring(*lsar));
+
+    XLOG_UNFINISHED();
+}
+
+template <typename A>
+void
+AreaRouter<A>::push_all_areas()
+{
+    XLOG_WARNING("TBD push all areas");
 }
 
 template <typename A>

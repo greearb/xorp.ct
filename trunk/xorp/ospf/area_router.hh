@@ -102,6 +102,17 @@ class AreaRouter {
     };
 
     /**
+     * Compare two LSAs.
+     *
+     * @param candidate offered LSA
+     * @param current equivalent to the database copy.
+     *
+     * @return LsaSearch that describes the type of match.
+     */
+    LsaSearch compare_lsa(const Lsa_header& candidate,
+			  const Lsa_header& current) const;
+
+    /**
      * Compare this LSA to 
      *
      * @param Lsa_header that is being sought.
@@ -273,6 +284,16 @@ class AreaRouter {
      * Send (push) any queued LSAs.
      */
     void push_lsas();
+
+    /**
+     * Send this LSA to all area's.
+     */
+    void flood_all_areas(Lsa::LsaRef lsar);
+
+    /**
+     * Notify all areas this is the last of the all areas LSAs.
+     */
+    void push_all_areas();
 
     /**
      *
