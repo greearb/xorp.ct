@@ -2410,14 +2410,14 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 		break;
 	    }
 
-	    // Deal with external-LSAs.
+	    // Deal with AS-external-LSA's (LS type = 5, 0x4005).
 	    switch(_peer.get_area_type()) {
 	    case OspfTypes::BORDER:
 		break;
 	    case OspfTypes::STUB:
-		if (ls_type == 5) {
+		if (ls_type == 5 || ls_type == 0x4005) {
 		    XLOG_TRACE(_ospf.trace()._input_errors,
-			       "external-LSA not allowed in STUB area %s",
+			       "AS-external-LSA not allowed in STUB area %s",
 			       cstring(*dd));
 		    event_sequence_number_mismatch();
 		    return;
@@ -2586,6 +2586,29 @@ template <typename A>
 bool
 Neighbour<A>::queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid)
 {
+    // RFC 2328 Section 13.3.  Next step in the flooding procedure
+
+    // (1) 
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+	// (a) Neighbour is in too low a state so return.
+	return true;
+    case Exchange:
+    case Loading:
+	// (b) See if this LSA is on the link state request list.
+	
+	break;
+    case Full:
+
+	break;
+    }
+    
+
+
     // If the neighbour IDs match then this is the neighbour that this
     // LSA was originally received on.
     if (_neighbourid == nid)
