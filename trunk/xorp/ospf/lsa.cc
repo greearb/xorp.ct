@@ -290,7 +290,7 @@ LsaDecoder::register_decoder(Lsa *lsa)
 }
 
 Lsa::LsaRef
-LsaDecoder::decode(uint8_t *ptr, size_t& len) throw(BadPacket)
+LsaDecoder::decode(uint8_t *ptr, size_t& len) const throw(BadPacket)
 {
     OspfTypes::Version version = get_version();
     Lsa_header header(version);
@@ -306,7 +306,7 @@ LsaDecoder::decode(uint8_t *ptr, size_t& len) throw(BadPacket)
     // actual LSA code. Could consider passing in the already decoded header.
     header.decode_inline(ptr);
 
-    map<uint16_t, Lsa *>::iterator i;
+    map<uint16_t, Lsa *>::const_iterator i;
     uint16_t type = header.get_ls_type();
     i = _lsa_decoders.find(type);
     if (i == _lsa_decoders.end())

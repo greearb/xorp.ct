@@ -439,7 +439,7 @@ class LsaDecoder {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    Lsa::LsaRef decode(uint8_t *ptr, size_t& len) throw(BadPacket);
+    Lsa::LsaRef decode(uint8_t *ptr, size_t& len) const throw(BadPacket);
 
     /**
      * @return The length of the smallest LSA that can be decoded.
@@ -451,12 +451,23 @@ class LsaDecoder {
     /**
      * Validate type field.
      * If we know how to decode an LSA of this type we must know how
-     * to decode it.
+     * to process it.
      *
-     * @return true if we know about this type os LSA.
+     * @return true if we know about this type of LSA.
      */
     bool validate(uint16_t type) const {
 	return _lsa_decoders.end() != _lsa_decoders.find(type);
+    }
+
+    /**
+     * Is an LSA of this type an AS-external-LSA?
+     *
+     * @return true if this type is an AS-external-LSA
+     */
+    bool external(uint16_t type) {
+	map<uint16_t, Lsa *>::iterator i = _lsa_decoders.find(type);
+	XLOG_ASSERT(_lsa_decoders.end() != i);
+	return i->second->external();
     }
 
     OspfTypes::Version get_version() const {

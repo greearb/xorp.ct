@@ -2332,7 +2332,6 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    negotiation_done = true;
 	}
 
-	
 	if (!dd->get_i_bit() && !dd->get_ms_bit() &&
 	    _last_dd.get_dd_seqno() == dd->get_dd_seqno() && 
 	    dd->get_router_id() < _ospf.get_router_id()) {  // Router is master
@@ -2419,7 +2418,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    case OspfTypes::BORDER:
 		break;
 	    case OspfTypes::STUB:
-		if (ls_type == 5 || ls_type == 0x4005) {
+		if (_ospf.get_lsa_decoder().external(ls_type)) {
 		    XLOG_TRACE(_ospf.trace()._input_errors,
 			       "AS-external-LSA not allowed in STUB area %s",
 			       cstring(*dd));
