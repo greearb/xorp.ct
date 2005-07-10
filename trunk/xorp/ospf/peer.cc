@@ -1804,13 +1804,17 @@ Neighbour<A>::retransmitter()
 	LinkStateRequestPacket lsrp(_ospf.get_version());
 
 	size_t lsr_len = 0;
-	list<Ls_request>::iterator i;
+	list<Lsa_header>::iterator i;
 	for (i = _ls_request_list.begin(); i != _ls_request_list.end(); i++) {
 	    if (lsrp.get_standard_header_length() +
 		Ls_request::length() + lsr_len < 
 		_peer.get_interface_mtu()) {
 		lsr_len += Ls_request::length();
-		lsrp.get_ls_request().push_back(*i);
+		lsrp.get_ls_request().
+		    push_back(Ls_request(i->get_version(),
+					 i->get_ls_type(),
+					 i->get_link_state_id(),
+					 i->get_advertising_router()));
 	    } else {
 		send_link_state_request_packet(lsrp);
 		lsrp.get_ls_request().clear();
@@ -2431,11 +2435,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    
 	    // Check to see if this is a newer LSA.
 	    if (get_area_router()->newer_lsa(*i))
-		_ls_request_list.
-		    push_back(Ls_request(i->get_version(),
-					 i->get_ls_type(),
-					 i->get_link_state_id(),
-					 i->get_advertising_router()));
+		_ls_request_list.push_back((*i));
 	}
 
 	if (_last_dd.get_ms_bit()) { // Router is slave

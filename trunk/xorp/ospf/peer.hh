@@ -763,7 +763,7 @@ class Neighbour {
     RxmtWrapper *_rxmt_wrapper;		// Wrapper to retransmiter.
 
     DataBaseHandle _database_handle;	// Handle to the Link State Database.
-    list<Ls_request> _ls_request_list;	// Link state request list.
+    list<Lsa_header> _ls_request_list;	// Link state request list.
 
     list<Lsa::LsaRef> _lsa_queue;	// Queue of LSAs waiting to be sent.
     list<Lsa::LsaRef> _lsa_rxmt;	// Unacknowledged LSAs
