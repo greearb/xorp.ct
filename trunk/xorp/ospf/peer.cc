@@ -389,6 +389,20 @@ Peer<A>::find_neighbour(A src, Packet *packet)
 
 template <typename A>
 bool
+Peer<A>::is_neighbour_DR_or_BDR(OspfTypes::NeighbourID nid) const
+{
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if ((*n)->get_neighbour_id() == nid)
+	    return (*n)->is_neighbour_DR_or_BDR();
+
+    XLOG_UNREACHABLE();
+
+    return false;
+}
+
+template <typename A>
+bool
 Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*hello));
@@ -1650,27 +1664,11 @@ Neighbour<A>::establish_adjacency_p() const
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
 	// The router itself is the Designated Router
-	if (_peer.get_candidate_id() == _peer.get_designated_router()) {
-	    become_adjacent = true;
-	    break;
-	}
 	// The router itself is the Backup Designated Router
-	if (_peer.get_candidate_id() == _peer.get_backup_designated_router()) {
-	    become_adjacent = true;
-	    break;
-	}
 	// The neighboring router is the Designated Router
-	if (get_candidate_id() == 
-	    get_hello_packet()->get_designated_router()) {
-	    become_adjacent = true;
-	    break;
-	}
 	// The neighboring router is the Backup Designated Router
-	if (get_candidate_id() == 
-	    get_hello_packet()->get_backup_designated_router()) {
+	if (is_DR_or_BDR() || is_neighbour_DR_or_BDR())
 	    become_adjacent = true;
-	    break;
-	}
 	break;
     case OspfTypes::PointToPoint:
     case OspfTypes::PointToMultiPoint:
@@ -1681,9 +1679,24 @@ Neighbour<A>::establish_adjacency_p() const
 
     return become_adjacent;
 }
+
 template <typename A>
 bool
-Neighbour<A>::is_designated_router_or_backup_designated_router() const
+Neighbour<A>::is_DR_or_BDR() const
+{
+    if (_peer.get_candidate_id() == _peer.get_designated_router())
+	return true;
+
+    if (_peer.get_candidate_id() == _peer.get_backup_designated_router())
+	return true;
+
+    return false;
+}
+
+template <typename A>
+bool
+Neighbour<A>::is_neighbour_DR_or_BDR()
+    const
 {
     if (get_candidate_id() == _peer.get_designated_router())
 	return true;
@@ -1995,7 +2008,7 @@ Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
 					 _peer.get_interface_address());
 	break;
     case OspfTypes::BROADCAST:
-	if (is_designated_router_or_backup_designated_router()) {
+	if (is_DR_or_BDR()) {
 	    transmit = new SimpleTransmit<A>(pkt,
 					     A::OSPFIGP_ROUTERS(), 
 					     _peer.get_interface_address());
@@ -2035,7 +2048,7 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
 					 _peer.get_interface_address());
 	break;
     case OspfTypes::BROADCAST:
-	if (is_designated_router_or_backup_designated_router()) {
+	if (is_DR_or_BDR()) {
 	    transmit = new SimpleTransmit<A>(pkt,
 					     A::OSPFIGP_ROUTERS(), 
 					     _peer.get_interface_address());
@@ -2657,8 +2670,9 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
     if (_peer.get_peerid() == peerid ) {
 	// (3) If this LSA arrived from the designated router or the
 	// backup designated router. Chances are high that our
-	// neightbours have received this LSA already.
-#error "This next"
+	// neighbours have received this LSA already.
+	if (_peer.is_neighbour_DR_or_BDR(nid))
+	    return true;
     }
 
     _lsa_queue.push_back(lsar);

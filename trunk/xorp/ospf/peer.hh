@@ -328,6 +328,11 @@ class Peer {
     Neighbour<A> *find_neighbour(A src, Packet *packet);
 
     /**
+     * @return true if this routers neighbour is the DR or BDR.
+     */
+    bool is_neighbour_DR_or_BDR(OspfTypes::NeighbourID nid) const;
+
+    /**
      * Process a hello packet.
      */
     bool process_hello_packet(A dst, A src, HelloPacket *hello);
@@ -689,6 +694,13 @@ class Neighbour {
     }
 
     /**
+     * Get neighbour ID our internal ID for each neighbour.
+     */
+    OspfTypes::NeighbourID get_neighbour_id() const {
+	return _neighbourid;
+    }
+
+    /**
      * Neighbours router ID.
      */
     OspfTypes::RouterID get_router_id() const { return _router_id; }
@@ -711,6 +723,11 @@ class Neighbour {
      * Get the state of this neighbour.
      */
     State get_state() const { return _state; }
+
+    /**
+     * @return true if this routers neighbour is the DR or BDR.
+     */
+    bool is_neighbour_DR_or_BDR() const;
 
     /**
      * Get a copy of the last hello packet that was received.
@@ -799,7 +816,7 @@ class Neighbour {
     /**
      * @return true if this router is the DR or BDR.
      */
-    bool is_designated_router_or_backup_designated_router() const;
+    bool is_DR_or_BDR() const;
 
     /**
      * Start the retransmit timer.
