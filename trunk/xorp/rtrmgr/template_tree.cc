@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.31 2005/06/28 20:33:25 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.32 2005/07/03 21:06:00 mjh Exp $"
 
 
 #include <glob.h>
@@ -40,6 +40,13 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     : _xorp_root_dir(xorp_root_dir),
       _verbose(verbose)
 {
+}
+
+TemplateTree::~TemplateTree()
+{
+    XLOG_ASSERT(_root_node != NULL);
+
+    delete _root_node;
 }
 
 bool 
@@ -84,7 +91,7 @@ TemplateTree::load_template_tree(const string& config_template_dir,
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	debug_msg("Loading template file %s\n", pglob.gl_pathv[i]);
 	if (!parse_file(string(pglob.gl_pathv[i]), 
-			config_template_dir,errmsg)) {
+			config_template_dir, errmsg)) {
 	    globfree(&pglob);
 	    return false;
 	}
@@ -126,14 +133,6 @@ TemplateTree::parse_file(const string& filename,
     }
     complete_template_parser();
     return true;
-}
-
-
-TemplateTree::~TemplateTree()
-{
-    XLOG_ASSERT(_root_node != NULL);
-
-    delete _root_node;
 }
 
 string
