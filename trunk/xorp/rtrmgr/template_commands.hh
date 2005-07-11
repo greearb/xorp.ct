@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.27 2005/07/09 19:47:41 mjh Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.28 2005/07/11 21:49:29 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -38,6 +38,8 @@ public:
     Action(TemplateTreeNode& template_tree_node, const list<string>& action);
     virtual ~Action() {};
 
+    enum ActionCharType { VAR, NON_VAR, QUOTE, ASSIGN };
+
     string str() const;
     TemplateTreeNode& template_tree_node() { return _template_tree_node; }
     const TemplateTreeNode& template_tree_node() const { return _template_tree_node; }
@@ -55,8 +57,6 @@ class XrlAction : public Action {
 public:
     XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
 	      const XRLdb& xrldb) throw (ParseError);
-
-    enum XrlCharType { VAR, NON_VAR, QUOTE, ASSIGN };
 
     bool expand_action(string& errmsg);
     int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,

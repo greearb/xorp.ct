@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.54 2005/07/09 19:47:41 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.55 2005/07/11 21:49:29 pavlin Exp $"
 
 
 #include <list>
@@ -348,12 +348,12 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	}
     }
 
-    debug_msg("before cleaning:\n%s\n", xrl_str.c_str());
+    debug_msg("XrlAction before cleaning:\n%s\n", xrl_str.c_str());
     //
     // Copy the XRL, omitting the "=$(VARNAME)" parts.
     // In the mean time, build the list of encountered "$(VARNAME)" variables.
     //
-    list <XrlCharType> mode_stack;
+    list<ActionCharType> mode_stack;
     mode_stack.push_front(NON_VAR);
     for (size_t i = start; i < stop; i++) {
 	switch (mode_stack.front()) {
@@ -444,7 +444,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	    break;
 	}
     }
-    debug_msg("after cleaning:\n%s\n", cleaned_xrl.c_str());
+    debug_msg("XrlAction after cleaning:\n%s\n", cleaned_xrl.c_str());
 
     if (xrldb.check_xrl_syntax(cleaned_xrl) == false) {
 	errmsg = c_format("Syntax error in module %s XRL %s: "
@@ -856,8 +856,6 @@ ProgramAction::check_program_is_valid(const list<string>& action,
     // because it may contain variable names and we don't know the values
     // of those variables yet.
     //
-    enum char_type { VAR, NON_VAR, QUOTE };
-    char_type mode = NON_VAR;
     string cleaned_program;
 
     // Trim quotes from around the program
@@ -868,12 +866,16 @@ ProgramAction::check_program_is_valid(const list<string>& action,
 	stop--;
     }
 
+    debug_msg("ProgramAction before cleaning:\n%s\n", program_str.c_str());
+
     //
     // Copy the program and perform some basic validations.
     // In the mean time, build the list of encountered "$(VARNAME)" variables.
     //
+    list<ActionCharType> mode_stack;
+    mode_stack.push_front(NON_VAR);
     for (size_t i = start; i < stop; i++) {
-	switch (mode) {
+	switch (mode_stack.front()) {
 	case VAR:
 	    if (program_str[i] == '$' || program_str[i] == '`') {
 		errmsg = c_format("Syntax error in program %s: "
@@ -881,8 +883,9 @@ ProgramAction::check_program_is_valid(const list<string>& action,
 				  program_str.c_str());
 		return false;
 	    }
-	    if (program_str[i] == ')')
-		mode = NON_VAR;
+	    if (program_str[i] == ')') {
+		mode_stack.pop_front();
+	    }
 	    break;
 	case NON_VAR:
 	    if (program_str[i] == '$') {
@@ -914,21 +917,27 @@ ProgramAction::check_program_is_valid(const list<string>& action,
 			_referred_variables.push_back(varname);
 		    }
 		}
-		mode = VAR;
+		mode_stack.push_front(VAR);
 		break;
 	    }
 	    if (program_str[i] == '`') {
-		mode = QUOTE;
+		mode_stack.push_front(QUOTE);
 		break;
 	    }
 	    cleaned_program += program_str[i];
 	    break;
 	case QUOTE:
-	    if (program_str[i] == '`')
-		mode = NON_VAR;
+	    if (program_str[i] == '`') {
+		mode_stack.pop_front();
+	    }
+	    break;
+	case ASSIGN:
+	    // XXX: not used
+	    XLOG_UNREACHABLE();
 	    break;
 	}
     }
+    debug_msg("ProgramAction after cleaning:\n%s\n", cleaned_program.c_str());
 
     if (cleaned_program.empty()) {
 	errmsg = c_format("Syntax error in program specification %s: "
