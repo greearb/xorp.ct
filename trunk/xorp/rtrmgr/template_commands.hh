@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.26 2005/07/02 02:06:07 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.27 2005/07/09 19:47:41 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -41,13 +41,13 @@ public:
     string str() const;
     TemplateTreeNode& template_tree_node() { return _template_tree_node; }
     const TemplateTreeNode& template_tree_node() const { return _template_tree_node; }
+    virtual bool expand_action(string& errmsg);
     bool check_referred_variables(string& errmsg) const;
 
 protected:
+    list<string> _action;
     list<string> _split_cmd;
     list<string> _referred_variables;
-
-private:
     TemplateTreeNode& _template_tree_node;
 };
 
@@ -58,6 +58,7 @@ public:
 
     enum XrlCharType { VAR, NON_VAR, QUOTE, ASSIGN };
 
+    bool expand_action(string& errmsg);
     int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
     template<class TreeNode> int expand_xrl_variables(const TreeNode& tn,
@@ -72,6 +73,7 @@ private:
     bool check_xrl_is_valid(const list<string>& action,
 			    const XRLdb& xrldb, string& errmsg);
 
+    const XRLdb&	_xrldb;
     string		_module_name;
     list<string>	_split_request;
     string		_request;
@@ -84,6 +86,7 @@ public:
     ProgramAction(TemplateTreeNode& template_tree_node,
 		  const list<string>& action) throw (ParseError);
 
+    bool expand_action(string& errmsg);
     int execute(const MasterConfigTreeNode&	ctn,
 		TaskManager&			task_manager,
 		TaskProgramItem::ProgramCallback program_cb) const;
@@ -129,6 +132,7 @@ public:
     set<string> affected_modules() const;
     bool affects_module(const string& module) const;
     virtual string str() const;
+    bool expand_actions(string& errmsg);
     bool check_referred_variables(string& errmsg) const;
 
 protected:

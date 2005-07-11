@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.53 2005/07/02 02:06:07 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.54 2005/07/09 19:47:41 mjh Exp $"
 
 
 #include <list>
@@ -36,7 +36,8 @@
 
 Action::Action(TemplateTreeNode& template_tree_node,
 	       const list<string>& action)
-    : _template_tree_node(template_tree_node)
+    : _action(action),
+      _template_tree_node(template_tree_node)
 {
     string cur("\n");
     enum char_type { VAR, NON_VAR, QUOTE };
@@ -125,6 +126,14 @@ Action::str() const
 }
 
 bool
+Action::expand_action(string& errmsg)
+{
+    // XXX: nothing to do in the default case
+    UNUSED(errmsg);
+    return (true);
+}
+
+bool
 Action::check_referred_variables(string& errmsg) const
 {
     list<string>::const_iterator iter;
@@ -149,22 +158,14 @@ Action::check_referred_variables(string& errmsg) const
 XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
 		     const list<string>& action, const XRLdb& xrldb)
     throw (ParseError)
-    : Action(template_tree_node, action)
+    : Action(template_tree_node, action),
+      _xrldb(xrldb)
 {
     string errmsg;
     list<string> xrl_parts = _split_cmd;
 
     debug_msg("XrlAction constructor\n");
     XLOG_ASSERT(action.front() == "xrl");
-
-    _module_name = template_tree_node.module_name();
-    if (_module_name.empty()) {
-	errmsg = "Empty module name";
-	xorp_throw(ParseError, errmsg);
-    }
-
-    if (check_xrl_is_valid(action, xrldb, errmsg) != true)
-	xorp_throw(ParseError, errmsg);
 
     // Print debug info
     {
@@ -251,6 +252,25 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
 	}
 	debug_msg("\n");
     }
+}
+
+bool
+XrlAction::expand_action(string& errmsg)
+{
+    debug_msg("XrlAction::expand_action()\n");
+    XLOG_ASSERT(_action.front() == "xrl");
+
+    _module_name = _template_tree_node.module_name();
+    if (_module_name.empty()) {
+	errmsg = c_format("Empty module name for action in template %s",
+			  _template_tree_node.path().c_str());
+	return false;
+    }
+
+    if (check_xrl_is_valid(_action, _xrldb, errmsg) != true)
+	return false;
+
+    return true;
 }
 
 bool
@@ -646,15 +666,6 @@ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
     debug_msg("ProgramAction constructor\n");
     XLOG_ASSERT(action.front() == "program");
 
-    _module_name = template_tree_node.module_name();
-    if (_module_name.empty()) {
-	errmsg = "Empty module name";
-	xorp_throw(ParseError, errmsg);
-    }
-
-    if (check_program_is_valid(action, errmsg) != true)
-	xorp_throw(ParseError, errmsg);
-
     // Print debug info
     {
 	list<string>::const_iterator si;
@@ -760,6 +771,25 @@ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
 	}
 	debug_msg("\n");
     }
+}
+
+bool
+ProgramAction::expand_action(string& errmsg)
+{
+    debug_msg("ProgramAction::expand_action()\n");
+    XLOG_ASSERT(_action.front() == "program");
+
+    _module_name = _template_tree_node.module_name();
+    if (_module_name.empty()) {
+	errmsg = c_format("Empty module name for action in template %s",
+			  _template_tree_node.path().c_str());
+	return false;
+    }
+
+    if (check_program_is_valid(_action, errmsg) != true)
+	return false;
+
+    return true;
 }
 
 void
@@ -1235,12 +1265,25 @@ Command::str() const
 }
 
 bool
+Command::expand_actions(string& errmsg)
+{
+    list<Action *>::iterator iter;
+    for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
+	Action* action = *iter;
+	if (action->expand_action(errmsg) != true)
+	    return false;
+    }
+
+    return true;
+}
+
+bool
 Command::check_referred_variables(string& errmsg) const
 {
     list<Action *>::const_iterator iter;
     for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
 	const Action* action = *iter;
-	if (! action->check_referred_variables(errmsg))
+	if (action->check_referred_variables(errmsg) != true)
 	    return false;
     }
 

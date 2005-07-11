@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.1 2004/12/11 21:29:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.2 2005/03/25 02:54:35 pavlin Exp $"
 
 
 #include <glob.h>
@@ -36,7 +36,14 @@ MasterTemplateTree::MasterTemplateTree(const string& xorp_root_dir,
 
 }
 
-bool 
+bool
+MasterTemplateTree::expand_template_tree(string& errmsg)
+{
+    // Expand the template tree
+    return root_node()->expand_template_tree(errmsg);
+}
+
+bool
 MasterTemplateTree::check_template_tree(string& errmsg)
 {
     // Verify the template tree

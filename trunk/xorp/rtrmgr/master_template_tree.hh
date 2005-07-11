@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_template_tree.hh,v 1.1 2004/12/11 21:29:57 mjh Exp $
+// $XORP: xorp/rtrmgr/master_template_tree.hh,v 1.2 2005/03/25 02:54:35 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_TEMPLATE_TREE_HH__
 #define __RTRMGR_MASTER_TEMPLATE_TREE_HH__
@@ -27,7 +27,8 @@ public:
     MasterTemplateTree(const string& xorp_root_dir,
 		       XRLdb& xrldb,
 		       bool verbose)  throw (InitError);
-    
+
+    bool expand_template_tree(string& errmsg);
     bool check_template_tree(string& errmsg);
 
     void add_cmd(char* cmd);

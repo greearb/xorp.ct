@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.21 2005/03/25 02:54:36 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.22 2005/06/17 21:15:12 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -35,6 +35,9 @@ public:
 
     void add_action(const list<string>& action,
 		    const XRLdb& xrldb) throw (ParseError);
+    bool expand_actions(string& errmsg);
+    bool check_referred_variables(string& errmsg) const;
+
     Validation* startup_validation(TaskManager& taskmgr) const;
     Validation* config_validation(TaskManager& taskmgr) const;
     Validation* ready_validation(TaskManager& taskmgr) const;

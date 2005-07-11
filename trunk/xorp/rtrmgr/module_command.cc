@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.31 2005/03/25 02:54:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.32 2005/06/17 21:15:12 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -239,6 +239,66 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
 	xorp_throw(ParseError, err);
     }
+}
+
+bool
+ModuleCommand::expand_actions(string& errmsg)
+{
+    //
+    // Expand all module-specific methods
+    //
+    if (_start_commit != NULL) {
+	if (_start_commit->expand_action(errmsg) != true)
+	    return (false);
+    }
+    if (_end_commit != NULL) {
+	if (_end_commit->expand_action(errmsg) != true)
+	    return (false);
+    }
+    if (_status_method != NULL) {
+	if (_status_method->expand_action(errmsg) != true)
+	    return (false);
+    }
+    if (_startup_method != NULL) {
+	if (_startup_method->expand_action(errmsg) != true)
+	    return (false);
+    }
+    if (_shutdown_method != NULL) {
+	if (_shutdown_method->expand_action(errmsg) != true)
+	    return (false);
+    }
+
+    return (true);
+}
+
+bool
+ModuleCommand::check_referred_variables(string& errmsg) const
+{
+    //
+    // Check all module-specific methods
+    //
+    if (_start_commit != NULL) {
+	if (_start_commit->check_referred_variables(errmsg) != true)
+	    return (false);
+    }
+    if (_end_commit != NULL) {
+	if (_end_commit->check_referred_variables(errmsg) != true)
+	    return (false);
+    }
+    if (_status_method != NULL) {
+	if (_status_method->check_referred_variables(errmsg) != true)
+	    return (false);
+    }
+    if (_startup_method != NULL) {
+	if (_startup_method->check_referred_variables(errmsg) != true)
+	    return (false);
+    }
+    if (_shutdown_method != NULL) {
+	if (_shutdown_method->check_referred_variables(errmsg) != true)
+	    return (false);
+    }
+
+    return (true);
 }
 
 Validation*
