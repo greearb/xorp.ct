@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.44 2005/07/08 20:51:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.45 2005/07/10 23:14:44 mjh Exp $"
 
 
 #include <glob.h>
@@ -104,11 +104,11 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	    _cmd_map[cmd] = command;
 	}
     } else if (cmd == "%allow-operator") {
-	printf("%%allow-operator\n");
+	debug_msg("%%allow-operator\n");
 	// If the command already exists, no need to create it again.
 	// The command action will simply be added to the existing command.
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
-	    printf("creating new AllowOperatorsCommand\n");
+	    debug_msg("creating new AllowOperatorsCommand\n");
 	    command = new AllowOperatorsCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
