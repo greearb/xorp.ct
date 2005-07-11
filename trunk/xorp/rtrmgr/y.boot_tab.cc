@@ -1,10 +1,5 @@
-#include <sys/cdefs.h>
 #ifndef lint
-#if 0
-static char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
-#else
-__IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $");
-#endif
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -14,7 +9,12 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define YYEMPTY -1
 #define yyclearin (yychar=(YYEMPTY))
 #define yyerrok (yyerrflag=0)
-#define YYRECOVERING (yyerrflag!=0)
+#define YYRECOVERING() (yyerrflag!=0)
+#if defined(__cplusplus) || __STDC__
+static int yygrowstack(void);
+#else
+static int yygrowstack();
+#endif
 #define yyparse bootparse
 #define yylex bootlex
 #define yyerror booterror
@@ -25,11 +25,9 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define yynerrs bootnerrs
 #define yyerrflag booterrflag
 #define yyss bootss
-#define yysslim bootsslim
 #define yyssp bootssp
 #define yyvs bootvs
 #define yyvsp bootvsp
-#define yystacksize bootstacksize
 #define yylhs bootlhs
 #define yylen bootlen
 #define yydefred bootdefred
@@ -41,6 +39,8 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define yycheck bootcheck
 #define yyname bootname
 #define yyrule bootrule
+#define yysslim bootsslim
+#define yystacksize bootstacksize
 #define YYPREFIX "boot"
 #line 2 "boot.yy"
 #define YYSTYPE char*
@@ -61,7 +61,8 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim
-#line 65 "y.boot_tab.c"
+#line 66 "y.boot_tab.c"
+#define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
 #define END 259
@@ -84,8 +85,7 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define MODIFIER 276
 #define SYNTAX_ERROR 277
 #define LINENUM 278
-#define YYERRCODE 256
-short bootlhs[] = {                                        -1,
+const short bootlhs[] = {                                        -1,
     0,    0,    0,    0,    1,    1,    6,    4,    8,    8,
     9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
     9,    9,    9,    5,    5,    7,   10,   10,   11,   11,
@@ -93,7 +93,7 @@ short bootlhs[] = {                                        -1,
    12,   12,   12,   12,   12,   12,   12,   12,   12,   12,
    12,    3,
 };
-short bootlen[] = {                                         2,
+const short bootlen[] = {                                         2,
     0,    2,    2,    1,    2,    2,    1,    1,    1,    2,
     2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
     2,    2,    2,    1,    1,    3,    0,    2,    1,    1,
@@ -101,7 +101,7 @@ short bootlen[] = {                                         2,
     4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
     4,    1,
 };
-short bootdefred[] = {                                      0,
+const short bootdefred[] = {                                      0,
    32,    9,   52,    0,    0,    0,    0,    4,    0,    0,
     0,    0,   10,    2,    3,    0,   25,    5,   24,    6,
    13,   14,   15,   16,   17,   18,   19,   20,   21,   22,
@@ -111,11 +111,11 @@ short bootdefred[] = {                                      0,
     0,    0,    0,    0,   37,   38,   39,   40,   41,   42,
    43,   44,   45,   46,   47,   36,   49,   48,   51,   50,
 };
-short bootdgoto[] = {                                       5,
+const short bootdgoto[] = {                                       5,
     6,    7,    8,    9,   18,   10,   19,   11,   12,   38,
    39,   40,   41,
 };
-short bootsindex[] = {                                   -218,
+const short bootsindex[] = {                                   -218,
     0,    0,    0, -269,    0, -218, -218,    0, -209, -235,
  -171, -227,    0,    0,    0, -217,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -125,7 +125,7 @@ short bootsindex[] = {                                   -218,
  -156, -155, -154, -153,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
-short bootrindex[] = {                                     53,
+const short bootrindex[] = {                                     53,
     0,    0,    0,    0,    0,   53,   53,    0,    0,    0,
  -169, -201,    0,    0,    0, -151,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -135,12 +135,12 @@ short bootrindex[] = {                                     53,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
-short bootgindex[] = {                                     12,
+const short bootgindex[] = {                                     12,
   -16,  -15,    0,    0,    0,    0,   98,   97,    0,   71,
     0,    0,    0,
 };
 #define YYTABLESIZE 110
-short boottable[] = {                                      36,
+const short boottable[] = {                                      36,
    37,    9,   13,   33,   33,    9,    9,    9,    9,    9,
     9,    9,    9,    9,    9,    9,    9,   14,   15,   33,
    33,   16,   36,   37,   10,   42,   34,   34,   10,   10,
@@ -153,7 +153,7 @@ short boottable[] = {                                      36,
    22,   23,   24,   25,   26,   27,   28,   29,   30,   31,
    32,   76,   77,   78,   79,   80,   27,   20,   33,   44,
 };
-short bootcheck[] = {                                      16,
+const short bootcheck[] = {                                      16,
    16,  257,  272,  259,  260,  261,  262,  263,  264,  265,
   266,  267,  268,  269,  270,  271,  272,    6,    7,  275,
   276,  257,   39,   39,  257,  272,  259,  260,  261,  262,
@@ -172,7 +172,7 @@ short bootcheck[] = {                                      16,
 #endif
 #define YYMAXTOKEN 278
 #if YYDEBUG
-char *bootname[] = {
+const char * const bootname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -185,7 +185,7 @@ char *bootname[] = {
 "URL_HTTP_VALUE","URL_TFTP_VALUE","LITERAL","STRING","ARITH","COMPARATOR",
 "MODIFIER","SYNTAX_ERROR","LINENUM",
 };
-char *bootrule[] = {
+const char * const bootrule[] = {
 "$accept : input",
 "input :",
 "input : definition input",
@@ -243,6 +243,9 @@ char *bootrule[] = {
 #endif
 #ifndef YYSTYPE
 typedef int YYSTYPE;
+#endif
+#if YYDEBUG
+#include <stdio.h>
 #endif
 #ifdef YYSTACKSIZE
 #undef YYMAXDEPTH
@@ -420,10 +423,8 @@ ConfigOperator boot_lookup_modifier(const char* s)
     }
     XLOG_UNREACHABLE();
 }
-#line 424 "y.boot_tab.c"
+#line 428 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
-int yyparse __P((void));
-static int yygrowstack __P((void));
 static int yygrowstack()
 {
     int newsize, i;
@@ -437,11 +438,15 @@ static int yygrowstack()
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
     i = yyssp - yyss;
-    if ((newss = (short *)realloc(yyss, newsize * sizeof *newss)) == NULL)
+    newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
+      (short *)malloc(newsize * sizeof *newss);
+    if (newss == NULL)
         return -1;
     yyss = newss;
     yyssp = newss + i;
-    if ((newvs = (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs)) == NULL)
+    newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
+      (YYSTYPE *)malloc(newsize * sizeof *newvs);
+    if (newvs == NULL)
         return -1;
     yyvs = newvs;
     yyvsp = newvs + i;
@@ -454,14 +459,37 @@ static int yygrowstack()
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
-int
-yyparse()
-{
-    int yym, yyn, yystate;
-#if YYDEBUG
-    char *yys;
 
-    if ((yys = getenv("YYDEBUG")) != NULL)
+#ifndef YYPARSE_PARAM
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG void
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG
+#define YYPARSE_PARAM_DECL
+#endif	/* ANSI-C/C++ */
+#else	/* YYPARSE_PARAM */
+#ifndef YYPARSE_PARAM_TYPE
+#define YYPARSE_PARAM_TYPE void *
+#endif
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM_TYPE YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL YYPARSE_PARAM_TYPE YYPARSE_PARAM;
+#endif	/* ANSI-C/C++ */
+#endif	/* ! YYPARSE_PARAM */
+
+int
+yyparse (YYPARSE_PARAM_ARG)
+    YYPARSE_PARAM_DECL
+{
+    register int yym, yyn, yystate;
+#if YYDEBUG
+    register const char *yys;
+
+    if ((yys = getenv("YYDEBUG")))
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
@@ -479,7 +507,7 @@ yyparse()
     *yyssp = yystate = 0;
 
 yyloop:
-    if ((yyn = yydefred[yystate]) != 0) goto yyreduce;
+    if ((yyn = yydefred[yystate])) goto yyreduce;
     if (yychar < 0)
     {
         if ((yychar = yylex()) < 0) yychar = 0;
@@ -519,10 +547,14 @@ yyloop:
         goto yyreduce;
     }
     if (yyerrflag) goto yyinrecovery;
+#if defined(lint) || defined(__GNUC__)
     goto yynewerror;
+#endif
 yynewerror:
     yyerror("syntax error");
+#if defined(lint) || defined(__GNUC__)
     goto yyerrlab;
+#endif
 yyerrlab:
     ++yynerrs;
 yyinrecovery:
@@ -784,7 +816,7 @@ case 52:
 			booterror("syntax error");
 		}
 break;
-#line 788 "y.boot_tab.c"
+#line 821 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

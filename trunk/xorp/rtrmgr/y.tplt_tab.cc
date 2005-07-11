@@ -1,10 +1,5 @@
-#include <sys/cdefs.h>
 #ifndef lint
-#if 0
-static char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
-#else
-__IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $");
-#endif
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -14,7 +9,12 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define YYEMPTY -1
 #define yyclearin (yychar=(YYEMPTY))
 #define yyerrok (yyerrflag=0)
-#define YYRECOVERING (yyerrflag!=0)
+#define YYRECOVERING() (yyerrflag!=0)
+#if defined(__cplusplus) || __STDC__
+static int yygrowstack(void);
+#else
+static int yygrowstack();
+#endif
 #define yyparse tpltparse
 #define yylex tpltlex
 #define yyerror tplterror
@@ -25,11 +25,9 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define yynerrs tpltnerrs
 #define yyerrflag tplterrflag
 #define yyss tpltss
-#define yysslim tpltsslim
 #define yyssp tpltssp
 #define yyvs tpltvs
 #define yyvsp tpltvsp
-#define yystacksize tpltstacksize
 #define yylhs tpltlhs
 #define yylen tpltlen
 #define yydefred tpltdefred
@@ -41,6 +39,8 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define yycheck tpltcheck
 #define yyname tpltname
 #define yyrule tpltrule
+#define yysslim tpltsslim
+#define yystacksize tpltstacksize
 #define YYPREFIX "tplt"
 #line 2 "template.yy"
 #define YYSTYPE char*
@@ -60,7 +60,8 @@ extern void add_cmd_action_adaptor(const string& cmd,
 /* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim
-#line 64 "y.tplt_tab.c"
+#line 65 "y.tplt_tab.c"
+#define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
 #define END 259
@@ -99,8 +100,7 @@ extern void add_cmd_action_adaptor(const string& cmd,
 #define LITERAL 292
 #define STRING 293
 #define SYNTAX_ERROR 294
-#define YYERRCODE 256
-short tpltlhs[] = {                                        -1,
+const short tpltlhs[] = {                                        -1,
     0,    0,    0,    1,    3,    3,    6,    6,    5,    5,
     5,    7,    7,    7,    7,    7,    7,    7,    7,    7,
     7,    7,    7,    7,    7,    8,    8,    8,    8,    8,
@@ -109,7 +109,7 @@ short tpltlhs[] = {                                        -1,
    12,   15,   16,   17,   18,   18,   19,   19,   19,   19,
    19,   19,   19,   19,   19,   20,   20,    2,
 };
-short tpltlen[] = {                                         2,
+const short tpltlen[] = {                                         2,
     0,    2,    1,    2,    1,    1,    2,    4,    1,    2,
     2,    1,    1,    1,    1,    1,    1,    1,    1,    1,
     1,    1,    1,    1,    1,    3,    3,    3,    3,    3,
@@ -118,7 +118,7 @@ short tpltlen[] = {                                         2,
     1,    4,    3,    1,    1,    3,    1,    2,    4,    3,
     2,    3,    1,    2,    1,    1,    2,    1,
 };
-short tpltdefred[] = {                                      0,
+const short tpltdefred[] = {                                      0,
     0,   68,    0,    0,    3,    0,    0,    6,    0,    2,
     0,    4,    0,   11,    0,   54,    0,   45,    0,    0,
    43,   44,   46,   47,   50,   51,    0,   12,   13,   14,
@@ -132,11 +132,11 @@ short tpltdefred[] = {                                      0,
    33,   34,   35,   36,   37,   38,   39,   60,   62,    0,
    56,   59,
 };
-short tpltdgoto[] = {                                       3,
+const short tpltdgoto[] = {                                       3,
     4,    5,    6,   12,    7,    8,   42,   62,   19,   20,
    21,   22,   23,   24,   25,   26,   27,   67,   68,   69,
 };
-short tpltsindex[] = {                                   -282,
+const short tpltsindex[] = {                                   -282,
  -284,    0,    0, -282,    0, -222, -221,    0, -187,    0,
  -218,    0, -284,    0, -249,    0, -246,    0, -181, -218,
     0,    0,    0,    0,    0,    0, -182,    0,    0,    0,
@@ -150,7 +150,7 @@ short tpltsindex[] = {                                   -282,
     0,    0,    0,    0,    0,    0,    0,    0,    0, -190,
     0,    0,
 };
-short tpltrindex[] = {                                    104,
+const short tpltrindex[] = {                                    104,
  -256,    0,    0,  104,    0,    0, -152,    0, -255,    0,
  -151,    0, -254,    0,    0,    0, -256,    0,    0, -151,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -164,12 +164,12 @@ short tpltrindex[] = {                                    104,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,
 };
-short tpltgindex[] = {                                    126,
+const short tpltgindex[] = {                                    126,
    -7,    0,    0,    0,    0,  124,  -43,    0,  113,    0,
     0,    0,    0,    0,    0,    0,    0,    0,   42,   11,
 };
 #define YYTABLESIZE 134
-short tplttable[] = {                                      61,
+const short tplttable[] = {                                      61,
     9,    7,   10,   18,    9,   91,   63,   66,   92,    1,
    66,    2,   18,   43,   28,   29,   30,   31,   32,   33,
    34,   35,   36,   37,   38,   39,   40,   41,   63,   65,
@@ -185,7 +185,7 @@ short tplttable[] = {                                      61,
    20,   21,  101,   22,   23,  103,   24,   25,  105,   10,
    14,  107,   45,  111,
 };
-short tpltcheck[] = {                                      43,
+const short tpltcheck[] = {                                      43,
   257,  257,  257,   11,  289,  259,  259,  259,  262,  292,
   262,  294,   20,  260,  264,  265,  266,  267,  268,  269,
   270,  271,  272,  273,  274,  275,  276,  277,  259,  259,
@@ -207,7 +207,7 @@ short tpltcheck[] = {                                      43,
 #endif
 #define YYMAXTOKEN 294
 #if YYDEBUG
-char *tpltname[] = {
+const char * const tpltname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -223,7 +223,7 @@ char *tpltname[] = {
 "URL_HTTP_VALUE","URL_TFTP_VALUE","VARDEF","COMMAND","VARIABLE","LITERAL",
 "STRING","SYNTAX_ERROR",
 };
-char *tpltrule[] = {
+const char * const tpltrule[] = {
 "$accept : input",
 "input :",
 "input : definition input",
@@ -297,6 +297,9 @@ char *tpltrule[] = {
 #endif
 #ifndef YYSTYPE
 typedef int YYSTYPE;
+#endif
+#if YYDEBUG
+#include <stdio.h>
 #endif
 #ifdef YYSTACKSIZE
 #undef YYMAXDEPTH
@@ -461,10 +464,8 @@ parse_template() throw (ParseError)
     if (tpltparse() != 0)
 	tplterror("unknown error");
 }
-#line 465 "y.tplt_tab.c"
+#line 469 "y.tplt_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
-int yyparse __P((void));
-static int yygrowstack __P((void));
 static int yygrowstack()
 {
     int newsize, i;
@@ -478,11 +479,15 @@ static int yygrowstack()
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
     i = yyssp - yyss;
-    if ((newss = (short *)realloc(yyss, newsize * sizeof *newss)) == NULL)
+    newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
+      (short *)malloc(newsize * sizeof *newss);
+    if (newss == NULL)
         return -1;
     yyss = newss;
     yyssp = newss + i;
-    if ((newvs = (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs)) == NULL)
+    newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
+      (YYSTYPE *)malloc(newsize * sizeof *newvs);
+    if (newvs == NULL)
         return -1;
     yyvs = newvs;
     yyvsp = newvs + i;
@@ -495,14 +500,37 @@ static int yygrowstack()
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
-int
-yyparse()
-{
-    int yym, yyn, yystate;
-#if YYDEBUG
-    char *yys;
 
-    if ((yys = getenv("YYDEBUG")) != NULL)
+#ifndef YYPARSE_PARAM
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG void
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG
+#define YYPARSE_PARAM_DECL
+#endif	/* ANSI-C/C++ */
+#else	/* YYPARSE_PARAM */
+#ifndef YYPARSE_PARAM_TYPE
+#define YYPARSE_PARAM_TYPE void *
+#endif
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM_TYPE YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL YYPARSE_PARAM_TYPE YYPARSE_PARAM;
+#endif	/* ANSI-C/C++ */
+#endif	/* ! YYPARSE_PARAM */
+
+int
+yyparse (YYPARSE_PARAM_ARG)
+    YYPARSE_PARAM_DECL
+{
+    register int yym, yyn, yystate;
+#if YYDEBUG
+    register const char *yys;
+
+    if ((yys = getenv("YYDEBUG")))
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
@@ -520,7 +548,7 @@ yyparse()
     *yyssp = yystate = 0;
 
 yyloop:
-    if ((yyn = yydefred[yystate]) != 0) goto yyreduce;
+    if ((yyn = yydefred[yystate])) goto yyreduce;
     if (yychar < 0)
     {
         if ((yychar = yylex()) < 0) yychar = 0;
@@ -560,10 +588,14 @@ yyloop:
         goto yyreduce;
     }
     if (yyerrflag) goto yyinrecovery;
+#if defined(lint) || defined(__GNUC__)
     goto yynewerror;
+#endif
 yynewerror:
     yyerror("syntax error");
+#if defined(lint) || defined(__GNUC__)
     goto yyerrlab;
+#endif
 yyerrlab:
     ++yynerrs;
 yyinrecovery:
@@ -915,7 +947,7 @@ case 68:
 			tplterror("syntax error");
 		}
 break;
-#line 919 "y.tplt_tab.c"
+#line 952 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

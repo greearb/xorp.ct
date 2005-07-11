@@ -1,10 +1,5 @@
-#include <sys/cdefs.h>
 #ifndef lint
-#if 0
-static char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
-#else
-__IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $");
-#endif
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -14,7 +9,12 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define YYEMPTY -1
 #define yyclearin (yychar=(YYEMPTY))
 #define yyerrok (yyerrflag=0)
-#define YYRECOVERING (yyerrflag!=0)
+#define YYRECOVERING() (yyerrflag!=0)
+#if defined(__cplusplus) || __STDC__
+static int yygrowstack(void);
+#else
+static int yygrowstack();
+#endif
 #define yyparse opcmdparse
 #define yylex opcmdlex
 #define yyerror opcmderror
@@ -25,11 +25,9 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define yynerrs opcmdnerrs
 #define yyerrflag opcmderrflag
 #define yyss opcmdss
-#define yysslim opcmdsslim
 #define yyssp opcmdssp
 #define yyvs opcmdvs
 #define yyvsp opcmdvsp
-#define yystacksize opcmdstacksize
 #define yylhs opcmdlhs
 #define yylen opcmdlen
 #define yydefred opcmddefred
@@ -41,6 +39,8 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define yycheck opcmdcheck
 #define yyname opcmdname
 #define yyrule opcmdrule
+#define yysslim opcmdsslim
+#define yystacksize opcmdstacksize
 #define YYPREFIX "opcmd"
 #line 2 "op_commands.yy"
 #define YYSTYPE char*
@@ -59,7 +59,8 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize opcmdstacksize
 #define yysslim opcmdsslim
-#line 63 "y.opcmd_tab.c"
+#line 64 "y.opcmd_tab.c"
+#define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
 #define END 259
@@ -74,54 +75,53 @@ __IDSTRING(yyrcsid, "$NetBSD: skeleton.c,v 1.14 1997/10/20 03:41:16 lukem Exp $"
 #define LITERAL 268
 #define STRING 269
 #define SYNTAX_ERROR 270
-#define YYERRCODE 256
-short opcmdlhs[] = {                                        -1,
+const short opcmdlhs[] = {                                        -1,
     0,    0,    0,    1,    4,    4,    6,    6,    6,    3,
     7,    8,    5,    9,   11,   10,   10,   12,   12,   12,
    12,   13,   14,   15,   16,   17,   17,    2,
 };
-short opcmdlen[] = {                                         2,
+const short opcmdlen[] = {                                         2,
     0,    2,    1,    3,    0,    2,    1,    1,    1,    1,
     1,    1,    3,    1,    1,    1,    2,    1,    1,    1,
     1,    4,    5,    5,    5,    3,    3,    1,
 };
-short opcmddefred[] = {                                      0,
+const short opcmddefred[] = {                                      0,
    10,   28,    0,    0,    3,    0,    2,   11,   12,    7,
     0,    0,    8,    9,   14,    4,    0,    6,    0,    0,
     0,    0,    0,    0,   18,   19,   20,   21,    0,    0,
     0,    0,   15,   13,   17,    0,    0,    0,    0,   22,
     0,    0,    0,    0,    0,   23,   24,   25,   26,   27,
 };
-short opcmddgoto[] = {                                       3,
+const short opcmddgoto[] = {                                       3,
     4,    5,    6,   11,   16,   12,   13,   14,   17,   23,
    34,   24,   25,   26,   27,   28,   42,
 };
-short opcmdsindex[] = {                                   -258,
+const short opcmdsindex[] = {                                   -258,
     0,    0,    0, -258,    0, -259,    0,    0,    0,    0,
  -254, -259,    0,    0,    0,    0, -260,    0, -249, -245,
  -244, -243, -240, -260,    0,    0,    0,    0, -248, -250,
  -247, -242,    0,    0,    0, -238, -239, -239, -246,    0,
  -235, -232, -231, -230, -255,    0,    0,    0,    0,    0,
 };
-short opcmdrindex[] = {                                     30,
+const short opcmdrindex[] = {                                     30,
     0,    0,    0,   30,    0, -226,    0,    0,    0,    0,
     0, -226,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0, -225,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
-short opcmdgindex[] = {                                     28,
+const short opcmdgindex[] = {                                     28,
     0,    0,   -6,   22,    0,    0,    0,    0,    0,   11,
     0,    0,    0,    0,    0,    0,   -2,
 };
 #define YYTABLESIZE 36
-short opcmdtable[] = {                                      10,
+const short opcmdtable[] = {                                      10,
    19,   20,   15,   21,   22,   10,    8,    9,    1,    1,
    29,    2,   49,   50,   30,   31,   32,   33,   37,   36,
    40,   38,   44,   41,   45,   39,   46,   47,   48,    1,
     5,    7,   16,   18,   35,   43,
 };
-short opcmdcheck[] = {                                       6,
+const short opcmdcheck[] = {                                       6,
   261,  262,  257,  264,  265,   12,  266,  267,  268,  268,
   260,  270,  268,  269,  260,  260,  260,  258,  269,  268,
   259,  269,  269,  263,  260,  268,  259,  259,  259,    0,
@@ -133,7 +133,7 @@ short opcmdcheck[] = {                                       6,
 #endif
 #define YYMAXTOKEN 270
 #if YYDEBUG
-char *opcmdname[] = {
+const char * const opcmdname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -144,7 +144,7 @@ char *opcmdname[] = {
 "COLON","CMD_MODULE","CMD_COMMAND","CMD_HELP","CMD_OPT_PARAMETER","CMD_TAG",
 "VARIABLE","WILDCARD","LITERAL","STRING","SYNTAX_ERROR",
 };
-char *opcmdrule[] = {
+const char * const opcmdrule[] = {
 "$accept : input",
 "input :",
 "input : definition input",
@@ -178,6 +178,9 @@ char *opcmdrule[] = {
 #endif
 #ifndef YYSTYPE
 typedef int YYSTYPE;
+#endif
+#if YYDEBUG
+#include <stdio.h>
 #endif
 #ifdef YYSTACKSIZE
 #undef YYMAXDEPTH
@@ -588,10 +591,8 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 592 "y.opcmd_tab.c"
+#line 596 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
-int yyparse __P((void));
-static int yygrowstack __P((void));
 static int yygrowstack()
 {
     int newsize, i;
@@ -605,11 +606,15 @@ static int yygrowstack()
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
     i = yyssp - yyss;
-    if ((newss = (short *)realloc(yyss, newsize * sizeof *newss)) == NULL)
+    newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
+      (short *)malloc(newsize * sizeof *newss);
+    if (newss == NULL)
         return -1;
     yyss = newss;
     yyssp = newss + i;
-    if ((newvs = (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs)) == NULL)
+    newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
+      (YYSTYPE *)malloc(newsize * sizeof *newvs);
+    if (newvs == NULL)
         return -1;
     yyvs = newvs;
     yyvsp = newvs + i;
@@ -622,14 +627,37 @@ static int yygrowstack()
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
-int
-yyparse()
-{
-    int yym, yyn, yystate;
-#if YYDEBUG
-    char *yys;
 
-    if ((yys = getenv("YYDEBUG")) != NULL)
+#ifndef YYPARSE_PARAM
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG void
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG
+#define YYPARSE_PARAM_DECL
+#endif	/* ANSI-C/C++ */
+#else	/* YYPARSE_PARAM */
+#ifndef YYPARSE_PARAM_TYPE
+#define YYPARSE_PARAM_TYPE void *
+#endif
+#if defined(__cplusplus) || __STDC__
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM_TYPE YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL
+#else	/* ! ANSI-C/C++ */
+#define YYPARSE_PARAM_ARG YYPARSE_PARAM
+#define YYPARSE_PARAM_DECL YYPARSE_PARAM_TYPE YYPARSE_PARAM;
+#endif	/* ANSI-C/C++ */
+#endif	/* ! YYPARSE_PARAM */
+
+int
+yyparse (YYPARSE_PARAM_ARG)
+    YYPARSE_PARAM_DECL
+{
+    register int yym, yyn, yystate;
+#if YYDEBUG
+    register const char *yys;
+
+    if ((yys = getenv("YYDEBUG")))
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
@@ -647,7 +675,7 @@ yyparse()
     *yyssp = yystate = 0;
 
 yyloop:
-    if ((yyn = yydefred[yystate]) != 0) goto yyreduce;
+    if ((yyn = yydefred[yystate])) goto yyreduce;
     if (yychar < 0)
     {
         if ((yychar = yylex()) < 0) yychar = 0;
@@ -687,10 +715,14 @@ yyloop:
         goto yyreduce;
     }
     if (yyerrflag) goto yyinrecovery;
+#if defined(lint) || defined(__GNUC__)
     goto yynewerror;
+#endif
 yynewerror:
     yyerror("syntax error");
+#if defined(lint) || defined(__GNUC__)
     goto yyerrlab;
+#endif
 yyerrlab:
     ++yynerrs;
 yyinrecovery:
@@ -826,7 +858,7 @@ case 28:
 #line 111 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 830 "y.opcmd_tab.c"
+#line 863 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

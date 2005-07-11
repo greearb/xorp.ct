@@ -1,3 +1,7 @@
+#ifndef YYERRCODE
+#define YYERRCODE 256
+#endif
+
 #define UPLEVEL 257
 #define DOWNLEVEL 258
 #define END 259
