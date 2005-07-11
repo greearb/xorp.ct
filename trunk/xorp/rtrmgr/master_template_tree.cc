@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.2 2005/03/25 02:54:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.3 2005/07/11 21:49:29 pavlin Exp $"
 
 
 #include <glob.h>
@@ -34,6 +34,22 @@ MasterTemplateTree::MasterTemplateTree(const string& xorp_root_dir,
 {
     string errmsg;
 
+}
+
+bool 
+MasterTemplateTree::load_template_tree(const string& config_template_dir,
+				       string& errmsg)
+{
+    if (TemplateTree::load_template_tree(config_template_dir, errmsg) != true)
+	return (false);
+
+    if (expand_template_tree(errmsg) != true)
+	return (false);
+
+    if (check_template_tree(errmsg) != true)
+	return (false);
+
+    return (true);
 }
 
 bool
