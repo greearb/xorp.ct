@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.4 2005/07/08 20:51:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.5 2005/07/10 23:14:44 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -169,7 +169,7 @@ AllowOperatorsCommand::add_action(const list<string>& action) throw (ParseError)
     debug_msg("AllowOperatorsCommand::add_action\n");
 
     if (action.size() < 1) {
-	xorp_throw(ParseError, "Allow command with less than two parameters");
+	xorp_throw(ParseError, "Allow command with less than one parameter");
     }
 
     list<string>::const_iterator iter;
