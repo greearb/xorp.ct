@@ -1,12 +1,14 @@
 %{
-#include <string.h>
+#include "libxorp/xorp.h"
 #include "y.tplt_tab.h"
 %}
 	int tplt_linenum = 1;
 	extern char* tpltlval;
+	string tplt_parsebuf;
 %option noyywrap
 %option nounput
 %x comment
+%x string
 
 
 /*
@@ -397,10 +399,39 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 	return LITERAL;
 	}
 
-\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`'{}<>? \t]*\"	{
-	tpltlval = strdup(tplttext);
-	return STRING;
-	}
+\"			{
+			BEGIN(string);
+			tplt_parsebuf="\"";
+			}
+
+<string>[^\\\n\"]*	/* normal text */ {
+			tplt_parsebuf += tplttext;
+			}
+
+<string>\\+\"		/* allow quoted quotes */ {
+			tplt_parsebuf += "\"";
+			}
+
+<string>\\+\\		/* allow quoted backslash */ {
+			tplt_parsebuf += "\\";
+			}
+
+<string>\n		/* allow unquoted newlines */ {
+			tplt_linenum++;
+			tplt_parsebuf += "\n";
+			}
+
+<string>\\+\n		/* allow quoted newlines */ {
+			tplt_linenum++;
+			tplt_parsebuf += "\n";
+			}
+
+<string>\"		{
+			BEGIN(INITIAL);
+			tplt_parsebuf += "\"";
+			tpltlval = strdup(tplt_parsebuf.c_str());
+			return STRING;
+			}
 
 "/*"			BEGIN(comment);
 
