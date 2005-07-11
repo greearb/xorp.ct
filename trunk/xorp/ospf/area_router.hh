@@ -268,10 +268,12 @@ class AreaRouter {
     /*
      * Send this LSA to all our peers.
      *
-     * @param lsar The LSA to publish
+     * @param peerid The peer this LSA arrived on.
      * @param nid The neighbour this LSA arrived on so don't reflect.
+     * @param lsar The LSA to publish
      */
-    void publish(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid);
+    void publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
+		 Lsa::LsaRef lsar) const;
 
     /*
      * Send this LSA to all our peers.

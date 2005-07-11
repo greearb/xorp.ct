@@ -126,11 +126,13 @@ class PeerOut {
     /**
      * Queue an LSA for transmission.
      *
+     * @param peer the LSA arrived on.
+     * @param nid the LSA arrived on.
      * @param lsar the lsa
-     * @param nid not to send to LSA on.
      * @return true on success.
      */
-    bool queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid);
+    bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+		   Lsa::LsaRef lsar) const;
     
     /**
      * Send (push) any queued LSAs.
@@ -305,11 +307,13 @@ class Peer {
     /**
      * Queue an LSA for transmission.
      *
+     * @param peer the LSA arrived on.
+     * @param nid the LSA arrived on.
      * @param lsar the lsa
-     * @param nid not to send to LSA on.
      * @return true on success.
      */
-    bool queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid);
+    bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+		   Lsa::LsaRef lsar) const;
 
     /**
      * Send (push) any queued LSAs.
@@ -727,12 +731,15 @@ class Neighbour {
     void link_state_update_received(LinkStateUpdatePacket *lsup);
 
     /**
-     * Queue a LSA for later transmission.
+     * Queue an LSA for transmission.
      *
-     * @param lsa to be queued.
-     * @param nid if the neighbour ID matches this neighbour ID don't queue.
+     * @param peer the LSA arrived on.
+     * @param nid the LSA arrived on.
+     * @param lsar the lsa
+     * @return true on success.
      */
-    bool queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid);
+    bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+		   Lsa::LsaRef lsar);
 
     /**
      * Send (push) any queued LSAs.

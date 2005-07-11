@@ -288,7 +288,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    if ((*i)->external())
 		flood_all_areas((*i));
 
-	    publish((*i), nid);
+	    publish(peerid, nid, (*i));
 
 	    XLOG_WARNING("TBD Section 13.3");
 
@@ -674,7 +674,8 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
 
 template <typename A>
 void
-AreaRouter<A>::publish(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
+AreaRouter<A>::publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
+		       Lsa::LsaRef lsar) const
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
 
@@ -689,11 +690,12 @@ AreaRouter<A>::publish(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
 	lsar->update_age(now);
     }
 
-    typename PeerMap::iterator i;
+    typename PeerMap::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	PeerStateRef temp_psr = i->second;
 	if (temp_psr->_up) {
-	    if (!_ospf.get_peer_manager().queue_lsa(i->first, lsar, nid))
+	    if (!_ospf.get_peer_manager().
+		queue_lsa(i->first, peerid, nid, lsar))
 		XLOG_FATAL("Unable to queue LSA");
 	}
     }
@@ -704,7 +706,7 @@ void
 AreaRouter<A>::publish_all(Lsa::LsaRef lsar)
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
-    publish(lsar, OspfTypes::ALLNEIGHBOURS);
+    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar);
 
     push_lsas();	// NOTE: a push after every LSA.
 }

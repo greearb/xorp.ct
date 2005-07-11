@@ -23,6 +23,11 @@
  */
 typedef uint32_t PeerID;
 
+/**
+ * An identifier meaning all peers. No single peer can have this identifier.
+ */
+static const PeerID ALLPEERS = 0;
+
 template <typename A> class Ospf;
 template <typename A> class PeerOut;
 template <typename A> class AreaRouter;
@@ -43,7 +48,7 @@ template <typename A>
 class PeerManager {
  public:
     PeerManager(Ospf<A> &ospf)
-	: _ospf(ospf), _next_peerid(0)
+	: _ospf(ospf), _next_peerid(ALLPEERS + 1)
     {}
 
     ~PeerManager();
@@ -114,12 +119,13 @@ class PeerManager {
      * Queue an LSA for transmission.
      *
      * @param peerid to queue to LSA on.
+     * @param peer the LSA arrived on.
+     * @param nid the LSA arrived on.
      * @param lsar the lsa
-     * @param nid not to send to LSA on.
      * @return true on success.
      */
-    bool queue_lsa(const PeerID peerid, Lsa::LsaRef lsar,
-		   OspfTypes::NeighbourID nid);
+    bool queue_lsa(const PeerID peerid, const PeerID peer,
+		   OspfTypes::NeighbourID nid, Lsa::LsaRef lsar);
 
     /**
      * Send (push) any queued LSAs.

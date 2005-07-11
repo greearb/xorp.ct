@@ -277,15 +277,15 @@ PeerManager<A>::receive(const string& interface, const string& vif,
 
 template <typename A>
 bool
-PeerManager<A>::queue_lsa(const PeerID peerid, Lsa::LsaRef lsar,
-			  OspfTypes::NeighbourID nid)
+PeerManager<A>::queue_lsa(const PeerID peerid, const PeerID peer,
+			  OspfTypes::NeighbourID nid, Lsa::LsaRef lsar)
 {
     if (0 == _peers.count(peerid)) {
 	XLOG_ERROR("Unknown PeerID %u", peerid);
 	return false;
     }
 
-    return _peers[peerid]->queue_lsa(lsar, nid);    
+    return _peers[peerid]->queue_lsa(peer, nid, lsar);
 }
 
 template <typename A>

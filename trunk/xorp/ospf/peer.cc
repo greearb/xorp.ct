@@ -165,12 +165,13 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
 
 template <typename A>
 bool
-PeerOut<A>::queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
+PeerOut<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+		      Lsa::LsaRef lsar) const
 {
-    typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
+    typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
 
     for(i = _areas.begin(); i != _areas.end(); i++) {
-	if (!(*i).second->queue_lsa(lsar, nid))
+	if (!(*i).second->queue_lsa(peerid, nid, lsar))
 	    return false;
     }
 
@@ -336,13 +337,14 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 
 template <typename A>
 bool
-Peer<A>::queue_lsa(Lsa::LsaRef lsar, OspfTypes::NeighbourID nid)
+Peer<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+		   Lsa::LsaRef lsar) const
 {
     debug_msg("lsa %s nid %d \n", cstring(*lsar), nid);
 
-    typename list<Neighbour<A> *>::iterator n;
+    typename list<Neighbour<A> *>::const_iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	if (!(*n)->queue_lsa(lsar, nid))
+	if (!(*n)->queue_lsa(peerid, nid, lsar))
 	    return false;
 
     return true;
@@ -2583,7 +2585,8 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 
 template <typename A>
 bool
-Neighbour<A>::queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid)
+Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+			Lsa::LsaRef lsar)
 {
     // RFC 2328 Section 13.3.  Next step in the flooding procedure
 
@@ -2597,31 +2600,68 @@ Neighbour<A>::queue_lsa(Lsa::LsaRef lsa, OspfTypes::NeighbourID nid)
 	// (a) Neighbour is in too low a state so return.
 	return true;
     case Exchange:
-    case Loading:
+    case Loading: {
 	// (b) See if this LSA is on the link state request list.
-	
+	list<Lsa_header>::iterator i;
+	Lsa_header& lsah = lsar->get_header();
+	for(i = _ls_request_list.begin(); i != _ls_request_list.end(); i++) {
+	    if (i->get_ls_type() != lsar->get_ls_type())
+		continue;
+
+	    if (i->get_link_state_id() != lsah.get_link_state_id())
+		continue;
+
+	    if (i->get_advertising_router() != lsah.get_advertising_router())
+		continue;
+	    break;
+	}
+	if (i != _ls_request_list.end()) {
+	    switch(get_area_router()->compare_lsa(lsah, *i)) {
+	    case AreaRouter<A>::NOMATCH:
+		XLOG_UNREACHABLE();
+		break;
+	    case AreaRouter<A>::EQUIVALENT:
+		_ls_request_list.erase(i);
+		return true;
+		break;
+	    case AreaRouter<A>::NEWER:
+		_ls_request_list.erase(i);
+		break;
+	    case AreaRouter<A>::OLDER:
+		return true;
+		break;
+	    }
+	}
+    }
 	break;
     case Full:
 
 	break;
     }
     
-
-
-    // If the neighbour IDs match then this is the neighbour that this
+    // (c) If the neighbour IDs match then this is the neighbour that this
     // LSA was originally received on.
     if (_neighbourid == nid)
 	return true;
 
-    // If the Neighbour state is Exchange or better the this LSA can
-    // be queued for transmission.
-    if (get_state() < Exchange)
-	return true;
+    // (d) If this LSA isn't already on the retransmit queue add it.
+    if (find(_lsa_rxmt.begin(), _lsa_rxmt.end(), lsar) == _lsa_rxmt.end())
+	_lsa_rxmt.push_back(lsar);
 
     // Add this neighbour ID to the set of unacknowledged neighbours.
-    lsa->add_nack(_neighbourid);
+    lsar->add_nack(_neighbourid);
 
-    _lsa_queue.push_back(lsa);
+    // (2) By now we should be thinking about sending this LSA out.
+
+    // Did this LSA arrive on this peer (interface).
+    if (_peer.get_peerid() == peerid ) {
+	// (3) If this LSA arrived from the designated router or the
+	// backup designated router. Chances are high that our
+	// neightbours have received this LSA already.
+#error "This next"
+    }
+
+    _lsa_queue.push_back(lsar);
 
     return true;
 }
@@ -2654,10 +2694,6 @@ Neighbour<A>::push_lsas()
 		_peer.get_interface_mtu()) {
 		lsas_len += len;
 		lsup.get_lsas().push_back(*i);
-		// If this LSA isn't already on the retransmit queue add it.
-		if (find(_lsa_rxmt.begin(), _lsa_rxmt.end(), *i) ==
-		    _lsa_rxmt.end())
-		    _lsa_rxmt.push_back(*i);
 	    } else {
 		send_link_state_update_packet(lsup);
 		lsup.get_lsas().clear();
