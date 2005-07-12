@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.71 2005/07/05 20:28:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.72 2005/07/08 20:51:16 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -215,8 +215,10 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 	if (_has_value && (_value != them.value())) {
 	    return false;
 	}
-	if (_operator != them.get_operator()) {
-	    return false;
+	if (!is_tag() && !them.is_tag()) {
+	    if (_operator != them.get_operator()) {
+		return false;
+	    }
 	}
 	if (_nodenum != them.nodenum()) {
 	    return false;
