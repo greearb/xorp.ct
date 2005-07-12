@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,40 +13,53 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.2 2005/03/25 02:54:17 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.3 2005/06/06 20:29:04 pavlin Exp $"
 
 #include "config.h"
 #include "register_operations.hh"
 #include "dispatcher.hh"
 #include "element.hh"
 #include "elem_set.hh"
+#include "elem_null.hh"
 #include "regex.h"
 #include "operator.hh"
-
 #include <set>
 #include <string>
 
-
-
-
 namespace operations {
 
-Element* op_not(const ElemBool& x) {
+// Unary operations
+Element* op_not(const ElemBool& x)
+{
     return new ElemBool(!x.val());
 }
 
+Element* op_head(const ElemStr& x)
+{
+    const string& str = x.val();
+
+    string::size_type pos = str.find(',', 0);
+
+    // try again
+    if (pos == string::npos)
+	pos = str.find(' ', 0);
+
+    // return whole thing... [if space and comma not found]
+
+    return new ElemStr(str.substr(0, pos));
+}
 
 // operations directly on element value
 #define DEFINE_BINOP(name,op) \
 template<class Result, class Left, class Right> \
-Element* name(const Left& x, const Right& y) { \
+Element* name(const Left& x, const Right& y) \
+{ \
     return new Result(x.val() op y.val()); \
 }
 
 DEFINE_BINOP(op_and,&&)
 DEFINE_BINOP(op_or,||)
 DEFINE_BINOP(op_xor,^)
-
 
 DEFINE_BINOP(op_eq,==)
 DEFINE_BINOP(op_ne,!=)
@@ -58,8 +72,6 @@ DEFINE_BINOP(op_ge,>=)
 DEFINE_BINOP(op_add,+)
 DEFINE_BINOP(op_sub,-)
 DEFINE_BINOP(op_mul,*)
-
-
 
 // Operations for which .val() is not needed. [operation performed on element
 // itself].
@@ -86,7 +98,8 @@ DEFINE_BINOP_NOVAL(op_ge_nv,>=)
 // Set::operator>(Element)
 #define DEFINE_BINOP_SWITCHPARAMS(name,op) \
 template<class Result, class Left, class Right> \
-Element* name(const Left& x, const Right& y) { \
+Element* name(const Left& x, const Right& y) \
+{ \
     return new Result(y op x); \
 }
 
@@ -99,12 +112,9 @@ DEFINE_BINOP_SWITCHPARAMS(op_gt_sw,<)
 DEFINE_BINOP_SWITCHPARAMS(op_le_sw,>=)
 DEFINE_BINOP_SWITCHPARAMS(op_ge_sw,<=)
 
-
-
-
-
 template<class T>
-Element* set_add(const ElemSet& s, const T& str) {
+Element* set_add(const ElemSet& s, const T& str)
+{
     ElemSet* es = new ElemSet(s.get_set());
 
     es->insert(str.str());
@@ -112,30 +122,36 @@ Element* set_add(const ElemSet& s, const T& str) {
     return es;
 }
 
-
-// XXX: for now, the only writable string is aspath.
-// in that case, addition means adding an aspath segment, so lets stick a comma
-// in between. Ideally aspath should have it's own type.
-// The problem is lexer does all type identification, so we would have to define
-// ASPATH + STR, STR + ASPATH, ASPATH + ASPATH etc, to get an aspath type. And
-// have the ability to assign a string to an aspath.
-Element* str_add(const ElemStr& left, const ElemStr& right) {
-    return new ElemStr(left.val() + "," + right.val());
+Element* str_add(const ElemStr& left, const ElemStr& right)
+{
+    return new ElemStr(left.val() + right.val());
 }
 
+Element* str_mul(const ElemStr& left, const ElemU32& right)
+{
+    string str = left.val();
+    string res = "";
+    uint32_t times = right.val();
+
+    for (uint32_t i = 0; i < times; ++i)
+	res.append(str);
+
+    return new ElemStr(res);
+}
 
 } // namespace
-
 
 // XXX: hack to compile on 2.95.x [may not use &operation::op... with templates]
 using namespace operations;
 
 // FIXME: no comment =D
 // macro ugliness to specify possible operations
-RegisterOperations::RegisterOperations() {
+RegisterOperations::RegisterOperations()
+{
     Dispatcher disp;
 
     disp.add<ElemBool,&operations::op_not>(OpNot());
+    disp.add<ElemStr, &operations::op_head>(OpHead());
 
 #define ADD_BINOP(result,left,right,funct,oper)				\
 do {									\
@@ -171,7 +187,6 @@ do {									\
     ADD_BINOP(arg,arg,arg,op_mul,Mul);					\
 } while (0)
 
-
     // SETS
     ADD_BINOP(ElemBool,ElemSet,ElemSet,op_eq_nv,Eq);
     ADD_BINOP(ElemBool,ElemSet,ElemSet,op_ne_nv,Ne);
@@ -200,10 +215,6 @@ do {									\
     ADD_BINOP(ElemBool,arg,ElemSet,op_ge_sw,Ge);			\
 } while (0)
 
-
-
-
-
     // i32
     ADD_EQOP(ElemInt32);
     ADD_RELOP(ElemInt32);
@@ -216,13 +227,12 @@ do {									\
     ADD_MATHOP(ElemU32);
     ADD_SETBINOP(ElemU32);
 
-
     // strings
     ADD_EQOP(ElemStr);
     ADD_SETBINOP(ElemStr);
     // string concatenation
-    disp.add<ElemStr,ElemStr,operations::str_add>(OpAdd()); 
-
+    disp.add<ElemStr,ElemStr,operations::str_add>(OpAdd());
+    disp.add<ElemStr,ElemU32,operations::str_mul>(OpMul());
 
     // IPV4
     ADD_EQOP(ElemIPv4);
@@ -243,5 +253,4 @@ do {									\
     ADD_EQOP(ElemIPv6Net);
     ADD_RELOP(ElemIPv6Net);
     ADD_SETBINOP(ElemIPv6Net);
-
 }

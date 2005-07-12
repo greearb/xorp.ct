@@ -53,14 +53,11 @@ static int yygrowstack();
 
 #include "config.h"
 #include "policy_backend_parser.hh"
-
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
-
 #include "instruction.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
-
 #include <vector>
 
 extern int yylex(void);
@@ -70,11 +67,11 @@ using namespace policy_backend_parser;
 
 static ElementFactory _ef;
 
-#line 27 "backend.y"
+#line 24 "backend.y"
 typedef union {
 	char* c_str;
 } YYSTYPE;
-#line 78 "yacc.yy_policy_backend_parser.cc"
+#line 75 "yacc.yy_policy_backend_parser.cc"
 #define YYERRCODE 256
 #define YY_ARG 257
 #define YY_NEWLINE 258
@@ -95,73 +92,76 @@ typedef union {
 #define YY_AND 273
 #define YY_OR 274
 #define YY_XOR 275
-#define YY_ADD 276
-#define YY_SUB 277
-#define YY_MUL 278
-#define YY_ONFALSE_EXIT 279
-#define YY_REGEX 280
-#define YY_LOAD 281
-#define YY_STORE 282
-#define YY_ACCEPT 283
-#define YY_REJECT 284
-#define YY_SET 285
+#define YY_HEAD 276
+#define YY_ADD 277
+#define YY_SUB 278
+#define YY_MUL 279
+#define YY_ONFALSE_EXIT 280
+#define YY_REGEX 281
+#define YY_LOAD 282
+#define YY_STORE 283
+#define YY_ACCEPT 284
+#define YY_REJECT 285
+#define YY_SET 286
 const short yy_policy_backend_parserlhs[] = {                                        -1,
     0,    0,    0,    2,    1,    3,    3,    4,    4,    5,
     5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
     5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
+    5,
 };
 const short yy_policy_backend_parserlen[] = {                                         2,
     2,    2,    0,    4,    6,    7,    0,    3,    0,    3,
     2,    1,    2,    2,    2,    1,    1,    1,    1,    1,
     1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+    1,
 };
 const short yy_policy_backend_parserdefred[] = {                                      3,
     0,    0,    0,    1,    2,    0,    0,    7,    0,    0,
     4,    0,    0,    5,    0,    9,    0,    0,    0,    0,
    18,   19,   20,   21,   22,   23,   24,   25,   27,   26,
-   28,   29,   30,   12,    0,    0,    0,   16,   17,    0,
-    6,    0,   11,   13,   14,   15,    8,   10,
+   31,   28,   29,   30,   12,    0,    0,    0,   16,   17,
+    0,    6,    0,   11,   13,   14,   15,    8,   10,
 };
 const short yy_policy_backend_parserdgoto[] = {                                       1,
-    4,    5,   10,   17,   40,
+    4,    5,   10,   17,   41,
 };
 const short yy_policy_backend_parsersindex[] = {                                      0,
- -260, -231, -230,    0,    0, -229, -227,    0, -226, -238,
-    0, -225, -223,    0, -222,    0, -262, -221, -219, -218,
+ -260, -230, -229,    0,    0, -228, -226,    0, -225, -237,
+    0, -224, -222,    0, -221,    0, -262, -220, -218, -217,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0, -217, -216, -215,    0,    0, -214,
-    0, -212,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0, -216, -215, -214,    0,    0,
+ -213,    0, -211,    0,    0,    0,    0,    0,    0,
 };
 const short yy_policy_backend_parserrindex[] = {                                      0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
 const short yy_policy_backend_parsergindex[] = {                                      0,
     0,    0,    0,    0,    0,
 };
-#define YYTABLESIZE 45
+#define YYTABLESIZE 46
 const short yy_policy_backend_parsertable[] = {                                       2,
    18,   19,   20,   21,   22,   23,   24,   25,   26,   27,
    28,   29,   30,   31,   32,   33,   34,   35,   36,   37,
-   38,   39,   12,   13,    3,    6,    7,    0,    8,    9,
-    0,   11,   14,   15,    0,   16,   41,   42,   43,   44,
-   45,   46,    0,   47,   48,
+   38,   39,   40,   12,   13,    3,    6,    7,    0,    8,
+    9,    0,   11,   14,   15,    0,   16,   42,   43,   44,
+   45,   46,   47,    0,   48,   49,
 };
 const short yy_policy_backend_parsercheck[] = {                                     260,
   263,  264,  265,  266,  267,  268,  269,  270,  271,  272,
   273,  274,  275,  276,  277,  278,  279,  280,  281,  282,
-  283,  284,  261,  262,  285,  257,  257,   -1,  258,  257,
-   -1,  258,  258,  257,   -1,  258,  258,  257,  257,  257,
-  257,  257,   -1,  258,  257,
+  283,  284,  285,  261,  262,  286,  257,  257,   -1,  258,
+  257,   -1,  258,  258,  257,   -1,  258,  258,  257,  257,
+  257,  257,  257,   -1,  258,  257,
 };
 #define YYFINAL 1
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 285
+#define YYMAXTOKEN 286
 #if YYDEBUG
 const char * const yy_policy_backend_parsername[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -173,8 +173,8 @@ const char * const yy_policy_backend_parsername[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"YY_ARG","YY_NEWLINE","YY_BLANK",
 "YY_POLICY_START","YY_POLICY_END","YY_TERM_START","YY_TERM_END","YY_PUSH",
 "YY_PUSH_SET","YY_EQ","YY_NE","YY_LT","YY_GT","YY_LE","YY_GE","YY_NOT","YY_AND",
-"YY_OR","YY_XOR","YY_ADD","YY_SUB","YY_MUL","YY_ONFALSE_EXIT","YY_REGEX",
-"YY_LOAD","YY_STORE","YY_ACCEPT","YY_REJECT","YY_SET",
+"YY_OR","YY_XOR","YY_HEAD","YY_ADD","YY_SUB","YY_MUL","YY_ONFALSE_EXIT",
+"YY_REGEX","YY_LOAD","YY_STORE","YY_ACCEPT","YY_REJECT","YY_SET",
 };
 const char * const yy_policy_backend_parserrule[] = {
 "$accept : program",
@@ -208,6 +208,7 @@ const char * const yy_policy_backend_parserrule[] = {
 "statement : YY_ADD",
 "statement : YY_SUB",
 "statement : YY_MUL",
+"statement : YY_HEAD",
 };
 #endif
 #if YYDEBUG
@@ -432,7 +433,7 @@ yyreduce:
     switch (yyn)
     {
 case 4:
-#line 64 "backend.y"
+#line 50 "backend.y"
 {
 	  	/* XXX: doesn't delete old*/
 		(*_yy_sets)[yyvsp[-2].c_str] = _ef.create("set",yyvsp[-1].c_str);
@@ -440,7 +441,7 @@ case 4:
 	  }
 break;
 case 5:
-#line 71 "backend.y"
+#line 57 "backend.y"
 {
 			PolicyInstr* pi = new PolicyInstr(yyvsp[-4].c_str,_yy_terms);
 			_yy_terms = new vector<TermInstr*>();
@@ -449,7 +450,7 @@ case 5:
 			}
 break;
 case 6:
-#line 80 "backend.y"
+#line 66 "backend.y"
 {
 	  
 			TermInstr* ti = new TermInstr(yyvsp[-4].c_str,_yy_instructions);
@@ -459,7 +460,7 @@ case 6:
 			}
 break;
 case 10:
-#line 97 "backend.y"
+#line 83 "backend.y"
 {
 	  			Instruction* i = new Push(_ef.create(yyvsp[-1].c_str,yyvsp[0].c_str));
 				_yy_instructions->push_back(i);
@@ -467,100 +468,104 @@ case 10:
 	  			}
 break;
 case 11:
-#line 102 "backend.y"
+#line 88 "backend.y"
 {
 				_yy_instructions->push_back(new PushSet(yyvsp[0].c_str));
 				free(yyvsp[0].c_str);
 				}
 break;
 case 12:
-#line 107 "backend.y"
+#line 93 "backend.y"
 {
 				_yy_instructions->push_back(new OnFalseExit());
 				}
 break;
 case 13:
-#line 111 "backend.y"
+#line 97 "backend.y"
 {
 				_yy_instructions->push_back(new Regex(yyvsp[0].c_str));
 				free(yyvsp[0].c_str);
 				}
 break;
 case 14:
-#line 116 "backend.y"
+#line 102 "backend.y"
 {
 				_yy_instructions->push_back(new Load(yyvsp[0].c_str));
 				free(yyvsp[0].c_str);
 				}
 break;
 case 15:
-#line 120 "backend.y"
+#line 106 "backend.y"
 {
 				_yy_instructions->push_back(new Store(yyvsp[0].c_str));
 				free(yyvsp[0].c_str);
 				}
 break;
 case 16:
-#line 125 "backend.y"
+#line 111 "backend.y"
 { _yy_instructions->push_back(new Accept()); }
 break;
 case 17:
-#line 126 "backend.y"
+#line 112 "backend.y"
 { _yy_instructions->push_back(new Reject()); }
 break;
 case 18:
-#line 128 "backend.y"
+#line 114 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpEq)); }
 break;
 case 19:
-#line 129 "backend.y"
+#line 115 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNe)); }
 break;
 case 20:
-#line 130 "backend.y"
+#line 116 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLt)); }
 break;
 case 21:
-#line 131 "backend.y"
+#line 117 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGt)); }
 break;
 case 22:
-#line 132 "backend.y"
+#line 118 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLe)); }
 break;
 case 23:
-#line 133 "backend.y"
+#line 119 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGe)); }
 break;
 case 24:
-#line 135 "backend.y"
+#line 121 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNot)); }
 break;
 case 25:
-#line 136 "backend.y"
+#line 122 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAnd)); }
 break;
 case 26:
-#line 137 "backend.y"
+#line 123 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpXor)); }
 break;
 case 27:
-#line 138 "backend.y"
+#line 124 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpOr)); }
 break;
 case 28:
-#line 140 "backend.y"
+#line 126 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAdd)); }
 break;
 case 29:
-#line 141 "backend.y"
+#line 127 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 break;
 case 30:
-#line 142 "backend.y"
+#line 128 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpMul)); }
 break;
-#line 564 "yacc.yy_policy_backend_parser.cc"
+case 31:
+#line 129 "backend.y"
+{ _yy_instructions->push_back(new NaryInstr(new OpHead));}
+break;
+#line 569 "yacc.yy_policy_backend_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

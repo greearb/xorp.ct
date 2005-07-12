@@ -5,14 +5,11 @@
 
 #include "config.h"
 #include "policy_backend_parser.hh"
-
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
-
 #include "instruction.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
-
 #include <vector>
 
 extern int yylex(void);
@@ -29,27 +26,16 @@ static ElementFactory _ef;
 };
 
 %token <c_str> YY_ARG
-
 %token YY_NEWLINE YY_BLANK
-
 %token YY_POLICY_START YY_POLICY_END YY_TERM_START YY_TERM_END
-
-
 %token YY_PUSH YY_PUSH_SET
-
 %token YY_EQ YY_NE YY_LT YY_GT YY_LE YY_GE
-%token YY_NOT YY_AND YY_OR YY_XOR
-
+%token YY_NOT YY_AND YY_OR YY_XOR YY_HEAD
 %token YY_ADD YY_SUB YY_MUL
-
 %token YY_ONFALSE_EXIT
-
 %token YY_REGEX
-
 %token YY_LOAD YY_STORE
-
 %token YY_ACCEPT YY_REJECT
-
 %token YY_SET
 %%
 
@@ -140,7 +126,7 @@ statement:
 	| YY_ADD	{ _yy_instructions->push_back(new NaryInstr(new OpAdd)); }
 	| YY_SUB	{ _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 	| YY_MUL	{ _yy_instructions->push_back(new NaryInstr(new OpMul)); }
-
+	| YY_HEAD	{ _yy_instructions->push_back(new NaryInstr(new OpHead));}
 	;  
 
 %%

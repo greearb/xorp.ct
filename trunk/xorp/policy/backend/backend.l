@@ -3,7 +3,6 @@
 #include "config.h"
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
-
 #include "yacc.yy_policy_backend_parser.cc.h"
 #include <assert.h>
 #include <sstream>
@@ -17,8 +16,6 @@ using namespace policy_backend_parser;
 
 void yyerror(const char*);
 int yyparse(void);
-
-
 
 vector<PolicyInstr*>* policy_backend_parser::_yy_policies;
 map<string,Element*>* policy_backend_parser::_yy_sets;
@@ -38,11 +35,6 @@ namespace {
 %option outfile="lex.yy_policy_backend_parser.cc"
 %x STR
 %%
-
-
-
-
-
 
 "POLICY_START"	{ return YY_POLICY_START; }
 "POLICY_END"	{ return YY_POLICY_END; }
@@ -70,34 +62,26 @@ namespace {
 "<="		{ return YY_LE; }
 ">="		{ return YY_GE; }
 
-
 "NOT"		{ return YY_NOT; }
 "AND"		{ return YY_AND; }
 "XOR"		{ return YY_XOR; }
 "OR"		{ return YY_OR; }
-
+"HEAD"		{ return YY_HEAD; }
 
 "+"		{ return YY_ADD; }
 "\-"		{ return YY_SUB; }
 "*"		{ return YY_MUL; }
 
-
 "ONFALSE_EXIT"	{ return YY_ONFALSE_EXIT; }
 
 "\n"		{ _parser_lineno++; return YY_NEWLINE; }
 
-
-
-
 [[:blank:]]+	/* eat blanks */
-
-
 
 [^\"[:blank:]\n]+	{	
 			yylval.c_str = strdup(yytext);
 		  	return YY_ARG;
 			}  
-
 
 \"		BEGIN(STR);
 
@@ -108,25 +92,26 @@ namespace {
 		  return YY_ARG;
 		}  
 
-
-
 %%
 
-
-void yyerror(const char *m) {
+void yyerror(const char *m)
+{
         ostringstream oss;
 
-        oss << "Error on line " <<  _parser_lineno << ": " << m;
+        oss << "Error on line " <<  _parser_lineno << " near (";
+        for(int i = 0; i < yyleng; i++)
+                oss << yytext[i];
+        oss << "): " << m;
 
         _last_error = oss.str();
 }
-
 
 int
 policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 					    map<string,Element*>& outsets,
 					    const string& conf,
-					    string& outerr) {
+					    string& outerr)
+{
 
 	YY_BUFFER_STATE yybuffstate = yy_scan_string(conf.c_str());
 	

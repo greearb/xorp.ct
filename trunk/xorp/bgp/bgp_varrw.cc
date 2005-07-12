@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.7 2005/03/25 02:52:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.8 2005/07/08 02:06:17 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -289,11 +289,15 @@ BGPVarRW<A>::more_tracelog()
     string x = "BGP " + _name + " route: ";
     uint32_t level = trace();
 
-    if (level > 0) {
-	if (modified())
-	    x += _filtered_rtmsg->net().str();
-	else
-	    x += _orig_rtmsg.net().str();
+    const InternalMessage<A>& msg = ( modified() ? 
+				     (*_filtered_rtmsg) :
+				     _orig_rtmsg);
+    
+    if (level > 0)
+	x += msg.net().str();
+    if (level > 1) {
+	x += " Full route: ";
+	x += msg.str();
     }
 
     return x;

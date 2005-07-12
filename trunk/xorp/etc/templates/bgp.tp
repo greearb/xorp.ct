@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.41 2005/07/08 02:06:19 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.42 2005/07/12 00:47:50 abittau Exp $ */
 
 protocols {
     bgp {
@@ -55,7 +55,7 @@ policy {
 		nexthop4: ipv4;
 		nexthop6: ipv6;
 
-		aspath: txt;
+		as-path: txt;
 		community: txt;
 
 		neighbor: ipv4;
@@ -73,7 +73,7 @@ policy {
 		nexthop4: ipv4;
 		nexthop6: ipv6;
 
-		aspath: txt;
+		as-path: txt;
 		community: txt;
 
 		neighbor: ipv4;
@@ -86,7 +86,8 @@ policy {
 		nexthop4: ipv4;
 		nexthop6: ipv6;
 
-		aspath: txt;
+		as-path-prepend: txt;
+		as-path-expand: u32;
 		community: txt;
 
 		origin: u32;
@@ -357,8 +358,8 @@ policy {
 			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
-		aspath {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=aspath REGEX $(@);";
+		as-path {
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=aspath REGEX '$(@)';";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		community {
@@ -404,8 +405,8 @@ policy {
 			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
-		aspath {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=aspath REGEX $(@);";
+		as-path {
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=aspath REGEX '$(@)';";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		community {
@@ -439,8 +440,12 @@ policy {
 			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
-		aspath {
-			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath $(<>) $(@);";
+		as-path-prepend {
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = '$(@)' add ',' add aspath;";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		as-path-expand {
+			%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = ((head aspath) add ', ') * $(@) add aspath;";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		community {

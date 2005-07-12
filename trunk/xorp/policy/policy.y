@@ -37,7 +37,7 @@ static ElementFactory _ef;
 %token <c_str> YY_INT YY_UINT YY_STR YY_ID 
 %token <c_str> YY_IPV4 YY_IPV4NET YY_IPV6 YY_IPV6NET
 
-%left YY_NOT YY_AND YY_XOR YY_OR
+%left YY_NOT YY_AND YY_XOR YY_OR YY_HEAD
 %left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_LE YY_GE
 %left YY_ADD YY_SUB
 %left YY_MUL
@@ -99,7 +99,8 @@ expr:
 	  expr YY_ADD expr { $$ = new NodeBin(new OpAdd,$1,$3,_parser_lineno); }
 	| expr YY_SUB expr { $$ = new NodeBin(new OpSub,$1,$3,_parser_lineno); }
 	| expr YY_MUL expr { $$ = new NodeBin(new OpMul,$1,$3,_parser_lineno); }
-	
+	| YY_HEAD expr { $$ = new NodeUn(new OpHead, $2, _parser_lineno); }
+
 	| YY_LPAR expr YY_RPAR { $$ = $2; }
 
 	| YY_STR { $$ = new NodeElem(_ef.create(ElemStr::id,$1),_parser_lineno); free($1); }

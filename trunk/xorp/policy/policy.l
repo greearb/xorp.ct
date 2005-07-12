@@ -66,12 +66,15 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  return YY_INT;
 		}  
 
-\"		BEGIN(STR);
+\"|\'		BEGIN(STR);
 
-<STR>\"		BEGIN(INITIAL);
+<STR>\"|\'	BEGIN(INITIAL);
 		
-<STR>[^\"]+	{ yylval.c_str = strdup(yytext); 
+<STR>[^\"\']+	{ yylval.c_str = strdup(yytext); 
 		  _parser_lineno += policy_utils::count_nl(yytext);
+		  /* XXX: a string can be started with " but terminated with '
+		   * and vice versa...
+		   */ 
 		  return YY_STR;
 		}
 
@@ -121,10 +124,11 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "not"		return YY_NOT;
 
 "+"		return YY_ADD;
+"add"		return YY_ADD;
 "\-"		return YY_SUB;
 "*"		return YY_MUL;
-
 "="		return YY_ASSIGN;
+"head"		return YY_HEAD;
 
 "accept"	return YY_ACCEPT;
 "reject"	return YY_REJECT;

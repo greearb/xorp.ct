@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,22 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/operator.hh,v 1.1 2004/09/17 13:48:59 abittau Exp $
+// $XORP: xorp/policy/common/operator.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
 
 #ifndef __POLICY_COMMON_OPERATOR_HH__
 #define __POLICY_COMMON_OPERATOR_HH__
 
 #include "operator_base.hh"
 
-/**
- * @short Logical NOT operation.
- */
-class OpNot : public UnOper {
-public:
-    ~OpNot() {}
-
-    string str() const { return "NOT"; }
-};
+#define DEFINE_UNOPER(name,human) \
+class name : public UnOper { \
+public: \
+    ~name() {} \
+    string str() const { return #human; } \
+}; 
 
 // Macro ugliness
 // name is the name of the class/operation
@@ -44,7 +42,6 @@ DEFINE_BINOPER(OpAnd,AND)
 DEFINE_BINOPER(OpOr,OR)
 DEFINE_BINOPER(OpXor,XOR)
 
-
 // Relational operators
 DEFINE_BINOPER(OpEq,==)
 DEFINE_BINOPER(OpNe,!=)
@@ -53,14 +50,16 @@ DEFINE_BINOPER(OpGt,>)
 DEFINE_BINOPER(OpLe,<=)
 DEFINE_BINOPER(OpGe,>=)
 
-
 // Math operators
 DEFINE_BINOPER(OpAdd,+)
 DEFINE_BINOPER(OpSub,-)
 DEFINE_BINOPER(OpMul,*)
 
-
 // Regular expression operator
 DEFINE_BINOPER(OpRegex,REGEX)
+
+// Unary operators
+DEFINE_UNOPER(OpNot,NOT)
+DEFINE_UNOPER(OpHead,HEAD)
 
 #endif // __POLICY_COMMON_OPERATOR_HH__
