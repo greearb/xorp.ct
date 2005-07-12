@@ -31,11 +31,12 @@
 #include "libxorp/callback.hh"
 
 #include "libxorp/ipv4.hh"
-#include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6.hh"
-#include "libxorp/ipv6net.hh"
+#include "libxorp/ipnet.hh"
 
 #include "libxorp/eventloop.hh"
+
+#include "libproto/spt.hh"
 
 #include "ospf.hh"
 #include "delay_queue.hh"

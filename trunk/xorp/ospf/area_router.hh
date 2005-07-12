@@ -182,6 +182,8 @@ class AreaRouter {
     OspfTypes::AreaType _area_type;	// Type of this area.
     const uint32_t _options;		// Options that we are sending.
 
+    Spt<IPNet<A> > _spt;			// SPT computation unit.
+
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
     deque<size_t> _empty_slots;		// Available slots in the Database.

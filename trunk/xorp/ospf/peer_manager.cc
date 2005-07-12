@@ -32,6 +32,7 @@
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
 
 #include "libxorp/eventloop.hh"
 
