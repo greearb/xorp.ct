@@ -2047,13 +2047,18 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
 					 A::OSPFIGP_ROUTERS(), 
 					 _peer.get_interface_address());
 	break;
-    case OspfTypes::BROADCAST:
+    case OspfTypes::BROADCAST: {
+	A dest;
 	if (is_DR_or_BDR()) {
-	    transmit = new SimpleTransmit<A>(pkt,
-					     A::OSPFIGP_ROUTERS(), 
-					     _peer.get_interface_address());
-	    break;
+	    dest = A::OSPFIGP_DESIGNATED_ROUTERS();
+	} else {
+	    dest = A::OSPFIGP_ROUTERS();
 	}
+	transmit = new SimpleTransmit<A>(pkt,
+					 dest, 
+					 _peer.get_interface_address());
+    }
+	break;
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
     case OspfTypes::VirtualLink:
@@ -2673,7 +2678,16 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 	// neighbours have received this LSA already.
 	if (_peer.is_neighbour_DR_or_BDR(nid))
 	    return true;
+
+	// (4) If this peer (interface) is in state Backup then out of
+	// here.
+	if (_peer.get_state() == Peer<A>::Backup)
+	    return true;
     }
+
+    // (5) This LSA should be flooded now.
+
+    XLOG_WARNING("TBD increment LSA's LS age by InfTransDelay");
 
     _lsa_queue.push_back(lsar);
 
