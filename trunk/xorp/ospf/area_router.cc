@@ -290,8 +290,6 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
 	    publish(peerid, nid, (*i));
 
-	    XLOG_WARNING("TBD Section 13.3");
-
 	    // (c) Remove the current copy from neighbours
 	    // retransmission lists.
 	    // (d) Install the new LSA.
