@@ -401,6 +401,7 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 
 \"			{
 			BEGIN(string);
+			/* XXX: include the original quote */
 			tplt_parsebuf="\"";
 			}
 
@@ -421,13 +422,14 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 			tplt_parsebuf += "\n";
 			}
 
-<string>\\+\n		/* allow quoted newlines */ {
-			tplt_linenum++;
+<string>\\+n		/* allow C-style quoted newlines */ {
+			/* XXX: don't increment the line number */
 			tplt_parsebuf += "\n";
 			}
 
 <string>\"		{
 			BEGIN(INITIAL);
+			/* XXX: include the original quote */
 			tplt_parsebuf += "\"";
 			tpltlval = strdup(tplt_parsebuf.c_str());
 			return STRING;

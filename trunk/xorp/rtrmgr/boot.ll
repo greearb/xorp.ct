@@ -329,6 +329,7 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 
 \"			{
 			BEGIN(string);
+			/* XXX: don't include the original quote */
 			parsebuf="";
 			}
 
@@ -349,13 +350,14 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 			parsebuf += "\n";
 			}
 
-<string>\\+\n		/* allow quoted newlines */ {
-			boot_linenum++;
+<string>\\+n		/* allow C-style quoted newlines */ {
+			/* XXX: don't increment the line number */
 			parsebuf += "\n";
 			}
 
 <string>\"		{
 			BEGIN(INITIAL);
+			/* XXX: don't include the original quote */
 			bootlval = strdup(parsebuf.c_str());
 			return STRING;
 			}
