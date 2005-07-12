@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,17 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_parser.hh,v 1.1 2004/09/17 13:48:49 abittau Exp $
+// $XORP: xorp/policy/policy_parser.hh,v 1.2 2005/03/25 02:54:08 pavlin Exp $
 
 #ifndef __POLICY_POLICY_PARSER_HH__
 #define __POLICY_POLICY_PARSER_HH__
 
-
 #include "node.hh"
-
+#include "term.hh"
 #include <string>
 #include <vector>
-
 
 /**
  * @short Minimises global namespace pollution of yacc/lex variables.
@@ -40,11 +39,12 @@ namespace policy_parser {
  *
  * @return 0 on success.
  * @param outnodes where parse tree will be stored.
- * @param conf configuration to parse
+ * @param block the policy block [source, action, dest] which is being parsed.
+ * @param conf configuration to parse.
  * @param outerr on error, this buffer will be filled with an error message.
  */
-int policy_parse(vector<Node*>& outnodes, const string& conf, string& outerr);
-
+int policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block,
+	         const string& conf, string& outerr);
 
 // THESE SHOULD NOT BE TOUCHED!
 extern vector<Node*>* _parser_nodes;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/xrl_target.hh,v 1.3 2005/07/01 22:54:35 abittau Exp $
+// $XORP: xorp/policy/xrl_target.hh,v 1.4 2005/07/09 00:32:46 abittau Exp $
 
 #ifndef __POLICY_XRL_TARGET_HH__
 #define __POLICY_XRL_TARGET_HH__
@@ -67,9 +67,7 @@ public:
         const string&   term,
 	const uint32_t& block,
         const string&   order,
-        const string&   variable,
-        const string&   op,
-        const string&   arg);
+        const string&   statement);
     
     XrlCmdError policy_0_1_create_policy(
         // Input values,

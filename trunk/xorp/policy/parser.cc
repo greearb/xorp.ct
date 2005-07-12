@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,28 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/parser.cc,v 1.1 2004/09/17 13:48:49 abittau Exp $"
+#ident "$XORP: xorp/policy/parser.cc,v 1.2 2005/03/25 02:54:07 pavlin Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "parser.hh"
 #include "policy_parser.hh"
 #include "policy/common/policy_utils.hh"
 
-
-// interface with lex & yacc
-extern int policy_parse(vector<Node*>& outnodes, 
-			const string& conf, 
-			string& outerr);
-
-
 Parser::Nodes* 
-Parser::parse(const string& text) {
+Parser::parse(const Term::BLOCKS& block, const string& text)
+{
     Nodes* nodes = new Nodes();
     
     // there was an error
-    if(policy_parser::policy_parse(*nodes,text,_last_error)) {
+    if(policy_parser::policy_parse(*nodes, block, text, _last_error)) {
 	
 	// delete semi-parsed tree  
 	policy_utils::delete_vector(nodes);
@@ -43,6 +37,7 @@ Parser::parse(const string& text) {
     return nodes;
 }
 
-string Parser::last_error() {
+string Parser::last_error()
+{
     return _last_error;
 }

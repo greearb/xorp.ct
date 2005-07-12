@@ -12,15 +12,12 @@
  */
 
 #include "config.h"
-
 #include "policy/common/element.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
 #include "policy_parser.hh"
-
 #include <vector>
 #include <string>
-
 
 extern int yylex(void);
 
@@ -36,8 +33,6 @@ static ElementFactory _ef;
 	char *c_str;
 	Node *node;
 };
-
-
 
 %token <c_str> YY_INT YY_UINT YY_STR YY_ID 
 %token <c_str> YY_IPV4 YY_IPV4NET YY_IPV6 YY_IPV6NET
@@ -117,7 +112,5 @@ expr:
 	| YY_IPV4NET { $$ = new NodeElem(_ef.create(ElemIPv4Net::id,$1),_parser_lineno); free($1); }
 	| YY_IPV6NET { $$ = new NodeElem(_ef.create(ElemIPv6Net::id,$1),_parser_lineno); free($1); }
         ;
-
-
 
 %%

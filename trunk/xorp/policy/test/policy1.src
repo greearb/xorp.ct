@@ -1,13 +1,13 @@
 policy-statement accepted {
 	term a {
 		source {
-			protocol "==" (static_routes);
+			protocol : static_routes;
 		}
 		dest {
 		}
 		action {
-			trace "=" (1);
-			aspath "=" ("6234" + aspath);
+			trace: 1;
+			aspath = "6234" + aspath;
 		}
 	}
 }

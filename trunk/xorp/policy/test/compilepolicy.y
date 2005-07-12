@@ -27,7 +27,6 @@ static yy_statements* _yy_statements = NULL;
 
 // add blocks to configuration, and delete stuff from memory
 static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
-	if(pname == "ao" || tname == "ao"){}
 	// source, action, dest
 	for(int i = 0; i < 3; i++) {
 		yy_statements* statements = term.block[i];
@@ -43,9 +42,7 @@ static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
 		    yy_statement* statement = *j;
 
 		    _yy_configuration.update_term_block(pname, tname, i, order,
-		    					statement->var,
-							statement->op,
-							statement->arg);
+		    					*statement);
 		    delete statement;
 		    order++;
 		}
@@ -60,7 +57,7 @@ static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
 	yy_statements* statements;
 };
 
-%token <c_str> YY_INT YY_STR YY_ID YY_PAR
+%token <c_str> YY_INT YY_STR YY_ID YY_STATEMENT
 %token <c_str> YY_SOURCEBLOCK YY_DESTBLOCK YY_ACTIONBLOCK
 %token <c_str> YY_IPV4 YY_IPV4NET YY_IPV6 YY_IPV6NET
 
@@ -190,21 +187,17 @@ action:
 	}
 	;
 
-statements:    statements YY_ID YY_STR YY_PAR YY_SEMICOLON
+statements:    statements YY_STATEMENT YY_SEMICOLON
 	       {
 	       
 	       	if (_yy_statements == NULL) {
 			_yy_statements = new yy_statements;
 		}
 		
-		yy_statement* statement = new yy_statement;
-		statement->var = $2;
-		statement->op = $3;
-		statement->arg = $4;
-		
+		yy_statement* statement = new yy_statement($2);
+		statement->append(";");
+	
 		free($2);
-		free($3);
-		free($4);
 
 		_yy_statements->push_back(statement);
 	       }

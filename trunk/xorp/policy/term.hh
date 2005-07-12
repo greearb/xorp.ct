@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,17 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.6 2005/07/01 22:54:34 abittau Exp $
+// $XORP: xorp/policy/term.hh,v 1.7 2005/07/09 00:32:45 abittau Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
 
 #include "policy/common/policy_exception.hh"
-
-#include "parser.hh"
-
 #include <map>
 #include <string>
+#include "node_base.hh"
 
 /**
  * @short A term is an atomic policy unit. 
@@ -32,6 +31,15 @@
  */
 class Term {
 public:
+    enum BLOCKS {
+	SOURCE = 0,
+	DEST,
+	ACTION,
+
+	// keep this last
+	LAST_BLOCK
+    };
+
     // the integer is the "line number", the node is the parsed structure [AST]
     // of the statement(s) in that line.
     typedef map<uint64_t, Node*> Nodes;
@@ -60,12 +68,10 @@ public:
      *
      * @param block the block to update (0:source, 1:dest, 2:action).
      * @param order numerical position (local) of statement.
-     * @param variable the attribute (such as metric) to operate on.
-     * @param op specific operation to perform on variable.
-     * @param arg the argument to the operator.
+     * @param statement the statement to insert.
      */
     void set_block(const uint32_t& block, const uint64_t& order, 
-		   const string& variable, const string& op, const string& arg);
+		   const string& statement);
 
     /**
      * Deletes statements in the location specified by order and block.
@@ -99,16 +105,15 @@ public:
      */
     Nodes& action_nodes() { return *_action_nodes; }
 
+    /**
+     * Convert block number to human readable form.
+     *
+     * @param num the block number.
+     * @return human readable representation of block name.
+     */
+    static string block2str(uint32_t num); 
+
 private:
-    enum BLOCKS {
-	SOURCE = 0,
-	DEST,
-	ACTION,
-
-	// keep this last
-	LAST_BLOCK
-    };
-
     string _name;
    
     Nodes* _block_nodes[3];
@@ -116,8 +121,6 @@ private:
     Nodes*& _source_nodes; 
     Nodes*& _dest_nodes;
     Nodes*& _action_nodes;
-
-    Parser _parser;
 
     // not impl
     Term(const Term&);

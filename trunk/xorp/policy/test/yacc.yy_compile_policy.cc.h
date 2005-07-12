@@ -5,7 +5,7 @@
 #define YY_INT 257
 #define YY_STR 258
 #define YY_ID 259
-#define YY_PAR 260
+#define YY_STATEMENT 260
 #define YY_SOURCEBLOCK 261
 #define YY_DESTBLOCK 262
 #define YY_ACTIONBLOCK 263

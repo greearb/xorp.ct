@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.3 2005/07/01 22:54:35 abittau Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.4 2005/07/09 00:32:46 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -106,14 +106,11 @@ XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
 					      const string&   term,
 					      const uint32_t& block,
 					      const string&   order,
-					      const string&   variable,
-					      const string&   op,
-					      const string&   arg)
+					      const string&   statement)
 {
     try {
 	uint64_t o = strtoll(order.c_str(), NULL, 10);
-	_policy_target.update_term_block(policy, term, block, o,
-					 variable, op, arg);
+	_policy_target.update_term_block(policy, term, block, o, statement);
     } catch(const PolicyException& e) {
         return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
 					   + " term " + term + " failed: "

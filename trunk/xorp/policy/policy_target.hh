@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.3 2005/07/01 22:54:34 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.4 2005/07/09 00:32:45 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -82,17 +82,13 @@ public:
      * @param term the name of the term.
      * @param block the block to update (0:source, 1:dest, 2:action).
      * @param order numerical position (local) of statement.
-     * @param variable the attribute (such as metric) to operate on.
-     * @param op specific operation to perform on variable.
-     * @param arg the argument to the operator.
+     * @param statement the statement to insert.
      */
     void update_term_block(const string& policy,
 			   const string& term,
 			   const uint32_t& block,
 			   const uint64_t& order,
-			   const string& variable,
-			   const string& op,
-			   const string& arg);
+			   const string& statement);
     
     /**
      * Attempts to create a policy.

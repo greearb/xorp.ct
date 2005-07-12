@@ -75,7 +75,6 @@ static yy_statements* _yy_statements = NULL;
 
 /* add blocks to configuration, and delete stuff from memory*/
 static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
-	if(pname == "ao" || tname == "ao"){}
 	/* source, action, dest*/
 	for(int i = 0; i < 3; i++) {
 		yy_statements* statements = term.block[i];
@@ -91,9 +90,7 @@ static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
 		    yy_statement* statement = *j;
 
 		    _yy_configuration.update_term_block(pname, tname, i, order,
-		    					statement->var,
-							statement->op,
-							statement->arg);
+		    					*statement);
 		    delete statement;
 		    order++;
 		}
@@ -101,17 +98,17 @@ static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
 	}
 }
 
-#line 58 "compilepolicy.y"
+#line 55 "compilepolicy.y"
 typedef union {
 	char *c_str;
 	yy_statements* statements;
 } YYSTYPE;
-#line 110 "yacc.yy_compile_policy.cc"
+#line 107 "yacc.yy_compile_policy.cc"
 #define YYERRCODE 256
 #define YY_INT 257
 #define YY_STR 258
 #define YY_ID 259
-#define YY_PAR 260
+#define YY_STATEMENT 260
 #define YY_SOURCEBLOCK 261
 #define YY_DESTBLOCK 262
 #define YY_ACTIONBLOCK 263
@@ -136,49 +133,47 @@ const short yy_compile_policylhs[] = {                                        -1
 };
 const short yy_compile_policylen[] = {                                         2,
     2,    2,    5,    5,    0,    4,    5,    8,    0,    4,
-    4,    4,    5,    0,
+    4,    4,    3,    0,
 };
 const short yy_compile_policydefred[] = {                                      5,
     0,    0,    0,    0,    0,    1,    2,    0,    0,    0,
     0,    9,    0,    0,    0,    0,    6,    3,    4,    7,
     0,    0,    0,    0,    0,   14,    0,    0,    0,   14,
-    0,    0,    0,   10,    0,   14,    8,    0,   11,    0,
-    0,   12,   13,
+    0,    0,    0,   10,    0,   14,    8,   13,   11,    0,
+   12,
 };
 const short yy_compile_policydgoto[] = {                                       1,
    25,   28,   32,    6,    7,   16,   29,
 };
 const short yy_compile_policysindex[] = {                                      0,
- -268, -254, -252, -244, -243,    0,    0, -251, -241, -239,
- -237,    0, -246, -245, -242, -266,    0,    0,    0,    0,
- -235, -240, -248, -238, -247,    0, -236, -234, -259,    0,
- -233, -232, -230,    0, -258,    0,    0, -228,    0, -257,
- -231,    0,    0,
+ -263, -254, -252, -243, -242,    0,    0, -251, -239, -238,
+ -237,    0, -246, -245, -244, -266,    0,    0,    0,    0,
+ -234, -241, -247, -240, -236,    0, -235, -248, -260,    0,
+ -233, -231, -228,    0, -259,    0,    0,    0,    0, -258,
+    0,
 };
 const short yy_compile_policyrindex[] = {                                      0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,
+    0,
 };
 const short yy_compile_policygindex[] = {                                      0,
-    0,    0,    0,    0,    0,    0,  -16,
+    0,    0,    0,    0,    0,    0,  -27,
 };
-#define YYTABLESIZE 41
+#define YYTABLESIZE 40
 const short yy_compile_policytable[] = {                                      33,
-   33,   33,    2,   20,    8,   21,    9,    3,    4,    5,
-   34,   39,   42,   35,   10,   11,   13,   12,   14,   40,
-   15,   17,   18,   22,   24,   19,   27,   38,   23,    0,
-   26,   41,   30,    0,    0,   36,   43,   37,    0,    0,
-   31,
+   33,   33,   35,   20,    8,   21,    9,    2,   40,   34,
+   39,   41,    3,    4,    5,   10,   11,   12,   13,   14,
+   15,   17,   18,   19,   22,   24,   31,   23,   26,    0,
+    0,    0,    0,   30,    0,   36,    0,   27,   37,   38,
 };
-const short yy_compile_policycheck[] = {                                     259,
-  259,  259,  271,  270,  259,  272,  259,  276,  277,  278,
-  270,  270,  270,   30,  259,  259,  258,  269,  258,   36,
-  258,  268,  268,  259,  273,  268,  274,  258,  269,   -1,
-  269,  260,  269,   -1,   -1,  269,  268,  270,   -1,   -1,
-  275,
+const short yy_compile_policycheck[] = {                                     260,
+  260,  260,   30,  270,  259,  272,  259,  271,   36,  270,
+  270,  270,  276,  277,  278,  259,  259,  269,  258,  258,
+  258,  268,  268,  268,  259,  273,  275,  269,  269,   -1,
+   -1,   -1,   -1,  269,   -1,  269,   -1,  274,  270,  268,
 };
 #define YYFINAL 1
 #ifndef YYDEBUG
@@ -194,7 +189,7 @@ const char * const yy_compile_policyname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"YY_INT","YY_STR","YY_ID",
-"YY_PAR","YY_SOURCEBLOCK","YY_DESTBLOCK","YY_ACTIONBLOCK","YY_IPV4",
+"YY_STATEMENT","YY_SOURCEBLOCK","YY_DESTBLOCK","YY_ACTIONBLOCK","YY_IPV4",
 "YY_IPV4NET","YY_IPV6","YY_IPV6NET","YY_SEMICOLON","YY_LBRACE","YY_RBRACE",
 "YY_POLICY_STATEMENT","YY_TERM","YY_SOURCE","YY_DEST","YY_ACTION","YY_SET",
 "YY_EXPORT","YY_IMPORT",
@@ -213,7 +208,7 @@ const char * const yy_compile_policyrule[] = {
 "source : YY_SOURCE YY_LBRACE statements YY_RBRACE",
 "dest : YY_DEST YY_LBRACE statements YY_RBRACE",
 "action : YY_ACTION YY_LBRACE statements YY_RBRACE",
-"statements : statements YY_ID YY_STR YY_PAR YY_SEMICOLON",
+"statements : statements YY_STATEMENT YY_SEMICOLON",
 "statements :",
 };
 #endif
@@ -439,7 +434,7 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 80 "compilepolicy.y"
+#line 77 "compilepolicy.y"
 {
 				list<string> tmp;
 
@@ -455,7 +450,7 @@ case 3:
 				}
 break;
 case 4:
-#line 94 "compilepolicy.y"
+#line 91 "compilepolicy.y"
 {
 				list<string> tmp;
 
@@ -471,7 +466,7 @@ case 4:
 				}
 break;
 case 6:
-#line 111 "compilepolicy.y"
+#line 108 "compilepolicy.y"
 {
 	  	string id = yyvsp[-2].c_str;
 		string sets = yyvsp[-1].c_str;
@@ -483,7 +478,7 @@ case 6:
 	  }
 break;
 case 7:
-#line 124 "compilepolicy.y"
+#line 121 "compilepolicy.y"
 {
 		string pname = yyvsp[-3].c_str;
 		free(yyvsp[-3].c_str);
@@ -509,7 +504,7 @@ case 7:
 	  }
 break;
 case 8:
-#line 152 "compilepolicy.y"
+#line 149 "compilepolicy.y"
 {
 	  	yy_tb* tb = new yy_tb;
 
@@ -523,7 +518,7 @@ case 8:
 	  }
 break;
 case 10:
-#line 168 "compilepolicy.y"
+#line 165 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -531,7 +526,7 @@ case 10:
 	}
 break;
 case 11:
-#line 177 "compilepolicy.y"
+#line 174 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -539,7 +534,7 @@ case 11:
 	}
 break;
 case 12:
-#line 186 "compilepolicy.y"
+#line 183 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -547,26 +542,22 @@ case 12:
 	}
 break;
 case 13:
-#line 194 "compilepolicy.y"
+#line 191 "compilepolicy.y"
 {
 	       
 	       	if (_yy_statements == NULL) {
 			_yy_statements = new yy_statements;
 		}
 		
-		yy_statement* statement = new yy_statement;
-		statement->var = yyvsp[-3].c_str;
-		statement->op = yyvsp[-2].c_str;
-		statement->arg = yyvsp[-1].c_str;
-		
-		free(yyvsp[-3].c_str);
-		free(yyvsp[-2].c_str);
+		yy_statement* statement = new yy_statement(yyvsp[-1].c_str);
+		statement->append(";");
+	
 		free(yyvsp[-1].c_str);
 
 		_yy_statements->push_back(statement);
 	       }
 break;
-#line 570 "yacc.yy_compile_policy.cc"
+#line 561 "yacc.yy_compile_policy.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

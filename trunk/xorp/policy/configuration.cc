@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.4 2005/07/08 02:06:21 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.5 2005/07/09 00:32:44 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -66,13 +66,11 @@ Configuration::update_term_block(const string& policy,
                                  const string& term,
 	                         const uint32_t& block,
 	                         const uint64_t& order,
-		                 const string& variable,
-		                 const string& op,
-			         const string& arg)
+		                 const string& statement)
 {
     Term& t = find_term(policy,term);
     try {
-	t.set_block(block, order, variable, op, arg);
+	t.set_block(block, order, statement);
         _modified_policies.insert(policy); // recompile on commit.
     } catch(const Term::term_syntax_error& e) {
         string err = "In policy " + policy + ": " + e.str();

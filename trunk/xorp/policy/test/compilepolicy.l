@@ -1,15 +1,15 @@
 %{
+// XXX: this whole parsing is becoming a mess... Once we finalize how to test
+// policy and what it should look like, it needs a re-write.
 #include "config.h"
 #include "policy/test/compilepolicy.hh"
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
 #include <sstream>
 
-
 #define yylval yy_compile_policylval
 #define yyparse yy_compile_policyparse
 #define yyerror yy_compile_policyerror
-
 
 void yyerror(const char *);
 int yyparse(void);
@@ -25,14 +25,12 @@ namespace {
 %option outfile="lex.yy_compile_policy.cc"
 %option noyywrap
 %option nounput
-%x STR
-%x PAR
+%x STR BLOCK
 
 RE_IPV4_BYTE 25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?
 RE_IPV4 {RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}
 RE_IPV4_PREFIXLEN 3[0-2]|[0-2]?[0-9]
 RE_IPV4NET {RE_IPV4}\/{RE_IPV4_PREFIXLEN}
-
 
 RE_H4 [a-fA-F0-9]{1,4}
 RE_H4_COLON {RE_H4}:
@@ -50,9 +48,6 @@ RE_IPV6 	{RE_IPV6_P1}|{RE_IPV6_P2}|{RE_IPV6_P3}|{RE_IPV6_P4}|{RE_IPV6_P5}|{RE_IP
 RE_IPV6_PREFIXLEN 12[0-8]|1[01][0-9]|[0-9][0-9]?
 RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
-
-
-
 %%
 
 \"		BEGIN(STR);
@@ -61,22 +56,30 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 "}"		return YY_RBRACE;
 
-"source"	return YY_SOURCE;
-"dest"		return YY_DEST;
-"action"	return YY_ACTION;
+"source"	BEGIN(BLOCK); return YY_SOURCE;
+"dest"		BEGIN(BLOCK); return YY_DEST;
+"action"	BEGIN(BLOCK); return YY_ACTION;
+
+<BLOCK>";"	{ return YY_SEMICOLON; }
+<BLOCK>[[:blank:]\n]*"{"[[:blank:]\n]*	{  
+	 	  _yy_lineno += policy_utils::count_nl(yytext);
+	   	  return YY_LBRACE; 
+					}
+<BLOCK>[[:blank:]\n]*"}"[[:blank:]\n]*	{
+		  BEGIN(INITIAL);
+		  _yy_lineno += policy_utils::count_nl(yytext);
+		  return YY_RBRACE; 
+					}
+
+<BLOCK>[^;{}]*	{ yylval.c_str = strdup(yytext);
+		  _yy_lineno += policy_utils::count_nl(yytext);
+		  return YY_STATEMENT;
+		}
 
 <STR>\"		BEGIN(INITIAL);
 <STR>[^\"]+	{ yylval.c_str = strdup(yytext); 
 		  _yy_lineno += policy_utils::count_nl(yytext);
 		  return YY_STR;
-		}
-
-\(		BEGIN(PAR);
-
-<PAR>\)		BEGIN(INITIAL);
-<PAR>[^\)]+	{ yylval.c_str = strdup(yytext); 
-		  _yy_lineno += policy_utils::count_nl(yytext);
-		  return YY_PAR;
 		}
 
 {RE_IPV4}	{
@@ -88,7 +91,6 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4NET;
 		}
-
 		
 {RE_IPV6}	{
 		  yylval.c_str = strdup(yytext);
@@ -100,29 +102,24 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  return YY_IPV6NET;
 		}
 
-
 "term"		return YY_TERM;
 
-
 "policy\-statement"	return YY_POLICY_STATEMENT;
-
 
 "SET"		return YY_SET;
 
 "import"	return YY_IMPORT;
 "export"	return YY_EXPORT;
 
-[[:alpha:]][[:alnum:]_]*		{ yylval.c_str = strdup(yytext);
+[[:alpha:]][[:alnum:]_]*	{ yylval.c_str = strdup(yytext);
 				  return YY_ID;
 				}  
 
 ;		return YY_SEMICOLON;
-		  
 
 "\n"		_yy_lineno++;
 
 [[:blank:]]+	/* eat blanks */
-
 
 .		{ yyerror("Unknown character"); }
 

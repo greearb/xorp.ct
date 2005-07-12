@@ -1,13 +1,10 @@
 %{
 
 #include "config.h"
-
 #include "policy/common/policy_utils.hh"
-
 #include <vector>
 #include <string>
 #include <sstream>
-
 #include "policy_parser.hh"
 #include "yacc.yy_policy_parser.cc.h"
 
@@ -15,10 +12,8 @@
 #define yyerror yy_policy_parsererror
 #define yyparse yy_policy_parserparse
 
-
 void yyerror(const char *m);
 extern int yyparse(void);
-
 
 using namespace policy_parser;
 
@@ -26,14 +21,13 @@ using namespace policy_parser;
 vector<Node*>* policy_parser::_parser_nodes;
 unsigned policy_parser::_parser_lineno;
 
-
 // try not to pollute
-namespace  {
+namespace {
 	string _last_error;
+	Term::BLOCKS _block;
 }
 
 %}
-
 
 %option prefix="yy_policy_parser"
 %option outfile="lex.yy_policy_parser.cc"
@@ -45,7 +39,6 @@ RE_IPV4_BYTE 25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?
 RE_IPV4 {RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}
 RE_IPV4_PREFIXLEN 3[0-2]|[0-2]?[0-9]
 RE_IPV4NET {RE_IPV4}\/{RE_IPV4_PREFIXLEN}
-
 
 RE_H4 [a-fA-F0-9]{1,4}
 RE_H4_COLON {RE_H4}:
@@ -62,9 +55,6 @@ RE_IPV6_P9      ({RE_H4_COLON}{0,6}{RE_H4})?::
 RE_IPV6 	{RE_IPV6_P1}|{RE_IPV6_P2}|{RE_IPV6_P3}|{RE_IPV6_P4}|{RE_IPV6_P5}|{RE_IPV6_P6}|{RE_IPV6_P7}|{RE_IPV6_P8}|{RE_IPV6_P9}
 RE_IPV6_PREFIXLEN 12[0-8]|1[01][0-9]|[0-9][0-9]?
 RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
-
-
-
 
 %%
 
@@ -106,6 +96,14 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  return YY_IPV6NET;
 		}
 
+":"		{
+		  // the colon is an alias for asignment in action and equality
+		  // in the source / dest blocks.
+		  if (_block == Term::ACTION)
+		  	return YY_ASSIGN;
+		  else
+		  	return YY_EQ;
+		}
 
 "("		return YY_LPAR;
 ")"		return YY_RPAR;
@@ -137,12 +135,11 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "protocol"	return YY_PROTOCOL;
 
 [[:alpha:]][[:alnum:]_]*		{ yylval.c_str = strdup(yytext);
-				  return YY_ID;
-				}  
+					  return YY_ID;
+					}  
 
 ;		return YY_SEMICOLON;
 		  
-
 [[:blank:]]+	/* eat blanks */
 
 "\n"		_parser_lineno++;
@@ -151,9 +148,9 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 %%
 
-void yyerror(const char *m) {
+void yyerror(const char *m)
+{
         ostringstream oss;
-
         oss << "Error on line " <<  _parser_lineno << " near (";
 
 	for(int i = 0; i < yyleng; i++)
@@ -165,13 +162,16 @@ void yyerror(const char *m) {
 
 // Everything is put in the lexer because of YY_BUFFER_STATE...
 int 
-policy_parser::policy_parse(vector<Node*>& outnodes, const string& conf, string& outerr) {
+policy_parser::policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block, 
+			    const string& conf, string& outerr)
+{
 
         YY_BUFFER_STATE yybuffstate = yy_scan_string(conf.c_str());
 
         _last_error = "No error";
         _parser_nodes = &outnodes;
         _parser_lineno = 1;
+	_block = block;
 
         int res = yyparse();
         

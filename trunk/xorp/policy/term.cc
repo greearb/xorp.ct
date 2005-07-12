@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.8 2005/07/08 02:06:21 abittau Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.9 2005/07/09 00:32:45 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,6 +23,7 @@
 #include "libxorp/debug.h"
 #include "term.hh"
 #include "policy/common/policy_utils.hh"
+#include "parser.hh"
 
 using namespace policy_utils;
 
@@ -45,14 +46,14 @@ Term::~Term()
 
 void
 Term::set_block(const uint32_t& block, const uint64_t& order,
-		const string& variable, const string& op, const string& arg)
+		const string& statement)
 {
     if (block >= LAST_BLOCK) {
 	throw term_syntax_error("Unknown block: " + to_str(block));
     }
 
     // check if we want to delete
-    if (variable.empty() && op.empty() && arg.empty()) {
+    if (statement.empty()) {
 	del_block(block, order);
 	return;
     }
@@ -64,38 +65,18 @@ Term::set_block(const uint32_t& block, const uint64_t& order,
 				+ to_str(order));
     }
 
-    string oper = op;
-    // XXX: rebuild original statement
-    // FIXME: no need to rebuild original statement + reparse... be smart...
-    // rtrmgr is "helping" us... well we have less freedom on syntax though...
-    // XXX: when we know what the front end syntax should be, and who does the
-    // parsing, we should fix all this...
-    if (oper == ":") { // default operator... [most of the times]
-	switch(block) {
-	    case SOURCE:
-	    case DEST:
-		oper = "==";
-		break;
-		
-	    case ACTION:
-		oper = "=";
-		break;
-
-	    default:
-		XLOG_ASSERT(false);
-		break;
-	}
-    }
-    string statement = variable + " " + oper + " " + arg + ";";
     debug_msg("[POLICY] Statement=(%s)\n", statement.c_str());
 
     // parse and check syntax error
-    Parser::Nodes* nodes = _parser.parse(statement);
+    Parser parser;
+    // cast should be safe... because of check earlier in method.
+    Parser::Nodes* nodes = parser.parse(static_cast<BLOCKS>(block), statement);
     if (!nodes) {
-	string err = _parser.last_error();
+	string err = parser.last_error();
 	// XXX convert block from int to string... [human readable]
 	throw term_syntax_error("Syntax error in term " + _name + 
-				" block " + to_str(block) + " " + err);
+				" block " + block2str(block) + " statement=("
+				+ statement + "): " + err);
     }
     XLOG_ASSERT(nodes->size() == 1); // XXX a single statement!
 
@@ -115,4 +96,22 @@ Term::del_block(const uint32_t& block, const uint64_t& order)
 				+ to_str(order));
     }
     conf_block.erase(i);
+}
+
+string
+Term::block2str(uint32_t block)
+{
+    switch (block) {
+	case SOURCE:
+	    return "source";
+
+	case DEST:
+	    return "dest";
+	    
+	case ACTION:
+	    return "action";
+    
+	default:
+	    return "UNKNOWN";
+    }
 }

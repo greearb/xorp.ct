@@ -310,38 +310,38 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 36
-#define YY_END_OF_BUFFER 37
+#define YY_NUM_RULES 37
+#define YY_END_OF_BUFFER 38
 static yyconst short int yy_accept[690] =
     {   0,
-        0,    0,    0,    0,   37,   35,   33,   34,   35,    3,
-       10,   11,   24,   22,   23,    1,    1,    1,   35,   32,
-       16,   25,   17,   31,   31,   31,   31,   31,   31,   31,
-       31,   31,   31,    5,    4,   33,   13,    2,    0,    1,
-        0,    0,    1,    1,    1,    8,   14,   12,   15,   31,
-       31,   31,   31,   31,   31,   31,   19,   31,   31,   31,
+        0,    0,    0,    0,   38,   36,   34,   35,   36,    3,
+       11,   12,   25,   23,   24,    1,    1,    1,   10,   33,
+       17,   26,   18,   32,   32,   32,   32,   32,   32,   32,
+       32,   32,   32,    5,    4,   34,   14,    2,    0,    1,
+        0,    0,    1,    1,    1,    8,   15,   13,   16,   32,
+       32,   32,   32,   32,   32,   32,   20,   32,   32,   32,
         5,    0,    0,    0,    1,    0,    0,    8,    1,    1,
-        0,    8,    8,    8,    8,   31,   31,   28,   31,   18,
-       21,   31,   31,   20,    0,    0,    0,    0,    0,    1,
+        0,    8,    8,    8,    8,   32,   32,   29,   32,   19,
+       22,   32,   32,   21,    0,    0,    0,    0,    0,    1,
         0,    0,    0,    8,    8,    8,    8,    9,    9,    0,
 
-        8,    0,    8,    8,    8,    8,   31,   31,   31,   31,
-       31,    0,    0,    0,    0,    1,    0,    0,    8,    8,
+        8,    0,    8,    8,    8,    8,   32,   32,   32,   32,
+       32,    0,    0,    0,    0,    1,    0,    0,    8,    8,
         0,    8,    8,    8,    8,    9,    9,    9,    0,    0,
-        0,    8,    8,    8,    8,    8,    8,    8,   29,   31,
-       31,   31,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    8,    8,    8,    8,    8,    8,    8,   30,   32,
+       32,   32,    0,    0,    0,    0,    0,    0,    0,    0,
         8,    8,    8,    8,    8,    8,    8,    8,    8,    8,
         8,    9,    0,    0,    0,    0,    0,    8,    0,    8,
-        0,    8,    8,    8,    8,   26,   31,   27,    6,    6,
+        0,    8,    8,    8,    8,   27,   32,   28,    6,    6,
         6,    0,    0,    0,    8,    8,    0,    8,    8,    8,
         8,    8,    8,    0,    8,    8,    8,    8,    0,    0,
 
         0,    0,    0,    0,    0,    8,    8,    8,    8,    8,
-        8,    8,   31,    0,    6,    6,    6,    6,    0,    0,
+        8,    8,   32,    0,    6,    6,    6,    6,    0,    0,
         0,    8,    8,    8,    8,    8,    8,    8,    8,    8,
         8,    8,    8,    8,    8,    8,    8,    8,    8,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    8,
-        0,    8,    0,    8,    8,    8,    8,   30,    7,    7,
+        0,    8,    0,    8,    8,    8,    8,   31,    7,    7,
         7,    6,    0,    0,    8,    8,    0,    8,    8,    8,
         8,    8,    8,    0,    8,    8,    8,    8,    8,    8,
         0,    8,    8,    8,    8,    8,    8,    8,    0,    0,
@@ -1430,13 +1430,10 @@ char *yytext;
 #line 2 "policy.l"
 
 #include "config.h"
-
 #include "policy/common/policy_utils.hh"
-
 #include <vector>
 #include <string>
 #include <sstream>
-
 #include "policy_parser.hh"
 #include "yacc.yy_policy_parser.cc.h"
 
@@ -1444,10 +1441,8 @@ char *yytext;
 #define yyerror yy_policy_parsererror
 #define yyparse yy_policy_parserparse
 
-
 void yyerror(const char *m);
 extern int yyparse(void);
-
 
 using namespace policy_parser;
 
@@ -1455,16 +1450,16 @@ using namespace policy_parser;
 vector<Node*>* policy_parser::_parser_nodes;
 unsigned policy_parser::_parser_lineno;
 
-
 // try not to pollute
-namespace  {
+namespace {
 	string _last_error;
+	Term::BLOCKS _block;
 }
 
 #define YY_NO_UNPUT 1
 #define STR 1
 
-#line 1468 "lex.yy_policy_parser.cc"
+#line 1463 "lex.yy_policy_parser.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1615,10 +1610,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 69 "policy.l"
+#line 59 "policy.l"
 
 
-#line 1622 "lex.yy_policy_parser.cc"
+#line 1617 "lex.yy_policy_parser.cc"
 
 	if ( yy_init )
 		{
@@ -1703,31 +1698,31 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 71 "policy.l"
+#line 61 "policy.l"
 { yylval.c_str = strdup(yytext);
 		  return YY_UINT;
 		}  
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 75 "policy.l"
+#line 65 "policy.l"
 { yylval.c_str = strdup(yytext);
 		  return YY_INT;
 		}  
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 79 "policy.l"
+#line 69 "policy.l"
 BEGIN(STR);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 81 "policy.l"
+#line 71 "policy.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 83 "policy.l"
+#line 73 "policy.l"
 { yylval.c_str = strdup(yytext); 
 		  _parser_lineno += policy_utils::count_nl(yytext);
 		  return YY_STR;
@@ -1735,7 +1730,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 88 "policy.l"
+#line 78 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4;
@@ -1743,7 +1738,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 93 "policy.l"
+#line 83 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4NET;
@@ -1751,7 +1746,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 99 "policy.l"
+#line 89 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6;
@@ -1759,7 +1754,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 104 "policy.l"
+#line 94 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6NET;
@@ -1767,142 +1762,154 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 110 "policy.l"
-return YY_LPAR;
+#line 99 "policy.l"
+{
+		  // the colon is an alias for asignment in action and equality
+		  // in the source / dest blocks.
+		  if (_block == Term::ACTION)
+		  	return YY_ASSIGN;
+		  else
+		  	return YY_EQ;
+		}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 111 "policy.l"
-return YY_RPAR;
+#line 108 "policy.l"
+return YY_LPAR;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 113 "policy.l"
-return YY_EQ; 
+#line 109 "policy.l"
+return YY_RPAR;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 114 "policy.l"
-return YY_NE;
+#line 111 "policy.l"
+return YY_EQ; 
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 115 "policy.l"
-return YY_LE;
+#line 112 "policy.l"
+return YY_NE;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 116 "policy.l"
-return YY_GE;
+#line 113 "policy.l"
+return YY_LE;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 117 "policy.l"
-return YY_LT;
+#line 114 "policy.l"
+return YY_GE;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 118 "policy.l"
-return YY_GT;
+#line 115 "policy.l"
+return YY_LT;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 120 "policy.l"
-return YY_AND;
+#line 116 "policy.l"
+return YY_GT;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 121 "policy.l"
-return YY_OR;
+#line 118 "policy.l"
+return YY_AND;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 122 "policy.l"
-return YY_XOR;
+#line 119 "policy.l"
+return YY_OR;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 123 "policy.l"
-return YY_NOT;
+#line 120 "policy.l"
+return YY_XOR;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 125 "policy.l"
-return YY_ADD;
+#line 121 "policy.l"
+return YY_NOT;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 126 "policy.l"
-return YY_SUB;
+#line 123 "policy.l"
+return YY_ADD;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 127 "policy.l"
-return YY_MUL;
+#line 124 "policy.l"
+return YY_SUB;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 129 "policy.l"
-return YY_ASSIGN;
+#line 125 "policy.l"
+return YY_MUL;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 131 "policy.l"
-return YY_ACCEPT;
+#line 127 "policy.l"
+return YY_ASSIGN;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 132 "policy.l"
-return YY_REJECT;
+#line 129 "policy.l"
+return YY_ACCEPT;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 134 "policy.l"
-return YY_SET;
+#line 130 "policy.l"
+return YY_REJECT;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 135 "policy.l"
-return YY_REGEX;
+#line 132 "policy.l"
+return YY_SET;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 137 "policy.l"
-return YY_PROTOCOL;
+#line 133 "policy.l"
+return YY_REGEX;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 139 "policy.l"
-{ yylval.c_str = strdup(yytext);
-				  return YY_ID;
-				}  
+#line 135 "policy.l"
+return YY_PROTOCOL;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 143 "policy.l"
-return YY_SEMICOLON;
+#line 137 "policy.l"
+{ yylval.c_str = strdup(yytext);
+					  return YY_ID;
+					}  
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 146 "policy.l"
-/* eat blanks */
+#line 141 "policy.l"
+return YY_SEMICOLON;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 148 "policy.l"
-_parser_lineno++;
+#line 143 "policy.l"
+/* eat blanks */
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 150 "policy.l"
-{ yyerror("Unknown character"); }
+#line 145 "policy.l"
+_parser_lineno++;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 152 "policy.l"
+#line 147 "policy.l"
+{ yyerror("Unknown character"); }
+	YY_BREAK
+case 37:
+YY_RULE_SETUP
+#line 149 "policy.l"
 ECHO;
 	YY_BREAK
-#line 1906 "lex.yy_policy_parser.cc"
+#line 1913 "lex.yy_policy_parser.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 	yyterminate();
@@ -2789,12 +2796,12 @@ int main()
 	return 0;
 	}
 #endif
-#line 152 "policy.l"
+#line 149 "policy.l"
 
 
-void yyerror(const char *m) {
+void yyerror(const char *m)
+{
         ostringstream oss;
-
         oss << "Error on line " <<  _parser_lineno << " near (";
 
 	for(int i = 0; i < yyleng; i++)
@@ -2806,13 +2813,16 @@ void yyerror(const char *m) {
 
 // Everything is put in the lexer because of YY_BUFFER_STATE...
 int 
-policy_parser::policy_parse(vector<Node*>& outnodes, const string& conf, string& outerr) {
+policy_parser::policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block, 
+			    const string& conf, string& outerr)
+{
 
         YY_BUFFER_STATE yybuffstate = yy_scan_string(conf.c_str());
 
         _last_error = "No error";
         _parser_nodes = &outnodes;
         _parser_lineno = 1;
+	_block = block;
 
         int res = yyparse();
         

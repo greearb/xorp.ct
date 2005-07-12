@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/policy/test/compilepolicy.hh,v 1.1 2005/07/01 22:54:37 abittau Exp $
 
 #ifndef __POLICY_TEST_COMPILEPOLICY_HH__
 #define __POLICY_TEST_COMPILEPOLICY_HH__
@@ -21,12 +21,7 @@
 #include <string>
 #include <vector>
 
-struct yy_statement {
-        string var;
-        string op;
-        string arg;
-};
-
+typedef string yy_statement;
 typedef vector<yy_statement*> yy_statements; 
 
 #endif // __POLICY_TEST_COMPILEPOLICY_HH__

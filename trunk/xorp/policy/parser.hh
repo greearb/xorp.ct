@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/parser.hh,v 1.1 2004/09/17 13:48:49 abittau Exp $
+// $XORP: xorp/policy/parser.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
 
 #ifndef __POLICY_PARSER_HH__
 #define __POLICY_PARSER_HH__
@@ -20,7 +21,7 @@
 #include <string>
 #include <vector>
 #include "node_base.hh"
-
+#include "term.hh"
 
 /**
  * @short A lex/yacc wrapper which parses a configuration and returns nodes.
@@ -35,10 +36,11 @@ public:
     typedef vector<Node*> Nodes;
 
     /**
-     * @return the parse-tree of the configuration. Null on error.
+     * @param block the term block which is being parsed [action/src/dest].
      * @param text Configuration to parse.
+     * @return the parse-tree of the configuration. Null on error.
      */
-    Nodes* parse(const string& text);
+    Nodes* parse(const Term::BLOCKS& block, const string& text);
 
     /**
      * This should be called if parse returns null.
