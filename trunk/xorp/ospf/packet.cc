@@ -310,9 +310,13 @@ PacketDecoder::register_decoder(Packet *packet)
 {
     switch(packet->get_version()) {
     case OspfTypes::V2:
+	// Don't allow a registration to be overwritten.
+	XLOG_ASSERT(0 == _ospfv2.count(packet->get_type()));
 	_ospfv2[packet->get_type()] = packet;
 	break;
     case OspfTypes::V3:
+	// Don't allow a registration to be overwritten.
+	XLOG_ASSERT(0 == _ospfv3.count(packet->get_type()));
 	_ospfv3[packet->get_type()] = packet;
 	break;
     }
