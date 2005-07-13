@@ -817,10 +817,10 @@ class NetworkLsa : public Lsa {
     size_t min_length() const {
 	switch(get_version()) {
 	case OspfTypes::V2:
-	    return 28;
+	    return 8;
 	    break;
 	case OspfTypes::V3:
-	    return 28;
+	    return 8;
 	    break;
 	}
 	XLOG_UNREACHABLE();
