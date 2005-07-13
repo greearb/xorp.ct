@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/config_operators.hh,v 1.1 2005/07/08 20:54:20 mjh Exp $
+// $XORP: xorp/rtrmgr/config_operators.hh,v 1.2 2005/07/08 23:17:43 pavlin Exp $
 
 #ifndef __RTRMGR_CONFIG_OPERATORS_HH__
 #define __RTRMGR_CONFIG_OPERATORS_HH__
@@ -31,13 +31,13 @@ enum ConfigOperator {
     OP_GTE = 6,
     OP_ASSIGN = 101,
     OP_ADD = 102,
-    OP_SUB = 103
+    OP_SUB = 103,
+    OP_DEL = 104
 };
-#define MAX_COMPARATOR 6
-#define MAX_MODIFIER 8
+#define MAX_COMPARATOR OP_GTE
+#define MAX_MODIFIER OP_DEL
 
 extern string operator_to_str(ConfigOperator op);
-extern "C" ConfigOperator lookup_modifier(const string& s);
-extern "C" ConfigOperator lookup_comparator(const string& s);
+extern "C" ConfigOperator lookup_operator(const string& s);
 
 #endif // __RTRMGR_CONFIG_OPERATORS_HH__

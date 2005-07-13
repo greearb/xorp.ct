@@ -37,8 +37,7 @@
 %token LITERAL
 %token STRING
 %token ARITH
-%token COMPARATOR
-%token MODIFIER
+%token INFIX_OPERATOR
 %token SYNTAX_ERROR
 %token LINENUM
 
@@ -111,56 +110,56 @@ term_literal:	LITERAL { nodenum = 0;
 terminal:	term_literal END {
 			terminal(strdup(""), NODE_VOID, OP_NONE);
 		}
-		| term_literal ASSIGN_OPERATOR STRING END {
-			terminal($3, NODE_TEXT, OP_ASSIGN); 
-		}
-		| term_literal ASSIGN_OPERATOR BOOL_VALUE END {
-			terminal($3, NODE_BOOL, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR UINT_VALUE END {
-			terminal($3, NODE_UINT, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR IPV4_VALUE END {
-			terminal($3, NODE_IPV4, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR IPV4NET_VALUE END {
-			terminal($3, NODE_IPV4NET, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR IPV6_VALUE END {
-			terminal($3, NODE_IPV6, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR IPV6NET_VALUE END {
-			terminal($3, NODE_IPV6NET, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR MACADDR_VALUE END {
-			terminal($3, NODE_MACADDR, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR URL_FILE_VALUE END {
-			terminal($3, NODE_URL_FILE, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR URL_FTP_VALUE END {
-			terminal($3, NODE_URL_FTP, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR URL_HTTP_VALUE END {
-			terminal($3, NODE_URL_HTTP, OP_ASSIGN);
-		}
-		| term_literal ASSIGN_OPERATOR URL_TFTP_VALUE END {
-			terminal($3, NODE_URL_TFTP, OP_ASSIGN);
-		}
-		| term_literal COMPARATOR ARITH END {
-			terminal($3, NODE_ARITH, boot_lookup_comparator($2));
+		| term_literal INFIX_OPERATOR STRING END {
+			terminal($3, NODE_TEXT, boot_lookup_operator($2)); 
 			free($2);
 		}
-		| term_literal COMPARATOR UINT_VALUE END{
-			terminal($3, NODE_UINT, boot_lookup_comparator($2));
+		| term_literal INFIX_OPERATOR BOOL_VALUE END {
+			terminal($3, NODE_BOOL, boot_lookup_operator($2));
 			free($2);
 		}
-		| term_literal MODIFIER ARITH END{
-			terminal($3, NODE_ARITH, boot_lookup_modifier($2));
+		| term_literal INFIX_OPERATOR UINT_VALUE END {
+			terminal($3, NODE_UINT, boot_lookup_operator($2));
 			free($2);
 		}
-		| term_literal MODIFIER UINT_VALUE END{
-			terminal($3, NODE_UINT, boot_lookup_modifier($2));
+		| term_literal INFIX_OPERATOR IPV4_VALUE END {
+			terminal($3, NODE_IPV4, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR IPV4NET_VALUE END {
+			terminal($3, NODE_IPV4NET, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR IPV6_VALUE END {
+			terminal($3, NODE_IPV6, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR IPV6NET_VALUE END {
+			terminal($3, NODE_IPV6NET, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR MACADDR_VALUE END {
+			terminal($3, NODE_MACADDR, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR URL_FILE_VALUE END {
+			terminal($3, NODE_URL_FILE, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR URL_FTP_VALUE END {
+			terminal($3, NODE_URL_FTP, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR URL_HTTP_VALUE END {
+			terminal($3, NODE_URL_HTTP, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR URL_TFTP_VALUE END {
+			terminal($3, NODE_URL_TFTP, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR ARITH END {
+			terminal($3, NODE_ARITH, boot_lookup_operator($2));
 			free($2);
 		}
 		;
@@ -252,7 +251,7 @@ parse_bootfile() throw (ParseError)
 	booterror("unknown error");
 }
 
-ConfigOperator boot_lookup_comparator(const char* s)
+ConfigOperator boot_lookup_operator(const char* s)
 {
     char *s0, *s1, *s2;
 
@@ -277,43 +276,7 @@ ConfigOperator boot_lookup_comparator(const char* s)
     string str = s1;
     free(s1);
     try {
-        op = lookup_comparator(str);
-	return op;
-    } catch (const ParseError& pe) {
-        string errmsg = pe.why();
-	errmsg += c_format("\n[Line %d]\n", boot_linenum);
-	errmsg += c_format("Last symbol parsed was \"%s\"", lastsymbol.c_str());
-	xorp_throw(ParseError, errmsg);
-    }
-    XLOG_UNREACHABLE();
-}
-
-ConfigOperator boot_lookup_modifier(const char* s)
-{
-    char *s0, *s1, *s2;
-
-    /* skip leading spaces */
-    s0 = strdup(s);
-    s1 = s0;
-    while (*s1 != '\0' && *s1 == ' ') {
-        s1++;
-    }
-
-    /* trim trailing spaces */
-    s2 = s1;
-    while (*s2 != '\0') {
-        if (*s2 == ' ') {
-            *s2 = 0;
-            break;
-        }
-        s2++;
-    }
-
-    ConfigOperator op;
-    string str = s1;
-    free(s1);
-    try {
-        op = lookup_modifier(str);
+        op = lookup_operator(str);
 	return op;
     } catch (const ParseError& pe) {
         string errmsg = pe.why();

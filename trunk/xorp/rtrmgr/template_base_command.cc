@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.5 2005/07/10 23:14:44 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.6 2005/07/11 22:09:44 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -176,11 +176,7 @@ AllowOperatorsCommand::add_action(const list<string>& action) throw (ParseError)
     
     for (iter = action.begin(); iter != action.end(); iter++) {
 	ConfigOperator op;
-	try {
-	    op = lookup_comparator(unquote(*iter));
-	} catch (ParseError) {
-	    op = lookup_modifier(unquote(*iter));
-	} 
+	op = lookup_operator(unquote(*iter));
 	_allowed_operators.push_back(op);
     }
 }

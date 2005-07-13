@@ -20,7 +20,6 @@
 #define LITERAL 272
 #define STRING 273
 #define ARITH 274
-#define COMPARATOR 275
-#define MODIFIER 276
-#define SYNTAX_ERROR 277
-#define LINENUM 278
+#define INFIX_OPERATOR 275
+#define SYNTAX_ERROR 276
+#define LINENUM 277

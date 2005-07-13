@@ -216,10 +216,11 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 /*
  * operators for arithmetic expressions
  */
-RE_COMPARATORS		"<"|">"|("<"+"=")|(">"+"=")|("="+"=") 
-RE_BIN_OPERATORS	"+"|"-"|"*"|"/"
-RE_MODIFIERS		"add"|"sub"|"set"|"="
-RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
+RE_COMPARATOR		"<"|">"|("<"+"=")|(">"+"=")|("="+"=") 
+RE_BIN_OPERATOR		"+"|"-"|"*"|"/"
+RE_MODIFIER		":"|"add"|"sub"|"set"|"del"|"="
+RE_INFIX_OPERATOR	{RE_COMPARATOR}|{RE_BIN_OPERATOR}|{RE_MODIFIER}
+RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 
 %%
 
@@ -240,10 +241,6 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 
 ";"	{
 	return END;
-	}
-
-":"	{
-	return ASSIGN_OPERATOR;
 	}
 
 "true"	{
@@ -306,14 +303,9 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATORS})[" "]*
 	return URL_TFTP_VALUE;
 	}
 
-{RE_COMPARATORS} {
+{RE_INFIX_OPERATOR} {
 	bootlval = strdup(boottext);
-	return COMPARATOR;
-	}
-
-{RE_MODIFIERS} {
-	bootlval = strdup(boottext);
-	return MODIFIER;
+	return INFIX_OPERATOR;
 	}
 
 [a-zA-Z][a-zA-Z0-9"\-""_"\.]*	{
