@@ -679,7 +679,7 @@ router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 
     DOUT(info) << rlsa1->str() << endl;
 
-    // Encode the Data Description Packet.
+    // Encode the Router-LSA.
     rlsa1->encode();
     size_t len1;
     uint8_t *ptr1 = rlsa1->lsa(len1);
@@ -710,6 +710,49 @@ router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 
     delete rlsa1;
     delete rlsa2;
+
+    return true;
+}
+
+bool
+network_lsa_compare(TestInfo& info, OspfTypes::Version version)
+{
+    NetworkLsa *nlsa1= new NetworkLsa(version);
+    populate_network_lsa(nlsa1, version);
+
+    DOUT(info) << nlsa1->str() << endl;
+
+    // Encode the Network-LSA.
+    nlsa1->encode();
+    size_t len1;
+    uint8_t *ptr1 = nlsa1->lsa(len1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    NetworkLsa *nlsa2= new NetworkLsa(version);
+
+    Lsa::LsaRef nlsa3 = nlsa2->decode(ptr1, len1);
+
+    DOUT(info) << nlsa3->str() << endl;
+
+    // Encode the second packet and compare.
+    nlsa3->encode();
+
+    DOUT(info) << nlsa3->str() << endl;
+
+    size_t len2;
+    uint8_t *ptr2 = nlsa3->lsa(len2);
+    
+    vector<uint8_t> pkt1;
+    fill_vector(pkt1, ptr1, len1);
+    vector<uint8_t> pkt2;
+    fill_vector(pkt2, ptr2, len2);
+
+    if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    delete nlsa1;
+    delete nlsa2;
 
     return true;
 }
@@ -813,6 +856,8 @@ main(int argc, char **argv)
 
 	{"router_lsa_compareV2", callback(router_lsa_compare, OspfTypes::V2)},
 	{"router_lsa_compareV3", callback(router_lsa_compare, OspfTypes::V3)},
+	{"network_lsa_compareV2",callback(network_lsa_compare, OspfTypes::V2)},
+	{"network_lsa_compareV3",callback(network_lsa_compare, OspfTypes::V3)},
 	{"lsa_decoder1V2", callback(lsa_decoder1, OspfTypes::V2)},
 	{"lsa_decoder1V3", callback(lsa_decoder1, OspfTypes::V3)},
 	{"lsa_decoder2V2", callback(lsa_decoder2, OspfTypes::V2)},
