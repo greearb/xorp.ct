@@ -39,36 +39,16 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
       _lsa_decoder(version), _peer_manager(*this)
 {
     // Register the LSAs and packets with the associated decoder.
-    switch(get_version()) {
-    case OspfTypes::V2:
-	_lsa_decoder.register_decoder(new RouterLsa(OspfTypes::V2));
+    _lsa_decoder.register_decoder(new RouterLsa(version));
+    _lsa_decoder.register_decoder(new NetworkLsa(version));
 
-	_packet_decoder.register_decoder(new HelloPacket(OspfTypes::V2));
-	_packet_decoder.
-	    register_decoder(new DataDescriptionPacket(OspfTypes::V2));
-	_packet_decoder.
-	    register_decoder(new LinkStateUpdatePacket(OspfTypes::V2,
-						       _lsa_decoder));
-	_packet_decoder.
-	    register_decoder(new LinkStateRequestPacket(OspfTypes::V2));
-	_packet_decoder.
-	   register_decoder(new LinkStateAcknowledgementPacket(OspfTypes::V2));
-	break;
-    case OspfTypes::V3:
-	_lsa_decoder.register_decoder(new RouterLsa(OspfTypes::V3));
-
-	_packet_decoder.register_decoder(new HelloPacket(OspfTypes::V3));
-	_packet_decoder.
-	    register_decoder(new DataDescriptionPacket(OspfTypes::V3));
-	_packet_decoder.
-	    register_decoder(new LinkStateUpdatePacket(OspfTypes::V3,
-						       _lsa_decoder));
-	_packet_decoder.
-	    register_decoder(new LinkStateRequestPacket(OspfTypes::V3));
-	_packet_decoder.
-	   register_decoder(new LinkStateAcknowledgementPacket(OspfTypes::V3));
-	break;
-    }
+    _packet_decoder.register_decoder(new HelloPacket(version));
+    _packet_decoder.register_decoder(new DataDescriptionPacket(version));
+    _packet_decoder.register_decoder(new LinkStateUpdatePacket(version,
+							       _lsa_decoder));
+    _packet_decoder.register_decoder(new LinkStateRequestPacket(version));
+    _packet_decoder.
+	register_decoder(new LinkStateAcknowledgementPacket(version));
 
     // Now that all the packet decoders are in place register for
     // receiving packets.

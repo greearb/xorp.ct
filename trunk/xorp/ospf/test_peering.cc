@@ -47,6 +47,7 @@ class DebugIO : public IO<A> {
 	  _lsa_decoder(version)
     {
 	_lsa_decoder.register_decoder(new RouterLsa(version));
+	_lsa_decoder.register_decoder(new NetworkLsa(version));
 
 	_dec.register_decoder(new HelloPacket(version));
 	_dec.register_decoder(new DataDescriptionPacket(version));
