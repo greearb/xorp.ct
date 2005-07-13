@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_set.hh,v 1.1 2004/09/17 13:48:58 abittau Exp $
+// $XORP: xorp/policy/common/elem_set.hh,v 1.2 2005/03/25 02:54:15 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEM_SET_HH__
 #define __POLICY_COMMON_ELEM_SET_HH__
@@ -30,8 +31,10 @@
  */
 class ElemSet : public Element {
 public:
+    typedef set<string> Set;
+
     static const char* id;
-    ElemSet(const set<string>& val);
+    ElemSet(const Set& val);
 
     /**
      * @param c_str initialize from string in the form element1,element2,...
@@ -45,10 +48,16 @@ public:
     string str() const;
 
     /**
-     * @param s string representation of element to insert
+     * @param s string representation of element to insert.
      */
     void insert(const string& s);
 
+    /**
+     * Insert all elements of other set.
+     *
+     * @param s set to insert.
+     */
+    void insert(const ElemSet& s);
 
     /**
      * Left and right sets are identical [same elements and size].
@@ -150,10 +159,22 @@ public:
     /**
      * @return reference to the actual set.
      */
-    const set<string>& get_set() const { return _val; }
+    const Set& get_set() const;
+
+    /**
+     * @return true if intersection is not empty
+     */
+    bool nonempty_intersection(const ElemSet& rhs) const;
+
+    /**
+     * Removes elements in set.
+     *
+     * @param s elements to remove.
+     */
+    void erase(const ElemSet& rhs); 
 
 private:
-    set<string> _val;
+    Set _val;
 };
 
 

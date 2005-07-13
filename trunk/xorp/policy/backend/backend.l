@@ -68,11 +68,15 @@ namespace {
 "OR"		{ return YY_OR; }
 "HEAD"		{ return YY_HEAD; }
 
+"CTR"		{ return YY_CTR; }
+
 "+"		{ return YY_ADD; }
 "\-"		{ return YY_SUB; }
 "*"		{ return YY_MUL; }
 
 "ONFALSE_EXIT"	{ return YY_ONFALSE_EXIT; }
+
+"NON_EMPTY_INTERSECTION" { return YY_NE_INT; }
 
 "\n"		{ _parser_lineno++; return YY_NEWLINE; }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.6 2005/03/25 02:52:39 pavlin Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.7 2005/07/08 02:06:17 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -100,6 +100,21 @@ private:
      * @return true if value was written. False otherwise.
      */
     bool write_nexthop(const string& id, const Element& e);
+
+    /**
+     * Read the community attribute.
+     *
+     * @param attr the attributes of the route.
+     * @return the element representing the community.
+     */
+    Element* read_community(const PathAttributeList<A>& attr);
+    
+    /**
+     * Write the community attribute.
+     *
+     * @param e the value of the new community.
+     */
+    void write_community(const Element& e);
     
     const InternalMessage<A>&	_orig_rtmsg;
     InternalMessage<A>*		_filtered_rtmsg;

@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.2 2005/03/03 07:37:45 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.3 2005/03/25 02:54:16 pavlin Exp $"
 
 #include "config.h"
 #include "policy_utils.hh"

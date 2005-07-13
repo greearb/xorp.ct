@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.3 2005/06/06 20:29:04 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.4 2005/07/12 22:07:24 abittau Exp $"
 
 #include "config.h"
 #include "register_operations.hh"
@@ -23,18 +23,21 @@
 #include "elem_null.hh"
 #include "regex.h"
 #include "operator.hh"
+#include "element_factory.hh"
 #include <set>
 #include <string>
 
 namespace operations {
 
 // Unary operations
-Element* op_not(const ElemBool& x)
+Element* 
+op_not(const ElemBool& x)
 {
     return new ElemBool(!x.val());
 }
 
-Element* op_head(const ElemStr& x)
+Element* 
+op_head(const ElemStr& x)
 {
     const string& str = x.val();
 
@@ -76,8 +79,9 @@ DEFINE_BINOP(op_mul,*)
 // Operations for which .val() is not needed. [operation performed on element
 // itself].
 #define DEFINE_BINOP_NOVAL(name,op) \
-template<class Result, class Left, class Right> \
-Element* name(const Left& x, const Right& y) { \
+template <class Result, class Left, class Right> \
+Element* \
+name(const Left& x, const Right& y) { \
     return new Result(x op y); \
 }
 
@@ -89,7 +93,6 @@ DEFINE_BINOP_NOVAL(op_gt_nv,>)
 DEFINE_BINOP_NOVAL(op_le_nv,<=)
 DEFINE_BINOP_NOVAL(op_ge_nv,>=)
 
-
 // useful for equivalences where we want one class to deal with the operation.
 // For example we want sets to know about elements, but not elements to know
 // about sets.
@@ -97,8 +100,9 @@ DEFINE_BINOP_NOVAL(op_ge_nv,>=)
 // not want that... so we switch the parameters and obtain
 // Set::operator>(Element)
 #define DEFINE_BINOP_SWITCHPARAMS(name,op) \
-template<class Result, class Left, class Right> \
-Element* name(const Left& x, const Right& y) \
+template <class Result, class Left, class Right> \
+Element* \
+name(const Left& x, const Right& y) \
 { \
     return new Result(y op x); \
 }
@@ -112,8 +116,9 @@ DEFINE_BINOP_SWITCHPARAMS(op_gt_sw,<)
 DEFINE_BINOP_SWITCHPARAMS(op_le_sw,>=)
 DEFINE_BINOP_SWITCHPARAMS(op_ge_sw,<=)
 
-template<class T>
-Element* set_add(const ElemSet& s, const T& str)
+template <class T>
+Element* 
+set_add(const ElemSet& s, const T& str)
 {
     ElemSet* es = new ElemSet(s.get_set());
 
@@ -122,12 +127,37 @@ Element* set_add(const ElemSet& s, const T& str)
     return es;
 }
 
-Element* str_add(const ElemStr& left, const ElemStr& right)
+template <>
+Element*
+set_add(const ElemSet& s, const ElemSet& r)
+{
+    ElemSet* es = new ElemSet(s.get_set());
+    es->insert(r);
+    return es;
+}
+
+Element*
+set_del(const ElemSet& s, const ElemSet& r)
+{
+    ElemSet* es = new ElemSet(s.get_set());
+    es->erase(r);
+    return es;
+}
+
+Element* 
+set_ne_int(const ElemSet& l, const ElemSet& r)
+{
+    return new ElemBool(l.nonempty_intersection(r));
+}
+
+Element* 
+str_add(const ElemStr& left, const ElemStr& right)
 {
     return new ElemStr(left.val() + right.val());
 }
 
-Element* str_mul(const ElemStr& left, const ElemU32& right)
+Element* 
+str_mul(const ElemStr& left, const ElemU32& right)
 {
     string str = left.val();
     string res = "";
@@ -137,6 +167,14 @@ Element* str_mul(const ElemStr& left, const ElemU32& right)
 	res.append(str);
 
     return new ElemStr(res);
+}
+
+Element* 
+ctr(const ElemStr& type, const Element& arg)
+{
+    ElementFactory ef;
+
+    return ef.create(type.val(), arg.str().c_str());
 }
 
 } // namespace
@@ -195,9 +233,12 @@ do {									\
     ADD_BINOP(ElemBool,ElemSet,ElemSet,op_gt_nv,Gt);
     ADD_BINOP(ElemBool,ElemSet,ElemSet,op_le_nv,Le);
     ADD_BINOP(ElemBool,ElemSet,ElemSet,op_ge_nv,Ge);
-
+    
     // SET ADDITION [used for policy tags] -- insert an element in the set.
-    disp.add<ElemSet,ElemU32,operations::set_add>(OpAdd());
+    disp.add<ElemSet, ElemU32, operations::set_add>(OpAdd());
+    disp.add<ElemSet, ElemSet, operations::set_ne_int>(OpNEInt());
+    disp.add<ElemSet, ElemSet, operations::set_add>(OpAdd());
+    disp.add<ElemSet, ElemSet, operations::set_del>(OpSub());
 
 #define ADD_SETBINOP(arg)						\
 do {									\

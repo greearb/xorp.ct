@@ -93,75 +93,80 @@ typedef union {
 #define YY_OR 274
 #define YY_XOR 275
 #define YY_HEAD 276
-#define YY_ADD 277
-#define YY_SUB 278
-#define YY_MUL 279
-#define YY_ONFALSE_EXIT 280
-#define YY_REGEX 281
-#define YY_LOAD 282
-#define YY_STORE 283
-#define YY_ACCEPT 284
-#define YY_REJECT 285
-#define YY_SET 286
+#define YY_CTR 277
+#define YY_NE_INT 278
+#define YY_ADD 279
+#define YY_SUB 280
+#define YY_MUL 281
+#define YY_ONFALSE_EXIT 282
+#define YY_REGEX 283
+#define YY_LOAD 284
+#define YY_STORE 285
+#define YY_ACCEPT 286
+#define YY_REJECT 287
+#define YY_SET 288
 const short yy_policy_backend_parserlhs[] = {                                        -1,
     0,    0,    0,    2,    1,    3,    3,    4,    4,    5,
     5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
     5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-    5,
+    5,    5,    5,
 };
 const short yy_policy_backend_parserlen[] = {                                         2,
     2,    2,    0,    4,    6,    7,    0,    3,    0,    3,
     2,    1,    2,    2,    2,    1,    1,    1,    1,    1,
     1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-    1,
+    1,    1,    1,
 };
 const short yy_policy_backend_parserdefred[] = {                                      3,
     0,    0,    0,    1,    2,    0,    0,    7,    0,    0,
     4,    0,    0,    5,    0,    9,    0,    0,    0,    0,
    18,   19,   20,   21,   22,   23,   24,   25,   27,   26,
-   31,   28,   29,   30,   12,    0,    0,    0,   16,   17,
-    0,    6,    0,   11,   13,   14,   15,    8,   10,
+   31,   32,   33,   28,   29,   30,   12,    0,    0,    0,
+   16,   17,    0,    6,    0,   11,   13,   14,   15,    8,
+   10,
 };
 const short yy_policy_backend_parserdgoto[] = {                                       1,
-    4,    5,   10,   17,   41,
+    4,    5,   10,   17,   43,
 };
 const short yy_policy_backend_parsersindex[] = {                                      0,
- -260, -230, -229,    0,    0, -228, -226,    0, -225, -237,
-    0, -224, -222,    0, -221,    0, -262, -220, -218, -217,
+ -260, -228, -227,    0,    0, -226, -224,    0, -223, -235,
+    0, -222, -220,    0, -219,    0, -262, -218, -216, -215,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0, -216, -215, -214,    0,    0,
- -213,    0, -211,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0, -214, -213, -212,
+    0,    0, -211,    0, -209,    0,    0,    0,    0,    0,
+    0,
 };
 const short yy_policy_backend_parserrindex[] = {                                      0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,
 };
 const short yy_policy_backend_parsergindex[] = {                                      0,
     0,    0,    0,    0,    0,
 };
-#define YYTABLESIZE 46
+#define YYTABLESIZE 48
 const short yy_policy_backend_parsertable[] = {                                       2,
    18,   19,   20,   21,   22,   23,   24,   25,   26,   27,
    28,   29,   30,   31,   32,   33,   34,   35,   36,   37,
-   38,   39,   40,   12,   13,    3,    6,    7,    0,    8,
-    9,    0,   11,   14,   15,    0,   16,   42,   43,   44,
-   45,   46,   47,    0,   48,   49,
+   38,   39,   40,   41,   42,   12,   13,    3,    6,    7,
+    0,    8,    9,    0,   11,   14,   15,    0,   16,   44,
+   45,   46,   47,   48,   49,    0,   50,   51,
 };
 const short yy_policy_backend_parsercheck[] = {                                     260,
   263,  264,  265,  266,  267,  268,  269,  270,  271,  272,
   273,  274,  275,  276,  277,  278,  279,  280,  281,  282,
-  283,  284,  285,  261,  262,  286,  257,  257,   -1,  258,
-  257,   -1,  258,  258,  257,   -1,  258,  258,  257,  257,
-  257,  257,  257,   -1,  258,  257,
+  283,  284,  285,  286,  287,  261,  262,  288,  257,  257,
+   -1,  258,  257,   -1,  258,  258,  257,   -1,  258,  258,
+  257,  257,  257,  257,  257,   -1,  258,  257,
 };
 #define YYFINAL 1
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 286
+#define YYMAXTOKEN 288
 #if YYDEBUG
 const char * const yy_policy_backend_parsername[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -173,8 +178,9 @@ const char * const yy_policy_backend_parsername[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"YY_ARG","YY_NEWLINE","YY_BLANK",
 "YY_POLICY_START","YY_POLICY_END","YY_TERM_START","YY_TERM_END","YY_PUSH",
 "YY_PUSH_SET","YY_EQ","YY_NE","YY_LT","YY_GT","YY_LE","YY_GE","YY_NOT","YY_AND",
-"YY_OR","YY_XOR","YY_HEAD","YY_ADD","YY_SUB","YY_MUL","YY_ONFALSE_EXIT",
-"YY_REGEX","YY_LOAD","YY_STORE","YY_ACCEPT","YY_REJECT","YY_SET",
+"YY_OR","YY_XOR","YY_HEAD","YY_CTR","YY_NE_INT","YY_ADD","YY_SUB","YY_MUL",
+"YY_ONFALSE_EXIT","YY_REGEX","YY_LOAD","YY_STORE","YY_ACCEPT","YY_REJECT",
+"YY_SET",
 };
 const char * const yy_policy_backend_parserrule[] = {
 "$accept : program",
@@ -209,6 +215,8 @@ const char * const yy_policy_backend_parserrule[] = {
 "statement : YY_SUB",
 "statement : YY_MUL",
 "statement : YY_HEAD",
+"statement : YY_CTR",
+"statement : YY_NE_INT",
 };
 #endif
 #if YYDEBUG
@@ -565,7 +573,15 @@ case 31:
 #line 129 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpHead));}
 break;
-#line 569 "yacc.yy_policy_backend_parser.cc"
+case 32:
+#line 130 "backend.y"
+{ _yy_instructions->push_back(new NaryInstr(new OpCtr));}
+break;
+case 33:
+#line 131 "backend.y"
+{ _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
+break;
+#line 585 "yacc.yy_policy_backend_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

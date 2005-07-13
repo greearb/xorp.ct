@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/operator.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
+// $XORP: xorp/policy/common/operator.hh,v 1.3 2005/07/12 22:07:24 abittau Exp $
 
 #ifndef __POLICY_COMMON_OPERATOR_HH__
 #define __POLICY_COMMON_OPERATOR_HH__
@@ -57,6 +57,10 @@ DEFINE_BINOPER(OpMul,*)
 
 // Regular expression operator
 DEFINE_BINOPER(OpRegex,REGEX)
+
+DEFINE_BINOPER(OpCtr,CTR)
+
+DEFINE_BINOPER(OpNEInt,NON_EMPTY_INTERSECTION)
 
 // Unary operators
 DEFINE_UNOPER(OpNot,NOT)

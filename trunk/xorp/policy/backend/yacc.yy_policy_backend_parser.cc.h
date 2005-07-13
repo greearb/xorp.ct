@@ -22,16 +22,18 @@
 #define YY_OR 274
 #define YY_XOR 275
 #define YY_HEAD 276
-#define YY_ADD 277
-#define YY_SUB 278
-#define YY_MUL 279
-#define YY_ONFALSE_EXIT 280
-#define YY_REGEX 281
-#define YY_LOAD 282
-#define YY_STORE 283
-#define YY_ACCEPT 284
-#define YY_REJECT 285
-#define YY_SET 286
+#define YY_CTR 277
+#define YY_NE_INT 278
+#define YY_ADD 279
+#define YY_SUB 280
+#define YY_MUL 281
+#define YY_ONFALSE_EXIT 282
+#define YY_REGEX 283
+#define YY_LOAD 284
+#define YY_STORE 285
+#define YY_ACCEPT 286
+#define YY_REJECT 287
+#define YY_SET 288
 typedef union {
 	char* c_str;
 } YYSTYPE;

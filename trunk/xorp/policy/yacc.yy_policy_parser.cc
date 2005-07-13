@@ -95,127 +95,149 @@ typedef union {
 #define YY_XOR 267
 #define YY_OR 268
 #define YY_HEAD 269
-#define YY_EQ 270
-#define YY_NE 271
-#define YY_LE 272
-#define YY_GT 273
-#define YY_LT 274
-#define YY_GE 275
-#define YY_ADD 276
-#define YY_SUB 277
-#define YY_MUL 278
-#define YY_SEMICOLON 279
-#define YY_LPAR 280
-#define YY_RPAR 281
-#define YY_ASSIGN 282
-#define YY_SET 283
-#define YY_REGEX 284
-#define YY_ACCEPT 285
-#define YY_REJECT 286
-#define YY_PROTOCOL 287
+#define YY_CTR 270
+#define YY_NE_INT 271
+#define YY_EQ 272
+#define YY_NE 273
+#define YY_LE 274
+#define YY_GT 275
+#define YY_LT 276
+#define YY_GE 277
+#define YY_ADD 278
+#define YY_SUB 279
+#define YY_MUL 280
+#define YY_SEMICOLON 281
+#define YY_LPAR 282
+#define YY_RPAR 283
+#define YY_ASSIGN 284
+#define YY_SET 285
+#define YY_REGEX 286
+#define YY_ACCEPT 287
+#define YY_REJECT 288
+#define YY_PROTOCOL 289
 const short yy_policy_parserlhs[] = {                                        -1,
     0,    0,    0,    1,    1,    1,    2,    3,    3,    3,
     3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-    4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-    4,    4,    4,    4,
+    3,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+    4,    4,    4,    4,    4,    4,
 };
 const short yy_policy_parserlen[] = {                                         2,
     2,    2,    0,    4,    2,    2,    2,    3,    2,    3,
     3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-    3,    3,    3,    2,    3,    1,    1,    1,    1,    2,
-    1,    1,    1,    1,
+    3,    3,    3,    3,    2,    3,    3,    1,    1,    1,
+    1,    2,    1,    1,    1,    1,
 };
 const short yy_policy_parserdefred[] = {                                      3,
-    0,   28,   27,   26,    0,   31,   33,   32,   34,    0,
-    0,    0,    0,    0,    0,    0,    1,    2,    0,    0,
-    0,   29,    9,    0,    0,    0,    0,   30,    5,    6,
-    0,    0,    0,    0,    7,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,   19,   25,    8,
-   10,   11,   12,    0,    0,    0,    0,    0,    0,    0,
-    0,   23,   20,    4,
+    0,   30,   29,   28,    0,   33,   35,   34,   36,    0,
+    0,    0,    0,    0,    0,    0,    0,    1,    2,    0,
+    0,    0,   31,    9,    0,    0,    0,    0,    0,   32,
+    5,    6,    0,    0,    0,    0,    7,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,   20,   27,    8,   10,   11,   12,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,   24,   21,    4,
 };
 const short yy_policy_parserdgoto[] = {                                       1,
-   17,   18,   19,   20,
+   18,   19,   20,   21,
 };
 const short yy_policy_parsersindex[] = {                                      0,
- -223,    0,    0,    0, -274,    0,    0,    0,    0, -210,
- -179, -210, -251, -268, -267, -256,    0,    0,  -42,  -70,
- -179,    0,    0, -179,  -98, -173,  -85,    0,    0,    0,
- -244, -210, -210, -210,    0, -179, -179, -179, -179, -179,
- -179, -179, -179, -179, -240, -180, -209,    0,    0,    0,
-    0,    0,    0,  -98,  -98,  -98,  -98,  -98,  -98, -254,
- -254,    0,    0,    0,
+ -220,    0,    0,    0, -275,    0,    0,    0,    0, -206,
+  -24,  -24, -206, -250, -269, -268, -257,    0,    0,  -25,
+   37,  -24,    0,    0,  -24, -198,  -53, -101,   21,    0,
+    0,    0, -243, -206, -206, -206,    0,  -24,  -24,  -24,
+  -24,  -24,  -24,  -24,  -24,  -24,  -24, -240,  -66, -208,
+ -198,    0,    0,    0,    0,    0,    0, -198, -198, -198,
+ -198, -198, -198, -198, -256, -256,    0,    0,    0,
 };
 const short yy_policy_parserrindex[] = {                                      0,
-    0,    0,    0,    0,  -55,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   53,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0, -123,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0, -113,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0, -264, -261, -192, -113, -104,  -97, -161,
- -142,    0,    0,    0,
+  -83,    0,    0,    0,    0,    0,    0, -263, -260,  -19,
+  -16,  -13,    5,    8, -173, -143,    0,    0,    0,
 };
 const short yy_policy_parsergindex[] = {                                      0,
-    0,    0,   11,  -11,
+    0,    0,   12,  -11,
 };
-#define YYTABLESIZE 237
-const short yy_policy_parsertable[] = {                                      25,
-   27,   13,   13,   13,   14,   14,   14,   21,   28,   46,
-   29,   30,   47,   31,   13,   50,   13,   14,   63,   14,
-   23,    0,   26,   44,   54,   55,   56,   57,   58,   59,
-   60,   61,   62,    2,    3,    4,    5,    6,    7,    8,
-    9,   10,   51,   52,   53,   11,    2,    3,    4,   22,
-    6,    7,    8,    9,   10,    0,   12,    0,   11,   13,
-    0,   14,   15,   16,    0,    0,   42,   43,   44,   12,
-    0,   49,   13,   17,   17,   17,   16,    2,    3,    4,
-   22,    6,    7,    8,    9,    0,   17,    0,   17,   11,
-    0,    0,   32,   33,   34,   42,   43,   44,   64,    0,
-   24,    0,    0,   13,   21,   21,   21,   48,   21,   21,
-   21,   21,   21,   21,   21,   21,    0,   21,    0,   21,
-    0,    0,   21,   22,   22,   22,    0,   22,   22,   22,
-   22,   22,   22,   22,   22,    0,   22,    0,   22,    0,
-    0,   22,   24,   24,   24,    0,   24,   24,   24,   24,
-   24,   24,   16,   16,   16,   24,    0,   24,    0,    0,
-   24,   15,   15,   15,    0,   16,    0,   16,   18,   18,
-   18,    0,    0,    0,   15,    0,   15,   42,   43,   44,
-    0,   18,    0,   18,   36,   37,   38,   39,   40,   41,
-   42,   43,   44,    0,    0,   49,    0,    0,   45,   36,
-   37,   38,   39,   40,   41,   42,   43,   44,    0,    0,
-    0,    0,    0,   45,   29,   29,   29,   29,   29,   29,
-   29,   29,   29,   32,   33,   34,    0,    0,   29,    0,
-    0,    0,    0,    0,    0,    0,   35,
+#define YYTABLESIZE 339
+const short yy_policy_parsertable[] = {                                      26,
+   27,   29,   19,   19,   19,   13,   13,   13,   22,   30,
+   49,   31,   32,   50,   33,   51,   54,   19,   68,   19,
+   13,   24,   13,   47,   28,    0,   58,   59,   60,   61,
+   62,   63,   64,   65,   66,   67,    2,    3,    4,    5,
+    6,    7,    8,    9,   10,   55,   56,   57,   11,   12,
+    2,    3,    4,   23,    6,    7,    8,    9,   10,    0,
+    0,   13,   11,   12,   14,    0,   15,   16,   17,   45,
+   46,   47,    0,    0,   53,   13,    0,    0,   14,   45,
+   46,   47,   17,   22,   22,   22,   22,   22,   22,   22,
+   22,    0,   22,   22,   22,   22,   22,   22,   22,   22,
+   22,   22,   22,   22,   22,   22,    0,   22,   22,   22,
+    0,   22,   22,   23,   23,   23,   23,   23,   23,   23,
+   23,    0,   23,   23,   23,   23,   23,   23,   23,   23,
+   23,   23,   23,   23,   23,   23,    0,   23,   23,   23,
+    0,   23,   23,   25,   25,   25,   25,   25,   25,   25,
+   25,    0,   25,   25,   25,   25,   25,   25,   25,   25,
+   25,   25,   25,   25,   34,   35,   36,   25,   25,   25,
+    0,   25,   25,   26,   26,   26,   26,   26,   26,   26,
+   26,   52,   26,   26,   26,   26,   26,   26,   26,   26,
+   26,   26,   26,   26,    0,    0,    0,   26,   26,   26,
+    0,   26,   26,    2,    3,    4,   23,    6,    7,    8,
+    9,   45,   46,   47,   69,   11,   12,    0,    0,    0,
+    0,    0,    0,    0,   45,   46,   47,    0,   25,    0,
+    0,   14,    2,    3,    4,   23,    6,    7,    8,    9,
+   34,   35,   36,    0,   11,   12,   14,   14,   14,   17,
+   17,   17,   16,   16,   16,   37,    0,   25,    0,    0,
+   14,   14,    0,   14,   17,    0,   17,   16,    0,   16,
+   15,   15,   15,   18,   18,   18,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,   15,    0,   15,   18,    0,
+   18,   38,   39,   40,   41,   42,   43,   44,   45,   46,
+   47,    0,    0,   53,    0,    0,   48,   38,   39,   40,
+   41,   42,   43,   44,   45,   46,   47,    0,    0,    0,
+    0,    0,   48,   31,   31,   31,   31,   31,   31,   31,
+   31,   31,   31,    0,    0,    0,    0,    0,   31,
 };
 const short yy_policy_parsercheck[] = {                                      11,
-   12,  266,  267,  268,  266,  267,  268,  282,  260,   21,
-  279,  279,   24,  270,  279,  260,  281,  279,  259,  281,
-   10,   -1,   12,  278,   36,   37,   38,   39,   40,   41,
-   42,   43,   44,  257,  258,  259,  260,  261,  262,  263,
-  264,  265,   32,   33,   34,  269,  257,  258,  259,  260,
-  261,  262,  263,  264,  265,   -1,  280,   -1,  269,  283,
-   -1,  285,  286,  287,   -1,   -1,  276,  277,  278,  280,
-   -1,  281,  283,  266,  267,  268,  287,  257,  258,  259,
-  260,  261,  262,  263,  264,   -1,  279,   -1,  281,  269,
-   -1,   -1,  266,  267,  268,  276,  277,  278,  279,   -1,
-  280,   -1,   -1,  283,  266,  267,  268,  281,  270,  271,
-  272,  273,  274,  275,  276,  277,   -1,  279,   -1,  281,
-   -1,   -1,  284,  266,  267,  268,   -1,  270,  271,  272,
-  273,  274,  275,  276,  277,   -1,  279,   -1,  281,   -1,
-   -1,  284,  266,  267,  268,   -1,  270,  271,  272,  273,
-  274,  275,  266,  267,  268,  279,   -1,  281,   -1,   -1,
-  284,  266,  267,  268,   -1,  279,   -1,  281,  266,  267,
-  268,   -1,   -1,   -1,  279,   -1,  281,  276,  277,  278,
-   -1,  279,   -1,  281,  270,  271,  272,  273,  274,  275,
-  276,  277,  278,   -1,   -1,  281,   -1,   -1,  284,  270,
-  271,  272,  273,  274,  275,  276,  277,  278,   -1,   -1,
-   -1,   -1,   -1,  284,  270,  271,  272,  273,  274,  275,
-  276,  277,  278,  266,  267,  268,   -1,   -1,  284,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,  279,
+   12,   13,  266,  267,  268,  266,  267,  268,  284,  260,
+   22,  281,  281,   25,  272,   27,  260,  281,  259,  283,
+  281,   10,  283,  280,   13,   -1,   38,   39,   40,   41,
+   42,   43,   44,   45,   46,   47,  257,  258,  259,  260,
+  261,  262,  263,  264,  265,   34,   35,   36,  269,  270,
+  257,  258,  259,  260,  261,  262,  263,  264,  265,   -1,
+   -1,  282,  269,  270,  285,   -1,  287,  288,  289,  278,
+  279,  280,   -1,   -1,  283,  282,   -1,   -1,  285,  278,
+  279,  280,  289,  257,  258,  259,  260,  261,  262,  263,
+  264,   -1,  266,  267,  268,  269,  270,  271,  272,  273,
+  274,  275,  276,  277,  278,  279,   -1,  281,  282,  283,
+   -1,  285,  286,  257,  258,  259,  260,  261,  262,  263,
+  264,   -1,  266,  267,  268,  269,  270,  271,  272,  273,
+  274,  275,  276,  277,  278,  279,   -1,  281,  282,  283,
+   -1,  285,  286,  257,  258,  259,  260,  261,  262,  263,
+  264,   -1,  266,  267,  268,  269,  270,  271,  272,  273,
+  274,  275,  276,  277,  266,  267,  268,  281,  282,  283,
+   -1,  285,  286,  257,  258,  259,  260,  261,  262,  263,
+  264,  283,  266,  267,  268,  269,  270,  271,  272,  273,
+  274,  275,  276,  277,   -1,   -1,   -1,  281,  282,  283,
+   -1,  285,  286,  257,  258,  259,  260,  261,  262,  263,
+  264,  278,  279,  280,  281,  269,  270,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,  278,  279,  280,   -1,  282,   -1,
+   -1,  285,  257,  258,  259,  260,  261,  262,  263,  264,
+  266,  267,  268,   -1,  269,  270,  266,  267,  268,  266,
+  267,  268,  266,  267,  268,  281,   -1,  282,   -1,   -1,
+  285,  281,   -1,  283,  281,   -1,  283,  281,   -1,  283,
+  266,  267,  268,  266,  267,  268,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,  281,   -1,  283,  281,   -1,
+  283,  271,  272,  273,  274,  275,  276,  277,  278,  279,
+  280,   -1,   -1,  283,   -1,   -1,  286,  271,  272,  273,
+  274,  275,  276,  277,  278,  279,  280,   -1,   -1,   -1,
+   -1,   -1,  286,  271,  272,  273,  274,  275,  276,  277,
+  278,  279,  280,   -1,   -1,   -1,   -1,   -1,  286,
 };
 #define YYFINAL 1
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 287
+#define YYMAXTOKEN 289
 #if YYDEBUG
 const char * const yy_policy_parsername[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -226,9 +248,9 @@ const char * const yy_policy_parsername[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"YY_INT","YY_UINT","YY_STR",
 "YY_ID","YY_IPV4","YY_IPV4NET","YY_IPV6","YY_IPV6NET","YY_NOT","YY_AND",
-"YY_XOR","YY_OR","YY_HEAD","YY_EQ","YY_NE","YY_LE","YY_GT","YY_LT","YY_GE",
-"YY_ADD","YY_SUB","YY_MUL","YY_SEMICOLON","YY_LPAR","YY_RPAR","YY_ASSIGN",
-"YY_SET","YY_REGEX","YY_ACCEPT","YY_REJECT","YY_PROTOCOL",
+"YY_XOR","YY_OR","YY_HEAD","YY_CTR","YY_NE_INT","YY_EQ","YY_NE","YY_LE","YY_GT",
+"YY_LT","YY_GE","YY_ADD","YY_SUB","YY_MUL","YY_SEMICOLON","YY_LPAR","YY_RPAR",
+"YY_ASSIGN","YY_SET","YY_REGEX","YY_ACCEPT","YY_REJECT","YY_PROTOCOL",
 };
 const char * const yy_policy_parserrule[] = {
 "$accept : statement",
@@ -250,12 +272,14 @@ const char * const yy_policy_parserrule[] = {
 "boolexpr : expr YY_GT expr",
 "boolexpr : expr YY_LE expr",
 "boolexpr : expr YY_GE expr",
+"boolexpr : expr YY_NE_INT expr",
 "boolexpr : YY_LPAR boolexpr YY_RPAR",
 "boolexpr : expr YY_REGEX YY_STR",
 "expr : expr YY_ADD expr",
 "expr : expr YY_SUB expr",
 "expr : expr YY_MUL expr",
 "expr : YY_HEAD expr",
+"expr : YY_CTR expr expr",
 "expr : YY_LPAR expr YY_RPAR",
 "expr : YY_STR",
 "expr : YY_UINT",
@@ -558,72 +582,80 @@ case 18:
 { yyval.node = new NodeBin(new OpGe,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 19:
+#line 89 "policy.y"
+{ yyval.node = new NodeBin(new OpNEInt, yyvsp[-2].node, yyvsp[0].node, _parser_lineno); }
+break;
+case 20:
 #line 91 "policy.y"
 { yyval.node = yyvsp[-1].node; }
 break;
-case 20:
+case 21:
 #line 93 "policy.y"
 { yyval.node = new NodeRegex(yyvsp[-2].node,yyvsp[0].c_str,_parser_lineno);
 					free(yyvsp[0].c_str); 
 				}
 break;
-case 21:
+case 22:
 #line 99 "policy.y"
 { yyval.node = new NodeBin(new OpAdd,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
-case 22:
+case 23:
 #line 100 "policy.y"
 { yyval.node = new NodeBin(new OpSub,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
-case 23:
+case 24:
 #line 101 "policy.y"
 { yyval.node = new NodeBin(new OpMul,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
-case 24:
-#line 102 "policy.y"
+case 25:
+#line 103 "policy.y"
 { yyval.node = new NodeUn(new OpHead, yyvsp[0].node, _parser_lineno); }
 break;
-case 25:
-#line 104 "policy.y"
-{ yyval.node = yyvsp[-1].node; }
-break;
 case 26:
-#line 106 "policy.y"
-{ yyval.node = new NodeElem(_ef.create(ElemStr::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
+#line 104 "policy.y"
+{ yyval.node = new NodeBin(new OpCtr, yyvsp[-1].node, yyvsp[0].node, _parser_lineno); }
 break;
 case 27:
-#line 107 "policy.y"
-{ yyval.node = new NodeElem(_ef.create(ElemU32::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str);}
+#line 106 "policy.y"
+{ yyval.node = yyvsp[-1].node; }
 break;
 case 28:
 #line 108 "policy.y"
-{ yyval.node = new NodeElem(_ef.create(ElemInt32::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str);}
+{ yyval.node = new NodeElem(_ef.create(ElemStr::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 29:
 #line 109 "policy.y"
-{ yyval.node = new NodeVar(yyvsp[0].c_str,_parser_lineno); free(yyvsp[0].c_str); }
+{ yyval.node = new NodeElem(_ef.create(ElemU32::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str);}
 break;
 case 30:
 #line 110 "policy.y"
-{ yyval.node = new NodeSet(yyvsp[0].c_str,_parser_lineno); free(yyvsp[0].c_str); }
+{ yyval.node = new NodeElem(_ef.create(ElemInt32::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str);}
 break;
 case 31:
 #line 111 "policy.y"
-{ yyval.node = new NodeElem(_ef.create(ElemIPv4::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
+{ yyval.node = new NodeVar(yyvsp[0].c_str,_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 32:
 #line 112 "policy.y"
-{ yyval.node = new NodeElem(_ef.create(ElemIPv6::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
+{ yyval.node = new NodeSet(yyvsp[0].c_str,_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 33:
 #line 113 "policy.y"
-{ yyval.node = new NodeElem(_ef.create(ElemIPv4Net::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
+{ yyval.node = new NodeElem(_ef.create(ElemIPv4::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 34:
 #line 114 "policy.y"
+{ yyval.node = new NodeElem(_ef.create(ElemIPv6::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
+break;
+case 35:
+#line 115 "policy.y"
+{ yyval.node = new NodeElem(_ef.create(ElemIPv4Net::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
+break;
+case 36:
+#line 116 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv6Net::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
-#line 627 "yacc.yy_policy_parser.cc"
+#line 659 "yacc.yy_policy_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

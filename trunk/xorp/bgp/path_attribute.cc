@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.56 2005/04/28 02:35:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.57 2005/07/08 02:06:17 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1741,6 +1741,16 @@ PathAttributeList<A>::aggregator_att() const
 
     return dynamic_cast<const AggregatorAttribute*>(
 	find_attribute_by_type(AGGREGATOR));
+}
+
+template<class A>
+const CommunityAttribute*
+PathAttributeList<A>::community_att() const 
+{
+    debug_msg("%p\n", this);
+
+    return dynamic_cast<const CommunityAttribute*>(
+	find_attribute_by_type(COMMUNITY));
 }
 
 /*

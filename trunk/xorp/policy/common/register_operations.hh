@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,10 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/register_operations.hh,v 1.1 2004/09/17 13:48:59 abittau Exp $
+// $XORP: xorp/policy/common/register_operations.hh,v 1.2 2005/03/25 02:54:17 pavlin Exp $
 
 #ifndef __POLICY_COMMON_REGISTER_OPERATIONS_HH__
 #define __POLICY_COMMON_REGISTER_OPERATIONS_HH__
+
+#include "element.hh"
 
 /**
  * @short Do initial registration of dispatcher callbacks.
@@ -32,5 +35,18 @@ public:
      */
     RegisterOperations();
 };
+
+namespace operations {
+
+/**
+ * Maybe be used to construct elements.  Also for casting! 
+ *
+ * @param type the string representation of typename.
+ * @param arg the string representation of value.
+ * @return element of wanted type representing arg.
+ */
+Element* ctr(const ElemStr& type, const Element& arg);
+
+}
 
 #endif // __POLICY_COMMON_REGISTER_OPERATIONS_HH__

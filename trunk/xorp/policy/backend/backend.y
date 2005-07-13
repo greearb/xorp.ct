@@ -30,7 +30,7 @@ static ElementFactory _ef;
 %token YY_POLICY_START YY_POLICY_END YY_TERM_START YY_TERM_END
 %token YY_PUSH YY_PUSH_SET
 %token YY_EQ YY_NE YY_LT YY_GT YY_LE YY_GE
-%token YY_NOT YY_AND YY_OR YY_XOR YY_HEAD
+%token YY_NOT YY_AND YY_OR YY_XOR YY_HEAD YY_CTR YY_NE_INT
 %token YY_ADD YY_SUB YY_MUL
 %token YY_ONFALSE_EXIT
 %token YY_REGEX
@@ -127,6 +127,8 @@ statement:
 	| YY_SUB	{ _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 	| YY_MUL	{ _yy_instructions->push_back(new NaryInstr(new OpMul)); }
 	| YY_HEAD	{ _yy_instructions->push_back(new NaryInstr(new OpHead));}
+	| YY_CTR	{ _yy_instructions->push_back(new NaryInstr(new OpCtr));}
+	| YY_NE_INT	{ _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
 	;  
 
 %%

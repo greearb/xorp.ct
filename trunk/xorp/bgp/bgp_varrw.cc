@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.8 2005/07/08 02:06:17 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.9 2005/07/12 22:07:21 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -68,7 +68,7 @@ BGPVarRW<A>::start_read()
     initialize("localpref", e);
 
     // XXX don't support community yet
-    initialize("community", NULL);
+    initialize("community", read_community(*attr));
 
     initialize("neighbor", read_neighbor());
 
@@ -77,6 +77,48 @@ BGPVarRW<A>::start_read()
     if(med) 
 	e = _ef.create(ElemU32::id, to_str(med->med()).c_str());
     initialize("med", e);
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_community(const PathAttributeList<A>& attr)
+{
+    const CommunityAttribute* ca = attr.community_att();
+
+    // no community!
+    if (!ca)
+	return NULL;
+
+    ElemSet* es = new ElemSet;
+
+    const set<uint32_t>& com = ca->community_set();
+    for (set<uint32_t>::const_iterator i = com.begin(); i != com.end(); ++i)
+	es->insert(to_str(*i));
+    
+    return es;
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_community(const Element& e)
+{
+    XLOG_ASSERT(e.type() == ElemSet::id);
+
+    const ElemSet& es = dynamic_cast<const ElemSet&>(e);
+
+    if (_palist.community_att())
+	_palist.remove_attribute_by_type(COMMUNITY);
+	
+    CommunityAttribute ca;
+   
+    const ElemSet::Set comset = es.get_set();
+    for (ElemSet::Set::const_iterator i = comset.begin(); i != comset.end(); 
+	 ++i) {
+	const string& com = *i;
+	ca.add_community(atoi(com.c_str()));
+    }	
+    
+    _palist.add_path_attribute(ca);
 }
 
 template <class A>
@@ -174,7 +216,7 @@ BGPVarRW<A>::single_write(const string& id, const Element& e)
 	return;
     }
     if (id == "community") {
-	XLOG_WARNING("Don't support writing community yet!");
+	write_community(e);
 	return;
     }
     if (id == "origin") {

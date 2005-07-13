@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,12 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.3 2005/07/08 02:53:24 abittau Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.4 2005/07/08 04:01:52 abittau Exp $"
 
 #include "config.h"
 #include "dispatcher.hh"
 #include "elem_null.hh"
 #include "policy_utils.hh"
+#include "operator.hh"
+#include "element.hh"
+#include "register_operations.hh"
 
 // init static members
 Dispatcher::Map Dispatcher::_map;
@@ -57,25 +61,46 @@ Element*
 Dispatcher::run(const Oper& op, const ArgList& args) const
 {
     unsigned arity = op.arity();
+    unsigned argno = args.size();
 
     // make sure we got correct # of args
-    if(arity != args.size()) {
+    if(arity != argno) {
 	ostringstream oss;
 
 	oss << "Wrong number of args. Arity: " << arity 
-	    << " Args supplied: " << args.size();
+	    << " Args supplied: " << argno;
 
 	throw OpNotFound(oss.str());
     }
 
+    const Element* first_args[2];
+    int j = 0;
     // check for null arguments and special case them: return null
     for(ArgList::const_iterator i = args.begin();
 	i != args.end(); ++i) {
     
 	const Element* arg = *i;
 
+	if (j < 2) {
+	    first_args[j] = arg;
+	    j++;
+	}
+
 	if(arg->type() == ElemNull::id)
 	    return new ElemNull();
+    }
+
+    // check for constructor
+    if (argno == 2 && typeid(op) == typeid(OpCtr)) {
+	string arg1type = first_args[0]->type();
+
+	if (arg1type != ElemStr::id)
+	    throw OpNotFound("First argument of ctr must be txt type, but is: " 
+			     + arg1type);
+	
+	const ElemStr& es = dynamic_cast<const ElemStr&>(*first_args[0]);
+
+	return operations::ctr(es, *(first_args[1]));
     }
 
     // find function
