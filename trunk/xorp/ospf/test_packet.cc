@@ -246,6 +246,32 @@ populate_link_state_update(LinkStateUpdatePacket *lsup,
 
 inline
 void
+populate_network_lsa(NetworkLsa *nlsa, OspfTypes::Version version)
+{
+    populate_lsa_header(nlsa->get_header(), version);
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	nlsa->set_options(0x010203);
+	break;
+    }
+    
+    switch(version) {
+    case OspfTypes::V2:
+	nlsa->get_network_masks().push_back(0xffff0000);
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+    nlsa->get_attached_routers().push_back(IPv4("128.16.64.16"));
+
+    // This will set the checksum and the length.
+    nlsa->encode();
+}
+
+inline
+void
 populate_link_state_acknowledgement(LinkStateAcknowledgementPacket *lsack,
 				    OspfTypes::Version version)
 {
@@ -596,6 +622,15 @@ packet_decoder2(TestInfo& info, OspfTypes::Version version)
 
 /* Packet stuff above - LSA stuff below */
 
+inline
+void
+fill_vector(vector<uint8_t>& pkt, uint8_t *ptr, size_t len)
+{
+    pkt.resize(len);
+    for(size_t i = 0; i < len; i++)
+	pkt[i] = ptr[i];
+}
+
 bool
 router_lsa_print(TestInfo& info)
 {
@@ -616,13 +651,24 @@ router_lsa_print(TestInfo& info)
     return true;
 }
 
-inline
-void
-fill_vector(vector<uint8_t>& pkt, uint8_t *ptr, size_t len)
+bool
+network_lsa_print(TestInfo& info)
 {
-    pkt.resize(len);
-    for(size_t i = 0; i < len; i++)
-	pkt[i] = ptr[i];
+    NetworkLsa *nlsa = new NetworkLsa(OspfTypes::V2);
+    populate_network_lsa(nlsa, OspfTypes::V2);
+
+    DOUT(info) << nlsa->str() << endl;
+
+    delete nlsa;
+
+    nlsa = new NetworkLsa(OspfTypes::V3);
+    populate_network_lsa(nlsa, OspfTypes::V3);
+
+    DOUT(info) << nlsa->str() << endl;
+
+    delete nlsa;
+
+    return true;
 }
 
 bool
@@ -735,6 +781,7 @@ main(int argc, char **argv)
 	{"link_state_acknowledgement_print",
 	 callback(link_state_acknowledgement_packet_print)},
 	{"router_lsa_print", callback(router_lsa_print)},
+	{"network_lsa_print", callback(network_lsa_print)},
 
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},

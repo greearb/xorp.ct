@@ -784,7 +784,7 @@ class RouterLsa : public Lsa {
     }
 
     /**
-     * Generate a printable representation of the header.
+     * Generate a printable representation.
      */
     string str() const;
 
@@ -797,6 +797,97 @@ class RouterLsa : public Lsa {
     uint32_t _options;	// OSPFv3 only.
 
     list<RouterLink> _router_links;
+};
+
+class NetworkLsa : public Lsa {
+ public:
+    NetworkLsa(OspfTypes::Version version)
+	: Lsa(version)
+    {
+	_header.set_ls_type(get_ls_type());
+    }
+
+    NetworkLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: Lsa(version, buf, len)
+    {}
+
+    /**
+     * @return the minimum length of a RouterLSA.
+     */
+    size_t min_length() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 28;
+	    break;
+	case OspfTypes::V3:
+	    return 28;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    uint16_t get_ls_type() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 2;
+	    break;
+	case OspfTypes::V3:
+	    return 0x2002;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    /**
+     * @return False this is not an AS-external-LSA.
+     */
+    bool external() const {return false; };
+
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+
+    bool encode();
+
+    void set_options(uint32_t options) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	if (options  > 0xffffff)
+	    XLOG_WARNING("Attempt to set %#x in a 24 bit field", options);
+	_options = options & 0xffffff;
+    }
+
+    uint32_t get_options() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _options;
+    }
+
+    list<uint32_t>& get_network_masks() {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _network_masks;
+    }
+
+    list<OspfTypes::RouterID>& get_attached_routers() {
+	return _attached_routers;
+    }
+
+    /**
+     * Generate a printable representation.
+     */
+    string str() const;
+    
+ private:
+    uint32_t _options;			// OSPFv3 only.
+
+    list<uint32_t> _network_masks;	// OSPFv2 only.
+    list<OspfTypes::RouterID> _attached_routers;
 };
 
 #if	0

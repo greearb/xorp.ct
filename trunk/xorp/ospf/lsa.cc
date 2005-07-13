@@ -481,7 +481,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     if (len < required)
 	xorp_throw(BadPacket,
-		   c_format("RouterLSA too short %u, must be at least %u",
+		   c_format("Router-LSA too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
 
@@ -530,7 +530,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    if (nlinks != lsa->get_router_links().size())
 		xorp_throw(BadPacket,
 			   c_format(
-				    "RouterLSA mismatch in router links"
+				    "Router-LSA mismatch in router links"
 				    " expected %u received %u",
 				    XORP_UINT_CAST(nlinks),
 				    XORP_UINT_CAST(lsa->
@@ -648,6 +648,178 @@ RouterLsa::str() const
 
     for (; i != rl.end(); i++) {
 	output += "\n\t" + (*i).str();
+    }
+
+    return output;
+}
+
+Lsa::LsaRef
+NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    size_t header_length = _header.length();
+    size_t required = header_length + min_length();
+
+    if (len < required)
+	xorp_throw(BadPacket,
+		   c_format("Network-LSA too short %u, must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(required)));
+
+    // Verify the checksum.
+    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+
+    NetworkLsa *lsa;
+    try {
+	lsa = new NetworkLsa(version, buf, len);
+
+	// Decode the LSA Header.
+	lsa->_header.decode_inline(buf);
+	uint8_t *start;
+	switch(version) {
+	case OspfTypes::V2:
+	    start = &buf[header_length];
+	    break;
+	case OspfTypes::V3:
+	    lsa->set_options(extract_32(&buf[header_length]) & 0xffffff);
+	    start = &buf[header_length + 4];
+	    break;
+	}
+
+	// Extract the list of network masks (OSPFv2 only) and
+	// attached routers.
+	uint8_t *end = &buf[len];
+	while(start < end) {
+	    switch(version) {
+	    case OspfTypes::V2:
+		lsa->get_network_masks().push_back(extract_32(start));
+		start += 4;
+		break;
+	    case OspfTypes::V3:
+		break;
+	    }
+	    if (!(start < end))
+		xorp_throw(BadPacket, c_format("Network-LSA too short"));
+	    lsa->get_network_masks().push_back(extract_32(start));
+	    start += 4;
+	}
+
+    } catch(BadPacket& e) {
+	delete lsa;
+	throw e;
+    }
+
+    return Lsa::LsaRef(lsa);
+}
+
+bool
+NetworkLsa::encode()
+{
+    OspfTypes::Version version = get_version();
+
+    size_t len;
+
+    switch(version) {
+    case OspfTypes::V2:
+	XLOG_ASSERT(get_attached_routers().size() == 
+		    get_network_masks().size());
+ 	len = _header.length() + 8 * get_attached_routers().size();
+	break;
+    case OspfTypes::V3:
+	len = _header.length() + 4 + 4 * get_attached_routers().size();
+	break;
+    }
+
+    _pkt.resize(len);
+    uint8_t *ptr = &_pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Copy the header into the packet
+    _header.set_ls_checksum(0);
+    _header.set_length(len);
+    size_t header_length = _header.copy_out(ptr);
+    XLOG_ASSERT(len > header_length);
+
+    size_t index;
+    list<uint32_t>::iterator j;
+    switch(version) {
+    case OspfTypes::V2:
+	j = get_network_masks().begin();
+	index = header_length;
+	break;
+    case OspfTypes::V3:
+	// Careful Options occupy 3 bytes, four bytes are written out.
+	embed_32(&ptr[header_length], get_options());
+	index = header_length + 4;
+	break;
+    }
+
+    // Copy out the attached router state.
+    list<OspfTypes::RouterID> &ars = get_attached_routers();
+    list<OspfTypes::RouterID>::iterator i = ars.begin();
+    for (; i != ars.end(); i++) {
+	switch(version) {
+	case OspfTypes::V2:
+	    embed_32(&ptr[index], *j++);
+	    embed_32(&ptr[index + 4], i->addr());
+	    index += 8;
+	    break;
+	case OspfTypes::V3:
+	    // Careful Options occupy 3 bytes, four bytes are written out.
+	    embed_32(&ptr[index], i->addr());
+	    index += 4;
+	break;
+    }
+	(*i).copy_out(&ptr[index]);
+    }
+
+    XLOG_ASSERT(index == len);
+
+    // Compute the checksum and write the whole header out again.
+    _header.set_ls_checksum(compute_checksum(ptr + 2, len - 2, 16 - 2));
+    _header.copy_out(ptr);
+
+    return true;
+}
+
+string
+NetworkLsa::str() const
+{
+    OspfTypes::Version version = get_version();
+
+    string output;
+
+    output += "Network-LSA:\n";
+    output += _header.str();
+
+    list<uint32_t>::iterator j;
+    list<uint32_t> nms = _network_masks;
+    switch(version) {
+    case OspfTypes::V2:
+	j = nms.begin();
+	break;
+    case OspfTypes::V3:
+	XLOG_ASSERT(nms.begin() == nms.end());
+	output += c_format("\n\tOptions %#x", get_options());
+	break;
+    }
+
+    list<OspfTypes::RouterID> ars = _attached_routers;
+    list<OspfTypes::RouterID>::iterator i = ars.begin();
+    for (; i != ars.end(); i++) {
+	switch(version) {
+	case OspfTypes::V2:
+ 	    output += c_format("\n\tNetwork Mask %#x", *j);
+	    if (j != nms.end())
+		j++;
+	    break;
+	case OspfTypes::V3:
+	    break;
+	}
+	output += "\n\tAttached Router " + (*i).str();
     }
 
     return output;
