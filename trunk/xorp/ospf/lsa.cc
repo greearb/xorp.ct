@@ -272,14 +272,9 @@ LsaDecoder::~LsaDecoder()
 void
 LsaDecoder::register_decoder(Lsa *lsa)
 {
-    switch(lsa->get_version()) {
-    case OspfTypes::V2:
-	_lsa_decoders[lsa->get_ls_type()] = lsa;
-	break;
-    case OspfTypes::V3:
-	_lsa_decoders[lsa->get_ls_type()] = lsa;
-	break;
-    }
+    // Don't allow a registration to be overwritten.
+    XLOG_ASSERT(0 == _lsa_decoders.count(lsa->get_ls_type()));
+    _lsa_decoders[lsa->get_ls_type()] = lsa;
 
     // Keep a record of the smallest LSA that may be decoded.
     // This will be useful as sanity check in the packet decoder.
@@ -702,7 +697,7 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    }
 	    if (!(start < end))
 		xorp_throw(BadPacket, c_format("Network-LSA too short"));
-	    lsa->get_network_masks().push_back(extract_32(start));
+	    lsa->get_attached_routers().push_back(IPv4(start));
 	    start += 4;
 	}
 
@@ -764,16 +759,14 @@ NetworkLsa::encode()
 	switch(version) {
 	case OspfTypes::V2:
 	    embed_32(&ptr[index], *j++);
-	    embed_32(&ptr[index + 4], i->addr());
+	    (*i).copy_out(&ptr[index + 4]);
 	    index += 8;
 	    break;
 	case OspfTypes::V3:
-	    // Careful Options occupy 3 bytes, four bytes are written out.
-	    embed_32(&ptr[index], i->addr());
+	    (*i).copy_out(&ptr[index]);
 	    index += 4;
 	break;
-    }
-	(*i).copy_out(&ptr[index]);
+	}
     }
 
     XLOG_ASSERT(index == len);
