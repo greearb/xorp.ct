@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.10 2005/04/12 23:43:02 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.11 2005/04/13 21:08:21 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -782,8 +782,12 @@ is very simple. It must define \verb=XORP_MODULE_NAME= and
 
 \begin{lstlisting}[caption={Listing of {\stt xorp/static\_routes/static\_routes\_module.h} %
                                      \label{lst:srn.module} } ]{}
+#ifndef XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"STATIC_ROUTES"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
 \end{lstlisting}
 
 
