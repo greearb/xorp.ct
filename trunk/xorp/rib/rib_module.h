@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/rib/rib_module.h,v 1.2 2004/06/10 22:41:39 hodson Exp $
+ * $XORP: xorp/rib/rib_module.h,v 1.3 2005/03/25 02:54:21 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __RIB_RIB_MODULE_H__
+#define __RIB_RIB_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"RIB"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __RIB_RIB_MODULE_H__

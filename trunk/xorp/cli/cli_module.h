@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/cli/cli_module.h,v 1.3 2004/06/10 22:40:42 hodson Exp $
+ * $XORP: xorp/cli/cli_module.h,v 1.4 2005/03/25 02:52:56 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __CLI_CLI_MODULE_H__
+#define __CLI_CLI_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"CLI"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __CLI_CLI_MODULE_H__

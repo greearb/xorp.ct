@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/rtrmgr/rtrmgr_module.h,v 1.3 2004/06/10 22:41:53 hodson Exp $
+ * $XORP: xorp/rtrmgr/rtrmgr_module.h,v 1.4 2005/03/25 02:54:37 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __RTRMGR_RTRMGR_MODULE_H__
+#define __RTRMGR_RTRMGR_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"RTRMGR"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __RTRMGR_RTRMGR_MODULE_H__

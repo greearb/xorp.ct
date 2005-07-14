@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6igmp_module.h,v 1.3 2004/06/10 22:41:26 hodson Exp $
+ * $XORP: xorp/mld6igmp/mld6igmp_module.h,v 1.4 2005/03/25 02:53:54 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __MLD6IGMP_MLD6IGMP_MODULE_H__
+#define __MLD6IGMP_MLD6IGMP_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"MLD6IGMP"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __MLD6IGMP_MLD6IGMP_MODULE_H__

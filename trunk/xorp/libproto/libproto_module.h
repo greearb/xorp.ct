@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/libproto/libproto_module.h,v 1.3 2004/06/10 22:41:03 hodson Exp $
+ * $XORP: xorp/libproto/libproto_module.h,v 1.4 2005/03/25 02:53:24 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __LIBPROTO_PROTO_MODULE_H__
+#define __LIBPROTO_PROTO_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"LIBPROTO"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __LIBPROTO_PROTO_MODULE_H__

@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/mibs/xorp_if_module.h,v 1.3 2004/06/10 22:41:25 hodson Exp $
+ * $XORP: xorp/mibs/xorp_if_module.h,v 1.4 2005/03/25 02:53:53 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __MIBS_XORP_IF_MODULE_H__
+#define __MIBS_XORP_IF_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"xorp_if_mib_module"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __MIBS_XORP_IF_MODULE_H__

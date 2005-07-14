@@ -15,12 +15,20 @@
  */
 
 /*
- * $XORP: xorp/rip/rip_module.h,v 1.2 2004/06/10 22:41:46 hodson Exp $
+ * $XORP: xorp/rip/rip_module.h,v 1.3 2005/03/25 02:54:28 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
+#ifndef __RIP_RIP_MODULE_H__
+#define __RIP_RIP_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"RIP"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __RIP_RIP_MODULE_H__

@@ -15,13 +15,21 @@
  */
 
 /*
- * $XORP: xorp/mibs/bgp4_mib_module.h,v 1.3 2004/06/10 22:41:24 hodson Exp $
+ * $XORP: xorp/mibs/bgp4_mib_module.h,v 1.4 2005/03/25 02:53:52 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __MIBS_BGP4_MIB_MODULE_H__
+#define __MIBS_BGP4_MIB_MODULE_H__
 
+
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"bgp4_mib_1657"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __MIBS_BGP4_MIB_MODULE_H__

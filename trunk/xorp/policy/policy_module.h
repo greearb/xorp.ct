@@ -12,7 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_module.h,v 1.3 2004/09/17 13:48:49 abittau Exp $
+// $XORP: xorp/policy/policy_module.h,v 1.4 2005/03/25 02:54:08 pavlin Exp $
 
+#ifndef __POLICY_SEMANTIC_MODULE_H__
+#define __POLICY_SEMANTIC_MODULE_H__
+
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME        "POLICY"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION     "0.1"
+#endif
+
+#endif // __POLICY_SEMANTIC_MODULE_H__

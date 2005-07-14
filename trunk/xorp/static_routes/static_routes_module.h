@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/static_routes/static_routes_module.h,v 1.2 2004/06/10 22:41:57 hodson Exp $
+ * $XORP: xorp/static_routes/static_routes_module.h,v 1.3 2005/03/25 02:54:42 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __STATIC_ROUTES_STATIC_ROUTES_MODULE_HH__
+#define __STATIC_ROUTES_STATIC_ROUTES_MODULE_HH__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"STATIC_ROUTES"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif // __STATIC_ROUTES_STATIC_ROUTES_MODULE_HH__

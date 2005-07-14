@@ -15,13 +15,20 @@
  */
 
 /*
- * $XORP: xorp/libxipc/finder_module.h,v 1.7 2004/06/10 22:41:05 hodson Exp $
+ * $XORP: xorp/libxipc/finder_module.h,v 1.8 2005/03/25 02:53:26 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
+#ifndef __LIBXIPC_FINDER_MODULE_H__
+#define __LIBXIPC_FINDER_MODULE_H__
 
+#ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"FINDER"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.3"
+#endif
 
+#endif // __LIBXIPC_FINDER_MODULE_H__
