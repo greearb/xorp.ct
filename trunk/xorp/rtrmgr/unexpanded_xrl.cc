@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.11 2004/12/11 21:29:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.12 2005/03/25 02:54:40 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -55,6 +55,7 @@ UnexpandedXrl::expand(string& errmsg) const
 	_xrl = NULL;
     }
 
+#if 0
     if (_action.expand_xrl_variables(_node, request, errmsg) != XORP_OK) {
 	debug_msg("Failed to expand XRL variables: %s\n", errmsg.c_str());
 	return NULL;
@@ -65,6 +66,11 @@ UnexpandedXrl::expand(string& errmsg) const
     } catch (const InvalidString& e) {
 	debug_msg("Failed to initialize XRL: %s\n", e.why().c_str());
 	return NULL;
+    }
+#endif
+    _xrl = _action.expand_xrl_variables(_node, errmsg);
+    if (_xrl == NULL) {
+	debug_msg("Failed to expand XRL variables: %s\n", errmsg.c_str());
     }
     return _xrl;
 }

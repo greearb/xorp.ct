@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.55 2005/07/11 21:49:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.56 2005/07/11 23:11:45 pavlin Exp $"
 
 
 #include <list>
@@ -541,81 +541,218 @@ XrlAction::execute(const MasterConfigTreeNode& ctn,
     return result;
 }
 
+
 template<class TreeNode>
-int
+Xrl*
 XrlAction::expand_xrl_variables(const TreeNode& tn,
-				string& result,
 				string& errmsg) const
 {
     string word;
     string expanded_var;
-    list<string> expanded_cmd;
+    string command;
+    list<string> args;
 
     debug_msg("expand_xrl_variables() node %s XRL %s\n",
-	      tn.segname().c_str(), _request.c_str());
+	   tn.segname().c_str(), _request.c_str());
 
-    //
-    // Go through the split command, doing variable substitution
-    // put split words back together, and remove special "\n" characters
-    //
-    list<string>::const_iterator iter = _split_request.begin();
-    while (iter != _split_request.end()) {
-	string segment = *iter;
-	// "\n" at start of segment indicates start of a word
-	if (segment[0] == '\n') {
-	    // Store the previous word
-	    if (word != "") {
-		expanded_cmd.push_back(word);
+
+    /* split the request into command and separate args */
+    bool escaped = false;
+    for (size_t i = 0; i< _request.size(); i++) {
+	if (escaped == false) {
+	    if (_request[i] == '\\') {
+		escaped = true;
+		word += '\\';
+	    } else if (_request[i] == '?') {
+		if (command == "") {
+		    command = word;
+		    word = "";
+		} else {
+		    errmsg = c_format("unescaped '?' in XRL args \"%s\" "
+				      "associated with node \"%s\"",
+				      _request.c_str(), tn.path().c_str());
+		    return NULL;
+		}
+	    } else if (_request[i] == '&') {
+		args.push_back(word);
 		word = "";
-	    }
-	    // Strip the magic "\n" off
-	    segment = segment.substr(1, segment.size() - 1);
-	    if (segment.empty()) {
-		++iter;
-		continue;
-	    }
-	}
-
-	// Do variable expansion
-	bool expand_done = false;
-	if (segment[0] == '`') {
-	    expand_done = tn.expand_expression(segment, expanded_var);
-	    if (expand_done) {
-	    	expanded_var = xrlatom_encode_value(expanded_var);
-		word += unquote(expanded_var);
 	    } else {
-		// Error
-		errmsg = c_format("failed to expand expression \"%s\" "
-				  "associated with node \"%s\"",
-				  segment.c_str(), tn.path().c_str());
-		return (XORP_ERROR);
-	    }
-	} else if (segment[0] == '$') {
-	    expand_done = tn.expand_variable(segment, expanded_var);
-	    if (expand_done) {
-	    	expanded_var = xrlatom_encode_value(expanded_var);
-		word += unquote(expanded_var);
-	    } else {
-		// Error
-		errmsg = c_format("failed to expand variable \"%s\" "
-				  "associated with node \"%s\"",
-				  segment.c_str(), tn.segname().c_str());
-		return (XORP_ERROR);
+		word += _request[i];
 	    }
 	} else {
-	    word += segment;
+	    word += _request[i];
 	}
-	++iter;
     }
-    // Store the last word
-    if (word != "")
-	expanded_cmd.push_back(word);
+    if (word != "") {
+	if (command.empty()) {
+	    command = word;
+	} else {
+	    args.push_back(word);
+	}
+    }
 
-    XLOG_ASSERT(expanded_cmd.size() >= 1);
+    debug_msg("target/command part: %s\n", command.c_str());
+    list <string>::const_iterator i2;
+    for (i2 = args.begin(); i2 != args.end(); i2++) {
+	debug_msg("arg part: %s\n", (*i2).c_str());
+    }
 
-    result = unquote(expanded_cmd.front());
+    string expanded_command;
+    if (!expand_vars(tn, command, expanded_command)) {
+	    errmsg = expanded_command;
+	    return NULL;
+	}
 
-    return (XORP_OK);
+    debug_msg("expanded target/command part: %s\n", expanded_command.c_str());
+
+    // find the command name
+    list <string> cmd_parts = split(expanded_command, '/');
+    if (cmd_parts.size() < 2) {
+	    errmsg = c_format("bad XRL \"%s\" "
+			      "associated with node \"%s\"",
+			      _request.c_str(), tn.path().c_str());
+	    return NULL;
+    }
+    command = cmd_parts.back();
+    cmd_parts.pop_back();
+    
+    // put the target name back together again
+    string target;
+    while (!cmd_parts.empty()) {
+	if (!target.empty()) {
+	    target += '/';
+	}
+	target += cmd_parts.front();
+	cmd_parts.pop_front();
+    }
+
+    // now process the args.
+
+    XrlArgs xrl_args;
+    
+    list<string>::const_iterator iter;
+    for (iter = args.begin(); iter != args.end(); iter++) {
+
+	// split each arg into argname, argtype and argvalue
+	string arg = *iter;
+	string name, type, value;
+	for (size_t i = 0; i < arg.size(); i++) {
+	    if (arg[i] == ':') {
+		name = strip_empty_spaces(arg.substr(0,i));
+		arg = arg.substr(i+1, arg.size()-(i+1));
+	    }
+	}
+	for (size_t i = 0; i < arg.size(); i++) {
+	    if (arg[i] == '=') {
+		type = strip_empty_spaces(arg.substr(0,i));
+		value = arg.substr(i+1, arg.size()-(i+1));
+	    }
+	}
+
+	// check that this is a legal XrlAtom type
+	// it really shouldn't be possible for this to fail given 
+	// earlier checks
+	XrlAtomType arg_type = XrlAtom::lookup_type(type.c_str());
+	if (arg_type == xrlatom_no_type) {
+	    errmsg = c_format("bad XRL syntax \"%s\" "
+				  "associated with node \"%s\"",
+				  _request.c_str(), tn.path().c_str());
+	    return NULL;
+	}
+	
+	string expanded_value;
+	if (!expand_vars(tn, value, expanded_value)) {
+	    errmsg = expanded_value;
+	    return NULL;
+	}
+
+	// At this point we've expanded all the variables. 
+	// Now it's time to build an XrlAtom
+	try {
+	    XrlAtom atom(name, arg_type, expanded_value);
+	    xrl_args.add(atom);
+	} catch (InvalidString) {
+	    errmsg = c_format("Bad xrl arg \"%s\" "
+			      "associated with node \"%s\"",
+			      name.c_str(), tn.path().c_str());
+	    return NULL;
+	}
+    }
+    
+    // Now we've got a arg list.  Time to build an Xrl
+    Xrl* xrl = new Xrl(target, command, xrl_args);
+    debug_msg("Xrl expanded to %s\n", xrl->str().c_str());
+    return xrl;
+}
+
+template<class TreeNode>
+bool
+XrlAction::expand_vars(const TreeNode& tn,
+		       const string& value, string& result) const {
+    debug_msg("expand_vars: %s\n", value.c_str());
+    bool escaped = false;
+    string varname;
+    for (size_t i = 0; i < value.size(); i++) {
+	if (escaped) {
+	    escaped = false;
+	    result += value[i];
+	} else if (value[i] == '\\') {
+	    if (varname.empty()) {
+		result += '\\';
+		escaped = true;
+	    } else {
+		// can't escape in a varname
+		result = c_format("bad varname \"%s\" "
+					  "associated with node \"%s\"",
+					  _request.c_str(), tn.path().c_str());
+		return false;
+	    }
+	} else if (value[i] == '$') {
+	    varname += '$';
+	} else if (value[i] == '`') {
+	    varname += '`';
+	} else if (varname.empty()) {
+	    // we're not building up a varname
+	    result += value[i];
+	} else if (varname[0] == '$' && value[i] == ')') {
+	    varname += ')';
+	    // expand variable
+	    string expanded_var;
+	    debug_msg("expanding varname: %s\n", varname.c_str());
+	    bool expand_done = tn.expand_variable(varname, expanded_var);
+	    if (expand_done) {
+		debug_msg("expanded to: %s\n", expanded_var.c_str());
+		//expanded_var = xrlatom_encode_value(expanded_var);
+		result += unquote(expanded_var);
+	    } else {
+		// Error
+		result = c_format("failed to expand variable \"%s\" "
+				  "associated with node \"%s\"",
+				  varname.c_str(), tn.segname().c_str());
+		return false;
+	    }
+	    varname = "";
+	} else if (varname[0] == '`' && value[i] == '`') {
+	    varname += '`';
+	    // expand expression
+	    string expanded_var;
+	    bool expand_done = tn.expand_expression(varname, expanded_var);
+	    if (expand_done) {
+		//expanded_var = xrlatom_encode_value(expanded_var);
+		result += unquote(expanded_var);
+	    } else {
+		// Error
+		result = c_format("failed to expand expression \"%s\" "
+				  "associated with node \"%s\"",
+				  varname.c_str(), tn.path().c_str());
+		return false;
+	    }
+	    varname = "";
+	} else {
+	    varname += value[i];
+	}
+    }
+    return true;
 }
 
 string
@@ -1304,14 +1441,20 @@ Command::check_referred_variables(string& errmsg) const
 //
 // Template explicit instatiation
 //
-template int XrlAction::expand_xrl_variables<class MasterConfigTreeNode>(
+template Xrl* XrlAction::expand_xrl_variables<class MasterConfigTreeNode>(
     const MasterConfigTreeNode& ctn,
-    string& result,
     string& errmsg) const;
-template int XrlAction::expand_xrl_variables<class TemplateTreeNode>(
+template Xrl* XrlAction::expand_xrl_variables<class TemplateTreeNode>(
     const TemplateTreeNode& ttn,
-    string& result,
     string& errmsg) const;
+template bool XrlAction::expand_vars<class MasterConfigTreeNode>(
+    const MasterConfigTreeNode& ctn,
+    const string& value, string& result) const;
+template bool XrlAction::expand_vars<class TemplateTreeNode>(
+    const TemplateTreeNode& ctn,
+    const string& value, string& result) const;
+    
+
 template int ProgramAction::expand_program_variables<class MasterConfigTreeNode>(
     const MasterConfigTreeNode& ctn,
     string& result,

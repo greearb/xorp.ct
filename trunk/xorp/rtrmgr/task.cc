@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.50 2005/06/21 20:33:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.51 2005/07/08 16:42:35 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,9 +100,8 @@ XrlStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 	    const MasterConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
-		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
-						     errmsg)
-		    != XORP_OK) {
+		xrl = _xrl_action.expand_xrl_variables(*ctn, errmsg);
+		if (xrl == NULL) {
 		    XLOG_FATAL("Cannot expand XRL validation action %s "
 			       "for module %s: %s",
 			       _xrl_action.str().c_str(),
@@ -114,8 +113,8 @@ XrlStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 
 	    // Try to expand using the template tree
 	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
-	    if (_xrl_action.expand_xrl_variables(ttn, xrl_request, errmsg)
-		!= XORP_OK) {
+	    xrl = _xrl_action.expand_xrl_variables(ttn, errmsg);
+	    if (xrl == NULL) {
 		XLOG_FATAL("Cannot expand XRL validation action %s "
 			   "for module %s: %s",
 			   _xrl_action.str().c_str(),
@@ -124,17 +123,9 @@ XrlStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 	    }
 	    break;
 	} while (false);
-	if (xrl_request.empty()) {
+	if (xrl == NULL) {
 	    XLOG_FATAL("Cannot expand XRL validation action %s for module %s",
 		       _xrl_action.str().c_str(), _module_name.c_str());
-	}
-
-	// Create the XRL
-	try {
-	    xrl = new Xrl(xrl_request.c_str());
-	} catch (const InvalidString& e) {
-	    XLOG_ERROR("Invalid XRL validation action %s for module %s",
-		       xrl_request.c_str(), _module_name.c_str());
 	}
 
 	XLOG_TRACE(_verbose, "Validating with XRL: >%s<\n",
@@ -750,9 +741,8 @@ XrlStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
 	    const MasterConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
-		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
-						     errmsg)
-		    != XORP_OK) {
+		xrl = _xrl_action.expand_xrl_variables(*ctn, errmsg);
+		if (xrl == NULL) {
 		    XLOG_FATAL("Cannot expand XRL startup action %s "
 			       "for module %s: %s",
 			       _xrl_action.str().c_str(),
@@ -764,8 +754,8 @@ XrlStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
 
 	    // Try to expand using the template tree
 	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
-	    if (_xrl_action.expand_xrl_variables(ttn, xrl_request, errmsg)
-		!= XORP_OK) {
+	    xrl = _xrl_action.expand_xrl_variables(ttn, errmsg);
+	    if (xrl == NULL) {
 		XLOG_FATAL("Cannot expand XRL startup action %s "
 			   "for module %s: %s",
 			   _xrl_action.str().c_str(),
@@ -774,18 +764,10 @@ XrlStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
 	    }
 	    break;
 	} while (false);
-	if (xrl_request.empty()) {
+	if (xrl == NULL) {
 	    XLOG_ERROR("Cannot expand XRL startup action %s for module %s",
 		       _xrl_action.str().c_str(), _module_name.c_str());
 	    return;
-	}
-
-	// Create the XRL
-	try {
-	    xrl = new Xrl(xrl_request.c_str());
-	} catch (const InvalidString& e) {
-	    XLOG_ERROR("Invalid XRL startup action %s for module %s",
-		       xrl_request.c_str(), _module_name.c_str());
 	}
 
 	XLOG_TRACE(_verbose, "Startup with XRL: >%s<\n", xrl->str().c_str());
@@ -1028,9 +1010,8 @@ XrlShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
 	    const MasterConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
-		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
-						     errmsg)
-		    != XORP_OK) {
+		xrl = _xrl_action.expand_xrl_variables(*ctn, errmsg);
+		if (xrl == NULL) {
 		    XLOG_FATAL("Cannot expand XRL shutdown action %s "
 			       "for module %s: %s",
 			       _xrl_action.str().c_str(),
@@ -1042,8 +1023,8 @@ XrlShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
 
 	    // Try to expand using the template tree
 	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
-	    if (_xrl_action.expand_xrl_variables(ttn, xrl_request, errmsg)
-		!= XORP_OK) {
+	    xrl = _xrl_action.expand_xrl_variables(ttn, errmsg);
+	    if (xrl == NULL) {
 		XLOG_FATAL("Cannot expand XRL shutdown action %s "
 			   "for module %s: %s",
 			   _xrl_action.str().c_str(),
@@ -1052,18 +1033,10 @@ XrlShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
 	    }
 	    break;
 	} while (false);
-	if (xrl_request.empty()) {
+	if (xrl == NULL) {
 	    XLOG_ERROR("Cannot expand XRL shutdown action %s for module %s",
 		       _xrl_action.str().c_str(), _module_name.c_str());
 	    return;
-	}
-
-	// Create the XRL
-	try {
-	    xrl = new Xrl(xrl_request.c_str());
-	} catch (const InvalidString& e) {
-	    XLOG_ERROR("Invalid XRL shutdown action %s for module %s",
-		       xrl_request.c_str(), _module_name.c_str());
 	}
 
 	XLOG_TRACE(_verbose, "Shutdown with XRL: >%s<\n", xrl->str().c_str());

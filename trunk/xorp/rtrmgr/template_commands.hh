@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.28 2005/07/11 21:49:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.29 2005/07/11 23:11:45 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -61,9 +61,13 @@ public:
     bool expand_action(string& errmsg);
     int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
+#if 0    
     template<class TreeNode> int expand_xrl_variables(const TreeNode& tn,
 						      string& result,
 						      string& errmsg) const;
+#endif
+    template<class TreeNode> Xrl* expand_xrl_variables(const TreeNode& tn,
+						       string& errmsg) const;
     inline const string& request() const { return _request; }
     const string& xrl_return_spec() const { return _response; }
     string related_module() const;
@@ -72,6 +76,9 @@ public:
 private:
     bool check_xrl_is_valid(const list<string>& action,
 			    const XRLdb& xrldb, string& errmsg);
+    template<class TreeNode> bool expand_vars(const TreeNode& tn,
+					      const string& s, 
+					      string& result) const;
 
     const XRLdb&	_xrldb;
     string		_module_name;
