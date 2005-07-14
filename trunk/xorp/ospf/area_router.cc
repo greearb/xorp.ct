@@ -327,7 +327,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 		_db[index]->get_header().get_ls_sequence_number() == 
 		OspfTypes::MaxSequenceNumber)
 		continue;
-	    // We have a more upto date copy of this LSA than our
+	    // We have a more up to date copy of this LSA than our
 	    // neighbour so blast this LSA directly back to this neighbour.
 	    send_lsa(peerid, nid, _db[index]);
 	    break;
