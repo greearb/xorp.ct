@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.56 2005/07/11 23:11:45 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.57 2005/07/14 00:08:30 mjh Exp $"
 
 
 #include <list>
@@ -558,7 +558,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 
     /* split the request into command and separate args */
     bool escaped = false;
-    for (size_t i = 0; i< _request.size(); i++) {
+    for (size_t i = 0; i < _request.size(); i++) {
 	if (escaped == false) {
 	    if (_request[i] == '\\') {
 		escaped = true;
@@ -593,7 +593,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 
     debug_msg("target/command part: %s\n", command.c_str());
     list <string>::const_iterator i2;
-    for (i2 = args.begin(); i2 != args.end(); i2++) {
+    for (i2 = args.begin(); i2 != args.end(); ++i2) {
 	debug_msg("arg part: %s\n", (*i2).c_str());
     }
 
@@ -631,7 +631,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
     XrlArgs xrl_args;
     
     list<string>::const_iterator iter;
-    for (iter = args.begin(); iter != args.end(); iter++) {
+    for (iter = args.begin(); iter != args.end(); ++iter) {
 
 	// split each arg into argname, argtype and argvalue
 	string arg = *iter;
@@ -639,13 +639,13 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	for (size_t i = 0; i < arg.size(); i++) {
 	    if (arg[i] == ':') {
 		name = strip_empty_spaces(arg.substr(0,i));
-		arg = arg.substr(i+1, arg.size()-(i+1));
+		arg = arg.substr(i + 1, arg.size() - (i + 1));
 	    }
 	}
 	for (size_t i = 0; i < arg.size(); i++) {
 	    if (arg[i] == '=') {
 		type = strip_empty_spaces(arg.substr(0,i));
-		value = arg.substr(i+1, arg.size()-(i+1));
+		value = arg.substr(i + 1, arg.size() - (i + 1));
 	    }
 	}
 
@@ -707,14 +707,8 @@ XrlAction::expand_vars(const TreeNode& tn,
 					  _request.c_str(), tn.path().c_str());
 		return false;
 	    }
-	} else if (value[i] == '$') {
-	    varname += '$';
-	} else if (value[i] == '`') {
-	    varname += '`';
-	} else if (varname.empty()) {
-	    // we're not building up a varname
-	    result += value[i];
-	} else if (varname[0] == '$' && value[i] == ')') {
+	} else if ((i != 0) && (! varname.empty())
+		   && varname[0] == '$' && value[i] == ')') {
 	    varname += ')';
 	    // expand variable
 	    string expanded_var;
@@ -722,7 +716,7 @@ XrlAction::expand_vars(const TreeNode& tn,
 	    bool expand_done = tn.expand_variable(varname, expanded_var);
 	    if (expand_done) {
 		debug_msg("expanded to: %s\n", expanded_var.c_str());
-		//expanded_var = xrlatom_encode_value(expanded_var);
+		// expanded_var = xrlatom_encode_value(expanded_var);
 		result += unquote(expanded_var);
 	    } else {
 		// Error
@@ -732,13 +726,14 @@ XrlAction::expand_vars(const TreeNode& tn,
 		return false;
 	    }
 	    varname = "";
-	} else if (varname[0] == '`' && value[i] == '`') {
+	} else if ((i != 0) && (! varname.empty())
+		   && varname[0] == '`' && value[i] == '`' ) {
 	    varname += '`';
 	    // expand expression
 	    string expanded_var;
 	    bool expand_done = tn.expand_expression(varname, expanded_var);
 	    if (expand_done) {
-		//expanded_var = xrlatom_encode_value(expanded_var);
+		// expanded_var = xrlatom_encode_value(expanded_var);
 		result += unquote(expanded_var);
 	    } else {
 		// Error
@@ -748,6 +743,13 @@ XrlAction::expand_vars(const TreeNode& tn,
 		return false;
 	    }
 	    varname = "";
+	} else if (value[i] == '$') {
+	    varname += '$';
+	} else if (value[i] == '`') {
+	    varname += '`';
+	} else if (varname.empty()) {
+	    // we're not building up a varname
+	    result += value[i];
 	} else {
 	    varname += value[i];
 	}
