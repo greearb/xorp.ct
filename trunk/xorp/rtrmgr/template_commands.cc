@@ -12,8 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.58 2005/07/14 18:37:26 pavlin Exp $"
-
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.59 2005/07/14 19:37:16 abittau Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -671,7 +670,10 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	// At this point we've expanded all the variables. 
 	// Now it's time to build an XrlAtom
 	try {
-	    XrlAtom atom(name, arg_type, expanded_value);
+	    debug_msg("Atom: %s\n", expanded_value.c_str());
+	    XrlAtom atom(name, arg_type, 
+			 xrlatom_encode_value(expanded_value.c_str(),
+					      expanded_value.size()));
 	    xrl_args.add(atom);
 	} catch (InvalidString) {
 	    errmsg = c_format("Bad xrl arg \"%s\" "
