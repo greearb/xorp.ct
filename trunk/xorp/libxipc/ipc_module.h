@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxipc/ipc_module.h,v 1.4 2005/03/25 02:53:28 pavlin Exp $
+ * $XORP: xorp/libxipc/ipc_module.h,v 1.5 2005/07/14 01:48:04 atanu Exp $
  */
 
 /*
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __LIBXIPC_IPC_MODULE_H__
+#endif /* __LIBXIPC_IPC_MODULE_H__ */

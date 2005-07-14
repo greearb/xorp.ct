@@ -15,14 +15,14 @@
  */
 
 /*
- * $XORP: xorp/libproto/libproto_module.h,v 1.4 2005/03/25 02:53:24 pavlin Exp $
+ * $XORP: xorp/libproto/libproto_module.h,v 1.5 2005/07/14 01:48:04 atanu Exp $
  */
 
 /*
  * Module definitions.
  */
-#ifndef __LIBPROTO_PROTO_MODULE_H__
-#define __LIBPROTO_PROTO_MODULE_H__
+#ifndef __LIBPROTO_LIBPROTO_MODULE_H__
+#define __LIBPROTO_LIBPROTO_MODULE_H__
 
 #ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"LIBPROTO"
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __LIBPROTO_PROTO_MODULE_H__
+#endif /* __LIBPROTO_LIBPROTO_MODULE_H__ */

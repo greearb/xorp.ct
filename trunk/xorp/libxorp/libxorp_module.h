@@ -15,14 +15,14 @@
  */
 
 /*
- * $XORP: xorp/libxorp/libxorp_module.h,v 1.4 2005/03/25 02:53:42 pavlin Exp $
+ * $XORP: xorp/libxorp/libxorp_module.h,v 1.5 2005/07/14 01:48:05 atanu Exp $
  */
 
 /*
  * Module definitions.
  */
-#ifndef __LIBXORP_IPV6_H__
-#define __LIBXORP_IPV6_H__
+#ifndef __LIBXORP_LIBXORP_MODULE_H__
+#define __LIBXORP_LIBXORP_MODULE_H__
 
 #ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"LIBXORP"
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __LIBXORP_IPV6_H__
+#endif /* __LIBXORP_LIBXORP_MODULE_H__ */

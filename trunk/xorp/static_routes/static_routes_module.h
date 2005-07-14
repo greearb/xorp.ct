@@ -15,14 +15,14 @@
  */
 
 /*
- * $XORP: xorp/static_routes/static_routes_module.h,v 1.3 2005/03/25 02:54:42 pavlin Exp $
+ * $XORP: xorp/static_routes/static_routes_module.h,v 1.4 2005/07/14 01:48:07 atanu Exp $
  */
 
 /*
  * Module definitions.
  */
-#ifndef __STATIC_ROUTES_STATIC_ROUTES_MODULE_HH__
-#define __STATIC_ROUTES_STATIC_ROUTES_MODULE_HH__
+#ifndef __STATIC_ROUTES_STATIC_ROUTES_MODULE_H__
+#define __STATIC_ROUTES_STATIC_ROUTES_MODULE_H__
 
 #ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"STATIC_ROUTES"
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __STATIC_ROUTES_STATIC_ROUTES_MODULE_HH__
+#endif /* __STATIC_ROUTES_STATIC_ROUTES_MODULE_H__ */

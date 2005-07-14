@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/rtrmgr/rtrmgr_module.h,v 1.4 2005/03/25 02:54:37 pavlin Exp $
+ * $XORP: xorp/rtrmgr/rtrmgr_module.h,v 1.5 2005/07/14 01:48:07 atanu Exp $
  */
 
 /*
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __RTRMGR_RTRMGR_MODULE_H__
+#endif /* __RTRMGR_RTRMGR_MODULE_H__ */

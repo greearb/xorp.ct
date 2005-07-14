@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6igmp_module.h,v 1.4 2005/03/25 02:53:54 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6igmp_module.h,v 1.5 2005/07/14 01:48:05 atanu Exp $
  */
 
 /*
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __MLD6IGMP_MLD6IGMP_MODULE_H__
+#endif /* __MLD6IGMP_MLD6IGMP_MODULE_H__ */

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/fib2mrib/fib2mrib_module.h,v 1.3 2005/03/25 02:53:21 pavlin Exp $
+ * $XORP: xorp/fib2mrib/fib2mrib_module.h,v 1.4 2005/07/14 01:48:03 atanu Exp $
  */
 
 /*
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __FIB2MRIB_FIB2MRIB_MODULE_H__
+#endif /* __FIB2MRIB_FIB2MRIB_MODULE_H__ */

@@ -15,14 +15,14 @@
  */
 
 /*
- * $XORP: xorp/bgp/bgp_module.h,v 1.4 2005/03/25 02:52:39 pavlin Exp $
+ * $XORP: xorp/bgp/bgp_module.h,v 1.5 2005/07/14 01:48:01 atanu Exp $
  */
 
 /*
  * Module definitions.
  */
-#ifndef __BGP_MODULE_H__
-#define __BGP_MODULE_H__
+#ifndef __BGP_BGP_MODULE_H__
+#define __BGP_BGP_MODULE_H__
 
 #ifndef XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"BGP"
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __BGP_MODULE_H__
+#endif /* __BGP_BGP_MODULE_H__ */

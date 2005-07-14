@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/cli/cli_module.h,v 1.4 2005/03/25 02:52:56 pavlin Exp $
+ * $XORP: xorp/cli/cli_module.h,v 1.5 2005/07/14 01:48:02 atanu Exp $
  */
 
 /*
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __CLI_CLI_MODULE_H__
+#endif /* __CLI_CLI_MODULE_H__ */

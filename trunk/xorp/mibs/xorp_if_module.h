@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mibs/xorp_if_module.h,v 1.4 2005/03/25 02:53:53 pavlin Exp $
+ * $XORP: xorp/mibs/xorp_if_module.h,v 1.5 2005/07/14 01:48:05 atanu Exp $
  */
 
 /*
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __MIBS_XORP_IF_MODULE_H__
+#endif /* __MIBS_XORP_IF_MODULE_H__ */

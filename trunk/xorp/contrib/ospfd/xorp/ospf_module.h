@@ -26,13 +26,20 @@
  */
 
 /*
- * $XORP: xorp/contrib/ospfd/xorp/ospf_module.h,v 1.4 2004/06/10 22:40:44 hodson Exp $
+ * $XORP: xorp/contrib/ospfd/xorp/ospf_module.h,v 1.5 2005/03/25 02:52:58 pavlin Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
+#ifndef __CONTRIB_OSPFD_XORP_OSPF_MODULE_H__
+#define __CONTRIB_OSPFD_XORP_OSPF_MODULE_H__
 
+#ifndef XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"OSPF"
+#endif
+#ifndef XORP_MODULE_VERSION
 #define XORP_MODULE_VERSION	"0.1"
+#endif
+
+#endif /* __CONTRIB_OSPFD_XORP_OSPF_MODULE_H__ */

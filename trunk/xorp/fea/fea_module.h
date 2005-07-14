@@ -15,14 +15,14 @@
  */
 
 /*
- * $XORP: xorp/fea/fea_module.h,v 1.4 2005/03/25 02:53:00 pavlin Exp $
+ * $XORP: xorp/fea/fea_module.h,v 1.5 2005/07/14 01:48:02 atanu Exp $
  */
 
 /*
  * Module definitions.
  */
-#ifndef __FEA_MODULE_H__
-#define __FEA_MODULE_H__
+#ifndef __FEA_FEA_MODULE_H__
+#define __FEA_FEA_MODULE_H__
 
 #ifndef	XORP_MODULE_NAME
 #define XORP_MODULE_NAME	"FEA"
@@ -31,4 +31,4 @@
 #define XORP_MODULE_VERSION	"0.1"
 #endif
 
-#endif // __FEA_MODULE_H__
+#endif /* __FEA_FEA_MODULE_H__ */
