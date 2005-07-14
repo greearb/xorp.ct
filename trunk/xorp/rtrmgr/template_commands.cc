@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.57 2005/07/14 00:08:30 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.58 2005/07/14 18:37:26 pavlin Exp $"
 
 
 #include <list>
@@ -640,12 +640,14 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	    if (arg[i] == ':') {
 		name = strip_empty_spaces(arg.substr(0,i));
 		arg = arg.substr(i + 1, arg.size() - (i + 1));
+		break;
 	    }
 	}
 	for (size_t i = 0; i < arg.size(); i++) {
 	    if (arg[i] == '=') {
 		type = strip_empty_spaces(arg.substr(0,i));
 		value = arg.substr(i + 1, arg.size() - (i + 1));
+		break;
 	    }
 	}
 
