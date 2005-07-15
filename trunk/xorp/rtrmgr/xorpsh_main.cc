@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.41 2005/07/02 04:20:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.42 2005/07/08 20:51:17 mjh Exp $"
 
 
 #include <sys/types.h>
@@ -43,7 +43,8 @@ static bool default_verbose = false;
 //
 // Local state
 //
-static bool	running = false;
+static bool	is_interrupted = false;
+static bool	is_user_exited = false;
 static bool	verbose = default_verbose;
 
 static void signal_handler(int signal_value);
@@ -109,11 +110,15 @@ XorpShell::XorpShell(const string& IPCname,
       _router_cli(NULL),
       _xorp_root_dir(xorp_root_dir),
       _verbose(verbose),
+      _ipc_name(IPCname),
       _got_config(false),
       _got_modules(false),
       _mode(MODE_INITIALIZING)
 {
-    _ipc_name = IPCname;
+    size_t i;
+
+    for (i = 0; i < sizeof(_fddesc) / sizeof(_fddesc[0]); i++)
+	_fddesc[i] = -1;
 
     //
     // Print various information
@@ -154,30 +159,61 @@ XorpShell::~XorpShell()
 	delete _ocl;
     if (_router_cli != NULL)
 	delete _router_cli;
+
+    // Close the opened file descriptors
+    size_t i;
+    for (i = 0; i < sizeof(_fddesc) / sizeof(_fddesc[0]); i++) {
+	if (_fddesc[i] >= 0) {
+	    close(_fddesc[i]);
+	    _fddesc[i] = -1;
+	}
+    }
 }
 
 void
-XorpShell::run()
+XorpShell::run(const string& commands)
 {
+    string errmsg;
+    int& xorpsh_write_commands_fd = _fddesc[1];
+    int xorpsh_input_fd = -1;
+    int xorpsh_output_fd = -1;
+
+    if (commands.empty()) {
+	// Accept commands from the stdin
+	xorpsh_input_fd = fileno(stdin);
+	xorpsh_output_fd = fileno(stdout);
+    } else {
+	//
+	// Create an internal pipe to pass the commands to the CLI
+	//
+	if (pipe(_fddesc) != 0) {
+	    errmsg = c_format("Cannot create an internal pipe: %s",
+			      strerror(errno));
+	    xorp_throw(InitError, errmsg);
+	}
+	// xorpsh_write_commands_fd = _fddesc[1];
+	xorpsh_input_fd = _fddesc[0];
+	xorpsh_output_fd = fileno(stdout);
+    }
+
     // Signal handlers so we can clean up when we're killed
-    running = true;
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
+    signal(SIGPIPE, signal_handler);
 
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
 
     if (wait_for_xrlrouter_ready(_eventloop, _xrlrouter) == false) {
 	// RtrMgr contains finder
-	fprintf(stderr, "Failed to connect to xorp_rtrmgr.\n");
-	return;
+	errmsg = c_format("Failed to connect to xorp_rtrmgr.");
+	xorp_throw(InitError, errmsg);
     }
 
     const uint32_t uid = getuid();
     _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name,
 					callback(this,
 						 &XorpShell::register_done));
-
     _mode = MODE_AUTHENTICATING;
     while (_authfile.empty()) {
 	_eventloop.run();
@@ -205,12 +241,12 @@ XorpShell::run()
 
     XLOG_TRACE(_verbose, "authtoken = >%s<\n", _authtoken.c_str());
 
-    _done = false;
+    _xrl_generic_done = false;
     _rtrmgr_client.send_authenticate_client("rtrmgr", uid, _ipc_name,
 					    _authtoken,
 					    callback(this,
 						     &XorpShell::generic_done));
-    while (!_done) {
+    while (!_xrl_generic_done) {
 	_eventloop.run();
     }
 
@@ -243,26 +279,64 @@ XorpShell::run()
 
 	// Start up the CLI
 	_cli_node.enable();
-	_router_cli = new RouterCLI(*this, _cli_node, _verbose);
+	_router_cli = new RouterCLI(*this, _cli_node, xorpsh_input_fd,
+				    xorpsh_output_fd, _verbose);
     } catch (const InitError& e) {
-	XLOG_ERROR("shutting down due to a parse error: %s", e.why().c_str());
-	running = false;
+	errmsg = c_format("Shutting down due to a parse error: %s",
+			  e.why().c_str());
+
+	_xrl_generic_done = false;
+	_rtrmgr_client.send_unregister_client(
+	    "rtrmgr",
+	    _authtoken,
+	    callback(this, &XorpShell::generic_done));
+	_mode = MODE_SHUTDOWN;
+	// Run the event loop to cause the unregister to be sent
+	while (! _xrl_generic_done) {
+	    _eventloop.run();
+	}
+	xorp_throw(InitError, errmsg);
+    }
+
+    //
+    // Write the commands to one end of the pipe
+    //
+    if (xorpsh_write_commands_fd >= 0) {
+	string modified_commands = commands;
+	if (! modified_commands.empty()) {
+	    if (modified_commands[modified_commands.size() - 1] != '\n')
+		modified_commands += "\n";
+	    write(xorpsh_write_commands_fd, modified_commands.c_str(),
+		  modified_commands.size());
+	    close(xorpsh_write_commands_fd);
+	    xorpsh_write_commands_fd = -1;
+	}
     }
 
     _mode = MODE_IDLE;
-    while (running) {
+    while ((! is_interrupted) && (! is_user_exited)) {
+	_eventloop.run();
+    }
+    while (! done()) {
 	_eventloop.run();
     }
 
-    _done = false;
-    _rtrmgr_client.send_unregister_client("rtrmgr", _authtoken,
-					  callback(this,
-						   &XorpShell::generic_done));
+    _xrl_generic_done = false;
+    _rtrmgr_client.send_unregister_client(
+	"rtrmgr",
+	_authtoken,
+	callback(this, &XorpShell::generic_done));
     _mode = MODE_SHUTDOWN;
-    // We need to return to the event loop to cause the unregister to be sent
-    while (!_done) {
+    // Run the event loop to cause the unregister to be sent
+    while (! _xrl_generic_done) {
 	_eventloop.run();
     }
+}
+
+bool
+XorpShell::done() const
+{
+    return (_xrl_generic_done && _ocl->done());
 }
 
 void
@@ -286,7 +360,7 @@ void
 XorpShell::generic_done(const XrlError& e)
 {
     if (e == XrlError::OKAY()) {
-	_done = true;
+	_xrl_generic_done = true;
 	return;
     }
 
@@ -542,9 +616,13 @@ signal_handler(int signal_value)
     case SIGINT:
 	// Ignore Ctrl-C: it is used by the CLI to interrupt a command.
 	break;
+    case SIGPIPE:
+	// Ignore SIGPIPE: it may be generated when executing commands
+	// specified on the command line.
+	break;
     default:
 	// XXX: anything else we have intercepted will terminate us.
-	running = false;
+	is_interrupted = true;
 	break;
     }
 }
@@ -552,7 +630,7 @@ signal_handler(int signal_value)
 static void
 exit_handler(CliClient*)
 {
-    running = false;
+    is_user_exited = true;
 }
 
 static void
@@ -560,6 +638,7 @@ usage(const char *argv0)
 {
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -c        Specify command(s) to execute\n");
     fprintf(stderr, "  -h        Display this information\n");
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
@@ -582,6 +661,7 @@ int
 main(int argc, char *argv[])
 {
     int errcode = 0;
+    string commands;
 
     //
     // Initialize and start xlog
@@ -608,8 +688,11 @@ main(int argc, char *argv[])
     string xrl_targets_dir	= xorp_xrl_targets_dir();
 
     int c;
-    while ((c = getopt (argc, argv, "t:x:vh")) != EOF) {
+    while ((c = getopt(argc, argv, "c:t:x:vh")) != EOF) {
 	switch(c) {
+	case 'c':
+	    commands = optarg;
+	    break;
 	case 't':
 	    template_dir = optarg;
 	    break;
@@ -643,7 +726,7 @@ main(int argc, char *argv[])
 	string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
 	XorpShell xorpsh(xname, xorp_binary_root_dir(), template_dir,
 			 xrl_targets_dir, verbose);
-	xorpsh.run();
+	xorpsh.run(commands);
     } catch (const InitError& e) {
 	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());
 	errcode = 1;

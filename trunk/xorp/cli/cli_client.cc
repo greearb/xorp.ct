@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.28 2005/04/30 21:58:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.29 2005/06/20 22:05:16 pavlin Exp $"
 
 
 //
@@ -59,15 +59,17 @@
 
 
 // TODO: use a parameter to define the buffer size
-CliClient::CliClient(CliNode& init_cli_node, int fd)
+CliClient::CliClient(CliNode& init_cli_node, int input_fd, int output_fd)
     : _cli_node(init_cli_node),
-      _cli_fd(fd),
+      _input_fd(input_fd),
+      _output_fd(output_fd),
       _command_buffer(1024),
       _telnet_sb_buffer(1024),
-      _cli_session_from_address(_cli_node.family())
+      _cli_session_from_address(_cli_node.family()),
+      _is_network(false)
 {
-    _cli_fd_file_read = NULL;
-    _cli_fd_file_write = NULL;
+    _input_fd_file = NULL;
+    _output_fd_file = NULL;
     _client_type = CLIENT_TERMINAL;	// XXX: default is terminal
     
     _gl = NULL;
@@ -136,14 +138,37 @@ CliClient::CliClient(CliNode& init_cli_node, int fd)
 
 CliClient::~CliClient()
 {
-    stop_connection();
+    string dummy_error_msg;
+
+    stop_connection(dummy_error_msg);
     
     set_log_output(false);
-    
-    if (_cli_fd >= 0) {
-	cli_node().eventloop().remove_selector(_cli_fd);
-	comm_close(_cli_fd);
+
+    // Remove the input file descriptor from the eventloop
+    if (_input_fd >= 0) {
+	cli_node().eventloop().remove_selector(_input_fd);
     }
+
+    // Close files and file descriptors
+    if (_input_fd_file != NULL) {
+	fclose(_input_fd_file);
+	_input_fd_file = NULL;
+	_input_fd = -1;
+    }
+    if (_output_fd_file != NULL) {
+	fclose(_output_fd_file);
+	_output_fd_file = NULL;
+	_output_fd = -1;
+    }
+    if (_input_fd >= 0) {
+	comm_close(_input_fd);
+	_input_fd = -1;
+    }
+    if (_output_fd >= 0) {
+	comm_close(_output_fd);
+	_output_fd = -1;
+    }
+
     if (_gl != NULL)
 	_gl = del_GetLine(_gl);
     
@@ -171,6 +196,34 @@ CliClient::set_log_output(bool v)
     
     // NOTERACHED
     return (XORP_ERROR);
+}
+
+bool
+CliClient::is_tty() const
+{
+    return (isatty(_output_fd) != 0);
+}
+
+bool
+CliClient::is_network() const
+{
+    return (_is_network);
+}
+
+void
+CliClient::set_network_client(bool v)
+{
+    _is_network = v;
+}
+
+bool
+CliClient::is_telnet() const
+{
+    //
+    // TODO: XXX: for the time being we assume that all network connections
+    // are telnet.
+    //
+    return (is_network());
 }
 
 CliPipe *
@@ -697,7 +750,7 @@ CliClient::cli_print(const string& msg)
     ret_value = output_string.size();
     // if (! (is_page_buffer_mode() && is_page_mode()))
     if (output_string.size())
-	ret_value = fprintf(_cli_fd_file_write, "%s", output_string.c_str());
+	ret_value = fprintf(_output_fd_file, "%s", output_string.c_str());
     
     return (ret_value);
 }
@@ -706,7 +759,7 @@ CliClient::cli_print(const string& msg)
 int
 CliClient::cli_flush()
 {
-    if ((_cli_fd_file_write != NULL) && (fflush(_cli_fd_file_write) == 0))
+    if ((_output_fd_file != NULL) && (fflush(_output_fd_file) == 0))
 	return (XORP_OK);
     return (XORP_ERROR);
 }
@@ -1070,6 +1123,13 @@ CliClient::post_process_command()
 	cli_print(current_cli_prompt());
     set_prompt_flushed(false);
     cli_flush();
+
+    //
+    // Process the pending input data (if any)
+    //
+    if (! _pending_input_data.empty()) {
+	process_input_data();
+    }
 }
 
 void
@@ -1114,21 +1174,27 @@ CliClient::flush_process_command_output()
 // XXX: returning %XORP_ERROR is also an indication that the connection
 // has been closed.
 int
-CliClient::process_char(const char *line, uint8_t val)
+CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
 {
     int gl_buff_curpos = gl_get_buff_curpos(gl());
     int ret_value = XORP_OK;
     
-    if (line == NULL)
-	return (XORP_ERROR);
-    
+    stop_processing = false;
+
     if ((val == '\n') || (val == '\r')) {
 	// New command
-	if (is_waiting_for_data())
-	    return (XORP_OK);
+	XLOG_ASSERT(is_waiting_for_data() == false);
 	set_page_buffer_mode(true);
-	process_command(string(line));
+	process_command(line);
 	post_process_command();
+
+	//
+	// Set the flag to stop processing pending input data while
+	// processing previous commands.
+	//
+	if (is_waiting_for_data())
+	    stop_processing = true;
+
 	return (XORP_OK);
     }
     
@@ -1153,17 +1219,10 @@ CliClient::process_char(const char *line, uint8_t val)
     }
     
     //
-    // XXX: the (val == ' ') case is handled by the parent function
+    // XXX: The (val == ' ') and 'Ctrl-C' cases are handled by the
+    // parent function.
     //
 
-    if (val == CHAR_TO_CTRL('c')) {
-	//
-	// Interrupt current command
-	//
-	interrupt_command();
-	return (XORP_OK);
-    }
-    
     // All other characters which we need to print
     // Store the line in the command buffer
     command_buffer().reset();
@@ -1179,9 +1238,11 @@ CliClient::process_char(const char *line, uint8_t val)
 	// This client is sending too much data. Kick it out!
 	// TODO: print more informative message about the
 	// client: E.g. where it came from, etc.
-	XLOG_WARNING("Removing client (socket = %d family = %d): "
+	XLOG_WARNING("Removing client (input fd = %d output fd = %d "
+		     "family = %d): "
 		     "data buffer full",
-		     cli_fd(),
+		     input_fd(),
+		     output_fd(),
 		     cli_node().family());
 	return (XORP_ERROR);
     }
@@ -1199,7 +1260,7 @@ CliClient::process_char(const char *line, uint8_t val)
  * Print the help for the same-line command.
  **/
 void
-CliClient::command_line_help(const char *line, int word_end)
+CliClient::command_line_help(const string& line, int word_end)
 {
     CliCommand *curr_cli_command = _current_cli_command;
     string command_help_string = "";
@@ -1213,7 +1274,7 @@ CliClient::command_line_help(const char *line, int word_end)
 	 iter != curr_cli_command->child_command_list().end();
 	 ++iter) {
 	CliCommand *tmp_cli_command = *iter;
-	if (tmp_cli_command->find_command_help(line, word_end,
+	if (tmp_cli_command->find_command_help(line.c_str(), word_end,
 					       command_help_string))
 	    is_found = true;
     }

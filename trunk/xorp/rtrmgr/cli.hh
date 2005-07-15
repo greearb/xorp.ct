@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.28 2005/07/02 04:20:20 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.29 2005/07/08 20:51:16 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -25,6 +25,8 @@
 
 #include "cli/cli_node.hh"
 #include "cli/cli_client.hh"
+
+#include "rtrmgr_error.hh"
 
 
 class CommandTree;
@@ -48,7 +50,8 @@ enum CliModeType {
 
 class RouterCLI {
 public:
-    RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose);
+    RouterCLI(XorpShell& xorpsh, CliNode& cli_node, int cli_client_input_fd,
+	      int cli_client_output_fd, bool verbose) throw (InitError);
     ~RouterCLI();
 
     bool is_config_mode() const;
@@ -196,6 +199,7 @@ public:
     void op_mode_cmd_tidy();
 
 private:
+    CliClient& cli_client() const { return (*_cli_client_ptr); }
     void reset_path();
     void set_path(string path);
     void apply_path_change();
@@ -290,7 +294,7 @@ private:
     //    SlaveConfigTreeNode* _current_config_node;
 
     CliNode&		_cli_node;
-    CliClient&		_cli_client;
+    CliClient*		_cli_client_ptr;
     bool		_verbose;	// Set to true if output is verbose
     CliModeType		_mode;
     CliCommand*		_set_node;

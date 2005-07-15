@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.35 2005/04/30 21:58:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.36 2005/06/20 22:08:18 pavlin Exp $"
 
 
 //
@@ -120,6 +120,8 @@ CliNode::sock_serv_close()
 void
 CliNode::accept_connection(int fd, SelectorMask mask)
 {
+    string error_msg;
+
     debug_msg("Received connection on socket = %d, family = %d\n",
 	      fd, family());
     
@@ -127,25 +129,33 @@ CliNode::accept_connection(int fd, SelectorMask mask)
     
     int client_socket = comm_sock_accept(fd);
     
-    if (client_socket >= 0)
-	add_connection(client_socket);
+    if (client_socket >= 0) {
+	if (add_connection(client_socket, client_socket, true, error_msg)
+	    == NULL) {
+	    XLOG_ERROR("Cannot accept CLI connection: %s", error_msg.c_str());
+	}
+    }
 }
 
 CliClient *
-CliNode::add_connection(int client_socket)
+CliNode::add_connection(int input_fd, int output_fd, bool is_network,
+			string& error_msg)
 {
+    string dummy_error_msg;
     CliClient *cli_client = NULL;
     
-    debug_msg("Added connection on socket = %d, family = %d\n",
-	      client_socket, family());
+    debug_msg("Added connection with input_fd = %d, output_fd = %d, "
+	      "family = %d\n",
+	      input_fd, output_fd, family());
     
-    cli_client = new CliClient(*this, client_socket);
+    cli_client = new CliClient(*this, input_fd, output_fd);
+    cli_client->set_network_client(is_network);
     _client_list.push_back(cli_client);
     
     //
     // Set peer address (for network connection only)
     //
-    if (! cli_client->is_stdio()) {
+    if (cli_client->is_network()) {
 	union {
 	    struct sockaddr sa;
 #ifdef HAVE_IPV6
@@ -154,9 +164,10 @@ CliNode::add_connection(int client_socket)
 	} un;
 	struct sockaddr *sa = (struct sockaddr *)&un.sa;
 	socklen_t len = sizeof(un);
-	if (getpeername(cli_client->cli_fd(), sa, &len) < 0) {
+	if (getpeername(cli_client->input_fd(), sa, &len) < 0) {
+	    error_msg = c_format("Cannot get peer name: %s", strerror(errno));
 	    // Error getting peer address
-	    delete_connection(cli_client);
+	    delete_connection(cli_client, dummy_error_msg);
 	    return (NULL);
 	}
 	IPvX peer_addr = IPvX::ZERO(family());
@@ -177,7 +188,10 @@ CliNode::add_connection(int client_socket)
 #endif // HAVE_IPV6
 	default:
 	    // Invalid address family
-	    delete_connection(cli_client);
+	    error_msg = c_format("Cannot set peer address: "
+				 "invalid address family (%d)",
+				 sa->sa_family);
+	    delete_connection(cli_client, dummy_error_msg);
 	    return (NULL);
 	}
 	cli_client->set_cli_session_from_address(peer_addr);
@@ -187,13 +201,15 @@ CliNode::add_connection(int client_socket)
     // Check access control for this peer address
     //
     if (! is_allow_cli_access(cli_client->cli_session_from_address())) {
-	delete_connection(cli_client);
+	error_msg = c_format("CLI access from address %s is not allowed",
+			     cli_client->cli_session_from_address().str().c_str());
+	delete_connection(cli_client, dummy_error_msg);
 	return (NULL);
     }
     
-    if (cli_client->start_connection() < 0) {
+    if (cli_client->start_connection(error_msg) < 0) {
 	// Error connecting to the client
-	delete_connection(cli_client);
+	delete_connection(cli_client, dummy_error_msg);
 	return (NULL);
     }
     
@@ -220,7 +236,9 @@ CliNode::add_connection(int client_socket)
 	}
 	if (i >= CLI_MAX_CONNECTIONS) {
 	    // Too many connections
-	    delete_connection(cli_client);
+	    error_msg = c_format("Too many CLI connections (max is %u)",
+				 XORP_UINT_CAST(CLI_MAX_CONNECTIONS));
+	    delete_connection(cli_client, dummy_error_msg);
 	    return (NULL);
 	}
 	cli_client->set_cli_session_term_name(term_name);
@@ -262,34 +280,51 @@ CliNode::add_connection(int client_socket)
 }
 
 int
-CliNode::delete_connection(CliClient *cli_client)
+CliNode::delete_connection(CliClient *cli_client, string& error_msg)
 {
-    debug_msg("Delete connection on socket = %d, family = %d\n",
-	      cli_client->cli_fd(), family());
+    list<CliClient *>::iterator iter;
+
+    iter = find(_client_list.begin(), _client_list.end(), cli_client);
+    if (iter == _client_list.end()) {
+	error_msg = c_format("Cannot delete CLI connection: invalid client");
+	return (XORP_ERROR);
+    }
+
+    debug_msg("Delete connection on input fd = %d, output fd = %d, "
+	      "family = %d\n",
+	      cli_client->input_fd(), cli_client->output_fd(), family());
     cli_client->cli_flush();
     
     // The callback when deleting this client
     if (! _cli_client_delete_callback.is_empty())
 	_cli_client_delete_callback->dispatch(cli_client);
 
-    _client_list.remove(cli_client);
-    delete cli_client;
+    if (cli_client->is_network()) {
+	// XXX: delete the client only if this was a network connection
+	_client_list.erase(iter);
+	delete cli_client;
+    }
     
     return (XORP_OK);
 }
 
 int
-CliClient::start_connection()
+CliClient::start_connection(string& error_msg)
 {
-    if (cli_node().eventloop().add_selector(cli_fd(), SEL_RD,
-					    callback(this, &CliClient::client_read))
-	== false)
+    if (cli_node().eventloop().add_selector(
+	    input_fd(),
+	    SEL_RD,
+	    callback(this, &CliClient::client_read))
+	== false) {
+	error_msg = c_format("Cannot start CLI connection: cannot add the "
+			     "file descriptor to the eventloop");
 	return (XORP_ERROR);
+    }
     
     //
     // Setup the telnet options
     //
-    if (! is_stdio()) {
+    if (is_telnet()) {
 	char will_echo_cmd[] = { IAC, WILL, TELOPT_ECHO, '\0' };
 	char will_sga_cmd[]  = { IAC, WILL, TELOPT_SGA, '\0'  };
 	char dont_linemode_cmd[] = { IAC, DONT, TELOPT_LINEMODE, '\0' };
@@ -297,12 +332,12 @@ CliClient::start_connection()
 	char do_transmit_binary_cmd[] = { IAC, DO, TELOPT_BINARY, '\0' };
 	char will_transmit_binary_cmd[] = { IAC, WILL, TELOPT_BINARY, '\0' };
 	
-	write(cli_fd(), will_echo_cmd, sizeof(will_echo_cmd));
-	write(cli_fd(), will_sga_cmd, sizeof(will_sga_cmd));
-	write(cli_fd(), dont_linemode_cmd, sizeof(dont_linemode_cmd));
-	write(cli_fd(), do_window_size_cmd, sizeof(do_window_size_cmd));
-	write(cli_fd(), do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd));
-	write(cli_fd(), will_transmit_binary_cmd, sizeof(will_transmit_binary_cmd));
+	write(output_fd(), will_echo_cmd, sizeof(will_echo_cmd));
+	write(output_fd(), will_sga_cmd, sizeof(will_sga_cmd));
+	write(output_fd(), dont_linemode_cmd, sizeof(dont_linemode_cmd));
+	write(output_fd(), do_window_size_cmd, sizeof(do_window_size_cmd));
+	write(output_fd(), do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd));
+	write(output_fd(), will_transmit_binary_cmd, sizeof(will_transmit_binary_cmd));
     }
     
     //
@@ -310,13 +345,14 @@ CliClient::start_connection()
     // In addition, disable signals INTR, QUIT, [D]SUSP
     // (i.e., force their value to be received when read from the terminal).
     //
-    if (is_stdio()) {
+    if (is_tty()) {
 	struct termios termios;
 	
-	while (tcgetattr(cli_fd(), &termios) != 0) {
+	while (tcgetattr(output_fd(), &termios) != 0) {
 	    if (errno != EINTR) {
-		XLOG_ERROR("start_connection(): tcgetattr() error: %s", 
-			   strerror(errno));
+		error_msg = c_format("start_connection(): "
+				     "tcgetattr() error: %s", 
+				     strerror(errno));
 		return (XORP_ERROR);
 	    }
 	}
@@ -331,10 +367,11 @@ CliClient::start_connection()
 	
 	// Reset the flags
 	termios.c_lflag &= ~(ICANON | ECHO | ISIG);
-	while (tcsetattr(cli_fd(), TCSADRAIN, &termios) != 0) {
+	while (tcsetattr(output_fd(), TCSADRAIN, &termios) != 0) {
 	    if (errno != EINTR) {
-		XLOG_ERROR("start_connection(): tcsetattr() error: %s", 
-			   strerror(errno));
+		error_msg = c_format("start_connection(): "
+				     "tcsetattr() error: %s", 
+				     strerror(errno));
 		return (XORP_ERROR);
 	    }
 	}
@@ -343,36 +380,51 @@ CliClient::start_connection()
     //
     // Setup the read/write file descriptors
     //
-    if (! is_stdio()) {
-	// Network connection
-	_cli_fd_file_read = fdopen(cli_fd(), "r");
-	_cli_fd_file_write = fdopen(cli_fd(), "w");
+    if (input_fd() == fileno(stdin)) {
+	_input_fd_file = stdin;
     } else {
-	// Stdin connection
-	_cli_fd_file_read = stdin;
-	_cli_fd_file_write = stdout;
+	_input_fd_file = fdopen(input_fd(), "r");
+	if (_input_fd_file == NULL) {
+	    error_msg = c_format("Cannot associate a stream with the "
+				 "input file descriptor: %s",
+				 strerror(errno));
+	    return (XORP_ERROR);
+	}
+    }
+    if (output_fd() == fileno(stdout)) {
+	_output_fd_file = stdout;
+    } else {
+	_output_fd_file = fdopen(output_fd(), "w");
+	if (_output_fd_file == NULL) {
+	    error_msg = c_format("Cannot associate a stream with the "
+				 "output file descriptor: %s",
+				 strerror(errno));
+	    return (XORP_ERROR);
+	}
     }
     
     _gl = new_GetLine(1024, 2048);		// TODO: hardcoded numbers
-    if (_gl == NULL)
+    if (_gl == NULL) {
+	error_msg = c_format("Cannot create a new GetLine instance");
 	return (XORP_ERROR);
+    }
     
     // XXX: always set to network type
     gl_set_is_net(_gl, 1);
     
     // Set the terminal
-    string term_name = "vt100";		// Default for network connection
-    if (is_stdio()) {
+    string term_name = "vt100";		// Default value
+    if (is_tty()) {
 	term_name = getenv("TERM");
 	if (term_name.empty())
 	    term_name = "vt100";	// Set to default
     }
 
     // Get the terminal size
-    if (is_stdio()) {
+    if (is_tty()) {
 	struct winsize window_size;
 
-	if (ioctl(cli_fd(), TIOCGWINSZ, &window_size) < 0) {
+	if (ioctl(output_fd(), TIOCGWINSZ, &window_size) < 0) {
 	    XLOG_ERROR("Cannot get window size (ioctl(TIOCGWINSZ) failed): %s",
 		       strerror(errno));
 	} else {
@@ -408,15 +460,17 @@ CliClient::start_connection()
     }
 
     // Change the input and output streams for libtecla
-    if (gl_change_terminal(_gl, _cli_fd_file_read, _cli_fd_file_write,
+    if (gl_change_terminal(_gl, _input_fd_file, _output_fd_file,
 			   term_name.c_str())
 	!= 0) {
+	error_msg = c_format("Cannot change the I/O streams");
 	_gl = del_GetLine(_gl);
 	return (XORP_ERROR);
     }
 
     // Add the command completion hook
     if (gl_customize_completion(_gl, this, command_completion_func) != 0) {
+	error_msg = c_format("Cannot customize command-line completion");
 	_gl = del_GetLine(_gl);
 	return (XORP_ERROR);
     }
@@ -449,12 +503,12 @@ CliClient::start_connection()
 }
 
 int
-CliClient::stop_connection()
+CliClient::stop_connection(string& error_msg)
 {
     //
     // Restore the terminal settings
     //
-    if (is_stdio()) {
+    if (is_tty()) {
 	if (! (_is_modified_stdio_termios_icanon
 	       || _is_modified_stdio_termios_echo
 	       || _is_modified_stdio_termios_isig)) {
@@ -463,7 +517,7 @@ CliClient::stop_connection()
 	
 	struct termios termios;
 	
-	while (tcgetattr(cli_fd(), &termios) != 0) {
+	while (tcgetattr(output_fd(), &termios) != 0) {
 	    if (errno != EINTR) {
 		XLOG_ERROR("stop_connection(): tcgetattr() error: %s", 
 			   strerror(errno));
@@ -477,10 +531,11 @@ CliClient::stop_connection()
 	    termios.c_lflag |= ECHO;
 	if (_is_modified_stdio_termios_isig)
 	    termios.c_lflag |= ISIG;
-	while (tcsetattr(cli_fd(), TCSADRAIN, &termios) != 0) {
+	while (tcsetattr(output_fd(), TCSADRAIN, &termios) != 0) {
 	    if (errno != EINTR) {
-		XLOG_ERROR("stop_connection(): tcsetattr() error: %s", 
-			   strerror(errno));
+		error_msg = c_format("stop_connection(): "
+				     "tcsetattr() error: %s",
+				     strerror(errno));
 		return (XORP_ERROR);
 	    }
 	}
@@ -508,17 +563,17 @@ CliClient::set_is_waiting_for_data(bool v)
 int
 CliClient::block_connection(bool is_blocked)
 {
-    if (cli_fd() < 0)
+    if (input_fd() < 0)
 	return (XORP_ERROR);
     
     if (is_blocked) {
 	// Un-select()
-	cli_node().eventloop().remove_selector(cli_fd(), SEL_ALL);
+	cli_node().eventloop().remove_selector(input_fd(), SEL_ALL);
 	return (XORP_OK);
     }
 
     // Do-select()
-    if (cli_node().eventloop().add_selector(cli_fd(), SEL_RD,
+    if (cli_node().eventloop().add_selector(input_fd(), SEL_RD,
 					    callback(this, &CliClient::client_read))
 	== false)
 	return (XORP_ERROR);
@@ -529,35 +584,62 @@ CliClient::block_connection(bool is_blocked)
 void
 CliClient::client_read(int fd, SelectorMask mask)
 {
-    char *line = NULL;
+    string dummy_error_msg;
+
     char buf[1024];		// TODO: 1024 size must be #define
-    int i, n, ret_value;
+    int n;
     
     XLOG_ASSERT(mask == SEL_RD);
     
-    n = read(fd, buf, sizeof(buf));
+    n = read(fd, buf, sizeof(buf) - 1);
     
     debug_msg("client_read %d octet(s)\n", n);
     if (n <= 0) {
-	cli_node().delete_connection(this);
+	cli_node().delete_connection(this, dummy_error_msg);
 	return;
     }
-    
-    // Scan the input data and filter-out the Telnet commands
-    for (i = 0; i < n; i++) {
-	uint8_t val = buf[i];
+
+    // Add the new data to the buffer with the pending data
+    size_t old_size = _pending_input_data.size();
+    _pending_input_data.resize(old_size + n);
+    memcpy(&_pending_input_data[old_size], buf, n);
+
+    process_input_data();
+}
+
+void
+CliClient::process_input_data()
+{
+    int ret_value;
+    string dummy_error_msg;
+    vector<uint8_t> input_data = _pending_input_data;
+    bool stop_processing = false;
+
+    //
+    // XXX: Remove the stored input data. Later we will add-back
+    // only the data which we couldn't process.
+    //
+    _pending_input_data.clear();
+
+    // Process the input data
+    vector<uint8_t>::iterator iter;
+    for (iter = input_data.begin(); iter != input_data.end(); ++iter) {
+	uint8_t val = *iter;
 	
-	if (! is_stdio()) {
+	if (is_telnet()) {
+	    // Filter-out the Telnet commands
 	    int ret = process_telnet_option(val);
 	    if (ret < 0) {
 		// Kick-out the client
 		// TODO: print more informative message about the client:
 		// E.g. where it came from, etc.
-		XLOG_WARNING("Removing client (socket = %d family = %d): "
+		XLOG_WARNING("Removing client (input fd = %d output fd = %d "
+			     "family = %d): "
 			     "error processing telnet option",
-			     fd,
+			     input_fd(),
+			     output_fd(),
 			     cli_node().family());
-		cli_node().delete_connection(this);
+		cli_node().delete_connection(this, dummy_error_msg);
 		return;
 	    }
 	    if (ret == 0) {
@@ -567,11 +649,24 @@ CliClient::client_read(int fd, SelectorMask mask)
 	}
 	
 	preprocess_char(val);
-	
+
+	if (val == CHAR_TO_CTRL('c')) {
+	    //
+	    // Interrupt current command
+	    //
+	    interrupt_command();
+	    _pending_input_data.clear();
+	    return;
+	}
+
+	if (stop_processing)
+	    continue;
+
 	//
 	// Get a character and process it
 	//
 	do {
+	    char *line;
 	    line = gl_get_line_net(gl(),
 				   current_cli_prompt().c_str(),
 				   (char *)command_buffer().data(),
@@ -586,15 +681,30 @@ CliClient::client_read(int fd, SelectorMask mask)
 		ret_value = process_char_page_mode(val);
 		break;
 	    }
-	    ret_value = process_char(line, val);
+	    ret_value = process_char(string(line), val, stop_processing);
 	    break;
 	} while (false);
 	
 	if (ret_value != XORP_OK) {
 	    // Either error or end of input
 	    cli_print("\nEnd of connection.\n");
-	    cli_node().delete_connection(this);
+	    cli_node().delete_connection(this, dummy_error_msg);
 	    return;
+	}
+
+	if (stop_processing) {
+	    //
+	    // Stop processing and save the remaining input data for later
+	    // processing.
+	    // However we continue scanning the rest of the data
+	    // primary to look for Ctrl-C
+	    //
+	    vector<uint8_t>::iterator iter2 = iter;
+	    ++iter2;
+	    if (iter2 != input_data.end())
+		_pending_input_data.assign(iter2, input_data.end());
+	    // _pending_input_data = input_data.substr(i + 1);
+	    continue;
 	}
     }
     cli_flush();		// Flush-out the output

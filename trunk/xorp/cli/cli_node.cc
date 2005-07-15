@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.24 2005/03/24 00:35:20 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.25 2005/03/25 02:52:56 pavlin Exp $"
 
 
 //
@@ -606,13 +606,26 @@ CliNode::recv_process_command_output(const string * , // processor_name,
 }
 
 CliClient *
-CliNode::add_stdio_client()
+CliNode::add_client(int input_fd, int output_fd, bool is_network,
+		    string& error_msg)
 {
-    return (add_connection(fileno(stdin)));
+    return (add_connection(input_fd, output_fd, is_network, error_msg));
 }
 
 int
-CliNode::delete_stdio_client(CliClient *cli_client)
+CliNode::delete_client(CliClient *cli_client, string& error_msg)
 {
-    return (delete_connection(cli_client));
+    if (delete_connection(cli_client, error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    // XXX: delete the client itself if it is still around
+    list<CliClient *>::iterator iter;
+
+    iter = find(_client_list.begin(), _client_list.end(), cli_client);
+    if (iter != _client_list.end()) {
+	_client_list.erase(iter);
+	delete cli_client;
+    }
+
+    return (XORP_OK);
 }

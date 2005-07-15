@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.14 2005/03/25 02:52:56 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.15 2005/04/30 21:58:29 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -58,9 +58,12 @@ public:
      * Constructor for a given CLI node and file descriptor.
      * 
      * @param init_cli_node the @ref CliNode CLI node this client belongs to.
-     * @param fd the file descriptor for communication with the user.
+     * @param input_fd the file descriptor for the CLI client to read
+     * data from.
+     * @param output_fd the file descriptor for the CLI client to write
+     * data to.
      */
-    CliClient(CliNode& init_cli_node, int fd);
+    CliClient(CliNode& init_cli_node, int input_fd, int output_fd);
 
     /**
      * Destructor
@@ -70,16 +73,18 @@ public:
     /**
      * Start the connection.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start_connection();
+    int		start_connection(string& error_msg);
 
     /**
      * Stop the connection.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop_connection();
+    int		stop_connection(string& error_msg);
     
     /**
      * Print a message to the CLI user.
@@ -115,19 +120,50 @@ public:
     bool	is_log_output() const { return (_is_log_output); }
     
     /**
-     * Get the file descriptor for communication with the user.
+     * Get the file descriptor for reading the input from the user.
      * 
-     * @return the file descriptor for communcation with the user.
+     * @return the file descriptor for reading the input from the user.
      */
-    int		cli_fd() { return (_cli_fd); }
+    int		input_fd() { return (_input_fd); }
+
+    /**
+     * Get the file descriptor for writing the output to the user.
+     * 
+     * @return the file descriptor for writing the output to the user.
+     */
+    int		output_fd() { return (_output_fd); }
     
     /**
-     * Test if this client is for stdio access.
+     * Test if this client is associated with a terminal type output device.
      * 
-     * @return true if this client is for stdion access, otherwise false.
+     * @return true if this client is associated with a terminal type output
+     * device, otherwise false.
      */
-    bool	is_stdio() const { return (_cli_fd == fileno(stdin)); }
-    
+    bool	is_tty() const;
+
+    /**
+     * Test if this client is associated with a network connection.
+     * 
+     * @return true if this client is associated with a network connection,
+     * otherwise false.
+     */
+    bool	is_network() const;
+
+    /**
+     * Set the flag that associates the client with a network connection.
+     * 
+     * @param v true if this client is associated with a network connection.
+     */
+    void	set_network_client(bool v);
+
+    /**
+     * Test if this client is associated with a telnet connection.
+     * 
+     * @return true if this client is associated with a telnet connection,
+     * otherwise false.
+     */
+    bool	is_telnet() const;
+
     //
     // Session info
     //
@@ -356,12 +392,14 @@ private:
     
     int		block_connection(bool is_blocked);
     void	client_read(int fd, SelectorMask mask);
+    void	process_input_data();
     
     static	CPL_MATCH_FN(command_completion_func);
-    int		process_char(const char *line, uint8_t val);
+    int		process_char(const string& line, uint8_t val,
+			     bool& stop_processing);
     int		process_char_page_mode(uint8_t val);
     int		preprocess_char(uint8_t val);
-    void	command_line_help(const char *line, int word_end);
+    void	command_line_help(const string& line, int word_end);
     bool	is_multi_command_prefix(const string& command_line);
     
     void	process_line_through_pipes(string& pipe_line);
@@ -398,9 +436,10 @@ private:
     void	set_prompt_flushed(bool v) { _is_prompt_flushed = v; }
     
     CliNode&	_cli_node;		// The CLI node I belong to
-    int		_cli_fd;		// The client socket
-    FILE	*_cli_fd_file_read;	// The FILE read version of the socket
-    FILE	*_cli_fd_file_write;	// The FILE write version of the socket
+    int		_input_fd;		// File descriptor to read the input
+    int		_output_fd;		// File descriptor to write the output
+    FILE	*_input_fd_file;	// The FILE version of _input_fd
+    FILE	*_output_fd_file;	// The FILE version of _output_fd
     
     enum ClientType{
 	CLIENT_MIN		= 0,
@@ -493,17 +532,22 @@ private:
     TimeVal	_cli_session_stop_time;
     bool	_is_cli_session_active;
     uint32_t	_cli_session_session_id;	// The unique session ID.
+    bool	_is_network;
     
     //
     // Log-related state
     //
     bool	_is_log_output;
-
     
     //
     // Server communication state
     //
     bool _is_waiting_for_data;		// True if waiting for external data
+
+    //
+    // Misc state
+    //
+    vector<uint8_t>	_pending_input_data;
 };
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.22 2005/07/08 20:51:17 mjh Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.23 2005/07/08 23:17:43 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -48,7 +48,9 @@ public:
 	      bool verbose) throw (InitError);
     ~XorpShell();
 
-    void run();
+    void run(const string& command);
+    bool done() const;
+
     enum Mode {
 	MODE_AUTHENTICATING, 
 	MODE_INITIALIZING, 
@@ -134,7 +136,7 @@ private:
     XorpClient		_xclient;
     XrlRtrmgrV0p1Client	_rtrmgr_client;
     XrlXorpshInterface	_xorpsh_interface;
-    SlaveModuleManager _mmgr;
+    SlaveModuleManager	_mmgr;
 
     TemplateTree*	_tt;
     SlaveConfigTree*	_ct;
@@ -150,7 +152,7 @@ private:
     bool		_got_modules;
     string		_configuration;
 
-    bool		_done;	// Used to move through the startup process
+    bool		_xrl_generic_done;	// XRL startup/shutdown flag
     Mode		_mode;
 
     // Used to store the callback during a commit until we get called
@@ -169,6 +171,8 @@ private:
     uint32_t            _clientid;
 
     XorpTimer           _repeat_request_timer;
+
+    int			_fddesc[2];
 };
 
 #endif // __RTRMGR_XORPSH_MAIN_HH__

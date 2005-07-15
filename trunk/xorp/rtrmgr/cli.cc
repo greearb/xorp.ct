@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.68 2005/07/03 21:05:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.69 2005/07/08 20:51:15 mjh Exp $"
 
 #include <pwd.h>
 
@@ -32,15 +32,27 @@
 #include "util.hh"
 
 
-RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose)
+RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node,
+		     int cli_client_input_fd, int cli_client_output_fd,
+		     bool verbose) throw (InitError)
     : _xorpsh(xorpsh),
       _cli_node(cli_node),
-      _cli_client(*(_cli_node.add_stdio_client())),
+      _cli_client_ptr(NULL),
       _verbose(verbose),
       _mode(CLI_MODE_NONE),
       _changes_made(false),
-      _op_mode_cmd(0)
+      _op_mode_cmd(NULL)
 {
+    string errmsg;
+
+    _cli_client_ptr = _cli_node.add_client(cli_client_input_fd,
+					   cli_client_output_fd,
+					   false, errmsg);
+    if (_cli_client_ptr == NULL) {
+	errmsg = c_format("Cannot add CliClient: %s", errmsg.c_str());
+	xorp_throw(InitError, errmsg);
+    }
+
     //
     // We do all this here to allow for later extensions for
     // internationalization.
@@ -405,7 +417,8 @@ See also \"exit\", \"quit\", \"top\".";
 RouterCLI::~RouterCLI()
 {
     // TODO: for now we leave the deletion to be implicit when xorpsh exits
-    // _cli_node.delete_stdio_client(&_cli_client);
+    // string dummy_errmsg;
+    // _cli_node.delete_client(_cli_client_ptr, dummy_errmsg);
 }
 
 string 
@@ -440,7 +453,7 @@ RouterCLI::commit_done_by_user(int uid)
     // Someone just did a commit, so we may need to regenerate options
     //
     string message = c_format("\nUser %d changed the configuration.\n", uid);
-    _cli_client.cli_print(message);
+    cli_client().cli_print(message);
     clear_command_set();
     add_op_mode_commands(NULL);
 }
@@ -600,10 +613,10 @@ RouterCLI::configure_mode()
 void
 RouterCLI::display_config_mode_users() const
 {
-    _cli_client.cli_print("Entering configuration mode.\n");
+    cli_client().cli_print("Entering configuration mode.\n");
 
     if (_config_mode_users.empty()) {
-	_cli_client.cli_print("There are no other users in configuration mode.\n");
+	cli_client().cli_print("There are no other users in configuration mode.\n");
 	return;
     }
 
@@ -611,9 +624,9 @@ RouterCLI::display_config_mode_users() const
     // There are other users
     //
     if (_config_mode_users.size() == 1)
-	_cli_client.cli_print("User ");
+	cli_client().cli_print("User ");
     else
-	_cli_client.cli_print("Users ");
+	cli_client().cli_print("Users ");
     list<uint32_t>::const_iterator iter, iter2;
     struct passwd* pwent;
     for (iter = _config_mode_users.begin();
@@ -623,21 +636,21 @@ RouterCLI::display_config_mode_users() const
 	    iter2 = iter;
 	    ++iter2;
 	    if (iter2 == _config_mode_users.end())
-		_cli_client.cli_print(" and ");
+		cli_client().cli_print(" and ");
 	    else
-		_cli_client.cli_print(", ");
+		cli_client().cli_print(", ");
 	}
 	pwent = getpwuid(*iter);
 	if (pwent == NULL)
-	    _cli_client.cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
+	    cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
 	else
-	    _cli_client.cli_print(pwent->pw_name);
+	    cli_client().cli_print(pwent->pw_name);
     }
     endpwent();
     if (_config_mode_users.size() == 1)
-	_cli_client.cli_print(" is also in configuration mode.\n");
+	cli_client().cli_print(" is also in configuration mode.\n");
     else
-	_cli_client.cli_print(" are also in configuration mode.\n");
+	cli_client().cli_print(" are also in configuration mode.\n");
 }
 
 void
@@ -645,7 +658,7 @@ RouterCLI::display_alerts()
 {
     // Display any alert messages that accumulated while we were busy
     while (!_alerts.empty()) {
-	_cli_client.cli_print(_alerts.front());
+	cli_client().cli_print(_alerts.front());
 	_alerts.pop_front();
     }
 }
@@ -917,10 +930,10 @@ void
 RouterCLI::set_prompt(const string& line1, const string& line2)
 {
     if (line1 != "") {
-	_cli_client.cli_print(line1 + "\n");
+	cli_client().cli_print(line1 + "\n");
     }
     _cli_node.cli_command_root()->set_allow_cd(true, line2);
-    _cli_client.set_current_cli_prompt(line2);
+    cli_client().set_current_cli_prompt(line2);
 }
 
 void
@@ -1346,7 +1359,7 @@ RouterCLI::enter_config_done(const XrlError& e)
     // have permission attempted to enter config mode.
     //
     string errmsg = c_format("ERROR: %s.\n", e.note().c_str());
-    _cli_client.cli_print(errmsg);
+    cli_client().cli_print(errmsg);
     reenable_ui();
 }
 
@@ -1359,7 +1372,7 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
 	    check_for_rtrmgr_restart();
 	    return;
 	}
-	_cli_client.cli_print("ERROR: failed to get config users from rtrmgr.\n");
+	cli_client().cli_print("ERROR: failed to get config users from rtrmgr.\n");
     } else {
 	_config_mode_users.clear();
 
@@ -1409,7 +1422,7 @@ void
 RouterCLI::leave_config_done(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	_cli_client.cli_print("ERROR: failed to inform rtrmgr of entry into config mode.\n");
+	cli_client().cli_print("ERROR: failed to inform rtrmgr of entry into config mode.\n");
 	// Something really bad happened - should we just exit here?
 	if (e == XrlError::COMMAND_FAILED() && e.note() == "AUTH_FAIL") {
 	    check_for_rtrmgr_restart();
@@ -1427,7 +1440,7 @@ RouterCLI::notify_user(const string& alert, bool urgent)
     if (_mode == CLI_MODE_TEXTENTRY && !urgent) {
 	_alerts.push_back(alert);
     } else {
-	_cli_client.cli_print(alert);
+	cli_client().cli_print(alert);
     }
 }
 
@@ -1458,7 +1471,7 @@ RouterCLI::op_help_func(const string& ,
     map<string,string>::const_iterator i;
     i = _help_long_o.find(path);
     if (i != _help_long_o.end()) {
-	_cli_client.cli_print("\n" + i->second + "\n\n");
+	cli_client().cli_print("\n" + i->second + "\n\n");
 	return (XORP_OK);
     } 
 
@@ -1468,11 +1481,11 @@ RouterCLI::op_help_func(const string& ,
     //
     i = _help_o.find(path);
     if (i != _help_o.end()) {
-	_cli_client.cli_print(i->second + "\n");
+	cli_client().cli_print(i->second + "\n");
 	return (XORP_OK);
     }
 
-    _cli_client.cli_print("Sorry, no help available for " + path + "\n");
+    cli_client().cli_print("Sorry, no help available for " + path + "\n");
 
     return (XORP_OK);
 }
@@ -1504,7 +1517,7 @@ RouterCLI::conf_help_func(const string& ,
     map<string,string>::const_iterator i;
     i = _help_long_c.find(path);
     if (i != _help_long_c.end()) {
-	_cli_client.cli_print("\n" + i->second + "\n\n");
+	cli_client().cli_print("\n" + i->second + "\n\n");
 	return (XORP_OK);
     } 
 
@@ -1514,11 +1527,11 @@ RouterCLI::conf_help_func(const string& ,
     //
     i = _help_c.find(path);
     if (i != _help_c.end()) {
-	_cli_client.cli_print(i->second + "\n");
+	cli_client().cli_print(i->second + "\n");
 	return (XORP_OK);
     }
 
-    _cli_client.cli_print("Sorry, no help available for " + path + "\n");
+    cli_client().cli_print("Sorry, no help available for " + path + "\n");
 
     return (XORP_OK);
 }
@@ -1530,16 +1543,21 @@ RouterCLI::logout_func(const string& ,
 		       const string& command_global_name,
 		       const vector<string>& argv)
 {
+    string errmsg;
+
     if (! argv.empty()) {
-	string errmsg = c_format("ERROR: \"%s\" does not take "
-				 "any additional parameters.\n",
-				 command_global_name.c_str());
-	_cli_client.cli_print(errmsg);
+	errmsg = c_format("ERROR: \"%s\" does not take "
+			  "any additional parameters.\n",
+			  command_global_name.c_str());
+	cli_client().cli_print(errmsg);
 	return (XORP_ERROR);
     }
 
     idle_ui();
-    _cli_node.delete_stdio_client(&_cli_client);
+    if (_cli_node.delete_client(_cli_client_ptr, errmsg) != XORP_OK) {
+	XLOG_FATAL("internal error deleting CLI client: %s", errmsg.c_str());
+	return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }
@@ -1556,13 +1574,13 @@ RouterCLI::exit_func(const string& ,
 	    string errmsg = c_format("ERROR: \"%s\" does not take "
 				     "any additional parameters.\n",
 				     command_global_name.c_str());
-	    _cli_client.cli_print(errmsg);
+	    cli_client().cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	if (_changes_made) {
-	    _cli_client.cli_print("ERROR: There are uncommitted changes.\n");
-	    _cli_client.cli_print("Use \"commit\" to commit the changes, "
-				  "or \"exit discard\" to discard them.\n");
+	    cli_client().cli_print("ERROR: There are uncommitted changes.\n");
+	    cli_client().cli_print("Use \"commit\" to commit the changes, "
+				   "or \"exit discard\" to discard them.\n");
 	    return (XORP_ERROR);
 	}
 	idle_ui();
@@ -1575,7 +1593,7 @@ RouterCLI::exit_func(const string& ,
 	    string errmsg = c_format("ERROR: \"%s\" does not take "
 				     "any additional parameters.\n",
 				     command_global_name.c_str());
-	    _cli_client.cli_print(errmsg);
+	    cli_client().cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	config_tree()->discard_changes();
@@ -1589,7 +1607,7 @@ RouterCLI::exit_func(const string& ,
 	    string errmsg = c_format("ERROR: \"%s\" does not take "
 				     "any additional parameters.\n",
 				     command_global_name.c_str());
-	    _cli_client.cli_print(errmsg);
+	    cli_client().cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	reset_path();
@@ -1606,7 +1624,7 @@ RouterCLI::exit_func(const string& ,
 	    string errmsg = c_format("ERROR: \"%s\" does not take "
 				     "any additional parameters.\n",
 				     command_global_name.c_str());
-	    _cli_client.cli_print(errmsg);
+	    cli_client().cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	if (! _path.empty())
@@ -1617,9 +1635,9 @@ RouterCLI::exit_func(const string& ,
 	    _path.pop_back();
 	} else {
 	    if (_changes_made) {
-		_cli_client.cli_print("ERROR: There are uncommitted changes.\n");
-		_cli_client.cli_print("Use \"commit\" to commit the changes, "
-				      "or \"exit discard\" to discard them.\n");
+		cli_client().cli_print("ERROR: There are uncommitted changes.\n");
+		cli_client().cli_print("Use \"commit\" to commit the changes, "
+				       "or \"exit discard\" to discard them.\n");
 		return (XORP_ERROR);
 	    }
 	    idle_ui();
@@ -1667,7 +1685,7 @@ RouterCLI::edit_func(const string& ,
 			   path.c_str(),
 			   arg_string.c_str());
 	}
-	_cli_client.cli_print(msg);
+	cli_client().cli_print(msg);
 	return (XORP_ERROR);
     }
 
@@ -1725,7 +1743,7 @@ RouterCLI::text_entry_func(const string& ,
 	// If there are no arguments, it must be a void structuring node
 	if (argv.empty()
 	    && (tag_ttn->type() != NODE_VOID || tag_ttn->is_tag())) {
-	    _cli_client.cli_print("ERROR: Insufficient arguments.\n");
+	    cli_client().cli_print("ERROR: Insufficient arguments.\n");
 	    return (XORP_ERROR);
 	}
 
@@ -1763,7 +1781,7 @@ RouterCLI::text_entry_func(const string& ,
 		if (!errhelp.empty()) {
 		    errmsg += errhelp + "\n"; 
 		}
-		_cli_client.cli_print(errmsg);
+		cli_client().cli_print(errmsg);
 		return (XORP_ERROR);
 	    }
 
@@ -1780,7 +1798,7 @@ RouterCLI::text_entry_func(const string& ,
 			string errmsg = c_format("ERROR: can't create \"%s\", "
 						 "as it already exists.\n",
 						 argv[0].c_str());
-			_cli_client.cli_print(errmsg);
+			cli_client().cli_print(errmsg);
 			return (XORP_ERROR);
 		    }
 		}
@@ -1791,10 +1809,10 @@ RouterCLI::text_entry_func(const string& ,
 		string errmsg = c_format("ERROR: \"{\" expected instead of "
 					 "\"%s\".\n",
 					 argv[1].c_str());
-		_cli_client.cli_print(errmsg);
+		cli_client().cli_print(errmsg);
 		return (XORP_ERROR);
 	    } else if (argv.size() > 2) {
-		_cli_client.cli_print("ERROR: too many arguments.\n");
+		cli_client().cli_print("ERROR: too many arguments.\n");
 		return (XORP_ERROR);
 	    }
 	} else {
@@ -1806,10 +1824,10 @@ RouterCLI::text_entry_func(const string& ,
 		string errmsg = c_format("ERROR: \"{\" expected instead of "
 					 "\"%s\".\n",
 					 argv[0]);
-		_cli_client.cli_print(errmsg);
+		cli_client().cli_print(errmsg);
 		return (XORP_ERROR);
 	    } else if (argv.size() > 1) {
-		_cli_client.cli_print("ERROR: too many arguments.\n");
+		cli_client().cli_print("ERROR: too many arguments.\n");
 		return (XORP_ERROR);
 	    }
 	}
@@ -1845,7 +1863,7 @@ RouterCLI::text_entry_func(const string& ,
 	    // Check that the value was OK
 	    string errmsg;
 	    if (newnode->check_allowed_value(errmsg) == false) {
-		_cli_client.cli_print(errmsg);
+		cli_client().cli_print(errmsg);
 		// If the value was bad, remove the nodes we just added
 		ctn->remove_child(newnode);
 		delete newnode;
@@ -1858,7 +1876,7 @@ RouterCLI::text_entry_func(const string& ,
 
 	    if (argv.size() == 1 && _nesting_depth == 0) {
 		// Nothing more to enter
-		_cli_client.cli_print("OK\n");
+		cli_client().cli_print("OK\n");
 		_changes_made = true;
 		// Apply path change to add the commit command
 		apply_path_change();
@@ -1880,7 +1898,7 @@ RouterCLI::text_entry_func(const string& ,
 	    //
 	    if (argv.empty() && _nesting_depth == 0) {
 		// Nothing more to enter
-		_cli_client.cli_print("OK\n");
+		cli_client().cli_print("OK\n");
 		_changes_made = true;
 		// Apply path change to add the commit command
 		apply_path_change();
@@ -1932,7 +1950,7 @@ RouterCLI::text_entry_func(const string& ,
 	    _changes_made = true;
 	    return (XORP_OK);
 	} else {
-	    _cli_client.cli_print("OK.  Use \"commit\" to apply these changes.\n");
+	    cli_client().cli_print("OK.  Use \"commit\" to apply these changes.\n");
 	    _changes_made = true;
 	    config_tree()->add_default_children();
 	    configure_mode();
@@ -2054,7 +2072,7 @@ RouterCLI::text_entry_func(const string& ,
 		string errmsg = c_format("ERROR: a value for \"%s\" "
 					 "is required.\n",
 					 ctn->segname().c_str());
-		_cli_client.cli_print(errmsg);
+		cli_client().cli_print(errmsg);
 		goto cleanup;
 	    }
 	    string value = new_path_segments.front();
@@ -2097,7 +2115,7 @@ RouterCLI::text_entry_func(const string& ,
 		    if (!errhelp.empty()) {
 			errmsg += errhelp + "\n"; 
 		    }
-		    _cli_client.cli_print(errmsg);
+		    cli_client().cli_print(errmsg);
 		    goto cleanup;
 		}
 		path_segments.push_back(value);
@@ -2130,7 +2148,7 @@ RouterCLI::text_entry_func(const string& ,
 		    if (!errhelp.empty()) {
 			errmsg += errhelp + "\n"; 
 		    }
-		    _cli_client.cli_print(errmsg);
+		    cli_client().cli_print(errmsg);
 		    goto cleanup;
 		}
 	    } else {
@@ -2151,7 +2169,7 @@ RouterCLI::text_entry_func(const string& ,
 		// Jump back out to the appropriate nesting depth
 		if (_braces.size() == 1) {
 		    // There's always at least one entry in _braces
-		    _cli_client.cli_print("ERROR: mismatched \"}\".\n");
+		    cli_client().cli_print("ERROR: mismatched \"}\".\n");
 		    goto cleanup;
 		}
 		XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
@@ -2198,7 +2216,7 @@ RouterCLI::text_entry_func(const string& ,
 		string errmsg = c_format("ERROR: path \"%s\" "
 					 "is not valid.\n",
 					 makepath(path_segments).c_str());
-		_cli_client.cli_print(errmsg);
+		cli_client().cli_print(errmsg);
 		goto cleanup;
 	    }
 	    //
@@ -2211,7 +2229,7 @@ RouterCLI::text_entry_func(const string& ,
 					 "is not valid: %s.\n",
 					 makepath(path_segments).c_str(),
 					 deprecated_ttn->deprecated_reason().c_str());
-		_cli_client.cli_print(errmsg);
+		cli_client().cli_print(errmsg);
 		goto cleanup;
 	    }
 
@@ -2250,7 +2268,7 @@ RouterCLI::text_entry_func(const string& ,
     if (value_expected) {
 	string errmsg = c_format("ERROR: node \"%s\" requires a value.\n",
 				 ctn->segname().c_str());
-	_cli_client.cli_print(errmsg);
+	cli_client().cli_print(errmsg);
     }
 
     // Preserve state for next time, and set up the command prompts
@@ -2386,11 +2404,11 @@ RouterCLI::delete_func(const string& ,
     }
 
     string result = config_tree()->show_subtree(path_segments, false);
-    _cli_client.cli_print("Deleting: \n");
-    _cli_client.cli_print(result + "\n");
+    cli_client().cli_print("Deleting: \n");
+    cli_client().cli_print(result + "\n");
 
     result = config_tree()->mark_subtree_for_deletion(path_segments, getuid());
-    _cli_client.cli_print(result + "\n");
+    cli_client().cli_print(result + "\n");
 
     // Regenerate the available command tree without the deleted stuff
     _changes_made = true;
@@ -2411,7 +2429,7 @@ RouterCLI::set_func(const string& ,
     string path = cmd_name.substr(4, cmd_name.size() - 4);
     string response = run_set_command(path, argv);
 
-    _cli_client.cli_print(response + "\n");
+    cli_client().cli_print(response + "\n");
     apply_path_change();
 
     return (XORP_OK);
@@ -2428,11 +2446,11 @@ RouterCLI::immediate_set_func(const string& ,
     string response = run_set_command(path, argv);
 
     if (_braces.empty()) {
-	_cli_client.cli_print(response + "\n");
+	cli_client().cli_print(response + "\n");
 	config_mode_prompt();
     } else {
 	if (response != "OK")
-	    _cli_client.cli_print(response + "\n");
+	    cli_client().cli_print(response + "\n");
 	text_entry_mode();
 	add_edit_subtree();
 	add_set_subtree();
@@ -2539,7 +2557,7 @@ RouterCLI::commit_func(const string& ,
 	string errmsg = c_format("ERROR: \"%s\" does not take "
 				 "any additional parameters.\n",
 				 command_global_name.c_str());
-	_cli_client.cli_print(errmsg);
+	cli_client().cli_print(errmsg);
 	return (XORP_ERROR);
     }
 
@@ -2552,9 +2570,9 @@ RouterCLI::commit_func(const string& ,
 	response, _xorpsh, callback(this, &RouterCLI::commit_done));
     if (! success) {
 	// _changes_made = false;
-	_cli_client.cli_print(response);
-	_cli_client.cli_print("The configuration has not been changed.\n");
-	_cli_client.cli_print("Fix this error, and run \"commit\" again.\n");
+	cli_client().cli_print(response);
+	cli_client().cli_print("The configuration has not been changed.\n");
+	cli_client().cli_print("Fix this error, and run \"commit\" again.\n");
 	//	set_prompt("", "XORP> ");
 	//	apply_path_change();
 	silent_reenable_ui();
@@ -2562,7 +2580,7 @@ RouterCLI::commit_func(const string& ,
 	return (XORP_ERROR);
     }
 
-    // _cli_client.cli_print(response + "\n");
+    // cli_client().cli_print(response + "\n");
     // apply_path_change();
 
     return (XORP_OK);
@@ -2571,20 +2589,20 @@ RouterCLI::commit_func(const string& ,
 void
 RouterCLI::idle_ui()
 {
-    _cli_client.set_is_waiting_for_data(true);
+    cli_client().set_is_waiting_for_data(true);
 }
 
 void
 RouterCLI::silent_reenable_ui()
 {
-    _cli_client.set_is_waiting_for_data(false);
+    cli_client().set_is_waiting_for_data(false);
 }
 
 void
 RouterCLI::reenable_ui()
 {
-    _cli_client.set_is_waiting_for_data(false);
-    _cli_client.post_process_command();
+    cli_client().set_is_waiting_for_data(false);
+    cli_client().post_process_command();
 }
 
 void
@@ -2596,12 +2614,12 @@ RouterCLI::commit_done(bool success, string errmsg)
     // change was applied.
     //
     if (! success) {
-	_cli_client.cli_print("Commit Failed\n");
-	_cli_client.cli_print(errmsg);
+	cli_client().cli_print("Commit Failed\n");
+	cli_client().cli_print(errmsg);
     } else {
 	_changes_made = false;
-	_cli_client.cli_print("OK\n");
-	_cli_client.cli_print(errmsg);
+	cli_client().cli_print("OK\n");
+	cli_client().cli_print(errmsg);
     }
     _xorpsh.set_mode(XorpShell::MODE_IDLE);
     apply_path_change();
@@ -2641,7 +2659,7 @@ RouterCLI::show_func(const string& ,
     }
 
     string result = config_tree()->show_subtree(path_segments, false);
-    _cli_client.cli_print(result + "\n");
+    cli_client().cli_print(result + "\n");
     config_mode_prompt();
 
     return (XORP_OK);
@@ -2684,7 +2702,7 @@ RouterCLI::op_mode_func(const string& ,
 	list<string> test_parts;
 	string cmd_error;
 
-	_cli_client.cli_print("ERROR: no matching command:\n");
+	cli_client().cli_print("ERROR: no matching command:\n");
 	for (iter = path_segments.begin();
 	     iter != path_segments.end();
 	     ++iter) {
@@ -2700,7 +2718,7 @@ RouterCLI::op_mode_func(const string& ,
 		break;
 	    }
 	}
-	_cli_client.cli_print(
+	cli_client().cli_print(
 	    c_format("%s\n%s\n", full_command.c_str(), cmd_error.c_str())
 	    );
 	return (XORP_ERROR);
@@ -2713,8 +2731,8 @@ void
 RouterCLI::op_mode_cmd_print(const string& result)
 {
     if (! result.empty()) {
-	_cli_client.cli_print(result);
-	_cli_client.flush_process_command_output();
+	cli_client().cli_print(result);
+	cli_client().flush_process_command_output();
     }
 }
 
@@ -2722,9 +2740,9 @@ void
 RouterCLI::op_mode_cmd_done(bool success, const string& error_msg)
 {
     if (! success) {
-	_cli_client.cli_print("ERROR:\n");
+	cli_client().cli_print("ERROR:\n");
 	if (!error_msg.empty())
-	    _cli_client.cli_print(error_msg + "\n");
+	    cli_client().cli_print(error_msg + "\n");
     }
     op_mode_cmd_tidy();
     reenable_ui();
@@ -2768,7 +2786,7 @@ RouterCLI::save_func(const string& ,
 		     const vector<string>& argv)
 {
     if (argv.size() != 1) {
-	_cli_client.cli_print("Usage: save <filename>\n");
+	cli_client().cli_print("Usage: save <filename>\n");
 	return (XORP_ERROR);
     }
 
@@ -2790,17 +2808,17 @@ void
 RouterCLI::save_communicated(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	_cli_client.cli_print("ERROR: Save failed.\n");
+	cli_client().cli_print("ERROR: Save failed.\n");
 	if (e == XrlError::COMMAND_FAILED()) {
 	    if (e.note() == "AUTH_FAIL") {
 		check_for_rtrmgr_restart();
 		return;
 	    }  else {
-		_cli_client.cli_print(c_format("%s\n", e.note().c_str()));
+		cli_client().cli_print(c_format("%s\n", e.note().c_str()));
 	    }
 	} else {
-	    _cli_client.cli_print("Failed to communicate save command to rtrmgr.\n");
-	    _cli_client.cli_print(c_format("%s\n", e.error_msg()));
+	    cli_client().cli_print("Failed to communicate save command to rtrmgr.\n");
+	    cli_client().cli_print(c_format("%s\n", e.error_msg()));
 	}
 	_xorpsh.set_mode(XorpShell::MODE_IDLE);
 	reenable_ui();
@@ -2821,10 +2839,10 @@ void
 RouterCLI::save_done(bool success, string errmsg)
 {
     if (! success) {
-	_cli_client.cli_print("ERROR: Save failed.\n");
-	_cli_client.cli_print(errmsg);
+	cli_client().cli_print("ERROR: Save failed.\n");
+	cli_client().cli_print(errmsg);
     } else {
-	_cli_client.cli_print("Save done.\n");
+	cli_client().cli_print("Save done.\n");
     }
     _xorpsh.set_mode(XorpShell::MODE_IDLE);
     reenable_ui();
@@ -2838,7 +2856,7 @@ RouterCLI::load_func(const string& ,
 		     const vector<string>& argv)
 {
     if (argv.size() != 1) {
-	_cli_client.cli_print("Usage: load <filename>\n");
+	cli_client().cli_print("Usage: load <filename>\n");
 	return (XORP_ERROR);
     }
 
@@ -2860,17 +2878,17 @@ void
 RouterCLI::load_communicated(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	_cli_client.cli_print("ERROR: Load failed.\n");
+	cli_client().cli_print("ERROR: Load failed.\n");
 	if (e == XrlError::COMMAND_FAILED()) {
 	    if (e.note() == "AUTH_FAIL") {
 		check_for_rtrmgr_restart();
 		return;
 	    }  else {
-		_cli_client.cli_print(c_format("%s\n", e.note().c_str()));
+		cli_client().cli_print(c_format("%s\n", e.note().c_str()));
 	    }
 	} else {
-	    _cli_client.cli_print("Failed to communicate load command to rtrmgr.\n");
-	    _cli_client.cli_print(c_format("%s\n", e.error_msg()));
+	    cli_client().cli_print("Failed to communicate load command to rtrmgr.\n");
+	    cli_client().cli_print(c_format("%s\n", e.error_msg()));
 	}
 	_xorpsh.set_mode(XorpShell::MODE_IDLE);
 	reenable_ui();
@@ -2891,10 +2909,10 @@ void
 RouterCLI::load_done(bool success, string errmsg)
 {
     if (! success) {
-	_cli_client.cli_print("ERROR: Load failed.\n");
-	_cli_client.cli_print(errmsg);
+	cli_client().cli_print("ERROR: Load failed.\n");
+	cli_client().cli_print(errmsg);
     } else {
-	_cli_client.cli_print("Load done.\n");
+	cli_client().cli_print("Load done.\n");
     }
     _xorpsh.set_mode(XorpShell::MODE_IDLE);
     reenable_ui();
@@ -2947,9 +2965,9 @@ RouterCLI::verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid)
 {
     if (e == XrlError::OKAY()) {
 	if (_xorpsh.rtrmgr_pid() != *pid) {
-	    _cli_client.cli_print("FATAL ERROR.\n");
-	    _cli_client.cli_print("The router manager process has restarted.\n");
-	    _cli_client.cli_print("Advise logout and login again.\n");
+	    cli_client().cli_print("FATAL ERROR.\n");
+	    cli_client().cli_print("The router manager process has restarted.\n");
+	    cli_client().cli_print("Advise logout and login again.\n");
 	    reenable_ui();
 	    return;
 	}
@@ -2957,13 +2975,13 @@ RouterCLI::verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid)
 	//
 	// It's not clear what happened, but attempt to carry on.
 	//
-	_cli_client.cli_print("ERROR: authentication failure.\n");
+	cli_client().cli_print("ERROR: authentication failure.\n");
 	reenable_ui();
 	return;
     } else {
-	_cli_client.cli_print("FATAL ERROR.\n");
-	_cli_client.cli_print("The router manager process is no longer functioning correctly.\n");
-	_cli_client.cli_print("Advise logout and login again, but if login fails the router may need rebooting.\n");
+	cli_client().cli_print("FATAL ERROR.\n");
+	cli_client().cli_print("The router manager process is no longer functioning correctly.\n");
+	cli_client().cli_print("Advise logout and login again, but if login fails the router may need rebooting.\n");
 	reenable_ui();
 	return;
     }

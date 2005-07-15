@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.17 2005/03/24 00:35:20 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.18 2005/03/25 02:52:56 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -329,21 +329,30 @@ public:
     }
     
     /**
-     * Add a CLI client (@ref CliClient) to the CLI with enabled stdio access.
+     * Add a CLI client (@ref CliClient) to the CLI with enabled access
+     * from a file descriptor.
      * 
+     * @param input_fd the file descriptor for the CLI client to read
+     * data from.
+     * @param output_fd the file descriptor for the CLI client to write
+     * data to.
+     * @param is_network if true, this client is associated with a
+     * network connection.
+     * @param error_msg the error message (if error).
      * @return a pointer to the CLI client (@ref CliClient) with enabled
-     * stdio access on success, otherwise NULL.
+     * CLI access on success, otherwise NULL.
      */
-    CliClient *add_stdio_client();
+    CliClient *add_client(int input_fd, int output_fd, bool is_network,
+			  string& error_msg);
 
     /**
-     * Delete a CLI client (@ref CliClient) from the CLI with enabled stdio
-     * access.
+     * Delete a CLI client (@ref CliClient) from the CLI.
      * 
      * @param cli_client the CLI client (@ref CliClient) to delete.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_stdio_client(CliClient *cli_client);
+    int delete_client(CliClient *cli_client, string& error_msg);
 
     typedef XorpCallback1<void,
 	CliClient*		// CLI client to delete
@@ -404,8 +413,9 @@ private:
     
     int		sock_serv_open();
     int		sock_serv_close();
-    CliClient	*add_connection(int client_socket);
-    int		delete_connection(CliClient *cli_client);
+    CliClient	*add_connection(int input_fd, int output_fd, bool is_network,
+				string& error_msg);
+    int		delete_connection(CliClient *cli_client, string& error_msg);
     void	accept_connection(int fd, SelectorMask mask);
     
     bool	is_allow_cli_access(const IPvX& ipvx) const;
