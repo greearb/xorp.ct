@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.46 2005/03/25 02:54:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.47 2005/06/18 01:17:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -218,8 +218,9 @@ OpInstance::terminate()
     _stderr_stream = NULL;
 }
 
-OpCommand::OpCommand(const list<string>& command_parts)
-    : _command_parts(command_parts)
+OpCommand::OpCommand(OpCommandList& ocl, const list<string>& command_parts)
+    : _ocl(ocl),
+      _command_parts(command_parts)
 {
     _command_name = command_parts2command_name(command_parts);
 }
@@ -385,6 +386,7 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 					print_cb, done_cb, this);
     
     _instances.insert(opinst);
+    _ocl.incr_running_op_instances_n();
 
     return opinst;
 }
@@ -510,12 +512,14 @@ OpCommand::remove_instance(OpInstance* instance)
     iter = _instances.find(instance);
     XLOG_ASSERT(iter != _instances.end());
     _instances.erase(iter);
+    _ocl.decr_running_op_instances_n();
 }
 
 OpCommandList::OpCommandList(const string& config_template_dir,
 			     const TemplateTree* tt,
 			     SlaveModuleManager& mmgr) throw (InitError)
-    : _mmgr(mmgr)
+    : _running_op_instances_n(0),
+      _mmgr(mmgr)
 {
     list<string> files;
     string errmsg;
@@ -582,6 +586,28 @@ OpCommandList::~OpCommandList()
 	delete _op_commands.front();
 	_op_commands.pop_front();
     }
+}
+
+bool
+OpCommandList::done() const
+{
+    if (_running_op_instances_n == 0)
+	return (true);
+    else
+	return (false);
+}
+
+void
+OpCommandList::incr_running_op_instances_n()
+{
+    _running_op_instances_n++;
+}
+
+void
+OpCommandList::decr_running_op_instances_n()
+{
+    XLOG_ASSERT(_running_op_instances_n > 0);
+    _running_op_instances_n--;
 }
 
 bool

@@ -217,7 +217,7 @@ push_path()
 
     // Push all temporary state storage into the stack
     map<string, string> dummy_map;
-    OpCommand op_command(path_segments);
+    OpCommand op_command(*ocl, path_segments);
     op_command_stack.push_back(op_command);
     op_command_tag_help_stack.push_back("");
     opt_params_tag_help_stack.push_back(dummy_map);

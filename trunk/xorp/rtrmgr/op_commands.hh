@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.24 2005/03/25 02:54:37 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.25 2005/06/18 01:17:24 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -75,7 +75,7 @@ private:
 
 class OpCommand {
 public:
-    OpCommand(const list<string>& command_parts);
+    OpCommand(OpCommandList& ocl, const list<string>& command_parts);
 
     const list<string>& command_parts() const { return _command_parts; }
     const string& command_name() const { return _command_name; }
@@ -131,6 +131,7 @@ public:
     void remove_instance(OpInstance* instance);
 
 private:
+    OpCommandList&	_ocl;
     list<string>	_command_parts;
     string		_command_name;
     string		_help_string;
@@ -150,6 +151,10 @@ public:
 	throw (InitError);
     ~OpCommandList();
 
+    bool done() const;
+    void incr_running_op_instances_n();
+    void decr_running_op_instances_n();
+
     void set_slave_config_tree(SlaveConfigTree* sct) { _slave_config_tree = sct; }
     bool check_variable_name(const string& variable_name) const;
     OpCommand* find_op_command(const list<string>& command_parts);
@@ -167,6 +172,7 @@ public:
 
 private:
     list<OpCommand*>	_op_commands;
+    size_t		_running_op_instances_n;
 
     // Below here is temporary storage for use in parsing
     list<string>	_path_segments;
