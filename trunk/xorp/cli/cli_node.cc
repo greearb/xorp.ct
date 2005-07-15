@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.25 2005/03/25 02:52:56 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.26 2005/07/15 06:33:21 pavlin Exp $"
 
 
 //
@@ -69,7 +69,8 @@
 CliNode::CliNode(int init_family, xorp_module_id module_id,
 		 EventLoop& init_eventloop)
     : ProtoNode<Vif>(init_family, module_id, init_eventloop),
-      _cli_command_root(NULL, "", "")
+      _cli_command_root(NULL, "", ""),
+      _is_log_trace(false)
 {
     XLOG_ASSERT(module_id == XORP_MODULE_CLI);
     if (module_id != XORP_MODULE_CLI) {
@@ -123,7 +124,7 @@ CliNode::start()
     
     add_internal_cli_commands();
 
-    XLOG_INFO("CLI started");
+    XLOG_TRACE(is_log_trace(), "CLI started");
 
     return (XORP_OK);
 }
@@ -159,7 +160,7 @@ CliNode::stop()
     if (ProtoNode<Vif>::stop() < 0)
 	return (XORP_ERROR);
 
-    XLOG_INFO("CLI stopped");
+    XLOG_TRACE(is_log_trace(), "CLI stopped");
 
     return (XORP_OK);
 }
@@ -174,7 +175,7 @@ CliNode::enable()
 {
     ProtoUnit::enable();
 
-    XLOG_INFO("CLI enabled");
+    XLOG_TRACE(is_log_trace(), "CLI enabled");
 }
 
 /**
@@ -189,7 +190,7 @@ CliNode::disable()
     stop();
     ProtoUnit::disable();
 
-    XLOG_INFO("CLI disabled");
+    XLOG_TRACE(is_log_trace(), "CLI disabled");
 }
 
 /**

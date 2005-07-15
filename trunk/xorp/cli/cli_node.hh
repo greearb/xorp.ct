@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.18 2005/03/25 02:52:56 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.19 2005/07/15 06:33:21 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -366,6 +366,28 @@ public:
     void set_cli_client_delete_callback(const CliClientDeleteCallback& v) {
 	_cli_client_delete_callback = v;
     }
+
+    //
+    // Debug-related methods
+    //
+    
+    /**
+     * Test if trace log is enabled.
+     * 
+     * This method is used to test whether to output trace log debug messges.
+     * 
+     * @return true if trace log is enabled, otherwise false.
+     */
+    bool	is_log_trace() const { return (_is_log_trace); }
+    
+    /**
+     * Enable/disable trace log.
+     * 
+     * This method is used to enable/disable trace log debug messages output.
+     * 
+     * @param is_enabled if true, trace log is enabled, otherwise is disabled.
+     */
+    void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
     
 private:
     friend class CliClient;
@@ -435,6 +457,11 @@ private:
     
     list<IPvXNet>	_enable_cli_access_subnet_list;
     list<IPvXNet>	_disable_cli_access_subnet_list;
+
+    //
+    // Debug and test-related state
+    //
+    bool	_is_log_trace;		// If true, enable XLOG_TRACE()
 };
 
 
