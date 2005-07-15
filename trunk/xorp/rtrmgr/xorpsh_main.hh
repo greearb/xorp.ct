@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.23 2005/07/08 23:17:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.24 2005/07/15 06:33:22 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -135,7 +135,6 @@ private:
     XrlStdRouter	_xrlrouter;
     XorpClient		_xclient;
     XrlRtrmgrV0p1Client	_rtrmgr_client;
-    XrlXorpshInterface	_xorpsh_interface;
     SlaveModuleManager	_mmgr;
 
     TemplateTree*	_tt;
@@ -173,6 +172,9 @@ private:
     XorpTimer           _repeat_request_timer;
 
     int			_fddesc[2];
+
+    // XXX: must be last
+    XrlXorpshInterface	_xorpsh_interface;
 };
 
 #endif // __RTRMGR_XORPSH_MAIN_HH__
