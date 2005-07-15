@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.15 2005/04/30 21:58:29 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.16 2005/07/15 06:33:21 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -134,12 +134,20 @@ public:
     int		output_fd() { return (_output_fd); }
     
     /**
+     * Test if this client is associated with a terminal type input device.
+     * 
+     * @return true if this client is associated with a terminal type input
+     * device, otherwise false.
+     */
+    bool	is_input_tty() const;
+
+    /**
      * Test if this client is associated with a terminal type output device.
      * 
      * @return true if this client is associated with a terminal type output
      * device, otherwise false.
      */
-    bool	is_tty() const;
+    bool	is_output_tty() const;
 
     /**
      * Test if this client is associated with a network connection.
@@ -163,6 +171,14 @@ public:
      * otherwise false.
      */
     bool	is_telnet() const;
+
+    /**
+     * Test if this client is running in interactive mode.
+     * 
+     * @return true if this client is running in interactive mode,
+     * otherwise false.
+     */
+    bool	is_interactive() const;
 
     //
     // Session info

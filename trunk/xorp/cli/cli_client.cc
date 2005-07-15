@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.29 2005/06/20 22:05:16 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.30 2005/07/15 06:33:21 pavlin Exp $"
 
 
 //
@@ -134,6 +134,12 @@ CliClient::CliClient(CliNode& init_cli_node, int input_fd, int output_fd)
     // Server communication state
     //
     _is_waiting_for_data = false;
+
+    //
+    // Set in "no-more" mode if a non-interactive client
+    //
+    if (! is_interactive())
+	set_nomore_mode(true);
 }
 
 CliClient::~CliClient()
@@ -199,7 +205,13 @@ CliClient::set_log_output(bool v)
 }
 
 bool
-CliClient::is_tty() const
+CliClient::is_input_tty() const
+{
+    return (isatty(_input_fd) != 0);
+}
+
+bool
+CliClient::is_output_tty() const
 {
     return (isatty(_output_fd) != 0);
 }
@@ -224,6 +236,12 @@ CliClient::is_telnet() const
     // are telnet.
     //
     return (is_network());
+}
+
+bool
+CliClient::is_interactive() const
+{
+    return (is_input_tty() || is_telnet());
 }
 
 CliPipe *

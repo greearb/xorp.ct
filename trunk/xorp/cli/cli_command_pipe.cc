@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.6 2005/03/25 02:52:56 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.7 2005/04/30 21:58:29 pavlin Exp $"
 
 
 //
@@ -610,7 +610,8 @@ int
 CliPipe::pipe_nomore_eof(string& input_line)
 {
     if (_cli_client != NULL) {
-	_cli_client->set_nomore_mode(false);
+	if (_cli_client->is_interactive())
+	    _cli_client->set_nomore_mode(false);
     }
     
     UNUSED(input_line);

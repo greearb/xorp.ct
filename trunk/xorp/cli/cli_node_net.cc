@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.36 2005/06/20 22:08:18 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.37 2005/07/15 06:33:21 pavlin Exp $"
 
 
 //
@@ -345,7 +345,7 @@ CliClient::start_connection(string& error_msg)
     // In addition, disable signals INTR, QUIT, [D]SUSP
     // (i.e., force their value to be received when read from the terminal).
     //
-    if (is_tty()) {
+    if (is_output_tty()) {
 	struct termios termios;
 	
 	while (tcgetattr(output_fd(), &termios) != 0) {
@@ -414,14 +414,14 @@ CliClient::start_connection(string& error_msg)
     
     // Set the terminal
     string term_name = "vt100";		// Default value
-    if (is_tty()) {
+    if (is_output_tty()) {
 	term_name = getenv("TERM");
 	if (term_name.empty())
 	    term_name = "vt100";	// Set to default
     }
 
     // Get the terminal size
-    if (is_tty()) {
+    if (is_output_tty()) {
 	struct winsize window_size;
 
 	if (ioctl(output_fd(), TIOCGWINSZ, &window_size) < 0) {
@@ -508,7 +508,7 @@ CliClient::stop_connection(string& error_msg)
     //
     // Restore the terminal settings
     //
-    if (is_tty()) {
+    if (is_output_tty()) {
 	if (! (_is_modified_stdio_termios_icanon
 	       || _is_modified_stdio_termios_echo
 	       || _is_modified_stdio_termios_isig)) {
