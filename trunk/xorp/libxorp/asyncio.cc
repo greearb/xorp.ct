@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.14 2005/03/03 07:44:18 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.15 2005/03/25 02:53:37 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -35,10 +35,10 @@ is_pseudo_error(const char* name, int fd, int error_num)
 {
     switch (error_num) {
     case EINTR:
-	XLOG_WARNING("%s (fd = %d) got EINTR, continuing.", name, fd);
+	debug_msg("%s (fd = %d) got EINTR, continuing.", name, fd);
 	return true;
     case EAGAIN:
-	XLOG_WARNING("%s (fd = %d) got EAGAIN, continuing.", name, fd);
+	debug_msg("%s (fd = %d) got EAGAIN, continuing.", name, fd);
 	return true;
     }
     return false;
