@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.10 2005/07/13 21:58:37 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.11 2005/07/15 02:27:05 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -275,8 +275,9 @@ BGPVarRW<A>::end_write()
 	_filtered_rtmsg->set_from_previous_peering();
 
     // delete route which may have been changed by previous filter.
-    if (_orig_rtmsg.changed())
-	old_route->unref();
+    // XXX I don't know if this is correct or not!!!!
+//    if (_orig_rtmsg.changed())
+//	old_route->unref();
 
     _modified = true;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.9 2005/07/09 00:32:45 abittau Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.10 2005/07/12 00:47:51 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -58,11 +58,19 @@ Term::set_block(const uint32_t& block, const uint64_t& order,
 	return;
     }
 
-    // check that position is empty
+    // check that position is empty... 
+    // if it's not delete and then add...  This usually occurs when "replacing"
+    // an existing statement. like:
+    // localpref: 101
+    // setting localpref: 102 in same node will cause this...
     Nodes& conf_block = *_block_nodes[block];
     if (conf_block.find(order) != conf_block.end()) {
+	debug_msg("[POLICY] Deleting previous statement...\n");
+	del_block(block, order);
+/*	
 	throw term_syntax_error("A statement is already present in position: " 
 				+ to_str(order));
+*/				
     }
 
     debug_msg("[POLICY] Statement=(%s)\n", statement.c_str());
