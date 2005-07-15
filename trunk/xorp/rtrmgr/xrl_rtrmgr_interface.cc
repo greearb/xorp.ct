@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.37 2005/07/08 16:42:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.38 2005/07/08 20:51:17 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -283,37 +283,47 @@ XrlRtrmgrInterface::finder_register_done(const XrlError& e, string clientname)
 void
 XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
 {
-    debug_msg("send_client_state %s\n", user->clientname().c_str());
+    string client = user->clientname();
+
+    debug_msg("send_client_state %s\n", client.c_str());
     if (!_rtrmgr.ready()) {
-	//we're still in the process of reconfiguring, so delay this
-	//til later
+	//
+	// We're still in the process of reconfiguring, so delay this
+	// until later.
+	//
 	initialize_client_state(user_id, user);
 	return;
     }
 
-    string config = _master_config_tree->show_tree(/*numbered*/ true);
-    string client = user->clientname();
     GENERIC_CALLBACK cb2;
-    cb2 = callback(this, &XrlRtrmgrInterface::client_updated, 
-		   user_id, user);
-    debug_msg("Sending config changed to %s\n", client.c_str());
-    _client_interface.send_config_changed(client.c_str(),
-					  0, config, "", cb2);
+    cb2 = callback(this, &XrlRtrmgrInterface::client_updated, user_id, user);
 
+    //
+    // Send the module status
+    //
     debug_msg("Sending mod status changed to %s\n", client.c_str());
-    list <string> module_names;
+    list<string> module_names;
     ModuleManager &mmgr(_master_config_tree->module_manager());
     mmgr.get_module_list(module_names);
-    list <string>::iterator i;
-    for (i = module_names.begin(); i != module_names.end(); i++) {
-	debug_msg("module: %s\n", (*i).c_str());
-	Module::ModuleStatus status = mmgr.module_status(*i);
+    list<string>::iterator iter;
+    for (iter = module_names.begin(); iter != module_names.end(); ++iter) {
+	const string& module_name = *iter;
+	debug_msg("module: %s\n", module_name.c_str());
+	Module::ModuleStatus status = mmgr.module_status(module_name);
 	if (status != Module::NO_SUCH_MODULE) {
 	    debug_msg("status %d\n", status);
-	    _client_interface.send_module_status(client.c_str(),
-                 *i, (uint32_t)status, cb2);
+	    _client_interface.send_module_status(client.c_str(), module_name,
+						 static_cast<uint32_t>(status),
+						 cb2);
 	}
     } 
+
+    //
+    // Send the configuration
+    //
+    debug_msg("Sending config changed to %s\n", client.c_str());
+    string config = _master_config_tree->show_tree(/*numbered*/ true);
+    _client_interface.send_config_changed(client.c_str(), 0, config, "", cb2);
 }
 
 XrlCmdError 
