@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.4 2005/07/09 00:32:45 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.5 2005/07/12 00:47:51 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -21,7 +22,6 @@
 #include "process_watch.hh"
 #include "configuration.hh"
 #include "filter_manager.hh"
-
 #include <string>
 
 /**
@@ -123,10 +123,12 @@ public:
      *
      * Exception is thrown on error.
      *
+     * @param type the type of the set.
      * @param name name of set to update.
      * @param elements the elements of a set comma separated.
      */
-    void update_set(const string& name, const string& elements);
+    void update_set(const string& type, const string& name, 
+		    const string& elements);
 
     /**
      * Attempts to delete a set.

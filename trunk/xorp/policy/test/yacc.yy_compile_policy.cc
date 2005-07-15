@@ -132,48 +132,50 @@ const short yy_compile_policylhs[] = {                                        -1
     2,    3,    7,    7,
 };
 const short yy_compile_policylen[] = {                                         2,
-    2,    2,    5,    5,    0,    4,    5,    8,    0,    4,
+    2,    2,    5,    5,    0,    5,    5,    8,    0,    4,
     4,    4,    3,    0,
 };
 const short yy_compile_policydefred[] = {                                      5,
     0,    0,    0,    0,    0,    1,    2,    0,    0,    0,
-    0,    9,    0,    0,    0,    0,    6,    3,    4,    7,
-    0,    0,    0,    0,    0,   14,    0,    0,    0,   14,
-    0,    0,    0,   10,    0,   14,    8,   13,   11,    0,
-   12,
+    0,    9,    0,    0,    0,    0,    0,    3,    4,    7,
+    0,    6,    0,    0,    0,    0,   14,    0,    0,    0,
+   14,    0,    0,    0,   10,    0,   14,    8,   13,   11,
+    0,   12,
 };
 const short yy_compile_policydgoto[] = {                                       1,
-   25,   28,   32,    6,    7,   16,   29,
+   26,   29,   33,    6,    7,   16,   30,
 };
 const short yy_compile_policysindex[] = {                                      0,
- -263, -254, -252, -243, -242,    0,    0, -251, -239, -238,
- -237,    0, -246, -245, -244, -266,    0,    0,    0,    0,
- -234, -241, -247, -240, -236,    0, -235, -248, -260,    0,
- -233, -231, -228,    0, -259,    0,    0,    0,    0, -258,
-    0,
+ -263, -254, -251, -243, -242,    0,    0, -250, -241, -238,
+ -237,    0, -236, -245, -244, -266, -240,    0,    0,    0,
+ -234,    0, -239, -247, -235, -233,    0, -232, -248, -260,
+    0, -231, -230, -229,    0, -259,    0,    0,    0,    0,
+ -258,    0,
 };
 const short yy_compile_policyrindex[] = {                                      0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,
+    0,    0,
 };
 const short yy_compile_policygindex[] = {                                      0,
-    0,    0,    0,    0,    0,    0,  -27,
+    0,    0,    0,    0,    0,    0,  -28,
 };
-#define YYTABLESIZE 40
-const short yy_compile_policytable[] = {                                      33,
-   33,   33,   35,   20,    8,   21,    9,    2,   40,   34,
-   39,   41,    3,    4,    5,   10,   11,   12,   13,   14,
-   15,   17,   18,   19,   22,   24,   31,   23,   26,    0,
-    0,    0,    0,   30,    0,   36,    0,   27,   37,   38,
+#define YYTABLESIZE 41
+const short yy_compile_policytable[] = {                                      34,
+   34,   34,   36,   20,    8,   21,    9,    2,   41,   35,
+   40,   42,    3,    4,    5,   10,   11,   13,   12,   14,
+   15,   17,   18,   19,   23,   25,   32,   22,    0,   24,
+    0,    0,    0,   27,    0,    0,   31,   37,   39,   38,
+   28,
 };
 const short yy_compile_policycheck[] = {                                     260,
-  260,  260,   30,  270,  259,  272,  259,  271,   36,  270,
-  270,  270,  276,  277,  278,  259,  259,  269,  258,  258,
-  258,  268,  268,  268,  259,  273,  275,  269,  269,   -1,
-   -1,   -1,   -1,  269,   -1,  269,   -1,  274,  270,  268,
+  260,  260,   31,  270,  259,  272,  258,  271,   37,  270,
+  270,  270,  276,  277,  278,  259,  259,  259,  269,  258,
+  258,  258,  268,  268,  259,  273,  275,  268,   -1,  269,
+   -1,   -1,   -1,  269,   -1,   -1,  269,  269,  268,  270,
+  274,
 };
 #define YYFINAL 1
 #ifndef YYDEBUG
@@ -201,7 +203,7 @@ const char * const yy_compile_policyrule[] = {
 "configuration : configuration YY_EXPORT YY_ID YY_STR YY_SEMICOLON",
 "configuration : configuration YY_IMPORT YY_ID YY_STR YY_SEMICOLON",
 "configuration :",
-"set : YY_SET YY_ID YY_STR YY_SEMICOLON",
+"set : YY_SET YY_STR YY_ID YY_STR YY_SEMICOLON",
 "policy_statement : YY_POLICY_STATEMENT YY_ID YY_LBRACE terms YY_RBRACE",
 "terms : terms YY_TERM YY_ID YY_LBRACE source dest action YY_RBRACE",
 "terms :",
@@ -468,17 +470,18 @@ break;
 case 6:
 #line 108 "compilepolicy.y"
 {
+	  	string type = yyvsp[-3].c_str;
 	  	string id = yyvsp[-2].c_str;
 		string sets = yyvsp[-1].c_str;
 
-		free(yyvsp[-2].c_str); free(yyvsp[-1].c_str);
+		free(yyvsp[-3].c_str); free(yyvsp[-2].c_str); free(yyvsp[-1].c_str);
 	  	
 		_yy_configuration.create_set(id);
-		_yy_configuration.update_set(id,sets);
+		_yy_configuration.update_set(type, id, sets);
 	  }
 break;
 case 7:
-#line 121 "compilepolicy.y"
+#line 122 "compilepolicy.y"
 {
 		string pname = yyvsp[-3].c_str;
 		free(yyvsp[-3].c_str);
@@ -504,7 +507,7 @@ case 7:
 	  }
 break;
 case 8:
-#line 149 "compilepolicy.y"
+#line 150 "compilepolicy.y"
 {
 	  	yy_tb* tb = new yy_tb;
 
@@ -518,7 +521,7 @@ case 8:
 	  }
 break;
 case 10:
-#line 165 "compilepolicy.y"
+#line 166 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -526,7 +529,7 @@ case 10:
 	}
 break;
 case 11:
-#line 174 "compilepolicy.y"
+#line 175 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -534,7 +537,7 @@ case 11:
 	}
 break;
 case 12:
-#line 183 "compilepolicy.y"
+#line 184 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -542,7 +545,7 @@ case 12:
 	}
 break;
 case 13:
-#line 191 "compilepolicy.y"
+#line 192 "compilepolicy.y"
 {
 	       
 	       	if (_yy_statements == NULL) {
@@ -557,7 +560,7 @@ case 13:
 		_yy_statements->push_back(statement);
 	       }
 break;
-#line 561 "yacc.yy_compile_policy.cc"
+#line 564 "yacc.yy_compile_policy.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

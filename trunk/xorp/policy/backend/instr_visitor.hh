@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,17 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instr_visitor.hh,v 1.1 2004/09/17 13:48:55 abittau Exp $
+// $XORP: xorp/policy/backend/instr_visitor.hh,v 1.2 2005/03/25 02:54:11 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_INSTR_VISITOR_HH__
 #define __POLICY_BACKEND_INSTR_VISITOR_HH__
-
 
 // XXX: not acyclic! [but better for compiletime "safety"].
 class Push;
 class PushSet;
 class OnFalseExit;
-class Regex;
 class Load;
 class Store;
 class Accept;
@@ -41,17 +40,11 @@ public:
 
     virtual void visit(Push&) = 0;
     virtual void visit(PushSet&) = 0;
-
     virtual void visit(OnFalseExit&) = 0;
-
-    virtual void visit(Regex&) = 0;
-
     virtual void visit(Load&) = 0;
     virtual void visit(Store&) = 0;
-
     virtual void visit(Accept&) = 0;
     virtual void visit(Reject&) = 0;
-
     virtual void visit(NaryInstr&) = 0;
 };
 

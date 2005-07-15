@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.9 2005/07/12 22:07:21 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.10 2005/07/13 21:58:37 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -89,11 +89,11 @@ BGPVarRW<A>::read_community(const PathAttributeList<A>& attr)
     if (!ca)
 	return NULL;
 
-    ElemSet* es = new ElemSet;
+    ElemSetU32* es = new ElemSetU32;
 
     const set<uint32_t>& com = ca->community_set();
-    for (set<uint32_t>::const_iterator i = com.begin(); i != com.end(); ++i)
-	es->insert(to_str(*i));
+    for (set<uint32_t>::const_iterator i = com.begin(); i != com.end(); ++i) 
+	es->insert(ElemU32(*i));
     
     return es;
 }
@@ -102,20 +102,18 @@ template <class A>
 void
 BGPVarRW<A>::write_community(const Element& e)
 {
-    XLOG_ASSERT(e.type() == ElemSet::id);
+    XLOG_ASSERT(e.type() == ElemSetU32::id);
 
-    const ElemSet& es = dynamic_cast<const ElemSet&>(e);
+    const ElemSetU32& es = dynamic_cast<const ElemSetU32&>(e);
 
     if (_palist.community_att())
 	_palist.remove_attribute_by_type(COMMUNITY);
 	
     CommunityAttribute ca;
    
-    const ElemSet::Set comset = es.get_set();
-    for (ElemSet::Set::const_iterator i = comset.begin(); i != comset.end(); 
+    for (typename ElemSetU32::const_iterator i = es.begin(); i != es.end(); 
 	 ++i) {
-	const string& com = *i;
-	ca.add_community(atoi(com.c_str()));
+	ca.add_community( (*i).val());
     }	
     
     _palist.add_path_attribute(ca);

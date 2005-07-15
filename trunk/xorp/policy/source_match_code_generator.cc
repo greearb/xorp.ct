@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.3 2005/07/01 22:54:34 abittau Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.4 2005/07/09 00:32:45 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -107,12 +107,13 @@ SourceMatchCodeGenerator::visit_term(Term& term)
 
     // generate code for source block
     for(i = source.begin(); i != source.end(); ++i) {
+	_protocol_statement = false;
 	(i->second)->accept(*this);
     
         // if it was a protocol statement, no need for "ONFALSE_EXIT", if its
 	// any other statement, then yes. The protocol is not read as a variable
 	// by the backend filters... it is only used by the policy manager.
-        if(_protocol == "")
+        if(!_protocol_statement)
 	   _os << "ONFALSE_EXIT" << endl;
     }
 
@@ -158,7 +159,7 @@ SourceMatchCodeGenerator::visit_proto(NodeProto& node)
 
     // define protocol
     _protocol = node.proto();
-
+    _protocol_statement = true;
     return NULL;
 }
 

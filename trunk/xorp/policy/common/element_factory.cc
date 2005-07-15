@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.2 2005/03/25 02:54:16 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.3 2005/07/08 02:53:24 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "config.h"
@@ -47,4 +47,10 @@ ElementFactory::create(const string& key, const char* arg)
 
     // execute the callback
     return (i->second)(arg);
+}
+
+bool
+ElementFactory::can_create(const string& key)
+{
+    return _map.find(key) != _map.end();
 }

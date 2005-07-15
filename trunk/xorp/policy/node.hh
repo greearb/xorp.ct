@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
+// $XORP: xorp/policy/node.hh,v 1.3 2005/07/08 07:17:07 pavlin Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
@@ -284,45 +285,6 @@ public:
 
 private:
     string _proto;
-};
-
-
-/**
- * @short Node representing a regular expression.
- */
-class NodeRegex : public Node {
-public:
-    /**
-     * Caller must not delete / modify pointer.
-     *
-     * @param arg the argument of the regular expression.
-     * @param reg the regular expression used for matching.
-     * @param line line of configuration where node was created.
-     */
-    NodeRegex(Node* arg, const string& reg, unsigned line) : Node(line),
-							     _arg(arg), 
-							     _reg(reg) {}
-    ~NodeRegex() { delete _arg; }
-
-    DEFINE_VISITABLE();
-
-    /**
-     * @return the argument of the regular expression.
-     */
-    Node& arg() const { return *_arg; }
-
-    /**
-     * @return the regular expression.
-     */
-    const string& reg() const { return _reg; }
-
-private:
-    Node* _arg;
-    string _reg;
-
-    // not impl
-    NodeRegex(const NodeRegex&);
-    NodeRegex& operator=(const NodeRegex&);
 };
 
 #endif // __POLICY_NODE_HH__

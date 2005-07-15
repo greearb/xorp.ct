@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,13 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.2 2005/03/25 02:54:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.3 2005/07/01 22:54:35 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "visitor_setdep.hh"
-
 #include <vector>
 #include <string>
 
@@ -26,8 +25,6 @@ VisitorSetDep::VisitorSetDep(SetMap& setmap) : _setmap(setmap)
 {
 }
 
-
-    
 const Element* 
 VisitorSetDep::visit(PolicyStatement& policy)
 {
@@ -69,40 +66,40 @@ VisitorSetDep::visit(Term& term)
     return NULL;
 }
     
-
-
 const Element* 
-VisitorSetDep::visit(NodeUn& node) {
+VisitorSetDep::visit(NodeUn& node)
+{
     // check arg
     node.node().accept(*this);
     return NULL;
 }
 
 const Element* 
-VisitorSetDep::visit(NodeBin& node) {
+VisitorSetDep::visit(NodeBin& node)
+{
     // check args
     node.left().accept(*this);
     node.right().accept(*this);
     return NULL;
 }
 
-
 const Element* 
-VisitorSetDep::visit(NodeAssign& node) {
+VisitorSetDep::visit(NodeAssign& node)
+{
     // check arg
     node.rvalue().accept(*this);
     return NULL;
 }
 
-
 const Element* 
-VisitorSetDep::visit(NodeVar& /* node */) {
+VisitorSetDep::visit(NodeVar& /* node */)
+{
     return NULL;
 }
 
-
 const Element* 
-VisitorSetDep::visit(NodeSet& node) {
+VisitorSetDep::visit(NodeSet& node)
+{
     // Only useful part of this visitor...
     // see if set exists
     try {
@@ -122,30 +119,25 @@ VisitorSetDep::visit(NodeSet& node) {
 }
 
 const Element* 
-VisitorSetDep::visit(NodeElem& /* node */) {
+VisitorSetDep::visit(NodeElem& /* node */)
+{
     return NULL;
 }
 
 const Element* 
-VisitorSetDep::visit(NodeRegex& node) {
-    // check arg
-    node.arg().accept(*this);
-
+VisitorSetDep::visit(NodeAccept& /* node */)
+{
     return NULL;
 }
 
 const Element* 
-VisitorSetDep::visit(NodeAccept& /* node */) {
+VisitorSetDep::visit(NodeReject& /* node */)
+{
     return NULL;
 }
 
 const Element* 
-VisitorSetDep::visit(NodeReject& /* node */) {
-    return NULL;
-}
-
-
-const Element* 
-VisitorSetDep::visit(NodeProto& /* node */) {
+VisitorSetDep::visit(NodeProto& /* node */)
+{
     return NULL;
 }

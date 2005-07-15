@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,19 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.4 2005/07/09 00:32:45 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.5 2005/07/12 00:47:51 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "policy_target.hh"
 #include "policy/common/policy_utils.hh"
 
-
 // static members
 string PolicyTarget::policy_target_name = "policy";
-
-
 
 PolicyTarget::PolicyTarget(XrlStdRouter& rtr) :
     _running(true), _commit_delay(2000), 
@@ -98,9 +95,10 @@ PolicyTarget::create_set(const string& name)
 }
 
 void
-PolicyTarget::update_set(const string& name, const string& element)
+PolicyTarget::update_set(const string& type, const string& name, 
+			 const string& element)
 {
-    _conf.update_set(name,element);
+    _conf.update_set(type, name, element);
 }
 
 void

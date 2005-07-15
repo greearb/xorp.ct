@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/register_elements.hh,v 1.1 2004/09/17 13:48:59 abittau Exp $
+// $XORP: xorp/policy/common/register_elements.hh,v 1.2 2005/03/25 02:54:17 pavlin Exp $
 
 #ifndef __POLICY_COMMON_REGISTER_ELEMENTS_HH__
 #define __POLICY_COMMON_REGISTER_ELEMENTS_HH__
@@ -30,6 +31,9 @@ public:
      */
     RegisterElements();
 
+private:
+    template <class T>
+    void register_element();
 };
 
 #endif // __POLICY_COMMON_REGISTER_ELEMENTS_HH__

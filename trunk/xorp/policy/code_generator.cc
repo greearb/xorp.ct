@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,35 +13,38 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.4 2005/07/08 02:06:21 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
 
 #include "code_generator.hh"    
     
-CodeGenerator::CodeGenerator() {
+CodeGenerator::CodeGenerator()
+{
 }
 
 CodeGenerator::CodeGenerator(const string& proto, 
-			     const filter::Filter& filter) {
+			     const filter::Filter& filter)
+{
     _code._target.protocol = proto;
     _code._target.filter = filter;
 }
 
-
 // constructor for import policies
-CodeGenerator::CodeGenerator(const string& proto) {
+CodeGenerator::CodeGenerator(const string& proto)
+{
     _code._target.protocol = proto;
     _code._target.filter = filter::IMPORT;
 }
 
-
-CodeGenerator::~CodeGenerator() {
+CodeGenerator::~CodeGenerator()
+{
 }
 
 const Element* 
-CodeGenerator::visit_policy(PolicyStatement& policy) {
+CodeGenerator::visit_policy(PolicyStatement& policy)
+{
     _os << "POLICY_START " << policy.name() << endl;
 
     PolicyStatement::TermContainer& terms = policy.terms();
@@ -59,7 +63,8 @@ CodeGenerator::visit_policy(PolicyStatement& policy) {
 }
 
 const Element* 
-CodeGenerator::visit_term(Term& term) {
+CodeGenerator::visit_term(Term& term)
+{
     Term::Nodes& source = term.source_nodes();
     Term::Nodes& dest = term.dest_nodes();
     Term::Nodes& actions = term.action_nodes();
@@ -89,10 +94,9 @@ CodeGenerator::visit_term(Term& term) {
 
 }
     
-
-
 const Element* 
-CodeGenerator::visit(NodeUn& node) {
+CodeGenerator::visit(NodeUn& node)
+{
     node.node().accept(*this);
 
     _os << node.op().str() << endl;
@@ -100,7 +104,8 @@ CodeGenerator::visit(NodeUn& node) {
 }
 
 const Element* 
-CodeGenerator::visit(NodeBin& node) {
+CodeGenerator::visit(NodeBin& node)
+{
     // reverse order, so they can be popped in correct order
     node.right().accept(*this);
     node.left().accept(*this);
@@ -109,9 +114,9 @@ CodeGenerator::visit(NodeBin& node) {
     return NULL;
 }
 
-
 const Element* 
-CodeGenerator::visit(NodeAssign& node) {
+CodeGenerator::visit(NodeAssign& node)
+{
     node.rvalue().accept(*this);
 
     _os << "STORE " << node.varid() << endl;
@@ -119,50 +124,45 @@ CodeGenerator::visit(NodeAssign& node) {
 }
 
 const Element* 
-CodeGenerator::visit(NodeRegex& node) {
-    node.arg().accept(*this);
-
-    _os << "REGEX \"" << node.reg() << "\"" << endl;
-    return NULL;
-}
-
-const Element* 
-CodeGenerator::visit(NodeElem& node) {
+CodeGenerator::visit(NodeElem& node)
+{
     _os << "PUSH " << node.val().type() << " " << 
 	"\"" << node.val().str() << "\"" << endl;
     return NULL;	
 }
 
-
 const Element* 
-CodeGenerator::visit(NodeVar& node) {
+CodeGenerator::visit(NodeVar& node)
+{
     _os << "LOAD " << node.val() << endl;
     return NULL;
 }
 
-
 const Element* 
-CodeGenerator::visit(NodeSet& node) {
+CodeGenerator::visit(NodeSet& node)
+{
     _os << "PUSH_SET " << node.setid() << endl;
     _code._sets.insert(node.setid());
     return NULL;
 }
 
 const Element* 
-CodeGenerator::visit(NodeAccept& /* node */) {
+CodeGenerator::visit(NodeAccept& /* node */)
+{
     _os << "ACCEPT" << endl;
     return NULL;
 }
 
 const Element* 
-CodeGenerator::visit(NodeReject& /* node */) {
+CodeGenerator::visit(NodeReject& /* node */)
+{
     _os << "REJECT" << endl;
     return NULL;
 }
 
-
 const Element* 
-CodeGenerator::visit_proto(NodeProto& node) {
+CodeGenerator::visit_proto(NodeProto& node)
+{
     ostringstream err;
 
     // import policies may not have protocol set.
@@ -171,21 +171,25 @@ CodeGenerator::visit_proto(NodeProto& node) {
 }
 
 const Code&
-CodeGenerator::code() { 
+CodeGenerator::code()
+{ 
     return _code; 
 }
 
 const Element*
-CodeGenerator::visit(PolicyStatement& ps) {
+CodeGenerator::visit(PolicyStatement& ps)
+{
     return visit_policy(ps);
 }
 
 const Element*
-CodeGenerator::visit(Term& term) {
+CodeGenerator::visit(Term& term)
+{
     return visit_term(term);
 }
 
 const Element*
-CodeGenerator::visit(NodeProto& proto) {
+CodeGenerator::visit(NodeProto& proto)
+{
     return visit_proto(proto);
 }

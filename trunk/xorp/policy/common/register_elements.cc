@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.1 2004/09/17 13:48:59 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.2 2005/03/25 02:54:17 pavlin Exp $"
 
 #include "config.h"
 #include "register_elements.hh"
@@ -21,68 +22,36 @@
 #include "elem_set.hh"
 #include "elem_null.hh"
 
-
-
-namespace elem_create {
-
-Element* create_i32(const char* x) {
-    return new ElemInt32(x);
+RegisterElements::RegisterElements()
+{
+    register_element<ElemInt32>();
+    register_element<ElemU32>();
+    register_element<ElemStr>();
+    register_element<ElemBool>();
+    register_element<ElemNull>();
+    register_element<ElemIPv4>();
+    register_element<ElemIPv4Net>();
+    register_element<ElemIPv6>();
+    register_element<ElemIPv6Net>();
+    
+    register_element<ElemSetU32>();
+    register_element<ElemSetIPv4Net>();
+    register_element<ElemSetStr>();
 }
 
-Element* create_u32(const char* x) {
-    return new ElemU32(x);
-}
+// I love templates =D [and C++]
+template <class T>
+void
+RegisterElements::register_element()
+{
+    static ElementFactory ef;
 
-Element* create_str(const char* x) {
-    return new ElemStr(x);
-}
+    struct Local {
+	static Element* create(const char* x)
+	{
+	    return new T(x);
+	}
+    };
 
-Element* create_bool(const char* x) {
-    return new ElemBool(x);
-}
-
-Element* create_set(const char* x) {
-    return new ElemSet(x);
-}
-
-Element* create_ipv4(const char* x) {
-    return new ElemIPv4(x);
-}
-
-
-Element* create_ipv6(const char* x) {
-    return new ElemIPv6(x);
-}
-
-Element* create_null(const char* x) {
-    return new ElemNull(x);
-}
-
-Element* create_ipv4net(const char* x) {
-    return new ElemIPv4Net(x);
-}
-
-Element* create_ipv6net(const char* x) {
-    return new ElemIPv6Net(x);
-}
-
-} // namespace
-
-RegisterElements::RegisterElements() {
-    ElementFactory ef;
-
-    ef.add(ElemInt32::id,elem_create::create_i32);
-    ef.add(ElemU32::id,elem_create::create_u32);
-    ef.add(ElemStr::id,elem_create::create_str);
-    ef.add(ElemBool::id,elem_create::create_bool);
-
-    ef.add(ElemSet::id,elem_create::create_set);
-
-    ef.add(ElemIPv4::id,elem_create::create_ipv4);
-    ef.add(ElemIPv6::id,elem_create::create_ipv6);
-
-    ef.add(ElemNull::id,elem_create::create_null);
-
-    ef.add(ElemIPv4Net::id,elem_create::create_ipv4net);
-    ef.add(ElemIPv6Net::id,elem_create::create_ipv6net);
+    ef.add(T::id, &Local::create);
 }

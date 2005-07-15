@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,20 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_semantic.hh,v 1.1 2004/09/17 13:48:52 abittau Exp $
+// $XORP: xorp/policy/visitor_semantic.hh,v 1.2 2005/03/25 02:54:10 pavlin Exp $
 
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
 
 #include "policy/common/varrw.hh"
 #include "policy/common/dispatcher.hh"
-
 #include "visitor.hh"
 #include "semantic_varrw.hh"
 #include "set_map.hh"
 #include "policy_statement.hh"
-#include "regex.h"
-
 #include "node.hh"
 
 /**
@@ -61,27 +59,15 @@ public:
 		    const string& protocol, PolicyType ptype);
     
     const Element* visit(PolicyStatement& policy);
-
     const Element* visit(Term& term);
-
     const Element* visit(NodeUn& node);
-    
     const Element* visit(NodeBin& node);
-    
     const Element* visit(NodeAssign& node);
-    
     const Element* visit(NodeVar& node);
-    
     const Element* visit(NodeSet& node);
-
     const Element* visit(NodeElem& node);
-
-    const Element* visit(NodeRegex& node);
-
     const Element* visit(NodeAccept& node);
-    
     const Element* visit(NodeReject& node);
-    
     const Element* visit(NodeProto& node);
 
     /**

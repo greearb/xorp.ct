@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.1 2004/09/17 13:48:56 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.2 2005/03/25 02:54:13 pavlin Exp $"
 
 #include "config.h"
 #include "policytags.hh"
@@ -41,20 +41,17 @@ PolicyTags::PolicyTags(const XrlAtomList& alist) {
 
 PolicyTags::PolicyTags(const Element& element) {
     // we only support set elements
-    const ElemSet* es = dynamic_cast<const ElemSet*>(&element);
+    const ElemSetU32* es = dynamic_cast<const ElemSetU32*>(&element);
     if(!es)
 	throw PolicyTagsError("Element is not a set: " + element.type());
 
-    // Manipulate the set directly
-    const set<string>& s = es->get_set();
-
     // go through all the set elements.
-    for(set<string>::iterator i = s.begin(); i != s.end(); ++i) {
-	const char *x = (*i).c_str();
+    for(ElemSetU32::const_iterator i = es->begin(); i != es->end(); ++i) {
+	const ElemU32& x = *i;
 
 	// all ElemSet elements are represented as string, so convert and
 	// insert.
-	_tags.insert(strtoul(x,NULL,10));
+	_tags.insert(x.val());
     }
 }
 
@@ -100,7 +97,12 @@ Element*
 PolicyTags::element() const {
     ElementFactory ef;
 
-    return ef.createSet(_tags);
+    ElemSetU32* s = new ElemSetU32;
+    for (Set::iterator i = _tags.begin(); i != _tags.end(); ++i) {
+	ElemU32* e = new ElemU32(*i);
+	s->insert(*e);
+    }
+    return s;
 }
 
 void

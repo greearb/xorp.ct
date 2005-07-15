@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.4 2005/07/12 22:07:24 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.5 2005/07/13 21:58:40 abittau Exp $"
 
 #include "config.h"
 #include "register_operations.hh"
@@ -21,9 +21,9 @@
 #include "element.hh"
 #include "elem_set.hh"
 #include "elem_null.hh"
-#include "regex.h"
 #include "operator.hh"
 #include "element_factory.hh"
+#include "policy_utils.hh"
 #include <set>
 #include <string>
 
@@ -116,36 +116,32 @@ DEFINE_BINOP_SWITCHPARAMS(op_gt_sw,<)
 DEFINE_BINOP_SWITCHPARAMS(op_le_sw,>=)
 DEFINE_BINOP_SWITCHPARAMS(op_ge_sw,<=)
 
-template <class T>
+// 2 template parameters because U can be T or ElemSetAny<T>
+template <class T, class U>
 Element* 
-set_add(const ElemSet& s, const T& str)
+set_add(const ElemSetAny<T>& s, const U& e)
 {
-    ElemSet* es = new ElemSet(s.get_set());
+    ElemSetAny<T>* es = new ElemSetAny<T>();
 
-    es->insert(str.str());
+    es->insert(s);
+    es->insert(e);
 
     return es;
 }
 
-template <>
+template <class T>
 Element*
-set_add(const ElemSet& s, const ElemSet& r)
+set_del(const ElemSetAny<T>& s, const ElemSetAny<T>& r)
 {
-    ElemSet* es = new ElemSet(s.get_set());
-    es->insert(r);
-    return es;
-}
-
-Element*
-set_del(const ElemSet& s, const ElemSet& r)
-{
-    ElemSet* es = new ElemSet(s.get_set());
+    ElemSetAny<T>* es = new ElemSetAny<T>();
+    es->insert(s);
     es->erase(r);
     return es;
 }
 
+template <class T>
 Element* 
-set_ne_int(const ElemSet& l, const ElemSet& r)
+set_ne_int(const ElemSetAny<T>& l, const ElemSetAny<T>& r)
 {
     return new ElemBool(l.nonempty_intersection(r));
 }
@@ -175,6 +171,29 @@ ctr(const ElemStr& type, const Element& arg)
     ElementFactory ef;
 
     return ef.create(type.val(), arg.str().c_str());
+}
+
+Element*
+str_regex(const ElemStr& left, const ElemStr& right)
+{
+    return new ElemBool(policy_utils::regex(left.val(), right.val()));
+}
+
+Element*
+str_setregex(const ElemStr& left, const ElemSetStr& right)
+{
+    string str = left.val();
+
+    // go through all regexps...
+    // only 1 needs to match...
+    for (ElemSetStr::const_iterator i = right.begin(); i != right.end(); ++i) {
+	const ElemStr& re = *i;
+
+	if (policy_utils::regex(str, re.val()))
+	    return new ElemBool(true);
+    }
+
+    return new ElemBool(false);
 }
 
 } // namespace
@@ -225,73 +244,74 @@ do {									\
     ADD_BINOP(arg,arg,arg,op_mul,Mul);					\
 } while (0)
 
-    // SETS
-    ADD_BINOP(ElemBool,ElemSet,ElemSet,op_eq_nv,Eq);
-    ADD_BINOP(ElemBool,ElemSet,ElemSet,op_ne_nv,Ne);
-
-    ADD_BINOP(ElemBool,ElemSet,ElemSet,op_lt_nv,Lt);
-    ADD_BINOP(ElemBool,ElemSet,ElemSet,op_gt_nv,Gt);
-    ADD_BINOP(ElemBool,ElemSet,ElemSet,op_le_nv,Le);
-    ADD_BINOP(ElemBool,ElemSet,ElemSet,op_ge_nv,Ge);
-    
     // SET ADDITION [used for policy tags] -- insert an element in the set.
-    disp.add<ElemSet, ElemU32, operations::set_add>(OpAdd());
-    disp.add<ElemSet, ElemSet, operations::set_ne_int>(OpNEInt());
-    disp.add<ElemSet, ElemSet, operations::set_add>(OpAdd());
-    disp.add<ElemSet, ElemSet, operations::set_del>(OpSub());
+    disp.add<ElemSetU32, ElemU32, operations::set_add>(OpAdd());
+   
+    // SET operations [used for communities in BGP for example].
+    disp.add<ElemSetU32, ElemSetU32, operations::set_ne_int>(OpNEInt());
+    disp.add<ElemSetU32, ElemSetU32, operations::set_add>(OpAdd());
+    disp.add<ElemSetU32, ElemSetU32, operations::set_del>(OpSub());
 
-#define ADD_SETBINOP(arg)						\
+#define ADD_LSETBINOP(set, arg)						\
 do {									\
-    ADD_BINOP(ElemBool,ElemSet,arg,op_eq_nv,Eq);			\
-    ADD_BINOP(ElemBool,ElemSet,arg,op_ne_nv,Ne);			\
-    ADD_BINOP(ElemBool,ElemSet,arg,op_lt_nv,Lt);			\
-    ADD_BINOP(ElemBool,ElemSet,arg,op_gt_nv,Gt);			\
-    ADD_BINOP(ElemBool,ElemSet,arg,op_le_nv,Le);			\
-    ADD_BINOP(ElemBool,ElemSet,arg,op_ge_nv,Ge);			\
-    ADD_BINOP(ElemBool,arg,ElemSet,op_eq_sw,Eq);			\
-    ADD_BINOP(ElemBool,arg,ElemSet,op_ne_sw,Ne);			\
-    ADD_BINOP(ElemBool,arg,ElemSet,op_lt_sw,Lt);			\
-    ADD_BINOP(ElemBool,arg,ElemSet,op_gt_sw,Gt);			\
-    ADD_BINOP(ElemBool,arg,ElemSet,op_le_sw,Le);			\
-    ADD_BINOP(ElemBool,arg,ElemSet,op_ge_sw,Ge);			\
+    ADD_BINOP(ElemBool,set,arg,op_eq_nv,Eq);			        \
+    ADD_BINOP(ElemBool,set,arg,op_ne_nv,Ne);   			        \
+    ADD_BINOP(ElemBool,set,arg,op_lt_nv,Lt);				\
+    ADD_BINOP(ElemBool,set,arg,op_gt_nv,Gt);				\
+    ADD_BINOP(ElemBool,set,arg,op_le_nv,Le);				\
+    ADD_BINOP(ElemBool,set,arg,op_ge_nv,Ge);				\
+} while(0)
+
+    ADD_LSETBINOP(ElemSetU32, ElemSetU32);
+
+#define ADD_SETBINOP(set, arg)                                          \
+do {                                                                    \
+    ADD_LSETBINOP(set, arg);                                            \
+    ADD_BINOP(ElemBool,arg,set,op_eq_sw,Eq);				\
+    ADD_BINOP(ElemBool,arg,set,op_ne_sw,Ne);				\
+    ADD_BINOP(ElemBool,arg,set,op_lt_sw,Lt);				\
+    ADD_BINOP(ElemBool,arg,set,op_gt_sw,Gt);				\
+    ADD_BINOP(ElemBool,arg,set,op_le_sw,Le);				\
+    ADD_BINOP(ElemBool,arg,set,op_ge_sw,Ge);				\
 } while (0)
 
     // i32
     ADD_EQOP(ElemInt32);
     ADD_RELOP(ElemInt32);
     ADD_MATHOP(ElemInt32);
-    ADD_SETBINOP(ElemInt32);
+//    ADD_SETBINOP(ElemInt32);
 
     // u32
     ADD_EQOP(ElemU32);
     ADD_RELOP(ElemU32);
     ADD_MATHOP(ElemU32);
-    ADD_SETBINOP(ElemU32);
+    ADD_SETBINOP(ElemSetU32, ElemU32);
 
     // strings
     ADD_EQOP(ElemStr);
-    ADD_SETBINOP(ElemStr);
-    // string concatenation
-    disp.add<ElemStr,ElemStr,operations::str_add>(OpAdd());
-    disp.add<ElemStr,ElemU32,operations::str_mul>(OpMul());
+//    ADD_SETBINOP(ElemStr);
+    disp.add<ElemStr, ElemStr, operations::str_add>(OpAdd());
+    disp.add<ElemStr, ElemU32, operations::str_mul>(OpMul());
+    disp.add<ElemStr, ElemStr, operations::str_regex>(OpRegex());
+    disp.add<ElemStr, ElemSetStr, operations::str_setregex>(OpRegex());
 
     // IPV4
     ADD_EQOP(ElemIPv4);
     ADD_RELOP(ElemIPv4);
-    ADD_SETBINOP(ElemIPv4);
+//    ADD_SETBINOP(ElemIPv4);
    
     // IPV4NET
     ADD_EQOP(ElemIPv4Net);
     ADD_RELOP(ElemIPv4Net);
-    ADD_SETBINOP(ElemIPv4Net);
+    ADD_SETBINOP(ElemSetIPv4Net, ElemIPv4Net);
    
     // IPV6
     ADD_EQOP(ElemIPv6);
     ADD_RELOP(ElemIPv6);
-    ADD_SETBINOP(ElemIPv6);
+//    ADD_SETBINOP(ElemIPv6);
    
     // IPV6NET
     ADD_EQOP(ElemIPv6Net);
     ADD_RELOP(ElemIPv6Net);
-    ADD_SETBINOP(ElemIPv6Net);
+//    ADD_SETBINOP(ElemIPv6Net);
 }

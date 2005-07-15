@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.4 2005/07/09 00:32:44 abittau Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.5 2005/07/12 00:47:50 abittau Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -126,10 +126,12 @@ public:
      * Throws an exception on failure.
      * Checks if set exists.
      *
+     * @param type the type of the set.
      * @param set name of the set to be updated.
      * @param elements comma separated elements to be replaced in set.
      */
-    void update_set(const string& set, const string& elements);
+    void update_set(const string& type, const string& set, 
+		    const string& elements);
 
     /**
      * Throws an exception on failure.

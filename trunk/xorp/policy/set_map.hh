@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/set_map.hh,v 1.1 2004/09/17 13:48:51 abittau Exp $
+// $XORP: xorp/policy/set_map.hh,v 1.2 2005/03/25 02:54:09 pavlin Exp $
 
 #ifndef __POLICY_SET_MAP_HH__
 #define __POLICY_SET_MAP_HH__
@@ -20,7 +21,6 @@
 #include "policy/common/element_factory.hh"
 #include "policy/common/policy_exception.hh"
 #include "dependancy.hh"
-
 #include <string>
 
 /**
@@ -62,11 +62,13 @@ public:
      *
      * Throws an expcetion if set does not exist.
      *
+     * @param type type of the set.
      * @param name name of the set.
      * @param elements the new elements comma separated.
      * @param modified set filled with policies which are now modified.
      */
-    void update_set(const string& name, 
+    void update_set(const string& type,
+		    const string& name, 
 		    const string& elements, 
 		    set<string>& modified);
 

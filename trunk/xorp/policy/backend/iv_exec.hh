@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.2 2005/03/25 02:54:12 pavlin Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.3 2005/07/08 17:49:14 abittau Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
@@ -22,7 +22,6 @@
 #include "policy/common/policy_exception.hh"
 #include "instruction.hh"
 #include "set_manager.hh"
-#include "regex.h"
 #include "term_instr.hh"
 #include "policy_instr.hh"
 #include <stack>
@@ -103,11 +102,6 @@ public:
      * @param x OnFalseExit to execute.
      */
     void visit(OnFalseExit& x);
-
-    /**
-     * @param re Regex to execute.
-     */
-    void visit(Regex& re);
 
     /**
      * @param l Load to execute.

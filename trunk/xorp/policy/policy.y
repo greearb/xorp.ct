@@ -90,9 +90,7 @@ boolexpr:
 
 	| YY_LPAR boolexpr YY_RPAR { $$ = $2; }
 	
-	| expr YY_REGEX YY_STR { $$ = new NodeRegex($1,$3,_parser_lineno);
-					free($3); 
-				}
+	| expr YY_REGEX expr    { $$ = new NodeBin(new OpRegex, $1, $3, _parser_lineno); }
 	;
 
 expr:	

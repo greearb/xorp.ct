@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,14 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/source_match_code_generator.hh,v 1.2 2005/03/25 02:54:09 pavlin Exp $
+// $XORP: xorp/policy/source_match_code_generator.hh,v 1.3 2005/07/09 00:32:45 abittau Exp $
 
 #ifndef __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
 #define __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
 
 #include "policy/common/policy_exception.hh"
 #include "code_generator.hh"
-
 #include <vector>
 #include <string>
 
@@ -59,7 +59,6 @@ public:
      * @param tagstart the first policy tag available.
      */
     SourceMatchCodeGenerator(uint32_t tagstart);
-
     
     const Element* visit_policy(PolicyStatement& policy);
 
@@ -102,13 +101,13 @@ private:
 
     uint32_t _currtag;
     string _protocol;
-
     CodeMap _codes;
-
+    
     // FIXME: who deletes these on exception ?
     vector<Code*> _codes_vect; 
-
+    
     Tags _tags;
+    bool _protocol_statement;
 
     // not impl
     SourceMatchCodeGenerator(const SourceMatchCodeGenerator&);

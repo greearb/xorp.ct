@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.4 2005/07/09 00:32:47 abittau Exp $ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.5 2005/07/12 00:47:53 abittau Exp $ */
 
 /**
  * Policy manager XRL interface.
@@ -62,10 +62,11 @@ interface policy/0.1 {
 	/**
 	 * Replace elements in a set.
 	 *
+	 * @param type the type of the set.
 	 * @param set name of the set.
 	 * @param elements comma delimited list of set elements.
 	 */
-	update_set ? set:txt & elements:txt
+	update_set ? type:txt & set:txt & elements:txt
 
 	/**
 	 * Delete a set.

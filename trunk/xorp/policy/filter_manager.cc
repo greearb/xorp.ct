@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,17 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.1 2004/09/17 13:48:48 abittau Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.2 2005/03/25 02:54:07 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "libxorp/debug.h"
 #include "filter_manager.hh"
-
 
 FilterManager::FilterManager(const CodeMap& imp, 
 			     const CodeMap& sm, 
@@ -44,7 +43,8 @@ FilterManager::FilterManager(const CodeMap& imp,
 }
 
 void 
-FilterManager::update_filter(const Code::Target& t) {
+FilterManager::update_filter(const Code::Target& t)
+{
     switch(t.filter) {
 	case filter::IMPORT:
 	    update_import_filter(t.protocol);
@@ -61,22 +61,26 @@ FilterManager::update_filter(const Code::Target& t) {
 }
 
 void 
-FilterManager::update_import_filter(const string& protocol) {
+FilterManager::update_import_filter(const string& protocol)
+{
     update_queue(protocol,_import,_import_queue);
 }
     
 void 
-FilterManager::update_sourcematch_filter(const string& protocol) {
+FilterManager::update_sourcematch_filter(const string& protocol)
+{
     update_queue(protocol,_sourcematch,_sourcematch_queue);
 }
 
 void 
-FilterManager::update_export_filter(const string& protocol) {
+FilterManager::update_export_filter(const string& protocol)
+{
     update_queue(protocol,_export,_export_queue);
 }
 
 void 
-FilterManager::update_tagmap(const string& protocol) {
+FilterManager::update_tagmap(const string& protocol)
+{
     TagMap::const_iterator i = _tagmap.find(protocol);
 
     // no tags for this protocol, no update needed.
@@ -103,14 +107,15 @@ FilterManager::update_tagmap(const string& protocol) {
 }
 
 void 
-FilterManager::policy_backend_cb(const XrlError& e) {
+FilterManager::policy_backend_cb(const XrlError& e)
+{
     if(e != XrlError::OKAY())
 	throw FMException(e.str()); // XXX: what else can we do ?
 }
 
 void 
-FilterManager::flush_export_queue() {
-    
+FilterManager::flush_export_queue()
+{
     debug_msg("[POLICY] Flushing export filter queue...\n");
 
     // commit all updates on export queue
@@ -143,8 +148,8 @@ FilterManager::flush_export_queue() {
 }
 
 void 
-FilterManager::flush_queue(ConfQueue& queue, filter::Filter f) {
-
+FilterManager::flush_queue(ConfQueue& queue, filter::Filter f)
+{
     debug_msg("[POLICY] Flushing %s queue...\n",
 	      filter::filter2str(f).c_str());
 
@@ -176,7 +181,8 @@ FilterManager::flush_queue(ConfQueue& queue, filter::Filter f) {
 }
 
 void
-FilterManager::push_routes_now() {
+FilterManager::push_routes_now()
+{
     for(set<string>::iterator i = _push_queue.begin();
 	i != _push_queue.end(); ++i) {
 	
@@ -193,7 +199,8 @@ FilterManager::push_routes_now() {
 }
 
 void 
-FilterManager::flush_updates_now() {
+FilterManager::flush_updates_now()
+{
     // flush all queues
     flush_export_queue();
     flush_queue(_sourcematch_queue,filter::EXPORT_SOURCEMATCH);
@@ -205,14 +212,16 @@ FilterManager::flush_updates_now() {
 }
 
 void 
-FilterManager::flush_updates(uint32_t msec) {
+FilterManager::flush_updates(uint32_t msec)
+{
     // delayed flush
     _flush_timer = _eventloop.new_oneoff_after_ms(msec,
 			callback(this,&FilterManager::flush_updates_now));
 }
 
 void 
-FilterManager::birth(const string& protocol) {
+FilterManager::birth(const string& protocol)
+{
     debug_msg("[POLICY] Protocol born: %s\n",protocol.c_str());
 
     // resend configuration to new born process.
@@ -265,7 +274,8 @@ FilterManager::birth(const string& protocol) {
 }
 
 void 
-FilterManager::death(const string& protocol) {
+FilterManager::death(const string& protocol)
+{
     // do not send any updates to dead process.
     delete_queue_protocol(_export_queue,protocol);
     delete_queue_protocol(_sourcematch_queue,protocol);
@@ -280,7 +290,8 @@ FilterManager::death(const string& protocol) {
 
 void 
 FilterManager::delete_queue_protocol(ConfQueue& queue, 
-				     const string& protocol) {
+				     const string& protocol)
+{
     ConfQueue::iterator i = queue.find(protocol);
 
     if(i == queue.end())
@@ -292,8 +303,8 @@ FilterManager::delete_queue_protocol(ConfQueue& queue,
 void 
 FilterManager::update_queue(const string& protocol, 
 			    const CodeMap& cm,
-			    ConfQueue& queue) {
-
+			    ConfQueue& queue)
+{
     // if a process is dead, erase it from the queue if it is there, and then do
     // nothing.
     bool alive = _process_watch.alive(protocol);
@@ -329,12 +340,11 @@ FilterManager::update_queue(const string& protocol,
     for(set<string>::iterator iter = sets.begin();
         iter != sets.end(); ++iter) {
 
-	conf += "SET " + *iter + " \"";
-    
+	const string& name = *iter;
         const Element& e = _sets.getSet(*iter);
-
+	
+	conf += "SET " + e.type() + " " + name + " \"";
         conf += e.str();
-
         conf += "\"\n";
     }
 

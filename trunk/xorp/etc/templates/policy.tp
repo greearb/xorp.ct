@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.5 2005/07/09 00:32:43 abittau Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.6 2005/07/12 00:47:50 abittau Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -9,8 +9,10 @@ policy {
 
 		network4: ipv4net;
 		network6: ipv6net;
-            }
-            dest {
+		
+		network4-list: txt;
+	    }
+	    dest {
             }
             action {
 	    	trace: u32;
@@ -18,7 +20,7 @@ policy {
         }
     }
 
-    set @: txt {
+    network4-list @: txt {
         elements: txt;
     }
 }
@@ -49,20 +51,24 @@ policy {
 	    
 	    source {
                 protocol {
-                        %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=protocol $(<>) $(@);";
-                        %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=protocol $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
                 }
 
                 network4 {
-                        %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
-                        %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
                 }
                 network6 {
-                        %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
-                        %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
                 }
-	    }	
-
+		
+		network4-list {
+                    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 <= SET $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+	    }
 
             action {
 		trace {
@@ -82,11 +88,12 @@ policy {
         }
     }
 
-    set @: txt {
+    network4-list @: txt {
         %delete: xrl "$(policy.targetname)/policy/0.1/delete_set?set:txt=$(@)";
         %create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
+
         elements {
-            %set: xrl "$(policy.targetname)/policy/0.1/update_set?set:txt=$(set.@)&elements:txt=$(@)";
+            %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&elements:txt=$(@)";
         }
     }
 }

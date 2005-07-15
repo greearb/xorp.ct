@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.2 2005/03/25 02:54:12 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.3 2005/07/08 02:06:22 abittau Exp $"
 
 #include "config.h"
 #include "iv_exec.hh"
@@ -23,14 +24,18 @@
 IvExec::IvExec(vector<PolicyInstr*>& policies, SetManager& sman, VarRW& varrw,
 	       ostream* os) : 
 	       _policies(policies), _sman(sman), _varrw(varrw),
-	       _finished(false), _fa(DEFAULT), _os(os) {}
+	       _finished(false), _fa(DEFAULT), _os(os) 
+{
+}
 
-IvExec::~IvExec() {
+IvExec::~IvExec()
+{
     clear_trash();
 }
 
 IvExec::FlowAction 
-IvExec::run() {
+IvExec::run()
+{
     vector<PolicyInstr*>::iterator i;
     
     FlowAction ret = DEFAULT;
@@ -58,7 +63,8 @@ IvExec::run() {
 }
 
 IvExec::FlowAction 
-IvExec::runPolicy(PolicyInstr& pi) {
+IvExec::runPolicy(PolicyInstr& pi)
+{
     vector<TermInstr*>& terms = pi.terms();
     
     vector<TermInstr*>::iterator i;
@@ -86,7 +92,8 @@ IvExec::runPolicy(PolicyInstr& pi) {
 }
 
 IvExec::FlowAction 
-IvExec::runTerm(TermInstr& ti) {
+IvExec::runTerm(TermInstr& ti)
+{
 
     // we just started
     _finished = false;
@@ -118,21 +125,28 @@ IvExec::runTerm(TermInstr& ti) {
 }
 
 void 
-IvExec::visit(Push& p) {
+IvExec::visit(Push& p)
+{
+    const Element& e = p.elem();
     // node owns element [no need to trash]
-    _stack.push(&(p.elem()));
+    _stack.push(&e);
     
     if(_os)
-	*_os << "PUSH " << p.elem().str() << endl;
+	*_os << "PUSH " << e.type() << " " << e.str() << endl;
 }
 
 void 
-IvExec::visit(PushSet& ps) {
+IvExec::visit(PushSet& ps)
+{
+    string name = ps.setid();
+    const Element& s = _sman.getSet(name);
+
     // set manager owns set [no need to trash]
-    _stack.push(&_sman.getSet(ps.setid()));
+    _stack.push(&s);
 
     if(_os)
-	*_os << "PUSH_SET " << ps.setid() << endl;
+	*_os << "PUSH_SET " << s.type() << " " << name
+	     << ": " << s.str() << endl;
 }
 
 void 
@@ -177,27 +191,8 @@ IvExec::visit(OnFalseExit& /* x */)
 }
 
 void 
-IvExec::visit(Regex& re) {
-    if(_stack.empty())
-	throw RuntimeError("Got empty stack on REGEX");
-
-    const Element* arg = _stack.top();
-    _stack.pop();
-
-    // XXX: regex errors
-    bool res = !regexec(&re.reg(),arg->str().c_str(),0,0,0);
-    
-    if(_os)
-	*_os << "REGEX " << re.rexp() << endl;
-	
-    ElemBool* r = new ElemBool(res);
-    // we just created element, so trash it.
-    _trash.insert(r);
-    _stack.push(r);
-}
-
-void 
-IvExec::visit(Load& l) {
+IvExec::visit(Load& l)
+{
     const Element& x = _varrw.read_trace(l.var());
 
     if(_os)
@@ -207,7 +202,8 @@ IvExec::visit(Load& l) {
 }
 
 void 
-IvExec::visit(Store& s) {
+IvExec::visit(Store& s)
+{
     if(_stack.empty())
 	throw RuntimeError("Stack empty on assign of " + s.var());
 
@@ -230,7 +226,8 @@ IvExec::visit(Store& s) {
 }
 
 void 
-IvExec::visit(Accept& /* a */) {
+IvExec::visit(Accept& /* a */)
+{
     // ok we like the route, so exit all execution
     _finished = true;
     _fa = ACCEPT;
@@ -239,7 +236,8 @@ IvExec::visit(Accept& /* a */) {
 }
     
 void 
-IvExec::visit(Reject& /* r */) {
+IvExec::visit(Reject& /* r */)
+{
     // we don't like it, get out of here.
     _finished = true;
     _fa = REJ;
@@ -249,7 +247,8 @@ IvExec::visit(Reject& /* r */) {
 }
 
 void
-IvExec::visit(NaryInstr& nary) {
+IvExec::visit(NaryInstr& nary)
+{
     unsigned size = _stack.size();
     unsigned arity = nary.op().arity();
 
@@ -286,13 +285,15 @@ IvExec::visit(NaryInstr& nary) {
 }
 
 void
-IvExec::clear_trash() {
+IvExec::clear_trash()
+{
     policy_utils::clear_container(_trash);
 }
 
 
 string
-IvExec::fa2str(const FlowAction& fa) {
+IvExec::fa2str(const FlowAction& fa)
+{
     switch(fa) {
 	case ACCEPT:
 	    return "Accept";

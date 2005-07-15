@@ -46,11 +46,11 @@ program:
 	;
 
 set:
-	  YY_SET YY_ARG YY_ARG YY_NEWLINE 
+	  YY_SET YY_ARG YY_ARG YY_ARG YY_NEWLINE 
 	  {
 	  	// XXX: doesn't delete old
-		(*_yy_sets)[$2] = _ef.create("set",$3);
-		free($2); free($3);
+		(*_yy_sets)[$3] = _ef.create($2, $4);
+		free($2); free($3); free($4);
 	  }
 	;  
 
@@ -94,15 +94,11 @@ statement:
 				_yy_instructions->push_back(new OnFalseExit());
 				}
 
-	| YY_REGEX YY_ARG	{
-				_yy_instructions->push_back(new Regex($2));
-				free($2);
-				}
-
 	| YY_LOAD YY_ARG	{
 				_yy_instructions->push_back(new Load($2));
 				free($2);
 				}
+
 	| YY_STORE YY_ARG	{
 				_yy_instructions->push_back(new Store($2));
 				free($2);
@@ -129,6 +125,7 @@ statement:
 	| YY_HEAD	{ _yy_instructions->push_back(new NaryInstr(new OpHead));}
 	| YY_CTR	{ _yy_instructions->push_back(new NaryInstr(new OpCtr));}
 	| YY_NE_INT	{ _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
+	| YY_REGEX	{ _yy_instructions->push_back(new NaryInstr(new OpRegex));}
 	;  
 
 %%

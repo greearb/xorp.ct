@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.2 2005/03/25 02:54:09 pavlin Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.3 2005/07/01 22:54:34 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -34,19 +35,17 @@ SetMap::create(const string& name)
 }
 
 void 
-SetMap::update_set(const string& name, const string& elements, 
-		   set<string>& modified)
+SetMap::update_set(const string& type, const string& name, 
+		   const string& elements, set<string>& modified)
 {
-
     // create the object, _deps will own it...
-    Element* e = _ef.create(ElemSet::id,elements.c_str());
+    Element* e = _ef.create(type ,elements.c_str());
 
     // see affected policies
-    _deps.get_deps(name,modified);
+    _deps.get_deps(name, modified);
 
     // replace with new set
-    _deps.update_object(name,e);
-
+    _deps.update_object(name, e);
 }
 
 void 

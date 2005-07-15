@@ -105,14 +105,15 @@ configuration:
 	;
 
 set:
-	  YY_SET YY_ID YY_STR YY_SEMICOLON {
-	  	string id = $2;
-		string sets = $3;
+	  YY_SET YY_STR YY_ID YY_STR YY_SEMICOLON {
+	  	string type = $2;
+	  	string id = $3;
+		string sets = $4;
 
-		free($2); free($3);
+		free($2); free($3); free($4);
 	  	
 		_yy_configuration.create_set(id);
-		_yy_configuration.update_set(id,sets);
+		_yy_configuration.update_set(type, id, sets);
 	  }
 	;  
 

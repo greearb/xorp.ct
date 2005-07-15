@@ -13,10 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.4 2005/07/09 00:32:46 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.5 2005/07/12 22:07:23 abittau Exp $"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "policy_module.h"
 #include "config.h"
+#include "libxorp/debug.h"
 #include "visitor_semantic.hh"
 #include "policy/common/elem_null.hh"
 #include <sstream>
@@ -63,6 +67,7 @@ VisitorSemantic::visit(Term& term)
 
     // go through the source block
     bool empty_source = true;
+    debug_msg("[POLICY] source size: %d\n", source.size());
     for (i = source.begin(); i != source.end(); ++i) {
         (i->second)->accept(*this);
 	empty_source = false;
@@ -206,32 +211,6 @@ const Element*
 VisitorSemantic::visit(NodeElem& node)
 {
     return &node.val();
-}
-
-const Element* 
-VisitorSemantic::visit(NodeRegex& node)
-{
-    // check arg
-    node.arg().accept(*this);
-
-    regex_t reg;
-
-    // try compiling the regex
-    if(regcomp(&reg,node.reg().c_str(),REG_EXTENDED)) {
-	regfree(&reg);
-        ostringstream err;
-
-        err << "INVALID REGEX " << node.reg() << " at line " << node.line();
-
-        throw sem_error(err.str());
-    }
-    regfree(&reg);
-
-    // just return a dummy value
-    // XXX: no dispatch, as any element may be compared to a regex.
-    Element* e = new ElemBool(true);
-    _trash.insert(e);
-    return e;
 }
 
 const Element* 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/policy_utils.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
+// $XORP: xorp/policy/common/policy_utils.hh,v 1.3 2005/07/13 21:58:40 abittau Exp $
 
 #ifndef __POLICY_COMMON_POLICY_UTILS_HH__
 #define __POLICY_COMMON_POLICY_UTILS_HH__
@@ -151,6 +151,15 @@ void read_file(const string& fname, string& out);
  * @param x the 0 terminated c-style string to count new lines in.
  */
 unsigned count_nl(const char* x);
+
+/**
+ * Match a regex.
+ *
+ * @param str input string to check.
+ * @param reg regular expression used for matching.
+ * @return true if string matches regular expression
+ */
+bool regex(const string& str, const string& reg);
 
 };
 

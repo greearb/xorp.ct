@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element_factory.hh,v 1.1 2004/09/17 13:48:58 abittau Exp $
+// $XORP: xorp/policy/common/element_factory.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_FACTORY_HH__
 #define __POLICY_COMMON_ELEMENT_FACTORY_HH__
@@ -20,13 +21,10 @@
 #include <map>
 #include <string>
 #include <sstream>
-
 #include "register_elements.hh"
 #include "element_base.hh"
 #include "elem_set.hh"
-
 #include "policy_exception.hh"
-
 
 /**
  * @short A factory for creating elements based on their type.
@@ -51,7 +49,6 @@ public:
     typedef map<string,Callback> Map;
 
     ElementFactory();
-
 
     /**
      * @short Exception thrown if an Unknown element is being created.
@@ -83,31 +80,12 @@ public:
     Element* create(const string& key, const char* arg);
 
     /**
-     * Create a set from an STL set. 
+     * Checks whether a type exists.
      *
-     * The objects contained in the set are converted to a string representation
-     * via an ostringstream.
-     *
-     * @return the requested ElemSet.
-     * @param s STL set to be converted to ElemSet.
+     * @param key the element to check for.
+     * @return true if the element can be create via the factory.
      */
-    template<class T>
-    Element* createSet(const set<T>& s) {
-	set<string> ss;
-
-	for(typename set<T>::iterator i = s.begin();
-	    i != s.end(); ++i) {
-
-	    ostringstream oss;
-	    
-	    oss << *i;
-
-	    ss.insert(oss.str());
-	}
-
-	return new ElemSet(ss);
-    }
-    
+    static bool can_create(const string& key);
 
 private:
     /**
@@ -125,7 +103,6 @@ private:
      * actually used.
      */
     static RegisterElements _regelems;
-
 };
 
 #endif // __POLICY_COMMON_ELEMENT_FACTORY_HH__

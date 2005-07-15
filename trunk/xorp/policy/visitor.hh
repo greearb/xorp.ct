@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,14 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor.hh,v 1.2 2005/03/25 02:54:10 pavlin Exp $
+// $XORP: xorp/policy/visitor.hh,v 1.3 2005/07/01 22:54:35 abittau Exp $
 
 #ifndef __POLICY_VISITOR_HH__
 #define __POLICY_VISITOR_HH__
 
 #include "policy/common/element_base.hh"
 #include <string>
-
 
 template<class T> class NodeAny;
 
@@ -29,16 +29,10 @@ class NodeElem;
 class NodeBin;
 class NodeUn;
 class NodeSet;
-
-
 class NodeAssign;
 class NodeAccept;
 class NodeReject;
-
-class NodeRegex;
-
 class NodeProto;
-
 class Term;
 class PolicyStatement;
 
@@ -61,7 +55,6 @@ public:
     virtual const Element* visit(Term&) = 0;
     virtual const Element* visit(PolicyStatement&) = 0;
     virtual const Element* visit(NodeElem&) = 0;
-    virtual const Element* visit(NodeRegex&) = 0;
     virtual const Element* visit(NodeProto&) = 0;
 };
 

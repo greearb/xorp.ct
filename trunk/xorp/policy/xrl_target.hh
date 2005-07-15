@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,14 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/xrl_target.hh,v 1.4 2005/07/09 00:32:46 abittau Exp $
+// $XORP: xorp/policy/xrl_target.hh,v 1.5 2005/07/12 00:47:52 abittau Exp $
 
 #ifndef __POLICY_XRL_TARGET_HH__
 #define __POLICY_XRL_TARGET_HH__
 
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/targets/policy_base.hh"
-
 #include "policy_target.hh"
 
 /**
@@ -83,6 +83,7 @@ public:
 
     XrlCmdError policy_0_1_update_set(
         // Input values,
+	const string&   type,
         const string&   set,
         const string&   elements);
     

@@ -13,13 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_set.hh,v 1.2 2005/03/25 02:54:15 pavlin Exp $
+// $XORP: xorp/policy/common/elem_set.hh,v 1.3 2005/07/13 21:58:40 abittau Exp $
 
 #ifndef __POLICY_COMMON_ELEM_SET_HH__
 #define __POLICY_COMMON_ELEM_SET_HH__
 
 #include "element_base.hh"
-
+#include "element.hh"
 #include <string>
 #include <set>
 
@@ -29,18 +29,21 @@
  * All sets hold a string representation of the elements. All type information
  * will be lost, as elements will all be promoted to strings.
  */
-class ElemSet : public Element {
+template <class T> 
+class ElemSetAny : public Element {
 public:
-    typedef set<string> Set;
+    typedef set<T> Set;
+    typedef typename Set::iterator iterator;
+    typedef typename Set::const_iterator const_iterator;
 
     static const char* id;
-    ElemSet(const Set& val);
+    ElemSetAny(const Set& val);
 
     /**
      * @param c_str initialize from string in the form element1,element2,...
      */
-    ElemSet(const char* c_str);
-    ElemSet();
+    ElemSetAny(const char* c_str);
+    ElemSetAny();
 
     /**
      * @return string representation of set.
@@ -48,58 +51,58 @@ public:
     string str() const;
 
     /**
-     * @param s string representation of element to insert.
+     * @param s element to insert.
      */
-    void insert(const string& s);
+    void insert(const T& s);
 
     /**
      * Insert all elements of other set.
      *
      * @param s set to insert.
      */
-    void insert(const ElemSet& s);
+    void insert(const ElemSetAny<T>& s);
 
     /**
      * Left and right sets are identical [same elements and size].
      *
      * @param rhs set to compare with
      */
-    bool operator==(const ElemSet& rhs) const;
+    bool operator==(const ElemSetAny<T>& rhs) const;
     
     /**
      * Left and right are not identical
      *
      * @param rhs set to compare with
      */
-    bool operator!=(const ElemSet& rhs) const;
+    bool operator!=(const ElemSetAny<T>& rhs) const;
 
     /**
      * All elements on left match, but right has more elments.
      *
      * @param rhs set to compare with
      */
-    bool operator<(const ElemSet& rhs) const;
+    bool operator<(const ElemSetAny<T>& rhs) const;
 
     /**
      * All elements on right match, but left has more elements.
      *
      * @param rhs set to compare with
      */
-    bool operator>(const ElemSet& rhs) const;
+    bool operator>(const ElemSetAny<T>& rhs) const;
 
     /**
      * Left is a subset of right.
      *
      * @param rhs set to compare with
      */
-    bool operator<=(const ElemSet& rhs) const;
+    bool operator<=(const ElemSetAny<T>& rhs) const;
 
     /**
      * Right is a subset of left.
      *
      * @param rhs set to compare with
      */
-    bool operator>=(const ElemSet& rhs) const;
+    bool operator>=(const ElemSetAny<T>& rhs) const;
 
     /**
      * All elements on left match, but right has more.
@@ -108,7 +111,7 @@ public:
      *
      * @param rhs element to compare with.
      */
-    bool operator<(const Element& rhs) const;
+    bool operator<(const T& rhs) const;
     
     /**
      * All elements on on right match, but left has more.
@@ -118,7 +121,7 @@ public:
      *
      * @param rhs element to compare with.
      */
-    bool operator>(const Element& rhs) const;
+    bool operator>(const T& rhs) const;
 
     /**
      * Left and right are identical.
@@ -127,7 +130,7 @@ public:
      *
      * @param rhs element to compare with.
      */
-    bool operator==(const Element& rhs) const;
+    bool operator==(const T& rhs) const;
 
     /**
      * Disjoint sets.
@@ -136,7 +139,7 @@ public:
      *
      * @param rhs element to compare with.
      */
-    bool operator!=(const Element& rhs) const;
+    bool operator!=(const T& rhs) const;
 
     /**
      * Left is a subset of right.
@@ -145,7 +148,7 @@ public:
      *
      * @param rhs element to compare with.
      */
-    bool operator<=(const Element& rhs) const;
+    bool operator<=(const T& rhs) const;
 
     /**
      * Right is a subset of left.
@@ -154,28 +157,55 @@ public:
      *
      * @param rhs element to compare with.
      */
-    bool operator>=(const Element& rhs) const;
-
-    /**
-     * @return reference to the actual set.
-     */
-    const Set& get_set() const;
+    bool operator>=(const T& rhs) const;
 
     /**
      * @return true if intersection is not empty
      */
-    bool nonempty_intersection(const ElemSet& rhs) const;
+    bool nonempty_intersection(const ElemSetAny<T>& rhs) const;
 
     /**
      * Removes elements in set.
      *
      * @param s elements to remove.
      */
-    void erase(const ElemSet& rhs); 
+    void erase(const ElemSetAny<T>& rhs);
+
+    /**
+     * Obtain iterator for set.
+     *
+     * @return iterator for the set.
+     */
+    iterator begin();
+
+    /**
+     * Obtain an iterator for the end.
+     *
+     * @return iterator for the end of the set.
+     */
+    iterator end(); 
+    
+    /**
+     * Obtain const iterator for set.
+     *
+     * @return const iterator for the set.
+     */
+    const_iterator begin() const;
+
+    /**
+     * Obtain an const iterator for the end.
+     *
+     * @return const iterator for the end of the set.
+     */
+    const_iterator end() const;
 
 private:
     Set _val;
 };
 
+// define set types
+typedef ElemSetAny<ElemU32> ElemSetU32;
+typedef ElemSetAny<ElemIPv4Net> ElemSetIPv4Net;
+typedef ElemSetAny<ElemStr> ElemSetStr;
 
 #endif // __POLICY_COMMON_ELEM_SET_HH__

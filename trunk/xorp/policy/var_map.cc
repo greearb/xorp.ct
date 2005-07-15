@@ -12,17 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.3 2005/07/01 22:54:34 abittau Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.4 2005/07/08 02:06:21 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "policy_module.h"
 #include "config.h"
-
 #include "libxorp/debug.h"
 #include "var_map.hh"
 #include "policy/common/policy_utils.hh"
+#include "policy/common/element_factory.hh"
 
 using namespace policy_utils;
 
@@ -106,6 +106,10 @@ VarMap::add_protocol_variable(const string& protocol,
     debug_msg("[POLICY] VarMap added proto: %s, var: %s, type: %s, R/W: %d\n",
 	      protocol.c_str(), varname.c_str(), type.c_str(), acc);
 
+    if (!ElementFactory::can_create(type)) {
+	throw VarMapErr("Unable to create element of type: " + type
+			+ " in proto: " + protocol + " varname: " + varname);
+    }
 
     ProtoMap::iterator iter = _protocols.find(protocol);
     VariableMap* vm;

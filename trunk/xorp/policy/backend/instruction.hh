@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instruction.hh,v 1.1 2004/09/17 13:48:55 abittau Exp $
+// $XORP: xorp/policy/backend/instruction.hh,v 1.2 2005/03/25 02:54:12 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_INSTRUCTION_HH__
 #define __POLICY_BACKEND_INSTRUCTION_HH__
@@ -22,11 +23,8 @@
 #include "policy/common/policy_exception.hh"
 #include "instr_visitor.hh"
 #include "instruction_base.hh"
-
 #include <string>
-
 #include <sys/types.h>
-#include <regex.h>
 
 /**
  * @short Push operation. Pushes a single element on the stack.
@@ -100,74 +98,6 @@ public:
     
     INSTR_VISITABLE();
 };
-
-
-/**
- * @short Instruction that matches a regular expression.
- *
- * Argument is element on top of the stack.
- *
- * 1 element popped from stack.
- *
- * Throws an exception if regular expression is invalid.
- */
-class Regex : public Instruction {
-public:
-    /**
-     * @short exception thrown if regular expression cannot be compiled.
-     */
-    class RegexErr : public PolicyException {
-    public:
-	RegexErr(const string& err) : PolicyException(err) {}
-    };
-
-    /**
-     * Compiles and initialized a regular expression
-     *
-     * @param rexp string representation of regular expression
-     */
-    Regex(const string& rexp) : _rexp(rexp) {
-        int res = regcomp(&_reg,_rexp.c_str(),REG_EXTENDED);
-	if (res) {
-	    string err = "Unable to compile regex " + rexp + ": ";
-	    char tmp[128];
-	    tmp[0] = 0;
-	    
-	    regerror(res,&_reg,tmp,sizeof(tmp)); 
-	    
-	    err += tmp;
-	    
-	    regfree(&_reg);
-	    throw RegexErr(err);
-	}
-	    
-    }
-    ~Regex() {
-	regfree(&_reg);
-    }
-
-    INSTR_VISITABLE();
-
-    /**
-     * @return string representation of regular expression
-     */
-    const string& rexp() const { return _rexp; }
-
-    /**
-     * @return regex structure used by C-library. Caller must not free.
-     */
-    regex_t& reg() { return _reg; }
-
-private:
-    string _rexp;
-    regex_t _reg;
-
-    // not impl
-    Regex(const Regex&);
-    Regex& operator=(const Regex&);
-    
-};
-
 
 /**
  * @short Instruction to read a variable via VarRW interface.

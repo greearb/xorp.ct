@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/policy/visitor_printer.hh,v 1.1 2005/07/01 22:54:35 abittau Exp $
 
 #ifndef __POLICY_VISITOR_PRINTER_HH__
 #define __POLICY_VISITOR_PRINTER_HH__
@@ -45,7 +45,6 @@ public:
     const Element* visit(Term&);
     const Element* visit(PolicyStatement&);
     const Element* visit(NodeElem&);
-    const Element* visit(NodeRegex&);
     const Element* visit(NodeProto&);
 
 private:

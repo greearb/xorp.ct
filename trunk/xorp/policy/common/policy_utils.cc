@@ -13,17 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.3 2005/03/25 02:54:16 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.4 2005/07/13 21:58:40 abittau Exp $"
 
 #include "config.h"
 #include "policy_utils.hh"
 #include <errno.h>
 #include <stdio.h>
+#include <regex.h>
 
 namespace policy_utils {
 
-
-void str_to_list(const string& in, list<string>& out) {
+void 
+str_to_list(const string& in, list<string>& out)
+{
     string::size_type pos1 = 0;	// beginning of token
     string::size_type pos2 = 0;  // end of token
     string::size_type len = in.length();
@@ -49,7 +51,9 @@ void str_to_list(const string& in, list<string>& out) {
     }
 }
 
-void str_to_set(const string& in, set<string>& out) {
+void 
+str_to_set(const string& in, set<string>& out)
+{
     list<string> tmp;
 
     // XXX: slow
@@ -63,8 +67,8 @@ void str_to_set(const string& in, set<string>& out) {
 }
 
 void
-read_file(const string& fname, string& out) {
-
+read_file(const string& fname, string& out)
+{
     char buff[4096];
     int rd;
 
@@ -103,8 +107,9 @@ read_file(const string& fname, string& out) {
     return;
 }
 
-
-unsigned count_nl(const char* x) {
+unsigned 
+count_nl(const char* x)
+{
     const char* end = &x[strlen(x)];
     unsigned nl = 0;
 
@@ -115,5 +120,32 @@ unsigned count_nl(const char* x) {
     return nl;
 }
 
+bool
+regex(const string& str, const string& reg)
+{
+    // compile the regex
+    regex_t re;
+    int res = regcomp(&re, reg.c_str(), REG_EXTENDED);
+    
+    if (res) {
+	char tmp[128];
+	string err;
+
+	regerror(res, &re, tmp, sizeof(tmp));
+	regfree(&re);
+
+	err = "Unable to compile regex (" + reg;
+	err += "): ";
+	err += tmp;
+
+	throw PolicyUtilsErr(err);
+    }
+
+    // execute the regex [XXX: check for errors!!]
+    bool result = !regexec(&re, str.c_str(), 0, 0, 0);
+    regfree(&re);
+
+    return result;
+}
 
 } // namespace

@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.4 2005/07/09 00:32:46 abittau Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.5 2005/07/12 00:47:51 abittau Exp $"
 
 #include "policy_module.h"
 #include "config.h"
@@ -160,11 +161,12 @@ XrlPolicyTarget::policy_0_1_create_set(const string&   set)
 }	
 
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_update_set(const string&   set,
+XrlPolicyTarget::policy_0_1_update_set(const string&   type,
+				       const string&   set,
 				       const string&   elements)
 {
     try {
-	_policy_target.update_set(set,elements);
+	_policy_target.update_set(type, set, elements);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("update_set: " + e.str());
     }

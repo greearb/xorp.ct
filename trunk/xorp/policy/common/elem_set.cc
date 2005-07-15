@@ -13,41 +13,51 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.2 2005/03/25 02:54:15 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.3 2005/07/13 21:58:40 abittau Exp $"
 
 #include "config.h"
 #include "elem_set.hh"
 #include "policy_utils.hh"
 #include <algorithm>
 
-const char* ElemSet::id = "set";
-
-ElemSet::ElemSet(const Set& val) : Element(id), _val(val) 
+template <class T>
+ElemSetAny<T>::ElemSetAny(const Set& val) : Element(id), _val(val) 
 {
 }
 
-ElemSet::ElemSet(const char* c_str) : Element(id) 
+template <class T>
+ElemSetAny<T>::ElemSetAny(const char* c_str) : Element(id) 
 {
     if(!c_str)
 	return;
 
-    policy_utils::str_to_set(c_str,_val);
+    // create each eleemnt in the list
+    typedef set<string> SS;
+    SS s;
+    policy_utils::str_to_set(c_str, s);
+
+    for (SS::iterator i = s.begin(); i != s.end(); ++i) {
+	const char* str = (*i).c_str();
+	_val.insert(T(str));
+    }
 }
 
-ElemSet::ElemSet() : Element(id) 
+template <class T>
+ElemSetAny<T>::ElemSetAny() : Element(id) 
 {
 }
 
+template <class T>
 string 
-ElemSet::str() const 
+ElemSetAny<T>::str() const 
 {
     string s = "";
 
     if(!_val.size())
 	return s;
 
-    for(Set::iterator i = _val.begin(); i != _val.end(); ++i) {
-	s += *i;
+    for(typename Set::iterator i = _val.begin(); i != _val.end(); ++i) {
+	s += (*i).str();
         s += ",";
     }
 
@@ -57,33 +67,37 @@ ElemSet::str() const
     return s;
 }
 
+template <class T>
 void 
-ElemSet::insert(const string& s) 
+ElemSetAny<T>::insert(const T& s) 
 {
     _val.insert(s);
 }
 
+template <class T>
 void
-ElemSet::insert(const ElemSet& s)
+ElemSetAny<T>::insert(const ElemSetAny<T>& s)
 {
-    const Set other = s.get_set();
-    _val.insert(other.begin(), other.end());
+    _val.insert(s._val.begin(), s._val.end());
 }
 
+template <class T>
 bool 
-ElemSet::operator==(const ElemSet& rhs) const 
+ElemSetAny<T>::operator==(const ElemSetAny<T>& rhs) const 
 {
     return _val == rhs._val;
 }
 
+template <class T>
 bool 
-ElemSet::operator!=(const ElemSet& rhs) const 
+ElemSetAny<T>::operator!=(const ElemSetAny<T>& rhs) const 
 {
     return !(*this == rhs);
 }
 
+template <class T>
 bool 
-ElemSet::operator<(const ElemSet& rhs) const 
+ElemSetAny<T>::operator<(const ElemSetAny<T>& rhs) const 
 {
     const Set& rset = rhs._val;
 
@@ -100,34 +114,39 @@ ElemSet::operator<(const ElemSet& rhs) const
     return tmp == _val;
 }
 
+template <class T>
 bool 
-ElemSet::operator>(const ElemSet& rhs) const 
+ElemSetAny<T>::operator>(const ElemSetAny<T>& rhs) const 
 {
     return (rhs < *this);
 }
 
+template <class T>
 bool 
-ElemSet::operator<=(const ElemSet& rhs) const 
+ElemSetAny<T>::operator<=(const ElemSetAny<T>& rhs) const 
 {
     return (*this < rhs || *this == rhs);
 }
 
+template <class T>
 bool 
-ElemSet::operator>=(const ElemSet& rhs) const 
+ElemSetAny<T>::operator>=(const ElemSetAny<T>& rhs) const 
 {
     return (*this > rhs || *this == rhs);
 }
 
+template <class T>
 bool 
-ElemSet::operator<(const Element& /* rhs */) const 
+ElemSetAny<T>::operator<(const T& /* rhs */) const 
 {
     return _val.empty();
 }
 
+template <class T>
 bool 
-ElemSet::operator>(const Element& rhs) const 
+ElemSetAny<T>::operator>(const T& rhs) const 
 {
-    Set::iterator i = _val.find(rhs.str());
+    typename Set::iterator i = _val.find(rhs);
 
     if(i == _val.end())
 	return false;
@@ -140,48 +159,47 @@ ElemSet::operator>(const Element& rhs) const
     return true;
 }
 
+template <class T>
 bool 
-ElemSet::operator==(const Element& rhs) const 
+ElemSetAny<T>::operator==(const T& rhs) const 
 {
-    if(_val.size() != 1)
+    if (_val.size() != 1)
 	return false;
 
-    if(_val.find(rhs.str()) == _val.end())
+    if (_val.find(rhs) == _val.end())
 	return false;
 
     return true;
 }
 
+template <class T>
 bool 
-ElemSet::operator!=(const Element& rhs) const 
+ElemSetAny<T>::operator!=(const T& rhs) const 
 {
-    if(_val.find(rhs.str()) == _val.end())
+    if (_val.find(rhs) == _val.end())
 	return true;
 
     return false;
 }
 
 
+template <class T>
 bool 
-ElemSet::operator<=(const Element& rhs) const 
+ElemSetAny<T>::operator<=(const T& rhs) const 
 {
     return (*this < rhs || *this == rhs);
 }
 
+template <class T>
 bool 
-ElemSet::operator>=(const Element& rhs) const 
+ElemSetAny<T>::operator>=(const T& rhs) const 
 {
     return (*this > rhs || *this == rhs);
 }
 
-const ElemSet::Set&
-ElemSet::get_set() const
-{
-    return _val;
-}
-
+template <class T>
 bool
-ElemSet::nonempty_intersection(const ElemSet& rhs) const
+ElemSetAny<T>::nonempty_intersection(const ElemSetAny<T>& rhs) const
 {
     Set tmp;
     set_intersection(_val.begin(), _val.end(),
@@ -191,16 +209,55 @@ ElemSet::nonempty_intersection(const ElemSet& rhs) const
     return tmp.size();
 }
 
+template <class T>
 void
-ElemSet::erase(const ElemSet& rhs)
+ElemSetAny<T>::erase(const ElemSetAny<T>& rhs)
 {
-    const Set& s = rhs.get_set();
-
     // go through all elements and delete ones present
-    for (Set::const_iterator i = s.begin(); i != s.end(); ++i) {
-	Set::iterator j = _val.find(*i);
+    for (typename Set::const_iterator i = rhs._val.begin(); 
+	 i != rhs._val.end(); ++i) {
+
+	typename Set::iterator j = _val.find(*i);
 
 	if (j != _val.end())
 	    _val.erase(j);
     }
 }
+
+template <class T>
+typename ElemSetAny<T>::iterator
+ElemSetAny<T>::begin()
+{
+    return _val.begin();
+}
+
+template <class T>
+typename ElemSetAny<T>::iterator
+ElemSetAny<T>::end()
+{
+    return _val.end();
+}
+
+template <class T>
+typename ElemSetAny<T>::const_iterator
+ElemSetAny<T>::begin() const
+{
+    return _val.begin();
+}
+
+template <class T>
+typename ElemSetAny<T>::const_iterator
+ElemSetAny<T>::end() const
+{
+    return _val.end();
+}
+
+// define the various sets
+template class ElemSetAny<ElemU32>;
+template <> const char* ElemSetU32::id = "set_u32";
+
+template class ElemSetAny<ElemIPv4Net>;
+template <> const char* ElemSetIPv4Net::id = "set_ipv4net";
+
+template class ElemSetAny<ElemStr>;
+template <> const char* ElemSetStr::id = "set_str";

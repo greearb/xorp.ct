@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.1 2004/09/17 13:48:58 abittau Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.2 2005/03/25 02:54:15 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -94,6 +95,9 @@ public:
 
     uint32_t val() const { return _val; }
 
+    bool operator==(const ElemU32& rhs) const { return _val == rhs._val; }
+    bool operator<(const ElemU32& rhs) const { return _val < rhs._val; }
+
 private:
     uint32_t _val;
 };
@@ -116,8 +120,10 @@ public:
     ElemStr(const string& str) : Element(id), _val(str) {}
 
     string str() const { return _val; }
-
     string val() const { return _val; }
+
+    bool operator==(const ElemStr& rhs) const { return _val == rhs._val; }
+    bool operator<(const ElemStr& rhs) const { return _val < rhs._val; }
 
 private:
     string _val;
@@ -209,6 +215,16 @@ public:
      */
     bool operator==(const ElemAny<T>& rhs) const {
 	return _val == rhs._val;
+    }
+
+    /**
+     * Invoke the < operator in the wrapped class.
+     *
+     * @return whether this is less than argument.
+     * @param rhs element to compare with.
+     */
+    bool operator<(const ElemAny<T>& rhs) const {
+	return _val < rhs._val;
     }
     
     /**
