@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,20 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.2 2005/03/25 02:54:13 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.3 2005/07/15 02:27:08 abittau Exp $"
 
 #include "config.h"
 #include "policytags.hh"
-#include "policy/common/element_factory.hh"
 #include "policy/common/elem_set.hh"
 #include "libxipc/xrl_atom.hh"
-
 #include <sstream>
 
-PolicyTags::PolicyTags() {}
+PolicyTags::PolicyTags()
+{
+}
 
-PolicyTags::PolicyTags(const XrlAtomList& alist) {
-
+PolicyTags::PolicyTags(const XrlAtomList& alist)
+{
     // go through all the atoms in the list
     for(unsigned i = 0; i < alist.size(); ++i) {
 	const XrlAtom& atom = alist.get(i);
@@ -39,7 +40,8 @@ PolicyTags::PolicyTags(const XrlAtomList& alist) {
     }
 }
 
-PolicyTags::PolicyTags(const Element& element) {
+PolicyTags::PolicyTags(const Element& element)
+{
     // we only support set elements
     const ElemSetU32* es = dynamic_cast<const ElemSetU32*>(&element);
     if(!es)
@@ -56,7 +58,8 @@ PolicyTags::PolicyTags(const Element& element) {
 }
 
 string
-PolicyTags::str() const {
+PolicyTags::str() const
+{
     ostringstream oss;
 
     for(Set::iterator i = _tags.begin(); i != _tags.end(); ++i)
@@ -74,14 +77,15 @@ PolicyTags::str() const {
 }
 
 bool
-PolicyTags::operator==(const PolicyTags& rhs) const {
+PolicyTags::operator==(const PolicyTags& rhs) const
+{
     // just check if the set of tags is equal.
     return _tags == rhs._tags;
 }
 
-
 XrlAtomList
-PolicyTags::xrl_atomlist() const {
+PolicyTags::xrl_atomlist() const
+{
     XrlAtomList alist;
 
     for(Set::iterator i = _tags.begin(); i != _tags.end(); ++i) {
@@ -94,9 +98,8 @@ PolicyTags::xrl_atomlist() const {
 }
 
 Element*
-PolicyTags::element() const {
-    ElementFactory ef;
-
+PolicyTags::element() const
+{
     ElemSetU32* s = new ElemSetU32;
     for (Set::iterator i = _tags.begin(); i != _tags.end(); ++i) {
 	ElemU32* e = new ElemU32(*i);
@@ -106,7 +109,8 @@ PolicyTags::element() const {
 }
 
 void
-PolicyTags::insert(const PolicyTags& ptags) {
+PolicyTags::insert(const PolicyTags& ptags)
+{
     // go through all the elements in ptags and insert them.
     for(Set::iterator i = ptags._tags.begin();
 	i != ptags._tags.end(); ++i)
@@ -115,7 +119,8 @@ PolicyTags::insert(const PolicyTags& ptags) {
 }
 
 bool
-PolicyTags::contains_atleast_one(const PolicyTags& tags) const {
+PolicyTags::contains_atleast_one(const PolicyTags& tags) const
+{
     Set output;
 
     // The two sets must not be dis-joint.
