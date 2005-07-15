@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.13 2005/04/20 09:44:44 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.14 2005/04/27 02:47:05 pavlin Exp $
  */
 
 
@@ -108,7 +108,6 @@
 #define PIM_HELLO_GENID_OPTION			20
 #define PIM_HELLO_GENID_LENGTH			4
 #define PIM_HELLO_ADDRESS_LIST_OPTION		24
-#define PIM_HELLO_ADDRESS_LIST_PRIVATE_OPTION	65001	/* TODO: temporary */
 
 #define PIM_HELLO_HELLO_TRIGGERED_DELAY_DEFAULT	5
 #define PIM_HELLO_HELLO_PERIOD_DEFAULT		30

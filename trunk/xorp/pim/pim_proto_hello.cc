@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.20 2005/04/20 09:44:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.21 2005/04/20 09:50:18 pavlin Exp $"
 
 
 //
@@ -188,7 +188,6 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	    break;
 
 	case PIM_HELLO_ADDRESS_LIST_OPTION:
-	case PIM_HELLO_ADDRESS_LIST_PRIVATE_OPTION:
 	    // Address List option
 	    while (option_length >= ENCODED_UNICAST_ADDR_SIZE(family())) {
 		IPvX secondary_addr(family());
