@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.5 2005/07/12 22:07:23 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.6 2005/07/15 02:27:07 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -67,7 +67,7 @@ VisitorSemantic::visit(Term& term)
 
     // go through the source block
     bool empty_source = true;
-    debug_msg("[POLICY] source size: %d\n", source.size());
+    debug_msg("[POLICY] source size: %u\n", XORP_UINT_CAST(source.size()));
     for (i = source.begin(); i != source.end(); ++i) {
         (i->second)->accept(*this);
 	empty_source = false;
