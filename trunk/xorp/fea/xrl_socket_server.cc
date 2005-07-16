@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.22 2005/04/28 02:31:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.23 2005/05/11 00:32:34 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -110,11 +110,11 @@ valid_addr_port(const AddressTableBase&	atable,
 		string&			err)
 {
     if (atable.address_valid(addr) == false) {
-	err = "Invalid Address.";
+	err = c_format("Invalid Address (%s).", addr.str().c_str());
 	return false;
     }
     if (port > 0xffff) {
-	err = "Port out of range.";
+	err = c_format("Port %u out of range.", port);
 	return false;
     }
     return true;
@@ -1290,7 +1290,8 @@ XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
-    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+    if (local_addr != IPv6::ANY() &&
+	valid_addr_port(_atable, local_addr, local_port, err) == false) {
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -1326,7 +1327,8 @@ XrlSocketServer::socket6_0_1_udp_open_and_bind(const string&	creator,
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
-    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+    if (local_addr != IPv6::ANY() &&
+	valid_addr_port(_atable, local_addr, local_port, err) == false) {
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -1359,6 +1361,10 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
 						const bool&	is_blocking,
 						string&		sockid)
 {
+    debug_msg("udp_open_bind_join(%s, %s, %u, %s, ttl=%u, reuse %d)\n",
+	      creator.c_str(), local_addr.str().c_str(), local_port,
+	      mcast_addr.str().c_str(), ttl, reuse);
+
     if (comm_ipv6_present() != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 
@@ -1384,7 +1390,9 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
-    if (comm_set_iface6(fd, pif_index) != XORP_OK) {
+    debug_msg("fd = %d\n", fd);
+    if (local_addr != IPv6::ANY() &&
+	comm_set_iface6(fd, pif_index) != XORP_OK) {
 	comm_close(fd);
 	return XrlCmdError::COMMAND_FAILED("Setting interface.");
     }
@@ -1394,6 +1402,14 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
     }
     if (comm_set_loopback(fd, 0) != XORP_OK) {
 	XLOG_WARNING("Could not turn off loopback.");
+    }
+    if (comm_set_reuseaddr(fd, true) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Setting reuse addr failed.");
+    }
+    if (comm_set_reuseport(fd, reuse) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Setting reuse addr failed.");
     }
 
     RemoteSocketOwner* rso = find_or_create_owner(creator);
@@ -1854,8 +1870,10 @@ XrlSocketServer::socket6_0_1_send_from_multicast_if(
 
     uint32_t  	old_pi;
     socklen_t 	old_pi_len = sizeof(old_pi);
-
-    getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &old_pi, &old_pi_len);
+    if (0 != getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &old_pi,
+			&old_pi_len)) {
+	XLOG_WARNING("Failed to get multicast interface.");
+    }
 
     if (0 != setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
 			&pi, sizeof(pi))) {
@@ -1865,6 +1883,8 @@ XrlSocketServer::socket6_0_1_send_from_multicast_if(
     }
 
     XrlCmdError r = socket6_0_1_send_to(sockid, group_addr, group_port, data);
+
+    // Restore old multicast interface
     setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &old_pi, sizeof(old_pi));
     return r;
 #else
