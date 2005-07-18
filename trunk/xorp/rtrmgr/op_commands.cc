@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.48 2005/07/15 06:04:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.49 2005/07/18 21:35:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -64,6 +64,8 @@ OpInstance::OpInstance(EventLoop&			eventloop,
 
     XLOG_ASSERT(_op_command.is_executable());
 
+    _op_command.add_instance(this);
+
     do {
 	if (_executable_filename.empty()) {
 	    errmsg = c_format("Empty program filename");
@@ -105,6 +107,7 @@ OpInstance::~OpInstance()
 	delete _run_command;
 	_run_command = NULL;
     }
+    _op_command.remove_instance(this);
 }
 
 void
@@ -143,7 +146,6 @@ OpInstance::done_cb(RunCommand* run_command, bool success,
 void
 OpInstance::execute_done(bool success)
 {
-    _op_command.remove_instance(this);
     _done_cb->dispatch(success, _error_msg);
     // The callback will delete us. Don't do anything more in this method.
     //    delete this;
@@ -316,9 +318,6 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 					command_arguments_str,
 					print_cb, done_cb);
     
-    _instances.insert(opinst);
-    _ocl.incr_running_op_instances_n();
-
     return opinst;
 }
 
@@ -436,12 +435,25 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 }
 
 void
+OpCommand::add_instance(OpInstance* instance)
+{
+    set<OpInstance*>::iterator iter;
+
+    iter = _instances.find(instance);
+    XLOG_ASSERT(iter == _instances.end());
+
+    _instances.insert(instance);
+    _ocl.incr_running_op_instances_n();
+}
+
+void
 OpCommand::remove_instance(OpInstance* instance)
 {
     set<OpInstance*>::iterator iter;
 
     iter = _instances.find(instance);
     XLOG_ASSERT(iter != _instances.end());
+
     _instances.erase(iter);
     _ocl.decr_running_op_instances_n();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.26 2005/07/15 06:04:40 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.27 2005/07/18 21:35:38 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -120,6 +120,7 @@ public:
 		     map<string, string>& return_matches,
 		     bool& is_executable,
 		     bool& can_pipe) const;
+    void add_instance(OpInstance* instance);
     void remove_instance(OpInstance* instance);
 
 private:
