@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/tools/send_cli_processor_xrl.cc,v 1.5 2004/12/09 07:54:34 pavlin Exp $"
+#ident "$XORP: xorp/cli/tools/send_cli_processor_xrl.cc,v 1.6 2005/03/25 02:52:58 pavlin Exp $"
 
 #include "pim/pim_module.h"
 #include "libxorp/xorp.h"
@@ -43,7 +43,8 @@ recv_process_command_output(const XrlError& xrl_error,
 			    const string* cli_term_name,
 			    const uint32_t* cli_session_id,
 			    const string* command_output,
-			    bool* done_flag);
+			    bool* done_flag,
+			    bool* success_flag);
 
 /**
  * usage:
@@ -101,7 +102,8 @@ send_process_command(XrlRouter* xrl_router,
 		     uint32_t cli_session_id,
 		     const string& command_name,
 		     const string& command_args,
-		     bool* done_flag)
+		     bool* done_flag,
+		     bool* success_flag)
 {
     XrlCliProcessorV0p1Client _xrl_cli_processor_client(xrl_router);
 
@@ -115,7 +117,7 @@ send_process_command(XrlRouter* xrl_router,
 	cli_session_id,
 	command_name,
 	command_args,
-	callback(&recv_process_command_output, done_flag));
+	callback(&recv_process_command_output, done_flag, success_flag));
 }
 
 //
@@ -127,15 +129,18 @@ recv_process_command_output(const XrlError& xrl_error,
 			    const string* cli_term_name,
 			    const uint32_t* cli_session_id,
 			    const string* command_output,
-			    bool* done_flag)
+			    bool* done_flag,
+			    bool* success_flag)
 {
     *done_flag = true;
 
     if (xrl_error != XrlError::OKAY()) {
+	*success_flag = false;
 	fprintf(stderr, "Error: %s\n", xrl_error.str().c_str());
         return;
     }
 
+    *success_flag = true;
     fprintf(stdout, "%s", command_output->c_str());
 
     UNUSED(processor_name);
@@ -143,18 +148,20 @@ recv_process_command_output(const XrlError& xrl_error,
     UNUSED(cli_session_id);
 }
 
-static void
-send_cli_processor_xrl_main(const char* finder_hostname, uint16_t finder_port,
+static int
+send_cli_processor_xrl_main(const string& finder_hostname,
+			    uint16_t finder_port,
 			    const string& target,
 			    const string& command_name,
 			    const string& command_args)
 {
     bool done_flag = false;
+    bool success_flag = false;
 
     EventLoop eventloop;
 
     XrlStdRouter xrl_std_router(eventloop, STD_ROUTER_NAME,
-				finder_hostname, finder_port);
+				finder_hostname.c_str(), finder_port);
     xrl_std_router.finalize();
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router);
 
@@ -166,11 +173,17 @@ send_cli_processor_xrl_main(const char* finder_hostname, uint16_t finder_port,
 			 0,			// cli_session_id,
 			 command_name,
 			 command_args,
-			 &done_flag);
+			 &done_flag,
+			 &success_flag);
 
     while (xrl_std_router.pending() || !done_flag) {
 	eventloop.run();
     }
+
+    if (success_flag)
+	return (XORP_OK);
+    else
+	return (XORP_ERROR);
 }
 
 int
@@ -182,6 +195,7 @@ main(int argc, char* const argv[])
     string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
     uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
     string arguments, command, target;
+    int ret_value;
 
     //
     // Initialize and start xlog
@@ -250,10 +264,11 @@ main(int argc, char* const argv[])
     }
 
     try {
-	send_cli_processor_xrl_main(finder_hostname.c_str(), finder_port,
-				    target, command, arguments);
+	ret_value = send_cli_processor_xrl_main(finder_hostname, finder_port,
+						target, command, arguments);
     } catch(...) {
 	xorp_catch_standard_exceptions();
+	ret_value = XORP_ERROR;
     }
 
     //
@@ -261,6 +276,9 @@ main(int argc, char* const argv[])
     //
     xlog_stop();
     xlog_exit();
+
+    if (ret_value != XORP_OK)
+	exit(1);
 
     exit (0);
 }
