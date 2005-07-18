@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.47 2005/06/18 01:17:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.48 2005/07/15 06:04:40 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,7 +29,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-#include "libxorp/popen.hh"
+#include "libxorp/run_command.hh"
 
 #include "cli.hh"
 #include "op_commands.hh"
@@ -46,176 +46,107 @@ extern void parse_opcmd() throw (ParseError);
 extern int opcmderror(const char *s);
 
 OpInstance::OpInstance(EventLoop&			eventloop,
+		       OpCommand&			op_command,
 		       const string&			executable_filename,
 		       const string&			command_arguments,
 		       RouterCLI::OpModePrintCallback	print_cb,
-		       RouterCLI::OpModeDoneCallback	done_cb,
-		       OpCommand*			op_command)
-    : _executable_filename(executable_filename),
-      _command_arguments(command_arguments),
+		       RouterCLI::OpModeDoneCallback	done_cb)
+    : _eventloop(eventloop),
       _op_command(op_command),
-      _stdout_file_reader(NULL),
-      _stderr_file_reader(NULL),
-      _stdout_stream(NULL),
-      _stderr_stream(NULL),
-      _pid(0),
-      _is_error(false),
-      _last_offset(0),
-      _print_callback(print_cb),
-      _done_callback(done_cb)
+      _executable_filename(executable_filename),
+      _command_arguments(command_arguments),
+      _run_command(NULL),
+      _print_cb(print_cb),
+      _done_cb(done_cb)
 {
-    XLOG_ASSERT(op_command->is_executable());
+    string errmsg;
+    bool success = true;
 
-    memset(_stdout_buffer, 0, OP_BUF_SIZE);
-    memset(_stderr_buffer, 0, OP_BUF_SIZE);
+    XLOG_ASSERT(_op_command.is_executable());
 
-    string execute = executable_filename + " " + command_arguments;
+    do {
+	if (_executable_filename.empty()) {
+	    errmsg = c_format("Empty program filename");
+	    success = false;
+	    break;
+	}
 
-    _pid = popen2(execute, _stdout_stream, _stderr_stream);
-    if (_stdout_stream == NULL) {
-	done_cb->dispatch(false, "Failed to execute command");
-    }
+	string program_request = _executable_filename;
+	if (! _command_arguments.empty())
+	    program_request = program_request + " " + _command_arguments;
 
-    _stdout_file_reader = new AsyncFileReader(eventloop,
-					      fileno(_stdout_stream));
-    _stdout_file_reader->add_buffer(_stdout_buffer, OP_BUF_SIZE,
-				    callback(this, &OpInstance::append_data));
-    if (! _stdout_file_reader->start()) {
-	done_cb->dispatch(false, "Failed to execute command");
-    }
+	// Run the program
+	XLOG_ASSERT(_run_command == NULL);
+	_run_command = new RunCommand(
+	    _eventloop,
+	    _executable_filename,
+	    _command_arguments,
+	    callback(this, &OpInstance::stdout_cb),
+	    callback(this, &OpInstance::stderr_cb),
+	    callback(this, &OpInstance::done_cb));
+	if (_run_command->execute() != XORP_OK) {
+	    delete _run_command;
+	    _run_command = NULL;
+	    errmsg = c_format("Could not execute program %s",
+			      program_request.c_str());
+	    success = false;
+	    break;
+	}
+	break;
+    } while (false);
 
-    _stderr_file_reader = new AsyncFileReader(eventloop,
-					      fileno(_stderr_stream));
-    _stderr_file_reader->add_buffer(_stderr_buffer, OP_BUF_SIZE,
-				    callback(this, &OpInstance::append_data));
-    if (! _stderr_file_reader->start()) {
-	done_cb->dispatch(false, "Failed to execute command");
-    }
+    if (! success)
+	_done_cb->dispatch(false, errmsg);
 }
 
 OpInstance::~OpInstance()
 {
-    terminate();
-}
-
-void
-OpInstance::append_data(AsyncFileOperator::Event event,
-			const uint8_t* buffer,
-			size_t /* buffer_bytes */,
-			size_t offset)
-{
-    if (buffer == _stderr_buffer) {
-	if (_is_error == false) {
-	    // We hadn't previously seen any error output
-	    if (event == AsyncFileOperator::END_OF_FILE) {
-		// We just got EOF on stderr - ignore this and wait for
-		// EOF on stdout
-		return;
-	    }
-	    _is_error = true;
-	    // Reset for reading error response
-	    _error_msg = "";
-	    _last_offset = 0;
-	}
-    } else {
-	if (_is_error == true) {
-	    // Discard further output
-	    return;
-	}
-    }
-
-    if ((event == AsyncFileOperator::DATA)
-	|| (event == AsyncFileOperator::END_OF_FILE)) {
-	XLOG_ASSERT(offset >= _last_offset);
-	if (offset == _last_offset) {
-	    XLOG_ASSERT(event == AsyncFileOperator::END_OF_FILE);
-	    done(!_is_error);
-	    return;
-	}
-
-	if (offset != _last_offset) {
-	    const char* p   = (const char*)buffer + _last_offset;
-	    size_t 	len = offset - _last_offset;
-	    debug_msg("len = %u\n", XORP_UINT_CAST(len));
-	    if (!_is_error) {
-		_print_callback->dispatch(string(p, len));
-	    } else {
-		_error_msg.append(p, p + len);
-	    }
-	    _last_offset = offset;
-	}
-
-	if (event == AsyncFileOperator::END_OF_FILE) {
-	    done(!_is_error);
-	    return;
-	}
-
-	if (offset == OP_BUF_SIZE) {
-	    // The buffer is exhausted
-	    _last_offset = 0;
-	    if (_is_error) {
-		memset(_stderr_buffer, 0, OP_BUF_SIZE);
-		_stderr_file_reader->add_buffer(_stderr_buffer, OP_BUF_SIZE,
-				callback(this, &OpInstance::append_data));
-		_stderr_file_reader->start();
-	    } else {
-		memset(_stdout_buffer, 0, OP_BUF_SIZE);
-		_stdout_file_reader->add_buffer(_stdout_buffer, OP_BUF_SIZE,
-				callback(this, &OpInstance::append_data));
-		_stdout_file_reader->start();
-	    }
-	}
-    } else {
-	// Something bad happened
-	// XXX ideally we'd figure out what.
-	_error_msg += "\nsomething bad happened\n";
-	done(false);
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
     }
 }
 
 void
-OpInstance::done(bool success)
+OpInstance::stdout_cb(RunCommand* run_command, const string& output)
 {
-    _op_command->remove_instance(this);
-    _done_callback->dispatch(success, _error_msg);
+    XLOG_ASSERT(run_command == _run_command);
+    // XXX: don't accumulate the output, but print it immediately
+    _print_cb->dispatch(output);
+}
+
+void
+OpInstance::stderr_cb(RunCommand* run_command, const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    // XXX: accumulate the error message and print it later
+    _error_msg += output;
+}
+
+void
+OpInstance::done_cb(RunCommand* run_command, bool success,
+		    const string& error_msg)
+{
+    XLOG_ASSERT(run_command == _run_command);
+
+    if (! success)
+	_error_msg += error_msg;
+
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+
+    execute_done(success);
+}
+
+void
+OpInstance::execute_done(bool success)
+{
+    _op_command.remove_instance(this);
+    _done_cb->dispatch(success, _error_msg);
     // The callback will delete us. Don't do anything more in this method.
     //    delete this;
-}
-
-bool
-OpInstance::operator<(const OpInstance& them) const
-{
-    // Completely arbitrary but unique sorting order
-    if (_stdout_file_reader < them._stdout_file_reader)
-	return true;
-    else
-	return false;
-}
-
-void
-OpInstance::terminate()
-{
-    // Kill the process group
-    if (0 != _pid)
-	killpg(_pid, SIGTERM);
-
-    if (_stdout_file_reader != NULL) {
-	delete _stdout_file_reader;
-	_stdout_file_reader = NULL;
-    }
-    if (_stderr_file_reader != NULL) {
-	delete _stderr_file_reader;
-	_stderr_file_reader = NULL;
-    }
-    if (_stdout_stream != NULL) {
-	pclose2(_stdout_stream);
-	_stdout_stream = NULL;
-    }
-    //
-    // XXX: don't call pclose2(_stderr_stream), because pclose2(_stdout_stream)
-    // automatically takes care of the _stderr_stream as well.
-    //
-    _stderr_stream = NULL;
 }
 
 OpCommand::OpCommand(OpCommandList& ocl, const list<string>& command_parts)
@@ -380,10 +311,10 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 	command_arguments_str += resolved_str;
     }
 
-    OpInstance *opinst = new OpInstance(eventloop,
+    OpInstance *opinst = new OpInstance(eventloop, *this,
 					_command_executable_filename,
 					command_arguments_str,
-					print_cb, done_cb, this);
+					print_cb, done_cb);
     
     _instances.insert(opinst);
     _ocl.incr_running_op_instances_n();

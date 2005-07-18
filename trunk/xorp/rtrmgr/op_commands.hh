@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.25 2005/06/18 01:17:24 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.26 2005/07/15 06:04:40 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -29,48 +29,40 @@
 
 class ConfigTree;
 class OpCommand;
+class RunCommand;
 class TemplateTree;
 class SlaveModuleManager;
 
 class OpInstance {
 public:
     OpInstance(EventLoop&			eventloop,
+	       OpCommand&			op_command,
 	       const string&			executable_filename,
 	       const string&			command_arguments,
 	       RouterCLI::OpModePrintCallback	print_cb,
-	       RouterCLI::OpModeDoneCallback	done_cb,
-	       OpCommand*			op_command);
-    OpInstance(const OpInstance& orig);
+	       RouterCLI::OpModeDoneCallback	done_cb);
     ~OpInstance();
 
-    void append_data(AsyncFileOperator::Event event, const uint8_t* buffer,
-		     size_t buffer_bytes, size_t offset);
-    void done(bool success);
-    bool operator<(const OpInstance& them) const;
-
-    /**
-     * Terminate this command
-     */
-    void terminate();
-
 private:
-    static const size_t OP_BUF_SIZE = 8192;
+    OpInstance(const OpInstance&);		// Not implemented
+    OpInstance& operator=(const OpInstance&);	// Not implemented
 
+    void stdout_cb(RunCommand* run_command, const string& output);
+    void stderr_cb(RunCommand* run_command, const string& output);
+    void done_cb(RunCommand* run_command, bool success,
+		 const string& error_msg);
+    void execute_done(bool success);
+
+    EventLoop&		_eventloop;
+    OpCommand&		_op_command;
     string		_executable_filename;
     string		_command_arguments;
-    OpCommand*		_op_command;
-    AsyncFileReader*	_stdout_file_reader;
-    AsyncFileReader*	_stderr_file_reader;
-    FILE*		_stdout_stream;
-    FILE*		_stderr_stream;
-    uint8_t		_stdout_buffer[OP_BUF_SIZE];
-    uint8_t		_stderr_buffer[OP_BUF_SIZE];
-    pid_t		_pid;
-    bool		_is_error;
+
+    RunCommand*		_run_command;
     string		_error_msg;
-    size_t		_last_offset;
-    RouterCLI::OpModePrintCallback _print_callback;
-    RouterCLI::OpModeDoneCallback _done_callback;
+
+    RouterCLI::OpModePrintCallback	_print_cb;
+    RouterCLI::OpModeDoneCallback	_done_cb;
 };
 
 class OpCommand {
