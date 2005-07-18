@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.31 2005/06/17 21:15:13 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.32 2005/07/08 16:42:35 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -96,7 +96,7 @@ public:
     ProgramStatusValidation(const string& module_name,
 			    const ProgramAction& program_action,
 			    TaskManager& taskmgr);
-    virtual ~ProgramStatusValidation() {}
+    virtual ~ProgramStatusValidation();
 
     void validate(RunCommand::ExecId exec_id, CallBack cb);
 
@@ -249,7 +249,7 @@ public:
     ProgramStartup(const string& module_name,
 		   const ProgramAction& program_action,
 		   TaskManager& taskmgr);
-    virtual ~ProgramStartup() {}
+    virtual ~ProgramStartup();
 
     void startup(const RunCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
@@ -308,7 +308,7 @@ public:
     ProgramShutdown(const string& module_name,
 		    const ProgramAction& program_action,
 		    TaskManager& taskmgr);
-    virtual ~ProgramShutdown() {}
+    virtual ~ProgramShutdown();
 
     void shutdown(const RunCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;

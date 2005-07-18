@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.51 2005/07/08 16:42:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.52 2005/07/14 00:08:30 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -238,6 +238,14 @@ ProgramStatusValidation::ProgramStatusValidation(
       _task_manager(taskmgr),
       _run_command(NULL)
 {
+}
+
+ProgramStatusValidation::~ProgramStatusValidation()
+{
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
 }
 
 EventLoop&
@@ -830,6 +838,14 @@ ProgramStartup::ProgramStartup(const string& module_name,
 {
 }
 
+ProgramStartup::~ProgramStartup()
+{
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
+}
+
 EventLoop&
 ProgramStartup::eventloop() const
 {
@@ -1109,8 +1125,17 @@ ProgramShutdown::ProgramShutdown(const string& module_name,
 				 TaskManager& taskmgr)
     : Shutdown(module_name, taskmgr.verbose()),
       _program_action(program_action),
-      _task_manager(taskmgr)
+      _task_manager(taskmgr),
+      _run_command(NULL)
 {
+}
+
+ProgramShutdown::~ProgramShutdown()
+{
+    if (_run_command != NULL) {
+	delete _run_command;
+	_run_command = NULL;
+    }
 }
 
 EventLoop&
