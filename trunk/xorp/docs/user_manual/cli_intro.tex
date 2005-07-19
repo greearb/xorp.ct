@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.4 2005/04/07 03:04:15 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -42,6 +42,10 @@ the \rtrmgr cannot write files in /tmp that \xorpsh can read, then
 Multiple users can run \xorpsh simultaneously.  There is some degree of
 configuration locking to prevent simultaneous changes to the router
 configuration, but currently this is fairly primitive.
+
+To facilitate automated \xorp router configuration, it is possible to use
+\xorpsh in non-interactive mode (\eg as part of a shell script).
+This is described in details in Section~\ref{xorpsh:non-interactive-mode}.
 
 \newpage
 \section{Basic Commands}
@@ -677,6 +681,69 @@ Xorp>
 \vspace{0.1in}
 
 
+\section{Running xorpsh in Non-Interactive Mode}
+\label{xorpsh:non-interactive-mode}
 
+Typically \xorpsh would be used as an interactive command shell.
+However, it is possible to use \xorpsh in non-interactive mode
+(\eg as part of a shell script). This could be useful for automated
+XORP router configuration such as adding new network interfaces
+to the XORP configuration for new PPP dial-up clients.
 
+The following non-interactive modes are supported:
+
+\begin{itemize}
+
+  \item Running \xorpsh as part of UNIX command-line pipes:
+
+\begin{verbatim}
+echo "show host os" | ./xorpsh
+cat filename | ./xorpsh
+./xorpsh < filename
+\end{verbatim}
+
+  \item Running \xorpsh as part of a shell script:
+
+\begin{verbatim}
+#!/bin/sh
+
+./xorpsh <<!
+show host os
+!
+\end{verbatim}
+
+  \item Running commands that are supplied by the ``-c'' \xorpsh
+   command-line option:
+
+\begin{verbatim}
+./xorpsh -c "show host os"
+\end{verbatim}
+
+  \item Running \xorpsh as part of an ``expect'' script:
+
+\begin{verbatim}
+#!/usr/bin/env python
+import time
+import sys
+import pexpect
+
+child=pexpect.spawn ('./xorpsh')
+child.expect('Xorp> ')
+child.sendline('show host os | no-more')
+child.sendeof()
+while 1:
+        line = child.readline()
+        if not line:
+                break
+        print line,
+child.close()
+\end{verbatim}
+
+Note that if \xorpsh is run in non-interactive more as part of an ``expect''
+script where there is a TTY associated with the \xorpsh process, then
+\xorpsh may use the internal pager if the output from a command is very long.
+In that case, it is advisable that the internal pager is explicitly disabled
+by using the ``no-more'' pipe as in the above example.
+
+\end{itemize}
 
