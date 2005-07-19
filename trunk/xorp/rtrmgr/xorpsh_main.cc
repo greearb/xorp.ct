@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.43 2005/07/15 06:33:22 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.44 2005/07/15 06:39:08 pavlin Exp $"
 
 
 #include <sys/types.h>
@@ -336,7 +336,7 @@ XorpShell::run(const string& commands)
 bool
 XorpShell::done() const
 {
-    return (_xrl_generic_done && _ocl->done());
+    return (_xrl_generic_done && _ocl->done() && _router_cli->done());
 }
 
 void

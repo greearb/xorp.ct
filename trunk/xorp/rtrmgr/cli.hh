@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.30 2005/07/15 06:33:22 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.31 2005/07/19 07:08:18 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -54,6 +54,7 @@ public:
 	      int cli_client_output_fd, bool verbose) throw (InitError);
     ~RouterCLI();
 
+    bool done() const;
     bool is_config_mode() const;
     void commit_done_by_user(int uid);
     void clear_command_set();
