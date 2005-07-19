@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.27 2005/07/18 21:35:38 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.28 2005/07/18 22:29:17 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -117,9 +117,7 @@ public:
     bool command_match(const list<string>& path_parts,
 		       SlaveConfigTree* sct, bool exact_match) const;
     void get_matches(size_t wordnum, SlaveConfigTree* sct,
-		     map<string, string>& return_matches,
-		     bool& is_executable,
-		     bool& can_pipe) const;
+		     map<string, CliCommandMatch>& return_matches) const;
     void add_instance(OpInstance* instance);
     void remove_instance(OpInstance* instance);
 
@@ -159,9 +157,7 @@ public:
 			RouterCLI::OpModePrintCallback print_cb,
 			RouterCLI::OpModeDoneCallback done_cb) const;
     map<string, string> top_level_commands() const;
-    map<string, string> childlist(const string& path,
-				  bool& is_executable,
-				  bool& can_pipe) const;
+    map<string, CliCommandMatch> childlist(const string& path) const;
 
 private:
     list<OpCommand*>	_op_commands;

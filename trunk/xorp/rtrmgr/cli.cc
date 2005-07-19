@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.70 2005/07/15 06:33:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.71 2005/07/18 21:35:37 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -541,11 +541,14 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
     // com1->set_can_pipe(true);
 }
 
-map<string, string> 
-RouterCLI::op_mode_help(const string& path, bool& is_executable,
-			bool& can_pipe) const
+map<string, CliCommandMatch> 
+RouterCLI::op_mode_help(const string& path) const
 {
-    map<string, string> children;
+    string command_name;
+    string help_string;
+    bool is_executable = false;
+    bool can_pipe = false;
+    map<string, CliCommandMatch> children;
     string trimmed_path;
 
     XLOG_ASSERT(path.substr(0, 4) == "help");
@@ -557,22 +560,36 @@ RouterCLI::op_mode_help(const string& path, bool& is_executable,
     }
 
     if (trimmed_path == "") {
-	// Add the static commands:
-	children["configure"] = get_help_o("configure");
-	children["quit"] = get_help_o("quit");
-	children["help"] = get_help_o("help");
+	// Add the static commands
+	string commands[] = { "configure", "quit", "help" };
+	is_executable = true;
+	can_pipe = false;
+	size_t i;
+	for (i = 0; i < sizeof(commands)/sizeof(commands[0]); i++) {
+	    command_name = commands[i];
+	    help_string = get_help_o(command_name);
+	    CliCommandMatch ccm(command_name, help_string, is_executable,
+				can_pipe);
+	    children.insert(make_pair(command_name, ccm));
+	}
 	map<string, string> cmds = op_cmd_list()->top_level_commands();
 	map<string, string>::const_iterator iter;
 	for (iter = cmds.begin(); iter != cmds.end(); ++iter) {
-	    children[iter->first] = c_format("Give help on the \"%s\" command",
-					     iter->first.c_str());
+	    command_name = iter->first;
+	    help_string = c_format("Give help on the \"%s\" command",
+				   command_name.c_str());
+	    CliCommandMatch ccm(command_name, help_string, is_executable,
+				can_pipe);
+	    children.insert(make_pair(command_name, ccm));
 	}
-	is_executable = true;
-	can_pipe = false;
     } else if (trimmed_path == "configure") {
 	is_executable = true;
 	can_pipe = false;
-	children["exclusive"] = get_help_o("configure exclusive");
+	command_name = "exclusive";
+	help_string = get_help_o(trimmed_path + " " + command_name);
+	CliCommandMatch ccm(command_name, help_string, is_executable,
+			    can_pipe);
+	children.insert(make_pair(command_name, ccm));
     } else if (trimmed_path == "configure exclusive") {
 	is_executable = true;
 	can_pipe = false;
@@ -583,8 +600,7 @@ RouterCLI::op_mode_help(const string& path, bool& is_executable,
 	is_executable = true;
 	can_pipe = true;
     } else {
-	children = op_cmd_list()->childlist(trimmed_path, is_executable,
-					    can_pipe);
+	children = op_cmd_list()->childlist(trimmed_path);
     }
 
     return children;
@@ -787,12 +803,14 @@ RouterCLI::add_static_configure_mode_commands()
     com1->set_can_pipe(false);
 }
 
-map<string, string>
-RouterCLI::configure_mode_help(const string& path,
-			       bool& is_executable,
-			       bool& can_pipe) const
+map<string, CliCommandMatch>
+RouterCLI::configure_mode_help(const string& path) const
 {
-    map<string, string> children;
+    string command_name;
+    string help_string;
+    bool is_executable = false;
+    bool can_pipe = false;
+    map<string, CliCommandMatch> children;
     string trimmed_path;
 
     XLOG_ASSERT(path.substr(0, 4) == "help");
@@ -805,33 +823,37 @@ RouterCLI::configure_mode_help(const string& path,
 
     if (trimmed_path == "") {
 	// Add the static commands:
-	children["commit"] = get_help_c("commit");
-	children["create"] = get_help_c("create");
-	children["delete"] = get_help_c("delete");
-	children["edit"] = get_help_c("edit");
-	children["exit"] = get_help_c("exit");
-	children["help"] = get_help_c("help");
-	children["load"] = get_help_c("load");
-	children["quit"] = get_help_c("quit");
-	children["run"] = get_help_c("run");
-	children["save"] = get_help_c("save");
-	children["set"] = get_help_c("set");
-	children["show"] = get_help_c("show");
-	children["top"] = get_help_c("top");
-	children["up"] = get_help_c("up");
+	string commands[] = { "commit", "create", "delete", "edit", "exit",
+			      "help", "load", "quit", "run", "save", "set",
+			      "show", "top", "up" };
+	is_executable = true;
+	can_pipe = false;
+	size_t i;
+	for (i = 0; i < sizeof(commands)/sizeof(commands[0]); i++) {
+	    command_name = commands[i];
+	    help_string = get_help_c(command_name);
+	    CliCommandMatch ccm(command_name, help_string, is_executable,
+				can_pipe);
+	    children.insert(make_pair(command_name, ccm));
+	}
 
 	//
 	// TODO: need to insert the commands that come from the template
 	// tree here.
 	//
 
-	is_executable = true;
-	can_pipe = false;
     } else if (trimmed_path == "exit") {
-	children["configuration-mode"] = get_help_c("exit configuration-mode");
-	children["discard"] = get_help_c("exit discard");
+	string commands[] = { "configuration-mode", "discard" };
 	is_executable = true;
 	can_pipe = false;
+	size_t i;
+	for (i = 0; i < sizeof(commands)/sizeof(commands[0]); i++) {
+	    command_name = commands[i];
+	    help_string = get_help_c(trimmed_path + " " + command_name);
+	    CliCommandMatch ccm(command_name, help_string, is_executable,
+				can_pipe);
+	    children.insert(make_pair(command_name, ccm));
+	}
     } else {
 	// Make the help for static commands executable
 	map<string,string>::const_iterator i;
@@ -2318,12 +2340,14 @@ RouterCLI::text_entry_func(const string& ,
     return (XORP_ERROR);
 }
 
-map<string, string> 
-RouterCLI::text_entry_children_func(const string& path,
-				    bool& is_executable,
-				    bool& can_pipe) const
+map<string, CliCommandMatch> 
+RouterCLI::text_entry_children_func(const string& path) const
 {
-    map <string, string> children;
+    string command_name;
+    string help_string;
+    bool is_executable = false;
+    bool can_pipe = false;
+    map<string, CliCommandMatch> children;
     list<string> path_segments;
 
     XLOG_TRACE(_verbose, "text_entry_children_func: %s\n", path.c_str());
@@ -2349,19 +2373,24 @@ RouterCLI::text_entry_children_func(const string& path,
 	    // XXX: ignore deprecated subtrees
 	    if ((*tti)->is_deprecated())
 		continue;
-	    string help;
-	    help = (*tti)->help();
+	    help_string = (*tti)->help();
 	    string subpath;
-	    if (help == "") {
-		help = "-- no help available --";
+	    if (help_string == "") {
+		help_string = "-- no help available --";
 	    }
 	    if ((*tti)->segname() == "@") {
 #if 0
 		string typestr = "<" + (*tti)->typestr() + ">";
-		children[typestr] = help;
+		command_name = typestr;
+		CliCommandMatch ccm(command_name, help_string, is_executable,
+				    can_pipe);
+		children.insert(make_pair(command_name, ccm));
 #endif // 0
 	    } else {
-		children[(*tti)->segname()] = help;
+		command_name = (*tti)->segname();
+		CliCommandMatch ccm(command_name, help_string, is_executable,
+				    can_pipe);
+		children.insert(make_pair(command_name, ccm));
 	    }
 	}
 #if 0
@@ -2371,7 +2400,11 @@ RouterCLI::text_entry_children_func(const string& path,
 	}
 #endif // 0
 	if (!ttn->is_tag() && !ttn->children().empty()) {
-	    children["{"] = "enter text on multiple lines";
+	    help_string = "enter text on multiple lines";
+	    command_name = "{";
+	    CliCommandMatch ccm(command_name, help_string, is_executable,
+				can_pipe);
+	    children.insert(make_pair(command_name, ccm));
 	}
     }
 

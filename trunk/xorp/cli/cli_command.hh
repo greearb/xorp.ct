@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.11 2004/07/26 03:46:10 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.12 2005/03/25 02:52:56 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -41,6 +41,7 @@
 //
 class CliCommand;
 class CliClient;
+class CliCommandMatch;
 
 //
 // The callback to print-out the return result from a processing function
@@ -61,10 +62,8 @@ typedef XorpCallback5<void,	/* return_value */
     const vector<string>&	/* command_args */
 >::RefPtr CLI_INTERRUPT_CALLBACK;
 
-typedef XorpCallback3<map<string, string>, /* return value */
-    const string& ,		/* global_name */
-    bool& ,			/* can_be_run */
-    bool&			/* can_pipe */
+typedef XorpCallback1<map<string, CliCommandMatch>, /* return value */
+    const string&		/* global_name */
 >::RefPtr DYNAMIC_CHILDREN_CALLBACK;
 
 //
@@ -421,6 +420,25 @@ private:
     CliCommand		*_cli_command_pipe;	// The "|" pipe command
 };
 
+class CliCommandMatch {
+public:
+    CliCommandMatch(const string& command_name, const string& help_string,
+		    bool is_executable, bool can_pipe)
+	: _command_name(command_name), _help_string(help_string),
+	  _is_executable(is_executable), _can_pipe(can_pipe)
+    {}
+
+    const string& command_name() const { return (_command_name); }
+    const string& help_string() const { return (_help_string); }
+    bool is_executable() const { return (_is_executable); }
+    bool can_pipe() const { return (_can_pipe); }
+
+private:
+    string	_command_name;
+    string	_help_string;
+    bool	_is_executable;
+    bool	_can_pipe;
+};
 
 //
 // Global variables

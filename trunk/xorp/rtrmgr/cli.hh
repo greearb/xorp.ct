@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.29 2005/07/08 20:51:16 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.30 2005/07/15 06:33:22 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -92,9 +92,8 @@ public:
 		  uint32_t ,
 		  const string& command_global_name,
 		  const vector<string>& argv);
-    map<string, string> text_entry_children_func(const string& path,
-						 bool& is_executable,
-						 bool& can_pipe) const;
+    map<string, CliCommandMatch> text_entry_children_func(
+	const string& path) const;
     int text_entry_func(const string& ,
 			const string& ,
 			uint32_t ,
@@ -148,12 +147,8 @@ public:
     void load_communicated(const XrlError& e);
     void load_done(bool success, string errmsg);
 
-    map<string, string> op_mode_help(const string& path,
-				     bool& is_executable,
-				     bool& can_pipe) const;
-    map<string, string> configure_mode_help(const string& path,
-					    bool& is_executable,
-					    bool& can_pipe) const;
+    map<string, CliCommandMatch> op_mode_help(const string& path) const;
+    map<string, CliCommandMatch> configure_mode_help(const string& path) const;
 
     typedef XorpCallback1<void, const string&>::RefPtr OpModePrintCallback;
     typedef XorpCallback2<void, bool,const string&>::RefPtr OpModeDoneCallback;

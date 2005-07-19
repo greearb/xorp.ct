@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.13 2005/03/25 02:52:56 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.14 2005/04/30 21:58:29 pavlin Exp $"
 
 
 //
@@ -768,32 +768,29 @@ CliCommand::child_command_list()
 
 	// Add dynamic children
 	XLOG_ASSERT(global_name().size() > 0);
-	bool can_be_run = false;
-	bool can_pipe = false;
-	map<string, string> dynamic_children;
-	dynamic_children = _dynamic_children_callback->dispatch(global_name(),
-								can_be_run,
-								can_pipe);
-	if (can_be_run) {
-	    if (_cli_process_callback.is_empty())
-		_cli_process_callback = _dynamic_process_callback;
-	    if (_cli_interrupt_callback.is_empty())
-		_cli_interrupt_callback = _dynamic_interrupt_callback;
-	}
-	map<string, string>::iterator iter;
+	map<string, CliCommandMatch> dynamic_children;
+	map<string, CliCommandMatch>::iterator iter;
+	dynamic_children = _dynamic_children_callback->dispatch(global_name());
 	CliCommand *new_cmd;
 	for (iter = dynamic_children.begin();
 	     iter != dynamic_children.end();
 	     ++iter) {
-	    string command_name = iter->first;
-	    string command_help = iter->second;
-	    new_cmd = add_command(command_name, command_help);
+	    const CliCommandMatch& ccm = iter->second;
+	    const string& command_name = ccm.command_name();
+	    const string& help_string = ccm.help_string();
+	    bool is_executable = ccm.is_executable();
+	    bool can_pipe = ccm.can_pipe();
+	    new_cmd = add_command(command_name, help_string);
 	    string child_name = global_name() + " " + command_name;
 	    new_cmd->set_global_name(child_name);
 	    new_cmd->set_can_pipe(can_pipe);
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);
 	    new_cmd->set_dynamic_interrupt_callback(_dynamic_interrupt_callback);
+	    if (is_executable) {
+		new_cmd->set_cli_process_callback(_dynamic_process_callback);
+		new_cmd->set_cli_interrupt_callback(_dynamic_interrupt_callback);
+	    }
 	}
     }
 

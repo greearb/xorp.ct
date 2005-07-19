@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.49 2005/07/18 21:35:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.50 2005/07/18 22:29:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -391,12 +391,15 @@ OpCommand::command_match(const list<string>& path_parts,
 
 void
 OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
-		       map<string, string>& return_matches,
-		       bool& is_executable,
-		       bool& can_pipe) const
+		       map<string, CliCommandMatch>& return_matches) const
 {
-    is_executable = false;
-    can_pipe = false;
+    bool is_executable = false;
+    bool can_pipe = false;
+
+    if (! _command_action.empty()) {
+	is_executable = true;
+	can_pipe = true;
+    }
 
     list<string>::const_iterator ci = _command_parts.begin();
     for (size_t i = 0; i < wordnum; i++) {
@@ -408,10 +411,11 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	// Add all the optional parameters
 	map<string, string>::const_iterator opi;
 	for (opi = _opt_params.begin(); opi != _opt_params.end(); ++opi) {
-	    return_matches.insert(*opi);
+	    const string& command_name = opi->first;
+	    const string& help_string = opi->second;
+	    CliCommandMatch ccm(command_name, help_string, true, true);
+	    return_matches.insert(make_pair(command_name, ccm));
 	}
-	is_executable = true;
-	can_pipe = true;
     } else {
 	string match = *ci;
 	if (match[0] == '$') {
@@ -421,16 +425,17 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    slave_config_tree->expand_varname_to_matchlist(match, var_matches);
 	    list<string>::const_iterator vi;
 	    for (vi = var_matches.begin(); vi != var_matches.end(); ++vi) {
-		return_matches.insert(make_pair(*vi, _help_string));
+		const string& command_name = *vi;
+		CliCommandMatch ccm(command_name, _help_string, is_executable,
+				    can_pipe);
+		return_matches.insert(make_pair(command_name, ccm));
 	    }
 	} else {
-	    return_matches.insert(make_pair(match, _help_string));
+	    const string& command_name = match;
+	    CliCommandMatch ccm(command_name, _help_string, is_executable,
+				can_pipe);
+	    return_matches.insert(make_pair(command_name, ccm));
 	}
-    }
-
-    if (! _command_action.empty()) {
-	is_executable = true;
-	can_pipe = true;
     }
 }
 
@@ -648,15 +653,12 @@ OpCommandList::top_level_commands() const
     return commands;
 }
 
-map<string, string>
-OpCommandList::childlist(const string& path, bool& is_executable,
-			 bool& can_pipe) const
+map<string, CliCommandMatch>
+OpCommandList::childlist(const string& path) const
 {
-    map<string, string> children;
+    map<string, CliCommandMatch> children;
     list<string> path_parts = split(path, ' ');
 
-    is_executable = false;
-    can_pipe = false;
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;
@@ -671,21 +673,15 @@ OpCommandList::childlist(const string& path, bool& is_executable,
 		continue;
 	    }
 
-	    map<string, string> matches;
-	    bool tmp_is_executable;
-	    bool tmp_can_pipe;
+	    map<string, CliCommandMatch> matches;
 	    op_command->get_matches(path_parts.size(), _slave_config_tree,
-				    matches, tmp_is_executable, tmp_can_pipe);
-	    if (tmp_is_executable)
-		is_executable = true;
-	    if (tmp_can_pipe)
-		can_pipe = true;
-	    map<string, string>::iterator mi;
+				    matches);
+	    map<string, CliCommandMatch>::iterator mi;
 	    for (mi = matches.begin(); mi != matches.end(); ++mi) {
-		string command_string = mi->first;
-		string help_string = mi->second;
-		XLOG_ASSERT(command_string != "");
-		children.insert(make_pair(command_string, help_string));
+		const string& key = mi->first;
+		const CliCommandMatch& ccm = mi->second;
+		XLOG_ASSERT(ccm.command_name() != "");
+		children.insert(make_pair(key, ccm));
 	    }
 	}
     }
