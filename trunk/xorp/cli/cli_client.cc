@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.30 2005/07/15 06:33:21 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.31 2005/07/15 09:34:17 pavlin Exp $"
 
 
 //
@@ -179,6 +179,18 @@ CliClient::~CliClient()
 	_gl = del_GetLine(_gl);
     
     delete_pipe_all();
+}
+
+bool
+CliClient::done() const
+{
+    if (_is_waiting_for_data)
+	return (false);
+
+    if (! _pending_input_data.empty())
+	return (false);
+
+    return (true);
 }
 
 int

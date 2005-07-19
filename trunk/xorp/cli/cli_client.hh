@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.16 2005/07/15 06:33:21 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.17 2005/07/15 09:34:17 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -69,7 +69,16 @@ public:
      * Destructor
      */
     virtual ~CliClient();
-    
+
+    /**
+     * Test if the processing of any pending commands or pending data has
+     * complated.
+     * 
+     * @return true if processing of any pending commands or pending data
+     * has completed, otherwise false.
+     */
+    bool done() const;
+
     /**
      * Start the connection.
      * 
