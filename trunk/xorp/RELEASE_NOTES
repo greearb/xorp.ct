@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.78 2005/06/03 21:33:06 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.79 2005/06/03 22:40:46 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -94,7 +94,7 @@ Release 1.2 (2005/??/??)
     - 
 
   XORPSH:
-    - 
+    - Addition of support to run xorpsh in non-interactive mode.
 
   POLICY:
     - 
@@ -133,7 +133,7 @@ Release 1.2 (2005/??/??)
     - 
 
   CLI:
-    - 
+    - Various improvements and bug fixes.
 
   SNMP:
     - 
