@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.32 2005/06/15 20:38:43 mjh Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.33 2005/06/20 03:32:10 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -633,6 +633,11 @@ command should also have a {\tt \%delete} command.
    template tree node.
 
 \end{itemize}
+
+If a node that is deleted does not have a {\tt \%delete} command, then
+the {\tt \%delete} commands of its children are called instead.
+This rule is applied recursively for each child that does not have
+a {\tt \%delete} command.
 
 \subsubsection{The {\tt \%set} Command.}
 {\tt \%set} is called to set the value of a leaf node in the
