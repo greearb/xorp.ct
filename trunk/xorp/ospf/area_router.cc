@@ -296,7 +296,12 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    publish(peerid, nid, (*i), multicast_on_peer);
 
 	    // (c) Remove the current copy from neighbours
-	    // retransmission lists.
+	    // retransmission lists. If this is a new LSA then there
+	    // can be no version of this LSA on the neighbours
+	    // retransmission lists. If this is a newer version of an
+	    // existing LSA then the old LSA will be invalidated in
+	    // update LSA, therefore the neighbours will not try and
+	    // transmit it.
 	    // (d) Install the new LSA.
 	    if (NOMATCH == search)
 		add_lsa((*i));
