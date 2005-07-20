@@ -167,12 +167,12 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
 template <typename A>
 bool
 PeerOut<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
-		      Lsa::LsaRef lsar) const
+		      Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
 
     for(i = _areas.begin(); i != _areas.end(); i++) {
-	if (!(*i).second->queue_lsa(peerid, nid, lsar))
+	if (!(*i).second->queue_lsa(peerid, nid, lsar, multicast_on_peer))
 	    return false;
     }
 
@@ -339,13 +339,13 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 template <typename A>
 bool
 Peer<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
-		   Lsa::LsaRef lsar) const
+		   Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     debug_msg("lsa %s nid %d \n", cstring(*lsar), nid);
 
     typename list<Neighbour<A> *>::const_iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	if (!(*n)->queue_lsa(peerid, nid, lsar))
+	if (!(*n)->queue_lsa(peerid, nid, lsar, multicast_on_peer))
 	    return false;
 
     return true;
@@ -2605,7 +2605,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 template <typename A>
 bool
 Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
-			Lsa::LsaRef lsar)
+			Lsa::LsaRef lsar, bool& multicast_on_peer)
 {
     // RFC 2328 Section 13.3.  Next step in the flooding procedure
 
@@ -2686,7 +2686,22 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 	    return true;
     }
 
-    // (5) This LSA should be flooded now.
+    // (5) This LSA should be flooded now. If it hasn't already been
+    // multicast out of this peer/inteface.
+
+    switch(_peer.get_linktype()) {
+    case OspfTypes::BROADCAST:
+	if (multicast_on_peer)
+	    return true;
+	else
+	    multicast_on_peer = true;
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+    case OspfTypes::PointToPoint:
+	break;
+    }
 
     XLOG_WARNING("TBD increment LSA's LS age by InfTransDelay");
 

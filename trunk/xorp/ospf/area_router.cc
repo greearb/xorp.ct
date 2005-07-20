@@ -273,7 +273,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	
 	switch(search) {
 	case NOMATCH:
-	case NEWER:
+	case NEWER: {
 	    // (5) New or newer LSA.
 	    // (a) If this LSA is too recent drop it.
 	    if (NEWER == search) {
@@ -289,7 +289,11 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    if ((*i)->external())
 		flood_all_areas((*i));
 
-	    publish(peerid, nid, (*i));
+	    // Set to true if the LSA was multicast out of this
+	    // interface. If it was, there is no requirement to send an
+	    // ACK.
+	    bool multicast_on_peer;
+	    publish(peerid, nid, (*i), multicast_on_peer);
 
 	    // (c) Remove the current copy from neighbours
 	    // retransmission lists.
@@ -304,12 +308,16 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    // (e) Possibly acknowledge this LSA.
 	    // RFC 2328 Section 13.5 Sending Link State Acknowledgment Packets
 
-	    XLOG_WARNING("TBD Section 13.5");
+	    if (!multicast_on_peer) {
+		if ((backup && dr) || !backup)
+		    delayed_ack.push_back(lsah);
+	    }
 	    
 	    // (f) Self orignating LSAs 
 	    // RFC 2328 Section 13.4. Receiving self-originated LSAs
 
 	    XLOG_WARNING("TBD Section 13.4");
+	}
 	    break;
 	case OLDER:
 	    // XXX - Is this really where case (6) belongs?
@@ -674,7 +682,7 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
 template <typename A>
 void
 AreaRouter<A>::publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
-		       Lsa::LsaRef lsar) const
+		       Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
 
@@ -693,9 +701,14 @@ AreaRouter<A>::publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	PeerStateRef temp_psr = i->second;
 	if (temp_psr->_up) {
+	    bool multicast;
 	    if (!_ospf.get_peer_manager().
-		queue_lsa(i->first, peerid, nid, lsar))
+		queue_lsa(i->first, peerid, nid, lsar, multicast))
 		XLOG_FATAL("Unable to queue LSA");
+	    // Did this LSA get broadcast/multicast on the
+	    // peer/interface that it came in on.
+	    if (peerid == i->first)
+		multicast_on_peer = multicast;
 	}
     }
 }
@@ -705,7 +718,8 @@ void
 AreaRouter<A>::publish_all(Lsa::LsaRef lsar)
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
-    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar);
+    bool multicast_on_peer;
+    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar, multicast_on_peer);
 
     push_lsas();	// NOTE: a push after every LSA.
 }

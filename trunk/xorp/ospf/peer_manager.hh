@@ -123,9 +123,11 @@ class PeerManager {
      * @param nid the LSA arrived on.
      * @param lsar the lsa
      * @return true on success.
+     * @return multicast_on_peer Did this LSA get multicast on this peer.
      */
     bool queue_lsa(const PeerID peerid, const PeerID peer,
-		   OspfTypes::NeighbourID nid, Lsa::LsaRef lsar);
+		   OspfTypes::NeighbourID nid, Lsa::LsaRef lsar,
+		   bool &multicast_on_peer);
 
     /**
      * Send (push) any queued LSAs.

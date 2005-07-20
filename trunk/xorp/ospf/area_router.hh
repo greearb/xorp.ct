@@ -273,9 +273,10 @@ class AreaRouter {
      * @param peerid The peer this LSA arrived on.
      * @param nid The neighbour this LSA arrived on so don't reflect.
      * @param lsar The LSA to publish
+     * @param multicast_on_peer Did this LSA get multicast on this peer.
      */
     void publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
-		 Lsa::LsaRef lsar) const;
+		 Lsa::LsaRef lsar, bool& multicast_on_peer) const;
 
     /*
      * Send this LSA to all our peers.

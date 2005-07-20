@@ -129,10 +129,12 @@ class PeerOut {
      * @param peer the LSA arrived on.
      * @param nid the LSA arrived on.
      * @param lsar the lsa
+     * @param multicast_on_peer Did this LSA get multicast on this peer.
+     *
      * @return true on success.
      */
     bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
-		   Lsa::LsaRef lsar) const;
+		   Lsa::LsaRef lsar, bool &multicast_on_peer) const;
     
     /**
      * Send (push) any queued LSAs.
@@ -310,10 +312,12 @@ class Peer {
      * @param peer the LSA arrived on.
      * @param nid the LSA arrived on.
      * @param lsar the lsa
+     * @param multicast_on_peer Did this LSA get multicast on this peer.
+     *
      * @return true on success.
      */
     bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
-		   Lsa::LsaRef lsar) const;
+		   Lsa::LsaRef lsar, bool& multicast_on_peer) const;
 
     /**
      * Send (push) any queued LSAs.
@@ -753,10 +757,12 @@ class Neighbour {
      * @param peer the LSA arrived on.
      * @param nid the LSA arrived on.
      * @param lsar the lsa
+     * @param multicast_on_peer Did this LSA get multicast on this peer.
+     *
      * @return true on success.
      */
     bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
-		   Lsa::LsaRef lsar);
+		   Lsa::LsaRef lsar, bool& multicast_on_peer);
 
     /**
      * Send (push) any queued LSAs.
