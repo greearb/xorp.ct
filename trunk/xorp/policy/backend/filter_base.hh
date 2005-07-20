@@ -13,44 +13,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filter.hh,v 1.3 2005/07/08 02:06:22 abittau Exp $
+// $XORP$
 
-#ifndef __POLICY_BACKEND_POLICY_FILTER_HH__
-#define __POLICY_BACKEND_POLICY_FILTER_HH__
+#ifndef __POLICY_BACKEND_FILTER_BASE_HH__
+#define __POLICY_BACKEND_FILTER_BASE_HH__
 
 #include "policy/common/varrw.hh"
-#include "policy/common/policy_exception.hh"
-#include "policy_instr.hh"
-#include "set_manager.hh"
-#include "filter_base.hh"
-#include "libxorp/ref_ptr.hh"
 #include <string>
-#include <map>
 
 /**
- * @short A generic policy filter.
- *
- * It may accept/reject/modify any route which supports VarRW.
+ * @short Base class for all policy filters.
  */
-class PolicyFilter : public FilterBase {
+class FilterBase {
 public:
-    /**
-     * @short Exception thrown on configuration error.
-     */
-    class ConfError : public PolicyException {
-    public:
-	ConfError(const string& err) : PolicyException(err) {}
-    };
-
-    PolicyFilter();
-    ~PolicyFilter();
+    virtual ~FilterBase() {}
     
     /**
      * Configure the filter
      *
      * @param str filter configuration.
      */
-    void configure(const string& str);
+    virtual void configure(const string& str) = 0;
 
     /**
      * Reset the filter.
@@ -58,7 +41,7 @@ public:
      * Filter becomes a NO-operation -- default action should
      * be returned everytime an acceptRoute is called.
      */
-    void reset();
+    virtual void reset() = 0;
 
     /**
      * See if a route is accepted by the filter.
@@ -67,17 +50,7 @@ public:
      * @return true if the route is accepted, false otherwise.
      * @param varrw the VarRW associated with the route being filtered.
      */
-    bool acceptRoute(VarRW& varrw);
-
-private:
-    vector<PolicyInstr*>* _policies;
-    SetManager _sman;
-
-    // not impl
-    PolicyFilter(const PolicyFilter&);
-    PolicyFilter& operator=(const PolicyFilter&);
+    virtual bool acceptRoute(VarRW& varrw) = 0;
 };
 
-typedef ref_ptr<PolicyFilter> RefPf;
-
-#endif // __POLICY_BACKEND_POLICY_FILTER_HH__
+#endif // __POLICY_BACKEND_FILTER_BASE_HH__

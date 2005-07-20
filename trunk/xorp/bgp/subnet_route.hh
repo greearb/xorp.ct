@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.16 2005/03/08 21:07:49 atanu Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.17 2005/03/25 02:52:48 pavlin Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -25,6 +25,7 @@
 #include "libxorp/ipv6net.hh"
 
 #include "policy/backend/policytags.hh"
+#include "policy/backend/policy_filter.hh"
 
 #define SRF_IN_USE 0x0001
 #define SRF_WINNER 0x0002
@@ -293,8 +294,11 @@ public:
      */
     void set_policytags(const PolicyTags& tags) {
 	_policytags = tags;
-    }	
+    }
 
+    const RefPf& policyfilter(uint32_t i) const;
+    void set_policyfilter(uint32_t i, const RefPf& pf) const;
+    
 protected:
     /**
      * @short protected SubnetRoute destructor.
@@ -384,6 +388,7 @@ private:
     mutable uint32_t _igp_metric;
 
     PolicyTags _policytags;
+    mutable RefPf _pfilter[3];
 };
 
 

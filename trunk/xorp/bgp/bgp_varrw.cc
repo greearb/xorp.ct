@@ -13,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.11 2005/07/15 02:27:05 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.12 2005/07/15 23:37:30 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
 #include "peer_handler.hh"
 #include "bgp_varrw.hh"
+#include "policy/backend/version_filters.hh"
 
 using namespace policy_utils;
 
@@ -32,6 +33,8 @@ BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify,
       _no_modify(no_modify),
       _modified(false)
 {
+    for (int i = 0; i < 3; i++)
+	_wrote_pfilter[i] = false;
 }
 
 template <class A>
@@ -47,8 +50,17 @@ template <class A>
 void
 BGPVarRW<A>::start_read()
 {
+    // intialize policy stuff
     initialize("policytags", _orig_rtmsg.route()->policytags().element());
 
+    initialize(VersionFilters::filter_import,
+	       new ElemFilter(_orig_rtmsg.route()->policyfilter(0)));
+    initialize(VersionFilters::filter_sm,
+	       new ElemFilter(_orig_rtmsg.route()->policyfilter(1)));
+    initialize(VersionFilters::filter_ex,
+	       new ElemFilter(_orig_rtmsg.route()->policyfilter(2)));
+
+    // initialize BGP vars
     const SubnetRoute<A>* route = _orig_rtmsg.route();
 
     read_route_nexthop(*route);
@@ -230,6 +242,37 @@ BGPVarRW<A>::single_write(const string& id, const Element& e)
 	_palist.replace_origin(origin);
 	return;
     }
+    
+    // XXX need to tidy up this whole class...
+try {    
+    if (id == VersionFilters::filter_import) {
+	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+
+	_pfilter[0] = ef.val();
+	_wrote_pfilter[0] = true;
+	return;
+    }
+
+    if (id == VersionFilters::filter_sm) {
+	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+
+	_pfilter[1] = ef.val();
+	_wrote_pfilter[1] = true;
+	return;
+    }
+    
+    if (id == VersionFilters::filter_ex) {
+	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+
+	_pfilter[2] = ef.val();
+	_wrote_pfilter[2] = true;
+	return;
+    }
+} catch(const bad_cast& ex) {
+    XLOG_FATAL("Bad cast when writing ElemFilter %s (Type=%s) (val=%s)", 
+	       id.c_str(), e.type().c_str(), e.str().c_str());
+}
+
 
     // XXX: writing a variable we don't know about!
     XLOG_FATAL("Don't know how to write: %s\n", id.c_str());
@@ -257,7 +300,21 @@ BGPVarRW<A>::end_write()
 	new_route->set_policytags(_ptags);
     else
 	new_route->set_policytags(old_route->policytags());
-   
+
+    for (int i = 0; i < 3; i++) {
+	if (_wrote_pfilter[i]) {
+	    // XXX we need to change the policyfilter in the ORIGINAL ROUTE too.
+	    // i.e. the version should be kept in the ribin subnetroute copy.
+	    // If we just store it in the copy we send down stream, next time we
+	    // get a push, we will get the wrong filter pointer [it will always
+	    // be the original one which was in ribin,.. as we never update it].
+	    old_route->set_policyfilter(i, _pfilter[i]);
+	    new_route->set_policyfilter(i, _pfilter[i]);
+	}    
+	else
+	    new_route->set_policyfilter(i, old_route->policyfilter(i));
+    }
+
     // propagate route flags
     new_route->set_filtered(old_route->is_filtered());
     if (old_route->is_winner())

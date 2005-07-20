@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.40 2005/03/25 02:52:39 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.41 2005/07/08 23:16:38 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -34,7 +34,7 @@
 #include "peer_handler.hh"
 #include "process_watch.hh"
 
-#include "policy/backend/policy_filters.hh"
+#include "policy/backend/version_filters.hh"
 
 class XrlBgpTarget;
 
@@ -574,7 +574,7 @@ private:
     XrlStdRouter *_xrl_router;
     static EventLoop _eventloop;
     ProcessWatch *_process_watch;
-    PolicyFilters _policy_filters;
+    VersionFilters _policy_filters;
     Profile _profile;
 };
 

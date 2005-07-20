@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filters.hh,v 1.2 2005/03/25 02:54:12 pavlin Exp $
+// $XORP: xorp/policy/backend/policy_filters.hh,v 1.3 2005/07/08 02:06:22 abittau Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_FILTERS_HH__
 #define __POLICY_BACKEND_POLICY_FILTERS_HH__
@@ -37,6 +37,8 @@ public:
     };
 
     PolicyFilters();
+    PolicyFilters(FilterBase* im, FilterBase* sm, FilterBase* ex);
+    virtual ~PolicyFilters();
 
     /**
      * Run a filter and decide whether route should be accepted.
@@ -75,11 +77,11 @@ private:
      * @return filter to execute.
      * @param ftype integral filter identifier.
      */
-    PolicyFilter&   whichFilter(const uint32_t& ftype);
+    FilterBase&   whichFilter(const uint32_t& ftype);
 
-    PolicyFilter   _import_filter;
-    PolicyFilter   _export_sm_filter;
-    PolicyFilter   _export_filter;
+    FilterBase*   _import_filter;
+    FilterBase*   _export_sm_filter;
+    FilterBase*   _export_filter;
 
     // not impl
     PolicyFilters(const PolicyFilters&);

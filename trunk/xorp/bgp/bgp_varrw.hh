@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.7 2005/07/08 02:06:17 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.8 2005/07/13 21:58:37 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -124,6 +124,8 @@ private:
     PathAttributeList<A>	_palist;
     bool			_no_modify;
     bool			_modified;
+    RefPf			_pfilter[3];
+    bool			_wrote_pfilter[3];
 
     // not impl
     BGPVarRW(const BGPVarRW&);

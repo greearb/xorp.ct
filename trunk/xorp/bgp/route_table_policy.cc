@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.5 2005/03/25 02:52:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.6 2005/07/08 02:06:18 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -114,11 +114,29 @@ PolicyTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
 
+#if 0
+    // if we are getting an add_route, it must? be a new route... Thus the
+    // policy filter should be null
+    switch (_filter_type) {
+	case filter::IMPORT:
+	   XLOG_ASSERT(rtmsg.route()->policyfilter(0).is_empty());
+	   break;
+
+	case filter::EXPORT_SOURCEMATCH:
+	   XLOG_ASSERT(rtmsg.route()->policyfilter(1).is_empty());
+	   break;
+
+	// when a new peering comes up, the routes will be sent as an ADD!
+	case filter::EXPORT:
+//	   XLOG_ASSERT(rtmsg.route()->policyfilter(2).is_empty());
+	   break;
+    }
+#endif
+
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
 
     if (!fmsg)
 	return ADD_FILTERED;
-
 
     int res = next->add_route(*fmsg, this);
 
@@ -146,18 +164,55 @@ PolicyTable<A>::replace_route(const InternalMessage<A>& old_rtmsg,
 	      old_rtmsg.str().c_str(),
 	      new_rtmsg.str().c_str());
 
+#if 0
+    // the old one should really be old?
+    switch (_filter_type) {
+	case filter::IMPORT:
+	   XLOG_ASSERT(!old_rtmsg.route()->policyfilter(0).is_empty());
+	   break;
+
+	case filter::EXPORT_SOURCEMATCH:
+	   XLOG_ASSERT(!old_rtmsg.route()->policyfilter(1).is_empty());
+	   break;
+
+	case filter::EXPORT:
+	   XLOG_ASSERT(!old_rtmsg.route()->policyfilter(2).is_empty());
+	   break;
+    }
+    
+    // the new route should really be new?
+    switch (_filter_type) {
+	case filter::IMPORT:
+	   XLOG_ASSERT(new_rtmsg.route()->policyfilter(0).is_empty());
+	   break;
+
+	case filter::EXPORT_SOURCEMATCH:
+	   XLOG_ASSERT(new_rtmsg.route()->policyfilter(1).is_empty());
+	   break;
+
+	case filter::EXPORT:
+	   XLOG_ASSERT(new_rtmsg.route()->policyfilter(2).is_empty());
+	   break;
+    }
+#endif
+
     const InternalMessage<A>* fold = do_filtering(old_rtmsg, false);
     const InternalMessage<A>* fnew = do_filtering(new_rtmsg, false);
 
     // XXX: We can probably use the is_filtered flag...
     int res;
+
+    // we didn't pass the old one, we don't want the new one
     if (fold == NULL && fnew == NULL) {
 	return ADD_FILTERED;
+    // we passed the old one, but we filtered the new one...
     } else if (fold != NULL && fnew == NULL) {
 	next->delete_route(*fold, this);
 	res = ADD_FILTERED;
+    // we didn't pass the old one, we like the new one
     } else if (fold == NULL && fnew != NULL) {
 	res = next->add_route(*fnew, this);
+    // we passed tthe old one, we like the new one
     } else {
 	res = next->replace_route(*fold, *fnew, this);
     }
@@ -185,11 +240,27 @@ PolicyTable<A>::delete_route(const InternalMessage<A>& rtmsg,
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
 
+#if 0
+    // it must be an existing route...
+    switch (_filter_type) {
+	case filter::IMPORT:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(0).is_empty());
+	   break;
+
+	case filter::EXPORT_SOURCEMATCH:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(1).is_empty());
+	   break;
+
+	case filter::EXPORT:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(2).is_empty());
+	   break;
+    }
+#endif
+
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     if (fmsg == NULL)
 	return 0;
 
-    
     int res = next->delete_route(*fmsg, this);
 
     if (fmsg != &rtmsg)
@@ -210,10 +281,26 @@ PolicyTable<A>::route_dump(const InternalMessage<A>& rtmsg,
 
     XLOG_ASSERT(next);
 
-    
     debug_msg("[BGP] PolicyTable %s route_dump: %s\n",
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
+
+#if 0
+    // it must be an existing route...
+    switch (_filter_type) {
+	case filter::IMPORT:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(0).is_empty());
+	   break;
+
+	case filter::EXPORT_SOURCEMATCH:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(1).is_empty());
+	   break;
+
+	case filter::EXPORT:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(2).is_empty());
+	   break;
+    }
+#endif
 
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     if (fmsg == NULL)
@@ -259,6 +346,23 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
     debug_msg("[BGP] PolicyTable %s lookup_route: %s\n",
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
+
+#if 0
+    // it must be an existing route...
+    switch (_filter_type) {
+	case filter::IMPORT:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(0).is_empty());
+	   break;
+
+	case filter::EXPORT_SOURCEMATCH:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(1).is_empty());
+	   break;
+
+	case filter::EXPORT:
+	   XLOG_ASSERT(!rtmsg.route()->policyfilter(2).is_empty());
+	   break;
+    }
+#endif 
 
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     if (!fmsg)

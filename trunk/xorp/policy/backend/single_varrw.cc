@@ -12,9 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.3 2004/10/04 18:45:53 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.4 2005/03/25 02:54:13 pavlin Exp $"
 
+#include "policy/policy_module.h"
 #include "config.h"
+#include "libxorp/xlog.h"
 #include "single_varrw.hh"
 #include "policy/common/elem_null.hh"
 
@@ -92,6 +94,7 @@ SingleVarRW::sync() {
 	const Element* e = (*iter).second;
 
 	// commit the variable
+	XLOG_ASSERT(e);
 	single_write(*i,*e);
     }
     

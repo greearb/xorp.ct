@@ -13,37 +13,38 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filter.hh,v 1.3 2005/07/08 02:06:22 abittau Exp $
+// $XORP$
 
-#ifndef __POLICY_BACKEND_POLICY_FILTER_HH__
-#define __POLICY_BACKEND_POLICY_FILTER_HH__
+#ifndef __POLICY_BACKEND_VERSION_FILTER_HH__
+#define __POLICY_BACKEND_VERSION_FILTER_HH__
 
 #include "policy/common/varrw.hh"
-#include "policy/common/policy_exception.hh"
-#include "policy_instr.hh"
-#include "set_manager.hh"
 #include "filter_base.hh"
-#include "libxorp/ref_ptr.hh"
-#include <string>
-#include <map>
+#include "policy_filter.hh"
 
 /**
- * @short A generic policy filter.
+ * @short Policy filters which support versioning [i.e. keep old version].
  *
- * It may accept/reject/modify any route which supports VarRW.
+ * The idea is to create a new policy filter on each configuration.  Whenever a
+ * route is being processed, you read which filter to run.  If this filter is 0,
+ * [null pointer] then give it the last configuration.  Else just run whatever
+ * filter is returned.
+ *
+ * Filters should be referenced counted by routes.  When reference count reaches
+ * 0, it should be deleted.
+ *
+ * Why not keep filters internally here and read a filter id from route?  Well
+ * because we cannot assume when to increment and decrement the reference count.
+ * Say it's a normal route lookup and we do the filtering, and it results to
+ * "accepted".  It doesn't imply we need to +1 the reference count.
  */
-class PolicyFilter : public FilterBase {
+class VersionFilter : public FilterBase {
 public:
     /**
-     * @short Exception thrown on configuration error.
+     * @param fname the variable to read/write in order to access filter.
      */
-    class ConfError : public PolicyException {
-    public:
-	ConfError(const string& err) : PolicyException(err) {}
-    };
-
-    PolicyFilter();
-    ~PolicyFilter();
+    VersionFilter(const string& fname);
+    ~VersionFilter();
     
     /**
      * Configure the filter
@@ -70,14 +71,8 @@ public:
     bool acceptRoute(VarRW& varrw);
 
 private:
-    vector<PolicyInstr*>* _policies;
-    SetManager _sman;
-
-    // not impl
-    PolicyFilter(const PolicyFilter&);
-    PolicyFilter& operator=(const PolicyFilter&);
+    RefPf _filter;
+    string _fname;
 };
 
-typedef ref_ptr<PolicyFilter> RefPf;
-
-#endif // __POLICY_BACKEND_POLICY_FILTER_HH__
+#endif // __POLICY_BACKEND_VERSION_FILTER_HH__

@@ -1,13 +1,14 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/backend/Makefile.am,v 1.3 2004/11/12 02:44:46 bms Exp $
+## $XORP: xorp/policy/backend/Makefile.am,v 1.4 2005/07/08 02:06:22 abittau Exp $
 ##
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libpolicybackend.la
 
 # Backend policy library
-libpolicybackend_la_SOURCES		 = instr_visitor.hh
+libpolicybackend_la_SOURCES		 = filter_base.hh
+libpolicybackend_la_SOURCES		+= instr_visitor.hh
 libpolicybackend_la_SOURCES		+= instruction.hh
 libpolicybackend_la_SOURCES		+= instruction_base.hh
 libpolicybackend_la_SOURCES		+= iv_exec.hh
@@ -20,6 +21,8 @@ libpolicybackend_la_SOURCES		+= policytags.hh
 libpolicybackend_la_SOURCES		+= set_manager.hh
 libpolicybackend_la_SOURCES		+= single_varrw.hh
 libpolicybackend_la_SOURCES		+= term_instr.hh
+libpolicybackend_la_SOURCES		+= version_filter.hh
+libpolicybackend_la_SOURCES		+= version_filters.hh
 
 libpolicybackend_la_SOURCES		+= iv_exec.cc
 libpolicybackend_la_SOURCES		+= policy_filter.cc
@@ -28,6 +31,8 @@ libpolicybackend_la_SOURCES		+= policy_redist_map.cc
 libpolicybackend_la_SOURCES		+= policytags.cc
 libpolicybackend_la_SOURCES		+= set_manager.cc
 libpolicybackend_la_SOURCES		+= single_varrw.cc
+libpolicybackend_la_SOURCES		+= version_filter.cc
+libpolicybackend_la_SOURCES		+= version_filters.cc
 
 
 libpolicybackend_la_SOURCES		+= lex.yy_policy_backend_parser.cc

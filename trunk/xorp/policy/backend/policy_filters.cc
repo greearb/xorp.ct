@@ -12,46 +12,62 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.2 2005/03/25 02:54:12 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.3 2005/07/08 02:06:22 abittau Exp $"
 
 #include "config.h"
 #include "policy_filters.hh"
 
 PolicyFilters::PolicyFilters()
 {
+    _import_filter = new PolicyFilter();
+    _export_sm_filter = new PolicyFilter();
+    _export_filter = new PolicyFilter();
+}
+
+PolicyFilters::PolicyFilters(FilterBase* im, FilterBase* sm, FilterBase* ex) :
+			     _import_filter(im), _export_sm_filter(sm),
+			     _export_filter(ex)
+{
+}
+
+PolicyFilters::~PolicyFilters()
+{
+    delete _import_filter;
+    delete _export_sm_filter;
+    delete _export_filter;
 }
 
 bool
 PolicyFilters::run_filter(const uint32_t& ftype, VarRW& varrw)
 {
-    PolicyFilter& pf = whichFilter(ftype);
+    FilterBase& pf = whichFilter(ftype);
     return pf.acceptRoute(varrw);
 }
 
 void
 PolicyFilters::configure(const uint32_t& ftype, const string& conf)
 {
-    PolicyFilter& pf = whichFilter(ftype);
+    FilterBase& pf = whichFilter(ftype);
     pf.configure(conf);
 }
 
 void
 PolicyFilters::reset(const uint32_t& ftype)
 {
-    PolicyFilter& pf = whichFilter(ftype);
+    FilterBase& pf = whichFilter(ftype);
     pf.reset();
 }
 
-PolicyFilter& 
+FilterBase& 
 PolicyFilters::whichFilter(const uint32_t& ftype)
 {
     switch(ftype) {
 	case 1:
-	    return _import_filter;
+	    return *_import_filter;
 	case 2:
-	    return _export_sm_filter;
+	    return *_export_sm_filter;
 	case 4:
-	    return _export_filter;
+	    return *_export_filter;
 	
     }
     throw PolicyFiltersErr("Unknown filter: " +

@@ -13,20 +13,33 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.2 2005/03/25 02:54:15 pavlin Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.3 2005/07/15 02:27:09 abittau Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
 
 #include <string>
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
+#include "libxorp/ref_ptr.hh"
 #include "element_base.hh"
 #include "policy_exception.hh"
 #include "policy_utils.hh"
+#include "policy/backend/policy_filter.hh"
 
+/**
+ * @short a filter element.  Used when versioning.
+ */
+class ElemFilter : public Element {
+public:
+    ElemFilter(const RefPf& pf) : Element("filter"), _pf(pf) {}
+    string str() const { return "policy filter"; }
+    const RefPf& val() const { return _pf; }
+
+private:
+    RefPf _pf;
+};
 
 /**
  * @short 32bit signed integer.

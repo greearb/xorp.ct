@@ -13,26 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw_export.cc,v 1.1 2005/07/08 02:06:17 abittau Exp $"
+#ident "$XORP$"
 
-#include "bgp_module.h"
 #include "config.h"
-#include "bgp_varrw_export.hh"
+#include "version_filters.hh"
+#include "version_filter.hh"
 
-template <class A>
-BGPVarRWExport<A>::BGPVarRWExport(const InternalMessage<A>& rtmsg, 
-				  bool no_modify, const string& name,
-				  const string& neighbor)
-    : BGPVarRW<A>(rtmsg, no_modify, name), _neighbor(neighbor)
+const string VersionFilters::filter_import("filter_im");
+const string VersionFilters::filter_sm("filter_sm");
+const string VersionFilters::filter_ex("filter_ex");
+
+VersionFilters::VersionFilters() : PolicyFilters(
+				    new VersionFilter(filter_import),
+				    new VersionFilter(filter_sm),
+				    new VersionFilter(filter_ex))
 {
 }
-
-template <class A>
-Element*
-BGPVarRWExport<A>::read_neighbor()
-{
-    return BGPVarRW<A>::_ef.create(ElemIPv4::id, _neighbor.c_str());
-}
-
-template class BGPVarRWExport<IPv4>;
-template class BGPVarRWExport<IPv6>;

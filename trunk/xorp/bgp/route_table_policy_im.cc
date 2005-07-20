@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.3 2004/09/18 02:06:19 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.4 2005/03/25 02:52:47 pavlin Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+ #define DEBUG_LOGGING
+ #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 
@@ -55,8 +55,33 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     debug_msg("[BGP] Policy route dump: %s\nWas filtered: %d\n",
 	      rtmsg.str().c_str(), was_filtered);
 
+    // "old" filter...
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    bool accepted = (fmsg != NULL);
+    was_filtered = (fmsg == NULL);
+
+    // new route
+    SubnetRoute<A>* cur_rt = new SubnetRoute<A>(*rtmsg.route());
+
+    // we want current filter
+    for (int i = 0; i < 3; i++)
+        cur_rt->set_policyfilter(i, RefPf());
+
+    InternalMessage<A>* tmp_im = new InternalMessage<A>(cur_rt,
+						        rtmsg.origin_peer(),
+						        rtmsg.genid());
+    if(rtmsg.changed())
+	tmp_im->set_changed();
+    if(rtmsg.push())
+	tmp_im->set_push();
+    if(rtmsg.from_previous_peering())
+	tmp_im->set_from_previous_peering();
+
+    // filter new message
+    const InternalMessage<A>* new_msg = do_filtering(*tmp_im, false);
+    if (tmp_im != new_msg)
+        delete tmp_im;
+
+    bool accepted = (new_msg != NULL);
 
     debug_msg("[BGP] Policy route dump accepted: %d\n", accepted);
 
@@ -68,8 +93,10 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 
     if (accepted) {
 	if (was_filtered) {
-	    res = next->add_route(*fmsg, this);
+	    debug_msg("[BGP] Policy add_route [accepted, was filtered]");
+	    res = next->add_route(*new_msg, this);
 	} else {
+#if 0	
 	    // I think it is suicidal to replace the same route, so copy it.
 	    // but we need to, so it goes down to the other filters...
 	    if (fmsg == &rtmsg) {
@@ -90,20 +117,24 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	    
 		fmsg = new_fmsg;
 	    }	
-
-	    res = next->replace_route(rtmsg, *fmsg, this);
+#endif
+	    debug_msg("[BGP] Policy replace_route old=(%s) new=(%s)\n",
+		      fmsg->str().c_str(), new_msg->str().c_str());
+	    res = next->replace_route(*fmsg, *new_msg, this);
 	}
     } else {
 	// not accepted
 	if (was_filtered) {
 	} else {
-	    next->delete_route(rtmsg, this);
+	    next->delete_route(*fmsg, this);
 	}
 	res = ADD_FILTERED;
     }
 
     if (fmsg != &rtmsg)
 	delete fmsg;
+
+    delete new_msg;
 
     return res;
 }

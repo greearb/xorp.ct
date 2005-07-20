@@ -93,7 +93,7 @@ install_sh = @install_sh@
 noinst_LTLIBRARIES = libpolicybackend.la
 
 # Backend policy library
-libpolicybackend_la_SOURCES = instr_visitor.hh instruction.hh instruction_base.hh iv_exec.hh policy_backend_parser.hh policy_filter.hh policy_filters.hh policy_instr.hh policy_redist_map.hh policytags.hh set_manager.hh single_varrw.hh term_instr.hh iv_exec.cc policy_filter.cc policy_filters.cc policy_redist_map.cc policytags.cc set_manager.cc single_varrw.cc lex.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.h
+libpolicybackend_la_SOURCES = filter_base.hh instr_visitor.hh instruction.hh instruction_base.hh iv_exec.hh policy_backend_parser.hh policy_filter.hh policy_filters.hh policy_instr.hh policy_redist_map.hh policytags.hh set_manager.hh single_varrw.hh term_instr.hh version_filter.hh version_filters.hh iv_exec.cc policy_filter.cc policy_filters.cc policy_redist_map.cc policytags.cc set_manager.cc single_varrw.cc version_filter.cc version_filters.cc lex.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.h
 
 # XXX find a way to link libpolicycommon
 libpolicybackend_la_LIBADD = ../common/dispatcher.lo ../common/elem_set.lo ../common/element.lo ../common/element_factory.lo ../common/filter.lo ../common/policy_utils.lo ../common/register_elements.lo ../common/register_operations.lo ../common/varrw.lo
@@ -115,7 +115,8 @@ libpolicybackend_la_DEPENDENCIES = ../common/dispatcher.lo \
 	../common/register_operations.lo ../common/varrw.lo
 am_libpolicybackend_la_OBJECTS = iv_exec.lo policy_filter.lo \
 	policy_filters.lo policy_redist_map.lo policytags.lo \
-	set_manager.lo single_varrw.lo lex.yy_policy_backend_parser.lo \
+	set_manager.lo single_varrw.lo version_filter.lo \
+	version_filters.lo lex.yy_policy_backend_parser.lo \
 	yacc.yy_policy_backend_parser.lo
 libpolicybackend_la_OBJECTS = $(am_libpolicybackend_la_OBJECTS)
 
@@ -132,6 +133,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/policy_redist_map.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/policytags.Plo $(DEPDIR)/set_manager.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/single_varrw.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/version_filter.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/version_filters.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/yacc.yy_policy_backend_parser.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -194,6 +197,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policytags.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/set_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/single_varrw.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/version_filter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/version_filters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/yacc.yy_policy_backend_parser.Plo@am__quote@
 
 distclean-depend:

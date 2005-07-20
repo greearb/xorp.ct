@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.15 2005/03/03 07:29:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.16 2005/03/25 02:52:48 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -49,6 +49,9 @@ SubnetRoute<A>::SubnetRoute(const SubnetRoute<A>& route_to_clone)
     _igp_metric = route_to_clone._igp_metric;
 
     _policytags = route_to_clone._policytags;
+
+    for (int i = 0; i < 3; i++)
+	_pfilter[i] = route_to_clone._pfilter[i];
 }
 
 template<class A>
@@ -269,6 +272,22 @@ SubnetRoute<A>::str() const {
     return s;
 }
 
+template<class A>
+const RefPf&
+SubnetRoute<A>::policyfilter(uint32_t i) const
+{
+    return _pfilter[i];
+}
+
+template<class A>
+void
+SubnetRoute<A>::set_policyfilter(uint32_t i, const RefPf& f) const
+{
+    if (_parent_route) {
+	_parent_route->set_policyfilter(i, f);
+    }
+    _pfilter[i] = f;
+}
 
 template class SubnetRoute<IPv4>;
 template class SubnetRoute<IPv6>;

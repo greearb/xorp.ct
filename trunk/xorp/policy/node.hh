@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.3 2005/07/08 07:17:07 pavlin Exp $
+// $XORP: xorp/policy/node.hh,v 1.4 2005/07/15 02:27:06 abittau Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
@@ -22,8 +22,6 @@
 #include "node_base.hh"
 #include "visitor.hh"
 #include <string>
-
-using std::string;
 
 /**
  * @short A generic node wrapper.

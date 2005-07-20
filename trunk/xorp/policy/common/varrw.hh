@@ -13,15 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/varrw.hh,v 1.2 2005/03/25 02:54:17 pavlin Exp $
+// $XORP: xorp/policy/common/varrw.hh,v 1.3 2005/07/08 02:06:23 abittau Exp $
 
 #ifndef __POLICY_BACKEND_VARRW_HH__
 #define __POLICY_BACKEND_VARRW_HH__
 
-#include "element.hh"
+#include "element_base.hh"
 #include <string>
-
-using std::string;
+#include <sstream>
 
 /**
  * @short Interface used by policy filters to execute a policy on a route.
