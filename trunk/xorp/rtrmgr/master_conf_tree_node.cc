@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.13 2005/07/08 20:51:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.14 2005/07/10 23:14:44 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -196,11 +196,23 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 	    return;
     }
 
-    if ((_template_tree_node != NULL) && (!_deleted)) {
+    if (_deleted) {
+	// XXX: ignore deleted subtrees
+	return;
+    }
+
+    if (_template_tree_node != NULL) {
 	const BaseCommand *base_cmd;
 	const Command *cmd;
 	set<string> modules;
 	set<string>::const_iterator iter;
+
+	//
+	// XXX: If the module's top-level node is not deleted explicitly, then
+	// the module is considered still active.
+	//
+	if (_template_tree_node->is_module_root_node())
+	    active_modules.insert(_template_tree_node->module_name());
 
 	base_cmd = _template_tree_node->const_command("%create");
 	if (base_cmd != NULL) {
@@ -231,12 +243,14 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 		active_modules.insert(*iter);
 	}
     }
-    if (!_deleted) {
-	list<ConfigTreeNode*>::const_iterator li;
-	for (li = _children.begin(); li != _children.end(); ++li) {
-	    MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*li);
-	    child->find_active_modules(active_modules);
-	}
+
+    //
+    // Process the subtree
+    //
+    list<ConfigTreeNode*>::const_iterator li;
+    for (li = _children.begin(); li != _children.end(); ++li) {
+	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*li);
+	child->find_active_modules(active_modules);
     }
 }
 
@@ -254,6 +268,13 @@ MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 	const Command *cmd = NULL;
 	set<string> modules;
 	set<string>::const_iterator iter;
+
+        //
+        // XXX: If the module's top-level node is in the configuration, then
+        // the module is added to the list.
+        //
+        if (_template_tree_node->is_module_root_node())
+            all_modules.insert(_template_tree_node->module_name());
 
 	base_cmd = _template_tree_node->const_command("%create");
 	if (base_cmd != NULL) {
