@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.14 2005/07/20 02:26:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.15 2005/07/20 16:56:51 zec Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -102,11 +102,11 @@ BGPVarRW<A>::read_community(const PathAttributeList<A>& attr)
     if (!ca)
 	return NULL;
 
-    ElemSetU32* es = new ElemSetU32;
+    ElemSetCom32* es = new ElemSetCom32;
 
     const set<uint32_t>& com = ca->community_set();
     for (set<uint32_t>::const_iterator i = com.begin(); i != com.end(); ++i) 
-	es->insert(ElemU32(*i));
+	es->insert(ElemCom32(*i));
     
     return es;
 }
