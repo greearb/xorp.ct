@@ -13,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/backend/version_filter.cc,v 1.1 2005/07/20 01:29:23 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "config.h"
 #include "libxorp/xlog.h"
 #include "version_filter.hh"
 #include "policy/common/element.hh"
+#include <typeinfo>
 
 VersionFilter::VersionFilter(const string& fname) : _filter(new PolicyFilter), _fname(fname)
 {
@@ -76,7 +77,7 @@ try {
 
     XLOG_ASSERT(!_filter.is_empty());
     return _filter->acceptRoute(varrw);
-} catch(const bad_cast& e) {
+} catch(const bad_cast& exp) {
     const Element& e = varrw.read(_fname);
 
     XLOG_FATAL("Reading %s but didn't get ElemFilter! Got %s: (%s)", 
