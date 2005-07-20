@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.12 2005/07/15 23:37:30 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.13 2005/07/20 01:29:21 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -21,6 +21,7 @@
 #include "peer_handler.hh"
 #include "bgp_varrw.hh"
 #include "policy/backend/version_filters.hh"
+#include <typeinfo>
 
 using namespace policy_utils;
 
