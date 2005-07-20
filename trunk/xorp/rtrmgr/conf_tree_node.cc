@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.72 2005/07/08 20:51:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.73 2005/07/12 19:12:22 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -441,6 +441,12 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 	    if (provisional_change) {
 		_deleted = true;
 		_value_committed = false;
+		//
+		// XXX: Mark the whole subtree for deletion so later
+		// the scanning of the tree will invoke the appropriate
+		// method for each node.
+		//
+		mark_subtree_for_deletion(user_id);
 	    } else {
 		delete_subtree_silently();
 	    }
