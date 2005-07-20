@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.2 2005/03/25 02:54:12 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.3 2005/07/08 02:06:22 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "config.h"
@@ -73,8 +73,14 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
     bool default_action = true;
 
     // no configuration done yet.
-    if(!_policies)
+    if(!_policies) {
+	// need to sync.  Consider case where the parent [such as version policy
+	// filter] performed a write for some reason.  If we return without
+	// syncing, it might be a problem [i.e. when using singlevarrw which
+	// will perform the write only on sync!]
+	varrw.sync();
 	return default_action;
+    }	
 
     // run policies
     ostringstream os;

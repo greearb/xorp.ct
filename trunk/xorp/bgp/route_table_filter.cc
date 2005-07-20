@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.29 2005/05/21 01:06:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.30 2005/07/20 01:29:21 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -65,6 +65,7 @@ BGPRouteFilter<A>::propagate_flags(const SubnetRoute<A>& route,
 	new_route.set_policyfilter(i, route.policyfilter(i));
     if(route.is_winner())
 	new_route.set_is_winner(route.igp_metric());
+    new_route.set_nexthop_resolved(route.nexthop_resolved());
 }				   
 
 /*************************************************************************/

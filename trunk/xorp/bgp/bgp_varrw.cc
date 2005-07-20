@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.15 2005/07/20 16:56:51 zec Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.16 2005/07/20 23:01:40 zec Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -32,7 +32,7 @@ BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify,
       _got_fmsg(false), _wrote_ptags(false), 
       _palist(*(rtmsg.route()->attributes())), // XXX: pointer deref in ctr
       _no_modify(no_modify),
-      _modified(false)
+      _modified(false), _route_modify(false)
 {
     for (int i = 0; i < 3; i++)
 	_wrote_pfilter[i] = false;
@@ -185,12 +185,49 @@ BGPVarRW<A>::single_write(const string& id, const Element& e)
 {
     if (_no_modify)
 	return;
+    
+    // XXX need to tidy up this whole class...
+
+    // MODIFY META ROUTING INFORMATION:
+try {    
+    if (id == VersionFilters::filter_import) {
+	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+
+	_pfilter[0] = ef.val();
+	_wrote_pfilter[0] = true;
+	return;
+    }
+
+    if (id == VersionFilters::filter_sm) {
+	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+
+	_pfilter[1] = ef.val();
+	_wrote_pfilter[1] = true;
+	return;
+    }
+    
+    if (id == VersionFilters::filter_ex) {
+	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+
+	_pfilter[2] = ef.val();
+	_wrote_pfilter[2] = true;
+	return;
+    }
+} catch(const bad_cast& ex) {
+    XLOG_FATAL("Bad cast when writing ElemFilter %s (Type=%s) (val=%s)", 
+	       id.c_str(), e.type().c_str(), e.str().c_str());
+}
+
 
     if (id == "policytags") {
 	_ptags = e;
 	_wrote_ptags = true;
 	return;
     }
+
+    // now we modify "real stuff"
+    _route_modify = true;
+    
     if (write_nexthop(id, e))
 	return;
 
@@ -244,37 +281,6 @@ BGPVarRW<A>::single_write(const string& id, const Element& e)
 	return;
     }
     
-    // XXX need to tidy up this whole class...
-try {    
-    if (id == VersionFilters::filter_import) {
-	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
-
-	_pfilter[0] = ef.val();
-	_wrote_pfilter[0] = true;
-	return;
-    }
-
-    if (id == VersionFilters::filter_sm) {
-	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
-
-	_pfilter[1] = ef.val();
-	_wrote_pfilter[1] = true;
-	return;
-    }
-    
-    if (id == VersionFilters::filter_ex) {
-	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
-
-	_pfilter[2] = ef.val();
-	_wrote_pfilter[2] = true;
-	return;
-    }
-} catch(const bad_cast& ex) {
-    XLOG_FATAL("Bad cast when writing ElemFilter %s (Type=%s) (val=%s)", 
-	       id.c_str(), e.type().c_str(), e.str().c_str());
-}
-
-
     // XXX: writing a variable we don't know about!
     XLOG_FATAL("Don't know how to write: %s\n", id.c_str());
 }
@@ -285,6 +291,9 @@ BGPVarRW<A>::end_write()
 {
     // I think there should be a better way of modifying bgp routes... [a copy
     // constructor, or helper methods possibly].
+
+    // OK.  The real problem is that you can't clone a subnet route, and assign
+    // path attributes to it!
 
     if (_no_modify)
 	return;
@@ -320,11 +329,18 @@ BGPVarRW<A>::end_write()
     new_route->set_filtered(old_route->is_filtered());
     if (old_route->is_winner())
 	new_route->set_is_winner(old_route->igp_metric());
+    new_route->set_in_use(old_route->in_use());
+    new_route->set_nexthop_resolved(old_route->nexthop_resolved());
 
     _filtered_rtmsg = new InternalMessage<A>(new_route,
 					     _orig_rtmsg.origin_peer(),
 					     _orig_rtmsg.genid());
-    _filtered_rtmsg->set_changed();
+
+    // XXX memleak:  if we modify only the policytags, the is_changed will not
+    // be set.  Cache table won't add it.  Who deletes the subnet route we just
+    // created!?
+    if (_orig_rtmsg.changed() || _route_modify)
+        _filtered_rtmsg->set_changed();
    
     // propagate internal message flags
     if (_orig_rtmsg.push())

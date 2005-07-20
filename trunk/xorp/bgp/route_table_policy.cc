@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.6 2005/07/08 02:06:18 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.7 2005/07/20 01:29:22 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -55,11 +55,35 @@ PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg,
     try {
 	bool accepted = true;
 
-	debug_msg("[BGP] running filter %s on route: %s\n",
+	void* pf = NULL;
+	int pfi = 0;
+	switch (_filter_type) {
+	    case filter::IMPORT:
+		pfi = 0;
+		break;
+
+	    case filter::EXPORT_SOURCEMATCH:
+		pfi = 1;
+		break;
+	
+	    case filter::EXPORT:
+		pfi = 2;
+		break;
+	}
+	pf = rtmsg.route()->policyfilter(pfi).get();
+	debug_msg("[BGP] running filter %s on route: %s (filter=%p)\n",
 		  filter::filter2str(_filter_type).c_str(),
-		  rtmsg.str().c_str());
+		  rtmsg.str().c_str(), pf);
 
 	accepted = _policy_filters.run_filter(_filter_type, *varrw);
+
+	pf = rtmsg.route()->policyfilter(pfi).get();
+	debug_msg("[BGP] filter after filtering=%p\n", pf);
+
+	// we just did a filtering, so a filter must be assigned to this route!
+	if (!no_modify) {
+	    XLOG_ASSERT(pf);
+	}
 
 	if (!accepted) {
 	    delete varrw;
@@ -306,7 +330,7 @@ PolicyTable<A>::route_dump(const InternalMessage<A>& rtmsg,
     if (fmsg == NULL)
 	return ADD_FILTERED;
 
-    int res = next->route_dump(rtmsg, this, dump_peer);
+    int res = next->route_dump(*fmsg, this, dump_peer);
 
     if (fmsg != &rtmsg)
 	delete fmsg;
