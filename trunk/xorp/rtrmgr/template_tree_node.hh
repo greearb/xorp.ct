@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.27 2005/06/27 17:05:14 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.28 2005/06/28 20:33:25 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -91,6 +91,7 @@ public:
     void set_subtree_default_target_name(const string& default_target_name);
     const string& segname() const { return _segname; }
     string path() const;
+    bool is_module_root_node() const;
 
 #if 0
     bool check_template_tree(string& errmsg) const;

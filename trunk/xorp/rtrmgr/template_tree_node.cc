@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.45 2005/07/10 23:14:44 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.46 2005/07/11 22:10:57 pavlin Exp $"
 
 
 #include <glob.h>
@@ -292,6 +292,21 @@ TemplateTreeNode::path() const
 	path = "";
     }
     return path;
+}
+
+bool
+TemplateTreeNode::is_module_root_node() const
+{
+    string my_module_name, parent_module_name;
+
+    my_module_name = module_name();
+    if (my_module_name.empty())
+	return (false);		// XXX: this node doesn't belong to any module
+
+    if (parent() != NULL)
+	parent_module_name = parent()->module_name();
+
+    return (my_module_name != parent_module_name);
 }
 
 string
