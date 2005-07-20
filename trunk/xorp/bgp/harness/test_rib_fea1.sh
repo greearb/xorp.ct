@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.11 2003/11/05 06:32:44 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.12 2004/12/17 01:31:02 atanu Exp $
 #
 
 #
@@ -512,8 +512,102 @@ test4()
     coord peer3 assert established
 }
 
+test5()
+{
+    echo "TEST5: "
+    echo "	1) Send two update packets with the same route"
+    echo "	2) The nexthops are different one resolves the other doesn't"
+    echo "	3) The route add on the RIB causes the unresolvable nexthop to resolve"
+
+    config_peers
+
+    PACKET1="packet update
+	origin 2
+	aspath $PEER1_AS
+	nexthop 1.2.3.4
+	nlri 10.10.10.0/24"
+
+    PACKET2="packet update
+	origin 2
+	aspath $PEER1_AS
+	nexthop 128.16.0.1
+	nlri 10.10.10.0/24"
+
+    # The nexthop for this packet should never be resolvable.
+    coord peer1 send $PACKET1
+    
+    # Verify that no update packets have been sent to the peers.
+    sleep 2
+    coord peer2 trie recv lookup 10.10.10.0/24 not
+    coord peer3 trie recv lookup 10.10.10.0/24 not
+
+    # Make sure that the nexthop carried in PACKET2 will resolve
+    add_route4 connected true false 128.16.0.0/16 172.16.1.2 1
+    sleep 2
+
+    # Sending this used to cause a fatal error in BGP.
+    coord peer1 send $PACKET2
+
+    # Try and verify that the correct route has popped out at peer2.
+    sleep 2
+    coord peer2 trie recv lookup 10.10.10.0/24 aspath "$AS,$PEER1_AS"
+    coord peer3 trie recv lookup 10.10.10.0/24 aspath "$PEER1_AS"
+    
+    # Make sure that the connections still exist.
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
+test6()
+{
+    echo "TEST6: "
+    echo "	1) Send two update packets with the same route"
+    echo "	2) The nexthops are different one resolves the other doesn't"
+    echo "	3) The route add on the RIB doesn't cause the unresolvable nexthop to resolve"
+
+    config_peers
+
+    PACKET1="packet update
+	origin 2
+	aspath $PEER1_AS
+	nexthop 1.2.3.4
+	nlri 10.10.10.0/32"
+
+    PACKET2="packet update
+	origin 2
+	aspath $PEER1_AS
+	nexthop 128.16.0.1
+	nlri 10.10.10.0/32"
+
+    # Make sure that the nexthop carried in PACKET2 will resolve
+    add_route4 connected true false 128.16.0.0/16 172.16.1.2 1
+    sleep 2
+
+    # The nexthop for this packet should never be resolvable.
+    coord peer1 send $PACKET1
+    
+    # Verify that no update packets have been sent to the peers.
+    sleep 2
+    coord peer2 trie recv lookup 10.10.10.0/32 not
+    coord peer3 trie recv lookup 10.10.10.0/32 not
+
+    # Sending this used to cause a fatal error in BGP.
+    coord peer1 send $PACKET2
+
+    # Try and verify that the correct route has popped out at peer2.
+    sleep 2
+    coord peer2 trie recv lookup 10.10.10.0/32 aspath "$AS,$PEER1_AS"
+    coord peer3 trie recv lookup 10.10.10.0/32 aspath "$PEER1_AS"
+    
+    # Make sure that the connections still exist.
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4'
+TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6'
 
 # Include command line
 . ${srcdir}/args.sh

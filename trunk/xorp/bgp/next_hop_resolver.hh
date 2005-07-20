@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.26 2004/06/10 22:40:30 hodson Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.27 2005/03/25 02:52:41 pavlin Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -623,6 +623,11 @@ public:
     bool premature_invalid(const A& addr, const uint32_t& prefix_len);
 
     /**
+     * An invalidate has been received after we deregistered interest.
+     */
+    bool tardy_invalid(const A& addr, const uint32_t& prefix_len);
+
+    /**
      * Deregister interest with the RIB about this next hop.
      *
      * @param nexthop The next hop that we are attempting to resolve.
@@ -710,6 +715,10 @@ private:
 
     bool _invalid;		// True if received an unmatched invalid call.
     IPNet<A> _invalid_net;	// Saved invalid subnet.
+
+    bool _tardy_invalid;	// True if we are expecting an invalid
+				// from the RIB.
+    IPNet<A> _tardy_invalid_net;// Saved invalid subnet.
 
     /**
      * The queue of outstanding requests.
