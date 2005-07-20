@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.3 2005/07/13 21:58:40 abittau Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.4 2005/07/15 02:27:09 abittau Exp $"
 
 #include "config.h"
 #include "elem_set.hh"
@@ -255,6 +255,9 @@ ElemSetAny<T>::end() const
 // define the various sets
 template class ElemSetAny<ElemU32>;
 template <> const char* ElemSetU32::id = "set_u32";
+
+template class ElemSetAny<ElemCom32>;
+template <> const char* ElemSetCom32::id = "set_com32";
 
 template class ElemSetAny<ElemIPv4Net>;
 template <> const char* ElemSetIPv4Net::id = "set_ipv4net";

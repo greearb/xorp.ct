@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.3 2005/07/15 02:27:09 abittau Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.4 2005/07/20 01:29:24 abittau Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -110,6 +110,31 @@ public:
 
     bool operator==(const ElemU32& rhs) const { return _val == rhs._val; }
     bool operator<(const ElemU32& rhs) const { return _val < rhs._val; }
+
+private:
+    uint32_t _val;
+};
+
+/**
+ * @short 32bit unsigned integer with BGP communities friendly syntax.
+ *    "X"  -> (uint32_t) X
+ *   ":X"  -> (uint16_t) X
+ *  "X:"   -> ((uint16_t) X) << 16
+ *  "X:Y"  -> (((uint16_t) X) << 16) + (uint16_t) Y
+ */
+class ElemCom32 : public Element {
+public:
+    static const char* id;
+    ElemCom32() : Element(id) {}
+    ElemCom32(const char*);		// in element.cc
+    ElemCom32(const uint32_t val) : Element(id), _val(val) {}
+
+    string str() const;			// in element.cc
+    uint32_t val() const { return _val; }
+
+    bool operator==(const ElemCom32& rhs) const { return _val == rhs._val; }
+    bool operator<(const ElemCom32& rhs) const { return _val < rhs._val; }
+
 
 private:
     uint32_t _val;

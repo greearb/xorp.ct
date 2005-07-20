@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.13 2005/07/20 01:29:21 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.14 2005/07/20 02:26:23 atanu Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -115,16 +115,16 @@ template <class A>
 void
 BGPVarRW<A>::write_community(const Element& e)
 {
-    XLOG_ASSERT(e.type() == ElemSetU32::id);
+    XLOG_ASSERT(e.type() == ElemSetCom32::id);
 
-    const ElemSetU32& es = dynamic_cast<const ElemSetU32&>(e);
+    const ElemSetCom32& es = dynamic_cast<const ElemSetCom32&>(e);
 
     if (_palist.community_att())
 	_palist.remove_attribute_by_type(COMMUNITY);
 	
     CommunityAttribute ca;
    
-    for (typename ElemSetU32::const_iterator i = es.begin(); i != es.end(); 
+    for (typename ElemSetCom32::const_iterator i = es.begin(); i != es.end(); 
 	 ++i) {
 	ca.add_community( (*i).val());
     }	

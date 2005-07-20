@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.45 2005/07/15 02:27:05 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.46 2005/07/15 23:37:30 abittau Exp $ */
 
 protocols {
     bgp {
@@ -351,7 +351,7 @@ policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aspath&type:txt=txt&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=community&type:txt=set_u32&access:txt=rw";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=community&type:txt=set_com32&access:txt=rw";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=neighbor&type:txt=ipv4&access:txt=r";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=origin&type:txt=u32&access:txt=rw";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw";
@@ -378,7 +378,7 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		community {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=community ne_int (ctr 'set_u32' '$(@)');";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=community ne_int (ctr 'set_com32' '$(@)');";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		community-list {
@@ -429,7 +429,7 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		community {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=community ne_int (ctr 'set_u32' '$(@)');";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=community ne_int (ctr 'set_com32' '$(@)');";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		neighbor {
@@ -468,15 +468,15 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		community {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community $(<>) (ctr 'set_u32' '$(@)');";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community $(<>) (ctr 'set_com32' '$(@)');";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		community-add {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community = community add (ctr 'set_u32' '$(@)');";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community = community add (ctr 'set_com32' '$(@)');";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		community-del {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community = community - (ctr 'set_u32' '$(@)');";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community = community - (ctr 'set_com32' '$(@)');";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		origin {
@@ -501,7 +501,7 @@ policy {
         %create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
 
         elements {
-            %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_u32&set:txt=$(community-list.@)&elements:txt=$(@)";
+            %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_com32&set:txt=$(community-list.@)&elements:txt=$(@)";
         }
     }
     

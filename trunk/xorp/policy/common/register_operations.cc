@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.5 2005/07/13 21:58:40 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.6 2005/07/15 02:27:10 abittau Exp $"
 
 #include "config.h"
 #include "register_operations.hh"
@@ -246,11 +246,15 @@ do {									\
 
     // SET ADDITION [used for policy tags] -- insert an element in the set.
     disp.add<ElemSetU32, ElemU32, operations::set_add>(OpAdd());
+    disp.add<ElemSetCom32, ElemCom32, operations::set_add>(OpAdd());
    
     // SET operations [used for communities in BGP for example].
     disp.add<ElemSetU32, ElemSetU32, operations::set_ne_int>(OpNEInt());
     disp.add<ElemSetU32, ElemSetU32, operations::set_add>(OpAdd());
     disp.add<ElemSetU32, ElemSetU32, operations::set_del>(OpSub());
+    disp.add<ElemSetCom32, ElemSetCom32, operations::set_ne_int>(OpNEInt());
+    disp.add<ElemSetCom32, ElemSetCom32, operations::set_add>(OpAdd());
+    disp.add<ElemSetCom32, ElemSetCom32, operations::set_del>(OpSub());
 
 #define ADD_LSETBINOP(set, arg)						\
 do {									\
@@ -263,6 +267,7 @@ do {									\
 } while(0)
 
     ADD_LSETBINOP(ElemSetU32, ElemSetU32);
+    ADD_LSETBINOP(ElemSetCom32, ElemSetCom32);
 
 #define ADD_SETBINOP(set, arg)                                          \
 do {                                                                    \
@@ -286,6 +291,12 @@ do {                                                                    \
     ADD_RELOP(ElemU32);
     ADD_MATHOP(ElemU32);
     ADD_SETBINOP(ElemSetU32, ElemU32);
+
+    // com32
+    ADD_EQOP(ElemCom32);
+    ADD_RELOP(ElemCom32);
+    ADD_MATHOP(ElemCom32);
+    ADD_SETBINOP(ElemSetCom32, ElemCom32);
 
     // strings
     ADD_EQOP(ElemStr);
