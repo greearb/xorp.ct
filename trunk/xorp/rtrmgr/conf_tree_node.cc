@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.73 2005/07/12 19:12:22 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.74 2005/07/20 01:55:06 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -594,7 +594,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
     if (_template_tree_node != NULL) {
 	if (_existence_committed == false) {
 	    result =  show_subtree(depth, /* XXX */ depth * 2, true, 
-				   /* numbered */ false, false);
+				   /* numbered */ false, false, false);
 	    delete_subtree_silently();
 	    return result;
 	} else if (_value_committed == false) {
@@ -704,9 +704,9 @@ ConfigTreeNode::get_operator() const
 
 string 
 ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
-			     bool numbered, bool annotate) const
+			     bool numbered, bool annotate,
+			     bool suppress_default_values) const
 {
-
     string s;
     string my_in;
     bool show_me = (depth > 0);
@@ -714,6 +714,9 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
     int new_indent;
 
     if (_deleted)
+	return string("");
+
+    if (suppress_default_values && is_default_value() && is_committed())
 	return string("");
 
     if (_template_tree_node != NULL)
@@ -726,20 +729,32 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	new_indent = indent;
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    if ((*iter)->deleted()) {
-		// skip deleted children
-	    } else {
-		if (annotate) {
-		    if ((*iter)->existence_committed())
-			s += "    ";
-		    else
-			s += ">   ";
-		}
-		s += my_in + show_nodenum(numbered, (*iter)->nodenum()) 
-		    + _segname + " " +
-		    (*iter)->show_subtree(depth, indent, false, 
-					  numbered, annotate);
+	    const ConfigTreeNode* child_ctn = *iter;
+	    if (child_ctn->deleted()) {
+		// Skip deleted children
+		continue;
 	    }
+
+	    if (suppress_default_values && child_ctn->is_default_value()
+		&& child_ctn->is_committed()) {
+		//
+		// Skip children with default values if we don't care about
+		// them.
+		//
+		continue;
+	    }
+
+	    if (annotate) {
+		if (child_ctn->existence_committed())
+		    s += "    ";
+		else
+		    s += ">   ";
+	    }
+	    s += my_in + show_nodenum(numbered, child_ctn->nodenum()) 
+		+ _segname + " " +
+		child_ctn->show_subtree(depth, indent, false, 
+					numbered, annotate,
+					suppress_default_values);
 	}
     } else if (is_a_tag && (show_me == false)) {
 	s = "ERROR";
@@ -750,17 +765,16 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 
 	// annotate modified config lines
 	if (annotate) {
-	    if ((_has_value && !_value_committed) || (!_existence_committed))
+	    if (is_uncommitted())
 		s2 = ">   ";
 	    else
 		s2 = "    ";
 	}
 
 	if (do_indent) {
-	    s = s2 + my_in + show_nodenum(numbered, nodenum())
-		+ _segname;
+	    s = s2 + my_in + show_nodenum(numbered, nodenum()) + _segname;
 	} else {
-	    /* no need to show the node number here */
+	    // no need to show the node number here
 	    XLOG_ASSERT(_parent->is_tag());
 	    s += _segname; 
 	}
@@ -788,7 +802,7 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 		s += " " + value;
 	    } else {
 		if (_operator == OP_NONE) {
-		    //no-op;
+		    // no-op
 		} else if (_operator == OP_ASSIGN) {
 		    s += show_operator() + " " + value;
 		} else {
@@ -796,8 +810,7 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 		}
 	    }
 	}
-	if (_children.size() == 0 
-	    && (type() != NODE_VOID || _has_value)) {
+	if (_children.empty() && (type() != NODE_VOID || _has_value)) {
 	    //
 	    // Normally if a node has no children, we don't want the
 	    // braces, but certain grouping nodes, with type NODE_VOID
@@ -810,16 +823,18 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	s += " {\n";
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(depth+1, new_indent, true, 
-				       numbered, annotate);
+	    s += (*iter)->show_subtree(depth + 1, new_indent, true, 
+				       numbered, annotate,
+				       suppress_default_values);
 	}
 	s += s2 + my_in + "}\n";
     } else if ((is_a_tag == false) && (show_me == false)) {
 	new_indent = indent;
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(depth+1, new_indent, true, 
-				       numbered, annotate);
+	    s += (*iter)->show_subtree(depth + 1, new_indent, true, 
+				       numbered, annotate,
+				       suppress_default_values);
 	}
     }
     return s;
@@ -1782,4 +1797,31 @@ string
 ConfigTreeNode::show_operator() const
 {
     return operator_to_str(_operator);
+}
+
+bool
+ConfigTreeNode::is_committed() const
+{
+    return (! is_uncommitted());
+}
+
+bool
+ConfigTreeNode::is_uncommitted() const
+{
+    return ((_has_value && !_value_committed) || (!_existence_committed));
+}
+
+bool
+ConfigTreeNode::is_default_value() const
+{
+    if (! _has_value)
+	return (false);
+
+    if (_template_tree_node == NULL)
+	return (false);
+
+    if (! _template_tree_node->has_default())
+	return (false);
+
+    return (value() == _template_tree_node->default_str());
 }

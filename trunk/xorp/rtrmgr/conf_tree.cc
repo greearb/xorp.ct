@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.35 2005/07/05 08:55:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.36 2005/07/05 18:08:27 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -392,7 +392,7 @@ ConfigTree::find_config_node(const list<string>& path_segments) const
 
 string
 ConfigTree::show_subtree(const list<string>& path_segments, 
-			 bool numbered) const
+			 bool numbered, bool suppress_default_values) const
 {
     const ConfigTreeNode *found = find_config_node(path_segments);
 
@@ -401,7 +401,8 @@ ConfigTree::show_subtree(const list<string>& path_segments,
 
     string s = found->show_subtree(/* depth */ 0, /* indent */ 0,
 				   /* do_indent */ true, numbered,
-				   /* annotate */ true);
+				   /* annotate */ true,
+				   suppress_default_values);
     return s;
 }
 
@@ -411,7 +412,8 @@ ConfigTree::show_tree(bool numbered) const
     return const_root_node().show_subtree(/* depth */ 0, /* indent */ 0,
 					  /* do_indent */ true, 
 					  numbered,
-					  /* annotate */ true);
+					  /* annotate */ true,
+					  /* suppress_default_values */ false);
 }
 
 string
@@ -420,7 +422,8 @@ ConfigTree::show_unannotated_tree(bool numbered) const
     return const_root_node().show_subtree(/* depth */ 0, /* indent */ 0,
 					  /* do_indent */ true, 
 					  numbered,
-					  /* annotate */ false);
+					  /* annotate */ false,
+					  /* suppress_default_values */ false);
 }
 
 ConfigTreeNode*

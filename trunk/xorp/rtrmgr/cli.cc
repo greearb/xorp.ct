@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.72 2005/07/19 07:08:17 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.73 2005/07/19 23:38:25 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -78,7 +78,8 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node,
     _help_c["run"] = "Run an operational-mode command";
     _help_c["save"] = "Save configuration to a file";
     _help_c["set"] = "Set the value of a parameter";
-    _help_c["show"] = "Show the value of a parameter";
+    _help_c["show"] = "Show the configuration (default values may be suppressed)";
+    _help_c["show -all"] = "Show the configuration (all values displayed)";
     _help_c["top"] = "Exit to top level of configuration";
     _help_c["up"] = "Exit one level of configuration";
 
@@ -352,6 +353,8 @@ configuration below the current position in the command tree (See the \n\
 \"edit\" command for how to move the current position).  The show command \n\
 can also take a part of the configuration as parameters; it will then show \n\
 only the selected part of the configuration.\n\
+Note that all configuration parameters that have default values are not\n\
+displayed.\n\
 \n\
 If the configuration has been modified, any changes not yet committed will \n\
 be highlighted.  For example, if \"show\" displays:\n\
@@ -364,7 +367,16 @@ be highlighted.  For example, if \"show\" displays:\n\
   }\n\
 \n\
 then this indicates that the peer 10.0.0.1 has been created or changed, \n\
-and the change has not yet been applied to the running router configuration.";
+and the change has not yet been applied to the running router configuration.\n\
+\n\
+See also \"show -all\".";
+
+    _help_long_c["show -all"] = "\
+The \"show -all\" command will display all or part of the router configuration.\n\
+It is same as the \"show\" command except that it displays all configuration\n\
+parameters including those that have default values.\n\
+\n\
+See also \"show\".";
 
     _help_long_c["top"] = "\
 The \"top\" command will cause the current position in the configuration \n\
@@ -540,17 +552,6 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	    callback(this, &RouterCLI::op_mode_cmd_interrupt));
 	com1->set_can_pipe(false);
     }
-
-    // com1 = com0->add_command("file", "Perform file operations");
-    // com1->set_can_pipe(false);
-    // com1 = com0->add_command("ping", "Ping a network host");
-    // com1->set_can_pipe(true);
-    // _set_node = com0->add_command("set", "Set CLI properties");
-    // _set_node->set_can_pipe(false);
-    // _show_node = com0->add_command("show", "Show router operational imformation");
-    // _show_node->set_can_pipe(true);
-    // com1 = com0->add_command("traceroute", "Trace the unicast path to a network host");
-    // com1->set_can_pipe(true);
 }
 
 map<string, CliCommandMatch> 
@@ -801,6 +802,10 @@ RouterCLI::add_static_configure_mode_commands()
     _show_node = com0->add_command("show", get_help_c("show"),
 				   callback(this, &RouterCLI::show_func));
     _show_node->set_can_pipe(true);
+    com1 = _show_node->add_command("-all", get_help_c("show -all"),
+				   callback(this, &RouterCLI::show_func));
+    com1->set_global_name("show -all");
+    com1->set_can_pipe(true);
 
     // Top Command
     com1 = com0->add_command("top", get_help_c("top"),
@@ -856,6 +861,18 @@ RouterCLI::configure_mode_help(const string& path) const
 
     } else if (trimmed_path == "exit") {
 	string commands[] = { "configuration-mode", "discard" };
+	is_executable = true;
+	can_pipe = false;
+	size_t i;
+	for (i = 0; i < sizeof(commands)/sizeof(commands[0]); i++) {
+	    command_name = commands[i];
+	    help_string = get_help_c(trimmed_path + " " + command_name);
+	    CliCommandMatch ccm(command_name, help_string, is_executable,
+				can_pipe);
+	    children.insert(make_pair(command_name, ccm));
+	}
+    } else if (trimmed_path == "show") {
+	string commands[] = { "-all" };
 	is_executable = true;
 	can_pipe = false;
 	size_t i;
@@ -949,11 +966,9 @@ RouterCLI::apply_path_change()
     // Rebuild the command subtree for the "show" command
     _show_node->delete_all_commands();
     add_show_subtree();
-    string cmdpath;
-    if (_path.empty())
-	cmdpath = "show";
-    else
-	cmdpath = "show " + pathstr();
+    string cmdpath = "show";
+    if (! _path.empty())
+	cmdpath += " " + pathstr();
     _show_node->set_global_name(cmdpath);
 
     // Set the prompt appropriately
@@ -1275,6 +1290,7 @@ void
 RouterCLI::add_show_subtree()
 {
     CommandTree cmd_tree;
+    CliCommand* com1;
     list<string> cmds;
 
     cmds.push_back("%get");
@@ -1289,15 +1305,26 @@ RouterCLI::add_show_subtree()
     debug_msg("%s", cmd_tree.tree_str().c_str());
     debug_msg("==========================================================\n");
 
-    string cmdpath;
-    if (_path.empty())
-	cmdpath = "show";
-    else
-	cmdpath = "show " + pathstr();
+    string cmdpath = "show";
+    string cmdpath_all= "show -all";
+    if (! _path.empty()) {
+	cmdpath += " " + pathstr();
+	cmdpath_all += " " + pathstr();
+    }
 
     add_command_subtree(*_show_node, cmd_tree.root_node(),
 			callback(this, &RouterCLI::show_func),
 			cmdpath, 0,
+			true /* can_pipe */);
+
+    com1 = _show_node->add_command("-all", get_help_c("show -all"),
+				   callback(this, &RouterCLI::show_func));
+    com1->set_global_name(cmdpath_all);
+    com1->set_can_pipe(true);
+
+    add_command_subtree(*com1, cmd_tree.root_node(),
+			callback(this, &RouterCLI::show_func),
+			cmdpath_all, 0,
 			true /* can_pipe */);
 }
 
@@ -2448,7 +2475,7 @@ RouterCLI::delete_func(const string& ,
 	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
-    string result = config_tree()->show_subtree(path_segments, false);
+    string result = config_tree()->show_subtree(path_segments, false, true);
     cli_client().cli_print("Deleting: \n");
     cli_client().cli_print(result + "\n");
 
@@ -2678,18 +2705,42 @@ RouterCLI::show_func(const string& ,
 		     const string& command_global_name,
 		     const vector<string>& argv)
 {
+    bool is_show_all = false;
+    bool suppress_default_values = true;
+    const string show_command_name = "show";
+    const string show_all_command_name = "show -all";
+
     if (! argv.empty())
 	return (XORP_ERROR);
 
     string cmd_name = command_global_name;
-    XLOG_ASSERT(cmd_name.substr(0, 4) == "show");
+    XLOG_ASSERT(cmd_name.substr(0, show_command_name.size())
+		== show_command_name);
+
+    //
+    // Test if this is the "show -all" command
+    //
+    if (cmd_name.size() >= show_all_command_name.size()) {
+	if (cmd_name.substr(0, show_all_command_name.size())
+	    == show_all_command_name)
+	    is_show_all = true;
+    }
+    if (is_show_all)
+	suppress_default_values = false;
+
     string path;
 
-    if (cmd_name == "show") {
-	// Command "show" with no parameters at the top level
+    if ((cmd_name == show_command_name)
+	|| (cmd_name == show_all_command_name)) {
+	// Command "show" or "show -all" with no parameters at the top level
 	path = "";
     } else {
-	path = cmd_name.substr(5, cmd_name.size() - 5);
+	string::size_type s;
+	if (is_show_all)
+	    s = show_all_command_name.size() + 1;
+	else
+	    s = show_command_name.size() + 1;
+	path = cmd_name.substr(s, cmd_name.size() - s);
     }
 
     list<string> path_segments;
@@ -2703,7 +2754,8 @@ RouterCLI::show_func(const string& ,
 	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
-    string result = config_tree()->show_subtree(path_segments, false);
+    string result = config_tree()->show_subtree(path_segments, false,
+						suppress_default_values);
     cli_client().cli_print(result + "\n");
     config_mode_prompt();
 
