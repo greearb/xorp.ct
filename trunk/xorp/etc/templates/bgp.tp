@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.46 2005/07/15 23:37:30 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.47 2005/07/20 16:56:51 zec Exp $ */
 
 protocols {
     bgp {
@@ -378,7 +378,8 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		community {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=community ne_int (ctr 'set_com32' '$(@)');";
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=community $(<>) (ctr 'set_com32' '$(@)');";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		community-list {

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.6 2005/07/15 02:27:10 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.7 2005/07/20 16:56:52 zec Exp $"
 
 #include "config.h"
 #include "register_operations.hh"
@@ -294,8 +294,8 @@ do {                                                                    \
 
     // com32
     ADD_EQOP(ElemCom32);
-    ADD_RELOP(ElemCom32);
-    ADD_MATHOP(ElemCom32);
+//  ADD_RELOP(ElemCom32);
+//  ADD_MATHOP(ElemCom32);
     ADD_SETBINOP(ElemSetCom32, ElemCom32);
 
     // strings
