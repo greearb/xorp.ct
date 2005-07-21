@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.4 2005/04/07 03:04:15 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.5 2005/07/19 23:16:30 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -315,7 +315,7 @@ Po\=ssible completi\=ons:\\
 \>  run             \>Run an operational-mode command\\
 \>  save            \>Save configuration to a file\\
 \>  set             \>Set the value of a parameter\\
-\>  show            \>Show the value of a parameter\\
+\>  show            \>Show the configuration (default values may be suppressed)\\
 \>  top             \>Exit to top level of configuration\\
 \>  up              \>Exit one level of configuration\\
 XORP> 
@@ -346,11 +346,39 @@ XORP> \textbf{show interfaces}\\
 \>\>\>address 192.150.187.108 \{\\
 \>\>\>\>prefix-length: 25\\
 \>\>\>\>broadcast: 192.150.187.255\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+Note that the \emph{show} command suppresses parameters that have default
+values (as specified in the corresponding router manager template files). Use
+command \emph{show -all} to show the complete configuration including the
+parameters with default values:
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+[edit]\\
+XORP> \textbf{show -all interfaces}\\
+\>interface rl0 \{\\
+\>\>description: "control interface"\\
+\>\>vif rl0 \{\\
+\>\>\>address 192.150.187.108 \{\\
+\>\>\>\>prefix-length: 25\\
+\>\>\>\>broadcast: 192.150.187.255\\
 \>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\>disable: false\\
 \>\>\}\\
 \>\>disable: false\\
+\>\>discard: false\\
 \>\}\\
 \>targetname: "fea"\\
 \end{tabbing}
@@ -358,6 +386,7 @@ XORP> \textbf{show interfaces}\\
 \end{minipage}
 }
 \vspace{0.1in}
+
 
 \newpage
 \subsection{Moving around the Configuration Tree}
@@ -388,9 +417,7 @@ XORP> \textbf{show}\\
 \>address 192.150.187.108 \{\\
 \>\>prefix-length: 25\\
 \>\>broadcast: 192.150.187.255\\
-\>\>disable: false\\
 \>\}\\
-\>disable: false\\
 \\
 \noindent[edit interfaces interface rl0 vif rl0]\\
 XORP> \textbf{up}\\
@@ -451,11 +478,8 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 25\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
-\>disable: false\\
 \\
 \noindent[edit interfaces interface rl0]\\
 XORP> \textbf{set vif rl0 address 192.150.187.108 prefix-length 24}\\
@@ -468,9 +492,7 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 >\>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
 \end{tabbing}
 \end{alltt}
@@ -516,11 +538,8 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
-\>disable: false\\
 \\
 \noindent[edit interfaces interface rl0]\\
 XORP> \textbf{create vif rl0b \{}\\
@@ -538,9 +557,7 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
 > vif rl0b \{\\
 >\>\> address 10.0.0.1 \{\\
@@ -575,19 +592,14 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
 \>vif rl0b \{\\
 \>\> address 10.0.0.1 \{\\
 \>\>\> prefix-length: 16\\
 \>\>\> broadcast: 10.0.255.255\\
-\>\>\> disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
-\>disable: false\\
 \\
 \noindent[edit]\\
 XORP> \textbf{delete interfaces interface rl0 vif rl0b}\\
@@ -595,7 +607,6 @@ Deleting:\\
 \>address 10.0.0.1 \{\\
 \>\>prefix-length: 16\\
 \>\>broadcast: 10.0.255.255\\
-\>\>disable: false\\
 \>\}\\
 \\
 OK\\
@@ -606,11 +617,8 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
-\>disable: false
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -697,9 +705,9 @@ The following non-interactive modes are supported:
   \item Running \xorpsh as part of UNIX command-line pipes:
 
 \begin{verbatim}
-echo "show host os" | ./xorpsh
-cat filename | ./xorpsh
-./xorpsh < filename
+echo "show host os" | xorpsh
+cat filename | xorpsh
+xorpsh < filename
 \end{verbatim}
 
   \item Running \xorpsh as part of a shell script:
@@ -707,7 +715,7 @@ cat filename | ./xorpsh
 \begin{verbatim}
 #!/bin/sh
 
-./xorpsh <<!
+xorpsh <<!
 show host os
 !
 \end{verbatim}
@@ -716,7 +724,7 @@ show host os
    command-line option:
 
 \begin{verbatim}
-./xorpsh -c "show host os"
+xorpsh -c "show host os"
 \end{verbatim}
 
   \item Running \xorpsh as part of an ``expect'' script:
@@ -727,7 +735,7 @@ import time
 import sys
 import pexpect
 
-child=pexpect.spawn ('./xorpsh')
+child=pexpect.spawn ('xorpsh')
 child.expect('Xorp> ')
 child.sendline('show host os | no-more')
 child.sendeof()
