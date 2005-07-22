@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/rtrmgr.tp,v 1.1 2005/07/02 04:20:19 pavlin Exp $ */
 
 rtrmgr {
     targetname:		txt = "rtrmgr";
@@ -151,48 +151,40 @@ rtrmgr {
     load @: url_file {
 	%help:	short "Load configuration file";
 	%create:	program "$(rtrmgr.load-file-command) $(rtrmgr.load-file-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 
     load @: url_ftp {
 	%help:	short "Load configuration file";
 	%create:	program "$(rtrmgr.load-ftp-command) $(rtrmgr.load-ftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 
     load @: url_http {
 	%help:	short "Load configuration file";
 	%create:	program "$(rtrmgr.load-http-command) $(rtrmgr.load-http-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 
     load @: url_tftp {
 	%help:	short "Load configuration file";
 	%create:	program "$(rtrmgr.load-tftp-command) $(rtrmgr.load-tftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 
     save @: url_file {
 	%help:	short "Save configuration file";
 	%create:	program "$(rtrmgr.save-file-command) $(rtrmgr.save-file-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 
     save @: url_ftp {
 	%help:	short "Save configuration file";
 	%create:	program "$(rtrmgr.save-ftp-command) $(rtrmgr.save-ftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 
     save @: url_http {
 	%help:	short "Save configuration file";
 	%create:	program "$(rtrmgr.save-http-command) $(rtrmgr.save-http-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 
     save @: url_tftp {
 	%help:	short "Save configuration file";
 	%create:	program "$(rtrmgr.save-tftp-command) $(rtrmgr.save-tftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
-	%set:;
     }
 }
