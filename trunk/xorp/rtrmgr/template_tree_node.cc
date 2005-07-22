@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.50 2005/07/22 10:37:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.51 2005/07/22 19:38:53 pavlin Exp $"
 
 
 #include <glob.h>
@@ -809,46 +809,64 @@ bool
 TemplateTreeNode::check_variable_name(const vector<string>& parts,
 				      size_t part) const
 {
+    bool ok = false;
+
     debug_msg("check_variable_name: us>%s< match>%s<, %d\n",
 	      _segname.c_str(), parts[part].c_str(), static_cast<int>(part));
-    bool ok = false;
-    if (_parent == NULL) {
-	// Root node
-	ok = true;
-	part--; // Prevent increment of part later
-    } else if (_parent->is_tag()) {
-	// We're the varname after a tag
-	if (parts[part] == "*") {
+
+    do {
+	if (_parent == NULL) {
+	    // Root node
 	    ok = true;
-	} else {
-	    debug_msg("--varname but not wildcarded\n");
+	    part--; // Prevent increment of part later
+	    break;
 	}
-    } else {
+
+	if (_parent->is_tag()) {
+	    // We're the varname after a tag
+	    if (parts[part] == "*") {
+		ok = true;
+	    } else {
+		debug_msg("--varname but not wildcarded\n");
+	    }
+	    break;
+	}
+
 	if (parts[part] != _segname) {
 	    debug_msg("--mismatch\n");
 	    return false;
 	}
+
 	ok = true;
+	break;
+    } while (false);
+
+    if (! ok)
+	return false;
+
+    if (part == parts.size() - 1) {
+	// Everything that we were looking for matched
+	// Final check that we haven't finished at a tag
+	if (is_tag())
+	    return (false);
+	debug_msg("**match successful**\n");
+	return true;
     }
-    if (ok) {
-	if (part == parts.size() - 1) {
-	    // Everything that we were looking for matched
-	    debug_msg("**match successful**\n");
+
+    if (_children.empty()) {
+	// No more children, but the search string still has components
+	debug_msg("--no children\n");
+	return false;
+    }
+
+    list<TemplateTreeNode*>::const_iterator tti;
+    for (tti = _children.begin(); tti != _children.end(); ++tti) {
+	if ((*tti)->check_variable_name(parts, part + 1)) {
 	    return true;
 	}
-	if (_children.empty()) {
-	    // No more children, but the search string still has components
-	    debug_msg("--no children\n");
-	    return false;
-	}
-	list<TemplateTreeNode*>::const_iterator tti;
-	for (tti = _children.begin(); tti != _children.end(); ++tti) {
-	    if ((*tti)->check_variable_name(parts, part + 1)) {
-		return true;
-	    }
-	}
-	debug_msg("--no successful children, %d\n", static_cast<int>(part));
     }
+    debug_msg("--no successful children, %d\n", static_cast<int>(part));
+
     return false;
 }
 
