@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.34 2005/07/20 01:57:02 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.35 2005/07/22 02:27:18 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -645,6 +645,11 @@ If a node that is deleted does not have a {\tt \%delete} command, then
 the {\tt \%delete} commands of its children are called instead.
 This rule is applied recursively for each child that does not have
 a {\tt \%delete} command.
+For example, lets say A is a parent of B1 and B2, and B1 is a parent of C1.
+Also, lets say that only B2 and C1 have {\tt \%delete} methods.
+If we delete A, then both B2's and C1's {\tt \%delete} methods are invoked.
+If, however, B1 also has a {\tt \%delete} method, then deleting A will invoke
+only B1 and B2's {\tt \%delete} methods.
 
 \subsubsection{The {\tt \%set} Command.}
 {\tt \%set} is called to set the value of a leaf node in the
