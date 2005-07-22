@@ -13,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.2 2004/09/18 02:06:20 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.3 2005/03/25 02:52:47 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_SM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_SM_HH__
 
 #include "route_table_policy.hh"
+#include "libxorp/eventloop.hh"
 
 /**
  * @short SourceMatch table has the aditional ability to perform route dumps.
@@ -35,11 +36,13 @@ public:
      * @param safi the safi.
      * @param parent the parent table.
      * @param pfs a reference to the global policyfilters.
+     * @param ev event loop for this process.
      */
     PolicyTableSourceMatch(const string& tablename,
 			   const Safi& safi,
 			   BGPRouteTable<A>* parent,
-			   PolicyFilters& pfs);
+			   PolicyFilters& pfs,
+			   EventLoop& ev);
     ~PolicyTableSourceMatch();
 
     /**
@@ -59,10 +62,18 @@ public:
      */
     void end_route_dump();
 
+    /**
+     * Do a background route dump
+     */
+    void do_background_dump();
 
 private:
+    EventLoop&		eventloop();
+
     bool		_pushing_routes;
     DumpIterator<A>*	_dump_iter;
+    EventLoop&		_ev;
+    XorpTimer		_dump_timer;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_SM_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_sm.cc,v 1.2 2004/09/18 02:06:19 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_sm.cc,v 1.3 2005/03/25 02:52:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,9 +28,10 @@ template <class A>
 PolicyTableSourceMatch<A>::PolicyTableSourceMatch(const string& tablename, 
 						  const Safi& safi,
 						  BGPRouteTable<A>* parent,
-						  PolicyFilters& pfs)
+						  PolicyFilters& pfs,
+						  EventLoop& ev)
     : PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT_SOURCEMATCH),
-      _pushing_routes(false), _dump_iter(NULL) 
+      _pushing_routes(false), _dump_iter(NULL), _ev(ev)
 
 {
     this->_parent = parent;		
@@ -55,8 +56,7 @@ PolicyTableSourceMatch<A>::push_routes(list<const PeerTableInfo<A>*>& peer_list)
 
     debug_msg("[BGP] Push routes\n");
 
-    while (_pushing_routes)
-	do_next_route_dump();
+    do_background_dump();
 }
 
 template <class A>
@@ -90,6 +90,34 @@ PolicyTableSourceMatch<A>::end_route_dump()
     delete _dump_iter;
     _dump_iter = NULL;
     _pushing_routes = false;
+    _dump_timer.unschedule();
+}
+
+template <class A>
+EventLoop&
+PolicyTableSourceMatch<A>::eventloop()
+{
+    return _ev;
+}
+
+template <class A>
+void
+PolicyTableSourceMatch<A>::do_background_dump()
+{
+    debug_msg("[BGP] doing a background dump step\n");
+
+    // we are done...
+    if (!_pushing_routes)
+	return;
+
+    // do a dump
+    do_next_route_dump();
+
+    // continue in background...
+    _dump_timer = eventloop().
+		    new_oneoff_after_ms(0,
+		     callback(this,
+			      &PolicyTableSourceMatch<A>::do_background_dump));
 }
 
 template class PolicyTableSourceMatch<IPv4>;

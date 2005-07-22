@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.5 2005/07/20 01:29:22 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.6 2005/07/20 16:23:12 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -50,36 +50,17 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     // it is a "policy dump"
     XLOG_ASSERT(caller == this->_parent);
     
-    bool was_filtered = rtmsg.route()->is_filtered();
-    
-    debug_msg("[BGP] Policy route dump: %s\nWas filtered: %d\n",
-	      rtmsg.str().c_str(), was_filtered);
+    debug_msg("[BGP] Policy route dump: %s\n\n", rtmsg.str().c_str());
 
     // "old" filter...
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    was_filtered = (fmsg == NULL);
-
-    // new route
-    SubnetRoute<A>* cur_rt = new SubnetRoute<A>(*rtmsg.route());
+    bool was_filtered = (fmsg == NULL);
 
     // we want current filter
-    for (int i = 0; i < 3; i++)
-        cur_rt->set_policyfilter(i, RefPf());
-
-    InternalMessage<A>* tmp_im = new InternalMessage<A>(cur_rt,
-						        rtmsg.origin_peer(),
-						        rtmsg.genid());
-    if(rtmsg.changed())
-	tmp_im->set_changed();
-    if(rtmsg.push())
-	tmp_im->set_push();
-    if(rtmsg.from_previous_peering())
-	tmp_im->set_from_previous_peering();
+    rtmsg.route()->set_policyfilter(0, RefPf());
 
     // filter new message
-    const InternalMessage<A>* new_msg = do_filtering(*tmp_im, false);
-    if (tmp_im != new_msg)
-        delete tmp_im;
+    const InternalMessage<A>* new_msg = do_filtering(rtmsg, false);
 
     bool accepted = (new_msg != NULL);
 
@@ -96,31 +77,27 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	    debug_msg("[BGP] Policy add_route [accepted, was filtered]");
 	    res = next->add_route(*new_msg, this);
 	} else {
-#if 0	
-	    // I think it is suicidal to replace the same route, so copy it.
-	    // but we need to, so it goes down to the other filters...
-	    if (fmsg == &rtmsg) {
-		SubnetRoute<A>* new_route = new SubnetRoute<A>(*(rtmsg.route()));
-
-		InternalMessage<A>* new_fmsg;
-		new_fmsg = new InternalMessage<A>(new_route,
-						  rtmsg.origin_peer(),
-					          rtmsg.genid());
-	
-		// propagate flags
-		if (rtmsg.push())
-		    new_fmsg->set_push();
-		if (rtmsg.from_previous_peering())
-		    new_fmsg->set_from_previous_peering();
-		if (rtmsg.changed())
-		    new_fmsg->set_changed();
-	    
-		fmsg = new_fmsg;
-	    }	
-#endif
 	    debug_msg("[BGP] Policy replace_route old=(%s) new=(%s)\n",
 		      fmsg->str().c_str(), new_msg->str().c_str());
-	    res = next->replace_route(*fmsg, *new_msg, this);
+
+
+	    // XXX don't check return of deleteroute!
+	    res = next->delete_route(*fmsg, this);
+
+	    // current filters
+
+	    for (int i = 1; i < 3; i++)
+		new_msg->route()->set_policyfilter(i, RefPf());
+	
+	    res = next->add_route(*new_msg, this);
+
+	    // XXX this won't work.  We need to keep original filter pointers on
+	    // old route and null pointers on new route.  If we clone the old
+	    // route, the cache table will find it, and send out the cached old
+	    // route which still has pointer to original parent, which now has
+	    // null pointers, in the case we sent them in the new route which
+	    // has same parent.  [it's a mess... fix soon]
+//	    res = next->replace_route(*fmsg, *new_msg, this);
 	}
     } else {
 	// not accepted
@@ -134,7 +111,8 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     if (fmsg != &rtmsg)
 	delete fmsg;
 
-    delete new_msg;
+    if (new_msg != &rtmsg)
+	delete new_msg;
 
     return res;
 }

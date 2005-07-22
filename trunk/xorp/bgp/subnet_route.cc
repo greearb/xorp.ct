@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.16 2005/03/25 02:52:48 pavlin Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.17 2005/07/20 01:29:22 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -276,6 +276,8 @@ template<class A>
 const RefPf&
 SubnetRoute<A>::policyfilter(uint32_t i) const
 {
+    if (_parent_route)
+	return _parent_route->policyfilter(i);
     return _pfilter[i];
 }
 
