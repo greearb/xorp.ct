@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.49 2005/07/22 02:52:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.50 2005/07/22 10:37:00 pavlin Exp $"
 
 
 #include <glob.h>
@@ -1209,7 +1209,8 @@ IPv4NetTemplate::type_match(const string& s, string& errmsg) const
 	errmsg = "Value must be a subnet in address/prefix-length form.";
 	return false;
     } catch (InvalidNetmaskLength) {
-	errmsg = "Prefix length must be an integer between 0 and 32.";
+	errmsg = c_format("Prefix length must be an integer between 0 and %u.",
+			  IPv4::addr_bitlen());
 	return false;
     }
     return true;
@@ -1332,7 +1333,8 @@ IPv6NetTemplate::type_match(const string& s, string& errmsg) const
 	errmsg = "Value must be an IPv6 subnet in address/prefix-length form.";
 	return false;
     } catch (InvalidNetmaskLength) {
-	errmsg = "Prefix length must be an integer between 0 and 128.";
+	errmsg = c_format("Prefix length must be an integer between 0 and %u.",
+			  IPv6::addr_bitlen());
 	return false;
     }
     return true;
