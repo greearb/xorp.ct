@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.48 2005/07/22 02:34:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.49 2005/07/22 02:52:43 pavlin Exp $"
 
 
 #include <glob.h>
@@ -1121,6 +1121,15 @@ IPv4Template::~IPv4Template()
 	delete _default;
 }
 
+string
+IPv4Template::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
+}
+
 bool
 IPv4Template::type_match(const string& s, string& errmsg) const
 {
@@ -1136,55 +1145,6 @@ IPv4Template::type_match(const string& s, string& errmsg) const
 	delete ipv4;
     } catch (InvalidString) {
 	errmsg = "Value must be an IP address in dotted decimal form.";
-	return false;
-    }
-    return true;
-}
-
-
-/**************************************************************************
- * IPv6Template
- **************************************************************************/
-
-IPv6Template::IPv6Template(TemplateTree& template_tree,
-			   TemplateTreeNode* parent,
-			   const string& path, const string& varname,
-			   const string& initializer) throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname),
-      _default(NULL)
-{
-    if (! initializer.empty()) {
-	try {
-	    _default = new IPv6(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad IPv6 type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
-    }
-}
-
-IPv6Template::~IPv6Template()
-{
-    if (_default != NULL)
-	delete _default;
-}
-
-bool
-IPv6Template::type_match(const string& s, string& errmsg) const
-{
-    string tmp = strip_quotes(s);
-
-    if (tmp.empty()) {
-	errmsg = "Value must be an IPv4 address.";
-	return false;
-    }
-
-    try {
-	IPv6* ipv6 = new IPv6(tmp.c_str());
-	delete ipv6;
-    } catch (InvalidString) {
-	errmsg = "Value must be an IPv6 address.";
 	return false;
     }
     return true;
@@ -1223,6 +1183,15 @@ IPv4NetTemplate::~IPv4NetTemplate()
 	delete _default;
 }
 
+string
+IPv4NetTemplate::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
+}
+
 bool
 IPv4NetTemplate::type_match(const string& s, string& errmsg) const
 {
@@ -1241,6 +1210,64 @@ IPv4NetTemplate::type_match(const string& s, string& errmsg) const
 	return false;
     } catch (InvalidNetmaskLength) {
 	errmsg = "Prefix length must be an integer between 0 and 32.";
+	return false;
+    }
+    return true;
+}
+
+
+/**************************************************************************
+ * IPv6Template
+ **************************************************************************/
+
+IPv6Template::IPv6Template(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
+			   const string& path, const string& varname,
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
+{
+    if (! initializer.empty()) {
+	try {
+	    _default = new IPv6(initializer.c_str());
+	} catch (InvalidString) {
+	    string err = "Bad IPv6 type value: " + initializer;
+	    xorp_throw(ParseError, err);
+	}
+	set_has_default();
+    }
+}
+
+IPv6Template::~IPv6Template()
+{
+    if (_default != NULL)
+	delete _default;
+}
+
+string
+IPv6Template::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
+}
+
+bool
+IPv6Template::type_match(const string& s, string& errmsg) const
+{
+    string tmp = strip_quotes(s);
+
+    if (tmp.empty()) {
+	errmsg = "Value must be an IPv4 address.";
+	return false;
+    }
+
+    try {
+	IPv6* ipv6 = new IPv6(tmp.c_str());
+	delete ipv6;
+    } catch (InvalidString) {
+	errmsg = "Value must be an IPv6 address.";
 	return false;
     }
     return true;
@@ -1277,6 +1304,15 @@ IPv6NetTemplate::~IPv6NetTemplate()
 {
     if (_default != NULL)
 	delete _default;
+}
+
+string
+IPv6NetTemplate::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
 }
 
 bool
@@ -1329,6 +1365,15 @@ MacaddrTemplate::~MacaddrTemplate()
 {
     if (_default != NULL)
 	delete _default;
+}
+
+string
+MacaddrTemplate::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
 }
 
 bool

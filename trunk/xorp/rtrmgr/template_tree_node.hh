@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.29 2005/07/20 22:03:41 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.30 2005/07/22 02:34:29 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -275,7 +275,7 @@ public:
     string typestr() const { return string("IPv4"); }
     TTNodeType type() const { return NODE_IPV4; }
     IPv4 default_value() const { return *_default; }
-    string default_str() const { return _default->str(); }
+    string default_str() const;
     bool type_match(const string& s, string& errmsg) const;
 
 private:
@@ -292,7 +292,7 @@ public:
     string typestr() const { return string("IPv4Net"); }
     TTNodeType type() const { return NODE_IPV4NET; }
     IPv4Net default_value() const { return *_default; }
-    string default_str() const { return _default->str(); }
+    string default_str() const;
     bool type_match(const string& s, string& errmsg) const;
 
 private:
@@ -309,7 +309,7 @@ public:
     string typestr() const { return string("IPv6"); }
     TTNodeType type() const { return NODE_IPV6; }
     IPv6 default_value() const { return *_default; }
-    string default_str() const { return _default->str(); }
+    string default_str() const;
     bool type_match(const string& s, string& errmsg) const;
 
 private:
@@ -326,7 +326,7 @@ public:
     string typestr() const { return string("IPv6Net"); }
     TTNodeType type() const { return NODE_IPV6NET; }
     IPv6Net default_value() const { return *_default; }
-    string default_str() const { return _default->str(); }
+    string default_str() const;
     bool type_match(const string& s, string& errmsg) const;
 
 private:
@@ -343,7 +343,7 @@ public:
     string typestr() const { return string("macaddr"); }
     TTNodeType type() const { return NODE_MACADDR; }
     Mac default_value() const { return *_default; }
-    string default_str() const { return _default->str(); }
+    string default_str() const;
     bool type_match(const string& s, string& errmsg) const;
 
 private:
