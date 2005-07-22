@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.7 2005/07/20 01:29:22 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.8 2005/07/20 23:35:09 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -162,6 +162,11 @@ PolicyTable<A>::add_route(const InternalMessage<A> &rtmsg,
     if (!fmsg)
 	return ADD_FILTERED;
 
+    if (rtmsg.changed() && fmsg != &rtmsg) {
+	debug_msg("[BGP] PolicyTable got modified route, deleting previous\n");
+	rtmsg.route()->unref();
+    }	
+
     int res = next->add_route(*fmsg, this);
 
     if (fmsg != &rtmsg)
@@ -221,7 +226,11 @@ PolicyTable<A>::replace_route(const InternalMessage<A>& old_rtmsg,
 #endif
 
     const InternalMessage<A>* fold = do_filtering(old_rtmsg, false);
+    if (old_rtmsg.changed() && fold != &old_rtmsg)
+	old_rtmsg.route()->unref();
     const InternalMessage<A>* fnew = do_filtering(new_rtmsg, false);
+    if (new_rtmsg.changed() && fnew != &new_rtmsg)
+	new_rtmsg.route()->unref();
 
     // XXX: We can probably use the is_filtered flag...
     int res;
@@ -284,6 +293,9 @@ PolicyTable<A>::delete_route(const InternalMessage<A>& rtmsg,
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     if (fmsg == NULL)
 	return 0;
+    
+    if (rtmsg.changed() && fmsg != &rtmsg)
+	rtmsg.route()->unref();
 
     int res = next->delete_route(*fmsg, this);
 
@@ -329,6 +341,9 @@ PolicyTable<A>::route_dump(const InternalMessage<A>& rtmsg,
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     if (fmsg == NULL)
 	return ADD_FILTERED;
+
+    if (rtmsg.changed() && &rtmsg != fmsg)
+	rtmsg.route()->unref();
 
     int res = next->route_dump(*fmsg, this, dump_peer);
 

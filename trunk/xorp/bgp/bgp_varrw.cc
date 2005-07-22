@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.16 2005/07/20 23:01:40 zec Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.17 2005/07/20 23:35:09 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -43,8 +43,12 @@ BGPVarRW<A>::~BGPVarRW()
 {
     // nobody ever obtained the filtered message but we actually created one. We
     // must delete it as no one else can, at this point.
-    if (!_got_fmsg && _filtered_rtmsg)
+    if (!_got_fmsg && _filtered_rtmsg) {
+	if (_filtered_rtmsg->changed())
+	    _filtered_rtmsg->route()->unref();
+
 	delete _filtered_rtmsg;
+    }	
 }
 
 template <class A>
@@ -175,6 +179,7 @@ template <class A>
 InternalMessage<A>*
 BGPVarRW<A>::filtered_message()
 {
+    XLOG_ASSERT(_modified && _filtered_rtmsg);
     _got_fmsg = true;
     return _filtered_rtmsg;
 }
@@ -218,6 +223,11 @@ try {
 	       id.c_str(), e.type().c_str(), e.str().c_str());
 }
 
+    // now we modify "real stuff"
+    // XXX: maybe we should make policytags be like filter pointers... i.e. meta
+    // information, rather than real route information...
+    _route_modify = true;
+    
 
     if (id == "policytags") {
 	_ptags = e;
@@ -225,9 +235,6 @@ try {
 	return;
     }
 
-    // now we modify "real stuff"
-    _route_modify = true;
-    
     if (write_nexthop(id, e))
 	return;
 
@@ -298,6 +305,16 @@ BGPVarRW<A>::end_write()
     if (_no_modify)
 	return;
 
+    // only meta routing stuff changed [i.e. policy filter pointers... so we can
+    // get away without creating a new subnet route, etc]
+    if (!_route_modify) {
+	for (int i = 0; i < 3; i++) {
+	    if (_wrote_pfilter[i])
+		_orig_rtmsg.route()->set_policyfilter(i, _pfilter[i]);
+	}
+	return;
+    }
+
     _palist.rehash();
 
     const SubnetRoute<A>* old_route = _orig_rtmsg.route();
@@ -320,7 +337,7 @@ BGPVarRW<A>::end_write()
 	    // be the original one which was in ribin,.. as we never update it].
 	    old_route->set_policyfilter(i, _pfilter[i]);
 	    new_route->set_policyfilter(i, _pfilter[i]);
-	}    
+	}
 	else
 	    new_route->set_policyfilter(i, old_route->policyfilter(i));
     }
@@ -336,22 +353,13 @@ BGPVarRW<A>::end_write()
 					     _orig_rtmsg.origin_peer(),
 					     _orig_rtmsg.genid());
 
-    // XXX memleak:  if we modify only the policytags, the is_changed will not
-    // be set.  Cache table won't add it.  Who deletes the subnet route we just
-    // created!?
-    if (_orig_rtmsg.changed() || _route_modify)
-        _filtered_rtmsg->set_changed();
+    _filtered_rtmsg->set_changed();
    
     // propagate internal message flags
     if (_orig_rtmsg.push())
 	_filtered_rtmsg->set_push();
     if (_orig_rtmsg.from_previous_peering())
 	_filtered_rtmsg->set_from_previous_peering();
-
-    // delete route which may have been changed by previous filter.
-    // XXX I don't know if this is correct or not!!!!
-//    if (_orig_rtmsg.changed())
-//	old_route->unref();
 
     _modified = true;
 }

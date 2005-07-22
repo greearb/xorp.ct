@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.6 2005/07/20 16:23:12 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.7 2005/07/22 01:20:11 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,6 +61,13 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 
     // filter new message
     const InternalMessage<A>* new_msg = do_filtering(rtmsg, false);
+    
+    // check if route was modified by our filters.  If it was, and it was
+    // modified by the static filters, then we need to free the new subnet route
+    // allocated by static filters...
+    if (rtmsg.changed() && fmsg != &rtmsg && new_msg != &rtmsg) {
+	rtmsg.route()->unref();
+    }
 
     bool accepted = (new_msg != NULL);
 
@@ -81,11 +88,39 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 		      fmsg->str().c_str(), new_msg->str().c_str());
 
 
+	    // we will delete and add the same subnetroute!
+	    // make new internal message to preserve route.
+	    if (fmsg->route() == new_msg->route()) {
+		SubnetRoute<A>* copy_rt = new SubnetRoute<A>(*new_msg->route());
+		InternalMessage<A>* copy_msg = 
+		    new InternalMessage<A>(copy_rt, new_msg->origin_peer(),
+					   new_msg->genid());
+		
+		XLOG_ASSERT(new_msg->changed());
+		
+		if (new_msg->changed())
+		    copy_msg->set_changed();
+	
+		if (new_msg->push())
+		    copy_msg->set_push();
+
+		if (new_msg->from_previous_peering())
+		    copy_msg->set_from_previous_peering();
+
+		if (new_msg != &rtmsg)
+		    delete new_msg;
+
+		new_msg = copy_msg;
+	    }
+
+	    XLOG_ASSERT(fmsg != new_msg);
+
 	    // XXX don't check return of deleteroute!
 	    res = next->delete_route(*fmsg, this);
 
-	    // current filters
+	    XLOG_ASSERT(new_msg->route());
 
+	    // current filters
 	    for (int i = 1; i < 3; i++)
 		new_msg->route()->set_policyfilter(i, RefPf());
 	
