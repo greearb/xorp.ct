@@ -11,15 +11,6 @@ in the standard header decode code.
 
 2) I don't think that the LSA routines check their own type field either.
 
-3) The Network Mask field in OSPFv2 hello packets currently we seem to
-be setting an index not a mask, check the spec to see what we should
-be doing.
-
-4) The LsaDecoder should have a method that can be used to check if LS
-types are valid. This method should be used by data_description_received.
-
-5) Are external-LSAs allowed in NSSAs?
-
 7) Can an interface a peer in our code have more than one subnet
 associated with it?
 
@@ -30,7 +21,7 @@ fill in the Router LSA.
 
 10) Section 3.3 Classification of routers. Add an OSPF enumeration for the
 four classifications. Note that the classifications are
-overlappying. Add four predicate methods to the peer manager that will
+overlapping. Add four predicate methods to the peer manager that will
 return the status of the router. For example if the router is only
 configured with one area internal_router_p will return true.
 
@@ -67,3 +58,23 @@ Possible issues
 packet or on the router ID, depending on the linktype that the packet
 arrived on. If a packet is being demultipled on the source address and
 the router ID changes is this likely to be a problem?
+
+Done
+~~~~
+
+3) The Network Mask field in OSPFv2 hello packets currently we seem to
+be setting an index not a mask, check the spec to see what we should
+be doing.
+
+[This field is a mask and the code treats it as an opaque
+quantity. The test code treats it as a mask]
+
+4) The LsaDecoder should have a method that can be used to check if LS
+types are valid. This method should be used by data_description_received.
+
+[DONE]
+
+5) Are external-LSAs allowed in NSSAs?
+
+[NO]
+
