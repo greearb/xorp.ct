@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.52 2005/07/06 16:33:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.53 2005/07/08 16:42:35 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -552,6 +552,7 @@ MasterConfigTree::commit_pass1_done(bool success, string result)
     } else {
 	string msg = "Commit pass 1 failed: " + result;
 	XLOG_ERROR("%s", msg.c_str());
+	_commit_in_progress = false;
 	_commit_cb->dispatch(false, result);
     }
 }
