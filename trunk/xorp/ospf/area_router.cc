@@ -250,11 +250,9 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	case OspfTypes::BORDER:
 	    break;
 	case OspfTypes::STUB:
+	case OspfTypes::NSSA:
  	    if ((*i)->external())
  		continue;
-	    break;
-	case OspfTypes::NSSA:
-	    XLOG_WARNING("TBD Check RFC 3101");
 	    break;
 	}
 	const Lsa_header& lsah = (*i)->get_header();
