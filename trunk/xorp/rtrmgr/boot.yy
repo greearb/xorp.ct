@@ -67,6 +67,7 @@ literal:	LITERAL { nodenum = 0;
 		;
 
 literals:	literals literal
+		| literal STRING { extend_path($2, NODE_TEXT, nodenum); }
 		| literal LITERAL { extend_path($2, NODE_TEXT, nodenum); }
 		| literal BOOL_VALUE { extend_path($2, NODE_BOOL, nodenum); }
 		| literal UINT_VALUE { extend_path($2, NODE_UINT, nodenum); }
