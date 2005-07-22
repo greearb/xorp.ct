@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.47 2005/07/20 22:03:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.48 2005/07/22 02:34:29 pavlin Exp $"
 
 
 #include <glob.h>
@@ -85,6 +85,7 @@ void
 TemplateTreeNode::add_cmd(const string& cmd)
     throw (ParseError)
 {
+    string errmsg;
     BaseCommand* command;
 
     if (cmd == "%modinfo") {
@@ -127,8 +128,24 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	       || (cmd == "%unset")
 	       || (cmd == "%get")
 	       || (cmd == "%default")) {
+	//
+	// Check if we are allowed to add this command
+	//
+	if (cmd == "%set") {
+	    // XXX: only leaf nodes should have %set command
+	    if (! is_leaf()) {
+		errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
+		errmsg += "This command only applies to leaf nodes that have ";
+		errmsg += "values and only if the value is allowed to be ";
+		errmsg += "changed.\n";
+		xorp_throw(ParseError, errmsg);
+	    }
+	}
+
+	//
 	// If the command already exists, no need to create it again.
 	// The command action will simply be added to the existing command.
+	//
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
 	    // we just create a placeholder here - if we were a master
 	    // template tree node we'd create a real command.
@@ -138,11 +155,11 @@ TemplateTreeNode::add_cmd(const string& cmd)
     } else if (cmd == "%mandatory") {
 	// Nothing to do
     } else {
-	string err = "Invalid command \"" + cmd + "\"\n";
-	err += "Valid commands are %create, %delete, %set, %unset, %get, ";
-	err += "%default, %modinfo, %activate, %update, %allow, %allow-range, %mandatory, ";
-	err += "%deprecated, %order\n";
-	xorp_throw(ParseError, err);
+	errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
+	errmsg += "Valid commands are %create, %delete, %set, %unset, %get, ";
+	errmsg += "%default, %modinfo, %activate, %update, %allow, ";
+	errmsg += "%allow-range, %mandatory, %deprecated, %order\n";
+	xorp_throw(ParseError, errmsg);
     }
 }
 

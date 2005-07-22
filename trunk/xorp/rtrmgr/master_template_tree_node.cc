@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.2 2005/03/25 02:54:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.3 2005/07/11 21:49:29 pavlin Exp $"
 
 
 #include <glob.h>
@@ -143,6 +143,8 @@ MasterTemplateTreeNode::expand_template_tree(string& errmsg)
 bool
 MasterTemplateTreeNode::check_template_tree(string& errmsg) const
 {
+    const BaseCommand *base_cmd = NULL;
+
     //
     // Check whether all referred variable names are valid.
     // First check the module-specific methods, then all commands
@@ -164,7 +166,7 @@ MasterTemplateTreeNode::check_template_tree(string& errmsg) const
     }
 
     //
-    // Check all commands for this node
+    // Check all refered variables for this node
     //
     map<string, BaseCommand *>::const_iterator iter1;
     for (iter1 = _cmd_map.begin(); iter1 != _cmd_map.end(); ++iter1) {
@@ -173,6 +175,19 @@ MasterTemplateTreeNode::check_template_tree(string& errmsg) const
 	if (command != NULL) {
 	    if (! command->check_referred_variables(errmsg))
 		return false;
+	}
+    }
+
+    //
+    // Check specific commands for this node
+    //
+    // XXX: only leaf nodes should have %set command
+    base_cmd = const_command("%set");
+    if (base_cmd != NULL) {
+	if (! is_leaf()) {
+	    errmsg = c_format("Found %%set command in non-leaf node \"%s\"",
+			      path().c_str());
+	    return false;
 	}
     }
 
