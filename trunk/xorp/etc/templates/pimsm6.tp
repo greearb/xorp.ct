@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.23 2005/05/18 00:01:22 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.24 2005/06/01 00:36:57 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -160,7 +160,7 @@ protocols {
 
 		alternative-subnet @ {
 		    %help:	short "Fake a subnet to appear directly-connected";
-		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/add_alternative_subnet6?vif_name:txt=$(vif.@)&subnet:ipv6net=$(alternative-subnet.@)";
+		    %create:	xrl "$(pimsm6.targetname)/pim/0.1/add_alternative_subnet6?vif_name:txt=$(vif.@)&subnet:ipv6net=$(alternative-subnet.@)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/delete_alternative_subnet6?vif_name:txt=$(vif.@)&subnet:ipv6net=$(alternative-subnet.@)";
 		}
 	    }
