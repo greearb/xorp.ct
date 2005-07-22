@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.74 2005/07/20 01:55:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.75 2005/07/21 09:01:50 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -654,9 +654,7 @@ ConfigTreeNode::is_leaf() const
 	return true;
     if (_template_tree_node == NULL)
 	return false;
-    if ((_template_tree_node->type() != NODE_VOID)
-	&& (_parent != NULL)
-	&& (!_parent->is_tag()))
+    if (_template_tree_node->is_leaf())
 	return true;
     return false;
 }
