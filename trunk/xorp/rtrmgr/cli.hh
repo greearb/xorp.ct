@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.31 2005/07/19 07:08:18 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.32 2005/07/19 23:38:25 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -38,7 +38,9 @@ class OpInstance;
 class SlaveConfigTree;
 class SlaveConfigTreeNode;
 class TemplateTree;
-class XorpShell;
+
+class XorpShellBase;
+
 class XrlAtomList;
 
 enum CliModeType {
@@ -50,8 +52,9 @@ enum CliModeType {
 
 class RouterCLI {
 public:
-    RouterCLI(XorpShell& xorpsh, CliNode& cli_node, int cli_client_input_fd,
-	      int cli_client_output_fd, bool verbose) throw (InitError);
+    RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
+	      int cli_client_input_fd, int cli_client_output_fd,
+	      bool verbose) throw (InitError);
     ~RouterCLI();
 
     bool done() const;
@@ -285,7 +288,7 @@ private:
     OpCommandList*	op_cmd_list() const;
     uint32_t clientid() const;
 
-    XorpShell&		_xorpsh;
+    XorpShellBase&     _xorpsh;
 
     //    SlaveConfigTreeNode* _current_config_node;
 

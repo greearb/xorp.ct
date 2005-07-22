@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.73 2005/07/19 23:38:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.74 2005/07/21 09:01:50 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -32,7 +32,7 @@
 #include "util.hh"
 
 
-RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node,
+RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 		     int cli_client_input_fd, int cli_client_output_fd,
 		     bool verbose) throw (InitError)
     : _xorpsh(xorpsh),
@@ -2693,7 +2693,7 @@ RouterCLI::commit_done(bool success, string errmsg)
 	cli_client().cli_print("OK\n");
 	cli_client().cli_print(errmsg);
     }
-    _xorpsh.set_mode(XorpShell::MODE_IDLE);
+    _xorpsh.set_mode(XorpShellBase::MODE_IDLE);
     apply_path_change();
     reenable_ui();
 }
@@ -2916,11 +2916,11 @@ RouterCLI::save_communicated(const XrlError& e)
 	    cli_client().cli_print("Failed to communicate save command to rtrmgr.\n");
 	    cli_client().cli_print(c_format("%s\n", e.error_msg()));
 	}
-	_xorpsh.set_mode(XorpShell::MODE_IDLE);
+	_xorpsh.set_mode(XorpShellBase::MODE_IDLE);
 	reenable_ui();
 	return;
     }
-    _xorpsh.set_mode(XorpShell::MODE_SAVING);
+    _xorpsh.set_mode(XorpShellBase::MODE_SAVING);
     //
     // Don't enable the UI - we'll get called back when the saving has
     // completed.
@@ -2940,7 +2940,7 @@ RouterCLI::save_done(bool success, string errmsg)
     } else {
 	cli_client().cli_print("Save done.\n");
     }
-    _xorpsh.set_mode(XorpShell::MODE_IDLE);
+    _xorpsh.set_mode(XorpShellBase::MODE_IDLE);
     reenable_ui();
 }
 
@@ -2986,11 +2986,11 @@ RouterCLI::load_communicated(const XrlError& e)
 	    cli_client().cli_print("Failed to communicate load command to rtrmgr.\n");
 	    cli_client().cli_print(c_format("%s\n", e.error_msg()));
 	}
-	_xorpsh.set_mode(XorpShell::MODE_IDLE);
+	_xorpsh.set_mode(XorpShellBase::MODE_IDLE);
 	reenable_ui();
 	return;
     }
-    _xorpsh.set_mode(XorpShell::MODE_LOADING);
+    _xorpsh.set_mode(XorpShellBase::MODE_LOADING);
     //
     // Don't enable the UI - we'll get called back when the commit has
     // completed.
@@ -3010,7 +3010,7 @@ RouterCLI::load_done(bool success, string errmsg)
     } else {
 	cli_client().cli_print("Load done.\n");
     }
-    _xorpsh.set_mode(XorpShell::MODE_IDLE);
+    _xorpsh.set_mode(XorpShellBase::MODE_IDLE);
     reenable_ui();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.24 2005/07/15 06:33:22 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.25 2005/07/15 06:39:08 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -30,16 +30,14 @@
 #include "xorp_client.hh"
 #include "xrl_xorpsh_interface.hh"
 #include "slave_module_manager.hh"
-
+#include "xorpsh_base.hh"
 
 class OpCommandList;
 class RouterCLI;
 class SlaveConfigTree;
 class TemplateTree;
 
-class XorpShell {
-    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
-
+class XorpShell : XorpShellBase {
 public:
     XorpShell(const string& IPCname, 
 	      const string& xorp_root_dir,
@@ -51,15 +49,6 @@ public:
     void run(const string& command);
     bool done() const;
 
-    enum Mode {
-	MODE_AUTHENTICATING, 
-	MODE_INITIALIZING, 
-	MODE_IDLE, 
-	MODE_COMMITTING, 
-	MODE_LOADING,
-	MODE_SAVING,
-	MODE_SHUTDOWN
-    };
 
     void set_mode(Mode mode) { _mode = mode; }
     
@@ -70,14 +59,10 @@ public:
     void receive_config(const XrlError& e, const bool* ready,
 			const string* config);
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
     void enter_config_mode(bool exclusive, GENERIC_CALLBACK cb);
 
     void leave_config_mode(GENERIC_CALLBACK cb);
 
-    typedef XorpCallback3<void, const XrlError&, 
-			  const bool*,
-			  const uint32_t*>::RefPtr LOCK_CALLBACK;
     void lock_config(LOCK_CALLBACK cb);
 
     void config_saved_done(bool success, const string& errmsg);
@@ -88,8 +73,6 @@ public:
 
     void unlock_config(GENERIC_CALLBACK cb);
 
-    typedef XorpCallback2<void, const XrlError&,
-			  const XrlAtomList*>::RefPtr GET_USERS_CALLBACK;
     void get_config_users(GET_USERS_CALLBACK cb);
 
     void new_config_user(uid_t user_id);
@@ -116,19 +99,17 @@ public:
     void module_status_change(const string& modname, 
 			      GenericModule::ModuleStatus status);
 
-    typedef XorpCallback2<void, const XrlError&, 
-			  const uint32_t*>::RefPtr PID_CALLBACK;
     void get_rtrmgr_pid(PID_CALLBACK cb);
 
     EventLoop& eventloop()		{ return _eventloop; }
+    OpCommandList* op_cmd_list()	{ return _ocl; }
     SlaveConfigTree* config_tree()	{ return _ct; }
     TemplateTree* template_tree()	{ return _tt; }
-    OpCommandList* op_cmd_list()	{ return _ocl; }
+    uint32_t clientid() const		{ return _clientid; }
+    uint32_t rtrmgr_pid() const		{ return _rtrmgr_pid; }
     XorpClient& xorp_client()		{ return _xclient; }
     const string& xorp_root_dir() const	{ return _xorp_root_dir; }
     bool verbose() const		{ return _verbose; }
-    uint32_t rtrmgr_pid() const		{ return _rtrmgr_pid; }
-    uint32_t clientid() const		{ return _clientid; }
 
 private:
     EventLoop		_eventloop; 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.18 2005/07/03 21:06:00 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.19 2005/07/08 20:51:16 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -27,6 +27,7 @@
 #include "slave_module_manager.hh"
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"
+#include "xorpsh_base.hh"
 #include "xorpsh_main.hh"
 
 
@@ -52,15 +53,15 @@ public:
 
     bool parse(const string& configuration, const string& config_file,
 	       string& errmsg);
-    bool commit_changes(string& response, XorpShell& xorpsh, CallBack cb);
+    bool commit_changes(string& response, XorpShellBase& xorpsh, CallBack cb);
     void commit_phase2(const XrlError& e, const bool* locked,
 		       const uint32_t* lock_holder, CallBack cb,
-		       XorpShell *xorpsh);
-    void commit_phase3(const XrlError& e, CallBack cb, XorpShell* xorpsh);
+		       XorpShellBase* xorpsh);
+    void commit_phase3(const XrlError& e, CallBack cb, XorpShellBase* xorpsh);
     void commit_phase4(bool success, const string& errmsg, CallBack cb,
-		       XorpShell* xorpsh);
+		       XorpShellBase* xorpsh);
     void commit_phase5(const XrlError& e, bool success, CallBack cb,
-		       XorpShell* xorpsh);
+		       XorpShellBase* xorpsh);
     void save_phase4(bool success, const string& errmsg, CallBack cb,
 		     XorpShell* xorpsh);
     void save_phase5(const XrlError& e, bool success, CallBack cb,
@@ -93,7 +94,7 @@ private:
     SlaveConfigTreeNode _root_node;
     XorpClient&	_xclient;
 
-    XorpShell::LOCK_CALLBACK _stage2_cb;
+    XorpShellBase::LOCK_CALLBACK _stage2_cb;
 
     string	_commit_errmsg;
     string	_save_errmsg;

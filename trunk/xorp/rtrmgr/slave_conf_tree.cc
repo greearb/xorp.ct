@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.28 2005/07/03 21:06:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.29 2005/07/08 20:51:16 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -105,7 +105,8 @@ SlaveConfigTree::parse(const string& configuration, const string& config_file,
 }
 
 bool
-SlaveConfigTree::commit_changes(string& result, XorpShell& xorpsh, CallBack cb)
+SlaveConfigTree::commit_changes(string& result, XorpShellBase& xorpsh,
+				CallBack cb)
 {
     bool success = true;
 
@@ -152,7 +153,7 @@ SlaveConfigTree::commit_changes(string& result, XorpShell& xorpsh, CallBack cb)
 void
 SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
 			       const uint32_t* /* lock_holder */,
-			       CallBack cb, XorpShell* xorpsh)
+			       CallBack cb, XorpShellBase* xorpsh)
 {
     if (!locked || (e != XrlError::OKAY())) {
 	cb->dispatch(false, "Failed to get lock");
@@ -178,7 +179,7 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
 
 void
 SlaveConfigTree::commit_phase3(const XrlError& e, CallBack cb,
-			       XorpShell* xorpsh)
+			       XorpShellBase* xorpsh)
 {
     XLOG_TRACE(_verbose, "commit_phase3\n");
 
@@ -193,12 +194,12 @@ SlaveConfigTree::commit_phase3(const XrlError& e, CallBack cb,
 	xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
 				       false, cb, xorpsh));
     }
-    xorpsh->set_mode(XorpShell::MODE_COMMITTING);
+    xorpsh->set_mode(XorpShellBase::MODE_COMMITTING);
 }
 
 void
 SlaveConfigTree::commit_phase4(bool success, const string& errmsg, CallBack cb,
-			       XorpShell *xorpsh)
+			       XorpShellBase* xorpsh)
 {
     XLOG_TRACE(_verbose, "commit_phase4\n");
 
@@ -215,7 +216,7 @@ void
 SlaveConfigTree::commit_phase5(const XrlError& /* e */,
 			       bool success,
 			       CallBack cb,
-			       XorpShell* /* xorpsh */)
+			       XorpShellBase* /* xorpsh */)
 {
     XLOG_TRACE(_verbose, "commit_phase5\n");
 

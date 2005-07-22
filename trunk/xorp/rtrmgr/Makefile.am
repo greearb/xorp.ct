@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.53 2005/07/08 20:51:15 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.54 2005/07/08 21:11:45 mjh Exp $
 ##
 
 # -- Real Programs
@@ -117,6 +117,7 @@ xorpsh_SOURCES	+= template_tree.hh
 xorpsh_SOURCES	+= template_tree_node.hh
 xorpsh_SOURCES	+= util.hh
 xorpsh_SOURCES	+= xorp_client.hh
+xorpsh_SOURCES	+= xorpsh_base.hh
 xorpsh_SOURCES	+= xorpsh_main.hh
 xorpsh_SOURCES	+= xrl_xorpsh_interface.hh
 
