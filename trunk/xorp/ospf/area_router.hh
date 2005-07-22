@@ -337,6 +337,18 @@ class AreaRouter {
      */
     bool send_lsa(const PeerID peerid, const OspfTypes::NeighbourID nid,
 		  Lsa::LsaRef lsar) const;
+
+    /**
+     * If this is a self-originated LSA do the appropriate processing.
+     * RFC 2328 Section 13.4. Receiving self-originated LSAs
+     *
+     * @param lsar received LSA.
+     * @param match if true this LSA has matched a self-originated LSA
+     * already in the database.
+     *
+     * @return true if this is a self-orignated LSA.
+     */
+    bool self_originated(Lsa::LsaRef lsar, bool match);
 };
 
 /**

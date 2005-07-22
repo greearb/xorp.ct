@@ -282,6 +282,17 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 		if ((now - then) < TimeVal(OspfTypes::MinLSArrival))
 		    continue;
 	    }
+	    // This is out of sequence but doing it later makes no sense.
+	    // (f) Self orignating LSAs 
+	    // RFC 2328 Section 13.4. Receiving self-originated LSAs
+
+	    bool match = false;
+	    if (NEWER == search)
+		match = _db[index]->get_self_originating();
+	    if (self_originated((*i), match))
+		continue;
+	    XLOG_WARNING("TBD Section 13.4");
+
 	    // (b) Flood this LSA to all of our neighbours.
 	    // RFC 2328 Section 13.3. Next step in the flooding procedure
 
@@ -318,10 +329,10 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 		    delayed_ack.push_back(lsah);
 	    }
 	    
+	    // Too late to do this now, its after (a).
 	    // (f) Self orignating LSAs 
 	    // RFC 2328 Section 13.4. Receiving self-originated LSAs
 
-	    XLOG_WARNING("TBD Section 13.4");
 	}
 	    break;
 	case OLDER:
@@ -793,6 +804,33 @@ AreaRouter<A>::send_lsa(const PeerID /*peerid*/,
 			Lsa::LsaRef /*lsar*/) const
 {
     XLOG_UNFINISHED();
+}
+
+template <typename A>
+bool
+AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool match)
+{
+    if (!match) {
+	if (lsar->get_header().get_advertising_router() ==
+	    ntohl(_ospf.get_router_id().addr())) {
+	    match = true;
+	} else {
+	    switch (_ospf.get_version()) {
+	    case OspfTypes::V2:
+		XLOG_UNFINISHED();
+		break;
+	    case OspfTypes::V3:
+		break;
+	    }
+	}
+    }
+
+    if (!match)
+	return false;
+
+    XLOG_UNFINISHED();
+
+    return true;
 }
 
 template class AreaRouter<IPv4>;
