@@ -427,6 +427,9 @@ AreaRouter<A>::update_lsa(Lsa::LsaRef lsar, size_t index)
 		lsar->get_header().get_advertising_router());
 
     XLOG_ASSERT(_db[index]->valid());
+    // A LSA arriving over the wire should never replace a
+    // self originating LSA.
+    XLOG_ASSERT(!_db[index]->get_self_originating());
     if (0 == _readers) {
 	_db[index]->invalidate();
 	_db[index] = lsar;
