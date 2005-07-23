@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.33 2005/07/22 10:47:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.34 2005/07/23 01:22:12 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -220,50 +220,7 @@ private:
 			     const CommandTreeNode& current_ctn,
 			     const CLI_PROCESS_CALLBACK& cli_process_callback,
 			     string path, size_t depth, bool can_pipe);
-
-#if 0
-    /**
-     * @short add commands for direct configuration of new nodes
-     *
-     * To add a new node in the command tree, you just start typing
-     * the name of the node, and continue adding new config until the
-     * new config subtree is complete.  add_immediate_commands adds
-     * the names of possible new configution nodes to the command menu
-     * to permit this. 
-     *
-     * @param current_cli_node the current position in the config tree.
-     *
-     * @param the command tree whose nodes need to be added to the CLI.
-     *
-     * @param cmd_names the list of template tree command names that
-     * we will use to find the template_tree nodes that form the
-     * command tree rooted at this config tree node.
-     *
-     * @param include_intermediate_nodes true if we want to add commands
-     * for nodes indirectly rooted at the current node, false if we
-     * only want to include commands that are direct children of the
-     * current node.
-     *
-     * @param cb the callback to call if any of these commands is
-     * typed by the user.
-     *
-     * @param path the configuration path to current position in the config 
-     * tree.
-     *
-     * @param can_pipe if true, then the output can be piped through
-     * the built-in CLI pipes.
-     */
-    void add_immediate_commands(CliCommand& current_cli_node,
-				const CommandTree& command_tree,
-				const list<string>& cmd_names,
-				bool include_intermediate_nodes,
-				const CLI_PROCESS_CALLBACK& cb,
-				const string& path,
-				bool can_pipe);
-#endif
-
     void add_text_entry_commands(CliCommand* com0);
-
     void add_edit_subtree();
     void add_create_subtree();
     void add_delete_subtree();
