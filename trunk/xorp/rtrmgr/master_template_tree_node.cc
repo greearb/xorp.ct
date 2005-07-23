@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.3 2005/07/11 21:49:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.4 2005/07/22 02:52:43 pavlin Exp $"
 
 
 #include <glob.h>
@@ -184,8 +184,9 @@ MasterTemplateTreeNode::check_template_tree(string& errmsg) const
     // XXX: only leaf nodes should have %set command
     base_cmd = const_command("%set");
     if (base_cmd != NULL) {
-	if (! is_leaf()) {
-	    errmsg = c_format("Found %%set command in non-leaf node \"%s\"",
+	if (! is_leaf_value()) {
+	    errmsg = c_format("Found %%set command in node \"%s\" that "
+			      "doesn't expect value",
 			      path().c_str());
 	    return false;
 	}
