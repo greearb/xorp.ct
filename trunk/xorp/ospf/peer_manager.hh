@@ -122,8 +122,9 @@ class PeerManager {
      * @param peer the LSA arrived on.
      * @param nid the LSA arrived on.
      * @param lsar the lsa
+     * @param multicast_on_peer will this LSA get multicast on this peer.
+     *
      * @return true on success.
-     * @return multicast_on_peer Did this LSA get multicast on this peer.
      */
     bool queue_lsa(const PeerID peerid, const PeerID peer,
 		   OspfTypes::NeighbourID nid, Lsa::LsaRef lsar,
@@ -133,6 +134,16 @@ class PeerManager {
      * Send (push) any queued LSAs.
      */
     bool push_lsas(const PeerID peerid);
+
+    /*
+     * Is this one of the routers interface addresses, used to try and
+     * detect self-originated LSAs.
+     *
+     * @param address under test
+     *
+     * @return true if this a known interface address.
+     */
+    bool known_interface_address(const A address) const;
 
     // Configure the peering.
 

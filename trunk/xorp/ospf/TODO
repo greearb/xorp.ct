@@ -51,6 +51,11 @@ decodable either due to being an unknown type or some other problem
 the whole packet is discarded. Only the bad LSA should be dropped. See
 section 13 of the RFC.
 
+18) The peer manager has a method that tests an address against
+interface addresses. At the moment it checks against configured
+interfaces. When the fea client interface watcher is linked in we
+should get this information from the FEA.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 

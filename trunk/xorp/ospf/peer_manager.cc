@@ -303,6 +303,23 @@ PeerManager<A>::push_lsas(const PeerID peerid)
 }
 
 template <typename A>
+bool
+PeerManager<A>::known_interface_address(const A address) const
+{
+    // XXX
+    // Note we are only checking the interface addresses of the
+    // configured peers. We should be checking the interface addresses
+    // with the FEA.
+
+    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end();)
+	if ((*i).second->get_interface_address() == address) 
+	    return true;
+
+    return false;
+}
+
+template <typename A>
 bool 
 PeerManager<A>::set_network_mask(const PeerID peerid, OspfTypes::AreaID area, 
 				 uint32_t network_mask)
