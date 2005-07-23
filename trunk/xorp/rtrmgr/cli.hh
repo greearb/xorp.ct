@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.32 2005/07/19 23:38:25 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.33 2005/07/22 10:47:35 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -239,7 +239,7 @@ private:
      * we will use to find the template_tree nodes that form the
      * command tree rooted at this config tree node.
      *
-     * @param include_intermediates true if we want to add commands
+     * @param include_intermediate_nodes true if we want to add commands
      * for nodes indirectly rooted at the current node, false if we
      * only want to include commands that are direct children of the
      * current node.
@@ -256,7 +256,7 @@ private:
     void add_immediate_commands(CliCommand& current_cli_node,
 				const CommandTree& command_tree,
 				const list<string>& cmd_names,
-				bool include_intermediates,
+				bool include_intermediate_nodes,
 				const CLI_PROCESS_CALLBACK& cb,
 				const string& path,
 				bool can_pipe);

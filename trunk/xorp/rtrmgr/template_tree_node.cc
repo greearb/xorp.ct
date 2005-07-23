@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.51 2005/07/22 19:38:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.52 2005/07/22 21:43:28 pavlin Exp $"
 
 
 #include <glob.h>
@@ -133,7 +133,7 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	//
 	if (cmd == "%set") {
 	    // XXX: only leaf nodes should have %set command
-	    if (! is_leaf()) {
+	    if (! is_leaf_value()) {
 		errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
 		errmsg += "This command only applies to leaf nodes that have ";
 		errmsg += "values and only if the value is allowed to be ";
@@ -327,7 +327,7 @@ TemplateTreeNode::is_module_root_node() const
 }
 
 bool
-TemplateTreeNode::is_leaf() const
+TemplateTreeNode::is_leaf_value() const
 {
     if ((type() != NODE_VOID) && (_parent != NULL) && (!_parent->is_tag()))
 	return true;
@@ -752,7 +752,7 @@ TemplateTreeNode::check_template_tree(string& errmsg) const
 
 bool
 TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
-				     bool include_intermediates,
+				     bool include_intermediate_nodes,
 				     size_t depth) const
 {
     bool instantiated = false;
@@ -792,10 +792,11 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
     // level node is a tag or a VOID node, then we need to check
     // further to find a real node.
     //
-    if (_is_tag || ((type() == NODE_VOID) && include_intermediates)) {
+    if (_is_tag || ((type() == NODE_VOID) && include_intermediate_nodes)) {
 	list<TemplateTreeNode*>::const_iterator tti;
 	for (tti = _children.begin(); tti != _children.end(); ++tti) {
-	    if ((*tti)->check_command_tree(cmd_names, include_intermediates,
+	    if ((*tti)->check_command_tree(cmd_names,
+					   include_intermediate_nodes,
 					   depth + 1)) {
 		instantiated = true;
 		break;

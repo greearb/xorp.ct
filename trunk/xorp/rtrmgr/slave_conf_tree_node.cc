@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.21 2005/07/05 18:08:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.22 2005/07/08 20:51:16 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -92,19 +92,21 @@ SlaveConfigTreeNode::create_node(const ConfigTreeNode& ctn)
 void
 SlaveConfigTreeNode::create_command_tree(CommandTree& cmd_tree,
 					 const list<string>& cmd_names,
-					 bool include_intermediates,
-					 bool include_templates) const
+					 bool include_intermediate_nodes,
+					 bool include_children_templates,
+					 bool include_leaf_value_nodes) const
 {
-    build_command_tree(cmd_tree, cmd_names, 0, include_intermediates,
-		       include_templates);
+    build_command_tree(cmd_tree, cmd_names, 0, include_intermediate_nodes,
+		       include_children_templates, include_leaf_value_nodes);
 }
 
 bool
 SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree, 
 					const list<string>& cmd_names, 
 					int depth,
-					bool include_intermediates,
-					bool include_templates) const
+					bool include_intermediate_nodes,
+					bool include_children_templates,
+					bool include_leaf_value_nodes) const
 {
     bool instantiated = false;
 
@@ -121,14 +123,19 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	return false;
     }
 
+    if (is_leaf_value() && (! include_leaf_value_nodes)) {
+	// XXX: exclude leaf nodes when not needed
+	return false;
+    }
+
     if (depth > 0) {
 	XLOG_ASSERT(_template_tree_node != NULL);
 	cmd_tree.push(_segname);
-	if (include_intermediates 
+	if (include_intermediate_nodes
 	    && (_template_tree_node->is_tag() == false)
 	    && (_template_tree_node->children().empty() == false)) {
 	    //
-	    // Include_intermediates indicates that we want to include all
+	    // Include_intermediate_nodes indicates that we want to include all
 	    // true subtree interior nodes.  This is needed for show and
 	    // edit commands, which can show or edit any point in the
 	    // hierarchy.
@@ -160,8 +167,9 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	SlaveConfigTreeNode *sctn = (SlaveConfigTreeNode*)*iter;
 	done = sctn->build_command_tree(cmd_tree, cmd_names, depth + 1,
-					include_intermediates,
-					include_templates);
+					include_intermediate_nodes,
+					include_children_templates,
+					include_leaf_value_nodes);
 	if (done) {
 	    templates_done.insert(sctn->template_tree_node());
 	    instantiated = true;
@@ -188,7 +196,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     // If we haven't already added the children of the template node,
     // we need to consider whether they can add to the command tree too.
     //
-    if ((_template_tree_node != NULL) && include_templates) {
+    if ((_template_tree_node != NULL) && include_children_templates) {
 	list<TemplateTreeNode*>::const_iterator ttn_iter;
 	for (ttn_iter = _template_tree_node->children().begin();
 	     ttn_iter != _template_tree_node->children().end();
@@ -210,7 +218,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 		}
 
 		if ((*ttn_iter)->check_command_tree(cmd_names,
-						    include_intermediates, 
+						    include_intermediate_nodes, 
 						    /* depth */ 0)) {
 
 		    XLOG_TRACE(_verbose, "***done == true\n");

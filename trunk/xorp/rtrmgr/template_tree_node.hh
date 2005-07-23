@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.30 2005/07/22 02:34:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.31 2005/07/22 10:37:00 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -92,13 +92,14 @@ public:
     const string& segname() const { return _segname; }
     string path() const;
     bool is_module_root_node() const;
-    bool is_leaf() const;
+    bool is_leaf_value() const;
 
 #if 0
     bool check_template_tree(string& errmsg) const;
 #endif
     bool check_command_tree(const list<string>& commands, 
-			    bool include_intermediates, size_t depth) const;
+			    bool include_intermediate_nodes,
+			    size_t depth) const;
     bool has_default() const { return _has_default; }
     bool check_variable_name(const vector<string>& parts, size_t part) const;
     string get_module_name_by_variable(const string& varname) const;

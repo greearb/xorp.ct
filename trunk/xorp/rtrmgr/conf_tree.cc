@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.36 2005/07/05 18:08:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.37 2005/07/21 09:01:50 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -198,7 +198,7 @@ ConfigTree::add_node(const string& segment, int type, uint64_t nodenum)
 	// error, or this current node is a terminal node, and this
 	// segment is actually a value.
 	//
-	if (_current_node->is_leaf()) {
+	if (_current_node->is_leaf_value()) {
 	    terminal_value(segment, _current_node->type(), OP_ASSIGN);
 	} else {
 	    booterror("Invalid child node");

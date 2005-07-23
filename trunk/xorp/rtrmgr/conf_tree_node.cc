@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.75 2005/07/21 09:01:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.76 2005/07/22 02:34:28 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -224,7 +224,7 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 	    return false;
 	}
     }
-    if (is_leaf() != them.is_leaf())
+    if (is_leaf_value() != them.is_leaf_value())
 	return false;
     if (_template_tree_node != them.template_tree_node())
 	return false;
@@ -346,7 +346,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
     if (_template_tree_node != NULL) {
 	XLOG_ASSERT(type() == delta_node.type());
 
-	if (delta_node.is_leaf()) {
+	if (delta_node.is_leaf_value()) {
 	    if (_value != delta_node.value() 
 		|| _operator != delta_node.get_operator()) {
 		_has_value = true;
@@ -607,7 +607,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 	    _modification_time = _committed_modification_time;
 	    _deleted = false;
 	    result = node_str();
-	    if (is_leaf()) 
+	    if (is_leaf_value()) 
 		result += "\n";
 	    else
 		result += " {\n";
@@ -648,13 +648,13 @@ ConfigTreeNode::is_tag() const
 }
 
 bool 
-ConfigTreeNode::is_leaf() const
+ConfigTreeNode::is_leaf_value() const
 {
     if (_has_value)
 	return true;
     if (_template_tree_node == NULL)
 	return false;
-    if (_template_tree_node->is_leaf())
+    if (_template_tree_node->is_leaf_value())
 	return true;
     return false;
 }
@@ -1052,8 +1052,8 @@ ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
 		break;
 	    }
 	    // Are the nodes the same leaf node, but with a changed value
-	    if (!retain_value_changed 
-		&& my_child->is_leaf() && their_child->is_leaf() 
+	    if (!retain_value_changed
+		&& my_child->is_leaf_value() && their_child->is_leaf_value()
 		&& (my_child->segname() == their_child->segname())) {
 		retain_child = false;
 		break;
