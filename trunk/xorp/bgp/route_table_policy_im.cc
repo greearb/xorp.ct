@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.7 2005/07/22 01:20:11 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.8 2005/07/22 21:46:40 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -90,7 +90,7 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 
 	    // we will delete and add the same subnetroute!
 	    // make new internal message to preserve route.
-	    if (fmsg->route() == new_msg->route()) {
+	    if (rtmsg.changed() && fmsg->route() == new_msg->route()) {
 		SubnetRoute<A>* copy_rt = new SubnetRoute<A>(*new_msg->route());
 		InternalMessage<A>* copy_msg = 
 		    new InternalMessage<A>(copy_rt, new_msg->origin_peer(),
@@ -111,9 +111,10 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 		    delete new_msg;
 
 		new_msg = copy_msg;
+	    
+		XLOG_ASSERT(fmsg != new_msg);
 	    }
 
-	    XLOG_ASSERT(fmsg != new_msg);
 
 	    // XXX don't check return of deleteroute!
 	    res = next->delete_route(*fmsg, this);
