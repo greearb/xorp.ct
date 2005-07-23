@@ -287,9 +287,11 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    bool match = false;
 	    if (NEWER == search)
 		match = _db[index]->get_self_originating();
-	    if (self_originated((*i), match))
+	    if (self_originated((*i), match, index)) {
+		bool multicast_on_peer;
+		publish(peerid, nid, (*i), multicast_on_peer);
 		continue;
-	    XLOG_WARNING("TBD Section 13.4");
+	    }
 
 	    // (b) Flood this LSA to all of our neighbours.
 	    // RFC 2328 Section 13.3. Next step in the flooding procedure
@@ -804,18 +806,41 @@ AreaRouter<A>::send_lsa(const PeerID /*peerid*/,
     XLOG_UNFINISHED();
 }
 
+template <>
+bool
+AreaRouter<IPv4>::self_originated_by_interface(Lsa::LsaRef lsar, IPv4) const
+{
+    if (0 == dynamic_cast<NetworkLsa *>(lsar.get()))
+	return false;
+
+    IPv4 address(lsar->get_header().get_link_state_id());
+    return _ospf.get_peer_manager().known_interface_address(address);
+}
+
+template <>
+bool
+AreaRouter<IPv6>::self_originated_by_interface(Lsa::LsaRef, IPv6) const
+{
+    XLOG_FATAL("Not required for OSPFv3");
+    return false;
+}
+
 template <typename A>
 bool
-AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool match)
+AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 {
-    if (!match) {
+    // RFC 2328 Section 13.4. Receiving self-originated LSAs
+
+    bool originated = lsa_exists;
+    if (!originated) {
 	if (lsar->get_header().get_advertising_router() ==
 	    ntohl(_ospf.get_router_id().addr())) {
-	    match = true;
+	    originated = true;
 	} else {
 	    switch (_ospf.get_version()) {
 	    case OspfTypes::V2:
-		XLOG_UNFINISHED();
+		if (self_originated_by_interface(lsar))
+		    originated = true;
 		break;
 	    case OspfTypes::V3:
 		break;
@@ -823,10 +848,25 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool match)
 	}
     }
 
-    if (!match)
+    if (!originated)
 	return false;
 
-    XLOG_UNFINISHED();
+    // If we got this far this is a self-originated LSA that needs to
+    // be removed from the wild.
+
+    // A database copy of this LSA exists. The new LSA that arrived is
+    // newer than the database copy. Copy the sequence number from the
+    // new LSA into the database LSA increment it and flood.
+    if (lsa_exists) {
+	_db[index]->set_ls_sequence_number(lsar->get_ls_sequence_number());
+	lsar = _db[index];
+	lsar->increment_sequence_number();
+	return true;
+    }
+
+    // This is a spurious LSA that was probably originated by us in
+    // the past just get rid of it by setting it to MaxAge.
+    lsar->set_maxage();
 
     return true;
 }

@@ -339,16 +339,28 @@ class AreaRouter {
 		  Lsa::LsaRef lsar) const;
 
     /**
+     * Check this LSA to see if its link state id matched any of the
+     * routers interfaces.
+     *
+     * @param lsar LSA to check.
+     * A dummy argument is used to force an IPv4 and an IPv6 instance
+     * of this method to be generated. Isn't C++ cool?
+     */
+    bool self_originated_by_interface(Lsa::LsaRef lsar, A = A::ZERO()) const;
+
+    /**
      * If this is a self-originated LSA do the appropriate processing.
      * RFC 2328 Section 13.4. Receiving self-originated LSAs
      *
      * @param lsar received LSA.
      * @param match if true this LSA has matched a self-originated LSA
      * already in the database.
+     * @param index if match is true the index into the database for
+     * the matching LSA.
      *
      * @return true if this is a self-orignated LSA.
      */
-    bool self_originated(Lsa::LsaRef lsar, bool match);
+    bool self_originated(Lsa::LsaRef lsar, bool match, size_t index);
 };
 
 /**
