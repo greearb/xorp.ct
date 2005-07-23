@@ -147,7 +147,7 @@ struct OspfTypes {
     /*
      * The maximum value that LS Sequence Number can attain.
      */
-    static const int32_t MaxSequenceNumber = 0x7fffffff;
+    static const uint32_t MaxSequenceNumber = 0x7fffffff;
 };
 
 /**

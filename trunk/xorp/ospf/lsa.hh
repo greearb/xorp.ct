@@ -143,7 +143,7 @@ class Lsa_header {
 	_ls_sequence_number = ls_sequence_number;
     }
 
-    int32_t get_ls_sequence_number() const {
+    uint32_t get_ls_sequence_number() const {
 	return _ls_sequence_number;
     }
 
@@ -335,8 +335,23 @@ class Lsa {
      */
     void update_age(TimeVal now);
 
-    int32_t get_ls_sequence_number() const {
+    /**
+     * Set the age to MaxAge.
+     */
+    void set_maxage();
+
+    /**
+     * Get the LS Sequence Number.
+     */
+    uint32_t get_ls_sequence_number() const {
 	return _header.get_ls_sequence_number();
+    }
+
+    /**
+     * Set the LS Sequence Number.
+     */
+    void set_ls_sequence_number(uint32_t seqno) {
+	_header.set_ls_sequence_number(seqno);
     }
 
     /**
@@ -410,6 +425,11 @@ class Lsa {
     // List of neighbours that have not yet acknowledged this LSA.
 
     set<OspfTypes::NeighbourID> _nack_list;	
+
+    /**
+     * Set the age and update the stored packet if it exists.
+     */
+    void set_ls_age(uint16_t ls_age);
 };
 
 /**
