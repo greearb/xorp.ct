@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.5 2005/07/19 23:16:30 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.6 2005/07/21 18:54:47 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -462,8 +462,8 @@ changes.
 
 In the example below, the prefix length (netmask) of address
 192.150.187.108 on vif rl0 is changed, but not yet committed.  The
-``{\tt >}'' indicates parts of the configuration that have changed but
-not yet been committed.
+``{\tt >}'' indicates parts of the configuration that has been added
+or modified but not yet been committed.
 \vspace{0.1in}
 
 \noindent\framebox[\textwidth][l]{
@@ -578,7 +578,8 @@ XORP> \textbf{show}\\
 The \emph{delete} command can be used to delete subtrees from the
 configuration.  The deletion will be visible in the results of the
 \emph{show} command, but will not actually take place until the changes are
-committed.
+committed. The ``{\tt -}'' indicates parts of the configuration that has
+been deleted but not yet been committed.
 \vspace{0.1in}
 
 \noindent\framebox[\textwidth][l]{
@@ -619,6 +620,14 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\>\>broadcast: 192.150.187.255\\
 \>\>\}\\
 \>\}\\
+-\>vif rl0b \{\\
+-\>\> address 10.0.0.1 \{\\
+-\>\>\> prefix-length: 16\\
+-\>\>\> broadcast: 10.0.255.255\\
+-\>\>\> disable: false\\
+-\>\>\}\\
+-\>\> disable: false\\
+-\>\}\\
 \end{tabbing}
 \end{alltt}
 \end{minipage}
