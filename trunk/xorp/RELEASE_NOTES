@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.80 2005/07/19 23:17:37 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.81 2005/07/21 09:06:20 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -102,6 +102,9 @@ Release 1.2 (2005/??/??)
 
     - Addition of command "show -all" that shows the complete configuration
       including the parameters with default values.
+
+    - Modification to the "show" command output: in configuration mode
+      all deleted (and uncommitted) entries are prefixed with "-".
 
   POLICY:
     - 
