@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.76 2005/07/22 02:34:28 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.77 2005/07/23 01:22:12 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -711,9 +711,6 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
     bool is_a_tag = false;
     int new_indent;
 
-    if (_deleted)
-	return string("");
-
     if (suppress_default_values && is_default_value() && is_committed())
 	return string("");
 
@@ -728,10 +725,6 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	    const ConfigTreeNode* child_ctn = *iter;
-	    if (child_ctn->deleted()) {
-		// Skip deleted children
-		continue;
-	    }
 
 	    if (suppress_default_values && child_ctn->is_default_value()
 		&& child_ctn->is_committed()) {
@@ -742,11 +735,22 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 		continue;
 	    }
 
+	    //
+	    // Add the annotation prefix
+	    //
 	    if (annotate) {
-		if (child_ctn->existence_committed())
+		do {
+		    if (child_ctn->deleted()) {
+			s += "-   ";
+			break;
+		    }
+		    if (! child_ctn->existence_committed()) {
+			s += ">   ";
+			break;
+		    }
 		    s += "    ";
-		else
-		    s += ">   ";
+		    break;
+		} while (false);
 	    }
 	    s += my_in + show_nodenum(numbered, child_ctn->nodenum()) 
 		+ _segname + " " +
@@ -761,12 +765,22 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 
 	new_indent = indent + 2;
 
-	// annotate modified config lines
+	//
+	// Add the annotation prefix
+	//
 	if (annotate) {
-	    if (is_uncommitted())
-		s2 = ">   ";
-	    else
+	    do {
+		if (deleted()) {
+		    s2 = "-   ";
+		    break;
+		}
+		if (is_uncommitted()) {
+		    s2 = ">   ";
+		    break;
+		}
 		s2 = "    ";
+		break;
+	    } while (false);
 	}
 
 	if (do_indent) {
