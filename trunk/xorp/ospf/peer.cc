@@ -330,6 +330,9 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 		    (packet))) {
 	return process_link_state_acknowledgement_packet(dst, src, lsap);
     } else {
+	// A packet of unknown type will only get this far if
+	// the deocoder has recognised it. Packets with bad type
+	// fields will not get here.
 	XLOG_FATAL("Unknown packet type %u", packet->get_type());
     }
 
