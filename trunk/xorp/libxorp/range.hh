@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2005 International Computer Science Institute
+// Copyright (c) 2001-2005 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/range.hh,v 1.3 2005/07/25 17:48:00 abittau Exp $
 
 #ifndef __LIBXORP_RANGE_HH__
 #define __LIBXORP_RANGE_HH__
@@ -101,10 +101,10 @@ public:
      */
     U32Range(const char *from_cstr) {
 	string from_string = string(from_cstr);
-	int delim = from_string.find("..", 0);
-	if (delim < 0)
+	string::size_type delim = from_string.find("..", 0);
+	if (delim == string::npos) {
 	    _low = _high = strtoul(from_cstr, NULL, 10);
-	else if (delim > 0 && (from_string.length() - delim > 2)) {
+	} else if (delim > 0 && (from_string.length() - delim > 2)) {
 	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
 	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
 	} else {
@@ -146,8 +146,8 @@ public:
      */
     IPvXRange(const char *from_cstr) {
 	string from_string = string(from_cstr);
-	int delim = from_string.find("..", 0);
-	if (delim < 0)
+	string::size_type delim = from_string.find("..", 0);
+	if (delim == string::npos)
 	    Range<T>::_low = Range<T>::_high = T(from_cstr);
 	else if (delim > 0 && (from_string.length() - delim > 2)) {
 	    Range<T>::_low = T(from_string.substr(0, delim).c_str());
