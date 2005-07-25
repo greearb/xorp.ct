@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.13 2005/03/25 02:53:41 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.14 2005/06/16 23:29:21 mjh Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -20,6 +20,7 @@
 #include "xorp.h"
 #include "exceptions.hh"
 #include "c_format.hh"
+#include "range.hh"
 
 /**
  * @short A template class for subnets
@@ -98,8 +99,73 @@ public:
     }
 
     /**
-     * Less-Than Operator
+     * Equality Operator
      *
+     * @param range the right-hand operand to compare against.
+     * @return true if the prefix length falls inside the range defined
+     * by the right-hand operand.
+     */
+    inline bool operator==(const U32Range range) const {
+printf("XXX MARKO XXX prefix_len = %d low = %d high = %d\n", prefix_len(), range.low(), range.high());
+	return (range == prefix_len());
+    }
+
+    /**
+     * Non-equality Operator
+     *
+     * @param range the right-hand operand to compare against.
+     * @return true if the prefix length falls outside the range defined
+     * by the right-hand operand.
+     */
+    inline bool operator!=(const U32Range range) const {
+	return (range != prefix_len());
+    }
+
+    /**
+     * Less-than comparison for prefix lengths.
+     *
+     * @param range the right-hand side of the comparison.
+     * @return true if the prefix length is bellow the range defined
+     * by the right-hand operand.
+     */
+    inline bool operator<(const U32Range range) const {
+	return (range > prefix_len());
+    };
+
+    /**
+     * Less-than or equal comparison for prefix lengths.
+     *
+     * @param range the right-hand side of the comparison.
+     * @return true if the prefix length is bellow or within the range
+     * defined by the right-hand operand.
+     */
+    inline bool operator<=(const U32Range range) const {
+	return (range >= prefix_len());
+    };
+
+    /**
+     * Greater-than comparison for prefix lengths.
+     *
+     * @param range the right-hand side of the comparison.
+     * @return true if the prefix length is above the range defined
+     * by the right-hand operand.
+     */
+    inline bool operator>(const U32Range range) const {
+	return (range < prefix_len());
+    };
+
+    /**
+     * Greater-than or equal comparison for prefix lengths.
+     *
+     * @param range the right-hand side of the comparison.
+     * @return true if the prefix length is above or within the range
+     * defined by the right-hand operand.
+     */
+    inline bool operator>=(const U32Range range) const {
+	return (range <= prefix_len());
+    };
+
+    /**
      * Less-than comparison for subnets (see body for description).
      *
      * @param other the right-hand side of the comparison.
