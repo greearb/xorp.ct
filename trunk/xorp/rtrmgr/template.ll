@@ -259,6 +259,11 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 	return INT_TYPE;
 	}
 
+"u32range"	{
+	tpltlval = strdup(tplttext);
+	return UINTRANGE_TYPE;
+	}
+
 "u32"	{
 	tpltlval = strdup(tplttext);
 	return UINT_TYPE;
@@ -274,6 +279,11 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 	return TOGGLE_TYPE;
 	}
 
+"ipv4range"	{
+	tpltlval = strdup(tplttext);
+	return IPV4RANGE_TYPE;
+	}
+
 "ipv4"	{
 	tpltlval = strdup(tplttext);
 	return IPV4_TYPE;
@@ -282,6 +292,11 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 "ipv4net"	{
 	tpltlval = strdup(tplttext);
 	return IPV4NET_TYPE;
+	}
+
+"ipv6range"	{
+	tpltlval = strdup(tplttext);
+	return IPV6RANGE_TYPE;
 	}
 
 "ipv6"	{
@@ -329,9 +344,19 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 	return BOOL_VALUE;
 	}
 
+[0-9]+".."[0-9]+	{
+	tpltlval = strdup(tplttext);
+	return UINTRANGE_VALUE;
+	}
+
 [\-]*[0-9]+	{
 	tpltlval = strdup(tplttext);
 	return INTEGER_VALUE;
+	}
+
+{RE_IPV4}".."{RE_IPV4}	{
+	tpltlval = strdup(tplttext);
+	return IPV4RANGE_VALUE;
 	}
 
 {RE_IPV4}	{
@@ -342,6 +367,11 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 {RE_IPV4NET} {
 	tpltlval = strdup(tplttext);
 	return IPV4NET_VALUE;
+	}
+
+{RE_IPV6}".."{RE_IPV6}	{
+	tpltlval = strdup(tplttext);
+	return IPV6RANGE_VALUE;
 	}
 
 {RE_IPV6}	{

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.52 2005/07/22 21:43:28 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.53 2005/07/23 01:22:13 pavlin Exp $"
 
 
 #include <glob.h>
@@ -1001,6 +1001,64 @@ string
 UIntTemplate::default_str() const
 {
     return c_format("%u", _default);
+}
+
+
+/**************************************************************************
+ * UIntRangeTemplate
+ **************************************************************************/
+
+UIntRangeTemplate::UIntRangeTemplate(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
+			   const string& path, const string& varname,
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
+{
+    if (! initializer.empty()) {
+	try {
+	    _default = new U32Range(initializer.c_str());
+	} catch (InvalidString) {
+	    string err = "Bad U32Range type value: " + initializer;
+	    xorp_throw(ParseError, err);
+	}
+	set_has_default();
+    }
+}
+
+UIntRangeTemplate::~UIntRangeTemplate()
+{
+    if (_default != NULL)
+	delete _default;
+}
+
+string
+UIntRangeTemplate::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
+}
+
+bool
+UIntRangeTemplate::type_match(const string& s, string& errmsg) const
+{
+    string tmp = strip_quotes(s);
+
+    if (tmp.empty()) {
+	errmsg = "Value must be a valid U32 range.";
+	return false;
+    }
+
+    try {
+	U32Range* u32range = new U32Range(tmp.c_str());
+	delete u32range;
+    } catch (InvalidString) {
+	errmsg = "Value must be a valid U32 range.";
+	return false;
+    }
+    return true;
 }
 
 

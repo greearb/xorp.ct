@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.32 2005/07/03 21:06:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.33 2005/07/11 21:33:56 pavlin Exp $"
 
 
 #include <glob.h>
@@ -195,6 +195,9 @@ TemplateTree::new_node(TemplateTreeNode* parent,
 	break;
     case NODE_UINT:
 	ttn = new UIntTemplate(*this, parent, path, varname, initializer);
+	break;
+    case NODE_UINTRANGE:
+	ttn = new UIntRangeTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_INT:
 	ttn = new IntTemplate(*this, parent, path, varname, initializer);

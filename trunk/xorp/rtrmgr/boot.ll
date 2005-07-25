@@ -216,7 +216,7 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 /*
  * operators for arithmetic expressions
  */
-RE_COMPARATOR		"<"|">"|("<"+"=")|(">"+"=")|("="+"=") 
+RE_COMPARATOR		"<"|">"|("<"+"=")|(">"+"=")|("="+"=")|("!"+"=")
 RE_BIN_OPERATOR		"+"|"-"|"*"|"/"
 RE_MODIFIER		":"|"add"|"sub"|"set"|"del"|"="
 RE_INFIX_OPERATOR	{RE_COMPARATOR}|{RE_BIN_OPERATOR}|{RE_MODIFIER}
@@ -253,9 +253,19 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 	return BOOL_VALUE;
 	}
 
+[0-9]+".."[0-9]+	{
+	bootlval = strdup(boottext);
+	return UINTRANGE_VALUE;
+	}
+
 [0-9]+	{
 	bootlval = strdup(boottext);
 	return UINT_VALUE;
+	}
+
+{RE_IPV4}".."{RE_IPV4}	{
+	bootlval = strdup(boottext);
+	return IPV4RANGE_VALUE;
 	}
 
 {RE_IPV4}	{
@@ -266,6 +276,11 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 {RE_IPV4NET}	{
 	bootlval = strdup(boottext);
 	return IPV4NET_VALUE;
+	}
+
+{RE_IPV6}".."{RE_IPV6}	{
+	bootlval = strdup(boottext);
+	return IPV6RANGE_VALUE;
 	}
 
 {RE_IPV6}	{

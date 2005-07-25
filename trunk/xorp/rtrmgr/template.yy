@@ -27,12 +27,16 @@ extern void add_cmd_action_adaptor(const string& cmd,
 %token RETURN
 %token TEXT_TYPE
 %token INT_TYPE
+%token INTRANGE_TYPE
 %token UINT_TYPE
+%token UINTRANGE_TYPE
 %token BOOL_TYPE
 %token TOGGLE_TYPE
 %token IPV4_TYPE
+%token IPV4RANGE_TYPE
 %token IPV4NET_TYPE
 %token IPV6_TYPE
+%token IPV6RANGE_TYPE
 %token IPV6NET_TYPE
 %token MACADDR_TYPE
 %token URL_FILE_TYPE
@@ -41,9 +45,12 @@ extern void add_cmd_action_adaptor(const string& cmd,
 %token URL_TFTP_TYPE
 %token BOOL_VALUE
 %token INTEGER_VALUE
+%token UINTRANGE_VALUE
 %token IPV4_VALUE
+%token IPV4RANGE_VALUE
 %token IPV4NET_VALUE
 %token IPV6_VALUE
+%token IPV6RANGE_VALUE
 %token IPV6NET_VALUE
 %token MACADDR_VALUE
 %token URL_FILE_VALUE
@@ -90,11 +97,14 @@ literals:	LITERAL { extend_path($1, false); }
 type:		TEXT_TYPE { tplt_type = NODE_TEXT; }
 		| INT_TYPE { tplt_type = NODE_INT; }
 		| UINT_TYPE { tplt_type = NODE_UINT; }
+		| UINTRANGE_TYPE { tplt_type = NODE_UINTRANGE; }
 		| BOOL_TYPE { tplt_type = NODE_BOOL; }
 		| TOGGLE_TYPE { tplt_type = NODE_TOGGLE; }
 		| IPV4_TYPE { tplt_type = NODE_IPV4; }
+		| IPV4RANGE_TYPE { tplt_type = NODE_IPV4RANGE; }
 		| IPV4NET_TYPE { tplt_type = NODE_IPV4NET; }
 		| IPV6_TYPE { tplt_type = NODE_IPV6; }
+		| IPV6RANGE_TYPE { tplt_type = NODE_IPV6RANGE; }
 		| IPV6NET_TYPE { tplt_type = NODE_IPV6NET; }
 		| MACADDR_TYPE { tplt_type = NODE_MACADDR; }
 		| URL_FILE_TYPE { tplt_type = NODE_URL_FILE; }
@@ -115,6 +125,10 @@ init_type:	TEXT_TYPE ASSIGN_DEFAULT STRING {
 			tplt_type = NODE_UINT;
 			tplt_initializer = $3;
 		}
+		| UINTRANGE_TYPE ASSIGN_DEFAULT UINTRANGE_VALUE {
+			tplt_type = NODE_UINTRANGE;
+			tplt_initializer = $3;
+		}
 		| BOOL_TYPE ASSIGN_DEFAULT BOOL_VALUE {
 			tplt_type = NODE_BOOL;
 			tplt_initializer = $3;
@@ -127,12 +141,20 @@ init_type:	TEXT_TYPE ASSIGN_DEFAULT STRING {
 			tplt_type = NODE_IPV4;
 			tplt_initializer = $3;
 		}
+		| IPV4RANGE_TYPE ASSIGN_DEFAULT IPV4RANGE_VALUE {
+			tplt_type = NODE_IPV4RANGE;
+			tplt_initializer = $3;
+		}
 		| IPV4NET_TYPE ASSIGN_DEFAULT IPV4NET_VALUE {
 			tplt_type = NODE_IPV4NET;
 			tplt_initializer = $3;
 		}
 		| IPV6_TYPE ASSIGN_DEFAULT IPV6_VALUE {
 			tplt_type = NODE_IPV6;
+			tplt_initializer = $3;
+		}
+		| IPV6RANGE_TYPE ASSIGN_DEFAULT IPV6RANGE_VALUE {
+			tplt_type = NODE_IPV6RANGE;
 			tplt_initializer = $3;
 		}
 		| IPV6NET_TYPE ASSIGN_DEFAULT IPV6NET_VALUE {

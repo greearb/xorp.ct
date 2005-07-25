@@ -25,9 +25,12 @@
 %left ASSIGN_OPERATOR
 %token BOOL_VALUE
 %token UINT_VALUE
+%token UINTRANGE_VALUE
 %token IPV4_VALUE
+%token IPV4RANGE_VALUE
 %token IPV4NET_VALUE
 %token IPV6_VALUE
+%token IPV6RANGE_VALUE
 %token IPV6NET_VALUE
 %token MACADDR_VALUE
 %token URL_FILE_VALUE
@@ -70,9 +73,12 @@ literals:	literals literal
 		| literal STRING { extend_path($2, NODE_TEXT, nodenum); }
 		| literal LITERAL { extend_path($2, NODE_TEXT, nodenum); }
 		| literal BOOL_VALUE { extend_path($2, NODE_BOOL, nodenum); }
+		| literal UINTRANGE_VALUE { extend_path($2, NODE_UINTRANGE, nodenum); }
 		| literal UINT_VALUE { extend_path($2, NODE_UINT, nodenum); }
+		| literal IPV4RANGE_VALUE { extend_path($2, NODE_IPV4RANGE, nodenum); }
 		| literal IPV4_VALUE { extend_path($2, NODE_IPV4, nodenum); }
 		| literal IPV4NET_VALUE { extend_path($2, NODE_IPV4NET, nodenum); }
+		| literal IPV6RANGE_VALUE { extend_path($2, NODE_IPV6RANGE, nodenum); }
 		| literal IPV6_VALUE { extend_path($2, NODE_IPV6, nodenum); }
 		| literal IPV6NET_VALUE { extend_path($2, NODE_IPV6NET, nodenum); }
 		| literal MACADDR_VALUE { extend_path($2, NODE_MACADDR, nodenum); }
@@ -119,8 +125,16 @@ terminal:	term_literal END {
 			terminal($3, NODE_BOOL, boot_lookup_operator($2));
 			free($2);
 		}
+		| term_literal INFIX_OPERATOR UINTRANGE_VALUE END {
+			terminal($3, NODE_UINTRANGE, boot_lookup_operator($2));
+			free($2);
+		}
 		| term_literal INFIX_OPERATOR UINT_VALUE END {
 			terminal($3, NODE_UINT, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR IPV4RANGE_VALUE END {
+			terminal($3, NODE_IPV4RANGE, boot_lookup_operator($2));
 			free($2);
 		}
 		| term_literal INFIX_OPERATOR IPV4_VALUE END {
@@ -129,6 +143,10 @@ terminal:	term_literal END {
 		}
 		| term_literal INFIX_OPERATOR IPV4NET_VALUE END {
 			terminal($3, NODE_IPV4NET, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR IPV6RANGE_VALUE END {
+			terminal($3, NODE_IPV6RANGE, boot_lookup_operator($2));
 			free($2);
 		}
 		| term_literal INFIX_OPERATOR IPV6_VALUE END {
