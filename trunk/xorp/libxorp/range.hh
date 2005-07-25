@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: 
+// $XORP$
 
 #ifndef __LIBXORP_RANGE_HH__
 #define __LIBXORP_RANGE_HH__
@@ -93,7 +93,8 @@ public:
     /**
      * Default constructor
      */
-    U32Range() 			{ _low = _high = 0; }
+    U32Range() 			{ Range<uint32_t>::_low = 
+    				   Range<uint32_t>::_high = 0; }
 
     /**
      * Constructor from a string.
@@ -138,7 +139,7 @@ public:
     /**
      * Default constructor
      */
-    IPvXRange()			{ _low = _high = 0; }
+    IPvXRange()			{ Range<T>::_low = Range<T>::_high = 0; }
 
     /**
      * Constructor from a string.
@@ -147,10 +148,12 @@ public:
 	string from_string = string(from_cstr);
 	int delim = from_string.find("..", 0);
 	if (delim < 0)
-	    _low = _high = T(from_cstr);
+	    Range<T>::_low = Range<T>::_high = T(from_cstr);
 	else if (delim > 0 && (from_string.length() - delim > 2)) {
-	    _low = T(from_string.substr(0, delim).c_str());
-	    _high = T(from_string.substr(delim + 2, from_string.length()).c_str());
+	    Range<T>::_low = T(from_string.substr(0, delim).c_str());
+	    Range<T>::_high = T(from_string.substr(delim + 2, 
+	    					   from_string.length())
+						    .c_str());
 	} else {
 	    xorp_throw(InvalidString, "Syntax error");
 	}
@@ -163,9 +166,9 @@ public:
      */
     string str() const {
 	ostringstream os;
-	os << _low.str();
-	if (_low < _high)
-	    os << ".." << _high.str();
+	os << Range<T>::_low.str();
+	if (Range<T>::_low < Range<T>::_high)
+	    os << ".." << Range<T>::_high.str();
 	return os.str();
     }
 };
