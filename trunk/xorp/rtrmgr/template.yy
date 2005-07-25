@@ -27,7 +27,6 @@ extern void add_cmd_action_adaptor(const string& cmd,
 %token RETURN
 %token TEXT_TYPE
 %token INT_TYPE
-%token INTRANGE_TYPE
 %token UINT_TYPE
 %token UINTRANGE_TYPE
 %token BOOL_TYPE
