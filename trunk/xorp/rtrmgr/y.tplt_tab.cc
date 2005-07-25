@@ -72,140 +72,153 @@ extern void add_cmd_action_adaptor(const string& cmd,
 #define TEXT_TYPE 264
 #define INT_TYPE 265
 #define UINT_TYPE 266
-#define BOOL_TYPE 267
-#define TOGGLE_TYPE 268
-#define IPV4_TYPE 269
-#define IPV4NET_TYPE 270
-#define IPV6_TYPE 271
-#define IPV6NET_TYPE 272
-#define MACADDR_TYPE 273
-#define URL_FILE_TYPE 274
-#define URL_FTP_TYPE 275
-#define URL_HTTP_TYPE 276
-#define URL_TFTP_TYPE 277
-#define BOOL_VALUE 278
-#define INTEGER_VALUE 279
-#define IPV4_VALUE 280
-#define IPV4NET_VALUE 281
-#define IPV6_VALUE 282
-#define IPV6NET_VALUE 283
-#define MACADDR_VALUE 284
-#define URL_FILE_VALUE 285
-#define URL_FTP_VALUE 286
-#define URL_HTTP_VALUE 287
-#define URL_TFTP_VALUE 288
-#define VARDEF 289
-#define COMMAND 290
-#define VARIABLE 291
-#define LITERAL 292
-#define STRING 293
-#define SYNTAX_ERROR 294
+#define UINTRANGE_TYPE 267
+#define BOOL_TYPE 268
+#define TOGGLE_TYPE 269
+#define IPV4_TYPE 270
+#define IPV4RANGE_TYPE 271
+#define IPV4NET_TYPE 272
+#define IPV6_TYPE 273
+#define IPV6RANGE_TYPE 274
+#define IPV6NET_TYPE 275
+#define MACADDR_TYPE 276
+#define URL_FILE_TYPE 277
+#define URL_FTP_TYPE 278
+#define URL_HTTP_TYPE 279
+#define URL_TFTP_TYPE 280
+#define BOOL_VALUE 281
+#define INTEGER_VALUE 282
+#define UINTRANGE_VALUE 283
+#define IPV4_VALUE 284
+#define IPV4RANGE_VALUE 285
+#define IPV4NET_VALUE 286
+#define IPV6_VALUE 287
+#define IPV6RANGE_VALUE 288
+#define IPV6NET_VALUE 289
+#define MACADDR_VALUE 290
+#define URL_FILE_VALUE 291
+#define URL_FTP_VALUE 292
+#define URL_HTTP_VALUE 293
+#define URL_TFTP_VALUE 294
+#define VARDEF 295
+#define COMMAND 296
+#define VARIABLE 297
+#define LITERAL 298
+#define STRING 299
+#define SYNTAX_ERROR 300
 const short tpltlhs[] = {                                        -1,
     0,    0,    0,    1,    3,    3,    6,    6,    5,    5,
     5,    7,    7,    7,    7,    7,    7,    7,    7,    7,
-    7,    7,    7,    7,    7,    8,    8,    8,    8,    8,
-    8,    8,    8,    8,    8,    8,    8,    8,    8,    4,
-    9,    9,   10,   10,   10,   11,   11,   14,   13,   12,
-   12,   15,   16,   17,   18,   18,   19,   19,   19,   19,
-   19,   19,   19,   19,   19,   20,   20,    2,
+    7,    7,    7,    7,    7,    7,    7,    7,    8,    8,
+    8,    8,    8,    8,    8,    8,    8,    8,    8,    8,
+    8,    8,    8,    8,    8,    4,    9,    9,   10,   10,
+   10,   11,   11,   14,   13,   12,   12,   15,   16,   17,
+   18,   18,   19,   19,   19,   19,   19,   19,   19,   19,
+   19,   20,   20,    2,
 };
 const short tpltlen[] = {                                         2,
     0,    2,    1,    2,    1,    1,    2,    4,    1,    2,
     2,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-    1,    1,    1,    1,    1,    3,    3,    3,    3,    3,
+    1,    1,    1,    1,    1,    1,    1,    1,    3,    3,
     3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-    0,    2,    1,    1,    1,    1,    1,    4,    4,    1,
-    1,    4,    3,    1,    1,    3,    1,    2,    4,    3,
-    2,    3,    1,    2,    1,    1,    2,    1,
+    3,    3,    3,    3,    3,    3,    0,    2,    1,    1,
+    1,    1,    1,    4,    4,    1,    1,    4,    3,    1,
+    1,    3,    1,    2,    4,    3,    2,    3,    1,    2,
+    1,    1,    2,    1,
 };
 const short tpltdefred[] = {                                      0,
-    0,   68,    0,    0,    3,    0,    0,    6,    0,    2,
-    0,    4,    0,   11,    0,   54,    0,   45,    0,    0,
-   43,   44,   46,   47,   50,   51,    0,   12,   13,   14,
+    0,   74,    0,    0,    3,    0,    0,    6,    0,    2,
+    0,    4,    0,   11,    0,   60,    0,   51,    0,    0,
+   49,   50,   52,   53,   56,   57,    0,   12,   13,   14,
    15,   16,   17,   18,   19,   20,   21,   22,   23,   24,
-   25,    8,    0,   40,   42,    0,    0,    0,    0,    0,
+   25,   26,   27,   28,    8,    0,   46,   48,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,   53,    0,    0,   66,    0,   55,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,   59,    0,
+    0,   72,    0,   61,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,   48,   49,    0,    0,    0,    0,    0,
-   52,    0,   67,   26,   27,   28,   29,   30,   31,   32,
-   33,   34,   35,   36,   37,   38,   39,   60,   62,    0,
-   56,   59,
+    0,    0,   54,   55,    0,    0,    0,    0,    0,   58,
+    0,   73,   29,   30,   31,   32,   33,   34,   35,   36,
+   37,   38,   39,   40,   41,   42,   43,   44,   45,   66,
+   68,    0,   62,   65,
 };
 const short tpltdgoto[] = {                                       3,
-    4,    5,    6,   12,    7,    8,   42,   62,   19,   20,
-   21,   22,   23,   24,   25,   26,   27,   67,   68,   69,
+    4,    5,    6,   12,    7,    8,   45,   68,   19,   20,
+   21,   22,   23,   24,   25,   26,   27,   73,   74,   75,
 };
-const short tpltsindex[] = {                                   -282,
- -284,    0,    0, -282,    0, -222, -221,    0, -187,    0,
- -218,    0, -284,    0, -249,    0, -246,    0, -181, -218,
-    0,    0,    0,    0,    0,    0, -182,    0,    0,    0,
+const short tpltsindex[] = {                                   -288,
+ -290,    0,    0, -288,    0, -187, -222,    0, -179,    0,
+ -216,    0, -290,    0, -249,    0, -246,    0, -175, -216,
+    0,    0,    0,    0,    0,    0, -176,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0, -219,    0,    0, -252, -180, -179, -178, -177,
- -176, -175, -174, -173, -172, -171, -170, -169, -168, -167,
- -164, -163,    0, -214, -226,    0, -253,    0, -213, -196,
- -166, -165, -162, -161, -160, -183, -159, -184, -158, -185,
- -157, -186, -156,    0,    0, -213, -249, -191, -155, -213,
-    0, -223,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0, -190,
-    0,    0,
+    0,    0,    0,    0,    0, -213,    0,    0, -252, -174,
+ -173, -172, -171, -170, -169, -168, -167, -166, -165, -164,
+ -163, -162, -161, -160, -159, -158, -155, -154,    0, -214,
+ -224,    0, -253,    0, -193, -192, -196, -157, -156, -153,
+ -152, -151, -177, -150, -178, -149, -148, -180, -147, -181,
+ -146, -182,    0,    0, -193, -249, -186, -145, -193,    0,
+ -220,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0, -185,    0,    0,
 };
-const short tpltrindex[] = {                                    104,
- -256,    0,    0,  104,    0,    0, -152,    0, -255,    0,
- -151,    0, -254,    0,    0,    0, -256,    0,    0, -151,
+const short tpltrindex[] = {                                    115,
+ -256,    0,    0,  115,    0,    0, -141,    0, -255,    0,
+ -175,    0, -254,    0,    0,    0, -256,    0,    0, -175,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0, -153, -150, -149, -148,
- -147, -144, -141, -140, -138, -137, -135, -134, -132, -131,
-    0,    0,    0, -230, -229,    0,    0,    0, -228,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0, -142,
+ -140, -139, -138, -137, -136, -135, -133, -129, -128, -127,
+ -125, -124, -122, -121, -119, -117,    0,    0,    0, -227,
+ -226,    0,    0,    0, -225,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0, -200,    0, -199, -251, -198,
+    0,    0,    0,    0, -221,    0, -191, -251, -190,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,
+    0,    0,    0,    0,
 };
-const short tpltgindex[] = {                                    126,
-   -7,    0,    0,    0,    0,  124,  -43,    0,  113,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,   42,   11,
+const short tpltgindex[] = {                                    139,
+   -7,    0,    0,    0,    0,  138,  -46,    0,  126,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,   47,  -31,
 };
-#define YYTABLESIZE 134
-const short tplttable[] = {                                      61,
-    9,    7,   10,   18,    9,   91,   63,   66,   92,    1,
-   66,    2,   18,   43,   28,   29,   30,   31,   32,   33,
-   34,   35,   36,   37,   38,   39,   40,   41,   63,   65,
-   57,   63,   65,   57,   11,    9,    7,   10,   64,   65,
-   66,   66,    9,  108,   47,   48,   49,   50,   51,   52,
-   53,   54,   55,   56,   57,   58,   59,   60,   64,   61,
-   58,   64,   61,   58,   87,   88,   89,   64,   65,   66,
-   13,   16,   15,   17,   86,   90,   44,   46,   66,   93,
-   70,   71,   72,   73,   74,   75,   76,   77,   78,   79,
-   80,   81,   82,   83,   84,   85,   94,  100,  102,  104,
-  106,  109,  112,    1,    5,   12,   41,  110,   13,   14,
-   15,   16,   95,   96,   17,   97,   98,   18,   19,   99,
-   20,   21,  101,   22,   23,  103,   24,   25,  105,   10,
-   14,  107,   45,  111,
+#define YYTABLESIZE 148
+const short tplttable[] = {                                      67,
+    9,    7,   10,   18,    9,  100,   69,   72,  101,    1,
+   72,    2,   18,   46,   28,   29,   30,   31,   32,   33,
+   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,
+   44,   69,   71,   63,   69,   71,   63,   70,   95,   99,
+   70,    9,    7,   10,   70,   71,   72,   72,    9,  120,
+   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,
+   60,   61,   62,   63,   64,   65,   66,   67,   64,   11,
+   67,   64,   96,   97,   98,   13,   70,   71,   72,   16,
+   15,   17,   47,   49,   72,  104,   76,   77,   78,   79,
+   80,   81,   82,   83,   84,   85,   86,   87,   88,   89,
+   90,   91,   92,   93,   94,  102,  103,  110,  112,  115,
+  117,  119,  121,  124,    1,    5,   12,  122,   13,   14,
+   15,   16,   17,   18,  105,   19,  106,  107,  108,   20,
+   21,   22,  109,   23,   24,  111,   25,   26,  113,   27,
+  114,   28,   10,  116,   14,   48,  118,  123,
 };
-const short tpltcheck[] = {                                      43,
-  257,  257,  257,   11,  289,  259,  259,  259,  262,  292,
-  262,  294,   20,  260,  264,  265,  266,  267,  268,  269,
-  270,  271,  272,  273,  274,  275,  276,  277,  259,  259,
-  259,  262,  262,  262,  257,  292,  292,  292,  291,  292,
-  293,  293,  289,   87,  264,  265,  266,  267,  268,  269,
-  270,  271,  272,  273,  274,  275,  276,  277,  259,  259,
-  259,  262,  262,  262,  291,  292,  293,  291,  292,  293,
-  292,  290,  260,  292,   64,   65,  258,  260,  293,  293,
+const short tpltcheck[] = {                                      46,
+  257,  257,  257,   11,  295,  259,  259,  259,  262,  298,
+  262,  300,   20,  260,  264,  265,  266,  267,  268,  269,
+  270,  271,  272,  273,  274,  275,  276,  277,  278,  279,
+  280,  259,  259,  259,  262,  262,  262,  259,   70,   71,
+  262,  298,  298,  298,  297,  298,  299,  299,  295,   96,
+  264,  265,  266,  267,  268,  269,  270,  271,  272,  273,
+  274,  275,  276,  277,  278,  279,  280,  259,  259,  257,
+  262,  262,  297,  298,  299,  298,  297,  298,  299,  296,
+  260,  298,  258,  260,  299,  282,  261,  261,  261,  261,
   261,  261,  261,  261,  261,  261,  261,  261,  261,  261,
-  261,  261,  261,  261,  259,  259,  293,  281,  283,  285,
-  287,  293,  293,    0,  257,  259,  258,  263,  259,  259,
-  259,  259,  279,  279,  259,  278,  278,  259,  259,  280,
-  259,  259,  282,  259,  259,  284,  259,  259,  286,    4,
-    7,  288,   20,   92,
+  261,  261,  261,  259,  259,  299,  299,  285,  287,  290,
+  292,  294,  299,  299,    0,  257,  259,  263,  259,  259,
+  259,  259,  259,  259,  282,  259,  283,  281,  281,  259,
+  259,  259,  284,  259,  259,  286,  259,  259,  288,  259,
+  289,  259,    4,  291,    7,   20,  293,  101,
 };
 #define YYFINAL 3
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 294
+#define YYMAXTOKEN 300
 #if YYDEBUG
 const char * const tpltname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -216,12 +229,13 @@ const char * const tpltname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"UPLEVEL","DOWNLEVEL","END",
 "COLON","ASSIGN_DEFAULT","LISTNEXT","RETURN","TEXT_TYPE","INT_TYPE","UINT_TYPE",
-"BOOL_TYPE","TOGGLE_TYPE","IPV4_TYPE","IPV4NET_TYPE","IPV6_TYPE","IPV6NET_TYPE",
-"MACADDR_TYPE","URL_FILE_TYPE","URL_FTP_TYPE","URL_HTTP_TYPE","URL_TFTP_TYPE",
-"BOOL_VALUE","INTEGER_VALUE","IPV4_VALUE","IPV4NET_VALUE","IPV6_VALUE",
-"IPV6NET_VALUE","MACADDR_VALUE","URL_FILE_VALUE","URL_FTP_VALUE",
-"URL_HTTP_VALUE","URL_TFTP_VALUE","VARDEF","COMMAND","VARIABLE","LITERAL",
-"STRING","SYNTAX_ERROR",
+"UINTRANGE_TYPE","BOOL_TYPE","TOGGLE_TYPE","IPV4_TYPE","IPV4RANGE_TYPE",
+"IPV4NET_TYPE","IPV6_TYPE","IPV6RANGE_TYPE","IPV6NET_TYPE","MACADDR_TYPE",
+"URL_FILE_TYPE","URL_FTP_TYPE","URL_HTTP_TYPE","URL_TFTP_TYPE","BOOL_VALUE",
+"INTEGER_VALUE","UINTRANGE_VALUE","IPV4_VALUE","IPV4RANGE_VALUE",
+"IPV4NET_VALUE","IPV6_VALUE","IPV6RANGE_VALUE","IPV6NET_VALUE","MACADDR_VALUE",
+"URL_FILE_VALUE","URL_FTP_VALUE","URL_HTTP_VALUE","URL_TFTP_VALUE","VARDEF",
+"COMMAND","VARIABLE","LITERAL","STRING","SYNTAX_ERROR",
 };
 const char * const tpltrule[] = {
 "$accept : input",
@@ -239,11 +253,14 @@ const char * const tpltrule[] = {
 "type : TEXT_TYPE",
 "type : INT_TYPE",
 "type : UINT_TYPE",
+"type : UINTRANGE_TYPE",
 "type : BOOL_TYPE",
 "type : TOGGLE_TYPE",
 "type : IPV4_TYPE",
+"type : IPV4RANGE_TYPE",
 "type : IPV4NET_TYPE",
 "type : IPV6_TYPE",
+"type : IPV6RANGE_TYPE",
 "type : IPV6NET_TYPE",
 "type : MACADDR_TYPE",
 "type : URL_FILE_TYPE",
@@ -253,11 +270,14 @@ const char * const tpltrule[] = {
 "init_type : TEXT_TYPE ASSIGN_DEFAULT STRING",
 "init_type : INT_TYPE ASSIGN_DEFAULT INTEGER_VALUE",
 "init_type : UINT_TYPE ASSIGN_DEFAULT INTEGER_VALUE",
+"init_type : UINTRANGE_TYPE ASSIGN_DEFAULT UINTRANGE_VALUE",
 "init_type : BOOL_TYPE ASSIGN_DEFAULT BOOL_VALUE",
 "init_type : TOGGLE_TYPE ASSIGN_DEFAULT BOOL_VALUE",
 "init_type : IPV4_TYPE ASSIGN_DEFAULT IPV4_VALUE",
+"init_type : IPV4RANGE_TYPE ASSIGN_DEFAULT IPV4RANGE_VALUE",
 "init_type : IPV4NET_TYPE ASSIGN_DEFAULT IPV4NET_VALUE",
 "init_type : IPV6_TYPE ASSIGN_DEFAULT IPV6_VALUE",
+"init_type : IPV6RANGE_TYPE ASSIGN_DEFAULT IPV6RANGE_VALUE",
 "init_type : IPV6NET_TYPE ASSIGN_DEFAULT IPV6NET_VALUE",
 "init_type : MACADDR_TYPE ASSIGN_DEFAULT MACADDR_VALUE",
 "init_type : URL_FILE_TYPE ASSIGN_DEFAULT URL_FILE_VALUE",
@@ -325,7 +345,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 264 "template.yy"
+#line 285 "template.yy"
 
 extern char *lstr;
 extern char *vstr;
@@ -464,7 +484,7 @@ parse_template() throw (ParseError)
     if (tpltparse() != 0)
 	tplterror("unknown error");
 }
-#line 469 "y.tplt_tab.c"
+#line 489 "y.tplt_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -660,220 +680,253 @@ yyreduce:
     switch (yyn)
     {
 case 5:
-#line 71 "template.yy"
+#line 77 "template.yy"
 { push_path(); }
 break;
 case 6:
-#line 72 "template.yy"
+#line 78 "template.yy"
 { push_path(); }
 break;
 case 7:
-#line 75 "template.yy"
+#line 81 "template.yy"
 {
 			extend_path(yyvsp[-1], true);
 			extend_path(yyvsp[0], false);
 		}
 break;
 case 8:
-#line 79 "template.yy"
+#line 85 "template.yy"
 {
 			extend_path(yyvsp[-3], true);
 			extend_path(yyvsp[-2], false);
 		}
 break;
 case 9:
-#line 85 "template.yy"
+#line 91 "template.yy"
 { extend_path(yyvsp[0], false); }
 break;
 case 10:
-#line 86 "template.yy"
+#line 92 "template.yy"
 { extend_path(yyvsp[0], false); }
 break;
 case 12:
-#line 90 "template.yy"
+#line 96 "template.yy"
 { tplt_type = NODE_TEXT; }
 break;
 case 13:
-#line 91 "template.yy"
+#line 97 "template.yy"
 { tplt_type = NODE_INT; }
 break;
 case 14:
-#line 92 "template.yy"
+#line 98 "template.yy"
 { tplt_type = NODE_UINT; }
 break;
 case 15:
-#line 93 "template.yy"
-{ tplt_type = NODE_BOOL; }
+#line 99 "template.yy"
+{ tplt_type = NODE_UINTRANGE; }
 break;
 case 16:
-#line 94 "template.yy"
-{ tplt_type = NODE_TOGGLE; }
+#line 100 "template.yy"
+{ tplt_type = NODE_BOOL; }
 break;
 case 17:
-#line 95 "template.yy"
-{ tplt_type = NODE_IPV4; }
+#line 101 "template.yy"
+{ tplt_type = NODE_TOGGLE; }
 break;
 case 18:
-#line 96 "template.yy"
-{ tplt_type = NODE_IPV4NET; }
+#line 102 "template.yy"
+{ tplt_type = NODE_IPV4; }
 break;
 case 19:
-#line 97 "template.yy"
-{ tplt_type = NODE_IPV6; }
+#line 103 "template.yy"
+{ tplt_type = NODE_IPV4RANGE; }
 break;
 case 20:
-#line 98 "template.yy"
-{ tplt_type = NODE_IPV6NET; }
+#line 104 "template.yy"
+{ tplt_type = NODE_IPV4NET; }
 break;
 case 21:
-#line 99 "template.yy"
-{ tplt_type = NODE_MACADDR; }
+#line 105 "template.yy"
+{ tplt_type = NODE_IPV6; }
 break;
 case 22:
-#line 100 "template.yy"
-{ tplt_type = NODE_URL_FILE; }
+#line 106 "template.yy"
+{ tplt_type = NODE_IPV6RANGE; }
 break;
 case 23:
-#line 101 "template.yy"
-{ tplt_type = NODE_URL_FTP; }
+#line 107 "template.yy"
+{ tplt_type = NODE_IPV6NET; }
 break;
 case 24:
-#line 102 "template.yy"
-{ tplt_type = NODE_URL_HTTP; }
+#line 108 "template.yy"
+{ tplt_type = NODE_MACADDR; }
 break;
 case 25:
-#line 103 "template.yy"
-{ tplt_type = NODE_URL_TFTP; }
+#line 109 "template.yy"
+{ tplt_type = NODE_URL_FILE; }
 break;
 case 26:
-#line 106 "template.yy"
+#line 110 "template.yy"
+{ tplt_type = NODE_URL_FTP; }
+break;
+case 27:
+#line 111 "template.yy"
+{ tplt_type = NODE_URL_HTTP; }
+break;
+case 28:
+#line 112 "template.yy"
+{ tplt_type = NODE_URL_TFTP; }
+break;
+case 29:
+#line 115 "template.yy"
 {
 			tplt_type = NODE_TEXT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 27:
-#line 110 "template.yy"
+case 30:
+#line 119 "template.yy"
 {
 			tplt_type = NODE_INT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 28:
-#line 114 "template.yy"
+case 31:
+#line 123 "template.yy"
 {
 			tplt_type = NODE_UINT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 29:
-#line 118 "template.yy"
+case 32:
+#line 127 "template.yy"
+{
+			tplt_type = NODE_UINTRANGE;
+			tplt_initializer = yyvsp[0];
+		}
+break;
+case 33:
+#line 131 "template.yy"
 {
 			tplt_type = NODE_BOOL;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 30:
-#line 122 "template.yy"
+case 34:
+#line 135 "template.yy"
 {
 			tplt_type = NODE_TOGGLE;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 31:
-#line 126 "template.yy"
+case 35:
+#line 139 "template.yy"
 {
 			tplt_type = NODE_IPV4;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 32:
-#line 130 "template.yy"
+case 36:
+#line 143 "template.yy"
+{
+			tplt_type = NODE_IPV4RANGE;
+			tplt_initializer = yyvsp[0];
+		}
+break;
+case 37:
+#line 147 "template.yy"
 {
 			tplt_type = NODE_IPV4NET;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 33:
-#line 134 "template.yy"
+case 38:
+#line 151 "template.yy"
 {
 			tplt_type = NODE_IPV6;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 34:
-#line 138 "template.yy"
+case 39:
+#line 155 "template.yy"
+{
+			tplt_type = NODE_IPV6RANGE;
+			tplt_initializer = yyvsp[0];
+		}
+break;
+case 40:
+#line 159 "template.yy"
 {
 			tplt_type = NODE_IPV6NET;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 35:
-#line 142 "template.yy"
+case 41:
+#line 163 "template.yy"
 {
 			tplt_type = NODE_MACADDR;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 36:
-#line 146 "template.yy"
+case 42:
+#line 167 "template.yy"
 {
 			tplt_type = NODE_URL_FILE;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 37:
-#line 150 "template.yy"
+case 43:
+#line 171 "template.yy"
 {
 			tplt_type = NODE_URL_FTP;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 38:
-#line 154 "template.yy"
+case 44:
+#line 175 "template.yy"
 {
 			tplt_type = NODE_URL_HTTP;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 39:
-#line 158 "template.yy"
+case 45:
+#line 179 "template.yy"
 {
 			tplt_type = NODE_URL_TFTP;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 40:
-#line 164 "template.yy"
+case 46:
+#line 185 "template.yy"
 { pop_path(); }
 break;
-case 48:
-#line 180 "template.yy"
-{ terminal(yyvsp[-3]); }
-break;
-case 49:
-#line 183 "template.yy"
-{ terminal(yyvsp[-3]); }
-break;
 case 54:
-#line 196 "template.yy"
+#line 201 "template.yy"
+{ terminal(yyvsp[-3]); }
+break;
+case 55:
+#line 204 "template.yy"
+{ terminal(yyvsp[-3]); }
+break;
+case 60:
+#line 217 "template.yy"
 { add_cmd(yyvsp[0]); }
 break;
-case 57:
-#line 203 "template.yy"
+case 63:
+#line 224 "template.yy"
 {
 			end_cmd();
 		}
 break;
-case 58:
-#line 206 "template.yy"
+case 64:
+#line 227 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
-case 59:
-#line 210 "template.yy"
+case 65:
+#line 231 "template.yy"
 {
 			append_cmd(yyvsp[-3]);
 			append_cmd(yyvsp[-2]);
@@ -882,8 +935,8 @@ case 59:
 			end_cmd();
 		}
 break;
-case 60:
-#line 217 "template.yy"
+case 66:
+#line 238 "template.yy"
 { /* e.g.: set FOOBAR ipv4 */
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
@@ -891,16 +944,16 @@ case 60:
 			end_cmd();
 		}
 break;
-case 61:
-#line 223 "template.yy"
+case 67:
+#line 244 "template.yy"
 {
 			append_cmd(yyvsp[-1]);
 			append_cmd(yyvsp[0]);
 			end_cmd();
 		}
 break;
-case 62:
-#line 228 "template.yy"
+case 68:
+#line 249 "template.yy"
 {
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
@@ -908,46 +961,46 @@ case 62:
 			end_cmd();
 		}
 break;
-case 63:
-#line 234 "template.yy"
+case 69:
+#line 255 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 			end_cmd();
 		}
 break;
-case 64:
-#line 238 "template.yy"
+case 70:
+#line 259 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
-case 65:
-#line 242 "template.yy"
+case 71:
+#line 263 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 			end_cmd();
 		}
 break;
-case 66:
-#line 249 "template.yy"
+case 72:
+#line 270 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 		}
 break;
-case 67:
-#line 252 "template.yy"
+case 73:
+#line 273 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 		}
 break;
-case 68:
-#line 257 "template.yy"
+case 74:
+#line 278 "template.yy"
 {
 			tplterror("syntax error");
 		}
 break;
-#line 952 "y.tplt_tab.c"
+#line 1005 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
