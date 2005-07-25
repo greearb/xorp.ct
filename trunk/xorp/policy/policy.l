@@ -58,6 +58,10 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 %%
 
+[[:digit:]]+".."[[:digit:]]+	{ yylval.c_str = strdup(yytext);
+		  return YY_UINTRANGE;
+		}  
+
 [[:digit:]]+	{ yylval.c_str = strdup(yytext);
 		  return YY_UINT;
 		}  
@@ -78,6 +82,11 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  return YY_STR;
 		}
 
+{RE_IPV4}".."{RE_IPV4}	{
+		  yylval.c_str = strdup(yytext);
+		  return YY_IPV4RANGE;
+		}
+
 {RE_IPV4}	{
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4;
@@ -89,6 +98,11 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		}
 
 		
+{RE_IPV6}".."{RE_IPV6}	{
+		  yylval.c_str = strdup(yytext);
+		  return YY_IPV6RANGE;
+		}
+
 {RE_IPV6}	{
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6;

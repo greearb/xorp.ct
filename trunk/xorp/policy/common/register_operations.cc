@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.7 2005/07/20 16:56:52 zec Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.8 2005/07/21 19:42:19 zec Exp $"
 
 #include "config.h"
 #include "register_operations.hh"
@@ -227,6 +227,12 @@ do {									\
     ADD_BINOP(ElemBool,arg,arg,op_ne,Ne);				\
 } while (0)
 
+#define ADD_EQOP2(argl,argr)						\
+do {									\
+    ADD_BINOP(ElemBool,argl,argr,op_eq,Eq);				\
+    ADD_BINOP(ElemBool,argl,argr,op_ne,Ne);				\
+} while (0)
+
 // RELATIONAL OPERATORS
 #define ADD_RELOP(arg)							\
 do {									\
@@ -234,6 +240,14 @@ do {									\
     ADD_BINOP(ElemBool,arg,arg,op_gt,Gt);				\
     ADD_BINOP(ElemBool,arg,arg,op_le,Le);				\
     ADD_BINOP(ElemBool,arg,arg,op_ge,Ge);				\
+} while (0)
+   
+#define ADD_RELOP2(argl,argr)						\
+do {									\
+    ADD_BINOP(ElemBool,argl,argr,op_lt,Lt);				\
+    ADD_BINOP(ElemBool,argl,argr,op_gt,Gt);				\
+    ADD_BINOP(ElemBool,argl,argr,op_le,Le);				\
+    ADD_BINOP(ElemBool,argl,argr,op_ge,Ge);				\
 } while (0)
    
 // MATH OPERATORS
@@ -313,7 +327,9 @@ do {                                                                    \
    
     // IPV4NET
     ADD_EQOP(ElemIPv4Net);
+    ADD_EQOP2(ElemIPv4Net,ElemU32Range);
     ADD_RELOP(ElemIPv4Net);
+    ADD_RELOP2(ElemIPv4Net,ElemU32Range);
     ADD_SETBINOP(ElemSetIPv4Net, ElemIPv4Net);
    
     // IPV6

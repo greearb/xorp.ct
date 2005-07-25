@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.3 2005/07/01 22:54:36 abittau Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.4 2005/07/20 16:56:52 zec Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
@@ -26,9 +26,12 @@ const char* ElemStr::id = "txt";
 const char* ElemBool::id = "bool";
 
 template<> const char* ElemIPv4::id = "ipv4";
+template<> const char* ElemIPv4Range::id = "ipv4range";
 template<> const char* ElemIPv6::id = "ipv6";
+template<> const char* ElemIPv6Range::id = "ipv6range";
 template<> const char* ElemIPv4Net::id = "ipv4net";
 template<> const char* ElemIPv6Net::id = "ipv6net";
+template<> const char* ElemU32Range::id = "u32range";
 
 const char* ElemNull::id = "null";
 

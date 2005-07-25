@@ -34,8 +34,8 @@ static ElementFactory _ef;
 	Node *node;
 };
 
-%token <c_str> YY_INT YY_UINT YY_STR YY_ID 
-%token <c_str> YY_IPV4 YY_IPV4NET YY_IPV6 YY_IPV6NET
+%token <c_str> YY_INT YY_UINT YY_UINTRANGE YY_STR YY_ID 
+%token <c_str> YY_IPV4 YY_IPV4RANGE YY_IPV4NET YY_IPV6 YY_IPV6RANGE YY_IPV6NET
 
 %left YY_NOT YY_AND YY_XOR YY_OR YY_HEAD YY_CTR YY_NE_INT
 %left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_LE YY_GE
@@ -105,11 +105,14 @@ expr:
 
 	| YY_STR { $$ = new NodeElem(_ef.create(ElemStr::id,$1),_parser_lineno); free($1); }
 	| YY_UINT { $$ = new NodeElem(_ef.create(ElemU32::id,$1),_parser_lineno); free($1);}
+	| YY_UINTRANGE { $$ = new NodeElem(_ef.create(ElemU32Range::id,$1),_parser_lineno); free($1);}
 	| YY_INT { $$ = new NodeElem(_ef.create(ElemInt32::id,$1),_parser_lineno); free($1);}
 	| YY_ID	{ $$ = new NodeVar($1,_parser_lineno); free($1); }
 	| YY_SET YY_ID { $$ = new NodeSet($2,_parser_lineno); free($2); }
 	| YY_IPV4 { $$ = new NodeElem(_ef.create(ElemIPv4::id,$1),_parser_lineno); free($1); }
+	| YY_IPV4RANGE { $$ = new NodeElem(_ef.create(ElemIPv4Range::id,$1),_parser_lineno); free($1); }
 	| YY_IPV6 { $$ = new NodeElem(_ef.create(ElemIPv6::id,$1),_parser_lineno); free($1); }
+	| YY_IPV6RANGE { $$ = new NodeElem(_ef.create(ElemIPv6Range::id,$1),_parser_lineno); free($1); }
 	| YY_IPV4NET { $$ = new NodeElem(_ef.create(ElemIPv4Net::id,$1),_parser_lineno); free($1); }
 	| YY_IPV6NET { $$ = new NodeElem(_ef.create(ElemIPv6Net::id,$1),_parser_lineno); free($1); }
         ;
