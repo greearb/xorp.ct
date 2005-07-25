@@ -12,6 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
+// $XORP: 
 
 #ifndef __LIBXORP_RANGE_HH__
 #define __LIBXORP_RANGE_HH__
