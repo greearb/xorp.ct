@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.76 2005/07/23 01:22:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.77 2005/07/23 01:40:21 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -1734,6 +1734,20 @@ RouterCLI::text_entry_func(const string& ,
 	ctn = brace_ctn;
     if (ctn == NULL)
 	ctn = &(config_tree()->slave_root_node());
+    XLOG_ASSERT(ctn != NULL);
+
+    //
+    // If the node was deleted previously, and it is not a tag, then
+    // undelete the whole subtree below it.
+    //
+    if (ctn->deleted() && (! ctn->is_tag()))
+	ctn->undelete_subtree();
+
+    //
+    // Undelete the node and all its ancestors (just in case it was deleted
+    // previously).
+    //
+    ctn->undelete_node_and_ancestors();
 
     //
     // At this point, path_segments contains the path of nodes that
