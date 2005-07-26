@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.81 2005/07/26 07:17:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.82 2005/07/26 07:51:50 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -1569,6 +1569,7 @@ RouterCLI::exit_func(const string& ,
 	    return (XORP_ERROR);
 	}
 	config_tree()->discard_changes();
+	_changes_made = false;
 	idle_ui();
 	_xorpsh.leave_config_mode(callback(this,
 					   &RouterCLI::leave_config_done));
