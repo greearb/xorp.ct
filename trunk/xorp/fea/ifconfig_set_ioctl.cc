@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.35 2005/03/05 01:41:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.36 2005/03/25 02:53:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -362,6 +362,68 @@ IfConfigSetIoctl::add_vif_address(const string& ifname,
     UNUSED(is_p2p);
     UNUSED(addr);
     UNUSED(dst_or_bcast);
+    UNUSED(prefix_len);
+
+    error_msg = "method not supported";
+
+    return (XORP_ERROR);
+}
+
+int
+IfConfigSetIoctl::add_vif_address4(const string& ifname,
+				   const string& vifname,
+				   uint16_t if_index,
+				   bool is_broadcast,
+				   bool is_p2p,
+				   const IPvX& addr,
+				   const IPvX& dst_or_bcast,
+				   uint32_t prefix_len,
+				   string& error_msg)
+{
+    debug_msg("add_vif_address4 "
+	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
+	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
+	      addr.str().c_str(), dst_or_bcast.str().c_str(), prefix_len);
+
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(if_index);
+    UNUSED(is_broadcast);
+    UNUSED(is_p2p);
+    UNUSED(addr);
+    UNUSED(dst_or_bcast);
+    UNUSED(prefix_len);
+
+    error_msg = "method not supported";
+
+    return (XORP_ERROR);
+}
+
+int
+IfConfigSetIoctl::add_vif_address6(const string& ifname,
+				   const string& vifname,
+				   uint16_t if_index,
+				   bool is_p2p,
+				   const IPvX& addr,
+				   const IPvX& dst,
+				   uint32_t prefix_len,
+				   string& error_msg)
+{
+    debug_msg("add_vif_address6 "
+	      "(ifname = %s vifname = %s if_index = %u is_p2p = %s "
+	      "addr = %s dst = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_p2p)? "true" : "false", addr.str().c_str(),
+	      dst.str().c_str(), prefix_len);
+
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(if_index);
+    UNUSED(is_p2p);
+    UNUSED(addr);
+    UNUSED(dst);
     UNUSED(prefix_len);
 
     error_msg = "method not supported";
