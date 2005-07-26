@@ -71,6 +71,15 @@
 /* XXX: Single threaded socket errno, used to record last error code. */
 int _comm_serrno;
 
+#ifdef HOST_OS_WINDOWS
+/*
+ * XXX: Flag used to determine if libcomm should immediately squelch
+ * the socket event mask after a Winsock accept(); for use with Windows
+ * dispatch code.
+ */
+int _comm_squelch_accept = 1;
+#endif
+
 /**
  * comm_sock_open:
  * @domain: The domain of the socket (e.g., %AF_INET, %AF_INET6).
@@ -228,6 +237,10 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 	if (st[1] != INVALID_SOCKET) {
 	    break;
 	} else {
+	    /* Squench inherited socket event mask, if applicable. */
+	    if (_comm_squelch_accept != 0)
+		(void)WSAEventSelect(st[1], NULL, 0);
+
 	    if (WSAGetLastError() == WSAEWOULDBLOCK) {
 		SleepEx(100, TRUE);
 	    } else {
@@ -848,6 +861,18 @@ comm_sock_accept(xsock_t sock)
 	return (XORP_BAD_SOCKET);
     }
 
+#ifdef HOST_OS_WINDOWS
+    /*
+     * If the library is configured to do so, then squelch any
+     * event notifications on the new socket which may have been
+     * inherited from a previous call to WSAAsyncSelect() on the
+     * listening socket. Use WSAEventSelect() to avoid having
+     * to know what the associated window handle was, if any.
+     */
+    if (_comm_squelch_accept != 0)
+	(void)WSAEventSelect(sock_accept, NULL, 0);
+#endif
+
     /* Enable TCP_NODELAY */
     if (comm_set_nodelay(sock_accept, 1) != XORP_OK) {
 	comm_sock_close(sock_accept);
@@ -873,6 +898,8 @@ comm_sock_close(xsock_t sock)
 #ifndef HOST_OS_WINDOWS
     ret = close(sock);
 #else
+    if (_comm_squelch_accept != 0)
+	(void)WSAEventSelect(sock, NULL, 0);
     ret = closesocket(sock);
 #endif
 

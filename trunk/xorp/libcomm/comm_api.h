@@ -31,11 +31,12 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.18 2005/07/01 16:57:25 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.17 2005/05/16 14:00:38 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
 #define __LIBCOMM_COMM_API_H__
+
 
 /*
  * COMM socket library API header.
