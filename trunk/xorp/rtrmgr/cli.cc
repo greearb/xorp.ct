@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.77 2005/07/23 01:40:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.78 2005/07/26 04:17:03 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -1688,6 +1688,8 @@ RouterCLI::text_entry_func(const string& ,
     list<string> path_segments;
     XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
     SlaveConfigTreeNode *ctn = NULL, *original_ctn = NULL, *brace_ctn;
+    const TemplateTreeNode* ttn = NULL;
+    bool value_expected = false;
 
     // Restore the indent position from last time we were called
     size_t original_braces_length = _braces.size();
@@ -1737,6 +1739,23 @@ RouterCLI::text_entry_func(const string& ,
     XLOG_ASSERT(ctn != NULL);
 
     //
+    // At this point, path_segments contains the path of nodes that
+    // already exist, new_path_segments contains the path that does not
+    // yet exist, and ctn points to the last existing node.
+    //
+
+    //
+    // Test if the node was already created.
+    //
+    if (new_path_segments.empty() && (! ctn->deleted())) {
+	string errmsg = c_format("ERROR: node \"%s\" "
+				 "already exists.\n",
+				 ctn->segname().c_str());
+	cli_client().cli_print(errmsg);
+	goto cleanup;
+    }
+
+    //
     // If the node was deleted previously, and it is not a tag, then
     // undelete the whole subtree below it.
     //
@@ -1750,22 +1769,13 @@ RouterCLI::text_entry_func(const string& ,
     ctn->undelete_node_and_ancestors();
 
     //
-    // At this point, path_segments contains the path of nodes that
-    // already exist, new_path_segments contains the path that does not
-    // yet exist, and ctn points to the last existing node.
-    //
-
-    const TemplateTreeNode* ttn = NULL;
-
-    //
     // Variable "value_expected" keeps track of whether the next
     // segment should be a value for the node we just created.
     //
-    bool value_expected = false;
-
-
     if (ctn->is_tag() || ctn->is_leaf_value())
 	value_expected = true;
+    else
+	value_expected = false;
 
     while (! new_path_segments.empty()) {
 	if (! ctn->children().empty()) {
