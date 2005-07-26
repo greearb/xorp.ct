@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.40 2005/07/23 01:22:12 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.41 2005/07/26 04:11:12 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -118,7 +118,7 @@ public:
     const ConfigTreeNode* const_parent() const { return _parent; }
     list<ConfigTreeNode*>& children() { return _children; }
     const list<ConfigTreeNode*>& const_children() const { return _children; }
-    string show_subtree(int depth, int indent, bool do_indent,
+    string show_subtree(bool show_top, int depth, int indent, bool do_indent,
 			bool numbered, bool annotate,
 			bool suppress_default_values) const;
     void mark_subtree_for_deletion(uid_t user_id);

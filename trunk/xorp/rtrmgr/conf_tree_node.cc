@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.78 2005/07/24 17:10:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.79 2005/07/26 04:11:12 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -593,8 +593,9 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
     // The root node has a NULL template
     if (_template_tree_node != NULL) {
 	if (_existence_committed == false) {
-	    result =  show_subtree(depth, /* XXX */ depth * 2, true, 
-				   /* numbered */ false, false, false);
+	    bool show_top = (depth > 0);
+	    result = show_subtree(show_top, depth, /* XXX */ depth * 2, true, 
+				  /* numbered */ false, false, false);
 	    delete_subtree_silently();
 	    return result;
 	} else if (_value_committed == false) {
@@ -726,14 +727,13 @@ ConfigTreeNode::undelete_subtree()
     }
 }
 
-string 
-ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
-			     bool numbered, bool annotate,
+string
+ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
+			     bool do_indent, bool numbered, bool annotate,
 			     bool suppress_default_values) const
 {
     string s;
     string my_in;
-    bool show_me = (depth > 0);
     bool is_a_tag = false;
     int new_indent;
 
@@ -746,7 +746,7 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
     for (int i = 0; i < indent; i++) 
 	my_in += "  ";
 
-    if (is_a_tag && show_me) {
+    if (is_a_tag && show_top) {
 	new_indent = indent;
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
@@ -780,13 +780,13 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	    }
 	    s += my_in + show_nodenum(numbered, child_ctn->nodenum()) 
 		+ _segname + " " +
-		child_ctn->show_subtree(depth, indent, false, 
+		child_ctn->show_subtree(show_top, depth, indent, false, 
 					numbered, annotate,
 					suppress_default_values);
 	}
-    } else if (is_a_tag && (show_me == false)) {
+    } else if (is_a_tag && (show_top == false)) {
 	s = "ERROR";
-    } else if ((is_a_tag == false) && show_me) {
+    } else if ((is_a_tag == false) && show_top) {
 	string s2;
 
 	new_indent = indent + 2;
@@ -861,16 +861,16 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	s += " {\n";
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(depth + 1, new_indent, true, 
+	    s += (*iter)->show_subtree(true, depth + 1, new_indent, true, 
 				       numbered, annotate,
 				       suppress_default_values);
 	}
 	s += s2 + my_in + "}\n";
-    } else if ((is_a_tag == false) && (show_me == false)) {
+    } else if ((is_a_tag == false) && (show_top == false)) {
 	new_indent = indent;
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(depth + 1, new_indent, true, 
+	    s += (*iter)->show_subtree(true, depth + 1, new_indent, true, 
 				       numbered, annotate,
 				       suppress_default_values);
 	}

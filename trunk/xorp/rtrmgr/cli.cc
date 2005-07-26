@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.78 2005/07/26 04:17:03 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.79 2005/07/26 04:32:57 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2152,7 +2152,8 @@ RouterCLI::delete_func(const string& ,
 	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
-    string result = config_tree()->show_subtree(path_segments, false, true);
+    string result = config_tree()->show_subtree(true, path_segments, false,
+						true);
     cli_client().cli_print("Deleting: \n");
     cli_client().cli_print(result + "\n");
 
@@ -2431,7 +2432,7 @@ RouterCLI::show_func(const string& ,
 	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
-    string result = config_tree()->show_subtree(path_segments, false,
+    string result = config_tree()->show_subtree(false, path_segments, false,
 						suppress_default_values);
     cli_client().cli_print(result + "\n");
     config_mode_prompt();
