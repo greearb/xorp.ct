@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.37 2005/07/15 06:33:21 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.38 2005/07/15 09:34:17 pavlin Exp $"
 
 
 //
@@ -625,6 +625,9 @@ CliClient::process_input_data()
     vector<uint8_t>::iterator iter;
     for (iter = input_data.begin(); iter != input_data.end(); ++iter) {
 	uint8_t val = *iter;
+	bool stop_processing_tmp = false;
+	bool save_input = false;
+	bool ignore_current_character = false;
 	
 	if (is_telnet()) {
 	    // Filter-out the Telnet commands
@@ -648,7 +651,12 @@ CliClient::process_input_data()
 	    }
 	}
 	
-	preprocess_char(val);
+	preprocess_char(val, stop_processing_tmp);
+	if (stop_processing_tmp && (! stop_processing)) {
+	    stop_processing = true;
+	    save_input = true;
+	    ignore_current_character = false;
+	}
 
 	if (val == CHAR_TO_CTRL('c')) {
 	    //
@@ -659,52 +667,56 @@ CliClient::process_input_data()
 	    return;
 	}
 
-	if (stop_processing)
-	    continue;
-
-	//
-	// Get a character and process it
-	//
-	do {
-	    char *line;
-	    line = gl_get_line_net(gl(),
-				   current_cli_prompt().c_str(),
-				   (char *)command_buffer().data(),
-				   buff_curpos(),
-				   val);
-	    ret_value = XORP_ERROR;
-	    if (line == NULL) {
+	if (! stop_processing) {
+	    //
+	    // Get a character and process it
+	    //
+	    do {
+		char *line;
+		line = gl_get_line_net(gl(),
+				       current_cli_prompt().c_str(),
+				       (char *)command_buffer().data(),
+				       buff_curpos(),
+				       val);
 		ret_value = XORP_ERROR;
+		if (line == NULL) {
+		    ret_value = XORP_ERROR;
+		    break;
+		}
+		if (is_page_mode()) {
+		    ret_value = process_char_page_mode(val);
+		    break;
+		}
+		ret_value = process_char(string(line), val,
+					 stop_processing_tmp);
+		if (stop_processing_tmp && (! stop_processing)) {
+		    stop_processing = true;
+		    save_input = true;
+		    ignore_current_character = true;
+		}
 		break;
+	    } while (false);
+
+	    if (ret_value != XORP_OK) {
+		// Either error or end of input
+		cli_print("\nEnd of connection.\n");
+		cli_node().delete_connection(this, dummy_error_msg);
+		return;
 	    }
-	    if (is_page_mode()) {
-		ret_value = process_char_page_mode(val);
-		break;
-	    }
-	    ret_value = process_char(string(line), val, stop_processing);
-	    break;
-	} while (false);
-	
-	if (ret_value != XORP_OK) {
-	    // Either error or end of input
-	    cli_print("\nEnd of connection.\n");
-	    cli_node().delete_connection(this, dummy_error_msg);
-	    return;
 	}
 
-	if (stop_processing) {
+	if (save_input) {
 	    //
 	    // Stop processing and save the remaining input data for later
 	    // processing.
 	    // However we continue scanning the rest of the data
-	    // primary to look for Ctrl-C
+	    // primarily to look for Ctrl-C input.
 	    //
 	    vector<uint8_t>::iterator iter2 = iter;
-	    ++iter2;
+	    if (ignore_current_character)
+		++iter2;
 	    if (iter2 != input_data.end())
 		_pending_input_data.assign(iter2, input_data.end());
-	    // _pending_input_data = input_data.substr(i + 1);
-	    continue;
 	}
     }
     cli_flush();		// Flush-out the output
@@ -714,8 +726,18 @@ CliClient::process_input_data()
 // Preprocess a character before 'libtecla' get its hand on it
 //
 int
-CliClient::preprocess_char(uint8_t val)
+CliClient::preprocess_char(uint8_t val, bool& stop_processing)
 {
+    stop_processing = false;
+
+    if ((val == '\n') || (val == '\r')) {
+	// New command
+	if (is_waiting_for_data())
+	    stop_processing = true;
+
+	return (XORP_OK);
+    }
+
     //
     // XXX: Bind/unbind the 'SPACE' to complete-word so it can
     // complete a half-written command.
@@ -738,6 +760,8 @@ CliClient::preprocess_char(uint8_t val)
 				 "bind \\\\\\040   complete-word",
 				 NULL, NULL);
 	}
+
+	return (XORP_OK);
     }
     
     return (XORP_OK);
