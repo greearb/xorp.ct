@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.31 2005/07/15 09:34:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.32 2005/07/19 23:36:06 pavlin Exp $"
 
 
 //
@@ -1204,12 +1204,14 @@ CliClient::flush_process_command_output()
 // XXX: returning %XORP_ERROR is also an indication that the connection
 // has been closed.
 int
-CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
+CliClient::process_char(const string& line, uint8_t val, bool& stop_processing,
+			bool& ignore_current_character)
 {
     int gl_buff_curpos = gl_get_buff_curpos(gl());
     int ret_value = XORP_OK;
     
     stop_processing = false;
+    ignore_current_character = false;
 
     if ((val == '\n') || (val == '\r')) {
 	// New command
@@ -1222,8 +1224,10 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
 	// Set the flag to stop processing pending input data while
 	// processing previous commands.
 	//
-	if (is_waiting_for_data())
+	if (is_waiting_for_data()) {
 	    stop_processing = true;
+	    ignore_current_character = true;
+	}
 
 	return (XORP_OK);
     }

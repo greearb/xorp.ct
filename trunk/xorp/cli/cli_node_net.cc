@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.38 2005/07/15 09:34:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.39 2005/07/26 06:39:30 pavlin Exp $"
 
 
 //
@@ -651,11 +651,10 @@ CliClient::process_input_data()
 	    }
 	}
 	
-	preprocess_char(val, stop_processing_tmp);
+	preprocess_char(val, stop_processing_tmp, ignore_current_character);
 	if (stop_processing_tmp && (! stop_processing)) {
 	    stop_processing = true;
 	    save_input = true;
-	    ignore_current_character = false;
 	}
 
 	if (val == CHAR_TO_CTRL('c')) {
@@ -688,11 +687,11 @@ CliClient::process_input_data()
 		    break;
 		}
 		ret_value = process_char(string(line), val,
-					 stop_processing_tmp);
+					 stop_processing_tmp,
+					 ignore_current_character);
 		if (stop_processing_tmp && (! stop_processing)) {
 		    stop_processing = true;
 		    save_input = true;
-		    ignore_current_character = true;
 		}
 		break;
 	    } while (false);
@@ -726,9 +725,11 @@ CliClient::process_input_data()
 // Preprocess a character before 'libtecla' get its hand on it
 //
 int
-CliClient::preprocess_char(uint8_t val, bool& stop_processing)
+CliClient::preprocess_char(uint8_t val, bool& stop_processing,
+			   bool& ignore_current_character)
 {
     stop_processing = false;
+    ignore_current_character = false;
 
     if ((val == '\n') || (val == '\r')) {
 	// New command
