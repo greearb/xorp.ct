@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.39 2005/07/21 09:01:50 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.40 2005/07/23 01:22:12 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -109,6 +109,8 @@ public:
     bool existence_committed() const { return _existence_committed; }
     bool deleted() const { return _deleted; }
     void undelete() { _deleted = false; }
+    void undelete_subtree();
+    void undelete_node_and_ancestors();
     const TimeVal& modification_time() const { return _modification_time; }
     const string& path() const { return _path; }
     void set_parent(ConfigTreeNode* parent) { _parent = parent; }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.77 2005/07/23 01:22:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.78 2005/07/24 17:10:14 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -698,6 +698,32 @@ ConfigTreeNode::get_operator() const
     }
 
     return _operator;
+}
+
+void
+ConfigTreeNode::undelete_node_and_ancestors()
+{
+    ConfigTreeNode* ctn;
+
+    //
+    // Undelete this node and all its ancestors
+    //
+    for (ctn = this; ctn != NULL; ctn = ctn->parent()) {
+	ctn->undelete();
+    }
+}
+
+void
+ConfigTreeNode::undelete_subtree()
+{
+    list<ConfigTreeNode*>::iterator iter;
+
+    undelete();
+
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	ConfigTreeNode* ctn = *iter;
+	ctn->undelete_subtree();
+    }
 }
 
 string 
