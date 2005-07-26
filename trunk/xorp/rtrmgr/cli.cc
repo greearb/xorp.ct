@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.80 2005/07/26 05:20:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.81 2005/07/26 07:17:29 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -1876,6 +1876,7 @@ RouterCLI::text_entry_func(const string& ,
 		    ctn->set_value(value, getuid());
 		    // default operator
 		    ctn->set_operator(OP_ASSIGN, getuid());
+		    _changes_made = true;
 		    value_expected = false;
 		} else {
 		    string errmsg = c_format("ERROR: argument \"%s\" "
