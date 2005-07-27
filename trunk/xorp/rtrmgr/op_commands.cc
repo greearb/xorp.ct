@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.50 2005/07/18 22:29:17 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.51 2005/07/19 07:08:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -407,6 +407,7 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	if (ci == _command_parts.end())
 	    break;
     }
+
     if (ci == _command_parts.end()) {
 	// Add all the optional parameters
 	map<string, string>::const_iterator opi;
@@ -416,8 +417,11 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    CliCommandMatch ccm(command_name, help_string, true, true);
 	    return_matches.insert(make_pair(command_name, ccm));
 	}
-    } else {
-	string match = *ci;
+	return;
+    }
+
+    string match = *ci;
+    do {
 	if (match[0] == '$') {
 	    XLOG_ASSERT(match[1] == '(');
 	    XLOG_ASSERT(match[match.size() - 1] == ')');
@@ -430,13 +434,24 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 				    can_pipe);
 		return_matches.insert(make_pair(command_name, ccm));
 	    }
-	} else {
+	    break;
+	}
+	if (match[0] == '<') {
+	    // A mandatory argument that is supplied by the user
+	    XLOG_ASSERT(match[match.size() - 1] == '>');
 	    const string& command_name = match;
 	    CliCommandMatch ccm(command_name, _help_string, is_executable,
 				can_pipe);
+	    ccm.set_wildcard(true);	// XXX: the argument can be any value
 	    return_matches.insert(make_pair(command_name, ccm));
+	    break;
 	}
-    }
+	const string& command_name = match;
+	CliCommandMatch ccm(command_name, _help_string, is_executable,
+			    can_pipe);
+	return_matches.insert(make_pair(command_name, ccm));
+	break;
+    } while (false);
 }
 
 void
