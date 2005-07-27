@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/range.hh,v 1.3 2005/07/25 17:48:00 abittau Exp $
+// $XORP: xorp/libxorp/range.hh,v 1.4 2005/07/25 22:16:51 pavlin Exp $
 
 #ifndef __LIBXORP_RANGE_HH__
 #define __LIBXORP_RANGE_HH__
@@ -48,30 +48,6 @@ public:
     explicit Range(T low, T high) {
 	_low = low;
 	_high = high;
-    }
-
-    inline bool operator==(const T& other) const {
-	return (_low <= other && _high >= other);
-    }
-
-    inline bool operator!=(const T& other) const {
-	return (_low > other || _high < other);
-    }
-
-    inline bool operator<(const T& other) const {
-	return (_high < other);
-    }
-
-    inline bool operator<=(const T& other) const {
-	return (_low <= other);
-    }
-
-    inline bool operator>(const T& other) const {
-	return (_low > other);
-    }
-
-    inline bool operator>=(const T& other) const {
-	return (_high >= other);
     }
 
     const T& low() const { return _low; }
@@ -125,6 +101,78 @@ public:
 	return os.str();
     }
 };
+
+/**
+ * Equality Operator for @ref uint32_t against @ref U32Range operand.
+ *
+ * @param lhs the left-hand @ref uint32_t type operand.
+ * @param rhs the right-hand @ref U32Range operand.
+ * @return true if the value of the left-hand operand falls inside
+ * the range defined by the right-hand operand.
+ */
+inline bool operator==(const uint32_t& lhs, const U32Range& rhs) {
+    return (lhs >= rhs.low() && lhs <= rhs.high());
+}
+
+/**
+ * Non-equality Operator for @ref uint32_t against @ref U32Range operand.
+ *
+ * @param lhs the left-hand @ref uint32_t type operand.
+ * @param rhs the right-hand @ref U32Range operand.
+ * @return true if the value of the left-hand operand falls outside
+ * the range defined by the right-hand operand.
+ */
+inline bool operator!=(const uint32_t& lhs, const U32Range& rhs) {
+    return (lhs < rhs.low() || lhs > rhs.high());
+}
+
+/**
+ * Less-than comparison for @ref uint32_t against @ref U32Range operand.
+ *
+ * @param lhs the left-hand @ref uint32_t type operand.
+ * @param rhs the right-hand @ref U32Range operand.
+ * @return true if the value of the left-hand operand is bellow
+ * the range defined by the right-hand operand.
+ */
+inline bool operator<(const uint32_t& lhs, const U32Range& rhs) {
+    return (lhs < rhs.low());
+}
+
+/**
+ * Less-than or equal comparison for @ref uint32_t against @ref U32Range
+ *
+ * @param lhs the left-hand @ref uint32_t type operand.
+ * @param rhs the right-hand @ref U32Range operand.
+ * @return true if the value of the left-hand operand is bellow or within
+ * the range defined by the right-hand operand.
+ */
+inline bool operator<=(const uint32_t& lhs, const U32Range& rhs) {
+    return (lhs <= rhs.high());
+}
+
+/**
+ * Greater-than comparison for @ref uint32_t against @ref U32Range operand.
+ *
+ * @param lhs the left-hand @ref uint32_t type operand.
+ * @param rhs the right-hand @ref U32Range operand.
+ * @return true if the value of the left-hand operand is above
+ * the range defined by the right-hand operand.
+ */
+inline bool operator>(const uint32_t& lhs, const U32Range& rhs) {
+    return (lhs > rhs.high());
+}
+
+/**
+ * Greater-than or equal comparison for @ref uint32_t against @ref U32Range
+ *
+ * @param lhs the left-hand @ref uint32_t type operand.
+ * @param rhs the right-hand @ref U32Range operand.
+ * @return true if the value of the left-hand operand is above or within
+ * the range defined by the right-hand operand.
+ */
+inline bool operator>=(const uint32_t& lhs, const U32Range& rhs) {
+    return (lhs >= rhs.low());
+}
 
 
 /**

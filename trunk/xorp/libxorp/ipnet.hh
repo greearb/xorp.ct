@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.16 2005/07/25 22:15:14 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.17 2005/07/25 23:01:49 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -135,7 +135,7 @@ public:
      * by the right-hand operand.
      */
     inline bool operator==(const U32Range& range) const {
-	return (range == prefix_len());
+	return (prefix_len() == range);
     }
 
     /**
@@ -146,7 +146,7 @@ public:
      * by the right-hand operand.
      */
     inline bool operator!=(const U32Range& range) const {
-	return (range != prefix_len());
+	return (prefix_len() != range);
     }
 
     /**
@@ -157,7 +157,7 @@ public:
      * by the right-hand operand.
      */
     inline bool operator<(const U32Range& range) const {
-	return (range > prefix_len());
+	return (prefix_len() < range);
     };
 
     /**
@@ -169,7 +169,7 @@ public:
      * defined by the right-hand operand.
      */
     inline bool operator<=(const U32Range& range) const {
-	return (range >= prefix_len());
+	return (prefix_len() <= range);
     };
 
     /**
@@ -180,7 +180,7 @@ public:
      * by the right-hand operand.
      */
     inline bool operator>(const U32Range& range) const {
-	return (range < prefix_len());
+	return (prefix_len() > range);
     };
 
     /**
@@ -192,7 +192,7 @@ public:
      * defined by the right-hand operand.
      */
     inline bool operator>=(const U32Range& range) const {
-	return (range <= prefix_len());
+	return (prefix_len() >= range);
     };
 
     /**
