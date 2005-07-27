@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.9 2005/07/22 02:00:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.10 2005/07/25 07:47:53 zec Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -13,8 +13,16 @@ policy {
 		network4-list: txt;
 
 		prefix-length4: u32range;
+		prefix-length6: u32range;
 	    }
 	    dest {
+		network4: ipv4net;
+		network6: ipv6net;
+		
+		network4-list: txt;
+
+		prefix-length4: u32range;
+		prefix-length6: u32range;
             }
             action {
 	    	trace: u32;
@@ -72,9 +80,41 @@ policy {
                 }
 
                 prefix-length4 {
-		    %allow-operator: "==" "!=" "<" "<=" ">" ">=" ":";
+		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
                     %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
                     %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+                prefix-length6 {
+		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+	    }
+
+	    dest {
+                network4 {
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
+                network6 {
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
+		
+		network4-list {
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 <= SET $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
+
+                prefix-length4 {
+		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
+                prefix-length6 {
+		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
                 }
 	    }
 
