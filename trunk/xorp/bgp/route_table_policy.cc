@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.9 2005/07/22 21:46:40 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.10 2005/07/27 17:59:47 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -156,13 +156,13 @@ PolicyTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
 
-    if (!fmsg)
-	return ADD_FILTERED;
-
     if (rtmsg.changed() && fmsg != &rtmsg) {
 	debug_msg("[BGP] PolicyTable got modified route, deleting previous\n");
 	rtmsg.route()->unref();
     }	
+    
+    if (!fmsg)
+	return ADD_FILTERED;
 
     int res = next->add_route(*fmsg, this);
 
@@ -288,12 +288,12 @@ PolicyTable<A>::delete_route(const InternalMessage<A>& rtmsg,
 #endif
 
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    if (fmsg == NULL)
-	return 0;
-    
     if (rtmsg.changed() && fmsg != &rtmsg)
 	rtmsg.route()->unref();
 
+    if (fmsg == NULL)
+	return 0;
+    
     int res = next->delete_route(*fmsg, this);
 
     if (fmsg != &rtmsg)
@@ -336,11 +336,11 @@ PolicyTable<A>::route_dump(const InternalMessage<A>& rtmsg,
 #endif
 
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    if (fmsg == NULL)
-	return ADD_FILTERED;
-
     if (rtmsg.changed() && &rtmsg != fmsg)
 	rtmsg.route()->unref();
+    
+    if (fmsg == NULL)
+	return ADD_FILTERED;
 
     int res = next->route_dump(*fmsg, this, dump_peer);
 
@@ -414,11 +414,22 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
 #endif 
 
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    if (!fmsg)
-	return NULL;
     
+    
+    if (!fmsg) {
+	// consider static filters changing the message and we drop it.
+	// that subnet route will leak!!!!
+	// XXX unstable/lame/wrong way of detecting if route changed
+	if (found->parent_route())
+	    found->unref();
+	return NULL;
+    }
+  
+    // static filters didn't change it
+    XLOG_ASSERT(found->parent_route() == NULL);
+    // we didn't change it
     XLOG_ASSERT(fmsg == &rtmsg);
-   
+  
     return found;
 }
 
