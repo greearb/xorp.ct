@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.79 2005/07/26 04:11:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.80 2005/07/26 05:20:51 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -548,7 +548,7 @@ ConfigTreeNode::check_config_tree(string& result) const
     //
     // Check that all mandatory child nodes are configured in place
     //
-    if (_template_tree_node != NULL) {
+    if ((! deleted()) && (_template_tree_node != NULL)) {
 	list<string>::const_iterator li;
 	for (li = _template_tree_node->mandatory_children().begin();
 	     li != _template_tree_node->mandatory_children().end();
@@ -556,7 +556,10 @@ ConfigTreeNode::check_config_tree(string& result) const
 	    const string& mandatory_child = *li;
 	    bool found = false;
 	    for (iter = _children.begin(); iter != _children.end(); ++iter) {
-		if ((*iter)->segname() == mandatory_child) {
+		const ConfigTreeNode* ctn = *iter;
+		if (ctn->deleted())
+		    continue;
+		if (ctn->segname() == mandatory_child) {
 		    found = true;
 		    break;
 		}
