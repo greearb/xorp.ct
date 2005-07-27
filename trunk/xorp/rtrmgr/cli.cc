@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.83 2005/07/26 23:54:01 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.84 2005/07/27 01:08:38 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2391,6 +2391,13 @@ RouterCLI::show_func(const string& ,
     const string show_all_command_name = "show -all";
 
     if (! argv.empty()) {
+	//
+	// XXX: The arguments to the "show" command should refer
+	// to a valid node in the configuration tree, and argument
+	// "command_global_name" should include the name of that node.
+	// Hence, "argv" should always be empty. If "argv" is not empty,
+	// then it is an error.
+	//
 	string errmsg;
 	vector<string>::const_iterator iter;
 	for (iter = argv.begin(); iter != argv.end(); ++iter) {
