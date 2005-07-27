@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_set.hh,v 1.4 2005/07/15 02:27:09 abittau Exp $
+// $XORP: xorp/policy/common/elem_set.hh,v 1.5 2005/07/20 16:56:52 zec Exp $
 
 #ifndef __POLICY_COMMON_ELEM_SET_HH__
 #define __POLICY_COMMON_ELEM_SET_HH__
@@ -207,6 +207,7 @@ private:
 typedef ElemSetAny<ElemU32> ElemSetU32;
 typedef ElemSetAny<ElemCom32> ElemSetCom32;
 typedef ElemSetAny<ElemIPv4Net> ElemSetIPv4Net;
+typedef ElemSetAny<ElemIPv6Net> ElemSetIPv6Net;
 typedef ElemSetAny<ElemStr> ElemSetStr;
 
 #endif // __POLICY_COMMON_ELEM_SET_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.4 2005/07/20 16:56:52 zec Exp $"
+#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.5 2005/07/25 07:37:19 zec Exp $"
 
 #include "config.h"
 #include "register_elements.hh"
@@ -40,6 +40,7 @@ RegisterElements::RegisterElements()
     register_element<ElemSetU32>();
     register_element<ElemSetCom32>();
     register_element<ElemSetIPv4Net>();
+    register_element<ElemSetIPv6Net>();
     register_element<ElemSetStr>();
 }
 
