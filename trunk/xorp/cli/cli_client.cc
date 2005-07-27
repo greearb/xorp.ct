@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.32 2005/07/19 23:36:06 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.33 2005/07/26 06:49:52 pavlin Exp $"
 
 
 //
@@ -1102,6 +1102,7 @@ CliClient::post_process_command()
     // Reset the state for the currently executed command
     //
     _executed_cli_command = NULL;
+    _executed_cli_command_name.clear();
     _executed_cli_command_args.clear();
 
     //
@@ -1336,6 +1337,7 @@ CliClient::process_command(const string& command_line)
     int syntax_error_offset_next = current_cli_prompt().size();
     int syntax_error_offset_prev = syntax_error_offset_next;
     int i, old_len, new_len;
+    string command_global_name;
     
     token_line = command_line;
     new_len = token_line.size();
@@ -1350,9 +1352,20 @@ CliClient::process_command(const string& command_line)
 	syntax_error_offset_prev = syntax_error_offset_next;
 	syntax_error_offset_next += old_len - new_len;
 	old_len = new_len;
+
+	if (child_cli_command == NULL) {
+	    //
+	    // Try to find a wildcard command
+	    //
+	    child_cli_command = parent_cli_command->command_find_wildcard();
+	}
 	
 	if (child_cli_command != NULL) {
 	    parent_cli_command = child_cli_command;
+	    // Add the token to the command
+	    if (! command_global_name.empty())
+		command_global_name += " ";
+	    command_global_name += copy_token(token);
 	    continue;
 	}
 	
@@ -1444,13 +1457,14 @@ CliClient::process_command(const string& command_line)
 	    final_string = "";
 	    
 	    _executed_cli_command = parent_cli_command;
+	    _executed_cli_command_name = command_global_name;
 	    _executed_cli_command_args = args_vector;
 	    ret_value = parent_cli_command->_cli_process_callback->dispatch(
 		parent_cli_command->server_name(),
 		cli_session_term_name(),
 		cli_session_session_id(),
-		parent_cli_command->global_name(),
-		args_vector);
+		_executed_cli_command_name,
+		_executed_cli_command_args);
 	    return (ret_value);
 	}
     }
@@ -1545,12 +1559,13 @@ CliClient::interrupt_command()
 	_executed_cli_command->server_name(),
 	cli_session_term_name(),
 	cli_session_session_id(),
-	_executed_cli_command->global_name(),
+	_executed_cli_command_name,
 	_executed_cli_command_args);
 
  cleanup_label:
     // Reset everything about the command
     _executed_cli_command = NULL;
+    _executed_cli_command_name.clear();
     _executed_cli_command_args.clear();
     delete_pipe_all();
     set_pipe_mode(false);

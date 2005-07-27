@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.12 2005/03/25 02:52:56 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.13 2005/07/19 07:08:17 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -285,6 +285,14 @@ public:
     void set_can_pipe(bool v) { _can_pipe = v; }
     
     /**
+     * Set whether this command name is a wildcard (i.e., it matches any
+     * string).
+     * 
+     * @param v if true, this command's name is a wildcard.
+     */
+    void set_wildcard(bool v) { _is_wildcard = v; }
+
+    /**
      * Get the global name of this command (i.e., the full name starting from
      * the root).
      * 
@@ -371,6 +379,7 @@ private:
     bool is_same_prefix(const string& token);
     bool is_same_command(const string& token);
     CliCommand *command_find(const string& token);
+    CliCommand *command_find_wildcard();
     bool is_multi_command_prefix(const string& command_line);
     
     bool find_command_help(const char *line, int word_end, string& ret_string);
@@ -398,9 +407,10 @@ private:
     CLI_INTERRUPT_CALLBACK _dynamic_interrupt_callback;
     
     bool can_complete();
-    bool can_pipe() { return (_can_pipe); }
+    bool can_pipe() const { return (_can_pipe); }
     CliCommand *cli_command_pipe();
     void set_cli_command_pipe(CliCommand *v) { _cli_command_pipe = v; }
+    bool is_wildcard() const { return (_is_wildcard); }
     
     CliCommand *root_command() { return (_root_command); }
     void set_root_command(CliCommand *v) { _root_command = v; }
@@ -418,6 +428,7 @@ private:
     string		_cd_prompt;		// The prompt if we can "cd"
     bool		_can_pipe;		// True if accepts "|" after it
     CliCommand		*_cli_command_pipe;	// The "|" pipe command
+    bool		_is_wildcard;		// True if the name is wildcard
 };
 
 class CliCommandMatch {
@@ -425,19 +436,23 @@ public:
     CliCommandMatch(const string& command_name, const string& help_string,
 		    bool is_executable, bool can_pipe)
 	: _command_name(command_name), _help_string(help_string),
-	  _is_executable(is_executable), _can_pipe(can_pipe)
+	  _is_executable(is_executable), _can_pipe(can_pipe),
+	  _is_wildcard(false)
     {}
 
     const string& command_name() const { return (_command_name); }
     const string& help_string() const { return (_help_string); }
     bool is_executable() const { return (_is_executable); }
     bool can_pipe() const { return (_can_pipe); }
+    bool is_wildcard() const { return (_is_wildcard); }
+    void set_wildcard(bool v) { _is_wildcard = v; }
 
 private:
     string	_command_name;
     string	_help_string;
     bool	_is_executable;
     bool	_can_pipe;
+    bool	_is_wildcard;
 };
 
 //

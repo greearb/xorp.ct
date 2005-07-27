@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.14 2005/04/30 21:58:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.15 2005/07/19 07:08:17 pavlin Exp $"
 
 
 //
@@ -68,6 +68,7 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     set_allow_cd(false, "");
     set_can_pipe(false);	// XXX: default
     set_cli_command_pipe(NULL);
+    set_wildcard(false);	// XXX: default
     
     // Set the command-completion help string
     // TODO: parameterize the hard-coded number
@@ -575,6 +576,24 @@ CliCommand::command_find(const string& token)
     return (NULL);
 }
 
+CliCommand *
+CliCommand::command_find_wildcard()
+{
+    list<CliCommand *>::iterator iter;
+    
+    for (iter = child_command_list().begin();
+	 iter != child_command_list().end();
+	 ++iter) {
+	CliCommand *cli_command = *iter;
+	if (cli_command->is_wildcard()) {
+	    // XXX: assume that no two subcommands are wildcards
+	    return (cli_command);
+	}
+    }
+    
+    return (NULL);
+}
+
 //
 // Test if the command line is a prefix for a multi-level command.
 // Note that if there is an exact match, then the return value is false.
@@ -780,10 +799,12 @@ CliCommand::child_command_list()
 	    const string& help_string = ccm.help_string();
 	    bool is_executable = ccm.is_executable();
 	    bool can_pipe = ccm.can_pipe();
+	    bool is_wildcard = ccm.is_wildcard();
 	    new_cmd = add_command(command_name, help_string);
 	    string child_name = global_name() + " " + command_name;
 	    new_cmd->set_global_name(child_name);
 	    new_cmd->set_can_pipe(can_pipe);
+	    new_cmd->set_wildcard(is_wildcard);
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);
 	    new_cmd->set_dynamic_interrupt_callback(_dynamic_interrupt_callback);
