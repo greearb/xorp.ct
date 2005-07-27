@@ -13,20 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.8 2005/07/20 23:35:09 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.9 2005/07/22 21:46:40 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-
 #include "bgp_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "route_table_policy.hh"
 #include "bgp_varrw.hh"
 #include "route_table_decision.hh"
-
+#include "route_table_ribin.hh"
 
 template <class A>
 PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
@@ -380,7 +377,20 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
     if (!found)
 	return NULL;
 
-    InternalMessage<A> rtmsg(found, NULL, genid);
+    // We need the origin peer for matching neighbor!
+    // XXX lame way of obtaining it:
+    XLOG_ASSERT(_filter_type != filter::EXPORT);
+
+    BGPRouteTable<A>* root = this->_parent;
+    XLOG_ASSERT(root);
+
+    while (root->parent() != NULL)
+        root = root->parent();
+
+    RibInTable<A>* ribin = dynamic_cast<RibInTable<A>* >(root);
+    XLOG_ASSERT(ribin);
+
+    InternalMessage<A> rtmsg(found, ribin->peer_handler(), genid);
 
     debug_msg("[BGP] PolicyTable %s lookup_route: %s\n",
 	      filter::filter2str(_filter_type).c_str(),

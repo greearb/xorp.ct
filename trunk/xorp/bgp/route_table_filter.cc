@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.30 2005/07/20 01:29:21 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.31 2005/07/20 23:35:09 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -732,9 +732,14 @@ FilterTable<A>::lookup_route(const IPNet<A> &net,
     if (filtered_msg == NULL)
 	return NULL;
 
+    // Not the case anymore---policy filters could have dropped the route and
+    // route never made it to cache!
+#if 0
     //the filters MUST NOT modify the route
     XLOG_ASSERT(!filtered_msg->changed());
     XLOG_ASSERT(filtered_msg == &msg);
+#endif
+
     genid = found_genid;
     return found_route;
 }
