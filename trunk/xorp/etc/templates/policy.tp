@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.10 2005/07/25 07:47:53 zec Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.11 2005/07/27 00:34:19 zec Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -11,6 +11,7 @@ policy {
 		network6: ipv6net;
 		
 		network4-list: txt;
+		network6-list: txt;
 
 		prefix-length4: u32range;
 		prefix-length6: u32range;
@@ -20,6 +21,7 @@ policy {
 		network6: ipv6net;
 		
 		network4-list: txt;
+		network6-list: txt;
 
 		prefix-length4: u32range;
 		prefix-length6: u32range;
@@ -31,6 +33,9 @@ policy {
     }
 
     network4-list @: txt {
+        elements: txt;
+    }
+    network6-list @: txt {
         elements: txt;
     }
 }
@@ -78,6 +83,10 @@ policy {
                     %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 <= SET $(@);";
                     %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
                 }
+		network6-list {
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 <= SET $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
 
                 prefix-length4 {
 		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
@@ -103,6 +112,10 @@ policy {
 		
 		network4-list {
                     %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 <= SET $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
+		network6-list {
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 <= SET $(@);";
                     %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
                 }
 
@@ -142,6 +155,14 @@ policy {
 
         elements {
             %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&elements:txt=$(@)";
+        }
+    }
+    network6-list @: txt {
+        %delete: xrl "$(policy.targetname)/policy/0.1/delete_set?set:txt=$(@)";
+        %create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
+
+        elements {
+            %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&elements:txt=$(@)";
         }
     }
 }

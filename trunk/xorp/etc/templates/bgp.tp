@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.48 2005/07/21 19:42:19 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.49 2005/07/22 01:55:15 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -63,8 +63,8 @@ policy {
 		neighbor: ipv4;
 	    
 		origin: u32;
-		med: u32;
-		localpref: u32;
+		med: u32range;
+		localpref: u32range;
             }
 	    dest {
 		protocol: txt;
@@ -81,8 +81,8 @@ policy {
 		neighbor: ipv4;
 	    
 		origin: u32;
-		med: u32;
-		localpref: u32;
+		med: u32range;
+		localpref: u32range;
 	    }
 	    action {
 		nexthop4: ipv4;
@@ -393,10 +393,12 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		med {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=med $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		localpref {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
@@ -440,10 +442,12 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		med {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=med $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		localpref {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
