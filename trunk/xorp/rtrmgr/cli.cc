@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.84 2005/07/27 01:08:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.85 2005/07/27 01:14:47 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2136,8 +2136,22 @@ RouterCLI::delete_func(const string& ,
 		       const string& command_global_name,
 		       const vector<string>& argv)
 {
-    if (! argv.empty())
+    string errmsg;
+
+    if (! argv.empty()) {
+	//
+	// XXX: The arguments to the "delete" command should refer
+	// to a valid node in the configuration tree, and argument
+	// "command_global_name" should include the name of that node.
+	// Hence, "argv" should always be empty. If "argv" is not empty,
+	// then it is an error.
+	//
+	errmsg = c_format("ERROR: cannot delete \"%s\" because it doesn't "
+			  "exist.\n",
+			  makepath(argv).c_str());
+	cli_client().cli_print(errmsg);
 	return (XORP_ERROR);
+    }
 
     string cmd_name = command_global_name;
     XLOG_ASSERT(cmd_name.substr(0, 7) == "delete ");
@@ -2152,6 +2166,18 @@ RouterCLI::delete_func(const string& ,
 	}
 	path_segments.push_back(path.substr(0, ix));
 	path = path.substr(ix + 1, path.size() - ix + 1);
+    }
+
+    //
+    // Test if this is a valid node that can be deleted
+    //
+    SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
+    if (ctn == NULL) {
+	errmsg = c_format("ERROR: cannot delete \"%s\" because it doesn't "
+			  "exist.\n",
+			  makepath(path_segments).c_str());
+	cli_client().cli_print(errmsg);
+	return (XORP_ERROR);
     }
 
     string result = config_tree()->show_subtree(true, path_segments, false,
@@ -2389,6 +2415,7 @@ RouterCLI::show_func(const string& ,
     bool suppress_default_values = true;
     const string show_command_name = "show";
     const string show_all_command_name = "show -all";
+    string errmsg;
 
     if (! argv.empty()) {
 	//
@@ -2398,16 +2425,9 @@ RouterCLI::show_func(const string& ,
 	// Hence, "argv" should always be empty. If "argv" is not empty,
 	// then it is an error.
 	//
-	string errmsg;
-	vector<string>::const_iterator iter;
-	for (iter = argv.begin(); iter != argv.end(); ++iter) {
-	    if (! errmsg.empty())
-		errmsg += " ";
-	    errmsg += *iter;
-	}
 	errmsg = c_format("ERROR: cannot show \"%s\" because it doesn't "
 			  "exist.\n",
-			  errmsg.c_str());
+			  makepath(argv).c_str());
 	cli_client().cli_print(errmsg);
 	return (XORP_ERROR);
     }
@@ -2796,6 +2816,22 @@ RouterCLI::makepath(const list<string>& parts) const
 {
     string path;
     list<string>::const_iterator iter;
+
+    for (iter = parts.begin(); iter != parts.end(); ++iter) {
+	if (path.empty())
+	    path = *iter;
+	else
+	    path += " " + *iter;
+    }
+
+    return path;
+}
+
+string
+RouterCLI::makepath(const vector<string>& parts) const
+{
+    string path;
+    vector<string>::const_iterator iter;
 
     for (iter = parts.begin(); iter != parts.end(); ++iter) {
 	if (path.empty())

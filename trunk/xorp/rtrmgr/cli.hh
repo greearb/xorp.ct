@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.34 2005/07/23 01:22:12 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.35 2005/07/23 01:40:21 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -239,6 +239,7 @@ private:
     string get_help_c(const string& s) const;
 
     string makepath(const list<string>& parts) const;
+    string makepath(const vector<string>& parts) const;
 
     const TemplateTree*	template_tree() const;
     SlaveConfigTree*	config_tree();
