@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.82 2005/07/26 07:51:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.83 2005/07/26 23:54:01 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2390,8 +2390,20 @@ RouterCLI::show_func(const string& ,
     const string show_command_name = "show";
     const string show_all_command_name = "show -all";
 
-    if (! argv.empty())
+    if (! argv.empty()) {
+	string errmsg;
+	vector<string>::const_iterator iter;
+	for (iter = argv.begin(); iter != argv.end(); ++iter) {
+	    if (! errmsg.empty())
+		errmsg += " ";
+	    errmsg += *iter;
+	}
+	errmsg = c_format("ERROR: cannot show \"%s\" because it doesn't "
+			  "exist.\n",
+			  errmsg.c_str());
+	cli_client().cli_print(errmsg);
 	return (XORP_ERROR);
+    }
 
     string cmd_name = command_global_name;
     XLOG_ASSERT(cmd_name.substr(0, show_command_name.size())
