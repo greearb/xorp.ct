@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.41 2005/07/26 04:11:12 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.42 2005/07/26 05:20:51 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -158,6 +158,7 @@ protected:
     void sort_by_value(list <ConfigTreeNode*>& children) const;
     string show_nodenum(bool numbered, uint64_t nodenum) const;
     virtual void allocate_unique_nodenum();
+    string quoted_value(const string& value) const;
 
 
     const TemplateTreeNode* _template_tree_node;

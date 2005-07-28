@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.80 2005/07/26 05:20:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.81 2005/07/27 00:49:05 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -817,25 +817,16 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 	} else {
 	    // no need to show the node number here
 	    XLOG_ASSERT(_parent->is_tag());
-	    s += _segname; 
+	    if ((type() == NODE_TEXT) && has_empty_space(_segname)) {
+		s += quoted_value(_segname);
+	    } else {
+		s += _segname; 
+	    }
 	}
 	if ((type() != NODE_VOID) && (_has_value)) {
 	    string value;
 	    if ((type() == NODE_TEXT) /* && annotate */ ) {
-	    	// XXX: re-escape quotes.
-	    	string escaped("");
-
-		for (string::const_iterator i = _value.begin();
-		    i != _value.end(); ++i) {
-		    
-		    const char x = *i;
-		    if (x == '"')
-			escaped += "\\\"";
-		    else
-			escaped += x;
-		}
-		
-		value = "\"" + escaped + "\"";
+		value = quoted_value(_value);
 	    } else {
 		value = _value;
 	    }
@@ -1865,4 +1856,25 @@ ConfigTreeNode::is_default_value() const
 	return (false);
 
     return (value() == _template_tree_node->default_str());
+}
+
+string
+ConfigTreeNode::quoted_value(const string& value) const
+{
+    string result;
+
+    // XXX: re-escape quotes
+    string escaped("");
+
+    for (string::const_iterator i = value.begin(); i != value.end(); ++i) {
+	const char x = *i;
+	if (x == '"')
+	    escaped += "\\\"";
+	else
+	    escaped += x;
+    }
+
+    result = "\"" + escaped + "\"";
+
+    return result;
 }
