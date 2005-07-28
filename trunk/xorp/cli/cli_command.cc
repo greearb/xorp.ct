@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.15 2005/07/19 07:08:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.16 2005/07/27 23:32:52 pavlin Exp $"
 
 
 //
@@ -138,14 +138,15 @@ CliCommand::add_command(CliCommand *child_command)
 // Create a new command.
 // Return the new child command on success, otherwise NULL.
 // XXX: By default, we CANNOT "cd" to this command.
-// XXX: @init_command_name can include more than one command levels
-// in the middle.
+// XXX: If @is_multilevel_command is true, then @init_command_name can
+// include more than one command levels in the middle.
 // E.g. "show version pim". However, commands "show" and "show version" must
 // have been installed first.
 //
 CliCommand *
 CliCommand::add_command(const string& init_command_name,
-			const string& init_command_help)
+			const string& init_command_help,
+			bool is_multilevel_command)
 {
     CliCommand *parent_cli_command = NULL;
     CliCommand *cli_command = NULL;
@@ -154,12 +155,19 @@ CliCommand::add_command(const string& init_command_name,
     string token_line = init_command_name;
     string command_name_string;
     
-    // Create a vector of all takens in the command
-    for (token = pop_token(token_line);
-	 ! token.empty();
-	 token = pop_token(token_line)) {
-	command_tokens.push_back(token);
+    if (is_multilevel_command) {
+	// Create a vector of all takens in the command
+	for (token = pop_token(token_line);
+	     ! token.empty();
+	     token = pop_token(token_line)) {
+	    command_tokens.push_back(token);
+	}
+    } else {
+	if (token_line.empty())
+	    return (NULL);
+	command_tokens.push_back(token_line);
     }
+
     if (command_tokens.empty())
 	return (NULL);
     command_name_string = command_tokens[command_tokens.size() - 1];
@@ -206,10 +214,12 @@ CliCommand::add_command(const string& init_command_name,
 CliCommand *
 CliCommand::add_command(const string& init_command_name,
 			const string& init_command_help,
+			bool is_multilevel_command,
 			const CLI_PROCESS_CALLBACK& init_cli_process_callback)
 {
     CliCommand *cli_command = add_command(init_command_name,
-					  init_command_help);
+					  init_command_help,
+					  is_multilevel_command);
     
     if (cli_command == NULL)
 	return (NULL);
@@ -230,11 +240,13 @@ CliCommand::add_command(const string& init_command_name,
 CliCommand *
 CliCommand::add_command(const string& init_command_name,
 			const string& init_command_help,
+			bool is_multilevel_command,
 			const CLI_PROCESS_CALLBACK& init_cli_process_callback,
 			const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback)
 {
     CliCommand *cli_command = add_command(init_command_name,
 					  init_command_help,
+					  is_multilevel_command,
 					  init_cli_process_callback);
     
     if (cli_command == NULL)
@@ -253,10 +265,12 @@ CliCommand::add_command(const string& init_command_name,
 CliCommand *
 CliCommand::add_command(const string& init_command_name,
 			const string& init_command_help,
-			const string& init_cd_prompt)
+			const string& init_cd_prompt,
+			bool is_multilevel_command)
 {
     CliCommand *cli_command = add_command(init_command_name,
-					  init_command_help);
+					  init_command_help,
+					  is_multilevel_command);
     
     if (cli_command == NULL)
 	return (NULL);
@@ -378,7 +392,7 @@ CliCommand::add_pipes()
     CliCommand *com0;
     
     com0 = new CliCommand(this, "|", "Pipe through a command");
-    // com0 = add_command("|", "Pipe through a command");
+    // com0 = add_command("|", "Pipe through a command", false);
     if (com0 == NULL) {
 	return (XORP_ERROR);
     }
@@ -800,7 +814,7 @@ CliCommand::child_command_list()
 	    bool is_executable = ccm.is_executable();
 	    bool can_pipe = ccm.can_pipe();
 	    bool is_wildcard = ccm.is_wildcard();
-	    new_cmd = add_command(command_name, help_string);
+	    new_cmd = add_command(command_name, help_string, false);
 	    string child_name = global_name() + " " + command_name;
 	    new_cmd->set_global_name(child_name);
 	    new_cmd->set_can_pipe(can_pipe);

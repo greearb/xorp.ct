@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.13 2005/07/19 07:08:17 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.14 2005/07/27 23:32:52 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -138,61 +138,76 @@ public:
     int add_pipes();
     
     /**
-     * Add a child CLI command.
+     * Add a CLI command.
      * 
      * By default, we cannot "cd" to this command.
      * 
-     * @param init_command_name the command name to add. It can include
+     * @param init_command_name the command name to add.
+     * If @ref is_multilevel_command is true, then it may include
      * more than one command levels in the middle. E.g., "show version pim".
      * However, commands "show" and "show version" must have been installed
      * first.
      * @param init_command_help the command help.
+     * @param is_multilevel_command if true, then @ref init_command_name
+     * may include more than one command levels in the middle.
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
-			    const string& init_command_help);
+			    const string& init_command_help,
+			    bool is_multilevel_command);
     
     /**
-     * Add a child CLI command we can "cd" to it.
+     * Add a CLI command we can "cd" to it.
      * 
      * By default, we can "cd" to this command.
      * 
-     * @param init_command_name the command name to add. It can include
+     * @param init_command_name the command name to add.
+     * If @ref is_multilevel_command is true, then it may include
      * more than one command levels in the middle. E.g., "set pim bsr".
      * However, commands "set" and "set pim" must have been installed first.
      * @param init_command_help the command help.
      * @param init_cd_prompt if not an empty string, the CLI prompt
      * when "cd" to this command.
+     * @param is_multilevel_command if true, then @ref init_command_name
+     * may include more than one command levels in the middle.
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
-			    const string& init_cd_prompt);
+			    const string& init_cd_prompt,
+			    bool is_multilevel_command);
     
     /**
-     * Add a child command with a processing callback.
+     * Add a CLI command with a processing callback.
      * 
-     * @param init_command_name the command name to add. It can include
+     * @param init_command_name the command name to add.
+     * If @ref is_multilevel_command is true, then it may include
      * more than one command levels in the middle. E.g., "show version pim".
      * However, commands "show" and "show version" must have been installed
      * first.
      * @param init_command_help the command help.
+     * @param is_multilevel_command if true, then @ref init_command_name
+     * may include more than one command levels in the middle.
      * @param init_cli_process_callback the callback to call when the
      * command is entered for execution from the command-line.
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
+			    bool is_multilevel_command,
 			    const CLI_PROCESS_CALLBACK& init_cli_process_callback);
 
     /**
-     * Add a child command with a processing and an interrupt callbacks.
+     * Add a CLI command with a processing and an interrupt callbacks.
      * 
-     * @param init_command_name the command name to add. It can include
+     * @param init_command_name the command name to add.
+     * If @ref is_multilevel_command is true, then it may include
      * more than one command levels in the middle. E.g., "show version pim".
      * However, commands "show" and "show version" must have been installed
      * first.
      * @param init_command_help the command help.
+     * @param is_multilevel_command if true, then @ref init_command_name
+     * may include more than one command levels in the middle.
      * @param init_cli_process_callback the callback to call when the
      * command is entered for execution from the command-line.
      * @param init_cli_interrupt_callback the callback to call when the
@@ -201,37 +216,46 @@ public:
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
+			    bool is_multilevel_command,
 			    const CLI_PROCESS_CALLBACK& init_cli_process_callback,
 			    const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback);
     
     /**
-     * Add a child command with a processing function.
+     * Add a CLI command with a processing function.
      * 
-     * @param init_command_name the command name to add. It can include
+     * @param init_command_name the command name to add.
+     * If @ref is_multilevel_command is true, then it may include
      * more than one command levels in the middle. E.g., "show version pim".
      * However, commands "show" and "show version" must have been installed
      * first.
      * @param init_command_help the command help.
+     * @param is_multilevel_command if true, then @ref init_command_name
+     * may include more than one command levels in the middle.
      * @param init_cli_process_func the processing function to call when the
      * command is entered for execution from the command-line.
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
+			    bool is_multilevel_command,
 			    CLI_PROCESS_FUNC init_cli_process_func) {
 	CLI_PROCESS_CALLBACK cb = callback(init_cli_process_func);
-	return (add_command(init_command_name, init_command_help, cb));
+	return (add_command(init_command_name, init_command_help,
+			    is_multilevel_command, cb));
     }
 
     /**
-     * Add a child command with a processing function and an interrupt
+     * Add a CLI command with a processing function and an interrupt
      * handler.
      * 
-     * @param init_command_name the command name to add. It can include
+     * @param init_command_name the command name to add.
+     * If @ref is_multilevel_command is true, then it may include
      * more than one command levels in the middle. E.g., "show version pim".
      * However, commands "show" and "show version" must have been installed
      * first.
      * @param init_command_help the command help.
+     * @param is_multilevel_command if true, then @ref init_command_name
+     * may include more than one command levels in the middle.
      * @param init_cli_process_func the processing function to call when the
      * command is entered for execution from the command-line.
      * @param init_cli_interrupt_func the function to call when the
@@ -240,15 +264,17 @@ public:
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
+			    bool is_multilevel_command,
 			    CLI_PROCESS_FUNC init_cli_process_func,
 			    CLI_INTERRUPT_FUNC init_cli_interrupt_func) {
 	CLI_PROCESS_CALLBACK cb1 = callback(init_cli_process_func);
 	CLI_INTERRUPT_CALLBACK cb2 = callback(init_cli_interrupt_func);
-	return (add_command(init_command_name, init_command_help, cb1, cb2));
+	return (add_command(init_command_name, init_command_help,
+			    is_multilevel_command, cb1, cb2));
     }
     
     /**
-     * Add a child command.
+     * Add a child CLI command.
      * 
      * @param child_command the child command to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.

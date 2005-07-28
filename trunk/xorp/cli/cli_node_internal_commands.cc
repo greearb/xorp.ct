@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.11 2005/03/12 05:04:42 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.12 2005/03/25 02:52:56 pavlin Exp $"
 
 
 //
@@ -74,30 +74,38 @@ CliNode::add_internal_cli_commands()
 	return (XORP_ERROR);
     
     // TODO: check that each command succeeded
-    c1 = c0->add_command("show", "Display information");
+    c1 = c0->add_command("show", "Display information", true);
     c1 = c0->add_command("show log",
 			 "Display information about log files and users",
+			 true,
 			 callback(this, &CliNode::cli_show_log));
     c1 = c0->add_command("show log user",
 			 "Display information about users",
+			 true,
 			 callback(this, &CliNode::cli_show_log_user));
-    c1 = c0->add_command("set", "Set variable");
-    c1 = c0->add_command("set log", "Set log-related state");
+    c1 = c0->add_command("set", "Set variable", true);
+    c1 = c0->add_command("set log", "Set log-related state", true);
     c1 = c0->add_command("set log output",
-			 "Set output destination for log messages");
+			 "Set output destination for log messages",
+			 true);
     c1 = c0->add_command("set log output cli",
 			 "Set output CLI terminal for log messages",
+			 true,
 			 callback(this, &CliNode::cli_set_log_output_cli));
     c1 = c0->add_command("set log output file",
 			 "Set output file for log messages",
+			 true,
 			 callback(this, &CliNode::cli_set_log_output_file));
     c1 = c0->add_command("set log output remove",
-			 "Remove output destination for log messages");
+			 "Remove output destination for log messages",
+			 true);
     c1 = c0->add_command("set log output remove cli",
 			 "Remove output CLI terminal for log messages",
+			 true,
 			 callback(this, &CliNode::cli_set_log_output_remove_cli));
     c1 = c0->add_command("set log output remove file",
 			 "Remove output file for log messages",
+			 true,
 			 callback(this, &CliNode::cli_set_log_output_remove_file));
     
     return (XORP_OK);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.86 2005/07/27 04:37:28 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.87 2005/07/28 07:26:54 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -501,7 +501,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 {
     CliCommand *com1, *com2, *help_com, *quit_com;
 
-    // com0->add_command("clear", "Clear information in the system *");
+    // com0->add_command("clear", "Clear information in the system *", false);
 
     // If no root node is specified, default to the true root
     if (com0 == NULL)
@@ -510,17 +510,19 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
     if (com0 == _cli_node.cli_command_root()) {
 	com1 = com0->add_command("configure",
 				 get_help_o("configure"),
+				 false,
 				 callback(this, &RouterCLI::configure_func));
 	com1->set_global_name("configure");
 	com1->set_can_pipe(false);
 	com2 = com1->add_command("exclusive",
 				 get_help_o("configure exclusive"),
+				 false,
 				 callback(this, &RouterCLI::configure_func));
 	com2->set_global_name("configure exclusive");
 	com2->set_can_pipe(false);
 
 	// Help Command
-	help_com = com0->add_command("help", get_help_o("help"));
+	help_com = com0->add_command("help", get_help_o("help"), false);
 	help_com->set_global_name("help");
 	help_com->set_dynamic_children_callback(
 	    callback(this, &RouterCLI::op_mode_help));
@@ -531,6 +533,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	// Quit Command
 	quit_com = com0->add_command("quit",
 				     get_help_o("quit"),
+				     false,
 				     callback(this, &RouterCLI::logout_func));
 	quit_com->set_can_pipe(false);
     }
@@ -538,7 +541,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
     map<string, string> cmds = op_cmd_list()->top_level_commands();
     map<string, string>::const_iterator iter;
     for (iter = cmds.begin(); iter != cmds.end(); ++iter) {
-	com1 = com0->add_command(iter->first, iter->second);
+	com1 = com0->add_command(iter->first, iter->second, false);
 	com1->set_global_name(iter->first);
 	// Set the callback to generate the node's children
 	com1->set_dynamic_children_callback(callback(op_cmd_list(),
@@ -730,43 +733,45 @@ RouterCLI::add_static_configure_mode_commands()
     com0 = _cli_node.cli_command_root();
     if (_changes_made) {
 	// Commit command
-	com1 = com0->add_command("commit", get_help_c("commit"),
+	com1 = com0->add_command("commit", get_help_c("commit"), false,
 				 callback(this, &RouterCLI::commit_func));
 	com1->set_can_pipe(false);
     }
 
     // Create command
-    _create_node = com0->add_command("create", get_help_c("create"));
+    _create_node = com0->add_command("create", get_help_c("create"), false);
     _create_node->set_can_pipe(false);
 
     // Delete command
-    _delete_node = com0->add_command("delete", get_help_c("delete"));
+    _delete_node = com0->add_command("delete", get_help_c("delete"), false);
     _delete_node->set_can_pipe(false);
 
     // Edit command
-    _edit_node = com0->add_command("edit", get_help_c("edit"),
+    _edit_node = com0->add_command("edit", get_help_c("edit"), false,
 				   callback(this, &RouterCLI::edit_func));
     _edit_node->set_global_name("edit");
     _edit_node->set_can_pipe(false);
 
     // Exit command
-    com1 = com0->add_command("exit", get_help_c("exit"),
+    com1 = com0->add_command("exit", get_help_c("exit"), false,
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("exit");
     com1->set_can_pipe(false);
     com2 = com1->add_command("configuration-mode",
 			     get_help_c("exit configuration_mode"),
+			     false,
 			     callback(this, &RouterCLI::exit_func));
     com2->set_global_name("exit configuration-mode");
     com2->set_can_pipe(false);
     com2 = com1->add_command("discard",
 			     "Exit from configuration mode, discarding changes",
+			     false,
 			     callback(this, &RouterCLI::exit_func));
     com2->set_global_name("exit discard");
     com2->set_can_pipe(false);
 
     // Help Command
-    help_com = com0->add_command("help", get_help_c("help"));
+    help_com = com0->add_command("help", get_help_c("help"), false);
     help_com->set_global_name("help");
     help_com->set_dynamic_children_callback(
 	callback(this, &RouterCLI::configure_mode_help));
@@ -775,47 +780,47 @@ RouterCLI::add_static_configure_mode_commands()
     help_com->set_can_pipe(true);
 
     // Load Command
-    com1 = com0->add_command("load", get_help_c("load"),
+    com1 = com0->add_command("load", get_help_c("load"), false,
 			     callback(this, &RouterCLI::load_func));
     com1->set_global_name("load");
     com1->set_can_pipe(false);
 
     // Quit Command
-    com1 = com0->add_command("quit", get_help_c("quit"),
+    com1 = com0->add_command("quit", get_help_c("quit"), false,
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("quit");
     com1->set_can_pipe(false);
 
-    _run_node = com0->add_command("run", get_help_c("run"));
+    _run_node = com0->add_command("run", get_help_c("run"), false);
     _run_node->set_can_pipe(false);
     add_op_mode_commands(_run_node);
 
-    com1 = com0->add_command("save", get_help_c("save"),
+    com1 = com0->add_command("save", get_help_c("save"), false,
 			     callback(this, &RouterCLI::save_func));
     com1->set_global_name("save");
     com1->set_can_pipe(false);
 
     // Set Command
-    _set_node = com0->add_command("set", get_help_c("set"));
+    _set_node = com0->add_command("set", get_help_c("set"), false);
     _set_node->set_can_pipe(false);
 
     // Show Command
-    _show_node = com0->add_command("show", get_help_c("show"),
+    _show_node = com0->add_command("show", get_help_c("show"), false,
 				   callback(this, &RouterCLI::show_func));
     _show_node->set_can_pipe(true);
-    com1 = _show_node->add_command("-all", get_help_c("show -all"),
+    com1 = _show_node->add_command("-all", get_help_c("show -all"), false,
 				   callback(this, &RouterCLI::show_func));
     com1->set_global_name("show -all");
     com1->set_can_pipe(true);
 
     // Top Command
-    com1 = com0->add_command("top", get_help_c("top"),
+    com1 = com0->add_command("top", get_help_c("top"), false,
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("top");
     com1->set_can_pipe(false);
 
     // Up Command
-    com1 = com0->add_command("up", get_help_c("up"),
+    com1 = com0->add_command("up", get_help_c("up"), false,
 			     callback(this, &RouterCLI::exit_func));
     com1->set_global_name("up");
     com1->set_can_pipe(false);
@@ -1012,9 +1017,9 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	    help = "-- no help available --";
 	}
 	if ((*cmd_iter)->has_command()) {
-	    com = current_cli_node.add_command(cmd_name, help, cb);
+	    com = current_cli_node.add_command(cmd_name, help, false, cb);
 	} else {
-	    com = current_cli_node.add_command(cmd_name, help);
+	    com = current_cli_node.add_command(cmd_name, help, false);
 	}
 	if (com == NULL) {
 	    XLOG_FATAL("add_command %s failed", cmd_name.c_str());
@@ -1229,7 +1234,7 @@ RouterCLI::add_show_subtree()
 			cmdpath, 0,
 			true /* can_pipe */);
 
-    com1 = _show_node->add_command("-all", get_help_c("show -all"),
+    com1 = _show_node->add_command("-all", get_help_c("show -all"), false,
 				   callback(this, &RouterCLI::show_func));
     com1->set_global_name(cmdpath_all);
     com1->set_can_pipe(true);
@@ -1279,8 +1284,8 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 	 }
 
 	 com = com0->add_command((*tti)->segname(),
-				 help, callback(this,
-						&RouterCLI::text_entry_func));
+				 help, false,
+				 callback(this, &RouterCLI::text_entry_func));
 	 if (com == NULL) {
 	     XLOG_FATAL("AI: add_command %s for template failed",
 			(*tti)->segname().c_str());
@@ -2036,6 +2041,7 @@ RouterCLI::text_entry_func(const string& ,
 	com = _cli_node.cli_command_root()->add_command(
 	    "}",
 	    "complete this configuration level",
+	    false,
 	    callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
 	com->set_can_pipe(false);
@@ -2238,6 +2244,7 @@ RouterCLI::immediate_set_func(const string& ,
 	com = _cli_node.cli_command_root()->add_command(
 	    "}",
 	    "complete this configuration level",
+	    false,
 	    callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
 	com->set_can_pipe(false);

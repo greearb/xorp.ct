@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.35 2005/02/12 04:50:25 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.36 2005/03/25 02:52:56 pavlin Exp $"
 
 
 //
@@ -471,24 +471,30 @@ add_my_cli_commands(CliNode& cli_node)
     CliCommand *com0, *com1, *com2, *com3;
 
     com0 = cli_node.cli_command_root();
-    com2 = com0->add_command("myset", "Set my variable", cli_myset_func);
-    com1 = com0->add_command("myshow", "Show my information", "Myshow> ");
+    com2 = com0->add_command("myset", "Set my variable", true, cli_myset_func);
+    com1 = com0->add_command("myshow", "Show my information", "Myshow> ",
+			     true);
     com2 = com0->add_command("myshow version",
-			     "Show my information about system");
+			     "Show my information about system", true);
     com3 = com0->add_command("myshow version pim",
-			     "Show my information about PIM");
+			     "Show my information about PIM", true);
     com3 = com0->add_command("myshow version igmp",
-			     "Show my information about IGMP");
+			     "Show my information about IGMP", true);
 
-    com1 = com0->add_command("myset2", "Set my variable2", cli_myset_func);
-    com1 = com0->add_command("myshow2", "Show my information2", "Myshow2> ");
+    com1 = com0->add_command("myset2", "Set my variable2", true,
+			     cli_myset_func);
+    com1 = com0->add_command("myshow2", "Show my information2", "Myshow2> ",
+			     true);
 
-    com1 = com0->add_command("print", "Print numbers", cli_print);
-    com1 = com0->add_command("print2", "Print few numbers", cli_print2);
-    com1 = com0->add_command("print2 newline", "Print few numbers with an extra newline",
-			     cli_print2_newline);
-    com1 = com0->add_command("print_wide", "Print wide lines", cli_print_wide);
-    com1 = com0->add_command("print_test", "Print test lines", cli_print_test);
+    com1 = com0->add_command("print", "Print numbers", true, cli_print);
+    com1 = com0->add_command("print2", "Print few numbers", true, cli_print2);
+    com1 = com0->add_command("print2 newline",
+			     "Print few numbers with an extra newline",
+			     true, cli_print2_newline);
+    com1 = com0->add_command("print_wide", "Print wide lines", true,
+			     cli_print_wide);
+    com1 = com0->add_command("print_test", "Print test lines", true,
+			     cli_print_test);
 
     return (XORP_OK);
 }
