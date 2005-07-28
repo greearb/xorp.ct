@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.85 2005/07/27 01:14:47 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.86 2005/07/27 04:37:28 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -428,9 +428,10 @@ See also \"exit\", \"quit\", \"top\".";
 
 RouterCLI::~RouterCLI()
 {
-    // TODO: for now we leave the deletion to be implicit when xorpsh exits
-    // string dummy_errmsg;
-    // _cli_node.delete_client(_cli_client_ptr, dummy_errmsg);
+    if (_cli_client_ptr != NULL) {
+	delete _cli_client_ptr;
+	_cli_client_ptr = NULL;
+    }
 }
 
 bool
@@ -1530,6 +1531,7 @@ RouterCLI::logout_func(const string& ,
 	XLOG_FATAL("internal error deleting CLI client: %s", errmsg.c_str());
 	return (XORP_ERROR);
     }
+    _cli_client_ptr = NULL;
 
     return (XORP_OK);
 }
