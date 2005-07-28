@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.38 2005/07/08 20:51:17 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.39 2005/07/15 05:59:36 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -979,7 +979,7 @@ XrlRtrmgrInterface::allocate_clientid()
     uint32_t expected = 1;
     set<uint32_t>::iterator i;
     for (i = _clientids.begin();; i++) {
-	if ((*i > expected) || (i== _clientids.end())) {
+	if ((i == _clientids.end()) || (*i > expected)) {
 	    _clientids.insert(expected);
 	    return expected;
 	}
