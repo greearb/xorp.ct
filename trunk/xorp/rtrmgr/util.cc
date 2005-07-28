@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.13 2005/06/18 01:14:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.14 2005/07/01 18:14:44 pavlin Exp $"
 
 
 #include <list>
@@ -238,6 +238,21 @@ strip_empty_spaces(const string& s)
     }
 
     return res;
+}
+
+bool
+has_empty_space(const string& s)
+{
+    string::size_type space;
+
+    space = s.find(' ');
+    if (space == string::npos)
+	space = s.find('\t');
+
+    if (space != string::npos)
+	return (true);
+
+    return (false);
 }
 
 string
