@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/util.hh,v 1.8 2005/06/18 01:14:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.9 2005/07/28 23:11:25 pavlin Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
@@ -121,7 +121,7 @@ string unquote(const string& s);
 string strip_empty_spaces(const string& s);
 
 /**
- * Test if a string has an empty space (i.e., ' ' or '\t').
+ * Test if a string has an empty space (i.e., <SPACE> or <TAB>).
  * 
  * @param s the string to test.
  * @return true if the string has an empty space, otherwise false.
