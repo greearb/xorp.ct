@@ -56,6 +56,9 @@ interface addresses. At the moment it checks against configured
 interfaces. When the fea client interface watcher is linked in we
 should get this information from the FEA.
 
+19) The delayed ACKs are not delayed. The peer should probably hold a
+delayed ack list that is transmitted ocassionally.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 

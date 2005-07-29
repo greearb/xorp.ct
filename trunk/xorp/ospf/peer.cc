@@ -193,6 +193,7 @@ PeerOut<A>::push_lsas()
     return true;
 }
 
+
 template <typename A>
 void
 PeerOut<A>::bring_up_peering()
@@ -365,6 +366,65 @@ Peer<A>::push_lsas()
 	    return false;
 
     return true;
+}
+
+template <typename A>
+void
+Peer<A>::send_direct_acks(OspfTypes::NeighbourID nid,
+			  list<Lsa_header>& ack)
+{
+    // A direct ACK is only sent back to the neighbour that sent the
+    // original LSA. 
+
+    if (ack.empty())
+	return;
+
+    bool multicast_on_peer;
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if ((*n)->get_neighbour_id() == nid) {
+	    if (!(*n)->send_ack(ack, /* direct */true, multicast_on_peer))
+		XLOG_WARNING("Failed to send ACK");
+	    XLOG_ASSERT(!multicast_on_peer);
+	    return;
+	}
+
+    XLOG_UNREACHABLE();
+}
+
+template <typename A>
+void
+Peer<A>::send_delayed_acks(OspfTypes::NeighbourID /*nid*/,
+			   list<Lsa_header>& ack)
+{
+    // A delayed ACK is sent to all neighbours.
+
+    if (ack.empty())
+	return;
+
+    // XXX - The sending of these ACKs should be delayed.
+    // One possible implementation would be to hold a delayed ack list
+    // in the peer. If when this method is called the list is empty
+    // the list is populated with acks that have been provided. Then a
+    // timer is started that is less than the retransmit value. If the
+    // list is non-empty when this method is called the provided acks
+    // are added to the list suppressing duplicates. The timer will
+    // fire and send the ACKs and empty the list. Currently ACKs are
+    // generated for every update packet, so its not possible that the
+    // ACKs will not fit into a single packet. If a list with a delay
+    // is used it is possible that all the ACKS will not fit into a
+    // single packet.
+    // XXX
+
+    bool multicast_on_peer;
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	(*n)->send_ack(ack, /* direct */false, multicast_on_peer);
+	// If this is broadcast peer it is only necessary to send the
+	// packet once.
+	if (multicast_on_peer)
+	    return;
+    }
 }
 
 template <typename A>
@@ -2080,6 +2140,62 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
 }
 
 template <typename A>
+bool
+Neighbour<A>::send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
+					 bool direct,
+					 bool& multicast_on_peer)
+{
+    _peer.populate_common_header(lsap);
+    
+    vector<uint8_t> pkt;
+    lsap.encode(pkt);
+
+    SimpleTransmit<A> *transmit;
+
+    multicast_on_peer = false;
+    if (direct) {
+	transmit = new SimpleTransmit<A>(pkt,
+					 get_neighbour_address(),
+					 _peer.get_interface_address());
+    } else {
+
+	switch(_peer.get_linktype()) {
+	case OspfTypes::PointToPoint:
+	    transmit = new SimpleTransmit<A>(pkt,
+					     A::OSPFIGP_ROUTERS(), 
+					     _peer.get_interface_address());
+	    break;
+	case OspfTypes::BROADCAST: {
+	    A dest;
+	    multicast_on_peer = true;
+	    if (is_DR_or_BDR()) {
+		dest = A::OSPFIGP_ROUTERS();
+	    } else {
+		dest = A::OSPFIGP_DESIGNATED_ROUTERS();
+	    }
+	    transmit = new SimpleTransmit<A>(pkt,
+					     dest, 
+					     _peer.get_interface_address());
+	}
+	    break;
+	case OspfTypes::NBMA:
+	case OspfTypes::PointToMultiPoint:
+	case OspfTypes::VirtualLink:
+	    transmit = new SimpleTransmit<A>(pkt,
+					     get_neighbour_address(),
+					     _peer.get_interface_address());
+	    break;
+	}
+    }
+
+    typename Transmit<A>::TransmitRef tr(transmit);
+
+    _peer.transmit(tr);
+    
+    return true;
+}
+
+template <typename A>
 void
 Neighbour<A>::tear_down_state()
 {
@@ -2597,12 +2713,22 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	break;
     }
 
+    list<Lsa_header> direct_ack, delayed_ack;
+
     get_area_router()->
 	receive_lsas(_peer.get_peerid(),
 		     _neighbourid,
 		     lsup->get_lsas(),
+		     direct_ack,
+		     delayed_ack,
 		     _peer.get_state() == Peer<A>::Backup,
 		     _peer.get_designated_router() == get_candidate_id());
+
+    // A more efficient way of sending the direct ack.
+//     bool multicast_on_peer;
+//     send_ack(direct_ack, /*direct*/true, multicast_on_peer);
+    _peer.send_direct_acks(get_neighbour_id(), direct_ack);
+    _peer.send_delayed_acks(get_neighbour_id(), delayed_ack);
 }
 
 template <typename A>
@@ -2759,6 +2885,33 @@ Neighbour<A>::push_lsas()
     restart_retransmitter();
 
     return true;
+}
+
+template <typename A>
+bool
+Neighbour<A>::send_ack(list<Lsa_header>& ack, bool direct,
+		       bool& multicast_on_peer)
+{
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+	multicast_on_peer = false;
+	return false;
+    case Exchange:
+    case Loading:
+    case Full:
+	break;
+    }
+
+    LinkStateAcknowledgementPacket lsap(_ospf.get_version());
+
+    list<Lsa_header>& l = lsap.get_lsa_headers();
+    l.insert(l.begin(), ack.begin(), ack.end());
+
+    return send_link_state_ack_packet(lsap, direct, multicast_on_peer);
 }
 
 template <typename A>

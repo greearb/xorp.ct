@@ -224,7 +224,10 @@ template <typename A>
 void
 AreaRouter<A>::receive_lsas(PeerID peerid,
 			    OspfTypes::NeighbourID nid,
-			    list<Lsa::LsaRef>& lsas, bool backup, bool dr)
+			    list<Lsa::LsaRef>& lsas, 
+			    list<Lsa_header>& direct_ack,
+			    list<Lsa_header>& delayed_ack,
+			    bool backup, bool dr)
 {
     debug_msg("PeerID %u NeighbourID %u %s backup %s dr %s\n", peerid, nid,
 	      pp_lsas(lsas).c_str(),
@@ -234,7 +237,6 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
 
-    list<Lsa_header> delayed_ack, direct_ack;
     
     // RFC 2328 Section 13. The Flooding Procedure
     // Validate the incoming LSAs.
@@ -374,7 +376,6 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
  out:
     push_lsas();
-    XLOG_WARNING("TBD process direct and delayed acks");
 }
 
 template <typename A>

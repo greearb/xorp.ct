@@ -324,6 +324,26 @@ class Peer {
      */
     bool push_lsas();
 
+    /**
+     * Send direct ACKs
+     *
+     * @param nid the neighbour that the LSAs that are being acked
+     * arrived on.
+     * @param ack list of acks to send.
+     */
+    void send_direct_acks(OspfTypes::NeighbourID nid,
+			 list<Lsa_header>& ack);
+
+    /**
+     * Send delayed ACKs
+     *
+     * @param nid the neighbour that the LSAs that are being acked
+     * arrived on.
+     * @param ack list of acks to send.
+     */
+    void send_delayed_acks(OspfTypes::NeighbourID nid,
+			  list<Lsa_header>& ack);
+
     /*
      * Find neighbour that this packet should be associated with.
      *
@@ -770,6 +790,19 @@ class Neighbour {
     bool push_lsas();
 
     /**
+     * Send acknowledgement.
+     *
+     * @param ack list of acknowledgements.
+     * @param direct if true send directly to the neighbour.
+     * @param multicast_on_peer set to true if the ack was
+     * multicast. Only if direct is false is it possible for the
+     * packet to be multicast.
+     *
+     * @return true if an acknowledgement is sent.
+     */
+    bool send_ack(list<Lsa_header>& ack, bool direct, bool& multicast_on_peer);
+
+    /**
      * Pretty print the neighbour state.
      */
     static string pp_state(State is);
@@ -881,6 +914,16 @@ class Neighbour {
      * Send link state update packet.
      */
     bool send_link_state_update_packet(LinkStateUpdatePacket& lsup);
+
+    /**
+     * Send link state ack packet.
+     * @param direct if true send directly to the neighbour.
+     * @param multicast_on_peer set to true if the packet is multicast
+     * false otherwise.
+     */
+    bool send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
+				    bool direct,
+				    bool& multicast_on_peer);
 
     /**
      * The state has just dropped so pull out any state associated

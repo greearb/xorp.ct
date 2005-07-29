@@ -84,12 +84,17 @@ class AreaRouter {
      * 
      * @param peerid that the LSAs arrived on.
      * @param nid neighbourID that the LSAs arrived on.
-     * @param lsas list of lsas.
+     * @param lsas list of recived lsas.
+     * @param direct_ack list of direct acks to send in response to the LSA
+     * @param delayed_ack list of delayed acks to send in response to the LSA
      * @param backup true if the receiving interface was in state backup.
      * @param dr true if the LSA was received from the designated router.
      */
     void receive_lsas(PeerID peerid, OspfTypes::NeighbourID nid,
-		      list<Lsa::LsaRef>& lsas, bool backup, bool dr);
+		      list<Lsa::LsaRef>& lsas, 
+		      list<Lsa_header>& direct_ack,
+		      list<Lsa_header>& delayed_ack,
+		      bool backup, bool dr);
 
     /**
      * Returned by compare_lsa.
