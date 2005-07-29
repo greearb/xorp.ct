@@ -12,7 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/c_format.cc,v 1.6 2005/03/25 02:53:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/c_format.cc,v 1.7 2005/06/20 21:31:43 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 #include <vector>
@@ -21,6 +25,12 @@
 #include "xorp.h"
 #include "xlog.h"
 #include "c_format.hh"
+
+#ifndef HOST_OS_WINDOWS
+#define HAVE_C99_SNPRINTF	// [v]snprintf() conforms to ISO C99 spec
+#endif
+
+#define FORMAT_BUFSIZE	4096
 
 void
 c_format_validate(const char* fmt, int exp_count)
@@ -82,13 +92,24 @@ c_format_validate(const char* fmt, int exp_count)
 string
 do_c_format(const char* fmt, ...)
 {
-    size_t buf_size = 4096;             // Default buffer size
+    size_t buf_size = FORMAT_BUFSIZE;             // Default buffer size
     vector<char> b(buf_size);
     va_list ap;
 
     do {
 	va_start(ap, fmt);
 	int ret = vsnprintf(&b[0], buf_size, fmt, ap);
+#ifndef HAVE_C99_SNPRINTF
+	// We have an evil vsnprintf() implementation (MSVC)
+	if (ret != -1 && ((size_t)ret < buf_size)) {
+	    string r = string(&b[0]);	// Buffer size is OK
+	    va_end(ap);
+	    return r;
+	}
+	buf_size += FORMAT_BUFSIZE;
+	b.resize(buf_size);
+#else
+	// We have a C99 compliant implementation
 	if ((size_t)ret < buf_size) {
 	    string r = string(&b[0]);	// Buffer size is OK
 	    va_end(ap);
@@ -96,6 +117,7 @@ do_c_format(const char* fmt, ...)
 	}
 	buf_size = ret + 1;		// Add space for the extra '\0'
 	b.resize(buf_size);
+#endif
     } while (true);
 
     XLOG_UNREACHABLE();
