@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.30 2005/03/18 01:44:06 atanu Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.31 2005/03/25 02:53:25 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -244,6 +244,7 @@ main(int argc, char* const argv[])
     string finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
     uint16_t port = FinderConstants::FINDER_DEFAULT_PORT();
     int c;
+    char *tmpport;
     while ((c = getopt(argc, argv, "F:Efir:w:")) != -1) {
 	switch (c) {
 	case 'E':
@@ -263,10 +264,10 @@ main(int argc, char* const argv[])
 	    wait_time = atoi(optarg) * 1000;
 	    break;
 	case 'F':
-	    {
-	    finder_host = strsep(&optarg, ":");
-	    const char *tmpport = strsep(&optarg, ":");
-	    if (0 != tmpport)
+	    finder_host = optarg;
+	    tmpport = strchr(optarg, ':');
+	    if (tmpport != NULL) {
+		*tmpport++ = '\0';
 		port = atoi(tmpport);
 	    }
 	    break;
