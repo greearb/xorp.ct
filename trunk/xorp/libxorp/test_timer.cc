@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.9 2004/10/08 18:52:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.10 2005/03/25 02:53:47 pavlin Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -121,6 +121,7 @@ private:
     XorpTimer	_zero_timer;
 };
 
+#ifdef SIGALRM
 static void
 alarm_signalhandler(int sig)
 {
@@ -129,6 +130,7 @@ alarm_signalhandler(int sig)
     fprintf(stderr, "Test failed: alarm timeout\n");
     exit(1);
 }
+#endif
 
 //
 // Test that recursively generating callbacks after time zero
@@ -140,13 +142,19 @@ test_zero_timer(EventLoop& eventloop)
     ZeroTimerTest zero_timer_test(eventloop);
 
     fprintf(stderr, "Start ZeroTimer test\n");
+#ifdef SIGALRM
     signal(SIGALRM, alarm_signalhandler);
     alarm(20);
+#endif
+
     zero_timer_test.start();
     while (! zero_timer_test.done()) {
 	eventloop.run();
     }
+
+#ifdef SIGALRM
     signal(SIGALRM, SIG_IGN);
+#endif
     fprintf(stderr, "End ZeroTimer test\n");
 }
 

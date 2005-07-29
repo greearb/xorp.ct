@@ -12,14 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.6 2004/12/15 22:55:59 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.7 2005/03/25 02:53:42 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string>
 
-#include "config.h"
 #include "ether_compat.h"
 #include "exceptions.hh"
 

@@ -13,27 +13,26 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.7 2004/06/10 22:41:23 hodson Exp $"
-
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.8 2005/03/25 02:53:49 pavlin Exp $"
 
 /*
  * Message logging utility.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <unistd.h>
+#include "xorp.h"
+
 #include <time.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/time.h>
 
 #include "libxorp_module.h"
 #include "config.h"
 #include "xlog.h"
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 /*
  * Exported variables

@@ -12,12 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.16 2004/10/29 01:17:51 pavlin Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.17 2005/03/25 02:53:44 pavlin Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "xorp.h"
 #include <vector>
 

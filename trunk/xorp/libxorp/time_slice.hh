@@ -12,19 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/time_slice.hh,v 1.5 2004/06/10 22:41:21 hodson Exp $
+// $XORP: xorp/libxorp/time_slice.hh,v 1.6 2005/03/25 02:53:48 pavlin Exp $
 
 
 #ifndef __LIBXORP_TIME_SLICE_HH__
 #define __LIBXORP_TIME_SLICE_HH__
 
-
 //
 // Time-slice class declaration.
 //
 
-
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 
 #include "timer.hh"
 #include "timeval.hh"

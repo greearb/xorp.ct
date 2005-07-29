@@ -12,14 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.15 2004/10/25 23:51:49 bms Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.16 2005/03/25 02:53:41 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 
 //
 // Static class members

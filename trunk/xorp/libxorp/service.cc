@@ -12,9 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/service.cc,v 1.4 2005/02/12 08:09:07 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/service.cc,v 1.5 2005/03/25 02:53:45 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include <string>
 
 #include "service.hh"

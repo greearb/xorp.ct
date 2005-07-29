@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_profile.cc,v 1.1 2004/09/21 17:59:47 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_profile.cc,v 1.2 2005/03/25 02:53:46 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,6 +24,9 @@
 #include "test_main.hh"
 #include "exceptions.hh"
 #include "profile.hh"
+#include "clock.hh"
+#include "timeval.hh"
+#include "timer.hh"
 
 bool
 test1(TestInfo& info)
@@ -222,6 +225,9 @@ main(int argc, char **argv)
     XorpUnexpectedHandler x(xorp_unexpected_handler);
 
     TestMain t(argc, argv);
+
+    SystemClock clock;
+    TimerList timer_list(&clock);
 
     string test =
 	t.get_optional_args("-t", "--test", "run only the specified test");

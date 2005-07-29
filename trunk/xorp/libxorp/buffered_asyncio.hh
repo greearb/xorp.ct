@@ -12,13 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.1 2004/10/13 05:48:50 pavlin Exp $
+// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.2 2005/03/25 02:53:37 pavlin Exp $
 
 #ifndef __LIBXORP_BUFFERED_ASYNCIO_HH__
 #define __LIBXORP_BUFFERED_ASYNCIO_HH__
 
+#include "libxorp/xorp.h"
+
 #include <list>
+
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"

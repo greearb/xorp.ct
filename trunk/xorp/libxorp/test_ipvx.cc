@@ -12,7 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.14 2005/03/03 07:46:58 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.15 2005/03/25 02:53:46 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -20,6 +24,9 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipvx.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM

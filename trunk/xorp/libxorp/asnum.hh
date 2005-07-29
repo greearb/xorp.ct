@@ -12,16 +12,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.9 2004/12/18 03:40:29 atanu Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.10 2005/03/25 02:53:37 pavlin Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "xorp.h"
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
+
 #include <string>
+
 #include "c_format.hh"
 
 /**

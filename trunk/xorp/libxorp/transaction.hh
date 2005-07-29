@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/transaction.hh,v 1.5 2004/06/10 22:41:22 hodson Exp $
+// $XORP: xorp/libxorp/transaction.hh,v 1.6 2005/03/25 02:53:49 pavlin Exp $
 
 #ifndef __LIBXORP_TRANSACTION_HH__
 #define __LIBXORP_TRANSACTION_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <map>
 #include <list>

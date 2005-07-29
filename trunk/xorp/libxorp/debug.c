@@ -13,16 +13,23 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/debug.c,v 1.5 2005/01/27 23:48:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/debug.c,v 1.6 2005/03/25 02:53:39 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "xorp.h"
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-
+#endif
 #include <stdio.h>
 #include <stdarg.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
-#include "config.h"
-#include "xorp.h"
 #include "debug.h"
 
 #ifdef UNUSED

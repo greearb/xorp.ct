@@ -12,14 +12,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.17 2005/03/25 02:53:41 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.18 2005/06/21 00:03:58 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "xorp.h"
 #include "ipv4.hh"
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 
 IPv4::IPv4(const uint8_t *from_uint8)
 {

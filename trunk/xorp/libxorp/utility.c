@@ -13,19 +13,27 @@
  * legally binding. 
  */
 
-#ident "$XORP: xorp/libxorp/utility.c,v 1.3 2004/06/10 22:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxorp/utility.c,v 1.4 2005/03/25 02:53:49 pavlin Exp $"
 
 
 /*
  * Misc. utilities.
  */
 
+#include "libxorp_module.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 
-#include "libxorp_module.h"
-#include "config.h"
+#include "xorp.h"
+
 #include "utility.h"
 
 /*
