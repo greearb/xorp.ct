@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.41 2004/12/09 07:57:38 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.42 2004/12/18 03:24:33 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -19,22 +19,23 @@ sbin_PROGRAMS	= call_xrl
 noinst_LTLIBRARIES = libxipc.la libfinder.la
 
 # -- Test Programs and scripts (order of increasing complexity)
-test_programs  = test_xrl_error test_xrl test_xrl_atom test_xrl_args
-test_programs += test_header test_inproc test_sudp test_stcp
-test_programs += test_lemming test_xrl_router
-test_programs += test_finder_tcp test_finder_messenger test_finder_msgs
-test_programs += test_finder test_finder_events
+test_programs	 = test_xrl_error test_xrl
+test_programs	+= test_xrl_atom test_xrl_args
+test_programs	+= test_header test_inproc
+test_programs	+= test_sudp test_stcp
+test_programs	+= test_lemming test_xrl_router
+test_programs	+= test_finder_tcp test_finder_messenger
+test_programs	+= test_finder_msgs test_finder
+test_programs	+= test_finder_events
 
-test_extra_programs  = test_xrl_parser test_finder_to
-test_extra_programs += test_xrl_receiver test_xrl_sender
-
-test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
-
-TESTS = $(test_programs) $(test_scripts)
+test_extra_programs	 = test_xrl_parser test_finder_to
+test_extra_programs	+= test_xrl_receiver test_xrl_sender
 
 # -- No-install Programs
-check_PROGRAMS = $(test_programs) $(test_extra_programs)
-check_SCRIPTS = $(test_scripts)
+check_PROGRAMS	 = $(test_programs) $(test_extra_programs)
+check_SCRIPTS	 = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
+
+TESTS		 = $(addsuffix $(EXEEXT),$(test_programs)) $(check_SCRIPTS)
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = ./libfinder.la

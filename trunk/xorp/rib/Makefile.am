@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.37 2004/11/12 02:44:47 bms Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.38 2004/11/23 22:43:47 bms Exp $
 ##
 
 SUBDIRS = . tools
@@ -10,13 +10,6 @@ bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_rib
-
-# -- Test Programs
-TESTS		 = test_rib_direct.sh
-TESTS		+= test_rib_xrls.sh
-TESTS		+= test_redist
-TESTS		+= test_register
-TESTS		+= test_deletion
 
 # -- No-install Programs
 noinst_PROGRAMS	 = add_route
@@ -28,6 +21,15 @@ check_PROGRAMS	+= test_register
 check_PROGRAMS	+= test_register_xrls
 check_PROGRAMS	+= test_rib_direct
 check_PROGRAMS	+= test_rib_xrls
+
+check_SCRIPTS	 = test_rib_direct.sh
+check_SCRIPTS	+= test_rib_xrls.sh
+
+# -- Test Programs
+TESTS		 = $(check_SCRIPTS)
+TESTS		+= test_redist$(EXEEXT)
+TESTS		+= test_register$(EXEEXT)
+TESTS		+= test_deletion$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES	 = librib.la libribxrl.la
@@ -251,6 +253,6 @@ EXTRA_DIST	+= xrl_shell_funcs.sh
 
 INCLUDES =	-I$(top_srcdir)
 
-test_rib_direct.sh: test_rib_direct
+test_rib_direct.sh: test_rib_direct$(EXEEXT)
 
-test_rib_xrls.sh: test_rib_xrls
+test_rib_xrls.sh: test_rib_xrls$(EXEEXT)

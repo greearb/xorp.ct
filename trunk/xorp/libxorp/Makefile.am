@@ -1,38 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.35 2005/07/01 18:39:19 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.36 2005/07/25 17:47:59 abittau Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
-
-# -- Test Programs
-TESTS		 = test_asyncio
-TESTS		+= test_callback
-TESTS		+= test_config_param
-TESTS		+= test_heap
-TESTS		+= test_ipnet
-TESTS		+= test_ipv4
-TESTS		+= test_ipv4net
-TESTS		+= test_ipv6
-TESTS		+= test_ipv6net
-TESTS		+= test_ipvx
-TESTS		+= test_ipvxnet
-TESTS		+= test_mac
-TESTS		+= test_observers
-TESTS		+= test_profile
-TESTS		+= test_ref_ptr
-TESTS		+= test_ref_trie
-TESTS		+= test_run_command
-TESTS		+= test_service
-TESTS		+= test_test_main
-TESTS		+= test_time_slice
-TESTS		+= test_timer
-TESTS		+= test_timeval
-TESTS		+= test_trie
-TESTS		+= test_types
-TESTS		+= test_utils
-TESTS		+= test_vif
 
 # -- No-install Programs
 check_PROGRAMS	 = test_asyncio
@@ -62,11 +34,41 @@ check_PROGRAMS	+= test_types
 check_PROGRAMS	+= test_utils
 check_PROGRAMS	+= test_vif
 
+# -- Test Programs
+TESTS	 = test_asyncio$(EXEEXT)
+TESTS	+= test_callback$(EXEEXT)
+TESTS	+= test_config_param$(EXEEXT)
+TESTS	+= test_heap$(EXEEXT)
+TESTS	+= test_ipnet$(EXEEXT)
+TESTS	+= test_ipv4$(EXEEXT)
+TESTS	+= test_ipv4net$(EXEEXT)
+TESTS	+= test_ipv6$(EXEEXT)
+TESTS	+= test_ipv6net$(EXEEXT)
+TESTS	+= test_ipvx$(EXEEXT)
+TESTS	+= test_ipvxnet$(EXEEXT)
+TESTS	+= test_mac$(EXEEXT)
+TESTS	+= test_observers$(EXEEXT)
+TESTS	+= test_profile$(EXEEXT)
+TESTS	+= test_ref_ptr$(EXEEXT)
+TESTS	+= test_ref_trie$(EXEEXT)
+TESTS	+= test_run_command.sh
+TESTS	+= test_service$(EXEEXT)
+TESTS	+= test_test_main$(EXEEXT)
+TESTS	+= test_time_slice$(EXEEXT)
+TESTS	+= test_timer$(EXEEXT)
+TESTS	+= test_timeval$(EXEEXT)
+TESTS	+= test_trie$(EXEEXT)
+TESTS	+= test_types$(EXEEXT)
+TESTS	+= test_utils$(EXEEXT)
+TESTS	+= test_vif$(EXEEXT)
+
 # -- No-install Libraries
 noinst_LTLIBRARIES = libxorp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD			 = $(noinst_LTLIBRARIES)
+
+test_asyncio_LDADD	 = ../libcomm/libcomm.la $(LDADD)
 
 # -- Program Sources
 test_asyncio_SOURCES	= test_asyncio.cc

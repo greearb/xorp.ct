@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.33 2004/11/12 02:44:48 bms Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.34 2004/11/23 22:43:47 bms Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -11,23 +11,19 @@ bindir				 = $(prefix)/$(subdir)
 # -- Real Programs
 bin_PROGRAMS			 = xorp_rip xorp_ripng
 
-# -- Test Programs
-TESTS				 = test_auth
-TESTS				+= test_packets
-TESTS				+= test_request
-TESTS				+= test_route_walk
-TESTS				+= test_timers
-TESTS				+= test_update_queue
-TESTS				+= test_outputs
-
 # -- No-install Programs
-check_PROGRAMS	 		 = test_auth
-check_PROGRAMS			+= test_packets
-check_PROGRAMS			+= test_request
-check_PROGRAMS			+= test_route_walk
-check_PROGRAMS			+= test_timers
-check_PROGRAMS			+= test_update_queue
-check_PROGRAMS			+= test_outputs
+test_programs			 = test_auth
+test_programs			+= test_packets
+test_programs			+= test_request
+test_programs			+= test_route_walk
+test_programs			+= test_timers
+test_programs			+= test_update_queue
+test_programs			+= test_outputs
+
+check_PROGRAMS			 = $(test_programs)
+
+# -- Test Programs
+TESTS				 = $(addsuffix $(EXEEXT),$(test_programs))
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES		 = librip.la

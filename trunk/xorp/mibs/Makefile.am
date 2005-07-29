@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mibs/Makefile.am,v 1.32 2005/04/15 03:39:44 pavlin Exp $
+## $XORP: xorp/mibs/Makefile.am,v 1.33 2005/05/24 22:11:09 jcardona Exp $
 ##
 
 # All of the following shared objects will be installed in
@@ -37,9 +37,9 @@ pkglib_LTLIBRARIES		+= xorp_if_mib_module.la
 
 # -- Test Programs
 
-TESTS				 = test_xorpevents
+check_PROGRAMS			 = test_xorpevents
 
-check_PROGRAMS			 = $(TESTS)
+TESTS				 = test_xorpevents$(EXEEXT)
 
 # -- Compiler and pre compiler flags
 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.57 2004/12/17 01:07:33 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.58 2004/12/17 04:45:20 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -13,15 +13,6 @@ SUBDIRS = . tools
 bin_PROGRAMS		 = xorp_fea xorp_fea_dummy
 bin_SCRIPTS		 = xorp_fea_click_config_generator
 
-# -- Test Programs and Scripts
-TESTS			 = test_rawsock4
-TESTS			+= test_ifmanager_transaction
-TESTS			+= test_xrl_sockets4_udp.sh
-
-test_scripts		 = test_add_route.sh
-test_scripts		+= test_config_interface.sh
-test_scripts		+= test_xrl_sockets4_udp.sh
-
 # -- No-install Programs and Scripts
 noinst_PROGRAMS 	 = demo_fea_ifmgr_client
 
@@ -30,7 +21,15 @@ check_PROGRAMS 		+= test_mfea
 check_PROGRAMS		+= test_rawsock4
 check_PROGRAMS		+= test_xrl_sockets4_udp
 
-check_SCRIPTS		 = $(test_scripts)
+check_SCRIPTS		 = test_xrl_sockets4_udp.sh
+check_SCRIPTS		+= test_add_route.sh
+check_SCRIPTS		+= test_config_interface.sh
+check_SCRIPTS		+= test_xrl_sockets4_udp.sh
+
+# -- Test Programs and Scripts
+TESTS			 = $(check_SCRIPTS)
+TESTS			+= test_rawsock4$(EXEEXT)
+TESTS			+= test_ifmanager_transaction$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES	 = libfea.la
@@ -138,6 +137,7 @@ test_ifmanager_transaction_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 test_rawsock4_SOURCES	 = test_rawsock4.cc
 test_rawsock4_LDADD	 = $(noinst_LTLIBRARIES)
 test_rawsock4_LDADD	+= $(top_builddir)/libxorp/libxorp.la
+test_rawsock4_LDADD	+= $(top_builddir)/libcomm/libcomm.la
 
 # -- Sources and Linkage for test_xrl_sockets
 test_xrl_sockets4_udp_SOURCES	 = test_xrl_sockets4_udp.cc

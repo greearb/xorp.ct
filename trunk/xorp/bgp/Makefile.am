@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.36 2005/07/08 02:06:17 abittau Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.37 2005/07/08 07:06:48 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -12,24 +12,23 @@ bindir = $(prefix)/$(subdir)
 # -- Real Programs
 bin_PROGRAMS	 = xorp_bgp
 
-# -- Test Programs
-TESTS		 = test_packet
-#TESTS		+= test_plumbing
-#TESTS		+= update_test
-TESTS		+= aspath_test
-TESTS		+= test_packet_coding
-TESTS		+= isolation_tests
-TESTS		+= test_peer_data
-TESTS		+= test_leaks.sh
-
 # -- No-install Programs
 check_PROGRAMS	 = test_packet
-check_PROGRAMS	+= test_plumbing
-check_PROGRAMS	+= update_test
 check_PROGRAMS	+= aspath_test
 check_PROGRAMS	+= test_packet_coding
 check_PROGRAMS	+= isolation_tests
 check_PROGRAMS	+= test_peer_data
+check_PROGRAMS	+= test_plumbing
+check_PROGRAMS	+= update_test
+
+check_SCRIPTS	 = test_leaks.sh
+
+# -- Regression tests
+TESTS		 = $(check_SCRIPTS)
+TESTS		+= aspath_test$(EXEEXT)
+TESTS		+= test_packet_coding$(EXEEXT)
+TESTS		+= isolation_tests$(EXEEXT)
+TESTS		+= test_peer_data$(EXEEXT)
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES	 = libbgp.la

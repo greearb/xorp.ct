@@ -1,16 +1,16 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.10 2004/12/17 01:07:33 pavlin Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.11 2005/03/28 20:38:29 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
-# -- Test Programs
-TESTS		 = test_spt
-
 # -- No-install Programs
-check_PROGRAMS  = test_spt
+check_PROGRAMS	 = test_spt
+
+# -- Test Programs
+TESTS		 = test_spt$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libproto.la

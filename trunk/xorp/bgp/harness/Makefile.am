@@ -1,26 +1,26 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.15 2004/11/12 02:44:28 bms Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.16 2004/11/23 22:43:41 bms Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS	 = 
-
-# -- Test Programs
-TESTS		 = test_trie
-TESTS		+= test_peering1.sh
-TESTS		+= test_peering2.sh
-TESTS		+= test_routing1.sh
-TESTS		+= test_routing2.sh
-TESTS		+= test_rib1.sh
-TESTS		+= test_rib_fea1.sh
-TESTS		+= test_path_attribute1.sh
-TESTS		+= test_terminate.sh
+bin_PROGRAMS	 =
 
 # -- No-install Programs
-check_PROGRAMS  = coord
+check_PROGRAMS	 = coord
 check_PROGRAMS	+= test_peer
 check_PROGRAMS	+= test_trie
+
+check_SCRIPTS	 = test_peering1.sh
+check_SCRIPTS	+= test_peering2.sh
+check_SCRIPTS	+= test_routing1.sh
+check_SCRIPTS	+= test_routing2.sh
+check_SCRIPTS	+= test_rib1.sh
+check_SCRIPTS	+= test_rib_fea1.sh
+check_SCRIPTS	+= test_path_attribute1.sh
+check_SCRIPTS	+= test_terminate.sh
+
+TESTS		 = $(check_SCRIPTS) test_trie$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES =
