@@ -12,19 +12,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.18 2005/03/12 04:25:06 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.19 2005/03/25 02:53:31 pavlin Exp $"
 
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <map>
-#include <string>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/xlog.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
+#include <map>
+#include <string>
 
 #include "xrl_atom.hh"
 #include "xrl_atom_encoding.hh"

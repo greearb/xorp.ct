@@ -12,11 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/header.cc,v 1.7 2005/03/12 01:51:51 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/header.cc,v 1.8 2005/03/25 02:53:27 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 #include <string.h>
 
 #include "xrl_module.h"

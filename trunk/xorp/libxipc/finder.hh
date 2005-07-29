@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder.hh,v 1.16 2004/11/04 21:52:47 pavlin Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.17 2005/03/25 02:53:25 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_HH__
 #define __LIBXIPC_FINDER_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <list>
 #include <map>

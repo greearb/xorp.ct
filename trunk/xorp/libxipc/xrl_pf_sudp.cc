@@ -12,30 +12,44 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.37 2005/03/24 03:31:39 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.38 2005/03/25 02:53:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "libxorp/xorp.h"
-
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/uio.h>
-
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include <string>
-
 #include "xrl_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 #include "libxorp/exceptions.hh"
+
+#include "libcomm/comm_api.h"
+
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+
+#include <errno.h>
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#include <string>
 
 #include "header.hh"
 #include "xrl_error.hh"

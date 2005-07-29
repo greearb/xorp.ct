@@ -14,13 +14,20 @@
 
 #ident "$XORP"
 
-#include "config.h"
 #include "libxorp/xorp.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "finder_client.hh"
 #include "finder_client_xrl_target.hh"
 #include "finder_tcp_messenger.hh"
 #include "finder_constants.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 //
 // A client process to help test the finder keepalive and time out

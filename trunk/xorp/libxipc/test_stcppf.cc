@@ -12,12 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcppf.cc,v 1.5 2004/06/10 22:41:08 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcppf.cc,v 1.6 2005/03/25 02:53:29 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 
 #include "xrl_module.h"
-#include "config.h"
 #include "xrl_error.hh"
 #include "xrl_pf_stcp_ph.hh"
 

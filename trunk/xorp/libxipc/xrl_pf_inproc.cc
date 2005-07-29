@@ -12,26 +12,38 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.22 2004/12/18 03:48:52 atanu Exp $"
-
-#include <sys/param.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <unistd.h>
-
-#include <string>
-#include <map>
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.23 2005/03/25 02:53:33 pavlin Exp $"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "xrl_module.h"
-#include "config.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
+
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
+#include <stdio.h>
+#include <string>
+#include <map>
 
 #include "xrl_error.hh"
 #include "xrl_pf_inproc.hh"
 #include "xrl_dispatcher.hh"
+
 
 // ----------------------------------------------------------------------------
 // InProc is "intra-process" - a minimalist and simple direct call transport

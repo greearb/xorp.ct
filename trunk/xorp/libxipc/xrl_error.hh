@@ -12,14 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.11 2004/06/10 22:41:11 hodson Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.12 2005/03/25 02:53:32 pavlin Exp $
 
 #ifndef	__LIBXIPC_XRL_ERROR_HH__
 #define __LIBXIPC_XRL_ERROR_HH__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string>
 
-#include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/c_format.hh"
 

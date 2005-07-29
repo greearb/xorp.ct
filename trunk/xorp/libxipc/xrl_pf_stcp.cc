@@ -14,13 +14,19 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.39 2005/01/26 02:45:33 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.40 2005/03/25 02:53:34 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 
 #include <string>
 #include <vector>
@@ -31,6 +37,8 @@
 #include "libxipc/xrl_module.h"
 #include "libxorp/xlog.h"
 #include "libxorp/buffered_asyncio.hh"
+
+#include "libcomm/comm_api.h"
 
 #include "sockutil.hh"
 #include "header.hh"

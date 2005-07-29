@@ -12,9 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.7 2004/06/10 22:41:11 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.8 2005/03/25 02:53:33 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp/c_format.hh"
+#include "libxorp/utils.hh"
 #include "xrl_parser_input.hh"
 
 // CPP # directives that are supported here

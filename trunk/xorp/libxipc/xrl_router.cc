@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.47 2005/06/03 21:33:06 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.48 2005/06/23 18:29:59 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -137,7 +137,7 @@ mk_instance_name(EventLoop& e, const char* classname)
 // ----------------------------------------------------------------------------
 // XrlRouter code
 
-static const uint32_t FINDER_CONNECT_TIMEOUT_MS = 30 * 1000;
+static const uint32_t DEFAULT_FINDER_CONNECT_TIMEOUT_MS = 30 * 1000;
 
 uint32_t XrlRouter::_icnt = 0;
 
@@ -193,13 +193,26 @@ XrlRouter::initialize(const char* class_name,
 	}
     }
 
+    // Set the finder connect timeout from environment variable if it is set.
+    uint32_t timeout_ms = DEFAULT_FINDER_CONNECT_TIMEOUT_MS;
+    value = getenv("XORP_FINDER_CONNECT_TIMEOUT_MS");
+    if (value != NULL) {
+	char *ep = NULL;
+	timeout_ms = strtoul(value, &ep, 10);
+	if ( !(*value != '\0' && *ep == '\0') &&
+	      (timeout_ms <= 0 || timeout_ms > 6000)) {
+	    XLOG_ERROR("Invalid \"XORP_FINDER_CONNECT_TIMEOUT_MS\": %s", value);
+	    timeout_ms = DEFAULT_FINDER_CONNECT_TIMEOUT_MS;
+	}
+    }
+
     _fc = new FinderClient();
 
     _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
 
     _fac = new FinderTcpAutoConnector(_e, *_fc, _fc->commands(),
 				      finder_addr, finder_port,
-				      true, FINDER_CONNECT_TIMEOUT_MS);
+				      true, timeout_ms);
 
     _instance_name = mk_instance_name(_e, class_name);
 

@@ -12,7 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.13 2005/07/08 07:10:04 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.14 2005/07/09 02:27:51 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "finder_module.h"
 
@@ -25,6 +29,10 @@
 #include "finder_tcp_messenger.hh"
 #include "permits.hh"
 #include "sockutil.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //

@@ -12,18 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.7 2005/02/27 21:32:54 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.8 2005/03/25 02:53:30 pavlin Exp $"
 
 
 //
 // Test XRLs receiver.
 //
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "xrl_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
@@ -32,6 +37,10 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/targets/test_xrls_base.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 
 //

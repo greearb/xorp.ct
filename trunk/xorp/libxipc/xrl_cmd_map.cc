@@ -12,11 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.10 2004/06/10 22:41:10 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.11 2005/03/25 02:53:32 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "xrl_module.h"
-#include "config.h"
 #include "libxorp/debug.h"
+
 #include "xrl_cmd_map.hh"
 
 bool

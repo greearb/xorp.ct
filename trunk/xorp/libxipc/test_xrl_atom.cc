@@ -12,14 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.8 2005/02/01 04:55:34 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.9 2005/03/25 02:53:30 pavlin Exp $"
 
 // test_xrl_atom: String Serialization Tests
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-#include "libxorp/xorp.h"
+#endif
 
 #include "xrl_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
 #include "xrl_atom.hh"

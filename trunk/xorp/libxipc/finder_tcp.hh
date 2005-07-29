@@ -12,17 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.13 2005/03/17 02:29:11 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.14 2005/03/25 02:53:27 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
+#endif
 
 #include <vector>
 
-#include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/asyncio.hh"
 #include "libxorp/eventloop.hh"

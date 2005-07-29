@@ -12,16 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/header.hh,v 1.6 2005/03/24 03:31:39 pavlin Exp $
+// $XORP: xorp/libxipc/header.hh,v 1.7 2005/03/25 02:53:28 pavlin Exp $
 
 #ifndef __LIBXIPC_HEADER_HH__
 #define __LIBXIPC_HEADER_HH__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string>
 #include <list>
 #include <map>
-
-#include "config.h"
 
 class HeaderWriter {
 public:
