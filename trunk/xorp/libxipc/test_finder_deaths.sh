@@ -13,7 +13,7 @@ finder_pid=$!
 # Wait a couple of seconds and check it is still running
 #
 sleep 2
-ps -p ${finder_pid} > /dev/null
+kill -0 ${finder_pid} > /dev/null
 if [ $? -ne 0 ] ; then
     echo "Finder did not start correctly."
     echo "Port ${finder_port} maybe in use by another application."
@@ -33,7 +33,7 @@ echo "Trying wait period of $w seconds"
 # Wait a couple of seconds and check it is still running
 #
     sleep 2
-    ps -p ${test_app_pid} > /dev/null
+    kill -0 ${test_app_pid} > /dev/null
     if [ $? -ne 0 ] ; then
 	echo "Test application did not start correctly."
 	kill -9 ${finder_pid}
@@ -48,7 +48,7 @@ echo "Trying wait period of $w seconds"
     kill -9 ${test_app_pid}
     sleep 2
 
-    ps -p ${finder_pid} > /dev/null
+    kill -0 ${finder_pid} > /dev/null
     if [ $? -ne 0 ] ; then
 	echo "Finder died unexpectedly."
 	exit 1
