@@ -95,11 +95,13 @@ SUBDIRS = . tools
 # -- Real Programs
 bin_PROGRAMS = xorp_rip xorp_ripng
 
-# -- Test Programs
-TESTS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
-
 # -- No-install Programs
-check_PROGRAMS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
+test_programs = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
+
+check_PROGRAMS = $(test_programs)
+
+# -- Test Programs
+TESTS = $(addsuffix $(EXEEXT),$(test_programs))
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES = librip.la libripng.la libripxrl.la libripngxrl.la

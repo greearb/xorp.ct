@@ -106,13 +106,11 @@ test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header 
 
 test_extra_programs = test_xrl_parser test_finder_to test_xrl_receiver test_xrl_sender
 
-test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
-
-TESTS = $(test_programs) $(test_scripts)
-
 # -- No-install Programs
 check_PROGRAMS = $(test_programs) $(test_extra_programs)
-check_SCRIPTS = $(test_scripts)
+check_SCRIPTS = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
+
+TESTS = $(addsuffix $(EXEEXT),$(test_programs)) $(check_SCRIPTS)
 
 # -- Libraries and library flags to link the binary programs
 LDADD = ./libfinder.la ./libxipc.la $(top_builddir)/libxorp/libxorp.la $(top_builddir)/libcomm/libcomm.la

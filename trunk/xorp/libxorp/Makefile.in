@@ -92,17 +92,19 @@ install_sh = @install_sh@
 
 bin_PROGRAMS = 
 
-# -- Test Programs
-TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_run_command test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_utils test_vif
-
 # -- No-install Programs
 check_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_profile test_ref_ptr test_ref_trie test_run_command test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_utils test_vif
+
+# -- Test Programs
+TESTS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) test_config_param$(EXEEXT) test_heap$(EXEEXT) test_ipnet$(EXEEXT) test_ipv4$(EXEEXT) test_ipv4net$(EXEEXT) test_ipv6$(EXEEXT) test_ipv6net$(EXEEXT) test_ipvx$(EXEEXT) test_ipvxnet$(EXEEXT) test_mac$(EXEEXT) test_observers$(EXEEXT) test_profile$(EXEEXT) test_ref_ptr$(EXEEXT) test_ref_trie$(EXEEXT) test_run_command.sh test_service$(EXEEXT) test_test_main$(EXEEXT) test_time_slice$(EXEEXT) test_timer$(EXEEXT) test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) test_utils$(EXEEXT) test_vif$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libxorp.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD = $(noinst_LTLIBRARIES)
+
+test_asyncio_LDADD = ../libcomm/libcomm.la $(LDADD)
 
 # -- Program Sources
 test_asyncio_SOURCES = test_asyncio.cc
@@ -175,8 +177,7 @@ PROGRAMS = $(bin_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
 test_asyncio_OBJECTS = $(am_test_asyncio_OBJECTS)
-test_asyncio_LDADD = $(LDADD)
-test_asyncio_DEPENDENCIES = libxorp.la
+test_asyncio_DEPENDENCIES = ../libcomm/libcomm.la libxorp.la
 test_asyncio_LDFLAGS =
 am_test_callback_OBJECTS = test_callback.$(OBJEXT)
 test_callback_OBJECTS = $(am_test_callback_OBJECTS)

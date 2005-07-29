@@ -95,13 +95,15 @@ SUBDIRS = . tools
 # -- Real Programs
 bin_PROGRAMS = xorp_rib
 
-# -- Test Programs
-TESTS = test_rib_direct.sh test_rib_xrls.sh test_redist test_register test_deletion
-
 # -- No-install Programs
 noinst_PROGRAMS = add_route main_routemap
 
 check_PROGRAMS = test_deletion test_redist test_register test_register_xrls test_rib_direct test_rib_xrls
+
+check_SCRIPTS = test_rib_direct.sh test_rib_xrls.sh
+
+# -- Test Programs
+TESTS = $(check_SCRIPTS) test_redist$(EXEEXT) test_register$(EXEEXT) test_deletion$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = librib.la libribxrl.la
@@ -781,7 +783,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -874,9 +876,9 @@ uninstall-info: uninstall-info-recursive
 	uninstall-info-recursive uninstall-recursive
 
 
-test_rib_direct.sh: test_rib_direct
+test_rib_direct.sh: test_rib_direct$(EXEEXT)
 
-test_rib_xrls.sh: test_rib_xrls
+test_rib_xrls.sh: test_rib_xrls$(EXEEXT)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

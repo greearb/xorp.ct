@@ -112,9 +112,9 @@ pkglib_LTLIBRARIES = libnetsnmpxorp.la bgp4_mib_1657.la ospf_mib_1850.la xorp_if
 
 
 # -- Test Programs
-TESTS = test_xorpevents
+check_PROGRAMS = test_xorpevents
 
-check_PROGRAMS = $(TESTS)
+TESTS = test_xorpevents$(EXEEXT)
 
 
 # -- Compiler and pre compiler flags

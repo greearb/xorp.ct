@@ -92,11 +92,12 @@ install_sh = @install_sh@
 
 bin_PROGRAMS = 
 
-# -- Test Programs
-TESTS = test_trie test_peering1.sh test_peering2.sh test_routing1.sh test_routing2.sh test_rib1.sh test_rib_fea1.sh test_path_attribute1.sh test_terminate.sh
-
 # -- No-install Programs
 check_PROGRAMS = coord test_peer test_trie
+
+check_SCRIPTS = test_peering1.sh test_peering2.sh test_routing1.sh test_routing2.sh test_rib1.sh test_rib_fea1.sh test_path_attribute1.sh test_terminate.sh
+
+TESTS = $(check_SCRIPTS) test_trie$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = 
@@ -401,7 +402,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)

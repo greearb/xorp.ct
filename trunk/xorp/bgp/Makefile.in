@@ -97,13 +97,13 @@ SUBDIRS = . tools harness
 # -- Real Programs
 bin_PROGRAMS = xorp_bgp
 
-# -- Test Programs
-#TESTS		+= test_plumbing
-#TESTS		+= update_test
-TESTS = test_packet aspath_test test_packet_coding isolation_tests test_peer_data test_leaks.sh
-
 # -- No-install Programs
-check_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests test_peer_data
+check_PROGRAMS = test_packet aspath_test test_packet_coding isolation_tests test_peer_data test_plumbing update_test
+
+check_SCRIPTS = test_leaks.sh
+
+# -- Regression tests
+TESTS = $(check_SCRIPTS) aspath_test$(EXEEXT) test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT) test_peer_data$(EXEEXT)
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES = libbgp.la
@@ -161,10 +161,10 @@ am_libbgp_la_OBJECTS = aspath.lo attribute_manager.lo bgp_trie.lo \
 	subnet_route.lo update_attrib.lo update_packet.lo xrl_target.lo
 libbgp_la_OBJECTS = $(am_libbgp_la_OBJECTS)
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
-check_PROGRAMS = test_packet$(EXEEXT) test_plumbing$(EXEEXT) \
-	update_test$(EXEEXT) aspath_test$(EXEEXT) \
+check_PROGRAMS = test_packet$(EXEEXT) aspath_test$(EXEEXT) \
 	test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT) \
-	test_peer_data$(EXEEXT)
+	test_peer_data$(EXEEXT) test_plumbing$(EXEEXT) \
+	update_test$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_aspath_test_OBJECTS = aspath_test.$(OBJEXT)
@@ -723,7 +723,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)

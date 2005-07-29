@@ -92,11 +92,11 @@ install_sh = @install_sh@
 
 bin_PROGRAMS = 
 
-# -- Test Programs
-TESTS = test_generated
-
 # -- No-install Programs
 check_PROGRAMS = test_generated
+
+# -- Test Programs
+TESTS = test_generated$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = 

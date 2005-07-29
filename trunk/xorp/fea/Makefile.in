@@ -97,17 +97,15 @@ SUBDIRS = . tools
 bin_PROGRAMS = xorp_fea xorp_fea_dummy
 bin_SCRIPTS = xorp_fea_click_config_generator
 
-# -- Test Programs and Scripts
-TESTS = test_rawsock4 test_ifmanager_transaction test_xrl_sockets4_udp.sh
-
-test_scripts = test_add_route.sh test_config_interface.sh test_xrl_sockets4_udp.sh
-
 # -- No-install Programs and Scripts
 noinst_PROGRAMS = demo_fea_ifmgr_client
 
 check_PROGRAMS = test_ifmanager_transaction test_mfea test_rawsock4 test_xrl_sockets4_udp
 
-check_SCRIPTS = $(test_scripts)
+check_SCRIPTS = test_xrl_sockets4_udp.sh test_add_route.sh test_config_interface.sh test_xrl_sockets4_udp.sh
+
+# -- Test Programs and Scripts
+TESTS = $(check_SCRIPTS) test_rawsock4$(EXEEXT) test_ifmanager_transaction$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libfea.la
@@ -150,7 +148,7 @@ test_ifmanager_transaction_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp
 
 # -- Sources and Linkages for test_rawsock4
 test_rawsock4_SOURCES = test_rawsock4.cc
-test_rawsock4_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
+test_rawsock4_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la $(top_builddir)/libcomm/libcomm.la
 
 # -- Sources and Linkage for test_xrl_sockets
 test_xrl_sockets4_udp_SOURCES = test_xrl_sockets4_udp.cc
@@ -277,7 +275,8 @@ test_mfea_LDFLAGS =
 am_test_rawsock4_OBJECTS = test_rawsock4.$(OBJEXT)
 test_rawsock4_OBJECTS = $(am_test_rawsock4_OBJECTS)
 test_rawsock4_DEPENDENCIES = libfea.la \
-	$(top_builddir)/libxorp/libxorp.la
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/libcomm/libcomm.la
 test_rawsock4_LDFLAGS =
 am_test_xrl_sockets4_udp_OBJECTS = test_xrl_sockets4_udp.$(OBJEXT)
 test_xrl_sockets4_udp_OBJECTS = $(am_test_xrl_sockets4_udp_OBJECTS)
