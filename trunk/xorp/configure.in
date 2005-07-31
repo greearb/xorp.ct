@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.135 2005/05/05 19:38:31 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.136 2005/06/03 22:30:42 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [Report configure problems to feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.135 2005/05/05 19:38:31 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.136 2005/06/03 22:30:42 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -471,7 +471,7 @@ AC_CHECK_HEADERS([pcreposix.h])
 dnl
 dnl Check for headers commonly found on UNIX systems (BSD, SYSV etc).
 dnl
-AC_CHECK_HEADERS([getopt.h paths.h sysexits.h sys/param.h])
+AC_CHECK_HEADERS([paths.h sysexits.h sys/param.h])
 AC_HEADER_SYS_WAIT
 
 dnl
@@ -652,10 +652,22 @@ AC_CHECK_FUNCS([random], ,
   [AC_DEFINE(NEED_RANDOM, 1,
 	     [Define to 1 if your system does not have modern random()])])
 
-dnl XXX needed in many places it shouldn't be
-AC_CHECK_FUNCS([getopt], ,
-  [AC_DEFINE(NEED_GETOPT, 1,
-	     [Define to 1 if your system does not have getopt])])
+dnl
+dnl XXX: This is a hack. Look for getopt in unistd.h by grepping for it.
+dnl If it's not there, then look for the getopt.h header file.
+dnl This assumes that the system's getopt declaration comes before the GNU one,
+dnl if getopt.h is being picked up from a GNU C library include directory.
+dnl This replaces the old NEED_GETOPT check which wasn't used.
+dnl
+AC_EGREP_HEADER(getopt, unistd.h, xr_cv_unistd_getopt=yes)
+if test "${xr_cv_unistd_getopt}" = "yes"
+then
+    AC_DEFINE(HAVE_DECL_GETOPT, 1,
+	      [Define to 1 if system getopt() is in unistd.h])
+else
+    AC_CHECK_HEADERS([getopt.h])
+fi
+
 
 dnl ---------------------------------------------------------------------------
 dnl Check for library functions

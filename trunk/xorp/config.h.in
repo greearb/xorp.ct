@@ -63,6 +63,9 @@
 /* Define to 1 if netinet6/nd6.h is not C++ friendly */
 #undef HAVE_BROKEN_CXX_NETINET6_ND6_H
 
+/* Define to 1 if system getopt() is in unistd.h */
+#undef HAVE_DECL_GETOPT
+
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
@@ -71,9 +74,6 @@
 
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
-
-/* Define to 1 if you have the `getopt' function. */
-#undef HAVE_GETOPT
 
 /* Define to 1 if you have the <getopt.h> header file. */
 #undef HAVE_GETOPT_H
@@ -513,9 +513,6 @@
 
 /* Define to 1 if missing getnameinfo(3) */
 #undef NEED_GETNAMEINFO
-
-/* Define to 1 if your system does not have getopt */
-#undef NEED_GETOPT
 
 /* Define to 1 if your system does not have modern random() */
 #undef NEED_RANDOM
