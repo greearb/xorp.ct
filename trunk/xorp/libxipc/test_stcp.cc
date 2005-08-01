@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.15 2004/10/13 06:03:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.16 2005/03/25 02:53:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -239,8 +239,10 @@ int main(int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
 
+#ifndef HOST_OS_WINDOWS
     // Set alarm
     alarm(60);
+#endif
 
     run_test();
 
