@@ -40,6 +40,7 @@
 
 #include "ospf.hh"
 #include "delay_queue.hh"
+#include "vertex.hh"
 #include "area_router.hh"
 #include "peer.hh"
 

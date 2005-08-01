@@ -17,6 +17,7 @@
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+#define PARANOIA
 
 #include "config.h"
 #include <map>
@@ -43,6 +44,7 @@
 #include "ospf.hh"
 #include "ls_database.hh"
 #include "delay_queue.hh"
+#include "vertex.hh"
 #include "area_router.hh"
 
 template <typename A>
@@ -237,6 +239,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
 
+    routing_begin();
     
     // RFC 2328 Section 13. The Flooding Procedure
     // Validate the incoming LSAs.
@@ -321,7 +324,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    else
 		update_lsa((*i), index);
 
-	    XLOG_WARNING("TBD Section 13.2");
+	    routing_add(*i);
 	    
 	    // (e) Possibly acknowledge this LSA.
 	    // RFC 2328 Section 13.5 Sending Link State Acknowledgment Packets
@@ -376,6 +379,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
  out:
     push_lsas();
+    routing_end();
 }
 
 template <typename A>
@@ -870,6 +874,56 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
     lsar->set_maxage();
 
     return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_begin()
+{
+#ifdef  PARANOIA
+    list<RouteCmd<Vertex> > r;
+    _spt.compute(r);
+    XLOG_ASSERT(r.empty());
+#endif
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_add(Lsa::LsaRef lsar)
+{
+    //  RFC 2328 Section  13.2. Installing LSAs in the database
+
+    debug_msg("%s\n", lsar->str().c_str());
+
+    RouterLsa *rlsa;
+    if (0 == (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+	list<RouterLink> &rl = rlsa->get_router_links();
+	list<RouterLink>::const_iterator i = rl.begin();
+	for(; i != rl.end(); i++) {
+	    switch (_ospf.get_version()) {
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		break;
+	    }
+	}
+    } else {
+	XLOG_UNFINISHED();
+    }
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_delete(Lsa::LsaRef /*lsar*/)
+{
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_end()
+{
+    list<RouteCmd<Vertex> > r;
+    _spt.compute(r);
 }
 
 template class AreaRouter<IPv4>;

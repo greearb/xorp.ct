@@ -187,7 +187,7 @@ class AreaRouter {
     OspfTypes::AreaType _area_type;	// Type of this area.
     const uint32_t _options;		// Options that we are sending.
 
-    Spt<IPNet<A> > _spt;			// SPT computation unit.
+    Spt<Vertex> _spt;			// SPT computation unit.
 
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
@@ -366,6 +366,28 @@ class AreaRouter {
      * @return true if this is a self-orignated LSA.
      */
     bool self_originated(Lsa::LsaRef lsar, bool match, size_t index);
+
+    /**
+     * Prepare for routing changes.
+     */
+    void routing_begin();
+
+    /**
+     * Add this LSA to the routing computation.
+     */
+    void routing_add(Lsa::LsaRef lsar);
+
+    /**
+     * Remove this LSA from the routing computation.
+     */
+    void routing_delete(Lsa::LsaRef lsar);
+
+    /**
+     * Routing changes are completed.
+     * 1) Update the routing table if necessary.
+     * 2) Possibly generate new sumamry LSAs.
+     */
+    void routing_end();
 };
 
 /**
