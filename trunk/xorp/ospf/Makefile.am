@@ -61,6 +61,7 @@ libospf_la_SOURCES  += peer_manager.hh
 libospf_la_SOURCES  += peer.hh
 libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
+libospf_la_SOURCES  += vertex.hh
 
 libospf_la_SOURCES  += area_router.cc
 libospf_la_SOURCES  += fletcher_checksum.cc

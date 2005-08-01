@@ -121,7 +121,7 @@ test_checksum_SOURCES = test_checksum.cc
 test_peering_SOURCES = test_peering.cc
 
 # -- Library Sources
-libospf_la_SOURCES = area_router.hh exceptions.hh delay_queue.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh xrl_io.hh xrl_target.hh area_router.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc xrl_io.cc xrl_target.cc
+libospf_la_SOURCES = area_router.hh exceptions.hh delay_queue.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh xrl_io.hh xrl_target.hh vertex.hh area_router.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc xrl_io.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = 
