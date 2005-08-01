@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP$
+ * $XORP: xorp/libxorp/random.h,v 1.1 2005/08/01 13:37:40 bms Exp $
  */
 
 #ifndef __LIBXORP_RANDOM_H__
@@ -30,7 +30,7 @@ long	random(void);
 void	srandom(unsigned long);
 char*	initstate(unsigned long, char *, long);
 char*	setstate(char *);
-void	srandomdev();
+void	srandomdev(void);
 #endif /* HAVE_RANDOM */
 
 #ifdef __cplusplus
