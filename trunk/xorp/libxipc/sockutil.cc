@@ -12,32 +12,60 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.13 2005/03/25 02:53:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.14 2005/03/29 23:10:20 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
-#include <arpa/inet.h>
-#include <netdb.h>
+#include "ipc_module.h"
+#include "libxorp/xorp.h"
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
-
+#endif
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
-#endif /* HAVE_SYS_SOCKIO_H */
-
+#endif
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
 
 #include <errno.h>
 #include <stdio.h>
-#include <unistd.h>
 
-#include "ipc_module.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_IPHLPAPI_H
+#include <iphlpapi.h>
+#include <iptypes.h>		// XXX
+#endif
+
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/ipv4.hh"
+
+#include "libcomm/comm_api.h"
 
 #include "sockutil.hh"
 
