@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.5 2004/06/10 22:41:03 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.6 2005/03/25 02:53:23 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -24,6 +24,10 @@
 #include "ifmgr_atoms.hh"
 #include "ifmgr_cmds.hh"
 #include "ifmgr_cmd_queue.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //

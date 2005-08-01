@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.10 2005/03/11 19:51:49 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.11 2005/03/25 02:53:23 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/timer.hh"
