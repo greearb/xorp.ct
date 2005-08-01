@@ -15,16 +15,21 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.12 2005/05/27 20:01:01 atanu Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.13 2005/06/06 20:26:32 pavlin Exp $"
 
-#include <strings.h>
-#include "libxorp_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-#include "xorp.h"
+#endif
+
+#include "libxorp_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "heap.hh"
+
+#include <strings.h>
 
 #define DBG(x)	//	x
 

@@ -12,16 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.6 2005/01/30 07:03:15 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.7 2005/03/25 02:53:45 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-#include "libxorp/xorp.h"
+#endif
 
-#include <fcntl.h>
-#include "libxorp/xorp.h"
 #include "libxorp_module.h"
 
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libcomm/comm_api.h"
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
 #include "asyncio.hh"
 
 static const int TIMEOUT_MS	  = 2000;

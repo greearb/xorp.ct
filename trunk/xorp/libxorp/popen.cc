@@ -57,19 +57,11 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.2 2005/03/25 02:53:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.3 2005/04/12 07:49:00 pavlin Exp $"
 
-#include <sys/param.h>
-#include <sys/wait.h>
-
-#include <fcntl.h>
-#include <signal.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <paths.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp_module.h"
 
@@ -77,8 +69,34 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "popen.hh"
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_VFORK_H
+#include <vfork.h>
+#endif
+#ifdef HAVE_PATHS_H
+#include <paths.h>
+#endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <errno.h>
+#include <signal.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "popen.hh"
 
 extern char **environ;
 

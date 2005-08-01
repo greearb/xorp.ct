@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.12 2004/10/06 20:32:53 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.13 2005/03/25 02:53:40 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
 
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 
 #include "clock.hh"
 #include "timer.hh"

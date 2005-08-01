@@ -12,19 +12,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_observers.cc,v 1.3 2004/06/10 22:41:20 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_observers.cc,v 1.4 2005/03/25 02:53:46 pavlin Exp $"
 
 //
 // test program to the Observer classes for TimerList and SelectorList
 //
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp_module.h"
 
 #include "libxorp/timer.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+
+#include <stdio.h>
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 static int fired(0);
 

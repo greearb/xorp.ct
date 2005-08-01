@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.9 2005/03/25 02:53:50 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.10 2005/07/01 16:57:25 pavlin Exp $
  */
 
 
@@ -33,20 +33,46 @@
 #include <cstdarg>
 #include <cstdio>
 #endif /* __cplusplus */
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
+#include <stdarg.h>
+
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <signal.h>
-#include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 #include <errno.h>
 #include <assert.h>
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <netinet/in.h>
+
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
+#include <time.h>
 
 #include "utility.h"
 

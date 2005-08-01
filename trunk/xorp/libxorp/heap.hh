@@ -15,19 +15,24 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.7 2005/03/25 02:53:41 pavlin Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.8 2005/05/27 20:01:01 atanu Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
 
 #define LRD	0
 
-#include <sys/time.h>
+#include <memory>
 
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 #include <assert.h>
-#include <memory>
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #include "timeval.hh"
 

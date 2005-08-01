@@ -12,7 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.8 2005/01/28 23:33:25 bms Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.9 2005/03/25 02:53:40 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp_module.h"
 #include "xorp.h"

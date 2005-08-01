@@ -13,13 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.5 2005/06/27 08:38:06 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.6 2005/07/08 16:33:15 pavlin Exp $
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 #include "libxorp_module.h"
-#include "xorp.h"
 
-#include <sys/wait.h>
-
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
