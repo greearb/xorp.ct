@@ -13,12 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.21 2005/03/25 02:54:28 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.22 2005/07/08 02:06:24 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include <map>
 
 #include "rip_module.h"

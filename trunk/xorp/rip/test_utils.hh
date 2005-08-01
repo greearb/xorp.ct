@@ -12,15 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/test_utils.hh,v 1.4 2004/09/17 13:57:16 abittau Exp $
+// $XORP: xorp/rip/test_utils.hh,v 1.5 2005/03/25 02:54:30 pavlin Exp $
 
 #ifndef __RIP_TEST_UTILS_HH__
 #define __RIP_TEST_UTILS_HH__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <functional>
 #include <set>
 
-#include "config.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"

@@ -13,7 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "libxorp/xorp.h"
 
 // #define DEBUG_LOGGING

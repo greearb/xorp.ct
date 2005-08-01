@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.10 2005/02/12 08:09:09 pavlin Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.11 2005/03/25 02:54:30 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -38,6 +38,10 @@
 
 #include "rip/xrl_target_rip.hh"
 #include "rip/xrl_target_ripng.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 /**
  * @short Class specialized to determine correct type of XrlTarget for

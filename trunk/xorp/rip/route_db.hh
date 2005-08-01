@@ -13,12 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.18 2005/02/12 05:54:56 pavlin Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.19 2005/03/25 02:54:28 pavlin Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include <map>
 
 #include "libxorp/ref_ptr.hh"

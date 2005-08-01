@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.8 2005/02/12 08:09:11 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.9 2005/03/25 02:54:33 pavlin Exp $"
 
 #include <iomanip>
 
@@ -33,6 +33,10 @@
 #include "xrl/interfaces/ripng_xif.hh"
 
 #include "common.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 // ----------------------------------------------------------------------------
 // Forward declarations

@@ -13,12 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.3 2004/09/17 13:57:16 abittau Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.4 2005/03/25 02:54:31 pavlin Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <list>
 #include <string>

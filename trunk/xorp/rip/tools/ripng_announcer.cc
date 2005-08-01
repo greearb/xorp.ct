@@ -12,17 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.4 2004/09/02 02:39:20 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.5 2005/03/25 02:54:33 pavlin Exp $"
 
 #include "rip/rip_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
-#include <net/if.h>
-
 #include <vector>
 #include <fstream>
+
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
@@ -32,6 +34,10 @@
 
 #include "rip/auth.hh"
 #include "rip/packet_assembly.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 template <typename A>
 struct RipRoute {
@@ -191,6 +197,8 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
+    comm_init();
+
     try {
 	vector<RipRoute<IPv6> > my_routes;
 	const char* if_name = "";
@@ -201,15 +209,19 @@ main(int argc, char* const argv[])
 	uint16_t tag	= 0;
 	uint16_t cost	= 1;
 	IPv6	 nh;
+	int	 if_num = -1;
 
 	int ch;
-	while ((ch = getopt(argc, argv, "c:n:i:o:t:h")) != -1) {
+	while ((ch = getopt(argc, argv, "c:n:i:I:o:t:h")) != -1) {
 	    switch(ch) {
 	    case 'c':
 		cost = atoi(optarg);
 		break;
 	    case 'i':
 		if_name = optarg;
+		break;
+	    case 'I':
+		if_num = atoi(optarg);
 		break;
 	    case 'n':
 		nh = IPv6(optarg);
@@ -228,7 +240,9 @@ main(int argc, char* const argv[])
 	}
 
 	if (do_run) {
-	    int if_num = if_nametoindex(if_name);
+#ifdef HAVE_IF_NAMETOINDEX
+	    if_num = if_nametoindex(if_name);
+#endif
 	    if (if_num <= 0) {
 		cerr << "Must specify a valid interface name with -i."
 		     << endl;
@@ -247,6 +261,8 @@ main(int argc, char* const argv[])
     } catch (...) {
 	xorp_print_standard_exceptions();
     }
+
+    comm_exit();
 
     //
     // Gracefully stop and exit xlog

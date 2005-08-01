@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.8 2005/02/01 08:35:52 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_packets.cc,v 1.9 2005/03/25 02:54:30 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -23,6 +23,10 @@
 
 #include "packets.hh"
 #include "test_utils.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //

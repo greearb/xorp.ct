@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.4 2004/09/02 02:39:20 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.5 2005/03/25 02:54:33 pavlin Exp $"
 
 #include <vector>
 #include <fstream>
@@ -30,6 +30,10 @@
 
 #include "rip/auth.hh"
 #include "rip/packet_assembly.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 template <typename A>
 struct RipRoute {
@@ -181,6 +185,8 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
+    comm_init();
+
     try {
 	vector<RipRoute<IPv4> > my_routes;
 	IPv4	 if_addr;
@@ -243,6 +249,8 @@ main(int argc, char* const argv[])
     } catch (...) {
 	xorp_print_standard_exceptions();
     }
+
+    comm_exit();
 
     //
     // Gracefully stop and exit xlog

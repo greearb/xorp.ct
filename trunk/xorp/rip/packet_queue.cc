@@ -12,9 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/packet_queue.cc,v 1.5 2004/06/10 22:41:44 hodson Exp $"
+#ident "$XORP: xorp/rip/packet_queue.cc,v 1.6 2005/03/25 02:54:27 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "rip_module.h"
 
