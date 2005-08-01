@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/clock.hh,v 1.1 2004/10/06 20:32:53 pavlin Exp $
+// $XORP: xorp/libxorp/clock.hh,v 1.2 2005/03/25 02:53:39 pavlin Exp $
 
 #ifndef __LIBXORP_CLOCK_HH__
 #define __LIBXORP_CLOCK_HH__
@@ -40,8 +40,8 @@ public:
 };
 
 /**
- * An implementation of ClockBase that uses gettimeofday() as it's clock
- * source.
+ * An implementation of ClockBase that uses the underlying system's
+ * 'get current system time' function as it's clock source.
  */
 class SystemClock : public ClockBase {
 public:
