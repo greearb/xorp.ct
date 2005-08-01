@@ -12,15 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.15 2005/03/25 02:53:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.16 2005/07/15 06:48:26 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp_module.h"
 #include "xorp.h"
 
 #include <signal.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
