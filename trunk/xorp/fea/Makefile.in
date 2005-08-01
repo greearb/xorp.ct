@@ -105,7 +105,8 @@ check_PROGRAMS = test_ifmanager_transaction test_mfea test_rawsock4 test_xrl_soc
 check_SCRIPTS = test_xrl_sockets4_udp.sh test_add_route.sh test_config_interface.sh test_xrl_sockets4_udp.sh
 
 # -- Test Programs and Scripts
-TESTS = $(check_SCRIPTS) test_rawsock4$(EXEEXT) test_ifmanager_transaction$(EXEEXT)
+#TESTS			 = $(check_SCRIPTS)
+TESTS = test_xrl_sockets4_udp.sh test_rawsock4$(EXEEXT) test_ifmanager_transaction$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libfea.la
