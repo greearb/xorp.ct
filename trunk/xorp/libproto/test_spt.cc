@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.3 2005/03/25 02:53:25 pavlin Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.4 2005/05/12 00:08:13 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,6 +29,12 @@
 #include "libxorp/tokenize.hh"
 
 #include "spt.hh"
+template <>
+string
+Node<string>::str() const
+{
+    return _nodename;
+}
 
 /**
  * Utility routine to be used by tests to read in graphs from files.

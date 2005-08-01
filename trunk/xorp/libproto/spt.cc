@@ -12,12 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/spt.cc,v 1.4 2005/03/25 02:53:24 pavlin Exp $"
+#ident "$XORP: xorp/libproto/spt.cc,v 1.5 2005/05/12 00:08:13 atanu Exp $"
+
+// XXX
+//		THIS FILE IS NOW OBSOLETE
+// XXX
 
 // #define INCREMENTAL_SPT
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+
+#if	0
 
 #include "libxorp/xorp.h"
 #include "libproto_module.h"
@@ -27,6 +33,7 @@
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipv6net.hh"
+#include "ospf/vertex.hh"
 #include "spt.hh"
 
 template <typename A>
@@ -646,12 +653,11 @@ PriorityQueue<A>::pop()
 
     return n;
 }
-
 template class Node<string>;
 template class Spt<string>;
 
 template class Node<IPv4>;
-template class Spt<IPv4>;
+emplate class Spt<IPv4>;
 
 template class Node<IPv4Net>;
 template class Spt<IPv4Net>;
@@ -661,3 +667,7 @@ template class Spt<IPv6>;
 
 template class Node<IPv6Net>;
 template class Spt<IPv6Net>;
+
+template class Node<OspfVertex>;
+template class Spt<OspfVertex>;
+#endif
