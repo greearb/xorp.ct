@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.32 2005/07/23 01:22:13 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.33 2005/07/25 07:23:03 zec Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -320,6 +320,23 @@ private:
     IPv4Net* _default;
 };
 
+class IPv4RangeTemplate : public TemplateTreeNode {
+public:
+    IPv4RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+		    const string& path, const string& varname, 
+		    const string& initializer) throw (ParseError);
+    ~IPv4RangeTemplate();
+
+    string typestr() const { return string("IPv4Range"); }
+    TTNodeType type() const { return NODE_IPV4RANGE; }
+    IPv4Range default_value() const { return *_default; }
+    string default_str() const;
+    bool type_match(const string& s, string& errmsg) const;
+
+private:
+    IPv4Range* _default;
+};
+
 class IPv6Template : public TemplateTreeNode {
 public:
     IPv6Template(TemplateTree& template_tree, TemplateTreeNode* parent,
@@ -352,6 +369,23 @@ public:
 
 private:
     IPv6Net* _default;
+};
+
+class IPv6RangeTemplate : public TemplateTreeNode {
+public:
+    IPv6RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname, 
+		 const string& initializer) throw (ParseError);
+    ~IPv6RangeTemplate();
+
+    string typestr() const { return string("IPv6Range"); }
+    TTNodeType type() const { return NODE_IPV6RANGE; }
+    IPv6Range default_value() const { return *_default; }
+    string default_str() const;
+    bool type_match(const string& s, string& errmsg) const;
+
+private:
+    IPv6Range* _default;
 };
 
 class MacaddrTemplate : public TemplateTreeNode {

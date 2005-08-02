@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.22 2005/03/25 02:53:41 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.23 2005/07/29 20:06:31 bms Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -35,6 +35,7 @@
 
 #include "xorp.h"
 #include "exceptions.hh"
+#include "range.hh"
 
 struct in_addr;
 
@@ -266,6 +267,72 @@ public:
      * right-hand operand.
      */
     bool operator!=(const IPv4& other) const { return (_addr != other._addr); }
+
+    /**
+     * Equality Operator for @ref IPv4 against @ref IPv4Range operand.
+     *
+     * @param rhs the right-hand @ref IPv4Range operand.
+     * @return true if the value of the left-hand operand falls inside
+     * the range defined by the right-hand operand.
+     */
+    bool operator==(const IPv4Range& rhs) const {
+	return (_addr >= rhs.low().addr() && _addr <= rhs.high().addr());
+    }
+
+    /**
+     * Not-equal Operator for @ref IPv4 against @ref IPv4Range operand.
+     *
+     * @param rhs the right-hand @ref IPv4Range operand.
+     * @return true if the value of the left-hand operand falls outside
+     * the range defined by the right-hand operand.
+     */
+    bool operator!=(const IPv4Range& rhs) const {
+	return (_addr < rhs.low().addr() || _addr > rhs.high().addr());
+    }
+
+    /**
+     * Less-than comparison for @ref IPv4 against @ref IPv4Range operand.
+     *
+     * @param rhs the right-hand @ref IPv4Range operand.
+     * @return true if the value of the left-hand operand is bellow
+     * the range defined by the right-hand operand.
+     */
+    bool operator<(const IPv4Range& rhs) const {
+	return (_addr < rhs.low().addr());
+    }
+
+    /**
+     * Less-than or equal comparison for @ref IPv4 against @ref IPv4Range
+     *
+     * @param rhs the right-hand @ref IPv4Range operand.
+     * @return true if the value of the left-hand operand is bellow or within
+     * the range defined by the right-hand operand.
+     */
+    bool operator<=(const IPv4Range& rhs) const {
+	return (_addr <= rhs.high().addr());
+    }
+
+    /**
+     * Greater-than comparison for @ref IPv4 against @ref IPv4Range operand.
+     *
+     * @param rhs the right-hand @ref IPv4Range operand.
+     * @return true if the value of the left-hand operand is above
+     * the range defined by the right-hand operand.
+     */
+    bool operator>(const IPv4Range& rhs) const {
+	return (_addr > rhs.high().addr());
+    }
+
+    /**
+     * Greater-than or equal comparison for @ref IPv4 against @ref IPv4Range
+     *
+     * @param rhs the right-hand @ref IPv4Range operand.
+     * @return true if the value of the left-hand operand is above or within
+     * the range defined by the right-hand operand.
+     */
+    bool operator>=(const IPv4Range& rhs) const {
+	return (_addr >= rhs.low().addr());
+    }
 
     /**
      * Decrement Operator

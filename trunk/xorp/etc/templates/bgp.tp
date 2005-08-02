@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.49 2005/07/22 01:55:15 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.50 2005/07/27 07:00:33 zec Exp $ */
 
 protocols {
     bgp {
@@ -52,8 +52,8 @@ policy {
     policy-statement @: txt {
         term @: txt {
             source {
-		nexthop4: ipv4;
-		nexthop6: ipv6;
+		nexthop4: ipv4range;
+		nexthop6: ipv6range;
 
 		as-path: txt;
 		as-path-list: txt;
@@ -72,8 +72,8 @@ policy {
 		network4: ipv4net;
 		network6: ipv6net;
 	    
-		nexthop4: ipv4;
-		nexthop6: ipv6;
+		nexthop4: ipv4range;
+		nexthop6: ipv6range;
 
 		as-path: txt;
 		community: txt;
@@ -360,10 +360,12 @@ policy {
 
             source {
 		nexthop4 {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		nexthop6 {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
@@ -410,10 +412,12 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		network4 {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		network6 {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}

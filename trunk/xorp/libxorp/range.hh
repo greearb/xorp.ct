@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/range.hh,v 1.4 2005/07/25 22:16:51 pavlin Exp $
+// $XORP: xorp/libxorp/range.hh,v 1.5 2005/07/27 01:04:13 zec Exp $
 
 #ifndef __LIBXORP_RANGE_HH__
 #define __LIBXORP_RANGE_HH__
@@ -35,7 +35,7 @@ public:
     /**
      * Default constructor
      */
-    Range() 			{ _low = _high = 0; }
+    Range() 			{}
 
     /**
      * Constructor from a single value.
@@ -114,6 +114,7 @@ inline bool operator==(const uint32_t& lhs, const U32Range& rhs) {
     return (lhs >= rhs.low() && lhs <= rhs.high());
 }
 
+
 /**
  * Non-equality Operator for @ref uint32_t against @ref U32Range operand.
  *
@@ -187,7 +188,7 @@ public:
     /**
      * Default constructor
      */
-    IPvXRange()			{ Range<T>::_low = Range<T>::_high = 0; }
+    IPvXRange()			{}
 
     /**
      * Constructor from a string.

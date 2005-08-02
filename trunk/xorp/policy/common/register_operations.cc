@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.10 2005/07/27 00:19:43 zec Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.11 2005/07/27 07:04:52 zec Exp $"
 
 #include "config.h"
 #include "register_operations.hh"
@@ -326,7 +326,9 @@ do {                                                                    \
 
     // IPV4
     ADD_EQOP(ElemIPv4);
+    ADD_EQOP2(ElemIPv4,ElemIPv4Range);
     ADD_RELOP(ElemIPv4);
+    ADD_RELOP2(ElemIPv4,ElemIPv4Range);
 //    ADD_SETBINOP(ElemIPv4);
    
     // IPV4NET
@@ -338,7 +340,9 @@ do {                                                                    \
    
     // IPV6
     ADD_EQOP(ElemIPv6);
+    ADD_EQOP2(ElemIPv6,ElemIPv6Range);
     ADD_RELOP(ElemIPv6);
+    ADD_RELOP2(ElemIPv6,ElemIPv6Range);
 //    ADD_SETBINOP(ElemIPv6);
    
     // IPV6NET

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.53 2005/07/23 01:22:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.54 2005/07/25 07:23:03 zec Exp $"
 
 
 #include <glob.h>
@@ -1295,6 +1295,64 @@ IPv4NetTemplate::type_match(const string& s, string& errmsg) const
 
 
 /**************************************************************************
+ * IPv4RangeTemplate
+ **************************************************************************/
+
+IPv4RangeTemplate::IPv4RangeTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
+				 const string& path, const string& varname,
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
+{
+    if (! initializer.empty()) {
+	try {
+	    _default = new IPv4Range(initializer.c_str());
+	} catch (InvalidString) {
+	    string err = "Bad IPv4Range type value: " + initializer;
+	    xorp_throw(ParseError, err);
+	}
+	set_has_default();
+    }
+}
+
+IPv4RangeTemplate::~IPv4RangeTemplate()
+{
+    if (_default != NULL)
+	delete _default;
+}
+
+string
+IPv4RangeTemplate::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
+}
+
+bool
+IPv4RangeTemplate::type_match(const string& s, string& errmsg) const
+{
+    string tmp = strip_quotes(s);
+
+    if (tmp.empty()) {
+	errmsg = "Invalid format.";
+	return false;
+    }
+
+    try {
+	IPv4Range* ipv4range = new IPv4Range(tmp.c_str());
+	delete ipv4range;
+    } catch (InvalidString) {
+	errmsg = "Invalid format.";
+	return false;
+    }
+    return true;
+}
+
+
+/**************************************************************************
  * IPv6Template
  **************************************************************************/
 
@@ -1412,6 +1470,64 @@ IPv6NetTemplate::type_match(const string& s, string& errmsg) const
     } catch (InvalidNetmaskLength) {
 	errmsg = c_format("Prefix length must be an integer between 0 and %u.",
 			  IPv6::addr_bitlen());
+	return false;
+    }
+    return true;
+}
+
+
+/**************************************************************************
+ * IPv6RangeTemplate
+ **************************************************************************/
+
+IPv6RangeTemplate::IPv6RangeTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
+				 const string& path, const string& varname,
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
+{
+    if (! initializer.empty()) {
+	try {
+	    _default = new IPv6Range(initializer.c_str());
+	} catch (InvalidString) {
+	    string err = "Bad IPv6Range type value: " + initializer;
+	    xorp_throw(ParseError, err);
+	}
+	set_has_default();
+    }
+}
+
+IPv6RangeTemplate::~IPv6RangeTemplate()
+{
+    if (_default != NULL)
+	delete _default;
+}
+
+string
+IPv6RangeTemplate::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
+}
+
+bool
+IPv6RangeTemplate::type_match(const string& s, string& errmsg) const
+{
+    string tmp = strip_quotes(s);
+
+    if (tmp.empty()) {
+	errmsg = "Invalid format.";
+	return false;
+    }
+
+    try {
+	IPv6Range* ipv6range = new IPv6Range(tmp.c_str());
+	delete ipv6range;
+    } catch (InvalidString) {
+	errmsg = "Invalid format.";
 	return false;
     }
     return true;
