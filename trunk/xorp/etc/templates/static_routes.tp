@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.20 2005/07/15 23:37:30 abittau Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.21 2005/07/27 07:00:33 zec Exp $ */
 
 protocols {
     static {
@@ -61,7 +61,7 @@ protocols {
 policy {
     policy-statement @: txt {
         term @: txt {
-            source {
+            from {
 		metric: u32range;
 	    }
 	}
@@ -321,7 +321,7 @@ policy {
 
     policy-statement @: txt {
 	term @: txt {
-	    source {
+	    from {
 		metric {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";

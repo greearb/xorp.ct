@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.51 2005/08/02 20:52:14 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.52 2005/08/03 13:12:03 zec Exp $ */
 
 protocols {
     bgp {
@@ -51,7 +51,7 @@ protocols {
 policy {
     policy-statement @: txt {
         term @: txt {
-            source {
+            from {
 		nexthop4: ipv4range;
 		nexthop6: ipv6range;
 
@@ -66,7 +66,7 @@ policy {
 		med: u32range;
 		localpref: u32range;
             }
-	    dest {
+	    to {
 		protocol: txt;
 
 		network4: ipv4net;
@@ -84,7 +84,7 @@ policy {
 		med: u32range;
 		localpref: u32range;
 	    }
-	    action {
+	    then {
 		nexthop4: ipv4;
 		nexthop6: ipv6;
 
@@ -358,7 +358,7 @@ policy {
     policy-statement @: txt {
         term @: txt {
 
-            source {
+            from {
 		nexthop4 {
 			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
@@ -405,9 +405,9 @@ policy {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
-            } /* source */
+            } /* from */
 
-	    dest {
+	    to {
 		protocol {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=protocol $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
@@ -457,9 +457,9 @@ policy {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
-	    } /* dest */
+	    } /* to */
 
-	    action {
+	    then {
 		nexthop4 {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
@@ -500,7 +500,7 @@ policy {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
-	    } /* action */
+	    } /* then */
 
         } /* term */
     } /* policy statement */
