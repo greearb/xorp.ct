@@ -368,14 +368,22 @@ class AreaRouter {
     bool self_originated(Lsa::LsaRef lsar, bool match, size_t index);
 
     /**
+     * Create a vertex for this router.
+     */
+    void RouterVertex(Vertex& v);
+
+    /**
      * Prepare for routing changes.
      */
     void routing_begin();
 
     /**
      * Add this LSA to the routing computation.
+     *
+     * @param lsar LSA to be added to the database.
+     * @param known true if this LSA is already in the database.
      */
-    void routing_add(Lsa::LsaRef lsar);
+    void routing_add(Lsa::LsaRef lsar, bool known);
 
     /**
      * Remove this LSA from the routing computation.

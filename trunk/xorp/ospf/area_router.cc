@@ -82,6 +82,12 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     add_lsa(_router_lsa);
 //     _db.push_back(_router_lsa);
 //     _last_entry = 1;
+
+    // Add this router to the SPT table.
+    Vertex v;
+    RouterVertex(v);
+    _spt.add_node(v);
+    _spt.set_origin(v);
 }
 
 template <typename A>
@@ -324,7 +330,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    else
 		update_lsa((*i), index);
 
-	    routing_add(*i);
+	    routing_add(*i, NOMATCH != search);
 	    
 	    // (e) Possibly acknowledge this LSA.
 	    // RFC 2328 Section 13.5 Sending Link State Acknowledgment Packets
@@ -878,6 +884,15 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 
 template <typename A>
 void
+AreaRouter<A>::RouterVertex(Vertex& v)
+{
+    v.set_version(_ospf.get_version());
+    v.set_type(Vertex::Router);
+    v.set_nodeid(ntohl(_ospf.get_router_id().addr()));
+}
+
+template <typename A>
+void
 AreaRouter<A>::routing_begin()
 {
 #ifdef  PARANOIA
@@ -889,14 +904,21 @@ AreaRouter<A>::routing_begin()
 
 template <typename A>
 void
-AreaRouter<A>::routing_add(Lsa::LsaRef lsar)
+AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool /*known*/)
 {
     //  RFC 2328 Section  13.2. Installing LSAs in the database
 
     debug_msg("%s\n", lsar->str().c_str());
 
     RouterLsa *rlsa;
-    if (0 == (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+    if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+	Vertex v;
+
+	v.set_version(_ospf.get_version());
+	v.set_type(Vertex::Router);
+	v.set_nodeid(ntohl(_ospf.get_router_id().addr()));
+
+	
 	list<RouterLink> &rl = rlsa->get_router_links();
 	list<RouterLink>::const_iterator i = rl.begin();
 	for(; i != rl.end(); i++) {
@@ -922,6 +944,21 @@ template <typename A>
 void
 AreaRouter<A>::routing_end()
 {
+    // XXX
+    // The edges from this router are not being tracked. So deleting
+    // and adding back this routers vertex fill remove all the edges.
+    // 1) When an interface changes state operate on the router vertex
+    // immediately.
+    // 2) Add a method to the spt code to remove all edges from a
+    // node.
+
+//     Vertex v;
+//     RouterVertex(v);
+//     _spt.remove_node(v);
+
+    // Put back this routers interfaces.
+    routing_add(_router_lsa, true);
+
     list<RouteCmd<Vertex> > r;
     _spt.compute(r);
 }
