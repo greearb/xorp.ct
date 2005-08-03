@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.50 2005/07/27 07:00:33 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.51 2005/08/02 20:52:14 zec Exp $ */
 
 protocols {
     bgp {
@@ -60,7 +60,7 @@ policy {
 		community: txt;
 		community-list: txt;
 
-		neighbor: ipv4;
+		neighbor: ipv4range;
 	    
 		origin: u32;
 		med: u32range;
@@ -78,7 +78,7 @@ policy {
 		as-path: txt;
 		community: txt;
 
-		neighbor: ipv4;
+		neighbor: ipv4range;
 	    
 		origin: u32;
 		med: u32range;
@@ -387,6 +387,7 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		neighbor {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=neighbor $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
@@ -438,6 +439,7 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		neighbor {
+			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=neighbor $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
