@@ -28,6 +28,19 @@
 #include <getopt.h>
 #endif
 
+#ifdef HOST_OS_WINDOWS
+#ifndef MSYS_ROOT
+#define MSYS_ROOT	"D:\\MSYS"
+#endif
+#define SLEEP_PATH	MSYS_ROOT "\\bin\\sleep.exe"
+#define AWK_PATH	MSYS_ROOT "\\bin\\gawk.exe"
+#else
+#define SLEEP_PATH	"/bin/sleep"
+#define AWK_PATH	"/usr/bin/awk"
+#endif
+
+#define SLEEP_ARGS	"10000"
+
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM
 //
@@ -273,7 +286,7 @@ test_execute_invalid_arguments()
     // Try to start an invalid command.
     //
     RunCommand run_command(eventloop,
-			   "/bin/sleep",
+			   SLEEP_PATH,
 			   "-no-such-flags -more-bogus-flags",
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -325,8 +338,8 @@ test_execute_terminate_command()
     // Start a sleep(1) command that should not terminate anytime soon
     //
     RunCommand run_command(eventloop,
-			   "/bin/sleep",
-			   "10000",
+			   SLEEP_PATH,
+			   SLEEP_ARGS,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
@@ -405,7 +418,7 @@ test_command_stdout_reading()
 			   stdout_msg_in.c_str());
 
     RunCommand run_command(eventloop,
-			   "/usr/bin/awk",
+			   AWK_PATH,
 			   args,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -481,7 +494,7 @@ test_command_stderr_reading()
 			   stderr_msg_in.c_str());
 
     RunCommand run_command(eventloop,
-			   "/usr/bin/awk",
+			   AWK_PATH,
 			   args,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -554,7 +567,7 @@ test_command_termination_failure()
 			   stdout_msg_in.c_str());
 
     RunCommand run_command(eventloop,
-			   "/usr/bin/awk",
+			   AWK_PATH,
 			   args,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
