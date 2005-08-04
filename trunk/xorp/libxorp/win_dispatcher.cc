@@ -548,11 +548,13 @@ WinDispatcher::wait_and_dispatch(int ms)
 	if (lasterr == ERROR_INVALID_HANDLE && !_handles.empty()) {
 	    // There's a bad handle in the handles vector. Find it.
 	    DWORD dwFlags;
-	    for (vector<HANDLE>::reverse_iterator kk = _handles.rbegin();
-		 kk != _handles.rend(); ++kk) {
+	    vector<HANDLE>::iterator kk = _handles.begin();
+	    while (kk != _handles.end()) {
 		if (GetHandleInformation(*kk, &dwFlags) == 0) {
-		    XLOG_ERROR("handle %p is bad, removing it.\n", *kk);
+		    XLOG_ERROR("handle %p is bad, removing it.", *kk);
 		    kk = _handles.erase(kk);
+		} else {
+		    ++kk;
 		}
 	    }
 	} else {
