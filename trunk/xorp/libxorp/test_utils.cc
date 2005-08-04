@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_utils.cc,v 1.2 2005/07/06 00:11:19 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_utils.cc,v 1.3 2005/07/29 20:06:33 bms Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -154,7 +154,11 @@ test_xorp_make_temporary_file()
     if (fp != NULL) {
 	// Close and unlink the temporary file
 	fclose(fp);
+#ifdef HOST_OS_WINDOWS
+	DeleteFileA(final_filename.c_str());
+#else
 	unlink(final_filename.c_str());
+#endif
     }
 }
 
