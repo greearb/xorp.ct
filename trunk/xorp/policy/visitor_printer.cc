@@ -13,10 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_printer.cc,v 1.1 2005/07/01 22:54:35 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_printer.cc,v 1.2 2005/07/15 02:27:07 abittau Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "policy_module.h"
-#include "config.h"
 #include "visitor_printer.hh"
 
 VisitorPrinter::VisitorPrinter(ostream& out) : _out(out)

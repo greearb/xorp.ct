@@ -3,6 +3,10 @@
 // policy and what it should look like, it needs a re-write.
 #include "config.h"
 #include "policy/test/compilepolicy.hh"
+#ifdef HOST_OS_WINDOWS		/* XXX: lame */
+#define strdup _strdup
+#endif
+
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
 #include <sstream>

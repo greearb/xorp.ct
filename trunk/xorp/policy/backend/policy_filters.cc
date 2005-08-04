@@ -12,9 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.3 2005/07/08 02:06:22 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.4 2005/07/20 01:29:23 abittau Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "policy_filters.hh"
 
 PolicyFilters::PolicyFilters()

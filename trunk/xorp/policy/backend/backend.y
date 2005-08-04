@@ -4,6 +4,9 @@
  */
 
 #include "config.h"
+
+#include "libxorp/xorp.h"
+
 #include "policy_backend_parser.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"

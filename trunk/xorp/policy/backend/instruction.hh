@@ -13,10 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instruction.hh,v 1.2 2005/03/25 02:54:12 pavlin Exp $
+// $XORP: xorp/policy/backend/instruction.hh,v 1.3 2005/07/15 02:27:08 abittau Exp $
 
 #ifndef __POLICY_BACKEND_INSTRUCTION_HH__
 #define __POLICY_BACKEND_INSTRUCTION_HH__
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "policy/common/element_base.hh"
 #include "policy/common/operator_base.hh"
@@ -24,7 +28,14 @@
 #include "instr_visitor.hh"
 #include "instruction_base.hh"
 #include <string>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if defined(HAVE_REGEX_H)
+#include <regex.h>
+#elif defined(HAVE_PCREPOSIX_H)
+#include <pcreposix.h>
+#endif
 
 /**
  * @short Push operation. Pushes a single element on the stack.

@@ -12,9 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_redist_map.cc,v 1.1 2004/09/17 13:48:56 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_redist_map.cc,v 1.2 2005/03/25 02:54:13 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "policy_redist_map.hh"
 #include "policy/common/policy_utils.hh"
 

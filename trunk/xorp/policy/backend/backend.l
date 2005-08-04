@@ -1,6 +1,9 @@
 %{
 
 #include "config.h"
+
+#include "libxorp/xorp.h"
+
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
 #include "yacc.yy_policy_backend_parser.cc.h"

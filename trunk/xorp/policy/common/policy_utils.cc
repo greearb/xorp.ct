@@ -13,14 +13,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.5 2005/07/15 02:27:09 abittau Exp $"
+#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.6 2005/07/15 17:03:40 abittau Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "policy_utils.hh"
+
 #include <errno.h>
 #include <stdio.h>
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+
+#if defined(HAVE_REGEX_H)
 #include <regex.h>
+#elif defined(HAVE_PCREPOSIX_H)
+#include <pcreposix.h>
+#else
+#error "No header defining regex_t is present."
+#endif
 
 namespace policy_utils {
 

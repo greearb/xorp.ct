@@ -51,7 +51,10 @@ static int yygrowstack();
  * yacc -d -p yy_policy_backend_parser -o yacc.yy_policy_backend_parser.cc backend.y
  */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "policy_backend_parser.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"

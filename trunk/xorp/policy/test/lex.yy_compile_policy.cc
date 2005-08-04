@@ -23,6 +23,15 @@
  * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.8 2004/01/06 19:03:44 nectar Exp $
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HOST_OS_WINDOWS		/* XXX: lame */
+#define strdup _strdup
+#endif
+
+
 #if defined(__FreeBSD__)
 #include <sys/cdefs.h>
 #else
@@ -1526,9 +1535,9 @@ char *yytext;
 #line 1 "compilepolicy.l"
 #define INITIAL 0
 #line 2 "compilepolicy.l"
-// XXX: this whole parsing is becoming a mess... Once we finalize how to test
-// policy and what it should look like, it needs a re-write.
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "policy/test/compilepolicy.hh"
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
@@ -2542,7 +2551,13 @@ FILE *file;
 #if YY_NEVER_INTERACTIVE
 	b->yy_is_interactive = 0;
 #else
+
+#ifdef HOST_OS_WINDOWS
+	b->yy_is_interactive = file ? (_isatty(_fileno(file) ) > 0) : 0;
+#else
 	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+#endif
+
 #endif
 #endif
 	}

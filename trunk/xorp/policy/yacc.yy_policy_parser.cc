@@ -56,7 +56,11 @@ static int yygrowstack();
  * yyrcsid
  */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include "libxorp/xorp.h"
 #include "policy/common/element.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"

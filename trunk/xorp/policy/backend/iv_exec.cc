@@ -13,9 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.3 2005/07/08 02:06:22 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.4 2005/07/15 02:27:08 abittau Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "iv_exec.hh"
 #include "policy/common/policy_utils.hh"
 #include "policy/common/elem_null.hh"

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.2 2005/03/25 02:54:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.3 2005/07/08 02:06:23 abittau Exp $"
 
 /*
  * EXIT CODES:
@@ -24,11 +24,19 @@
  *
  */
 
-#include "policy/policy_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-#include <sys/time.h>
+#endif
+
+#include "policy/policy_module.h"
+
 #include <string>
 #include <iostream>
+
+#include "libxorp/xorp.h"
+#include "libxorp/timeval.hh"
+#include "libxorp/timer.hh"
+
 #include "policy/backend/policy_filter.hh"
 #include "policy/common/policy_utils.hh"
 #include "libxorp/xlog.h"
@@ -47,17 +55,13 @@ int main(int argc, char *argv[]) {
 
     bool accepted = true;
 
-    struct timeval tv_start;
+    TimeVal start;
+    TimerList::system_gettimeofday(&start);
 
     xlog_init(argv[0], 0);
     xlog_set_verbose(XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-
-    if(gettimeofday(&tv_start,NULL)) {
-	perror("gettimeofday()");
-	exit(3);
-    }
 
 try {
     read_file(argv[1],conf);
@@ -91,19 +95,11 @@ try {
     exit(2);
 }
 
-    struct timeval tv_end;
+    TimeVal elapsed;
+    TimerList::system_gettimeofday(&elapsed);
+    elapsed -= start;
 
-    if(gettimeofday(&tv_end,NULL)) {
-	perror("gettimeofday()");
-	exit(3);
-    }
-
-    long usec = tv_end.tv_usec - tv_start.tv_usec;
-    long sec = tv_end.tv_sec - tv_start.tv_sec;
-
-    double speed = ((double)usec/1000) + ((double)sec*1000);
-
-    printf("Execution successful in %.3f milliseconds\n",speed);
+    printf("Execution successful in %d milliseconds\n", elapsed.to_ms());
 
     xlog_stop();
     xlog_exit();

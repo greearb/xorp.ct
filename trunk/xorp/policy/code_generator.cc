@@ -13,11 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.4 2005/07/08 02:06:21 abittau Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.5 2005/07/15 02:27:06 abittau Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "policy_module.h"
-#include "config.h"
-
 #include "code_generator.hh"    
     
 CodeGenerator::CodeGenerator()

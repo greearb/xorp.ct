@@ -12,10 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.4 2005/07/09 00:32:45 abittau Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "policy_module.h"
-#include "config.h"
 #include "policy_statement.hh"   
 #include "policy/common/policy_utils.hh"
 

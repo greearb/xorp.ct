@@ -1,6 +1,8 @@
 %{
 
 #include "config.h"
+#include "libxorp/xorp.h"
+
 #include "policy/common/policy_utils.hh"
 #include <vector>
 #include <string>

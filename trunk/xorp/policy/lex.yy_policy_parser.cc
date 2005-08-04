@@ -23,6 +23,8 @@
  * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.4 1999/10/27 07:56:44 obrien Exp $
  */
 
+#include "libxorp/xorp.h"
+
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
@@ -2419,7 +2421,9 @@ char *yytext;
 #define INITIAL 0
 #line 2 "policy.l"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "policy/common/policy_utils.hh"
 #include <vector>
 #include <string>
@@ -3537,7 +3541,13 @@ FILE *file;
 #if YY_NEVER_INTERACTIVE
 	b->yy_is_interactive = 0;
 #else
+
+#ifdef HOST_OS_WINDOWS
+	b->yy_is_interactive = file ? (_isatty(_fileno(file) ) > 0) : 0;
+#else
 	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+#endif
+
 #endif
 #endif
 	}

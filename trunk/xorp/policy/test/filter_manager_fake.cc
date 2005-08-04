@@ -12,9 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/filter_manager_fake.cc,v 1.1 2004/09/17 13:49:01 abittau Exp $"
+#ident "$XORP: xorp/policy/test/filter_manager_fake.cc,v 1.2 2005/03/25 02:54:18 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "filter_manager_fake.hh"
 #include <iostream>

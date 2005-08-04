@@ -13,9 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.11 2005/07/27 07:04:52 zec Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.12 2005/08/02 20:52:15 zec Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "register_operations.hh"
 #include "dispatcher.hh"
 #include "element.hh"

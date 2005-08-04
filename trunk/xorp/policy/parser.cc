@@ -13,10 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/parser.cc,v 1.2 2005/03/25 02:54:07 pavlin Exp $"
+#ident "$XORP: xorp/policy/parser.cc,v 1.3 2005/07/12 00:47:51 abittau Exp $"
 
-#include "policy_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+#include "policy_module.h"
 #include "parser.hh"
 #include "policy_parser.hh"
 #include "policy/common/policy_utils.hh"

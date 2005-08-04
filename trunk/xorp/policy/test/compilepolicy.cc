@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.3 2005/03/25 02:54:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.4 2005/07/01 22:54:37 abittau Exp $"
 
 /*
  * EXIT CODES:
@@ -29,7 +29,9 @@
  */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "policy/common/policy_utils.hh"
 #include "policy/configuration.hh"
@@ -40,7 +42,13 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 using namespace policy_utils;
 
@@ -347,13 +355,9 @@ int main(int argc, char *argv[]) {
 	cout << "No source file specified for mapping of policy variables\n\n";
 	usage(argv[0]);
     }
-    
-    struct timeval tv_start;
-    
-    if(gettimeofday(&tv_start,NULL) < 0) {
-	perror("gettimeofday()");
-	exit(4);
-    }
+   
+    TimeVal start;
+    TimerList::system_gettimeofday(&start); 
 
     try {
 	go(source_file,policy_var_map_file,filterid,protocol);
@@ -363,27 +367,19 @@ int main(int argc, char *argv[]) {
 	exit(1);
     }
 
-    struct timeval tv_end;
-    if(gettimeofday(&tv_end,NULL) < 0) {
-	perror("gettimeofday()");
-	exit(4);
-    }
+    TimeVal elapsed;
+    TimerList::system_gettimeofday(&elapsed);
+    elapsed -= start; 
 
     if(code_out) {
 	code_out->close();
 	delete code_out;
     }	
 
-
     xlog_stop();
     xlog_exit();
 
-    long usec = tv_end.tv_usec - tv_start.tv_usec;
-    long sec = tv_end.tv_sec - tv_start.tv_sec;
-
-    double speed = ((double)usec/1000) + ((double)sec*1000);
-
-    printf("Compile successful in %.3f milliseconds\n",speed);
+    printf("Compile successful in %d milliseconds\n", elapsed.to_ms());
 
     exit(0);
 }

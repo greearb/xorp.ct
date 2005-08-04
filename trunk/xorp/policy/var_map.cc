@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.4 2005/07/08 02:06:21 abittau Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.5 2005/07/15 02:27:07 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "policy_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+#include "policy_module.h"
 #include "libxorp/debug.h"
 #include "var_map.hh"
 #include "policy/common/policy_utils.hh"

@@ -51,7 +51,10 @@ static int yygrowstack();
  * yacc -d -p yy_compile_policy -o yacc.yy_compile_policy.cc compilepolicy.y
  */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include <vector>
 #include <string>
 #include <list>

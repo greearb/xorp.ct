@@ -23,6 +23,8 @@
  * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.8 2004/01/06 19:03:44 nectar Exp $
  */
 
+#include "libxorp/xorp.h"
+
 #if defined(__FreeBSD__)
 #include <sys/cdefs.h>
 #else
@@ -470,7 +472,10 @@ char *yytext;
 #define INITIAL 0
 #line 2 "backend.l"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
 #include "yacc.yy_policy_backend_parser.cc.h"
@@ -1516,7 +1521,13 @@ FILE *file;
 #if YY_NEVER_INTERACTIVE
 	b->yy_is_interactive = 0;
 #else
+
+#ifdef HOST_OS_WINDOWS
+	b->yy_is_interactive = file ? (_isatty(_fileno(file) ) > 0) : 0;
+#else
 	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+#endif
+
 #endif
 #endif
 	}
