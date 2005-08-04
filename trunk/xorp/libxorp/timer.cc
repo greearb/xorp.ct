@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.22 2005/05/27 20:01:01 atanu Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.23 2005/05/27 22:17:24 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -206,10 +206,20 @@ TimerList::TimerList(ClockBase* clock)
 {
     assert(the_timerlist == NULL);
     the_timerlist = this;
+#ifdef HOST_OS_WINDOWS
+    //timeBeginPeriod(1);	// requires WINMM.DLL
+    _hirestimer = CreateWaitableTimer(NULL, TRUE, NULL);
+    assert(_hirestimer != NULL);
+#endif
 }
 
 TimerList::~TimerList()
 {
+#ifdef HOST_OS_WINDOWS
+    if (_hirestimer != NULL)
+	CloseHandle(_hirestimer);
+    //timeEndPeriod(1);
+#endif
     the_timerlist = NULL;
 }
 
@@ -239,15 +249,31 @@ TimerList::system_gettimeofday(TimeVal* tv)
     instance->current_time(*tv);
 }
 
+/*
+ * Call the underlying system's 'alertable wait' function.
+ */
 void
 TimerList::system_sleep(const TimeVal& tv)
 {
     TimerList* instance = TimerList::instance();
-
+#ifdef HOST_OS_WINDOWS
+    DWORD ms = tv.to_ms();
+    if (ms == 0 || ms > 10) {
+	SleepEx(ms, TRUE);
+    } else {
+	FILETIME ft;
+	tv.copy_out(ft);
+	assert(instance->_hirestimer != NULL);
+	SetWaitableTimer(instance->_hirestimer, (LARGE_INTEGER *)&ft, 0,
+			 NULL, NULL, FALSE);
+	WaitForSingleObjectEx(instance->_hirestimer, 0, TRUE);
+    }
+#else /* !HOST_OS_WINDOWS */
     if (tv.sec() > 0)
 	sleep(tv.sec());
     if (tv.usec() > 0)
 	usleep(tv.usec());
+#endif /* HOST_OS_WINDOWS */
 
     instance->advance_time();
 }

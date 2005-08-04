@@ -350,7 +350,8 @@ public:
      * Default time querier.
      *
      * Get the current time.  This method is analogous to calling
-     * gettimeofday(2) and is implemented as a call to advance_time()
+     * the underlying operating system's 'get current system time'
+     * function and is implemented as a call to advance_time()
      * followed by a call to current_time().
      *
      * @param tv a pointer to the @ref TimeVal storage to store the current
@@ -403,6 +404,9 @@ private:
 private:
     ClockBase* 			_clock;
     TimerListObserverBase* 	_observer;
+#ifdef HOST_OS_WINDOWS
+    HANDLE			_hirestimer;
+#endif
 
     friend class TimerNode;
     friend class TimerListObserverBase;
