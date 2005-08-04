@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.15 2005/03/25 02:53:26 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.16 2005/07/29 20:00:14 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -106,10 +106,12 @@ valid_interface(const IPv4& addr)
 void
 finder_sig_handler(int s)
 {
-    if (s == SIGHUP) {
-	fprintf(stderr, "SIGHUP received. Exiting.\n");
-    } else if (s == SIGINT) {
+    if (s == SIGINT) {
 	fprintf(stderr, "SIGINT received. Exiting.\n");
+#ifdef SIGHUP
+    } else if (s == SIGHUP) {
+	fprintf(stderr, "SIGHUP received. Exiting.\n");
+#endif
     } else if (s == SIGTERM) {
 	fprintf(stderr, "SIGTERM received. Exiting.\n");
     } else {
@@ -125,11 +127,14 @@ finder_main(int argc, char* const argv[])
     list<IPv4>  bind_addrs;
     uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
 
+#ifdef SIGHUP
     signal(SIGHUP, finder_sig_handler);
+#endif
     signal(SIGINT, finder_sig_handler);
     signal(SIGTERM, finder_sig_handler);
-
+#ifdef SIGPIPE
     signal(SIGPIPE, finder_sig_handler);
+#endif
 
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
@@ -253,7 +258,13 @@ main(int argc, char * const argv[])
     xlog_add_default_output();
     xlog_start();
 
+    // Initialize comm library.
+    comm_init();
+
     finder_main(argc, argv);
+
+    // Cleanup comm library.
+    comm_exit();
 
     //
     // Gracefully stop and exit xlog
