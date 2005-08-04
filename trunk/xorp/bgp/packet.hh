@@ -12,24 +12,40 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.30 2004/12/18 03:37:58 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.31 2005/03/25 02:52:42 pavlin Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include "libxorp/xorp.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#include <inttypes.h>
 
 #include <iostream>
 
 #include <string.h>
 #include <stdio.h>
-#include <inttypes.h>
-#include <stdlib.h> 
-#include <sys/types.h>
-#include <sys/uio.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "exceptions.hh"
 #include "parameter.hh"

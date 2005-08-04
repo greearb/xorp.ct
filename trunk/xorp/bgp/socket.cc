@@ -12,20 +12,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.28 2005/05/11 07:28:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.29 2005/05/13 16:24:35 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
 
 #include "bgp_module.h"
 
-#include "config.h"
-#include "libxorp/debug.h"
 #include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/callback.hh"
 #include "libcomm/comm_api.h"
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "socket.hh"
 #include "packet.hh"

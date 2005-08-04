@@ -12,14 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.30 2005/03/19 16:55:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.31 2005/03/25 02:52:48 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "bgp_module.h"
-#include "config.h"
-#include <pwd.h>
+
+#include "libxorp/xorp.h"
 #include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
+
+#include "libcomm/comm_api.h"
 
 #include "bgp.hh"
 #include "route_table_base.hh"
@@ -30,14 +37,28 @@
 #include "local_data.hh"
 #include "dummy_next_hop_resolver.hh"
 
+#ifndef HOST_OS_WINDOWS
+#include <pwd.h>
+#endif
+
 bool
 test_decision(TestInfo& /*info*/)
 {
+#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_decision.";
     filename += pwd->pw_name;
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_decision";
+    free(tmppath);
+#endif
+
     BGPMain bgpmain;
     LocalData localdata;
+
+    comm_init();
 
     Iptuple iptuple1("3.0.0.127", 179, "2.0.0.1", 179);
     BGPPeerData *peer_data1 =
@@ -2693,7 +2714,11 @@ test_decision(TestInfo& /*info*/)
 	return false;
 
     }
+#ifndef HOST_OS_WINDOWS
     unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
     return true;
 }
 

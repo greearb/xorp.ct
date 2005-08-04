@@ -12,17 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_peer.hh,v 1.9 2004/12/05 22:23:54 atanu Exp $
+// $XORP: xorp/bgp/tools/print_peer.hh,v 1.10 2005/03/25 02:52:55 pavlin Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
 
-#include "bgptools_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include "bgptools_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xrl_args.hh"
+
 #include "xrl/interfaces/bgp_xif.hh"
 
 class PrintPeers : public XrlBgpV0p2Client {

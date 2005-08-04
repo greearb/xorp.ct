@@ -12,9 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peers.cc,v 1.3 2004/06/10 22:40:41 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peers.cc,v 1.4 2005/03/25 02:52:55 pavlin Exp $"
 
 #include "print_peer.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 
 void usage()

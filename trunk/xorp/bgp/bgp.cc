@@ -13,19 +13,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.51 2005/05/10 15:23:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.52 2005/05/11 07:28:51 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include <sys/time.h>
-
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+
+#include "libcomm/comm_api.h"
 
 #include "bgp.hh"
 #include "path_attribute.hh"

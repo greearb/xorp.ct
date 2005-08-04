@@ -12,12 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.44 2005/03/19 16:01:41 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.45 2005/03/25 02:52:49 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "bgp_module.h"
-#include "config.h"
-#include <pwd.h>
+
+#include "libxorp/xorp.h"
 #include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
 
@@ -29,6 +34,10 @@
 #include "path_attribute.hh"
 #include "local_data.hh"
 #include "dummy_next_hop_resolver.hh"
+
+#ifndef HOST_OS_WINDOWS
+#include <pwd.h>
+#endif
 
 bool
 test_dump_create(TestInfo& /*info*/)
@@ -46,9 +55,18 @@ bool
 test_dump(TestInfo& /*info*/)
 {
     //stuff needed to create an eventloop
+#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_dump.";
     filename += pwd->pw_name;
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_dump";
+    free(tmppath);
+#endif
+
+
     BGPMain bgpmain;
     LocalData localdata;
 
@@ -2545,7 +2563,11 @@ test_dump(TestInfo& /*info*/)
 	return false;
 	
     }
+#ifndef HOST_OS_WINDOWS
     unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
     return true;
 }
 

@@ -12,12 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.33 2005/07/08 02:06:18 abittau Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.34 2005/07/13 21:58:37 abittau Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "libxorp/xorp.h"
 
 #include <unistd.h>

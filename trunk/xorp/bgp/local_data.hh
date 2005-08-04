@@ -12,12 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.7 2004/06/10 22:40:30 hodson Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.8 2005/03/25 02:52:40 pavlin Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "bgp_module.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipv4.hh"

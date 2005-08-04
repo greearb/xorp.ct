@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.13 2005/03/25 02:52:50 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.14 2005/06/21 00:15:36 pavlin Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -367,7 +367,9 @@ int main(int /* argc */, char *argv[])
 
     try {
 	// The BGP constructor expects to use the finder, so start one.
+#ifndef HOST_OS_WINDOWS
 	pid_t pid;
+
 	switch(pid = fork()) {
 	case 0:
 	    execlp("../libxipc/xorp_finder", "xorp_finder", static_cast<char *>(NULL));
@@ -377,6 +379,16 @@ int main(int /* argc */, char *argv[])
 	default:
 	    break;
 	}
+#else	// HOST_OS_WINDOWS
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+
+    GetStartupInfoA(&si);
+    if (CreateProcessA("..\\libxipc\\xorp_finder.exe", NULL, NULL,
+	NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi) == 0) {
+	    XLOG_FATAL("unable to exec xorp_finder");
+    }
+#endif	// !HOST_OS_WINDOWS
 
 	BGPMain bgpm;
 
@@ -388,7 +400,11 @@ int main(int /* argc */, char *argv[])
 	}
 
 	// Remember to kill the finder.
+#ifndef HOST_OS_WINDOWS
  	kill(pid, SIGTERM);
+#else
+	TerminateProcess(pi.hProcess, 1);
+#endif
 
 	printf("Tests successful\n");
     } catch(...) {
@@ -399,3 +415,4 @@ int main(int /* argc */, char *argv[])
 
     return 0;
 }
+

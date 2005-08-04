@@ -12,24 +12,36 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/exceptions.hh,v 1.5 2004/06/10 22:40:29 hodson Exp $
+// $XORP: xorp/bgp/exceptions.hh,v 1.6 2005/03/25 02:52:40 pavlin Exp $
 
 #ifndef __BGP_EXCEPTIONS_HH__
 #define __BGP_EXCEPTIONS_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#include <inttypes.h>
 
 #include <iostream>
 
 #include <string.h>
 #include <stdio.h>
-#include <inttypes.h>
-#include <stdlib.h> 
-#include <sys/types.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
-
-#include <netinet/in.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "libxorp/exceptions.hh"
 

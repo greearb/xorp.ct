@@ -12,14 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.12 2005/03/25 02:52:44 pavlin Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.13 2005/04/02 16:29:51 mjh Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
 
-#include <sys/time.h>
 #include <list>
+
 #include "libxorp/xlog.h"
+#include "libxorp/timer.hh"
+
+#include "libxorp/timeval.hh"
 #include "libxorp/timer.hh"
 
 template<class A>

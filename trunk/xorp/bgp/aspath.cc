@@ -12,21 +12,34 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.23 2004/12/18 02:47:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.24 2005/03/25 02:52:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
+
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+
 #include <string.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <stdio.h>
+
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "aspath.hh"
 #include "path_attribute.hh"

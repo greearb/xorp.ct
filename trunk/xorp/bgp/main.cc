@@ -12,9 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.40 2005/03/23 09:47:52 atanu Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.41 2005/03/25 02:52:40 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -22,6 +25,8 @@
 
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
+
+#include "libcomm/comm_api.h"
 
 #include "bgp.hh"
 #include "xrl_target.hh"
@@ -52,6 +57,8 @@ main(int /*argc*/, char **argv)
     xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+
+    comm_init();
 
     try {
 // 	signal(SIGINT, terminate_main_loop);
@@ -87,6 +94,7 @@ main(int /*argc*/, char **argv)
     //
     xlog_stop();
     xlog_exit();
+    comm_exit();
     debug_msg("Bye!\n");
     return 0;
 }

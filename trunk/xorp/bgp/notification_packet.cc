@@ -12,10 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.19 2005/03/03 07:29:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.20 2005/03/25 02:52:41 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "bgp_module.h"
-#include "config.h"
+
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 

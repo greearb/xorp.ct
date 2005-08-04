@@ -12,13 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.21 2004/06/10 22:40:37 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.22 2005/03/25 02:52:49 pavlin Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "bgp_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include "bgp_module.h"
+
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"

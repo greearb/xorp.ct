@@ -12,11 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.8 2004/06/10 22:40:41 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.9 2005/03/25 02:52:55 pavlin Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
 #include "bgp/path_attribute.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 void usage()
 {

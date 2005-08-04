@@ -12,12 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.22 2005/03/19 16:57:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.23 2005/03/25 02:52:48 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "bgp_module.h"
-#include "config.h"
-#include <pwd.h>
+
+#include "libxorp/xorp.h"
 #include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
 
@@ -29,12 +34,24 @@
 #include "local_data.hh"
 #include "dump_iterators.hh"
 
+#ifndef HOST_OS_WINDOWS
+#include <pwd.h>
+#endif
+
 bool
 test_cache(TestInfo& /*info*/)
 {
+#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_cache.";
     filename += pwd->pw_name;
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_cache";
+    free(tmppath);
+#endif
+
     BGPMain bgpmain;
     // EventLoop* eventloop = bgpmain.eventloop();
     LocalData localdata;
@@ -393,7 +410,11 @@ test_cache(TestInfo& /*info*/)
 	return false;
 
     }
+#ifndef HOST_OS_WINDOWS
     unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
     return true;
 }
 

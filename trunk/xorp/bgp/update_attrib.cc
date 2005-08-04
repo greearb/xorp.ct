@@ -12,18 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.9 2005/01/31 22:35:18 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.10 2005/03/25 02:52:50 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "bgp_module.h"
+
 #include "libxorp/xlog.h"
 #include "update_attrib.hh"
 #include "libxorp/ipv4net.hh"
 
 #include <string.h>
 #include <stdlib.h>
+
 #include "libxorp/debug.h"
 #include "packet.hh"
+
 #include <set>
 
 BGPUpdateAttrib::BGPUpdateAttrib(const uint8_t *d)

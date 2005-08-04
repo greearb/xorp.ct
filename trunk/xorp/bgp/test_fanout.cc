@@ -12,12 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.24 2005/03/20 22:07:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.25 2005/03/25 02:52:49 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "bgp_module.h"
-#include "config.h"
-#include <pwd.h>
+
+#include "libxorp/xorp.h"
 #include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
 
@@ -30,12 +35,24 @@
 #include "local_data.hh"
 #include "dump_iterators.hh"
 
+#ifndef HOST_OS_WINDOWS
+#include <pwd.h>
+#endif
+
 bool
 test_fanout(TestInfo& /*info*/)
 {
+#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_fanout.";
     filename += pwd->pw_name;
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_fanout";
+    free(tmppath);
+#endif
+
     BGPMain bgpmain;
     //    EventLoop* eventloop = bgpmain.eventloop();
     LocalData localdata;
@@ -702,7 +719,11 @@ test_fanout(TestInfo& /*info*/)
 	return false;
 	
     }
+#ifndef HOST_OS_WINDOWS
     unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
     return true;
 }
 

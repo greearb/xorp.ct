@@ -13,17 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.10 2005/07/27 17:59:47 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.11 2005/07/27 19:12:59 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
+
 #include "libxorp/xorp.h"
+
 #include "route_table_policy.hh"
 #include "bgp_varrw.hh"
 #include "route_table_decision.hh"
 #include "route_table_ribin.hh"
+
 
 template <class A>
 PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,

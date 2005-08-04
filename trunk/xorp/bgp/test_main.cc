@@ -12,12 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.12 2004/06/10 22:40:37 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.13 2005/03/25 02:52:49 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
+
 #include "bgp_module.h"
-#include "config.h"
+
 #include "libxorp/xlog.h"
+
 #include "test_next_hop_resolver.hh"
 
 bool test_ribin(TestInfo& info);
@@ -89,7 +95,11 @@ validate_reference_file(string reference_file, string output_file,
 	return false;
 	
     }
+#ifdef HOST_OS_WINDOWS
+    DeleteFileA(output_file.c_str());
+#else
     unlink(output_file.c_str());
+#endif
 
     return true;
 }

@@ -12,14 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_reader.hh,v 1.5 2004/06/10 22:40:35 hodson Exp $
+// $XORP: xorp/bgp/route_table_reader.hh,v 1.6 2005/03/25 02:52:47 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_READER_HH__
 #define __BGP_ROUTE_TABLE_READER_HH__
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "libxorp/xorp.h"
+
 #include <map>
+
 #include "libxorp/ipnet.hh"
 #include "bgp_trie.hh"
 

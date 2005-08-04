@@ -13,22 +13,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.57 2005/07/08 02:06:17 abittau Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.58 2005/07/13 21:58:37 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "bgp_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include "bgp_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
 #include "path_attribute.hh"
 #include "packet.hh"
 
-#include <stdio.h>
-#include <netinet/in.h>
 #include <vector>
+#include <stdio.h>
+
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
