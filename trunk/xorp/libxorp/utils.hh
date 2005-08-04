@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.5 2005/07/01 18:39:20 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.6 2005/07/06 00:11:19 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -20,9 +20,93 @@
 #include <list>
 #include <vector>
 
+#include "utility.h"
+
 //
 // Set of utilities
 //
+
+#define	PATH_CURDIR			"."
+#define	PATH_PARENT			".."
+
+#define	NT_PATH_DELIMITER_CHAR		'\\'
+#define	NT_PATH_DELIMITER_STRING	"\\"
+#define	NT_PATH_ENV_DELIMITER_CHAR	';'
+#define	NT_PATH_ENV_DELIMITER_STRING	";"
+#define	NT_PATH_DRIVE_DELIMITER_CH	':'
+#define	NT_EXECUTABLE_SUFFIX		".exe"
+
+// NT specific
+#define	NT_PATH_UNC_PREFIX		"\\\\"
+#define	NT_PATH_DRIVE_SUFFIX		":"
+
+#define	UNIX_PATH_DELIMITER_CHAR	'/'
+#define	UNIX_PATH_DELIMITER_STRING	"/"
+#define	UNIX_PATH_ENV_DELIMITER_CHAR	':'
+#define	UNIX_PATH_ENV_DELIMITER_STRING	":"
+#define	UNIX_EXECUTABLE_SUFFIX		""
+
+#ifdef	HOST_OS_WINDOWS
+#define	PATH_DELIMITER_CHAR		NT_PATH_DELIMITER_CHAR
+#define	PATH_DELIMITER_STRING		NT_PATH_DELIMITER_STRING
+#define	PATH_ENV_DELIMITER_CHAR		NT_PATH_ENV_DELIMITER_CHAR
+#define	PATH_ENV_DELIMITER_STRING	NT_PATH_ENV_DELIMITER_STRING
+#define	EXECUTABLE_SUFFIX		NT_EXECUTABLE_SUFFIX
+#else	// !HOST_OS_WINDOWS
+#define	PATH_DELIMITER_CHAR		UNIX_PATH_DELIMITER_CHAR
+#define	PATH_DELIMITER_STRING		UNIX_PATH_DELIMITER_STRING
+#define	PATH_ENV_DELIMITER_CHAR		UNIX_PATH_ENV_DELIMITER_CHAR
+#define	PATH_ENV_DELIMITER_STRING	UNIX_PATH_ENV_DELIMITER_STRING
+#define	EXECUTABLE_SUFFIX		UNIX_EXECUTABLE_SUFFIX
+#endif	// HOST_OS_WINDOWS
+
+/*
+ * Convert a UNIX style path to the platform's native path format.
+ *
+ * @param path the UNIX style path to be converted.
+ * @return the converted path.
+ */
+inline string
+unix_path_to_native(const string& unixpath)
+{
+#ifdef HOST_OS_WINDOWS
+    string nativepath = unixpath;
+    string::size_type n = 0;
+    while (string::npos != (n = nativepath.find(UNIX_PATH_DELIMITER_CHAR, n))) {
+        nativepath[n] = NT_PATH_DELIMITER_CHAR;
+    }
+    return (nativepath);
+#else
+    return string(unixpath);
+#endif
+}
+
+/*
+ * Determine if a provided native path string is an absolute path, or
+ * possibly relative to a user's home directory under UNIX.
+ *
+ * @param path a path in native format to inspect.
+ * @param homeok allow paths relative to a home directory to be regarded
+ * as absolute paths by this function.
+ * @return true if the path if satisfies the criteria for an absolute path.
+ */
+inline bool
+is_absolute_path(const string& path, bool homeok = false)
+{
+#ifdef HOST_OS_WINDOWS
+    if ((path.find(NT_PATH_UNC_PREFIX) == 0) ||
+	(isalpha(path[0]) && path[1] == ':'))
+        return true;
+    return false;
+    UNUSED(homeok);
+#else
+    if (path[0] == '/')
+        return true;
+    if (homeok && path[0] == '~')
+        return true;
+    return false;
+#endif
+}
 
 /**
  * Template to delete a list of pointers, and the objects pointed to.
