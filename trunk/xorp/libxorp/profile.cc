@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.4 2004/09/28 00:43:23 atanu Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.5 2005/03/25 02:53:43 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
 
-#include <sys/time.h>
+#include "libxorp/timeval.hh"
+#include "libxorp/timer.hh"
 
 #include "xlog.h"
 #include "debug.h"
@@ -72,11 +73,9 @@ Profile::log(const string& pname, string comment)
 	xorp_throw(PVariableLocked, pname.c_str());
 #endif
     
-    struct timeval tv;
-    if (0 != gettimeofday(&tv, 0))
-	XLOG_FATAL("gettimeofday failed");
-    TimeVal t(tv);
-    i->second->logptr()->push_back(ProfileLogEntry(t, comment));
+    TimeVal tv;
+    TimerList::system_gettimeofday(&tv);
+    i->second->logptr()->push_back(ProfileLogEntry(tv, comment));
 }
 
 void
