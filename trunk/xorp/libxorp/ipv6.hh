@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.22 2005/07/29 20:06:31 bms Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.23 2005/08/02 20:52:14 zec Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -48,8 +48,8 @@ struct in6_addr;
  */
 class IPv6 {
 public:
-    typedef in6_addr 		InAddrType;
-    typedef sockaddr_in6 	SockAddrType;
+    typedef struct in6_addr 		InAddrType;
+    typedef struct sockaddr_in6 	SockAddrType;
 
 public:
     /**
