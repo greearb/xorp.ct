@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.9 2005/07/29 20:06:33 bms Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.10 2005/07/31 02:03:55 bms Exp $"
 
 /*
  * Message logging utility.
@@ -141,6 +141,7 @@ xlog_init(const char *argv0, const char *preamble_message)
     }
 
     pid = getpid();
+
     if (process_name_string != NULL) {
 	free(process_name_string);
 	process_name_string = NULL;
@@ -562,7 +563,9 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     char	*buf_output_ptr = NULL;
     int		buf_output_size;
     size_t	i;
+#ifdef SIGPIPE
     sig_t	sigpipe_handler;
+#endif
 
     if (! start_flag) {
 	if (! init_flag)
@@ -585,7 +588,9 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
 	return;			/* The log level is disabled */
 
     xlog_write_lock();
+#ifdef SIGPIPE
     sigpipe_handler = signal(SIGPIPE, SIG_IGN);
+#endif
 
     preamble_lead = (preamble_string) ? preamble_string : "";
     process_name_lead = (process_name_string) ? process_name_string : "";
@@ -692,8 +697,9 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
 	free(buf_payload_ptr);
     if (buf_output_ptr)
 	free(buf_output_ptr);
-
+#ifdef SIGPIPE
     signal(SIGPIPE, sigpipe_handler);
+#endif
     xlog_write_unlock();
 }
 
@@ -971,6 +977,26 @@ xlog_remove_output_func(xlog_output_func_t func, void *obj)
 int
 xlog_add_default_output(void)
 {
+#ifdef HOST_OS_WINDOWS
+    FILE *fp = NULL;
+    HANDLE hstd = INVALID_HANDLE_VALUE;
+
+    hstd = GetStdHandle(STD_ERROR_HANDLE);
+    fp = _fdopen(_open_osfhandle((long)hstd, _O_TEXT), "w");
+    if (fp != NULL)
+	return (xlog_add_output(fp));
+
+    fp = fopen("CONOUT$", "w");
+    if (fp != NULL)
+	return (xlog_add_output(fp));
+
+    hstd = GetStdHandle(STD_OUTPUT_HANDLE),
+    fp = _fdopen(_open_osfhandle((long)hstd, _O_TEXT), "w");
+    if (fp != NULL)
+	return (xlog_add_output(fp));
+
+#else /* !HOST_OS_WINDOWS */
+
     const char* defaults[] = {	/* The default outputs (in preference order) */
 	"/dev/stderr",		/* XXX: temporary this is the default */
 	"/dev/console",
@@ -988,6 +1014,8 @@ xlog_add_default_output(void)
 	    return (xlog_add_output(fp_default));
 	}
     }
+#endif /* HOST_OS_WINDOWS */
+
     return -1;
 }
 
@@ -1051,10 +1079,24 @@ xlog_localtime2string_short(void)
  *
  * Return value: A statically allocated string with the local time using
  * the format described above.
+ * XXX: This function uses a BSD-specific function, gettimeofday().
+ * XXX: This function calls sprintf() without bounds checking.
  **/
 const char *
 xlog_localtime2string(void)
 {
+#ifdef HOST_OS_WINDOWS
+    static char buf[sizeof("999999999/99/99 99/99/99.999999999 ")];
+    SYSTEMTIME st;
+    DWORD usecs;
+
+    GetSystemTime(&st);
+    usecs = st.wMilliseconds * 1000;
+    snprintf(buf, sizeof(buf), "%u/%u/%u %u:%u:%u.%lu",
+	     st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond,
+	     usecs);
+    return (buf);
+#else /* !HOST_OS_WINDOWS */
     /* XXX: The code below may stop working after year 999999999 */
     char buf[sizeof("999999999/99/99 99/99/99.999999999 ")];
     static char ret_buf[sizeof(buf)];
@@ -1073,6 +1115,7 @@ xlog_localtime2string(void)
     sprintf(ret_buf, "%s.%lu", buf, (unsigned long)tv.tv_usec);
 
     return (ret_buf);
+#endif /* HOST_OS_WINDOWS */
 }
 
 /**
