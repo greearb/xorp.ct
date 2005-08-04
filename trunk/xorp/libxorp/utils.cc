@@ -13,17 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/utils.cc,v 1.2 2005/07/06 00:11:19 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.3 2005/07/08 01:27:13 atanu Exp $"
 
 #include "xorp.h"
+#include "c_format.hh"
 #include "utils.hh"
-
-
-#ifdef HOST_OS_WINDOWS
-#define PATH_SEPARATOR		"\\"
-#else
-#define PATH_SEPARATOR		"/"
-#endif
 
 FILE*
 xorp_make_temporary_file(const string& tmp_dir,
@@ -68,7 +62,7 @@ xorp_make_temporary_file(const string& tmp_dir,
     // The system-specific path of the directory designated for temporary files
 #ifdef HOST_OS_WINDOWS
     size_t size;
-    size = GetTempPath(sizeof(dirname), dirname);
+    size = GetTempPathA(sizeof(dirname), dirname);
     if (size >= sizeof(dirname)) {
 	errmsg = c_format("Internal error: directory name buffer size is too "
 			  "small (allocated %u required %u)",
@@ -104,7 +98,7 @@ xorp_make_temporary_file(const string& tmp_dir,
 	if (tmp_dir.empty())
 	    continue;
 	// Remove the trailing '/' (or '\') from the directory name
-	if (tmp_dir.substr(tmp_dir.size() - 1, 1) == PATH_SEPARATOR)
+	if (tmp_dir.substr(tmp_dir.size() - 1, 1) == PATH_DELIMITER_STRING)
 	    tmp_dir.erase(tmp_dir.size() - 1);
 
 	filename[0] = '\0';
@@ -112,7 +106,8 @@ xorp_make_temporary_file(const string& tmp_dir,
 #ifdef HOST_OS_WINDOWS
 	// Get the temporary filename and open the file
 	snprintf(dirname, sizeof(dirname)/sizeof(dirname[0]), tmp_dir.c_str());
-	if (GetTempFileName(dirname, filename_template.c_str(), filename) == 0)
+	if (GetTempFileNameA(dirname, filename_template.c_str(), 0,
+	    filename) == 0)
 	    continue;
 	fp = fopen(filename, "w+");
 	if (fp == NULL)
@@ -121,8 +116,8 @@ xorp_make_temporary_file(const string& tmp_dir,
 #else
 
 	// Compose the temporary file name and try to create the file
-	string tmp_filename = tmp_dir + PATH_SEPARATOR + filename_template
-	    + ".XXXXXX";
+	string tmp_filename = tmp_dir + PATH_DELIMITER_STRING +
+			      filename_template + ".XXXXXX";
 	snprintf(filename, sizeof(filename)/sizeof(filename[0]),
 		 tmp_filename.c_str());
 
