@@ -59,10 +59,6 @@
 
 #ident "$XORP: xorp/libxorp/popen.cc,v 1.3 2005/04/12 07:49:00 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp_module.h"
 
 #include "libxorp/xorp.h"
@@ -98,19 +94,116 @@
 
 #include "popen.hh"
 
+#ifdef HOST_OS_WINDOWS
+extern char **_environ;
+#else
 extern char **environ;
+#endif
 
+/* XXX: static instance */
 static struct pid_s {
     struct pid_s *next;
     FILE *fp_out;
     FILE *fp_err;
+#ifdef HOST_OS_WINDOWS
+    DWORD pid;
+    HANDLE ph;
+#else
     pid_t pid;
+#endif
 } *pidlist;
 
 
 pid_t
 popen2(const string& command, FILE *& outstream, FILE *&errstream)
 {
+#ifdef HOST_OS_WINDOWS
+    struct pid_s *cur;
+    FILE *iop_out, *iop_err;
+    HANDLE hout[2], herr[2];
+    SECURITY_ATTRIBUTES pipesa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+
+    outstream = NULL;
+    errstream = NULL;
+
+    if (CreatePipe(&hout[0], &hout[1], &pipesa, 0) == 0)
+	return (0);
+    if (CreatePipe(&herr[0], &herr[1], &pipesa, 0) == 0) {
+	CloseHandle(hout[0]);
+	CloseHandle(hout[1]);
+	return (0);
+    }
+    if ((cur = (struct pid_s*)malloc(sizeof(struct pid_s))) == NULL) {
+	CloseHandle(hout[0]);
+	CloseHandle(hout[1]);
+	CloseHandle(herr[0]);
+	CloseHandle(herr[1]);
+	return (0);
+    }
+
+#if 0
+    DWORD pipemode = PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT;
+    SetNamedPipeHandleState(hout[0], &pipemode, NULL, NULL);
+    SetNamedPipeHandleState(hout[1], &pipemode, NULL, NULL);
+    SetNamedPipeHandleState(herr[0], &pipemode, NULL, NULL);
+    SetNamedPipeHandleState(herr[1], &pipemode, NULL, NULL);
+#endif
+
+    /*
+     * XXX: Windows has no notion of non-blocking file handles;
+     * there is overlapped I/O which is broadly similar to POSIX aio.
+     * XXX: We're using ASCII, not Unicode, APIs here, because all the
+     * strings we pass in are 8-bit.
+     */
+    GetStartupInfoA(&si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    //si.hStdInput = NULL;		/* XXX: is this OK? */
+    si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    si.hStdOutput = hout[1];
+    si.hStdError = herr[1];
+
+    debug_msg("Trying to execute: '%s'\n", command.c_str());
+
+    if (CreateProcessA(NULL, const_cast<char *>(command.c_str()), NULL, NULL,
+TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
+&si, &pi) == 0) {
+	DWORD err = GetLastError();
+	XLOG_WARNING("CreateProcessA failed: %u", XORP_UINT_CAST(err));
+	CloseHandle(hout[0]);
+	CloseHandle(hout[1]);
+	CloseHandle(herr[0]);
+	CloseHandle(herr[1]);
+	return (0);
+    }
+
+    /* Parent; assume _fdopen can't fail. */
+    iop_out = _fdopen(_open_osfhandle((long)hout[0], _O_RDONLY|_O_TEXT), "r");
+    iop_err = _fdopen(_open_osfhandle((long)herr[0], _O_RDONLY|_O_TEXT), "r");
+    setvbuf(iop_out, NULL, _IONBF, 0 );
+    setvbuf(iop_err, NULL, _IONBF, 0 );
+#if 0
+    CloseHandle(hout[1]);
+    CloseHandle(herr[1]);
+#endif
+
+    /* Link into list of file descriptors. */
+    cur->fp_out = iop_out;
+    cur->fp_err = iop_err;
+    cur->pid = pi.dwProcessId;
+    cur->ph = pi.hProcess;
+    cur->next = pidlist;
+    pidlist = cur;
+
+    outstream = iop_out;
+    errstream = iop_err;
+
+    /* Kick off the child process's main thread. */
+    ResumeThread(pi.hThread);
+    return (cur->pid);
+
+#else /* !HOST_OS_WINDOWS */
     struct pid_s *cur;
     FILE *iop_out, *iop_err;
     int pdes_out[2], pdes_err[2], pid;
@@ -221,6 +314,7 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
     errstream = iop_err;
 
     return pid;
+#endif /* HOST_OS_WINDOWS */
 }
 
 /*
@@ -245,9 +339,28 @@ pclose2(FILE *iop_out)
     (void)fclose(cur->fp_out);
     (void)fclose(cur->fp_err);
 
+#ifdef HOST_OS_WINDOWS
+    DWORD dwStat = 0;
+    BOOL result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
+
+    while (dwStat == STILL_ACTIVE) {
+    	WaitForSingleObject(cur->ph, INFINITE);
+    	result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
+    }
+
+    XLOG_ASSERT(result != 0);
+
+    CloseHandle(cur->ph);
+    pid = cur->pid;
+    pstat = (int)dwStat;
+
+#else /* !HOST_OS_WINDOWS */
+
     do {
 	pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
     } while (pid == -1 && errno == EINTR);
+
+#endif /* HOST_OS_WINDOWS */
 
     /* Remove the entry from the linked list. */
     if (last == NULL)
@@ -259,3 +372,23 @@ pclose2(FILE *iop_out)
     return (pid == -1 ? -1 : pstat);
 }
 
+#ifdef HOST_OS_WINDOWS
+/*
+ * Return the process handle given the process ID.
+ * The handle we get from CreateProcess() has privileges which
+ * the OpenProcess() handle doesn't get.
+ */
+HANDLE
+pgethandle(pid_t pid)
+{
+    register struct pid_s *cur, *last;
+
+    for (last = NULL, cur = pidlist; cur; last = cur, cur = cur->next)
+	if ((pid_t)cur->pid == pid)
+	    break;
+    if (cur == NULL)
+	return (INVALID_HANDLE_VALUE);
+
+    return (cur->ph);
+}
+#endif
