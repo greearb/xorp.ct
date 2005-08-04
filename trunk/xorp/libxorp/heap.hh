@@ -20,8 +20,6 @@
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
 
-#define LRD	0
-
 #include <memory>
 
 #include <stdio.h>
@@ -155,7 +153,7 @@ public:
      */
     void heapify();
 
-#ifdef LRD
+#ifdef _TEST_HEAP_CODE
     void print();
     void print_all(int);
 #endif

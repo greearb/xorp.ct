@@ -27,11 +27,16 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+
 #include "heap.hh"
 
 #include <strings.h>
 
-#define DBG(x)	//	x
+#ifdef _TEST_HEAP_CODE
+#define DBG(x)	x
+#else
+#define DBG(x)
+#endif
 
 /*
  * A heap entry is made of a key and a pointer to the actual
@@ -265,14 +270,14 @@ Heap::verify()
     for (i = 1 ; i < _elements ; i++ )
 	if ( _p[i].key < _p[(i-1)/2 ].key ) {
 	    XLOG_WARNING("+++ heap violated at %d", i-1/2);
-#if LRD
+#ifdef _TEST_HEAP_CODE
 	    print_all(i-1/2);
 #endif
 	    return ;
 	}
 }
 
-#if LRD
+#ifdef _TEST_HEAP_CODE
 void
 Heap::print()
 {
@@ -299,6 +304,8 @@ Heap::print_all(int base)
 	depth /= 2 ;
     }
 }
+
+#ifdef _TEST_HEAP_CODE_HARNESS
 
 struct foo {
     Heap_Key t;
@@ -337,5 +344,7 @@ main(int argc, char *argv[])
 	h->pop();
     }
 }
-#endif
 
+#endif /* _TEST_HEAP_CODE_HARNESS */
+
+#endif /* _TEST_HEAP_CODE */
