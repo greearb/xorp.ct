@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.10 2005/02/12 08:09:09 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.11 2005/03/25 02:54:26 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -31,6 +31,10 @@
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/targets/show_routes_base.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 // ----------------------------------------------------------------------------
 // Structure for holding command line options

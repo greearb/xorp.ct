@@ -12,18 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/add_route.cc,v 1.4 2005/03/05 01:31:45 pavlin Exp $"
+#ident "$XORP: xorp/rib/add_route.cc,v 1.5 2005/03/25 02:54:19 pavlin Exp $"
 
 // Add routes to the RIB.
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#include <sysexits.h>
+#endif
+
 #include <fstream>
 #include <cstdlib>
 #include <vector>
@@ -35,10 +41,16 @@
 #include "libxorp/debug.h"
 #include "libxorp/callback.hh"
 #include "libxorp/ipv4.hh"
+#include "libxorp/timeval.hh"
+#include "libxorp/timer.hh"
 
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/interfaces/rib_xif.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 template <typename A>
 class Route {
@@ -108,7 +120,7 @@ read_routes(const string& route_file, Fire<IPv4>::Routes& v)
     if (!routein) {
 	XLOG_ERROR("Failed to open file: %s %s", route_file.c_str(),
 		   strerror(errno));
-	return EX_NOINPUT;
+	return -1;
     }
 
     while (routein) {
@@ -129,7 +141,7 @@ read_routes(const string& route_file, Fire<IPv4>::Routes& v)
 	} else {
 	    XLOG_ERROR("Allowed command are \"add\" or \"delete\""
 		       " not <%s>", which.c_str());
-	    return EX_DATAERR;
+	    return -1;
 	}
 
 	string word;
@@ -150,7 +162,7 @@ usage(const char *myname)
 {
     fprintf(stderr, "usage: %s -r routes [-t tablename] [-R][-u][-s][-d]\n",
 	    myname);
-    return EX_USAGE;
+    return -1;
 }
 
 int 
@@ -237,16 +249,14 @@ main(int argc, char **argv)
 	// Main loop
 	//
 	do {
-	    timeval now;
-	    gettimeofday(&now, 0);
-	    TimeVal start = TimeVal(now);
+	    TimeVal start, end, delta;
+	    TimerList::system_gettimeofday(&start);
 	    f.start();
 	    while (f.busy()) {
 		eventloop.run();
 	    }
-	    gettimeofday(&now, 0);
-	    TimeVal end = TimeVal(now);
-	    TimeVal delta = end - start;
+	    TimerList::system_gettimeofday(&end);
+	    delta = end - start;
 	    if (!silent)
 		printf("%s seconds taken to add/delete %u routes\n",
 		       delta.str().c_str(), XORP_UINT_CAST(v.size()));

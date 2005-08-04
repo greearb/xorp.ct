@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.7 2005/03/05 01:31:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.8 2005/03/25 02:54:24 pavlin Exp $"
 
 #include <set>
 
@@ -29,6 +29,9 @@
 #include "rt_tab_origin.hh"
 #include "rt_tab_deletion.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif // HAVE_GETOPT_H
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -180,16 +183,17 @@ template <typename A>
 static bool
 unblock_output(TestOutput<A>* to)
 {
-    static struct timeval t0;
-    struct timeval t1;
-    if (t0.tv_sec == 0) {
-	gettimeofday(&t0, 0);
+    static TimeVal t0;
+    TimeVal t1;
+
+    if (t0 == TimeVal::ZERO()) {
+	TimerList::system_gettimeofday(&t0);
 	t1 = t0;
     } else {
-	gettimeofday(&t1, 0);
+	TimerList::system_gettimeofday(&t1);
     }
 
-    TimeVal t = TimeVal(t1) - TimeVal(t0);
+    TimeVal t = t1 - t0;
     verbose_log("Unblock output at %s\n", t.str().c_str());
 
     bool r = to->blocked();

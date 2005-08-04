@@ -12,9 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.24 2005/01/21 03:25:06 atanu Exp $"
-
-#include <sysexits.h>
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.25 2005/03/25 02:54:19 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -23,6 +21,10 @@
 #include "libxorp/debug.h"
 
 #include "rib_manager.hh"
+
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
 
 int
 main (int /* argc */, char* argv[])
