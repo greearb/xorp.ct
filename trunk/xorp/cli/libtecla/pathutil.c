@@ -42,6 +42,11 @@
 
 #include "pathutil.h"
 
+#ifdef __MINGW32__
+#define stat _stat
+#define statbuf _statbuf
+#endif
+
 /*.......................................................................
  * Create a new PathName object.
  *
@@ -429,8 +434,12 @@ int _pu_path_is_exe(const char *pathname)
  * Is the file a regular file which is executable by the current user.
  */
   return S_ISREG(statbuf.st_mode) != 0 &&
+#ifdef __MINGW32__
+    1;
+#else
     (statbuf.st_mode & (S_IXOTH | S_IXGRP | S_IXUSR)) &&
     access(pathname, X_OK) == 0;
+#endif
 }
 
 /*.......................................................................

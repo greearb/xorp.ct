@@ -43,11 +43,20 @@
 /*
  * UNIX headers.
  */
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+
 #ifdef HAVE_SELECT
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#endif
+
+#ifdef __MINGW32__
+#define sigsetjmp setjmp
+#define siglongjmp longjmp
+#define sigjmp_buf jmp_buf
 #endif
 
 /*
@@ -88,8 +97,12 @@ static int gl_tputs_putchar(TputsType c);
 /*
  * POSIX headers.
  */
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif
 
 /*
  * Does the system provide the signal and ioctl query facility used
@@ -102,8 +115,10 @@ static int gl_tputs_putchar(TputsType c);
 /*
  * Provide typedefs for standard POSIX structures.
  */
+#ifndef __MINGW32__
 typedef struct sigaction SigAction;
 typedef struct termios Termios;
+#endif
 
 /*
  * Local headers.
@@ -228,8 +243,10 @@ struct GlSignalNode {
   GlSignalNode *next;  /* The next signal in the list */
   int signo;           /* The number of the signal */
   sigset_t proc_mask;  /* A process mask which only includes signo */
+#ifndef __MINGW32__
   SigAction original;  /* The signal disposition of the calling program */
                        /*  for this signal. */
+#endif
   unsigned flags;      /* A bitwise union of GlSignalFlags enumerators */
   GlAfterSignal after; /* What to do after the signal has been handled */
   int errno_value;     /* What to set errno to */
@@ -288,7 +305,9 @@ struct GetLine {
   GlSignalNode *sigs;        /* The head of the list of signals */
   sigset_t old_signal_set;   /* The signal set on entry to gl_get_line() */
   sigset_t new_signal_set;   /* The set of signals that we are trapping */
+#ifndef __MINGW32__
   Termios oldattr;           /* Saved terminal attributes. */
+#endif
   KeyTab *bindings;          /* A table of key-bindings */
   int ntotal;                /* The number of characters in gl->line[] */
   int buff_curpos;           /* The cursor position within gl->line[] */
@@ -417,8 +436,12 @@ static const struct GlDefSignal {
   {SIGABRT,   GLS_SUSPEND_INPUT, GLS_ABORT, EINTR},
   {SIGINT,    GLS_SUSPEND_INPUT, GLS_ABORT, EINTR},
   {SIGTERM,   GLS_SUSPEND_INPUT, GLS_ABORT, EINTR},
+#if defined (SIGALRM)
   {SIGALRM,   GLS_RESTORE_ENV, GLS_CONTINUE, 0},
+#endif
+#if defined (SIGCONT)
   {SIGCONT,   GLS_RESTORE_ENV, GLS_CONTINUE, 0},
+#endif
 #if defined(SIGHUP)
 #ifdef ENOTTY
   {SIGHUP,    GLS_SUSPEND_INPUT, GLS_ABORT, ENOTTY},
@@ -1360,8 +1383,10 @@ GetLine *new_GetLine(size_t linelen, size_t histlen)
   gl->vi.repeat.active = 0;
   gl->sig_mem = NULL;
   gl->sigs = NULL;
+#ifndef __MINGW32__
   sigemptyset(&gl->old_signal_set);
   sigemptyset(&gl->new_signal_set);
+#endif
   gl->bindings = NULL;
   gl->ntotal = 0;
   gl->buff_curpos = 0;
@@ -1754,6 +1779,7 @@ char *gl_get_line(GetLine *gl, const char *prompt,
  */
 static int gl_override_signal_handlers(GetLine *gl)
 {
+#ifndef __MINGW32__
   GlSignalNode *sig;   /* A node in the list of signals to be caught */
 /*
  * Set up our signal handler.
@@ -1819,6 +1845,7 @@ static int gl_override_signal_handlers(GetLine *gl)
       return 1;
   }
 #endif
+#endif /* __MINGW32__ */
   return 0;
 }
 
@@ -1833,6 +1860,7 @@ static int gl_override_signal_handlers(GetLine *gl)
  */
 static int gl_restore_signal_handlers(GetLine *gl)
 {
+#ifndef __MINGW32__
   GlSignalNode *sig;   /* A node in the list of signals to be caught */
 /*
  * Restore application signal handlers that were overriden
@@ -1852,6 +1880,7 @@ static int gl_restore_signal_handlers(GetLine *gl)
     fprintf(stderr, "gl_get_line(): sigprocmask error: %s\n", strerror(errno));
     return 1;
   };
+#endif /* __MINGW32__ */
   return 0;
 }
 
@@ -1877,6 +1906,9 @@ static void gl_signal_handler(int signo)
  */
 static int gl_raw_terminal_mode(GetLine *gl)
 {
+#ifdef __MINGW32__
+  return 0;
+#else
   Termios newattr;   /* The new terminal attributes */
 /*
  * Record the current terminal attributes.
@@ -1928,6 +1960,7 @@ static int gl_raw_terminal_mode(GetLine *gl)
     };
   };
   return 0;
+#endif /* __MINGW32__ */
 }
 
 /*.......................................................................
@@ -1948,6 +1981,7 @@ static int gl_restore_terminal_attributes(GetLine *gl)
  */
   if(gl_flush_output(gl))
     waserr = 1;
+#ifndef __MINGW32__
 /*
  * Reset the terminal attributes to the values that they had on
  * entry to gl_get_line().
@@ -1959,6 +1993,7 @@ static int gl_restore_terminal_attributes(GetLine *gl)
       break;
     };
   };
+#endif
   return waserr;
 }
 
@@ -2355,6 +2390,8 @@ static int gl_read_character(GetLine *gl, char *c, int val)
       *c = (char)val;
       return 0;
     }
+
+#ifndef __MINGW32__
 /*
  * Since the code in this function can block, trap signals.
  */
@@ -2366,6 +2403,7 @@ static int gl_read_character(GetLine *gl, char *c, int val)
 	fprintf(stderr, "getline(): sigprocmask error: %s\n", strerror(errno));
 	return 1;
       };
+#endif
 /*
  * If select() is available, watch for activity on any file descriptors
  * that the user has registered, and for data available on the terminal
@@ -2380,6 +2418,9 @@ static int gl_read_character(GetLine *gl, char *c, int val)
  * than one call if an interrupt that we aren't trapping is
  * received.
  */
+#ifdef __MINGW32__
+	/* XXX: need terminal read implementation here */
+#else
       while(read(gl->input_fd, (void *)c, 1) != 1) {
 	if(errno != EINTR) {
 #ifdef EAGAIN
@@ -2416,7 +2457,8 @@ static int gl_read_character(GetLine *gl, char *c, int val)
  */
     if(gl_check_caught_signal(gl))
       return 1;
-  };
+#endif /* __MINGW32__ */
+  }; /* for (;;) */
 }
 
 /*.......................................................................
@@ -2431,6 +2473,9 @@ static int gl_read_character(GetLine *gl, char *c, int val)
  */
 static int gl_check_caught_signal(GetLine *gl)
 {
+#ifdef __MINGW32__
+  return 0;
+#else
   GlSignalNode *sig;      /* The signal disposition */
   SigAction keep_action;  /* The signal disposition of tecla signal handlers */
 /*
@@ -2525,6 +2570,7 @@ static int gl_check_caught_signal(GetLine *gl)
     break;
   };
   return 0;
+#endif /* __MINGW32__ */
 }
 
 /*.......................................................................
@@ -2760,7 +2806,9 @@ static KT_KEY_FN(gl_abort)
  */
 static KT_KEY_FN(gl_suspend)
 {
+#ifdef SIGTSTP
   raise(SIGTSTP);
+#endif
   return 0;
 }
 
@@ -2769,7 +2817,9 @@ static KT_KEY_FN(gl_suspend)
  */
 static KT_KEY_FN(gl_stop_output)
 {
+#ifdef TCOOFF
   tcflow(gl->output_fd, TCOOFF);
+#endif
   return 0;
 }
 
@@ -2778,7 +2828,9 @@ static KT_KEY_FN(gl_stop_output)
  */
 static KT_KEY_FN(gl_start_output)
 {
+#ifdef TCOON
   tcflow(gl->output_fd, TCOON);
+#endif
   return 0;
 }
 
@@ -4899,6 +4951,7 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
  * If we have a terminal install new bindings for it.
  */
   if(is_term) {
+#ifndef __MINGW32__
 /*
  * Get the current settings of the terminal.
  */
@@ -4907,6 +4960,7 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
 	      strerror(errno));
       return 1;
     };
+#endif /* __MINGW32__ */
 /*
  * Lookup the terminal control string and size information.
  */
@@ -4935,6 +4989,7 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
     if(gl_bind_terminal_keys(gl))
       return 1;
 
+#ifndef __MINGW32__
 /*
  * Unbind the dangerous keys that affect the remote program.
  */
@@ -4951,6 +5006,7 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
 				MAKE_META(gl->oldattr.c_cc[VSUSP]), NULL))
       return 1;
     };
+#endif
   };
 
   return 0;
@@ -4968,6 +5024,7 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
  */
 static int gl_bind_terminal_keys(GetLine *gl)
 {
+#ifndef __MINGW32__
 /*
  * Install key-bindings for the special terminal characters.
  */
@@ -5000,6 +5057,7 @@ static int gl_bind_terminal_keys(GetLine *gl)
   if(_kt_set_keybinding(gl->bindings, KTB_TERM, "^V", "literal-next"))
     return 1;
 #endif
+#endif /* __MINGW32__ */
 /*
  * Bind action functions to the terminal-specific arrow keys
  * looked up by gl_control_strings().
@@ -8322,6 +8380,9 @@ void gl_prompt_style(GetLine *gl, GlPromptStyle style)
 int gl_trap_signal(GetLine *gl, int signo, unsigned flags,
 		   GlAfterSignal after, int errno_value)
 {
+#ifdef __MINGW32__
+  return 0;
+#else
   GlSignalNode *sig;
 /*
  * Check the arguments.
@@ -8370,6 +8431,7 @@ int gl_trap_signal(GetLine *gl, int signo, unsigned flags,
   sig->after = after;
   sig->errno_value = errno_value;
   return 0;
+#endif /* __MINGW32__ */
 }
 
 /*.......................................................................

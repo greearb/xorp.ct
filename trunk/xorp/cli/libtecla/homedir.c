@@ -37,7 +37,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifndef __MINGW32__
 #include <pwd.h>
+#endif
 
 #include "pathutil.h"
 #include "homedir.h"
@@ -215,6 +218,11 @@ const char *_hd_lookup_home_dir(HomeDir *home, const char *user)
     fprintf(stderr, "_hd_lookup_home_dir: NULL argument(s).\n");
     return NULL;
   };
+
+#ifdef __MINGW32__
+  return NULL;
+#else
+
 /*
  * Handle the ksh "~+". This expands to the absolute path of the
  * current working directory.
@@ -272,6 +280,7 @@ const char *_hd_lookup_home_dir(HomeDir *home, const char *user)
   };
 #endif
   return home_dir;
+#endif /* __MINGW32__*/
 }
 
 /*.......................................................................
@@ -307,6 +316,9 @@ const char *_hd_last_home_dir_error(HomeDir *home)
  */
 int _hd_scan_user_home_dirs(HomeDir *home, void *data, HOME_DIR_FN(*callback_fn))
 {
+#ifdef __MINGW32__
+  return 1;
+#else
   int waserr = 0;       /* True after errors */
 /*
  * Check the arguments.
@@ -358,6 +370,7 @@ int _hd_scan_user_home_dirs(HomeDir *home, void *data, HOME_DIR_FN(*callback_fn)
     };
   };
   return waserr;
+#endif /* __MINGW32__ */
 }
 
 /*.......................................................................
