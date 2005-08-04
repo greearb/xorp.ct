@@ -71,7 +71,7 @@ template <typename A>
 bool
 PeerOut<A>::add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type)
 {
-    debug_msg("Area %s\n", area.str().c_str());
+    debug_msg("Area %s\n", pr_id(area).c_str());
 
     // Only OSPFv3 allows a peer to be connected to multiple areas.
     XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
@@ -87,7 +87,7 @@ template <typename A>
 bool
 PeerOut<A>::remove_area(OspfTypes::AreaID area)
 {
-    debug_msg("Area %s\n", area.str().c_str());
+    debug_msg("Area %s\n", pr_id(area).c_str());
     // All the peers are notified when an area is deleted.
     if (0 == _areas.count(area)) {
 	return false;
@@ -158,7 +158,7 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
     if (0 == _areas.count(area)) {
 	    xorp_throw(BadPeer,
 		       c_format("Area %s not handled by %s/%s",
-				cstring(packet->get_area_id()),
+				pr_id(packet->get_area_id()).c_str(),
 				_interface.c_str(), _vif.c_str()));
     }
 
@@ -235,7 +235,7 @@ bool
 PeerOut<A>::set_network_mask(OspfTypes::AreaID area, uint32_t network_mask)
 {
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
@@ -247,7 +247,7 @@ bool
 PeerOut<A>::set_interface_id(OspfTypes::AreaID area, uint32_t interface_id)
 {
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
@@ -259,7 +259,7 @@ bool
 PeerOut<A>::set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval)
 {
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
@@ -271,7 +271,7 @@ bool
 PeerOut<A>::set_options(OspfTypes::AreaID area,	uint32_t options)
 {
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
@@ -283,7 +283,7 @@ bool
 PeerOut<A>::set_router_priority(OspfTypes::AreaID area,	uint8_t priority)
 {
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
@@ -296,7 +296,7 @@ PeerOut<A>::set_router_dead_interval(OspfTypes::AreaID area,
 				     uint32_t router_dead_interval)
 {
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", area.str().c_str());
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
@@ -631,8 +631,8 @@ void
 Peer<A>::start()
 {
     //    _interface_state = Down;
-    set_designated_router("0.0.0.0");
-    set_backup_designated_router("0.0.0.0");
+    set_designated_router(set_id("0.0.0.0"));
+    set_backup_designated_router(set_id("0.0.0.0"));
     event_interface_up();
 }
 
@@ -980,7 +980,7 @@ template <>
 OspfTypes::RouterID
 Peer<IPv4>::get_candidate_id(IPv4 source_address, OspfTypes::RouterID)
 {
-    return source_address;
+    return ntohl(source_address.addr());
 }
 
 template <>
@@ -994,7 +994,7 @@ template <>
 OspfTypes::RouterID
 Peer<IPv4>::get_candidate_id(IPv4) const
 {
-    return _peerout.get_interface_address();
+    return ntohl(_peerout.get_interface_address().addr());
 }
 
 template <>
@@ -1012,7 +1012,7 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates) const
     // Calculate the the new backup designated router.
     // Look for routers that do not consider themselves to be the DR
     // but do consider themselves to the the BDR.
-    Candidate c("0.0.0.0", "0.0.0.0", "0.0.0.0", 0);
+    Candidate c(set_id("0.0.0.0"), set_id("0.0.0.0"), set_id("0.0.0.0"), 0);
     typename list<Candidate>::const_iterator i;
     for(i = candidates.begin(); i != candidates.end(); i++) {
 	if ((*i)._router_id != (*i)._dr && (*i)._router_id == (*i)._bdr) {
@@ -1049,7 +1049,7 @@ Peer<A>::designated_router(list<Candidate>& candidates) const
 {
     // Step (3)
     // Calculate the designated router.
-    Candidate c("0.0.0.0", "0.0.0.0", "0.0.0.0", 0);
+    Candidate c(set_id("0.0.0.0"), set_id("0.0.0.0"), set_id("0.0.0.0"), 0);
     typename list<Candidate>::const_iterator i;
     for(i = candidates.begin(); i != candidates.end(); i++) {
 	if ((*i)._router_id == (*i)._dr) {
@@ -1373,7 +1373,7 @@ Peer<IPv4>::update_router_linksV2()
 	    if (adjacent) {
 		router_link.set_type(RouterLink::transit);
 
-		router_link.set_link_id(ntohl(get_designated_router().addr()));
+		router_link.set_link_id(get_designated_router());
 		router_link.set_link_data(ntohl(get_interface_address().
 						addr()));
 
@@ -1462,8 +1462,7 @@ Peer<IPv6>::update_router_linksV3()
 	    router_link.set_type(RouterLink::p2p);
 	    router_link.set_neighbour_interface_id((*n)->get_hello_packet()->
 						   get_interface_id());
-	    router_link.set_neighbour_router_id(ntohl((*n)->
-						      get_router_id().addr()));
+	    router_link.set_neighbour_router_id((*n)->get_router_id());
 
 	    get_area_router()->add_router_link(get_peerid(), router_link);
 	}
@@ -1509,9 +1508,7 @@ Peer<IPv6>::update_router_linksV3()
 		    set_neighbour_interface_id(
 				       get_designated_router_interface_id());
 		// DR router ID.
-		router_link.
-		    set_neighbour_router_id(ntohl(get_designated_router().
-						  addr()));
+		router_link.set_neighbour_router_id(get_designated_router());
 
 		get_area_router()->add_router_link(get_peerid(), router_link);
 	    }
@@ -2227,11 +2224,11 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
-	      cstring(get_candidate_id()),
+	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str(),
 	      cstring(*hello));
@@ -2312,7 +2309,7 @@ Neighbour<A>::event_1_way_received()
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     switch(get_state()) {
@@ -2342,7 +2339,7 @@ Neighbour<A>::event_2_way_received()
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
     XLOG_WARNING("TBD");
 
@@ -2433,11 +2430,11 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
-	      cstring(get_candidate_id()),
+	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str(),
 	      cstring(*dd));
@@ -2630,11 +2627,11 @@ Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
-	      cstring(get_candidate_id()),
+	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str(),
 	      cstring(*lsrp));
@@ -2691,11 +2688,11 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
-	      cstring(get_candidate_id()),
+	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str(),
 	      cstring(*lsup));
@@ -2938,11 +2935,11 @@ Neighbour<A>::event_negotiation_done()
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      cstring(get_candidate_id()),
+	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str());
 
@@ -3001,11 +2998,11 @@ Neighbour<A>::event_exchange_done()
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      cstring(get_candidate_id()),
+	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str());
 
@@ -3068,11 +3065,11 @@ Neighbour<A>::event_SequenceNumberMismatch_or_BadLSReq(const char *event_name)
 	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
-	       get_candidate_id().str().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      cstring(get_candidate_id()),
+	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str());
 

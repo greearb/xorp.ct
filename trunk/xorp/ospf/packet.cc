@@ -157,8 +157,8 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
 			    packet_length,
 			    XORP_UINT_CAST(len)));
 
-    set_router_id(IPv4(&ptr[4]));
-    set_area_id(IPv4(&ptr[8]));
+    set_router_id(extract_32(&ptr[4]));
+    set_area_id(extract_32(&ptr[8]));
 
     // In OSPFv2 there is authentication info in the standard header.
     switch(version) {
@@ -223,8 +223,8 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
     ptr[0] = version;
     ptr[1] = get_type();
     embed_16(&ptr[2], len);
-    get_router_id().copy_out(&ptr[4]);
-    get_area_id().copy_out(&ptr[8]);
+    embed_32(&ptr[4], get_router_id());
+    embed_32(&ptr[8], get_area_id());
     
     switch(version) {
     case OspfTypes::V2:
@@ -260,8 +260,8 @@ Packet::standard() const
     
     output = c_format("\tVersion %u\n", get_version());
     output += c_format("\tType %u\n", get_type());
-    output += "\tRouter ID " + get_router_id().str() + "\n";
-    output += "\tArea ID " + get_area_id().str() + "\n";
+    output += "\tRouter ID " + pr_id(get_router_id()) + "\n";
+    output += "\tArea ID " + pr_id(get_area_id()) + "\n";
 
     switch(get_version()) {
     case OspfTypes::V2:
@@ -412,8 +412,8 @@ HelloPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 	break;
     }
 
-    packet->set_designated_router(IPv4(&ptr[offset + 12]));
-    packet->set_backup_designated_router(IPv4(&ptr[offset + 16]));
+     packet->set_designated_router(extract_32(&ptr[offset + 12]));
+     packet->set_backup_designated_router(extract_32(&ptr[offset + 16]));
 
     // If there is any more space in the packet extract the neighbours.
     int neighbours = (len - (offset + MINIMUM_LENGTH)) / 4;
@@ -422,7 +422,7 @@ HelloPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 
     for(int i = 0; i < neighbours; i++)
 	packet->get_neighbours().
-	    push_back(IPv4(&ptr[offset + MINIMUM_LENGTH + i*4]));
+	    push_back(extract_32(&ptr[offset + MINIMUM_LENGTH + i*4]));
 
     return packet;
 }
@@ -464,13 +464,13 @@ HelloPacket::encode(vector<uint8_t>& pkt)
 	break;
     }
 
-    get_designated_router().copy_out(&ptr[offset + 12]);
-    get_backup_designated_router().copy_out(&ptr[offset + 16]);
+    embed_32(&ptr[offset + 12], get_designated_router());
+    embed_32(&ptr[offset + 16], get_backup_designated_router());
 
     list<OspfTypes::RouterID> &li = get_neighbours();
     list<OspfTypes::RouterID>::iterator i = li.begin();
     for(size_t index = 0; i != li.end(); i++, index += 4) {
-	(*i).copy_out(&ptr[offset + 20 + index]);
+	embed_32(&ptr[offset + 20 + index], *i);
     }
 	
     if (offset != encode_standard_header(ptr, len)) {
@@ -506,14 +506,14 @@ HelloPacket::str() const
     output += c_format("\tRouter Priority %u\n", get_router_priority());
     output += c_format("\tRouter Dead Interval %u\n",
 		       get_router_dead_interval());
-    output += "\tDesignated Router " + get_designated_router().str() + "\n";
+    output += "\tDesignated Router " + pr_id(get_designated_router()) +  "\n";
     output += "\tBackup Designated Router " +
-	get_backup_designated_router().str();
+	pr_id(get_backup_designated_router());
 
     list<OspfTypes::RouterID> li = _neighbours;
     list<OspfTypes::RouterID>::iterator i = li.begin();
     for(; i != li.end(); i++) {
-	output += "\n\tNeighbour: " + (*i).str();
+	output += "\n\tNeighbour: " + pr_id(*i);
     }
     
     return output;

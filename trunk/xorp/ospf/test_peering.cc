@@ -263,9 +263,9 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     DebugIO<A> io(info, version, eventloop);
     
     Ospf<A> ospf(version, eventloop, &io);
-    ospf.set_router_id("0.0.0.1");
+    ospf.set_router_id(set_id("0.0.0.1"));
 
-    OspfTypes::AreaID area("128.16.64.16");
+    OspfTypes::AreaID area = set_id("128.16.64.16");
     const uint16_t interface_mtu = 1500;
 
     // Create an area
@@ -346,12 +346,12 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     Ospf<A> ospf_1(version, eventloop, &io_1);
     Ospf<A> ospf_2(version, eventloop, &io_2);
 
-    ospf_1.set_router_id("192.150.187.1");
-    ospf_2.set_router_id("192.150.187.2");
+    ospf_1.set_router_id(set_id("192.150.187.1"));
+    ospf_2.set_router_id(set_id("192.150.187.2"));
 
     const uint16_t interface_mtu = 1500;
 
-    OspfTypes::AreaID area("128.16.64.16");
+    OspfTypes::AreaID area = set_id("128.16.64.16");
 
     ospf_1.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
     ospf_2.get_peer_manager().create_area_router(area, OspfTypes::BORDER);

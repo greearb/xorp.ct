@@ -709,7 +709,7 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    }
 	    if (!(start < end))
 		xorp_throw(BadPacket, c_format("Network-LSA too short"));
-	    lsa->get_attached_routers().push_back(IPv4(start));
+	    lsa->get_attached_routers().push_back(extract_32(start));
 	    start += 4;
 	}
 
@@ -771,11 +771,11 @@ NetworkLsa::encode()
 	switch(version) {
 	case OspfTypes::V2:
 	    embed_32(&ptr[index], *j++);
-	    (*i).copy_out(&ptr[index + 4]);
+	    embed_32(&ptr[index + 4], *i);
 	    index += 8;
 	    break;
 	case OspfTypes::V3:
-	    (*i).copy_out(&ptr[index]);
+	    embed_32(&ptr[index], *i);
 	    index += 4;
 	break;
 	}
@@ -824,7 +824,7 @@ NetworkLsa::str() const
 	case OspfTypes::V3:
 	    break;
 	}
-	output += "\n\tAttached Router " + (*i).str();
+	output += "\n\tAttached Router " + pr_id(*i);
     }
 
     return output;

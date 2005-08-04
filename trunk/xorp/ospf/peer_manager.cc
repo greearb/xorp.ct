@@ -70,12 +70,12 @@ bool
 PeerManager<A>::create_area_router(OspfTypes::AreaID area,
 				   OspfTypes::AreaType area_type)
 {
-    debug_msg("Area %s Type %s\n", area.str().c_str(), 
+    debug_msg("Area %s Type %s\n", pr_id(area).c_str(), 
 	      pp_area_type(area_type).c_str());
 
     // Check this area doesn't already exist.
     if (0 != _areas.count(area)) {
-	XLOG_ERROR("Area %s already exists\n", area.str().c_str());
+	XLOG_ERROR("Area %s already exists\n", pr_id(area).c_str());
 	return false;
     }
 
@@ -89,11 +89,11 @@ template <typename A>
 AreaRouter<A> *
 PeerManager<A>::get_area_router(OspfTypes::AreaID area)
 {
-    debug_msg("Area %s\n", area.str().c_str());
+    debug_msg("Area %s\n", pr_id(area).c_str());
 
     // Check this area exists.
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Area %s doesn't exist\n", area.str().c_str());
+	XLOG_ERROR("Area %s doesn't exist\n", pr_id(area).c_str());
 	return 0;
     }
 
@@ -104,11 +104,11 @@ template <typename A>
 bool
 PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
 {
-    debug_msg("Area %s\n", area.str().c_str());
+    debug_msg("Area %s\n", pr_id(area).c_str());
 
     // Verify this area exists.
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Area %s doesn't exist\n", area.str().c_str());
+	XLOG_ERROR("Area %s doesn't exist\n", pr_id(area).c_str());
 	return false;
     }
 
@@ -189,14 +189,14 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     debug_msg("Interface %s Vif %s source net %s mtu %d linktype %u area %s\n",
 	      interface.c_str(), vif.c_str(),
 	      cstring(source),  interface_mtu,
-	      linktype, area.str().c_str());
+	      linktype, pr_id(area).c_str());
 
     AreaRouter<A> *area_router = get_area_router(area);
 
     // Verify that this area is known.
     if (0 == area_router)
 	xorp_throw(BadPeer, 
-		   c_format("Unknown Area %s", area.str().c_str()));
+		   c_format("Unknown Area %s", pr_id(area).c_str()));
 
     PeerID peerid = create_peerid(interface, vif);
 

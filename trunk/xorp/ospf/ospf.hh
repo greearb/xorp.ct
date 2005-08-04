@@ -36,12 +36,12 @@ struct OspfTypes {
     /**
      * Router ID.
      */
-    typedef IPv4 RouterID;
+    typedef uint32_t RouterID;
 
     /**
      * Area ID.
      */
-    typedef IPv4 AreaID;
+    typedef uint32_t AreaID;
 
     /**
      * Link Type
@@ -149,6 +149,26 @@ struct OspfTypes {
      */
     static const uint32_t MaxSequenceNumber = 0x7fffffff;
 };
+
+/**
+ * Pretty print a router or area ID.
+ */
+inline
+string
+pr_id(uint32_t id)
+{
+    return IPv4(htonl(id)).str();
+}
+
+/**
+ * Set a router or area ID using dot notation: "128.16.64.16".
+ */
+inline
+uint32_t
+set_id(const char *addr)
+{
+    return ntohl(IPv4(addr).addr());
+}
 
 /**
  * Pretty print the link type.

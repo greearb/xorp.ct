@@ -77,8 +77,8 @@ inline
 void
 populate_helloV2(HelloPacket *hello)
 {
-    hello->set_router_id(IPv4("128.16.64.16"));
-    hello->set_area_id(IPv4("4.3.2.1"));
+    hello->set_router_id(set_id("128.16.64.16"));
+    hello->set_area_id(set_id("4.3.2.1"));
     hello->set_auth_type(5);
 
     hello->set_network_mask(0xffff0000);
@@ -86,12 +86,12 @@ populate_helloV2(HelloPacket *hello)
     hello->set_options(0xfe);
     hello->set_router_priority(42);
     hello->set_router_dead_interval(66000);
-    hello->set_designated_router(IPv4("1.2.3.4"));
-    hello->set_backup_designated_router(IPv4("2.4.6.8"));
+    hello->set_designated_router(set_id("1.2.3.4"));
+    hello->set_backup_designated_router(set_id("2.4.6.8"));
 
     // Add some neighbours.
-    hello->get_neighbours().push_back(IPv4("10.11.12.13"));
-    hello->get_neighbours().push_back(IPv4("11.12.13.14"));
+    hello->get_neighbours().push_back(set_id("10.11.12.13"));
+    hello->get_neighbours().push_back(set_id("11.12.13.14"));
 }
 
 /**
@@ -101,8 +101,8 @@ inline
 void
 populate_helloV3(HelloPacket *hello)
 {
-    hello->set_router_id(IPv4("128.16.64.16"));
-    hello->set_area_id(IPv4("4.3.2.1"));
+    hello->set_router_id(set_id("128.16.64.16"));
+    hello->set_area_id(set_id("4.3.2.1"));
     hello->set_instance_id(5);
 
     hello->set_interface_id(0x12345678);
@@ -110,12 +110,12 @@ populate_helloV3(HelloPacket *hello)
     hello->set_options(0xfefefe);
     hello->set_router_priority(42);
     hello->set_router_dead_interval(6600);
-    hello->set_designated_router(IPv4("1.2.3.4"));
-    hello->set_backup_designated_router(IPv4("2.4.6.8"));
+    hello->set_designated_router(set_id("1.2.3.4"));
+    hello->set_backup_designated_router(set_id("2.4.6.8"));
 
     // Add some neighbours.
-    hello->get_neighbours().push_back(IPv4("10.11.12.13"));
-    hello->get_neighbours().push_back(IPv4("11.12.13.14"));
+    hello->get_neighbours().push_back(set_id("10.11.12.13"));
+    hello->get_neighbours().push_back(set_id("11.12.13.14"));
 }
 
 inline
@@ -136,8 +136,8 @@ inline
 void
 populate_standard_header(Packet *packet, OspfTypes::Version version)
 {
-    packet->set_router_id(IPv4("128.16.64.16"));
-    packet->set_area_id(IPv4("4.3.2.1"));
+    packet->set_router_id(set_id("128.16.64.16"));
+    packet->set_area_id(set_id("4.3.2.1"));
 
     switch(version) {
     case OspfTypes::V2:
@@ -264,7 +264,7 @@ populate_network_lsa(NetworkLsa *nlsa, OspfTypes::Version version)
     case OspfTypes::V3:
 	break;
     }
-    nlsa->get_attached_routers().push_back(IPv4("128.16.64.16"));
+    nlsa->get_attached_routers().push_back(set_id("128.16.64.16"));
 
     // This will set the checksum and the length.
     nlsa->encode();

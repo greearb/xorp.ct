@@ -75,8 +75,8 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     }
     
     // This is a router LSA so the link state ID is the Router ID.
-    header.set_link_state_id(ntohl(_ospf.get_router_id().addr()));
-    header.set_advertising_router(ntohl(_ospf.get_router_id().addr()));
+    header.set_link_state_id(_ospf.get_router_id());
+    header.set_advertising_router(_ospf.get_router_id());
 
     _router_lsa = Lsa::LsaRef(rlsa);
     add_lsa(_router_lsa);
@@ -845,7 +845,7 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
     bool originated = lsa_exists;
     if (!originated) {
 	if (lsar->get_header().get_advertising_router() ==
-	    ntohl(_ospf.get_router_id().addr())) {
+	    _ospf.get_router_id()) {
 	    originated = true;
 	} else {
 	    switch (_ospf.get_version()) {
@@ -888,7 +888,7 @@ AreaRouter<A>::RouterVertex(Vertex& v)
 {
     v.set_version(_ospf.get_version());
     v.set_type(Vertex::Router);
-    v.set_nodeid(ntohl(_ospf.get_router_id().addr()));
+    v.set_nodeid(_ospf.get_router_id());
 }
 
 template <typename A>
@@ -916,9 +916,8 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool /*known*/)
 
 	v.set_version(_ospf.get_version());
 	v.set_type(Vertex::Router);
-	v.set_nodeid(ntohl(_ospf.get_router_id().addr()));
+	v.set_nodeid(_ospf.get_router_id());
 
-	
 	list<RouterLink> &rl = rlsa->get_router_links();
 	list<RouterLink>::const_iterator i = rl.begin();
 	for(; i != rl.end(); i++) {
