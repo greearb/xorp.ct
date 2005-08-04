@@ -12,11 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.13 2004/12/09 07:54:42 pavlin Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.14 2005/03/25 02:55:15 pavlin Exp $"
 
 #include <iostream>
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
