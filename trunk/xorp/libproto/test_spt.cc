@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.4 2005/05/12 00:08:13 atanu Exp $"
-
-#define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.5 2005/08/01 23:08:43 atanu Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -29,11 +26,21 @@
 #include "libxorp/tokenize.hh"
 
 #include "spt.hh"
+
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
+
 template <>
 string
 Node<string>::str() const
 {
     return _nodename;
+}
+template <>
+string
+RouteCmd<string>::str() const
+{
+    return c() + " node: " + _node + " nexthop: " + _nexthop;
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.4 2005/05/12 00:08:13 atanu Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.5 2005/08/01 23:08:43 atanu Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -435,7 +435,7 @@ class RouteCmd {
 	    _nexthop == lhs._nexthop;
     }
 
-    string str() const {
+    string c() const {
 	string cmd;
 	switch(_cmd) {
 	case ADD:
@@ -448,7 +448,11 @@ class RouteCmd {
 	    cmd = "REPLACE";
 	    break;
 	}
-	return cmd + " node: " + _node + " nexthop: " + _nexthop;
+	return cmd;
+    }
+
+    string str() const {
+	return c() + " node: " + _node.str() + " nexthop: " + _nexthop.str();
     }
  private:
     Cmd _cmd;
