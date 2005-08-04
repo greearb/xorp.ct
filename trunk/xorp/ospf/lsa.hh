@@ -506,7 +506,7 @@ class LsaDecoder {
  */
 class RouterLink {
  public:
-    enum type {
+    enum Type {
 	p2p = 1,	// Point-to-point connection to another router
 	transit = 2,	// Connection to a transit network
 	stub = 3,	// Connection to a stub network OSPFv2 only
@@ -598,13 +598,13 @@ class RouterLink {
     }
 
     // Type
-    void set_type(type t) {
+    void set_type(Type t) {
 	if (stub == t)
 	    XLOG_ASSERT(OspfTypes::V2 == get_version());
 	_type = t;
     }
 
-    type get_type() const {
+    Type get_type() const {
 	return _type;
     }
 
@@ -680,7 +680,7 @@ class RouterLink {
  private:
     const OspfTypes::Version 	_version;
 
-    type	_type;
+    Type	_type;
     uint16_t	_metric;		// Only store TOS 0 metric
 
     uint32_t	_link_id;		// OSPFv2 Only
